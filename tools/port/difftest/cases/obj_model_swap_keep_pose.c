@@ -1,8 +1,8 @@
 void obj_remove(struct127 *obj, s32 mode);
-s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
+s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 
 // obj_model_swap_keep_pose: sets the object's model record (+0x144: +4 = `a1`, +3 = `a2`, +0x20 / +0x24 = `scale`,
-// +2 = 0), resets the object (obj_remove mode 0) and reloads model slot +0x13F (func_15082E44, owner = object
+// +2 = 0), resets the object (obj_remove mode 0) and reloads model slot +0x13F (setup_entry_spawn, owner = object
 // index + 1), then puts back what the reset clears: position (+0x14..+0x1C, copied to +0x2C..+0x34, y also to
 // +0x1CC), +0x318 (whose +0x3D4 gets the object's +0x31C), +0xB8, +0x40, +0xC4 and the yaw (+0x76, also +0x7A).
 void obj_model_swap_keep_pose(struct127 *obj, s32 a1, s32 a2, f32 scale) {
@@ -32,7 +32,7 @@ void obj_model_swap_keep_pose(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     fC4 = *(f32 *) (o + 0xC4);
     yaw = *(u16 *) (o + 0x76);
     obj_remove(obj, 0);
-    func_15082E44(e, slot, 0, 0, (obj - D_800CC2D0) + 1);
+    setup_entry_spawn(e, slot, 0, 0, (obj - D_800CC2D0) + 1);
     *(f32 *) (o + 0x14) = x;
     *(f32 *) (o + 0x18) = y;
     *(u8 **) (o + 0x318) = link;

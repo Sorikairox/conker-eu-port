@@ -1,3 +1,3 @@
-# P243 func_150B40EC (emit_point_spark_ring): x=10 y=5 z=-10, a (word 8), angle0 (word 9), argB (word 14); random_int = jal 150ADF00 (RET), random_float = jal 150ADF48 (RETF), func_151429E0 = jal 15142F50 (OUTB), func_15156700 / func_151568F8 = jal 15156700 / 151568F8 (ARGMEM 58 bytes in the registry)
+# P243 emit_point_spark_ring (emit_point_spark_ring): x=10 y=5 z=-10, a (word 8), angle0 (word 9), argB (word 14); random_int = jal 150ADF00 (RET), random_float = jal 150ADF48 (RETF), fx_pick_random_color = jal 15142F50 (OUTB), line_fx_spawn / line_fx_spawn_default = jal 15156700 / 151568F8 (ARGMEM 58 bytes in the registry)
 base ! 2=41200000,3=40A00000,4=C1200000,8=30,9=A0,14=1234 ! ! 150ADF00=25 ! 150ADF48=3F000000 ! ! ! 15142F50=1:11/2:22/3:33
 neg ! 2=C2C80000,3=0,4=42480000,8=1C0,9=7,14=7F ! ! 150ADF00=FFFFFFFF ! 150ADF48=3E800000 ! ! ! 15142F50=1:81/2:92/3:A3

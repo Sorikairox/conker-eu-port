@@ -1,4 +1,4 @@
-# P249 func_150BE050 (rideable_vehicle_update) mutants: sed % setup names
+# P249 rideable_vehicle_update (rideable_vehicle_update) mutants: sed % setup names
 s/if (o\[4\] == 0x23) {/if (o[4] == 0x22) {/ % ride23 pick3
 s/state1 = 0xA;/state1 = 0xB;/ % pick3
 s/state2 = 0xB;/state2 = 0xA;/ % ride23

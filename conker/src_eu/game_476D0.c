@@ -222,8 +222,8 @@ Gfx *render_fill_rect_clamped(Gfx *arg0, s32 a, s32 b, s32 c, s32 d) {
 void func_150A7A00(f32 arg0, f32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f32* arg6, f32* arg7, f32* arg8, f32* arg9);
 #ifdef NON_MATCHING
 extern u8 D_800DA130[];
-void func_150A7EE0(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-/* world_to_screen: projects (x, y, z) with view `view`'s matrix D_800DA130[view] (func_150A7EE0) and maps it into
+void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+/* world_to_screen: projects (x, y, z) with view `view`'s matrix D_800DA130[view] (mtxf_transform_point_w) and maps it into
  * the camera record D_800BE628 + view * 0x180: screen x = (half width +0xC + 5) * x / w + centre +0x34, screen
  * y = centre +0x38 - (half height +0x10 + 5) * y / w, depth = (z offset + z / w * z scale) * 32 from the
  * D_800BE9C0 entry (s16 +0x4C / +0x44). (EU address 0x1501A744; the source keeps the US name.) */
@@ -236,7 +236,7 @@ void camera_world_to_screen(s32 view, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32
     u8 *cam;
     u8 *zv;
 
-    func_150A7EE0(D_800DA130 + (s16)view * 64, x, y, z, &px, &py, &pz, &w);
+    mtxf_transform_point_w(D_800DA130 + (s16)view * 64, x, y, z, &px, &py, &pz, &w);
     w = 1.0f / w;
     cam = (u8 *)D_800BE628 + (s16)view * 0x180;
     *sx = (*(f32 *)(cam + 0xC) + 5.0f) * px * w + *(f32 *)(cam + 0x34);

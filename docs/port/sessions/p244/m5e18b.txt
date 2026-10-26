@@ -1,6 +1,6 @@
-488s/func_15063894(obj);/;/ % k9_r999
+488s/obj_knockdown_clear(obj);/;/ % k9_r999
 \#^            anim = 0x11A;$#s/0x11A/0x11B/ % k9_g k9_g8
-\#^                func_1507EB4C(obj, 0x2A);$#s/0x2A/0x2B/ % k3_c8
+\#^                face_set_default_anim(obj, 0x2A);$#s/0x2A/0x2B/ % k3_c8
 1165s/|= 1/|= 4/ % k24_p
 \#^                anim = 0x156;$#s/0x156/0x155/ % k24_q k24_q1
 1183s/0x2EB/0x2EC/ % k24_q k24_q1
@@ -25,7 +25,7 @@
 \#^                grab = grabAnim;$#s/grabAnim/hold/ % k1B_g k1B_g2
 1606s/B(CTL, 0x199) = 0;/;/ % k1B_r2
 \#^            W(o, 0xF8) = 0x401807;$#s/0x401807/0x401806/ % k3A_5
-\#^            func_1514FAD8((s32)o);$#s/func_1514FAD8((s32)o);/;/ % k3A_5
+\#^            char_fx_glow_spawn((s32)o);$#s/char_fx_glow_spawn((s32)o);/;/ % k3A_5
 \#^                    ang = (30\.0f - F(CTL, 0x170)) \* 182\.04445f; /\* D_80099DC0 \*/$#s/30.0f/31.0f/ % k3A_7
 \#^                F(o, 0x20) = -y;$#s/-y/y/ % k3A_7 k3A_70
 \#^                    H(o, 0x76) = yaw;$#s/= yaw;/= yaw + 1;/ % k3A_7 k3A_70

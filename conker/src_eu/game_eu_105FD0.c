@@ -125,11 +125,11 @@ s16 *obj2b_write_msg(s16 *arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15046F70(f32 *, s32, f32, f32 *);
-void func_1504715C(void *, u8 *);
+s32 collision_floor_probe(f32 *, s32, f32, f32 *);
+void hitinfo_from_obj_floor(void *, u8 *);
 void fx_scorch_decal_spawn(f32, s32, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 void fx_debris_emitter_spawn(void *, s16, u8, s32);
-void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* was func_150D8ABC */
 void explosion_ground_effect(struct127 *arg0) {
@@ -201,8 +201,8 @@ void explosion_ground_effect(struct127 *arg0) {
     sp.uD8 = sp.uE4;
     sp.uE0 = sp.uEC;
     sp.uDC = sp.uE8 + 100.0f;
-    func_1504715C(&sp.uB4, arg0);
-    if ((func_15046F70(&sp.uD8, 0, sp.uE8 - 200.0f, &sp.uB4) != 0) && (sp.uD0 & 1)) {
+    hitinfo_from_obj_floor(&sp.uB4, arg0);
+    if ((collision_floor_probe(&sp.uD8, 0, sp.uE8 - 200.0f, &sp.uB4) != 0) && (sp.uD0 & 1)) {
         sp.uE4 = sp.uD8;
         sp.uE8 = sp.uB4;
         sp.uEC = sp.uE0;
@@ -255,7 +255,7 @@ void explosion_ground_effect(struct127 *arg0) {
     sp.uA0 = 0.30200002f;
     sp.u88 = sp.uEC;
     sp.uB0 = 0.905482f;
-    func_15153BA4(&sp.u48, 0xFF, 0xFF, 1);
+    emit_particle_burst_req(&sp.u48, 0xFF, 0xFF, 1);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/explosion_ground_effect.s")
@@ -300,7 +300,7 @@ s32 obj_get_mode_joint_point(f32 *arg0, u8 *arg1, u8 arg2) {
         break;
     }
     y = 0.0f;
-    func_150A7E40((f32 (*)[4]) (*(u8 **)(arg1 + 0x1D4) + (idx << 6)), x, 0.0f, z, &x, &y, &z);
+    mtxf_transform_point((f32 (*)[4]) (*(u8 **)(arg1 + 0x1D4) + (idx << 6)), x, 0.0f, z, &x, &y, &z);
     arg0[0] = x;
     arg0[1] = y;
     arg0[2] = z;
@@ -313,8 +313,8 @@ s32 handler_return_8(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_151664F0(s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
+void water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void shard_ring_spawn(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
 
 /* was func_150D8F44 */
 void obj_joint_dust_puff(u8 *arg0, u8 arg1, s32 arg2) {
@@ -326,8 +326,8 @@ void obj_joint_dust_puff(u8 *arg0, u8 arg1, s32 arg2) {
 
     if ((*(s32 *)((u8 *)arg0 + 0x1D4)) != 0) {
         obj_get_mode_joint_point(&sp.u34, arg0, arg1);
-        func_15187B50(sp.u34, sp.u38, sp.u3C, 0x1E, 0xF, 7, 0.1f, 0.03f);
-        func_151664F0(-1, (s32) sp.u34, (s32) ((*(f32 *)((u8 *)arg0 + 0x180)) + 4.0f), (s32) sp.u3C, 4, 0x32, 0, 0xFF, 0);
+        shard_ring_spawn(sp.u34, sp.u38, sp.u3C, 0x1E, 0xF, 7, 0.1f, 0.03f);
+        water_ring_spawn(-1, (s32) sp.u34, (s32) ((*(f32 *)((u8 *)arg0 + 0x180)) + 4.0f), (s32) sp.u3C, 4, 0x32, 0, 0xFF, 0);
     }
 }
 #else

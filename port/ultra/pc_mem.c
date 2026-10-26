@@ -73,7 +73,7 @@ void port_rom_read(void *dst, unsigned off, unsigned size) {
     be_to_vbe(dst, port_rom + off, size);
 }
 
-/* P66: the P58 TEMPORARY PC func_1000480C was removed: the port branch converted it in P62 (init_4470.c,
+/* P66: the P58 TEMPORARY PC rom_read_direct was removed: the port branch converted it in P62 (init_4470.c,
  * NON_MATCHING). Its CART_WORD loads (`*(vu32 *)(addr | 0xA0000000)`, KSEG1) become __port_io_read(addr) through
  * port/tools/vbe.py's P42 computed-IO_READ rule, which answers the cart domain 0xB0000000.. with the big-endian ROM
  * word (port/ultra/pc_os.c); PI_STATUS_REG reads as idle. */
@@ -339,23 +339,23 @@ int port_inflate_raw(unsigned char *out, unsigned outlen, const unsigned char *i
     return inflate_raw(out, outlen, in, inlen);
 }
 
-/* P37: the P33 TEMPORARY PC func_1000654C is gone: Rare's inflater is the game's C (init_eu_5DA0.c, port P36).
- * ?infcheck=1 checks it at run time through a link-time wrapper of its entry func_10006530(src, dst, work)
- * (-Wl,--wrap=func_10006530, port/Makefile; the callers are in other TUs): before the call the stream is inflated
+/* P37: the P33 TEMPORARY PC rzip_inflate_impl is gone: Rare's inflater is the game's C (init_eu_5DA0.c, port P36).
+ * ?infcheck=1 checks it at run time through a link-time wrapper of its entry rzip_inflate(src, dst, work)
+ * (-Wl,--wrap=rzip_inflate, port/Makefile; the callers are in other TUs): before the call the stream is inflated
  * here into a host buffer (independent decoder, input read through the vbe layout), then the game's C runs and
  * its return value and output bytes (vbe) are compared with it and with the rzip header's BE u32 size.
  * Lines: [infcheck] per call (first 12 and every mismatch), and a running total every 64 calls. */
 int port_flag(const char *name);
 void port_js_stack(int skip, int n);
-int __real_func_10006530(int src, int dst, unsigned work);
-int __wrap_func_10006530(int src, int dst, unsigned work) {
+int __real_rzip_inflate(int src, int dst, unsigned work);
+int __wrap_rzip_inflate(int src, int dst, unsigned work) {
     static int on = -1;
     static unsigned calls, ok, bad, bytes;
     unsigned hw, hdr, cap, i, diff = 0, firstdiff = 0;
     unsigned char *ref;
     int got, ret, good;
     if (on < 0) on = port_flag("infcheck");
-    if (!on) return __real_func_10006530(src, dst, work);
+    if (!on) return __real_rzip_inflate(src, dst, work);
     if ((unsigned)src < 0x10000000u || (unsigned)dst < 0x10000000u) { /* not game memory: report, don't decode */
         static int nbad;
         if (nbad++ < 4) {
@@ -376,7 +376,7 @@ int __wrap_func_10006530(int src, int dst, unsigned work) {
                   port_log("[infcheck]   slot index %u (age byte %02X)\n", k, vbe_ld8(&D_800BC860[k])); break; } }
             port_js_stack(1, 6);
         }
-        return __real_func_10006530(src, dst, work);
+        return __real_rzip_inflate(src, dst, work);
     }
     hw = vbe_ld8((void *)(uintptr_t)src) << 8 | vbe_ld8((void *)(uintptr_t)(src + 1));
     hdr = hw == 0x1172 ? 0 : (unsigned)vbe_ld8((void *)(uintptr_t)src) << 24 | vbe_ld8((void *)(uintptr_t)(src + 1)) << 16 |
@@ -384,7 +384,7 @@ int __wrap_func_10006530(int src, int dst, unsigned work) {
     cap = hdr && hdr < 0x800000 ? hdr : 0x400000;
     ref = malloc(cap);
     got = inflate_raw2(ref, cap, (const unsigned char *)(uintptr_t)(src + (hw == 0x1172 ? 2 : 4)), 0x1000000u, 1);
-    ret = __real_func_10006530(src, dst, work);
+    ret = __real_rzip_inflate(src, dst, work);
     if (got > 0 && ret == got)
         for (i = 0; i < (unsigned)got; i++)
             if (vbe_ld8((void *)(uintptr_t)(dst + i)) != ref[i]) { if (!diff++) firstdiff = i; }
@@ -422,7 +422,7 @@ void __wrap_level_load_models(int level) {
     __real_level_load_models(level);
     if (on > 1) port_log("[infcheck] level loader level_load_models(0x%X) ends\n", level);
     if (on && level == 0x21) { /* texture 0xED0 through the game's own cache once the level is loaded (slots are -1 now);
-                                * the func_10006530 wrapper checks the C inflater's output against the 768-byte header */
+                                * the rzip_inflate wrapper checks the C inflater's output against the 768-byte header */
         extern unsigned D_800B1268[];
         int sz = 0, had = D_800B1268[0xED0] != 0xFFFFFFFFu, p = __wrap_texture_cache_lookup(0xED0, &sz, 3, 0);
         port_log("[infcheck] texture 0xED0 via texture_cache_lookup: %s, data %08X size %d\n", had ? "already cached" : "loaded", p, sz);

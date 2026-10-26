@@ -30,8 +30,8 @@
 97s/if (col >= cols) {/if (col > cols) {/ % right up0
 98s/D_800E10B0 = 0;/D_800E10B0 = 1;/ % right up0
 100s/if (moved) {/if (!moved) {/ % idle up1 right
-101s/func_10010F30(0x62D, 0x4650, 0x40, 0, 0);/func_10010F30(0x62D, 0x4650, 0x40, 0, 1);/ % up1
-101s/func_10010F30(0x62D, 0x4650, 0x40, 0, 0);/func_10010F30(0x62C, 0x4650, 0x40, 0, 0);/ % up1
+101s/sound_play_2d(0x62D, 0x4650, 0x40, 0, 0);/sound_play_2d(0x62D, 0x4650, 0x40, 0, 1);/ % up1
+101s/sound_play_2d(0x62D, 0x4650, 0x40, 0, 0);/sound_play_2d(0x62C, 0x4650, 0x40, 0, 0);/ % up1
 103s/sel = D_800E10B1 \* 6 + D_800E10B0;/sel = D_800E10B1 * 5 + D_800E10B0;/ % idle selP
 103s/sel = D_800E10B1 \* 6 + D_800E10B0;/sel = D_800E10B1 * 6 + col;/ % right up0
 104s/if (D_800E10B1 == 5) {/if (D_800E10B1 == 4) {/ % row5 Y row4
@@ -46,7 +46,7 @@
 117s/if (D_800E10B2 >= 13) {/if (D_800E10B2 >= 14) {/ % tilt13
 118s/D_800E10B2 = 12;/D_800E10B2 = 13;/ % tiltmax
 121s/if (\*(u16 \*) (D_80090174 + 0x20) \& 0x10) {/if (*(u16 *) (D_80090174 + 0x20) \& 0x8) {/ % selP right
-122s/func_10010F30(0x500, 0x7D00, 0x40, 0, 0);/func_10010F30(0x500, 0x7D01, 0x40, 0, 0);/ % selP
+122s/sound_play_2d(0x500, 0x7D00, 0x40, 0, 0);/sound_play_2d(0x500, 0x7D01, 0x40, 0, 0);/ % selP
 123s/ch = sel + 'A';/ch = sel + 'B';/ % selP selA
 124s/if (D_800E10B1 == 5) {/if (D_800E10B1 == 3) {/ % space selX
 125s/ch = ' ';/ch = '_';/ % space
@@ -124,8 +124,8 @@
 225s/D_800E10AC\[n + 0x20\] = D_800E10AC\[n\];/D_800E10AC[n + 0x21] = D_800E10AC[n];/ % ch10 repdiff
 227s/D_800E10AC\[n + 0x20\] = '\\0';/D_800E10AC[n + 0x1F] = '\\0';/ % reppre2 ch10
 228s/if (sfx != 0) {/if (sfx == 0) {/ % ch10 rep0
-229s/func_1001263C(sfx, 0x7D00, 0x40);/func_1001263C(sfx, 0x7D00, 0x41);/ % ch10
-231s/obj = func_15083E90(9);/obj = func_15083E90(8);/ % ch10
+229s/mp3_voice_play(sfx, 0x7D00, 0x40);/mp3_voice_play(sfx, 0x7D00, 0x41);/ % ch10
+231s/obj = obj_find_by_setup_id(9);/obj = obj_find_by_setup_id(8);/ % ch10
 232s/if (obj != NULL) {/if (obj == NULL) {/ % ch10 chnull
 233s/obj->unk232 = kind;/obj->unk232 = 0x10;/ % rep0
 234s/D_800D154C = obj;/D_800D154C = NULL;/ % ch10
@@ -176,7 +176,7 @@
 271s/if (off == sel \* 12) {/if (off != sel * 12) {/ % idle
 272s/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);/gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);/ % idle
 277s/text_set_color(0xFF, 0xB1, 0x1E, D_800E0EC5);/text_set_color(0xFF, 0xB1, 0x1F, D_800E0EC5);/ % idle
-278s/func_15042BC4(D_800E10AC, \&w, \&h, \&d);/func_15042BC4(D_800E10AC, \&h, \&w, \&d);/ % idle
+278s/text_measure_string(D_800E10AC, \&w, \&h, \&d);/text_measure_string(D_800E10AC, \&h, \&w, \&d);/ % idle
 279s/x = 75 - (w >> 1);/x = 76 - (w >> 1);/ % idle
 279s/x = 75 - (w >> 1);/x = 75 - (w >> 2);/ % idle
 280s/if (x < 10) {/if (x < 9) {/ % w132

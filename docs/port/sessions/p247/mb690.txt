@@ -19,9 +19,9 @@
 \#^    changed = (drive \^ mode) & 0x7F;$#s/\^/|/
 \#^        if ((changed & 2) && (drive & 2)) {$#s/(drive & 2)/(drive \& 1)/
 \#^            snd = 0x4A5;$#s/0x4A5/0x4A4/
-\#^            snd = func_1000F568(0x4A3, 4);$#s/4)/3)/
-\#^        if (func_10010894((struct127 \*) tank) == 0) {$#s/== 0/!= 0/
-\#^            func_10010154(snd, (struct127 \*) tank, 0x6D60, 0x12C, 0x708);$#s/0x6D60, 0x12C, 0x708/0x6D60, 0x12C, 0x709/
+\#^            snd = sound_pick_variant(0x4A3, 4);$#s/4)/3)/
+\#^        if (actor_sound2_is_playing((struct127 \*) tank) == 0) {$#s/== 0/!= 0/
+\#^            actor_sound_play(snd, (struct127 \*) tank, 0x6D60, 0x12C, 0x708);$#s/0x6D60, 0x12C, 0x708/0x6D60, 0x12C, 0x709/
 \#^        if (\*id == 0x4A7) {$#s/0x4A7/0x4A8/
 \#^            newId = 0x4A8;$#s/0x4A8/0x4A9/
 \#^            volume = 0x2EE0;$#s/0x2EE0/0x2EE1/
@@ -30,8 +30,8 @@
 \#^        newId = 0x4A7;$#s/0x4A7/0x4A6/
 \#^        volume = 0x2000;$#s/0x2000/0x2001/
 \#^    if (newId != 0) {$#s/!= 0/== 0/
-\#^        func_1000FA64(newId, (s32) \*(f32 \*) (tank + 0x14), (s32) \*(f32 \*) (tank + 0x18),$#s/(tank + 0x14)/(tank + 0x1C)/
-\#^                      (s32) \*(f32 \*) (tank + 0x1C), volume, 0x320, 0xC8, (s32) &func_151BB690, tank,$#s/0x320/0x321/
+\#^        sfx_emitter_start(newId, (s32) \*(f32 \*) (tank + 0x14), (s32) \*(f32 \*) (tank + 0x18),$#s/(tank + 0x14)/(tank + 0x1C)/
+\#^                      (s32) \*(f32 \*) (tank + 0x1C), volume, 0x320, 0xC8, (s32) &tank_engine_sound_update, tank,$#s/0x320/0x321/
 \#^                      drive | 0x12CFF00, 8, 0);$#s/0x12CFF00/0x12DFF00/
 \#^                      drive | 0x12CFF00, 8, 0);$#s/8, 0/8, 1/
 \#^    if (\*id != 0x4A7) {$#s/!= 0x4A7/!= 0x4A8/
@@ -50,7 +50,7 @@
 \#^            if (timer <= 0) {$#s/<= 0/< 0/
 \#^                timer = 0;$#s/0/1/
 \#^                if (\*id == 0x4A8) {$#s/0x4A8/0x4A9/
-\#^                                  (s32) \*(f32 \*) (tank + 0x1C), 0x2EE0, 0x320, 0xC8, (s32) &func_151BB690, tank,$#s/0x2EE0/0x2000/
+\#^                                  (s32) \*(f32 \*) (tank + 0x1C), 0x2EE0, 0x320, 0xC8, (s32) &tank_engine_sound_update, tank,$#s/0x2EE0/0x2000/
 \#^                                  drive | 0x880, 8, 0);$#s/0x880/0x80/
 \#^                    timer = (random_int() & 0x200) + 0x384;$#s/0x384/0x12C/
 \#^        \*pitch = (s32) (fabsf(\*(f32 \*) (tank + 0x3C)) \* \*(f32 \*) (tank + 0xB8) \* 0\.5f);$#s/0\.5f/0.25f/

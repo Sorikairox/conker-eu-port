@@ -11,7 +11,8 @@ s32 __osRepairPackId(OSPfs *pfs, __OSPackId *badid, __OSPackId *newid);
 s32 __osCheckPackId(OSPfs *pfs, __OSPackId *temp);
 s32 __osPfsSelectBank(OSPfs *pfs);
 
-u16 func_151F0D10(u8 *ptr, int length) {
+/* was func_151F0D10 */
+u16 game_os_sumcalc(u8 *ptr, int length) {
     int i;
     u32 sum;
     u8 *tmp;
@@ -25,7 +26,8 @@ u16 func_151F0D10(u8 *ptr, int length) {
     return sum;
 }
 
-s32 func_151F0D6C(u16 *ptr, u16 *csum, u16 *icsum) {
+/* was func_151F0D6C */
+s32 game_os_id_check_sum(u16 *ptr, u16 *csum, u16 *icsum) {
     u16 data;
     u32 j;
 
@@ -39,7 +41,8 @@ s32 func_151F0D6C(u16 *ptr, u16 *csum, u16 *icsum) {
     return 0;
 }
 
-s32 func_151F0DD4(OSPfs *pfs, __OSPackId *badid, __OSPackId *newid) {
+/* was func_151F0DD4 */
+s32 game_os_repair_pack_id(OSPfs *pfs, __OSPackId *badid, __OSPackId *newid) {
     s32 ret;
     u8 temp[BLOCKSIZE];
     u8 comp[BLOCKSIZE];
@@ -114,7 +117,8 @@ s32 func_151F0DD4(OSPfs *pfs, __OSPackId *badid, __OSPackId *newid) {
     return 0;
 }
 
-s32 func_151F11EC(OSPfs *pfs, __OSPackId *temp) {
+/* was func_151F11EC */
+s32 game_os_check_pack_id(OSPfs *pfs, __OSPackId *temp) {
     u16 index[4];
     s32 ret = 0;
     u16 sum;
@@ -148,7 +152,8 @@ s32 func_151F11EC(OSPfs *pfs, __OSPackId *temp) {
     return 0;
 }
 
-s32 func_151F1384(OSPfs *pfs) {
+/* was func_151F1384 */
+s32 game_os_get_id(OSPfs *pfs) {
     int k;
     u16 sum;
     u16 isum;
@@ -194,7 +199,8 @@ s32 func_151F1384(OSPfs *pfs) {
     return 0;
 }
 
-s32 func_151F15E0(OSPfs *pfs) {
+/* was func_151F15E0 */
+s32 game_os_check_id(OSPfs *pfs) {
     int k;
     u8 temp[BLOCKSIZE];
     s32 ret;
@@ -218,7 +224,8 @@ s32 func_151F15E0(OSPfs *pfs) {
     return 0;
 }
 
-s32 func_151F16DC(OSPfs *pfs, __OSInode *inode, u8 flag, u8 bank) {
+/* was func_151F16DC */
+s32 game_os_pfs_rw_inode(OSPfs *pfs, __OSInode *inode, u8 flag, u8 bank) {
     u8 sum;
     int j;
     s32 ret;
@@ -273,7 +280,8 @@ s32 func_151F16DC(OSPfs *pfs, __OSInode *inode, u8 flag, u8 bank) {
     return 0;
 }
 
-s32 func_151F19FC(OSPfs *pfs) {
+/* was func_151F19FC */
+s32 game_os_pfs_select_bank(OSPfs *pfs) {
     u8 temp[BLOCKSIZE];
     int i;
     s32 ret = 0;

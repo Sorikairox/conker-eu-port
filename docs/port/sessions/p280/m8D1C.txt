@@ -9,15 +9,15 @@
 \#^        k = 16.0f / d;$#s/16.0f/15.0f/ % ptr
 \#^        \*(s32 \*) (rec + 0x1C) = y + dy \* k;$#s/dy/dx/ % ptr
 \#^    for (i = 0; i <= D_80082FA0; i++) {$#s/<=/</ % ptr
-\#^        if (func_150A6840(D_800BE628 + i \* 0x180#s/0x180/0x18/ % ptrfar
-\#^        if (func_150A6840(D_800BE628 + i \* 0x180#s/i \* 0x40/i * 0x20/ % ptrfar
+\#^        if (camera_view_test_sphere(D_800BE628 + i \* 0x180#s/0x180/0x18/ % ptrfar
+\#^        if (camera_view_test_sphere(D_800BE628 + i \* 0x180#s/i \* 0x40/i * 0x20/ % ptrfar
 \#^                          \*(s32 \*) (rec + 0x1C), \*(s32 \*) (rec + 0x20), 100.0f#s/100.0f, 100.0f/100.0f, 50.0f/ % ptr
 \#^            mask |= 1 << i;$#s/1 << i/1/ % ptrfar
 \#^    rec\[0x36\] = mask;$#s/0x36/0x35/ % ptr
 \#^    if (rec\[0x37\] != 0) {$#s/!=/==/ % ptr
-\#^            \*(u16 \*) (rec + 0x2E) = func_10010F88(0x4A2, 10000#s/0x4A2/0x4A3/ % ptr
+\#^            \*(u16 \*) (rec + 0x2E) = sound_play_at(0x4A2, 10000#s/0x4A2/0x4A3/ % ptr
 \#^                                                  \*(s32 \*) (rec + 0x1C), \*(s32 \*) (rec + 0x20), 100, 800);$#s/800/801/ % ptr
-\#^            func_1000F91C(\*(u16 \*) (rec + 0x2E), 10000#s/10000/10001/ % ptrh
+\#^            sound_voice_update_3d(\*(u16 \*) (rec + 0x2E), 10000#s/10000/10001/ % ptrh
 \#^        iz = p\[2\];$#s/2/0/ % ptr
 \#^        iy = \*(s16 \*) (rec + 0x12);$#s/0x12/0x10/ % pk3d0
 \#^    iy = iy + \*(s16 \*) (rec + 0x30) - #s/+ \*(s16/- *(s16/ % pk3d0 yoff

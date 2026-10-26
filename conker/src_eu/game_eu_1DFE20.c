@@ -27,7 +27,8 @@ typedef struct {
 } struct_eu_1DFE20;
 
 
-void func_151B2610(u8 *arg0) {
+/* was func_151B2610 */
+void cord_rig_spawn(u8 *arg0) {
     struct260 *temp_v0;
     struct {
         u8 *unk0;
@@ -42,7 +43,7 @@ void func_151B2610(u8 *arg0) {
     if (arg0 != NULL) {
         tmp.unk0 = arg0;
         tmp.unk4 = arg0[0x3B];
-        tmp.unk8 = func_15083E90(1);
+        tmp.unk8 = obj_find_by_setup_id(1);
         tmp.unkC = 1;
         tmp.unkD = 0;
         bzero(tmp.unk10, 0xC);
@@ -62,12 +63,13 @@ typedef struct {
     u8 cC;
     u8 d;
 } Link26B0;
-s32 func_151B28A4(u8 *arg0);
-void func_151B27DC(u8 *);
-void func_151B28F8(u8 *);
-void func_151B2C40(u8 *);
+s32 cord_rig_get_state(u8 *arg0);
+void cord_rig_free_ropes(u8 *);
+void cord_rig_spawn_three_ropes(u8 *);
+void cord_rig_spawn_twin_ropes(u8 *);
 
-void func_151B26B0(u8 *arg0) {
+/* was func_151B26B0 */
+void cord_rig_update(u8 *arg0) {
     Link26B0 *s;
     u8 *a;
     u8 *c;
@@ -81,25 +83,27 @@ void func_151B26B0(u8 *arg0) {
         return;
     }
     old = s->d;
-    s->d = func_151B28A4(arg0);
+    s->d = cord_rig_get_state(arg0);
     if (s->d != old) {
-        func_151B27DC(arg0);
+        cord_rig_free_ropes(arg0);
         if (s->d == 1) {
-            func_151B28F8(arg0);
+            cord_rig_spawn_three_ropes(arg0);
         }
         if (s->d == 2 || s->d == 0) {
-            func_151B2C40(arg0);
+            cord_rig_spawn_twin_ropes(arg0);
         }
     }
 }
 
-void func_151B27DC(u8 *);
+void cord_rig_free_ropes(u8 *);
 
-void func_151B27BC(s32 arg0) {
-    func_151B27DC(arg0);
+/* was func_151B27BC */
+void cord_rig_free_ropes_wrap(s32 arg0) {
+    cord_rig_free_ropes(arg0);
 }
 
-void func_151B27DC(u8 *arg0) {
+/* was func_151B27DC */
+void cord_rig_free_ropes(u8 *arg0) {
     u8 *base = arg0 + 0x28;
     u8 i;
 
@@ -115,17 +119,20 @@ void func_151B27DC(u8 *arg0) {
     }
 }
 
-void func_151B284C(void *arg0) {
-    func_151B27BC(arg0);
+/* was func_151B284C */
+void cord_rig_retire(void *arg0) {
+    cord_rig_free_ropes_wrap(arg0);
     func_1514933C(arg0);
 }
 
-void func_151B2878(void *arg0) {
-    func_151B27BC(arg0);
+/* was func_151B2878 */
+void cord_rig_delete(void *arg0) {
+    cord_rig_free_ropes_wrap(arg0);
     func_15149368(arg0);
 }
 
-s32 func_151B28A4(u8 *arg0) {
+/* was func_151B28A4 */
+s32 cord_rig_get_state(u8 *arg0) {
     struct127 *temp_v0 = *(struct127 **)(arg0 + 0x28);
     s32 ret = 2;
     u8 *temp_v1 = *(u8 **)(arg0 + 0x30);
@@ -143,8 +150,9 @@ extern s32 D_800AA718;
 extern s32 D_800AA724;
 extern s32 D_800AA730;
 
-u8 *func_151B3660(void *, f32, s32, u8, s32); /* P95 */
-void func_151B28F8(u8 *arg0) {
+u8 *cord_spawn(void *, f32, s32, u8, s32); /* P95 */
+/* was func_151B28F8 */
+void cord_rig_spawn_three_ropes(u8 *arg0) {
     struct {
         u8 * u34;
         u8 u38;
@@ -223,7 +231,7 @@ void func_151B28F8(u8 *arg0) {
     sp.u90 = -0.02f;
     sp.u94 = 0.70000005f;
     sp.u7C = (*(f32 *)((u8 *)temp_s0 + 0x1C));
-    temp_v0 = func_151B3660(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
+    temp_v0 = cord_spawn(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
     (*(s32 *)((u8 *)(&arg0[0x28]) + 0x18)) = temp_v0;
     if (temp_v0 != 0) {
         memcpy(temp_v0 + 0x150, &sp.u34, 0x30);
@@ -249,7 +257,7 @@ void func_151B28F8(u8 *arg0) {
     sp.u82 = 0;
     sp.u8C = 170.0f;
     sp.u7C = (*(f32 *)((u8 *)temp_s0 + 0x1C));
-    temp_v0_2 = func_151B3660(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
+    temp_v0_2 = cord_spawn(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
     (*(s32 *)((u8 *)(&arg0[0x28]) + 0x14)) = temp_v0_2;
     if (temp_v0_2 != 0) {
         memcpy(temp_v0_2 + 0x150, &sp.u34, 0x30);
@@ -274,14 +282,14 @@ void func_151B28F8(u8 *arg0) {
     sp.u78 = (*(f32 *)((u8 *)temp_s0 + 0x18));
     sp.u82 = 0;
     sp.u7C = (*(f32 *)((u8 *)temp_s0 + 0x1C));
-    temp_v0_3 = func_151B3660(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
+    temp_v0_3 = cord_spawn(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
     (*(s32 *)((u8 *)(&arg0[0x28]) + 0x10)) = temp_v0_3;
     if (temp_v0_3 != 0) {
         memcpy(temp_v0_3 + 0x150, &sp.u34, 0x30);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B28F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/cord_rig_spawn_three_ropes.s")
 #endif
 #ifdef NON_MATCHING
 /* a light attachment: owner, its room byte, a mode and an offset from the owner */
@@ -293,7 +301,7 @@ typedef struct {
     f32 offset[3];
 } Attach2C40;
 
-/* the 0x30-byte record copied to each func_151B3660 light (+0x150) */
+/* the 0x30-byte record copied to each cord_spawn light (+0x150) */
 typedef struct {
     Attach2C40 a;   /* 0x00 */
     Attach2C40 b;   /* 0x14 */
@@ -314,7 +322,7 @@ typedef struct {
     u8 *obj;        /* 0x24 */
 } Beam2C40;
 
-/* func_151B3660's light template */
+/* cord_spawn's light template */
 typedef struct {
     u8 u0;          /* 0x00 */
     s16 u2;         /* 0x02 */
@@ -336,11 +344,12 @@ typedef struct {
 extern f32 D_800AA748[3]; /* (27, 42, 0) */
 extern f32 D_800AA754[3]; /* (-27, 42, 0) */
 
-// twin_lights_spawn: obj +0x28 holds the owner. Spawns two lights (func_151B3660: template at the owner position,
+// twin_lights_spawn: obj +0x28 holds the owner. Spawns two lights (cord_spawn: template at the owner position,
 // rate 0.0015) whose records attach them to the owner at (+-77, 20, 67) (mode 5) and (+-27, 42, 0) (mode 2), the
 // first one flagged; stores them at obj +0x3C / +0x38. Then a type 0x13 object (func_15149130) for the beam between
 // (27, 42, 0) and (-27, 42, 0), stored at obj +0x44.
-void func_151B2C40(u8 *obj) {
+/* was func_151B2C40 */
+void cord_rig_spawn_twin_ropes(u8 *obj) {
     Beam2C40 beam;
     Light2C40 rec;
     LightTmpl2C40 t;
@@ -375,7 +384,7 @@ void func_151B2C40(u8 *obj) {
     t.u28 = 180.0f;
     t.u2C = -0.01185f;  /* D_800AA768 */
     t.u30 = 0.713000059f; /* D_800AA76C */
-    o = func_151B3660(&t, 0.0015f, 0x30, 0xFF, 0);
+    o = cord_spawn(&t, 0.0015f, 0x30, 0xFF, 0);
     *(u8 **) (obj + 0x3C) = o;
     if (o != NULL) {
         memcpy(o + 0x150, &rec, 0x30);
@@ -384,7 +393,7 @@ void func_151B2C40(u8 *obj) {
     *(Vec3f2C40 *) rec.a.offset = *(Vec3f2C40 *) &D_800AA70C;
     *(Vec3f2C40 *) rec.b.offset = *(Vec3f2C40 *) D_800AA754;
     t.u1C[2] = 1;
-    o = func_151B3660(&t, 0.0015f, 0x30, 0xFF, 0);
+    o = cord_spawn(&t, 0.0015f, 0x30, 0xFF, 0);
     *(u8 **) (obj + 0x38) = o;
     if (o != NULL) {
         memcpy(o + 0x150, &rec, 0x30);
@@ -403,10 +412,11 @@ void func_151B2C40(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B2C40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/cord_rig_spawn_twin_ropes.s")
 #endif
 
-void func_151B2F00(struct_eu_1DFE20_d *arg0) {
+/* was func_151B2F00 */
+void cord_rig_rope_unlink(struct_eu_1DFE20_d *arg0) {
     struct_eu_1DFE20_c *temp_v0 = arg0->unk178;
 
     if (temp_v0 != NULL) {
@@ -416,16 +426,17 @@ void func_151B2F00(struct_eu_1DFE20_d *arg0) {
 
 #ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
-s32 func_15142B7C(u8 *, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
-s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
-s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+s32 gfx_geometry_mode_cached(u8 *, s32, s32);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
+s32 gfx_prim_color_cached(s32, s32, s32, s32, s32, s32, s32, s8 *);
+s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 D_80091198;
 extern s32 D_800D30BC;
 
-u8 *func_151B2F24(u8 *arg0, u8 *arg1, s16 arg2) {
+/* was func_151B2F24 */
+u8 *cord_plank_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     struct {
         f32 u74;
         f32 u78;
@@ -479,18 +490,18 @@ u8 *func_151B2F24(u8 *arg0, u8 *arg1, s16 arg2) {
     }
     temp_s1_2 = arg1 + 0x28;
     if ((sp.uB3 == 0) && ((*(s32 *)((u8 *)((*(u8 **)((u8 *)temp_s1_2 + 0))) + 0x1D4)) != 0)) {
-        func_151D6310(arg1 + 0x14, arg2, 0x40, &sp.uAC, 0);
+        vtx_slot_buffer_get(arg1 + 0x14, arg2, 0x40, &sp.uAC, 0);
         if (sp.uAC == NULL) {
             return var_s0;
         }
         temp_a2 = (*(s32 *)((u8 *)((*(u8 **)((u8 *)temp_s1_2 + 0))) + 0x1D4)) + ((*(u8 *)((u8 *)temp_s1_2 + 5)) << 6);
         sp64 = temp_a2;
-        func_15143134(temp_s1_2 + 8, &sp.u80, temp_a2);
-        func_15143134(temp_s1_2 + 0x14, &sp.u74, sp64);
+        mtx_transform_point_or_origin(temp_s1_2 + 8, &sp.u80, temp_a2);
+        mtx_transform_point_or_origin(temp_s1_2 + 0x14, &sp.u74, sp64);
         sp.uB2 = 1;
         sp.uA8 = &D_800DBFF0[arg2].unk2F8;
         temp_v1 = ((u8 *)&D_800A4EA8);
-        temp_v0 = func_15142FBC(gfx_set_combine_mode(func_15142CF0(func_15142C10(func_15142E24(func_15142B7C(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
+        temp_v0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(gfx_load_texture_cached(gfx_geometry_mode_cached(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
         temp_f0 = sp.u74 - sp.u80;
         temp_f14 = ((temp_f0 * 0.5f) + sp.u80) - (*(f32 *)((u8 *)sp.uA8 + 0));
         temp_f2 = sp.u78 - sp.u84;
@@ -560,13 +571,15 @@ block_11:
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B2F24.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/cord_plank_draw.s")
 #endif
-void func_151B3474(s32 arg0, s32 arg1, u8 arg2) {
+/* was func_151B3474 */
+void cord_plank_handle_link_msg(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-void func_151B34B4(u8 *arg0, s32 *arg1, u8 arg2)
+/* was func_151B34B4 */
+void cord_rig_on_obj_replaced(u8 *arg0, s32 *arg1, u8 arg2)
 {
   u8 *v = arg0 + 0x28;
   s32 a;
@@ -598,32 +611,37 @@ void func_151B34B4(u8 *arg0, s32 *arg1, u8 arg2)
   }
 }
 
-s32 func_151B4D88(void *arg0, void *arg1, s32 arg2, u8 arg3);
+s32 cord_end_get_bone_pos(void *arg0, void *arg1, s32 arg2, u8 arg3);
 
-/* P274: s32 (D_8008FE90 entry; func_151B44D8 and the C dispatchers test the result: the asm passes on
-   func_151B4D88's v0) */
-s32 func_151B3550(u8 *arg0, s32 arg1, u8 arg2) {
-    return func_151B4D88(arg0, arg0 + 0x150, arg1, arg2);
+/* P274: s32 (D_8008FE90 entry; cord_end_get_obj_pos and the C dispatchers test the result: the asm passes on
+   cord_end_get_bone_pos's v0) */
+/* was func_151B3550 */
+s32 cord_end_handler_bone(u8 *arg0, s32 arg1, u8 arg2) {
+    return cord_end_get_bone_pos(arg0, arg0 + 0x150, arg1, arg2);
 }
 
-void func_151B3580(struct_eu_1DFE20 *arg0) {
+/* was func_151B3580 */
+void cord_plank_unlink(struct_eu_1DFE20 *arg0) {
     struct_eu_1DFE20_b *temp_v0 = arg0->unk4C;
     if (temp_v0 != NULL) {
         temp_v0->unk44 = 0;
     }
 }
 
-void func_151B3598(void *arg0) {
-    func_151B3580(arg0);
+/* was func_151B3598 */
+void cord_plank_retire(void *arg0) {
+    cord_plank_unlink(arg0);
     func_1514933C(arg0);
 }
 
-void func_151B35C4(void *arg0) {
-    func_151B3580(arg0);
+/* was func_151B35C4 */
+void cord_plank_delete(void *arg0) {
+    cord_plank_unlink(arg0);
     func_15149368(arg0);
 }
 
-void func_151B35F0(s32 arg0, s32 arg1, u8 arg2) {
+/* was func_151B35F0 */
+void cord_handle_link_msg(s32 arg0, s32 arg1, u8 arg2) {
     s32 pad;
     s32 temp_a2;
 

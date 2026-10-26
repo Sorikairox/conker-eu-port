@@ -8,8 +8,8 @@
 \#^        ((s32 \*) &rec)\[i\] = ((s32 \*) (spec + 4))\[i\];$#s/spec + 4/spec + 8/
 \#^    src\[0\] = rec\.at;$#s/rec\.at/rec.at2/
 \#^    dst\[1\] = rec\.pos2;$#s/rec\.pos2/rec.pos/
-\#^    func_15145EA4(src, dst, \*(u8 \*\*) (rec\.obj + 0x1D4) + (rec\.node << 6), 2);$#s/<< 6/<< 5/
-\#^    func_15145EA4(src, dst, \*(u8 \*\*) (rec\.obj + 0x1D4) + (rec\.node << 6), 2);$#s/2);/1);/
+\#^    mtx_transform_points(src, dst, \*(u8 \*\*) (rec\.obj + 0x1D4) + (rec\.node << 6), 2);$#s/<< 6/<< 5/
+\#^    mtx_transform_points(src, dst, \*(u8 \*\*) (rec\.obj + 0x1D4) + (rec\.node << 6), 2);$#s/2);/1);/
 \#^    req\.pos\[1\] = rec\.pos\[1\];$#s/rec\.pos\[1\]/rec.pos2[1]/
 \#^    rec\.u128 = 0\.0f;$#s/0\.0f/1.0f/
 \#^    rec\.u12C = 0\.0f;$#s/0\.0f/1.0f/
@@ -28,10 +28,10 @@
 \#^    rec\.flags = ((fl & 0x10) ? 0x20 : 0) | ((fl & 2) ? 2 : 0) | ((fl & 4) ? 4 : 0) | ((fl & 8) ? 8 : 0);$#s/((fl & 8) ? 8/((fl \& 8) ? 0x80/
 \#^    rec\.u152 = 0;$#s/0/1/
 \#^    rec\.u151 = 0;$#s/0/1/
-\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/arg0 + 0x158/arg0 + 0x154/
-\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/0x28,/0x29,/
-\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/0xC, 0xC, 0xC/0xC, 0xD, 0xC/
-\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/arg2, arg3)/arg3, arg2)/
+\#^    e = fxrec_spawn(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/arg0 + 0x158/arg0 + 0x154/
+\#^    e = fxrec_spawn(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/0x28,/0x29,/
+\#^    e = fxrec_spawn(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/0xC, 0xC, 0xC/0xC, 0xD, 0xC/
+\#^    e = fxrec_spawn(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/arg2, arg3)/arg3, arg2)/
 \#^    if (e != NULL) {$#s/!=/==/
 \#^        data = \*(Emitter2Record \*\*) (e + 0x98);$#s/0x98/0x94/
 \#^        memcpy(data, &rec, sizeof(Emitter2Record));$#s/sizeof(Emitter2Record)/0x150/
@@ -41,8 +41,8 @@
 \#^        if (rec\.initFn != -1) {$#s/!= -1/!= 0/
 \#^            D_8008FC44\[rec\.initFn\](e);$#s/(e)/((u8 *) data)/
 \#^        if (spec\[0x54\] & 1) {$#s/& 1/\& 2/
-\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/req\.pos/rec.pos2/
-\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/spec\[0x50\], spec\[0x51\]/spec[0x51], spec[0x50]/
-\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/spec\[0x52\], spec\[0x53\]/spec[0x53], spec[0x52]/
-\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/arg2, arg3/arg2, 0/
+\#^            data->u148 = (s32) emitter2_light_create((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/req\.pos/rec.pos2/
+\#^            data->u148 = (s32) emitter2_light_create((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/spec\[0x50\], spec\[0x51\]/spec[0x51], spec[0x50]/
+\#^            data->u148 = (s32) emitter2_light_create((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/spec\[0x52\], spec\[0x53\]/spec[0x53], spec[0x52]/
+\#^            data->u148 = (s32) emitter2_light_create((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/arg2, arg3/arg2, 0/
 \#^            data->u148 = 0;$#s/0/1/

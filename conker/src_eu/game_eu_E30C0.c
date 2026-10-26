@@ -5,7 +5,8 @@
 
 void attach_fx_asset_acquire(s32 arg0);
 
-struct260 *func_150B58B0(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+/* was func_150B58B0 */
+struct260 *obj_electrify_fx_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct260 *temp_v0;
     struct {
         u8 *unk0;
@@ -34,11 +35,12 @@ extern f32 D_8009FFF0;
 extern f32 D_8009FFF4;
 extern f32 D_8009FFF8;
 extern f32 D_8009FFFC;
-void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
+void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 s32 object_arc_to_surface_spawn(u8 *, s16, s16, s16, s32, f32, f32, s32, s32, s8 *, s32, s32);
 void obj_angle_point_effect(u8 *, s16, s16, u8, s32);
 
-void func_150B5988(u8 *arg0) {
+/* was func_150B5988 */
+void obj_electrify_fx_update(u8 *arg0) {
     struct {
         s8 u94;
         s8 u95;
@@ -58,7 +60,7 @@ void func_150B5988(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         return;
     }
-    func_1502ED88(temp_s6, 0xFF, 0xFF, 0xFF, 0x1E, 0, 0xA);
+    obj_tint_set_flash(temp_s6, 0xFF, 0xFF, 0xFF, 0x1E, 0, 0xA);
     (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((D_8009FFF0 + (random_float() * D_8009FFF4)) * D_800BE9A4));
     if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
         do {
@@ -83,23 +85,27 @@ void func_150B5988(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5988.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/obj_electrify_fx_update.s")
 #endif
-void func_150B5CA4(void *arg0) {
+/* was func_150B5CA4 */
+void obj_electrify_asset_release(void *arg0) {
     attach_fx_asset_release(6);
 }
 
-void func_150B5CC8(void *arg0) {
-    func_150B5CA4(arg0);
+/* was func_150B5CC8 */
+void obj_electrify_die_retire(void *arg0) {
+    obj_electrify_asset_release(arg0);
     func_1514933C(arg0);
 }
 
-void func_150B5CF4(void *arg0) {
-    func_150B5CA4(arg0);
+/* was func_150B5CF4 */
+void obj_electrify_die_free(void *arg0) {
+    obj_electrify_asset_release(arg0);
     func_15149368(arg0);
 }
 
-void func_150B5D20(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150B5D20 */
+void obj_electrify_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x28;
     if (arg2 == 0) {
         s32 t = *(s32 *)arg1;

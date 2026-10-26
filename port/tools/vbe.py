@@ -407,10 +407,10 @@ def self_intrinsic(text, st):
 
 
 # P318: game functions that now have NON_MATCHING C but must stay replaced by the port's platform layer (the PC cannot
-# run them: func_10001194 clears RDRAM up to 0x80400000, decompresses the game segment from ROM and sets up the TLB;
+# run them: boot_game_thread_main clears RDRAM up to 0x80400000, decompresses the game segment from ROM and sets up the TLB;
 # port/boot/game_main.c has the PC main thread). The game definition becomes `weak`, so the port's strong definition
-# wins at link time and references (osCreateThread(..., func_10001194, ...) in init_1050.c) go to it.
-PORT_OWNED = ['func_10001194']
+# wins at link time and references (osCreateThread(..., boot_game_thread_main, ...) in init_1050.c) go to it.
+PORT_OWNED = ['boot_game_thread_main']
 
 
 def port_owned(text, st, src=''):
@@ -432,14 +432,14 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
            # As data stubs they were wasm addresses: texture_cache_lookup stored the id in D_800DA37C (before its range
            # check), so texture_cache_age_tick walked its cache tables up to 0x10xxxxxx and fed garbage to the inflater.
            'D_D11': 0xD11, 'D_A4A': 0xA4A, 'D_2C1': 0x2C1, 'D_1C0': 0x1C0,
-           # P37: texture ids stored as D_89C / D_85D (boot screen func_151EC300, game_eu_216470.c), and the ROM range of
-           # the fixed player-slot setup table that func_15016950 (game_eu_44010.c) DMAs: D_1A3750..D_1A3840..D_1A3B40.
+           # P37: texture ids stored as D_89C / D_85D (boot screen screen_intro_credits_draw, game_eu_216470.c), and the ROM range of
+           # the fixed player-slot setup table that level_setup_load (game_eu_44010.c) DMAs: D_1A3750..D_1A3840..D_1A3B40.
            'D_89C': 0x89C, 'D_85D': 0x85D, 'D_1A3750': 0x1A3750, 'D_1A3840': 0x1A3840,
-           # P228: texture ids D_88C (barrel menu title) / D_87B (fill bar) of the C barrel_menu_draw func_151ECE00
+           # P228: texture ids D_88C (barrel menu title) / D_87B (fill bar) of the C barrel_menu_draw barrel_menu_draw
            # (port P226): as data stubs they were wasm addresses (0x10A377xx) -> texture_cache_lookup range -> fatal
            # func_150ADC50 + trap in texture_cache_age_tick in the multiplayer barrel menu (frame 4442).
            'D_88C': 0x88C, 'D_87B': 0x87B,
-           # P318: ROM offsets of the compressed game segment used by func_10001194's NM C (init_1050.c, P281/P288).
+           # P318: ROM offsets of the compressed game segment used by boot_game_thread_main's NM C (init_1050.c, P281/P288).
            'D_427B0': 0x427B0, 'D_19EDE8': 0x19EDE8}
 # P233: link symbols whose value is the PHYSICAL / segment address of real RAM data (KSEG0 | value = that symbol).
 # The C hands them to the RSP as pointers (gSPMatrix(&D_89810) = the identity matrix D_80089810 in the shadow pass of
@@ -448,13 +448,13 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
 RAM_ALIAS = {'D_89810': 'D_80089810'}
 # Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
-# instead of a zero-filled data stub. (func_151DE100 used to be a data stub, read as code bytes by func_151E86A4's
-# checksum; since P127 the NON_MATCHING func_151E86A4 skips the checksum and func_151DE100 is C, so it is a
+# instead of a zero-filled data stub. (game_pause_update used to be a data stub, read as code bytes by menu_settings_apply_checked's
+# checksum; since P127 the NON_MATCHING menu_settings_apply_checked skips the checksum and game_pause_update is C, so it is a
 # plain function and n64mem.py relocates D_8009018C[0] to its table slot - P131.)
-FUNC_AS_DATA = ['func_15033ECC', 'rocket_sound_update', 'zap_sound_release_cb', 'func_151BB690',
+FUNC_AS_DATA = ['attachment_sound_cb', 'rocket_sound_update', 'zap_sound_release_cb', 'tank_engine_sound_update',
                 'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
-                # P26: callbacks handed to func_1000FA64 / stored in D_800E0D64 / debug_cont_get_read_data.
-                # func_1000EC24 (P26) dropped in P29: port P28 declares it as a function under NON_MATCHING.
+                # P26: callbacks handed to sfx_emitter_start / stored in D_800E0D64 / debug_cont_get_read_data.
+                # sfx_cb_delayed_play_2d (P26) dropped in P29: port P28 declares it as a function under NON_MATCHING.
                 'object_sound_delayed', 'object_sound_follow_cam', 'trigger_zones_check', 'debug_cont_pad_buf']
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
 ALIAS_REF = re.compile(r'@(' + '|'.join(RAM_ALIAS) + r')\b(?![.\w])')
@@ -527,13 +527,13 @@ def k0_checks(text, st):
 # (>= 0x10000000, GLOBAL_BASE), never above 0x80000000, so each listed compare against the KSEG0 boundary is moved
 # to the wasm data base 0x10000000. Small values (area-2 object vertex offsets <= 0x100000, segment addresses
 # 0x0Exxxxxx) stay on the "not a pointer" side, as on the N64. Scoped by function, with the expected count:
-#   func_15002008 (game_eu_2F180, leaf lists):        (u32)p < 0x80000001 -> (u32)p < 0x10000000
-#   func_15002248 (game_eu_2F180, quadtree helper):   (u32)p < 0x80000001 -> (u32)p < 0x10000000
+#   quadtree_write_leaf_list (game_eu_2F180, leaf lists):        (u32)p < 0x80000001 -> (u32)p < 0x10000000
+#   quadtree_filter_box_tris (game_eu_2F180, quadtree helper):   (u32)p < 0x80000001 -> (u32)p < 0x10000000
 #   gfx_dl_relocate_seg_e (game_30E90, DL MOVEWORD reloc):    unk4 < 0x80000000   -> unk4 < 0x10000000
 # Not rewritten: collision_scan_level_dl's `>= 0x100001` holds for wasm pointers as it is. List: docs/port/MEMORY.md.
 K0_PTR_SITES = {
-    'func_15002008': ('ult', '-2147483647', 1),
-    'func_15002248': ('ult', '-2147483647', 1),
+    'quadtree_write_leaf_list': ('ult', '-2147483647', 1),
+    'quadtree_filter_box_tris': ('ult', '-2147483647', 1),
     'gfx_dl_relocate_seg_e': ('ult', '-2147483648', 1),
 }
 
@@ -581,15 +581,15 @@ def k0_add_sites(text, st):
     return ''.join(out)
 
 
-# P319: K0_TO_PHYS / PHYS_TO_K0 pair on the TLB code area. func_10005B04 (tlb_area_init, game C since P285) keeps
-# `area & 0x0FFFFFFF` (physical) in D_8003BE74; func_100014C4 (level code reload) frees `D_8003BE74 | 0x80000000` and
+# P319: K0_TO_PHYS / PHYS_TO_K0 pair on the TLB code area. tlb_area_init (tlb_area_init, game C since P285) keeps
+# `area & 0x0FFFFFFF` (physical) in D_8003BE74; tlb_remap_game_segment (level code reload) frees `D_8003BE74 | 0x80000000` and
 # `D_8003BE70 | 0x80000000`. On the PC both are wasm pointers (0x10xxxxxx): the mask dropped the 0x10000000 bit and the
 # or made 0x9xxxxxxx -> free() trapped out of bounds at the first level load (boot). Both become identity ops.
-K0_PHYS_SITES = {'func_10005B04': ('and', '268435455', 1), 'func_100014C4': ('or', '-2147483648', 2)}
+K0_PHYS_SITES = {'tlb_area_init': ('and', '268435455', 1), 'tlb_remap_game_segment': ('or', '-2147483648', 2)}
 K0_PHYS_IDENT = {'and': '-1', 'or': '0'}
 
 # P19: RCP / PI / SI register accesses through a constant KSEG1 address (rcp.h IO_READ / IO_WRITE in
-# matched game C, e.g. `IO_READ(AI_LEN_REG)` in func_100095A0) are not memory on the PC. Constant
+# matched game C, e.g. `IO_READ(AI_LEN_REG)` in audio_do_frame) are not memory on the PC. Constant
 # 32-bit loads/stores in 0xA4000000..0xA4FFFFFF become calls to the PC register model
 # (port/ultra/pc_os.c __port_io_read / __port_io_write). Non-constant addresses are left alone.
 IO_LD = re.compile(r'^(\s*)(%[\w.$-]+) = load (?:volatile )?i32, ptr inttoptr \(i32 (-?\d+) to ptr\)(?:, align \d+)?$', re.M)
@@ -612,7 +612,7 @@ def rcp_io(text, st):
     n = st['rcp_io']
     text = IO_ST.sub(stv, IO_LD.sub(ld, text))
     # P42: IO_READ with a computed address, i.e. PHYS_TO_K1(x) = `or i32 x, 0xA0000000` -> inttoptr -> volatile
-    # load (func_15001A08: IO_READ(osRomBase | 0xB0000D24), the cart word). The load becomes __port_io_read(x);
+    # load (quadtree_alloc_node_pool: IO_READ(osRomBase | 0xB0000D24), the cart word). The load becomes __port_io_read(x);
     # the register model answers the cart domain 0xB0000000.. with the big-endian ROM word.
     k1 = set(re.findall(r'^\s*(%[\w.$-]+) = or i32 %[\w.$-]+, -1610612736$', text, re.M))
     if k1:

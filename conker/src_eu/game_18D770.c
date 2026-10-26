@@ -84,13 +84,13 @@ struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s3
     struct226 *sp30;
 
     ret = NULL;
-    sp30 = func_1515D5F8(header2->unk0, header2->unk4, header2->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
+    sp30 = light_add_point(header2->unk0, header2->unk4, header2->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
     if (sp30 != 0) {
         ret = light_ctrl_alloc(header, sp30, offset, arg9, argA);
         if (ret != 0) {
             ret->unkE |= 2;
         } else {
-            func_1515F10C(sp30);
+            light_remove(sp30);
         }
     }
     return ret;
@@ -228,7 +228,7 @@ s32 light_beh_rotated_offset(struct225 *arg0) {
     mtx[3][0] = ((s16 *)*pp)[8];
     mtx[3][1] = ((s16 *)*pp)[9];
     mtx[3][2] = ((s16 *)*pp)[10];
-    func_150A7E40(mtx, D_800A6A94.unk0, D_800A6A94.unk4, D_800A6A94.unk8, &x, &y, &z);
+    mtxf_transform_point(mtx, D_800A6A94.unk0, D_800A6A94.unk4, D_800A6A94.unk8, &x, &y, &z);
     arg0->unk14->unkE = x;
     arg0->unk14->unk10 = y;
     arg0->unk14->unk12 = z;
@@ -347,7 +347,7 @@ u8 light_beh_follow_joint(struct225 *arg0) {
     if (*(u8 **)(obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
         V3_60B74 out;
 
-        func_15143134(s + 8, &out, (s[5] << 6) + *(u8 **)(obj + 0x1D4));
+        mtx_transform_point_or_origin(s + 8, &out, (s[5] << 6) + *(u8 **)(obj + 0x1D4));
         arg0->unk14->unkE = out.x;
         arg0->unk14->unk10 = out.y;
         arg0->unk14->unk12 = out.z;
@@ -410,9 +410,9 @@ struct225 *light_create_obj_beam(struct127 *arg0, u8 arg1, struct17 *arg2, struc
 
 // similar to light_beh_follow_joint
 #ifdef NON_MATCHING
-void func_15145EA4(f32 **, f32 **, void *, s32);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
+s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 typedef struct {
     struct127 *obj; /* first object hit */
     f32 t;          /* hit distance along the ray (fraction of dir) */
@@ -427,9 +427,9 @@ typedef struct {
 /* light_beam_update: P237. D_8008B0F0 handler for the beam lights of light_create_obj_beam. Ends the light (0) when its
  * object is gone or was reused (unique id). Without attach matrices (+0x1D4), without flag 1, or for a hidden
  * object (+0x74 & 0xF == 0xF), the light sits at the object position (light +0xE / +0x10 / +0x12) with brightness
- * +0x2F = 0 and +9 = 1. Else the offset and end points go through attach matrix `point` (func_15145EA4), and when
- * the direction between them is not degenerate (func_15145128) a ray is cast from the start along it
- * (func_15081A90): no hit = as above; a hit moves the light to the hit point with brightness
+ * +0x2F = 0 and +9 = 1. Else the offset and end points go through attach matrix `point` (mtx_transform_points), and when
+ * the direction between them is not degenerate (vec3_normalize_len) a ray is cast from the start along it
+ * (ray_cast_world): no hit = as above; a hit moves the light to the hit point with brightness
  * clamp(scale * t, 0, 255) and +9 = 0, and with flag 2 a hit object of kind 0x9E gets +0x2E4 = 1. Returns 1. */
 /* was func_15160E30 */
 s32 light_beh_beam_raycast(struct225 *arg0) {
@@ -454,12 +454,12 @@ s32 light_beh_beam_raycast(struct225 *arg0) {
         src[1] = (f32 *) (s + 0x14);
         dst[0] = start;
         dst[1] = dir;
-        func_15145EA4(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 6), 2);
+        mtx_transform_points(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 6), 2);
         dir[0] = dir[0] - start[0];
         dir[1] = dir[1] - start[1];
         dir[2] = dir[2] - start[2];
-        if (func_15145128(dir, dir, &tmp0, &tmp1) != 0) {
-            func_15081A90((struct127 *) obj, start[0], start[1], start[2], dir[0], dir[1], dir[2], (u8 *) &ray, 0.0f,
+        if (vec3_normalize_len(dir, dir, &tmp0, &tmp1) != 0) {
+            ray_cast_world((struct127 *) obj, start[0], start[1], start[2], dir[0], dir[1], dir[2], (u8 *) &ray, 0.0f,
                           0, 0, 1, -1, 0, 0);
             if (ray.hit != 0) {
                 if ((s[0x24] & 2) && ray.hit >= 2 && ((u8 *) ray.obj)[4] == 0x9E) {
@@ -671,25 +671,25 @@ void light_ctrl_broadcast(u8 arg0, u8 arg1, s32 arg2) {
 
 /* was func_15161714 */
 void light_obj_destroy_a(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
+    char_fx_detach_effect(arg0, arg0->unk18);
     light_ctrl_retire(arg0);
 }
 
 /* was func_15161740 */
 void light_obj_delete_a(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
+    char_fx_detach_effect(arg0, arg0->unk18);
     light_ctrl_free(arg0);
 }
 
 /* was func_1516176C */
 void light_obj_destroy_b(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
+    char_fx_detach_effect(arg0, arg0->unk18);
     light_ctrl_retire(arg0);
 }
 
 /* was func_15161798 */
 void light_obj_delete_b(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
+    char_fx_detach_effect(arg0, arg0->unk18);
     light_ctrl_free(arg0);
 }
 
@@ -706,7 +706,7 @@ void light_ctrl_free(struct225 *arg0) {
 /* was func_15161804 */
 void light_ctrl_destroy(struct225 *arg0) {
     if ((arg0->unkE & 2) != 0) {
-        func_1515F10C(arg0->unk14, arg0);
+        light_remove(arg0->unk14, arg0);
     }
     D_8008B208[arg0->unk12](arg0);
 }
@@ -714,7 +714,7 @@ void light_ctrl_destroy(struct225 *arg0) {
 /* was func_15161860 */
 void light_ctrl_delete(struct225 *arg0) {
     if ((arg0->unkE & 2) != 0) {
-        func_1515F10C(arg0->unk14, arg0);
+        light_remove(arg0->unk14, arg0);
     }
     D_8008B2B0[arg0->unk12](arg0);
 }
@@ -729,7 +729,7 @@ extern struct_eu_151618BC D_800A6AC4;
 void light_play_zap_sfx(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6) {
     struct_eu_151618BC tbl = D_800A6AC4;
 
-    func_10010F88(tbl.unk0[(u32)random_int() % 10], arg0, arg1, arg2, arg3, arg4[0], arg4[1], arg4[2], arg5, arg6);
+    sound_play_at(tbl.unk0[(u32)random_int() % 10], arg0, arg1, arg2, arg3, arg4[0], arg4[1], arg4[2], arg5, arg6);
 }
 
 /* was func_151619A0 */
@@ -942,9 +942,9 @@ void ambient_pulse_update(u8 *volatile arg0) { // fakematch: volatile gives the 
 
     s = sinf(*(f32 *)(arg0 + 0x40));
     p = (f32 *)(arg0 + 0x28);
-    func_1515D4D4((u8)(s * p[3] + p[0]), (u8)(s * p[4] + p[1]), (u8)(s * p[5] + p[2]), 0);
+    light_set_level_colour((u8)(s * p[3] + p[0]), (u8)(s * p[4] + p[1]), (u8)(s * p[5] + p[2]), 0);
     p[6] = p[7] * D_800BE9A4 + p[6];
-    p[6] = func_15144B68(p[6]);
+    p[6] = wrap_angle_rad(p[6]);
 }
 // NON-MATCHING: not quite right here
 // struct235 *ambient_pulse_update(struct236 *arg0) {
@@ -962,9 +962,9 @@ void ambient_pulse_update(u8 *volatile arg0) { // fakematch: volatile gives the 
 //     temp_a2 = temp_v0->unk8 + (temp_f0 * temp_v0->unk14);
 //
 //
-//     func_1515D4D4(temp_a0, temp_a1, temp_a2, 0);
+//     light_set_level_colour(temp_a0, temp_a1, temp_a2, 0);
 //     temp_v0->unk18 += temp_v0->unk1C * D_800BE9A4;
-//     temp_v0->unk18 = func_15144B68(temp_v0->unk18);
+//     temp_v0->unk18 = wrap_angle_rad(temp_v0->unk18);
 //
 //     return temp_v0;
 // }
@@ -1009,7 +1009,7 @@ s32 light_beh_colour_pulse(u8 *arg0) {
     (*(u8 **)(arg0 + 0x14))[6] = s * p[4] + p[1];
     (*(u8 **)(arg0 + 0x14))[7] = s * p[5] + p[2];
     p[6] = p[7] * D_800BE9A4 + p[6];
-    p[6] = func_15144B68(p[6]);
+    p[6] = wrap_angle_rad(p[6]);
     return 1;
 }
 // s32 light_beh_colour_pulse(struct237 *arg0) {
@@ -1024,7 +1024,7 @@ s32 light_beh_colour_pulse(u8 *arg0) {
 //     arg0->unk14->unk7 = temp_v1->unk8 + (temp_f0 * temp_v1->unk14);
 //
 //     temp_v1->unk18 += temp_v1->unk1C * D_800BE9A4;
-//     temp_v1->unk18 = func_15144B68(temp_v1->unk18);
+//     temp_v1->unk18 = wrap_angle_rad(temp_v1->unk18);
 //     return 1;
 // }
 
@@ -1386,12 +1386,12 @@ struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4
 // of the area object +0x14 (skipped when its +0x9 is 1): its +0x2F gets the flash level +0x18, which decays by the
 // factor +0x1C once per tick (D_800BE9E4). While a burst is running (+0x2C flashes left) +0x38 counts down by
 // D_800BE9A4; at zero a new flash of level rand * +0x48 + +0x44 starts, the next one is due after rand * +0x40 + +0x3C,
-// and a flash counter is used up (func_1000E770 is called with two NULL pointers; the asm also computes a thunder
-// delay from func_151EFDD0 that EU's two-pointer func_1000E770 never reads). Between bursts +0x20 counts down; at zero
+// and a flash counter is used up (music_get_event_request is called with two NULL pointers; the asm also computes a thunder
+// delay from game_gu_random that EU's two-pointer music_get_event_request never reads). Between bursts +0x20 counts down; at zero
 // a burst of rand % (+0x34 + 1) + +0x30 flashes is queued and the next pause is rand * +0x28 + +0x24.
-s32 func_1000E770(s32 *arg0, s32 *arg1);
+s32 music_get_event_request(s32 *arg0, s32 *arg1);
 f32 random_float(void);
-int func_151EFDD0(void);
+int game_gu_random(void);
 
 /* was func_151630F4 */
 s32 light_beh_burst_flash(u8 *rec) {
@@ -1411,8 +1411,8 @@ s32 light_beh_burst_flash(u8 *rec) {
         if (*(f32 *) (rec + 0x38) < 0.0f) {
             *level = random_float() * *(f32 *) (rec + 0x48) + *(f32 *) (rec + 0x44);
             *(f32 *) (rec + 0x38) = random_float() * *(f32 *) (rec + 0x40) + *(f32 *) (rec + 0x3C);
-            func_151EFDD0();
-            func_1000E770(NULL, NULL);
+            game_gu_random();
+            music_get_event_request(NULL, NULL);
             *(s32 *) (rec + 0x2C) -= 1;
         }
     } else {
@@ -1534,7 +1534,7 @@ s32 light_beh_pulse_once(struct225 *arg0) {
     arg0->unk14->unk2F = temp_v0->unk0 + (temp_v0->unk4 * tmp);
 
     temp_v0->unk8 += temp_v0->unkC * D_800BE9A4;
-    temp_v0->unk8 = func_15144B68(temp_v0->unk8);
+    temp_v0->unk8 = wrap_angle_rad(temp_v0->unk8);
 
     if (temp_v0->unk8 > 3.1415927f) {
         return 0;
@@ -1575,8 +1575,8 @@ s32 light_beh_level_track(struct225 *arg0) {
     f32 sp20[3];
     f32 sp1C;
 
-    func_15188530(pl->unk0, sp20);
-    func_15188580(pl->unk0, &sp1C);
+    light_fx_get_colour(pl->unk0, sp20);
+    light_fx_get_blend(pl->unk0, &sp1C);
     arg0->unk14->unk2F = pl->unk4 + (pl->unk8 * sp1C);
     return 1;
 }
@@ -1676,7 +1676,7 @@ void light_sine_intensity_step(struct227 *arg0, struct225 *arg1) {
     f32 tmp = sinf(arg0->unk8);
     arg1->unk14->unk2F = arg0->unk0 + (arg0->unk4 * tmp);
     arg0->unk8 = arg0->unk8 + (arg0->unkC * D_800BE9A4);
-    arg0->unk8 = func_15144B68(arg0->unk8);
+    arg0->unk8 = wrap_angle_rad(arg0->unk8);
 }
 
 /* was func_15163DEC */
@@ -1940,7 +1940,7 @@ void light_set_transformed_pos(struct225 *arg0, s32 *arg1) {
 
     sp2C = arg1;
     sp28 = sp1C;
-    func_15145CD0(arg1[3], &sp2C, &sp28, 1);
+    xform_points_ptrs(arg1[3], &sp2C, &sp28, 1);
     arg0->unk14->unkE = sp1C[0];
     arg0->unk14->unk10 = sp1C[1];
     arg0->unk14->unk12 = sp1C[2];
@@ -1968,7 +1968,7 @@ void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f3
     mf[3][0] = arg1->unk0;
     mf[3][1] = arg1->unk4;
     mf[3][2] = arg1->unk8;
-    func_150A7E40(mf, 0.0f, *(f32 *)&arg2, 0.0f, &x, &y, &z);
+    mtxf_transform_point(mf, 0.0f, *(f32 *)&arg2, 0.0f, &x, &y, &z);
     arg0->unk14->unkE = x;
     arg0->unk14->unk10 = y;
     arg0->unk14->unk12 = z;
@@ -1998,7 +1998,7 @@ extern u8 D_80088A90[];
 extern u8 D_80088A94[];
 extern u8 D_80088A98[];
 void overlay_mode_set(s32);
-void func_1515F170(s32, s32);
+void light_group_set_disabled(s32, s32);
 
 /* was func_151645C4 */
 void level_set_lights_mode(u8 arg0) {
@@ -2009,7 +2009,7 @@ void level_set_lights_mode(u8 arg0) {
             overlay_mode_set(4);
             break;
         case 0x6:
-            func_1515F170(0xA, 1);
+            light_group_set_disabled(0xA, 1);
             overlay_mode_set(4);
         case 0x39:
             ((u8 *)&D_800DCD20)[0] = D_80088A90[0];
@@ -2026,7 +2026,7 @@ void level_set_lights_mode(u8 arg0) {
     } else {
         switch (D_800BE9F0) {
         case 0x6:
-            func_1515F170(0xA, 0);
+            light_group_set_disabled(0xA, 0);
         case 0x7:
         case 0xC:
         case 0x39:

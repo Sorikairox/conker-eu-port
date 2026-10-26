@@ -16,7 +16,8 @@ extern f32 D_8009B860;
  * anim_events_run (the record's frame hook) may replace the frame. The final frame is copied to rec->unkB4.
  * The callback's arguments are not set up by the asm (it sees anim / player, or scratch after the hook): it is
  * called with anim here (UNVERIFIED). */
-void func_1507C170(struct197 *anim, f32 step, struct127 *rec, s32 player) {
+/* was func_1507C170 */
+void anim_advance_frame(struct197 *anim, f32 step, struct127 *rec, s32 player) {
     void (*cb)(struct197 *);
     f32 frame, end, f;
     s32 hold;
@@ -139,28 +140,29 @@ void func_1507C170(struct197 *anim, f32 step, struct127 *rec, s32 player) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_A9980/func_1507C170.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_A9980/anim_advance_frame.s")
 #endif
-s32 func_15022A8C(struct127 *);
+s32 cutscene_obj_takes_part(struct127 *);
 #ifdef NON_MATCHING
-void func_1507C170(struct197 *, f32, struct127 *, s32); /* P59: void in the NM definition */
+void anim_advance_frame(struct197 *, f32, struct127 *, s32); /* P59: void in the NM definition */
 #else
-s32 func_1507C170(struct197 *, f32, struct127 *, s32);
+s32 anim_advance_frame(struct197 *, f32, struct127 *, s32);
 #endif
 extern u8 D_800C3A78;
 
-void func_1507C608(s32 arg0)
+/* was func_1507C608 */
+void obj_anims_advance_all(s32 arg0)
 {
   struct127 *var_s0;
   struct197 *temp_a0;
   s32 *new_var;
   var_s0 = D_800CC2D0; ; do { // fakematch: permuter empty statement before the loop
-    if ((((var_s0->interaction_state != 0) && (!(var_s0->unk25C & 0x200))) && ((arg0 == 0) || (var_s0->unk5 == 4))) && (((D_800C3638 == 0) || (D_800C3A78 != 0)) || (func_15022A8C(var_s0) != 0)))
+    if ((((var_s0->interaction_state != 0) && (!(var_s0->unk25C & 0x200))) && ((arg0 == 0) || (var_s0->unk5 == 4))) && (((D_800C3638 == 0) || (D_800C3A78 != 0)) || (cutscene_obj_takes_part(var_s0) != 0)))
     {
       temp_a0 = var_s0->unk2D0;
       if ((temp_a0 != 0) && (var_s0->unk2FA != 0))
       {
-        func_1507C170(temp_a0, var_s0->unk48, var_s0, arg0);
+        anim_advance_frame(temp_a0, var_s0->unk48, var_s0, arg0);
         if (&D_800D121C) // fakematch: permuter empty if
         {
         }
@@ -174,7 +176,8 @@ void func_1507C608(s32 arg0)
   while (var_s0 != ((struct127 *) (&D_800D121C)));
 }
 
-void func_1507C700(u8 *arg0, u8 *arg1) {
+/* was func_1507C700 */
+void obj_sync_anim_frame(u8 *arg0, u8 *arg1) {
     f32 temp_f0;
     u8 *temp_v0;
     u8 *temp_v1;

@@ -4,8 +4,8 @@ s/    kind = (s8) kind;/    ;/ % kind_hi
 s/    band = (s8) band;/    band = (u8) band;/ % band_s8
 s/    if (D_8008763C != 0xFF) {/    if (D_8008763C != 0xFE) {/ % cached_fe
 1,/dx = p->unk0 - x;/s/        dx = p->unk0 - x;/        dx = p->unk2 - x;/ % cached_far
-s/        if (!walls || func_15087204(x, y, z, dx, dz) < 0.0f) {/        if (func_15087204(x, y, z, dx, dz) < 0.0f) {/ % cached
-s/        if (!walls || func_15087204(x, y, z, dx, dz) < 0.0f) {/        if (!walls || func_15087204(x, y, z, dx, dy) < 0.0f) {/ % cached_free
+s/        if (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f) {/        if (rail_wall_hit(x, y, z, dx, dz) < 0.0f) {/ % cached
+s/        if (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f) {/        if (!walls || rail_wall_hit(x, y, z, dx, dy) < 0.0f) {/ % cached_free
 s/            best = dx \* dx + dy \* dy + dz \* dz + 10.0f;/            best = dx * dx + dy * dy + dz * dz + 1.0f;/ % cached_bar
 s/        D_8008763C = 0xFF;/        ;/ % cached
 s/    for (i = 0; i < D_80087630; i++) {/    for (i = 1; i < D_80087630; i++) {/ % first
@@ -16,9 +16,9 @@ s/        if (kind != p->pad8\[6\] \&\& kind != -1) {/        if (kind != -1) {/
 /for (i = 0;/,$s/        dy = p->unk2 - y;/        dy = p->unk2 + y;/ % dy
 /for (i = 0;/,$s/        dz = p->unk4 - z;/        dz = p->unk4 + z;/ % dy
 s/        d = dx \* dx + dy \* dy + dz \* dz;/        d = dx * dx + dz * dz;/ % dy
-s/        if (d < best \&\& (!walls || func_15087204(x, y, z, dx, dz) < 0.0f)) {/        if (d <= best \&\& (!walls || func_15087204(x, y, z, dx, dz) < 0.0f)) {/ % tie
-s/        if (d < best \&\& (!walls || func_15087204(x, y, z, dx, dz) < 0.0f)) {/        if (d < best \&\& (!walls || func_15087204(x, y, z, dx, dz) <= 0.0f)) {/ % kind0_zero
-s/        if (d < best \&\& (!walls || func_15087204(x, y, z, dx, dz) < 0.0f)) {/        if (d < best \&\& (!walls || func_15087204(x, y, z, dz, dx) < 0.0f)) {/ % kind0_free
+s/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f)) {/        if (d <= best \&\& (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f)) {/ % tie
+s/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f)) {/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dx, dz) <= 0.0f)) {/ % kind0_zero
+s/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dx, dz) < 0.0f)) {/        if (d < best \&\& (!walls || rail_wall_hit(x, y, z, dz, dx) < 0.0f)) {/ % kind0_free
 s/            best = d;/            ;/ % any
 s/            res = i;/            res = i + 1;/ % any
 s/    D_800D277C = sqrtf(best);/    D_800D277C = best;/ % band1

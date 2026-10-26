@@ -1,4 +1,4 @@
-# P262 func_1514E88C (object_glow_attach) mutants: sed % setup names
+# P262 char_fx_object_glow (object_glow_attach) mutants: sed % setup names
 s/a.u4C = 3;/a.u4C = 2;/ % base
 s/a.u8C = 0x2012;/a.u8C = 0x12012;/ % base
 s/a.u91 = 0xFF;/a.u91 = 0xFE;/ % base

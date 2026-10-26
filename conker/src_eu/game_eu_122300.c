@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15132BBC(f32 *, s32, s32, s32, s32, s32, s32);
-s32 func_15145128(f32 *, f32 *, f32 *, s32 *);
+s32 mdl_particle_spawn_ex(f32 *, s32, s32, s32, s32, s32, s32);
+s32 vec3_normalize_len(f32 *, f32 *, f32 *, s32 *);
 s32 memcpy(s32, f32 *, s32);
 
 /* was func_150F4AF0 */
@@ -86,7 +86,7 @@ void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 a
     sp.u6C = (*(f32 *)((u8 *)arg1 + 0)) - (*(f32 *)((u8 *)arg0 + 0));
     sp.u70 = (*(f32 *)((u8 *)arg1 + 4)) - (*(f32 *)((u8 *)arg0 + 4));
     sp.u74 = (*(f32 *)((u8 *)arg1 + 8)) - (*(f32 *)((u8 *)arg0 + 8));
-    if (func_15145128(&sp.u6C, &sp.u78, &sp.u68, &sp.u64) != 0) {
+    if (vec3_normalize_len(&sp.u6C, &sp.u78, &sp.u68, &sp.u64) != 0) {
         if (arg6 != 0) {
             var_v1 = 1;
         } else {
@@ -156,7 +156,7 @@ void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 a
         sp.uF8 = 0xFF;
         sp.uD0 = 0.0f;
         sp.uFC = arg7;
-        temp_v0 = func_15132BBC(&sp.u84, 3, 0xFF, 0, 0x28, (s32) arg8, arg9);
+        temp_v0 = mdl_particle_spawn_ex(&sp.u84, 3, 0xFF, 0, 0x28, (s32) arg8, arg9);
         if (temp_v0 != 0) {
             memcpy(temp_v0 + 0x170, &sp.u3C, 0x28);
         }
@@ -166,7 +166,7 @@ void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 a
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_bolt_spawn.s")
 #endif
 #ifdef NON_MATCHING
-void func_1514373C(f32, f32, f32 *, f32 *);
+void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 
 /* was func_150F4E50 */
 u8 *lightning_bolt_update(u8 *arg0) {
@@ -183,7 +183,7 @@ u8 *lightning_bolt_update(u8 *arg0) {
         return NULL;
     }
     sp18 = temp_v0;
-    func_1514373C((*(f32 *)((u8 *)temp_v0 + 0x10)), (*(f32 *)((u8 *)temp_v0 + 0x20)), &sp.u1C, &sp.u20);
+    vec2_from_angle_rad((*(f32 *)((u8 *)temp_v0 + 0x10)), (*(f32 *)((u8 *)temp_v0 + 0x20)), &sp.u1C, &sp.u20);
     (*(f32 *)((u8 *)sp18 + 0x10)) = (f32) ((*(f32 *)((u8 *)sp18 + 0x10)) + ((*(f32 *)((u8 *)sp18 + 0x14)) * D_800BE9A4));
     (*(f32 *)((u8 *)sp18 + 4)) = (f32) ((*(f32 *)((u8 *)sp18 + 4)) + ((*(f32 *)((u8 *)arg0 + 0x44)) * D_800BE9A4));
     (*(f32 *)((u8 *)sp18 + 8)) = (f32) ((*(f32 *)((u8 *)sp18 + 8)) + ((*(f32 *)((u8 *)arg0 + 0x48)) * D_800BE9A4));
@@ -200,13 +200,13 @@ u8 *lightning_bolt_update(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/lightning_bolt_update.s")
 #endif
 #ifdef NON_MATCHING
-f32 func_15143E64(f32 *);
+f32 vec3_length(f32 *);
 
 // ambient_emitter_update: per-frame update of an ambient object with flags +0x194: the distance to the camera
-// (func_15144B34(0)) from the position +0x38..; flag 1 fades the alpha +0x70 (0 below 500, 255 from 1200, linear in
+// (camera_get_pos(0)) from the position +0x38..; flag 1 fades the alpha +0x70 (0 below 500, 255 from 1200, linear in
 // between); flag 2 (unless flag 4) keeps a looping sound: when a handle is in the high half of +0x88 it is moved to
-// the position (func_1000F9D4), otherwise within 200 units sound id (+0x88 low half) starts at a random pitch
-// 0x4000..0x7FFF (func_10010F88) and its handle goes to the high half. Returns 1.
+// the position (sound_voice_update_pan), otherwise within 200 units sound id (+0x88 low half) starts at a random pitch
+// 0x4000..0x7FFF (sound_play_at) and its handle goes to the high half. Returns 1.
 /* was func_150F4FB8 */
 s32 ambient_obj_update(u8 *obj) {
     f32 delta[3];
@@ -216,11 +216,11 @@ s32 ambient_obj_update(u8 *obj) {
     u16 handle;
 
     if ((obj[0x194] & 1) || (obj[0x194] & 2)) {
-        cam = func_15144B34(0);
+        cam = camera_get_pos(0);
         delta[0] = *(f32 *) (obj + 0x38) - cam[0];
         delta[1] = *(f32 *) (obj + 0x3C) - cam[1];
         delta[2] = *(f32 *) (obj + 0x40) - cam[2];
-        dist = func_15143E64(delta);
+        dist = vec3_length(delta);
     }
     if (obj[0x194] & 1) {
         if (dist < 500.0f) {
@@ -234,10 +234,10 @@ s32 ambient_obj_update(u8 *obj) {
     if ((obj[0x194] & 2) && !(obj[0x194] & 4)) {
         sound = *(u32 *) (obj + 0x88);
         if ((sound >> 16) != 0) {
-            func_1000F9D4(sound >> 16, (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
+            sound_voice_update_pan(sound >> 16, (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
                           (s32) * (f32 *) (obj + 0x40));
         } else if (dist < 200.0f) {
-            handle = func_10010F88(*(u32 *) (obj + 0x88) & 0xFFFF, (random_int() & 0x3FFF) + 0x4000, 0, 0, -1,
+            handle = sound_play_at(*(u32 *) (obj + 0x88) & 0xFFFF, (random_int() & 0x3FFF) + 0x4000, 0, 0, -1,
                                    (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
                                    (s32) * (f32 *) (obj + 0x40), 10000, 20000);
             *(u32 *) (obj + 0x88) |= handle << 16;
@@ -292,12 +292,12 @@ typedef struct {
 } BoltSet536C;
 extern s32 (*D_80088ED8[])(u8 *);
 extern BoltSet536C D_80088EC0[];
-void func_15143874(s16, f32, f32 *, f32 *);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 
 // lightning_emitter_update: per-frame update of an emitter (record at +0x28: owner, accumulator, condition +0x30,
 // bolt set +0x31). If a condition function (D_80088ED8[+0x30], -1 = none) says no, nothing happens. Otherwise the
 // accumulator grows by (~0.051 + rand x ~0.153) x frame time and every whole unit spawns one bolt (lightning_bolt_spawn)
-// between two points around the owner's camera (func_15144B34(owner[0x23D])): both at a random distance 254..635
+// between two points around the owner's camera (camera_get_pos(owner[0x23D])): both at a random distance 254..635
 // along the camera heading (owner +0x380 degrees, to 256-unit angle) +-21, at height -133..79 relative to it, in
 // random order; style / scale picked at random from the D_80088EC0 set, width 5..15.
 /* was func_150F536C */
@@ -329,17 +329,17 @@ void lightning_emitter_update(u8 *obj) {
     if (!(1.0f < em->acc)) {
         return;
     }
-    cam = func_15144B34(em->owner[0x23D]);
+    cam = camera_get_pos(em->owner[0x23D]);
     angle = (s32) ((*(f32 *) (em->owner + 0x380) + 180.0f) * 0.7111111283f);
     left = angle - 21;
     right = angle + 21;
     do {
-        func_15143874(right, random_float() * 381.0f + 254.0f, &a.v[0], &a.v[2]);
+        vec2_from_angle_byte(right, random_float() * 381.0f + 254.0f, &a.v[0], &a.v[2]);
         a.v[1] = random_float() * 212.0f + -133.0f;
         a.v[0] += cam[0];
         a.v[1] += cam[1];
         a.v[2] += cam[2];
-        func_15143874(left, random_float() * 381.0f + 254.0f, &b.v[0], &b.v[2]);
+        vec2_from_angle_byte(left, random_float() * 381.0f + 254.0f, &b.v[0], &b.v[2]);
         b.v[1] = random_float() * 212.0f + -133.0f;
         b.v[0] += cam[0];
         b.v[1] += cam[1];

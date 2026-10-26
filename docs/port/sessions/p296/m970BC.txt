@@ -1,8 +1,8 @@
 \#^    if (\*(u8 \*\*) (rec->obj + 0x1D4) == NULL) {#s/== NULL/!= NULL/
 \#^    if (rec->speedFn != -1) {#s/!= -1/!= 0/
 \#^    mtx = \*(u8 \*\*) (rec->obj + 0x1D4) + rec->node \* 0x40;#s/0x40/0x30/
-\#^    func_15143134(&rec->at, e + 0x10, mtx);#s/&rec->at,/\&rec->at2,/
-\#^    func_15143134(&rec->at2, &newPos2, mtx);#s/&rec->at2/\&rec->at/
+\#^    mtx_transform_point_or_origin(&rec->at, e + 0x10, mtx);#s/&rec->at,/\&rec->at2,/
+\#^    mtx_transform_point_or_origin(&rec->at2, &newPos2, mtx);#s/&rec->at2/\&rec->at/
 \#^    rec->u4C += rec->u48 \* D_800BE9A4;#s/rec->u48 \* //
 \#^    if (!(1.0f < rec->u4C)) {#s/1.0f < rec->u4C/1.0f <= rec->u4C/
 \#^    time = rec->u3C + D_800BE9A4;#s/+ D_800BE9A4//
@@ -16,9 +16,9 @@
 \#^    step2.z = dz2 \* inv;#s/dz2/dy2/
 \#^        rec->u7C += rec->u78;#s/u78/u84/
 \#^        if (1.0f < rec->u7C) {#s/1.0f/0.5f/
-\#^            func_151992F8(e, (u8 \*) &newPos2);#s/(u8 \*) &newPos2/e + 0x10/
+\#^            emitter_streak_burst(e, (u8 \*) &newPos2);#s/(u8 \*) &newPos2/e + 0x10/
 \#^        if (1.0f < rec->u88) {#s/</>/
-\#^            func_1519961C(e, (u8 \*) &newPos2);#s/e,/(u8 *) rec,/
+\#^            spray_particles_burst(e, (u8 \*) &newPos2);#s/e,/(u8 *) rec,/
 \#^        pt = &pts\[(s8) e\[0x2E\]\];#s/0x2E/0x2D/
 \#^        pt->age = 0;#s/0;/1;/
 \#^        pt->pos.y = cur.y;#s/cur.y/cur2.y/

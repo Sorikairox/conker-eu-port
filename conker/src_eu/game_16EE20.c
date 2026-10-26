@@ -9,7 +9,7 @@ s32 interaction_mode_for_level(u32 arg0);
 
 /* was func_15141970 */
 void interact_fx_detach(struct37 *arg0) {
-    func_1514EDF0(arg0, arg0->unk2C);
+    char_fx_detach_effect(arg0, arg0->unk2C);
 }
 
 /* was func_15141990 */
@@ -112,7 +112,7 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
         }
         temp_a0 = arg0->unk2F4;
         sp3C = temp_a0;
-        if (func_1514F250(temp_a0, 0x1A, &sp3C) != 0) {
+        if (char_fx_find_slot(temp_a0, 0x1A, &sp3C) != 0) {
             do {
                 temp_v0_3 = sp3C->unk10;
                 if (D_8008A0B4[temp_v0_3->unk28].unk0 != 0) {
@@ -120,7 +120,7 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
                 }
                 temp_t8 = sp3C->unk14;
                 sp3C = temp_t8;
-            } while (func_1514F250(temp_t8, 0x1A, &sp3C) != 0);
+            } while (char_fx_find_slot(temp_t8, 0x1A, &sp3C) != 0);
         }
     }
 }
@@ -241,7 +241,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
     var_s1 = NULL;
     temp_a0 = arg0->unk2F4;
     sp58 = temp_a0;
-    if (func_1514F250(temp_a0, 0x1A, &sp58) != 0) {
+    if (char_fx_find_slot(temp_a0, 0x1A, &sp58) != 0) {
         do {
             temp_v0 = sp58->unk10;
             if (arg1 == temp_v0->unk28) {
@@ -250,7 +250,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
             }
             temp_t4 = sp58->unk14;
             sp58 = temp_t4;
-        } while (func_1514F250(temp_t4, 0x1A, &sp58) != 0);
+        } while (char_fx_find_slot(temp_t4, 0x1A, &sp58) != 0);
     }
     if (var_s1 == NULL) {
         rec.id = arg1;
@@ -259,7 +259,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
         temp_v0_2 = func_15149130((*(s16 *)((u8 *)(&D_8008A0B4[arg1]) + 6)), -1, -1, -1, 1U, 0x32U, (struct37 *)0xC, 0xFFU, 1);
         if (temp_v0_2 != NULL) {
             memcpy((u8 *)temp_v0_2 + 0x28, (s32 *)&rec, 0xC);
-            func_1514F18C(temp_v0_2, arg0, 0x1A);
+            char_fx_attach(temp_v0_2, arg0, 0x1A);
         }
     }
 }
@@ -280,7 +280,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //
 //     found = NULL;
 //     sp58 = arg0->unk2F4;
-//     if (func_1514F250(sp58, 0x1A, &sp58)) {
+//     if (char_fx_find_slot(sp58, 0x1A, &sp58)) {
 //         do {
 //             if (arg1 == sp58->unk10->unk28) {
 //                 found = sp58;
@@ -288,7 +288,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //             }
 //             temp = sp58->unk14;
 //             sp58 = temp;
-//         } while (func_1514F250(temp, 0x1A, &sp58));
+//         } while (char_fx_find_slot(temp, 0x1A, &sp58));
 //     }
 //     if (found == NULL) {
 //         sp40.unk0 = arg1;
@@ -297,7 +297,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //         temp_v0 = func_15149130(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, 0xC, 0xFF, 1);
 //         if (temp_v0 != NULL) {
 //             memcpy((u8 *)temp_v0 + 0x28, &sp40, 0xC);
-//             func_1514F18C(temp_v0, arg0, 0x1A);
+//             char_fx_attach(temp_v0, arg0, 0x1A);
 //         }
 //     }
 // }
@@ -389,7 +389,7 @@ void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8
 s32 obj_query_table6(struct127 *arg0) {
     struct_eu_words6 sp18 = D_800A55E0;
 
-    if (func_150A2FCC(arg0 - D_800CC2D0, 6, &sp18, arg0) == -1) {
+    if (trigger_first_touched(arg0 - D_800CC2D0, 6, &sp18, arg0) == -1) {
         return 0;
     }
     return 1;
@@ -422,7 +422,7 @@ void fx_spawn_impact_burst(u8 arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4
     sp24.unk40 = 0.0f;
     sp24.unk48 = arg2;
     sp24.unk3C = arg0;
-    func_15154488(&sp24, &sp24.unk8, 0, 0xFF, 1);
+    emit_sparks_in_angle_range(&sp24, &sp24.unk8, 0, 0xFF, 1);
 }
 
 /* was func_151422C0 */
@@ -490,7 +490,7 @@ struct127 *obj_resolve_with_model(u8 arg0, struct127 *arg1) {
         }
         return NULL;
     }
-    temp_v0 = func_15083E90(arg0);
+    temp_v0 = obj_find_by_setup_id(arg0);
     if ((temp_v0 != NULL) && (temp_v0->unk1D4 != NULL)) {
         return temp_v0;
     }

@@ -1,4 +1,4 @@
-s/func_1508DF48(i, 1);/func_1508DF48(i, 0);/ % newrace
+s/rail_pickup_slot_release(i, 1);/rail_pickup_slot_release(i, 0);/ % newrace
 s/if (!(seen \& bit)) {/if (!(mask \& bit)) {/ % gone newrace
 s/        cooldown\[i\] -= D_800BE9E4;/        cooldown[i] -= 1;/ %
 s/        if (counter\[i\] < 0) {/        if (counter[i] <= 0) {/ %

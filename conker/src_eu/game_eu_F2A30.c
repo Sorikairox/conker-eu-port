@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_150C5220(u8 *arg0) {
+/* was func_150C5220 */
+void scenery_swing_angle_update(u8 *arg0) {
     f32 sp44;
     s32 sp38;
     f32 temp_f0;
@@ -27,7 +28,7 @@ void func_150C5220(u8 *arg0) {
         temp_f4 = (s32) (temp_f12 - 256.0f);
         sp44 = temp_f2;
         sp38 = temp_f4;
-        func_10010F88(0xF, 0x55F0U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0x1F4, 0x3E8);
+        sound_play_at(0xF, 0x55F0U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0x1F4, 0x3E8);
         var_v0 = temp_f4;
     }
     (*(s32 *)((u8 *)arg0 + 0x7C)) = var_v0;
@@ -49,7 +50,7 @@ void func_150C5220(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/func_150C5220.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/scenery_swing_angle_update.s")
 #endif
 #ifdef NON_MATCHING
 u8 *allocate_memory(s32, s32, s32, s32);
@@ -59,7 +60,8 @@ s32 scenery_dl_find_tex_slots(s32, u8 *);
 extern s32 D_1C0;
 extern s32 D_2C1;
 
-void func_150C539C(u8 *arg0) {
+/* was func_150C539C */
+void scenery_vtx_scroll_update(u8 *arg0) {
     struct {
         s32 u50;
         s32 * u54;
@@ -186,10 +188,11 @@ void func_150C539C(u8 *arg0) {
     segment_override_add(arg0, temp_v0_3, var_a2, 4, 5);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/func_150C539C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/scenery_vtx_scroll_update.s")
 #endif
 extern struct102 *D_800D9CF0[];
-void func_150C572C(void) {
+/* was func_150C572C */
+void fx_slots_9cf0_clear(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
@@ -200,26 +203,29 @@ void func_150C572C(void) {
     }
 }
 
-s32 func_150C5780(void) {
+/* was func_150C5780 */
+s32 cutscene_is_scene_b_to_d(void) {
     if ((D_800C35EA == 1) && ((D_800C3A08 == 0xB) || (D_800C3A08 == 0xC) || (D_800C3A08 == 0xD))) {
         return 1;
     }
     return 0;
 }
 
-s32 func_150C5780(void);
+s32 cutscene_is_scene_b_to_d(void);
 
-s32 func_150C57CC(s32 arg0) {
-    if (func_150C5780() != 0) {
+/* was func_150C57CC */
+s32 cutscene_gated_b148_call(s32 arg0) {
+    if (cutscene_is_scene_b_to_d() != 0) {
         return 0;
     }
     return D_8008B148(arg0);
 }
 
-s32 func_150C5780();
+s32 cutscene_is_scene_b_to_d();
 
-s32 func_150C5810(u8 *arg0) {
-    if (func_150C5780() != 0) {
+/* was func_150C5810 */
+s32 obj_hide_in_cutscene_b_to_d(u8 *arg0) {
+    if (cutscene_is_scene_b_to_d() != 0) {
         (*(s32 *)((u8 *)arg0 + 0x60)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x60)) | 0x20000);
     } else {
         (*(s32 *)((u8 *)arg0 + 0x60)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x60)) & 0xFFFDFFFF);

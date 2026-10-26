@@ -8,11 +8,11 @@ extern u8 D_800A22BC[];
 
 
 void view_sparkle_burst(u8);
-s32 func_1516547C(s32, s32, s32, s32, s32);
+s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
 #ifdef NON_MATCHING
-s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
+s32 sfx_cb_delayed_play_2d(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
 #else
-extern s32 func_1000EC24;
+extern s32 sfx_cb_delayed_play_2d;
 #endif
 
 /* was func_150FCFB0 */
@@ -23,13 +23,13 @@ void view_spots_flash_event(void) {
     view_sparkle_burst(0);
     view_sparkle_burst(1);
     view_sparkle_burst(2);
-    func_1000FA64(0x2B8U, -0x7F6, 0x618, -0xA47, 0x6D60, 0x2328U, 0x1B58, (s32) &func_1000EC24, (u8 *)0x2D, 0, 0, 0);
-    func_1000FA64(0x2B7U, -0x13F, -0x111, -0xD5B, 0x6D60, 0x2328U, 0x1B58, (s32) &func_1000EC24, NULL, 0, 0, 0);
-    func_1000FA64(0x2B6U, 0x5EF, 0x3B3, -0xA49, 0x6D60, 0x2328U, 0x1B58, (s32) &func_1000EC24, (u8 *)0x5A, 0, 0, 0);
+    sfx_emitter_start(0x2B8U, -0x7F6, 0x618, -0xA47, 0x6D60, 0x2328U, 0x1B58, (s32) &sfx_cb_delayed_play_2d, (u8 *)0x2D, 0, 0, 0);
+    sfx_emitter_start(0x2B7U, -0x13F, -0x111, -0xD5B, 0x6D60, 0x2328U, 0x1B58, (s32) &sfx_cb_delayed_play_2d, NULL, 0, 0, 0);
+    sfx_emitter_start(0x2B6U, 0x5EF, 0x3B3, -0xA49, 0x6D60, 0x2328U, 0x1B58, (s32) &sfx_cb_delayed_play_2d, (u8 *)0x5A, 0, 0, 0);
     var_s0 = 0;
     if ((D_80082FA0 + 1) > 0) {
         do {
-            func_1516547C(4, var_s0 & 0xFF, 0, 0xFF, 1);
+            cam_wobble_start_preset(4, var_s0 & 0xFF, 0, 0xFF, 1);
             var_s0 += 1;
         } while (D_80082FA0 >= var_s0);
     }
@@ -38,19 +38,19 @@ void view_spots_flash_event(void) {
     sp.u49 = 0xF;
     sp.u48 = 8;
     sp.u4A = -1;
-    func_151D8E18((structEU_151D8E18 *) &sp, 0, 0xFFU, 0);
+    rumble_request((structEU_151D8E18 *) &sp, 0, 0xFFU, 0);
 }
 
 #ifdef NON_MATCHING
 /* P179 */
 extern s16 D_800A22B0[];
-s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
-void func_15143874(s16, f32, f32 *, f32 *);
-void func_15150258(u8 *, u8, s32);
+s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+void emit_random_sprites(u8 *, u8, s32);
 
 // view_sparkle_burst: P179: one flash plus 3..4 spark sprays at view `view`'s spot (D_800D9AA0[view], 0..2: s16 x, y,
-/* z, radius +6, height +8; nothing when the slot is NULL). The flash (func_15154728) sits at the middle of the
- * height: size random * 4 + 12, brightness 200..255. Each spray (func_15150258 block, layout of func_15150258 in
+/* z, radius +6, height +8; nothing when the slot is NULL). The flash (spark_shower_spawn) sits at the middle of the
+ * height: size random * 4 + 12, brightness 200..255. Each spray (emit_random_sprites block, layout of emit_random_sprites in
  * game_eu_17D3C0) starts on the circle of the spot's radius at angle base + random [0, range] (D_800A22B0[view]:
  * s16 base, range; angle byte), at a random height in [y, y + height], and fans out from that angle - 40 over 80. */
 /* was func_150FD140 */
@@ -103,7 +103,7 @@ void view_sparkle_burst(u8 view) {
     pos[2] = spot[2];
     size = random_float();
     r = random_int();
-    func_15154728(pos, size * 4.0f + 12.0f, 6.6943097f, r % 56 + 200, 2.6090002f, 0xFF, 1);
+    spark_shower_spawn(pos, size * 4.0f + 12.0f, 6.6943097f, r % 56 + 200, 2.6090002f, 0xFF, 1);
     n = (random_int() & 1) + 3;
     if (n <= 0) {
         return;
@@ -136,11 +136,11 @@ void view_sparkle_burst(u8 view) {
     do {
         a = random_int() % (u32) (arc[1] + 1) + arc[0];
         spray.angle = a - 0x28;
-        func_15143874(a, spot[3], &spray.pos[0], &spray.pos[2]);
+        vec2_from_angle_byte(a, spot[3], &spray.pos[0], &spray.pos[2]);
         spray.pos[0] += spot[0];
         spray.pos[2] += spot[2];
         spray.pos[1] = random_float() * spot[4] + spot[1];
-        func_15150258((u8 *) &spray, 0xFF, 1);
+        emit_random_sprites((u8 *) &spray, 0xFF, 1);
         n--;
     } while (n > 0);
 }
@@ -149,12 +149,12 @@ void view_sparkle_burst(u8 view) {
 #endif
 
 #ifdef NON_MATCHING
-f32 func_15166120(void *, void *, s32, s32, f32);
+f32 cam_wobble_fade_by_distance(void *, void *, s32, s32, f32);
 
-/* view_spot_distance_fade: P238: entry 0 of D_8008B734 (func_15164E0C, asm, passes the object in a0 and stores f0).
- * Fade factor of `obj` against view 0's spot (D_800D9AA0[0], s16 x / y / z as floats): func_15166120 with near
+/* view_spot_distance_fade: P238: entry 0 of D_8008B734 (cam_wobble_update, asm, passes the object in a0 and stores f0).
+ * Fade factor of `obj` against view 0's spot (D_800D9AA0[0], s16 x / y / z as floats): cam_wobble_fade_by_distance with near
  * distance 2007, range 9005 and scale 1 / 9005 (D_800A22FC, 0x38E8E334). 1.0 when there is no spot. The near /
- * range parameters are f32 bit patterns in func_15166120's s32 slots (it reads them as floats). */
+ * range parameters are f32 bit patterns in cam_wobble_fade_by_distance's s32 slots (it reads them as floats). */
 /* was func_150FD49C */
 f32 view_spot_distance_fade(u8 *obj) {
     f32 pos[3];
@@ -168,7 +168,7 @@ f32 view_spot_distance_fade(u8 *obj) {
     pos[0] = spot[0];
     pos[1] = spot[1];
     pos[2] = spot[2];
-    return func_15166120(obj, pos, *(s32 *) &nearDist, *(s32 *) &range, 0.00011104942f);
+    return cam_wobble_fade_by_distance(obj, pos, *(s32 *) &nearDist, *(s32 *) &range, 0.00011104942f);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/view_spot_distance_fade.s")
@@ -180,8 +180,8 @@ void level_update_sfx_tick_a(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15046F70(u8 *, u16, f32, u8 *);
-void func_1504715C(void *, u8 *);
+s32 collision_floor_probe(u8 *, u16, f32, u8 *);
+void hitinfo_from_obj_floor(void *, u8 *);
 s32 obj_send_hit(struct127 *, s32, u16, s32);
 s32 light_create_flicker_preset(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(u8 *, struct127 **, s32);
@@ -304,8 +304,8 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u18C = arg0->y_position + 100.0f;
         sp.u1A0 = arg0->z_position;
         sp.u190 = sp.u1A0;
-        func_1504715C(&sp.u1A4, arg0);
-        if (func_15046F70(&sp.u188, 0, -10000.0f, &sp.u1A4) /* P93: was the bit pattern 0xC61C4000 as an int */ != 0) {
+        hitinfo_from_obj_floor(&sp.u1A4, arg0);
+        if (collision_floor_probe(&sp.u188, 0, -10000.0f, &sp.u1A4) /* P93: was the bit pattern 0xC61C4000 as an int */ != 0) {
             sp.u197 = 1;
             sp.u19C = sp.u1A4;
         } else {
@@ -329,7 +329,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u100 = 0.0f;
         sp.uF4 = temp_f16;
         sp.u104 = *(struct_eu_bytes24 *)(&sp.u1A4);
-        sp.u128 = func_1000FA64(0x69EU, (s16) (s32) sp.u198, (s16) (s32) sp.u19C, (s16) (s32) sp.u1A0, 0x7D00, 0xBB8U, 0x1F4, 0, NULL, 0, 0, 0);
+        sp.u128 = sfx_emitter_start(0x69EU, (s16) (s32) sp.u198, (s16) (s32) sp.u19C, (s16) (s32) sp.u1A0, 0x7D00, 0xBB8U, 0x1F4, 0, NULL, 0, 0, 0);
         if (sp.u197 != 0) {
             var_v0 = 1;
         } else {
@@ -434,9 +434,9 @@ extern f32 D_800A232C;
 extern f32 D_800A2330;
 extern f32 D_800A2334;
 extern f32 D_800A2338;
-void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
+void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 void obj_angle_point_effect(u8 *, s16, s16, u8, s32);
-void func_151D58E4(u8 *, f32, f32, f32, u8, u8, s32);
+void cam_shake_all_players(u8 *, f32, f32, f32, u8, u8, s32);
 void fx_scorch_decal_spawn(f32, u8, s32, u8 *, s16, u8, u8, u8, u8, u8, u8, s32);
 void fx_debris_emitter_spawn(f32 *, s16, u8, s32);
 // bound_cloud_update: update handler (D_8008A100 slot 43) of a cloud effect that can be bound to an object. The
@@ -475,7 +475,7 @@ s32 bound_cloud_update(u8 *fx) {
         z = *(f32 *)(fx + 0x3C);
     }
     if (obj != NULL) {
-        func_1502ED88(obj, 0xFF, 0, 0, 0xFF, 0, 4);
+        obj_tint_set_flash(obj, 0xFF, 0, 0, 0xFF, 0, 4);
         *(f32 *)(st + 0x2C) += (D_800A2310 + random_float() * D_800A2314) * D_800BE9A4;
         while (*(f32 *)(st + 0x2C) > 1.0f) {
             r0 = random_int();
@@ -494,12 +494,12 @@ s32 bound_cloud_update(u8 *fx) {
         if (st[0x58] == 0) {
             if (obj != NULL) {
                 obj_send_hit((struct127 *)obj, 0x16, *(u16 *)(obj + 0x7A), -1);
-                func_10010F88(0x69D, 0x7D00, 0, 0, 0, (s16)(s32) * (f32 *)(fx + 0x34),
+                sound_play_at(0x69D, 0x7D00, 0, 0, 0, (s16)(s32) * (f32 *)(fx + 0x34),
                               (s16)(s32) * (f32 *)(fx + 0x38), (s16)(s32) * (f32 *)(fx + 0x3C), 500, 3000);
             }
             st[0x58] = 1;
-            func_151D5404((struct17 *)(fx + 0x34), 506.0f, 1013.0f, 0.0009871669f, 15, 20, fx[0xC], fx[1]);
-            func_151D58E4(fx + 0x34, 506.0f, 1013.0f, 0.0009871669f, 5, fx[0xC], fx[1]);
+            rumble_all_players_at((struct17 *)(fx + 0x34), 506.0f, 1013.0f, 0.0009871669f, 15, 20, fx[0xC], fx[1]);
+            cam_shake_all_players(fx + 0x34, 506.0f, 1013.0f, 0.0009871669f, 5, fx[0xC], fx[1]);
             if (st[0x59] & 1) {
                 pos[0] = *(f32 *)(fx + 0x34);
                 pos[1] = *(f32 *)(st + 0x30);
@@ -515,11 +515,11 @@ s32 bound_cloud_update(u8 *fx) {
     }
     fx[0x5C] = (u32)(sinf(*(f32 *)(st + 0x10)) * 57.0f + 198.0f);
     *(f32 *)(st + 0x10) += D_800A2320 * D_800BE9A4;
-    *(f32 *)(st + 0x10) = func_15144B68(*(f32 *)(st + 0x10));
+    *(f32 *)(st + 0x10) = wrap_angle_rad(*(f32 *)(st + 0x10));
     *(f32 *)(st + 0x1C) += D_800A2324 * D_800BE9A4;
     *(f32 *)(st + 0x20) += D_800A2328 * D_800BE9A4;
-    *(f32 *)(st + 0x1C) = func_15144B68(*(f32 *)(st + 0x1C));
-    *(f32 *)(st + 0x20) = func_15144B68(*(f32 *)(st + 0x20));
+    *(f32 *)(st + 0x1C) = wrap_angle_rad(*(f32 *)(st + 0x1C));
+    *(f32 *)(st + 0x20) = wrap_angle_rad(*(f32 *)(st + 0x20));
     *(f32 *)(st + 0x14) = func_150AD78C(*(f32 *)(st + 0x1C)) * D_800A232C + D_800A2330;
     *(f32 *)(st + 0x18) = func_150AD78C(*(f32 *)(st + 0x20)) * 1192.0f + D_800A2334;
     link = *(u8 **)(st + 0x28);
@@ -598,8 +598,8 @@ void bound_cloud_free(u8 *arg0)
   
   if (*(s32 *)(arg0 + 0x134) != 0) { node_destroy(*(struct102 **)(arg0 + 0x134)); }
   if (*(struct102 **)(v + 0x28)) { node_destroy(*(struct102 **)(v + 0x28)); } // fakematch: pointer-typed test gives one load (s32 test double-loads like line above)
-  if (*(u16 *)(v + 0x54) != 0) { func_100111C8(*(u16 *)(v + 0x54)); }
-  if (*(u16 *)(v + 0x56) != 0) func_100111C8(*(u16 *)(v + 0x56));
+  if (*(u16 *)(v + 0x54) != 0) { sound_voice_stop(*(u16 *)(v + 0x54)); }
+  if (*(u16 *)(v + 0x56) != 0) sound_voice_stop(*(u16 *)(v + 0x56));
 }
 
 /* was func_150FE22C */

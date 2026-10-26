@@ -7,7 +7,8 @@
 extern s32 D_800C6A70;
 extern u32 D_800C6A74;
 
-void func_1503E0C0(s32 arg0) {
+/* was func_1503E0C0 */
+void look_point_remove(s32 arg0) {
     u32 temp_t5;
     u32 var_v0;
     u8 *var_v1;
@@ -33,5 +34,5 @@ loop_4:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B8D0/func_1503E0C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B8D0/look_point_remove.s")
 #endif

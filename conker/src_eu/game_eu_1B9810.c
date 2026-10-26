@@ -12,15 +12,16 @@ typedef struct {
     u8 id;           // 0x18 obj[0x3B]
     u8 u19;          // 0x19
     u8 u1A;          // 0x1A
-} ObjEffect1FSpec;   // 0x1C bytes, copied by func_1518C240
-u8 *func_1518C240(s32, u8, s32);
+} ObjEffect1FSpec;   // 0x1C bytes, copied by drip_effect_create
+u8 *drip_effect_create(s32, u8, s32);
 
 // obj_effect1F_attach: the type-0x1F effect node (lists D_800DD280[0..1][0x1F]) that belongs to `obj` (+0x24) or has
-// its id (+0x28 == obj[0x3B]); if there is none, spawns one with func_1518C240 (`arg1`, `arg2` passed on) whose
+// its id (+0x28 == obj[0x3B]); if there is none, spawns one with drip_effect_create (`arg1`, `arg2` passed on) whose
 // parameters depend on the object's kind obj[4]: 0..4 -> 10.0 x4 / 5 / 0, 7 -> (2.76, 5.96, 3.21, 5.0) / 4 / 0x37.
 // Nothing for a NULL object or another kind. void: the asm returns the node, but the only caller (game_eu_C5530,
 // a void prototype) ignores it.
-void func_1518C000(struct127 *obj, s32 arg1, s32 arg2) {
+/* was func_1518C000 */
+void drip_effect_attach(struct127 *obj, s32 arg1, s32 arg2) {
     ObjEffect1FSpec spec;
     struct_eu_node *node;
     s32 i;
@@ -65,13 +66,14 @@ void func_1518C000(struct127 *obj, s32 arg1, s32 arg2) {
     }
     spec.obj = obj;
     spec.id = ((u8 *) obj)[0x3B];
-    func_1518C240((s32) &spec, arg1, arg2);
+    drip_effect_create((s32) &spec, arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C000.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_effect_attach.s")
 #endif
 
-void func_1518C164(u8 *arg0) {
+/* was func_1518C164 */
+void drip_effect_detach(u8 *arg0) {
     s32 i;
     struct_eu_node *node;
 
@@ -96,7 +98,8 @@ void func_1518C164(u8 *arg0) {
 
 s32 memcpy(u8 *, s32, s32);
 
-u8 *func_1518C240(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_1518C240 */
+u8 *drip_effect_create(s32 arg0, u8 arg1, s32 arg2) {
     u8 *temp_v0;
 
     temp_v0 = node_alloc(0x1F, arg2, 0x44, 1, (u8) (s32) arg1, 1U);
@@ -110,9 +113,10 @@ u8 *func_1518C240(s32 arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
-void func_1518C2D0(u8 *arg0) {
+/* was func_1518C2D0 */
+void drip_effect_update(u8 *arg0) {
     struct {
         s32 uB8;
         s32 uBC;
@@ -193,7 +197,7 @@ void func_1518C2D0(u8 *arg0) {
                 sp.uF4 = (*(u8 *)((u8 *)arg0 + 0x2A)) | 8;
                 sp.uF7 = 0xFF;
                 sp.uF6 = 0xFF - (((u32) (*(u32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x24))) + 0x184)) >> 5) << 6);
-                temp_v0 = func_15148310(&sp.uFC, &sp.uDC, (sp.u111 * 0xC) + 8, 5, 1, 0, 2, 1, 0, 0, 0, &sp.uB8, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_v0 = trail_spawn(&sp.uFC, &sp.uDC, (sp.u111 * 0xC) + 8, 5, 1, 0, 2, 1, 0, 0, 0, &sp.uB8, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0 != NULL) {
                     temp_v1_2 = (*(s32 *)((u8 *)temp_v0 + 0x98)) + 0x48;
                     (*(u8 **)((u8 *)temp_v1_2 + 0)) = arg0;
@@ -209,10 +213,11 @@ void func_1518C2D0(u8 *arg0) {
     } while (temp_t7 < 2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C2D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_effect_update.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1518C628(u8 *arg0) {
+/* was func_1518C628 */
+s32 drip_stream_update(u8 *arg0) {
     struct {
         f32 u40;
         f32 u44;
@@ -350,9 +355,10 @@ s32 func_1518C628(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C628.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_stream_update.s")
 #endif
-s32 func_1518CAB0(u8 *arg0) {
+/* was func_1518CAB0 */
+s32 drip_stream_fade(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
     s32 var_v1 = *(s16 *)(arg0 + 0x1C) * 8;
 
@@ -388,7 +394,8 @@ typedef struct {
 s32 sprite_vtx_quads_init(SpawnCAEC *, s32, s32, s32, s32);
 s32 node_spawn_vtx_sprite(SpawnCAEC *, u8, u8);
 
-s32 func_1518CAEC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* was func_1518CAEC */
+s32 drip_stream_splash(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     SpawnCAEC sp;
     u8 *obj;
     u8 *tbl;
@@ -414,7 +421,8 @@ s32 func_1518CAEC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1518CC0C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+/* was func_1518CC0C */
+s32 drip_stream_splash_dust(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     struct {
         f32 u38;
         f32 u3C;
@@ -459,9 +467,10 @@ s32 func_1518CC0C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518CC0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/drip_stream_splash_dust.s")
 #endif
-void func_1518CDC0(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_1518CDC0 */
+void drip_effect_on_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     s32 id;
     if (arg2 == 0x2D) {
         if (*(s32 *)(arg1 + 0) == *(s32 *)((u8 *)arg0 + 0x24)) {

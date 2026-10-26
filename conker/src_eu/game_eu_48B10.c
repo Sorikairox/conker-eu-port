@@ -13,7 +13,8 @@ extern f32 D_800BEAE0[];
 extern f32 D_800BEAF0[];
 #define DEG_TO_RAD 0.017453292f
 
-void func_1501B300(s32 player) {
+/* was func_1501B300 */
+void camera_update_dir_vector(s32 player) {
     u8 *cam;
     f32 rate;
     f32 pitch;
@@ -83,13 +84,14 @@ void func_1501B300(s32 player) {
 }
 
 /* the asm only forwards a0 (the player index) */
-void func_1501B640(s32 player) {
-    func_1501B300(player);
+/* was func_1501B640 */
+void camera_update_dir_vector_thunk(s32 player) {
+    camera_update_dir_vector(player);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_48B10/func_1501B300.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_48B10/camera_update_dir_vector.s")
 
-void func_1501B640(void) {
-    func_1501B300();
+void camera_update_dir_vector_thunk(void) {
+    camera_update_dir_vector();
 }
 #endif

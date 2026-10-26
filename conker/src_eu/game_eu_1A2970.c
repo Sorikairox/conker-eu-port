@@ -6,8 +6,8 @@ extern Row20 D_800DE2B4[];
 extern Row20 D_800DE2B8[];
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 extern u8 D_800A7550[4];
-void func_15175EC8(u8 *);
-s32 func_150ADE40(s32, s32, s32, s32);
+void flyer_update(u8 *);
+s32 approx_dist2_int(s32, s32, s32, s32);
 #endif
 
 
@@ -20,7 +20,8 @@ extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
 // direction +-15 degrees, speed jitter 0.01 * (-128..127), fall -1, size `base` + rand * `scale`, one of the two
 // D_800DE2B8 models. Only the first leaf starts sound 0xA2. With `ground` & 1 each leaf records the floor below it
 // (collision_level_nearest_height: height +0xC8, surface type +0xE8, colour D_800A7550[(type >> 5) & 3] at +0xEC).
-void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 base, f32 scale, s32 ground) {
+/* was func_15175160 */
+void flyer_leaf_burst_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 base, f32 scale, s32 ground) {
     struct { f32 x, y, z; } d;
     s32 tri;
     u8 *pl;
@@ -73,7 +74,7 @@ void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 bas
         *(s32 *)(p + 0x94) = D_800DE2B8[m].x0;
         p[0xED] = m;
         if (i == 0) {
-            *(u16 *)(p + 0xEE) = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, px, y, pz, 1000, 4000);
+            *(u16 *)(p + 0xEE) = sound_voice_play_at(0, 0xA2, 0x7D00, 0, 0, 0, px, y, pz, 1000, 4000);
         } else {
             *(u16 *)(p + 0xEE) = 0;
         }
@@ -95,20 +96,21 @@ void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 bas
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15175160.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_leaf_burst_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 void collision_select_area(s32 arg0);
-s32 func_150A3F50(s32 x, s32 z);
-extern s32 D_800D3720; /* floor candidates (16 bytes: +0 height in 24.8) left by func_150A3F50 */
+s32 floor_collect_level_tris(s32 x, s32 z);
+extern s32 D_800D3720; /* floor candidates (16 bytes: +0 height in 24.8) left by floor_collect_level_tris */
 
 // leaf_drop_spawn: spawns up to `count` leaves of model row 7 (node_alloc list 0x13) in a `width` square around
 // (x, z) at height y: life 4..6, spin / tilt jitter, size `base` + rand * `scale`. Each leaf takes the lowest floor
-// below it (func_150A3F50; none -> the leaf is freed with node_delete). mode 0 (after collision_select_area(0)) puts the
+// below it (floor_collect_level_tris; none -> the leaf is freed with node_delete). mode 0 (after collision_select_area(0)) puts the
 // leaf 10 above that floor in state 1; otherwise it falls from 300..427 above it in state 4 (+0x91 = 2).
 // `player` is not used.
-void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 player, s32 mode, f32 base, f32 scale) {
+/* was func_15175514 */
+void flyer_leaf_drop_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 player, s32 mode, f32 base, f32 scale) {
     u8 *p;
     s32 i;
     s32 k;
@@ -145,7 +147,7 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
         *(s32 *)(p + 0x94) = D_800DE2B8[7].x0;
         p[0xED] = 7;
 
-        n = func_150A3F50(px, pz);
+        n = floor_collect_level_tris(px, pz);
         if (n == 0) {
             node_delete((struct102 *)p);
             continue;
@@ -182,7 +184,7 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15175514.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_leaf_drop_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -200,7 +202,8 @@ extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
 // The first particle of list 0xA starts sound 0xA2 (+0xEE). With `ground` & 1 the particle records the floor
 // surface (+0xE8, colour D_800A7550[(type >> 5) & 3] at +0xEC; +0x92 |= 0x80). Called by game_eu_1B1010 (effects
 // kinds with 18 arguments).
-void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 player, s32 yRange, s32 rMin, s32 flags,
+/* was func_15175900 */
+void flyer_field_spawn(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 player, s32 yRange, s32 rMin, s32 flags,
                    s32 list, s32 listRand, s32 model, s32 modelMask, s32 mode, f32 base, f32 scale, s32 ground) {
     struct { f32 x, y, z; } d;
     s32 tri;
@@ -307,7 +310,7 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
         if (i != 0) {
             *(u16 *)(p + 0xEE) = 0;
         } else if (list == 0xA) {
-            *(u16 *)(p + 0xEE) = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, px, py, pz, 1000, 4000);
+            *(u16 *)(p + 0xEE) = sound_voice_play_at(0, 0xA2, 0x7D00, 0, 0, 0, px, py, pz, 1000, 4000);
         }
         if (onGround) {
             *(s16 *)(p + 0x92) |= 0x80;
@@ -325,11 +328,11 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15175900.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_field_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-/* ambient flyer object (the node_alloc particles of func_15175900 / game_eu_1B1010) */
+/* ambient flyer object (the node_alloc particles of flyer_field_spawn / game_eu_1B1010) */
 typedef struct {
     u8 kind;            /* 0x00: 0x13 = chirping kind */
     u8 pad1[0x8F];
@@ -411,7 +414,7 @@ static const f32 sFlyerCircleFloor[1] = { -3100.0f };   /* D_800A7584 */
 static const f32 sFlyerDegToRad[1] = { 0.0174532924f }; /* D_800A7588 */
 
 // ambient_flyer_update: per-frame update of an ambient flyer (bird / bat; render-layer field 0 of layers 10 / 20 /
-// 68 / 69, also called by func_15176DCC / func_151770F4). Removed (node_destroy) when its type row is off. Types 8
+// 68 / 69, also called by flyer_perched_update / flyer_resting_update). Removed (node_destroy) when its type row is off. Types 8
 // and 9 on level 6 during D_800C3A08 == 0xF scatter after 60 frames of D_800C39D0: they start circling (flag 0x200)
 // round (-3478, 3858), the radius shrinking to 60 while they sink, and vanish below -3100 or when the event ends.
 // Otherwise: fade in / fade out (alpha +0xF0, `fading` once the slot is gone and flag 8 is set), keep the looping
@@ -419,7 +422,8 @@ static const f32 sFlyerDegToRad[1] = { 0.0174532924f }; /* D_800A7588 */
 // 0x10, then wander with random headings), flag 0x80 = follow the floor, flag 0x40 = bob between home y and a random
 // height; then pitch / turn / roll / speed integration (limits in D_8008D450), wing model by pitch (flag 1 = fixed),
 // a chirp for kind 0x13 and removal when outside both views (flag 2).
-void func_15175EC8(u8 *arg0) {
+/* was func_15175EC8 */
+void flyer_update(u8 *arg0) {
     Flyer *f = (Flyer *)arg0;
     FlyerModels *row;
     FlyerType *t;
@@ -487,15 +491,15 @@ void func_15175EC8(u8 *arg0) {
     t = (FlyerType *)((u8 *)&D_8008D450 + f->type * 0x38);
 
     if (f->sound != 0) {
-        if (func_1000F3D0(f->sound) != 0) {
-            func_1000F91C(f->sound, 0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4000);
+        if (sound_voice_is_playing(f->sound) != 0) {
+            sound_voice_update_3d(f->sound, 0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4000);
         } else {
             f->sound = 0;
         }
     }
 
     if (f->flags & 4) {
-        dist = func_150ADE40((s32)f->x, (s32)f->z, f->homeX, f->homeZ);
+        dist = approx_dist2_int((s32)f->x, (s32)f->z, f->homeX, f->homeZ);
         near = 0;
         if ((f->flags & 0x10) && dist < f->rangeMin) {
             near = 1;
@@ -684,7 +688,7 @@ void func_15175EC8(u8 *arg0) {
     }
 
     if (f->kind == 0x13 && D_800DDF60[f->slot] == 0) {
-        func_10010F88(0x10, 0x7FFF, random_int() & 0x7F, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 500, 4000);
+        sound_play_at(0x10, 0x7FFF, random_int() & 0x7F, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 500, 4000);
         D_800DDF60[f->slot] = (random_int() & 0x3F) + 30;
     }
     if ((f->flags & 2)
@@ -696,11 +700,12 @@ void func_15175EC8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15175EC8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15176DCC(u8 *arg0) {
+/* was func_15176DCC */
+void flyer_perched_update(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f0_2;
     f32 temp_f10;
@@ -712,7 +717,7 @@ void func_15176DCC(u8 *arg0) {
         temp_v0 = (*(u8 *)((u8 *)arg0 + 0x91));
         switch (temp_v0) {                          /* irregular */
         case 0:
-            if (func_150ADE40((s32) D_800CC2D0->x_position, (s32) D_800CC2D0->z_position, (s32) (*(f32 *)((u8 *)arg0 + 0x98)), (s32) (*(f32 *)((u8 *)arg0 + 0xA0))) < 0x190) {
+            if (approx_dist2_int((s32) D_800CC2D0->x_position, (s32) D_800CC2D0->z_position, (s32) (*(f32 *)((u8 *)arg0 + 0x98)), (s32) (*(f32 *)((u8 *)arg0 + 0xA0))) < 0x190) {
                 (*(u8 *)((u8 *)arg0 + 0x91)) = 1U;
                 temp_f10 = (f32) (-1 - (random_int() & 3));
                 (*(f32 *)((u8 *)arg0 + 0xA8)) = -8.0f;
@@ -755,7 +760,7 @@ void func_15176DCC(u8 *arg0) {
                 (*(s16 *)((u8 *)arg0 + 0x92)) = (s16) ((*(s16 *)((u8 *)arg0 + 0x92)) | 4);
                 (*(f32 *)((u8 *)arg0 + 0xE4)) = (f32) ((f32) (random_int() & 0x7F) + (300.0f + (*(f32 *)((u8 *)arg0 + 0xC8))));
             }
-            func_15175EC8(arg0);
+            flyer_update(arg0);
             return;
         default:
         case 2:
@@ -765,7 +770,7 @@ void func_15176DCC(u8 *arg0) {
             } else if ((*(f32 *)((u8 *)arg0 + 0xA8)) < 0.0f) {
                 (*(f32 *)((u8 *)arg0 + 0xB4)) = 1.5f;
             }
-            func_15175EC8(arg0);
+            flyer_update(arg0);
             return;
         }
     } else {
@@ -773,12 +778,13 @@ void func_15176DCC(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15176DCC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_perched_update.s")
 #endif
-s32 func_150ADE40(s32, s32, s32, s32);
-void func_15175EC8(u8 *);
+s32 approx_dist2_int(s32, s32, s32, s32);
+void flyer_update(u8 *);
 
-void func_151770F4(u8 *arg0) {
+/* was func_151770F4 */
+void flyer_resting_update(u8 *arg0) {
     s32 v;
 
     if (((Row20 *)D_800DDE80)[arg0[0xED]].x0 == 0 || D_800DDF78[arg0[0xED]] == 0) {
@@ -810,7 +816,7 @@ void func_151770F4(u8 *arg0) {
     D_800DDF68[arg0[0xED]] = 1;
     switch (arg0[0x91]) {
         case 0:
-            if (func_150ADE40(*(f32 *)((u8 *)D_800CC2D0 + 0x14), *(f32 *)((u8 *)D_800CC2D0 + 0x1C),
+            if (approx_dist2_int(*(f32 *)((u8 *)D_800CC2D0 + 0x14), *(f32 *)((u8 *)D_800CC2D0 + 0x1C),
                               *(f32 *)(arg0 + 0x98), *(f32 *)(arg0 + 0xA0)) < 200) {
                 arg0[0x91] = 2;
                 *(f32 *)(arg0 + 0xE4) = (f32)((u32)random_int() % *(s16 *)(arg0 + 0xDA));
@@ -830,21 +836,22 @@ void func_151770F4(u8 *arg0) {
             }
             break;
     }
-    func_15175EC8(arg0);
+    flyer_update(arg0);
 }
 
 #ifdef NON_MATCHING
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+void mtxf_mul(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+Gfx *gfx_other_mode_cached(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 extern u8 D_800A7550[4];
 extern Row20 D_800DE2BC[];
 
-// prop_model_draw: draws the object's model (kinds 1..3 of func_15177638) unless its row of D_800DDE80 / D_800DDF78
+// prop_model_draw: draws the object's model (kinds 1..3 of flyer_draw) unless its row of D_800DDE80 / D_800DDF78
 // (index obj[0xED]) is empty: matrix = yaw (+0xAC) after pitch / roll (+0xA8 / +0xB0), scaled by +0xC0, at +0x98..+0xA0
 // (into the object's per-frame matrix slot +0x10 + D_800BE9C0 * 0x40), segment 1 = +0x94, render mode
-// (func_15142FBC) and env colour (v, v, v, obj[0xF0]) where v (obj[0xEC]) fades by 4 per frame towards
+// (gfx_other_mode_cached) and env colour (v, v, v, obj[0xF0]) where v (obj[0xEC]) fades by 4 per frame towards
 // D_800A7550[(+0xE8 >> 5) & 3], then the row's display list (D_800DE2BC).
-Gfx *func_15177360(Gfx *gdl, u8 *obj, s16 arg2) {
+/* was func_15177360 */
+Gfx *flyer_model_draw(Gfx *gdl, u8 *obj, s16 arg2) {
     f32 mf[4][4];
     f32 rot[4][4];
     s32 v;
@@ -856,7 +863,7 @@ Gfx *func_15177360(Gfx *gdl, u8 *obj, s16 arg2) {
     }
     mtxf_rotate_xyz_deg(mf, 0.0f, *(f32 *)(obj + 0xAC), 0.0f);
     mtxf_rotate_xyz_deg(rot, *(f32 *)(obj + 0xA8), 0.0f, *(f32 *)(obj + 0xB0));
-    func_150A7A48(rot, mf, mf);
+    mtxf_mul(rot, mf, mf);
     mf[3][0] = *(f32 *)(obj + 0x98);
     mf[3][1] = *(f32 *)(obj + 0x9C);
     mf[3][2] = *(f32 *)(obj + 0xA0);
@@ -891,13 +898,13 @@ Gfx *func_15177360(Gfx *gdl, u8 *obj, s16 arg2) {
         obj[0xEC] = v;
     }
     flag = 0;
-    gdl = func_15142FBC(gdl, 0x82CA0, 0x504A50, &flag);
+    gdl = gfx_other_mode_cached(gdl, 0x82CA0, 0x504A50, &flag);
     gDPSetEnvColor(gdl++, v, v, v, obj[0xF0]);
     gSPDisplayList(gdl++, D_800DE2BC[obj[0xED]].x0);
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15177360.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_model_draw.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -905,13 +912,14 @@ s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
 #else
 s32 view_point_cull_test(u8 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 #endif
-Gfx *func_15177360(Gfx *, u8 *, s16);
+Gfx *flyer_model_draw(Gfx *, u8 *, s16);
 extern f32 D_800D3A00;
 extern f32 D_800D3A04;
 extern f32 D_800D9F40;
 extern u8 D_800DA030[];
 
-Gfx *func_15177638(Gfx *gdl, u8 *arg1, s16 arg2) {
+/* was func_15177638 */
+Gfx *flyer_draw(Gfx *gdl, u8 *arg1, s16 arg2) {
     f32 mf[4][4];
     s32 pad[2];
 
@@ -935,7 +943,7 @@ Gfx *func_15177638(Gfx *gdl, u8 *arg1, s16 arg2) {
         case 2:
         case 3:
         default:
-            gdl = func_15177360(gdl, arg1, arg2);
+            gdl = flyer_model_draw(gdl, arg1, arg2);
             break;
         }
     }
@@ -945,7 +953,8 @@ Gfx *func_15177638(Gfx *gdl, u8 *arg1, s16 arg2) {
 #ifdef NON_MATCHING
 extern s32 D_8008D450;
 
-void func_151777CC(u8 arg0) {
+/* was func_151777CC */
+void flyer_wing_flap_animate(u8 arg0) {
     f32 sp28;
     f32 temp_f12;
     f32 temp_f20;
@@ -1000,5 +1009,5 @@ void func_151777CC(u8 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_151777CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/flyer_wing_flap_animate.s")
 #endif

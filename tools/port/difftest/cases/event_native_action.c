@@ -1,4 +1,4 @@
-s32 func_150AE60C(s32 *args) {
+s32 event_native_action(s32 *args) {
     s32 id = args[0];
     s32 n = (id & 0xF000) >> 12;
 

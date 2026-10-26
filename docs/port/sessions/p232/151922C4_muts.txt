@@ -6,12 +6,12 @@ s/    d->u18 += (d->u1C + random_float() \* d->u20) \* D_800BE9A4;/    d->u18 +=
 s/    if (!(d->u18 > 1.0f)) {/    if (!(d->u18 >= 1.0f)) {/ % exact1
 s/    if (\*(u8 \*\*) (obj + 0x1D4) == NULL) {/    if (*(u8 **) (obj + 0x1D4) != NULL) {/ % one nomodel
 s/            d->u18 -= 1.0f;/            d->u18 -= 2.0f;/ % nomodel
-s/    func_15143134(d->offset, \&pos, \*(u8 \*\*) (obj + 0x1D4) + d->kind);/    func_15143134(d->offset, \&pos, *(u8 **) (obj + 0x1D4));/ % one
+s/    mtx_transform_point_or_origin(d->offset, \&pos, \*(u8 \*\*) (obj + 0x1D4) + d->kind);/    mtx_transform_point_or_origin(d->offset, \&pos, *(u8 **) (obj + 0x1D4));/ % one
 s/    if (0.0f < d->u60) {/    if (0.0f <= d->u60) {/ % u60_0
-s/        if (func_1514672C(\&pos.x) == 0) {/        if (func_1514672C(\&pos.x) != 0) {/ % one outside
+s/        if (pos_in_world_bounds(\&pos.x) == 0) {/        if (pos_in_world_bounds(\&pos.x) != 0) {/ % one outside
 s/            height = D_800A84C8;/            height = D_800A84D0;/ % outside
 s/            depth = D_800A84CC;/            depth = D_800A84C8;/ % one nofloor
-s/            if (func_15047274(\&pos.x, 0, depth, d->ground) != 0) {/            if (func_15047274(\&pos.x, 0, depth, d->ground) == 0) {/ % one nofloor
+s/            if (collision_floor_probe_alt(\&pos.x, 0, depth, d->ground) != 0) {/            if (collision_floor_probe_alt(\&pos.x, 0, depth, d->ground) == 0) {/ % one nofloor
 s/                height = \*(f32 \*) \&d->ground\[0\];/                height = *(f32 *) \&d->ground[1];/ % one
 s/                height = depth;/                height = 0.0f;/ % nofloor
 s/        height = D_800A84D0;/        height = D_800A84CC;/ % u60_0
@@ -27,8 +27,8 @@ s/        life = (u32) r1 \(.\) (u32)/        life = (s32) r1 \1 (s32)/ % mods
 s/(u32) (d->u55 + 1) + d->u54;/(u32) (d->u54 + 1) + d->u55;/ % one mods3
 s/(u32) (d->u55 + 1) + d->u54;/(u32) (d->u55) + d->u54;/ % one mods3
 s/        scale = random_float() \* d->u5C + d->u58;/        scale = random_float() * d->u58 + d->u5C;/ % one
-s/    func_151925AC(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/    func_151925AC(\&pos, \&vel, size * d->u48 + d->u4C, life, frames, 0xFF, scale, onGround, height,/ % one
-s/        func_151925AC(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/        func_151925AC(\&pos, \&vel, size * d->u4C + d->u48, life, frames, 0xFE, scale, onGround, height,/ % one
-s/        func_151925AC(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/        func_151925AC(\&pos, \&vel, size * d->u4C + d->u48, frames, life, 0xFF, scale, onGround, height,/ % one
+s/    dust_drop_particle_spawn(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/    dust_drop_particle_spawn(\&pos, \&vel, size * d->u48 + d->u4C, life, frames, 0xFF, scale, onGround, height,/ % one
+s/        dust_drop_particle_spawn(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/        dust_drop_particle_spawn(\&pos, \&vel, size * d->u4C + d->u48, life, frames, 0xFE, scale, onGround, height,/ % one
+s/        dust_drop_particle_spawn(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/        dust_drop_particle_spawn(\&pos, \&vel, size * d->u4C + d->u48, frames, life, 0xFF, scale, onGround, height,/ % one
 s/                      (H12_25AC \*) \&d->ground\[1\], d->u64, fx\[0xC\], fx\[1\]);/                      (H12_25AC *) \&d->ground[0], d->u64, fx[0xC], fx[1]);/ % one
 s/                      (H12_25AC \*) \&d->ground\[1\], d->u64, fx\[0xC\], fx\[1\]);/                      (H12_25AC *) \&d->ground[1], d->u64, fx[1], fx[0xC]);/ % one

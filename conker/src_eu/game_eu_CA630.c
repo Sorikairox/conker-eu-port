@@ -6,23 +6,28 @@ extern u8 D_800A6440[];
 #endif
 
 
-s32 func_1509CE20(s32 arg0) {
+/* was func_1509CE20 */
+s32 event_table_get_block(s32 arg0) {
     return D_800877D0[arg0].unk0;
 }
 
-u16 func_1509CE40(s32 arg0) {
+/* was func_1509CE40 */
+u16 event_table_get_u16_8(s32 arg0) {
     return D_800877D0[arg0].unk8;
 }
 
-s32 func_1509CE60(s32 arg0) {
+/* was func_1509CE60 */
+s32 event_table_get_id_field(s32 arg0) {
     return *(u16 *)((u8 *)&D_800877D0[arg0] + 0xA) & 0xFFF;
 }
 
-s32 func_1509CE88(s32 arg0) {
+/* was func_1509CE88 */
+s32 event_table_get_word4(s32 arg0) {
     return D_800877D0[arg0].unk4;
 }
 
-s32 func_1509CEA8(s32 arg0)
+/* was func_1509CEA8 */
+s32 event_table_find_by_word4(s32 arg0)
 {
   s32 var_v1;
   struct_eu_800877D0 *var_v0;
@@ -51,7 +56,8 @@ s32 func_1509CEA8(s32 arg0)
   goto loop_1;
 }
 
-s32 func_1509CF78(void) {
+/* was func_1509CF78 */
+s32 event_table_count(void) {
     s32 n = 0;
     s32 i;
     for (i = 0; i < 204; i++) {
@@ -65,14 +71,15 @@ s32 func_1509CF78(void) {
 #ifdef NON_MATCHING
 /* event_prereqs_met: D_800877D0[id] +0xC is a 0xFFFF-terminated list of event ids. The event may start when every
  * prerequisite has its save bit set (bit field at D_800D2E4C) and its own prerequisites hold. Empty list: 1. */
-s32 func_1509CBD4(s32 id) {
+/* was func_1509CBD4 */
+s32 event_prereqs_met(s32 id) {
     u16 *p = *(u16 **) ((u8 *) D_800877D0 + id * 0x14 + 0xC);
     u16 e;
     s32 ok;
 
     e = *p;
     while (e != 0xFFFF) {
-        ok = func_1509CBD4(e);
+        ok = event_prereqs_met(e);
         e = *p;
         if (!(((u8 *) D_800D2E4C)[e >> 3] & (1 << (e & 7))) || ok == 0) {
             return 0;
@@ -83,29 +90,32 @@ s32 func_1509CBD4(s32 id) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509CBD4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_prereqs_met.s")
 #endif
 
-void func_1509D0C4(s32 arg0);
+void event_unlock_chain_rec(s32 arg0);
 
-void func_1509D0A4(s32 arg0) {
-    func_1509D0C4(arg0);
+/* was func_1509D0A4 */
+void event_unlock_chain(s32 arg0) {
+    event_unlock_chain_rec(arg0);
 }
 
 #ifdef NON_MATCHING
-void func_1509D274(s32 listp, void (*cb)(s32), s32 arg2);
+void event_list_unlock(s32 listp, void (*cb)(s32), s32 arg2);
 #else
-s32 func_1509D274(s32, void (*)(s32), s32);
+s32 event_list_unlock(s32, void (*)(s32), s32);
 #endif
 extern s32 D_800877DC;
 
-void func_1509D0C4(s32 arg0) {
-    func_1509D274(*(s32 *)((u8 *)&D_800877DC + (arg0 * 0x14)), func_1509D0C4, arg0);
+/* was func_1509D0C4 */
+void event_unlock_chain_rec(s32 arg0) {
+    event_list_unlock(*(s32 *)((u8 *)&D_800877DC + (arg0 * 0x14)), event_unlock_chain_rec, arg0);
 }
 
 extern u16 *D_800877E0[][5];
 
-s32 func_1509D104(s32 arg0) {
+/* was func_1509D104 */
+s32 save_unlocks_apply(s32 arg0) {
     s32 cnt;
     u16 *p;
     s32 *new_var2; // fakematch: permuter temp
@@ -121,7 +131,7 @@ s32 func_1509D104(s32 arg0) {
             q = *new_var + (u8 *)(new_var2 = &D_800D2E70);
             if (*((u8 *)&D_800D2E70 + *new_var) != 3) {
                 *((u8 *)new_var2 + *new_var) = 3;
-                func_1509D0C4(*new_var);
+                event_unlock_chain_rec(*new_var);
                 cnt++;
             }
             p++;
@@ -131,31 +141,33 @@ s32 func_1509D104(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-// save_unlocks_propagate: unlocks arg0's list (func_1509D104), then keeps expanding every entry of the state bytes
+// save_unlocks_propagate: unlocks arg0's list (save_unlocks_apply), then keeps expanding every entry of the state bytes
 // D_800D2E70 (0xCC of them) that is in state 3 until a whole pass unlocks nothing new. The asm returns no value.
-void func_1509D1EC(s32 arg0) {
+/* was func_1509D1EC */
+void save_unlocks_propagate(s32 arg0) {
     s32 added;
     s32 i;
 
-    func_1509D104(arg0);
+    save_unlocks_apply(arg0);
     do {
         added = 0;
         for (i = 0; i < 0xCC; i++) {
             if (((u8 *) &D_800D2E70)[i] == 3) {
-                added += func_1509D104(i);
+                added += save_unlocks_apply(i);
             }
         }
     } while (added != 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D1EC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/save_unlocks_propagate.s")
 #endif
 
 #ifdef NON_MATCHING
-// event_list_unlock: for each id of the 0xFFFF-terminated u16 list: calls cb(id) (func_1509D0C4 recurses into the
+// event_list_unlock: for each id of the 0xFFFF-terminated u16 list: calls cb(id) (event_unlock_chain_rec recurses into the
 // event's own list), sets its state byte D_800D2E70[id] to 3 and its save bit in D_800D2E4C. arg2 is unused; the
 // asm returns no value.
-void func_1509D274(s32 listp, void (*cb)(s32), s32 arg2) {
+/* was func_1509D274 */
+void event_list_unlock(s32 listp, void (*cb)(s32), s32 arg2) {
     u16 *list = (u16 *)listp;
 
     while (*list != 0xFFFF) {
@@ -166,7 +178,7 @@ void func_1509D274(s32 listp, void (*cb)(s32), s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D274.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_list_unlock.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -182,7 +194,8 @@ s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 // (records - 1) in record 0 and *count, and relocates each route block: every pair's first word gets the block
 // address added (up to the pair flagged 0x80000000; the flags are cleared), and the block's word 3 becomes
 // (word 3 & 0x0FFFFFFF) >> 1. Returns 0 (and *count = 0) when nothing was loaded, else 1.
-s32 func_1509D338(s32 arg0, s32 *count) {
+/* was func_1509D338 */
+s32 save_route_table_load(s32 arg0, s32 *count) {
     u32 n;
     u32 i;
     u32 *p;
@@ -215,29 +228,31 @@ s32 func_1509D338(s32 arg0, s32 *count) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D338.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/save_route_table_load.s")
 #endif
 
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
-void func_10004074(s32);
+void heap_free(s32);
 #else
-s32 func_10004074(s32);
+s32 heap_free(s32);
 #endif
-void func_1509D464(void) {
+/* was func_1509D464 */
+void save_route_table_free(void) {
     s32 r;
     if (D_800D33D0 != 0) {
         r = D_800D33D0;
-        func_10004074(r);
+        heap_free(r);
         D_800D33D0 = 0;
     }
 }
 
 #ifdef NON_MATCHING
-// save_route_check: route arg1 of the table D_800D33D0 (record arg1 + 1, relocated by func_1509D338): writes the
+// save_route_check: route arg1 of the table D_800D33D0 (record arg1 + 1, relocated by save_route_table_load): writes the
 // first id of its requirement list through outA and the id its word 0 points at through outB (0xBF / 0 when there
 // is no table or no route; NULL out-pointers are skipped) and returns 1 when every id of the list (word 2, count
 // word 3, s16 each) has its bit set in D_800D2E4C, else 0. arg0 is unused.
-s32 func_1509D49C(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
+/* was func_1509D49C */
+s32 save_route_check(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
     SaveRouteRec *rec;
     u32 *route;
     s16 *ids;
@@ -276,18 +291,18 @@ s32 func_1509D49C(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D49C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/save_route_check.s")
 #endif
 
 #ifdef NON_MATCHING
 extern u8 D_8009F4A0;            /* the one-entry effect table of command 0x18 */
 extern s8 D_800D9D40;
 void light_ctrl_broadcast(u8, u8, s32);
-void func_1000E7A0(u32, s32);
-s32 func_15046F70(void *, u16, f32, void *);
-struct260 *func_150B58B0(u8 *, s16, u8, s32);
-void func_150BD550(u8, s32);
-void func_150BF47C(s32);
+void music_post_event_request(u32, s32);
+s32 collision_floor_probe(void *, u16, f32, void *);
+struct260 *obj_electrify_fx_spawn(u8 *, s16, u8, s32);
+void blast_debris_and_smoke(u8, s32);
+void twin_particle_emitters_spawn(s32);
 void debris_burst_destroyed_object(struct127 *, s32, s32);
 void big_explosion_spawn(f32 *, u8, s32);
 void water_effect_start_once(void);
@@ -306,23 +321,24 @@ void view_spots_flash_event(void);
 void bound_cloud_spawn(struct127 *, u8, s32);
 void obj_impact_burst(struct127 *, u8, s32);
 s32 object_hit_effects(u8 *, u8, u8, u8, u8, u8, u8, s32);
-void func_15155D6C(s32, s32, f32);
+void head_icon_show_timed(s32, s32, f32);
 struct225 *light_create_obj_pulse(u8, u8, s32);
-void func_1517946C(s32);
-s32 func_1518FA8C(s32, u8, s16, s8, s8, s8, u8, s32, u8, s32);
-void func_151C0434(u8 *, f32 *, f32 *, u8, u8, s32);
-void func_151C0648(u8 *, s32, u8, s32, s32);
-void func_151CD90C(s32);
-void func_151D2C70(s16);
+void rain_request(s32);
+s32 bone_sparks_attach_preset(s32, u8, s16, s8, s8, s8, u8, s32, u8, s32);
+void impact_effects_spawn(u8 *, f32 *, f32 *, u8, u8, s32);
+void explosion_ground_effects(u8 *, s32, u8, s32, s32);
+void spout_broadcast_start(s32);
+void scroll_banner_spawn(s16);
 /* event_effect_command: handler 14 of the event VM's native table D_800887C0 (id = the command word without its
  * nibble, args = the operands, args[1] mostly an object id resolved with obj_find_by_spawn & 0xFFF). Starts effects /
- * spawns: 0 func_150B58B0, 1 func_150BF47C (returns 1), 2 sets D_800D9D40, 3 func_1517946C, 4 / 5 / 6 spawn through
+ * spawns: 0 obj_electrify_fx_spawn, 1 twin_particle_emitters_spawn (returns 1), 2 sets D_800D9D40, 3 rain_request, 4 / 5 / 6 spawn through
  * zap_bolt_spawn_between / zap_bolt_spawn_follow (at an object) / zap_bolt_spawn_with_sound (at the player) and return the handle as
  * (h << 6) | 0xE004, 7 big_explosion_spawn at a point (args[1] == 999) or fx_scripted_blast, 0x10 / 0x16 light_ctrl_broadcast
- * pairs, 0x18 func_1518FA8C on character args[1], 0x21 func_151C0648 50 above an object, 0x22 func_151C0434 at the
- * ground below (args[1], args[2]) found by func_15046F70, 0x24 func_1514F18C (0x1B), others single calls. Returns 0
+ * pairs, 0x18 bone_sparks_attach_preset on character args[1], 0x21 explosion_ground_effects 50 above an object, 0x22 impact_effects_spawn at the
+ * ground below (args[1], args[2]) found by collision_floor_probe, 0x24 char_fx_attach (0x1B), others single calls. Returns 0
  * unless noted. */
-s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
+/* was func_1509D590 */
+s32 event_effect_command(s32 id, s32 *args, s32 *operand) {
     struct {
         u8 pad[0x14];
         s32 u14;
@@ -339,16 +355,16 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
 
     switch ((u32) id) {
     case 0x00:
-        func_150B58B0((u8 *) obj_find_by_spawn(args[1] & 0xFFF), (s16) args[2], 0xFF, 1);
+        obj_electrify_fx_spawn((u8 *) obj_find_by_spawn(args[1] & 0xFFF), (s16) args[2], 0xFF, 1);
         break;
     case 0x01:
-        func_150BF47C(args[1]);
+        twin_particle_emitters_spawn(args[1]);
         return 1;
     case 0x02:
         D_800D9D40 = 1;
         break;
     case 0x03:
-        func_1517946C(args[1]);
+        rain_request(args[1]);
         break;
     case 0x04:
         ret = zap_bolt_spawn_between(args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
@@ -386,14 +402,14 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         storm_lightning_strike();
         break;
     case 0x10:
-        func_1000E7A0(0x10, 0);
+        music_post_event_request(0x10, 0);
         light_ctrl_broadcast(0x16, 0x1F, 0);
         break;
     case 0x12:
-        func_151CD90C(args[1]);
+        spout_broadcast_start(args[1]);
         break;
     case 0x13:
-        func_151D2C70((s16) args[1]);
+        scroll_banner_spawn((s16) args[1]);
         break;
     case 0x14:
         fx_model_emitter_spawn((u8) args[1], 0xFF, 1);
@@ -407,7 +423,7 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         break;
     case 0x18:
         tbl[0] = D_8009F4A0;
-        func_1518FA8C((s32) func_15083E90((u8) args[1]), tbl[args[2]], (s16) args[3], -1, -1, -1, 0, 0, 0xFF, 1);
+        bone_sparks_attach_preset((s32) obj_find_by_setup_id((u8) args[1]), tbl[args[2]], (s16) args[3], -1, -1, -1, 0, 0, 0xFF, 1);
         break;
     case 0x1B:
         view_spots_flash_event();
@@ -421,7 +437,7 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
             pos[0] = obj->x_position;
             pos[1] = obj->y_position + 50.0f;
             pos[2] = obj->z_position;
-            func_151C0648((u8 *) pos, (s32) obj, 1, 0xFF, 1);
+            explosion_ground_effects((u8 *) pos, (s32) obj, 1, 0xFF, 1);
         }
         break;
     case 0x22:
@@ -433,12 +449,12 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         pos[0] = (f32) args[1];
         pos[1] = 20000.0f;
         pos[2] = (f32) args[2];
-        if (func_15046F70(pos, 0, -10000.0f, &ground) != 0) {
+        if (collision_floor_probe(pos, 0, -10000.0f, &ground) != 0) {
             pos[1] = ground;
             dir[0] = 0.0f;
             dir[1] = -1.0f;
             dir[2] = 0.0f;
-            func_151C0434((u8 *) &hit, pos, dir, 1, 0xFF, 1);
+            impact_effects_spawn((u8 *) &hit, pos, dir, 1, 0xFF, 1);
         }
         break;
     case 0x23:
@@ -447,11 +463,11 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
     case 0x24:
         obj = obj_find_by_spawn(args[1] & 0xFFF);
         if (obj != NULL) {
-            func_1514F18C(glow_pair_spawn(obj), obj, 0x1B);
+            char_fx_attach(glow_pair_spawn(obj), obj, 0x1B);
         }
         break;
     case 0x25:
-        func_15155D6C(args[1] & 0xFFF, 0x78, (f32) args[2]);
+        head_icon_show_timed(args[1] & 0xFFF, 0x78, (f32) args[2]);
         break;
     case 0x2A:
         obj = obj_find_by_spawn(args[1] & 0xFFF);
@@ -484,29 +500,30 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         level_cue_switch_on();
         break;
     case 0x33:
-        func_150BD550(0xFF, 1);
+        blast_debris_and_smoke(0xFF, 1);
         break;
     }
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D590.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_effect_command.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150B42B0(void);
-void func_150C572C(void);
-void func_150C619C(s32);
+void water_jets_stop_all(void);
+void fx_slots_9cf0_clear(void);
+void char_fx_event15_stop(s32);
 void zap_bolt_free_slot(s32);
 s32 fx_fireworks_burst(s32);
 void glow_pair_post_remove_event(u8 *);
 void fire_post_finish_events(u8);
 void light_ctrl_broadcast(u8, u8, s32);
-void func_151CD944(s32);
-void func_151D2CC8(s16);
+void spout_broadcast_stop(s32);
+void scroll_banner_stop(s16);
 extern s8 D_800D9D40;
 
-void func_1509DB90(s32 arg0, u8 *arg1) {
+/* was func_1509DB90 */
+void event_effect_stop(s32 arg0, u8 *arg1) {
     struct127 *temp_v0;
     struct127 *temp_v0_2;
 
@@ -532,7 +549,7 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
         light_ctrl_broadcast(0x26, 0x18, 0);
         return;
     case 18:
-        func_151CD944((*(s32 *)((u8 *)arg1 + 4)));
+        spout_broadcast_stop((*(s32 *)((u8 *)arg1 + 4)));
         return;
     case 2:
         D_800D9D40 = 0;
@@ -543,20 +560,20 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
         zap_bolt_free_slot(arg0 >> 6);
         return;
     case 8:
-        func_150B42B0();
+        water_jets_stop_all();
         return;
     case 9:
         temp_v0_2 = obj_find_by_spawn((*(s32 *)((u8 *)arg1 + 4)) & 0xFFF);
         if (temp_v0_2 == NULL) {
             return;
         }
-        func_150C619C(temp_v0_2);
+        char_fx_event15_stop(temp_v0_2);
         return;
     case 10:
-        func_150C572C();
+        fx_slots_9cf0_clear();
         return;
     case 19:
-        func_151D2CC8((*(s16 *)((u8 *)arg1 + 6)));
+        scroll_banner_stop((*(s16 *)((u8 *)arg1 + 6)));
         return;
     case 21:
         light_ctrl_broadcast(0x20, 0x18, 0);
@@ -568,14 +585,15 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509DB90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_effect_stop.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_800A0D30;
 
 // P176: s32 like the D_80088874 handler table. The asm sets v0 only on the case 0x1C / 5 out-of-range path (1);
 // elsewhere v0 is a callee's result (undefined): 0 here.
-s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
+/* was func_1509DD0C */
+s32 event_action_effect(s32 arg0, s32 arg1, u8 *arg2) {
     struct {
         f32 u2C;
         s8 u30;
@@ -594,7 +612,7 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
     switch (arg0) {
     case 0x34:
         if (arg1 == 3) {
-            func_15197A7C(obj_find_by_spawn((*(s32 *)((u8 *)arg2 + 4)) & 0xFFF));
+            emitter_stop_for_obj(obj_find_by_spawn((*(s32 *)((u8 *)arg2 + 4)) & 0xFFF));
             return 0;
         }
     default:
@@ -614,13 +632,13 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
         return 0;
     case 0x28:
         if (arg1 == 2) {
-            func_1515F170(4, 1);
-            func_1515F170(5, 0);
+            light_group_set_disabled(4, 1);
+            light_group_set_disabled(5, 0);
             return 0;
         }
         if (arg1 == 3) {
-            func_1515F170(4, 0);
-            func_1515F170(5, 1);
+            light_group_set_disabled(4, 0);
+            light_group_set_disabled(5, 1);
             return 0;
         }
         break;
@@ -692,12 +710,13 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509DD0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_action_effect.s")
 #endif
 #ifdef NON_MATCHING
 void zap_bolt_get_pos(s32, s32 *, s32 *, s32 *);
 
-s32 func_1509DFCC(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1509DFCC */
+s32 event_query_effect(s32 arg0, s32 arg1, s32 arg2) {
     struct {
         s32 u34;
         s32 u38;
@@ -759,5 +778,5 @@ loop_7:
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509DFCC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/event_query_effect.s")
 #endif

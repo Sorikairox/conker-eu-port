@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
+void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 extern s32 D_80088AD4[2]; /* break sound ids */
 extern s32 D_80088ADC;    /* bounce sound id */
 void *memcpy(void *, const void *, s32);
@@ -35,7 +35,7 @@ typedef struct {
     /* 0x56 */ s16 u56;
 } Rec8EC0A;
 
-/* func_15151FA8 burst request (0x88 bytes) */
+/* emit_sparks_by_angles burst request (0x88 bytes) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 u0C;
@@ -76,9 +76,10 @@ typedef struct {
 // Speed +0x140 <= 15: stops (+0x72 / +0x78 = 1, low byte of +0x60 cleared), turns the velocity (0, 0, 200) by
 // mtxf_rotate_xyz_deg(+0x20, +0x24, +0x28) into +0x20..+0x28 and adds +0x38..+0x40 (keep). Speed > 30: breaks: a
 // effect3d_spawn_oriented flash record at (x, w, z) (random size, gets an 8-byte random spin at +0x128 of the new record), a
-// func_15151FA8 burst, a random break sound (D_80088AD4) at +0x38..+0x40; returns 0. Otherwise bounces: scales
+// emit_sparks_by_angles burst, a random break sound (D_80088AD4) at +0x38..+0x40; returns 0. Otherwise bounces: scales
 // +0x44..+0x58 by +0x14 (flipping +0x48) and plays D_80088ADC (keep).
-s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
+/* was func_150B8EC0 */
+s32 projectile_bounce_update(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
     f32 mtx[4][4];
     Burst8EC0B b;
     f32 spin[2];
@@ -95,7 +96,7 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
         obj[0x78] = 1;
         *(s32 *) (obj + 0x60) &= ~0xFF;
         mtxf_rotate_xyz_deg(mtx, *(f32 *) (obj + 0x20), *(f32 *) (obj + 0x24), *(f32 *) (obj + 0x28));
-        func_150A7E40(mtx, 0.0f, 0.0f, 200.0f, (f32 *) (obj + 0x20), (f32 *) (obj + 0x24), (f32 *) (obj + 0x28));
+        mtxf_transform_point(mtx, 0.0f, 0.0f, 200.0f, (f32 *) (obj + 0x20), (f32 *) (obj + 0x24), (f32 *) (obj + 0x28));
         *(f32 *) (obj + 0x20) += *(f32 *) (obj + 0x38);
         *(f32 *) (obj + 0x24) += *(f32 *) (obj + 0x3C);
         *(f32 *) (obj + 0x28) += *(f32 *) (obj + 0x40);
@@ -187,8 +188,8 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
         b.u82 = 0x19;
         b.u5C = *(s32 *) (obj + 0x168);
         b.u84 = *(s32 *) (obj + 0x128);
-        func_15151FA8((u8 *) &b, obj[0xC], obj[1]);
-        func_10010F88(D_80088AD4[random_int() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 25.0f,
+        emit_sparks_by_angles((u8 *) &b, obj[0xC], obj[1]);
+        sound_play_at(D_80088AD4[random_int() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 25.0f,
                       *(f32 *) (obj + 0x40), 1000, 4000);
         return 0;
     }
@@ -199,19 +200,19 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
     *(f32 *) (obj + 0x50) *= k;
     *(f32 *) (obj + 0x54) *= k;
     *(f32 *) (obj + 0x58) *= k;
-    func_10010F88(D_80088ADC, 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C), *(f32 *) (obj + 0x40),
+    sound_play_at(D_80088ADC, 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C), *(f32 *) (obj + 0x40),
                   1000, 4000);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B8EC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/projectile_bounce_update.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150A3538(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
+s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-s32 func_15145C90(s32);
-void func_15151BE0(u8 *arg0, s32 arg1, s32 arg2);
+s32 prop_is_flagged(s32);
+void emit_sparks_from_surface(u8 *arg0, s32 arg1, s32 arg2);
 
 /* rodata copies (NM link drops the asm rodata) */
 static const f32 D_800A018C_c[1] = { 0.001f };      /* 0x3A83126F */
@@ -226,7 +227,7 @@ typedef struct {
     s16 v[9];
 } Surf9424;
 
-/* func_15151BE0 burst request (0xA4 bytes) */
+/* emit_sparks_from_surface burst request (0xA4 bytes) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 dir[3];
@@ -270,10 +271,11 @@ typedef struct {
 // projectile_wall_hit: handler of D_80089D14 (`s32 (*)(obj, hit, x, y, z)`, slot 1; 0 = destroyed). Speed = +0x140
 // - |+0x48|. Up to 6: bounces off the wall: stops x / z (+0x44 / +0x4C), keeps +0x48 (scaled by +0x14 if upwards),
 // moves to the hit point (hit +0x14..+0x1C), scales +0x50..+0x58 by +0x14 and plays D_80088ADC (keep). Faster: breaks;
-// unless func_150A3538 rejects the hit point, ray casts back from (x, y, z) along the last move (func_150ACEA0) and at
-// the hit spawns a effect3d_spawn_oriented flash (if func_15145C90 accepts the surface; random 8-byte spin at +0x128) and a
-// func_15151BE0 debris burst against the move; always plays a random break sound D_80088AD4; returns 0.
-s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
+// unless trigger_point_in_kind3 rejects the hit point, ray casts back from (x, y, z) along the last move (func_150ACEA0) and at
+// the hit spawns a effect3d_spawn_oriented flash (if prop_is_flagged accepts the surface; random 8-byte spin at +0x128) and a
+// emit_sparks_from_surface debris burst against the move; always plays a random break sound D_80088AD4; returns 0.
+/* was func_150B9424 */
+s32 projectile_wall_hit(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
     Burst9424 b;
     f32 spin[2];
     Rec8EC0A a;
@@ -300,16 +302,16 @@ s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
         *(f32 *) (obj + 0x50) *= k;
         *(f32 *) (obj + 0x54) *= k;
         *(f32 *) (obj + 0x58) *= k;
-        func_10010F88(D_80088ADC, 0xFA00, 0, 0, 0, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C),
+        sound_play_at(D_80088ADC, 0xFA00, 0, 0, 0, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C),
                       1000, 4000);
         return 1;
     }
-    if (func_150A3538(1, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C)) == 0) {
+    if (trigger_point_in_kind3(1, *(f32 *) (hit + 0x14), *(f32 *) (hit + 0x18), *(f32 *) (hit + 0x1C)) == 0) {
         d[0] = *(f32 *) (obj + 0x38) - x;
         d[1] = *(f32 *) (obj + 0x3C) - y;
         d[2] = *(f32 *) (obj + 0x40) - z;
         if (func_150ACEA0(x, y, z, d[0], d[1], d[2], 0, &surf, &hp[0], &hp[1], &hp[2], 0, &surfId, 0, 0.0f) != 0) {
-            if (func_15145C90(surfId) != 0) {
+            if (prop_is_flagged(surfId) != 0) {
                 a.u54 = 0x19;
                 a.u56 = 0xA;
                 a.u00 = 4;
@@ -397,19 +399,20 @@ s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
             b.u9E = 0x19;
             b.u78 = *(s32 *) (obj + 0x168);
             b.uA0 = *(s32 *) (obj + 0x128);
-            func_15151BE0((u8 *) &b, obj[0xC], obj[1]);
+            emit_sparks_from_surface((u8 *) &b, obj[0xC], obj[1]);
         }
     }
-    func_10010F88(D_80088AD4[random_int() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C),
+    sound_play_at(D_80088AD4[random_int() & 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C),
                   *(f32 *) (obj + 0x40), 1000, 4000);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9424.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/projectile_wall_hit.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150B9A40(u8 *arg0) {
+/* was func_150B9A40 */
+s32 fx_rise_grow_update(u8 *arg0) {
     f32 *temp_v0;
 
     if ((*(s16 *)((u8 *)arg0 + 0x1C)) < 0x50) {
@@ -428,9 +431,10 @@ s32 func_150B9A40(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9A40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/fx_rise_grow_update.s")
 #endif
-s32 func_150B9ADC(u8 *arg0) {
+/* was func_150B9ADC */
+s32 fx_fade_in_alpha_update(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);
     if (temp_v0 < 32) {
         arg0[0x5C] = temp_v0 * 8;
@@ -438,7 +442,8 @@ s32 func_150B9ADC(u8 *arg0) {
     return 1;
 }
 
-s32 func_150B9AFC(struct102 *arg0) {
+/* was func_150B9AFC */
+s32 fx_fade_in_28_update(struct102 *arg0) {
     s16 temp_v0 = arg0->unk1C;
     if (temp_v0 < 64) {
         arg0->unk28 = temp_v0 * 4;
@@ -447,8 +452,8 @@ s32 func_150B9AFC(struct102 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15046F70(f32 *, s32, f32, f32 *);
-void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
+s32 collision_floor_probe(f32 *, s32, f32, f32 *);
+void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 extern s32 D_80088AE0;    /* landing sound id */
 void *memcpy(void *, const void *, s32);
 
@@ -484,7 +489,7 @@ typedef struct {
     /* 0x56 */ s16 u56;
 } Rec9B1CA;
 
-/* func_15151FA8 burst request (0x88 bytes; as Burst8EC0B) */
+/* emit_sparks_by_angles burst request (0x88 bytes; as Burst8EC0B) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 u0C;
@@ -526,14 +531,15 @@ typedef struct {
 } Vec9B1C;
 
 // thrown_object_land_check: per-frame check of a thrown / falling object (+0x38..+0x40 position, +0x10 radius)
-// against the current holder D_80088730 (refreshed with func_15083E90(1) when gone or not in room 1). Inside
+// against the current holder D_80088730 (refreshed with obj_find_by_setup_id(1) when gone or not in room 1). Inside
 // radius^2 + 2500: if the holder's +0x3C is above 15, half the time it is knocked away (flags on +0x60 / +0x71..+0x78,
 // velocity 1.3 * +0x3C * the sin / cos (angle_byte_cos) of the holder's heading +0x76, up 10..25, timer 300; returns
-// 1). Otherwise it lands: a effect3d_spawn_oriented dust record on the ground below (func_15046F70, ground height kept at
-// +0x110; random 8-byte spin at +0x128 of the record), a func_15151FA8 burst and the D_80088AE0 sound; returns 0.
+// 1). Otherwise it lands: a effect3d_spawn_oriented dust record on the ground below (collision_floor_probe, ground height kept at
+// +0x110; random 8-byte spin at +0x128 of the record), a emit_sparks_by_angles burst and the D_80088AE0 sound; returns 0.
 // Out of range it eases +0x20..+0x28 by 0.2 towards D_80088724 (the second holder D_80088720's position + 50 up)
 // and returns 1.
-s32 func_150B9B1C(u8 *obj) {
+/* was func_150B9B1C */
+s32 thrown_object_land_check(u8 *obj) {
     Burst9B1CB b;
     f32 spin[2];
     Rec9B1CA a;
@@ -548,7 +554,7 @@ s32 func_150B9B1C(u8 *obj) {
 
     h = (u8 *) D_80088730;
     if (h == NULL || *(s32 *) h == 0 || h[0x3B] != 1) {
-        D_80088730 = func_15083E90(1);
+        D_80088730 = obj_find_by_setup_id(1);
         h = (u8 *) D_80088730;
     }
     if (h != NULL) {
@@ -577,7 +583,7 @@ s32 func_150B9B1C(u8 *obj) {
             pos[0] = *(f32 *) (obj + 0x38);
             pos[1] = *(f32 *) (obj + 0x3C) + 100.0f;
             pos[2] = *(f32 *) (obj + 0x40);
-            if (func_15046F70(pos, 0, *(f32 *) (obj + 0x3C) - 2000.0f, (f32 *) (obj + 0x110)) != 0) {
+            if (collision_floor_probe(pos, 0, *(f32 *) (obj + 0x3C) - 2000.0f, (f32 *) (obj + 0x110)) != 0) {
                 pos[1] = *(f32 *) (obj + 0x110);
                 a.u54 = 0x19;
                 a.u56 = 0xA;
@@ -661,8 +667,8 @@ s32 func_150B9B1C(u8 *obj) {
             b.u82 = 0x19;
             b.u5C = *(s32 *) (obj + 0x168);
             b.u84 = *(s32 *) (obj + 0x128);
-            func_15151FA8((u8 *) &b, obj[0xC], obj[1]);
-            func_10010F88(D_80088AE0, 0x61A8, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C),
+            emit_sparks_by_angles((u8 *) &b, obj[0xC], obj[1]);
+            sound_play_at(D_80088AE0, 0x61A8, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C),
                           *(f32 *) (obj + 0x40), 1000, 4000);
             return 0;
         }
@@ -670,7 +676,7 @@ s32 func_150B9B1C(u8 *obj) {
 
     h = (u8 *) D_80088720;
     if (h == NULL || *(s32 *) h == 0 || h[0x3B] != 1) {
-        D_80088720 = func_15083E90(1);
+        D_80088720 = obj_find_by_setup_id(1);
         h = (u8 *) D_80088720;
     }
     tgt = (f32 *) &D_80088724;
@@ -685,7 +691,7 @@ s32 func_150B9B1C(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9B1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/thrown_object_land_check.s")
 #endif
 
 #ifdef NON_MATCHING /* P209: void, the caller ignores v0 */
@@ -693,7 +699,8 @@ void mtx_look_along_scaled(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32
 #else
 s32 mtx_look_along_scaled(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 #endif
-s32 func_150BA1F4(s32 arg0, u8 *arg1) {
+/* was func_150BA1F4 */
+s32 fx_build_look_matrix(s32 arg0, u8 *arg1) {
 #ifdef NON_MATCHING
     mtx_look_along_scaled(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
 #else
@@ -703,7 +710,8 @@ s32 func_150BA1F4(s32 arg0, u8 *arg1) {
 }
 
 typedef struct { s32 u0; s16 u4; u8 u6; s32 u8; s32 uC; u8 u10; u8 u11; u8 u12; u8 u13; u8 u14; u8 u15; s32 u18; u8 pad[16]; } BA_S;
-void func_150BA26C(u8 *arg0) {
+/* was func_150BA26C */
+void obj_sprite_fx_spawn(u8 *arg0) {
     BA_S s;
     s32 c;
     s32 b;

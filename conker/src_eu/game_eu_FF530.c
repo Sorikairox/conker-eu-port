@@ -5,13 +5,13 @@
 
 #ifdef NON_MATCHING
 Gfx *render_set_color_image(Gfx *);
-Gfx *func_150954E4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *gfx_load_texture_tile(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 void matrix_rotate_ypr(f32 (*)[4], f32, f32, f32);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 extern s32 D_800DC2E0;
 extern Vtx *D_800DC2B8[][2];
 
-/* P64: texture descriptor passed to func_150954E4 (the texture load) */
+/* P64: texture descriptor passed to gfx_load_texture_tile (the texture load) */
 typedef struct {
     s32 image;   /* D_800DC2B0 */
     s16 fmt;     /* 4 */
@@ -23,7 +23,7 @@ typedef struct {
 
 /* P64: draws a scrolling textured quad over the view of player D_80082FA4 (word 0 = player index, half +2 = a
  * parameter of render_set_scissor): texture, pipe sync, other modes and combiner, render_set_scissor / render_set_color_image,
- * the texture load (func_150954E4), then the player's view matrix (D_800BE628[p] +0xBC, 0x180-byte records)
+ * the texture load (gfx_load_texture_tile), then the player's view matrix (D_800BE628[p] +0xBC, 0x180-byte records)
  * multiplied by a Z rotation `angle` (matrix_rotate_ypr) into the frame's Mtx D_800DC2E0[p * 2 + D_800BE9C0],
  * D_80089810 as the projection, perspective normalisation D_800BE628[p] +0xB8 and the 4 vertices
  * D_800DC2B8[p][D_800BE9C0] whose t coordinates are scrolled by `scroll` * 81 (top / bottom rows depend on the
@@ -31,7 +31,8 @@ typedef struct {
 /* P243: D_80089578 camera callback: takes the dispatcher's 8 arguments (view_background_draw passes gdl, x, y, z, yaw, pitch,
  * roll, handle); only yaw (= scroll) and roll (= angle) are used. Was 7 arguments with s32 x / y / z / pitch: same o32
  * slots, but a wasm signature mismatch through the table. */
-Gfx *func_150D1D20(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pitch, f32 angle, s32 handle) {
+/* was func_150D1D20 */
+Gfx *view_scroll_overlay_draw(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pitch, f32 angle, s32 handle) {
     TexDesc_D1D20 tex;
     f32 view[4][4];
     f32 rot[4][4];
@@ -62,12 +63,12 @@ Gfx *func_150D1D20(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pitch, f32 ang
     gdl->words.w0 = 0xFCFFFFFF; gdl->words.w1 = 0xFFFCF279; gdl++;    /* gDPSetCombineMode */
     gdl = (Gfx *)render_set_scissor((s32)gdl, ((s16 *)&D_80082FA4)[1], 0, 0, 0, 0);
     gdl = render_set_color_image(gdl);
-    gdl = func_150954E4(gdl, &tex, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
+    gdl = gfx_load_texture_tile(gdl, &tex, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
 
     matrix_rotate_ypr(rot, 0.0f, 0.0f, angle);
     p = D_80082FA4;
     player = (u8 *)D_800BE628 + p * 0x180;
-    func_150A7A48(rot, (f32 (*)[4])(player + 0xBC), view);
+    mtxf_mul(rot, (f32 (*)[4])(player + 0xBC), view);
     mtx = (Mtx *)D_800DC2E0 + (D_80082FA4 * 2 + D_800BE9C0);
     guMtxF2L(view, mtx);
 
@@ -86,5 +87,5 @@ Gfx *func_150D1D20(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pitch, f32 ang
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF530/func_150D1D20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF530/view_scroll_overlay_draw.s")
 #endif

@@ -6,7 +6,7 @@
 
 // wtf?
 #ifdef NON_MATCHING
-/* P20: the asm caller func_15002248 tests v0, which is func_150AB278's return value passed through */
+/* P20: the asm caller quadtree_filter_box_tris tests v0, which is func_150AB278's return value passed through */
 /* was func_15049260 */
 s32 quadtree_tri_box_test(struct_eu_bytes24 arg0) {
     return func_150AB278(arg0);

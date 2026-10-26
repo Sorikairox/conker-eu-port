@@ -4,19 +4,21 @@
 #include "variables.h"
 #include <stdarg.h>
 
-s32 func_100020D0(void *prout, char *arg, const char *fmt, va_list args);
+s32 init_printf_xprintf(void *prout, char *arg, const char *fmt, va_list args);
 
 
-s32 func_10002070(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_10002070 */
+s32 init_printf_null_out(s32 arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-void func_10002088(const char *fmt, ...) {
+/* was func_10002088 */
+void init_debug_printf_stub(const char *fmt, ...) {
     va_list args;
 
     va_start(args, fmt);
     D_80035500 = 0;
-    func_100020D0(func_10002070, 0, fmt, args);
+    init_printf_xprintf(init_printf_null_out, 0, fmt, args);
 }
 
 typedef struct {
@@ -71,10 +73,11 @@ int strlen(const char *);
 			return x.nchar; \
 	}
 extern char D_8002AE30[33]; // spaces
-void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
+void init_printf_put_arg(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 char *strchr(const char *, s32);
 
-s32 func_100020D0(void *prout, char *arg, const char *fmt, va_list args)
+/* was func_100020D0 */
+s32 init_printf_xprintf(void *prout, char *arg, const char *fmt, va_list args)
 {
 #define char unsigned char
 	_Pft x;
@@ -137,7 +140,7 @@ s32 func_100020D0(void *prout, char *arg, const char *fmt, va_list args)
 			++s;
 		}
 
-		func_10002718(&x, &args, *s, ac);
+		init_printf_put_arg(&x, &args, *s, ac);
 
 		x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
 
@@ -166,7 +169,8 @@ s32 func_100020D0(void *prout, char *arg, const char *fmt, va_list args)
 
 #define char unsigned char
 
-void func_10002718(_Pft *x, va_list *args, char type, char *buff)
+/* was func_10002718 */
+void init_printf_put_arg(_Pft *x, va_list *args, char type, char *buff)
 {
 	x->n0 = x->nz0 = x->n1 = x->nz1 = x->n2 = x->nz2 = 0;
 
@@ -245,7 +249,7 @@ void func_10002718(_Pft *x, va_list *args, char type, char *buff)
 		}
 
 		x->s = (char *)&buff[x->n0];
-		func_10001550(x, type);
+		init_printf_ldtob(x, type);
 		break;
 	case 'n':
 		if (x->qual == 'h') {

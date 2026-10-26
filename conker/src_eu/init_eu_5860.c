@@ -18,10 +18,11 @@ extern u8 D_80042D60[]; // __osPfsPifRam
 extern u8 D_8003BFD0[]; // __MotorDataBuf
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_10025B60(s32, void *); // __osSiRawStartDma
+s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 
 // libultra motor.c (osMotorStop)
-s32 func_10005860(OSPfs *pfs) {
+/* was func_10005860 */
+s32 os_motor_stop(OSPfs *pfs) {
     int i;
     s32 ret;
     u8 *ptr;
@@ -29,9 +30,9 @@ s32 func_10005860(OSPfs *pfs) {
 
     __osSiGetAccess();
     D_80042DE0 = 3;
-    func_10025B60(OS_WRITE, &D_8003BFD0[pfs->channel << 6]);
+    os_si_raw_start_dma(OS_WRITE, &D_8003BFD0[pfs->channel << 6]);
     osRecvMesg(pfs->queue, NULL, OS_MESG_BLOCK);
-    func_10025B60(OS_READ, D_80042D60);
+    os_si_raw_start_dma(OS_READ, D_80042D60);
     osRecvMesg(pfs->queue, NULL, OS_MESG_BLOCK);
     ptr = D_80042D60;
     if (pfs->channel != 0) {
@@ -50,7 +51,8 @@ s32 func_10005860(OSPfs *pfs) {
 
 extern u8 D_8003C0D0[]; // __MotorDataBuf (start)
 // libultra motor.c (osMotorStart)
-s32 func_10005990(OSPfs *pfs) {
+/* was func_10005990 */
+s32 os_motor_start(OSPfs *pfs) {
     int i;
     s32 ret;
     u8 *ptr;
@@ -58,9 +60,9 @@ s32 func_10005990(OSPfs *pfs) {
 
     __osSiGetAccess();
     D_80042DE0 = 3;
-    func_10025B60(OS_WRITE, &D_8003C0D0[pfs->channel << 6]);
+    os_si_raw_start_dma(OS_WRITE, &D_8003C0D0[pfs->channel << 6]);
     osRecvMesg(pfs->queue, NULL, OS_MESG_BLOCK);
-    func_10025B60(OS_READ, D_80042D60);
+    os_si_raw_start_dma(OS_READ, D_80042D60);
     osRecvMesg(pfs->queue, NULL, OS_MESG_BLOCK);
     ptr = D_80042D60;
     if (pfs->channel != 0) {

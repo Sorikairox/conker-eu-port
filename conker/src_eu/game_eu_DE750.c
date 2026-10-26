@@ -3,7 +3,8 @@
 #include "variables.h"
 
 extern f32 D_8009FC40;
-void func_150B0F40(u8 *arg0, u8 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, s16 *arg5) {
+/* was func_150B0F40 */
+void wake_spray_point_pick(u8 *arg0, u8 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, s16 *arg5) {
     f32 r;
     f32 k;
     f32 s;
@@ -38,11 +39,13 @@ void func_150B0F40(u8 *arg0, u8 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, s16 *arg
     arg4[2] += *(f32 *)(arg0 + 0x1C);
 }
 
-void func_150B1114(u8 *arg0) {
-    func_150B1138(arg0, 0xFF, 1);
+/* was func_150B1114 */
+void wake_spray_spawn_default(u8 *arg0) {
+    wake_spray_spawn(arg0, 0xFF, 1);
 }
 
-void func_150B1138(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150B1138 */
+void wake_spray_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -59,24 +62,26 @@ void func_150B1138(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-void func_150B11C0(s32 arg0, s32 arg1, u8 arg2) {
+/* was func_150B11C0 */
+void wake_spray_link_message(s32 arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 #ifdef NON_MATCHING
-s32 func_1515C668(u8 *arg0, u8 **arg1);
-void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
-void func_15143794(s16, s16, f32, void *);
+s32 motion_track_get_delta(u8 *arg0, u8 **arg1);
+void vec2_from_angle_rad(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 random_int(void);
 f32 random_float(void);
 
-// wake_spray_update: update handler of the effect func_150B1138 creates (+0x28 = the object, +0x2C its id, +0x30
+// wake_spray_update: update handler of the effect wake_spray_spawn creates (+0x28 = the object, +0x2C its id, +0x30
 // the spray accumulator). Ends the effect (+0xE = -1) when the object is gone or reused. While the owner rides in
 // mode 2 (+0x31C +0x4F) faster than 26 (max of the object's +0x3C and owner +0x44 x 1.35), the accumulator grows
 // by (1.259 + rand x 1.079) x D_800BE9A4 per frame (Rare indexes {1, 1.259} / {0, 1.079} by the flag, always 1
-// here) and every whole unit spawns one spray particle (kind 5) at a point beside the object (func_150B0F40) thrown up / out (func_15143794) against the owner's ground velocity
-// (func_1515C668, else zero) x 0.925.
-void func_150B1200(u8 *fx) {
+// here) and every whole unit spawns one spray particle (kind 5) at a point beside the object (wake_spray_point_pick) thrown up / out (vec3_from_angles_byte) against the owner's ground velocity
+// (motion_track_get_delta, else zero) x 0.925.
+/* was func_150B1200 */
+void wake_spray_update(u8 *fx) {
     u8 *obj = *(u8 **) (fx + 0x28);
     u8 *owner;
     u8 *ground;
@@ -118,17 +123,17 @@ void func_150B1200(u8 *fx) {
     if (!(*(f32 *) (fx + 0x30) > 1.0f)) {
         return;
     }
-    if (func_1515C668(obj, &ground) == 0) {
+    if (motion_track_get_delta(obj, &ground) == 0) {
         ground = D_800A5860;
     }
-    func_1514373C(*(f32 *) (obj + 0x40) * 0.017453292f, 1.0f, side, &side[1]);
+    vec2_from_angle_rad(*(f32 *) (obj + 0x40) * 0.017453292f, 1.0f, side, &side[1]);
     fwd[1] = -side[0];
     fwd[0] = side[1];
     do {
-        func_150B0F40(obj, owner, side, fwd, pos, &yaw);
+        wake_spray_point_pick(obj, owner, side, fwd, pos, &yaw);
         n1 = random_int();
         r = random_float() * 3.77f;
-        func_15143794(yaw, n1 % 26 - 0x29, r + 4.06f, vel);
+        vec3_from_angles_byte(yaw, n1 % 26 - 0x29, r + 4.06f, vel);
         vel[0] -= ((f32 *) ground)[0] * 0.9250001f;
         vel[2] -= ((f32 *) ground)[2] * 0.9250001f;
         r = random_float();
@@ -142,5 +147,5 @@ void func_150B1200(u8 *fx) {
     } while (*(f32 *) (fx + 0x30) > 1.0f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DE750/func_150B1200.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DE750/wake_spray_update.s")
 #endif

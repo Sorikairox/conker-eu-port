@@ -5,15 +5,15 @@
 
 #ifdef NON_MATCHING
 void mtx_translate_fixed(Mtx *mtx, f32 x, f32 y, f32 z);
-void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
-void func_15047E70(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA);
+void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
+void mtx_look_at_reflect(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA);
 void vec3_dir_to(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 f32 vec3_heading_deg(struct17 *arg0);
 f32 func_150484A0(f32 arg0, f32 arg1);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 void camera_calc_pitch(struct108 *arg0);
 void camera_sync_angles(struct108 *arg0);
-void func_150A82D0(Mtx *m, f32 rx, f32 ry, f32 rz);
+void mtx_rotate_xyz_deg_fixed(Mtx *m, f32 rx, f32 ry, f32 rz);
 void camera_wobble_apply(u8 *arg0);
 void camera_track_noop(s32 arg0);
 void camera_track_update(u8 *arg0);
@@ -69,11 +69,11 @@ void camera_build_view_matrix(struct108 *arg0) {
         CAM_F(0x194) = CAM_F(0x198);
         CAM_F(0x18C) = CAM_F(0x190);
     } else if (CAM_W(0x2C) == 0x100 || p[0x23E] != 0) {
-        func_150498A0((f32 *)(p + 0x194), CAM_F(0x198), (f32 *)(p + 0x7D0), 4.0f, 6.0f, CAM_F(0x7B4));
-        func_150498A0((f32 *)(p + 0x18C), CAM_F(0x190), (f32 *)(p + 0x7D4), 4.0f, 6.0f, CAM_F(0x7B4));
+        math_spring_approach((f32 *)(p + 0x194), CAM_F(0x198), (f32 *)(p + 0x7D0), 4.0f, 6.0f, CAM_F(0x7B4));
+        math_spring_approach((f32 *)(p + 0x18C), CAM_F(0x190), (f32 *)(p + 0x7D4), 4.0f, 6.0f, CAM_F(0x7B4));
     } else {
-        func_150498A0((f32 *)(p + 0x194), CAM_F(0x198), (f32 *)(p + 0x7D0), 0.75f, 1.1f, CAM_F(0x7B4));
-        func_150498A0((f32 *)(p + 0x18C), CAM_F(0x190), (f32 *)(p + 0x7D4), 0.75f, 1.1f, CAM_F(0x7B4));
+        math_spring_approach((f32 *)(p + 0x194), CAM_F(0x198), (f32 *)(p + 0x7D0), 0.75f, 1.1f, CAM_F(0x7B4));
+        math_spring_approach((f32 *)(p + 0x18C), CAM_F(0x190), (f32 *)(p + 0x7D4), 0.75f, 1.1f, CAM_F(0x7B4));
     }
     CAM_W(0x2E0) = CAM_W(0x2BC);
     CAM_W(0x2E4) = CAM_W(0x2C0);
@@ -133,7 +133,7 @@ void camera_build_view_matrix(struct108 *arg0) {
     *(f32 *)(obj + 0x130) = dir[0];
     *(f32 *)(obj + 0x134) = dir[1];
     *(f32 *)(obj + 0x138) = dir[2];
-    func_15047E70(CAM_MTX(), (s32)(D_800D9FB0 + D_800BE9C0 * 0x20), eye[0], eye[1], eye[2], at[0], at[1], at[2],
+    mtx_look_at_reflect(CAM_MTX(), (s32)(D_800D9FB0 + D_800BE9C0 * 0x20), eye[0], eye[1], eye[2], at[0], at[1], at[2],
                   0.0f, 1.0f, 0.0f);
 
     fl = CAM_W(0x2C);
@@ -143,7 +143,7 @@ void camera_build_view_matrix(struct108 *arg0) {
         return;
     }
     if (fl == 0x40000) {
-        func_150A82D0(&m158, 0.0f, 0.0f, CAM_F(0x5EC));
+        mtx_rotate_xyz_deg_fixed(&m158, 0.0f, 0.0f, CAM_F(0x5EC));
         guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
         camera_wobble_apply(p);
         return;
@@ -180,7 +180,7 @@ void camera_build_view_matrix(struct108 *arg0) {
     }
     a = CAM_F(0x854) * scale;
     CAM_F(0x5EC) = CAM_F(0x5EC) + a;
-    func_150A82D0(&m158, -CAM_F(0x858) * scale, CAM_F(0x85C) * scale, a);
+    mtx_rotate_xyz_deg_fixed(&m158, -CAM_F(0x858) * scale, CAM_F(0x85C) * scale, a);
     guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
 
     /* the object's view direction follows the shake */
@@ -198,7 +198,7 @@ void camera_build_view_matrix(struct108 *arg0) {
     }
     if (CAM_OBJ()[0x197] != 0) {
         d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
-        func_150A82D0(&m158, d[3], d[4], d[5]);
+        mtx_rotate_xyz_deg_fixed(&m158, d[3], d[4], d[5]);
         d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
         mtx_translate_fixed(&m118, d[0], d[1], d[2]);
         guMtxCatL(&m158, &m118, &m158);
@@ -217,9 +217,9 @@ void camera_build_view_matrix(struct108 *arg0) {
     }
     if (!(fl & 0x40000)) {
         if ((CAM_W(0x5F0) & 0x80) || CAM_REC()[0x102] != 0) {
-            func_150498A0((f32 *)(p + 0x5EC), a, (f32 *)(p + 0x264), 2.0f, 4.0f, CAM_F(0x7B4));
+            math_spring_approach((f32 *)(p + 0x5EC), a, (f32 *)(p + 0x264), 2.0f, 4.0f, CAM_F(0x7B4));
         } else {
-            func_150498A0((f32 *)(p + 0x5EC), a, (f32 *)(p + 0x264), 4.0f, 8.0f, CAM_F(0x7B4));
+            math_spring_approach((f32 *)(p + 0x5EC), a, (f32 *)(p + 0x264), 4.0f, 8.0f, CAM_F(0x7B4));
         }
     }
     camera_track_noop((s32)p);
@@ -230,10 +230,10 @@ void camera_build_view_matrix(struct108 *arg0) {
             CAM_F(0x398) = CAM_F(0x388) * 0.017453292f; /* D_800A3A9C */
         }
         d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
-        func_150A82D0(&m158, d[3] + (CAM_F(0x5D0) + CAM_F(0x3A8) + CAM_F(0x38C)), d[4] + CAM_F(0x5E8),
+        mtx_rotate_xyz_deg_fixed(&m158, d[3] + (CAM_F(0x5D0) + CAM_F(0x3A8) + CAM_F(0x38C)), d[4] + CAM_F(0x5E8),
                       d[5] + (CAM_F(0x5EC) + *(f32 *)&D_800DC6F0[p[0x23D]][0x60] * 0.5f));
         if (CAM_W(0x2C) == 0x40000) {
-            func_150A82D0(&m158, 0.0f, 0.0f, CAM_F(0x5EC));
+            mtx_rotate_xyz_deg_fixed(&m158, 0.0f, 0.0f, CAM_F(0x5EC));
         }
     }
     guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
@@ -255,7 +255,7 @@ void camera_build_view_matrix(struct108 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15A210/camera_build_view_matrix.s")
 #endif
-void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern Mtx *D_800DC6D0[];
 
 /* was func_1512D5E0 */
@@ -282,7 +282,7 @@ void camera_wobble_apply(u8 *arg0) {
     if (arg0[0x23C] != 0 || (*(s32 *)(arg0 + 0x5F0) & 4)) {
         *(f32 *)(arg0 + 0x7DC) = k;
     } else {
-        func_150498A0((f32 *)(arg0 + 0x7DC), k, (f32 *)(arg0 + 0x7D8), 0.2f, 0.4f, *(f32 *)(arg0 + 0x7B4));
+        math_spring_approach((f32 *)(arg0 + 0x7DC), k, (f32 *)(arg0 + 0x7D8), 0.2f, 0.4f, *(f32 *)(arg0 + 0x7B4));
     }
     guMtxIdentF(mf);
     mf[0][0] = 2.0f * *(f32 *)(arg0 + 0x7DC) + 2.0f * (*(f32 *)(arg0 + 0x7DC) * func_150AD78C(*(f32 *)(arg0 + 0x7B0))) + 1.0f;

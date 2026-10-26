@@ -3,9 +3,10 @@
 #include "variables.h"
 
 
-s32 func_1507C7C0(struct127 *, u16 *, u16 *, u16 *);
+s32 obj_collision_cylinder(struct127 *, u16 *, u16 *, u16 *);
 
-void func_1507C370(void) {
+/* was func_1507C370 */
+void obj_collision_sizes_update(void) {
     s32 i;
     struct127 *p;
     struct126 *t;
@@ -16,7 +17,7 @@ void func_1507C370(void) {
         do {
             t = p->unk31C;
             if (t != NULL) {
-                func_1507C7C0(p, &t->unk114, &t->unk116, &t->unk118);
+                obj_collision_cylinder(p, &t->unk114, &t->unk116, &t->unk118);
             }
             i++;
             p++;
@@ -34,7 +35,8 @@ extern f32 D_8009BA58;
  * ledge, water and controller variants; a few fixed sizes; anything else unkE4 / 2 x unkE6 unscaled. Records held
  * by a record of id 0x13 (unk13C = 100 + index) are bigger, and the sized kinds scale by unk14C / unk150.
  * The result is not used by any caller (the asm leaves a scratch value in v0); 0 here. */
-s32 func_1507C7C0(struct127 *rec, u16 *height, u16 *width, u16 *radius) {
+/* was func_1507C7C0 */
+s32 obj_collision_cylinder(struct127 *rec, u16 *height, u16 *width, u16 *radius) {
     u8 *c;
     u8 *cam;
     s32 scaled = 1;
@@ -160,5 +162,5 @@ out:
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_A9F60/func_1507C7C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_A9F60/obj_collision_cylinder.s")
 #endif

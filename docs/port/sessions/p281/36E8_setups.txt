@@ -1,4 +1,4 @@
-# P281 func_100036E8 (viMgrMain). Knobs: STOPCALL osRecvMesg (100238E0) #8 ends the endless loop; OUTW writes the
+# P281 os_vi_manager_main (viMgrMain). Knobs: STOPCALL osRecvMesg (100238E0) #8 ends the endless loop; OUTW writes the
 # message pointer: 80480000 = VRETRACE (type 13), 80480100 = COUNTER (14), 80480200 = other (5).
 # RET __osGetActiveQueue (10024870) = context 80481000 (u16 retraceCount at +2, msgq +0x10, msg +0x14).
 rc2 ! 0=8002AEB0 ! 80480000=000D0000,80480100=000E0000,80480200=00050000,80481000=00020000,80481010=80482000,80481014=1234 ! 10024870=80481000 ! ! ! 100238E0=1:80480000;80480100;80480000;80480200;80480000;80480000;80480000 !

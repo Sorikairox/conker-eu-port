@@ -13,13 +13,13 @@ extern s32 *D_800DC3C4;
 s32 world_record_find(u8);
 s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
 s32 player_hit_reaction(struct127 *, s32);
-void func_15196888(u8 *, s32, s32);
+void texscroll_set_speed(u8 *, s32, s32);
 
 // player_item_drop_check: unless the player's held object (D_800CCA0C, byte 0x120) is busy, checks items 0xFA and
 // 0xF9 (world_record_find; entry index = (item - D_800DBEF4) / 160 into the flag words at D_800DC3C4). The first one
 // with bit 0 set: releases the player's current carried object (obj_remove), clears D_800CC8BA and resets the
-// player (object_hit_effects, sound 0x627 via func_10010630, func_15145A50, mode 6 via player_hit_reaction). Then the four
-// D_800BE4F0 nodes are offset by +-object 0xE's +0x2E4 value (func_15196888).
+// player (object_hit_effects, sound 0x627 via actor_sound_play_untracked, obj_set_destroyed, mode 6 via player_hit_reaction). Then the four
+// D_800BE4F0 nodes are offset by +-object 0xE's +0x2E4 value (texscroll_set_speed).
 /* was func_150F2FE0 */
 void player_item_drop_check(s32 arg0) {
     struct127 *o;
@@ -38,18 +38,18 @@ void player_item_drop_check(s32 arg0) {
             }
             D_800CC8BA = 0;
             object_hit_effects(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
-            func_10010630(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);
-            func_15145A50(D_800CC2D0);
+            actor_sound_play_untracked(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);
+            obj_set_destroyed(D_800CC2D0);
             player_hit_reaction(D_800CC2D0, 6);
             break;
         }
     }
-    o = func_15083E90(0xE);
+    o = obj_find_by_setup_id(0xE);
     off = (o != NULL) ? *(s32 *) ((u8 *) o + 0x2E4) : 0;
-    func_15196888(((u8 **) D_800BE4F0)[0], off, 0);
-    func_15196888(((u8 **) D_800BE4F0)[1], 0, -off);
-    func_15196888(((u8 **) D_800BE4F0)[2], off, 0);
-    func_15196888(((u8 **) D_800BE4F0)[3], -off, 0);
+    texscroll_set_speed(((u8 **) D_800BE4F0)[0], off, 0);
+    texscroll_set_speed(((u8 **) D_800BE4F0)[1], 0, -off);
+    texscroll_set_speed(((u8 **) D_800BE4F0)[2], off, 0);
+    texscroll_set_speed(((u8 **) D_800BE4F0)[3], -off, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/player_item_drop_check.s")
@@ -78,9 +78,9 @@ void drip_emitter_spawn(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
-void func_15145EA4(f32 **, f32 **, void *, s32);
-s32 func_15146078(f32 *, s32 *, s32 *);
+void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+s32 vec3_make_basis(f32 *, s32 *, s32 *);
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
                     u8 argA, s32 argB);
 extern u8 D_800A1D2C[];  /* second bone-space point (after D_800A1D20) */
@@ -90,9 +90,9 @@ extern f32 D_800A1D3C;
 // drip_emitter_update: object update of a drip emitter (record at +0x28: owner, +4 owner id, +5 last owner
 // state, +8 f32 accumulator, +0xC s8 drops left). Stops when the cutscene flag D_800C35EA is 1; ends the object
 // (+0xE = -1) when the owner is gone or its id changed. A new non-zero owner state (+0x222) refills 3 drops; while
-// the state is set, func_1502ED88 runs on object D_800CC2D0[state]. With a model, the accumulator grows by
+// the state is set, obj_tint_set_flash runs on object D_800CC2D0[state]. With a model, the accumulator grows by
 // D_800A1D38 * frame time and every whole unit drops one: the line between the bone points D_800A1D20 / D_800A1D2C
-// (bone matrix +0x3C0) is probed (func_15146078) and a drop sprite (effect3d_spawn_full, template D_800A4AA0, size
+// (bone matrix +0x3C0) is probed (vec3_make_basis) and a drop sprite (effect3d_spawn_full, template D_800A4AA0, size
 // 60..100, alpha 0x34-byte trail record copied to +0x110) is spawned at the first point.
 /* was func_150F3294 */
 void drip_emitter_update(u8 *obj) {
@@ -158,7 +158,7 @@ void drip_emitter_update(u8 *obj) {
     st[5] = owner[0x222];
     state = owner[0x222];
     if (state != 0) {
-        func_1502ED88((u8 *) D_800CC2D0 + state * 0x32C, 0xFF, 0, 0, 0x50, 0, 0xF);
+        obj_tint_set_flash((u8 *) D_800CC2D0 + state * 0x32C, 0xFF, 0, 0, 0x50, 0, 0xF);
     }
     if (*(u8 **) (owner + 0x1D4) == NULL) {
         return;
@@ -182,11 +182,11 @@ void drip_emitter_update(u8 *obj) {
         in[1] = (f32 *) D_800A1D2C;
         out[0] = spr.pos;
         out[1] = dir;
-        func_15145EA4(in, out, *(u8 **) (owner + 0x1D4) + 0x3C0, 2);
+        mtx_transform_points(in, out, *(u8 **) (owner + 0x1D4) + 0x3C0, 2);
         dir[0] -= spr.pos[0];
         dir[1] -= spr.pos[1];
         dir[2] -= spr.pos[2];
-        if (func_15146078(dir, trail.hit, trail.normal) == 0) {
+        if (vec3_make_basis(dir, trail.hit, trail.normal) == 0) {
             return;
         }
         spr.alpha = (u32) trail.speed;
@@ -259,7 +259,7 @@ s32 drip_sprite_update(u8 *arg0) {
         return 0;
     }
     sp18 = temp_v0;
-    func_15143134(((u8 *)&D_800A1D20), arg0 + 0x34, temp_t0 + 0x3C0);
+    mtx_transform_point_or_origin(((u8 *)&D_800A1D20), arg0 + 0x34, temp_t0 + 0x3C0);
     temp_f2 = sqrtf((*(f32 *)((u8 *)temp_v0 + 8))) * (*(f32 *)((u8 *)temp_v0 + 0x10));
     (*(f32 *)((u8 *)arg0 + 0x30)) = temp_f2;
     (*(f32 *)((u8 *)arg0 + 0x2C)) = temp_f2;
@@ -337,11 +337,11 @@ extern u8 D_800CC1F3;
 void obj_stun_update(struct127 *); /* P209: the asm reads only a0 (this caller leaves 0.25f in a1) */
 u8 obj_turn_towards(struct127 *arg0, u8 arg1, u16 arg2);
 f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_15052590(struct127 *);
+void obj_state_common_update(struct127 *);
 void objev_spawn_helper_object(void);
 
 // player_swim_update: player interaction state 0x15 handler (entry 21 of D_800863B4, called as `(obj)` by
-// func_1504A730 / func_15022A40). Reads the controller (D_800CC6A4, cleared when the D_800DDE3C / D_800DDDC8 gate
+// objects_run_state_handlers / cutscene_event_dispatch). Reads the controller (D_800CC6A4, cleared when the D_800DDE3C / D_800DDDC8 gate
 // of player D_800C3E78 holds). Stunned: drops the carried object (unk13C = 100 + index). Entry (unk102 == 0): heading
 // from the stick (math_atan2_u16 / pad_stick_speed), may grab object D_800CC68D, dives below unk118. Then each frame:
 // stick y / buttons 0x8000 / 0x4000 / 0x10 steer pitch (unkB8), turn (unkC4 -> unk76) and speed (obj_approach_speed),
@@ -424,7 +424,7 @@ void player_swim_update(struct127 *self) {
             self->unk232 = 8;
             self->unk102 = 1;
         }
-        func_15052590(self);
+        obj_state_common_update(self);
         if (D_800CC68D != 0) {
             if (self->unk28 > 30.0f) {
                 /* grab object D_800CC68D - 100 */

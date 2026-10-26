@@ -6,7 +6,8 @@
 #ifdef NON_MATCHING
 void mtx_get_translation(void *, s32, void *);
 
-s32 func_150C1EC0(s32 arg0, u8 *arg1, s32 arg2) {
+/* was func_150C1EC0 */
+s32 obj_fx_point_foot(s32 arg0, u8 *arg1, s32 arg2) {
     s32 sp1C;
     s32 temp_t6;
 
@@ -23,16 +24,18 @@ s32 func_150C1EC0(s32 arg0, u8 *arg1, s32 arg2) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/func_150C1EC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/obj_fx_point_foot.s")
 #endif
-s32 func_150C1F2C(s32 arg0, s32 arg1) {
+/* was func_150C1F2C */
+s32 foot_fx_effect_id(s32 arg0, s32 arg1) {
     return 7;
 }
 
 #ifdef NON_MATCHING
-s32 func_1514C860(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+s32 spawn_ring_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
-void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_150C1F40 */
+void foot_step_ring_effect(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         f32 uA4;
         f32 uA8;
@@ -97,7 +100,7 @@ void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
 
     if ((*(s32 *)((u8 *)arg0 + 0x1D4)) != 0) {
         sp.u120 = ((*(f32 *)((u8 *)arg0 + 0x14C)) + (*(f32 *)((u8 *)arg0 + 0x150))) * 0.5f;
-        func_150C1EC0(&sp.u124, arg0, arg1 & 0xFF);
+        obj_fx_point_foot(&sp.u124, arg0, arg1 & 0xFF);
         if (arg1 == 1) {
             var_v0 = 0x10;
         } else {
@@ -105,8 +108,8 @@ void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
         }
         temp_f0 = sp.u120 * 70.0f;
         sp7C = temp_f0;
-        func_1514C860(sp.u124, (*(f32 *)((u8 *)arg0 + 0x180)), sp.u12C, temp_f0, (((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8) + 0x40) & 0xFF, var_v0, 8, 0, 0, temp_f0 * 4.04f, 0, 0xFF);
-        func_151664F0(-1, (s32) sp.u124, (s32) ((f32) (s32) (*(f32 *)((u8 *)arg0 + 0x180)) + 2.0f), (s32) sp.u12C, 8, 0x15, 0, 0xFF, 0);
+        spawn_ring_emit(sp.u124, (*(f32 *)((u8 *)arg0 + 0x180)), sp.u12C, temp_f0, (((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8) + 0x40) & 0xFF, var_v0, 8, 0, 0, temp_f0 * 4.04f, 0, 0xFF);
+        water_ring_spawn(-1, (s32) sp.u124, (s32) ((f32) (s32) (*(f32 *)((u8 *)arg0 + 0x180)) + 2.0f), (s32) sp.u12C, 8, 0x15, 0, 0xFF, 0);
         sp.uFA = 5;
         sp.uF4 = 0x29E9;
         sp.uFC = 0;
@@ -155,7 +158,7 @@ void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
                 sp.uBC = random_float() * 360.0f;
                 sp.uE4 = 25.0f - (random_float() * 50.0f);
                 sp.uE8 = 25.0f - (random_float() * 50.0f);
-                temp_v0 = func_15132FBC(&sp.uA4, 3, 0xFF, 4, 0xFF, 0);
+                temp_v0 = mdl_particle_spawn(&sp.uA4, 3, 0xFF, 4, 0xFF, 0);
                 if (temp_v0 != NULL) {
                     (*(f32 *)((u8 *)temp_v0 + 0x170)) = (f32) (*(f32 *)((u8 *)arg0 + 0x180));
                 }
@@ -165,15 +168,15 @@ void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/func_150C1F40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/foot_step_ring_effect.s")
 #endif
 #ifdef NON_MATCHING
-/* P243: readable C for func_150C2334 (game_eu_EF6D0, 75 insns). */
+/* P243: readable C for emit_point_puff (game_eu_EF6D0, 75 insns). */
 // emit_point_puff: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
-// s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, emitters func_1514C860 / func_1514C9E0 / func_1514CBE8):
-// queues one func_1518CFF0 particle at (x, y, z): drift (x - x0, z - z0) * 10, size (s32) arg9 and (s32) (arg9 *
-// 0.1757) (double, the ROM's D_800A05F8), constants 150 / 20 / 600, two func_151429E0 colour triples of palette 0,
-// alpha bytes 0xFF / 0xFF, a random 12..27 byte and 1 (the record layout of func_1514A434). Always returns 1 (go on).
+// s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, emitters spawn_ring_emit / spawn_line_emit / spawn_circle_random_emit):
+// queues one puff_sprite_spawn particle at (x, y, z): drift (x - x0, z - z0) * 10, size (s32) arg9 and (s32) (arg9 *
+// 0.1757) (double, the ROM's D_800A05F8), constants 150 / 20 / 600, two fx_pick_random_color colour triples of palette 0,
+// alpha bytes 0xFF / 0xFF, a random 12..27 byte and 1 (the record layout of spark_die_spawn_burst). Always returns 1 (go on).
 typedef struct {
     f32 pos[3];
     u8 unkC[0xA];
@@ -182,10 +185,11 @@ typedef struct {
     u8 c1[3];
     u8 b2E, b2F, b30, b31;
 } Puff2334;
-void func_151429E0(u8, u8 *, u8 *, u8 *);
-void func_1518CFF0(Puff2334 *, s32);
+void fx_pick_random_color(u8, u8 *, u8 *, u8 *);
+void puff_sprite_spawn(Puff2334 *, s32);
 
-s32 func_150C2334(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
+/* was func_150C2334 */
+s32 emit_point_puff(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
                   f32 arg9, s32 argA, s32 argB) {
     Puff2334 s;
     s16 size;
@@ -205,15 +209,15 @@ s32 func_150C2334(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     s.h18 = size;
     s.h1A = sizeB;
     s.h1C = sizeB;
-    func_151429E0(0, &s.c0[0], &s.c0[1], &s.c0[2]);
-    func_151429E0(0, &s.c1[0], &s.c1[1], &s.c1[2]);
+    fx_pick_random_color(0, &s.c0[0], &s.c0[1], &s.c0[2]);
+    fx_pick_random_color(0, &s.c1[0], &s.c1[1], &s.c1[2]);
     s.b2E = 0xFF;
     s.b2F = 0xFF;
     s.b30 = (random_int() & 0xF) + 12;
     s.b31 = 1;
-    func_1518CFF0(&s, 1);
+    puff_sprite_spawn(&s, 1);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/func_150C2334.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/emit_point_puff.s")
 #endif

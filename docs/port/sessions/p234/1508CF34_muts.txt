@@ -1,4 +1,4 @@
-# P234 func_1508CF34 (rail_racer_steer) mutants: sed % setup names (first setup file)
+# P234 rail_racer_steer (rail_racer_steer) mutants: sed % setup names (first setup file)
 # dropped as equivalent: mode 1 -> 2 for kind 0x1B (only mode != 0 matters there); the 0x8E stores 0 / 10 / 2 before the final
 # 0x8E = 1; 0x8A &= 0xDFEF (the final |= 0x10); `kind == 3` in the oz test (kind 3 clears oz); veh != NULL -> hasVeh in the
 # special / no-limit branch (special kinds never clear hasVeh)
@@ -32,7 +32,7 @@ s/        dz += h \* t;/        dz -= h * t;/ % ox_only oz_ox
 s/    ang = (f32) (u32) math_atan2_u16(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (u32) math_atan2_u16(dx, dz, 0) * 0.0054931640625f;/ % plain
 s/    ang = (f32) (u32) math_atan2_u16(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (s16) math_atan2_u16(dx, -dz, 0) * 0.0054931640625f;/ % ang_hi
 s/        cur = CF34_F(obj, 0x40) - 90.0f;/        cur = CF34_F(obj, 0x40) + 90.0f;/ % k3
-s/    diff = func_15144BC8(func_15144BC8(cur) - base);/    diff = func_15144BC8(func_15144BC8(cur) + base);/ % plain
+s/    diff = wrap_angle_deg(wrap_angle_deg(cur) - base);/    diff = wrap_angle_deg(wrap_angle_deg(cur) + base);/ % plain
 s/        diff = -360.0f + diff;/        diff = 360.0f - diff;/ % plain_yaw200
 s/    if (45.0f < diff || diff < -45.0f) {/    if (45.0f <= diff || diff < -45.0f) {/ % plain_yaw45
 s/    if (45.0f < diff || diff < -45.0f) {/    if (45.0f < diff) {/ % plain_yawneg
@@ -42,7 +42,7 @@ s/    CF34_RAILF(0x17E8, i) += h \* rate;/    CF34_RAILF(0x17E8, i) += h;/ % pla
 s/    pitch = (f32) (u32) math_atan2_u16(dist, CF34_F(CF34_ST(obj), 0x140) - CF34_RAILF(0x17E8, i), 0) \* 0.0054931640625f;/    pitch = (f32) (u32) math_atan2_u16(dist, CF34_F(CF34_ST(obj), 0x144) - CF34_RAILF(0x17E8, i), 0) * 0.0054931640625f;/ % plain
 s/    while (180.0f < curp) {/    if (180.0f < curp) {/ % plain_dp450
 s/    while (180.0f < dp) {/    if (180.0f < dp) {/ % k15_dp600
-s/    dp = func_15144BC8(curp - pitch);/    dp = func_15144BC8(pitch - curp);/ % plain
+s/    dp = wrap_angle_deg(curp - pitch);/    dp = wrap_angle_deg(pitch - curp);/ % plain
 s/    yaw = diff \* 8.0f;/    yaw = diff * 4.0f;/ % plain_small
 s/        yaw = -90.0f;/        yaw = -80.0f;/ % plain_yawneg
 s/        yaw = 90.0f;/        yaw = 80.0f;/ % plain_yaw200 plain_yaw45

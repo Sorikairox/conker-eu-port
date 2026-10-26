@@ -6,14 +6,15 @@
 #ifdef NON_MATCHING
 typedef struct Node8D80 { u8 u0; u8 u1; u8 u2; u8 u3; u8 u4; s16 u6; void *u8_; struct Node8D80 *uC; struct127 *u10; s32 u14; } Node8D80;
 void *allocate_memory(s32, s32, s32, s32);
-void func_10004074(u8 *);
-s32 func_1502DE10(u8);
-void func_15188FC8();
+void heap_free(u8 *);
+s32 model_joint_mtx_count(u8);
+void afterimage_list_append();
 
 // object_trail_start: starts (or extends) the trail effect of obj (scene event 5 / 0x2D): an existing node of the
 // D_800DF7C8 list for obj gets the longer duration and the new style; else a 0x18-byte node (type 3, 0x14) with a
-// zeroed buffer of 0x180 bytes per trail point of the object's kind (func_1502DE10(kind), 0 = no trail) is appended.
-void func_15188D80(struct127 *obj, s32 frames, s32 style) {
+// zeroed buffer of 0x180 bytes per trail point of the object's kind (model_joint_mtx_count(kind), 0 = no trail) is appended.
+/* was func_15188D80 */
+void afterimage_start(struct127 *obj, s32 frames, s32 style) {
     Node8D80 *n;
     void *buf;
     s32 count;
@@ -31,14 +32,14 @@ void func_15188D80(struct127 *obj, s32 frames, s32 style) {
     if (n == NULL) {
         return;
     }
-    count = func_1502DE10(((u8 *) obj)[4]);
+    count = model_joint_mtx_count(((u8 *) obj)[4]);
     if (count == 0) {
-        func_10004074((u8 *) n);
+        heap_free((u8 *) n);
         return;
     }
     buf = allocate_memory(count * 0x180, 1, 1, 1);
     if (buf == NULL) {
-        func_10004074((u8 *) n);
+        heap_free((u8 *) n);
         return;
     }
     n->u0 = 0;
@@ -51,22 +52,23 @@ void func_15188D80(struct127 *obj, s32 frames, s32 style) {
     n->u14 = 0;
     n->u6 = frames;
     bzero(buf, count * 0x180);
-    func_15188FC8(n, D_800DF7C8);
+    afterimage_list_append(n, D_800DF7C8);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15188D80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_start.s")
 #endif
 
 typedef struct Node8EBC { u8 u0; u8 u1; u8 u2; u8 u3; u8 u4; s16 u6; void *u8_; struct Node8EBC *uC; s32 u10; } Node8EBC;
 extern Node8EBC *D_800DFBFC;
 void *allocate_memory(s32, s32, s32, s32);
 #ifdef NON_MATCHING // the definition is void; one signature for wasm
-void func_10004074(u8 *);
+void heap_free(u8 *);
 #else
-s32 func_10004074(u8 *);
+s32 heap_free(u8 *);
 #endif
-void func_15188FC8();
-void func_15188EBC(s32 arg0, s32 arg1, s32 arg2) {
+void afterimage_list_append();
+/* was func_15188EBC */
+void afterimage_start_world(s32 arg0, s32 arg1, s32 arg2) {
     Node8EBC *n;
     void *buf;
 
@@ -85,7 +87,7 @@ void func_15188EBC(s32 arg0, s32 arg1, s32 arg2) {
     }
     buf = allocate_memory(0x180, 1, 1, 0);
     if (buf == NULL) {
-        func_10004074((u8 *)n);
+        heap_free((u8 *)n);
         return;
     }
     n->u0 = 1;
@@ -97,7 +99,7 @@ void func_15188EBC(s32 arg0, s32 arg1, s32 arg2) {
     n->u8_ = buf;
     n->u10 = arg0;
     bzero(buf, 0x180);
-    func_15188FC8(n, &D_800DFBFC);
+    afterimage_list_append(n, &D_800DFBFC);
 }
 
 typedef struct struct_15188FC8 {
@@ -105,7 +107,8 @@ typedef struct struct_15188FC8 {
     struct struct_15188FC8 *unkC;
 } struct_15188FC8;
 
-void func_15188FC8(struct_15188FC8 *arg0, struct_15188FC8 **arg1) {
+/* was func_15188FC8 */
+void afterimage_list_append(struct_15188FC8 *arg0, struct_15188FC8 **arg1) {
     struct_15188FC8 *var_v1;
 
     arg0->unkC = NULL;
@@ -118,7 +121,8 @@ void func_15188FC8(struct_15188FC8 *arg0, struct_15188FC8 **arg1) {
     }
 }
 
-void func_1518900C(s32 arg0) {
+/* was func_1518900C */
+void afterimage_stop(s32 arg0) {
     struct_eu_1B6590 *var_v0 = (struct_eu_1B6590 *)D_800DF7C8[0];
     while (var_v0 != NULL) {
         if (arg0 == var_v0->unk10) {
@@ -129,12 +133,13 @@ void func_1518900C(s32 arg0) {
 }
 
 #ifdef NON_MATCHING // the definition is void; one signature for wasm
-void func_10004074(u8 *);
+void heap_free(u8 *);
 #else
-s32 func_10004074(u8 *);
+s32 heap_free(u8 *);
 #endif
 
-void func_15189040(s32 arg0) {
+/* was func_15189040 */
+void afterimage_remove_object(s32 arg0) {
     s32 temp_s0;
     s32 var_s1;
     u8 *var_s2;
@@ -150,8 +155,8 @@ void func_15189040(s32 arg0) {
                 } else {
                     (*(s32 *)((u8 *)var_s2 + 0xC)) = temp_s0;
                 }
-                func_100043B4((*(s32 **)((u8 *)var_s1 + 8)), 2U);
-                func_10004074((u8 *) var_s1);
+                heap_set_block_tag((*(s32 **)((u8 *)var_s1 + 8)), 2U);
+                heap_free((u8 *) var_s1);
             } else {
                 var_s2 = (u8 *) var_s1;
             }
@@ -163,11 +168,12 @@ void func_15189040(s32 arg0) {
 extern void (*D_8008D920[])(struct_eu_1B6590 *);
 extern void (*D_8008D928[])(struct_eu_1B6590 *);
 #ifdef NON_MATCHING // the definition is void; one signature for wasm
-void func_10004074(u8 *);
+void heap_free(u8 *);
 #else
-s32 func_10004074(u8 *);
+s32 heap_free(u8 *);
 #endif
-void func_151890E4(s32 arg0) {
+/* was func_151890E4 */
+void afterimage_list_update(s32 arg0) {
     struct_eu_1B6590 **head;
     struct_eu_1B6590 *n;
     struct_eu_1B6590 *next;
@@ -207,7 +213,7 @@ void func_151890E4(s32 arg0) {
                     prev->unkC = next;
                 }
                 D_8008D928[n->pad0[0]](n);
-                func_10004074((u8 *)n);
+                heap_free((u8 *)n);
             } else {
                 n->pad0[3] = v;
                 prev = n;
@@ -217,7 +223,8 @@ void func_151890E4(s32 arg0) {
 }
 
 extern Gfx *(*D_8008D930[])(Gfx *, struct_eu_1B6590 *, s16);
-Gfx *func_15189270(Gfx *gfx, s32 arg1, s16 arg2) {
+/* was func_15189270 */
+Gfx *afterimage_list_draw(Gfx *gfx, s32 arg1, s16 arg2) {
     struct_eu_1B6590 *n;
 
     n = (struct_eu_1B6590 *)D_800DF7C8[arg1];
@@ -238,19 +245,20 @@ Gfx *func_15189270(Gfx *gfx, s32 arg1, s16 arg2) {
 }
 
 #ifdef NON_MATCHING
-/* P249: readable C for func_151893B8 (game_eu_1B6590, 79 insns). */
+/* P249: readable C for afterimage_history_push (game_eu_1B6590, 79 insns). */
 // trail_matrix_history_push: advances an object's motion-trail matrix history. The record holds rec[1] steps of
-// `per` matrices (func_1502DE10(object kind), 64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is
+// `per` matrices (model_joint_mtx_count(object kind), 64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is
 // written, the other half read): step j of this half = step j + 1 of the other half, and the last step = the
 // object's current bone matrices (object +0x10, its +0x1D4); without matrices the filled count rec[2] is reset to 0
 // and nothing else happens. Otherwise rec[2] counts up to rec[1].
-s32 func_1502DE10(u8);
-void func_151893B8(u8 *rec) {
+s32 model_joint_mtx_count(u8);
+/* was func_151893B8 */
+void afterimage_history_push(u8 *rec) {
     s32 n, per, total, cur, prev, i, j;
     u8 *src;
 
     n = rec[1];
-    per = func_1502DE10((*(u8 **) (rec + 0x10))[4]);
+    per = model_joint_mtx_count((*(u8 **) (rec + 0x10))[4]);
     total = per * n;
     cur = D_800BE9C0 * total;
     prev = (D_800BE9C0 ^ 1) * total;
@@ -273,20 +281,21 @@ void func_151893B8(u8 *rec) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151893B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_history_push.s")
 #endif
 
 #ifdef NON_MATCHING
 extern u16 **D_800895E0[];   /* per group: -> the group's entry list (4-byte entries, u16 record id first) */
 extern Mtx **D_800895F0[2];  /* per DL buffer: -> the world-object matrix array (one Mtx per record id) */
 extern u16 D_800DC318[];     /* per group: entry count */
-// trail_matrix_history_push_world: P253. Like func_151893B8 (same handler table), for an object with one matrix: the
+// trail_matrix_history_push_world: P253. Like afterimage_history_push (same handler table), for an object with one matrix: the
 // record holds rec[1] matrices (64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is written, the other
 // half read): matrix j of this half = matrix j + 1 of the other half, and the last one = the object's world matrix
 // (the object +0x10 is looked up in group 0's entry list by its record id, 0xA0-byte records at D_800DBEF4; matrix
 // array of the current DL buffer). When the object is not in the list, the filled count rec[2] is reset to 0 and
 // nothing else happens. Otherwise rec[2] counts up to rec[1].
-void func_151894F4(u8 *rec) {
+/* was func_151894F4 */
+void afterimage_history_push_world(u8 *rec) {
     s32 n = rec[1];
     s32 cur = D_800BE9C0 * n;
     s32 prev = (D_800BE9C0 ^ 1) * n;
@@ -319,13 +328,14 @@ void func_151894F4(u8 *rec) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151894F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_history_push_world.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1502DE10(u8);
+s32 model_joint_mtx_count(u8);
 
-void func_15189688(s32 arg0) {
+/* was func_15189688 */
+void afterimage_clamp_spacing(s32 arg0) {
     f32 temp_f0;
     f32 temp_f14_2;
     f32 temp_f14_3;
@@ -368,7 +378,7 @@ void func_15189688(s32 arg0) {
         do {
             if ((*(u8 *)((u8 *)var_s0 + 4)) != 0) {
                 temp_s1 = (*(u8 *)((u8 *)var_s0 + 1));
-                temp_v0 = func_1502DE10((*(u8 *)((u8 *)((*(u8 **)((u8 *)var_s0 + 0x10))) + 4)));
+                temp_v0 = model_joint_mtx_count((*(u8 *)((u8 *)((*(u8 **)((u8 *)var_s0 + 0x10))) + 4)));
                 temp_t4 = (*(u8 *)((u8 *)var_s0 + 4));
                 temp_a2 = temp_v0;
                 var_f30 = (f32) temp_t4;
@@ -453,28 +463,31 @@ block_12:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15189688.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_clamp_spacing.s")
 #endif
-void func_15189B14(u8 *arg0) {
-    func_100043B4((*(s32 **)((u8 *)arg0 + 8)), 2U);
+/* was func_15189B14 */
+void afterimage_free_history(u8 *arg0) {
+    heap_set_block_tag((*(s32 **)((u8 *)arg0 + 8)), 2U);
 }
 
-void func_15189B3C(u8 *arg0) {
-    func_100043B4((*(s32 **)((u8 *)arg0 + 8)), 2U);
+/* was func_15189B3C */
+void afterimage_world_free_history(u8 *arg0) {
+    heap_set_block_tag((*(s32 **)((u8 *)arg0 + 8)), 2U);
 }
 
 #ifdef NON_MATCHING
-u8 func_15084E34(struct127 *, s32 *);
-s32 func_1503DD8C(struct127 *, u8, s32, s32);
-u8 *func_1502CC64(u8 *, s32, s16, s32, s32);
-extern u8 *D_800DFBF0; /* matrix list func_1502CC64 draws the object with */
-extern u8 D_800DFBF4;  /* alpha func_1502CC64 draws the object with */
-// trail_draw: P253. Draw handler (u8 *(u8 *gfx, u8 *rec, s16 arg2), same table as func_151893B8) of an object's
-// motion trail: with filled steps (rec[2] != 0) it prepares the object +0x10 (func_15084E34 / func_1503DD8C), swaps
-// the object's +0x94 for the record's +0x14 and draws the object (func_1502CC64, D_800CC2D0 slot index, mode 4) once
+u8 obj_current_part_model_idx(struct127 *, s32 *);
+s32 model_make_ready(struct127 *, u8, s32, s32);
+u8 *obj_draw_part(u8 *, s32, s16, s32, s32);
+extern u8 *D_800DFBF0; /* matrix list obj_draw_part draws the object with */
+extern u8 D_800DFBF4;  /* alpha obj_draw_part draws the object with */
+// trail_draw: P253. Draw handler (u8 *(u8 *gfx, u8 *rec, s16 arg2), same table as afterimage_history_push) of an object's
+// motion trail: with filled steps (rec[2] != 0) it prepares the object +0x10 (obj_current_part_model_idx / model_make_ready), swaps
+// the object's +0x94 for the record's +0x14 and draws the object (obj_draw_part, D_800CC2D0 slot index, mode 4) once
 // per filled step, each time with that step's matrices from the history buffer +8 (this half, D_800BE9C0) and alpha
 // rec[3] * (3 + step) * 32 / 256, then restores +0x94. Objects outside the 25 first D_800CC2D0 slots are skipped.
-u8 *func_15189B64(u8 *gfx, u8 *rec, s16 arg2) {
+/* was func_15189B64 */
+u8 *afterimage_draw(u8 *gfx, u8 *rec, s16 arg2) {
     struct127 *obj = *(struct127 **) (rec + 0x10);
     s32 sp64;
     s32 n, alpha0, per, slot, count, i, m, a;
@@ -484,11 +497,11 @@ u8 *func_15189B64(u8 *gfx, u8 *rec, s16 arg2) {
     if (rec[2] == 0) {
         return gfx;
     }
-    k = func_15084E34(obj, &sp64);
-    func_1503DD8C(*(struct127 **) (rec + 0x10), k, sp64, 1);
+    k = obj_current_part_model_idx(obj, &sp64);
+    model_make_ready(*(struct127 **) (rec + 0x10), k, sp64, 1);
     n = rec[1];
     alpha0 = rec[3];
-    per = func_1502DE10(((u8 *) *(struct127 **) (rec + 0x10))[4]);
+    per = model_joint_mtx_count(((u8 *) *(struct127 **) (rec + 0x10))[4]);
     obj = *(struct127 **) (rec + 0x10);
     m = D_800BE9C0 * per * n;
     count = rec[2];
@@ -502,7 +515,7 @@ u8 *func_15189B64(u8 *gfx, u8 *rec, s16 arg2) {
     for (i = 0; i < count; i++) {
         D_800DFBF0 = *(u8 **) (rec + 8) + m * 64;
         D_800DFBF4 = a >> 8;
-        gfx = func_1502CC64(gfx, slot, arg2, 4, 1);
+        gfx = obj_draw_part(gfx, slot, arg2, 4, 1);
         a += alpha0 * 32;
         m += per;
     }
@@ -510,13 +523,14 @@ u8 *func_15189B64(u8 *gfx, u8 *rec, s16 arg2) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15189B64.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_draw.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 world_mesh_draw(s32, u8 *, s32, s16, s32, s32);
 
-s32 func_15189D14(s32 arg0, u8 *arg1, s16 arg2) {
+/* was func_15189D14 */
+s32 afterimage_world_draw(s32 arg0, u8 *arg1, s16 arg2) {
     s32 sp44;
     s32 temp_v0;
     s32 var_s0;
@@ -550,9 +564,10 @@ s32 func_15189D14(s32 arg0, u8 *arg1, s16 arg2) {
     return var_s4;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15189D14.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/afterimage_world_draw.s")
 #endif
-void func_151898C0(s32 arg0, s32 arg1) {
+/* was func_151898C0 */
+void afterimage_set_skin(s32 arg0, s32 arg1) {
     s32 var_v0;
 
     var_v0 = *D_800DF7C8;

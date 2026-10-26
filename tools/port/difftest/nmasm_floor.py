@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P53: func_150A44A4 (hand asm, floor height of a triangle under (x, z)) vs its NON_MATCHING C (game_eu_D1760.c).
+"""P53: floor_tri_height (hand asm, floor height of a triangle under (x, z)) vs its NON_MATCHING C (game_eu_D1760.c).
 Reference: VR4300 interpreter (nmasm_vr.Ref; the asm uses ldl / ldr and keeps s5-s7 / fp in f1-f4); candidate: Unicorn.
 Inputs: random s16 triangles (mixed scales, shared z / x values, points on vertices and edges, slivers), passed
 either as 3 vertex pointers (a2, a3 = 0) or 9 inline halfwords (a3; sometimes with a zero first / second 8 bytes);
@@ -59,7 +59,7 @@ def main():
             r1 = ref.run(m1, a=(0, 0) + a, fa=fa, stack=(OUT,), entry=0x150A44A4, regs=sreg)
         except RuntimeError as e:
             print('REF', t, e); bad += 1; continue
-        r2 = cand.run(m2, a=(0, 0) + a, fa=fa, stack=(OUT,), entry='func_150A44A4', regs=sreg)
+        r2 = cand.run(m2, a=(0, 0) + a, fa=fa, stack=(OUT,), entry='floor_tri_height', regs=sreg)
         k1 = (r1['v0'], [r1['gpr'][i] for i in list(range(16, 24)) + [29, 30]])
         k2 = (r2['v0'], [r2['gpr'][i] for i in list(range(16, 24)) + [29, 30]])
         d = memdiff(m1, m2, skip=[(SP0 - 0x400, SP0 + 0x100)])
@@ -69,7 +69,7 @@ def main():
             bad += 1
             if bad <= 6: print('DIFF', t, 'packed' if packed else 'ptrs', v, x, z, hex(r1['v0']), hex(r2['v0']),
                                struct.unpack('>f', m1[phys(OUT):phys(OUT) + 4]), struct.unpack('>f', m2[phys(OUT):phys(OUT) + 4]), [hex(q) for q in d])
-    print('func_150A44A4 trials', n, 'diffs', bad, hist)
+    print('floor_tri_height trials', n, 'diffs', bad, hist)
 
 if __name__ == '__main__':
     main()

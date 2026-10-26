@@ -4,28 +4,29 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15083E0C(u8);
-struct127 *func_15083E90(u8);
-s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
+s32 setup_entry_find_by_id(u8);
+struct127 *obj_find_by_setup_id(u8);
+s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 
-/* Object id (0x2000 | n) of script entity `entity` (u8): -1 when it has no record (func_15083E0C), the live object's
- * +0x13F when it exists (func_15083E90), else the record's flag +2 is cleared and the entity is spawned
- * (func_15082E44; -1 when that fails) and looked up again. 0 stays 0. */
-s32 func_15097D20(s32 entity, s32 unused) {
+/* Object id (0x2000 | n) of script entity `entity` (u8): -1 when it has no record (setup_entry_find_by_id), the live object's
+ * +0x13F when it exists (obj_find_by_setup_id), else the record's flag +2 is cleared and the entity is spawned
+ * (setup_entry_spawn; -1 when that fails) and looked up again. 0 stays 0. */
+/* was func_15097D20 */
+s32 script_entity_object_id(s32 entity, s32 unused) {
     s32 idx;
     struct127 *obj;
 
-    idx = func_15083E0C(entity);
+    idx = setup_entry_find_by_id(entity);
     if (idx != -1) {
-        obj = func_15083E90(entity);
+        obj = obj_find_by_setup_id(entity);
         if (obj != NULL) {
             idx = ((u8 *)obj)[0x13F];
         } else {
             ((u8 *)D_800D20FC + idx * 0x30)[2] = 0;
-            if (func_15082E44((u8 *)D_800D20FC + idx * 0x30, idx, 0, 0, 0) == 0) {
+            if (setup_entry_spawn((u8 *)D_800D20FC + idx * 0x30, idx, 0, 0, 0) == 0) {
                 return -1;
             }
-            idx = func_15083E0C(entity);
+            idx = setup_entry_find_by_id(entity);
         }
     }
     if (idx != 0) {
@@ -34,19 +35,20 @@ s32 func_15097D20(s32 entity, s32 unused) {
     return idx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/func_15097D20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/script_entity_object_id.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15053430(struct127 *);
+s32 obj_death_resolve(struct127 *);
 void obj_remove(struct127 *arg0, s32 arg1);
 extern u8 D_800D2520;
 extern s32 D_800D3C60;
 
 /* Removes object `id`: sets flag +2 of its entity record (when id < D_800D2520) and kills it with
- * obj_remove(obj, 0), or with func_15053430 when called with two words and args[1] != 0. Returns 999999,
+ * obj_remove(obj, 0), or with obj_death_resolve when called with two words and args[1] != 0. Returns 999999,
  * 0 for a missing object. */
-s32 func_15097DDC(s32 id, s32 *args) {
+/* was func_15097DDC */
+s32 script_object_remove(s32 id, s32 *args) {
     struct127 *obj;
 
     obj = obj_find_by_spawn(id);
@@ -57,63 +59,63 @@ s32 func_15097DDC(s32 id, s32 *args) {
         ((u8 *)D_800D20FC + id * 0x30)[2] = 1;
     }
     if (D_800D3C60 == 2 && args[1] != 0) {
-        func_15053430(obj);
+        obj_death_resolve(obj);
     } else {
         obj_remove(obj, 0);
     }
     return 999999;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/func_15097DDC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/script_object_remove.s")
 #endif
 
 #ifdef NON_MATCHING
 f32 sinf(f32);
 f32 cosf(f32);
-void func_1504BAF0(struct127 *);
-s32 func_150871B8(s32);
-s32 func_1508712C(s32, f32 *, f32 *, f32 *);
-s32 func_15084000(s32);
-void func_15085880(void *, s32);
-void func_15085710(s16, s16, s32);
-s32 func_150859AC(s16, s32);
+void obj_drop_carried(struct127 *);
+s32 rail_node_find_by_tag(s32);
+s32 rail_node_position(s32, f32 *, f32 *, f32 *);
+s32 obj_slot_by_spawn(s32);
+void player_start_index_set(void *, s32);
+void player_stat_modify(s16, s16, s32);
+s32 player_stat_get(s16, s32);
 void text_set_box(s32, s32);
 void text_set_pos(s16, s16);
 void text_set_flags(u8);
-void func_1518C000(struct127 *, s32, s32);
-void func_1518C164(u8 *);
-void func_15173298(u8 *, s32);
-void func_1507EF0C(struct127 *);
-void func_1507EB4C(struct127 *, s32);
-void func_15080A20(s32, s32, s32, s32);
+void drip_effect_attach(struct127 *, s32, s32);
+void drip_effect_detach(u8 *);
+void warp_player_to_entry(u8 *, s32);
+void face_clear_default_anim(struct127 *);
+void face_set_default_anim(struct127 *, s32);
+void context_action_lock(s32, s32, s32, s32);
 s32 obj_send_hit(struct127 *, s32, u16, s32);
 s32 attack_spawn_at_point(f32, f32, f32, s32, s32, u16, s32, s32);
-void func_1503DE70(struct127 *, s32, s32);
+void breakable_request_flag_entry(struct127 *, s32, s32);
 struct127 *obj_find_child_nth(struct127 *, s32);
 void obj_set_scale(struct127 *, f32, f32);
 void obj_start_anim(struct127 *, u16, f32, f32, f32, f32, s32);
 void collision_find_floor(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32);
 s32 random_int(void);
 s32 math_angle_diff_deg_int(s32, s32);
-s32 func_15083568(struct127 *, s32, f32, s32);
-s32 func_150836CC(struct127 *, s32);
-u8 *func_15031C4C(struct127 *, s32, s32);
-struct127 *func_15083E90(u8);
+s32 obj_setup_run(struct127 *, s32, f32, s32);
+s32 obj_setup_undo(struct127 *, s32);
+u8 *attachment_find_by_slot(struct127 *, s32, s32);
+struct127 *obj_find_by_setup_id(u8);
 void obj_fade_command(struct127 *, u8, u8, u8, u8);
-void func_150637B4(struct127 *);
-void func_15063920(struct127 *);
-void func_15063894(struct127 *);
-void func_1514E404(struct127 *);
-f32 func_15052F9C(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15193660(u8 *, u8, s32);
-void func_151937F4(u8 *, s32, s32);
-void func_151D71AC(u8 *, u8, s32);
+void obj_knockdown_start(struct127 *);
+void obj_hit_react_start(struct127 *);
+void obj_knockdown_clear(struct127 *);
+void char_fx_beam_light_setup(struct127 *);
+f32 obj_carry_release(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+void obj_head_particle_burst(u8 *, u8, s32);
+void obj_bone_debris_emitter_attach(u8 *, s32, s32);
+void money_collect_popup_spawn(u8 *, u8, s32);
 void obj_attach_to_carrier(struct127 *, s32);
 void obj_model_swap_keep_pose(struct127 *, s32, s32, f32);
 void mp_player_respawn(struct127 *);
 void player_lose_life(s32);
 s32 player_hit_reaction(struct127 *, s32);
-void func_1517F3B0(s32, s32, s32, s32, s8, s32);
+void screen_fade_start(s32, s32, s32, s32, s8, s32);
 void obj_remove(struct127 *, s32);
 void *aiscript_find_by_kind(s32, s32);
 extern s32 D_800D3C60;
@@ -142,7 +144,8 @@ extern u16 D_8009015C;
  * handler(id, cmd, args) with args = {id, cmd, x1, x2, ...} (args[2] is the first extra argument, D_800D3C60 the
  * number of words; 16.16 fixed point for speeds / scales, degrees for angles). `id` names an object
  * (obj_find_by_spawn); returns 0 when it does not exist or for an unknown command, else 1. */
-s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
+/* was func_15097E9C */
+s32 event_action_object(s32 id, s32 cmd, s32 *args) {
     struct127 *obj;
     u8 *o;
     u8 *rec;
@@ -188,7 +191,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x07:
         D_800D154C = obj;
-        func_1504BAF0(obj);
+        obj_drop_carried(obj);
         return 1;
     case 0x08: /* position; 0x7FFFFFFF keeps a coordinate */
         if (args[2] != 0x7FFFFFFF) {
@@ -202,9 +205,9 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         }
         return 1;
     case 0x09: /* position = point args[2] */
-        n = func_150871B8(args[2]);
+        n = rail_node_find_by_tag(args[2]);
         if (n != -1) {
-            func_1508712C(n, &obj->x_position, &obj->y_position, &obj->z_position);
+            rail_node_position(n, &obj->x_position, &obj->y_position, &obj->z_position);
         }
         return 1;
     case 0x0A:
@@ -256,9 +259,9 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x17:
         if (args[2] != 0) {
-            func_1518C000(obj, 0xFF, 0);
+            drip_effect_attach(obj, 0xFF, 0);
         } else {
-            func_1518C164(o);
+            drip_effect_detach(o);
         }
         return 1;
     case 0x18:
@@ -269,10 +272,10 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
             E9C_U8(o, 0x222) = args[2];
             return 1;
         }
-        if (func_15084000(args[2] & 0xFFFF0FFF) == -1) {
+        if (obj_slot_by_spawn(args[2] & 0xFFFF0FFF) == -1) {
             return 1;
         }
-        E9C_U8(o, 0x222) = func_15084000(args[2] & 0xFFFF0FFF);
+        E9C_U8(o, 0x222) = obj_slot_by_spawn(args[2] & 0xFFFF0FFF);
         return 1;
     case 0x1A:
         E9C_U8(o, 0x20A) = args[2];
@@ -308,7 +311,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         }
         return 1;
     case 0x1F:
-        func_15085880(o, args[2] & 0xFFF);
+        player_start_index_set(o, args[2] & 0xFFF);
         return 1;
     case 0x20:
         E9C_U8(o, 0x1CA) = args[2];
@@ -318,7 +321,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         }
         return 1;
     case 0x21:
-        func_15085710(id, args[2], args[3]);
+        player_stat_modify(id, args[2], args[3]);
         return 1;
     case 0x22: /* +0x2D8[i] = fixed args[2 + i] (0x78000000 keeps one) */
         for (i = 0; i < D_800D3C60 - 2; i++) {
@@ -336,16 +339,16 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x24:
         if (args[2] == 0) {
-            func_1507EF0C(obj);
+            face_clear_default_anim(obj);
             E9C_U16(E9C_REC(o), 0x8) = 0;
             E9C_U8(E9C_REC(o), 0x16) = 0;
             return 1;
         }
         E9C_U16(E9C_REC(o), 0x8) = 1;
         if (args[2] == 1) {
-            func_1507EB4C(obj, 0x15);
+            face_set_default_anim(obj, 0x15);
         } else if (args[2] == 2) {
-            func_1507EB4C(obj, 0x2A);
+            face_set_default_anim(obj, 0x2A);
             E9C_U8(E9C_REC(o), 0x16) = 0xFF;
         }
         return 1;
@@ -354,10 +357,10 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_U16(E9C_REC(o), 0xE) = 0xA6;
         return 1;
     case 0x26:
-        func_15080A20(id, 0, args[2], 0);
+        context_action_lock(id, 0, args[2], 0);
         return 1;
     case 0x27:
-        func_15080A20(id, 1, args[2], 0);
+        context_action_lock(id, 1, args[2], 0);
         if (D_800D3C60 == 3 && args[2] == 0) {
             E9C_U8(E9C_REC(o), 0x78) = 0;
         }
@@ -481,7 +484,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         }
         return 1;
     case 0x3E:
-        func_1503DE70(obj, args[2], args[3]);
+        breakable_request_flag_entry(obj, args[2], args[3]);
         return 1;
     case 0x3F:
         E9C_U8(o, 0x8A) = args[2];
@@ -506,9 +509,9 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_PATH(o, args[2] + 1)[2] = args[5];
         return 1;
     case 0x44: /* point args[2] + 1 of path +0x13F = the position of point args[3] */
-        n = func_150871B8(args[3]);
+        n = rail_node_find_by_tag(args[3]);
         if (n != -1) {
-            func_1508712C(n, &px, &py, &pz);
+            rail_node_position(n, &px, &py, &pz);
             E9C_PATH(o, args[2] + 1)[0] = (s32)px;
             E9C_PATH(o, args[2] + 1)[1] = (s32)py;
             E9C_PATH(o, args[2] + 1)[2] = (s32)pz;
@@ -533,22 +536,22 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_U8(o, 0x1C9) = args[2];
         return 1;
     case 0x4A:
-        func_1507EB4C(obj, args[2]);
+        face_set_default_anim(obj, args[2]);
         return 1;
     case 0x4B:
-        func_15083568(obj, args[2], 0.0f, 0);
+        obj_setup_run(obj, args[2], 0.0f, 0);
         return 1;
     case 0x4C:
-        func_150836CC(obj, args[2]);
+        obj_setup_undo(obj, args[2]);
         return 1;
     case 0x4D:
-        p = func_15031C4C(obj, args[2], args[3]);
+        p = attachment_find_by_slot(obj, args[2], args[3]);
         if (p != NULL) {
             E9C_S32(p, 0x38) = args[4];
         }
         return 1;
     case 0x4E: /* hold on to entity args[2]: +0x65 = its object number + 1, +0x5C = args[3] */
-        p = (u8 *)func_15083E90(args[2]);
+        p = (u8 *)obj_find_by_setup_id(args[2]);
         if (p == NULL) {
             return 1;
         }
@@ -600,16 +603,16 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_U8(o, 0x20B + args[3]) = args[2];
         return 1;
     case 0x5A:
-        func_15173298(o, -1);
+        warp_player_to_entry(o, -1);
         return 1;
     case 0x5B: /* point args[2] (0xFF for < 0) into +0x211 */
-        E9C_U8(o, 0x211) = (args[2] < 0) ? 0xFF : func_150871B8(args[2]);
+        E9C_U8(o, 0x211) = (args[2] < 0) ? 0xFF : rail_node_find_by_tag(args[2]);
         return 1;
     case 0x5C:
-        E9C_U8(o, 0x20F) = (args[2] < 0) ? 0xFF : func_150871B8(args[2]);
+        E9C_U8(o, 0x20F) = (args[2] < 0) ? 0xFF : rail_node_find_by_tag(args[2]);
         return 1;
     case 0x5D:
-        E9C_U8(o, 0x212) = (args[2] < 0) ? 0xFF : func_150871B8(args[2]);
+        E9C_U8(o, 0x212) = (args[2] < 0) ? 0xFF : rail_node_find_by_tag(args[2]);
         return 1;
     case 0x5F: /* lower +0x44 to args[2] */
         f = args[2];
@@ -618,7 +621,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         }
         return 1;
     case 0x60: /* target point args[2] (+0x211), no +0x20F, script args[3] */
-        E9C_U8(o, 0x211) = (args[2] < 0) ? 0xFF : func_150871B8(args[2]);
+        E9C_U8(o, 0x211) = (args[2] < 0) ? 0xFF : rail_node_find_by_tag(args[2]);
         E9C_U8(o, 0x20F) = 0xFF;
         E9C_S32(o, 0x25C) &= ~0x800;
         E9C_U8(o, 0x232) = args[3];
@@ -642,19 +645,19 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
             E9C_U8(E9C_REC(o), 0x8E) = 2;
         }
         return 1;
-    case 0x62: /* the first D_8008FD8C objects: func_15085710(index, 10, args[2]); D_800BE804 = func_150859AC */
+    case 0x62: /* the first D_8008FD8C objects: player_stat_modify(index, 10, args[2]); D_800BE804 = player_stat_get */
         n = E9C_INDEX(o);
         if (n >= 0 && n < D_8008FD8C) {
-            func_15085710(E9C_INDEX(o), 10, args[2]);
+            player_stat_modify(E9C_INDEX(o), 10, args[2]);
         }
-        D_800BE804 = func_150859AC(E9C_INDEX(o), 6);
+        D_800BE804 = player_stat_get(E9C_INDEX(o), 6);
         return 1;
     case 0x63:
         n = E9C_INDEX(o);
         if (n >= 0 && n < D_8008FD8C) {
-            func_15085710(E9C_INDEX(o), 9, args[2]);
+            player_stat_modify(E9C_INDEX(o), 9, args[2]);
         }
-        D_800BE804 = func_150859AC(E9C_INDEX(o), 6);
+        D_800BE804 = player_stat_get(E9C_INDEX(o), 6);
         return 1;
     case 0x64:
         i = args[2];
@@ -663,13 +666,13 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         }
         n = E9C_INDEX(o);
         if (n >= 0 && n < D_8008FD8C) {
-            func_15085710(E9C_INDEX(o), 2, i);
+            player_stat_modify(E9C_INDEX(o), 2, i);
         }
         return 1;
     case 0x65:
         n = E9C_INDEX(o);
         if (n >= 0 && n < D_8008FD8C) {
-            func_15085710(E9C_INDEX(o), 3, args[2]);
+            player_stat_modify(E9C_INDEX(o), 3, args[2]);
         }
         return 1;
     case 0x66:
@@ -704,14 +707,14 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x6C:
         if (args[2] == 9) {
-            func_150637B4(obj);
+            obj_knockdown_start(obj);
         } else if (args[2] == 0x3B) {
-            func_15063920(obj);
+            obj_hit_react_start(obj);
         }
         return 1;
     case 0x6D:
         if (args[2] == 9) {
-            func_15063894(obj);
+            obj_knockdown_clear(obj);
         }
         return 1;
     case 0x6E:
@@ -774,14 +777,14 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
     case 0x78:
         switch ((u32)args[2]) {
         case 0:
-            func_15083568(obj, 0x79, 0.0f, 0);
+            obj_setup_run(obj, 0x79, 0.0f, 0);
             if (E9C_INDEX(o) < D_80090130) {
                 E9C_U8(E9C_REC(o), 0x4E) = 2;
                 obj_start_anim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             }
             break;
         case 1:
-            func_1514E404(obj);
+            char_fx_beam_light_setup(obj);
             break;
         case 2:
             E9C_U8(E9C_REC(o), 0x17) = 1;
@@ -791,13 +794,13 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
             p = (u8 *)obj_find_by_spawn(args[3] & 0xFFFF0FFF);
             if (p != NULL) {
                 E9C_U8(E9C_REC(o), 0x4E) = 1;
-                func_15052F9C((struct127 *)p, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
+                obj_carry_release((struct127 *)p, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
             }
             break;
         case 4:
-            func_15193660(o, 0xFF, 1);
-            func_151937F4(o, 0xFF, 1);
-            func_151D71AC(o, 0xFF, 1);
+            obj_head_particle_burst(o, 0xFF, 1);
+            obj_bone_debris_emitter_attach(o, 0xFF, 1);
+            money_collect_popup_spawn(o, 0xFF, 1);
             break;
         case 5:
             obj_start_anim(obj, 0x16, 1.0f, 0.0f, 0.0f, 0.0f, 0);
@@ -808,7 +811,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         E9C_U8(E9C_REC(o), 0x7D) = (args[2] != 0) ? 1 : 0;
         return 1;
     case 0x7A: /* grab entity args[2]: +0x13C = its object number + 100, stop, obj_attach_to_carrier(it, this number) */
-        p = (u8 *)func_15083E90(args[2]);
+        p = (u8 *)obj_find_by_setup_id(args[2]);
         if (p == NULL) {
             return 1;
         }
@@ -873,7 +876,7 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
         return 1;
     case 0x8B: /* players up to D_80082FA0 */
         if (E9C_INDEX(o) <= D_80082FA0) {
-            func_1517F3B0(args[2], args[3], args[4], args[5], args[6], E9C_INDEX(o));
+            screen_fade_start(args[2], args[3], args[4], args[5], args[6], E9C_INDEX(o));
         }
         return 1;
     case 0x8C:
@@ -894,30 +897,30 @@ s32 func_15097E9C(s32 id, s32 cmd, s32 *args) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/func_15097E9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/event_action_object.s")
 #endif
 #ifdef NON_MATCHING
 /* Object query handler: entry 1 of event_dispatch's handler table D_80088838 (event ids 0x2xxx), called as
  * handler(id & 0xFFF, cmd, args) with args = D_800D3380 = {id, cmd, x1, x2, ...} (args[2] is the first extra
- * argument; D_800D3C60 = the number of words). `id` names an object (obj_find_by_spawn). 0xB7 asks func_15083E0C,
+ * argument; D_800D3C60 = the number of words). `id` names an object (obj_find_by_spawn). 0xB7 asks setup_entry_find_by_id,
  * 0xB0 / 0xB1 test whether the object is missing (0xB1: or of kind 8 / 0x27); every other query returns 0 for a
  * missing object and otherwise a field or a derived value (positions packed as x << 16 | z, distances, angles in
  * degrees, ...). Object ids passed as arguments drop bits 12..15 (& 0xFFFF0FFF). */
-s32 func_15083E0C(u8);
-s32 func_15084000(s32);
-s32 func_15085890(struct127 *);
-s32 func_15086218(f32 y);
-s32 func_15086508(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *sel);
-s32 func_150867D4(s32 point, s32 count, s32 first, u8 *list, s8 *sel); /* P203: s32 (asm returns s5; func_15086508 and game_A28B0 read it) */
-s32 func_1508712C(s32 point, f32 *x, f32 *y, f32 *z);
-s32 func_150871B8(s32 id);
-f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz);
-s32 func_150A3674(s32, s32, s32 x, s32 y, s32 z);
-u8 *func_15031C4C(struct127 *, s32, s32);
-f32 func_15144BC8(f32 angle);
+s32 setup_entry_find_by_id(u8);
+s32 obj_slot_by_spawn(s32);
+s32 player_start_index_get(struct127 *);
+s32 rail_band_for_height(f32 y);
+s32 rail_point_pick(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *sel);
+s32 rail_route_next(s32 point, s32 count, s32 first, u8 *list, s8 *sel); /* P203: s32 (asm returns s5; rail_point_pick and game_A28B0 read it) */
+s32 rail_node_position(s32 point, f32 *x, f32 *y, f32 *z);
+s32 rail_node_find_by_tag(s32 id);
+f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz);
+s32 trigger_find_at_point(s32, s32, s32 x, s32 y, s32 z);
+u8 *attachment_find_by_slot(struct127 *, s32, s32);
+f32 wrap_angle_deg(f32 angle);
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-s32 func_151E5DF8(void);
-s32 func_151E5E08(void);
+s32 mp_is_free_for_all(void);
+s32 mp_match_check_over(void);
 extern s32 D_800D3C60;
 extern u8 D_800E0FE8[];
 extern s8 D_800E0EF0[];
@@ -939,7 +942,8 @@ extern f32 D_8009E80C;
 #define A024_POINT(i) (((u8 *)D_800D2778 + (i) * 0x10)[7])
 #define A024_DEG (360.0f / 65536.0f)
 
-s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
+/* was func_1509A024 */
+s32 event_query_object(s32 id, s32 cmd, s32 *args) {
     struct127 *obj;
     struct127 *other;
     u8 *rec;
@@ -968,7 +972,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
     u8 none;
 
     if (cmd == 0xB7) {
-        return func_15083E0C(id & 0xFF);
+        return setup_entry_find_by_id(id & 0xFF);
     }
     obj = obj_find_by_spawn(id);
     if (cmd == 0xB0) {
@@ -997,7 +1001,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         if (A024_U8(obj, 0x13C) == 0) {
             return 0;
         }
-        return (A024_U8(obj, 0x13C) == func_15084000(args[2] & 0xFFFF0FFF) + 100) ? 1 : 0;
+        return (A024_U8(obj, 0x13C) == obj_slot_by_spawn(args[2] & 0xFFFF0FFF) + 100) ? 1 : 0;
     case 0x96:
         return (obj->in_water == 1) ? 1 : 0;
     case 0x97:
@@ -1045,11 +1049,11 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
     case 0xA4:
         return A024_U16(obj, 0x7A);
     case 0xA5:
-        return func_150859AC(id, (s16)args[2]);
+        return player_stat_get(id, (s16)args[2]);
     case 0xA6: /* more than 150 below +0x1CC */
         return (150.0f < A024_F32(obj, 0x1CC) - obj->y_position) ? 1 : 0;
     case 0xA7:
-        return func_15085890(obj) | 0xD000;
+        return player_start_index_get(obj) | 0xD000;
     case 0xA8:
         return (obj->stunned != 0) ? 1 : 0;
     case 0xA9:
@@ -1059,7 +1063,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
     case 0xAB:
         return A024_U8(A024_REC(obj), 0x79);
     case 0xAC:
-        r = func_150A2FCC(A024_INDEX(obj), D_800D3C60 - 2, &args[2]);
+        r = trigger_first_touched(A024_INDEX(obj), D_800D3C60 - 2, &args[2]);
         if (r != -1) {
             return r | 0x4000;
         }
@@ -1127,12 +1131,12 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         return A024_S32(obj, 0x25C);
     case 0xC5:
         return A024_U8(obj, 0x89);
-    case 0xC6: /* func_150859AC(index, 6) for the first D_8008FD8C objects */
+    case 0xC6: /* player_stat_get(index, 6) for the first D_8008FD8C objects */
         n = A024_INDEX(obj);
         if (n < 0 || n >= D_8008FD8C) {
             return 0;
         }
-        return func_150859AC(A024_INDEX(obj), 6);
+        return player_stat_get(A024_INDEX(obj), 6);
     case 0xC7:
         if (A024_U8(obj, 0x211) == 0xFF) {
             return 1;
@@ -1143,13 +1147,13 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
             return 0;
         }
         best = -1;
-        if (func_1508712C(A024_U8(obj, 0x20F), &px, &py, &pz) != 0) {
+        if (rail_node_position(A024_U8(obj, 0x20F), &px, &py, &pz) != 0) {
             px -= obj->x_position;
             py -= obj->y_position;
             pz -= obj->z_position;
             best = (s32)sqrtf(px * px + py * py + pz * pz) + A024_S16(obj, 0x216);
             if (A024_U8(obj, 0x211) != A024_U8(obj, 0x20F)
-                && func_1508712C(A024_U8(obj, 0x211), &px, &py, &pz) != 0) {
+                && rail_node_position(A024_U8(obj, 0x211), &px, &py, &pz) != 0) {
                 px -= obj->x_position;
                 py -= obj->y_position;
                 pz -= obj->z_position;
@@ -1161,14 +1165,14 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         }
         return best;
     case 0xC9:
-        return func_15086218(obj->y_position);
+        return rail_band_for_height(obj->y_position);
     case 0xCA: /* the point +0x20F, else the nearest one (stored in +0x213) */
         none = 0xFF;
         if (A024_U8(obj, 0x20F) != 0xFF) {
             return A024_POINT(A024_U8(obj, 0x20F));
         }
         D_8008763C = A024_U8(obj, 0x213);
-        r = func_15086508(obj->x_position, obj->y_position, obj->z_position, 0, 0, &none, &none);
+        r = rail_point_pick(obj->x_position, obj->y_position, obj->z_position, 0, 0, &none, &none);
         A024_U8(obj, 0x213) = r;
         if (r != 0xFF) {
             return A024_POINT(r);
@@ -1188,14 +1192,14 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
             return dist;
         }
         if (dist < hit[0]) {
-            if (0.0f < func_15087204(obj->x_position, obj->y_position, obj->z_position, dx, dz)) {
+            if (0.0f < rail_wall_hit(obj->x_position, obj->y_position, obj->z_position, dx, dz)) {
                 return 0;
             }
             return dist;
         }
         return 0;
     case 0xCC: /* index of the D_800D34B8 record (0x34 bytes) at the object's position */
-        p = (u8 *)func_150A3674(3, 0xB, obj->x_position, obj->y_position, obj->z_position);
+        p = (u8 *)trigger_find_at_point(3, 0xB, obj->x_position, obj->y_position, obj->z_position);
         if (p == NULL) {
             return -1;
         }
@@ -1204,8 +1208,8 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         other = A024_OBJ(args[2]);
         r = math_atan2_u16(other->x_position - obj->x_position, other->z_position - obj->z_position, 0);
         dist = A024_F32(obj, 0x40);
-        d = func_15144BC8((f32)(r + 0x4000) * A024_DEG);
-        d = func_15144BC8(func_15144BC8(dist) - d);
+        d = wrap_angle_deg((f32)(r + 0x4000) * A024_DEG);
+        d = wrap_angle_deg(wrap_angle_deg(dist) - d);
         if (180.0f < d) {
             d += -360.0f;
         }
@@ -1219,7 +1223,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         dz = other->z_position - obj->z_position;
         dy = other->y_position - obj->y_position;
         r = math_atan2_u16(sqrtf(dx * dx + dz * dz), dy, 0);
-        d = func_15144BC8((f32)(u32)r * A024_DEG);
+        d = wrap_angle_deg((f32)(u32)r * A024_DEG);
         if (180.0f < d) {
             d += -360.0f;
         }
@@ -1231,17 +1235,17 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         sel = 0;
         count = 0;
         for (i = 0; i < args[2]; i++) {
-            found[count] = func_150871B8(args[3 + i]);
+            found[count] = rail_node_find_by_tag(args[3 + i]);
             if (found[count] != 0xFF) {
                 count++;
             }
         }
         best = -1;
         if (count != 0) {
-            r = func_15086508(obj->x_position, obj->y_position, obj->z_position, count, sel, found, &sel);
+            r = rail_point_pick(obj->x_position, obj->y_position, obj->z_position, count, sel, found, &sel);
             D_80087638 = 0xFF;
             if ((u8)r != 0xFF) {
-                func_150867D4((u8)r, count, sel, found, &sel);
+                rail_route_next((u8)r, count, sel, found, &sel);
             }
             if (D_80087638 != 0xFF) {
                 best = A024_POINT(D_80087638);
@@ -1249,7 +1253,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         }
         return best;
     case 0xD0: /* xz distance to point args[2] (30000 when there is none) */
-        if (func_1508712C(func_150871B8(args[2]), &px, &py, &pz) == 0) {
+        if (rail_node_position(rail_node_find_by_tag(args[2]), &px, &py, &pz) == 0) {
             return 30000;
         }
         px -= obj->x_position;
@@ -1296,9 +1300,9 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
         }
         return A024_U8(rec, 0x78);
     case 0xD5:
-        return func_151E5DF8();
+        return mp_is_free_for_all();
     case 0xD6:
-        return func_151E5E08();
+        return mp_match_check_over();
     case 0xD7:
         return (600.0f < A024_F32(obj, 0x1CC) - obj->y_position && D_8009E80C == A024_F32(obj, 0x118)) ? 1 : 0;
     case 0xD8:
@@ -1386,7 +1390,7 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
     case 0xE9:
         return A024_U8(A024_REC(obj), 0x51);
     case 0xEA:
-        p = func_15031C4C(obj, args[2], args[3]);
+        p = attachment_find_by_slot(obj, args[2], args[3]);
         if (p != NULL) {
             return A024_S32(p, 0x38);
         }
@@ -1428,5 +1432,5 @@ s32 func_1509A024(s32 id, s32 cmd, s32 *args) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/func_1509A024.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C5530/event_query_object.s")
 #endif

@@ -12,10 +12,11 @@ extern f32 D_800A0CC0[6][3];  /* beam end points (beam space) */
 
 // beam_rays_update: obj + 0x28 is the source point, +0x34 the beam position (moved by its velocity +0x40 x
 // D_800BE9A4), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end D_800A0CC0[i] is moved to the
-// beam's position (mtxf_rotate_xyz_deg / func_150A7E40) and traced from the source (func_150ACEA0): on a hit the part's
+// beam's position (mtxf_rotate_xyz_deg / mtxf_transform_point) and traced from the source (func_150ACEA0): on a hit the part's
 // sprite (+0x14) is shown at the hit point with alpha +0x64 x hit fraction, otherwise it is hidden. Without the bit
 // every ray sprite is hidden.
-void func_150D2140(u8 *obj) {
+/* was func_150D2140 */
+void beam_rays_update(u8 *obj) {
     f32 mtx[4][4];
     f32 end[3];
     f32 hit[3];
@@ -34,7 +35,7 @@ void func_150D2140(u8 *obj) {
             if (part == NULL) {
                 continue;
             }
-            func_150A7E40(mtx, D_800A0CC0[i][0], D_800A0CC0[i][1], D_800A0CC0[i][2], &end[0], &end[1], &end[2]);
+            mtxf_transform_point(mtx, D_800A0CC0[i][0], D_800A0CC0[i][1], D_800A0CC0[i][2], &end[0], &end[1], &end[2]);
             if (func_150ACEA0(*(f32 *) (obj + 0x28), *(f32 *) (obj + 0x2C), *(f32 *) (obj + 0x30), end[0], end[1],
                               end[2], 0, NULL, &hit[0], &hit[1], &hit[2], &frac, 0, 0, 0.0f) != 0) {
                 (*(u8 **) (part + 0x14))[9] = 0;
@@ -57,11 +58,12 @@ void func_150D2140(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF950/func_150D2140.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF950/beam_rays_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150D247C(struct102 *arg0, u8 *arg1, s32 arg2) {
+/* was func_150D247C */
+void beam_rays_handle_event(struct102 *arg0, u8 *arg1, s32 arg2) {
     s32 temp_t6;
     u8 *temp_t4;
     u8 *temp_v0_2;
@@ -99,9 +101,10 @@ void func_150D247C(struct102 *arg0, u8 *arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF950/func_150D247C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF950/beam_rays_handle_event.s")
 #endif
-void func_150D2564(u8 *arg0) {
+/* was func_150D2564 */
+void beam_rays_free_parts(u8 *arg0) {
     u8 *base = arg0 + 0x28;
     u8 i;
 
@@ -114,12 +117,14 @@ void func_150D2564(u8 *arg0) {
     }
 }
 
-void func_150D25C0(struct260 *arg0) {
-    func_150D2564(arg0);
+/* was func_150D25C0 */
+void beam_rays_delete(struct260 *arg0) {
+    beam_rays_free_parts(arg0);
     func_15149368(arg0);
 }
 
-void func_150D25EC(struct260 *arg0) {
-    func_150D2564(arg0);
+/* was func_150D25EC */
+void beam_rays_retire(struct260 *arg0) {
+    beam_rays_free_parts(arg0);
     func_1514933C(arg0);
 }

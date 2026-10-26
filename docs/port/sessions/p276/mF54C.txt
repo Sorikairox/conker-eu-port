@@ -23,4 +23,4 @@
 \#^    spec\.u11A = #s/= .*;/= 0x7B;/
 \#^    spec.u004 = #s/= .*;/= (u8 *) 0;/
 \#^    spec.u008 = #s/0x3B/0x3A/
-\#^    func_15199A28(0, (u8 \*) &spec, 0xFF, 0);$#s/0xFF/0xFE/
+\#^    spec_emitter_spawn(0, (u8 \*) &spec, 0xFF, 0);$#s/0xFF/0xFE/

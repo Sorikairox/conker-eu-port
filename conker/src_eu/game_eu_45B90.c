@@ -7,12 +7,13 @@
 extern s32 D_eu_800BE9F4;   /* PVS row index: per row {s16 byte index, s16 bit} */
 extern s32 D_eu_800BE9F8;   /* Huffman tree: 6-byte nodes {s16 symbol (-1: inner), s16 child 0, s16 child 1} */
 u8 *allocate_memory(s32, s32, s32, s32);
-void func_150184B0(s32 *table);
+void pvs_build_huffman_tree(s32 *table);
 
-/* PVS setup (hand asm): builds the Huffman tree from `table` (func_150184B0), keeps the bit stream in
+/* PVS setup (hand asm): builds the Huffman tree from `table` (pvs_build_huffman_tree), keeps the bit stream in
  * D_800BE5D0 and records, for each of `rows` rows, where the row starts in the stream ({byte index, bit}; the
  * first row is {-1, 0}). A row is `rowlen` symbols; bits are read MSB first. Both loops are do-while, as in the asm. */
-void func_150183D0(s32 rowlen, s32 rows, s32 stream, s32 table) {
+/* was func_150183D0 */
+void pvs_setup(s32 rowlen, s32 rows, s32 stream, s32 table) {
     s16 *ix;
     s16 *node;
     u8 *p;
@@ -22,7 +23,7 @@ void func_150183D0(s32 rowlen, s32 rows, s32 stream, s32 table) {
     s32 k;
     u32 cur;
 
-    func_150184B0((s32 *) table);
+    pvs_build_huffman_tree((s32 *) table);
     D_800BE5D0 = stream;
     ix = (s16 *) allocate_memory(rows * 4, 1, 0, 0);
     D_eu_800BE9F4 = (s32) ix;
@@ -58,7 +59,8 @@ void func_150183D0(s32 rowlen, s32 rows, s32 stream, s32 table) {
  * then per symbol {u32 code, u32 length} (length 0: unused). Codes are inserted MSB first from the root
  * {-1, 0, 0}; a leaf met on the way is pushed down (copied to a new node) until the two codes differ.
  * Shift counts use the low 5 bits (srlv / sllv). */
-void func_150184B0(s32 *table) {
+/* was func_150184B0 */
+void pvs_build_huffman_tree(s32 *table) {
     s16 *nodes;
     s16 *next;
     s16 *node;
@@ -168,7 +170,7 @@ void func_150184B0(s32 *table) {
     } while (sym++ != 0xFF);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_45B90/func_150183D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_45B90/pvs_setup.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_45B90/func_150184B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_45B90/pvs_build_huffman_tree.s")
 #endif

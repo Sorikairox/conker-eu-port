@@ -1,4 +1,4 @@
-# P295 mutants for func_151B6ED8 (ribbon_trail_draw)
+# P295 mutants for ribbon_trail_w10_draw (ribbon_trail_draw)
 /if (\*(s8 \*) (trail + 0x2C) < 2) {/s/< 2/< 3/
 /(trail\[0x25\] << 5) + 0xA0, (s32 \*) &v, 0);/s/0xA0/0xA4/
 /^    if (v == NULL) {/s/== NULL/!= NULL/

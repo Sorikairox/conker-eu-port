@@ -4,10 +4,10 @@
 \#^        vec3_diff(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/unk2A4/unk2A8/
 \#^        vec3_diff(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/&D_800A1F50/\&D_800A1F5C/
 \#^        vec3_diff(&D_800A1F50, &D_800A1F5C, &axis);$#s/&D_800A1F50, &D_800A1F5C/\&D_800A1F5C, \&D_800A1F50/
-\#^        invLen = 1.0f / func_150AD930((f32 \*) &axis);$#s/1.0f \//2.0f \//
+\#^        invLen = 1.0f / vec3f_magnitude((f32 \*) &axis);$#s/1.0f \//2.0f \//
 \#^        vec3_normalize(&axis, &dir);$#s/&axis/\&toObj/
-\#^        t = func_150ADDE0(&dir, &toObj) \* invLen \* 0.75f;$#s/0.75f/0.7f/
-\#^        t = func_150ADDE0(&dir, &toObj) \* invLen \* 0.75f;$#s/&dir, &toObj/\&toObj, \&dir/
+\#^        t = vec3f_dot(&dir, &toObj) \* invLen \* 0.75f;$#s/0.75f/0.7f/
+\#^        t = vec3f_dot(&dir, &toObj) \* invLen \* 0.75f;$#s/&dir, &toObj/\&toObj, \&dir/
 \#^        if (t < 0.0f) {$#s/t < 0.0f/t <= 0.0f/
 \#^            t = 0.0f;$#s/0.0f/0.5f/
 \#^        } else if (1.0f < t) {$#s/1.0f < t/0.9f < t/
@@ -19,8 +19,8 @@
 \#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) -20.0f/(s32) -21.0f/
 \#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/6728.0f/6720.0f/
 \#^        event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f \* t + -5530.0f));$#s/(s32) (6728.0f \* t + -5530.0f)/(s32) (6728.0f * t) + -5530/
-\#^        func_15049978(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/180.0f/90.0f/
-\#^        func_15049978(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/8.0f, 10.0f/10.0f, 8.0f/
+\#^        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/180.0f/90.0f/
+\#^        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,$#s/8.0f, 10.0f/10.0f, 8.0f/
 \#^                      arg0->unk7B4);$#s/unk7B4/unk7B8/
 \#^        arg0->unk39C = arg0->unk37C \* 0.017453292f;$#s/0.017453292f/0.0174533f/
 \#^        arg0->unk84 &= 0x3FFFEFFF;$#s/0x3FFFEFFF/0x3FFFFFFF/

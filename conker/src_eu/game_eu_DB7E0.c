@@ -7,8 +7,8 @@
 /*
  * P106: the level event script VM, hand C.
  *
- * Rare wrote func_150ADFD0 in assembly (the .s is marked "Handwritten function": it saves gp / fp, keeps its own sp in
- * D_800D3858 for the abort entry func_150AE760, uses `add` / `sub` / `neg`, and dispatches through five jump tables).
+ * Rare wrote event_vm_run in assembly (the .s is marked "Handwritten function": it saves gp / fp, keeps its own sp in
+ * D_800D3858 for the abort entry event_vm_abort, uses `add` / `sub` / `neg`, and dispatches through five jump tables).
  * This is a readable interpreter of the same machine, not a register-level translation.
  *
  * Event block (loaded by event_load, relocated by event_block_relocate), u16 header:
@@ -25,9 +25,9 @@
  * Native calls (call with a mode-6 operand) run D_80088A44[index](stack pointer); the pushed arguments are not
  * popped (as in the asm: the stack is reset by the next `return`).
  *
- * Abort: func_150AE760 (called only by the game-state handler func_1509FD30, as `func_150AE760(); return 0;`) makes
- * the asm reload D_800D3858 into sp, clear it, and leave through the VM's epilogue. Here it is a flag: func_150AE760
- * stores EV_ABORTED in D_800D3858 (nothing but func_150AE760 reads that word; the TU cannot have its own .bss in the
+ * Abort: event_vm_abort (called only by the game-state handler event_action_game_state, as `event_vm_abort(); return 0;`) makes
+ * the asm reload D_800D3858 into sp, clear it, and leave through the VM's epilogue. Here it is a flag: event_vm_abort
+ * stores EV_ABORTED in D_800D3858 (nothing but event_vm_abort reads that word; the TU cannot have its own .bss in the
  * NM link), and the VM checks it right after every native call returns, clears it to 0 as the asm does, and leaves
  * before storing the result. A flag is enough because the only caller aborts in tail position (nothing it does after
  * the call is observable); setjmp/longjmp is not available in the N64 NM build. Divergence only where the N64 itself
@@ -39,7 +39,7 @@
  * Not reproduced (no valid script has them; the asm jumps into another operand's decoder or to address 0):
  * addressing mode 7, opcodes 0 and >= 0x1F, entry kinds > 4. The VM stops on them.
  */
-f32 func_15144B68(f32);
+f32 wrap_angle_rad(f32);
 f32 sinf(f32);
 s32 random_int(void);
 
@@ -62,12 +62,13 @@ extern u8 D_800BE9A0;           /* frames since the last update */
 
 enum { EV_FRAME, EV_VAR, EV_DATA, EV_IMM, EV_LABEL, EV_RESULT, EV_NATIVE };
 
-#define EV_ABORTED -1   /* D_800D3858 after func_150AE760 */
+#define EV_ABORTED -1   /* D_800D3858 after event_vm_abort */
 
 /* event_vm_run: run the event block `blk` from entry `entry` (0: +0x20, 1..4: header +0x0E..+0x14) until its outermost return.
  * The asm leaves v0 as it is (the last native result or return value, else the caller's v0); no caller reads it, so
  * this is void. One function (no decoding helper) so that the whole interpreter is one unit for difftest. */
-void func_150ADFD0(struct249 *blk, s32 entry) {
+/* was func_150ADFD0 */
+void event_vm_run(struct249 *blk, s32 entry) {
     u16 *hdr = (u16 *) blk;
     u8 *base = (u8 *) blk;      /* code offsets are relative to the block */
     u8 *vars = base + hdr[5];
@@ -253,7 +254,8 @@ void func_150ADFD0(struct249 *blk, s32 entry) {
  * pointer: args[0] is the last value pushed. 3..6 call handler (args[0] >> 12 & 0xF) - 1 of their table with the
  * id word minus that nibble; the asm passes on the VM's a2 (the call operand's address) to the first two kinds. */
 /* event_native_call_tab_7C0: handler of D_800887C0 by the id word's nibble */
-s32 func_150AE5D8(s32 *args, s32 mode, s32 *operand) {
+/* was func_150AE5D8 */
+s32 event_native_start_cmd(s32 *args, s32 mode, s32 *operand) {
     s32 id = args[0];
     s32 n = (id & 0xF000) >> 12;
 
@@ -264,7 +266,8 @@ s32 func_150AE5D8(s32 *args, s32 mode, s32 *operand) {
 }
 
 /* event_native_call_tab_7FC: handler of D_800887FC */
-s32 func_150AE5E8(s32 *args, s32 mode, s32 *operand) {
+/* was func_150AE5E8 */
+s32 event_native_stop_cmd(s32 *args, s32 mode, s32 *operand) {
     s32 id = args[0];
     s32 n = (id & 0xF000) >> 12;
 
@@ -275,7 +278,8 @@ s32 func_150AE5E8(s32 *args, s32 mode, s32 *operand) {
 }
 
 /* event_native_call_tab_838: handler of D_80088838 (id, args[1], args) */
-s32 func_150AE5F8(s32 *args) {
+/* was func_150AE5F8 */
+s32 event_native_query(s32 *args) {
     s32 id = args[0];
     s32 n = (id & 0xF000) >> 12;
 
@@ -286,7 +290,8 @@ s32 func_150AE5F8(s32 *args) {
 }
 
 /* event_native_game_state: handler of D_80088874 (game-state actions; id, args[1], args) */
-s32 func_150AE60C(s32 *args) {
+/* was func_150AE60C */
+s32 event_native_action(s32 *args) {
     s32 id = args[0];
     s32 n = (id & 0xF000) >> 12;
 
@@ -297,7 +302,8 @@ s32 func_150AE60C(s32 *args) {
 }
 
 /* event_native_random: random number below args[0] (unsigned; VR4300 x % 0 = x) */
-s32 func_150AE674(s32 *args) {
+/* was func_150AE674 */
+s32 event_native_random(s32 *args) {
     u32 r = random_int();
     u32 n = args[0];
 
@@ -305,17 +311,20 @@ s32 func_150AE674(s32 *args) {
 }
 
 /* event_native_frame_time: frames since the last update */
-s32 func_150AE690(s32 *args) {
+/* was func_150AE690 */
+s32 event_native_frame_time(s32 *args) {
     return D_800BE9A0;
 }
 
 /* event_native_fixed_mul: 16.16 fixed-point product (64-bit intermediate) */
-s32 func_150AE6A0(s32 *args) {
+/* was func_150AE6A0 */
+s32 event_native_fixed_mul(s32 *args) {
     return (s32) ((u64) ((s64) args[0] * args[1]) >> 16);
 }
 
 /* event_native_fixed_div: 16.16 fixed-point quotient (64-bit intermediate) */
-s32 func_150AE6BC(s32 *args) {
+/* was func_150AE6BC */
+s32 event_native_fixed_div(s32 *args) {
     s64 n = (s64) args[0] << 16;
 
     if (args[1] == 0) { /* VR4300 ddiv by 0 */
@@ -325,7 +334,8 @@ s32 func_150AE6BC(s32 *args) {
 }
 
 /* event_native_timer_up: timer counting up by the frame time: negative timers stop at 0 when they cross it, 0 becomes 1 */
-s32 func_150AE6D4(s32 *args) {
+/* was func_150AE6D4 */
+s32 event_native_timer_up(s32 *args) {
     s32 t = args[0];
     s32 next = (u32) t + D_800BE9A0;
 
@@ -339,7 +349,8 @@ s32 func_150AE6D4(s32 *args) {
 }
 
 /* event_native_timer_down: timer counting down by the frame time: stops at 1 when it crosses below 2, 1 becomes 0 */
-s32 func_150AE714(s32 *args) {
+/* was func_150AE714 */
+s32 event_native_timer_down(s32 *args) {
     s32 t = args[0];
     s32 next = (u32) t - D_800BE9A0;
 
@@ -352,44 +363,48 @@ s32 func_150AE714(s32 *args) {
     return next;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/func_150ADFD0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/event_vm_run.s")
 #endif
 
 #ifdef NON_MATCHING
 /* event_vm_abort: abort the running event script (see the VM comment). */
-void func_150AE760(void) {
+/* was func_150AE760 */
+void event_vm_abort(void) {
     D_800D3858 = EV_ABORTED;
 }
 
-/* object_sway_update: the rest of func_150AE760's asm (from 0x150AE780) is an ordinary function, an entry of the table at 0x80089C70:
- * two phases advance with the frame time, are wrapped by func_15144B68, and drive a sine sway (+0x20 / +0x28). */
-s32 func_150AE780(u8 *obj) {
+/* object_sway_update: the rest of event_vm_abort's asm (from 0x150AE780) is an ordinary function, an entry of the table at 0x80089C70:
+ * two phases advance with the frame time, are wrapped by wrap_angle_rad, and drive a sine sway (+0x20 / +0x28). */
+/* was func_150AE780 */
+s32 object_sway_update(u8 *obj) {
     f32 *phase = (f32 *) (obj + 0x178);
 
     phase[0] += 0.065f * D_800BE9A4;
     phase[1] += 0.0484f * D_800BE9A4;
-    phase[0] = func_15144B68(phase[0]);
-    phase[1] = func_15144B68(phase[1]);
+    phase[0] = wrap_angle_rad(phase[0]);
+    phase[1] = wrap_angle_rad(phase[1]);
     *(f32 *) (obj + 0x20) = sinf(phase[0]) * 3.0860002f;
     *(f32 *) (obj + 0x28) = sinf(phase[1]) * 5.9140005f;
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/func_150AE760.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/event_vm_abort.s")
 #endif
 
-s32 func_150AE83C(s32 arg0) {
+/* was func_150AE83C */
+s32 object_handler_true(s32 arg0) {
     return 1;
 }
 
 #ifdef NON_MATCHING
 void mtxf_rot_scale2_trans(s32, f32, f32, f32, f32, f32, f32, f32, f32);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 extern s32 D_800DD608;
 extern s32 D_800DD618;
 
-u8 *func_150AE84C(u8 *arg0, s16 arg1) {
+/* was func_150AE84C */
+u8 *object_quad_vtx_build(u8 *arg0, s16 arg1) {
     struct {
         u8 u43;
         u8 * u44;
@@ -416,7 +431,7 @@ u8 *func_150AE84C(u8 *arg0, s16 arg1) {
     u8 *temp_v0;
     u8 *temp_v0_2;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.uA4, &sp.u43);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.uA4, &sp.u43);
     sp.uA0 = sp.uA4;
     if (sp.uA4 != NULL) {
         if (sp.u43 != 0) {
@@ -430,7 +445,7 @@ u8 *func_150AE84C(u8 *arg0, s16 arg1) {
         temp_v0_2 = (*(u8 **)((u8 *)arg0 + 0x160));
         sp3C = arg1 * 4;
         mtxf_rot_scale2_trans((f32 (*)[4]) &sp.u44[0], (*(s32 *)((u8 *)temp_v0_2 + 0x18)), (*(s32 *)((u8 *)temp_v0_2 + 0x1C)), (*(s32 *)((u8 *)temp_v0_2 + 0x20)), (*(f32 *)((u8 *)temp_v0_2 + 0x24)), (*(f32 *)((u8 *)temp_v0_2 + 0x28)), (*(f32 *)((u8 *)temp_v0_2 + 0x38)), (*(f32 *)((u8 *)temp_v0_2 + 0x3C)), (*(f32 *)((u8 *)temp_v0_2 + 0x40)));
-        func_150A7E40((f32 (*)[4]) &sp.u44[0], (*(f32 *)((u8 *)arg0 + 0x34)), (*(f32 *)((u8 *)arg0 + 0x38)), (*(f32 *)((u8 *)arg0 + 0x3C)), &sp.u8C, &sp.u90, &sp.u94);
+        mtxf_transform_point((f32 (*)[4]) &sp.u44[0], (*(f32 *)((u8 *)arg0 + 0x34)), (*(f32 *)((u8 *)arg0 + 0x38)), (*(f32 *)((u8 *)arg0 + 0x3C)), &sp.u8C, &sp.u90, &sp.u94);
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x2C));
         (*(s16 *)((u8 *)sp.uA4 + 6)) = 0;
         temp_f2 = *(s32 *)((s32)&D_800DD618 + (s32)sp3C) * (s32)temp_f0;
@@ -461,5 +476,5 @@ u8 *func_150AE84C(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/func_150AE84C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/object_quad_vtx_build.s")
 #endif

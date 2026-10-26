@@ -1,25 +1,25 @@
 s/team = ctl\[0x11B\];/team = ctl[0x11A];/
 s/team = -1;/team = 0;/
 s/if (D_800BE9F0 == 0x2B) {/if (D_800BE9F0 == 0x2C) {/
-s/n = func_150859AC((s16) idx, 1);/n = func_150859AC((s16) idx, 3);/
+s/n = player_stat_get((s16) idx, 1);/n = player_stat_get((s16) idx, 3);/
 s/if (n >= 0x11 \&\& n < 0x21) {/if (n >= 0x11 \&\& n < 0x20) {/
 s/if (n >= 0x11 \&\& n < 0x21) {/if (n > 0x11 \&\& n < 0x21) {/
 s/n = (random_int() \& 0xF) + 0x11;/n = (random_int() \& 0x7) + 0x11;/
-s/func_15085710((s16) idx, 0, n);/func_15085710((s16) idx, 1, n);/
+s/player_stat_modify((s16) idx, 0, n);/player_stat_modify((s16) idx, 1, n);/
 s/if (n < 0x1D) {/if (n < 0x1C) {/
 s/idx \* 0x30 + 4\] = 0x9C;/idx * 0x30 + 5] = 0x9C;/
 s/\] = 0x9D;/] = 0x9E;/
 s/obj_remove(rec, 0);/obj_remove(rec, 1);/
 s/D_800D18A8 = 1;/D_800D18A8 = 2;/
-s/func_15082E44((u8 \*) D_800D20FC + idx \* 0x30, idx, 0, 0, 0);/func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 1);/
+s/setup_entry_spawn((u8 \*) D_800D20FC + idx \* 0x30, idx, 0, 0, 0);/setup_entry_spawn((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 1);/
 s/\[0x1B0\] = keep1B0;/[0x1B0] = keep1AF;/
 s/obj\[0x328\] = keep328;/obj[0x329] = keep328;/
 s/if (idx <= D_80082FA0) {/if (idx < D_80082FA0) {/
 s/idx \* 0x9A0), idx, D_800BEE12, team);/idx * 0x9A0), idx, D_800BEE12, 0);/
-s/func_15182338(idx);/func_15182338(0);/
-s/func_1517F3B0(0, 0, 0, 0, 1, idx);/func_1517F3B0(0, 0, 0, 0, 0, idx);/
-s/func_1517F3B0(0, 0, 0, 0x1E, 0, idx);/func_1517F3B0(0, 0, 0, 0x1F, 0, idx);/
-s/func_150858A0(obj, team, 0);/func_150858A0(obj, 0, 0);/
+s/hud_lens_reset(idx);/hud_lens_reset(0);/
+s/screen_fade_start(0, 0, 0, 0, 1, idx);/screen_fade_start(0, 0, 0, 0, 0, idx);/
+s/screen_fade_start(0, 0, 0, 0x1E, 0, idx);/screen_fade_start(0, 0, 0, 0x1F, 0, idx);/
+s/obj_place_at_start(obj, team, 0);/obj_place_at_start(obj, 0, 0);/
 s/D_800D18A8 = 0;/D_800D18A8 = 1;/
 s/\[0x122\] = 0;/[0x123] = 0;/
 s/+ 0x124) = 0;/+ 0x126) = 0;/
@@ -35,5 +35,5 @@ s/obj\[0x125\] = 0x96;/obj[0x125] = 0x95;/
 s/\[0x1B1\] = 0x96;/[0x1B0] = 0x96;/
 s/if (D_800BE9F0 == 0x33) {/if (D_800BE9F0 == 0x34) {/
 s/player_send_event(idx, 0x78, 0, 0, 0);/player_send_event(idx, 0x77, 0, 0, 0);/
-s/func_150891D4(obj);/func_150891D4(0);/
+s/rail_record_resync(obj);/rail_record_resync(0);/
 s/s8 keep1B0 = ctl\[0x1B0\];/s8 keep1B0 = ctl[0x1B1];/

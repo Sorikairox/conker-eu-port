@@ -4,7 +4,7 @@
 
 // libultra gu/ortho.c (game copy, -O3: functions are emitted in reverse source order)
 
-void func_151F05C0(float mf[4][4]); // guMtxIdentF
+void game_gu_mtx_ident_f(float mf[4][4]); // guMtxIdentF
 void guMtxF2L2(float mf[4][4], Mtx *m);
 void func_151EFFC0(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale);
 
@@ -20,7 +20,7 @@ void func_151F0114(Mtx *m, float l, float r, float b, float t, float n, float f,
 void func_151EFFC0(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale)
 {
 	int	i, j;
-	func_151F05C0(mf);
+	game_gu_mtx_ident_f(mf);
 	mf[0][0] = 2/(r-l);
 	mf[1][1] = 2/(t-b);
 	mf[2][2] = -2/(f-n);

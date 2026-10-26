@@ -47,7 +47,7 @@ void camera_init_player_projections(void) {
 
 /* was func_15012470 */
 void fx_alloc_d88750(void) {
-    D_80088750 = func_1518AADC(4, 300, 0);
+    D_80088750 = timed_queue_create(4, 300, 0);
 }
 
 #ifdef NON_MATCHING

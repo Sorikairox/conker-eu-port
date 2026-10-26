@@ -1,5 +1,5 @@
-# P221 item_effect_spawn (EU 150DC2F0, game_eu_109770) item_effect_spawn. ARG 0 kind. func_15083E90 = jal 150842F8 (RET obj, +0x84 u16),
-# func_15147FF0 (RET rec, ARGMEM spec 24 bytes), memcpy 10023360 (ARGMEM data 0x11C = 284 bytes). Jump table D_800A1010 from the ROM.
+# P221 item_effect_spawn (EU 150DC2F0, game_eu_109770) item_effect_spawn. ARG 0 kind. obj_find_by_setup_id = jal 150842F8 (RET obj, +0x84 u16),
+# fxrec_spawn (RET rec, ARGMEM spec 24 bytes), memcpy 10023360 (ARGMEM data 0x11C = 284 bytes). Jump table D_800A1010 from the ROM.
 # knobs: DIFFTEST_STKFILL=5A5A5A5A DIFFTEST_ROMDATA=1 DIFFTEST_ARGMEM=10023360=1:284,15147FF0=0:24
 k0 ! 0=0 ! 80480098=80490000 ! 15147FF0=80480000,150842F8=80450000 ! ! ! !
 k5 ! 0=5 ! 80480098=80490000 ! 15147FF0=80480000,150842F8=80450000 ! ! ! !

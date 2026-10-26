@@ -55,7 +55,7 @@
 126s/p\[3 + k\] = p\[k\] - pos\[j\]\[k\];/p[3 + k] = p[k] - cur[k];/ % n2
 129s/if (total > 250\.0f) {/if (total > 25.0f) {/ % medium slow snd0
 130s/if (\*(u16 \*) (e + 0x54) == 0 ||/if (/ % snd0
-130s/func_1000F3D0(\*(u16 \*) (e + 0x54)) == 0) {/func_1000F3D0(*(u16 *) (e + 0x54)) != 0) {/ % sndplay sndend
+130s/sound_voice_is_playing(\*(u16 \*) (e + 0x54)) == 0) {/sound_voice_is_playing(*(u16 *) (e + 0x54)) != 0) {/ % sndplay sndend
 131s/(s32) cur\[0\],/(s32) cur[2],/ % snd0
 132s/(s32) cur\[1\], (s32) cur\[2\], 250, -0x7E0C);/(s32) cur[1], (s32) cur[2], 250, -0x7E0D);/ % snd0
 131s/+ 0x507, 30000,/+ 0x508, 30000,/ % snd0

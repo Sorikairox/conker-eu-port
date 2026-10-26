@@ -3,9 +3,10 @@
 #include "variables.h"
 
 #ifdef NON_MATCHING
-u8 *func_15142FBC(u8 *, s32, s32, s8 *);
+u8 *gfx_other_mode_cached(u8 *, s32, s32, s8 *);
 
-void func_151A5720(u8 *arg0, u8 *arg1, s16 arg2) {
+/* was func_151A5720 */
+void screen_tint_draw_fill(u8 *arg0, u8 *arg1, s16 arg2) {
     struct {
         s8 uAB;
         s32 uAC;
@@ -54,7 +55,7 @@ void func_151A5720(u8 *arg0, u8 *arg1, s16 arg2) {
     arg0 = temp_a0_3;
     render_set_scissor((s32) temp_a0_3, arg2, 0, 0, 0, 3);
     sp.uAB = 0;
-    var_a0 = func_15142FBC(arg0, 0xC00, 0x0F0A4004, &sp.uAB);
+    var_a0 = gfx_other_mode_cached(arg0, 0xC00, 0x0F0A4004, &sp.uAB);
     var_a2 = D_800BE628 + ((*(u8 *)((u8 *)arg1 + 0x1A)) * 0x180);
     var_a3 = 0;
     var_v1 = (s32) (*(f32 *)((u8 *)var_a2 + 4));
@@ -139,19 +140,21 @@ block_7:
     }
     (*(s32 *)((u8 *)var_a0 + 0)) = 0xE7000000;
     (*(s32 *)((u8 *)var_a0 + 4)) = 0;
-    func_15142FBC(var_a0 + 8, 0x2C00, 0x0F0A4004, &sp.uAB);
+    gfx_other_mode_cached(var_a0 + 8, 0x2C00, 0x0F0A4004, &sp.uAB);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D2F30/func_151A5720.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D2F30/screen_tint_draw_fill.s")
 #endif
-void func_151A5B84(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_151A5B84 */
+void screen_tint_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
     void (*f)(s32, void *, u8) = D_8008FCA4[arg0[0x19]];
     if (f != NULL) {
         f(arg0, arg1, arg2);
     }
 }
 
-void func_151A5BCC(s32 arg0, u8 arg1) {
+/* was func_151A5BCC */
+void screen_tint_broadcast(s32 arg0, u8 arg1) {
     const s32 sp1C[1] = {0x5A};
 
     node_broadcast_types(sp1C, 1, arg0, arg1);

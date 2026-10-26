@@ -1,4 +1,4 @@
-# P234 func_151B61A0 (ripple_spawn_flat) mutants: sed % setup names
+# P234 ripple_spawn_flat (ripple_spawn_flat) mutants: sed % setup names
 s/    req.u0 = 0.0f;/    req.u0 = 1.0f;/ % base
 s/    req.size = 24.7f \* scale;/    req.size = 24.0f * scale;/ % base
 s/    req.grow = grow;/    req.grow = scale;/ % base
@@ -33,8 +33,8 @@ s/    req.u74 = 0;/    req.u74 = 1;/ % base
 s/    req.u78 = 0;/    req.u78 = 1;/ % base
 s/    req.step = n;/    req.step = n + 1;/ % base
 s/    req.fade = 0xFF \/ n;/    req.fade = 0x100 \/ n;/ % shift3
-s/    obj = func_15132FBC(&req.size, 3, 0xFF, 8, layer, owner);/    obj = func_15132FBC(\&req.grow, 3, 0xFF, 8, layer, owner);/ % base
-s/    obj = func_15132FBC(&req.size, 3, 0xFF, 8, layer, owner);/    obj = func_15132FBC(\&req.size, 3, 0xFF, 8, alpha, owner);/ % base
+s/    obj = mdl_particle_spawn(&req.size, 3, 0xFF, 8, layer, owner);/    obj = mdl_particle_spawn(\&req.grow, 3, 0xFF, 8, layer, owner);/ % base
+s/    obj = mdl_particle_spawn(&req.size, 3, 0xFF, 8, layer, owner);/    obj = mdl_particle_spawn(\&req.size, 3, 0xFF, 8, alpha, owner);/ % base
 s/    if (obj != 0) {/    if (obj == 0) {/ % base noobj
 s/        memcpy((void \*) (obj + 0x170), &req, 8);/        memcpy((void *) (obj + 0x170), \&req, 4);/ % base
 s/    return obj;/    return 0;/ % base

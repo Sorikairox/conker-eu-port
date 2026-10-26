@@ -10,7 +10,8 @@ typedef struct { f32 x, y, z; } V368D0;
 typedef struct { V368D0 pos; s16 u80; s16 u82; s32 u84; u8 pad88; s8 u89; u8 pad8A[2]; s32 pad8C; } SA68D0;
 typedef struct { u8 *u44; u8 u48; u8 pad49[3]; V368D0 pos; f32 u58, u5C, u60, u64, u68, u6C; } SB68D0;
 void *memcpy(void *, const void *, u32);
-void func_151B68D0(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151B68D0 */
+void obj_ribbon_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     SA68D0 a;
     s32 pad; // fakematch: frame padding between the two spawn structs
     SB68D0 b;
@@ -31,20 +32,21 @@ void func_151B68D0(u8 *arg0, u8 arg1, s32 arg2) {
     b.u60 = -16384.0f;
     b.u68 = 0.0f;
     a.u84 = 0xD;
-    r = func_15147FF0(&a, 0x30, 0x1C, 0xB, 0xB, 0xB, 0, 0, 0, arg1, arg2);
+    r = fxrec_spawn(&a, 0x30, 0x1C, 0xB, 0xB, 0xB, 0, 0, 0, arg1, arg2);
     if (r != NULL) {
         memcpy(*(void **)(r + 0x98), &b, sizeof(b));
     }
 }
 
 #ifdef NON_MATCHING
-// trail_ring_age_update: update handler (s32 (u8 *obj), the func_151B6B84 table) of the trail objects: the ring +0x94
+// trail_ring_age_update: update handler (s32 (u8 *obj), the ribbon_trail_follow_update table) of the trail objects: the ring +0x94
 // holds 28-byte points {pos, life +0xC, alpha +0x10, distance +0x18}; write index +0x2E, read index +0x2D, count
 // +0x2C, capacity +0x25. Returns 0 (done) when fewer than 2 points are left and flag 8 of +0x1E is set. Walking back
 // from the newest point, each life runs down by the frame time D_800BE9A4; at a dead point all older points are
 // dropped (read index moves up to it). Then each point's alpha is its distance from the oldest point * 0.494
 // (at most 0x9B), and +0x54 gets the oldest point (0, 0, 0 when empty). Returns 1.
-s32 func_151B69D0(u8 *obj) {
+/* was func_151B69D0 */
+s32 trail_ring_age_update(u8 *obj) {
     s32 count = (s8) obj[0x2C];
     u8 *ring = *(u8 **) (obj + 0x94);
     s32 i;
@@ -110,13 +112,14 @@ s32 func_151B69D0(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B69D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/trail_ring_age_update.s")
 #endif
 
 #ifdef NON_MATCHING
-f32 func_15143E64(void *);
+f32 vec3_length(void *);
 
-s32 func_151B6B84(u8 *arg0) {
+/* was func_151B6B84 */
+s32 ribbon_trail_follow_update(u8 *arg0) {
     struct {
         f32 u84;
         f32 u88;
@@ -162,7 +165,7 @@ s32 func_151B6B84(u8 *arg0) {
     sp.uB0 = (*(s32 *)((u8 *)arg0 + 0x94));
     sp.uB4 = temp_a2;
     sp.uA8 = (*(f32 *)((u8 *)arg0 + 0x18)) - (*(f32 *)((u8 *)temp_a2 + 0x10));
-    temp_f0 = func_15143E64(&sp.uA0);
+    temp_f0 = vec3_length(&sp.uA0);
     (*(f32 *)((u8 *)sp.uB4 + 0x14)) = (f32) ((*(f32 *)((u8 *)sp.uB4 + 0x14)) + (temp_f0 * 0.003722f * D_800BE9A4));
     temp_f2 = (*(f32 *)((u8 *)sp.uB4 + 0x14));
     (*(f32 *)((u8 *)sp.uB4 + 0x1C)) = (f32) ((*(f32 *)((u8 *)sp.uB4 + 0x1C)) + (temp_f0 * 4.409548f));
@@ -226,15 +229,15 @@ s32 func_151B6B84(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B6B84.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/ribbon_trail_follow_update.s")
 #endif
 #ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
-u8 *func_15142C10(u8 *, s32, s32, s32, s32, s8 *);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
+u8 *gfx_env_color_cached(u8 *, s32, s32, s32, s32, s8 *);
 extern s32 D_80091084;
 extern s32 D_800D30BC;
 
@@ -251,10 +254,11 @@ typedef struct {
 // nothing below 2 points, +0x2C) as a camera-facing ribbon of half-width 10: each point gets two vertices offset by
 // +-10 * normalize((prev - next) x (point - camera)) (no offset when that is 0), texture s = the point's width
 // value, t 0 / 0x7FF, white with the point's alpha; one G_VTX of 4 + two triangles per segment. With +0x1E bit 1
-// the ribbon starts at the trail's own position (+0x10, alpha 0x80, s 0). Vertices come from func_151D6310 (the
+// the ribbon starts at the trail's own position (+0x10, alpha 0x80, s 0). Vertices come from vtx_slot_buffer_get (the
 // trail's +0x84 buffer, (count << 5) + 0xA0 bytes; none -> gfx unchanged); render state: texture D_80091084,
 // combine 0x4E, geometry 0x200005 / 0x1F0600, othermode D_800D30BC | 0x82CA0 / D_800A4EA8 words 6 | 7.
-u8 *func_151B6ED8(u8 *trail, u8 *gfx, s16 arg2) {
+/* was func_151B6ED8 */
+u8 *ribbon_trail_w10_draw(u8 *trail, u8 *gfx, s16 arg2) {
     RibbonPoint *pts;
     f32 *cam;
     Vtx *v;
@@ -278,18 +282,18 @@ u8 *func_151B6ED8(u8 *trail, u8 *gfx, s16 arg2) {
     if (*(s8 *) (trail + 0x2C) < 2) {
         return gfx;
     }
-    func_151D6310((s32 *) (trail + 0x84), arg2, (trail[0x25] << 5) + 0xA0, (s32 *) &v, 0);
+    vtx_slot_buffer_get((s32 *) (trail + 0x84), arg2, (trail[0x25] << 5) + 0xA0, (s32 *) &v, 0);
     if (v == NULL) {
         return gfx;
     }
     pts = *(RibbonPoint **) (trail + 0x94);
-    cam = func_15144B34(arg2);
+    cam = camera_get_pos(arg2);
     flag = 1;
-    gfx = (u8 *) func_15142E24(gfx, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
-    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gfx = (u8 *) gfx_load_texture_cached(gfx, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+    gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4E, &flag);
-    gfx = (u8 *) func_15142B7C((s32) gfx, 0x200005, 0x1F0600);
-    gfx = func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
+    gfx = (u8 *) gfx_geometry_mode_cached((s32) gfx, 0x200005, 0x1F0600);
+    gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
                         &flag);
 
     if (*(u16 *) (trail + 0x1E) & 2) {
@@ -436,10 +440,11 @@ u8 *func_151B6ED8(u8 *trail, u8 *gfx, s16 arg2) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B6ED8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/ribbon_trail_w10_draw.s")
 #endif
 
-void func_151B7664(u8 *arg0, s32 *arg1, u8 arg2)
+/* was func_151B7664 */
+void ribbon_trail_handle_message(u8 *arg0, s32 *arg1, u8 arg2)
 {
   s32 *p;
   s32 id;
@@ -477,9 +482,9 @@ void func_151B7664(u8 *arg0, s32 *arg1, u8 arg2)
 #ifdef NON_MATCHING
 s32 random_int(void);
 f32 random_float(void);
-s32 func_151307F0(void *spec, s32 count, s32 arg2, s32 arg3, s32 alpha, s32 arg5);
+s32 particle_spawn_ex(void *spec, s32 count, s32 arg2, s32 arg3, s32 alpha, s32 arg5);
 extern f32 D_800AA85C;
-/* particle spec read by func_151307F0 (offsets from its start) */
+/* particle spec read by particle_spawn_ex (offsets from its start) */
 typedef struct {
     /* 0x00 */ s32 type;
     /* 0x04 */ s32 unk4;
@@ -503,10 +508,11 @@ typedef struct {
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s8 unk60[6];
 } SmokePuffSpec;
-// obj_smoke_puff_spawn: one random smoke puff particle at obj's position (func_151307F0, alpha arg1, arg2 passed
+// obj_smoke_puff_spawn: one random smoke puff particle at obj's position (particle_spawn_ex, alpha arg1, arg2 passed
 // on): size 89..139 (random_float * 50 + 89), life 30..39, colours DD D3 CD FF / 57 55 5A (200..255 alpha),
-// random mirror flags 0x40 / 0x80. Called by func_1506ADC8 (with func_151B68D0), handler 8 of func_1506B04C.
-void func_151B76F4(u8 *obj, s32 alpha, s32 arg2) {
+// random mirror flags 0x40 / 0x80. Called by obj_effect_smoke_ribbon (with obj_ribbon_trail_spawn), handler 8 of obj_effect_run_handler.
+/* was func_151B76F4 */
+void obj_smoke_puff_spawn(u8 *obj, s32 alpha, s32 arg2) {
     SmokePuffSpec p;
     s32 flipX;
     s32 flipY;
@@ -554,17 +560,17 @@ void func_151B76F4(u8 *obj, s32 alpha, s32 arg2) {
     p.size[0] = size;
     p.size[1] = size;
     p.accel[2] = 0.0f;
-    func_151307F0(&p, 1, 0, 0, alpha & 0xFF, arg2);
+    particle_spawn_ex(&p, 1, 0, 0, alpha & 0xFF, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B76F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/obj_smoke_puff_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-extern s32 (*D_8008FF30[])(u8 *, void *);   /* attach handlers: 0 func_151B7C28, 1 func_151B7C7C */
+extern s32 (*D_8008FF30[])(u8 *, void *);   /* attach handlers: 0 glow_attach_follow_obj, 1 glow_attach_follow_model_point */
 extern s32 D_800AA840[4];                    /* glow particle variants (low byte used) */
 extern f32 D_800AA860;
-/* glow particle spec read by func_151307F0 (same layout as SmokePuffSpec, one more byte at 0x66) */
+/* glow particle spec read by particle_spawn_ex (same layout as SmokePuffSpec, one more byte at 0x66) */
 typedef struct {
     /* 0x00 */ s32 type;
     /* 0x04 */ s32 unk4;
@@ -588,7 +594,7 @@ typedef struct {
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s8 unk60[7];
 } GlowSpec;
-/* object spawn request for func_15147FF0 (as SA68D0) */
+/* object spawn request for fxrec_spawn (as SA68D0) */
 typedef struct {
     f32 pos[3];
     s16 u80;
@@ -603,13 +609,14 @@ typedef struct {
     void *data;
     u8 type;
 } AttachData;
-// obj_attached_glow_spawn: spawns a helper object (func_15147FF0, extra size + 0x10) that follows something:
+// obj_attached_glow_spawn: spawns a helper object (fxrec_spawn, extra size + 0x10) that follows something:
 // its data block gets a copy of `size` bytes of `src` and the attach type; the type's handler (D_8008FF30[type],
 // 0 = follow an object, 1 = follow a model point) places it, and if it fails the object is freed (returns NULL).
-// Then a big glow particle (func_151307F0; variant D_800AA840[rand & 3], size rand * 800 + D_800AA860, life 300,
+// Then a big glow particle (particle_spawn_ex; variant D_800AA840[rand & 3], size rand * 800 + D_800AA860, life 300,
 // random mirror flags) is started and its handle kept in the data block. Returns the object.
-// Callers: func_1506AFCC (effect handler 12 of func_1506B04C, type 0), func_150B0574 (type 1).
-u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
+// Callers: obj_effect_attached_glow (effect handler 12 of obj_effect_run_handler, type 0), beam_trail_spawn (type 1).
+/* was func_151B78D8 */
+u8 *obj_attached_glow_spawn(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
     AttachSpawn a;
     AttachData d;
     AttachData *data;
@@ -628,7 +635,7 @@ u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
     a.u82 = 0x14;
     a.u84 = 0x10;
     a.u88 = 2;
-    obj = (u8 *) func_15147FF0(&a, size + 0x10, 0x14, 0, 0xE, 0xE, 0, 0, 0, alpha, arg4);
+    obj = (u8 *) fxrec_spawn(&a, size + 0x10, 0x14, 0, 0xE, 0xE, 0, 0, 0, alpha, arg4);
     if (obj != NULL) {
         data = *(AttachData **) (obj + 0x98);
         memcpy(data, &d, sizeof(d));
@@ -678,15 +685,16 @@ u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
         p.unk60[5] = 0;
         p.unk5C = 0;
         p.unk60[6] = -1;
-        data->glow = func_151307F0(&p, 1, 0, 0, alpha, arg4);
+        data->glow = particle_spawn_ex(&p, 1, 0, 0, alpha, arg4);
     }
     return obj;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B78D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/obj_attached_glow_spawn.s")
 #endif
 
-s32 func_151B7C28(u8 *arg0, u8 *arg1)
+/* was func_151B7C28 */
+s32 glow_attach_follow_obj(u8 *arg0, u8 *arg1)
 {
   u8 *temp_a2;
   u8 *new_var;
@@ -700,7 +708,8 @@ s32 func_151B7C28(u8 *arg0, u8 *arg1)
   return 1;
 }
 
-s32 func_151B7C7C(u8 *arg0, f32 *arg1) {
+/* was func_151B7C7C */
+s32 glow_attach_follow_model_point(u8 *arg0, f32 *arg1) {
     u8 *p;
     u8 *q;
     u8 *obj;
@@ -722,17 +731,18 @@ s32 func_151B7C7C(u8 *arg0, f32 *arg1) {
     mf[2][0] *= *(f32 *)(obj + 0x18);
     mf[2][1] *= *(f32 *)(obj + 0x18);
     mf[2][2] *= *(f32 *)(obj + 0x18);
-    func_150A7E40(mf, 0.0f, 0.0f, -250.0f, &arg1[0], &arg1[1], &arg1[2]);
+    mtxf_transform_point(mf, 0.0f, 0.0f, -250.0f, &arg1[0], &arg1[1], &arg1[2]);
     return 1;
 }
 
 #ifdef NON_MATCHING
-// obj_attached_glow_update: update handler of the func_151B78D8 helper objects. Each frame with a time step
+// obj_attached_glow_update: update handler of the obj_attached_glow_spawn helper objects. Each frame with a time step
 // (D_800BE9E4 > 0): the attach type's handler (D_8008FF30) moves the object (pos +0x10) - on failure returns 0 (the
 // caller frees it); the glow particle (data->glow, pos +0x40) follows. The move is logged in the trail ring +0x94
-// (20-byte entries {pos, step length (func_15143E64), alpha 0xFF}; write index +0x2E, read index +0x2D, count +0x2C,
+// (20-byte entries {pos, step length (vec3_length), alpha 0xFF}; write index +0x2E, read index +0x2D, count +0x2C,
 // capacity +0x25): when the write index catches the read index, the oldest entry is dropped. Returns 1.
-s32 func_151B7DA4(u8 *obj) {
+/* was func_151B7DA4 */
+s32 obj_attached_glow_update(u8 *obj) {
     u8 *ring = *(u8 **) (obj + 0x94);
     AttachData *data = *(AttachData **) (obj + 0x98);
     f32 old[3];
@@ -755,7 +765,7 @@ s32 func_151B7DA4(u8 *obj) {
         d[0] = *(f32 *) (obj + 0x10) - old[0];
         d[1] = *(f32 *) (obj + 0x14) - old[1];
         d[2] = *(f32 *) (obj + 0x18) - old[2];
-        len = func_15143E64(d);
+        len = vec3_length(d);
         e = ring + (s8) obj[0x2E] * 20;
         *(s32 *) (e + 0) = *(s32 *) (obj + 0x10);
         *(s32 *) (e + 4) = *(s32 *) (obj + 0x14);
@@ -778,7 +788,7 @@ s32 func_151B7DA4(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7DA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/obj_attached_glow_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -788,7 +798,8 @@ s32 func_151B7DA4(u8 *obj) {
 // point is pulled along its step so the trail is exactly 1198 long, that step shortened by the same fraction, and all
 // older points dropped (read index advanced, count decremented). Then each point's alpha is set to 255 * (length from
 // it to the trail's end) / total length, newest first.
-s32 func_151B7F48(u8 *obj) {
+/* was func_151B7F48 */
+s32 trail_ring_trim_fade(u8 *obj) {
     u8 *ring = *(u8 **) (obj + 0x94);
     u8 *e;
     f32 *prev;
@@ -861,19 +872,20 @@ s32 func_151B7F48(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7F48.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/trail_ring_trim_fade.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 D_800914B0;
 extern s32 D_800D30BC;
 
-u8 *func_151B81E8(u8 *arg0, u8 *arg1, s16 arg2) {
+/* was func_151B81E8 */
+u8 *glow_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     struct {
         u8 * u90;
         u8 pad94[0x3];
@@ -941,16 +953,16 @@ u8 *func_151B81E8(u8 *arg0, u8 *arg1, s16 arg2) {
 
     } else {
         sp.uC0 = (*(s32 *)((u8 *)arg0 + 0x94));
-        func_151D6310(arg0 + 0x84, arg2, ((*(u8 *)((u8 *)arg0 + 0x25)) << 5) + 0xA0, &sp.u90, 0);
+        vtx_slot_buffer_get(arg0 + 0x84, arg2, ((*(u8 *)((u8 *)arg0 + 0x25)) << 5) + 0xA0, &sp.u90, 0);
         if (sp.u90 == NULL) {
 
         } else {
-            temp_v0 = func_15144B34((s32) arg2);
+            temp_v0 = camera_get_pos((s32) arg2);
             sp.u97 = 1;
             sp.uC4 = temp_v0;
             temp_v1 = ((u8 *)&D_800A4EA8);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
-            var_s0 = func_15142FBC(gfx_set_combine_mode(func_15142B7C(func_15142E24(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.u97, 3), 0x200005, 0x1F0600), 0x56, &sp.u97), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u97);
+            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_load_texture_cached(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.u97, 3), 0x200005, 0x1F0600), 0x56, &sp.u97), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u97);
             if (var_a0 < 0) {
                 var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
             }
@@ -1076,9 +1088,10 @@ u8 *func_151B81E8(u8 *arg0, u8 *arg1, s16 arg2) {
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B81E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/glow_trail_draw.s")
 #endif
-void func_151B887C(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_151B887C */
+void glow_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
     void (*temp_v1)(u8 *, s32, u8) = D_8008FF38[temp_v0[8]];
 
@@ -1087,7 +1100,8 @@ void func_151B887C(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-void func_151B88C8(u8 *arg0, s32 *arg1, u8 arg2) {
+/* was func_151B88C8 */
+void glow_attach_obj_on_message(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *q = *(u8 **)(arg0 + 0x98);
     u8 *p = *(u8 **)(q + 4);
     s32 id;
@@ -1099,7 +1113,8 @@ void func_151B88C8(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-void func_151B8920(u8 *arg0) {
+/* was func_151B8920 */
+void glow_free_particle(u8 *arg0) {
     struct102 **temp_v0 = *(struct102 ***)(arg0 + 0x98);
     struct102 *temp_a1 = *temp_v0;
 
@@ -1108,12 +1123,14 @@ void func_151B8920(u8 *arg0) {
     }
 }
 
-void func_151B8950(s32 arg0) {
-    func_151B8920(arg0);
-    func_15147E64(arg0);
+/* was func_151B8950 */
+void glow_retire(s32 arg0) {
+    glow_free_particle(arg0);
+    fxrec_die_retire(arg0);
 }
 
-void func_151B897C(s32 arg0) {
-    func_151B8920(arg0);
-    func_15147E98(arg0);
+/* was func_151B897C */
+void glow_delete(s32 arg0) {
+    glow_free_particle(arg0);
+    fxrec_die_free(arg0);
 }

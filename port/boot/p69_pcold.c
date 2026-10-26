@@ -1,5 +1,5 @@
 /* P69 DIAGNOSTIC: ?p69pc=MASK runs the removed P63 PC versions instead of the P65 game C (bisecting the respawn
- * hang): 1 = asset_rec_fetch_block, 2 = func_150A69E0, 4 = floor_triangle_slope (link-time wraps; this TU goes through vbe like
+ * hang): 1 = asset_rec_fetch_block, 2 = world_objects_at_point, 4 = floor_triangle_slope (link-time wraps; this TU goes through vbe like
  * pc_overrides.c). Without the flag the game C runs. */
 #include <ultra64.h>
 int port_flag(const char *name);
@@ -11,16 +11,16 @@ static int m(int b) { if (pcmask < 0) pcmask = port_flag("p69pc"); return pcmask
  * absolute (+= base). As a gen_stubs stub it returned base itself, so anim_start_entry read garbage / no header and
  * Conker stayed in the bind pose. Read from the asm:
  *   src = base + index * 8;  dst = (buf + 8) & ~15;
- *   func_10004514(src & ~15, dst, ((src & 0xE) + n * 8 + 15) & ~15, 1);
+ *   rom_dma_read(src & ~15, dst, ((src & 0xE) + n * 8 + 15) & ~15, 1);
  *   rec = dst + (src & 0xF);  for i < n: rec[2 * i] += base;  return rec. */
-s32 func_10004514(s32, void *, u32, s32);
+s32 rom_dma_read(s32, void *, u32, s32);
 static s32 pc_1502AF04(s32 base, s32 buf, s32 index, s32 n) {
     u32 src = (u32)base + (u32)index * 8;
     u32 dst = ((u32)buf + 8) & ~15u;
     s32 *rec;
     s32 i;
 
-    func_10004514(src & ~15u, (void *)dst, ((src & 0xE) + (u32)n * 8 + 15) & ~15u, 1);
+    rom_dma_read(src & ~15u, (void *)dst, ((src & 0xE) + (u32)n * 8 + 15) & ~15u, 1);
     rec = (s32 *)(dst + (src & 0xF));
     for (i = 0; i < n; i++) {
         rec[i * 2] += base;
@@ -28,26 +28,26 @@ static s32 pc_1502AF04(s32 base, s32 buf, s32 index, s32 n) {
     return (s32)rec;
 }
 
-/* P63: TEMPORARY PC func_150A69E0 (game_eu_D3880.c, asm, 13 instructions; remove when the port branch converts it):
- *   return func_150A6A48(a0, a1, a2, a3, a0, a1, -10000, 20000);
- * (the asm stores a0 / a1 / -10000 / 0x4E20 as the 5th..8th stack arguments and jumps to the C func_150A6A48). Its
- * caller func_15045A04 (game_eu_71E70.c) passes a2 = &count; as a gen_stubs stub the count stayed uninitialised
- * stack, and func_1504627C -> func_150A49D0(count, ...) walked a garbage id list: a "memory access out of bounds"
+/* P63: TEMPORARY PC world_objects_at_point (game_eu_D3880.c, asm, 13 instructions; remove when the port branch converts it):
+ *   return world_objects_in_box(a0, a1, a2, a3, a0, a1, -10000, 20000);
+ * (the asm stores a0 / a1 / -10000 / 0x4E20 as the 5th..8th stack arguments and jumps to the C world_objects_in_box). Its
+ * caller collision_query_dynamic_cells (game_eu_71E70.c) passes a2 = &count; as a gen_stubs stub the count stayed uninitialised
+ * stack, and collision_floor_dynamic_b -> world_objects_transform_mesh(count, ...) walked a garbage id list: a "memory access out of bounds"
  * that came and went with the stack layout (seen in P63 with ?p49walk, frame 723). */
-s32 func_150A6A48(s32, s32, s32 *, s32, s32, s32, s32, s32);
+s32 world_objects_in_box(s32, s32, s32 *, s32, s32, s32, s32, s32);
 static s32 pc_150A69E0(s32 a0, s32 a1, s32 a2, s32 a3) {
-    return func_150A6A48(a0, a1, (s32 *)a2, a3, a0, a1, -10000, 20000);
+    return world_objects_in_box(a0, a1, (s32 *)a2, a3, a0, a1, -10000, 20000);
 }
 
 /* P63: TEMPORARY PC floor_triangle_slope (game_eu_13B700.c, asm, 188 lines; remove when the port branch converts it). The
- * floor-slope solver behind floor_slope_direction (P60's func_15051558 floor push): for the floor triangle given either as
+ * floor-slope solver behind floor_slope_direction (P60's walk_ground_slide_push floor push): for the floor triangle given either as
  * 3 vertex pointers (tris, s16 x/y/z each) or, when tris is NULL, as 3 packed s16 x/y/z vertices (verts, stride 6,
  * the record's +0x18C copy), it tries the edge pairs (P1 = v[i], P0 = v[i+1], P2 = v[i+2], i = 0..2, then the same
  * three with the two edges swapped) until one gives a non-degenerate system, and returns
  *   *outB = (e2.x * e1.y - e1.x * e2.y) / (e2.x * e1.z - e1.x * e2.z),  *outA = (e2.y - *outB * e2.z) / e2.x
  * (e1 = P0 - P1, e2 = P2 - P1), result 1; all degenerate (or the 6th try reached), or both inputs NULL: 0 / 0, result
  * 0. As a gen_stubs stub it wrote nothing, so floor_slope_direction's dx / dz were stack leftovers: on the flat start floor
- * of level 0x21 func_15051558 saw a "strong push" (dx^2 + dz^2 > 1) every frame, started a slide (D_800CC69C = 1,
+ * of level 0x21 walk_ground_slide_push saw a "strong push" (dx^2 + dz^2 > 1) every frame, started a slide (D_800CC69C = 1,
  * +0x110 = 3, animation 0x28E) and pushed the player off the level (P63). Read from the asm instruction by instruction
  * (the 6th try forces "fail" even when it is not degenerate, as the asm does). */
 static s32 pc_1510E908(s32 tris, s32 verts, f32 *outA, f32 *outB) {
@@ -106,13 +106,13 @@ static s32 pc_1510E908(s32 tris, s32 verts, f32 *outA, f32 *outB) {
 
 s32 __real_asset_rec_fetch_block(s32, s32, s32, s32);
 s32 __wrap_asset_rec_fetch_block(s32 a, s32 b, s32 c, s32 d) { return m(1) ? pc_1502AF04(a, b, c, d) : __real_asset_rec_fetch_block(a, b, c, d); }
-s32 __real_func_150A69E0(s32, s32, s32, s32);
-s32 __wrap_func_150A69E0(s32 a, s32 b, s32 c, s32 d) { return m(2) ? pc_150A69E0(a, b, c, d) : __real_func_150A69E0(a, b, c, d); }
+s32 __real_world_objects_at_point(s32, s32, s32, s32);
+s32 __wrap_world_objects_at_point(s32 a, s32 b, s32 c, s32 d) { return m(2) ? pc_150A69E0(a, b, c, d) : __real_world_objects_at_point(a, b, c, d); }
 s32 __real_floor_triangle_slope(s32, s32, f32 *, f32 *);
 s32 __wrap_floor_triangle_slope(s32 a, s32 b, f32 *c, f32 *d) { return m(4) ? pc_1510E908(a, b, c, d) : __real_floor_triangle_slope(a, b, c, d); }
 
-/* P121 TEST ONLY (?p121spr=1, through the func_151EE704 wrap in port/gfx/p103_boot.c): a copy of the game C
- * func_151EE704 (game_eu_216470.c, P117 hand C, menu_sprites_load, mode 3's first frame) without the KSEG0 OR:
+/* P121 TEST ONLY (?p121spr=1, through the menu_sprites_load wrap in port/gfx/p103_boot.c): a copy of the game C
+ * menu_sprites_load (game_eu_216470.c, P117 hand C, menu_sprites_load, mode 3's first frame) without the KSEG0 OR:
  *   vtx = (u8 *) (dl[1] | 0x80000000)   -> on N64 a no-op (the asset is already 0x80xxxxxx); in the port the asset is
  *                                          a wasm address 0x10xxxxxx, so the OR gives 0x9xxxxxxx and the byte store
  *                                          traps (memory access out of bounds, frame 2139, P121).

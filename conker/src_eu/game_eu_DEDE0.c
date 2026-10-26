@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_150B15D0(struct127 *arg0) {
+/* was func_150B15D0 */
+void obj_whirlpool_pull_update(struct127 *arg0) {
     s32 pad;
     f32 sp50;
     f32 sp4C;
@@ -46,11 +47,12 @@ void func_150B15D0(struct127 *arg0) {
 #ifdef NON_MATCHING
 extern f32 D_8009FC8C;
 extern f32 D_8009FC90;
-void func_15021834(struct127 *, s32, s32);
+void cutscene_actor_apply_track(struct127 *, s32, s32);
 void obj_walk_update(struct127 *);
-s32 func_150535F4(struct127 *);
+s32 obj_check_death(struct127 *);
 
-void func_150B17DC(struct127 *arg0) {
+/* was func_150B17DC */
+void obj_path_bank_update(struct127 *arg0) {
     f32 var_f2;
     f32 var_f0;
     f32 temp_f2;
@@ -79,17 +81,17 @@ block_3:
     arg0->unkC4 = temp_f12 + arg0->unk148;
     arg0->unk40 = (f32) (s16) (arg0->unk7A + 0x4000) * 0.005493164f;
     obj_physics_step(arg0);
-    if (func_150535F4(arg0) == 0) {
-        func_15021834(arg0, 0, -1);
+    if (obj_check_death(arg0) == 0) {
+        cutscene_actor_apply_track(arg0, 0, -1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B17DC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/obj_path_bank_update.s")
 #endif
 
 #ifdef NON_MATCHING
 void obj_stun_update(struct127 *);
-void func_15052760(struct127 *, s16);
+void obj_lean_into_turn(struct127 *, s16);
 
 // held_object_update: update of an object that may be held, thrown or resting: unk80 = 10; stunned objects only run
 // obj_stun_update. Otherwise its resting height is 210 above the floor entry D_800D20FC[unk13F] (+8), the vertical
@@ -98,9 +100,10 @@ void func_15052760(struct127 *, s16);
 // the player) the height comes from unk224 (10000: the D_800D2104 path point unk21E, else 8 x unk224, + unk180 for
 // all but kinds 5 / 0x50 / 0xAD..0xAF) and, unless unk100 bit 6, the collision box (obj_set_gravity_band, 3 x 12 for kind
 // 0x44 at its path point height, else 5 x 35). Then the move (obj_walk_update), the facing unk40 from unk7A, the
-// animation (obj_physics_step), kinds 5 / 0xAD..0xAF / 0x44 turn from the old heading (func_15052760), and the object
-// is released (func_15021834) when func_150535F4 says so.
-void func_150B1964(struct127 *obj) {
+// animation (obj_physics_step), kinds 5 / 0xAD..0xAF / 0x44 turn from the old heading (obj_lean_into_turn), and the object
+// is released (cutscene_actor_apply_track) when obj_check_death says so.
+/* was func_150B1964 */
+void held_object_update(struct127 *obj) {
     s16 heading;
     f32 height;
     f32 half;
@@ -160,14 +163,14 @@ void func_150B1964(struct127 *obj) {
     obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) * 0.0054931640625f;
     obj_physics_step(obj);
     if (obj->id == 5 || obj->id == 0xAD || obj->id == 0xAE || obj->id == 0xAF || obj->id == 0x44) {
-        func_15052760(obj, heading);
+        obj_lean_into_turn(obj, heading);
     }
-    if (func_150535F4(obj) == 0) {
-        func_15021834(obj, 0, -1);
+    if (obj_check_death(obj) == 0) {
+        cutscene_actor_apply_track(obj, 0, -1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1964.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/held_object_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -175,7 +178,8 @@ void obj_walk_update(struct127 *);
 void obj_apply_gravity(struct127 *);
 u8 *obj_find_by_state(s32, s32 *);
 
-void func_150B1CBC(struct127 *arg0) {
+/* was func_150B1CBC */
+void obj_carrier_update(struct127 *arg0) {
     struct {
         f32 u2C;
         f32 u30;
@@ -222,7 +226,7 @@ void func_150B1CBC(struct127 *arg0) {
     arg0->unk40 = (f32) (s16) (temp_v0 + 0x4000) * 0.005493164f;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1CBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/obj_carrier_update.s")
 #endif
 #ifdef NON_MATCHING
 extern u8 D_800B8AC4[];
@@ -241,7 +245,8 @@ void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 // factor 0.2, else towards 0) once unk21C reaches 9, unless the region's D_800B8AC4 entry is set and D_800CC670 bit 2
 // is clear. Facing / animation / obj_find_carrier / obj_start_anim / release as usual. In water, 40 in 256 frames spawn
 // a ripple record (node_spawn_sprite) at a random point up to 40 x xz_scale around it, drifting with the player's speed.
-void func_150B1EC0(struct127 *obj) {
+/* was func_150B1EC0 */
+void sinking_object_update(struct127 *obj) {
     struct {
         s32 u00;
         s32 u04;
@@ -304,7 +309,7 @@ void func_150B1EC0(struct127 *obj) {
     obj_physics_step(obj);
     obj_find_carrier(obj);
     obj_start_anim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
-    func_15021834(obj, 0, -1);
+    cutscene_actor_apply_track(obj, 0, -1);
     if (obj->unk13D == 0 || (u8) random_int() >= 40) {
         return;
     }
@@ -342,5 +347,5 @@ void func_150B1EC0(struct127 *obj) {
     node_spawn_sprite(&rec, 0, 0, -1, 0xFF, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1EC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/sinking_object_update.s")
 #endif

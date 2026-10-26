@@ -9,109 +9,109 @@ extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
 /* matching */
-void func_10001050(void);
-void func_100010F8(s32 arg0);
-void func_10001444(void);
-void func_100014A0(void);
-s32  func_10002070(s32 arg0, s32 arg1, s32 arg2);
+void boot_entry_main(void);
+void boot_idle_thread_main(s32 arg0);
+void tlb_reset_and_flush_icache(void);
+void game_thread_stop(void);
+s32  init_printf_null_out(s32 arg0, s32 arg1, s32 arg2);
 void func_1000349C(s32 arg0);
-s32  func_1000390C(void);
-void func_10003930(void);
-void func_100039B0(void);
-void func_100039C0(void);
-void func_10004250(void);
-void func_10004308(void);
-void func_1000440C(void);
-void func_10004470(void);
-s32  func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
-void func_10004674(void);
-void func_10004F00(void);
-void func_10004FE0(void);
-void func_10005020(void);
-void func_100051C8(OSPfs *pfs, OSMesgQueue *queue);
-void func_100051E8(void);
-void func_10005218(void);
-void func_10005298(void);
-void func_100084D8(u8 arg0);
-s32  func_1000853C(u8 arg0);
-void func_10008570(u8 arg0, s32 arg1);
-void func_100085A4(s32 arg0, s32 arg1, s32 arg2);
-void func_100085B8(u8 arg0, s32 arg1, u8 arg2);
-void func_100085F8(u8 arg0, s32 arg1);
-void func_1000862C(u8 arg0, s32 arg1);
-void func_10008660(u8 arg0, u8 arg1, u8 arg2, s32 arg3);
-void func_100086FC(u8 arg0, u8 arg1, u8 arg2);
-void func_10008744(u8 arg0, u8 arg1, u8 arg2);
-void func_10008790(u8 arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_10008824(u8 arg0, u8 arg1, u8 arg2);
-void func_1000886C(u8 arg0, s32 arg1, u8 arg2);
-void func_100088F0(u8 arg0, s32 arg1, s32 arg2);
-void func_10008988(u8 idx, s32 mask, s32 enable);
-u8   func_10008A4C(u8 idx, u8 chan);
-void func_10008A94(u8 arg0, s32 arg1, s32 arg2);
-void func_10008B2C(u8 arg0);
-void func_10008B60(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_10008BC0(u8 arg0, f32 arg1, f32 arg2);
-void func_10008EE0(u8 arg0, s32 arg1);
-void func_10008F24(u8 arg0);
-void func_10008F58(u8 arg0);
-void func_100093CC(void);
-s32  func_10009980(s32 *arg0);
-void func_10009B2C(struct54 *arg0);
-void func_10009B4C(struct54 *arg0);
-void func_10009B90(struct54 *arg0);
-s32  func_1000BA18(u32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
-struct151 *func_1000B1B0(s32 arg0);
-s32  func_1000B830(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000B8B8(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
-s32  func_1000BBE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000BC28(s32 arg0, u8 arg1, s32 arg2, s32 arg3);
-void func_1000CBA8(s32 arg0);
-s32  func_1000CD40(s32 arg0, s32 arg1, s32 arg2);
-void func_1000E054(s32 arg0, s32 arg1);
-s32  func_1000E0F8(s32 arg0);
-void func_1000E40C(s32 arg0, s32 arg1);
-s32  func_1000E654(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000E704(s32 arg0, s32 arg1, s32 arg2);
-void func_1000E75C(s32 arg0);
-s32  func_1000E770(s32 *arg0, s32 *arg1);
-u16  func_1000EA94(s32 arg0);
-s32  func_1000EB00(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 arg7, u16 *arg8);
-s32  func_1000EBC4(struct00 *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
-void func_1000F248(s32 arg0);
-s32  func_1000F3D0(u16 arg0);
-s32  func_1000F44C(u16 arg0);
-void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-void func_1000F9D4(u16 arg0, s16 arg1, s16 arg2, s16 arg3);
-void func_10010720(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) ;
-s32  func_100107F8(struct127 *arg0);
-s32  func_10010894(struct127 *arg0);
-void func_100109D0(struct127 *arg0);
-void func_10010A3C(struct127 *arg0);
-void func_10010AA8(struct127 *arg0);
-u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
-void func_100111C8(u16 arg0);
-void func_1001123C(u16 arg0);
-s32  func_100112BC(s32 arg0, s32 arg1);
-s32  func_1001147C(u16 arg0);
-void func_10011E88(s32 arg0);
-void func_10011E94(s32 arg0);
-void func_10011FA0(s32 *arg0);
-void func_10011FB0(s32 arg0);
-void func_10011FDC(s32 arg0);
-void func_10011FEC(void);
+s32  init_stub_return_zero(void);
+void mem_init_region_bounds(void);
+void init_stub_noop(void);
+void video_init_screen(void);
+void heap_age_tagged_blocks(void);
+void heap_free_tags_1_to_4(void);
+void heap_update_largest_free(void);
+void pi_init_dma_queues(void);
+s32  rom_dma_read(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
+void rom_dma_wait_queued(void);
+void sched_start_gfx_task(void);
+void sched_try_swap_buffer(void);
+void sched_swap_framebuffer(void);
+void sched_add_client(OSPfs *pfs, OSMesgQueue *queue);
+void sched_send_retrace_msg(void);
+void prenmi_thread_start(void);
+void prenmi_stub_noop(void);
+void music_player_play(u8 arg0);
+s32  music_player_get_state(u8 arg0);
+void music_player_set_msg_queue(u8 arg0, s32 arg1);
+void music_stub_noop3(s32 arg0, s32 arg1, s32 arg2);
+void music_player_set_chan_flag17(u8 arg0, s32 arg1, u8 arg2);
+void music_chan_mute(u8 arg0, s32 arg1);
+void music_chan_unmute(u8 arg0, s32 arg1);
+void music_chan_fade_volume(u8 arg0, u8 arg1, u8 arg2, s32 arg3);
+void music_chan_set_cc41(u8 arg0, u8 arg1, u8 arg2);
+void music_chan_set_pan(u8 arg0, u8 arg1, u8 arg2);
+void music_chans_fade_volume(u8 arg0, s32 arg1, u8 arg2, s32 arg3);
+void music_chan_set_volume(u8 arg0, u8 arg1, u8 arg2);
+void music_chans_set_volume(u8 arg0, s32 arg1, u8 arg2);
+void music_chans_set_muted(u8 arg0, s32 arg1, s32 arg2);
+void music_chans_set_enabled(u8 idx, s32 mask, s32 enable);
+u8   music_chan_get_volume(u8 idx, u8 chan);
+void music_chans_set_cc92(u8 arg0, s32 arg1, s32 arg2);
+void music_player_get_tempo(u8 arg0);
+void music_player_set_voice_param(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
+void music_player_set_master_gain(u8 arg0, f32 arg1, f32 arg2);
+void music_player_set_volume(u8 arg0, s32 arg1);
+void music_player_end_track(u8 arg0);
+void music_player_stop(u8 arg0);
+void audio_thread_stop(void);
+s32  audio_dma_new(s32 *arg0);
+void snd_cache_entry_unref(struct54 *arg0);
+void snd_cache_entry_release(struct54 *arg0);
+void snd_cache_entry_ref(struct54 *arg0);
+s32  music_song_cb_pos_song4d(u32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
+struct151 *music_find_song(s32 arg0);
+s32  music_song_cb_duck_song16(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32  music_song_cb_level4_meter(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
+s32  music_song_cb_start_song20(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32  music_song_cb_sync_level(s32 arg0, u8 arg1, s32 arg2, s32 arg3);
+void music_players_set_fade_target(s32 arg0);
+s32  music_step_toward(s32 arg0, s32 arg1, s32 arg2);
+void music_song_set_paused(s32 arg0, s32 arg1);
+s32  music_song_is_playing(s32 arg0);
+void music_song_set_volume(s32 arg0, s32 arg1);
+s32  music_song_set_marker(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32  music_song_set_chans_cc92(s32 arg0, s32 arg1, s32 arg2);
+void music_set_b070_mode(s32 arg0);
+s32  music_get_event_request(s32 *arg0, s32 *arg1);
+u16  music_play_menu_song(s32 arg0);
+s32  sfx_cb_ambient_random_chirp(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 arg7, u16 *arg8);
+s32  sfx_cb_fade_out(struct00 *arg0, s32 arg1, s32 arg2, s32 arg3);
+s32  sfx_cb_keep_until_silent(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
+void sound_level_init(s32 arg0);
+s32  sound_voice_is_playing(u16 arg0);
+s32  sound_voice_is_looping(u16 arg0);
+void sound_voice_update_3d(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+void sound_voice_update_pan(u16 arg0, s16 arg1, s16 arg2, s16 arg3);
+void actor_sound_play_untracked_delay(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) ;
+s32  actor_sound_is_playing(struct127 *arg0);
+s32  actor_sound2_is_playing(struct127 *arg0);
+void actor_sound_stop(struct127 *arg0);
+void actor_sound2_stop(struct127 *arg0);
+void actor_sounds_stop_loops(struct127 *arg0);
+u16 sound_play_2d(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
+void sound_voice_stop(u16 arg0);
+void sound_voice_stop_deferred(u16 arg0);
+s32  sound_stop_queue_push(s32 arg0, s32 arg1);
+s32  sound_voice_get_id(u16 arg0);
+void sound_level_hook_nop(s32 arg0);
+void sound_set_pause_mute(s32 arg0);
+void audio_mixer_request_mode(s32 *arg0);
+void audio_mixer_set_override_mode(s32 arg0);
+void audio_mixer_set_base_mode(s32 arg0);
+void audio_mixer_reset_modes(void);
 #ifdef NON_MATCHING
-void func_10012560(s32 arg0, u8 *arg1, s32 arg2);
+void mp3_id3_text_enqueue(s32 arg0, u8 *arg1, s32 arg2);
 #else
-void func_10012560(s32 arg0);
+void mp3_id3_text_enqueue(s32 arg0);
 #endif
-void func_10012588(s32 arg0);
-void func_100125CC(s32 arg0);
-void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
-s32 func_100126E8(s32 arg0, s32 arg1);
-s32  func_10012718(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
-s32  func_100127D0(void);
+void mp3_voice_init(s32 arg0);
+void mp3_voice_stop(s32 arg0);
+void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2);
+s32 text_queue_read(s32 arg0, s32 arg1);
+s32  mp3_voice_play_at_object(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
+s32  mp3_voice_is_playing(void);
 void func_10012A28(struct121 *arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_10012B84(struct11 *arg0, s32 arg1);
 void func_10012BD0(struct11 *arg0, s32 arg1);
@@ -178,23 +178,23 @@ void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2);
 void func_1001DAE4(struct139 *arg0, s16 arg1, s32 *arg2);
 // void func_1001E170(struct22 *arg0, s32 *w, f32 pitch, s16 vol, u8 pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, s32 arg9);
 // void func_1001E400(struct26 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4);
-s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
-f32  func_1001FA78(f32 arg0[4][4], s32 arg1);
+s32  n_synth_aux_fx_new(s16 arg0, s32 arg1, s32 arg2);
+f32  n_reverb_do_mod_func(f32 arg0[4][4], s32 arg1);
 /* chunk0 */
 void game_init_message_queues(void);
 void level_music_stop_all(void);
 void texture_scroll_clear(void);
 void func_15001B08(void);
-u16* func_15001B10(void);
-void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2);
-void func_15001970(void);
-void func_150026C4(s32 arg0);
-void func_150026E8(s32 arg0);
-void func_15002724(s32 arg0);
-void func_15002F40(s32 arg0);
-s32  func_15002FA0(s32 arg0);
-void func_15002FB4(s32 arg0);
-void func_1500310C(void);
+u16* quadtree_alloc_node(void);
+void quadtree_build_area(s32 arg0, s16 *arg1, s16 *arg2);
+void collision_build_reset(void);
+void collision_begin_area(s32 arg0);
+void collision_end_area(s32 arg0);
+void collision_count_dl_tris(s32 arg0);
+void collision_set_step_size(s32 arg0);
+s32  xor_f0f0f0f0(s32 arg0);
+void level_load_header(s32 arg0);
+void level_stub_noop(void);
 s32  texture_table_reset(void);
 void collision_build_quadtrees(void);
 s32  texture_table_find(s32 arg0);
@@ -312,9 +312,9 @@ void hotspot_fx_type87_88(s32 arg0, s32 arg1);
 void hotspot_fx_dispatch(s32 arg0, s32 arg1);
 void ambient_fx_spawn_type2(s32 arg0);
 void ambient_fx_dispatch(s32 arg0);
-void func_1500ABA0(s32 arg0);
-void func_1500BE40(s32 arg0);
-void func_1500BE68(void);
+void ambient_sounds_reset(s32 arg0);
+void ambient_timer_reset(s32 arg0);
+void ambient_state_reset(void);
 
 void func_1500EB20(void);
 void func_1500EB30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -402,22 +402,22 @@ void vec3_dir_to(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 void quadtree_set_test_box(f32 arg0, f32 arg1, f32 arg2);
 s32 func_15049440(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 f32  func_1504A5E0(f32 arg0);
-s32  func_1504AEF4(s32 arg0, s32 arg1);
-s32  func_1504C078(void);
-s32  func_1504C0B8(void);
-void func_1504C854(struct127 *arg0);
+s32  obj_coll_link_resolve_stub(s32 arg0, s32 arg1);
+s32  walk_anim_cancel_special(void);
+s32  walk_anim_land_id(void);
+void ctl_decay_button_latches(struct127 *arg0);
 
-void func_15052408(struct127 *arg0);
-void func_15052458(s32 arg0);
-void func_15052464(struct127 *arg0);
-void func_15052490(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3);
-void func_15052EF0(struct127 *arg0);
-struct127 *func_15052F58(s32 arg0, s32 arg1);
-void func_15053694(struct127 *arg0);
-void func_150536D0(struct127 *arg0);
-void func_150536E8(struct127 *arg0);
-void func_1505371C(struct127 *arg0);
-void func_15055D48(struct127 *arg0);
+void swim_exit_water(struct127 *arg0);
+void obj_state_nop(s32 arg0);
+void obj_state_remove_when_dead(struct127 *arg0);
+void obj_roll_pitch_step(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3);
+void obj_state_reset_idle(struct127 *arg0);
+struct127 *obj_reset_link_state(s32 arg0, s32 arg1);
+void obj_set_dead_fading(struct127 *arg0);
+void obj_set_dead_still(struct127 *arg0);
+void obj_state_dead_still(struct127 *arg0);
+void obj_state_dead_fading(struct127 *arg0);
+void player_state_shrink_death(struct127 *arg0);
 void obj_leash_to_spawn(struct127 *arg0);
 void obj_follow_water_level(struct127 *arg0);
 s32  obj_in_spawn_radius(struct127 *arg0, s32 arg1);
@@ -819,15 +819,15 @@ void obj_interaction_start_timed(void *arg0, s32 arg1, s32 arg2);
 s32  debug_tweak_int_mid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, char *arg4, s32 arg5);
 s32  debug_tweak_int(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32  debug_tweak_value(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32  func_15143E08(struct127 *arg0);
-s32  func_15144C2C(s16 arg0);
-f32  func_15144C8C(f32 arg0, f32 arg1);
-void func_151450B4(struct17 *arg0, struct17 *arg1, struct17 *arg2);
-s32  func_151454BC(u8 arg0, f32 arg1, struct17 *arg2);
-f32  func_15145A0C(f32 arg0, f32 arg1, f32 arg2);
-void func_15145A50(struct127 *arg0);
-void func_15146508(struct127 *arg0, struct127 *arg1);
-void func_151467A4(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7);
+s32  obj_get_yaw_byte(struct127 *arg0);
+s32  wrap_byte_angle(s16 arg0);
+f32  angle_diff_rad(f32 arg0, f32 arg1);
+void vec3_cross(struct17 *arg0, struct17 *arg1, struct17 *arg2);
+s32  camera_within_dist(u8 arg0, f32 arg1, struct17 *arg2);
+f32  curve_table_lookup(f32 arg0, f32 arg1, f32 arg2);
+void obj_set_destroyed(struct127 *arg0);
+void obj_broadcast_replace(struct127 *arg0, struct127 *arg1);
+void fx_random_flicker_update(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7);
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 void func_15149318(struct260 *arg0);
@@ -884,159 +884,159 @@ s32  debug_sprintf_put(u8 *arg0, u8 *arg1, u32 arg2);
 
 /* non-matching */
 
-void func_10001194(s32 arg0);
-void func_10001420(void);
-void func_100014C4(s32 arg0);
-void func_10001550(void *arg0, u8 arg1);
-// s16  func_100019F0(s16 *arg0, struct05 *arg1);
-//func_10001AA8
-// s32  func_100020D0(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3);
-//func_10002718
+void boot_game_thread_main(s32 arg0);
+void boot_clear_low_block(void);
+void tlb_remap_game_segment(s32 arg0);
+void init_printf_ldtob(void *arg0, u8 arg1);
+// s16  init_printf_ldunscale(s16 *arg0, struct05 *arg1);
+//init_printf_genld
+// s32  init_printf_xprintf(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3);
+//init_printf_put_arg
 // s32  func_10002DB0(s32 arg0, s32 arg1);
-//func_10002E50
+//pi_dev_mgr_main
 void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg3);
 struct00* func_10003220(struct00 *arg0);
 void func_10003330(struct00 *arg0);
 //func_100034E0
 //func_10003658
-// void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-// void func_100038E0(void);
-void func_10003920(void);
-// void func_10003BD0(void);
-//func_10003ACC
-s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-//func_10004074
-void func_100043B4(s32 *arg0, u32 arg1);
-//func_100046E4
-void func_1000480C(s32 devAddr, void *dramAddr, u32 size);
-void func_100049E0(s32 arg0);
-//func_10004DB0
-void func_100050A0(OSMesgQueue *arg0);
-void func_100052A0(s32 arg0);
+// void init_stub_noop4(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+// void debug_port_write_4040(void);
+void mem_clear_expansion_flag(void);
+// void heap_init(void);
+//framebuffer_fill_color
+s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+//heap_free
+void heap_set_block_tag(s32 *arg0, u32 arg1);
+//rom_dma_read_chunked
+void rom_read_direct(s32 devAddr, void *dramAddr, u32 size);
+void sched_thread_main(s32 arg0);
+//sched_try_start_gfx_task
+void sched_init(OSMesgQueue *arg0);
+void prenmi_thread_main(s32 arg0);
 //func_10005570
 //func_100056A0
 //func_100057E0
 //func_10005948
 //func_10005AB0
-void func_10005B04(s32 arg0);
-//func_10005BE0
+void tlb_area_init(s32 arg0);
+//tlb_page_bitmap_reset
 //func_10005C2C
 void func_1000709C(void);
 //func_10007C74
 //func_10007CC4
-//func_10007D28
+//os_dispatch_thread
 //func_10007DA0
 //func_10007DAC
 //func_10008120
-//func_10008180
-//func_10008B60
-//func_10008BC0
-//func_10008C04
-void func_10008C6C(u8 arg0, u8 arg1);
-//func_10008CE8
-//func_10008F90
-void func_10009400(s32 arg0);
-//func_100095A0
-s32 func_100097CC(u32 arg0, s32 arg1, s32 arg2);
-//func_100099BC
-void func_10009BE4(struct54 *arg0);
-s32 func_10009CBC(void *arg0, s32 arg1);
-s32  func_10009FFC(void);
-//func_1000A03C
-//func_1000A348
-//func_1000A420
-//func_1000A750
-//func_1000B060
-struct151 *func_1000B1FC(s32 arg0);
-//func_1000B294
-//func_1000B2F4
-//func_1000B3D4
-//func_1000B548
-//func_1000B638
-//func_1000B8B8
-//func_1000BAFC
-//func_1000BCBC
-//func_1000BF60
-//func_1000C350
-s32 func_1000C530(s32, u8, f32, f32, f32);
-//func_1000C7E8
-//func_1000C934
-//func_1000CA18
-//func_1000CAE4
-//func_1000CBF0
-//func_1000CC54
-//func_1000CDA0
-//func_1000CEAC
-//func_1000D2F8
-void func_1000D758(f32 arg0, f32 arg1, s32 arg2);
-//func_1000D96C
-//func_1000DE1C
-//func_1000DEC4
-void func_1000DF68(s32 arg0, s32 arg1, s32 arg2);
-//func_1000E134
-//func_1000E17C
-//func_1000E2F4
-s32 func_1000E46C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_1000E588(s32 arg0, s32 arg1, s32 arg2);
-//func_1000E654
-//func_1000E7A0
-//func_1000E8C4
-//func_1000E8F0
-//func_1000E934
-//func_1000EC24
-//func_1000ECCC
-s32  func_1000EDA0(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
-s32  func_1000EE70(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *arg5);
-//func_1000EFB4
-//func_1000F1A8
-//func_1000F44C
-//func_1000F4D8
-//func_1000F568
-//func_1000F6B8
-void func_1000F85C(u16 arg0, s16 arg1, s32 arg2);
-void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-u16  func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, s32 arg7, void *arg8, s32 arg9, s32 argA, s32 argB);
-//func_1000FC18
-//func_1000FD38
-//func_1000FDF4
-//func_1000FE88
-//func_1000FEF0
-s32  func_1000FF90(s32 arg0, s32 arg1, s32 arg2);
-//func_1001001C
-//func_100100E0
-u16 func_10010154(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
-u16 func_10010344(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
-//func_10010558
-void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
-//func_1001091C
-u16  func_10010BE8(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6);
-//func_10010E78
+//audio_system_init
+//music_player_set_voice_param
+//music_player_set_master_gain
+//music_seq_new_marker
+void music_seq_jump_marker(u8 arg0, u8 arg1);
+//music_player_start_seq
+//audio_mgr_init
+void audio_thread_main(s32 arg0);
+//audio_do_frame
+s32 audio_dma_callback(u32 arg0, s32 arg1, s32 arg2);
+//audio_clear_dma
+void snd_cache_entry_free(struct54 *arg0);
+s32 snd_cache_load_on_demand(void *arg0, s32 arg1);
+s32  snd_cache_dma_new(void);
+//snd_cache_update_dmas
+//snd_cache_flush_unused
+//sound_calc_pan_volume
+//sound_path_calc_pan_volume
+//sound_calc_pan_from_xz
+struct151 *music_find_song_or_queued(s32 arg0);
+//music_clear_link_refs
+//music_song_slot_alloc
+//music_queue_song
+//music_get_playing_songs
+//music_song_cb_mute_layers
+//music_song_cb_level4_meter
+//music_song_cb_pos_song93
+//music_song_cb_level19_ambience
+//music_song_cb_level1d_voices
+//music_song_cb_level1d_mode
+s32 music_song_cb_channel_effect(s32, u8, f32, f32, f32);
+//music_song_cb_level31_distance
+//music_song_cb_level37_song54
+//music_song_cb_level37_song54_b
+//music_song_cb_level42_song58
+//music_players_set_volume_ramp
+//music_player_apply_volume
+//music_song_can_start
+//music_player_process_messages
+//music_player_update_frame
+void music_update_all(f32 arg0, f32 arg1, s32 arg2);
+//music_play_song
+//music_stop_song
+//music_release_stopped_slots
+void music_song_set_fade(s32 arg0, s32 arg1, s32 arg2);
+//music_song_type_is_1_or_3
+//music_restart_type13_songs
+//music_set_all_paused
+s32 music_song_set_chans_level(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 music_song_set_chans_volume(s32 arg0, s32 arg1, s32 arg2);
+//music_song_set_marker
+//music_post_event_request
+//music_clear_event_flag1
+//music_song_get_player_flags
+//music_system_reset
+//sfx_cb_delayed_play_2d
+//sfx_cb_delayed_object_sound2
+s32  sfx_cb_delayed_object_sound(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
+s32  sfx_cb_follow_object(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *arg5);
+//sfx_cb_follow_object_anim
+//sound_voices_reset
+//sound_voice_is_looping
+//sound_id_is_playing
+//sound_pick_variant
+//sound_listener_volume_pan
+void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2);
+void sound_voice_update_3d(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+u16  sfx_emitter_start(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, s32 arg7, void *arg8, s32 arg9, s32 argA, s32 argB);
+//sfx_emitter_stop_at
+//sfx_emitter_stop_by_callback
+//sfx_emitter_stop_by_voice
+//sfx_emitter_free_index
+//sfx_emitter_find_by_voice
+s32  sfx_emitter_find_by_callback(s32 arg0, s32 arg1, s32 arg2);
+//sfx_emitter_set_volume_pitch
+//sfx_emitter_replace_callback
+u16 actor_sound_play(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
+u16 actor_sound_play2(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
+//actor_sound_play2_delayed
+void actor_sound_play_untracked(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
+//actor_sound_set_volume
+u16  sound_voice_play(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6);
+//sound_voice_play_at
 #ifdef NON_MATCHING
-u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+u16 sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 #else
-void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+void sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 #endif
-//func_10010FFC
-//func_10011310
-s32 func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8);
-//func_10011624
-//func_10011BB8
-//func_10011EB8
-//func_10012020
-//func_1001263C
-//func_100126E8
+//sound_play_for_actor
+//sound_stop_queue_process
+s32 sound_source_mix(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8);
+//sfx_emitters_update
+//sound_update_frame
+//sound_surface_footstep
+//audio_mixer_update_frame
+//mp3_voice_play
+//text_queue_read
 // void func_10017870(u8 arg0);
 void func_100186DC(void *arg0, void *arg1);
 void func_10018790(void *arg0, s32 arg1, u32 arg2, u32 arg3);
 // void func_10019D98(struct26 *arg0, u8 arg1);
 // void func_1001A030(struct26 *arg0, s32 arg1, s32 arg2, u32 arg3);
 // void func_1001A508(struct26 *arg0, struct25 *arg1, s32 arg2, s32 arg3);
-//func_1001AAE0
-//func_1001ADA4
-//func_1001AFEC
-//func_1001B07C
+//n_seqp_unmap_voice
+//n_seqp_cancel_voice_kill
+//n_seqp_lookup_voice
+//n_seqp_lookup_sound_quick
 //func_1001B200
-// s32  func_1001B310(void *arg0, void *arg1);
+// s32  n_seqp_voice_fx_mix(void *arg0, void *arg1);
 // u8   func_1001B450(void *arg0, void *arg1);
 Acmd *func_1001E530(s32 arg0, Acmd *arg1, s32 arg2);
 //func_1019EA88
@@ -1073,7 +1073,7 @@ Acmd *func_1001E530(s32 arg0, Acmd *arg1, s32 arg2);
 void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_1001CF38(struct139 *arg0, f32 arg1);
 
-u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+u16 *quadtree_build_node(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void level_lights_stub(s16 arg0);
 
 s32  render_set_scissor(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
@@ -1081,7 +1081,7 @@ s32  asset_load_ptr(s32 *, s32, ...);
 struct126 *func_1503195C(struct127 *, s32, s32);
 void dl_validate_list(void *arg0, u32 arg1, s32 arg2);
 #ifdef NON_MATCHING
-s32 ring_buffer_put_record(struct105 *arg0, u8 *arg1, s32 arg2); /* P98: the asm reads a1 / a2 (callback args left in place by func_10012560) */
+s32 ring_buffer_put_record(struct105 *arg0, u8 *arg1, s32 arg2); /* P98: the asm reads a1 / a2 (callback args left in place by mp3_id3_text_enqueue) */
 #else
 s32 ring_buffer_put_record(struct105*arg0);
 #endif
@@ -1113,13 +1113,13 @@ s32 camera_object_spawn(f32, f32, f32, f32, u8, s32, f32, f32, s32, s32, s32);
 struct127 *obj_find_child_nth(struct127 *, s32);
 void aiscript_set_flags_fc(void);
 s32  func_15081574(s32, f32, f32, s32, s32, s32);
-s32 func_15083568(struct127*, s32, f32, s32);
-s32  func_15083E0C(u8);
-struct127 *func_15083E90(u8);
-void func_15085710(s16, s16, s32);
-s32  func_150859AC(s16 arg0, s32 arg1); // a guess
-void func_1508B20C(f32, f32, f32, f32);
-s32 func_150A29C8(s32, s32);
+s32 obj_setup_run(struct127*, s32, f32, s32);
+s32  setup_entry_find_by_id(u8);
+struct127 *obj_find_by_setup_id(u8);
+void player_stat_modify(s16, s16, s32);
+s32  player_stat_get(s16 arg0, s32 arg1); // a guess
+void rail_event_add(f32, f32, f32, f32);
+s32 trigger_test_player(s32, s32);
 void mtxf_scale(f32 mtx[4][4], s32 x, s32 y, s32 z);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 void func_150A9B0C(f32 mtx[4][4], f32, f32, f32, f32, f32, f32);
@@ -1127,7 +1127,7 @@ void func_150AD770(void);
 f32  func_150AD780(f32);
 f32  func_150AD78C(f32);
 f32  func_150AD900(f32 *arg0, f32 *arg1);
-f32  func_150AD930(f32 *arg0);
+f32  vec3f_magnitude(f32 *arg0);
 s32  random_int(void);
 f32  random_float(void);
 void beam_effect_spawn_attached_ex(struct127*, u8, s16, s32, f32, f32, f32, f32, f32, f32, s16, s16, u16, f32, f32, u8, f32);
@@ -1146,28 +1146,28 @@ s32  effect3d_build_axes(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4
 void  sprite_quad_place(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6);
 s32 sprite_quad_place_cam(s32, s32, s32, f32, f32, f32, f32, f32, u8);
 f32  angle_byte_cos(u8);
-f32  func_15144598(struct_eu_15144598 *arg0);
-f32  func_1514462C(struct_eu_15144598 *arg0);
-f32  func_15144B68(f32 arg0);
+f32  spawn_region_area(struct_eu_15144598 *arg0);
+f32  spawn_region_volume(struct_eu_15144598 *arg0);
+f32  wrap_angle_rad(f32 arg0);
 #ifdef NON_MATCHING
-s32 func_1514D3B0(s32, s16, s32, s32); /* P218: the asm passes the event values (a2 / a3) through unmasked */
+s32 char_fx_send_event(s32, s16, s32, s32); /* P218: the asm passes the event values (a2 / a3) through unmasked */
 #else
-s32 func_1514D3B0(s32, s16, u8, u8);   /* the s32 version changes the C callers' default codegen */
+s32 char_fx_send_event(s32, s16, u8, u8);   /* the s32 version changes the C callers' default codegen */
 #endif
 s32  func_1515D6D0(s32 arg0, s32 arg1);
-void func_1515D4D4(s32, s32, s32, u8);
+void light_set_level_colour(s32, s32, s32, u8);
 void node_broadcast_types(void *, s32, s32, u8);
 void node_broadcast_type(s32, s32, u8);
 s32 node_handle_link_message(s32, u8, s32, s32, s32);
-void func_15174690(s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_15177410(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16 arg6, f32 arg7, s8 arg8, s8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
+void fx_dust_puff_behind_obj(s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void vtx_anim_light_create(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16 arg6, f32 arg7, s8 arg8, s8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 s32  func_1517EFAC(s32 arg0);
-void func_15178E14(u8);
-s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
-void *func_15195AA8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
-void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, u8 arg3);
-void func_151D5404(struct17*, f32, f32, f32, s16, s16, s32, s32);
-void func_151D5714(struct127*, f32*, f32*, u8, f32, u8, s32);
+void swarm_destroy_by_id(u8);
+s32  light_fx_add(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
+void *level_dl_add_texture_scroll(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void swinging_lamp_spawn(s32 arg0, u8 arg1, u8 arg2, u8 arg3);
+void rumble_all_players_at(struct17*, f32, f32, f32, s16, s16, s32, s32);
+void bone_beam_spawn(struct127*, f32*, f32*, u8, f32, u8, s32);
 s32 impact_debris_spawn(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
 s32 impact_smoke_puff_spawn(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void *arg6, s32 arg7, s32 arg8);
 void impact_dust_particle_spawn(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void *arg4, u8 arg5, s32 arg6);
@@ -1179,13 +1179,13 @@ void func_1019EA88(void);
 /* EU: new decompilation */
 void node_set_type(s32 arg0, s32 arg1);
 void node_broadcast_range(s32 arg0, s32 arg1, s32 arg2, u8 arg3);
-void func_151BCB54(void *arg0, void *arg1, u8 arg2);
+void point_emitter_handle_message(void *arg0, void *arg1, u8 arg2);
 void impact_burst(s32 arg0, u8 arg1, s32 arg2);
-void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5);
-void func_1517E6A4(f32 *arg0, structEU_16DC80 *arg1);
+void flash_blades_spawn(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5);
+void flare_node_remove(f32 *arg0, structEU_16DC80 *arg1);
 void effect_set_orbit_pos(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
 void swing_lamp_handle_event(u8 *arg0, s32 arg1, u8 arg2);
-void func_151BAA18(u8 *arg0, s32 arg1, u8 arg2);
+void screen_uv_mesh_handle_message(u8 *arg0, s32 arg1, u8 arg2);
 #ifdef NON_MATCHING
 s32 func_150AB278(struct_eu_bytes24 arg0);
 #else
@@ -1196,9 +1196,9 @@ void func_16000590(struct118 *arg0);
 s32  asset_rec_read_cached(u8 *arg0, s32 arg1, s32 *arg2);
 void node_list_insert(struct_eu_node *arg0, s32 arg1);
 void node_list_unlink(struct_eu_node *arg0);
-s32  func_150A2FCC(); // 3 params (u32, s32, s32 *); the caller in game_16EE20 passes a 4th
-s32 func_150027F8(Gfx *arg0);
-u16  func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
+s32  trigger_first_touched(); // 3 params (u32, s32, s32 *); the caller in game_16EE20 passes a 4th
+s32 dl_count_triangles(Gfx *arg0);
+u16  sound_voice_play_at(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
 #ifdef NON_MATCHING
 void objev_start_anim_cmd(void);
 #else
@@ -1206,64 +1206,64 @@ s32 objev_start_anim_cmd(void);
 #endif
 void ground_explosion(struct127 *arg0, struct127 *arg1, f32 *arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
 void *node_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
-s32  func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 arg4, s32 arg5, f32 *arg6, f32 *arg7);
-void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-void func_151B6150(struct127 *arg0, struct127 *arg1);
-s32  func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
+s32  ray_sphere_intersect(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 arg4, s32 arg5, f32 *arg6, f32 *arg7);
+void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void obj_dust_trail_on_link(struct127 *arg0, struct127 *arg1);
+s32  line_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
 struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
-s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
+s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
 s32  held_obj_byte7d_get(void);
 void object_beam_fire(struct127 *arg0, u8 arg1, s32 arg2);
 void object_bolt_fire(struct127 *arg0, u8 arg1, s32 arg2);
 void character_smoke_puff(struct127 *arg0, u8 arg1, s32 arg2);
 s32 point_emitter_spawn(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3);
-void *func_15147FF0(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA);
-void func_15143134(void *arg0, void *arg1, void *arg2);
-void func_151C384C(void *arg0, u8 arg1, s32 arg2);
+void *fxrec_spawn(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA);
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
+void fire_embers_spawn(void *arg0, u8 arg1, s32 arg2);
 void impact_blast_spawn_small(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
+void emit_sparks_in_angle_range(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
 void obj_start_hit_reaction(struct127 *arg0, s32 arg1, u8 arg2);
-void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1);
-s32 func_1514F250(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2);
-s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2);
+void quadtree_link_siblings(struct_eu_qnode *arg0, struct_eu_qnode *arg1);
+s32 char_fx_find_slot(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2);
+s32 char_fx_attach(void *arg0, struct127 *arg1, s16 arg2);
 void obj_interaction_attach_timed(struct127 *arg0, s32 arg1);
 s32 impact_dust_cloud_spawn(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
-s32  func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
+s32  sfx_cb_delayed_object_sound2(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
 #ifdef NON_MATCHING
-s32 func_151BEE00(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98: asm reloads a1 with lwc1 */
+s32 life_pickup_spawn(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98: asm reloads a1 with lwc1 */
 #else
-s32 func_151BEE00(f32 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6);
+s32 life_pickup_spawn(f32 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6);
 #endif
-void func_151A9940(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
-void func_1000DEC4(void);
+void kind_effect_spawn(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
+void music_release_stopped_slots(void);
 s32  asset_dma_into(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_15194978(struct127 *arg0, struct127 *arg1);
-void func_15152700(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7);
-f32 *func_15144B34(s32 arg0);
-s32 func_151DD4A0(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes); // osEepromLongWrite
-s32 func_151DD950(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes); // osEepromLongRead
-s32 func_151DDA90(OSMesgQueue *mq, u8 address, u8 *buffer); // osEepromWrite
+void hit_react_puff_burst(struct127 *arg0, struct127 *arg1);
+void emit_textured_burst(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7);
+f32 *camera_get_pos(s32 arg0);
+s32 eeprom_async_write_start(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes); // osEepromLongWrite
+s32 game_eeprom_long_read(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes); // osEepromLongRead
+s32 game_eeprom_write(OSMesgQueue *mq, u8 address, u8 *buffer); // osEepromWrite
 s32 impact_dust_cloud_wobble(struct_eu_2062D0_d *arg0, s32 arg1);
 struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *arg0);
-void func_1514C9E0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
-void func_15001A08(void);
+void spawn_line_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
+void quadtree_alloc_node_pool(void);
 void attach_fx_asset_release(s32 arg0);
-void func_150B1138(u8 *arg0, u8 arg1, s32 arg2);
-void func_1519D320(s32 arg0, f32 arg1, s32 arg2);
+void wake_spray_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void path_trail_spawn_effects(s32 arg0, f32 arg1, s32 arg2);
 f32  scenery_swing_angle_step(f32 *arg0, f32 arg1);
 f32  scenery_pendulum_angle_step(f32 *arg0, f32 arg1);
-void func_150D27E4(s32 arg0);
-void func_15145740(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
-void func_1503EE68(s32 arg0, f32 arg1, f32 arg2, s32 arg3);
-void func_15155C9C(void *arg0, u8 arg1);
-void func_151D43B4(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4);
-void func_1507EB4C(struct127 *arg0, s32 arg1);
+void sky_flash_uncount(s32 arg0);
+void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
+void breakable_scatter_pieces(s32 arg0, f32 arg1, f32 arg2, s32 arg3);
+void sprite2d_broadcast(void *arg0, u8 arg1);
+void obj_bone_point_or_pos(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4);
+void face_set_default_anim(struct127 *arg0, s32 arg1);
 struct127 *obj_find_by_spawn();
-s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6);
+s32 sprite_draw_if_visible(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+void rubble_scatter_spawn_ex(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6);
 s32 attack_spawn_at_point(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
-void func_151C40BC(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 arg7);
-void func_1507F298(u8 arg0, u8 *arg1);
+void surface_impact_effects(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 arg7);
+void idle_recent_push_one(u8 arg0, u8 *arg1);
 #ifdef NON_MATCHING
 /* P221: NM only (game_981E0's objfx_fc438 called it undeclared: implicit int, a wasm signature mismatch) */
 void gunfire_burst_spawn(struct127 *arg0, struct127 *arg1, u8 arg2, u8 arg3);

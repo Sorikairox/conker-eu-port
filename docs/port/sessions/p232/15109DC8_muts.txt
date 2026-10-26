@@ -27,8 +27,8 @@ s/    flipY = (random_int() \& 1) ? 0x80 : 0;/    flipY = (random_int() \& 1) ? 
 s/    t.mode = flipY | 5 | flipX | 0xC200;/    t.mode = flipY | 5 | flipX | 0xC000;/ % r00
 s/    t.u60\[2\] = 0xFF;/    t.u60[2] = 0;/ % r00
 s/    t.u60\[5\] = 4;/    t.u60[5] = 5;/ % r00
-s/    func_151308E4(\&t, 1, 0, obj\[0xC\], obj\[1\]);/    func_151308E4(\&t, 1, 0, obj[1], obj[0xC]);/ % r00
-s/    func_151308E4(\&t, 1, 0, obj\[0xC\], obj\[1\]);/    func_151308E4(\&t, 0, 0, obj[0xC], obj[1]);/ % r00
+s/    particle_spawn_basic(\&t, 1, 0, obj\[0xC\], obj\[1\]);/    particle_spawn_basic(\&t, 1, 0, obj[1], obj[0xC]);/ % r00
+s/    particle_spawn_basic(\&t, 1, 0, obj\[0xC\], obj\[1\]);/    particle_spawn_basic(\&t, 0, 0, obj[0xC], obj[1]);/ % r00
 s/    e.u0 = 1;/    e.u0 = 2;/ % r00
 s/    e.u4 = 4;/    e.u4 = 3;/ % r00
 s/    e.pos\[1\] = pos\[1\];/    e.pos[1] = pos[0];/ % r00
@@ -55,4 +55,4 @@ s/    e.u6A = 0;/    e.u6A = 1;/ % r00
 s/    e.u6C = 1.0f;/    e.u6C = 2.0f;/ % r00
 s/    e.u70\[1\] = 0;/    e.u70[1] = 1;/ % r00
 s/    e.u70\[3\] = -1;/    e.u70[3] = 0;/ % r00
-s/    func_151530A8(\&e, obj\[0xC\], obj\[1\]);/    func_151530A8(\&e, obj[0xC], obj[0]);/ % r00
+s/    emit_streaks_from_spec(\&e, obj\[0xC\], obj\[1\]);/    emit_streaks_from_spec(\&e, obj[0xC], obj[0]);/ % r00

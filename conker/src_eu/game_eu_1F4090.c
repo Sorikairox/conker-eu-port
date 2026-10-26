@@ -5,42 +5,43 @@
 
 #ifdef NON_MATCHING
 /* P188 */
-s32 func_15142A5C(u8 *);
-void func_151D56F8(u8 *arg0);
-s32 func_1514654C(u8 *, u8 *, s32, f32 **, f32 **, s32);
-void func_15145EA4(f32 **, f32 **, void *, s32);
-void func_151D5724(u8 *, u8 *, void *, void *, void *, u8 *, u8 *, u8 **, u8 **, u8 *);
-void func_151D44C4(u8 *, u8, s32);
-void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
-void func_151C7320(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
-u8 *func_151C284C(u8 *, u8 *, u8 *, u8 *, u8, s32, f32, f32, f32, f32, f32, u8, u8 *, u8, u8, u8, u8, u8, u8, s8, s32, f32, u8, s8, s32, u8, s32);
+s32 obj_sub_counter_positive(u8 *);
+void weapon_count_shot(u8 *arg0);
+s32 model_node_points_to_world(u8 *, u8 *, s32, f32 **, f32 **, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+void weapon_find_aim_target(u8 *, u8 *, void *, void *, void *, u8 *, u8 *, u8 **, u8 **, u8 *);
+void muzzle_light_small_spawn(u8 *, u8, s32);
+void bone_streak_fx_start(u8 *, u8 *, s32, u8 *, f32, u8, s32);
+void gun_side_spark_spray(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
+u8 *tracer_spawn(u8 *, u8 *, u8 *, u8 *, u8, s32, f32, f32, f32, f32, f32, u8, u8 *, u8, u8, u8, u8, u8, u8, s8, s32, f32, u8, s8, s32, u8, s32);
 extern u32 D_800AAEE0[]; /* [2 side] bone matrix byte offset */
 extern u8 D_800AAEE8[];  /* [2 side] f32[3] muzzle point */
 extern u8 D_800AAF00[];  /* [2 side] f32[3] aim point (with `aimed`) */
 extern u8 D_800AAF18[];  /* [2 side] f32[3] second point */
 extern u8 D_800AAF30[];  /* [2 side] f32[3] third point (direction = third - second) */
 extern u8 D_800AAF48[];  /* [2 side] f32[3] shot start point */
-extern f32 D_800AAFD8;   /* func_15145740 parameter */
+extern f32 D_800AAFD8;   /* obj_get_aim_vectors parameter */
 extern f32 D_800AAFDC;   /* smallest direction component for a side offset */
 extern f32 D_800AAFE0;   /* shot parameter (1 / 300) */
 extern u8 D_800DCE50;
 
 /*
- * object_gun_fire: P188: fires side `side` (0 / 1) of obj's gun (not while func_15142A5C says it is busy).
+ * object_gun_fire: P188: fires side `side` (0 / 1) of obj's gun (not while obj_sub_counter_positive says it is busy).
  * With a bone matrix (obj +0x1D4) the muzzle, second, third and shot-start points of the side (D_800AAEE8 /
  * D_800AAF18 / D_800AAF30 / D_800AAF48, plus the aim point D_800AAF00 when `aimed`) go to world space by the bone
- * (func_1514654C when an attachment `att` is given, which can refuse, else func_15145EA4); the tracer direction is
+ * (model_node_points_to_world when an attachment `att` is given, which can refuse, else mtx_transform_points); the tracer direction is
  * third - second and, when aimed, the aim direction is aim - muzzle. Without matrices (only when not aimed) the
  * muzzle is the object position +0x14.. + 49 up and 34 to the side (left for side 0) of the direction
- * func_15145740 gave, which also becomes the shot start. Then func_151D5724 (impact / target search), a sound
- * when the object has one (+0x318: func_151D8E18 with a random 11..21 pitch value and voice 1 << +0x23D), and with
- * matrices and a model that is not hidden (+0x74 & 0xF != 15): the muzzle puff (func_151D44C4), the tracer
- * (func_151D49B8) and the shot (func_151C7320), each always when aimed, otherwise only by chance (puff / tracer: 1
+ * obj_get_aim_vectors gave, which also becomes the shot start. Then weapon_find_aim_target (impact / target search), a sound
+ * when the object has one (+0x318: rumble_request with a random 11..21 pitch value and voice 1 << +0x23D), and with
+ * matrices and a model that is not hidden (+0x74 & 0xF != 15): the muzzle puff (muzzle_light_small_spawn), the tracer
+ * (bone_streak_fx_start) and the shot (gun_side_spark_spray), each always when aimed, otherwise only by chance (puff / tracer: 1
  * in 2 and single-player-ish modes D_80082FA0 < 2; shot: random & the D_800DCE50 mask is 0), and the projectile
- * (func_151C284C: speed 300, random life / size, kind 26). The asm returns func_151C284C's result (0 on the early
+ * (tracer_spawn: speed 300, random life / size, kind 26). The asm returns tracer_spawn's result (0 on the early
  * exits) but no caller reads it and game_eu_51190 declares it void, so it is void here (one wasm signature).
  */
-void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s32 arg6) {
+/* was func_151C62D0 */
+void object_gun_fire(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s32 arg6) {
     f32 *src[5];
     f32 *dst[5];
     f32 aim[3];      /* sp328 */
@@ -68,12 +69,12 @@ void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s3
     if (side >= 2) {
         return;
     }
-    if (func_15142A5C(obj) != 0) {
+    if (obj_sub_counter_positive(obj) != 0) {
         return;
     }
-    func_151D56F8(obj);
+    weapon_count_shot(obj);
     if (!aimed) {
-        func_15145740((struct127 *) obj, (s32) aim, (s32) out280, (s32) out228, D_800AAFD8);
+        obj_get_aim_vectors((struct127 *) obj, (s32) aim, (s32) out280, (s32) out228, D_800AAFD8);
     }
     if (*(u8 **) (obj + 0x1D4) != NULL) {
         bone = *(u8 **) (obj + 0x1D4) + D_800AAEE0[side];
@@ -88,11 +89,11 @@ void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s3
         src[3] = (f32 *) (D_800AAF48 + side * 12);
         src[4] = (f32 *) (D_800AAF00 + side * 12);
         if (att != NULL) {
-            if (func_1514654C(obj, att, 0, src, dst, aimed ? 5 : 4) == 0) {
+            if (model_node_points_to_world(obj, att, 0, src, dst, aimed ? 5 : 4) == 0) {
                 return;
             }
         } else {
-            func_15145EA4(src, dst, bone, aimed ? 5 : 4);
+            mtx_transform_points(src, dst, bone, aimed ? 5 : 4);
         }
         dir[0] -= second[0];
         dir[1] -= second[1];
@@ -124,7 +125,7 @@ void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s3
         start[1] = muzzle[1];
         start[2] = muzzle[2];
     }
-    func_151D5724(obj, (u8 *) muzzle, aim, out280, out228, (u8 *) out304, (u8 *) out292, &hit244, &hit240,
+    weapon_find_aim_target(obj, (u8 *) muzzle, aim, out280, out228, (u8 *) out304, (u8 *) out292, &hit244, &hit240,
                   (u8 *) start);
     if (*(u8 **) (obj + 0x318) != NULL) {
         snd.unk0 = 1;
@@ -133,15 +134,15 @@ void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s3
         random_int();
         snd.unk4 = 8;
         snd.unk6 = -1;
-        func_151D8E18(&snd, 0, 255, 1);
+        rumble_request(&snd, 0, 255, 1);
     }
     if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 15) {
         if (aimed || (D_80082FA0 < 2 && (random_int() & 1))) {
-            func_151D44C4((u8 *) muzzle, flag, arg6);
+            muzzle_light_small_spawn((u8 *) muzzle, flag, arg6);
         }
         if (aimed || D_80082FA0 < 2) {
             if (random_int() & 1) {
-                func_151D49B8((u8 *) second, (u8 *) dir, (s32) bone, obj, 1.0f, flag, arg6);
+                bone_streak_fx_start((u8 *) second, (u8 *) dir, (s32) bone, obj, 1.0f, flag, arg6);
             }
         }
         mask = 1;
@@ -149,42 +150,44 @@ void func_151C62D0(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, s3
             mask |= 1 << n;
         }
         if (aimed || !(random_int() & mask)) {
-            func_151C7320((s32) obj, side, (s32) muzzle, kind, flag, arg6);
+            gun_side_spark_spray((s32) obj, side, (s32) muzzle, kind, flag, arg6);
         }
     }
     r1 = random_float();
     r2 = random_float();
     r = random_int();
-    func_151C284C((u8 *) start, (u8 *) aim, hit244, hit240, 1, 0, 300.0f, D_800AAFE0, r1 * 10.0f + 25.0f,
+    tracer_spawn((u8 *) start, (u8 *) aim, hit244, hit240, 1, 0, 300.0f, D_800AAFE0, r1 * 10.0f + 25.0f,
                                r2 * 150.0f + 400.0f, 50.0f, r % 156 + 100, obj, !aimed, !aimed, !aimed, 8, !aimed, 1,
                                0, 26, 0.0f, 255, -1, 0, flag, arg6);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C62D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/object_gun_fire.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P160: func_151C6F7C reads three arguments (the matching callers below leave a 4th in a3) */
-void func_151C6F7C(u8 *obj, f32 *out, u8 kind);
+/* P160: object_bone_point reads three arguments (the matching callers below leave a 4th in a3) */
+void object_bone_point(u8 *obj, f32 *out, u8 kind);
 
-// object_bone_point_0: D_80090010 handler 0 (func_151D469C): bone point 0 of obj into out (arg1 unused)
-void func_151C6F24(u8 *obj, s32 arg1, f32 *out) {
-    func_151C6F7C(obj, out, 0);
+// object_bone_point_0: D_80090010 handler 0 (object_point_effect_spawn): bone point 0 of obj into out (arg1 unused)
+/* was func_151C6F24 */
+void object_bone_point_0(u8 *obj, s32 arg1, f32 *out) {
+    object_bone_point(obj, out, 0);
 }
 
-// object_bone_point_1: D_80090010 handler 1 (func_151D469C): bone point 1 of obj into out (arg1 unused)
-void func_151C6F50(u8 *obj, s32 arg1, f32 *out) {
-    func_151C6F7C(obj, out, 1);
+// object_bone_point_1: D_80090010 handler 1 (object_point_effect_spawn): bone point 1 of obj into out (arg1 unused)
+/* was func_151C6F50 */
+void object_bone_point_1(u8 *obj, s32 arg1, f32 *out) {
+    object_bone_point(obj, out, 1);
 }
 #else
-void func_151C6F7C();
+void object_bone_point();
 
-void func_151C6F24(s32 arg0, s32 arg1, s32 arg2) {
-    func_151C6F7C(arg0, arg2, 0, arg2);
+void object_bone_point_0(s32 arg0, s32 arg1, s32 arg2) {
+    object_bone_point(arg0, arg2, 0, arg2);
 }
 
-void func_151C6F50(s32 arg0, s32 arg1, s32 arg2) {
-    func_151C6F7C(arg0, arg2, 1, arg2);
+void object_bone_point_1(s32 arg0, s32 arg1, s32 arg2) {
+    object_bone_point(arg0, arg2, 1, arg2);
 }
 #endif
 
@@ -195,21 +198,22 @@ extern u8 D_800AAEE8[];
 
 // object_bone_point: transforms point `kind` (0 or 1) of the D_800AAEE8 offset table (3 floats each) by the bone
 // matrix at byte offset D_800AAEE0[kind] in the object's matrix block (obj+0x1D4) and writes it to out.
-void func_151C6F7C(u8 *obj, f32 *out, u8 kind) {
-    func_15143134(D_800AAEE8 + kind * 12, out, *(u8 **)(obj + 0x1D4) + D_800AAEE0[kind]);
+/* was func_151C6F7C */
+void object_bone_point(u8 *obj, f32 *out, u8 kind) {
+    mtx_transform_point_or_origin(D_800AAEE8 + kind * 12, out, *(u8 **)(obj + 0x1D4) + D_800AAEE0[kind]);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C6F7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/object_bone_point.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P163 */
-s32 func_15142A5C(u8 *);
-void func_151D56F8(u8 *arg0);
-void func_15145EA4(f32 **, f32 **, void *, s32);
-void func_151D44C4(u8 *, u8, s32);
-void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
-void func_151C7320(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
+s32 obj_sub_counter_positive(u8 *);
+void weapon_count_shot(u8 *arg0);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+void muzzle_light_small_spawn(u8 *, u8, s32);
+void bone_streak_fx_start(u8 *, u8 *, s32, u8 *, f32, u8, s32);
+void gun_side_spark_spray(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
 void beam_light_effect_spawn(f32 *, void *, void *, void *, u8, u8 *, f32, f32, f32, u8 *, u8, u8, u8, u8, s32, s8, s32, u8, u8, s32);
 extern u32 D_800AAEE0[];  /* [2 kind] bone matrix byte offset */
 extern u8 D_800AAEE8[];   /* [2 kind] f32[3] muzzle point */
@@ -220,13 +224,14 @@ extern f32 D_800AAFE8;
 extern f32 D_800AAFEC;
 
 /* Returns 0: game_981E0 calls it undeclared (int); difftested as the void draft d_6a28.c. */
-// object_muzzle_fire: for point kind arg1 (0 / 1) of obj (not while func_15142A5C says it is busy), moves the
+// object_muzzle_fire: for point kind arg1 (0 / 1) of obj (not while obj_sub_counter_positive says it is busy), moves the
 // kind's three D_800AAEE8 / D_800AAF18 / D_800AAF30 points to world space by the bone matrix, spawns the muzzle
-// puff (func_151D44C4), the tracer from the second point along (third - second) (func_151D49B8) and the shot
-// (func_151C7320); when the object's link 0x1B record is active (+0x9C bit 0) with a light at +0x91, spawns its
+// puff (muzzle_light_small_spawn), the tracer from the second point along (third - second) (bone_streak_fx_start) and the shot
+// (gun_side_spark_spray); when the object's link 0x1B record is active (+0x9C bit 0) with a light at +0x91, spawns its
 // light effect (beam_light_effect_spawn) from the muzzle with a copy of the record's 0x64-byte light block whose position
 // (+0x2C) is the record's point (+0x40), or for light kinds >= 2 part of the way from the muzzle to it
-s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
+/* was func_151C6A28 */
+s32 object_muzzle_fire(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 *src[3];
     f32 *dst[3];
     u8 *bone;
@@ -243,10 +248,10 @@ s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
     if (obj == NULL || arg1 >= 2) {
         return 0;
     }
-    if (func_15142A5C(obj) != 0) {
+    if (obj_sub_counter_positive(obj) != 0) {
         return 0;
     }
-    func_151D56F8(obj);
+    weapon_count_shot(obj);
     if (*(u8 **)(obj + 0x1D4) == NULL) {
         return 0;
     }
@@ -257,14 +262,14 @@ s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
     dst[1] = second;
     dst[2] = dir;
     bone = *(u8 **)(obj + 0x1D4) + D_800AAEE0[arg1];
-    func_15145EA4(src, dst, bone, 3);
+    mtx_transform_points(src, dst, bone, 3);
     dir[0] -= second[0];
     dir[1] -= second[1];
     dir[2] -= second[2];
-    func_151D44C4(muzzle, arg2, arg3);
-    func_151D49B8((u8 *)second, (u8 *)dir, (s32)bone, obj, 1.0f, arg2, arg3);
-    func_151C7320((s32)obj, arg1, (s32)muzzle, -1, arg2, arg3);
-    if (func_1514F250(*(struct_eu_link **)(obj + 0x2F4), 0x1B, &link) == 0) {
+    muzzle_light_small_spawn(muzzle, arg2, arg3);
+    bone_streak_fx_start((u8 *)second, (u8 *)dir, (s32)bone, obj, 1.0f, arg2, arg3);
+    gun_side_spark_spray((s32)obj, arg1, (s32)muzzle, -1, arg2, arg3);
+    if (char_fx_find_slot(*(struct_eu_link **)(obj + 0x2F4), 0x1B, &link) == 0) {
         return 0;
     }
     rec = *(u8 **)((u8 *)link + 0x10);
@@ -295,7 +300,7 @@ s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C6A28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/object_muzzle_fire.s")
 #endif
 
 #ifdef NON_MATCHING /* P262: the C definition's exact types (game_eu_1306B0) */
@@ -312,7 +317,8 @@ extern f32 D_800AAFF8;
 extern f32 D_800AAFFC;
 extern f32 D_800AB000;
 
-void func_151C7320(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5)
+/* was func_151C7320 */
+void gun_side_spark_spray(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5)
 {
   f32 v[2];
   f32 t; // fakematch: named rand temp (s162 recipe: named float temps)
@@ -354,7 +360,8 @@ typedef struct {
     s32 u78;
 } Blk7C_7450;
 
-void func_151C7450(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151C7450 */
+void obj_attached_model_fx_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     Blk7C_7450 blk;
     u8 tmp[1];
     void *temp_v0;
@@ -393,21 +400,22 @@ void func_151C7450(u8 *arg0, u8 arg1, s32 arg2) {
     blk.u72 = 1;
     blk.u74 = 0xFF;
     blk.u78 = 0;
-    temp_v0 = func_15132BBC(&blk, 3, 0xFF, 0, 1, arg1, arg2);
+    temp_v0 = mdl_particle_spawn_ex(&blk, 3, 0xFF, 0, 1, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x170, tmp, 1);
     }
 }
 
 #ifdef NON_MATCHING
-/* P163: func_15142A5C (game_eu_170760) takes only the object; the matching build passes a second argument the
+/* P163: obj_sub_counter_positive (game_eu_170760) takes only the object; the matching build passes a second argument the
    callee ignores, which would be a call signature mismatch on wasm. */
-s32 func_15142A5C(u8 *);
+s32 obj_sub_counter_positive(u8 *);
 #else
-s32 func_15142A5C(u8 *, u8 *);
+s32 obj_sub_counter_positive(u8 *, u8 *);
 #endif
 
-s32 func_151C75E8(u8 *arg0) {
+/* was func_151C75E8 */
+s32 fx_alpha_from_parent_update(u8 *arg0) {
     u8 *p;
     f32 f;
 
@@ -416,9 +424,9 @@ s32 func_151C75E8(u8 *arg0) {
         return 0;
     }
 #ifdef NON_MATCHING
-    if (func_15142A5C(p) != 0) {
+    if (obj_sub_counter_positive(p) != 0) {
 #else
-    if (func_15142A5C(p, arg0) != 0) {
+    if (obj_sub_counter_positive(p, arg0) != 0) {
 #endif
         *(s32 *)(arg0 + 0x60) |= 0x20000;
     } else {

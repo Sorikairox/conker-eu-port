@@ -3,6 +3,6 @@ s/    if (\*(u8 \*\*)(node + 0x84) != NULL) {/    if (1) {/
 s/node_destroy(\*(struct102 \*\*)(node + 0x84));/node_destroy(*(struct102 **)(node + 0x80));/
 s/(s32)node, \*(s32 \*)(node + 0x10));/(s32)node, *(s32 *)(node + 0x14));/
 s/(s32)node, \*(s32 \*)(node + 0x10));/0, *(s32 *)(node + 0x10));/
-s/func_1000FD38((s32)func_1518E808,/func_1000FD38(0,/
+s/sfx_emitter_stop_by_callback((s32)effect_sound_follow_owner,/sfx_emitter_stop_by_callback(0,/
 s/(node + 0x30 + 0x48));/(node + 0x30 + 0x44));/
 s/    attach_fx_asset_release(/    (/

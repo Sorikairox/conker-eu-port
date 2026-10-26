@@ -25,6 +25,6 @@
 \#^        for (i = 0; i < 4; i++) {$#s/i < 4/i < 3/
 \#^            spec.x = (f32) i \* 71.5f + 35.75f - 143.0f;$#s/71.5f/71.0f/
 \#^            spec.kind = kinds.b\[i\];$#s/kinds.b\[i\]/kinds.b[0]/
-\#^            rec = (u8 \*) func_151559FC(&spec, 0xB, 0, 0, 0x58, group, 1);$#s/0xB/0xA/
-\#^            rec = (u8 \*) func_151559FC(&spec, 0xB, 0, 0, 0x58, group, 1);$#s/group, 1/group, 0/
+\#^            rec = (u8 \*) sprite2d_spawn(&spec, 0xB, 0, 0, 0x58, group, 1);$#s/0xB/0xA/
+\#^            rec = (u8 \*) sprite2d_spawn(&spec, 0xB, 0, 0, 0x58, group, 1);$#s/group, 1/group, 0/
 \#^                memcpy(rec + 0x70, &blk, 0x58);$#s/0x70/0x6C/

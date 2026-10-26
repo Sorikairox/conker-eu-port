@@ -57,7 +57,7 @@ def addresses():
 # 0x16xxxxxx): real data that n64mem.py mirrors / relocates. Below that: ROM offsets, ids, physical addresses.
 LOW_LIMIT = 0x10000000
 # Symbols whose KSEG0 address happens to equal a RAM data symbol but that the C uses as a number (reviewed by hand).
-REVIEWED_ABS = {'D_2D810': 'ROM offset handed to the PI DMA func_10004514 (game_eu_4A070.c); 0x8002D810 = D_8002D4B0 is a coincidence'}
+REVIEWED_ABS = {'D_2D810': 'ROM offset handed to the PI DMA rom_dma_read (game_eu_4A070.c); 0x8002D810 = D_8002D4B0 is a coincidence'}
 SYM = re.compile(r'\bD_[0-9A-Fa-f]+\b')
 
 

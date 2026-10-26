@@ -4,13 +4,14 @@
 
 
 #ifdef NON_MATCHING
-/* func_15034B50 (P57): per-object adjustment entries for the face (eyelids / mouth), appended to buf as
- * {u16 offset, s16 value} pairs for func_150A86B0; returns the end (func_150342D0 writes the 0x1000 terminator).
+/* obj_adjust_entries_face (P57): per-object adjustment entries for the face (eyelids / mouth), appended to buf as
+ * {u16 offset, s16 value} pairs for func_150A86B0; returns the end (obj_adjust_list_build writes the 0x1000 terminator).
  * obj = &D_800CC2D0[i] (bytes): +4 type, +0x1FE blink amount, +0x1FF blink state, +0x200 blink timer,
  * +0x201 blink angle, +0x202 random blink offset, +0x203 blink speed; +0x204 mouth amount (s16), +0x206 mouth
  * state, +0x207 mouth timer, +0x208 mouth angle (s8), +0x209 mouth speed. a2 / a3: joint indices (0xFF = none). */
 extern s16 D_800C4310;
-s16 *func_15034B50(s16 *buf, u8 *obj, s32 a2, s32 a3) {
+/* was func_15034B50 */
+s16 *obj_adjust_entries_face(s16 *buf, u8 *obj, s32 a2, s32 a3) {
     s32 type = obj[4];
     s32 noeye = (type == 0x70);
     s32 off1, off2, rnd, sp, lo, r, sgn, v;
@@ -112,12 +113,13 @@ s16 *func_15034B50(s16 *buf, u8 *obj, s32 a2, s32 a3) {
     return buf;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15034B50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/obj_adjust_entries_face.s")
 #endif
 
 extern s16 D_800C4310;
 
-void func_150351A4(u8 *arg0, s32 arg1, s32 arg2)
+/* was func_150351A4 */
+void obj_lower_joints_by_face(u8 *arg0, s32 arg1, s32 arg2)
 {
   f32 temp_f0;
   s32 temp_v1;
@@ -140,21 +142,22 @@ void func_150351A4(u8 *arg0, s32 arg1, s32 arg2)
   }
 }
 
-void func_15035210(void) {
+/* was func_15035210 */
+void reflect_queue_reset(void) {
     D_800C4320 = 0;
 }
 
 #ifdef NON_MATCHING
 void guMtxF2L2(float mf[4][4], Mtx *m);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-s32 func_150ADE40(s32 x0, s32 z0, s32 x1, s32 z1);
-void func_15034A18(struct127 *obj);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+s32 approx_dist2_int(s32 x0, s32 z0, s32 x1, s32 z1);
+void obj_hide_masked_joints(struct127 *obj);
 
 /* IDO's f32 -> u32 conversion (cvt.w.s, truncating): a result below 0 gives 0xFFFFFFFF. In C a negative value
  * converted to u32 is undefined (wasm traps), e.g. mode 0 with the object below the plane (y < b). */
 #define IDO_F2U8(v) (((v) <= -1.0f) ? 0xFF : (u8) (u32) (v))
 
-/* P95: builds the mirrored joint matrices of one draw-queue entry `e` (func_15035AF8: the object itself, then each
+/* P95: builds the mirrored joint matrices of one draw-queue entry `e` (reflect_queue_object: the object itself, then each
  * attachment) and sets the entry alpha e->unk0[4].
  *   src = `model`: nmtx joint matrices of 0x40 bytes (Mtx fixed point when `fixed` != 0, else f32 matrices whose
  *         last column is reset to (0, 0, 0, 1) in place); dst = `mtx` (f32, converted to Mtx in place when
@@ -162,11 +165,12 @@ void func_15034A18(struct127 *obj);
  *   mode 0 / 1: reflection in the plane y = b: dst = src * diag(1, -1, 1, 1), dst.y = 2b - src.y. The fade distance
  *         is the height y - b of the object above the plane.
  *   mode 2: reflection about the vertical plane through (a, b, c) turned by `f` around y (rotate by -f, flip x,
- *         rotate by f, around the point). The fade distance is the 2D distance (a, c) - (x, z) (func_150ADE40).
+ *         rotate by f, around the point). The fade distance is the 2D distance (a, c) - (x, z) (approx_dist2_int).
  *   other modes: nothing at all.
  * Alpha: 0 beyond h, `alpha` below g (mode 0: ramped in over the first 10 units), linear between g and h.
- * Finally an object with unk9C set gets func_15034A18 run on the new matrices (unk1D4 swapped for the call). */
-void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c,
+ * Finally an object with unk9C set gets obj_hide_masked_joints run on the new matrices (unk1D4 swapped for the call). */
+/* was func_15035220 */
+void reflect_build_joint_matrices(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c,
                    f32 d, f32 f, f32 x, f32 y, f32 z, f32 g, f32 h, f32 alpha, s32 fixed, s32 tofixed) {
     f32 flip[4][4];
     f32 rot1[4][4];
@@ -193,7 +197,7 @@ void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32
                 src[3][3] = 1.0f;
             }
             dst = (f32 (*)[4]) (mtx + (i << 6));
-            func_150A7A48(src, flip, dst);
+            mtxf_mul(src, flip, dst);
             dst[3][1] = src[3][1] - (src[3][1] - b) * 2;
             if (tofixed) {
                 bcopy(dst, tmp, 0x40);
@@ -221,9 +225,9 @@ void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32
             dst[3][0] -= a;
             dst[3][1] -= b;
             dst[3][2] -= c;
-            func_150A7A48(dst, rot1, dst);
-            func_150A7A48(dst, flip, dst);
-            func_150A7A48(dst, rot2, dst);
+            mtxf_mul(dst, rot1, dst);
+            mtxf_mul(dst, flip, dst);
+            mtxf_mul(dst, rot2, dst);
             dst[3][0] += a;
             dst[3][1] += b;
             dst[3][2] += c;
@@ -232,7 +236,7 @@ void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32
                 guMtxF2L2(tmp, (Mtx *) dst);
             }
         }
-        dist = (f32) func_150ADE40((s32) a, (s32) c, (s32) x, (s32) z);
+        dist = (f32) approx_dist2_int((s32) a, (s32) c, (s32) x, (s32) z);
     } else {
         return;
     }
@@ -252,15 +256,16 @@ void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32
     if (obj != NULL && obj->unk9C != 0) {
         saved = obj->unk1D4;
         obj->unk1D4 = (struct255 *) mtx;
-        func_15034A18(obj);
+        obj_hide_masked_joints(obj);
         obj->unk1D4 = saved;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15035220.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_build_joint_matrices.s")
 #endif
 
-struct_eu_size0C *func_150359B8(void) {
+/* was func_150359B8 */
+struct_eu_size0C *reflect_queue_alloc(void) {
     if (D_800C4320 == 15) {
         return NULL;
     }
@@ -269,11 +274,12 @@ struct_eu_size0C *func_150359B8(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150A6840(s32, s32 *, f32, f32, f32, f32, f32, f32);
+s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern s32 D_800DA030;
 extern f32 D_80098120;
 
-s32 func_15035A04(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
+/* was func_15035A04 */
+s32 reflect_is_culled(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
     s32 sp28 = D_800BE628;
     struct124 *e = D_800D1C90[arg1[4]];
     f32 w = (f32)(u16)e->unkE;
@@ -285,25 +291,26 @@ s32 func_15035A04(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
     } else {
         y = *(f32 *)(arg1 + 0x18) + h;
     }
-    return func_150A6840(sp28, &D_800DA030, *(f32 *)(arg2 + 0x30), y, *(f32 *)(arg2 + 0x38),
+    return camera_view_test_sphere(sp28, &D_800DA030, *(f32 *)(arg2 + 0x30), y, *(f32 *)(arg2 + 0x38),
                          w * *(f32 *)(arg1 + 0x14C), w * *(f32 *)(arg1 + 0x150), D_80098120) == 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15035A04.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_is_culled.s")
 #endif
 #ifdef NON_MATCHING
-void func_15035220(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 x, f32 y, f32 z, f32 g, f32 h, f32 alpha, s32 shadow, s32 sub);
-s32 func_1502DE10(s32 id);
-void func_1502D83C(s32 id, u8 *col);
+void reflect_build_joint_matrices(struct127 *obj, struct_eu_size0C *e, s32 mode, s32 model, s32 mtx, s32 nmtx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 x, f32 y, f32 z, f32 g, f32 h, f32 alpha, s32 shadow, s32 sub);
+s32 model_joint_mtx_count(s32 id);
+void obj_ambient_colour(s32 id, u8 *col);
 s32 approx_dist3_int(s32 dx, s32 dy, s32 dz);
-s32 func_15031360(u8 *att, u8 *obj, s32 *model, s32 *out);
+s32 attachment_get_matrices(u8 *att, u8 *obj, s32 *model, s32 *out);
 f32 *allocate_memory(s32, s32, s32, s32);
 
 /* P93: queue the draw (and shadow) of object `idx` for this frame. Fades out between max - 200 and max (max = 1400,
  * or 10000 when D_800C35EA == 1) of the camera distance, scaled by obj->unk7 (0xFF = opaque). Reserves the
- * object's joint matrices in the D_800C42A8 arena (func_1502DE10(id) x 0x40 bytes) unless func_15035A04 culls it,
- * then adds one entry per attachment of D_800C3EE0 that belongs to the object (func_15031360 accepts it). */
-void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, f32 h, f32 alpha) {
+ * object's joint matrices in the D_800C42A8 arena (model_joint_mtx_count(id) x 0x40 bytes) unless reflect_is_culled culls it,
+ * then adds one entry per attachment of D_800C3EE0 that belongs to the object (attachment_get_matrices accepts it). */
+/* was func_15035AF8 */
+void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, f32 h, f32 alpha) {
     struct127 *obj;
     struct_eu_size0C *e;
     u8 *att;
@@ -335,7 +342,7 @@ void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, 
     if (opacity == 0) {
         return;
     }
-    nmtx = func_1502DE10(obj->id);
+    nmtx = model_joint_mtx_count(obj->id);
     if ((u32) (D_800C3E7C << 6) < (u32) (D_800C42A8 + (nmtx << 6) - D_800C42AC)) {
         return;   /* the matrix arena is full */
     }
@@ -355,12 +362,12 @@ void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, 
         fade = (s32) ((u32) fade * opacity) >> 8;
     }
 
-    e = func_150359B8();
+    e = reflect_queue_alloc();
     if (e == NULL) {
         return;
     }
     *(s32 *) &e->unk0[0] = D_800C42A8;
-    func_1502D83C(idx, (u8 *) col);
+    obj_ambient_colour(idx, (u8 *) col);
     e->unk0[5] = col[0];
     e->unk0[6] = col[1];
     e->unk0[7] = col[2];
@@ -368,10 +375,10 @@ void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, 
     e->unk0[8] = idx;
     e->unk0[9] = obj->unique_id;
     model = (s32) obj->unk1D4;
-    func_15035220(obj, e, mode, model, *(s32 *) &e->unk0[0], nmtx, a, b, c, d, f, obj->x_position, obj->y_position,
+    reflect_build_joint_matrices(obj, e, mode, model, *(s32 *) &e->unk0[0], nmtx, a, b, c, d, f, obj->x_position, obj->y_position,
                   obj->z_position, g, h, alpha, 0, 0);
     e->unk0[4] = (s32) ((u32) e->unk0[4] * fade) >> 8;
-    if (func_15035A04(mode, (u8 *) obj, (u8 *) model, b) != 0) {
+    if (reflect_is_culled(mode, (u8 *) obj, (u8 *) model, b) != 0) {
         D_800C4320--;   /* culled: drop the entry again */
         return;
     }
@@ -383,7 +390,7 @@ void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, 
         if (att[0] != obj->unique_id || att[3] == 0) {
             continue;
         }
-        e = func_150359B8();
+        e = reflect_queue_alloc();
         if (e == NULL) {
             return;
         }
@@ -394,7 +401,7 @@ void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, 
         e->unk0[8] = idx;
         e->unk0[9] = obj->unique_id;
         e->unk0[0xA] = att[6];
-        if (func_15031360(att, (u8 *) obj, &model, out) == 0) {
+        if (attachment_get_matrices(att, (u8 *) obj, &model, out) == 0) {
             continue;
         }
         a8 = (s32) alpha;
@@ -409,20 +416,21 @@ void func_15035AF8(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, f32 g, 
         }
         *(s32 *) &e->unk0[0] = mtx;
         shadow = *(s32 *) (att + 0x34) != 0 || *(s32 *) (att + 0x48) != 0;
-        func_15035220(NULL, e, mode, model, mtx, nmtx, a, b, c, d, f, obj->x_position, obj->y_position, obj->z_position,
+        reflect_build_joint_matrices(NULL, e, mode, model, mtx, nmtx, a, b, c, d, f, obj->x_position, obj->y_position, obj->z_position,
                       g, h, (f32) ((s32) ((u32) a8 * att[3]) >> 8), shadow, 1);
         e->unk0[4] = (s32) ((u32) e->unk0[4] * fade) >> 8;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15035AF8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_queue_object.s")
 #endif
 
 #ifdef NON_MATCHING
 extern s32 D_80083350;
 extern s32 D_800834D0;
 
-u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_1503605C */
+u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 *temp_s4;
     s32 *var_a0_2;
     s32 temp_t6;
@@ -494,14 +502,15 @@ u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
     return var_a0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_1503605C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_emit_entries_dl.s")
 #endif
 #ifdef NON_MATCHING
-Gfx *func_1502CFEC(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
+Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
 
-/* Draw the D_800C4320 entries of D_800C4328 that have no unkB flag through func_1502CFEC, after a
+/* Draw the D_800C4320 entries of D_800C4328 that have no unkB flag through obj_draw_model_dl, after a
  * geometry-mode / othermode setup. */
-Gfx *func_150362D8(Gfx *gdl, s32 arg1) {
+/* was func_150362D8 */
+Gfx *reflect_draw_queue(Gfx *gdl, s32 arg1) {
     struct_eu_size0C *e;
     s32 color[4];
 
@@ -525,18 +534,19 @@ Gfx *func_150362D8(Gfx *gdl, s32 arg1) {
         color[1] = e->unk0[6];
         color[2] = e->unk0[7];
         color[3] = 0xFF;
-        gdl = func_1502CFEC(gdl, e->unk0[8], arg1, *(s32 *)e->unk0, e->unk0[4], color, 0, 1);
+        gdl = obj_draw_model_dl(gdl, e->unk0[8], arg1, *(s32 *)e->unk0, e->unk0[4], color, 0, 1);
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_150362D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_draw_queue.s")
 #endif
 #ifdef NON_MATCHING
-void func_15035AF8(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
-s32 func_1507C7C0(struct127 *, s16 *, s32 *, s32 *);
+void reflect_queue_object(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+s32 obj_collision_cylinder(struct127 *, s16 *, s32 *, s32 *);
 
-void func_15036438(void) {
+/* was func_15036438 */
+void reflect_queue_objects_over_water(void) {
     struct {
         s32 u8E;
         s16 u92;
@@ -554,10 +564,10 @@ void func_15036438(void) {
             if ((var_s0->interaction_state != 0) && ((temp_v0 = var_s0->unk5, (temp_v0 == 0)) || (temp_v0 == 1))) {
                 temp_f0 = var_s0->unk118;
                 if ((temp_f0 != -10000.0f) && (temp_f0 < var_s0->y_position) && (var_s0->unk180 < temp_f0) && (var_s0->unk28 > 5.0f)) {
-                    func_1507C7C0(var_s0, &sp.u92, &(*(s32 *)((u8 *)&sp + 0x2)), &sp.u8E);
+                    obj_collision_cylinder(var_s0, &sp.u92, &(*(s32 *)((u8 *)&sp + 0x2)), &sp.u8E);
                     temp_f0_2 = var_s0->unk118;
                     if ((f32) sp.u92 < (temp_f0_2 - var_s0->unk180)) {
-                        func_15035AF8(1, var_s1, var_s0->x_position, temp_f0_2, var_s0->z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
+                        reflect_queue_object(1, var_s1, var_s0->x_position, temp_f0_2, var_s0->z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }
                 }
             }
@@ -567,5 +577,5 @@ void func_15036438(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15036438.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/reflect_queue_objects_over_water.s")
 #endif

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""P190: compare the hand-asm func_150A4FE4 (+ its exit / release labels func_150A53D4 / func_150A543C, 0x150A4FE4 -
+"""P190: compare the hand-asm obj_floor_mesh_update (+ its exit / release labels func_150A53D4 / func_150A543C, 0x150A4FE4 -
 0x150A5480; game_eu_D1760; object floor mesh build) with its NON_MATCHING C, whole.
 
 The asm saves $gp and every FPR and keeps values in odd FPRs (f1 / f3 / f13 / f31 as a GPR spill), so it runs in
 the VR4300 interpreter (Ref) of nmasm_vis5858.py; the candidate (build_nm/conker.eu.elf) runs in Unicorn (Cand).
-allocate_memory and func_10004074 (free) are replaced in both images by the same small MIPS stub: allocations come
+allocate_memory and heap_free (free) are replaced in both images by the same small MIPS stub: allocations come
 from a bump pointer (STATE + 0), bit k of STATE + 4 makes the k-th allocation fail, and every call logs its
 arguments at STATE + 8 (pointer into LOG), so the logs are part of the compared RDRAM.
 
@@ -36,14 +36,14 @@ class RefS(Ref):
     def __init__(self, elf):
         Ref.__init__(self, elf)
         self.st = {}
-        for name, code in (('allocate_memory', STUB_ALLOC), ('func_10004074', STUB_FREE)):
+        for name, code in (('allocate_memory', STUB_ALLOC), ('heap_free', STUB_FREE)):
             for k, w in enumerate(code): self.st[self.s[name] + 4 * k] = w
     def word(self, pc):
         if pc in self.st: return self.st[pc]
         return Ref.word(self, pc)
 
 def cand_stubs(cand):
-    for name, code in (('allocate_memory', STUB_ALLOC), ('func_10004074', STUB_FREE)):
+    for name, code in (('allocate_memory', STUB_ALLOC), ('heap_free', STUB_FREE)):
         cand.mu.mem_write(cand.s[name], b''.join(struct.pack('>I', w) for w in code))
 
 def P(mem, a, fmt, *v):
@@ -134,8 +134,8 @@ def main():
             rng = random.Random(seed * 100003 + t)
             mem = bytearray(RAM)
             args = scene(rng, mem, base, st if who == 'ref' else {k: 0 for k in st})
-            if who == 'ref': ref.run(mem, args, entry='func_150A4FE4')
-            else: cand.run(mem, args, entry='func_150A4FE4')
+            if who == 'ref': ref.run(mem, args, entry='obj_floor_mesh_update')
+            else: cand.run(mem, args, entry='obj_floor_mesh_update')
             mem[phys(SP0) - 0x1000:phys(SP0) + 0x100] = bytes(0x1100)
             res.append(mem)
         o = phys(args[0])

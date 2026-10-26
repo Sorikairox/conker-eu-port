@@ -5,7 +5,7 @@
 
 #ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 extern f32 D_80088C60; // tint red, green, blue (current)
 extern f32 D_80088C64;
 extern f32 D_80088C68;
@@ -19,9 +19,10 @@ extern f32 D_80088C80;
 // player_tint_update: player state handler (D_80089A10 table). While event flag 0x9000/6/0x403D is set the player
 // gets +0x84 bits 0x80021000 and the screen tint target becomes red-less (0x4043: 64, 255, 255), green-less (0x4044:
 // 255, 64, 255), blue-less (0x4045: 255, 255, 64) or white; otherwise the target is white and +0x84 loses
-// 0x80021000 and gains 8. The tint D_80088C60..68 eases toward the target (func_150498A0, rate 4, max 6, the
+// 0x80021000 and gains 8. The tint D_80088C60..68 eases toward the target (math_spring_approach, rate 4, max 6, the
 // player's +0x7B4 step) and is published as bytes in event flags 0x12/0x30F5..0x30F3 and 0x30FA..0x30F8.
-void func_150D0DD0(u8 *obj) {
+/* was func_150D0DD0 */
+void player_tint_update(u8 *obj) {
     if (event_dispatch(1, 0x403D, 6, 0x9000) != 0) {
         *(s32 *) (obj + 0x84) |= 0x80021000;
         if (event_dispatch(1, 0x4043, 6, 0x9000) != 0) {
@@ -48,9 +49,9 @@ void func_150D0DD0(u8 *obj) {
         *(s32 *) (obj + 0x84) &= ~0x80021000;
         *(s32 *) (obj + 0x84) |= 8;
     }
-    func_150498A0(&D_80088C60, D_80088C6C, &D_80088C78, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    func_150498A0(&D_80088C64, D_80088C70, &D_80088C7C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    func_150498A0(&D_80088C68, D_80088C74, &D_80088C80, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&D_80088C60, D_80088C6C, &D_80088C78, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&D_80088C64, D_80088C70, &D_80088C7C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&D_80088C68, D_80088C74, &D_80088C80, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
     event_dispatch_alt(1, 0x30F5, 0x12, (u32) D_80088C60 & 0xFF);
     event_dispatch_alt(1, 0x30F4, 0x12, (u32) D_80088C64 & 0xFF);
     event_dispatch_alt(1, 0x30F3, 0x12, (u32) D_80088C68 & 0xFF);
@@ -59,7 +60,7 @@ void func_150D0DD0(u8 *obj) {
     event_dispatch_alt(1, 0x30F8, 0x12, (u32) D_80088C68 & 0xFF);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/func_150D0DD0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/player_tint_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -69,15 +70,16 @@ extern s32 D_80088C38;
 extern s32 D_80088C3C;
 extern s32 *D_800DC3C4;
 s32 world_record_find(u8);
-void func_15195750(struct127 *);
+void obj_hit_split_halves(struct127 *);
 s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
 s32 player_hit_reaction(struct127 *, s32);
 
 // level_item_flags_update: advances the four scroll counters D_80088C30..3C by the frame step (x40, x-66, x-8, x92);
 // unless the player's held object (object 0 +0x31C, byte 0x120) is busy: for items 0xFA..0xF8 with flag bit 0
-// (world_record_find entry index = (item - D_800DBEF4) / 160 into D_800DC3C4) calls func_15195750 on the player and plays
-// sound 0x627; for item 0xFB plays it and resets the player (object_hit_effects, func_15145A50, mode 6 via player_hit_reaction).
-void func_150D13A0(s32 arg0) {
+// (world_record_find entry index = (item - D_800DBEF4) / 160 into D_800DC3C4) calls obj_hit_split_halves on the player and plays
+// sound 0x627; for item 0xFB plays it and resets the player (object_hit_effects, obj_set_destroyed, mode 6 via player_hit_reaction).
+/* was func_150D13A0 */
+void level_item_flags_update(s32 arg0) {
     s32 step = D_800BE9E4;
     s32 i;
     s32 item;
@@ -92,26 +94,27 @@ void func_150D13A0(s32 arg0) {
     for (i = 0; i < 3; i++) {
         item = world_record_find(0xFA - i);
         if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
-            func_15195750(D_800CC2D0);
-            func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
+            obj_hit_split_halves(D_800CC2D0);
+            actor_sound_play(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
         }
     }
     item = world_record_find(0xFB);
     if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
-        func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
+        actor_sound_play(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
         object_hit_effects(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);
-        func_15145A50(D_800CC2D0);
+        obj_set_destroyed(D_800CC2D0);
         player_hit_reaction(D_800CC2D0, 6);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/func_150D13A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/level_item_flags_update.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 bone_emitter_spawn(u8 *, s32);
 
-void func_150D15F4(u8 *arg0, s32 arg1) {
+/* was func_150D15F4 */
+void bone_spark_emitter_spawn(u8 *arg0, s32 arg1) {
     struct {
         u8 u1C;
         u8 pad1D[0x3];
@@ -166,11 +169,12 @@ void func_150D15F4(u8 *arg0, s32 arg1) {
     bone_emitter_spawn(&sp.u1C, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/func_150D15F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/bone_spark_emitter_spawn.s")
 #endif
 extern f32 D_800A0C64;
 
-s32 func_150D16C4(u8 *arg0) {
+/* was func_150D16C4 */
+s32 bone_spark_emitter_init(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x74)) = (f32) (((random_float() * 150.0f) + 350.0f) * D_800A0C64);
     return 1;
 }
@@ -182,7 +186,8 @@ s32 impact_tinted_particle_spawn(s32, f32 *, f32 *, f32, f32, f32, f32, s32, s32
 #endif
 
 extern f32 D_800A0C68, D_800A0C6C, D_800A0C70, D_800A0C74;
-void func_150D1714(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, f32 arg4, u8 *arg5) {
+/* was func_150D1714 */
+void bone_spark_emitter_emit(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, f32 arg4, u8 *arg5) {
     f32 a[3];
     f32 x;
     f32 y;

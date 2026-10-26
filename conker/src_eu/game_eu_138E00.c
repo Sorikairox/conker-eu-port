@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void camera_compute_frustum_planes(s32);
 #endif
 
@@ -197,7 +197,7 @@ void camera_matrices_refresh_all(void) {
     for (i = 0; i <= D_80082FA0; i++) {
         guMtxL2F(proj, (Mtx *)(D_800BE628 + i * 0x180 + D_800BE9C0 * 0x40 + 0x100));
         guMtxL2F(D_800DA030[i], (Mtx *)(D_800DC6D0[D_800BE9C0] + i * 0x40));
-        func_150A7A48(D_800DA030[i], proj, D_800DA130[i]);
+        mtxf_mul(D_800DA030[i], proj, D_800DA130[i]);
         camera_compute_frustum_planes(i);
     }
 }
@@ -274,20 +274,20 @@ void camera_zoom_factors_calc(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/camera_zoom_factors_calc.s")
 #endif
 #ifdef NON_MATCHING
-Gfx *func_150A55A0(s32, Gfx *, u8 *, s32, s32, s32);
-Gfx *func_150A5858(s32, Gfx *, u8 *, s32, s32, s32);
-Gfx *func_150C8B00(Gfx *);
-Gfx *func_150CFAF8(Gfx *);
+Gfx *mesh_dl_cull_copy(s32, Gfx *, u8 *, s32, s32, s32);
+Gfx *level_dl_visibility_filter(s32, Gfx *, u8 *, s32, s32, s32);
+Gfx *wobblers_set_tex_segments(Gfx *);
+Gfx *tex_scroll_set_tile_sizes(Gfx *);
 Gfx *anim_segments_set(Gfx *);
 Gfx *level_parts_set_segments(Gfx *);
 Gfx *sky_segments_set(Gfx *);
 void tint_channels_update(s16);
 Gfx *tint_emit_prim_env_colors(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
 Gfx *camera_read_depth_row(Gfx *, struct108 *);
-Gfx *func_1515DE84(Gfx *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, u8 *);
-Gfx *func_1515EAB4(Gfx *, s32, u8, s32, u8 *);
-Gfx *func_15173948(Gfx *, s32);
-Gfx *func_1517485C(Gfx *, s16);
+Gfx *light_apply_object_lights(Gfx *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, u8 *);
+Gfx *light_write_light_cmds(Gfx *, s32, u8, s32, u8 *);
+Gfx *fog_identity_stub(Gfx *, s32);
+Gfx *occlusion_probes_update(Gfx *, s16);
 extern s32 D_800B1214;          /* optional display lists */
 extern s32 D_800B1218;
 extern u8 D_800BEECA;
@@ -326,7 +326,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
     gdl[1].words.w1 = (u32)(D_800D9FB0 + (D_800BE9C0 << 5) + 0x10);
     gdl += 2;
     tint_channels_update(player);
-    gdl = func_15173948(tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player), 1);
+    gdl = fog_identity_stub(tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player), 1);
     gdl->words.w0 = 0xDA380003;
     gdl->words.w1 = (u32)D_80089810;
     gdl++;
@@ -334,7 +334,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
     if (!skipWorld) {
         switch (D_800BE9F0) {
         case 0x14:
-            gdl = func_150C8B00(gdl);
+            gdl = wobblers_set_tex_segments(gdl);
             break;
         case 0x1A:
             gdl = sky_segments_set(gdl);
@@ -343,7 +343,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
             gdl = level_parts_set_segments(gdl);
             break;
         case 0x35:
-            gdl = func_150CFAF8(gdl);
+            gdl = tex_scroll_set_tile_sizes(gdl);
             break;
         case 0x33:
             gdl = anim_segments_set(gdl);
@@ -361,7 +361,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
     p = (struct108 *)((u8 *)D_800DBFF0 + player * 0x9A0);
     dataPtr = &D_800DA230[player];
     vpPtr = D_800D9FF0 + player * 0x10;
-    gdl = func_1515DE84(gdl, player, (s32)p->unk2F8, (s32)p->unk2FC, (s32)p->unk300, 0, *dataPtr, D_800DA240,
+    gdl = light_apply_object_lights(gdl, player, (s32)p->unk2F8, (s32)p->unk2FC, (s32)p->unk300, 0, *dataPtr, D_800DA240,
                         vpPtr + D_800BE9C0 * 8, &D_800DA241, 1, 0, 0x25, &D_800DA248);
 
     if (!skipWorld) {
@@ -370,7 +370,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
                 gDPPipeSync(gdl++);
                 if (D_800DBE62 != 0) {
                     if ((D_800BE9F0 != 0x14) && (D_800BE9F0 != 0x33) && (D_800BE9F0 != 0x32)) {
-                        gdl = func_150A5858(D_800B0E00[0], gdl, (u8 *)D_800DA030[player], 0, 0, mask);
+                        gdl = level_dl_visibility_filter(D_800B0E00[0], gdl, (u8 *)D_800DA030[player], 0, 0, mask);
                     } else {
                         gdl->words.w0 = 0xDE000000;
                         gdl->words.w1 = D_800B0E00[0];
@@ -378,9 +378,9 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
                     }
                     if (D_800B1214 != 0) {
                         gDPPipeSync(gdl++);
-                        gdl = func_15173948(tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player), 1);
+                        gdl = fog_identity_stub(tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player), 1);
                         if (D_800BE9F0 == 0x35) {
-                            gdl = func_150CFAF8(gdl);
+                            gdl = tex_scroll_set_tile_sizes(gdl);
                         }
                         gdl->words.w0 = 0xDE000000;
                         gdl->words.w1 = D_800B1214;
@@ -403,7 +403,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
                 gdl++;
             }
         }
-        gdl = func_1515EAB4(gdl, *dataPtr, D_800DA240, D_800DA241, vpPtr + D_800BE9C0 * 8);
+        gdl = light_write_light_cmds(gdl, *dataPtr, D_800DA240, D_800DA241, vpPtr + D_800BE9C0 * 8);
         if (D_800B1218 != 0) {
             gDPPipeSync(gdl++);
             gdl = tint_emit_prim_env_colors(gdl, 0xFF, 0xFF, player);
@@ -412,7 +412,7 @@ Gfx *player_view_dl_build(Gfx *gdl, s16 player) {
             gdl++;
         }
     }
-    gdl = func_1517485C(gdl, player);
+    gdl = occlusion_probes_update(gdl, player);
     gDPPipeSync(gdl++);
     return gdl;
 }

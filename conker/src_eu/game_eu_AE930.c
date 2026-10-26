@@ -12,11 +12,12 @@ extern u8 D_8009CF9C[];
 /* or 0. The point is `reach` (x attacker scale +0x14C) ahead of the attacker, turned by its angles +0xB8 and +0x40
  * (degrees), from its position +0x14. A bounding sphere around the target (radius D_800D1C90[target +4] +0xE x
  * target +0x14C, centre raised by +0x10 x +0x150) is tested first; then the target's sphere list for model kind
- * `kind` (D_80087000[kind], D_8009CF9C[kind] entries of 10 bytes, same layout as func_1508154C: +0 bone, +2 radius,
+ * `kind` (D_80087000[kind], D_8009CF9C[kind] entries of 10 bytes, same layout as obj_ray_hit_model: +0 bone, +2 radius,
  * +4 centre in bone space, bone matrices at +0x1D4) with each radius x +0x14C plus `grow` (x attacker scale). The
  * first sphere containing the point wins; unless the target's +0x125 is set the hit is reported to it with
  * attack_spawn_at_point(target position, `arg5`, the attacker's index in D_800CC2D0, 0, 0, 0). */
-s32 func_15081120(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5) {
+/* was func_15081120 */
+s32 obj_reach_hit(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5) {
     u8 *att = (u8 *) arg0;
     u8 *type;
     u8 *rec;
@@ -72,7 +73,7 @@ s32 func_15081120(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
         local[0] = *(s16 *)(rec + 4);
         local[1] = *(s16 *)(rec + 6);
         local[2] = *(s16 *)(rec + 8);
-        func_15143134(local, world, bones + rec[0] * 64);
+        mtx_transform_point_or_origin(local, world, bones + rec[0] * 64);
         dx = v[0] - world[0];
         dy = v[1] - world[1];
         dz = v[2] - world[2];
@@ -88,14 +89,15 @@ s32 func_15081120(s32 arg0, u8 *target, s32 kind, f32 reach, f32 grow, s32 arg5)
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/func_15081120.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/obj_reach_hit.s")
 #endif
 
 extern u16 D_8009C100;
 extern u16 D_8009C104;
 extern u16 D_8009C108;
 extern u16 D_8009C10C[][2];
-s32 func_1508148C(u8 *arg0) {
+/* was func_1508148C */
+s32 obj_hit_model_kind(u8 *arg0) {
     unsigned long i;
     s32 id;
     if ((id = arg0[4]) == D_8009C100) {
@@ -120,7 +122,7 @@ s32 func_1508148C(u8 *arg0) {
 extern u8 *D_80087000[];
 extern u8 D_8009CF9C[];
 // object_ray_hit_model: intersects the ray start + t * dir with an object's hit spheres. The object's model kind
-// (func_1508148C, -1 = none) selects a sphere list D_80087000[k] of D_8009CF9C[k] entries of 10 bytes: +0 bone,
+// (obj_hit_model_kind, -1 = none) selects a sphere list D_80087000[k] of D_8009CF9C[k] entries of 10 bytes: +0 bone,
 // +1 priority, +2 radius (u16, times the object scale +0x14C), +4 / +6 / +8 centre (s16, bone space; the bone
 // matrices are at +0x1D4, 64 bytes each). A bounding sphere around the object (height and radius from its
 // D_800D1C90 type, times +0x150) is tested first. Spheres whose bone bit is set in +0x9C are skipped; the nearest
@@ -128,7 +130,8 @@ extern u8 D_8009CF9C[];
 // object has no bones or no sphere list, 0 on a miss, 1 on a hit: point / exitPoint = entry / exit point, normal
 // (optional) = the sphere centre, *dist = the last tested sphere's entry distance (as the original), *index /
 // *bone / *priority = the sphere, centre[3] = its bone-space centre.
-s32 func_1508154C(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint, f32 *normal, f32 *dist, s32 *index,
+/* was func_1508154C */
+s32 obj_ray_hit_model(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint, f32 *normal, f32 *dist, s32 *index,
                   s32 *bone, s32 *priority, s16 *centre) {
     f32 local[3];
     f32 hitOut[3];
@@ -151,7 +154,7 @@ s32 func_1508154C(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint, f32
     if (*(u8 **)(obj + 0x1D4) == NULL) {
         return -1;
     }
-    kind = func_1508148C(obj);
+    kind = obj_hit_model_kind(obj);
     if (kind == -1) {
         return -1;
     }
@@ -165,7 +168,7 @@ s32 func_1508154C(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint, f32
     sphere[1] = *(s16 *)(type + 0x10) * *(f32 *)(obj + 0x150) + *(f32 *)(obj + 0x18);
     sphere[2] = *(f32 *)(obj + 0x1C);
     type = (u8 *)D_800D1C90[obj[4]];
-    if (func_151452C4((struct17 *)start, (struct17 *)dir, (struct17 *)sphere,
+    if (ray_sphere_intersect((struct17 *)start, (struct17 *)dir, (struct17 *)sphere,
                       *(u16 *)(type + 0xE) * *(f32 *)(obj + 0x150), (s32)hitIn, (s32)hitOut, &tIn, &tOut) == 0) {
         return 0;
     }
@@ -178,8 +181,8 @@ s32 func_1508154C(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint, f32
         local[0] = *(s16 *)(e + 4);
         local[1] = *(s16 *)(e + 6);
         local[2] = *(s16 *)(e + 8);
-        func_15143134(local, sphere, *(u8 **)(obj + 0x1D4) + e[0] * 64);
-        if (func_151452C4((struct17 *)start, (struct17 *)dir, (struct17 *)sphere,
+        mtx_transform_point_or_origin(local, sphere, *(u8 **)(obj + 0x1D4) + e[0] * 64);
+        if (ray_sphere_intersect((struct17 *)start, (struct17 *)dir, (struct17 *)sphere,
                           *(u16 *)(e + 2) * *(f32 *)(obj + 0x14C), (s32)hitIn, (s32)hitOut, &tIn, &tOut) == 0) {
             continue;
         }
@@ -227,13 +230,14 @@ s32 func_1508154C(u8 *obj, f32 *start, f32 *dir, f32 *point, f32 *exitPoint, f32
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/func_1508154C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/obj_ray_hit_model.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15081120(s32, u8 *, s32, f32, f32, s32);
+s32 obj_reach_hit(s32, u8 *, s32, f32, f32, s32);
 
-s32 func_15081974(s32 arg0, f32 arg1, f32 arg2, u8 **arg3, s32 arg4, s32 arg5) {
+/* was func_15081974 */
+s32 obj_find_reach_hit(s32 arg0, f32 arg1, f32 arg2, u8 **arg3, s32 arg4, s32 arg5) {
     s32 temp_v0;
     s32 temp_v0_2;
     struct127 *var_s0;
@@ -242,9 +246,9 @@ s32 func_15081974(s32 arg0, f32 arg1, f32 arg2, u8 **arg3, s32 arg4, s32 arg5) {
     var_s0 = D_800CC2D0;
 loop_1:
     if ((var_s0->interaction_state != 0) && (var_s0->unk1D4 != NULL) && (arg5 == var_s0->id)) {
-        temp_v0_2 = func_1508148C((u8 *) var_s0);
+        temp_v0_2 = obj_hit_model_kind((u8 *) var_s0);
         if (temp_v0_2 != -1) {
-            temp_v0 = func_15081120(arg0, (u8 *) var_s0, (*(u8 *)((u8 *)((((u8 *)&D_8009C100) + (temp_v0_2 * 4))) + 2)), arg1, arg2, arg4);
+            temp_v0 = obj_reach_hit(arg0, (u8 *) var_s0, (*(u8 *)((u8 *)((((u8 *)&D_8009C100) + (temp_v0_2 * 4))) + 2)), arg1, arg2, arg4);
             if (temp_v0 != 0) {
                 *arg3 = var_s0;
                 return temp_v0;
@@ -258,5 +262,5 @@ loop_1:
     goto loop_1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/func_15081974.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE930/obj_find_reach_hit.s")
 #endif

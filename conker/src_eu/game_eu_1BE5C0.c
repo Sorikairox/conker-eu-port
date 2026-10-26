@@ -1,8 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-// hoisted forward declaration(s) for func_15191970
-void func_15191970(u8 *arg0);
+// hoisted forward declaration(s) for model_drip_drop_all
+void model_drip_drop_all(u8 *arg0);
 
 typedef struct {
     /* 0x00 */ f32 x;
@@ -57,28 +57,30 @@ typedef struct {
     /* 0x40 */ struct_eu_1BAAA0_b *unk40;
 } struct_eu_1BAAA0;
 
-void func_15190DB0(void *arg0) {
-    func_15191970(arg0);
+/* was func_15190DB0 */
+void model_drip_retire(void *arg0) {
+    model_drip_drop_all(arg0);
     node_retire(arg0);
 }
 
-void func_15190DDC(void *arg0) {
-    func_15191970(arg0);
+/* was func_15190DDC */
+void model_drip_unlink_free(void *arg0) {
+    model_drip_drop_all(arg0);
     node_unlink_free(arg0);
 }
 
-/* P188: moved up from func_15191970 (also used by the NON_MATCHING func_15190E08) */
+/* P188: moved up from model_drip_drop_all (also used by the NON_MATCHING model_drip_update) */
 typedef struct { s16 base; s16 range; u8 pad4[0x10]; } Rng14;
 extern Rng14 D_800AA120[];
 
 #ifdef NON_MATCHING
 /* P188 */
 /* P188: the 3-argument prototype (functions.h) again here, so that difftest takes its arity from it: the asm leaves
- * cfg->points in a3 at the call, func_15143134 (matching C, 3 parameters) never reads a3 */
-void func_15143134(void *arg0, void *arg1, void *arg2);
+ * cfg->points in a3 at the call, mtx_transform_point_or_origin (matching C, 3 parameters) never reads a3 */
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
 void effect3d_set_handlers(u8 *, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
-void func_1504715C(void *, u8 *);
+void hitinfo_from_obj_floor(void *, u8 *);
 extern f32 D_800A83F4;
 extern u8 D_800AB6F0[];
 extern u8 D_800AB7E4[];
@@ -106,11 +108,12 @@ extern DripCfg D_8008FE10[];
  * Kills itself (node_destroy) when its timer s16 e +0x16 runs out (flag e[0x18] & 1), the owner is gone or has
  * another id (e[0x14] vs owner[0x3B]), or the owner has no matrices (+0x1D4; then it first starts the ending
  * effect func_151491F4 with e +0x10..+0x1B copied to its +0x28). Hanging drops follow their point on the owner
- * (func_15143134 with the owner matrix), and once their timer is over they fall (velocity from the last move *
+ * (mtx_transform_point_or_origin with the owner matrix), and once their timer is over they fall (velocity from the last move *
  * D_800BEDC8, effect3d_set_handlers, life from D_800AA120). The accumulator gains rate * dt; for every whole unit a free slot
  * is picked at random and, when the point is below the owner's +0x118 height limit, a drop object is created
  * (effect3d_spawn_default with a 0x60-byte motion block at +0x110) and given a hang time. */
-void func_15190E08(u8 *e) {
+/* was func_15190E08 */
+void model_drip_update(u8 *e) {
     struct {
         f32 vel[3];     /* +0x00 */
         f32 gravity;    /* +0x0C -1 */
@@ -122,7 +125,7 @@ void func_15190E08(u8 *e) {
         u8 b21, b22, b23, b24;
         u8 pad25[3];
         s32 rng[4];     /* +0x28 D_800AA120[kind] +4..+0x13 (+0x2C, +0x34 read as f32) */
-        u8 owner[0x24]; /* +0x38 func_1504715C */
+        u8 owner[0x24]; /* +0x38 hitinfo_from_obj_floor */
         u8 b5C;         /* +0x5C e[0x2C] */
         u8 pad5D[3];
     } blk;
@@ -185,7 +188,7 @@ void func_15190E08(u8 *e) {
                     *(f32 *) (obj + 0x40) = *(f32 *) (obj + 0x34);
                     *(f32 *) (obj + 0x44) = *(f32 *) (obj + 0x38);
                     *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x3C);
-                    func_15143134(cfg->points + i * 0x10, obj + 0x34,
+                    mtx_transform_point_or_origin(cfg->points + i * 0x10, obj + 0x34,
                                   *(u8 **) (*(u8 **) (e + 0x10) + 0x1D4) + cfg->points[i * 0x10 + 0xC] * 0x40);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
@@ -228,7 +231,7 @@ void func_15190E08(u8 *e) {
                     blk.gravity = -1.0f;
                     blk.kind = cfg->kind;
                     r = &D_800AA120[cfg->kind];
-                    func_1504715C(blk.owner, *(u8 **) (e + 0x10));
+                    hitinfo_from_obj_floor(blk.owner, *(u8 **) (e + 0x10));
                     blk.b5C = e[0x2C];
                     spawn.type = D_800AB6F0[e[0x2C]];
                     spawn.flags = 0x1001;
@@ -264,7 +267,7 @@ void func_15190E08(u8 *e) {
                         blk.rng[3] = src[3];
                         blk.b23 = (u32) random_int() % 5 + 4;
                         blk.b24 = (u32) random_int() % 5 + 4;
-                        func_15143134(cfg->points + idx * 0x10, spawn.pos,
+                        mtx_transform_point_or_origin(cfg->points + idx * 0x10, spawn.pos,
                                       *(u8 **) (*(u8 **) (e + 0x10) + 0x1D4) + cfg->points[idx * 0x10 + 0xC] * 0x40);
                         spawn.pos2[0] = spawn.pos[0];
                         spawn.pos2[1] = spawn.pos[1];
@@ -294,10 +297,11 @@ void func_15190E08(u8 *e) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15190E08.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_update.s")
 #endif
 
-s32 func_1519150C(u8 *arg0) {
+/* was func_1519150C */
+s32 drop_wobble_update(u8 *arg0) {
     s32 pad;
     u8 *p;
     f32 s;
@@ -314,12 +318,13 @@ s32 func_1519150C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, f32 *, s32);
 extern s32 D_800DD608;
 extern s32 D_800DD618;
 
-u8 *func_151915FC(u8 *arg0, s16 arg1) {
+/* was func_151915FC */
+u8 *drop_quad_velocity_build(u8 *arg0, s16 arg1) {
     struct {
         u8 u37;
         f32 u38;
@@ -353,7 +358,7 @@ u8 *func_151915FC(u8 *arg0, s16 arg1) {
     s32 temp_t0;
     u8 *temp_v0;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u64, &sp.u37);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u64, &sp.u37);
     sp.u60 = sp.u64;
     if (sp.u64 != NULL) {
         if (sp.u37 != 0) {
@@ -413,10 +418,11 @@ u8 *func_151915FC(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_151915FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/drop_quad_velocity_build.s")
 #endif
 void effect3d_set_handlers(u8 *, s32, s32, s32, s32);
-void func_15191970(u8 *arg0) {
+/* was func_15191970 */
+void model_drip_drop_all(u8 *arg0) {
     s32 i;
     u8 **p;
     u8 *q;
@@ -442,19 +448,20 @@ void func_15191970(u8 *arg0) {
 
 #ifdef NON_MATCHING
 /* P143 */
-s32 func_1514672C(u8 *);
-s32 func_15046F70(f32 *, s32, f32, f32 *);
+s32 pos_in_world_bounds(u8 *);
+s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
 void impact_dust_particle_spawn(u8, f32, s16, s32, void *, u8, s32);
 extern f32 D_800A83FC;
 extern f32 D_800A8400;
 // drop_fall_update: update handler (D_8008A058 slot 13) of a falling drop / debris sprite. Motion block at +0x110:
 // velocity x/y/z, gravity +0x11C, drag +0x120 (x / z speeds times drag * dt each frame), trail easing +0x128 (the
-// trail point +0x40 follows the position +0x34). Ends (0) when func_1514672C rejects the new position (out of the
-// level); a floor probe (func_15046F70, floor y to +0x148) that hits also ends it and spawns a splash at the floor,
+// trail point +0x40 follows the position +0x34). Ends (0) when pos_in_world_bounds rejects the new position (out of the
+// level); a floor probe (collision_floor_probe, floor y to +0x148) that hits also ends it and spawns a splash at the floor,
 // sized by width +0x2C * height +0x30: kind +0x165 == 3 -> impact_dust_particle_spawn (0.25), else randomly impact_debris_spawn
 // (D_800A83FC, life 80..120) or the ring impact_splash_ring_spawn (D_800A8400), of type +0x16C, owner data +0x14C.
-s32 func_15191A90(u8 *fx) {
+/* was func_15191A90 */
+s32 drop_fall_update(u8 *fx) {
     f32 *mv = (f32 *)(fx + 0x110);
     f32 probe[3];
     f32 y0, vx0, vz0, vy, dvy;
@@ -489,10 +496,10 @@ s32 func_15191A90(u8 *fx) {
     probe[0] = x;
     probe[1] = y0 - *(f32 *)(fx + 0x30);
     probe[2] = *(f32 *)(fx + 0x3C);
-    if (func_1514672C((u8 *)probe) == 0) {
+    if (pos_in_world_bounds((u8 *)probe) == 0) {
         return 0;
     }
-    if (func_15046F70(probe, 0, *(f32 *)(fx + 0x38) - *(f32 *)(fx + 0x30), (f32 *)(fx + 0x148)) != 0) {
+    if (collision_floor_probe(probe, 0, *(f32 *)(fx + 0x38) - *(f32 *)(fx + 0x30), (f32 *)(fx + 0x148)) != 0) {
         probe[1] = *(f32 *)(fx + 0x148);
         if (fx[0x165] == 3) {
             impact_dust_particle_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * 0.25f, fx[0x5C], (s32)(fx + 0x14C),
@@ -510,10 +517,11 @@ s32 func_15191A90(u8 *fx) {
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15191A90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/drop_fall_update.s")
 #endif
 
-s32 func_15191DEC(struct_eu_1BAAA0_e *arg0) {
+/* was func_15191DEC */
+s32 drop_fade(struct_eu_1BAAA0_e *arg0) {
     s16 temp_v0 = arg0->unk1C;
     s32 temp_v1;
 
@@ -527,14 +535,15 @@ s32 func_15191DEC(struct_eu_1BAAA0_e *arg0) {
 }
 
 #ifdef NON_MATCHING
-u8 *func_15190770(u8 **, s32, u8, s32);
+u8 *model_drip_create(u8 **, s32, u8, s32);
 
 /* owner_effect_watch: P238: entry 13 of D_8008A4E8 (EU 0x8008A888, `void (u8 *)` handlers) for an effect e whose
  * 12-byte spawn record (owner pointer, id byte +4, s16 life +6, flags +8) sits at e +0x28. It kills itself
  * (node_destroy) when the owner is gone (owner word 0 is 0) or has another id (e[0x2C] vs owner[0x3B]). When the
- * owner's +0x1D4 is set it first re-spawns the record through func_15190770(e + 0x28, 0, e[0xC], e[1]) (life = s16
+ * owner's +0x1D4 is set it first re-spawns the record through model_drip_create(e + 0x28, 0, e[0xC], e[1]) (life = s16
  * e +0xE with flag bit 0 when e[0xD] bit 0 is set, else 300) and then kills itself. Otherwise nothing happens. */
-void func_15191E2C(u8 *e) {
+/* was func_15191E2C */
+void model_drip_wait_owner(u8 *e) {
     u8 *owner = *(u8 **) (e + 0x28);
     u8 *rec;
     s32 done = 0;
@@ -550,18 +559,19 @@ void func_15191E2C(u8 *e) {
         } else {
             *(s16 *) (rec + 6) = 300;
         }
-        func_15190770((u8 **) rec, 0, e[0xC], e[1]);
+        model_drip_create((u8 **) rec, 0, e[0xC], e[1]);
     }
     if (done) {
         node_destroy((struct102 *) e);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15191E2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_wait_owner.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15191EF0(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_15191EF0 */
+void model_drip_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0xD) {
         if (((*(s32 *)((u8 *)arg0 + 0x10)) == (*(s32 *)((u8 *)arg1 + 0))) || (arg0->unk14 == (*(u8 *)((u8 *)arg1 + 4)))) {
             (*(s16 *)((u8 *)arg0 + 0x16)) = 0x64;
@@ -580,10 +590,11 @@ void func_15191EF0(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15191EF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_on_message.s")
 #endif
 #ifdef NON_MATCHING
-void func_15191FF4(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_15191FF4 */
+void model_drip_wait_on_message(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *temp_a2;
     u8 *temp_a2_2;
     u8 *temp_a2_3;
@@ -611,11 +622,12 @@ void func_15191FF4(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15191FF4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/model_drip_wait_on_message.s")
 #endif
 extern s32 D_800A83F0;
 
-void func_151920FC(s32 arg0, u8 arg1) {
+/* was func_151920FC */
+void model_drip_broadcast(s32 arg0, u8 arg1) {
     s32 sp1C;
 
     sp1C = D_800A83F0;

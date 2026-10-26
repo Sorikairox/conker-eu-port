@@ -6,13 +6,14 @@ u8 impact_current_kind(void);
 #endif
 
 
-s32 func_15045AF0(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
-void func_151AC3F0(struct17 *, s32 *, s32, u8, s32);
-void func_10010FFC(s32, s32, s32, s32, s32, u8 *);
-void func_151AC3B0(u8 *);
-void func_151AA814(u8 *, u8 *);
+s32 collision_floor_dynamic_b_full(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
+void debris_burst_spawn(struct17 *, s32 *, s32, u8, s32);
+void sound_play_for_actor(s32, s32, s32, s32, s32, u8 *);
+void char_broadcast_msg_c(u8 *);
+void char_ground_hit_trail(u8 *, u8 *);
 extern f32 D_800A9354;
-void func_151A9F80(u8 *arg0) {
+/* was func_151A9F80 */
+void char_ground_debris_3(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
 
@@ -25,14 +26,15 @@ void func_151A9F80(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+    if (collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
     }
 }
 
 extern f32 D_800A9358;
-void func_151AA054(u8 *arg0) {
+/* was func_151AA054 */
+void char_ground_debris_3_sound(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
     s32 ret;
@@ -46,17 +48,18 @@ void func_151AA054(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    ret = collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
     if (ret) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
-        func_10010FFC(0, 17, 21000, 0, 0, obj);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
+        sound_play_for_actor(0, 17, 21000, 0, 0, obj);
     }
-    func_151AC3B0(obj);
+    char_broadcast_msg_c(obj);
 }
 
 extern f32 D_800A935C;
-void func_151AA150(u8 *arg0) {
+/* was func_151AA150 */
+void char_ground_debris_1_sound(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
     s32 ret;
@@ -70,16 +73,17 @@ void func_151AA150(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    ret = collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
     if (ret) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 1, arg0[0xC], arg0[1]);
-        func_10010FFC(0, 17, 21000, 0, 0, obj);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 1, arg0[0xC], arg0[1]);
+        sound_play_for_actor(0, 17, 21000, 0, 0, obj);
     }
 }
 
 extern f32 D_800A9360;
-void func_151AA250(u8 *arg0) {
+/* was func_151AA250 */
+void char_ground_debris_1_heavy(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
 
@@ -93,17 +97,18 @@ void func_151AA250(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+    if (collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 1, arg0[0xC], arg0[1]);
-        func_10010FFC(0, 8, 27000, 0, 0, obj);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 1, arg0[0xC], arg0[1]);
+        sound_play_for_actor(0, 8, 27000, 0, 0, obj);
     }
-    func_151AA814(obj, arg0 + 0x34);
-    func_151AC3B0(obj);
+    char_ground_hit_trail(obj, arg0 + 0x34);
+    char_broadcast_msg_c(obj);
 }
 
 extern f32 D_800A9364;
-void func_151AA370(u8 *arg0) {
+/* was func_151AA370 */
+void char_ground_debris_2_sound(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
     s32 ret;
@@ -117,16 +122,17 @@ void func_151AA370(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    ret = collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
     if (ret) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 2, arg0[0xC], arg0[1]);
-        func_10010FFC(0, 17, 21000, 0, 0, obj);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 2, arg0[0xC], arg0[1]);
+        sound_play_for_actor(0, 17, 21000, 0, 0, obj);
     }
 }
 
 extern f32 D_800A9368;
-void func_151AA470(u8 *arg0) {
+/* was func_151AA470 */
+void char_ground_debris_2_heavy(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
     s32 ret;
@@ -140,18 +146,19 @@ void func_151AA470(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    ret = collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
     if (ret) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 2, arg0[0xC], arg0[1]);
-        func_10010FFC(0, 8, 27000, 0, 0, obj);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 2, arg0[0xC], arg0[1]);
+        sound_play_for_actor(0, 8, 27000, 0, 0, obj);
     }
-    func_151AA814(obj, arg0 + 0x34);
-    func_151AC3B0(obj);
+    char_ground_hit_trail(obj, arg0 + 0x34);
+    char_broadcast_msg_c(obj);
 }
 
 extern f32 D_800A936C;
-void func_151AA578(u8 *arg0) {
+/* was func_151AA578 */
+void char_ground_debris_4(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
 
@@ -164,14 +171,15 @@ void func_151AA578(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+    if (collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 4, arg0[0xC], arg0[1]);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 4, arg0[0xC], arg0[1]);
     }
 }
 
 extern f32 D_800A9370;
-void func_151AA64C(u8 *arg0) {
+/* was func_151AA64C */
+void char_ground_debris_4_b(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
 
@@ -184,16 +192,18 @@ void func_151AA64C(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+    if (collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 4, arg0[0xC], arg0[1]);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 4, arg0[0xC], arg0[1]);
     }
 }
 
-void func_151AA720(s32 arg0) {
+/* was func_151AA720 */
+void char_handler_nop_a(s32 arg0) {
 }
 
-void func_151AA72C(u8 *arg0) {
+/* was func_151AA72C */
+void char_foot_trails_restart(u8 *arg0) {
     s32 temp_v0;
     struct {
         s32 unk0;
@@ -203,20 +213,23 @@ void func_151AA72C(u8 *arg0) {
     temp_v0 = *(s32 *)(arg0 + 0x18);
     sp1C.unk0 = temp_v0;
     sp1C.unk4 = arg0[0x1C];
-    func_151482D4((s32)&sp1C, 0xA);
+    fxrec_broadcast((s32)&sp1C, 0xA);
     func_151494E0((s32)&sp1C, 0xA);
-    func_1519F928(arg0);
+    foot_trails_start(arg0);
 }
 
-void func_151AA780(u8 *arg0) {   /* P76: callback; a0 passes through */
-    func_1519F970(arg0);
+/* was func_151AA780 */
+void char_foot_trails_stop(u8 *arg0) {   /* P76: callback; a0 passes through */
+    foot_trails_stop(arg0);
 }
 
-void func_151AA7A0(u8 *arg0) {   /* P76: callback; a0 passes through */
-    func_1519F970(arg0);
+/* was func_151AA7A0 */
+void char_foot_trails_stop_b(u8 *arg0) {   /* P76: callback; a0 passes through */
+    foot_trails_stop(arg0);
 }
 
-void func_151AA7C0(u8 *arg0) {
+/* was func_151AA7C0 */
+void char_foot_trails_restart_b(u8 *arg0) {
     s32 temp_v0;
     struct {
         s32 unk0;
@@ -226,15 +239,16 @@ void func_151AA7C0(u8 *arg0) {
     temp_v0 = *(s32 *)(arg0 + 0x18);
     sp1C.unk0 = temp_v0;
     sp1C.unk4 = arg0[0x1C];
-    func_151482D4((s32)&sp1C, 0xA);
+    fxrec_broadcast((s32)&sp1C, 0xA);
     func_151494E0((s32)&sp1C, 0xA);
-    func_1519F928(arg0);
+    foot_trails_start(arg0);
 }
 
 #ifdef NON_MATCHING
 s32 emitter_trail_spawn(s32 *, s32, s32, s32);
 
-void func_151AA814(u8 *arg0, u8 *arg1) {
+/* was func_151AA814 */
+void char_ground_hit_trail(u8 *arg0, u8 *arg1) {
     struct {
         s32 u18;
         s32 u1C;
@@ -275,18 +289,19 @@ void func_151AA814(u8 *arg0, u8 *arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA814.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/char_ground_hit_trail.s")
 #endif
 extern f32 D_800A9378;
 extern f32 D_800A937C;
 extern f32 D_800A9380;
 #ifdef NON_MATCHING
-s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
+s32 smoke_puff_spawn_grounded(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
 #else
-void func_1515A7A8(f32 *, f32 *, f32, s32, s32, f32, s32, s32, s32, s32, s32);
+void smoke_puff_spawn_grounded(f32 *, f32 *, f32, s32, s32, f32, s32, s32, s32, s32, s32);
 #endif
-s32 func_1515AE90(u8 *, s32 *);
-void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+s32 move_watch_get_data(u8 *, s32 *);
+/* was func_151AA8BC */
+void ground_drip_particle_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     f32 pos[3];
     f32 vel[3];
     u8 *obj;
@@ -294,7 +309,7 @@ void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
 
     obj = *(u8 **)(arg6 + 0x1C);
     if (!(*(f32 *)(obj + 0x118) < arg1)) {
-        if (func_1515AE90(obj, &sp48) == 0) {
+        if (move_watch_get_data(obj, &sp48) == 0) {
             sp48 = 0;
         }
         vel[0] = 0.0f;
@@ -304,10 +319,10 @@ void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
         pos[1] = arg1;
         pos[2] = arg2;
 #ifdef NON_MATCHING
-        func_1515A7A8(pos, vel, (random_float() * D_800A937C + 454.0f) * D_800A9380, 0.972683f /* 0x3F7901C1 */, (u8 *) sp48,
+        smoke_puff_spawn_grounded(pos, vel, (random_float() * D_800A937C + 454.0f) * D_800A9380, 0.972683f /* 0x3F7901C1 */, (u8 *) sp48,
             random_float() * 101.0f + 101.0f, random_int() % 31U + 0x32, random_int() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
 #else
-        func_1515A7A8(pos, vel, (random_float() * D_800A937C + 454.0f) * D_800A9380, 0x3F7901C1, sp48,
+        smoke_puff_spawn_grounded(pos, vel, (random_float() * D_800A937C + 454.0f) * D_800A9380, 0x3F7901C1, sp48,
             random_float() * 101.0f + 101.0f, random_int() % 31U + 0x32, random_int() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
 #endif
     }
@@ -347,7 +362,8 @@ s32 bone_emitter_spawn(SpA3C *, s32, ...);
 extern f32 D_800A9384;
 extern f32 D_800A9388;
 
-s32 func_151AAA3C(u8 *arg0, s32 arg1) {
+/* was func_151AAA3C */
+s32 char_bone_emitter_spawn(u8 *arg0, s32 arg1) {
     SpA3C s;
     s32 v;
     SpB3C b;
@@ -384,20 +400,22 @@ s32 func_151AAA3C(u8 *arg0, s32 arg1) {
     return v;
 }
 
-s32 func_151EFDD0();
+s32 game_gu_random();
 
-s32 func_151AAB54(u8 *arg0) {
+/* was func_151AAB54 */
+s32 char_emitter_random_sound(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x88)) = 0;
     if (random_int() & 1) {
-        func_10010F88(0xA, 0x55F0U, (s16) ((func_151EFDD0() % 1200) - 0x258), 0U, 0, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x58)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x5C)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x60)), 0x1F4, 0x9C4);
+        sound_play_at(0xA, 0x55F0U, (s16) ((game_gu_random() % 1200) - 0x258), 0U, 0, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x58)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x5C)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x60)), 0x1F4, 0x9C4);
     } else {
-        func_10010F88(0xB, 0x55F0U, (s16) ((func_151EFDD0() % 1200) - 0x258), 0U, 0, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x58)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x5C)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x60)), 0x1F4, 0x9C4);
+        sound_play_at(0xB, 0x55F0U, (s16) ((game_gu_random() % 1200) - 0x258), 0U, 0, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x58)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x5C)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x60)), 0x1F4, 0x9C4);
     }
     return 1;
 }
 
 #ifdef NON_MATCHING
-void func_151AAC88(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
+/* was func_151AAC88 */
+void char_emitter_particle_emit(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
     struct {
         f32 u1C;
         s8 u20;
@@ -521,15 +539,16 @@ void func_151AAC88(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
     sp.u38 = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
     sp.u3C = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
     sp.u9C = ((random_float() * 70.0f) + 73.0f) * 0.001f;
-    temp_v0 = func_1513092C(&sp.u48, 2, 0x28);
+    temp_v0 = particle_spawn_default(&sp.u48, 2, 0x28);
     if (temp_v0 != 0) {
         memcpy(temp_v0 + 0xA8, &sp.u1C, 0x28);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AAC88.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/char_emitter_particle_emit.s")
 #endif
-f32 func_151AAFFC(u8 *arg0) {
+/* was func_151AAFFC */
+f32 char_emitter_wobble(u8 *arg0) {
     u8 **q;
     u8 *p;
     f32 r;
@@ -544,9 +563,10 @@ f32 func_151AAFFC(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151AB874(u8 *, u8 *, u8 *);
+s32 character_spawn_ring_fx(u8 *, u8 *, u8 *);
 
-void func_151AB06C(u8 *arg0) {
+/* was func_151AB06C */
+void char_emitters_refresh(u8 *arg0) {
     u8 *sp2C;
     u8 *sp1C;
     s32 temp_a0;
@@ -560,7 +580,7 @@ void func_151AB06C(u8 *arg0) {
     } else {
         sp2C = temp_a2;
         var_v1 = arg0 + 0x58;
-        (*(s32 *)((u8 *)var_v1 + 0x14)) = func_151AAA3C(temp_a2, (s32) arg0);
+        (*(s32 *)((u8 *)var_v1 + 0x14)) = char_bone_emitter_spawn(temp_a2, (s32) arg0);
     }
     temp_a0 = (*(s32 *)((u8 *)var_v1 + 0x1C));
     if (temp_a0 != 0) {
@@ -568,24 +588,27 @@ void func_151AB06C(u8 *arg0) {
         return;
     }
     sp1C = var_v1;
-    (*(s32 *)((u8 *)var_v1 + 0x1C)) = func_151AB874(temp_a2, arg0, temp_a2);
+    (*(s32 *)((u8 *)var_v1 + 0x1C)) = character_spawn_ring_fx(temp_a2, arg0, temp_a2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB06C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/char_emitters_refresh.s")
 #endif
-void func_151AB100(u8 *arg0) {
+/* was func_151AB100 */
+void char_bone_emitter_retire(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x80) + 0x58;
     *(s32 *)(temp_v0 + 0x14) = 0;
     bone_emitter_retire(arg0);
 }
 
-void func_151AB128(u8 *arg0) {
+/* was func_151AB128 */
+void char_bone_emitter_free(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x80) + 0x58;
     *(s32 *)(temp_v0 + 0x14) = 0;
     bone_emitter_free(arg0);
 }
 
-s32 func_151AB150(u8 *arg0) {
+/* was func_151AB150 */
+s32 fx_alive_flag_check(u8 *arg0) {
     s32 ret = 1;
     if (arg0[0x84] == 0) {
         ret = 0;
@@ -597,11 +620,11 @@ s32 func_151AB150(u8 *arg0) {
 #ifdef NON_MATCHING
 /* P191 */
 void mtx_get_translation(Mtx *arg0, s32 arg1, struct17 *arg2);
-s32 func_15046C6C(f32 *, s32, f32, f32 *);
-void func_1504715C(void *, u8 *);
+s32 collision_floor_all(f32 *, s32, f32, f32 *);
+void hitinfo_from_obj_floor(void *, u8 *);
 extern u8 D_800A9350[];   /* bone of each foot: 5, 10, 19, 23 */
-extern f32 D_800A93AC[5]; /* splash ring parameters (unk18..unk28 of the func_15154488 block) */
-/* ground probe result of func_1504715C / func_15046C6C (HitInfo in game_eu_71E70.c) */
+extern f32 D_800A93AC[5]; /* splash ring parameters (unk18..unk28 of the emit_sparks_in_angle_range block) */
+/* ground probe result of hitinfo_from_obj_floor / collision_floor_all (HitInfo in game_eu_71E70.c) */
 typedef struct {
     f32 y;          /* 0x00: ground height */
     s16 pos[9];     /* 0x04 */
@@ -614,11 +637,12 @@ typedef struct {
 
 // footstep_splash: P191: footstep effect of the player p for foot `foot` (0..3, animation event callbacks
 // objfx_1aabc4_0 ... in game_981E0): when p has a model (+0x1D4), takes the foot bone's position (mtx_get_translation, bone
-// D_800A9350[foot]), probes the ground from 50 above to 50 below it (func_1504715C / func_15046C6C) and, on a hit,
+// D_800A9350[foot]), probes the ground from 50 above to 50 below it (hitinfo_from_obj_floor / collision_floor_all) and, on a hit,
 // spawns a splash sprite at (bone x, ground y, bone z) (impact_dust_particle_spawn: light, size 40, 150, the hit's surface) and a
-// ring burst there (func_15154488 with D_800A93AC's five parameters). s32 although the asm leaves no defined result:
+// ring burst there (emit_sparks_in_angle_range with D_800A93AC's five parameters). s32 although the asm leaves no defined result:
 // game_981E0 calls it without a prototype (implicitly int), so the port needs the int signature; it returns 0.
-s32 func_151AABC4(struct127 *p, s32 foot) {
+/* was func_151AABC4 */
+s32 footstep_splash(struct127 *p, s32 foot) {
     struct_eu_15154488 ring;
     struct17 at;
     f32 probe[3];
@@ -631,11 +655,11 @@ s32 func_151AABC4(struct127 *p, s32 foot) {
     }
     light = impact_current_kind();
     mtx_get_translation(*(Mtx **) ((u8 *) p + 0x1D4), D_800A9350[foot & 0xFF], (struct17 *) bone);
-    func_1504715C(&hit, (u8 *) p);
+    hitinfo_from_obj_floor(&hit, (u8 *) p);
     probe[0] = bone[0];
     probe[1] = bone[1] + 50.0f;
     probe[2] = bone[2];
-    if (func_15046C6C(probe, 0, probe[1] - 100.0f, (f32 *) &hit) == 0) {
+    if (collision_floor_all(probe, 0, probe[1] - 100.0f, (f32 *) &hit) == 0) {
         return 0;
     }
     at.unk0 = bone[0];
@@ -666,14 +690,15 @@ s32 func_151AABC4(struct127 *p, s32 foot) {
     ring.unk28 = D_800A93AC[4];
     ring.unk3C = light;
     ring.unk40 = 0.0f;
-    func_15154488(&ring, &ring.unk8, (s32) &hit, 0xFF, 1);
+    emit_sparks_in_angle_range(&ring, &ring.unk8, (s32) &hit, 0xFF, 1);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AABC4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/footstep_splash.s")
 #endif
 
-s32 func_151AB36C(u8 *arg0) {
+/* was func_151AB36C */
+s32 fx_alpha_fade_by_life16(u8 *arg0) {
     u8 *temp_v0;
     s32 temp_v1;
     temp_v0 = *(u8 **)(arg0 + 0x98);
@@ -690,7 +715,8 @@ s32 func_151AB36C(u8 *arg0) {
 #ifdef NON_MATCHING
 extern s32 D_800AB7F4;
 
-void func_151AB3A8(u8 *arg0) {
+/* was func_151AB3A8 */
+void char_ground_glow_refresh(u8 *arg0) {
     struct {
         u8 * u60;
         s8 u64;
@@ -747,7 +773,7 @@ void func_151AB3A8(u8 *arg0) {
         sp.uAC = (*(f32 *)((u8 *)temp_v0 + 0x18)) + 150.0f;
     }
     sp.uB0 = (*(f32 *)((u8 *)temp_v0 + 0x1C));
-    if (func_15045AF0((u8 *) &sp.uA8, 0U, sp.uAC - 300.0f, arg0 + 0x34) != 0) {
+    if (collision_floor_dynamic_b_full((u8 *) &sp.uA8, 0U, sp.uAC - 300.0f, arg0 + 0x34) != 0) {
         sp5B = impact_current_kind();
         temp_f18 = (*(f32 *)((u8 *)arg0 + 0x34));
         sp.uAC = temp_f18;
@@ -787,7 +813,7 @@ void func_151AB3A8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB3A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/char_ground_glow_refresh.s")
 #endif
 typedef struct {
     u8 pad0[4];
@@ -802,7 +828,8 @@ typedef struct {
     s16 pad1A;
     f32 unk1C;
 } struct_C630;
-s8 func_151AB640(u8 *arg0) {
+/* was func_151AB640 */
+s8 char_ground_glow_update(u8 *arg0) {
     s8 ret;
     struct_C630 *p;
     ret = 1;
@@ -821,7 +848,8 @@ s8 func_151AB640(u8 *arg0) {
 }
 
 s32 sprite_fx_set_handlers(u8 *, s32, s32);
-s32 func_151AB730(u8 *arg0)
+/* was func_151AB730 */
+s32 char_ground_glow_free(u8 *arg0)
 {
   u8 *p;
   p = *((u8 **) (arg0 + 0xB0));
@@ -835,7 +863,8 @@ s32 func_151AB730(u8 *arg0)
 }
 
 extern f32 D_800A93CC;
-void func_151AB774(u8 *arg0) {
+/* was func_151AB774 */
+void char_ground_debris_3_heavy(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x18);
     struct17 pos;
     s32 ret;
@@ -849,22 +878,23 @@ void func_151AB774(u8 *arg0) {
         pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
     }
     pos.unk8 = *(f32 *)(obj + 0x1C);
-    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    ret = collision_floor_dynamic_b_full((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
     if (ret) {
         pos.unk4 = *(f32 *)(arg0 + 0x34);
-        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
-        func_10010FFC(0, 17, 21000, 0, 0, obj);
+        debris_burst_spawn(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
+        sound_play_for_actor(0, 17, 21000, 0, 0, obj);
     }
-    func_151AA814(obj, arg0 + 0x34);
+    char_ground_hit_trail(obj, arg0 + 0x34);
 }
 
 #ifdef NON_MATCHING
-/* character_spawn_ring_fx: P238: called by func_151AB06C (which stores the result at its record +0x1C) as
+/* character_spawn_ring_fx: P238: called by char_emitters_refresh (which stores the result at its record +0x1C) as
  * (character, owner, character). Creates effect type 0xC (emitter_trail_spawn(&spawn, 0xC, 0xFF, 0)) from a 0x2E-byte
  * spawn block: character + its id byte +0x3B, flag 1, offset (0, 0, 0), radius 25, scale 0.26497 (D_800A93D0,
  * 0x3E87AA26), life 300, bytes 10 / 3 / 0 / 1. On success the effect's +0x58 gets a 12-byte record (owner, 1, s16 0,
  * the character's f32 +0x118). Returns the effect (or NULL). The third argument is unused. */
-s32 func_151AB874(u8 *chr, u8 *owner, u8 *unused) {
+/* was func_151AB874 */
+s32 character_spawn_ring_fx(u8 *chr, u8 *owner, u8 *unused) {
     struct {
         u8 *owner;
         u8 one;
@@ -914,11 +944,12 @@ s32 func_151AB874(u8 *chr, u8 *owner, u8 *unused) {
     return (s32) fx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB874.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/character_spawn_ring_fx.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+/* was func_151AB954 */
+void char_emitter_particle_emit_b(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
         f32 u1C;
         s8 u20;
@@ -1039,13 +1070,13 @@ void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp.u38 = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
     sp.u3C = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
     sp.u9C = ((random_float() * 60.0f) + 21.0f) * 0.001f;
-    temp_v0 = func_1513092C(&sp.u48, 2, 0x28);
+    temp_v0 = particle_spawn_default(&sp.u48, 2, 0x28);
     if (temp_v0 != 0) {
         memcpy(temp_v0 + 0xA8, &sp.u1C, 0x28);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB954.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/char_emitter_particle_emit_b.s")
 #endif
 typedef struct {
     u8 pad0[4];
@@ -1054,17 +1085,18 @@ typedef struct {
     u16 unk6;
 } SndC68;
 
-u8 func_151ABC68(u8 *arg0) {
+/* was func_151ABC68 */
+u8 char_loop_sound_update(u8 *arg0) {
     u8 ret;
     SndC68 *s;
 
     ret = 1;
     s = (SndC68 *)(arg0 + 0x58);
     if (s->unk6 != 0 && !(D_800DBFF0->unk5F0 & 1)) {
-        func_100111C8(*(s16 *)&s->unk6);
+        sound_voice_stop(*(s16 *)&s->unk6);
         s->unk6 = 0;
     } else if (s->unk6 == 0 && (D_800DBFF0->unk5F0 & 1)) {
-        s->unk6 = func_10010F30(0x355, 0x7D00, 0x40, 0, 0);
+        s->unk6 = sound_play_2d(0x355, 0x7D00, 0x40, 0, 0);
     }
     if (s->unk4 == 0) {
         ret = 0;
@@ -1079,64 +1111,68 @@ s32 object_list_free(u8 *);
 
 /* D_80089E40 table entries 4 / 14 (s32 (*)(obj), see emitter_trail_update): stop the object's sound (+0x5E), clear the
  * data's word +0x74, then return object_list_move_1 / object_list_free's result (the asm tail value). */
-s32 func_151ABD38(u8 *arg0) {
+/* was func_151ABD38 */
+s32 char_sound_obj_retire(u8 *arg0) {
     s32 *temp_v0;
 
     temp_v0 = (s32 *)(*(u8 **)(arg0 + 0x58) + 0x58);
     if (*(u16 *)(arg0 + 0x5E) != 0) {
-        func_100111C8(*(s16 *)(arg0 + 0x5E));
+        sound_voice_stop(*(s16 *)(arg0 + 0x5E));
     }
     temp_v0[7] = 0;
     return object_list_move_1(arg0);
 }
 
-s32 func_151ABD88(u8 *arg0) {
+/* was func_151ABD88 */
+s32 char_sound_obj_free(u8 *arg0) {
     s32 *temp_v0;
 
     temp_v0 = (s32 *)(*(u8 **)(arg0 + 0x58) + 0x58);
     if (*(u16 *)(arg0 + 0x5E) != 0) {
-        func_100111C8(*(s16 *)(arg0 + 0x5E));
+        sound_voice_stop(*(s16 *)(arg0 + 0x5E));
     }
     temp_v0[7] = 0;
     return object_list_free(arg0);
 }
 #else
-void func_151ABD38(u8 *arg0) {
+void char_sound_obj_retire(u8 *arg0) {
     s32 pad;
     s32 *temp_v0;
 
     temp_v0 = (s32 *)(*(u8 **)(arg0 + 0x58) + 0x58);
     if (*(u16 *)(arg0 + 0x5E) != 0) {
-        func_100111C8(*(s16 *)(arg0 + 0x5E));
+        sound_voice_stop(*(s16 *)(arg0 + 0x5E));
     }
     temp_v0[7] = 0;
     object_list_move_1(arg0);
 }
 
-void func_151ABD88(u8 *arg0) {
+void char_sound_obj_free(u8 *arg0) {
     s32 pad;
     s32 *temp_v0;
 
     temp_v0 = (s32 *)(*(u8 **)(arg0 + 0x58) + 0x58);
     if (*(u16 *)(arg0 + 0x5E) != 0) {
-        func_100111C8(*(s16 *)(arg0 + 0x5E));
+        sound_voice_stop(*(s16 *)(arg0 + 0x5E));
     }
     temp_v0[7] = 0;
     object_list_free(arg0);
 }
 #endif
 
-void func_151ABDD8(void **arg0) {
+/* was func_151ABDD8 */
+void char_start_interaction_4(void **arg0) {
     obj_interaction_start_timed(arg0[0x18 / 4], 0, 4);
 }
 
 #ifdef NON_MATCHING
-u8 *func_15190770(void *, s32, u8, s32);
+u8 *model_drip_create(void *, s32, u8, s32);
 
 // character_spawn_aura: for characters of type 0..4 or 0x96 (arg0's data +0x18), spawns the 12-byte-template effect
-// func_15190770 (character, its +0x3B, life 300, mode 3 for type 0x96 else 0) and, when the character has a
+// model_drip_create (character, its +0x3B, life 300, mode 3 for type 0x96 else 0) and, when the character has a
 // partner (+0x127 != 0xFF), sets the partner's +0x66 timer to 500. P124: one struct instead of m2c's 6 locals.
-void func_151ABE04(u8 *arg0) {
+/* was func_151ABE04 */
+void character_spawn_aura(u8 *arg0) {
     struct {
         u8 *u0;
         u8 u4;
@@ -1164,19 +1200,21 @@ void func_151ABE04(u8 *arg0) {
         if (chr[0x127] != 0xFF) {
             *(s16 *)(*(u8 **)(chr + 0x31C) + 0x66) = 500;
         }
-        func_15190770(&t, 0, arg0[0xC], arg0[1]);
+        model_drip_create(&t, 0, arg0[0xC], arg0[1]);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151ABE04.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/character_spawn_aura.s")
 #endif
-void func_151AB920(s32 arg0, s32 arg1) {
+/* was func_151AB920 */
+void char_handler_nop_b(s32 arg0, s32 arg1) {
 }
 
 u8 impact_current_kind(void);
 extern f32 D_800A93F4;
 
-void func_151AB930(u8 *arg0) {
+/* was func_151AB930 */
+void char_state_fx_start(u8 *arg0) {
     struct260 *temp_v0;
     struct {
         u8 *unk0;
@@ -1202,9 +1240,10 @@ void func_151AB930(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_1504715C(void *, u8 *);
+void hitinfo_from_obj_floor(void *, u8 *);
 
-void func_151ABF78(u8 *arg0) {
+/* was func_151ABF78 */
+void char_state_fx_update(u8 *arg0) {
     struct {
         f32 uD4;
         f32 uD8;
@@ -1253,7 +1292,7 @@ block_5:
         sp.u113 = var_v1;
         (*(f32 *)((u8 *)temp_s1_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) + (((*(f32 *)((u8 *)temp_s1_2 + 0x10)) + (random_float() * (*(f32 *)((u8 *)temp_s1_2 + 0x14)))) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s1_2 + 0xC)) > 1.0f) {
-            func_1504715C(&sp.uEC, (*(u8 **)((u8 *)temp_s1_2 + 0)));
+            hitinfo_from_obj_floor(&sp.uEC, (*(u8 **)((u8 *)temp_s1_2 + 0)));
             do {
                 temp_s0 = random_int() & 0xFF;
                 temp_t5 = (random_int() % 46U) - 0x3F;
@@ -1284,9 +1323,10 @@ block_5:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151ABF78.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/char_state_fx_update.s")
 #endif
-void func_151AC304(u8 *arg0, s32 *arg1, u8 arg2) {
+/* was func_151AC304 */
+void char_state_fx_handle_msg(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *v = arg0 + 0x28;
     if (arg2 == 0) {
         if ((*(s32 *)v == arg1[0]) || (v[4] == ((u8 *)arg1)[4])) {
@@ -1306,7 +1346,8 @@ void func_151AC304(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-void func_151AC3B0(u8 *arg0)
+/* was func_151AC3B0 */
+void char_broadcast_msg_c(u8 *arg0)
 {
   struct { u8 *unk0; u8 unk4; } sp18;
   sp18.unk0 = arg0;

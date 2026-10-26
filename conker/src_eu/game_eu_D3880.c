@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-/* P130: shadow triangle projection (hand asm func_150A6070, func_150A6324 and their private vertex
- * transform func_150A661C) */
+/* P130: shadow triangle projection (hand asm shadow_level_triangles, shadow_object_triangles and their private vertex
+ * transform shadow_project_vertex_entry) */
 extern f32 D_800D3AA0;  /* [2] f32: shadow u / v scale */
 extern f32 D_800D3AA8;  /* shadow far clip depth: w <= this -> outcode 0x10 */
 extern f32 D_800D3AAC;  /* shadow near clip depth: w >= this -> outcode 0x20 */
@@ -30,7 +30,7 @@ typedef struct {
     f32 *m;
 } ShadowProj;
 
-// shadow_project_vertex: (hand asm func_150A661C, private t4 -> f13..f15 / t3 call) transforms the s16 vertex v by
+// shadow_project_vertex: (hand asm shadow_project_vertex_entry, private t4 -> f13..f15 / t3 call) transforms the s16 vertex v by
 // the light matrix m (row vectors: u = x m0 + y m4 + z m8 + m12, v = .. m1 m5 m9 m13, w = .. m2 m6 m10 m14), scales
 // u and v, and returns its outcode. u / v are outside when |u| > -w (NaN too); the sign of u is taken before the
 // scale, the sign of v after it (as the asm).
@@ -67,7 +67,7 @@ static s32 shadow_project_vertex(ShadowProj *p, s16 *v, ShadowVtx *o) {
     return clip;
 }
 
-// shadow_emit_triangle: (part of func_150A6070 / func_150A6324) projects triangle tri, whose vertex pointers are
+// shadow_emit_triangle: (part of shadow_level_triangles / shadow_object_triangles) projects triangle tri, whose vertex pointers are
 // the table entries + base, into out[0..2] when its x / z bounds touch the shadow box D_800DF518..D_800DF524, its
 // three outcodes share no bit and it faces the light ((v0 - v2)(u0 - u1) > (u0 - u2)(v0 - v1), NaN counts as facing).
 // Returns 1 when written.
@@ -106,7 +106,8 @@ static void shadow_proj_init(ShadowProj *p, f32 *m) {
 // shadow_level_triangles: (hand asm) projects the level triangles whose bit is set in mask (bit i of word i / 32,
 // words up to D_800D3AB4) with the light matrix m into shadow vertices at out. A triangle that reaches end is
 // written but not counted and ends the walk. Returns the end of the counted vertices.
-s32 func_150A6070(u32 *mask, s32 out, f32 *m, s32 end) {
+/* was func_150A6070 */
+s32 shadow_level_triangles(u32 *mask, s32 out, f32 *m, s32 end) {
     ShadowProj p;
     ShadowVtx *o = (ShadowVtx *) out;
     u32 *stop = (u32 *) D_800D3AB4;
@@ -133,10 +134,11 @@ s32 func_150A6070(u32 *mask, s32 out, f32 *m, s32 end) {
     return (s32) o;
 }
 
-// shadow_object_triangles: (hand asm) as func_150A6070 for D_800DF514 (>= 1) world objects: ids[i] selects the
+// shadow_object_triangles: (hand asm) as shadow_level_triangles for D_800DF514 (>= 1) world objects: ids[i] selects the
 // 0xA0-byte record D_800DBEF4 + id * 0xA0 (u16 triangle count +0x56, first triangle +0x58, >= 1 triangle) whose
 // vertex offsets are relative to D_800DC328[id].
-s32 func_150A6324(u16 *ids, s32 out, f32 *m, s32 end) {
+/* was func_150A6324 */
+s32 shadow_object_triangles(u16 *ids, s32 out, f32 *m, s32 end) {
     ShadowProj p;
     ShadowVtx *o = (ShadowVtx *) out;
     u16 *last = ids + D_800DF514;
@@ -164,11 +166,12 @@ s32 func_150A6324(u16 *ids, s32 out, f32 *m, s32 end) {
     return (s32) o;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6070.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/shadow_level_triangles.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6324.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/shadow_object_triangles.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A661C.s")
+/* was func_150A661C */
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/shadow_project_vertex_entry.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -184,12 +187,13 @@ extern f32 D_800D3A00[2];
 
 /*
  * view_sphere_depth: P197: view test of a box around (x, y, z) (hand asm, FR=1 odd FPRs as singles, epilogue
- * func_150A6834), the frustum variant of func_150A6840 without a camera record: m (4x4 floats) maps the point to
+ * view_test_epilogue), the frustum variant of camera_view_test_sphere without a camera record: m (4x4 floats) maps the point to
  * (u, v, w); outside when w - r > -D_800D9F40 (in front of the near bound) or w + r < -far, or when u / v scaled by
  * D_800D3A00[0] / [1] leave +-(depth + half size) with the half sizes r / ry scaled by 0.70710677 (sqrt(1/2)),
  * depth = -w (the asm's c.ule / c.olt: a NaN passes every test). Returns 0 when outside, else round(-w) (0 stays 0).
  */
-s32 func_150A66F0(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
+/* was func_150A66F0 */
+s32 view_sphere_depth(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
     f32 u, v, w, depth, lim, rs, rys;
 
     w = (m[2] * x + m[6] * y) + (m[10] * z + m[14]);
@@ -220,19 +224,20 @@ s32 func_150A66F0(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
     return VIEW66F0_RINT(depth);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A66F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/view_sphere_depth.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150A6834(void) {
+/* was func_150A6834 */
+void view_test_epilogue(void) {
 
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6834.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/view_test_epilogue.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800D9F40; /* screen width (also the near-depth bound here) */
-s32 func_150A6A48(s32, s32, s32 *, s32, s32, s32, s32, s32);
+s32 world_objects_in_box(s32, s32, s32 *, s32, s32, s32, s32, s32);
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even */
 #define VIEW6840_RINT(f)                                                                             \
@@ -247,7 +252,8 @@ s32 func_150A6A48(s32, s32, s32 *, s32, s32, s32, s32, s32);
  * u * p0 + w * p2 < -r (planes +0x88/+0x90, +0x94/+0x9C) or v * p0 + w * p2 < -ry (+0xA4/+0xA8, +0xB0/+0xB4)
  * (NaN counts as outside). Returns 0 when outside, else round(w), or 1 when that is 0.
  */
-s32 func_150A6840(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
+/* was func_150A6840 */
+s32 camera_view_test_sphere(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far) {
     f32 *m = (f32 *)mtx;
     u8 *c = (u8 *)cam;
     f32 u, v, w;
@@ -281,32 +287,33 @@ s32 func_150A6840(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far
     return ret;
 }
 
-/* func_150A6A48(a0, a1, a2, 0, a0, a1, -10000, a3) (same .s as func_150A6840) */
+/* world_objects_in_box(a0, a1, a2, 0, a0, a1, -10000, a3) (same .s as camera_view_test_sphere) */
 s32 func_150A69A8(s32 arg0, s32 arg1, s32 *arg2, s32 arg3) {
-    return func_150A6A48(arg0, arg1, arg2, 0, arg0, arg1, -10000, arg3);
+    return world_objects_in_box(arg0, arg1, arg2, 0, arg0, arg1, -10000, arg3);
 }
 
-/* P54: func_150A6840_tail.s no longer needed (func_150A6A48 is C) */
+/* P54: func_150A6840_tail.s no longer needed (world_objects_in_box is C) */
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6840.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/camera_view_test_sphere.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * P65: func_150A6A48 over the point box (x, z) .. (x, z) and y -10000 .. 20000 (all heights). Called by
- * func_15045A04 with outCount = &count. The .s also holds a second, unreferenced entry at 0x150A6A18 (no caller,
+ * P65: world_objects_in_box over the point box (x, z) .. (x, z) and y -10000 .. 20000 (all heights). Called by
+ * collision_query_dynamic_cells with outCount = &count. The .s also holds a second, unreferenced entry at 0x150A6A18 (no caller,
  * no symbol: it would pass its caller's stack words as the box), not translated.
  */
-s32 func_150A69E0(s32 x, s32 z, s32 *outCount, s32 n) {
-    return func_150A6A48(x, z, outCount, n, x, z, -10000, 20000);
+/* was func_150A69E0 */
+s32 world_objects_at_point(s32 x, s32 z, s32 *outCount, s32 n) {
+    return world_objects_in_box(x, z, outCount, n, x, z, -10000, 20000);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A69E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/world_objects_at_point.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * P54: func_150A6A48 (hand asm): the world objects (D_800DBEF4, D_800DC320 of them, 0xA0 bytes) whose box
+ * P54: world_objects_in_box (hand asm): the world objects (D_800DBEF4, D_800DC320 of them, 0xA0 bytes) whose box
  * (+0x10 / +0x12 / +0x14 centre, +0x50 x/z half size, +0x52 y half size) overlaps (x .. x2, z .. z2) and, unless
  * +0x4F & 0x40, (y .. y2), all bounds strict; skipped: +0x6E != 0, +0x4F & 0x60 == 0x20, index n - 1.
  * Indices with +0x4F & 0x60 == 0 go to the u16 list D_800D3C00 (the count is returned), the others (0x40 / 0x60)
@@ -315,7 +322,8 @@ s32 func_150A69E0(s32 x, s32 z, s32 *outCount, s32 n) {
 extern s32 D_800D3C00;
 extern s32 D_800D3C50;
 
-s32 func_150A6A48(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32 y, s32 y2) {
+/* was func_150A6A48 */
+s32 world_objects_in_box(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32 y, s32 y2) {
     u16 *l0 = (u16 *)&D_800D3C00;
     u16 *l1 = (u16 *)&D_800D3C50;
     u8 *obj, *end;
@@ -356,12 +364,12 @@ s32 func_150A6A48(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32 y, s32
     return n0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6A48.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/world_objects_in_box.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P128 */
-extern s32 D_eu_800BE9F4; /* PVS row index: per row {u16 byte index, s16 bit} (func_150183D0) */
+extern s32 D_eu_800BE9F4; /* PVS row index: per row {u16 byte index, s16 bit} (pvs_setup) */
 extern s32 D_eu_800BE9F8; /* Huffman tree: 6-byte nodes {s16 symbol (< 0: inner), s16 child 0, s16 child 1} */
 extern s16 D_800DC260[]; /* current PVS row per view (player_zone_update) */
 extern s32 D_800DC278; /* record list head (func_150A4ED4) */
@@ -371,7 +379,8 @@ extern s32 D_800DC278; /* record list head (func_150A4ED4) */
 // byte offsets; 0 ends the list). One decoded symbol gives 8 records, LSB first. Bits are read MSB first; the row
 // start {byte, bit} comes from D_eu_800BE9F4 (byte 0xFFFF = none loaded yet: read as u16, as in the asm).
 // Shift counts use the low 5 bits (srlv).
-void func_150A6C40(s32 view) {
+/* was func_150A6C40 */
+void pvs_row_apply(s32 view) {
     u8 *p;
     u8 *rec;
     s16 *node;
@@ -425,5 +434,5 @@ void func_150A6C40(s32 view) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6C40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/pvs_row_apply.s")
 #endif

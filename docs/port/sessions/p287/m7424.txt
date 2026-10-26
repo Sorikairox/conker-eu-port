@@ -3,7 +3,7 @@ s#    s32 size = block\[1\] - block\[0\];#    s32 size = block[1] - block[0] + 4
 s#    s32 speed = info >> 16;#    s32 speed = (info >> 16) + 1;#
 s#    if (\*(u8 \*\*) (obj + 0x80) == NULL) {#    if (*(u8 **) (obj + 0x80) != NULL) {#
 s#        \*(s16 \*\*) (obj + 0x80) = allocate_memory(size, 1, 2, 0);#        *(s16 **) (obj + 0x80) = allocate_memory(size, 1, 1, 0);# % load
-s#        func_10004514(block\[0\], \*(u8 \*\*) (obj + 0x80), size, 1);#        func_10004514(block[1], *(u8 **) (obj + 0x80), size, 1);# % load
+s#        rom_dma_read(block\[0\], \*(u8 \*\*) (obj + 0x80), size, 1);#        rom_dma_read(block[1], *(u8 **) (obj + 0x80), size, 1);# % load
 s#    t = (f32) frames \* ((f32) pos \* 1\.5259022e-05f);#    t = (f32) frames * ((f32) pos * 1.5258789e-05f);#
 s#    frac = t - (f32) k;#    frac = t - (f32) k - 0.01f;#
 s#    if (frames == k) {#    if (frames == k + 1) {#

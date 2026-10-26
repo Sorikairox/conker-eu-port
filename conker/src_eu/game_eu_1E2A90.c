@@ -25,7 +25,8 @@ s32 obj_get_hit_kind(u8 *);
 void node_broadcast_obj_type(s32, u8 *, u8);
 u8 *emitter_trail_spawn(void *, s32, u8, s32);
 
-u8 *func_151B5280(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151B5280 */
+u8 *hit_dust_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *ret;
     Spawn5280 sp;
     u8 flag[1];
@@ -69,17 +70,19 @@ u8 *func_151B5280(u8 *arg0, u8 arg1, s32 arg2) {
     return ret;
 }
 
-s32 func_151B5454(f32 *, f32, f32, f32, u8, u8);
-void func_151B53FC(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6)
+s32 hit_dust_puff_spawn(f32 *, f32, f32, f32, u8, u8);
+/* was func_151B53FC */
+void hit_dust_trail_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6)
 {
   f32 v[3];
   v[0] = arg0;
   v[1] = arg1;
   v[2] = arg2;
-  func_151B5454(v, arg3, arg4, arg5, arg6[0x58], arg6[0xC]);
+  hit_dust_puff_spawn(v, arg3, arg4, arg5, arg6[0x58], arg6[0xC]);
 }
 
-s32 func_151B5454(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5) {
+/* was func_151B5454 */
+s32 hit_dust_puff_spawn(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5) {
     s32 pad; // fakematch: frame slot
     f32 v[3];
 
@@ -89,7 +92,8 @@ s32 func_151B5454(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5) {
     return impact_dust_cloud_spawn(arg0, v, arg4, random_float() * 0.497f + -1.0f, random_int() % 31U + 0x14, random_int() % 101U + 0x9B, random_float() * 152.0f + 109.0f, random_int() & 1, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
 }
 
-u8 *func_151B5590(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151B5590 */
+u8 *obj_dust_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     s32 pad; // fakematch: frame slot
     Spawn5280 sp;
 
@@ -114,19 +118,21 @@ u8 *func_151B5590(u8 *arg0, u8 arg1, s32 arg2) {
     return emitter_trail_spawn(&sp, 0, arg1, arg2);
 }
 
-s32 func_151B56A4(f32 *, f32, f32, f32, u8);
+s32 obj_dust_puff_spawn(f32 *, f32, f32, f32, u8);
 
-void func_151B5654(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6)
+/* was func_151B5654 */
+void obj_dust_trail_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6)
 {
   f32 new_var[2];
   f32 sp24;
   sp24 = arg0;
   new_var[0] = arg1;
   new_var[1] = arg2;
-  func_151B56A4(&sp24, arg3, arg4, arg5, (s32) (*((u8 *) (((u8 *) arg6) + 0xC))));
+  obj_dust_puff_spawn(&sp24, arg3, arg4, arg5, (s32) (*((u8 *) (((u8 *) arg6) + 0xC))));
 }
 
-s32 func_151B56A4(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4) {
+/* was func_151B56A4 */
+s32 obj_dust_puff_spawn(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4) {
     s32 pad; // fakematch: frame slot
     f32 v[3];
     u8 flag;

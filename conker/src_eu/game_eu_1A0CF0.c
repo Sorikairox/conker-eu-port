@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-u8 *func_151734E0(u8 *arg0) {
+/* was func_151734E0 */
+u8 *screen_flash_overlay_draw(u8 *arg0) {
     u8 *temp_a0;
     u8 *temp_a0_2;
     u8 *temp_a0_3;
@@ -52,5 +53,5 @@ u8 *func_151734E0(u8 *arg0) {
     return var_a0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A0CF0/func_151734E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A0CF0/screen_flash_overlay_draw.s")
 #endif

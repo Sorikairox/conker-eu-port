@@ -4,7 +4,8 @@
 
 
 void scenery_platform_drift_update(s32, s32, s32, f32);
-void func_150C7D70(s32 arg0) {
+/* was func_150C7D70 */
+void scenery_drift_by_level_flag(s32 arg0) {
     if (!((*(u8 *)((u8 *)D_800D2E4C + 0xA)) & 8)) {
         if (!(D_800DBEF4->pad70[3] & 4)) {
             scenery_platform_drift_update(arg0, 1, 0x353, 1000.0f);
@@ -15,7 +16,8 @@ void func_150C7D70(s32 arg0) {
 }
 
 void scenery_spin_z_update(u8 *);
-void func_150C7DE0(u8 *arg0) {
+/* was func_150C7DE0 */
+void scenery_spin_z_level_neg(u8 *arg0) {
     u8 *p;
     if (!(arg0[0x73] & 4)) {
         p = (u8 *)D_800DBEF4;
@@ -26,7 +28,8 @@ void func_150C7DE0(u8 *arg0) {
     }
 }
 
-void func_150C7E30(u8 *arg0) {
+/* was func_150C7E30 */
+void scenery_spin_z_level(u8 *arg0) {
     u8 *p;
     p = (u8 *)D_800DBEF4;
     p += 0x1E1;  // fakematch: keeps the dead addiu (p += K+1; p--;)
@@ -37,10 +40,11 @@ void func_150C7E30(u8 *arg0) {
 
 #ifdef NON_MATCHING
 void scenery_start_pending_anim(u8 *obj);
-// obj_shade_from_level: P237. Object callback (same family as func_150C7DE0 / func_150C7E30): runs scenery_start_pending_anim(obj),
+// obj_shade_from_level: P237. Object callback (same family as scenery_spin_z_level_neg / scenery_spin_z_level): runs scenery_start_pending_anim(obj),
 // then, unless the object's +0x73 bit 2 is set, gives its model record (+0x7C, when there is one) the shade byte
 // +0x13 = the level block's (D_800DBEF4) s16 +0x21C / 16.
-void func_150C7E68(u8 *obj) {
+/* was func_150C7E68 */
+void obj_shade_from_level(u8 *obj) {
     u8 *rec;
 
     scenery_start_pending_anim(obj);
@@ -52,17 +56,18 @@ void func_150C7E68(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/func_150C7E68.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/obj_shade_from_level.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1000D96C(s32, s32, s32);
-void func_1000DE1C(s32, s32);
+void music_play_song(s32, s32, s32);
+void music_stop_song(s32, s32);
 f32 math_cos_u8(s32);
-void func_1517A550(s32, s16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
+void puff_drift_spawn(s32, s16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_80088B94;
 
-void func_150C7EBC(s32 arg0) {
+/* was func_150C7EBC */
+void zone_ambience_update(s32 arg0) {
     u8 sp4B;
     s32 sp44;                                       /* compiler-managed */
     f32 temp_f18;
@@ -82,14 +87,14 @@ void func_150C7EBC(s32 arg0) {
     temp_s1 = (s32) temp_v0->unk300 - 0x6EF;
     if (((var_a1 - 0x9C4) >= -0xC7) && (((temp_s0 * temp_s0) + (temp_s1 * temp_s1)) < 0x15F900)) {
         if (D_80088B94 == 0) {
-            func_1000D96C(0x5F, 0xF, 6);
-            func_1000DE1C(0x10, 4);
+            music_play_song(0x5F, 0xF, 6);
+            music_stop_song(0x10, 4);
             D_80088B94 = 1;
             var_a1 = (s32) (*(f32 *)((u8 *)((D_800DBFF0 + sp44)) + 0x2FC));
         }
     } else if (D_80088B94 != 0) {
-        func_1000D96C(0xF, 0x5F, 4);
-        func_1000D96C(0x10, 0, 3);
+        music_play_song(0xF, 0x5F, 4);
+        music_play_song(0x10, 0, 3);
         D_80088B94 = 0;
         var_a1 = (s32) (*(f32 *)((u8 *)((D_800DBFF0 + sp44)) + 0x2FC));
     }
@@ -101,16 +106,17 @@ void func_150C7EBC(s32 arg0) {
         temp_f18 = math_cos_u8(temp_v0_2 & 0xFF) * temp_f2;
         sp44 = temp_f2;
         temp_s1_3 = (s32) ((math_sin_u8(sp4B) * temp_f2) + 1775.0f);
-        func_1517A550((s32) ((f32) ((random_int() & 0xFFFF) * 2) * 0.000015258789f) & 0xFF, (s16) (s32) (temp_f18 + -2418.0f), 0x62F, (s16) temp_s1_3, 7, 0x4B0, 0x25, 0xA, 0x1E, 3, 8);
+        puff_drift_spawn((s32) ((f32) ((random_int() & 0xFFFF) * 2) * 0.000015258789f) & 0xFF, (s16) (s32) (temp_f18 + -2418.0f), 0x62F, (s16) temp_s1_3, 7, 0x4B0, 0x25, 0xA, 0x1E, 3, 8);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/func_150C7EBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/zone_ambience_update.s")
 #endif
 #ifdef NON_MATCHING
 u8 *world_record_find(u8 id); /* P119: one argument (world_record_find reads only the id) */
 
-void func_150C8190(u8 *arg0) {
+/* was func_150C8190 */
+void scenery_dl_set_angle_coord(u8 *arg0) {
     s32 *sp18;
     s32 *temp_a1_2;
     s32 temp_t0;
@@ -152,12 +158,13 @@ void func_150C8190(u8 *arg0) {
     *temp_a1_2 = temp_t0 | var_v1_2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/func_150C8190.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/scenery_dl_set_angle_coord.s")
 #endif
-void func_150C827C(u8 *arg0) {
+/* was func_150C827C */
+void scenery_follow_obj_0c(u8 *arg0) {
     struct127 *temp_v0;
 
-    temp_v0 = func_15083E90(0xC);
+    temp_v0 = obj_find_by_setup_id(0xC);
     (*(s16 *)((u8 *)arg0 + 0x10)) = (s16) (s32) (temp_v0->x_position - 30.0f);
     (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) (temp_v0->y_position + 50.0f);
     (*(s16 *)((u8 *)arg0 + 0x14)) = (s16) (s32) (temp_v0->z_position + 30.0f);

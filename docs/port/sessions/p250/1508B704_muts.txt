@@ -1,4 +1,4 @@
-# P250 func_1508B704 (rail_zone_flood) mutants: sed % setup names
+# P250 rail_zone_flood (rail_zone_flood) mutants: sed % setup names
 s/zone->rest\[node >> 3\] |= 1 << (node & 3);/zone->rest[node >> 2] |= 1 << (node \& 3);/ % out in masked
 s/zone->rest\[node >> 3\] |= 1 << (node & 3);/zone->rest[node >> 3] |= 1 << (node \& 7);/ % in out
 s/if (zone->radius < d) {/if (zone->radius <= d) {/ % edge
@@ -14,4 +14,4 @@ s/u8 next = n\[9 + i\];/u8 next = n[8 + i];/ % in
 s/dz = (f32) \*(s16 \*) (n + 4) - zone->z;/dz = (f32) *(s16 *) (n + 2) - zone->z;/ % outz
 s/d = dx \* dx + dz \* dz;/d = dx * dx + dz;/ % outz
 s/dx = (f32) \*(s16 \*) (n + 0) - zone->x;/dx = (f32) *(s16 *) (n + 0) - zone->z;/ % edge
-s/func_1508B704(next, zone);/func_1508B704(node, zone);/ % in
+s/rail_zone_flood(next, zone);/rail_zone_flood(node, zone);/ % in

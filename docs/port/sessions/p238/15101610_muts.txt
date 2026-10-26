@@ -12,5 +12,5 @@ s/node_destroy(\*(struct102 \*\*) (fx + 0x34));/;/ % all
 s/    effect3d_retire(arg0);/    effect3d_retire((struct210 *) fx);/ % none
 s/u8 \*fx = obj + 0x110;/u8 *fx = obj + 0x114;/ % all
 s/    if (\*(u16 \*) (obj + 0x1A0) != 0) {/    if (*(u16 *) (obj + 0x1A2) != 0) {/ % all
-s/func_100111C8(\*(u16 \*) (obj + 0x1A0));/func_100111C8(*(u16 *) (obj + 0x1A2));/ % alt2
-s/        func_100111C8(\*(u16 \*) (obj + 0x1A0));/        ;/ % all
+s/sound_voice_stop(\*(u16 \*) (obj + 0x1A0));/sound_voice_stop(*(u16 *) (obj + 0x1A2));/ % alt2
+s/        sound_voice_stop(\*(u16 \*) (obj + 0x1A0));/        ;/ % all

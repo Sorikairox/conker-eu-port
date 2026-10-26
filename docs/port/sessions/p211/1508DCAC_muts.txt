@@ -11,7 +11,7 @@ s/\] < \*count) {/] <= *count) {/ %
 s/        \*count = 0;/        *count = 1;/ %
 s/0x10000 << \*target/0x8000 << *target/ %
 s/i \* 4 + 0x16C0/i * 4 + 0x16C4/ %
-s/func_1508EFEC(i, 0x61, 0x2000)/func_1508EFEC(i, 0x62, 0x2000)/ %
+s/rail_racer_send_event(i, 0x61, 0x2000)/rail_racer_send_event(i, 0x62, 0x2000)/ %
 s/        return band;/        return 0;/ %
 s/+ 0x12A) = 0;/+ 0x12A) = 2;/ %
 s/D_80087688\[D_800E1000\] < /D_80087688[D_800E1000] <= / %

@@ -2,45 +2,46 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15031D40(u8 *arg0, u8 *arg1);
+void attachment_apply_kind_effects(u8 *arg0, u8 *arg1);
 f32 *allocate_memory(s32, s32, s32, s32);
 s32 *asset_load_with_subfiles(s32, s32, s32, s32, s32, s32);
 s32 texture_resolve_dl_ids(s32, s32, s32, s32, s32 *);
 void gfx_dl_relocate(s32, s32 *);
-void func_100043B4(s32 *arg0, u32 arg1);
-void func_10004074(s32);
-void func_15031F04(u8 *);
-void func_1503FAA8(s32);
-void func_1518CF74(s32);
+void heap_set_block_tag(s32 *arg0, u32 arg1);
+void heap_free(s32);
+void attachment_undo_kind_effects(u8 *);
+void animmodel_free(s32);
+void shared_dl_release(s32);
 extern s32 D_800DFDE8[];
 extern s32 *D_800E0578[];
-/* P71: a word of an attachment record (the list D_800C3EE0, see func_15030758) */
+/* P71: a word of an attachment record (the list D_800C3EE0, see attachment_update_all) */
 #define ATT_W(rec, off) (*(s32 *) ((rec) + (off)))
-s32 func_15033ECC();   /* P71: C under NON_MATCHING (else an extern s32 below, as the matching code uses it) */
-s32 func_1000FD38(s32 *, u8 *, u8 *);
+s32 attachment_sound_cb();   /* P71: C under NON_MATCHING (else an extern s32 below, as the matching code uses it) */
+s32 sfx_emitter_stop_by_callback(s32 *, u8 *, u8 *);
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1503F8A8(u8 *, s32, s32, f32, f32, s32); /* P95: f32 parameter */
+s32 animmodel_start_anim(u8 *, s32, s32, f32, f32, s32); /* P95: f32 parameter */
 #else
-s32 func_1503F8A8(u8 *, s32, s32, s32, f32, s32);
+s32 animmodel_start_anim(u8 *, s32, s32, s32, f32, s32);
 #endif
 
-void func_15030448(struct127 *, s32);
+void attachment_free(struct127 *, s32);
 
-s32 func_15030600(u8 *, s32, s32);
+s32 attachment_remove_by_slot_n(u8 *, s32, s32);
 
 
 #ifdef NON_MATCHING
 /*
  * P71: reference-counted load of asset (9, idx) with several display lists (the one-list variant is
- * func_1518C900; func_1518CF74 releases both). Header words: +0 the display-list offset table (+4 >> 2 entries),
+ * shared_dl_acquire; shared_dl_release releases both). Header words: +0 the display-list offset table (+4 >> 2 entries),
  * +8, +0xC (>> 4), +0x10, the data from +0x18. First use: asset_load_with_subfiles(0, 0, 0, 2, 9, idx) (none: return 1),
  * each table entry is relocated by the header address, texture_resolve_dl_ids resolves its segments
  * (&D_800DFDE8[idx] keeps the list), gfx_dl_relocate patches its addresses; the header is kept in D_800E0578[idx].
  * The count D_800DFC00[idx] is not saturated here. Returns 0 once loaded.
  */
-s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC) {
+/* was func_15030100 */
+s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC) {
     u8 *refs = &D_800DFC00[idx];
     s32 *hdr;
     s32 i;
@@ -78,21 +79,22 @@ s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030100.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/model_asset9_load_refcounted.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC);
-s32 func_1503F91C(s32, s32, u8 *, u8 *, s32 *, u8 *, u8 *);
+s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC);
+s32 animmodel_create(s32, s32, u8 *, u8 *, s32 *, u8 *, u8 *);
 
 /*
  * P71: loads the model of attachment record rec (once: +0x24 set means loaded). +0x17 == -1: asset 9 entry +1
- * (func_15030100, display lists to +0x24 / count +0x14 / +0x30), else entry (+1, +0x17) of func_1503F91C (also
+ * (model_asset9_load_refcounted, display lists to +0x24 / count +0x14 / +0x30), else entry (+1, +0x17) of animmodel_create (also
  * +0x48). Failure returns 1. The vertex data runs from the returned data pointer up to the list table (+0x24).
  * Records without bit 0x10 of +4 whose owner has (obj[0x66] & 0xC) == 8 and a +0x30 get two private copies of it
- * (+0x28 / +0x2C, +8 = 1 so func_15030448 frees them), the others share it. Marks the record loaded (+9).
+ * (+0x28 / +0x2C, +8 = 1 so attachment_free frees them), the others share it. Marks the record loaded (+9).
  */
-s32 func_150302C8(struct127 *arg0, u8 *obj) {
+/* was func_150302C8 */
+s32 attachment_load_model(struct127 *arg0, u8 *obj) {
     u8 *rec = (u8 *) arg0;
     s32 data;
     s32 size;
@@ -101,10 +103,10 @@ s32 func_150302C8(struct127 *arg0, u8 *obj) {
         return 0;
     }
     if ((s8) rec[0x17] == -1) {
-        if (func_15030100(rec[1], (s32 **) (rec + 0x24), rec + 0x14, &data, (s32 *) (rec + 0x30), NULL, NULL)) {
+        if (model_asset9_load_refcounted(rec[1], (s32 **) (rec + 0x24), rec + 0x14, &data, (s32 *) (rec + 0x30), NULL, NULL)) {
             return 1;
         }
-    } else if (func_1503F91C(rec[1], (s8) rec[0x17], rec + 0x24, rec + 0x14, &data, rec + 0x30, rec + 0x48)) {
+    } else if (animmodel_create(rec[1], (s8) rec[0x17], rec + 0x24, rec + 0x14, &data, rec + 0x30, rec + 0x48)) {
         return 1;
     }
     size = ATT_W(rec, 0x24) - data;
@@ -115,7 +117,7 @@ s32 func_150302C8(struct127 *arg0, u8 *obj) {
         }
         ATT_W(rec, 0x2C) = (s32) allocate_memory(size, 1, 2, 2);
         if (ATT_W(rec, 0x2C) == 0) {
-            func_10004074(ATT_W(rec, 0x28));
+            heap_free(ATT_W(rec, 0x28));
             ATT_W(rec, 0x28) = 0;
             return 1;
         }
@@ -130,62 +132,63 @@ s32 func_150302C8(struct127 *arg0, u8 *obj) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150302C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_load_model.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * P70: frees an attachment record of the list D_800C3EE0 (see func_15030758). now != 0 frees its buffers at
- * once (func_10004074), else they are released deferred (func_100043B4(buf, 4)) after func_15031F04.
+ * P70: frees an attachment record of the list D_800C3EE0 (see attachment_update_all). now != 0 frees its buffers at
+ * once (heap_free), else they are released deferred (heap_set_block_tag(buf, 4)) after attachment_undo_kind_effects.
  * Loaded records (+9) drop the two vertex copies +0x28 / +0x2C when they were made (+8), the +0x48 handle
- * (func_1503FAA8) and their asset (func_1518CF74(+1)). Then +0x34, +0x44 (always at once), +0x4C, +0x50, the
+ * (animmodel_free) and their asset (shared_dl_release(+1)). Then +0x34, +0x44 (always at once), +0x4C, +0x50, the
  * unlink from the doubly linked list (+0x54 next, +0x58 prev; the head D_800C3EE0) and the record itself.
  */
-void func_15030448(struct127 *arg0, s32 now) {
+/* was func_15030448 */
+void attachment_free(struct127 *arg0, s32 now) {
     u8 *rec = (u8 *) arg0;
     u8 *next;
     u8 *prev;
 
     if (!now) {
-        func_15031F04(rec);
+        attachment_undo_kind_effects(rec);
     }
     if (rec[9] != 0) {
         if (rec[8] != 0) {
             if (now) {
-                func_10004074(ATT_W(rec, 0x28));
-                func_10004074(ATT_W(rec, 0x2C));
+                heap_free(ATT_W(rec, 0x28));
+                heap_free(ATT_W(rec, 0x2C));
             } else {
-                func_100043B4((s32 *) ATT_W(rec, 0x28), 4);
-                func_100043B4((s32 *) ATT_W(rec, 0x2C), 4);
+                heap_set_block_tag((s32 *) ATT_W(rec, 0x28), 4);
+                heap_set_block_tag((s32 *) ATT_W(rec, 0x2C), 4);
             }
         }
         if (ATT_W(rec, 0x48) != 0) {
-            func_1503FAA8(ATT_W(rec, 0x48));
+            animmodel_free(ATT_W(rec, 0x48));
         }
-        func_1518CF74(rec[1]);
+        shared_dl_release(rec[1]);
     }
     if (ATT_W(rec, 0x34) != 0) {
         if (now) {
-            func_10004074(ATT_W(rec, 0x34));
+            heap_free(ATT_W(rec, 0x34));
         } else {
-            func_100043B4((s32 *) ATT_W(rec, 0x34), 4);
+            heap_set_block_tag((s32 *) ATT_W(rec, 0x34), 4);
         }
     }
     if (ATT_W(rec, 0x44) != 0) {
-        func_10004074(ATT_W(rec, 0x44));
+        heap_free(ATT_W(rec, 0x44));
     }
     if (ATT_W(rec, 0x4C) != 0) {
         if (now) {
-            func_10004074(ATT_W(rec, 0x4C));
+            heap_free(ATT_W(rec, 0x4C));
         } else {
-            func_100043B4((s32 *) ATT_W(rec, 0x4C), 4);
+            heap_set_block_tag((s32 *) ATT_W(rec, 0x4C), 4);
         }
     }
     if (ATT_W(rec, 0x50) != 0) {
         if (now) {
-            func_10004074(ATT_W(rec, 0x50));
+            heap_free(ATT_W(rec, 0x50));
         } else {
-            func_100043B4((s32 *) ATT_W(rec, 0x50), 4);
+            heap_set_block_tag((s32 *) ATT_W(rec, 0x50), 4);
         }
     }
     if ((u8 *) D_800C3EE0 == rec) {
@@ -199,18 +202,20 @@ void func_15030448(struct127 *arg0, s32 now) {
     if (next != NULL) {
         ATT_W(next, 0x58) = ATT_W(rec, 0x58);
     }
-    func_10004074((s32) rec);
+    heap_free((s32) rec);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030448.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_free.s")
 #endif
 
-void func_150305E0(s32 arg0, s32 arg1) {
-    func_15030600(arg0, arg1, 0xFF);
+/* was func_150305E0 */
+void attachment_remove_by_slot(s32 arg0, s32 arg1) {
+    attachment_remove_by_slot_n(arg0, arg1, 0xFF);
 }
 
 #ifdef NON_MATCHING
-s32 func_15030600(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_15030600 */
+s32 attachment_remove_by_slot_n(u8 *arg0, s32 arg1, s32 arg2) {
     s32 temp_s1;
     s32 var_a0;
     s32 var_s0;
@@ -232,7 +237,7 @@ loop_3:
                 goto block_10;
             }
             var_s5 = 1;
-            func_15030448((struct127 *) var_a0, 0);
+            attachment_free((struct127 *) var_a0, 0);
             if (var_s0 != 0) {
                 goto block_9;
             }
@@ -248,9 +253,10 @@ block_10:
     return var_s5;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030600.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_remove_by_slot_n.s")
 #endif
-s32 func_150306D4(u8 *arg0) {
+/* was func_150306D4 */
+s32 attachment_remove_all_of_owner(u8 *arg0) {
     s32 temp_s0;
     s32 var_a0;
     s32 var_s1;
@@ -265,7 +271,7 @@ s32 func_150306D4(u8 *arg0) {
             temp_s0 = (*(s32 *)((u8 *)var_a0 + 0x54));
             if ((*(u8 *)((u8 *)arg0 + 0x3B)) == (*(u8 *)var_a0)) {
                 var_s1 = 1;
-                func_15030448((u8 *) var_a0, 0);
+                attachment_free((u8 *) var_a0, 0);
             }
             var_a0 = temp_s0;
         } while (temp_s0 != 0);
@@ -274,9 +280,9 @@ s32 func_150306D4(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-/* P65: the attachment records of the D_800C3EE0 list (offsets read from func_15030758's asm). */
+/* P65: the attachment records of the D_800C3EE0 list (offsets read from attachment_update_all's asm). */
 typedef struct Attach {
-    /* 0x00 */ u8 model;            /* model id for func_15083E90 */
+    /* 0x00 */ u8 model;            /* model id for obj_find_by_setup_id */
     /* 0x01 */ u8 pad1;
     /* 0x02 */ u8 joint;            /* joint matrix of the model (64 bytes each) */
     /* 0x03 */ u8 pad3[2];
@@ -289,7 +295,7 @@ typedef struct Attach {
     /* 0x16 */ u8 mode;             /* 4: scale the joint rotation by +0x40 */
     /* 0x17 */ u8 pad17[5];
     /* 0x1C */ u16 timer;           /* 0xFFFF = forever, else frames left (D_800BE9E4 per call) */
-    /* 0x1E */ u16 subModel;        /* != 0: attached through func_15031C4C / func_15031360 (second pass) */
+    /* 0x1E */ u16 subModel;        /* != 0: attached through attachment_find_by_slot / attachment_get_matrices (second pass) */
     /* 0x20 */ u16 subMtx;
     /* 0x22 */ s16 spin;            /* extra rotation (65536 = 360 degrees) */
     /* 0x24 */ u8 pad24[0x10];
@@ -297,27 +303,28 @@ typedef struct Attach {
     /* 0x38 */ u8 pad38[8];
     /* 0x40 */ f32 scale;
     /* 0x44 */ f32 *transform;      /* x, y, z, then rotation angles at +0xC / +0x10 / +0x14 */
-    /* 0x48 */ u8 *target;          /* gets the matrix pointer at +0x3E0[D_800BE9C0], then func_1503F7A0 */
+    /* 0x48 */ u8 *target;          /* gets the matrix pointer at +0x3E0[D_800BE9C0], then animmodel_update_matrices */
     /* 0x4C */ u8 pad4C[8];
     /* 0x54 */ struct Attach *next;
 } Attach;
 
 extern s32 (*D_80084550[])(Attach *, u8 *);
-s32 func_15031360(u8 *, u8 *, s32 *, s32 *);
-u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
-void func_1503F7A0(u8 *);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+s32 attachment_get_matrices(u8 *, u8 *, s32 *, s32 *);
+u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
+void animmodel_update_matrices(u8 *);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 /*
  * P65: per-frame update of the attachments (D_800C3EE0 list). Pass 0 handles the records without +0x1E (and notes
- * whether any has one), pass 1, only when needed, those attached to a sub-model. For each: its model (func_15083E90)
- * must exist and the optional callback D_80084550[+7] must return 0, else the record is freed (func_15030448).
+ * whether any has one), pass 1, only when needed, those attached to a sub-model. For each: its model (obj_find_by_setup_id)
+ * must exist and the optional callback D_80084550[+7] must return 0, else the record is freed (attachment_free).
  * With a matrix buffer (+0x34) or a target (+0x48), the joint matrix (the model's joint +2, or the sub-model matrix
- * from func_15031360 as f32) gives the record's matrix for this DL buffer: transformed by +0x44 (rotation, scale +0x40,
+ * from attachment_get_matrices as f32) gives the record's matrix for this DL buffer: transformed by +0x44 (rotation, scale +0x40,
  * translation) / scaled to +0x40 (mode 4) / as is, then rotated by +0x22. The target gets the pointer. Records whose
  * owner ids no longer match the model's +0x84, or whose timer runs out, are freed.
  */
-void func_15030758(void) {
+/* was func_15030758 */
+void attachment_update_all(void) {
     Attach *rec;
     Attach *next;
     u8 *model;
@@ -356,14 +363,14 @@ void func_15030758(void) {
                 continue;
             }
 
-            model = (u8 *) func_15083E90(rec->model);
+            model = (u8 *) obj_find_by_setup_id(rec->model);
             rec->seen = 1;
             if (model == NULL) {
-                func_15030448((struct127 *) rec, 0);
+                attachment_free((struct127 *) rec, 0);
                 continue;
             }
             if (rec->callback != 0 && D_80084550[rec->callback](rec, model) != 0) {
-                func_15030448((struct127 *) rec, 0);
+                attachment_free((struct127 *) rec, 0);
                 continue;
             }
 
@@ -373,13 +380,13 @@ void func_15030758(void) {
                 joints = *(u8 **) (model + 0x1D4);
                 if (joints != NULL) {
                     if (rec->subModel != 0) {
-                        sub = func_15031C4C(model, rec->subModel, 0);
+                        sub = attachment_find_by_slot(model, rec->subModel, 0);
                         if (sub == NULL) {
-                            func_15030448((struct127 *) rec, 0);
+                            attachment_free((struct127 *) rec, 0);
                             continue;
                         }
-                        if (func_15031360(sub, model, &subMtx, &unused) == 0) {
-                            func_15030448((struct127 *) rec, 0);
+                        if (attachment_get_matrices(sub, model, &subMtx, &unused) == 0) {
+                            attachment_free((struct127 *) rec, 0);
                             continue;
                         }
                         src = local;
@@ -426,12 +433,12 @@ void func_15030758(void) {
                             xform[3][1] = rec->transform[1];
                             xform[3][2] = rec->transform[2];
                             xform[3][3] = 1.0f;
-                            func_150A7A48(xform, norm, res);
+                            mtxf_mul(xform, norm, res);
                             guMtxF2L(res, out);
                         } else if (rec->spin != 0) {
                             /* extra rotation by spin (65536 = 360 degrees) */
                             mtxf_rotate_xyz_deg(rot, 0.0f, 0.0f, rec->spin * (360.0f / 65536.0f));
-                            func_150A7A48(rot, m, res);
+                            mtxf_mul(rot, m, res);
                             guMtxF2L(res, out);
                         } else {
                             guMtxF2L(m, out);
@@ -442,7 +449,7 @@ void func_15030758(void) {
 
             if (rec->target != NULL) {
                 ((void **) (rec->target + 0x3E0))[D_800BE9C0] = (rec->mtx != NULL) ? (void *) out : (void *) src;
-                func_1503F7A0(rec->target);
+                animmodel_update_matrices(rec->target);
             }
 
             if (rec->ownerIds[0] != 0) {
@@ -454,7 +461,7 @@ void func_15030758(void) {
                     }
                 }
                 if (!keep) {
-                    func_15030448((struct127 *) rec, 0);
+                    attachment_free((struct127 *) rec, 0);
                     continue;
                 }
             }
@@ -462,7 +469,7 @@ void func_15030758(void) {
             t = rec->timer;
             if (t != 0xFFFF) {
                 if (t == 0) {
-                    func_15030448((struct127 *) rec, 0);
+                    attachment_free((struct127 *) rec, 0);
                 } else if (D_800BE9E4 < t) {
                     rec->timer = t - D_800BE9E4;
                 } else {
@@ -473,13 +480,14 @@ void func_15030758(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030758.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_update_all.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150302C8(struct127 *, u8 *);
+s32 attachment_load_model(struct127 *, u8 *);
 
-struct127 *func_15030DE4(u8 *arg0, s8 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 *arg9, s32 argA, s32 argB, s32 argC) {
+/* was func_15030DE4 */
+struct127 *attachment_create(u8 *arg0, s8 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 *arg9, s32 argA, s32 argB, s32 argC) {
     s32 sp24;
     s32 temp_v0_2;
     s32 var_s0;
@@ -570,22 +578,23 @@ block_9:
     }
     if (var_t1 == 0) {
         sp24 = var_t1;
-        var_t1 |= func_150302C8(temp_v0, arg0);
+        var_t1 |= attachment_load_model(temp_v0, arg0);
     }
     if (var_t1 != 0) {
-        func_15030448(temp_v0, 1);
+        attachment_free(temp_v0, 1);
         return NULL;
     }
-    func_15031D40(temp_v0, arg0);
+    attachment_apply_kind_effects(temp_v0, arg0);
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030DE4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_create.s")
 #endif
 #ifdef NON_MATCHING
 f32 *allocate_memory(s32, s32, s32, s32);
 
-void func_15031044(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
+/* was func_15031044 */
+void attachment_set_local_transform(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
     f32 *temp_v0;
 
     temp_v0 = allocate_memory(0x18, 1, 0, 2);
@@ -603,12 +612,13 @@ void func_15031044(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031044.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_set_local_transform.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_150314B4(s32, u8 *, struct127 *, s32, s32);
+s32 attachment_draw(s32, u8 *, struct127 *, s32, s32);
 
-s32 func_150310F8(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_150310F8 */
+s32 attachment_draw_all_for_player(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_s2;
     s32 temp_v0_2;
     s32 temp_v1;
@@ -624,7 +634,7 @@ s32 func_150310F8(s32 arg0, s32 arg1, s32 arg2) {
             if ((*(u8 *)((u8 *)var_s0 + 3)) == 0) {
 
             } else {
-                temp_v0 = func_15083E90((*(u8 *)((u8 *)var_s0 + 0)));
+                temp_v0 = obj_find_by_setup_id((*(u8 *)((u8 *)var_s0 + 0)));
                 if ((temp_v0 == NULL) || (temp_v0->unk1D4 == NULL) || (temp_v1 = 1 << arg1, (temp_v1 == (temp_v0->unk74 & temp_v1)))) {
 
                 } else if (arg2 == 2) {
@@ -645,7 +655,7 @@ s32 func_150310F8(s32 arg0, s32 arg1, s32 arg2) {
 
                     } else {
 block_19:
-                        var_s6 = func_150314B4(var_s6, (u8 *) var_s0, temp_v0, arg1, 0);
+                        var_s6 = attachment_draw(var_s6, (u8 *) var_s0, temp_v0, arg1, 0);
                     }
                 }
             }
@@ -655,14 +665,15 @@ block_19:
     return var_s6;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150310F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_draw_all_for_player.s")
 #endif
 #ifdef NON_MATCHING
 #ifndef NON_MATCHING
-s32 func_150314B4(s32, u8 *, u8 *, s32, s32);
+s32 attachment_draw(s32, u8 *, u8 *, s32, s32);
 #endif
 
-s32 func_15031284(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
+/* was func_15031284 */
+s32 attachment_draw_for_object(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
     s32 temp_s1;
     s32 var_s0;
     s32 var_s3;
@@ -678,7 +689,7 @@ s32 func_15031284(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
                 if (((*(u8 *)((u8 *)arg1 + 0x3B)) != (*(u8 *)((u8 *)var_s0 + 0))) || ((*(u8 *)((u8 *)var_s0 + 3)) == 0)) {
 
                 } else {
-                    var_s3 = func_150314B4(var_s3, (u8 *) var_s0, arg1, arg2, arg3);
+                    var_s3 = attachment_draw(var_s3, (u8 *) var_s0, arg1, arg2, arg3);
                 }
                 var_s0 = temp_s1;
             } while (var_s0 != 0);
@@ -688,7 +699,7 @@ s32 func_15031284(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
 }
 #else
 #ifdef NON_MATCHING
-s32 func_15031284(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
+s32 attachment_draw_for_object(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
     s32 temp_s1;
     s32 var_s0;
     s32 var_s3;
@@ -704,7 +715,7 @@ s32 func_15031284(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
                 if (((*(u8 *)((u8 *)arg1 + 0x3B)) != (*(u8 *)((u8 *)var_s0 + 0))) || ((*(u8 *)((u8 *)var_s0 + 3)) == 0)) {
 
                 } else {
-                    var_s3 = func_150314B4(var_s3, (u8 *) var_s0, arg1, arg2, arg3);
+                    var_s3 = attachment_draw(var_s3, (u8 *) var_s0, arg1, arg2, arg3);
                 }
                 var_s0 = temp_s1;
             } while (var_s0 != 0);
@@ -713,13 +724,14 @@ s32 func_15031284(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
     return var_s3;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031284.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_draw_for_object.s")
 #endif
 #endif
 #ifdef NON_MATCHING
-u8 * func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
+u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
 
-s32 func_15031360(u8 *arg0, u8 *arg1, s32 *arg2, s32 *arg3) {
+/* was func_15031360 */
+s32 attachment_get_matrices(u8 *arg0, u8 *arg1, s32 *arg2, s32 *arg3) {
     s32 temp_t9;
     s32 temp_v0_2;
     s32 var_t3;
@@ -744,11 +756,11 @@ s32 func_15031360(u8 *arg0, u8 *arg1, s32 *arg2, s32 *arg3) {
     }
     temp_v0_3 = (*(u16 *)((u8 *)arg0 + 0x1E));
     if (temp_v0_3 != 0) {
-        temp_v0_4 = func_15031C4C(arg1, temp_v0_3, 0);
+        temp_v0_4 = attachment_find_by_slot(arg1, temp_v0_3, 0);
         if (temp_v0_4 == NULL) {
             return 0;
         }
-        if (func_15031360(temp_v0_4, arg1, arg2, arg3) == 0) {
+        if (attachment_get_matrices(temp_v0_4, arg1, arg2, arg3) == 0) {
             return 0;
         }
         *arg2 += (*(u16 *)((u8 *)arg0 + 0x20)) << 6;
@@ -764,7 +776,7 @@ block_14:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031360.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_get_matrices.s")
 #endif
 #ifdef NON_MATCHING
 extern u8 D_80083350[];     /* segment 8: blended (alpha < 0xFF) material set */
@@ -772,16 +784,16 @@ extern u8 D_800834D0[];     /* segment 8: opaque material set */
 extern u8 D_800DD714[];     /* fog colour r, g, b when the level fogs (header +0x3E) */
 extern u8 D_800DA248[];
 extern s32 D_800BEFC4;      /* display list capacity (commands) */
-s32 func_15031360(u8 *, u8 *, s32 *, s32 *);
-void func_1502D83C(s32 arg0, u8 *arg1);
-void func_1502D920(u8 *rec, s32 *col, s32 view);
-void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8,
+s32 attachment_get_matrices(u8 *, u8 *, s32 *, s32 *);
+void obj_ambient_colour(s32 arg0, u8 *arg1);
+void obj_fog_alpha(u8 *rec, s32 *col, s32 view);
+void obj_unpack_light_colours(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8,
                    s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD);
-void func_150836AC(u8 *);
-u8 *func_1515EAB4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
-Gfx *func_1515DE84(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
+void obj_alloc_light_bufs(u8 *);
+u8 *light_write_light_cmds(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
+Gfx *light_apply_object_lights(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
-u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
+u8 *reflect_emit_entries_dl(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
 
 /* one display list command */
 #define ATT_DL(g, a, b)              \
@@ -795,12 +807,13 @@ u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
  * P76: draw attachment att (+3 alpha, +5 visible, +0x13 / +0x14 hidden-part mask / part count, +0x18 / +0x1A
  * texture ids for segments 6 / 7, +0x24 part display lists, +0x28 per-buffer segment 1) of object obj for player
  * view `player`: alpha scaled by obj_get_player_alpha, segment 8 = blended or opaque material set, matrix (segment 3) from
- * func_15031360 (nothing drawn without one), fog / tint colours from func_1502D83C / func_1502D920 / func_1502CF24,
- * lighting by the object's +0x66 mode (lights +0x304[player] built by func_150836AC on demand, func_1515EAB4 /
- * func_1515DE84), then the parts (or func_1503605C when special != 0). When the display list would overflow
+ * attachment_get_matrices (nothing drawn without one), fog / tint colours from obj_ambient_colour / obj_fog_alpha / obj_unpack_light_colours,
+ * lighting by the object's +0x66 mode (lights +0x304[player] built by obj_alloc_light_bufs on demand, light_write_light_cmds /
+ * light_apply_object_lights), then the parts (or reflect_emit_entries_dl when special != 0). When the display list would overflow
  * (D_800BEFC4 commands from D_800BEDE8[D_800BE9C0]) the commands are dropped (the start pointer is returned).
  */
-s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
+/* was func_150314B4 */
+s32 attachment_draw(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
     Gfx *start = (Gfx *) gfxp;
     Gfx *gfx = start;
     u8 *obj = (u8 *) objp;
@@ -831,17 +844,17 @@ s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
     } else {
         ATT_DL(gfx, 0xDB060020, D_800834D0);
     }
-    if (func_15031360(att, obj, &mtx, &unused110) == 0) {
+    if (attachment_get_matrices(att, obj, &mtx, &unused110) == 0) {
         return (s32) gfx;
     }
     i = (obj - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
-    func_1502D83C(i, (u8 *) col);
+    obj_ambient_colour(i, (u8 *) col);
     if (*(s16 *) ((u8 *) D_800B0DF0 + 0x3E) != 0) {
-        func_1502D920((u8 *) &D_800CC2D0[i], col, player);
+        obj_fog_alpha((u8 *) &D_800CC2D0[i], col, player);
     } else {
         col[3] = 0xFF;
     }
-    func_1502CF24(obj, player, alpha, (u8 *) col, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+    obj_unpack_light_colours(obj, player, alpha, (u8 *) col, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
     fogs = *(s16 *) ((u8 *) D_800B0DF0 + 0x3E);
 
@@ -862,17 +875,17 @@ s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
         created = FALSE;
         lights = *(s32 *) (obj + 0x304 + player * 4);
         if (lights == 0) {
-            func_150836AC(obj);
+            obj_alloc_light_bufs(obj);
             created = TRUE;
             lights = *(s32 *) (obj + 0x304 + player * 4);
         }
         if (lights != 0) {
             size = (obj[0x2FD] != 0 || created) ? 10 : 2;
             if (obj[5] != 5 && obj[0x302] != 0 && (obj[0x66] & 0xC) != 0 && !created) {
-                gfx = (Gfx *) func_1515EAB4((u8 *) gfx, lights, obj[0x301], obj[0x302],
+                gfx = (Gfx *) light_write_light_cmds((u8 *) gfx, lights, obj[0x301], obj[0x302],
                                             *(s32 *) (obj + 0x314) + D_800BE9C0 * 8);
             } else {
-                gfx = func_1515DE84(gfx, player, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C),
+                gfx = light_apply_object_lights(gfx, player, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C),
                                     *(s32 *) (obj + 0x184), lights, obj[0x301],
                                     (u8 *) (*(s32 *) (obj + 0x314) + D_800BE9C0 * 8), obj + 0x302, 2, obj + 0x1DD,
                                     size, D_800DA248);
@@ -906,7 +919,7 @@ s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
         }
     } else {
         ATT_DL(gfx, 0xD9FFFFFF, 0x200);
-        gfx = (Gfx *) func_1503605C((u8 *) gfx, att, envR, envG, envB);
+        gfx = (Gfx *) reflect_emit_entries_dl((u8 *) gfx, att, envR, envG, envB);
     }
     if (gfx - D_800BEDE8[D_800BE9C0] > D_800BEFC4) {
         return (s32) start;
@@ -914,11 +927,12 @@ s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
     return (s32) gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150314B4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_draw.s")
 #endif
 
-void func_15031C1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 *temp_v0 = func_15031C4C(arg0, arg1, arg3);
+/* was func_15031C1C */
+void attachment_set_alpha_by_slot(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    u8 *temp_v0 = attachment_find_by_slot(arg0, arg1, arg3);
     if (temp_v0 != NULL) {
         temp_v0[3] = arg2;
     }
@@ -927,7 +941,8 @@ void func_15031C1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 // attachment_find_nth: returns the arg2-th (0 = first) entry of the D_800C3EE0 list whose owner id (+0) is obj+0x3B
 // and whose sub id (+6) is arg1, or NULL.
-u8 * func_15031C4C(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_15031C4C */
+u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2) {
     s32 var_a2;
     s32 var_v1;
     u8 temp_v0;
@@ -958,9 +973,10 @@ loop_3:
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031C4C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_find_by_slot.s")
 #endif
-u8 *func_15031CBC(s32 arg0, u8 *arg1) {
+/* was func_15031CBC */
+u8 *attachment_find_by_slot_any(s32 arg0, u8 *arg1) {
     u8 *n;
     u8 *next;
 
@@ -994,28 +1010,29 @@ s32 object_fire_spawn(u8 *, s32, s32);
 void fire_smoke_trail_spawn(u8 *, u8, s32);
 void obj_timer_link_spawn(u8 *);
 s32 light_create_joint_pulse(u8 *, s32, s32);
-s32 func_151BDDD8(u8 *, s32, s32);
-void func_151D7A60(u8 *, u8, s8, u8, s32);
+s32 aura_burst_group_spawn(u8 *, s32, s32);
+void char_glow_trail_spawn(u8 *, u8, s8, u8, s32);
 extern s32 D_800905D8;
 extern s32 D_800905DC;
 
 // attachment_start_effect: runs the start effect of an attachment record by its kind (rec[1]): two jump tables
 // in the asm, kinds 0x82..0x90 (jtbl_800972F0) and 0x37..0x5E (jtbl_8009732C), plus kind 0x1D. P272 rewrite: the
 // m2c C nested the low kinds inside the 0x82..0x90 branch, so they never ran.
-void func_15031D40(u8 *arg0, u8 *arg1) {
+/* was func_15031D40 */
+void attachment_apply_kind_effects(u8 *arg0, u8 *arg1) {
     u8 kind = arg0[1];
     u8 *other;
 
     if (kind >= 0x5F) {
         switch (kind) {
         case 0x82:
-            func_151D7A60(arg1, 6, -1, 0xFF, 1);
+            char_glow_trail_spawn(arg1, 6, -1, 0xFF, 1);
             break;
         case 0x85:
             *(s32 *)(arg1 + 0x9C) |= 0x6000;
             break;
         case 0x8D:
-            if (func_150859AC(0, 6) < 0x64) {
+            if (player_stat_get(0, 6) < 0x64) {
                 *(s16 *)(arg0 + 0x18) = (s16) D_800905D8;
             } else {
                 *(s16 *)(arg0 + 0x18) = (s16) D_800905DC;
@@ -1031,7 +1048,7 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
         return;
     }
     if (kind == 0x1D) {
-        func_151D7A60(arg1, 0, 2, 0xFF, 1);
+        char_glow_trail_spawn(arg1, 0, 2, 0xFF, 1);
         return;
     }
     switch (kind) {
@@ -1039,7 +1056,7 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
         obj_timer_link_spawn(arg1);
         break;
     case 0x3D:
-        func_151BDDD8(arg1, 0xFF, 1);
+        aura_burst_group_spawn(arg1, 0xFF, 1);
         break;
     case 0x49:
         light_create_joint_pulse(arg1, 0xFF, 1);
@@ -1060,27 +1077,28 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031D40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_apply_kind_effects.s")
 #endif
 #ifdef NON_MATCHING
-struct127 *func_15083E90(u8);
+struct127 *obj_find_by_setup_id(u8);
 void obj_timer_link_post_remove(u8 *);
 void light_ctrl_broadcast(u8, u8, s32);
-void func_151482D4(s32, u8);
+void fxrec_broadcast(s32, u8);
 void func_151494E0(s32, u8);
-void func_151BDDA4(u8 *);
-void func_151D4668(u8 *);
-void func_151D7A2C(u8 *);
+void obj_aura_burst_stop(u8 *);
+void obj_point_fx_broadcast_kill(u8 *);
+void char_glow_broadcast_kill(u8 *);
 void obj_glow_post_remove_event(u8 *);
 
 /*
- * P71: undoes what attachment record rec (model id +1) did to its owner object (func_15083E90(+0), none: nothing):
+ * P71: undoes what attachment record rec (model id +1) did to its owner object (obj_find_by_setup_id(+0), none: nothing):
  * flag bits of +0x9C are cleared per model (0x90: 0x70, 0x8F: 0xE00, 0x85 / 0x5E: 0x6000), models 0x37 / 0x4B / 0x4C
- * queue func_15033ECC (func_1000FD38; 0x37 also obj_timer_link_post_remove), 0x49 / 0x5D send messages with the owner and its
+ * queue attachment_sound_cb (sfx_emitter_stop_by_callback; 0x37 also obj_timer_link_post_remove), 0x49 / 0x5D send messages with the owner and its
  * +0x3B, 0x5A lowers +0x31C->+0x1A6 by 0xAA; others call per-model handlers. Records of kind +6 = 0x16 / 0x63 /
- * 0x89 also call obj_glow_post_remove_event and func_151D4668.
+ * 0x89 also call obj_glow_post_remove_event and obj_point_fx_broadcast_kill.
  */
-void func_15031F04(u8 *rec) {
+/* was func_15031F04 */
+void attachment_undo_kind_effects(u8 *rec) {
     struct {
         u8 *obj;
         u8 id;
@@ -1088,14 +1106,14 @@ void func_15031F04(u8 *rec) {
     u8 *obj;
     u8 *p;
 
-    obj = (u8 *) func_15083E90(rec[0]);
+    obj = (u8 *) obj_find_by_setup_id(rec[0]);
     if (obj == NULL) {
         return;
     }
     switch (rec[1]) {
         case 0x82:
         case 0x1D:
-            func_151D7A2C(obj);
+            char_glow_broadcast_kill(obj);
             break;
         case 0x85:
         case 0x5E:
@@ -1112,7 +1130,7 @@ void func_15031F04(u8 *rec) {
         case 0x5F:
         case 0x65:
         case 0x66:
-            func_151D4668(obj);
+            obj_point_fx_broadcast_kill(obj);
             break;
         case 0x5A:
             p = *(u8 **) (obj + 0x31C);
@@ -1123,7 +1141,7 @@ void func_15031F04(u8 *rec) {
         case 0x37:
         case 0x4B:
         case 0x4C:
-            func_1000FD38((s32 *) func_15033ECC, rec, obj);
+            sfx_emitter_stop_by_callback((s32 *) attachment_sound_cb, rec, obj);
             if (rec[1] == 0x37) {
                 obj_timer_link_post_remove(obj);
             }
@@ -1136,23 +1154,24 @@ void func_15031F04(u8 *rec) {
         case 0x5D:
             msg.obj = obj;
             msg.id = obj[0x3B];
-            func_151482D4((s32) &msg, 0x2E);
+            fxrec_broadcast((s32) &msg, 0x2E);
             func_151494E0((s32) &msg, 0x2F);
             break;
         case 0x3D:
-            func_151BDDA4(obj);
+            obj_aura_burst_stop(obj);
             break;
     }
     if (rec[6] == 0x16 || rec[6] == 0x63 || rec[6] == 0x89) {
         obj_glow_post_remove_event(obj);
-        func_151D4668(obj);
+        obj_point_fx_broadcast_kill(obj);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031F04.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_undo_kind_effects.s")
 #endif
 
-s32 func_1503211C(u8 *arg0, s32 arg1) {
+/* was func_1503211C */
+s32 attachment_cb_texture_pingpong(u8 *arg0, s32 arg1) {
     s32 var_v0 = *(s32 *)(arg0 + 0x38);
 
     if (*(s32 *)(arg0 + 0x38) >= 3) {
@@ -1175,7 +1194,8 @@ extern f32 D_8009748C; /* 1 / 60 */
  * its first word (t = 1 in animation 0x55, 0 in 0x56, else 1 - y / 60 for y in 0..120, 0 outside).
  * Returns 0 (also when there is no record or display list).
  */
-s32 func_1503216C(u8 *arg0, struct127 *obj) {
+/* was func_1503216C */
+s32 attachment_cb_tile_by_height(u8 *arg0, struct127 *obj) {
     u8 *rec = (u8 *) obj->unk2D0;
     u32 *dl;
     f32 t;
@@ -1218,7 +1238,7 @@ s32 func_1503216C(u8 *arg0, struct127 *obj) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_1503216C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_cb_tile_by_height.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -1226,7 +1246,7 @@ extern s32 D_80090680;      /* att+0x18 for kinds 0x5A / 0x74 / 0x7A when obj+0x
 extern s32 D_80090684;      /* ... and when obj+0x2E8 != 0 */
 void anim_state_snapshot(u8 *);
 
-/* Tables of func_150322B8: animation index by animation id, generated from the ROM's jump tables by
+/* Tables of attachment_cb_sync_animation: animation index by animation id, generated from the ROM's jump tables by
  * docs/port/sessions/p80/gen_150322B8.py (do not edit by hand). 0 = the model's default animation. */
 static const u8 sAnim_8009751C[0x2B] = {
     /* 0x000 */ 0x05, 0x03, 0x06, 0x06, 0x09, 0x0A, 0x07, 0x02, 0x10, 0x06, 0x04, 0x06, 0x06, 0x06, 0x06, 0x08,
@@ -1282,11 +1302,12 @@ static const u8 sAnim_80097DB8[0x4E] = {
  * P80: attachment callback 5. Chooses the animation of attachment att's animation state (att+0x48) from the owner
  * object's kind (obj[4]), the attachment's model id (att[1]) and the object's animation id (obj+0x84), setting the
  * attachment's mode att[2] (and +0x18 / +0x1E / +0x20 for some models) on the way. The index starts the animation
- * (func_1503F8A8); then the attachment's frame follows the object's animation obj+0x2D0 (frame +8, and +0x3A / +0x3C
+ * (animmodel_start_anim); then the attachment's frame follows the object's animation obj+0x2D0 (frame +8, and +0x3A / +0x3C
  * unless model 0x9E), clamped below the last frame (+0x18 - 1). Returns 1 (and changes nothing) for an animation id
  * some models (0x83, 0x87, 0x89, 0x8E, 0x98) do not know, else 0. Index -1 = keep the current animation.
  */
-s32 func_150322B8(u8 *att, u8 *obj) {
+/* was func_150322B8 */
+s32 attachment_cb_sync_animation(u8 *att, u8 *obj) {
     u8 *anim = *(u8 **) (att + 0x48);
     u8 *src = *(u8 **) (obj + 0x2D0);
     s32 idx = -1;
@@ -1525,7 +1546,7 @@ s32 func_150322B8(u8 *att, u8 *obj) {
     }
 
     if (idx != -1) {
-        func_1503F8A8(*(u8 **) (att + 0x48), 0, idx, 0, 0.0f, 1);
+        animmodel_start_anim(*(u8 **) (att + 0x48), 0, idx, 0, 0.0f, 1);
     }
     if (src != NULL) {
         anim = *(u8 **) (att + 0x48);
@@ -1548,10 +1569,11 @@ s32 func_150322B8(u8 *att, u8 *obj) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150322B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_cb_sync_animation.s")
 #endif
 
-s32 func_150334A8(u8 *arg0, u8 *arg1) {
+/* was func_150334A8 */
+s32 attachment_cb_anim_from_owner(u8 *arg0, u8 *arg1) {
     u8 *v;
     u8 *s;
     f32 f;
@@ -1564,9 +1586,9 @@ s32 func_150334A8(u8 *arg0, u8 *arg1) {
     t = *(s32 *)(arg1 + 0x2E4) & 0xFF;
     if (t != 0xFF) {
 #ifdef NON_MATCHING
-        func_1503F8A8(s, 0, t, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
+        animmodel_start_anim(s, 0, t, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
 #else
-        func_1503F8A8(s, 0, t, 0x3F800000, 0.0f, 1);
+        animmodel_start_anim(s, 0, t, 0x3F800000, 0.0f, 1);
 #endif
     }
     if (v != NULL) {
@@ -1581,7 +1603,8 @@ s32 func_150334A8(u8 *arg0, u8 *arg1) {
 }
 
 
-s32 func_1503356C(u8 *arg0, s32 arg1) {
+/* was func_1503356C */
+s32 attachment_cb_play_anim_once(u8 *arg0, s32 arg1) {
     u8 *var_s0;
 
     var_s0 = *(u8 **)(arg0 + 0x48);
@@ -1590,9 +1613,9 @@ s32 func_1503356C(u8 *arg0, s32 arg1) {
     }
     if ((*(u16 *)(var_s0 + 4) & 0x8000) != 0x8000) {
 #ifdef NON_MATCHING
-        func_1503F8A8(var_s0, 0, 0, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
+        animmodel_start_anim(var_s0, 0, 0, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
 #else
-        func_1503F8A8(var_s0, 0, 0, 0x3F800000, 0.0f, 1);
+        animmodel_start_anim(var_s0, 0, 0, 0x3F800000, 0.0f, 1);
 #endif
         var_s0 = *(u8 **)(arg0 + 0x48);
     }
@@ -1602,7 +1625,8 @@ s32 func_1503356C(u8 *arg0, s32 arg1) {
     return 0;
 }
 
-s32 func_15033618(u8 *arg0, u8 *arg1)
+/* was func_15033618 */
+s32 attachment_cb_expire_timer(u8 *arg0, u8 *arg1)
 {
   s32 temp_a1;
   if (D_800C35EA == 1)
@@ -1623,7 +1647,8 @@ s32 func_15033618(u8 *arg0, u8 *arg1)
   return 0;
 }
 
-s32 func_15033698(u8 *arg0, u8 *arg1) {
+/* was func_15033698 */
+s32 attachment_cb_expire_on_flag(u8 *arg0, u8 *arg1) {
     f32 temp_f0;
     f32 new_var;
     u8 *temp_v0;
@@ -1647,7 +1672,8 @@ s32 func_15033698(u8 *arg0, u8 *arg1) {
     return 0;
 }
 
-s32 func_15033730(u8 *arg0, u8 *arg1)
+/* was func_15033730 */
+s32 attachment_cb_spin_in_state5(u8 *arg0, u8 *arg1)
 {
   switch (arg0[1]) {
   case 0x27:
@@ -1667,7 +1693,8 @@ s32 func_15033730(u8 *arg0, u8 *arg1)
 }
 
 #ifdef NON_MATCHING
-s32 func_150337A8(u8 *arg0, u8 *arg1) {
+/* was func_150337A8 */
+s32 attachment_tile_scroll_update(u8 *arg0, u8 *arg1) {
     s32 temp_a3;
     s32 temp_t0;
     s32 temp_t2;
@@ -1731,12 +1758,13 @@ s32 func_150337A8(u8 *arg0, u8 *arg1) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150337A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_tile_scroll_update.s")
 #endif
-void func_15031044(s32, f32, f32, f32, f32, f32, f32);
-void func_1503E5F8(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-s32 func_150335C8(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+void attachment_set_local_transform(s32, f32, f32, f32, f32, f32, f32);
+void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+void mtxf_mul(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+/* was func_150335C8 */
+s32 attachment_spawn_at_joint(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     s32 ret;
     f32 m1[4][4];
     f32 m2[4][4];
@@ -1755,7 +1783,7 @@ s32 func_150335C8(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     if (arg1->unk1D4 == NULL) {
         return 0;
     }
-    ret = func_15083568(arg1, arg2, 1.0f, 0);
+    ret = obj_setup_run(arg1, arg2, 1.0f, 0);
     if (ret != 0) {
         *(s8 *)(ret + 2) = arg3;
         *(f32 *)(ret + 0x40) = *(f32 *)(arg0 + 0x14C);
@@ -1774,20 +1802,21 @@ s32 func_150335C8(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
         m3[1][3] = 0.0f;
         m3[2][3] = 0.0f;
         m3[3][3] = 1.0f;
-        func_150A7A48(m3, m2, m4);
-        func_1503E5F8((f32 *)m4, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
+        mtxf_mul(m3, m2, m4);
+        mtxf_decompose((f32 *)m4, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
         if (arg5 != 0) {
             z = 0.0f;
             y = 0.0f;
             x = 0.0f;
         }
-        func_15031044(ret, x, y, z, r0, r1, r2);
+        attachment_set_local_transform(ret, x, y, z, r0, r1, r2);
         return ret;
     }
     return 0;
 }
 
-s32 func_15033A7C(u8 *arg0, u8 *arg1) {
+/* was func_15033A7C */
+s32 attachment_cb_keep_during_anims(u8 *arg0, u8 *arg1) {
     u16 temp_v0;
 
     temp_v0 = (*(u16 *)((u8 *)arg1 + 0x84));
@@ -1797,7 +1826,8 @@ s32 func_15033A7C(u8 *arg0, u8 *arg1) {
     return 1;
 }
 
-s32 func_15033AD4(u8 *arg0, s32 arg1) {
+/* was func_15033AD4 */
+s32 attachment_cb_blink_texture(u8 *arg0, s32 arg1) {
     *(s32 *)(arg0 + 0x38) += D_800BE9E4;
     if (*(s32 *)(arg0 + 0x38) >= 16) {
         *(s32 *)(arg0 + 0x38) = 0;
@@ -1811,7 +1841,8 @@ s32 func_15033AD4(u8 *arg0, s32 arg1) {
 void obj_glow_post_remove_event(u8 *);
 s32 object_effect_start(u8 *, s32, s32, s32, s32, s32);
 
-s32 func_15033B28(u8 *arg0, u8 *arg1) {
+/* was func_15033B28 */
+s32 attachment_cb_slot_anim_check(u8 *arg0, u8 *arg1) {
     s32 var_a2;
     s32 var_v1;
     u16 temp_v0_2;
@@ -1851,45 +1882,47 @@ block_10:
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033B28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_cb_slot_anim_check.s")
 #endif
 #ifndef NON_MATCHING
-extern s32 func_15033ECC;
+extern s32 attachment_sound_cb;
 #endif
-s32 func_1000FD38(s32 *, u8 *, u8 *);
-s32 func_150337A8(u8 *, u8 *);
+s32 sfx_emitter_stop_by_callback(s32 *, u8 *, u8 *);
+s32 attachment_tile_scroll_update(u8 *, u8 *);
 extern u8 D_800BEE2C;
-s32 func_15033CB8(u8 *arg0, u8 *arg1) {
-    func_150337A8(arg0, arg1);
+/* was func_15033CB8 */
+s32 attachment_cb_loop_sound(u8 *arg0, u8 *arg1) {
+    attachment_tile_scroll_update(arg0, arg1);
     if (D_800C35EA != 1) {
         if (D_800BEE2C != 0) {
             if (*(s32 *)(arg0 + 0x3C) != 0) {
-                func_1000FD38(&func_15033ECC, arg0, arg1);
+                sfx_emitter_stop_by_callback(&attachment_sound_cb, arg0, arg1);
             }
             *(s32 *)(arg0 + 0x3C) = 0;
         } else if (*(s32 *)(arg0 + 0x3C) == 0) {
-            *(s32 *)(arg0 + 0x3C) = func_1000FA64(0x448U, (s16) (s32) (*(f32 *)(arg1 + 0x14)), (s16) (s32) (*(f32 *)(arg1 + 0x18)), (s16) (s32) (*(f32 *)(arg1 + 0x1C)), 0x7D00, 0x3E8U, 0x1F4, (s32) &func_15033ECC, arg0, (s32) arg1, 0, 0) | 0x80000000;
+            *(s32 *)(arg0 + 0x3C) = sfx_emitter_start(0x448U, (s16) (s32) (*(f32 *)(arg1 + 0x14)), (s16) (s32) (*(f32 *)(arg1 + 0x18)), (s16) (s32) (*(f32 *)(arg1 + 0x1C)), 0x7D00, 0x3E8U, 0x1F4, (s32) &attachment_sound_cb, arg0, (s32) arg1, 0, 0) | 0x80000000;
         }
     }
     return 0;
 }
 
 #ifndef NON_MATCHING
-extern s32 func_15033ECC;
+extern s32 attachment_sound_cb;
 #endif
 
-s32 func_15033DC8(u8 *arg0, u8 *arg1) {
+/* was func_15033DC8 */
+s32 attachment_cb_delayed_sound(u8 *arg0, u8 *arg1) {
     s32 temp_v0;
 
     if (D_800BE616 != 0) {
-        func_1508B20C((*(f32 *)((u8 *)arg1 + 0x14)), (*(f32 *)((u8 *)arg1 + 0x18)), (*(f32 *)((u8 *)arg1 + 0x1C)), 900.0f);
+        rail_event_add((*(f32 *)((u8 *)arg1 + 0x14)), (*(f32 *)((u8 *)arg1 + 0x18)), (*(f32 *)((u8 *)arg1 + 0x1C)), 900.0f);
     }
     if ((*(s32 *)((u8 *)arg0 + 0x38)) == 0) {
         temp_v0 = (*(s32 *)((u8 *)arg0 + 0x3C));
         if (temp_v0 < 0x19) {
             (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) (temp_v0 + D_800BE9E4);
         } else {
-            (*(s32 *)((u8 *)arg0 + 0x3C)) = func_1000FA64(0x513U, (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x18)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x1C)), 0x7D00, 0x3E8U, 0x1F4, (s32) &func_15033ECC, arg0, (s32) arg1, 0, 0);
+            (*(s32 *)((u8 *)arg0 + 0x3C)) = sfx_emitter_start(0x513U, (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x18)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 0x1C)), 0x7D00, 0x3E8U, 0x1F4, (s32) &attachment_sound_cb, arg0, (s32) arg1, 0, 0);
             (*(s32 *)((u8 *)arg0 + 0x38)) = 0x513;
         }
     }
@@ -1898,17 +1931,18 @@ s32 func_15033DC8(u8 *arg0, u8 *arg1) {
 
 #ifdef NON_MATCHING
 s32 random_int(void);
-void func_10010FFC(s32, s32, s32, s32, s32, u8 *);
+void sound_play_for_actor(s32, s32, s32, s32, s32, u8 *);
 
 /*
- * P71: sound callback of the attachment sounds (func_1000FA64 / func_1000FD38 with rec, owner; voice +0x18 / +0x1C).
+ * P71: sound callback of the attachment sounds (sfx_emitter_start / sfx_emitter_stop_by_callback with rec, owner; voice +0x18 / +0x1C).
  * Missing record / owner (or owner state 0): 1. Keeps the voice at the owner's position (+2 / +4 / +6). Playing
  * (*playing): model 0x37 follows the owner's animation +0x84 (on a change to 0x15F one of sounds 0x444..0x447
- * starts, func_10010FFC) and returns 0; others: when the owner's +0x31C->+0x19C < 100 the looping 0x513 sound
+ * starts, sound_play_for_actor) and returns 0; others: when the owner's +0x31C->+0x19C < 100 the looping 0x513 sound
  * becomes a new 0x3A1 voice (rec +0x38 / +0x3C, returns 1), else 0. Stopped: model 0x37 stops its +0x24 voice and
  * clears *out (0), others return 1.
  */
-s32 func_15033ECC(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s32 arg5, u16 *out) {
+/* was func_15033ECC */
+s32 attachment_sound_cb(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s32 arg5, u16 *out) {
     u8 *rec = *(u8 **) (voice + 0x18);
     u8 *obj = *(u8 **) (voice + 0x1C);
     u8 *p;
@@ -1925,7 +1959,7 @@ s32 func_15033ECC(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s32 arg
             return 1;
         }
         if (*(u16 *) (voice + 0x24) != 0) {
-            func_100111C8(*(u16 *) (voice + 0x24));
+            sound_voice_stop(*(u16 *) (voice + 0x24));
             *(u16 *) (voice + 0x24) = 0;
         }
         *out = 0;
@@ -1937,7 +1971,7 @@ s32 func_15033ECC(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s32 arg
             snd = (random_int() & 3) + 0x444;
         }
         if (snd != -1) {
-            func_10010FFC(0, snd, 0x5DC0, 0, 0, obj);
+            sound_play_for_actor(0, snd, 0x5DC0, 0, 0, obj);
         }
         *(s32 *) (rec + 0x38) = *(u16 *) (obj + 0x84);
         return 0;
@@ -1945,25 +1979,27 @@ s32 func_15033ECC(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s32 arg
     p = *(u8 **) (obj + 0x31C);
     if (p != NULL && *(u16 *) (p + 0x19C) < 100 && *(s32 *) (rec + 0x38) == 0x513) {
         *(s32 *) (rec + 0x38) = 0x3A1;
-        *(s32 *) (rec + 0x3C) = func_1000FA64(0x3A1, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x18),
+        *(s32 *) (rec + 0x3C) = sfx_emitter_start(0x3A1, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x18),
                                               (s32) *(f32 *) (obj + 0x1C), 0x7D00, 0x3E8, 0x1F4,
-                                              (s32) func_15033ECC, rec, (s32) obj, 0, 0);
+                                              (s32) attachment_sound_cb, rec, (s32) obj, 0, 0);
         return 1;
     }
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033ECC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/attachment_sound_cb.s")
 #endif
 
-s32 func_150340F0(s32 arg0, u8 *arg1) {
+/* was func_150340F0 */
+s32 attachment_cb_free_in_state3(s32 arg0, u8 *arg1) {
     if (arg1[5] == 3) {
         return 1;
     }
     return 0;
 }
 
-s32 func_15034118(u8 *arg0, s32 *arg1) {
+/* was func_15034118 */
+s32 attachment_list_for_owner(u8 *arg0, s32 *arg1) {
     s32 n;
     u8 *p;
     u8 *next;
@@ -1985,7 +2021,8 @@ s32 func_15034118(u8 *arg0, s32 *arg1) {
     return n;
 }
 
-u8 *func_15034174(u8 *arg0) {
+/* was func_15034174 */
+u8 *attachment_find_first_of_owner(u8 *arg0) {
     u8 *var_v1;
     u8 *next;
     for (var_v1 = (u8 *)D_800C3EE0; var_v1 != NULL; var_v1 = next) {
@@ -1997,7 +2034,8 @@ u8 *func_15034174(u8 *arg0) {
     return NULL;
 }
 
-void func_150341B4(s32 arg0, s32 arg1) {
+/* was func_150341B4 */
+void attachment_swap_owner_ids(s32 arg0, s32 arg1) {
     u8 *var_v0;
     u8 *next;
     for (var_v0 = (u8 *)D_800C3EE0; var_v0 != NULL; var_v0 = next) {
@@ -2010,7 +2048,8 @@ void func_150341B4(s32 arg0, s32 arg1) {
     }
 }
 
-s32 func_150341FC(s32 arg0, u8 *arg1) {
+/* was func_150341FC */
+s32 attachment_cb_release_link(s32 arg0, u8 *arg1) {
     u8 *temp_v1;
 
     if (D_800C35EA == 1) {
@@ -2024,7 +2063,8 @@ s32 func_150341FC(s32 arg0, u8 *arg1) {
     return 0;
 }
 
-s32 func_15034260(s32 arg0, u8 *arg1) {
+/* was func_15034260 */
+s32 attachment_cb_release_link2(s32 arg0, u8 *arg1) {
     u8 temp_v0;
     u8 *temp_v1;
 

@@ -6,4 +6,4 @@ s/if (bestSlot + 1 == nOpen) {/if (bestSlot == nOpen) {/ %
 s/link == 0xFF || link == start/link == 0xFF/ %
 s/free == 0xFF \&\& w.open\[slot\] == 0xFF/w.open[slot] == 0xFF/ %
 s/if (n < 2) {/if (n < 1) {/ %
-s/func_150870E0(w.path\[i\]) != 0;/func_150870E0(w.path[i]);/ %
+s/rail_node_in_zone(w.path\[i\]) != 0;/rail_node_in_zone(w.path[i]);/ %

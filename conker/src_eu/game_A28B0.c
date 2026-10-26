@@ -570,12 +570,12 @@ void aiscript_play_sound_3d(void) {
 
 /* was func_150762B0 */
 void aiscript_set_music_param(void) {
-    func_1000CBA8(D_800D1890);
+    music_players_set_fade_target(D_800D1890);
 }
 
 /* was func_150762D4 */
 void aiscript_spawn_effect_above(void) {
-    func_15166F10(D_800D154C->x_position, D_800D154C->y_position + 100.0f, D_800D154C->z_position, 0.45f, 0xFF, 0);
+    flash_blades_spawn(D_800D154C->x_position, D_800D154C->y_position + 100.0f, D_800D154C->z_position, 0.45f, 0xFF, 0);
 }
 
 /* was func_15076340 */
@@ -689,13 +689,13 @@ void aiscript_nop_b(void) {
 }
 
 // ???
-void func_1504715C(f32 *, struct127 *);
+void hitinfo_from_obj_floor(f32 *, struct127 *);
 #ifdef NON_MATCHING
-s32 func_1514B8D4(f32 *, f32 *, s32, s32); /* P183: s32 as its C definition (stale v0, unused) */
+s32 lava_splash_effect(f32 *, f32 *, s32, s32); /* P183: s32 as its C definition (stale v0, unused) */
 #else
-void func_1514B8D4(f32 *, f32 *, s32, s32);
+void lava_splash_effect(f32 *, f32 *, s32, s32);
 #endif
-void func_15197A7C(struct127 *);
+void emitter_stop_for_obj(struct127 *);
 
 /* was func_15076768 */
 void aiscript_spawn_special_fx(void) {
@@ -703,7 +703,7 @@ void aiscript_spawn_special_fx(void) {
 
     switch (D_800D1890) {
     case 0:
-        func_15197A7C(D_800D154C);
+        emitter_stop_for_obj(D_800D154C);
         break;
     case 1:
         pos[0] = *(f32 *)((u8 *)D_800D154C + 0x14);
@@ -711,8 +711,8 @@ void aiscript_spawn_special_fx(void) {
         pos[2] = *(f32 *)((u8 *)D_800D154C + 0x1C);
         {
             f32 buf[9];
-            func_1504715C(buf, D_800D154C);
-            func_1514B8D4(pos, buf, 0xFF, 0);
+            hitinfo_from_obj_floor(buf, D_800D154C);
+            lava_splash_effect(pos, buf, 0xFF, 0);
         }
         break;
     }
@@ -991,7 +991,7 @@ void aiscript_play_sound_3d_b(void) {
     s32 tmp0 = (D_800D1890 << 8) | D_800D1891;
     if (tmp0 != 0) {
         s32 tmp1 = D_800D1892 << 7;
-        func_10010630(tmp0, D_800D154C, tmp1, 0x1F4, 0x9C4);
+        actor_sound_play_untracked(tmp0, D_800D154C, tmp1, 0x1F4, 0x9C4);
     }
 }
 
@@ -1010,9 +1010,9 @@ void aiscript_fade_or_anim_cmd(void) {
         }
         obj_fade_command(D_800D154C, var_a1, a2, a3, 0);
     } else if (D_800D1892 == 0) {
-        func_1502ED50(D_800D154C, D_800D1890);
+        obj_tint_fade_in(D_800D154C, D_800D1890);
     } else {
-        func_1502ED6C(D_800D154C, D_800D1890);
+        obj_tint_fade_out(D_800D154C, D_800D1890);
     }
 }
 
@@ -1030,7 +1030,7 @@ void aiscript_set_health(void) {
 
 /* was func_150772E8 */
 void aiscript_set_flag_entry(void) {
-    func_1503DE70(D_800D154C, D_800D1890, -1);
+    breakable_request_flag_entry(D_800D154C, D_800D1890, -1);
 }
 
 /* was func_15077318 */
@@ -1087,9 +1087,9 @@ void aiscript_if_nav_arrived(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15086508(f32, f32, f32, s8, s8, u8 *, u8 *); /* P98: from the asm (f12, f14, a2 = z bits, a3, 3 stack words) */
-s32 func_150867D4(u8, s8, s8, u8 *, u8 *);
-s32 func_1508712C(s32, f32 *, f32 *, f32 *);
+s32 rail_point_pick(f32, f32, f32, s8, s8, u8 *, u8 *); /* P98: from the asm (f12, f14, a2 = z bits, a3, 3 stack words) */
+s32 rail_route_next(u8, s8, s8, u8 *, u8 *);
+s32 rail_node_position(s32, f32 *, f32 *, f32 *);
 extern s32 D_800D277C;
 
 /* was func_15077508 */
@@ -1161,7 +1161,7 @@ block_5:
                 sp.u84 = (s32) D_800D154C->unk210;
             }
             if (sp.u84 == 0xFF) {
-                var_v0 = func_15086508(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position, var_a1, sp76, &D_800D154C->unk211, &D_800D154C->pad212);
+                var_v0 = rail_point_pick(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position, var_a1, sp76, &D_800D154C->unk211, &D_800D154C->pad212);
                 goto block_28;
             }
         } else if (temp_v1_2 != 0xFF) {
@@ -1196,14 +1196,14 @@ block_5:
                 }
                 sp.u84 = var_v1_2;
             } else {
-                var_v0 = func_150867D4(temp_v1_2, var_a1, sp76, &D_800D154C->unk211, &D_800D154C->pad212);
+                var_v0 = rail_route_next(temp_v1_2, var_a1, sp76, &D_800D154C->unk211, &D_800D154C->pad212);
 block_28:
                 sp.u84 = var_v0;
             }
         }
         if (sp.u84 != 0xFF) {
             D_800D154C->unk21E = 0;
-            if (func_1508712C(sp.u84, &sp.u80, &sp.u7C, &sp.u78) != 0) {
+            if (rail_node_position(sp.u84, &sp.u80, &sp.u7C, &sp.u78) != 0) {
                 (*(s16 *)((u8 *)D_800D154C + 0x216)) = (s16) D_800D277C;
                 D_800D154C->unk210 = D_800D154C->unk20F;
                 D_800D154C->unk20F = (u8) sp.u84;
@@ -1374,7 +1374,7 @@ void aiscript_warp_to_path_point(void) {
 /* was func_15077E9C */
 void aiscript_play_sound_3d_c(void) {
     s32 tmp = ((D_800D1890 << 8) + D_800D1891);
-    func_10012718(tmp, D_800D154C, 0x5DC0, 0x1F4, 0x9C4);
+    mp3_voice_play_at_object(tmp, D_800D154C, 0x5DC0, 0x1F4, 0x9C4);
 }
 
 /* was func_15077EEC */
@@ -1512,7 +1512,7 @@ void aiscript_if_unique_id(void) {
 
 /* was func_15078358 */
 void aiscript_target_by_unique_id(void) {
-    s32 tmp = func_15083FB0(D_800D1890);
+    s32 tmp = obj_slot_by_setup_id(D_800D1890);
     D_800D154C->unk222 = tmp;
     if (tmp == -1) {
         D_800D154C->unk222 = 0;
@@ -1887,7 +1887,7 @@ void aiscript_send_event(void) {
     u16 tmp0 = D_800D1890;
     u8 tmp1 = D_800D1891;
     u8 tmp2 = D_800D1892;
-    func_1514D3B0(D_800D154C, tmp0, tmp1, tmp2);
+    char_fx_send_event(D_800D154C, tmp0, tmp1, tmp2);
 }
 
 #ifdef NON_MATCHING
@@ -1955,7 +1955,7 @@ void aiscript_send_script_to_uid(void) {
     s32 idx;
     struct127 *temp_v1;
 
-    idx = func_15083FB0(D_800D1890);
+    idx = obj_slot_by_setup_id(D_800D1890);
     if (idx != -1) {
         temp_v1 = &D_800CC2D0[idx];
         temp_v1->unk232 = D_800D1891;
@@ -1966,7 +1966,7 @@ void aiscript_send_script_to_uid(void) {
 
 /* was func_150796CC */
 void aiscript_uid_immune_or_if_stunned(void) {
-    s32 idx = func_15083FB0(D_800D1890);
+    s32 idx = obj_slot_by_setup_id(D_800D1890);
     if (D_800D1892 != 0) {
         if (idx != -1) {
             D_800CC3F5[idx * sizeof(struct127)] = D_800D1891;
@@ -2019,12 +2019,12 @@ void aiscript_start_anim(void) {
     if (phi_a3 == 0) {
         phi_a3 = 0xFFFF;
     }
-    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, phi_a3, 0);
+    face_anim_start(D_800D154C, D_800D1890, D_800D1893, phi_a3, 0);
 }
 
 /* was func_15079988 */
 void aiscript_set_anim_field70(void) {
-    func_1507EB4C(D_800D154C, D_800D1890);
+    face_set_default_anim(D_800D154C, D_800D1890);
 }
 
 /* was func_150799B4 */
@@ -2060,12 +2060,12 @@ u16 aiscript_path_point_angle(s32 arg0) {
 
 // requires jump table
 #ifdef NON_MATCHING
-/* func_15083FB0 (s32 (u8), game_eu_AF2A0) is used undeclared in this file, like its other callers here */
+/* obj_slot_by_setup_id (s32 (u8), game_eu_AF2A0) is used undeclared in this file, like its other callers here */
 int aiscript_find_by_kind(s32, s32);
 u16 aiscript_path_point_angle(s32 arg0);
 
 // object_var_cmd: P210: script command on object `idx` (D_800D1891 0 / 1: the current one D_800C3E78, else
-// func_15083FB0(D_800D1891 - 2); -1 = none). D_800D1892 selects: 1..3 counter unk2E4 / unk2E8 / unk2EC, updated by
+// obj_slot_by_setup_id(D_800D1891 - 2); -1 = none). D_800D1892 selects: 1..3 counter unk2E4 / unk2E8 / unk2EC, updated by
 // D_800D1893 (0 = D_800D1890, 1 -1, 2 + frame time D_800BE9E4, 3 +1, 4 - frame time, 5 - D_800CC264,
 // 6 + D_800CC264); 4 / 5 start script D_800D1890 on the object (when it is not running it already); 6 unkC8 =
 // D_800D1890; 7 unkB8 = 0; for the current object: 8 unk221 = D_800D1890 when the path point angle
@@ -2082,7 +2082,7 @@ void aiscript_object_var_cmd(void) {
     if (D_800D1891 == 0 || D_800D1891 == 1) {
         idx = D_800C3E78;
     } else {
-        idx = func_15083FB0(D_800D1891 - 2);
+        idx = obj_slot_by_setup_id(D_800D1891 - 2);
         if (idx == -1) {
             return;
         }
@@ -2279,7 +2279,7 @@ void aiscript_wait(void) {
 
 /* was func_1507A270 */
 void aiscript_set_flag_entry_set(void) {
-    func_1503DE70(D_800D154C, D_800D1890, (s8)D_800D1891);
+    breakable_request_flag_entry(D_800D154C, D_800D1890, (s8)D_800D1891);
 }
 
 /* was func_1507A2A4 */
@@ -2423,7 +2423,7 @@ void aiscript_set_disable_run(void) {
 
 /* was func_1507A7DC */
 void aiscript_remove_spawned(void) {
-    func_150836CC(D_800D154C, D_800D1890);
+    obj_setup_undo(D_800D154C, D_800D1890);
 }
 
 /* was func_1507A808 */
@@ -2465,7 +2465,7 @@ void aiscript_attach_to_id(void) {
     s32 temp_v0;
 
     if (D_800D1890 != 0) {
-        temp_v0 = func_15083E90(D_800D1890);
+        temp_v0 = obj_find_by_setup_id(D_800D1890);
         if (temp_v0 != 0) {
             if (D_800D1892 == 0) {
                 D_800D154C->unk101 |= 4;
@@ -2897,7 +2897,7 @@ void aiscript_nop_e(void) {
 
 // scary loops
 #ifdef NON_MATCHING
-/* P102 draft (game_A28B0.c is not a port-b file): producer of the script pointer that func_15097E9C (cases 0x14,
+/* P102 draft (game_A28B0.c is not a port-b file): producer of the script pointer that event_action_object (cases 0x14,
  * 0x35, 0x60) and func_1507B... (game_A28B0.c line ~423) store in object +0x218. */
 extern u8 D_8009A4E0[];          /* empty script */
 extern u8 D_80086E28[];          /* default script list, 8-byte entries {script, kind} */

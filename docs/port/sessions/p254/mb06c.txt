@@ -4,8 +4,8 @@
 \#^    ((f32 \*) ends)\[2\] += (0\.0800000057f + random_float() \* 0\.18f) \* D_800BE9A4;$#s/\* D_800BE9A4/+ D_800BE9A4/
 \#^    ((f32 \*) ends)\[2\] += (0\.0800000057f + random_float() \* 0\.18f) \* D_800BE9A4;$#s/+=/=/
 \#^    while (1\.0f < ((f32 \*) ends)\[2\]) {$#s/1\.0f </1.0f <=/
-\#^        func_1514470C(((u8 \*\*) ends)\[0\], (u8 \*) from);$#s/\[0\]/[1]/
-\#^        func_1514470C(((u8 \*\*) ends)\[1\], (u8 \*) to);$#s/to/from/
+\#^        spawn_region_random_point_3d(((u8 \*\*) ends)\[0\], (u8 \*) from);$#s/\[0\]/[1]/
+\#^        spawn_region_random_point_3d(((u8 \*\*) ends)\[1\], (u8 \*) to);$#s/to/from/
 \#^        style = (u8) ((u32) random_int() . D_80088ECC);$#s/(u8)/(u16)/
 \#^        style = (u8) ((u32) random_int() . D_80088ECC);$#s/D_80088ECC/15/
 \#^        len = random_float() \* 25\.0f + 30\.0f;$#s/25\.0f/24.0f/

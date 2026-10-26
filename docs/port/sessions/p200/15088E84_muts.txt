@@ -3,13 +3,13 @@ s/        rec->unk8 += 1.0f;/        rec->unk8 += 0.5f;/
 s/        r\[0x2E\] = r\[0x2D\];//
 s/        r\[0x2C\] = r\[0x2B\];//
 s/        dir = -1;/        dir = 1;/
-s/func_15088D24(r\[0x2D\], r\[0x2C\], (s8) r\[0x2F\])/func_15088D24(r[0x2C], r[0x2D], (s8) r[0x2F])/
-s/func_15088D24(r\[0x2D\], r\[0x2C\], (s8) r\[0x2F\])/func_15088D24(r[0x2D], r[0x2C], r[0x2F])/
+s/rail_link_pick(r\[0x2D\], r\[0x2C\], (s8) r\[0x2F\])/rail_link_pick(r[0x2C], r[0x2D], (s8) r[0x2F])/
+s/rail_link_pick(r\[0x2D\], r\[0x2C\], (s8) r\[0x2F\])/rail_link_pick(r[0x2D], r[0x2C], r[0x2F])/
 s/    } else if (1.0f <= rec->unk8) {/    } else if (1.0f < rec->unk8) {/
 s/        rec->unk8 -= 1.0f;/        rec->unk8 = 0.0f;/
 s/        r\[0x2B\] = r\[0x2C\];//
 s/        r\[0x2D\] = r\[0x2E\];//
-s/func_15088D24(r\[0x2C\], r\[0x2D\], (s8) r\[0x2F\])/func_15088D24(r[0x2D], r[0x2C], (s8) r[0x2F])/
+s/rail_link_pick(r\[0x2C\], r\[0x2D\], (s8) r\[0x2F\])/rail_link_pick(r[0x2D], r[0x2C], (s8) r[0x2F])/
 s/        dir = 1;/        dir = 2;/
 s/        if (D_800D27C8 == 0) {/        if (D_800D27C8 != 0) {/
 s/            if (node\[0xF\] == 5) {/            if (node[0xF] == 4) {/

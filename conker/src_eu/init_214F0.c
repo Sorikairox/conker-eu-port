@@ -7,10 +7,11 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-Acmd *func_10021E4C(Acmd *, N_PVoice *, s32, s32, s16, s16, s32);
+Acmd *n_adpcm_decode_chunk(Acmd *, N_PVoice *, s32, s32, s16, s16, s32);
 
 // n_alAdpcmPull
-Acmd *func_100214F0(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
+/* was func_100214F0 */
+Acmd *n_adpcm_pull(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 {
 	Acmd *ptr = p;
 	s16 inp;
@@ -71,7 +72,7 @@ Acmd *func_100214F0(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 	nbytes =  nframes*ADPCMFBYTES;
 
 	if (looped) {
-		ptr = func_10021E4C(ptr, f, tsam, nbytes, *outp, inp, f->dc_first);
+		ptr = n_adpcm_decode_chunk(ptr, f, tsam, nbytes, *outp, inp, f->dc_first);
 
 		if (f->dc_lastsam) {
 			*outp += (f->dc_lastsam<<1);
@@ -105,7 +106,7 @@ Acmd *func_100214F0(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 
 			nframes = (tsam+ADPCMFSIZE - 1) >> LFSAMPLES;
 			nbytes =  nframes*ADPCMFBYTES;
-			ptr = func_10021E4C(ptr, f, tsam, nbytes, op, inp, f->dc_first | A_LOOP);
+			ptr = n_adpcm_decode_chunk(ptr, f, tsam, nbytes, op, inp, f->dc_first | A_LOOP);
 
 			aDMEMMove(ptr++, op + (f->dc_lastsam << 1), bEnd, nSam << 1);
 		}
@@ -135,7 +136,7 @@ Acmd *func_100214F0(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 
 	if (nOver - (nOver & 0xf) < outCount) {
 		decoded = 1;
-		ptr = func_10021E4C(ptr, f, nSam - nOver, nbytes, *outp, inp, f->dc_first);
+		ptr = n_adpcm_decode_chunk(ptr, f, nSam - nOver, nbytes, *outp, inp, f->dc_first);
 
 		if (f->dc_lastsam) {
 			*outp += f->dc_lastsam << 1;
@@ -167,7 +168,8 @@ Acmd *func_100214F0(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 }
 
 // n_alLoadParam
-s32 func_10021C40(N_PVoice *a, s32 paramID, void *param)
+/* was func_10021C40 */
+s32 n_adpcm_load_param(N_PVoice *a, s32 paramID, void *param)
 {
 
 	switch (paramID) {
@@ -211,7 +213,8 @@ s32 func_10021C40(N_PVoice *a, s32 paramID, void *param)
 	return 0;
 }
 
-Acmd *func_10021E4C(Acmd *arg0, N_PVoice *arg1, s32 arg2, s32 arg3, s16 arg4, s16 arg5, s32 arg6) {
+/* was func_10021E4C */
+Acmd *n_adpcm_decode_chunk(Acmd *arg0, N_PVoice *arg1, s32 arg2, s32 arg3, s16 arg4, s16 arg5, s32 arg6) {
     s32 sp2C;
     s32 sp28;
     Acmd *sp24;

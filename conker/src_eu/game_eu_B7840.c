@@ -3,12 +3,13 @@
 #include "variables.h"
 
 
-void func_15089BB0(void) {
+/* was func_15089BB0 */
+void rail_state_clear(void) {
     D_800D27D0 = NULL;
 }
 
 #ifdef NON_MATCHING
-void func_1508C07C(void);
+void rail_lane_shuffle(void);
 s8 *event_get_vars(s32);
 extern s32 D_80087650;
 extern s32 D_80087690;
@@ -16,7 +17,8 @@ extern s32 D_80087698;
 extern s32 D_800D3268;
 extern s8 D_800E1000;
 
-s32 func_1508A040(void) {
+/* was func_1508A040 */
+s32 rail_state_init(void) {
     s32 sp1C;
     s32 temp_a0;
     s32 var_v0;
@@ -33,7 +35,7 @@ s32 func_1508A040(void) {
         D_800D27D0 = temp_v0;
 block_12:
         sp1C = temp_a0;
-        func_1508C07C(); /* P230: takes no argument, returns nothing */
+        rail_lane_shuffle(); /* P230: takes no argument, returns nothing */
         (*(s8 *)((u8 *)D_800D27D0 + 0x1700)) = 0;
         (*(s8 *)((u8 *)D_800D27D0 + 0x1701)) = 0;
         var_v0 = 0;
@@ -114,7 +116,7 @@ block_12:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508A040.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_state_init.s")
 #endif
 #ifdef NON_MATCHING
 // mode_pick_mid_range_object: P259: for player slot `player` of the mode state D_800D27D0, returns the index of the
@@ -122,7 +124,8 @@ block_12:
 // the player's mask +0x16C0) whose ground distance to the player's object scores best on
 // 1 + sin((d - lo) * 2pi / (hi - lo) - pi/2), i.e. lies closest to the middle of [lo, hi] (d clamped to [lo, hi];
 // lo / hi = 750 / 3500, or 1500 / 8000 when the player's flag +0x15C is set); -1 when none qualifies.
-s32 func_1508A41C(s32 player) {
+/* was func_1508A41C */
+s32 mode_pick_mid_range_object(s32 player) {
     s8 *state = D_800D27D0;
     s32 *slots = (s32 *) (state + 0xE64);
     s32 mask = *(s32 *) (state + 0x14);
@@ -179,22 +182,23 @@ s32 func_1508A41C(s32 player) {
     return best_i;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508A41C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/mode_pick_mid_range_object.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150859AC(s16, s32);
-// rail_rank_rivals: script command 5 (func_1509E3D4). Advances the rail cursor +0x1704 (wraps to 0 at the racer
+s32 player_stat_get(s16, s32);
+// rail_rank_rivals: script command 5 (event_action_rail). Advances the rail cursor +0x1704 (wraps to 0 at the racer
 // count +0x10) to racer `me`. If me's bit in the mask +0x14 is clear, its 16-entry rival list (+0x5DC[me * 16]) is
 // cleared to -1. Otherwise every active (+0x39C > 0) racer k of another team (+0xE64) is scored by its xz distance
 // to me (D_800CC2D0 objects; 0x7D00 without an object), +500 on another rail node (+0x9C), doubled when k is not
 // among the first D_80090130 racers; with me's +0x16C0 bit (0x10000 << k) set, k is dropped (-1) when it is more
 // than 3000 away and its object's unk65 is set, else kinds 2 / 3 (+0x15C) are dropped unless the race mode +0x16BC is
 // 0xB8. In mode 0xB7 a dropped k keeps its raw distance and racers with a carrier (unk13C) are divided by
-// func_150859AC(k, 6) + 2. Scores of the first D_80090130 racers are scaled by +0x16B8. Kept racers are inserted in
+// player_stat_get(k, 6) + 2. Scores of the first D_80090130 racers are scaled by +0x16B8. Kept racers are inserted in
 // ascending order into me's list (k in +0x5DC, score in +0x9DC), the rest of the list is set to -1, and the smallest
 // raw distance (start 0x7D00) goes to +0x51C[me]. Returns 0 (asm too).
-s32 func_1508A63C(void) {
+/* was func_1508A63C */
+s32 rail_rank_rivals(void) {
     u8 *rail = (u8 *) D_800D27D0;
     s32 *team = (s32 *) (rail + 0xE64);
     s32 n = *(s32 *) (rail + 0x10);
@@ -272,7 +276,7 @@ s32 func_1508A63C(void) {
                 if (k >= D_80090130) {
                     d *= 2;
                 }
-                d /= func_150859AC(k, 6) + 2;
+                d /= player_stat_get(k, 6) + 2;
             }
         }
         if (k < D_80090130 && d != -1) {
@@ -302,7 +306,7 @@ s32 func_1508A63C(void) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508A63C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_rank_rivals.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -311,23 +315,24 @@ extern s8 D_80087670[];    /* by difficulty D_800E1000: AI timer limit */
 extern s8 D_80087680[];    /* by difficulty: AI timer restart value (negated) */
 extern s16 D_80087664[];   /* by difficulty: boost time that forces a re-plan (-1 = never) */
 extern s8 D_80087688[];    /* by difficulty: chance (percent) to keep the old steering offsets */
-s32 func_15086218(f32);
-s32 func_1508CF34(s32, s32, s32, s32, s32, s32);
-void func_1508B854(void);
-s32 func_1508DF48(s32, s32);
-void func_1508F054(s32, s32);
-void func_1508F0B8(s32, s32);
-// rail_racers_update: script command 6 (func_1509E3D4; its result is read by the scripts). For every racer i of the rail
+s32 rail_band_for_height(f32);
+s32 rail_racer_steer(s32, s32, s32, s32, s32, s32);
+void rail_events_assign_nodes(void);
+s32 rail_pickup_slot_release(s32, s32);
+void rail_racer_send_event_14(s32, s32);
+void rail_racer_send_event_61(s32, s32);
+// rail_racers_update: script command 6 (event_action_rail; its result is read by the scripts). For every racer i of the rail
 // state D_800D27D0 (count +0x10): racers in the mask +0x14 (or newly seen ones, which are added to the mask +0x18) run
 // their timers by the frame time D_800BE9E4, take their input byte D_800E0FE8[i] (bit 7 cleared), refresh their rail
 // node (+0x9C) and activity (+0x39C); a racer that is not started (+0x35C) and becomes active (or is new, or its object
-// has unk2FD set) is started: its team count moves, func_1508DF48(i, 1) resets its route, and bit i goes into the
-// result. Racers with a target (+0x31C) steer through func_1508CF34 with smoothed s8 offsets (+0x1725 / +0x1735) and
+// has unk2FD set) is started: its team count moves, rail_pickup_slot_release(i, 1) resets its route, and bit i goes into the
+// result. Racers with a target (+0x31C) steer through rail_racer_steer with smoothed s8 offsets (+0x1725 / +0x1735) and
 // pick a new random offset when their AI timer runs out; state 5 of the object's +0x232 places a boost point near it
 // (and its target). Racers neither in the mask nor new are deactivated (active 0, node -1). Afterwards the frame scale
 // +0x16B4 is set and, in race mode 0xB9, each player's +0x1574 counter is drawn (/50) on its viewport.
 // Returns the bit mask of the racers started this call.
-s32 func_1508AB7C(void) {
+/* was func_1508AB7C */
+s32 rail_racers_update(void) {
     u8 *rail = (u8 *) D_800D27D0;
     s32 mask = *(s32 *) (rail + 0x14);
     s32 seen = *(s32 *) (rail + 0x18);
@@ -400,13 +405,13 @@ s32 func_1508AB7C(void) {
             counter[i] = 0;
         }
         if (state[i] == 3 && (cooldown[i] & 0x1F) >= 0x1D) {
-            func_1508F0B8(i, 0x8000);
+            rail_racer_send_event_61(i, 0x8000);
         }
         input[i] = D_800E0FE8[i];
         D_800E0FE8[i] &= 0x7F;
         ((s32 *) ((u8 *) D_800D27D0 + 0x4DC))[i] = (*(u8 **) (obj + 0x31C))[0x19A];
-        active[i] = func_150859AC(i, 4);
-        node[i] = func_15086218(*(f32 *) (obj + 0x18));
+        active[i] = player_stat_get(i, 4);
+        node[i] = rail_band_for_height(*(f32 *) (obj + 0x18));
 
         if (active[i] != 0 && !isNew && obj[0x2FD] == 0) {
             started[i] = 0;
@@ -429,7 +434,7 @@ s32 func_1508AB7C(void) {
             }
             if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) != 0xB9) {
                 ((s32 *) ((u8 *) D_800D27D0 + 0xFF0))[i] = 0;
-                func_1508DF48(i, 1);
+                rail_pickup_slot_release(i, 1);
             }
             result |= bit;
         }
@@ -442,7 +447,7 @@ s32 func_1508AB7C(void) {
                 st = obj[0x232];
                 obj[0x222] = target[i] - 2;
                 if (st != 4 && st != 5) {
-                    func_1508F054(i, 4);
+                    rail_racer_send_event_14(i, 4);
                 }
                 if (st == 4) {
                     boost[i] = 0;
@@ -482,7 +487,7 @@ s32 func_1508AB7C(void) {
             rail = (u8 *) D_800D27D0;
             rail[0x1735 + i] += (s8) (((s8) rail[0x1715 + i] - (s8) rail[0x1735 + i]) >> 2);
             rail = (u8 *) D_800D27D0;
-            if (func_1508CF34(i, target[i] - 2, limit, replan, (s8) rail[0x1725 + i], (s8) rail[0x1735 + i]) != 0
+            if (rail_racer_steer(i, target[i] - 2, limit, replan, (s8) rail[0x1725 + i], (s8) rail[0x1735 + i]) != 0
                 && state[i] != 1) {
                 boost[i] = 0;
             }
@@ -524,7 +529,7 @@ s32 func_1508AB7C(void) {
     } else {
         *(f32 *) ((u8 *) D_800D27D0 + 0x16B4) = 1.0f;
     }
-    func_1508B854();
+    rail_events_assign_nodes();
     if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9) {
         /* each player's counter, centred on its viewport */
         view = *(u8 **) &D_800BE628;
@@ -542,24 +547,27 @@ s32 func_1508AB7C(void) {
     return result;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508AB7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_racers_update.s")
 #endif
 
-s32 func_1508B5F0(s32 arg0) {
+/* was func_1508B5F0 */
+s32 mp_human_counter_get(s32 arg0) {
     if (arg0 >= D_80090130) {
         return 0;
     }
     return *(s16 *)((u8 *)D_80090174 + arg0 * 12 + 0x70);
 }
 
-void func_1508B630(s32 arg0) {
+/* was func_1508B630 */
+void mp_human_counter_clear(s32 arg0) {
     if (arg0 < D_80090130) {
         *(s16 *)((u8 *)D_80090174 + arg0 * 12 + 0x70) = 0;
     }
 }
 
 // PERMUTER CHANGED DECL: voidfunc_1508B20C(f32,f32,f32,f32) (base: voidfunc_1508B20C(f32arg0,f32arg1,f32arg2,f32arg3))
-void func_1508B20C(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
+/* was func_1508B20C */
+void rail_event_add(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
 {
   s32 temp_a1;
   s8 temp_v1;
@@ -581,7 +589,7 @@ void func_1508B20C(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
 }
 
 
-/* the zone block func_1508B704 fills (sp+0xAC in func_1508B854) */
+/* the zone block rail_zone_flood fills (sp+0xAC in rail_events_assign_nodes) */
 typedef struct {
     f32 x;              /* 0x00 */
     f32 z;              /* 0x04 */
@@ -589,7 +597,7 @@ typedef struct {
     f32 lim[8];         /* 0x0C: per-node squared-distance limits */
     s16 count;          /* 0x2C */
     u8 node[8];         /* 0x2E */
-    u8 rest[0x20];      /* 0x36: visited-node bits, cleared before func_1508B704 */
+    u8 rest[0x20];      /* 0x36: visited-node bits, cleared before rail_zone_flood */
 } RailZone1508B854;
 
 #ifdef NON_MATCHING
@@ -598,7 +606,8 @@ typedef struct {
 // 3): the game masks with 3, not 7, so bytes share bits; kept as is). A node whose squared xz distance to the zone
 // centre is above the zone radius ends the walk there and is added to the zone's list (up to 8 nodes, with that squared
 // distance as its limit); a node inside the radius recurses into its unvisited neighbours.
-void func_1508B704(u8 node, RailZone1508B854 *zone) {
+/* was func_1508B704 */
+void rail_zone_flood(u8 node, RailZone1508B854 *zone) {
     u8 *n;
     f32 dx, dz, d;
     s32 i;
@@ -620,30 +629,31 @@ void func_1508B704(u8 node, RailZone1508B854 *zone) {
         u8 next = n[9 + i];
 
         if (next != 0xFF && !(zone->rest[next >> 3] & (1 << (next & 3)))) {
-            func_1508B704(next, zone);
+            rail_zone_flood(next, zone);
         }
     }
 }
 
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B704.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_zone_flood.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_8009DE2C;
-s32 func_15086268(f32, f32, f32, s32, s32);
+s32 rail_node_nearest(f32, f32, f32, s32, s32);
 
 /*
  * rail_events_assign_nodes: P230. Racer rail slots (+0x55C[k]) that are set (!= -1) become -2. Then for each of the
  * +0x1745 pending rail events (records of 0xC bytes at +0x1748: f32 radius, s16 x / y / z) every computer racer k
  * (D_80090130 .. D_8008FD8C) within -100 < dy < 200 of the event and with dx^2 + dz^2 < radius + 100 gets the
  * nearest node of the event's zone: the zone is built once per event at the first racer in range (the rail node
- * near the event: func_15086268(x, y, z, 0, func_15086218(y)); if there is one, func_1508B704 fills the zone).
+ * near the event: rail_node_nearest(x, y, z, 0, rail_band_for_height(y)); if there is one, rail_zone_flood fills the zone).
  * The node is the zone's node with the smallest squared distance that is below both its limit and 1e8; the racer's
  * slot gets that node's +7 byte (+0x5C[k] = 1 when the slot was not -2). Slots still < 0 become -1, and the event
  * count is cleared.
  */
-void func_1508B854(void) {
+/* was func_1508B854 */
+void rail_events_assign_nodes(void) {
     RailZone1508B854 zone;
     s32 *slot = (s32 *) ((u8 *) D_800D27D0 + 0x55C);
     u8 *ev = (u8 *) D_800D27D0 + 0x1748;
@@ -678,13 +688,13 @@ void func_1508B854(void) {
             if (!found) {
                 zone.count = 0;
                 found = TRUE;
-                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));
+                near = rail_node_nearest(ex, ey, ez, 0, rail_band_for_height(ey));
                 if (near != -1) {
                     zone.x = ex;
                     zone.z = ez;
                     zone.count = 0;
                     bzero(zone.rest, sizeof(zone.rest));
-                    func_1508B704(near & 0xFF, &zone);
+                    rail_zone_flood(near & 0xFF, &zone);
                 }
             }
             px = p->x_position;
@@ -714,23 +724,24 @@ void func_1508B854(void) {
     *(s8 *) ((u8 *) D_800D27D0 + 0x1745) = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B854.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_events_assign_nodes.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_8009DE30;
 extern f32 D_8009DE34;
-s32 func_1508CA14(s32, s32); /* P230: returns the +0x16C0 mask of arg0 (asm v0) */
-s32 func_1508A63C(void);
+s32 rail_pair_rivals(s32, s32); /* P230: returns the +0x16C0 mask of arg0 (asm v0) */
+s32 rail_rank_rivals(void);
 
-// rail_pick_chase_target: script command 13 (func_1509E3D4). Refreshes the rail state (func_1508CA14 with 1 or, for
-// more than 8 racers, 4; func_1508A63C), then picks the racer the current one (+0x4) should chase: among the active
+// rail_pick_chase_target: script command 13 (event_action_rail). Refreshes the rail state (rail_pair_rivals with 1 or, for
+// more than 8 racers, 4; rail_rank_rivals), then picks the racer the current one (+0x4) should chase: among the active
 // racers k (+0x39C[k] > 0, not itself) whose link list +0x5DC[k * 16..] (ended by -1) holds the current racer, the
 // cost (link weight +0x9DC) * (byte +0x15B4[me * 16 + k] * D_8009DE34), times D_8009DE30 for the racer already in
 // slot +0x11C[me], is lowest (start 10000000). Stores the pick in +0x49C[me] and in +0x45C[me] the distance to it
 // (or the start cost when there is none). The link tables and the current racer are the ones read before the calls;
 // the result slots go to the block D_800D27D0 points to afterwards. Returns 0.
-s32 func_1508BE18(void) {
+/* was func_1508BE18 */
+s32 rail_pick_chase_target(void) {
     u8 *rail = (u8 *) D_800D27D0;
     s32 n = *(s32 *) (rail + 0x10);
     s32 me = *(s32 *) (rail + 0x4);
@@ -749,8 +760,8 @@ s32 func_1508BE18(void) {
     f32 dx;
     f32 dz;
 
-    func_1508CA14(0, (n < 9) ? 1 : 4);
-    func_1508A63C();
+    rail_pair_rivals(0, (n < 9) ? 1 : 4);
+    rail_rank_rivals();
     rail = (u8 *) D_800D27D0;
     bias = rail + me * 16 + 0x15B4;
     for (k = 0; k < n; k++) {
@@ -788,7 +799,7 @@ s32 func_1508BE18(void) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508BE18.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_pick_chase_target.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -798,7 +809,8 @@ s32 func_1508BE18(void) {
  * this row) and writes a triangle wave into the row from there: 0x55, + step, ... (step = 0xAA / max(n / 2, 2),
  * negated each time the value reaches 0x100; values >= 0x100 are stored as 0xFF), wrapping at column n.
  */
-void func_1508C07C(void) {
+/* was func_1508C07C */
+void rail_lane_shuffle(void) {
     s8 used[16];
     s32 n = D_8008FD8C;
     s32 half = n >> 1;
@@ -850,16 +862,17 @@ void func_1508C07C(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C07C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_lane_shuffle.s")
 #endif
 
 #ifdef NON_MATCHING
-// rail_assign_targets: script command 7 (func_1509E3D4). For every racer i on the current racer's team (+0xE64), the
+// rail_assign_targets: script command 7 (event_action_rail). For every racer i on the current racer's team (+0xE64), the
 // ones of kind 2 / 3 (+0x15C) first, then the others: picks the active (+0x39C > 0) racer k of another team whose
 // link list +0x5DC[k * 16..] (ended by -1) holds i, with the lowest link weight (+0x9DC) shifted left by the number
 // of racers already assigned to k (start 10000000). Stores the cost in +0x45C[i] and k in +0x49C[i] (-1: none) and
 // counts the assignment for k. Returns 0.
-s32 func_1508C370(void) {
+/* was func_1508C370 */
+s32 rail_assign_targets(void) {
     u8 *rail = (u8 *) D_800D27D0;
     s32 me = *(s32 *) (rail + 0x4);
     s32 n = *(s32 *) (rail + 0x10);
@@ -926,27 +939,29 @@ s32 func_1508C370(void) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C370.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_assign_targets.s")
 #endif
 
-s32 func_1508C5F0(s32 arg0) {
+/* was func_1508C5F0 */
+s32 rail_cmd_stub(s32 arg0) {
     return 0;
 }
 
 #ifdef NON_MATCHING
-f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz);
+f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz);
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern s16 D_80087664[];
 
-// rail_pair_sight: P237. Line-of-sight test between rail racers a and b (func_1508CA14 pairs them). Each racer's
+// rail_pair_sight: P237. Line-of-sight test between rail racers a and b (rail_pair_rivals pairs them). Each racer's
 // record (obj_find_by_spawn(id & 0xFFFF0FFF)) gives an eye point: a racer whose state block (+0x31C) has +0x84 set
 // looks from y + 0.75 * height (+0x114, s16), 50 lower for state kind 9 (+0x75 & 0x7F); a record of kind 0x1F from
 // y + 80; when only the OTHER racer has +0x84 set and the difficulty's D_80087664 entry is not -1, from the s16
 // point +0x1A4 / +0x1A6 / +0x1A8; else from y + 40. The ray a -> b is cast with func_150ACEA0: no hit, or a hit
-// farther than the distance, means "seen", then func_15087204 (the wall test from a along x / z) > 0 clears it.
+// farther than the distance, means "seen", then rail_wall_hit (the wall test from a along x / z) > 0 clears it.
 // Rail block +0x16C0 masks: bit b of a's word and bit a of b's word when the pair is clear; bits 16 + b / 16 + a
 // when the ray reached the other racer (whatever the wall test said). Nothing when a record is missing.
-void func_1508C600(s32 a, s32 b) {
+/* was func_1508C600 */
+void rail_pair_sight(s32 a, s32 b) {
     u8 *ra, *rb, *sa, *sb;
     s32 flagA, flagB, seen, clear;
     f32 xa, ya, za, xb, yb, zb, dx, dy, dz, dist, hit, h0, h1, h2;
@@ -1002,7 +1017,7 @@ void func_1508C600(s32 a, s32 b) {
         if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, &h0, &h1, &h2, &hit, 0, 0, 0.0f) == 0 || dist < hit) {
             seen = 1;
             clear = 1;
-            if (0.0f < func_15087204(xa, ya, za, dx, dz)) {
+            if (0.0f < rail_wall_hit(xa, ya, za, dx, dz)) {
                 clear = 0;
             }
         }
@@ -1017,27 +1032,28 @@ void func_1508C600(s32 a, s32 b) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C600.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_pair_sight.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_8009DE38;
-void func_1508C600(s32, s32);
+void rail_pair_sight(s32, s32);
 
 /*
  * rail_pair_rivals: P230. The rail block's +0x16C0 words are per-racer masks (bit k and k + 16 = "not yet paired
  * with racer k"). With refresh != 0:
- * 1. each human racer i (< D_80090130) is paired (func_1508C600(i, k), both mask bits cleared) with up to three of
+ * 1. each human racer i (< D_80090130) is paired (rail_pair_sight(i, k), both mask bits cleared) with up to three of
  *    the computer racers k (D_80090130.. D_8008FD8C) that are on another team (+0xE64) and whose bit is still set
  *    in i's mask, the three with the smallest "distance" (the asm's d = (x - x)^2 + (x - z)^2 from racer i's own
  *    position, halved per axis when k is racer i's current target +0x11C[k]; best first, ties keep the earlier);
  * 2. then `refresh` times, the round-robin cursor (+0x1700 = a, +0x1701 = b, u8) moves to the next pair (b + 1;
  *    past the last racer a + 1, b = a + 1, a wraps at n - 1); both mask bits are cleared each step, and the
  *    first pair (at most 64 steps) with neither bit in D_800D18A0 and the two racers on different teams (+0x128)
- *    goes to func_1508C600(a, b).
+ *    goes to rail_pair_sight(a, b).
  * The cursor is stored back; returns racer `who`'s mask.
  */
-s32 func_1508CA14(s32 who, s32 refresh) {
+/* was func_1508CA14 */
+s32 rail_pair_rivals(s32 who, s32 refresh) {
     s32 *team = (s32 *) ((u8 *) D_800D27D0 + 0xE64);
     u8 a = *(u8 *) ((u8 *) D_800D27D0 + 0x1700);
     u8 b = *(u8 *) ((u8 *) D_800D27D0 + 0x1701);
@@ -1089,7 +1105,7 @@ s32 func_1508CA14(s32 who, s32 refresh) {
                 }
                 ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[i] &= ~(0x10001 << *q);
                 ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[*q] &= ~(0x10001 << i);
-                func_1508C600(i, *q);
+                rail_pair_sight(i, *q);
             }
         }
     }
@@ -1113,7 +1129,7 @@ s32 func_1508CA14(s32 who, s32 refresh) {
                 ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[b] &= ~(0x10001 << a);
                 steps++;
             } while (steps < 0x40 && (((D_800D18A0 & ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0[b].unk128));
-            func_1508C600(a, b);
+            rail_pair_sight(a, b);
         } while (--refresh != 0);
     }
     *(u8 *) ((u8 *) D_800D27D0 + 0x1700) = a;
@@ -1121,7 +1137,7 @@ s32 func_1508CA14(s32 who, s32 refresh) {
     return ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[who];
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508CA14.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_pair_rivals.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -1130,7 +1146,8 @@ s32 func_1508CA14(s32 who, s32 refresh) {
  * cursor D_800D27D0[0x1702]: returns the first record that is live (+0), has a state block (+0x31C) with +0x84 set
  * and whose bit in D_800D18A0 is clear (-1 if none); the cursor is left on the last record examined.
  */
-s32 func_1508CE28(void) {
+/* was func_1508CE28 */
+s32 player_next_active(void) {
     s32 n = D_8008FD8C;
     s32 found = -1;
     s32 tries = 0;
@@ -1161,10 +1178,11 @@ s32 func_1508CE28(void) {
     return found;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508CE28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/player_next_active.s")
 #endif
 
-s32 func_1508CEE4(void) {
+/* was func_1508CEE4 */
+s32 rail_human_cursor_next(void) {
     D_800D27D0[0x1703]++;
     if (D_800D27D0[0x1703] >= D_80090130) {
         D_800D27D0[0x1703] = 0;
@@ -1175,7 +1193,7 @@ s32 func_1508CEE4(void) {
 #ifdef NON_MATCHING
 extern s32 D_800BEDCC;    /* frame counter (the wobble phase of kind 3) */
 extern s8 D_80087678[];   /* by difficulty D_800E1000: rail time (+0x29C) after which mode 1 stops boosting */
-f32 func_15144BC8(f32);
+f32 wrap_angle_deg(f32);
 void trail_send_aim_msg(u8 *, f32);
 
 #define CF34_F(p, off) (*(f32 *) ((u8 *) (p) + (off)))
@@ -1183,20 +1201,21 @@ void trail_send_aim_msg(u8 *, f32);
 #define CF34_RAILF(off, i) (*(f32 *) ((u8 *) D_800D27D0 + (off) + (i) * 4))
 #define CF34_RAILW(off, i) (*(s32 *) ((u8 *) D_800D27D0 + (off) + (i) * 4))
 
-// rail_racer_steer: P234. Script command 9 (func_1509E3D4, (i, node, limit, replan, 0, 0)) and the per-racer steering of
-// func_1508AB7C (which also passes its smoothed s8 offsets ox / oz). Racer i (record D_800CC2D0[i], state block +0x31C,
+// rail_racer_steer: P234. Script command 9 (event_action_rail, (i, node, limit, replan, 0, 0)) and the per-racer steering of
+// rail_racers_update (which also passes its smoothed s8 offsets ox / oz). Racer i (record D_800CC2D0[i], state block +0x31C,
 // vehicle +0x318) aims at rail node `node` (obj_find_by_spawn(node & 0xFFFF0FFF); NULL -> 1, node -1 -> 0). Some kinds
 // lead the node by its motion (+0x14 - +0x2C) scaled by the distance in race 0xB9 or difficulty >= 3. The aim point
 // (rail +0x17A8 / +0x1828 / +0x17E8 per racer, s16 targets +0x1A4 / +0x1A6 / +0x1A8 with `replan`) moves towards the
 // node at rate +0x1868 * frame time (at most 1); ox swings the aim sideways (50 when close). The yaw / pitch errors
-// (math_atan2_u16 angles, func_15144BC8 normalised) give the stick bytes (+0x85 / +0x86 or the vehicle's control block
+// (math_atan2_u16 angles, wrap_angle_deg normalised) give the stick bytes (+0x85 / +0x86 or the vehicle's control block
 // +0x36C[2] / [3]); kinds that turn by themselves (`turn`) rotate +0x16C / +0x170 directly through func_15048758 instead.
 // Then the button bits (+0x8A / +0x8C / +0x8E) follow the kind (mode 1: boost until D_80087678; 2: `limit` -> 10;
 // kind 0x1B: when the target is close below and paired in +0x16C0; kind 3 flies with trail_send_aim_msg), the height
 // value (+0x90 or the vehicle's +0x1A4) eases by 1/8 towards the pitch-derived height, and the vehicle's +0x1A8 is
-// rescaled by the view ratio. Returns 1 when the yaw error is beyond 45 degrees (func_1508AB7C then resets the
+// rescaled by the view ratio. Returns 1 when the yaw error is beyond 45 degrees (rail_racers_update then resets the
 // racer's boost time), else 0.
-s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
+/* was func_1508CF34 */
+s32 rail_racer_steer(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
     u8 *obj = (u8 *) &D_800CC2D0[i];
     u8 *veh;
     u8 *rec;
@@ -1323,8 +1342,8 @@ s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
     } else {
         cur = CF34_F(CF34_ST(obj), 0x16C);
     }
-    base = func_15144BC8(ang);
-    diff = func_15144BC8(func_15144BC8(cur) - base);
+    base = wrap_angle_deg(ang);
+    diff = wrap_angle_deg(wrap_angle_deg(cur) - base);
     if (180.0f < diff) {
         diff = -360.0f + diff;
     }
@@ -1347,7 +1366,7 @@ s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
     while (180.0f < curp) {
         curp -= 360.0f;
     }
-    dp = func_15144BC8(curp - pitch);
+    dp = wrap_angle_deg(curp - pitch);
     while (180.0f < dp) {
         dp -= 360.0f;
     }
@@ -1465,7 +1484,7 @@ s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508CF34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_racer_steer.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -1473,17 +1492,18 @@ extern s16 D_800876C0[];
 extern s8 D_80087688[];
 extern f32 D_8009DE5C;
 extern s8 D_800E1000;
-void func_1508EFEC(s32, s32, s32);
+void rail_racer_send_event(s32, s32, s32);
 f32 random_float(void);
 
-// rail_rival_pace: script command 14 (func_1509E3D4). Object `i` of D_800CC2D0 races towards the object in its rail
+// rail_rival_pace: script command 14 (event_action_rail). Object `i` of D_800CC2D0 races towards the object in its rail
 // slot +0x11C (copied to its record's +0x129). The distance band to it (0 far = beyond D_8009DE5C, 1 beyond 2000,
 // 2 close) and the difficulty D_800E1000 pick a step limit from D_800876C0; once the slot's counter +0x29C passes it,
-// the counter restarts (and when the target's bit 16 + target is set in the slot's mask +0x16C0, func_1508EFEC
+// the counter restarts (and when the target's bit 16 + target is set in the slot's mask +0x16C0, rail_racer_send_event
 // sends message 0x61). On a zero counter the record's boost flag +0x12A is set when 100 * random beats D_80087688.
 // Returns the band while the counter runs, 0 otherwise: no event script reads command 14's result (P211 scan), the
 // asm leaves the random helper's v0 there.
-s32 func_1508DCAC(s32 i) {
+/* was func_1508DCAC */
+s32 rail_rival_pace(s32 i) {
     struct127 *obj = &D_800CC2D0[i];
     u8 *rail = (u8 *) D_800D27D0;
     s32 *target = (s32 *) (rail + 0x11C) + i;
@@ -1512,7 +1532,7 @@ s32 func_1508DCAC(s32 i) {
     if (D_800876C0[D_800E1000 * 3 + band] < *count) {
         *count = 0;
         if ((0x10000 << *target) & *(s32 *) ((u8 *) D_800D27D0 + i * 4 + 0x16C0)) {
-            func_1508EFEC(i, 0x61, 0x2000);
+            rail_racer_send_event(i, 0x61, 0x2000);
         }
     }
     if (*count != 0) {
@@ -1525,16 +1545,17 @@ s32 func_1508DCAC(s32 i) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DCAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_rival_pace.s")
 #endif
 
 #ifdef NON_MATCHING
-// rail_state_reset: script command 10 (func_1509E3D4): marks the D_800D27D0 slots +0xEB0 free (-1, +0x10 of them)
+// rail_state_reset: script command 10 (event_action_rail): marks the D_800D27D0 slots +0xEB0 free (-1, +0x10 of them)
 // and resets the per-entry tables (+0xEA4 entries): +0xF70 = -1, +0xFF0 = 0, +0x10F0 = -1, +0x1070 = 1,
 // +0x12F4 = 0. The counts are re-read through D_800D27D0 on every pass, the tables stay on the block it pointed to
 // at entry. Returns what the asm leaves in v0 for the script runner: the end of the +0xF70 table, or the +0xEB0
 // table when there are no entries (never 0).
-s32 func_1508DE78(void) {
+/* was func_1508DE78 */
+s32 rail_state_reset(void) {
     u8 *rail = (u8 *) D_800D27D0;
     s32 *slots = (s32 *) (rail + 0xEB0);
     s32 *link = (s32 *) (rail + 0xF70);
@@ -1560,11 +1581,12 @@ s32 func_1508DE78(void) {
     return (s32) slots;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DE78.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_state_reset.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1508DF48(s32 arg0, s32 arg1) {
+/* was func_1508DF48 */
+s32 rail_pickup_slot_release(s32 arg0, s32 arg1) {
     s32 temp_a3;
     s32 temp_v1;
     s32 var_a1;
@@ -1604,41 +1626,42 @@ s32 func_1508DF48(s32 arg0, s32 arg1) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DF48.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_pickup_slot_release.s")
 #endif
 #ifdef NON_MATCHING
 extern s8 D_800876E0;      /* racer whose items are checked this frame (cycles over the racers) */
-s32 func_1508EBDC(s32);
-void func_1508EFEC(s32, s32, s32);
-s32 func_1508DF48(s32, s32);
-void func_15080A20(s32, s32, s32, s32);
-void func_1502ED40(struct127 *);
-void func_1502ECFC(struct127 *, s32, s32, s32, s32, s32);
-s32 func_15034118(u8 *, s32 *);
-void func_15030448(struct127 *, s32);
+s32 rail_weapon_pickup_id(s32);
+void rail_racer_send_event(s32, s32, s32);
+s32 rail_pickup_slot_release(s32, s32);
+void context_action_lock(s32, s32, s32, s32);
+void obj_tint_pulse_stop(struct127 *);
+void obj_tint_set_pulse(struct127 *, s32, s32, s32, s32, s32);
+s32 attachment_list_for_owner(u8 *, s32 *);
+void attachment_free(struct127 *, s32);
 void obj_glow_post_remove_event(u8 *);
 u8 *world_record_find(s32);
-s32 func_150871B8(s32);
-s32 func_1508712C(s32, f32 *, f32 *, f32 *);
+s32 rail_node_find_by_tag(s32);
+s32 rail_node_position(s32, f32 *, f32 *, f32 *);
 f32 random_float(void);
-// rail_weapons_update: script command 11 (func_1509E3D4; its result is never read: returns the rail state pointer like
+// rail_weapons_update: script command 11 (event_action_rail; its result is never read: returns the rail state pointer like
 // the asm). Pass 1, every racer i (count +0x10; skipped in race mode 0xB9 while the object's +0x128 is set): the weapon
 // it should hold (+0xFF0[i]; 0x3A / 0x26 when its +0x19B ammo level is >= 5 / > 0; when none, the weapon of its pickup
 // slot +0xEB0[i] (+0x1174[slot]) or the default +0x1170; 0x457 = none) is compared with the one it holds (+0x75 & 0x7F,
-// or +0x128 without bit 5 in mode 0xB8). On a change the old weapon's sound / item (func_1508EBDC, 0x1000 = no item
-// change) and the new one's are switched through func_1508EFEC, and the object is armed (mode 0xB8: +0x128, counter
-// +0x12C; otherwise func_15080A20). For the racer D_800876E0 (not in mode 0xB8) the carried items (func_15034118) that
-// do not belong to the weapon are dropped (func_15030448), the weapon item is given back when missing
-// (func_15083568), and an object of kind 0x6E owned by the racer (+0x65 = i + 1) beyond the racers is removed.
+// or +0x128 without bit 5 in mode 0xB8). On a change the old weapon's sound / item (rail_weapon_pickup_id, 0x1000 = no item
+// change) and the new one's are switched through rail_racer_send_event, and the object is armed (mode 0xB8: +0x128, counter
+// +0x12C; otherwise context_action_lock). For the racer D_800876E0 (not in mode 0xB8) the carried items (attachment_list_for_owner) that
+// do not belong to the weapon are dropped (attachment_free), the weapon item is given back when missing
+// (obj_setup_run), and an object of kind 0x6E owned by the racer (+0x65 = i + 1) beyond the racers is removed.
 // D_800876E0 then moves to the next racer. Pass 2, every pickup slot i (+0xEA4): its object (world_record_find of +0xEF0[i])
 // counts down its hide timer +0x12F4 (then the respawn timer +0x1070 = 4) and its respawn timer; on respawn it goes
 // back to its home position (+0x1374 / +0x13F4 / +0x1474) or, unless flag 4 of +0x11F4, to a rail point: a random
-// one not used by another slot (flag 1; +0x10F0) or the fixed +0x1274, placed with func_150871B8 / func_1508712C
+// one not used by another slot (flag 1; +0x10F0) or the fixed +0x1274, placed with rail_node_find_by_tag / rail_node_position
 // (y + 0x3C). A slot whose object was picked up (+0x80 = racer + 1) is taken: weapon 0x8AE adds 3 ammo (max 6) to the
-// racer and restarts the timer (+0xEAC); others reset the racer's route (func_1508DF48(r, 0)), either restart the
+// racer and restarts the timer (+0xEAC); others reset the racer's route (rail_pickup_slot_release(r, 0)), either restart the
 // timer (flag 2) or hide the slot (-1, +0xF70 = racer | 0x2000, point -1), and link the racer to the slot (+0xEB0[r],
 // +0x5C[r] = 1). Mode 0xB9 sets the racer's counter +0x12C to 600, mode 0xB8 the weapon's counter (see pass 1).
-s32 func_1508E080(void) {
+/* was func_1508E080 */
+s32 rail_weapons_update(void) {
     u8 *rail = (u8 *) D_800D27D0;
     s32 *slotOf = (s32 *) (rail + 0xEB0);
     s32 *slotObj = (s32 *) (rail + 0xEF0);
@@ -1699,22 +1722,22 @@ s32 func_1508E080(void) {
             have = ext[0x128] & ~0x20;
         }
         if (cur != have) {
-            item = func_1508EBDC(have);
+            item = rail_weapon_pickup_id(have);
             if (item != -1) {
                 item &= ~0x1000;
-                func_1508EFEC(i, 0x4C, item);
+                rail_racer_send_event(i, 0x4C, item);
                 if (item == 0x1D) {
-                    func_1508EFEC(i, 0x4C, 0x1E);
+                    rail_racer_send_event(i, 0x4C, 0x1E);
                 }
                 ((u8 *) obj->unk31C)[0x11A] = 0;
             }
-            item = func_1508EBDC(cur);
+            item = rail_weapon_pickup_id(cur);
             if (item > 0x1000) {
-                func_1508EFEC(i, 0x4B, item & ~0x1000);
+                rail_racer_send_event(i, 0x4B, item & ~0x1000);
             }
             if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB8) {
                 if (have == 0x80) {
-                    func_1502ED40(obj);
+                    obj_tint_pulse_stop(obj);
                     *((u8 *) obj + 0x125) = 0;
                 }
                 ((u8 *) obj->unk31C)[0x128] = cur;
@@ -1722,20 +1745,20 @@ s32 func_1508E080(void) {
                     *(s16 *) ((u8 *) obj->unk31C + 0x12C) = 500;
                 } else if (cur == 0x80) {
                     *(s16 *) ((u8 *) obj->unk31C + 0x12C) = 1500;
-                    func_1502ECFC(obj, 0, 0, 0xFF, 0xBF, 4);
+                    obj_tint_set_pulse(obj, 0, 0, 0xFF, 0xBF, 4);
                 } else if (cur == 0x10) {
                     *(s16 *) ((u8 *) obj->unk31C + 0x12C) = 3;
                 }
             } else {
-                func_15080A20(i, 1, cur, 0);
+                context_action_lock(i, 1, cur, 0);
                 if (cur == 0 && have != 3) {
                     ((u8 *) obj->unk31C)[0x78] = 0;
                 }
                 if (have == 0x20) {
-                    func_1508EFEC(i, 0x45, 4);
+                    rail_racer_send_event(i, 0x45, 4);
                 }
                 if (cur == 0x20) {
-                    func_1508EFEC(i, 0x45, 3);
+                    rail_racer_send_event(i, 0x45, 3);
                 }
             }
         }
@@ -1743,12 +1766,12 @@ s32 func_1508E080(void) {
             continue;
         }
         found = 0;
-        item = func_1508EBDC(cur);
-        n = func_15034118((u8 *) obj, (s32 *) items);
+        item = rail_weapon_pickup_id(cur);
+        n = attachment_list_for_owner((u8 *) obj, (s32 *) items);
         if (n == 0 && ((u8 *) obj->unk31C)[0x11A] == 2 && item != 0x55 && item != 0x2E) {
-            func_15083568(obj, item, 1.0f, 0);
+            obj_setup_run(obj, item, 1.0f, 0);
             if (item == 0x1D) {
-                func_15083568(obj, 0x1E, 1.0f, 0);
+                obj_setup_run(obj, 0x1E, 1.0f, 0);
             }
         }
         if (n != 0 && cur != 0x20) {
@@ -1762,14 +1785,14 @@ s32 func_1508E080(void) {
                             found = 1;
                         }
                     } else {
-                        func_15030448((struct127 *) items[k], 0);
+                        attachment_free((struct127 *) items[k], 0);
                         ((u8 *) obj->unk31C)[0x11A] = 0;
                     }
                 }
                 if (!found && ((u8 *) obj->unk31C)[0x11A] == 2 && item != 0x55 && item != 0x2E) {
-                    func_15083568(obj, item, 1.0f, 0);
+                    obj_setup_run(obj, item, 1.0f, 0);
                     if (item == 0x1D) {
-                        func_15083568(obj, 0x1E, 1.0f, 0);
+                        obj_setup_run(obj, 0x1E, 1.0f, 0);
                     }
                 }
             } else {
@@ -1777,7 +1800,7 @@ s32 func_1508E080(void) {
                     kind = items[k][6];
                     if (kind != 0x2A && kind != 0x22 && kind != 0x2C && kind != 0x64 && kind != 0x2D && kind != 0x72
                         && kind != 0x73 && kind != 0x76 && kind != 0x77 && kind != 0x78 && kind != 7) {
-                        func_15030448((struct127 *) items[k], 0);
+                        attachment_free((struct127 *) items[k], 0);
                         ((u8 *) obj->unk31C)[0x11A] = 0;
                     }
                 }
@@ -1841,9 +1864,9 @@ s32 func_1508E080(void) {
                 pt = fixedPoint[i];
             }
             point[i] = pt;
-            r = func_150871B8(((s32 *) ((u8 *) D_800D27D0 + 0x14F4))[pt]);
+            r = rail_node_find_by_tag(((s32 *) ((u8 *) D_800D27D0 + 0x14F4))[pt]);
             if (r != -1) {
-                func_1508712C(r, &x, &y, &z);
+                rail_node_position(r, &x, &y, &z);
                 *(s16 *) (pick + 0x10) = (s32) x;
                 *(s16 *) (pick + 0x12) = (s32) y + 0x3C;
                 *(s16 *) (pick + 0x14) = (s32) z;
@@ -1862,7 +1885,7 @@ s32 func_1508E080(void) {
                 }
                 respawn[i] = *(s32 *) ((u8 *) D_800D27D0 + 0xEAC);
             } else {
-                func_1508DF48(r, 0);
+                rail_pickup_slot_release(r, 0);
                 if (flags[i] & 2) {
                     respawn[i] = *(s32 *) ((u8 *) D_800D27D0 + 0xEAC);
                 } else {
@@ -1894,13 +1917,15 @@ s32 func_1508E080(void) {
     return (s32) D_800D27D0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508E080.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_weapons_update.s")
 #endif
 
-void func_1508EB24(void) {
+/* was func_1508EB24 */
+void rail_stub_empty(void) {
 }
 
-s32 func_1508EB2C(s32 arg0) {
+/* was func_1508EB2C */
+s32 rail_weapon_range(s32 arg0) {
     switch (arg0) {
     case 0x3F:
         return 0x708;
@@ -1937,7 +1962,8 @@ s32 func_1508EB2C(s32 arg0) {
     }
 }
 
-s32 func_1508EBDC(s32 arg0) {
+/* was func_1508EBDC */
+s32 rail_weapon_pickup_id(s32 arg0) {
     if ((*(s16 *)((u8 *)D_800D27D0 + 0x16BC)) != 0xB8) {
         switch (arg0) {
         case 0x14:
@@ -2001,14 +2027,15 @@ void obj_slots_swap(struct127 *, struct127 *);
 
 #define RAIL_WORDS(off) ((s32 *) ((u8 *) D_800D27D0 + (off)))
 
-// rail_racer_take_over: script command 15 (func_1509E3D4). Racer i takes over racer j's place: only when i's
+// rail_racer_take_over: script command 15 (event_action_rail). Racer i takes over racer j's place: only when i's
 // D_800D1CC4 byte is >= 0x33 and i is not yet marked in D_800D1CC2. Marks i there, moves the D_800D18A0 bit from i to
-// j, gives i j's func_150859AC(j, 3) value through func_15085710 (j gets 0), moves the rail flag word +0x18 bit i -> j,
+// j, gives i j's player_stat_get(j, 3) value through player_stat_modify (j gets 0), moves the rail flag word +0x18 bit i -> j,
 // copies j's rail slots (+0x9C, +0x39C, +0x3DC, +0xEB0 with its back link +0xF70, +0x16C0) to i, swaps the two
 // objects (obj_slots_swap), on level 0x3F re-points the D_800D3268 record's racer entry of the object's carrier
 // (unk13C >= 100) at the moved object, then resets object i (+0x125 = 0x5A, unk31C state byte 0x84, 0x1AA kept from
 // before the swap, 0x1AF = 0x40), refreshes its camera (camera_snap_to_object) and counts D_80090134. Returns 0 (asm too).
-s32 func_1508ECF8(s32 i, s32 j) {
+/* was func_1508ECF8 */
+s32 rail_racer_take_over(s32 i, s32 j) {
     s32 mask;
     s32 jbit;
     s32 k;
@@ -2030,8 +2057,8 @@ s32 func_1508ECF8(s32 i, s32 j) {
     D_800D18A0 &= ~mask;
     D_800D1CC2 |= mask;
     D_800D18A0 |= jbit;
-    func_15085710(i, 2, func_150859AC(j, 3));
-    func_15085710(j, 2, 0);
+    player_stat_modify(i, 2, player_stat_get(j, 3));
+    player_stat_modify(j, 2, 0);
 
     if (RAIL_WORDS(0x18)[0] != 0) {
         RAIL_WORDS(0x18)[0] &= ~mask;
@@ -2079,22 +2106,25 @@ s32 func_1508ECF8(s32 i, s32 j) {
 
 #undef RAIL_WORDS
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508ECF8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/rail_racer_take_over.s")
 #endif
 
-void func_1508EFEC(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1508EFEC */
+void rail_racer_send_event(s32 arg0, s32 arg1, s32 arg2) {
     s32 t;
     t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
     event_dispatch_alt(1, t | 0x2000, arg1, arg2);
 }
 
-void func_1508F054(s32 arg0, s32 arg1) {
+/* was func_1508F054 */
+void rail_racer_send_event_14(s32 arg0, s32 arg1) {
     s32 t;
     t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
     event_dispatch_alt(1, t | 0x2000, 0x14, arg1);
 }
 
-void func_1508F0B8(s32 arg0, s32 arg1) {
+/* was func_1508F0B8 */
+void rail_racer_send_event_61(s32 arg0, s32 arg1) {
     s32 t;
     t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
     event_dispatch_alt(1, t | 0x2000, 0x61, arg1);

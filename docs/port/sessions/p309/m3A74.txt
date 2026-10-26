@@ -36,7 +36,7 @@ s/^        if ((D_800CC288 \& 0xC000) || self->unk28 > 100.0f) {/        if ((D_
 s/ || self->unk28 > 100.0f) {/ || self->unk28 > 160.0f) {/ % e100
 s/^            self->unk232 = 8;/            self->unk232 = 9;/ % e100
 /self->unk232 = 8;/,/}/s/^            self->unk102 = 1;/            self->unk102 = 2;/ % e100
-s/^        func_15052590(self);/        ;/ % e0
+s/^        obj_state_common_update(self);/        ;/ % e0
 s/^            if (self->unk28 > 30.0f) {/            if (self->unk28 > 60.0f) {/ % eGrab
 s/^                obj_attach_to_carrier(\&D_800CC2D0\[D_800CC68D - 100\], D_800C3E78);/                obj_attach_to_carrier(\&D_800CC2D0[D_800CC68D - 100], 1);/ % eGrab
 s/^                self->unk13C = D_800CC68D;/                self->unk13C = 1;/ % eGrab

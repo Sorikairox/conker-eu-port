@@ -5,9 +5,9 @@
 
 #ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
-s32 func_15046C6C(f32 *, s32, f32, f32 *);
+s32 collision_floor_all(f32 *, s32, f32, f32 *);
 
-/* func_15046C6C ground probe: start position, hit height in/out (+0xC) */
+/* collision_floor_all ground probe: start position, hit height in/out (+0xC) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 hit;
@@ -25,7 +25,8 @@ typedef struct {
 // character's y gives the ground height, a second probe from the character's y down 250 more gives the start height
 // (else y - 250). The func_151491F4 object (5..65, -1, 0xC, 1, 7, 0x18 bytes, 0xFF, 0) gets the record
 // {x, start y, z, 195 * 0.001, 0, ground y} at +0x28.
-void func_1515B500(s16 idx) {
+/* was func_1515B500 */
+void dust_drop_spawn_near_char(s16 idx) {
     Probe1515B500 q2;
     Probe1515B500 q;
     s16 angle;
@@ -59,7 +60,7 @@ void func_1515B500(s16 idx) {
     q.pos[1] = 19500.0f;
     q.pos[2] = rec[2];
     q.hit = -10000.0f;
-    if (func_15046C6C(q.pos, 0, pos[1], &q.hit) != 0) {
+    if (collision_floor_all(q.pos, 0, pos[1], &q.hit) != 0) {
         rec[5] = q.hit;
     } else {
         ok = 0;
@@ -74,7 +75,7 @@ void func_1515B500(s16 idx) {
         q2.pos[0] = rec[0];
         q2.pos[1] = pos[1];
         q2.pos[2] = rec[2];
-        if (func_15046C6C(q2.pos, 0, y0, &q2.hit) != 0) {
+        if (collision_floor_all(q2.pos, 0, y0, &q2.hit) != 0) {
             rec[1] = q2.hit;
         } else {
             rec[1] = y0;
@@ -92,13 +93,14 @@ void func_1515B500(s16 idx) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515B500.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/dust_drop_spawn_near_char.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
 
-void func_1515B78C(u8 *arg0) {
+/* was func_1515B78C */
+void dust_drop_update(u8 *arg0) {
     struct {
         f32 u6C;
         s8 u70;
@@ -222,7 +224,7 @@ void func_1515B78C(u8 *arg0) {
             sp.u88 = ((random_float() * 0.07f) + 0.06f) * sp.u6C;
             sp.u8C = ((random_float() * 0.07f) + 0.06f) * sp.u6C;
             sp.uE8 = ((random_float() * 1005.0f) + 600.0f) * 0.001f;
-            temp_v0 = func_1513092C(&sp.u94, 2, 0x28);
+            temp_v0 = particle_spawn_default(&sp.u94, 2, 0x28);
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u6C, 0x28);
             }
@@ -231,16 +233,18 @@ void func_1515B78C(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515B78C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/dust_drop_update.s")
 #endif
-void func_1515BB64(s16 arg0) {
+/* was func_1515BB64 */
+void screen_smoke_clear(s16 arg0) {
     s16 sp1C[2];
 
     sp1C[0] = arg0;
-    func_15155C9C((f32 *)sp1C, 0xB);
+    sprite2d_broadcast((f32 *)sp1C, 0xB);
 }
 
-void func_1515BB9C(u8 *arg0, s16 *arg1, u8 arg2) {
+/* was func_1515BB9C */
+void screen_smoke_on_message(u8 *arg0, s16 *arg1, u8 arg2) {
     if (arg2 == 0xB) {
         if (*(s16 *)(arg0 + 0x70) == *arg1) {
             node_destroy((struct102 *)arg0);
@@ -250,15 +254,16 @@ void func_1515BB9C(u8 *arg0, s16 *arg1, u8 arg2) {
 
 #ifdef NON_MATCHING
 u8 impact_current_kind(void);
-s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
 extern u8 (*D_800900A4[])(void);
 
-// smoke_cloud_burst: spawns 10 drifting smoke sprites (func_151559FC list 2, 0x18 / 0xFF / 1) tagged with id (the
+// smoke_cloud_burst: spawns 10 drifting smoke sprites (sprite2d_spawn list 2, 0x18 / 0xFF / 1) tagged with id (the
 // sprite's +0x70 gets the 0x18-byte block {id, speed (105..210) * 0.001, spin 0..3008 * 0.001, size, size 2
 // ((94..395) * 0.01), ...}; size = (489..2068) * 0.01. Each starts at (-100..100, -100..48), with the texture byte of
 // the current kind's D_800900A4 handler (impact_current_kind), life 50..100, alpha 100..200 and random flip flags 2 / 4.
 // The first random_int call's result is not used.
-void func_1515BBE4(s16 id) {
+/* was func_1515BBE4 */
+void screen_smoke_burst(s16 id) {
     struct {
         s16 id;             /* 0x00 */
         u8 pad2[2];
@@ -341,18 +346,19 @@ void func_1515BBE4(s16 id) {
         if (random_int() & 1) {
             spr.flags |= 4;
         }
-        e = (u8 *) func_151559FC(&spr, 2, 0, 0, 0x18, 0xFF, 1);
+        e = (u8 *) sprite2d_spawn(&spr, 2, 0, 0, 0x18, 0xFF, 1);
         if (e != NULL) {
             memcpy((s32) (e + 0x70), (f32 *) &blk, 0x18);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515BBE4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/screen_smoke_burst.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1515BF04(u8 *arg0) {
+/* was func_1515BF04 */
+s32 screen_smoke_beh_rise(u8 *arg0) {
     f32 temp_f14;
     f32 temp_f2;
 
@@ -364,26 +370,32 @@ s32 func_1515BF04(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515BF04.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/screen_smoke_beh_rise.s")
 #endif
-void func_1515BF80(s32 arg0) {
+/* was func_1515BF80 */
+void cam_zone_outside_tick(s32 arg0) {
 }
 
-void func_1515BF8C(s16 arg0) {
-    func_1515B500(arg0);
+/* was func_1515BF8C */
+void cam_zone_inside_tick(s16 arg0) {
+    dust_drop_spawn_near_char(arg0);
 }
 
-void func_1515BFB8(s32 arg0) {
+/* was func_1515BFB8 */
+void cam_zone_leave_alt(s32 arg0) {
 }
 
-void func_1515BFC4(s16 arg0) {
-    func_1515BBE4(arg0);
+/* was func_1515BFC4 */
+void cam_zone_leave(s16 arg0) {
+    screen_smoke_burst(arg0);
 }
 
-void func_1515BFF0(s16 arg0) {
-    func_1515BB64(arg0);
+/* was func_1515BFF0 */
+void cam_zone_enter_alt(s16 arg0) {
+    screen_smoke_clear(arg0);
 }
 
-void func_1515C01C(s16 arg0) {
-    func_1515BB64(arg0);
+/* was func_1515C01C */
+void cam_zone_enter(s16 arg0) {
+    screen_smoke_clear(arg0);
 }

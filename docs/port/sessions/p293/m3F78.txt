@@ -8,7 +8,7 @@ s#                \*(f32 \*) (\*(u8 \*\*) (st + 0x10) + 0x44) = dir\[1\];#      
 s#                \*(s32 \*) (\*(u8 \*\*) (st + 0x10) + 0x58) |= 2;#                *(s32 *) (*(u8 **) (st + 0x10) + 0x58) |= 6;# % r1
 s#        } else if (r == 2) {#        } else if (r == 3) {# % r2 r3
 s#        step\[1\] = pos\[1\] - old\[1\];#        step[1] = pos[1] - old[0];# % r3 r1
-s#        spd = func_15143E64((s32) step);#        spd = func_15143E64((s32) old);# % r3
+s#        spd = vec3_length((s32) step);#        spd = vec3_length((s32) old);# % r3
 s#        ring\[(s8) obj\[0x2E\]\]\.dist = spd;#        ring[(s8) obj[0x2E]].dist = -spd;# % r3
 s#        ring\[(s8) obj\[0x2E\]\]\.u10 = 100\.0f;#        ring[(s8) obj[0x2E]].u10 = 10.0f;# % r3
 s#        if (obj\[0x25\] == (s8) obj\[0x2E\]) {#        if (obj[0x25] <= (s8) obj[0x2E]) {# % wrap r3

@@ -6,12 +6,12 @@
 #ifdef NON_MATCHING
 /* Level vertex colour backup (filled at level load, flags at level header byte +0x21):
  *  D_800BE930[4]  per level geometry chunk 0..3: its slice of the colour store (3 bytes per vertex); [0] is also
- *                 the store itself (func_15012C34 writes through it)
+ *                 the store itself (vertex_colours_store writes through it)
  *  D_800BE940     u8 ** per colour group: per entry of the group, the RGB of its listed vertices
  *  D_800BE944     u16 per room record: first colour index in the store (0xFFFF: none)
  *  D_800BE948     u16 number of colours stored so far
  *  D_800BE950 / D_800BE970 / D_800BE984: RGB, DL command index and count of the G_SETENVCOLOR commands of
- *                 D_800B0E00's display list (func_15012E88) */
+ *                 D_800B0E00's display list (dl_env_colours_list) */
 extern u8 *D_800BE930[4];
 extern u8 *D_800B1220[4];  /* level geometry chunks: vertex arrays */
 extern s32 D_800B1250[4];  /* level geometry chunks: vertex counts */
@@ -24,13 +24,14 @@ extern u8 D_800BE984;
 #define COLOURS_STORED (*(u16 *) D_800BE948)
 #define LEVEL_FLAGS (((u8 *) D_800B0DF0)[0x21])
 #define ROOM_REC(i) ((u8 *) D_800DBEF4 + (i) * 0xA0) /* +0x16 u16 vertex count, +0x28 vertex array */
-void func_15012C34(u8 *vtx, s32 count);
-void func_15012E88(u32 *dl);
+void vertex_colours_store(u8 *vtx, s32 count);
+void dl_env_colours_list(u32 *dl);
 
 // level_vertex_colours_backup: level load. Allocates the colour store for the level chunks (flag 1) and the
 // room records (flag 2) and copies their vertex colours into it, then (flag 4) the per-entry colour lists of the
-// colour groups, and finally lists the env colour commands of the level DL (func_15012E88).
-void func_15012760(void) {
+// colour groups, and finally lists the env colour commands of the level DL (dl_env_colours_list).
+/* was func_15012760 */
+void level_vertex_colours_backup(void) {
     s32 total;
     s32 i;
     s32 j;
@@ -64,7 +65,7 @@ void func_15012760(void) {
             if (D_800B1220[i] != NULL) {
                 /* literal: based on D_800BE930[0], which is NULL here when chunk 0 has no vertices */
                 D_800BE930[i] = D_800BE930[0] + COLOURS_STORED * 3;
-                func_15012C34(D_800B1220[i], D_800B1250[i]);
+                vertex_colours_store(D_800B1220[i], D_800B1250[i]);
             } else {
                 D_800BE930[i] = NULL;
             }
@@ -75,7 +76,7 @@ void func_15012760(void) {
         for (i = 0; i < D_800DC320; i++) {
             if (*(u16 *) (ROOM_REC(i) + 0x16) != 0) {
                 ROOM_COLOUR_BASE[i] = COLOURS_STORED;
-                func_15012C34(*(u8 **) (ROOM_REC(i) + 0x28), *(u16 *) (ROOM_REC(i) + 0x16));
+                vertex_colours_store(*(u8 **) (ROOM_REC(i) + 0x28), *(u16 *) (ROOM_REC(i) + 0x16));
             } else {
                 ROOM_COLOUR_BASE[i] = 0xFFFF;
             }
@@ -103,16 +104,17 @@ void func_15012760(void) {
             }
         }
     }
-    func_15012E88((u32 *) D_800B0E00[0]);
+    dl_env_colours_list((u32 *) D_800B0E00[0]);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/func_15012760.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/level_vertex_colours_backup.s")
 #endif
 
 #ifdef NON_MATCHING
 // vertex_colours_store: appends the colours (+0xC..+0xE) of `count` 16-byte vertices to the colour store
 // D_800BE930[0] at index D_800BE948.
-void func_15012C34(u8 *vtx, s32 count) {
+/* was func_15012C34 */
+void vertex_colours_store(u8 *vtx, s32 count) {
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -123,13 +125,14 @@ void func_15012C34(u8 *vtx, s32 count) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/func_15012C34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/vertex_colours_store.s")
 #endif
 
 #ifdef NON_MATCHING
 // dl_env_colours_list: walks a display list to its G_ENDDL and records each G_SETENVCOLOR command: its index
 // (D_800BE970) and RGB (D_800BE950, 3 bytes); D_800BE984 counts them.
-void func_15012E88(u32 *dl) {
+/* was func_15012E88 */
+void dl_env_colours_list(u32 *dl) {
     s32 i;
     u8 *rgb;
 
@@ -145,10 +148,11 @@ void func_15012E88(u32 *dl) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/func_15012E88.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3FF70/dl_env_colours_list.s")
 #endif
 
-void func_15012F40(void) {
+/* was func_15012F40 */
+void clear_dfc00_table(void) {
     s32 i;
 
     for (i = 0; i < 0x1E3; i++) {

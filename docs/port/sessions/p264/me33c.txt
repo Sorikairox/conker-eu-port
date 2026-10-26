@@ -10,8 +10,8 @@
 \#^        src\[3\] = D_800AAB7C;$#s/D_800AAB7C/D_800AAB70/
 \#^        dst\[1\] = pos\[1\];$#s/pos\[1\]/pos[0]/
 \#^        dst\[2\] = dir\[0\];$#s/dir\[0\]/dir[1]/
-\#^        func_15145EA4(src, dst, \*(u8 \*\*) (owner + 0x1D4) + 0x40, 4);$#s/0x40/0x80/
-\#^        func_15145EA4(src, dst, \*(u8 \*\*) (owner + 0x1D4) + 0x40, 4);$#s/4);/3);/
+\#^        mtx_transform_points(src, dst, \*(u8 \*\*) (owner + 0x1D4) + 0x40, 4);$#s/0x40/0x80/
+\#^        mtx_transform_points(src, dst, \*(u8 \*\*) (owner + 0x1D4) + 0x40, 4);$#s/4);/3);/
 \#^                p\[0x168\] |= 1;$#s/|= 1/|= 2/
 \#^                \*(s32 \*) (p + 0x58) |= 2;$#s/|= 2/|= 4/
 \#^                \*(s32 \*) (p + 0x58) &= ~4;$#s/~4/~8/

@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 extern s32 D_800D2DB4;
 extern f32 D_80089890[][5]; /* camera lean presets: {k0, k1, k2, k3, base} per +0x134 index */
 
@@ -36,8 +36,8 @@ void camera_lean_from_heading(struct108 *arg0, f32 *outB, f32 *outA) {
     }
     if (D_800D2DB4 != 0 || ((mode = *(s16 *)(p + 0x73C)) != 0 && mode != 3)
         || (*(u8 **)(p + 0x3D4))[0x120] != 0) {
-        func_150498A0((f32 *)(p + 0x5E8), 0.0f, (f32 *)(p + 0x660), 6.0f, 9.0f, *(f32 *)(p + 0x7B4));
-        func_150498A0((f32 *)(p + 0x3A8), 0.0f, (f32 *)(p + 0x65C), 1.5f, 2.5f, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x5E8), 0.0f, (f32 *)(p + 0x660), 6.0f, 9.0f, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x3A8), 0.0f, (f32 *)(p + 0x65C), 1.5f, 2.5f, *(f32 *)(p + 0x7B4));
         return;
     }
     e = D_80089890[*(s32 *)(p + 0x134)];
@@ -74,7 +74,7 @@ void camera_lean_from_heading(struct108 *arg0, f32 *outB, f32 *outA) {
         *(f32 *)(p + 0x3A8) = a;
         *(f32 *)(p + 0x65C) = 0.0f;
     } else {
-        func_150498A0((f32 *)(p + 0x3A8), a, (f32 *)(p + 0x65C), 1.5f, 2.5f, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x3A8), a, (f32 *)(p + 0x65C), 1.5f, 2.5f, *(f32 *)(p + 0x7B4));
     }
 
     /* offset B: heading folded to the front */
@@ -94,9 +94,9 @@ void camera_lean_from_heading(struct108 *arg0, f32 *outB, f32 *outA) {
         *(f32 *)(p + 0x660) = 0.0f;
         *(f32 *)(p + 0x5E8) = b;
     } else if (*(s32 *)(p + 0x2C) & 0x100) {
-        func_150498A0((f32 *)(p + 0x5E8), b, (f32 *)(p + 0x660), 6.0f, 9.0f, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x5E8), b, (f32 *)(p + 0x660), 6.0f, 9.0f, *(f32 *)(p + 0x7B4));
     } else {
-        func_150498A0((f32 *)(p + 0x5E8), b, (f32 *)(p + 0x660), 1.5f, 2.5f, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x5E8), b, (f32 *)(p + 0x660), 1.5f, 2.5f, *(f32 *)(p + 0x7B4));
     }
     *(s32 *)(p + 0x134) = saved;
 }

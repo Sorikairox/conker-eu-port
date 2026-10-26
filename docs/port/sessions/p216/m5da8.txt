@@ -11,10 +11,10 @@ s/hitA\[2\] + hitB\[2\]/hitA[2] + hitB[1]/
 s/0xC0) = hitA/0xBC) = hitA/
 s/    if (ctl\[0x109\] != 0) {/    if (ctl[0x109] == 0) {/
 s/seg\[1\] = \*(f32 \*)((u8 \*)obj->unk31C + 0xBC) - mouth\[1\]/seg[1] = *(f32 *)((u8 *)obj->unk31C + 0xBC) - mouth[0]/
-s/if (func_15145128(seg, seg, &len, NULL) != 0)/if (func_15145128(seg, seg, \&len, NULL) == 0)/
+s/if (vec3_normalize_len(seg, seg, &len, NULL) != 0)/if (vec3_normalize_len(seg, seg, \&len, NULL) == 0)/
 s/(u8 \*)obj->unk31C + 0xB0,/(u8 *)obj->unk31C + 0xB4,/
 s/len \* 1.01f, 0, 0, 0, -1, 0, 0/len * 1.02f, 0, 0, 0, -1, 0, 0/
 s/len \* 1.01f, 0, 0, 0, -1, 0, 0/len * 1.01f, 0, 0, 0, 0, 0, 0/
 s/len \* 1.01f, 0, 0, 0, -1, 0, 0/len * 1.01f, 0, 1, 0, -1, 0, 0/
 s/mouth\[0\], mouth\[1\], mouth\[2\], seg\[0\]/mouth[0], mouth[1], mouth[1], seg[0]/
-s/    func_15063A54(obj);/    ;/
+s/    obj_notify_hit_target(obj);/    ;/

@@ -2,13 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15147ECC(u8 *arg0);
+void fxrec_free_lights(u8 *arg0);
 
 
 extern s32 (*D_8008A5A0[])(u8 *);
 extern s32 (*D_8008A5DC[])(u8 *);
 extern s32 (*D_8008A624[])(u8 *);
-void func_15147CB0(u8 *arg0) {
+/* was func_15147CB0 */
+void fxrec_update(u8 *arg0) {
     s32 pad; // fakematch: moves the byte spill slot
     s8 done = 0;
     s8 w;
@@ -54,37 +55,42 @@ void func_15147CB0(u8 *arg0) {
     }
 }
 
-void func_15147E40(u8 *arg0) {
-    func_151D5E30(arg0 + 0x84, arg0);
+/* was func_15147E40 */
+void fxrec_free_data(u8 *arg0) {
+    vtx_slot_buffers_free(arg0 + 0x84, arg0);
 }
 
-void func_15147E64(void *arg0) {
-    func_15147E40(arg0);
-    func_15147ECC(arg0);
+/* was func_15147E64 */
+void fxrec_die_retire(void *arg0) {
+    fxrec_free_data(arg0);
+    fxrec_free_lights(arg0);
     node_retire(arg0);
 }
 
-void func_15147E98(void *arg0) {
-    func_15147E40(arg0);
-    func_15147ECC(arg0);
+/* was func_15147E98 */
+void fxrec_die_free(void *arg0) {
+    fxrec_free_data(arg0);
+    fxrec_free_lights(arg0);
     node_unlink_free(arg0);
 }
 
-void func_15147ECC(u8 *arg0) {
+/* was func_15147ECC */
+void fxrec_free_lights(u8 *arg0) {
     s32 i;
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (((s32 *)(arg0 + 0x3C))[i]) {
-            func_100043B4(((s32 *)(arg0 + 0x3C))[i], 4);
+            heap_set_block_tag(((s32 *)(arg0 + 0x3C))[i], 4);
         }
     }
     if (*(s32 *)(arg0 + 0x4C) != 0) {
-        func_100043B4(*(s32 *)(arg0 + 0x4C), 4);
+        heap_set_block_tag(*(s32 *)(arg0 + 0x4C), 4);
     }
 }
 
 // record_free_dispatch: calls the record kind's (+0x20, 0..19, else 0) free handler D_8008A690 with the record.
-void func_15147F50(u8 *arg0) {
+/* was func_15147F50 */
+void fxrec_dispatch_free(u8 *arg0) {
     s32 idx = *(s32 *)(arg0 + 0x20);
 
     if (idx < 0) {
@@ -93,7 +99,7 @@ void func_15147F50(u8 *arg0) {
         idx = 0;
     }
 #ifdef NON_MATCHING
-    /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: func_15147E64 freed
+    /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: fxrec_die_retire freed
      * garbage at rec + 0x84 when it got no argument) */
     ((void (*)(u8 *)) D_8008A690[idx])(arg0);
 #else
@@ -102,7 +108,8 @@ void func_15147F50(u8 *arg0) {
 }
 
 // record_dispatch_b: calls the record kind's (+0x20, 0..19, else 0) D_8008A6E0 handler with the record.
-void func_15147FA0(u8 *arg0) {
+/* was func_15147FA0 */
+void fxrec_dispatch_b(u8 *arg0) {
     s32 idx = *(s32 *)(arg0 + 0x20);
 
     if (idx < 0) {
@@ -111,7 +118,7 @@ void func_15147FA0(u8 *arg0) {
         idx = 0;
     }
 #ifdef NON_MATCHING
-    /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: func_15147E64 freed
+    /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: fxrec_die_retire freed
      * garbage at rec + 0x84 when it got no argument) */
     ((void (*)(u8 *)) D_8008A6E0[idx])(arg0);
 #else
@@ -120,11 +127,12 @@ void func_15147FA0(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void * func_1515D9B0(void);
-s32 func_1515D9F0(s32);
+void * light_alloc_lookat_buf(void);
+s32 light_alloc_light_buf(s32);
 s32 memcpy(u8 *, u8 *, s32);
 
-void * func_15147FF0(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA) {
+/* was func_15147FF0 */
+void * fxrec_spawn(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA) {
     u8 * arg0 = (u8 *) arg0_p;
     s32 var_s1;
     s32 var_s1_2;
@@ -173,12 +181,12 @@ void * func_15147FF0(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
         var_s0_2 = temp_v0;
         if (D_80082FA0 >= 0) {
             do {
-                (*(s32 *)((u8 *)var_s0_2 + 0x3C)) = func_1515D9F0(arg6);
+                (*(s32 *)((u8 *)var_s0_2 + 0x3C)) = light_alloc_light_buf(arg6);
                 var_s1_2 += 1;
                 var_s0_2 += 4;
             } while (D_80082FA0 >= var_s1_2);
         }
-        (*(s32 *)((u8 *)temp_v0 + 0x4C)) = func_1515D9B0();
+        (*(s32 *)((u8 *)temp_v0 + 0x4C)) = light_alloc_lookat_buf();
     }
     (*(f32 *)((u8 *)temp_v0 + 0x54)) = 0.0f;
     (*(f32 *)((u8 *)temp_v0 + 0x58)) = 0.0f;
@@ -187,14 +195,15 @@ void * func_15147FF0(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1754C0/func_15147FF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1754C0/fxrec_spawn.s")
 #endif
 extern s32 (*D_8008A644[])(u8 *, s32, s16);
-s32 func_151462C8(s32, u8 *, s32, s32, s32, s16, u8 *, s32, s32);
+s32 model_part_emit_lights(s32, u8 *, s32, s32, s32, s16, u8 *, s32, s32);
 
-s32 func_151481BC(s32 arg0, u8 *arg1, s16 arg2) {
+/* was func_151481BC */
+s32 fxrec_draw(s32 arg0, u8 *arg1, s16 arg2) {
 
-    arg0 = func_151462C8(arg0, arg1 + 0x34, 0, 0, 0, arg2, arg1 + 0x54, 2, (*(u16 *)(arg1 + 0x1E) & 0x20) ? *(s32 *)(arg1 + 0x28) : 0);
+    arg0 = model_part_emit_lights(arg0, arg1 + 0x34, 0, 0, 0, arg2, arg1 + 0x54, 2, (*(u16 *)(arg1 + 0x1E) & 0x20) ? *(s32 *)(arg1 + 0x28) : 0);
     if (arg1[0x31] >= 0x13) {
         node_destroy((struct102 *)arg1);
         return arg0;
@@ -205,7 +214,8 @@ s32 func_151481BC(s32 arg0, u8 *arg1, s16 arg2) {
     return arg0;
 }
 
-void func_1514828C(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_1514828C */
+void fxrec_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {
     void (*func)(void *, s32, u8) = D_8008A730[*(s32 *)(arg0 + 0x20)];
 
     if (func != NULL) {
@@ -213,6 +223,7 @@ void func_1514828C(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-void func_151482D4(s32 arg0, u8 arg1) {
+/* was func_151482D4 */
+void fxrec_broadcast(s32 arg0, u8 arg1) {
     node_broadcast_types(D_800A5B40, 2, arg0, arg1);
 }

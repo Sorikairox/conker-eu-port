@@ -7,7 +7,7 @@
 extern OSPifRam __osPfsPifRam;
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_10025B60(s32, void *); // __osSiRawStartDma
+s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 void __osPfsRequestData(u8 cmd);
 void func_1002560C(u8 *pattern, OSContStatus *data); // __osPfsGetInitData
 s32 __osPfsGetStatus(OSMesgQueue *queue, int channel);
@@ -15,7 +15,8 @@ s32 __osGetId(OSPfs *pfs);
 s32 osPfsChecker(OSPfs *pfs);
 
 // osPfsInit
-s32 func_10027990(OSMesgQueue *queue, OSPfs *pfs, int channel) {
+/* was func_10027990 */
+s32 os_pfs_init(OSMesgQueue *queue, OSPfs *pfs, int channel) {
     s32 ret = 0;
 
     __osSiGetAccess();
@@ -43,9 +44,9 @@ s32 __osPfsGetStatus(OSMesgQueue *queue, int channel) {
     OSContStatus data[4];
 
     __osPfsRequestData(CONT_CMD_REQUEST_STATUS);
-    ret = func_10025B60(OS_WRITE, &__osPfsPifRam);
+    ret = os_si_raw_start_dma(OS_WRITE, &__osPfsPifRam);
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
-    ret = func_10025B60(OS_READ, &__osPfsPifRam);
+    ret = os_si_raw_start_dma(OS_READ, &__osPfsPifRam);
     osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
     func_1002560C(&pattern, data);
     if (((data[channel].status & CONT_CARD_ON) != 0) && ((data[channel].status & CONT_CARD_PULL) != 0)) {
@@ -65,7 +66,8 @@ OSPiHandle D_80043E50;  /* LeoDiskHandle (.bss; tentative definition, COMMON res
 extern OSPiHandle *D_80043EC4; /* __osDiskHandle (.bss) */
 
 // osLeoDiskInit (Rare libultrare, GoldenEye src/libultrare/io/leodiskinit.c)
-OSPiHandle *func_10027B50(void) {
+/* was func_10027B50 */
+OSPiHandle *os_leo_disk_init(void) {
     s32 sp1c;
 
     D_80043E50.type = 2;

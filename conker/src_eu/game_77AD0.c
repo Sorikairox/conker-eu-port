@@ -4,8 +4,8 @@
 #include "variables.h"
 
 
-f32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+s32 obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 
 // logf: Perfect Dark src/lib/mp3/lib_47ef0.c func00047ef0; Conker: `*= 0.5f`, `+= self`, `return 0.0f` (s90)
 f32 func_1504A620(f32 arg0)

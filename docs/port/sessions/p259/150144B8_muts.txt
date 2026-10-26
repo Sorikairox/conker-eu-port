@@ -6,8 +6,8 @@ s/if (D_80082FA0 >= 2) {/if (D_80082FA0 > 2) {/ % mp
 s/if (D_80082FA0 >= 2) {/if ((u32) D_80082FA0 >= 2) {/ % neg
 s/\*(f32 \*) (rec + 0x10), 0.0f);/*(f32 *) (rec + 0x10), 1.0f);/ % base
 s/\*(f32 \*) (rec + 0xC), \*(f32 \*) (rec + 0x10)/*(f32 *) (rec + 0x10), *(f32 *) (rec + 0xC)/ % base
-s/func_150A7E40(mtx, 0.0f, 100.0f, 0.0f,/func_150A7E40(mtx, 0.0f, 10.0f, 0.0f,/ % base
-s/func_15145974(pos, \&e.screen_x, \&e.screen_y);/func_15145974(pos, \&e.screen_y, \&e.screen_x);/ % base
+s/mtxf_transform_point(mtx, 0.0f, 100.0f, 0.0f,/mtxf_transform_point(mtx, 0.0f, 10.0f, 0.0f,/ % base
+s/vec3_to_yaw_pitch_deg(pos, \&e.screen_x, \&e.screen_y);/vec3_to_yaw_pitch_deg(pos, \&e.screen_y, \&e.screen_x);/ % base
 s/e.screen_y \*= 0.017453292f;/;/ % base
 s/e.min = \*(u32 \*) (rec + 0x18) \& 0xFF;/e.min = *(u32 *) (rec + 0x18) \& 0x7F;/ % one
 s/e.range = (\*(u32 \*) (rec + 0x18) >> 8) \& 0xFF;/e.range = (*(u32 *) (rec + 0x18) >> 8) \& 0x7F;/ % one

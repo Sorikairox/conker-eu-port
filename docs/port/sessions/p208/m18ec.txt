@@ -16,7 +16,7 @@ s/                        gdl->words.w0 = 0xFD180000;/                        gd
 s/                    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0x80);/                    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/
 s/                        ready = 1;/                        ready = 0;/
 s/                ix = table\[5\] + x;/                ix = table[6] + x;/
-s/                k = func_150859AC((s16)p, 3);/                k = func_150859AC((s16)p, 4);/
+s/                k = player_stat_get((s16)p, 3);/                k = player_stat_get((s16)p, 4);/
 s/                s = D_80087764\[k & 3\] << 5;/                s = D_80087764[k \& 3] << 4;/
 s/                t = D_80087768\[k >> 2\] << 5;/                t = D_80087768[k >> 1] << 5;/
 s/(table\[5\] + ix) \* 4, (table\[7\] + y) \* 4,/(table[5] + ix) * 4, (table[8] + y) * 4,/
@@ -115,8 +115,8 @@ s/        tex = texture_cache_lookup((D_8009015C & 0x40) ? 0xCF4 : 0xCF3, NULL, 
 s/        for (p = 0; p < D_80090130; p++) {/        for (p = 0; p <= D_80090130; p++) {/
 s/            my = (table\[24\] + (s32)view->unk24 + table\[21\]) \* 4;/            my = (table[24] + (s32)view->unk24 + table[20]) * 4;/
 s/            r = table\[32\] \* 4;/            r = table[31] * 4;/
-s/                if (i != p && !(i < D_8008FD8C && func_150859AC((s16)i, 3) > 0) && obj->unk328 == 0) {/                if (i != p \&\& obj->unk328 == 0) {/
-s/                if (i != p && !(i < D_8008FD8C && func_150859AC((s16)i, 3) > 0) && obj->unk328 == 0) {/                if (!(i < D_8008FD8C \&\& func_150859AC((s16)i, 3) > 0) \&\& obj->unk328 == 0) {/
+s/                if (i != p && !(i < D_8008FD8C && player_stat_get((s16)i, 3) > 0) && obj->unk328 == 0) {/                if (i != p \&\& obj->unk328 == 0) {/
+s/                if (i != p && !(i < D_8008FD8C && player_stat_get((s16)i, 3) > 0) && obj->unk328 == 0) {/                if (!(i < D_8008FD8C \&\& player_stat_get((s16)i, 3) > 0) \&\& obj->unk328 == 0) {/
 s/                fy = (f32)my + D_8009E244;/                fy = (f32)my + D_8009E248;/
 s/                fx = (f32)mx + D_8009E248;/                fx = (f32)mx + D_8009E244;/
 s/                    gDPSetEnvColor(gdl++, 0x00, 0xFF, 0x00, 0xFF);/                    gDPSetEnvColor(gdl++, 0x00, 0xFF, 0x01, 0xFF);/

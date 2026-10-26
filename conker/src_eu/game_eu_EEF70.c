@@ -4,9 +4,10 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1514C860(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+s32 spawn_ring_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
-void func_150C1260(u8 *arg0, s32 arg1) {
+/* was func_150C1260 */
+void foot_ring_debris_effect(u8 *arg0, s32 arg1) {
     struct {
         f32 uA8;
         f32 uAC;
@@ -87,8 +88,8 @@ void func_150C1260(u8 *arg0, s32 arg1) {
             mtx_get_translation(temp_v1, sp.u128, &sp.u12C);
             temp_f0 = sp.u124 * 80.0f;
             sp80 = temp_f0;
-            func_1514C860(sp.u12C, (*(f32 *)((u8 *)arg0 + 0x180)), sp.u134, temp_f0, 0, 0x10, 0x10, 0, 0, temp_f0 * 4.0f, 0, 0xFF);
-            func_151664F0(-1, (s32) sp.u12C, (s32) ((f32) (s32) (*(f32 *)((u8 *)arg0 + 0x180)) + 2.0f), (s32) sp.u134, 0xB, 0x13, 0, 0xFF, 0);
+            spawn_ring_emit(sp.u12C, (*(f32 *)((u8 *)arg0 + 0x180)), sp.u134, temp_f0, 0, 0x10, 0x10, 0, 0, temp_f0 * 4.0f, 0, 0xFF);
+            water_ring_spawn(-1, (s32) sp.u12C, (s32) ((f32) (s32) (*(f32 *)((u8 *)arg0 + 0x180)) + 2.0f), (s32) sp.u134, 0xB, 0x13, 0, 0xFF, 0);
             sp.uFE = 5;
             sp.uF8 = 0x29E8;
             sp.u100 = 0;
@@ -137,7 +138,7 @@ void func_150C1260(u8 *arg0, s32 arg1) {
                     sp.uC0 = random_float() * 360.0f;
                     sp.uE8 = 25.0f - (random_float() * 50.0f);
                     sp.uEC = 25.0f - (random_float() * 50.0f);
-                    temp_v0 = func_15132FBC(&sp.uA8, 3, 0xFF, 4, 0xFF, 0);
+                    temp_v0 = mdl_particle_spawn(&sp.uA8, 3, 0xFF, 4, 0xFF, 0);
                     if (temp_v0 != NULL) {
                         (*(f32 *)((u8 *)temp_v0 + 0x170)) = (f32) (*(f32 *)((u8 *)arg0 + 0x180));
                     }
@@ -148,5 +149,5 @@ void func_150C1260(u8 *arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EEF70/func_150C1260.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EEF70/foot_ring_debris_effect.s")
 #endif

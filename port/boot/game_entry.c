@@ -23,25 +23,25 @@ extern s16 D_800BEEC8;
 
 /* callees: prototypes must match the wasm signature of the definition (C body or stub) */
 void func_15007A20(void);
-void func_100050A0(OSMesgQueue *);
+void sched_init(OSMesgQueue *);
 void texture_build_size_table(void);
-void func_10008180(void);
+void audio_system_init(void);
 void game_init_message_queues(void);
 void level_build_flag_bitmask(void);
-void func_151EF7B0(void);
+void game_clear_e9d00_flag(void);
 void controller_init_si_queue(void);
 void controller_init_all(void);
-void func_151DDF20(void);
-void func_150158D0(s32);
+void settings_reset_defaults(void);
+void glyph_set_load_rom(s32);
 void func_15008A60(void);
 void text_queue_reset(void);
 void save_block_realloc_random(void);
-void func_151E582C(void);
+void menu_init(void);
 void level_lights_clear(void);
 s32 random_seed(s32);
 void level_start_game(s32, s32, s32);
 void level_load(void);
-void func_100051E8(void);
+void sched_send_retrace_msg(void);
 void game_main_loop(void);
 
 int port_entry_iterations;
@@ -61,18 +61,18 @@ void func_15007830(void) {
     D_800BEE88[0] = 2;     /* sh 0x0(D_800BEE88) */
     D_800BEE88[0x10] = 2;  /* sh 0x20(D_800BEE88) */
     D_800BEA37 = 0;
-    func_100050A0(&D_800BEE30);
+    sched_init(&D_800BEE30);
     texture_build_size_table();
     D_800BEECB = 0;
-    func_10008180();
+    audio_system_init();
     game_init_message_queues();
     level_build_flag_bitmask();
-    func_151EF7B0();
+    game_clear_e9d00_flag();
     D_800BEEC8 = 0;
     controller_init_si_queue();
     controller_init_all();
-    func_151DDF20();
-    func_150158D0(0);
+    settings_reset_defaults();
+    glyph_set_load_rom(0);
     func_15008A60();
     text_queue_reset();
     D_800BEA35 = 5;
@@ -93,7 +93,7 @@ void func_15007830(void) {
             port_log("[entry] loop state %d -> case %08X\n", D_800BEA35, target);
         switch (target) {
             case 0x1500793C:
-                func_151E582C();
+                menu_init();
                 /* fallthrough */
             case 0x15007944:
                 level_lights_clear();
@@ -111,7 +111,7 @@ void func_15007830(void) {
                 port_log("[entry] jump-table word %08X is not a case label\n", target);
                 return;
         }
-        func_100051E8();
+        sched_send_retrace_msg();
         D_800BEE08 = 0;
         game_main_loop();
         port_wait_frame(); /* PC: the frame wait happens inside asm stubs today; pace one pass per frame */
@@ -133,11 +133,11 @@ void __wrap_game_main_loop(void) {
 /* ---------------------------------------------------------------- memory-model self-test */
 
 /* converted game functions (game_eu_CA630.c, game_eu_6EDC0.c) that read ROM-data fields */
-s32 func_1509CE20(s32 i);  /* D_800877D0[i].unk0  s32 (a pointer in the data: relocated) */
-u16 func_1509CE40(s32 i);  /* D_800877D0[i].unk8  u16 */
-s32 func_1509CE60(s32 i);  /* *(u16 *)(&D_800877D0[i] + 0xA) & 0xFFF */
-s32 func_1509CE88(s32 i);  /* D_800877D0[i].unk4  s32 */
-s32 func_15041770(u8 c);   /* index of c in the u8 table D_80084C60 */
+s32 event_table_get_block(s32 i);  /* D_800877D0[i].unk0  s32 (a pointer in the data: relocated) */
+u16 event_table_get_u16_8(s32 i);  /* D_800877D0[i].unk8  u16 */
+s32 event_table_get_id_field(s32 i);  /* *(u16 *)(&D_800877D0[i] + 0xA) & 0xFFF */
+s32 event_table_get_word4(s32 i);  /* D_800877D0[i].unk4  s32 */
+s32 dbgfont_char_index(u8 c);   /* index of c in the u8 table D_80084C60 */
 #include "../stubs/memtest_expect.h"
 
 static int fails;
@@ -158,14 +158,14 @@ int port_memtest(void) {
     check("u8[3] store then s32 read", 0, (u32)word, 0x1234569A);
     for (k = 0; k < MEMTEST_N; k++) {
         const MemtestRow *r = &memtest_rows[k];
-        u32 p = (u32)func_1509CE20(r->i), n = port_wasm_to_n64((void *)p);
-        check("func_1509CE20 unk0 (ptr)", r->i, n ? n : p, r->unk0); /* relocated back to N64 */
-        check("func_1509CE88 unk4 s32", r->i, (u32)func_1509CE88(r->i), r->unk4);
-        check("func_1509CE40 unk8 u16", r->i, func_1509CE40(r->i), r->unk8);
-        check("func_1509CE60 (u16 +0xA)&0xFFF", r->i, (u32)func_1509CE60(r->i), r->unkA);
+        u32 p = (u32)event_table_get_block(r->i), n = port_wasm_to_n64((void *)p);
+        check("event_table_get_block unk0 (ptr)", r->i, n ? n : p, r->unk0); /* relocated back to N64 */
+        check("event_table_get_word4 unk4 s32", r->i, (u32)event_table_get_word4(r->i), r->unk4);
+        check("event_table_get_u16_8 unk8 u16", r->i, event_table_get_u16_8(r->i), r->unk8);
+        check("event_table_get_id_field (u16 +0xA)&0xFFF", r->i, (u32)event_table_get_id_field(r->i), r->unkA);
     }
     for (k = 0; k < MEMTEST_NC; k++)
-        check("func_15041770 u8 table", memtest_chars[k].c, (u32)func_15041770(memtest_chars[k].c), memtest_chars[k].idx);
+        check("dbgfont_char_index u8 table", memtest_chars[k].c, (u32)dbgfont_char_index(memtest_chars[k].c), memtest_chars[k].idx);
     port_log("[memtest] %s (%d failures)\n", port_gstr(fails ? "FAIL" : "PASS"), fails);
     return fails;
 }

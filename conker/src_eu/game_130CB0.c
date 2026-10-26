@@ -39,8 +39,8 @@ typedef struct {
     s32 vol;        /* 0x0C */
     s32 flags;      /* 0x10 */
     void *callback; /* 0x14 */
-    s32 state;      /* 0x18: callback state (func_1000FA64's arg8: high half = queued sound, low half = timer) */
-    u8 *obj;        /* 0x1C: func_1000FA64's arg9, the object that makes the sound */
+    s32 state;      /* 0x18: callback state (sfx_emitter_start's arg8: high half = queued sound, low half = timer) */
+    u8 *obj;        /* 0x1C: sfx_emitter_start's arg9, the object that makes the sound */
     s16 unk20;
     u8 unk22;
     u8 unk23;
@@ -51,14 +51,14 @@ typedef struct {
     f32 unk2C;
 } SfxEnt_130CB0;
 #ifdef NON_MATCHING
-// object_sound_follow_cam: P253. func_1000FA64 callback (s32 (SfxEnt *, s32 *pos, u32 *vol, s32 *pan, s32 *pitch,
+// object_sound_follow_cam: P253. sfx_emitter_start callback (s32 (SfxEnt *, s32 *pos, u32 *vol, s32 *pan, s32 *pitch,
 // s32 *slot, u16 *sound), called from the sound update in init_EB00.c; non-zero = free the slot) of the sounds
 // object_sound_play_cooldown starts for an object with a camera. The slot follows the object's position. With a timer (low half of
 // state, signed): a sound the update is about to start is queued instead (high half) and sound 0x5B0 is started
 // (volume 25000, 100, 0x78); otherwise the timer counts down by D_800BE9E4 and at 0 the queued sound is handed back
 // (*sound, slot sound, *vol = slot volume, *pos = 1, state cleared). Without a timer: *vol = slot volume, *pos = 1;
 // with no voice yet the slot ends (sound 0x5B1 started, returns 1); else the object's voice (+0x8C) is replaced by
-// this slot's voice (the old one stopped with func_100111C8) and flag 0x80 is cleared.
+// this slot's voice (the old one stopped with sound_voice_stop) and flag 0x80 is cleared.
 /* was func_15103910 */
 s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
     u8 *obj = e->obj;
@@ -73,7 +73,7 @@ s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 
             e->state = (*sound << 16) | (state & 0xFFFF);
             e->sound = 0;
             *sound = 0;
-            func_10010344(0x5B0, (struct127 *) obj, 25000, 100, 0x78);
+            actor_sound_play2(0x5B0, (struct127 *) obj, 25000, 100, 0x78);
             return 0;
         }
         timer -= D_800BE9E4;
@@ -89,11 +89,11 @@ s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 
         *vol = e->vol;
         *pos = 1;
         if (e->voice == 0) {
-            func_10010344(0x5B1, (struct127 *) obj, e->vol, e->unkA, e->unk8);
+            actor_sound_play2(0x5B1, (struct127 *) obj, e->vol, e->unkA, e->unk8);
             return 1;
         }
         if (e->voice != *(u16 *) (obj + 0x8C)) {
-            func_100111C8(*(u16 *) (obj + 0x8C));
+            sound_voice_stop(*(u16 *) (obj + 0x8C));
             *(u16 *) (obj + 0x8C) = e->voice;
         }
         e->flags &= ~0x80;
@@ -108,12 +108,12 @@ s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 
 #endif
 
 #ifdef NON_MATCHING
-// object_sound_delayed: P253. func_1000FA64 callback (same signature as object_sound_follow_cam) of the sounds object_sound_play_cooldown
+// object_sound_delayed: P253. sfx_emitter_start callback (same signature as object_sound_follow_cam) of the sounds object_sound_play_cooldown
 // starts for an object without a camera (state = flag 0x8000 from its arg4 | 0x10). The slot follows the object's
 // position. With a timer (state & 0x7FFF): a sound the update is about to start is queued (high half) and sound 0x5B0
 // is started (volume -25000); otherwise the timer counts down by D_800BE9E4 and once it would reach 0 the queued
 // sound is handed back (*sound, slot sound; the timer bits cleared). Without a timer: with no voice yet the slot ends
-// (sound 0x5B1, returns 1); else, unless flag 0x8000 is set, func_1000F85C(voice, -0x8000, 2) once, the state is
+// (sound 0x5B1, returns 1); else, unless flag 0x8000 is set, sound_voice_set_param(voice, -0x8000, 2) once, the state is
 // cleared and flag 0x80 of the slot is cleared.
 /* was func_15103AA0 */
 s32 object_sound_delayed(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
@@ -129,7 +129,7 @@ s32 object_sound_delayed(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pi
             e->state = (*sound << 16) | (state & 0xFFFF);
             e->sound = 0;
             *sound = 0;
-            func_10010344(0x5B0, (struct127 *) obj, -25000, e->unkA, e->unk8);
+            actor_sound_play2(0x5B0, (struct127 *) obj, -25000, e->unkA, e->unk8);
             return 0;
         }
         if ((u32) timer <= (u32) D_800BE9E4) {
@@ -141,12 +141,12 @@ s32 object_sound_delayed(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pi
         timer -= D_800BE9E4;
     } else {
         if (e->voice == 0) {
-            func_10010344(0x5B1, (struct127 *) obj, -25000, e->unkA, e->unk8);
+            actor_sound_play2(0x5B1, (struct127 *) obj, -25000, e->unkA, e->unk8);
             return 1;
         }
         if (state != 0) {
             if (!(state & 0x8000)) {
-                func_1000F85C(e->voice, -0x8000, 2);
+                sound_voice_set_param(e->voice, -0x8000, 2);
             }
             e->state = 0;
         }
@@ -175,7 +175,7 @@ void object_sound_play_cooldown(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4
     if ((*temp_v0 == 0) || (var_s1 == 0x58D)) {
         sp40 = temp_v0;
         temp_v0_2 = obj_find_by_spawn(arg1);
-        if ((temp_v0_2 != NULL) && (func_10010894(temp_v0_2) == 0)) {
+        if ((temp_v0_2 != NULL) && (actor_sound2_is_playing(temp_v0_2) == 0)) {
             if (arg2 != 0) {
                 if (arg4 != 0) {
                     var_s1 += (random_int() % arg2) * 2;
@@ -189,9 +189,9 @@ void object_sound_play_cooldown(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4
                 var_s1 += 1;
             }
             if (sp48 != 0) {
-                func_1000FA64(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7530, 0x7FFFU, 0x7FFE, (s32) &object_sound_follow_cam, (u8 *)0x10, (s32) temp_v0_2, 0x100, 0);
+                sfx_emitter_start(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7530, 0x7FFFU, 0x7FFE, (s32) &object_sound_follow_cam, (u8 *)0x10, (s32) temp_v0_2, 0x100, 0);
             } else {
-                func_1000FA64(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7FBC, 0x7FFFU, 0x7FFE, (s32) &object_sound_delayed, (u8 *) ((arg4 << 0xF) | 0x10), (s32) temp_v0_2, 0x100, 0);
+                sfx_emitter_start(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7FBC, 0x7FFFU, 0x7FFE, (s32) &object_sound_delayed, (u8 *) ((arg4 << 0xF) | 0x10), (s32) temp_v0_2, 0x100, 0);
             }
             *sp40 = 0x1F4;
         }

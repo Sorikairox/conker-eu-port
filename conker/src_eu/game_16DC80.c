@@ -36,14 +36,14 @@ struct210 *particle_emitter_spawn(void *emit, s32 emitSize, u8 *spawn, u8 arg3, 
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 (*D_8008A330[])(u8 *, s16);
 extern s32 D_800899D0[8][2];   /* z-buffer decode per exponent (code >> 13): {shift, add} */
 // particle_glow_update: per-player update of a light-flare particle (record from particle_emitter_spawn, emitter block at
 // +0x110). Runs the kind check D_8008A330[+0x169] (-1 = none), clears the player's screen cell (+0x134 / +0x144),
-// needs flag 2 (+0x58), projects the source (+0x34) with func_15144CEC and drops it outside the player's viewport
-// (D_800BE628[player] +0x24..+0x30). Gets 4 vertices from func_151D6310 (copying the 0x40-byte template at +0xC0
+// needs flag 2 (+0x58), projects the source (+0x34) with world_to_screen and drops it outside the player's viewport
+// (D_800BE628[player] +0x24..+0x30). Gets 4 vertices from vtx_slot_buffer_get (copying the 0x40-byte template at +0xC0
 // into a fresh buffer), normalises the axis (+0x40 = source + 500 * dir, once, flag 4), takes the facing term
 // dot(axis, camera - source) (0 = drop unless flag 0x10000), fades with distance (1 - e[0x20] * dist), and with
 // flag 0x10 tests occlusion: the projected depth (viewport scale 0x44 / 0x4C, x32) against the z-buffer code at
@@ -88,7 +88,7 @@ u8 *effect_flare_update(u8 *obj, s16 player) {
     if (!(*(s32 *) (obj + 0x58) & 2)) {
         return NULL;
     }
-    vis = func_15144CEC((f32 *) (obj + 0x34), scr, &oz, &ow, &oinv, player);
+    vis = world_to_screen((f32 *) (obj + 0x34), scr, &oz, &ow, &oinv, player);
     if (vis == 0) {
         return NULL;
     }
@@ -96,8 +96,8 @@ u8 *effect_flare_update(u8 *obj, s16 player) {
     if (scr[0] < view[0x2C / 4] || view[0x30 / 4] < scr[0] || scr[1] < view[0x24 / 4] || view[0x28 / 4] < scr[1]) {
         return NULL;
     }
-    cam = func_15144B34(player);
-    func_151D6310((s32 *) (obj + 0x100), player, 0x40, (s32 *) &verts, &reload);
+    cam = camera_get_pos(player);
+    vtx_slot_buffer_get((s32 *) (obj + 0x100), player, 0x40, (s32 *) &verts, &reload);
     if (verts == NULL) {
         return NULL;
     }
@@ -225,7 +225,7 @@ void effect_free_buffers_delete(struct210 *arg0) {
 /* was func_151411E4 */
 void effect_destroy_retire(structEU_16DC80 *arg0) {
     if (*(s32 *)((u8 *)arg0 + 0x154) != 0) {
-        func_1517E6A4(*(f32 **)((u8 *)arg0 + 0x154), arg0);
+        flare_node_remove(*(f32 **)((u8 *)arg0 + 0x154), arg0);
     }
     D_800DCE20 -= 1;
     D_8008A33C[arg0->unk168](arg0);
@@ -234,7 +234,7 @@ void effect_destroy_retire(structEU_16DC80 *arg0) {
 /* was func_15141250 */
 void effect_destroy_delete(structEU_16DC80 *arg0) {
     if (*(s32 *)((u8 *)arg0 + 0x154) != 0) {
-        func_1517E6A4(*(f32 **)((u8 *)arg0 + 0x154), arg0);
+        flare_node_remove(*(f32 **)((u8 *)arg0 + 0x154), arg0);
     }
     D_800DCE20 -= 1;
     D_8008A384[arg0->unk168](arg0);
@@ -347,7 +347,7 @@ s32 effect_pulse_sine_update(structEU_16DC80 *arg0) {
     s = sinf(temp->unk8);
     arg0->unk158 = temp->unk0 + (temp->unk4 * s);
     temp->unk8 += temp->unkC * D_800BE9A4;
-    temp->unk8 = func_15144B68(temp->unk8);
+    temp->unk8 = wrap_angle_rad(temp->unk8);
     return 1;
 }
 
@@ -443,7 +443,7 @@ void effect_set_orbit_pos(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3,
     mf[3][0] = ((f32 *)arg1)[0];
     mf[3][1] = ((f32 *)arg1)[1];
     mf[3][2] = ((f32 *)arg1)[2];
-    func_150A7E40(mf, 0.0f, *(f32 *)&arg2, 0.0f, &arg0->unk34, &arg0->unk38, &arg0->unk3C);
+    mtxf_transform_point(mf, 0.0f, *(f32 *)&arg2, 0.0f, &arg0->unk34, &arg0->unk38, &arg0->unk3C);
     x = *(f32 *)&arg3 * (arg0->unk34 - ((f32 *)arg1)[0]);
     y = *(f32 *)&arg3 * (arg0->unk38 - ((f32 *)arg1)[1]);
     z = *(f32 *)&arg3 * (arg0->unk3C - ((f32 *)arg1)[2]);

@@ -34,7 +34,7 @@ s32 obj_leg_tip_pos(u8 *arg0, u8 *arg1, u8 arg2) {
     default:
         return 0;
     }
-    func_15143134((void *)D_800A1CF0_vec, arg0, *(s32 *)(arg1 + 0x1D4) + (var_v0 << 6));
+    mtx_transform_point_or_origin((void *)D_800A1CF0_vec, arg0, *(s32 *)(arg1 + 0x1D4) + (var_v0 << 6));
     return 1;
 }
 
@@ -50,7 +50,7 @@ void obj_leg_dust_puff(u8 *arg0, int arg1, s32 arg2)
   if ((*((s32 *) (arg0 + 0x1D4))) != 0)
   {
     obj_leg_tip_pos(sp1C, arg0, arg1);
-    func_151C384C(sp1C, 0xFF, 0);
+    fire_embers_spawn(sp1C, 0xFF, 0);
   }
 }
 
@@ -61,8 +61,8 @@ s32 fx_sine_sway_update(u8 *arg0) {
     temp_s0 = (f32 *)(arg0 + 0x170);
     *(f32 *)(arg0 + 0x20) = temp_s0[4] * sinf(*(f32 *)(arg0 + 0x170));
     *(f32 *)(arg0 + 0x28) = temp_s0[5] * sinf(temp_s0[1]);
-    temp_s0[0] = func_15144B68((temp_s0[2] * D_800BE9A4) + temp_s0[0]);
-    temp_s0[1] = func_15144B68((temp_s0[3] * D_800BE9A4) + temp_s0[1]);
+    temp_s0[0] = wrap_angle_rad((temp_s0[2] * D_800BE9A4) + temp_s0[0]);
+    temp_s0[1] = wrap_angle_rad((temp_s0[3] * D_800BE9A4) + temp_s0[1]);
     return 1;
 }
 
@@ -74,8 +74,8 @@ s32 fx_sine_swing_update(u8 *arg0) {
     p += 0xF8;
     *(f32 *)(p + 0x24) = *(f32 *)(p + 0x10) * sinf(*(f32 *)(p + 0));
     *(f32 *)(p + 0x28) = *(f32 *)(p + 0x14) * sinf(*(f32 *)(p + 4));
-    *(f32 *)(p + 0) = func_15144B68(*(f32 *)(p + 8) * D_800BE9A4 + *(f32 *)(p + 0));
-    *(f32 *)(p + 4) = func_15144B68(*(f32 *)(p + 0xC) * D_800BE9A4 + *(f32 *)(p + 4));
+    *(f32 *)(p + 0) = wrap_angle_rad(*(f32 *)(p + 8) * D_800BE9A4 + *(f32 *)(p + 0));
+    *(f32 *)(p + 4) = wrap_angle_rad(*(f32 *)(p + 0xC) * D_800BE9A4 + *(f32 *)(p + 4));
     return 1;
 }
 
@@ -107,7 +107,7 @@ s32 fx_pendulum_sprite_update(u8 *arg0) {
     m[3][0] = *(f32 *)(*p + 0x38);
     m[3][1] = *(f32 *)(*p + 0x3C);
     m[3][2] = *(f32 *)(*p + 0x40);
-    func_150A7E40(m, 0.0f, -495.0f, 0.0f, &x, &y, &z);
+    mtxf_transform_point(m, 0.0f, -495.0f, 0.0f, &x, &y, &z);
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0xE) = x;
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x10) = y;
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x12) = z;

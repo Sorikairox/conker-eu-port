@@ -1,15 +1,15 @@
 \#^    if (arg0 != 0) {#s/!=/==/
-\#^    func_15174F10(5, 4);#s/4)/3)/
+\#^    level_anim_frame_counter_tick(5, 4);#s/4)/3)/
 \#^    kind = 6;#s/6/5/
 \#^        kind = 7;#s/7/6/
 \#^    slot = 3;#s/3/2/
 \#^        slot = 4;#s/4/5/
-\#^            func_150A2D44(slot, 0);#s/0)/1)/
-\#^            func_150A3924(slot, (s32) \*(f32 \*) (obj + 0x14)#s/0x14/0x18/
-\#^            func_150A3924(slot, #s/200\.0f/100.0f/
-\#^            func_150A3924(slot, #s/(s32) \*(f32/(s16) (s32) (u16) *(f32/
+\#^            trigger_set_disabled(slot, 0);#s/0)/1)/
+\#^            trigger_set_position(slot, (s32) \*(f32 \*) (obj + 0x14)#s/0x14/0x18/
+\#^            trigger_set_position(slot, #s/200\.0f/100.0f/
+\#^            trigger_set_position(slot, #s/(s32) \*(f32/(s16) (s32) (u16) *(f32/
 \#^                          (s32) \*(f32 \*) (obj + 0x1C));#s/0x1C/0x14/
-\#^            func_150A2D44(slot, 1);#s/1)/0)/
+\#^            trigger_set_disabled(slot, 1);#s/1)/0)/
 \#^    dl = #s/\[0\]/[1]/
 \#^    for (i = 0; i < 3; i++, fade++) {#s/i < 3/i < 2/
 \#^            if (\*fade < 0x60) {#s/0x60/0x5F/

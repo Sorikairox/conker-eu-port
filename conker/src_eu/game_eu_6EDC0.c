@@ -2,16 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-Gfx *func_150417F8(Gfx *gdl, s32 x, s32 y, s32 idx);
-s32 func_15041770(u8 arg0);
-s32 func_15042F30(s32 arg0);
+Gfx *dbgfont_draw_char(Gfx *gdl, s32 x, s32 y, s32 idx);
+s32 dbgfont_char_index(u8 arg0);
+s32 text_char_to_glyph(s32 arg0);
 #endif
 
 
 #ifdef NON_MATCHING
 extern s32 D_80084CC0;
 
-u8 *func_150415B0(u8 *arg0) {
+/* was func_150415B0 */
+u8 *dbgfont_setup_dl(u8 *arg0) {
     u8 *temp_a0;
     u8 *temp_a0_10;
     u8 *temp_a0_11;
@@ -62,10 +63,11 @@ u8 *func_150415B0(u8 *arg0) {
     return temp_a0 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_150415B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/dbgfont_setup_dl.s")
 #endif
 #ifdef NON_MATCHING
-Gfx *func_150416EC(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
+/* was func_150416EC */
+Gfx *dbgfont_draw_string(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
     Gfx *temp_v0;
     Gfx *var_s2;
     s32 var_s1;
@@ -80,7 +82,7 @@ Gfx *func_150416EC(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
     var_a0 = temp_t6 & 0xFF;
     if (temp_t6 != 0) {
         do {
-            temp_v0 = func_150417F8(var_s2, var_s1, arg2, func_15041770(var_a0));
+            temp_v0 = dbgfont_draw_char(var_s2, var_s1, arg2, dbgfont_char_index(var_a0));
             var_a0 = (*(u8 *)((u8 *)var_s0 + 1));
             var_s2 = temp_v0;
             var_s0 += 1;
@@ -90,10 +92,11 @@ Gfx *func_150416EC(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
     return var_s2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_150416EC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/dbgfont_draw_string.s")
 #endif
 extern u8 D_80084C60[];
-s32 func_15041770(u8 arg0) {
+/* was func_15041770 */
+s32 dbgfont_char_index(u8 arg0) {
     s32 i;
     for (i = 0; i < 0x50; i++) {
         if (arg0 == D_80084C60[i]) {
@@ -103,7 +106,8 @@ s32 func_15041770(u8 arg0) {
     return i;
 }
 
-Gfx *func_150417F8(Gfx *gdl, s32 x, s32 y, s32 idx) {
+/* was func_150417F8 */
+Gfx *dbgfont_draw_char(Gfx *gdl, s32 x, s32 y, s32 idx) {
     s32 col = idx % 8; // fakematch: locals keep the unfolded mod/sub/div
     s32 s = col * 8;
     s32 row = (idx - col) / 8;
@@ -112,7 +116,8 @@ Gfx *func_150417F8(Gfx *gdl, s32 x, s32 y, s32 idx) {
     return gdl;
 }
 
-void func_150418D0(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5) {
+/* was func_150418D0 */
+void text_icon_metrics(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5) {
     if ((arg0 >= 0xA8) && (arg0 < 0x100)) {
         *arg5 = 1.0f;
         switch (arg0) {
@@ -203,10 +208,10 @@ extern s32 D_800D30C0;
 extern s32 D_8009198C[], D_8009199C[], D_800919AC[], D_800919BC[], D_800919CC[], D_800919DC[], D_800919EC[],
     D_800919FC[], D_80091A0C[], D_80091A40[], D_80091A5C[], D_80091A78[], D_80091A94[], D_80091AB0[], D_80091AC0[],
     D_80091AD0[], D_80091AE0[], D_80091AF0[], D_80091B00[], D_80091B14[];
-s32 func_15042F30(s32 arg0);
-void func_150418D0(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5);
-Gfx *func_15095380(Gfx *, s32 *, s32, void *, s32, s32, s32, s32, s32);
-Gfx *func_15095E58(Gfx *, void *, f32, f32);
+s32 text_char_to_glyph(s32 arg0);
+void text_icon_metrics(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5);
+Gfx *sprite_load_texture(Gfx *, s32 *, s32, void *, s32, s32, s32, s32, s32);
+Gfx *sprite_draw_at_screen(Gfx *, void *, f32, f32);
 
 /* the view of the current player (0x180-byte records): +0x14 / +0x18 scale, +0x24..+0x30 clip top / bottom / left / right */
 #define TEXT_VIEW() ((u8 *) D_800BE628 + D_80082FA4 * 0x180)
@@ -214,15 +219,16 @@ Gfx *func_15095E58(Gfx *, void *, f32, f32);
 
 /*
  * P85: draw len characters of str at (x, y) in colour r, g, b, a with scales scaleX / scaleY (4096 = 1).
- * Characters go through func_15042F30 (glyph index). Glyphs are I8 texture rectangles from font 0 (D_80085D20 /
+ * Characters go through text_char_to_glyph (glyph index). Glyphs are I8 texture rectangles from font 0 (D_80085D20 /
  * D_80085D24), clipped against the view; 0x60 is a space. Codes 0xA1..0xA7 change the colour (A1 reset, A2 red,
  * A3 green, A4 blue, A5 yellow), A6 starts flashing (alpha pulses with D_800CC17C), A7 starts the wave (glyphs
  * bob with D_800CC17E). Codes 0xA8..0xBB pick a button icon (sprite D_8009198C..., frame from D_800CC16E for some)
- * and the next code >= 0xA8 draws it (func_150418D0 size, func_15095380 / func_15095E58). Byte 0xBC is skipped
+ * and the next code >= 0xA8 draws it (text_icon_metrics size, sprite_load_texture / sprite_draw_at_screen). Byte 0xBC is skipped
  * (the previous glyph is handled again, as in the original). When the display list is full, a pipe sync is
  * written and the commands of the current character are dropped.
  */
-Gfx *func_15041A9C(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len) {
+/* was func_15041A9C */
+Gfx *text_draw_string(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len) {
     struct {
         u8 pad0[6];
         s16 w;
@@ -239,7 +245,7 @@ Gfx *func_15041A9C(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     u8 *view;
     u8 *metrics;
     u8 *str_p;
-    s32 *iconSprite;   /* sprite descriptor for func_15095380 */
+    s32 *iconSprite;   /* sprite descriptor for sprite_load_texture */
     Gfx *start;
     f32 flash;
     f32 wave;
@@ -325,7 +331,7 @@ Gfx *func_15041A9C(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             D_800CC170 = 0xFF;
         } else {
             font = 0;
-            glyph = func_15042F30(*str_p);
+            glyph = text_char_to_glyph(*str_p);
             D_800CC170 = (glyph >= 0xA1) ? glyph : 0xFF;
         }
         switch (D_800CC170) {
@@ -398,7 +404,7 @@ Gfx *func_15041A9C(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 draw = 1;
             } else {
                 /* button icon, centred on the pen position */
-                func_150418D0(glyph, &w, &h, &iconDy, &iconFlip, &iconScale);
+                text_icon_metrics(glyph, &w, &h, &iconDy, &iconFlip, &iconScale);
                 if (D_800CC17D != 0) {
                     iconDy += wave;
                 }
@@ -418,9 +424,9 @@ Gfx *func_15041A9C(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 if (iconFlip == 0) {
                     gDPSetCombine(gdl++, 0xFFB3FF, 0xFF65FEFF);
                 }
-                gdl = func_15095380(gdl, iconSprite, iconFrame, &icon, 0, 0, 0, 2, 3);
+                gdl = sprite_load_texture(gdl, iconSprite, iconFrame, &icon, 0, 0, 0, 2, 3);
                 if (D_800D30C0 != (s32) 0x80000000) {
-                    gdl = func_15095E58(gdl, &icon, x, y - iconDy);
+                    gdl = sprite_draw_at_screen(gdl, &icon, x, y - iconDy);
                 }
                 gSPDisplayList(gdl++, D_800877A8);
                 gSPDisplayList(gdl++, D_80085D30);
@@ -478,7 +484,7 @@ Gfx *func_15041A9C(Gfx *gdl, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_15041A9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/text_draw_string.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -486,7 +492,8 @@ extern f32 D_80038400;
 extern f32 D_80038404;
 extern u8 *D_80085D24[]; /* [0] glyph metrics (4 bytes per glyph) */
 
-void func_15042BC4(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
+/* was func_15042BC4 */
+void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     struct {
         f32 u54;
         s32 u58;
@@ -528,7 +535,7 @@ void func_15042BC4(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
                 if (var_v0 == 0xBC) {
                     var_s2 += 2;
                 } else {
-                    temp_v0 = func_15042F30(var_a0);
+                    temp_v0 = text_char_to_glyph(var_a0);
                     temp_v1 = temp_v0 & 0xFF;
                     temp_s3 = temp_v0 & 0xFF;
                     var_t0 = 0;
@@ -540,7 +547,7 @@ void func_15042BC4(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
                     } else if ((temp_v1 < 0xA1) || (temp_v1 >= 0xA8)) {
                         if ((temp_v1 >= 0xA8) && (temp_v1 < 0x100)) {
                             sp.u68 = 0;
-                            func_150418D0(temp_s3, &sp.u64, &sp.u60, &sp.u5C, &sp.u58, &sp.u54);
+                            text_icon_metrics(temp_s3, &sp.u64, &sp.u60, &sp.u5C, &sp.u58, &sp.u54);
                             var_t0 = sp.u68;
                             *arg1 = (s32) ((f32) *arg1 + ((f32) sp.u64 * sp.u54));
                             temp_v0_2 = (s32) ((f32) (s32) ((f32) sp.u60 * sp.u54) - sp.u5C) + 1;
@@ -593,7 +600,7 @@ void func_15042BC4(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_15042BC4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/text_measure_string.s")
 #endif
 #ifdef NON_MATCHING
 extern u8 D_80085CC0;
@@ -601,7 +608,8 @@ extern u8 D_80085CC1;
 extern u8 D_80085CC2;
 extern s32 D_80085CC3;
 
-s32 func_15042F30(s32 arg0) {
+/* was func_15042F30 */
+s32 text_char_to_glyph(s32 arg0) {
     s32 *var_v0_2;
     s32 temp_t6;
     s32 var_a0;
@@ -648,5 +656,5 @@ loop_13:
     goto loop_13;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_15042F30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/text_char_to_glyph.s")
 #endif

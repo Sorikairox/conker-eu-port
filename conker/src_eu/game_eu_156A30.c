@@ -11,19 +11,19 @@ s32 camera_pop_mode(struct108 *arg0, s32 arg1);
 u8 *camera_dequeue_event(u8 *arg0);
 void camera_exit_aim_mode(struct108 *);
 void camera_shake_reset(struct108 *arg0);
-void func_151CA484(u8 *arg0);
+void aim_hud_clear(u8 *arg0);
 s32 camera_push_mode(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void camera_start_transition(struct108 *arg0, s32 arg1, s32 arg2);
 void camera_apply_request(struct108 *);
-void func_151CA150(u8 *arg0, s32 arg1);
+void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1);
 void camera_update_follow(struct108 *);
-void func_150A09D0(s32 arg0);
-void func_150A16A4(struct127 *arg0);
+void triggers_update(s32 arg0);
+void trigger_zones_update_object(struct127 *arg0);
 void camera_dispatch_mode(struct108 *);
 void camera_lean_from_heading(struct108 *, f32 *, f32 *);
 f32 math_angle_diff_deg(f32 arg0, f32 arg1);
 void camera_projection_update(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width);
-void func_1501B300(s32 player);
+void camera_update_dir_vector(s32 player);
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 void camera_update_state_flags(struct108 *arg0);
 f32 sinf(f32);
@@ -108,7 +108,7 @@ void camera_process_events(struct108 *arg0) {
             }
             camera_shake_reset(arg0);
             if (p[0x84C] != 0) {
-                func_151CA484(p);
+                aim_hud_clear(p);
                 p[0x84C] = 0;
             }
             src = (s32 *)((u8 *)D_800DBFF0 + p[0x23D] * 0x9A0);
@@ -171,7 +171,7 @@ void camera_process_events(struct108 *arg0) {
                     *(u16 *)(p + 0x36A) |= 0x10;
                     **(u16 **)(p + 0x36C) |= 0x10;
                     (*(u8 **)(p + 0x3D4))[0x197] = D_800898C4[p[0x23D]];
-                    func_151CA150(p, p[0x23E]);
+                    aim_hud_spawn_for_mode(p, p[0x23E]);
                     heading = *(f32 *)(p + 0x774);
                 } else {
                     (*(u8 **)(p + 0x3D4))[0x198] = 0;
@@ -203,8 +203,8 @@ void camera_process_events(struct108 *arg0) {
             for (i = 0; i < 3; i++) {
                 ((f32 *)(p + 0x304))[i] = ((f32 *)(p + 0x2F8))[i];
             }
-            func_150A09D0(D_800BE9E4);
-            func_150A16A4((struct127 *)((u8 *)D_800CC2D0 + p[0x23D] * 0x32C));
+            triggers_update(D_800BE9E4);
+            trigger_zones_update_object((struct127 *)((u8 *)D_800CC2D0 + p[0x23D] * 0x32C));
             camera_apply_request(arg0);
             camera_lean_from_heading(arg0, NULL, NULL);
             camera_dispatch_mode(arg0);
@@ -306,7 +306,7 @@ void camera_process_events(struct108 *arg0) {
                 camera_projection_update(p[0x23D], *(f32 *)(p + 0x19C), *(f32 *)(p + 0x1A0), 1.0f, 0.0f);
             }
             if (D_800DBFF4[0] != 0) {
-                func_1501B300(0);
+                camera_update_dir_vector(0);
             }
             if (D_800BEAC0 == 0) {
                 collision_find_floor((s32)(p + 0x644), (s32)(p + 0x648), (s32)&probe, (s32)(p + 0x360), (s32)(p + 0x640), 0,
@@ -361,8 +361,8 @@ void camera_pivot_slot_reset(u8 *arg0, s32 arg1)
 void vec3_diff(struct17 *a, struct17 *b, struct17 *out);
 void vec3_normalize(struct17 *v, struct17 *out);
 void vec3_scale(struct17 *v, f32 len, struct17 *out);
-void func_150498A0(f32 *cur, f32 target, f32 *vel, f32 arg3, f32 arg4, f32 arg5);
-s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
+void math_spring_approach(f32 *cur, f32 target, f32 *vel, f32 arg3, f32 arg4, f32 arg5);
+s32 floor_tri_height(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 s32 camera_yaw_fade_in(struct108 *);
 void camera_update_state_flags(struct108 *);
@@ -373,9 +373,9 @@ extern f32 D_800A39FC;
 /* camera_follow_update: camera mode 0x40 (camera_dispatch_mode). Unless D_800898F0 is 0 or +0x73C is set: the pivot
  * +0x27C = +0x288; the camera target is the pivot plus the direction pivot -> eye (+0x2BC) scaled to the eye
  * distance minus +0x278 (at least 0), its y part scaled by D_800A39F4 unless +0x704 & 0xF. The camera position
- * +0x2F8 eases towards it (func_150498A0 with velocity +0x3C0, rates 3 / 2 / 3, +0x7B4), or snaps there (also
+ * +0x2F8 eases towards it (math_spring_approach with velocity +0x3C0, rates 3 / 2 / 3, +0x7B4), or snaps there (also
  * +0x304, velocity 0) when +0x23C. Then camera_yaw_fade_in; when snapped, flag 0x400000 of +0x84, or no floor under
- * the camera (func_150A44A4 into +0x35C), the collision probe collision_find_floor runs (+0x360 kept unless the result
+ * the camera (floor_tri_height into +0x35C), the collision probe collision_find_floor runs (+0x360 kept unless the result
  * +0x364 equals D_800A39FC) and camera_update_state_flags. Finally the four zoom pairs +0x964..+0x980 = 1 / 2. */
 /* was func_15129EA4 */
 void camera_pivot_follow_update(struct108 *cam) {
@@ -418,25 +418,25 @@ void camera_pivot_follow_update(struct108 *cam) {
         *(f32 *) (c + 0x304) = tx;
         *(f32 *) (c + 0x3C0) = 0.0f;
     } else {
-        func_150498A0((f32 *) (c + 0x2F8), tx, (f32 *) (c + 0x3C0), 1.0f, 3.0f, *(f32 *) (c + 0x7B4));
+        math_spring_approach((f32 *) (c + 0x2F8), tx, (f32 *) (c + 0x3C0), 1.0f, 3.0f, *(f32 *) (c + 0x7B4));
     }
     if (c[0x23C] != 0) {
         *(f32 *) (c + 0x2FC) = ty;
         *(f32 *) (c + 0x308) = ty;
         *(f32 *) (c + 0x3C4) = 0.0f;
     } else {
-        func_150498A0((f32 *) (c + 0x2FC), ty, (f32 *) (c + 0x3C4), 1.0f, 2.0f, *(f32 *) (c + 0x7B4));
+        math_spring_approach((f32 *) (c + 0x2FC), ty, (f32 *) (c + 0x3C4), 1.0f, 2.0f, *(f32 *) (c + 0x7B4));
     }
     if (c[0x23C] != 0) {
         *(f32 *) (c + 0x300) = tz;
         *(f32 *) (c + 0x30C) = tz;
         *(f32 *) (c + 0x3C8) = 0.0f;
     } else {
-        func_150498A0((f32 *) (c + 0x300), tz, (f32 *) (c + 0x3C8), 1.0f, 3.0f, *(f32 *) (c + 0x7B4));
+        math_spring_approach((f32 *) (c + 0x300), tz, (f32 *) (c + 0x3C8), 1.0f, 3.0f, *(f32 *) (c + 0x7B4));
     }
     camera_yaw_fade_in(cam);
     if (c[0x23C] != 0 || (*(s32 *) (c + 0x84) & 0x400000) ||
-        func_150A44A4(*(f32 *) (c + 0x2F8), *(f32 *) (c + 0x300), *(s32 *) (c + 0x644), c + 0x648,
+        floor_tri_height(*(f32 *) (c + 0x2F8), *(f32 *) (c + 0x300), *(s32 *) (c + 0x644), c + 0x648,
                       (f32 *) (c + 0x35C)) == 0) {
         collision_find_floor(0, 0, (s32) probe, (s32) (c + 0x360), (s32) (c + 0x640), 0, *(f32 *) (c + 0x2F8),
                       *(f32 *) (c + 0x2FC), *(f32 *) (c + 0x300), *(f32 *) (c + 0x2FC), 0, 0, D_800A39F8,

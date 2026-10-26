@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-void func_15047680(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
+void mtxf_look_at_f(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 // line_of_sight_hit_object: looks from (x0, y0, z0) towards (x1, y1, z1) and finds the live object (D_800CC2D0,
 // except index `skip`, dead or immune ones and `self`'s own slot unk124 - 1) that func_15049440 rates lowest
 // (non-zero) in that view within the eye-target distance; spawns effect `kind` (attack_spawn_at_point) at that object,
@@ -21,7 +21,7 @@ s32 object_ray_hit_nearest(struct127 *self, f32 x0, f32 y0, f32 z0, f32 x1, f32 
     s32 i;
     f32 dx, dy, dz, dist;
 
-    func_15047680(view, x0, y0, z0, x1, y1, z1, 0.0f, 1.0f, 0.0f);
+    mtxf_look_at_f(view, x0, y0, z0, x1, y1, z1, 0.0f, 1.0f, 0.0f);
     dx = x0 - x1;
     dy = y0 - y1;
     dz = z0 - z1;

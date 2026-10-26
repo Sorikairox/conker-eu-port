@@ -38,12 +38,12 @@
 150s/if (alpha < 0) {/if (alpha < -1) {/ % fadeclp fade7
 156s/D_800DDF68\[f->type\] = 1;/D_800DDF68[f->slot] = 1;/ % base
 157s/(u8 \*)\&D_8008D450 + f->type \* 0x38/(u8 *)\&D_8008D450 + f->type * 0x34/ % base plo spdhi
-160s/if (func_1000F3D0(f->sound) != 0) {/if (func_1000F3D0(f->sound) == 0) {/ % sndon sndoff
+160s/if (sound_voice_is_playing(f->sound) != 0) {/if (sound_voice_is_playing(f->sound) == 0) {/ % sndon sndoff
 161s/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4000/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4001/ % sndon
 161s/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4000/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->z, (s32)f->z, 1000, 4000/ % sndon
 163s/f->sound = 0;/f->sound = 1;/ % sndoff
 167s/if (f->flags \& 4) {/if (f->flags \& 6) {/ % cull0 base
-168s/dist = func_150ADE40((s32)f->x, (s32)f->z, f->homeX, f->homeZ);/dist = func_150ADE40((s32)f->x, (s32)f->z, f->homeX, f->homeY);/ % tfar
+168s/dist = approx_dist2_int((s32)f->x, (s32)f->z, f->homeX, f->homeZ);/dist = approx_dist2_int((s32)f->x, (s32)f->z, f->homeX, f->homeY);/ % tfar
 170s/(f->flags \& 0x10) \&\& dist < f->rangeMin/(f->flags \& 0x10) \&\& dist <= f->rangeMin/ % tedge
 170s/(f->flags \& 0x10) \&\& dist < f->rangeMin/(f->flags \& 0x14) \&\& dist < f->rangeMin/ % tnearno
 173s/if (dist > f->rangeMax || near) {/if (dist >= f->rangeMax || near) {/ % tedge
@@ -163,7 +163,7 @@
 353s/f->z += dir\.unk8 \* d;/f->z -= dir.unk8 * d;/ % base
 356s/f->kind == 0x13 \&\& D_800DDF60\[f->slot\] == 0/f->kind >= 0x13 \&\& D_800DDF60[f->slot] == 0/ % chirpk chirp
 356s/f->kind == 0x13 \&\& D_800DDF60\[f->slot\] == 0/f->kind == 0x13 \&\& D_800DDF60[f->slot] != 1/ % chirpno chirp chirpf2
-357s/func_10010F88(0x10, 0x7FFF, random_int() \& 0x7F, 0, 0/func_10010F88(0x10, 0x7FFF, random_int() \& 0xFF, 0, 0/ % chirp
+357s/sound_play_at(0x10, 0x7FFF, random_int() \& 0x7F, 0, 0/sound_play_at(0x10, 0x7FFF, random_int() \& 0xFF, 0, 0/ % chirp
 357s/(s32)f->z, 500, 4000);/(s32)f->z, 400, 4000);/ % chirp
 358s/D_800DDF60\[f->slot\] = (random_int() \& 0x3F) + 30;/D_800DDF60[f->slot] = (random_int() \& 0x7F) + 30;/ % chirp
 358s/D_800DDF60\[f->slot\] = (random_int() \& 0x3F) + 30;/D_800DDF60[f->slot] = (random_int() \& 0x3F) + 31;/ % chirp

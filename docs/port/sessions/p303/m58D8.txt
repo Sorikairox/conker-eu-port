@@ -4,15 +4,15 @@
 58s/if (\*(s32 \*) b == 0 || st\[0x58C\] != b\[0x3B\]) {/if (st[0x58C] != b[0x3B]) {/ % deadB
 61s/!= NULL \&\& \*(u8 \*\*) (b + 0x1D4) != NULL) {/!= NULL) {/ % nomatB
 61s/if (!dead \&\&/if (/ % deadA deadB
-62s/func_15143134(D_800AA7E0, pa,/func_15143134(D_800AA7EC, pa,/ % mid
+62s/mtx_transform_point_or_origin(D_800AA7E0, pa,/mtx_transform_point_or_origin(D_800AA7EC, pa,/ % mid
 62s/+ 0x1D4) + D_8008FF20 \* 0x40);/+ 0x1D4) + D_8008FF20 * 0x20);/ % mid
 63s/+ 0x1D4) + D_8008FF24 \* 0x40);/+ 0x1D4) + D_8008FF20 * 0x40);/ % mid close
 64s/v = st + D_800BE9C0 \* 0x2C0;/v = st + D_800BE9C0 * 0x280;/ % mid
 65s/player \* 0x9A0 + 0x2F8);/player * 0x9A0 + 0x2FC);/ % mid far
 66s/flag = 1;/flag = 0;/ % mid
-67s/func_15142B7C(gfx, 0x200005, 0x60600);/func_15142B7C(gfx, 0x200004, 0x60600);/ % mid
+67s/gfx_geometry_mode_cached(gfx, 0x200005, 0x60600);/gfx_geometry_mode_cached(gfx, 0x200004, 0x60600);/ % mid
 68s/0, 0, 0, 0, 0x56, 0, 0, \&flag, 3);/0, 0, 0, 0, 0x55, 0, 0, \&flag, 3);/ % mid
-70s/gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, \&flag);/gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0, 0xFF, \&flag);/ % mid
+70s/gfx = gfx_prim_color_cached(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, \&flag);/gfx = gfx_prim_color_cached(gfx, 0, 0, 0xFF, 0xFF, 0, 0xFF, \&flag);/ % mid
 71s/gfx = gfx_set_combine_mode(gfx, 0x2E, \&flag);/gfx = gfx_set_combine_mode(gfx, 0x2F, \&flag);/ % mid
 72s/D_800A4EA8\[5 \* 2 + 1\] | D_800A4EA8\[5 \* 2\],/D_800A4EA8[5 * 2 + 1],/ % mid
 74s/dir\[1\] = pb\[1\] - pa\[1\];/dir[1] = pb[1] - pa[0];/ % mid

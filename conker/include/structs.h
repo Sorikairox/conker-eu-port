@@ -3202,7 +3202,7 @@ typedef struct {
     u8  pad54[0x110 - 0x54];
     struct_eu_2062D0_b_sub unk110;
 } struct_eu_2062D0_b;
-// argument block of func_151D8E18
+// argument block of rumble_request
 typedef struct {
     u8  unk0;
     u8  pad1;
@@ -3224,7 +3224,7 @@ typedef struct {
     s8  unk18;
     s8  unk19;
 } struct_eu_EF410;
-// parameter block passed to func_15154488 (built on the stack by its callers)
+// parameter block passed to emit_sparks_in_angle_range (built on the stack by its callers)
 typedef struct {
     s16 unk0;
     s16 unk2;
@@ -3277,7 +3277,7 @@ typedef struct {
     /* 0x1E0 */ s16 unk1E0[0x16];
     /* 0x20C */ s16 unk20C[0x15];
 } struct_eu_108_stack;
-// quadtree node built by func_15001DE0 (game_2DF70); unk4 and unkC are byte offsets to sibling/child
+// quadtree node built by quadtree_build_node (game_2DF70); unk4 and unkC are byte offsets to sibling/child
 typedef struct {
     u16 unk0;
     u16 unk2;

@@ -19,7 +19,7 @@ void* node_render_layers_draw(void *arg0, s32 arg1, s16 arg2, s32 arg3);
 
 /* was func_150186D0 */
 void game_main_loop(void) {
-    func_10001444();
+    tlb_reset_and_flush_icache();
     render_dl_buffers_init();
     func_151E6BFC();
 
@@ -33,7 +33,7 @@ void game_main_loop(void) {
 
     D_8002AC60 = 1;
     D_8002AC64 = 3500;
-    *D_800BE728 = func_1501BBB8();
+    *D_800BE728 = cont_read_frame();
 
     while (func_151DCFD8(1) != 0) {};
 }
@@ -56,22 +56,22 @@ extern u8 D_80089810[];
 extern s32 D_800BEFC4;
 extern u8 D_800BEEE2;
 extern Vp D_800D9FB0[][2];
-void func_10004074(s32);
+void heap_free(s32);
 void effect_sample_zbuffer_cells(void);
 void camera_projection_apply_pending_fov(void);
-void func_1517D534(void);
-void func_151E5928(void);
+void ambient_slots_free_all(void);
+void game_mode_frame_step(void);
 void camera_projection_apply_pending_viewport(void);
 s32 world_update(void);
 Gfx *render_player_frame_setup(Gfx *, s16);
-Gfx *func_1515DC40(Gfx *, s32);
+Gfx *light_setup_view(Gfx *, s32);
 Gfx *render_player_scene(Gfx *, s16);
 Gfx *render_player_3d_setup(Gfx *, s32);
 Gfx *text_queue_draw(Gfx *);
-void func_15084E80(void);
+void model_slots_age_release(void);
 void texture_cache_age_tick(void);
 void world_records_release_blocks(void);
-void func_eu_1501C860(s32, s32);
+void gfx_task_submit(s32, s32);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
 
@@ -92,7 +92,7 @@ s32 game_frame_step(void) {
         case 1:
             break;
         case 2:
-            func_1517E71C();
+            flare_nodes_read_zbuffer();
             if (D_800DCE20 != 0) {
                 effect_sample_zbuffer_cells();
             }
@@ -100,12 +100,12 @@ s32 game_frame_step(void) {
             if (D_800BEA35 == 0 || D_800BEEC8 != 0) {
                 return 1;
             }
-            func_10004074((s32)D_800BEDE8[0]);
-            func_10004074((s32)D_800BEDE8[1]);
+            heap_free((s32)D_800BEDE8[0]);
+            heap_free((s32)D_800BEDE8[1]);
             D_800BEDE8[0] = NULL;
             return 0;
         case 4:
-            while (func_151DD588(1) != 0) {
+            while (eeprom_async_write_step(1) != 0) {
             }
             for (;;) {
             }
@@ -116,7 +116,7 @@ s32 game_frame_step(void) {
     if (D_800BEA35 != 0) {
         return 1;
     }
-    func_151E5928();
+    game_mode_frame_step();
     if (D_800BEA35 != 0) {
         return 1;
     }
@@ -136,7 +136,7 @@ s32 game_frame_step(void) {
     }
 
     GDL = render_set_color_image(GDL);
-    func_1515DC0C();
+    light_list_clear_frame_flags();
     node_lists_run_view_update();
     for (i = 0; i <= D_80082FA0; i++) {
         D_80082FA4 = D_800BEA50[i];
@@ -157,7 +157,7 @@ s32 game_frame_step(void) {
     for (i = 0; i <= D_80082FA0; i++) {
         saved = GDL;
         D_80082FA4 = D_800BEA50[i];
-        GDL = func_1515DC40(GDL, D_80082FA4);
+        GDL = light_setup_view(GDL, D_80082FA4);
         GDL = render_player_scene(GDL, D_80082FA4);
         /* Out of DL space: drop this player's view. */
         if (D_800BEFC4 < GDL - D_800BEDE8[D_800BE9C0]) {
@@ -170,7 +170,7 @@ s32 game_frame_step(void) {
 
     for (i = 0; i <= D_80082FA0; i++) {
         D_80082FA4 = D_800BEA50[i];
-        GDL = func_1515DC40(GDL, D_80082FA4);
+        GDL = light_setup_view(GDL, D_80082FA4);
         GDL = render_player_3d_setup(GDL, D_80082FA4);
         if (D_800BEAC0 == 0 && D_80082FA0 > 0) {
             GDL = render_player_hud(GDL, D_80082FA4);
@@ -183,20 +183,20 @@ s32 game_frame_step(void) {
             GDL = render_player_hud(GDL, D_80082FA4);
         }
     }
-    GDL = func_151E8C60(GDL);
+    GDL = hud_overlay_draw_post(GDL);
     GDL = text_queue_draw(GDL);
-    func_15034AD8();
-    func_1502E764();
-    func_15189688(0);
-    func_15084E80();
+    obj_hide_masked_joints_all();
+    obj_mtx_buffer_flush();
+    afterimage_clamp_spacing(0);
+    model_slots_age_release();
     camera_tick_timers();
     gDPFullSync(GDL++);
     gSPEndDisplayList(GDL++);
-    func_10004674();
+    rom_dma_wait_queued();
     texture_cache_age_tick();
     world_records_release_blocks();
-    func_1517D534();
-    func_eu_1501C860(0, 1);
+    ambient_slots_free_all();
+    gfx_task_submit(0, 1);
     D_800BE9B4 = 0;
 
     if (D_800BEAC0 != 0) {
@@ -207,14 +207,14 @@ s32 game_frame_step(void) {
     if (D_800BEAC1 != D_800BEAC0) {
         D_800BEAC0 = D_800BEAC1;
         if (D_800BEAC0 != 0) {
-            func_1000E2F4(1);
-            func_10011E94(1);
+            music_set_all_paused(1);
+            sound_set_pause_mute(1);
             if (func_151F2CDC() != 0) {
                 func_151F2BE8();
             }
         } else {
-            func_1000E2F4(0);
-            func_10011E94(0);
+            music_set_all_paused(0);
+            sound_set_pause_mute(0);
             if (func_151F2CDC() != 0) {
                 func_151F2C4C();
             }
@@ -228,51 +228,51 @@ s32 game_frame_step(void) {
 #endif
 /* was func_15018DFC */
 void world_update_objects(void) {
-    func_150A09D0(D_800BE9E4);
+    triggers_update(D_800BE9E4);
     objects_update_visibility();
     func_1501C870();
     if (D_800BEAC0 == 0) {
         if (D_800C35EA == 1) {
-            func_1502378C();
+            cutscene_update_objects();
         } else {
-            func_1504A730();
+            objects_run_state_handlers();
         }
-        func_15085ABC(D_800D2340);
+        player_stats_store_health(D_800D2340);
     }
-    func_1507C370();
+    obj_collision_sizes_update();
     player_update_life_states();
 }
 
 #ifdef NON_MATCHING
-/* P13: returns the DL pointer. The matching C is void, but the asm leaves func_15174AA4's result in v0 and
+/* P13: returns the DL pointer. The matching C is void, but the asm leaves render_level_pre_layer's result in v0 and
  * render_player_scene uses it as the new GDL. */
 /* was func_15018E88 */
 void *render_scene_layers_pre(void *arg0, s16 arg1) {
     if (D_800BE616 == 0) {
-        func_1517D7B0(&arg0, 1);
+        ambient_flames_draw(&arg0, 1);
     }
     arg0 = node_render_layers_draw(arg0, 0, arg1, 0);
     arg0 = node_render_layers_draw(arg0, 0, arg1, 1);
-    return func_15174AA4(arg0, D_800BE9F0, arg1);
+    return render_level_pre_layer(arg0, D_800BE9F0, arg1);
 }
 #else
 void render_scene_layers_pre(void *arg0, s16 arg1) {
     if (D_800BE616 == 0) {
-        func_1517D7B0(&arg0, 1);
+        ambient_flames_draw(&arg0, 1);
     }
     arg0 = node_render_layers_draw(arg0, 0, arg1, 0);
     arg0 = node_render_layers_draw(arg0, 0, arg1, 1);
-    func_15174AA4(arg0, D_800BE9F0, arg1);
+    render_level_pre_layer(arg0, D_800BE9F0, arg1);
 }
 #endif
 
 /* was func_15018F08 */
 void *render_scene_layers_post(void *arg0, s16 arg1) {
-    arg0 = func_15174B48(arg0, D_800BE9F0, arg1);
+    arg0 = render_level_post_layer(arg0, D_800BE9F0, arg1);
     arg0 = node_render_layers_draw(arg0, 1, arg1, 0);
     arg0 = node_render_layers_draw(arg0, 1, arg1, 1);
 
-    func_1517D7B0(&arg0, 2);
+    ambient_flames_draw(&arg0, 2);
 
     return arg0;
 }
@@ -281,33 +281,33 @@ void *render_scene_layers_post(void *arg0, s16 arg1) {
 void camera_player_update(s16 arg0) {
     struct108 *sp24 = &D_800DBFF0[arg0];
     D_8003C8E0 = 0xA000000;
-    if ((func_1517F40C(arg0) == 0) && (D_800BEAC0 == 0)) {
-        func_1517F448(arg0);
+    if ((screen_fade_is_done(arg0) == 0) && (D_800BEAC0 == 0)) {
+        screen_fade_tick(arg0);
     }
-    func_1501B640(arg0);
+    camera_update_dir_vector_thunk(arg0);
     D_800D3674 = (sp24->unk388 < 0.0f) ? -1000 : 5000;
-    func_15172D80(arg0);
+    warp_request_update(arg0);
     D_8003C8E0 = 0;
 }
 
 /* was func_1501905C */
 void game_frame_begin(void) {
     D_800BE9D0 = D_800BE9D8[D_800BE9C0];
-    *D_800BE728 = func_1501BBB8();
+    *D_800BE728 = cont_read_frame();
     game_update_frame_timing();
     if ((D_800BEAC1 != 0) && (D_800BEAC0 == 0)) {
         node_broadcast_all(0, 0x47);
     }
-    func_1501C1B0();
-    func_1501BB20();
-    func_1502C380();
+    rumble_update();
+    cont_arm_read_timer();
+    obj_mtx_buffer_reset();
     if (0) {};
-    func_1000D758(D_800DBFF0->unk2A4, D_800DBFF0->unk2A8, D_800DBFF0->unk2AC);
-    func_10011BB8();
+    music_update_all(D_800DBFF0->unk2A4, D_800DBFF0->unk2A8, D_800DBFF0->unk2AC);
+    sound_update_frame();
     if (D_800E0B94 == 2) {
         random_seed(0x81280783); // 2166884227
     }
-    func_10012020();
+    audio_mixer_update_frame();
 }
 
 // few loops
@@ -317,26 +317,26 @@ void game_frame_begin(void) {
 // builds the frame only when this is nonzero).
 extern s32 D_80043ED0;
 extern s8 D_800D27C9;
-void func_10004250(void);
+void heap_age_tagged_blocks(void);
 void world_update_objects(void);
 void func_1501C860(void);
-void func_1501E364(s32 arg0);
-void func_1501E46C(s32 arg0);
-void func_1501ECA4(s32 arg0);
-void func_15020F6C(s32 arg0);
-void func_1502457C(s32 arg0, s32 arg1);
-void func_1502C1D4(void);
-void func_1502C494(void);
-void func_15035210(void);
-void func_15036438(void);
-void func_15044D18(void);
-void func_1504ADD0(void);
-void func_15063AA0(void);
-void func_15088130(void);
-void func_150952B0(s32 arg0);
+void cutscene_check_finished(s32 arg0);
+void cutscene_advance_position(s32 arg0);
+void cutscene_camera_track_pass(s32 arg0);
+void cutscene_apply_cameras(s32 arg0);
+void scene_event_track_pass(s32 arg0, s32 arg1);
+void objects_update_all(void);
+void objects_update_blob_shadows(void);
+void reflect_queue_reset(void);
+void reflect_queue_objects_over_water(void);
+void timedfx_update_all(void);
+void objects_update_tank_views(void);
+void obj_run_pending_actions(void);
+void rail_cameras_update(void);
+void camera_build_view_proj(s32 arg0);
 void event_list_unload(s32 arg0);
 void event_list_run_phase(s32 arg0);
-void func_150A126C(void);
+void trigger_reflect_queue_objects(void);
 void camera_matrices_refresh_all(void);
 void segment_override_clear(void);
 void collision_select_area(s32 arg0);
@@ -349,18 +349,18 @@ void world_records_run_callbacks(s32 arg0);
 void world_records_dispatch_touches(void);
 void func_1511FC20(s32 arg0);
 void camera_update_all(void);
-void func_1515DC38(void);
+void light_stub(void);
 void node_run_global_hooks(void);
 void node_lists_run_update(void);
 void node_lists_run_update2(void);
-void func_15173E34(s32 arg0);
-void func_15174F68(s32 arg0, s32 arg1);
-void func_15178004(void);
-void func_1517FCCC(void);
-void func_1517FD24(void);
-void func_15181A6C(void);
-void func_15184298(void);
-void func_151890E4(s32 arg0);
+void fog_apply_level_default(s32 arg0);
+void level_update_frame(s32 arg0, s32 arg1);
+void vtx_anims_update(void);
+void screen_tint_timers_tick(void);
+void screen_pulse_tick(void);
+void hud_lens_update(void);
+void anim_meshes_update(void);
+void afterimage_list_update(s32 arg0);
 
 /* was func_15019130 */
 s32 world_update(void) {
@@ -372,9 +372,9 @@ s32 world_update(void) {
     event_list_unload(0);
     event_list_run_phase(2);
     D_800DD157 = 0;
-    func_10004250();
-    func_1501E46C(0);
-    func_15035210();
+    heap_age_tagged_blocks();
+    cutscene_advance_position(0);
+    reflect_queue_reset();
     camera_matrices_refresh_all();
     collision_select_area(0);
     world_records_flag_active();
@@ -384,59 +384,59 @@ s32 world_update(void) {
     if (D_800BEAC0 == 0) {
         world_records_dispatch_touches();
     }
-    func_15044D18();
+    timedfx_update_all();
     world_update_objects();
-    func_1502457C(1, 0);
-    func_1501ECA4(0);
-    func_1502457C(0, 0);
-    func_15020F6C(0);
-    func_1501E364(0);
+    scene_event_track_pass(1, 0);
+    cutscene_camera_track_pass(0);
+    scene_event_track_pass(0, 0);
+    cutscene_apply_cameras(0);
+    cutscene_check_finished(0);
     if (D_800D27C9 != 0) {
-        func_15088130();
+        rail_cameras_update();
     }
     camera_update_all();
-    func_1504ADD0();
+    objects_update_tank_views();
     collision_select_area(0);
     for (i = 0; i <= D_80082FA0; i++) {
         player_zone_update(i);
     }
     camera_matrices_refresh_all();
     for (j = 0; j <= D_80082FA0; j++) {
-        func_150952B0(j);
+        camera_build_view_proj(j);
     }
     world_records_build_visible(0);
-    func_15174F68(D_800BE9F0, 0);
+    level_update_frame(D_800BE9F0, 0);
     func_1501C860();
     func_1511FC20(D_800BE9C0);
-    func_151890E4(0);
+    afterimage_list_update(0);
     if (D_800BEAC0 == 0) {
         node_run_global_hooks();
         node_lists_run_update2();
     }
-    func_1502C1D4();
+    objects_update_all();
     if (D_800BE616 == 0) {
-        func_150A126C();
+        trigger_reflect_queue_objects();
     }
     world_records_update_matrices();
-    func_151890E4(1);
-    func_15173E34(D_800BE9F0);
-    func_1502C494();
+    afterimage_list_update(1);
+    fog_apply_level_default(D_800BE9F0);
+    objects_update_blob_shadows();
     world_records_update_shadows();
     if (D_800CC2B0 != 0) {
-        func_15063AA0();
+        obj_run_pending_actions();
     }
     if (D_800BEAC0 == 0) {
-        func_15184298();
+        anim_meshes_update();
         node_lists_run_update();
-        func_15178004();
+        vtx_anims_update();
     }
     if (D_800BEAC0 == 0) {
-        func_15181A6C();
+        hud_lens_update();
     }
-    func_1517FCCC();
-    func_1517FD24();
-    func_15036438();
-    func_1515DC38();
+    screen_tint_timers_tick();
+    screen_pulse_tick();
+    reflect_queue_objects_over_water();
+    light_stub();
     p = &D_80043ED0;
     do {
         p[1]++;
@@ -455,7 +455,7 @@ void game_frame_end_update(void) {
     if (D_800BEAC0 == 0) {
         node_types_run_frame_hooks();
     }
-    func_1517ABB0();
+    player_morph_cache_age();
     if (D_800BE616 == 0) {
         hud_health_air_update();
     }
@@ -467,7 +467,7 @@ void game_frame_end_update(void) {
 extern s16 D_80084810;
 void camera_zoom_factors_calc(s16 player);
 Gfx *view_background_draw(Gfx *gdl, s32 arg1);
-s32 func_1517F51C(s32 player);
+s32 screen_fade_is_opaque(s32 player);
 Gfx *player_view_dl_build(Gfx *gdl, s16 player);
 
 /* was func_15019464 */
@@ -482,10 +482,10 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
         return gdl;
     }
     gdl = view_background_draw(gdl, D_800BE9F0);
-    if (func_1517F51C(player) != 0 || (D_800D18A0 & (1 << player))) {
+    if (screen_fade_is_opaque(player) != 0 || (D_800D18A0 & (1 << player))) {
         return gdl;
     }
-    gdl = func_1515DC40(gdl, player);
+    gdl = light_setup_view(gdl, player);
     return player_view_dl_build(gdl, player);
 }
 #else
@@ -518,19 +518,19 @@ Gfx *render_player_frame_setup(Gfx *gdl, s16 player) {
 
 #ifdef NON_MATCHING
 /* Per-player scene pass (P13, hand C). Skipped (returns gdl) while paused (D_800BEAC0), during D_80084810, when
- * func_1517F51C(player) says so or the player's bit in D_800D18A0 is set. In split screen it first sets the
+ * screen_fade_is_opaque(player) says so or the player's bit in D_800D18A0 is set. In split screen it first sets the
  * player's viewport/projection; then the layers in order: sky (world_meshes_draw_player 1), the D_800BE575 == 2 pass,
- * model group 6, func_15186D04, the projection again, func_1502BDC0 1, func_150362D8, the fixed matrix, the
- * world (render_scene_layers_pre / world_meshes_draw_player 0 / render_scene_layers_post, order by player flag 0x5F0 bit 0), func_15189270 0/1,
- * func_1502BDC0 2 and model group 2. */
+ * model group 6, shadow_draw_all, the projection again, objects_draw_pass 1, reflect_draw_queue, the fixed matrix, the
+ * world (render_scene_layers_pre / world_meshes_draw_player 0 / render_scene_layers_post, order by player flag 0x5F0 bit 0), afterimage_list_draw 0/1,
+ * objects_draw_pass 2 and model group 2. */
 void *render_scene_layers_pre(void *arg0, s16 arg1);
 Gfx *view_dl_begin(Gfx *arg0, s32 arg1);
 Gfx *world_meshes_draw_player(Gfx *arg0, s32 arg1, s16 arg2);
-Gfx *func_15186D04(Gfx *arg0, s32 arg1);
-Gfx *func_150362D8(Gfx *arg0, s32 arg1);
-Gfx *func_1502BDC0(Gfx *arg0, s32 arg1, s16 arg2);
-Gfx *func_15189270(Gfx *gfx, s32 arg1, s16 arg2);
-u8 *func_151D6D28(u8 *);
+Gfx *shadow_draw_all(Gfx *arg0, s32 arg1);
+Gfx *reflect_draw_queue(Gfx *arg0, s32 arg1);
+Gfx *objects_draw_pass(Gfx *arg0, s32 arg1, s16 arg2);
+Gfx *afterimage_list_draw(Gfx *gfx, s32 arg1, s16 arg2);
+u8 *fb_ghost_render(u8 *);
 
 /* was func_150195A0 */
 Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
@@ -544,12 +544,12 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     if (D_80084810 != 0) {
         return gdl;
     }
-    if (func_1517F51C(player) != 0 || (D_800D18A0 & (1 << player))) {
+    if (screen_fade_is_opaque(player) != 0 || (D_800D18A0 & (1 << player))) {
         return gdl;
     }
     if (D_80082FA0 > 0) {
         gdl = view_dl_begin(gdl, player);
-        gdl = func_1515DC40(gdl, player);
+        gdl = light_setup_view(gdl, player);
         camera_zoom_factors_calc(player);
         gdl->words.w0 = 0xDC080008;
         gdl->words.w1 = D_800BE628 + player * 0x180 + D_800BE9C0 * 16 + 0x40;
@@ -557,14 +557,14 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     }
     gdl = world_meshes_draw_player(gdl, 1, player);
     if (D_800BE575 == 2) {
-        gdl = (Gfx *)func_151D6D28((u8 *)gdl);
+        gdl = (Gfx *)fb_ghost_render((u8 *)gdl);
     }
     gdl = node_render_layers_draw(gdl, 6, player, 0);
     gdl = node_render_layers_draw(gdl, 6, player, 1);
-    gdl = func_15186D04(gdl, player);
+    gdl = shadow_draw_all(gdl, player);
     gdl = (Gfx *)render_set_scissor((s32)gdl, player, 0, 0, 0, 0);
-    gdl = func_1502BDC0(gdl, 1, player);
-    gdl = func_150362D8(gdl, player);
+    gdl = objects_draw_pass(gdl, 1, player);
+    gdl = reflect_draw_queue(gdl, player);
     gdl->words.w0 = 0xDA380003;
     gdl->words.w1 = (u32)D_80089810;
     gdl++;
@@ -577,9 +577,9 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
         gdl = world_meshes_draw_player(gdl, 0, player);
         gdl = render_scene_layers_pre(gdl, player);
     }
-    gdl = func_15189270(gdl, 0, player);
-    gdl = func_15189270(gdl, 1, player);
-    gdl = func_1502BDC0(gdl, 2, player);
+    gdl = afterimage_list_draw(gdl, 0, player);
+    gdl = afterimage_list_draw(gdl, 1, player);
+    gdl = objects_draw_pass(gdl, 2, player);
     gdl = node_render_layers_draw(gdl, 2, player, 0);
     gdl = node_render_layers_draw(gdl, 2, player, 1);
     return gdl;
@@ -589,13 +589,13 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
 #endif
 #ifdef NON_MATCHING
 u8 * hud_draw(u8 *);
-s32 func_151734E0(s32);
-s32 func_1517E7FC(s32, s32);
-u8 * func_1517FAD4(s32);
-s32 func_15182450(s32);
-s32 func_151D6440(u8 *, s32, s32, s32);
-void func_151D6760(s32);
-u8 * func_151D6D28(u8 *);
+s32 screen_flash_overlay_draw(s32);
+s32 flare_nodes_draw(s32, s32);
+u8 * screen_pulse_overlay_draw(s32);
+s32 hud_letterbox_draw(s32);
+s32 fb_ghost_copy_draw(u8 *, s32, s32, s32);
+void fb_blur_average(s32);
+u8 * fb_ghost_render(u8 *);
 extern s32 D_8002AE20;
 extern s8 D_80083320;
 
@@ -610,7 +610,7 @@ Gfx *render_overlay_pass(u8 *arg0) {
 
     var_s0 = arg0;
     if (D_800BE575 == 1) {
-        var_s0 = func_151D6D28(var_s0);
+        var_s0 = fb_ghost_render(var_s0);
     }
     if (D_80082FA0 != 0) {
         D_80082FA4 = D_80082FA0 + 1;
@@ -630,42 +630,42 @@ Gfx *render_overlay_pass(u8 *arg0) {
             (*(s32 *)((u8 *)var_s0_3 + 4)) = (s32) D_800BEDE4;
             (*(s32 *)((u8 *)temp_s0 + 0)) = 0xED000000;
             (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((((s32) ((f32) D_800BE620 * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) D_800BE624 * 4.0f) & 0xFFF));
-            var_s0_3 = render_set_color_image(func_151D6440(temp_s0 + 8, *(((s32 *)((u8 *)&D_8002AE20 + -(D_800BE9C0 * 4)))), 0, 1));
+            var_s0_3 = render_set_color_image(fb_ghost_copy_draw(temp_s0 + 8, *(((s32 *)((u8 *)&D_8002AE20 + -(D_800BE9C0 * 4)))), 0, 1));
             D_80083320 = 1;
         } else if (D_80083320 < 5) {
             D_80083320 += 1;
-            func_151D6760(D_800BEDE4);
+            fb_blur_average(D_800BEDE4);
         }
-        var_s0_3 = func_151D6440((u8 *) var_s0_3, D_800BEDE4, 0, 1);
+        var_s0_3 = fb_ghost_copy_draw((u8 *) var_s0_3, D_800BEDE4, 0, 1);
     } else {
         D_80083320 = 0;
     }
-    if (func_1517F51C(0) == 0) {
-        var_s0_3 = func_15182450(func_151734E0(func_1517E7FC(var_s0_3, D_800BE9F0)));
+    if (screen_fade_is_opaque(0) == 0) {
+        var_s0_3 = hud_letterbox_draw(screen_flash_overlay_draw(flare_nodes_draw(var_s0_3, D_800BE9F0)));
     }
-    temp_v0 = func_1517FAD4(var_s0_3);
+    temp_v0 = screen_pulse_overlay_draw(var_s0_3);
     var_s0_4 = temp_v0;
     if ((D_800BEAC0 == 0) && (D_800BEAC1 == 0)) {
         var_s0_4 = hud_draw(temp_v0);
     }
-    return (Gfx *)func_15096D44(node_render_layers_draw(node_render_layers_draw(var_s0_4, 3, 0, 0), 3, 0, 1));
+    return (Gfx *)sprite_gfx_begin_alt(node_render_layers_draw(node_render_layers_draw(var_s0_4, 3, 0, 0), 3, 0, 1));
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/render_overlay_pass.s")
 #endif
 extern u16 D_800D1CC2;
 #ifdef NON_MATCHING
-void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
+void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 #else
-Gfx *func_15151FA8();
+Gfx *emit_sparks_by_angles();
 #endif
 /* was func_15019BB8 */
 Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
     gSPViewport(gdl++, (u8 *)D_800BE628 + arg1 * 0x180 + 0x40 + D_800BE9C0 * 0x10);
     gdl = render_set_scissor(gdl, (s16)arg1, 0, 0, 0, 0);
-    gdl = func_1517FA48(gdl, arg1);
-    gdl = func_1517F910(gdl, arg1);
-    gdl = func_15180AF0(gdl, arg1);
+    gdl = screen_tint_draw(gdl, arg1);
+    gdl = screen_fade_draw(gdl, arg1);
+    gdl = hud_sniper_scope_draw(gdl, arg1);
     if ((D_800D18A0 & (1 << arg1)) || (D_800D1CC2 & (1 << arg1))) {
         gdl = player_draw_out_overlay(gdl, arg1);
     }
@@ -697,10 +697,10 @@ Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
 #ifdef NON_MATCHING
 /* Per-player 3D setup (P13, hand C): viewport and projection of camera record D_800BE628 + player * 0x180
  * (double-buffered by the DL buffer index D_800BE9C0), the fixed matrix D_80089810, level 0x1D's extra pass
- * (func_1502BDC0), the two model layers of group 5, then the view matrix and the player's model matrix from
+ * (objects_draw_pass), the two model layers of group 5, then the view matrix and the player's model matrix from
  * D_800DC6D0[idx] (0x40 per player). */
 extern s32 D_800DC6D0[];
-Gfx *func_1502BDC0(Gfx *arg0, s32 arg1, s16 arg2);
+Gfx *objects_draw_pass(Gfx *arg0, s32 arg1, s16 arg2);
 
 /* was func_15019CC8 */
 Gfx *render_player_3d_setup(Gfx *arg0, s32 arg1) {
@@ -716,7 +716,7 @@ Gfx *render_player_3d_setup(Gfx *arg0, s32 arg1) {
     gdl[1].words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 64 + 0x100;
     gdl += 2;
     if (D_800BE9F0 == 0x1D) {
-        gdl = func_1502BDC0(gdl, 6, player);
+        gdl = objects_draw_pass(gdl, 6, player);
     }
     gdl = node_render_layers_draw(gdl, 5, 0, 0);
     gdl = node_render_layers_draw(gdl, 5, 0, 1);
@@ -737,11 +737,11 @@ Gfx *render_final_overlay(Gfx *arg0) {
     } else {
         gSPViewport(arg0++, D_800BE628 + 64);
     }
-    return (Gfx *)text_queue_draw(func_151E8620(render_set_scissor(arg0, 0xFF, 0, 0, 0, 0)));
+    return (Gfx *)text_queue_draw(hud_overlay_draw_screen(render_set_scissor(arg0, 0xFF, 0, 0, 0, 0)));
 }
 
 #ifdef NON_MATCHING
-void func_150A067C(void);
+void event_timers_update(void);
 extern u32 D_800BEA30;
 extern u8 D_800BEA39;
 extern u8 D_800BEA3A;
@@ -843,7 +843,7 @@ void game_update_frame_timing(void) {
             D_800BEDDC = 0.0f;
         }
     }
-    func_150A067C();
+    event_timers_update();
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/game_update_frame_timing.s")

@@ -5,11 +5,11 @@
 
 #ifdef NON_MATCHING
 struct127 *player_find_owned_object(struct127 *, struct127 *, s32);
-void func_15145EA4(f32 **src, f32 **dst, u8 *bone, s32 n);
-s32 func_151C284C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32,
+void mtx_transform_points(f32 **src, f32 **dst, u8 *bone, s32 n);
+s32 tracer_spawn(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32,
                   s32, s32, s32, f32, s32, s32, s32, s32, s32);
 void attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
-void func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+void sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
 extern f32 D_800A21A4[2][3];   /* per side: muzzle offsets (non-0x23 characters) */
 extern f32 D_800A21BC[2][3];
 extern f32 D_800A21D4[2][3];
@@ -42,15 +42,15 @@ typedef struct {
     u8 b41;           /* 0x41 */
     u8 pad42[2];
     u8 mask;          /* 0x44 */
-} GunfireFlash;       /* func_151559FC's spec */
+} GunfireFlash;       /* sprite2d_spawn's spec */
 
 // gun_fire_effects: muzzle flash, tracer and shells for one shot of `obj`'s gun on hand `side` (0 / 1), `dt` into the
 // frame. Unless `noOwner`, the shooter is player_find_owned_object(obj) (no shooter -> nothing); `aimed` = its record's 0x197.
-// func_15145EA4 places the muzzle point / direction points from the hand bone (obj+0x1D4, 64-byte bones; character
+// mtx_transform_points places the muzzle point / direction points from the hand bone (obj+0x1D4, 64-byte bones; character
 // 0x23 has its own tables). Aimed shots project onto the shooter's aim line (unk31C 0x13C point, 0x130 direction).
-// func_151C284C spawns the tracer (kind 5 in levels 0x34 / 0x26, else 4; hidden from the shooter's own camera); unless
+// tracer_spawn spawns the tracer (kind 5 in levels 0x34 / 0x26, else 4; hidden from the shooter's own camera); unless
 // obj+0x74's low nibble is 0xF a 1-in-8 spark (light_create_with_ctrl) and a 1-in-2 shell (attached_particle_spawn) follow; aimed shots
-// with a camera also get the screen flash (func_151559FC) and func_15155C9C event 0x37.
+// with a camera also get the screen flash (sprite2d_spawn) and sprite2d_broadcast event 0x37.
 /* was func_150FBE40 */
 void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner) {
     struct127 *owner;
@@ -127,7 +127,7 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
     out[0] = pos;
     out[1] = aimed ? side0 : tip;
     out[2] = side1;
-    func_15145EA4(tbl, out, bone, aimed ? 3 : 2);
+    mtx_transform_points(tbl, out, bone, aimed ? 3 : 2);
     if (aimed) {
         aim = (u8 *)owner->unk31C;
         p = (f32 *)(aim + 0x13C);
@@ -137,7 +137,7 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
         side1[0] -= pos[0];
         side1[1] -= pos[1];
         side1[2] -= pos[2];
-        func_151450B4((struct17 *)side0, (struct17 *)side1, (struct17 *)norm);
+        vec3_cross((struct17 *)side0, (struct17 *)side1, (struct17 *)norm);
         aim = (u8 *)owner->unk31C;
         t = (norm[0] * (pos[0] - p[0]) + norm[1] * (pos[1] - p[1]) + norm[2] * (pos[2] - p[2])) /
             (norm[0] * *(f32 *)(aim + 0x130) + norm[1] * *(f32 *)(aim + 0x134) + norm[2] * *(f32 *)(aim + 0x138));
@@ -161,7 +161,7 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
     r1 = random_float();
     r2 = random_float();
     r3 = random_int();
-    func_151C284C(pos, aimed ? NULL : tip, aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,
+    tracer_spawn(pos, aimed ? NULL : tip, aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,
                   gunfire_tracer_k[0], r1 * 20.0f + 75.0f, r2 * 250.0f + 502.0f, 50.0f, r3 % 31 + 225,
                   (owner != NULL) ? (u8 *)owner : obj, 1, 1, D_800BE616 ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,
                   0, (u8)fxflag, fxowner);
@@ -231,10 +231,10 @@ void gun_shot_effects(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxow
     flash.b40 = 0;
     flash.b41 = 7;
     flash.mask = *((u8 *)owner->camera + 0x23D);
-    func_151559FC(&flash, 0, 0, 0, 0, 0, fxowner);
+    sprite2d_spawn(&flash, 0, 0, 0, 0, 0, fxowner);
     ev.side = side;
     ev.camera = owner->camera;
-    func_15155C9C(&ev, 0x37);
+    sprite2d_broadcast(&ev, 0x37);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gun_shot_effects.s")
@@ -254,20 +254,20 @@ void tracer_draw_masked(u8 *arg0) {
     } else {
         var_v0 = ~(1 << (*(u8 *)((u8 *)temp_v1_2 + 0x23D))) & 0xFF;
     }
-    func_151C40BC((s32) arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFFU, 0xFFU, (u8) var_v0);
+    surface_impact_effects((s32) arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFFU, 0xFFU, (u8) var_v0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/tracer_draw_masked.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A2280, D_800A2284, D_800A2288, D_800A228C, D_800A2290, D_800A2294, D_800A2298, D_800A229C, D_800A22A0;
-u8 *func_15164CF0(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
+u8 *cam_wobble_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 
 // effect27_spawn_with_screen_effect: starts an effect record of kind 0x27 (300 frames, func_15149130) whose 32-byte
 // data (rec + 0x28) holds `obj` and its id (+0x3B), the flag `a`, `other`, its id (0xFF without one) and its player
 // (+0x318 -> +0x23D, -1 without one) and the value `b`. When `other` has a player record, a kind-4 screen effect of
-// 300 frames for that player is started too (func_15164CF0, scales 12 / 20 / 19 and the D_800A2280.. table); its record
-// goes to data + 0x10. Called by the B-pad item action func_15065E18 and by objfx_fc438 (game_981E0).
+// 300 frames for that player is started too (cam_wobble_spawn, scales 12 / 20 / 19 and the D_800A2280.. table); its record
+// goes to data + 0x10. Called by the B-pad item action player_item_action and by objfx_fc438 (game_981E0).
 /* was func_150FC438 */
 void gunfire_burst_spawn(struct127 *obj, struct127 *other, u8 a, u8 b) {
     struct {
@@ -335,7 +335,7 @@ void gunfire_burst_spawn(struct127 *obj, struct127 *other, u8 a, u8 b) {
     fx.f[9] = D_800A2298;
     fx.f[10] = D_800A229C;
     fx.f[11] = D_800A22A0;
-    *(u8 **) (rec + 0x28 + 0x10) = func_15164CF0((u8 *) &fx, 0, 0xFF, 1);
+    *(u8 **) (rec + 0x28 + 0x10) = cam_wobble_spawn((u8 *) &fx, 0, 0xFF, 1);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/gunfire_burst_spawn.s")
@@ -392,7 +392,7 @@ void gunfire_burst_update(u8 *arg0) {
             sp.u55 = 1 << (*(s8 *)((u8 *)temp_s0 + 0x16));
             sp.u54 = (random_int() % 6U) + 3;
             sp.u56 = -1;
-            func_151D8E18((structEU_151D8E18 *) &sp.u50, 0, (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            rumble_request((structEU_151D8E18 *) &sp.u50, 0, (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             random_int();
             (*(s16 *)((u8 *)temp_s0 + 0x14)) = 0xFA;
         }

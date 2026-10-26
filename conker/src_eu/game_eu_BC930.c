@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1508F120(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1508F120 */
+s32 link_group_find_partner(s32 arg0, s32 arg1, s32 arg2) {
     s32 var_t0;
     u16 temp_a1;
     u16 temp_t1;
@@ -63,9 +64,10 @@ block_14:
     return -1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_BC930/func_1508F120.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_BC930/link_group_find_partner.s")
 #endif
-void func_1508F21C(u32 arg0) {
+/* was func_1508F21C */
+void link_group_clear(u32 arg0) {
     if (arg0 < D_80087380) {
         *(s16 *)(D_800D23C0 + arg0 * 0x18 + 2) = 0;
         *(s32 *)(D_800D23C0 + arg0 * 0x18 + 4) = 0;
@@ -74,10 +76,11 @@ void func_1508F21C(u32 arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_1503E0C0(s32);
+void look_point_remove(s32);
 void world_record_remove(u32);
 
-void func_1508F26C(s32 arg0, s32 arg1) {
+/* was func_1508F26C */
+void link_group_remove_members(s32 arg0, s32 arg1) {
     s32 temp_a1;
     s32 temp_a2;
     s32 temp_v1;
@@ -117,7 +120,7 @@ loop_4:
                             var_a0 = (*(u16 *)((u8 *)((D_800D23C0 + var_s3)) + 2));
                             break;
                         case 3:
-                            func_1503E0C0(temp_a1);
+                            look_point_remove(temp_a1);
                             var_a0 = (*(u16 *)((u8 *)((D_800D23C0 + var_s3)) + 2));
                             break;
                         }
@@ -125,7 +128,7 @@ loop_4:
                         var_s1 += 2;
                     } while (var_s0_2 < var_a0);
                 }
-                func_1508F21C(var_s2);
+                link_group_clear(var_s2);
                 return;
             }
             var_v0 += 2;
@@ -146,5 +149,5 @@ block_15:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_BC930/func_1508F26C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_BC930/link_group_remove_members.s")
 #endif

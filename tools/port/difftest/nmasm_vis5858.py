@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P34: compare the hand-asm blob func_150A5858 .. func_150A5F98 (game_eu_D2DB0; level visibility walk + level DL
+"""P34: compare the hand-asm blob level_dl_visibility_filter .. level_box_corner_outcode (game_eu_D2DB0; level visibility walk + level DL
 filter) with its NON_MATCHING C, whole.
 
 The asm uses 64-bit registers (sd/ld of DL words, dsll32/dmtc1, sdc1/ldc1 and c.eq.d on odd FPRs, i.e. FR=1),
@@ -59,7 +59,7 @@ class Ref:
     def word(self, pc):
         o = pc - self.cv
         return struct.unpack('>I', self.cb[o:o + 4])[0]
-    def run(self, mem, args, gp=0, maxi=3000000, entry='func_150A5858'):
+    def run(self, mem, args, gp=0, maxi=3000000, entry='level_dl_visibility_filter'):
         r = [0] * 32; f = [0] * 32; cc = False; lo = hi = 0
         for k, a in enumerate(args[:4]): r[4 + k] = sx32(a)
         r[28] = gp; r[29] = sx32(SP0); r[31] = sx32(RET)
@@ -212,7 +212,7 @@ class Cand:
         self.mu = mu
     def data(self):
         return [(v, b) for v, b in self.secs if v >= 0x80000000]
-    def run(self, mem, args, entry='func_150A5858'):
+    def run(self, mem, args, entry='level_dl_visibility_filter'):
         mu = self.mu
         mu.mem_write(0x80000, bytes(mem[0x80000:RAM]))
         for k, a in enumerate(args[:4]): mu.reg_write(UC_MIPS_REG_A0 + k, a & 0xFFFFFFFF)

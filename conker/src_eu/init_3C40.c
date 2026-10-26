@@ -5,7 +5,7 @@
 
 
 s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return func_10003C6C(arg0, arg1, arg2, 0, arg3);
+    return heap_alloc_tagged(arg0, arg1, arg2, 0, arg3);
 }
 
 #ifdef NON_MATCHING
@@ -37,7 +37,8 @@ extern s32 D_80038430;
 void func_150ADC50(void);
 OSIntMask osSetIntMask(OSIntMask);   /* (repeated so difftest knows its arity) */
 
-s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_10003C6C */
+s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 size = arg0;
     s32 alignAdd;
     s32 alignMask;
@@ -193,18 +194,19 @@ s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         }
     }
     if (block == (HeapBlock *)D_800380B0) {
-        func_1000440C();
+        heap_update_largest_free();
     }
     osSetIntMask(mask);
     return (s32)newb + HEAP_HDR;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/func_10003C6C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/heap_alloc_tagged.s")
 #endif
 #ifdef NON_MATCHING
 extern struct54 *D_8003841C;
 
-void func_10004074(s32 arg0) {
+/* was func_10004074 */
+void heap_free(s32 arg0) {
     struct54 *sp2C;
     s32 sp20;
     u32 sp1C;
@@ -312,9 +314,10 @@ loop_21:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/func_10004074.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/heap_free.s")
 #endif
-void func_10004250(void) {
+/* was func_10004250 */
+void heap_age_tagged_blocks(void) {
     s32 temp_v0;
     u32 temp_v1;
     OSIntMask mask;
@@ -327,7 +330,7 @@ void func_10004250(void) {
             temp_v1 = phi_s0->unk8;
             temp_v0 = temp_v1 >> 0x18;
             if (2 == temp_v0) {
-                func_10004074(&phi_s0->unkC);
+                heap_free(&phi_s0->unkC);
             } else if ((temp_v0 == 3) || (temp_v0 == 4)) {
                 phi_s0->unk8 = ((temp_v0 - 1) << 0x18) | (temp_v1 & 0xFFFFFF);
             }
@@ -336,7 +339,8 @@ void func_10004250(void) {
     osSetIntMask(mask);
 }
 
-void func_10004308(void) {
+/* was func_10004308 */
+void heap_free_tags_1_to_4(void) {
     u32 temp_t6;
     struct54 *phi_s0;
     OSIntMask mask;
@@ -349,7 +353,7 @@ void func_10004308(void) {
         do {
             temp_t6 = phi_s0->unk8 >> 24;
             if (temp_t6 == 1 || temp_t6 == 2 || temp_t6 == 3 || temp_t6 == 4) {
-                func_10004074(&phi_s0->unkC);
+                heap_free(&phi_s0->unkC);
             }
         }
         while (phi_s0 = phi_s0->unk0);
@@ -359,7 +363,8 @@ void func_10004308(void) {
 
 typedef struct { s32 a; s32 b; u32 c; } Hdr43B4; /* 12-byte header before the block */
 
-void func_100043B4(s32 *arg0, u32 arg1) {
+/* was func_100043B4 */
+void heap_set_block_tag(s32 *arg0, u32 arg1) {
     Hdr43B4 *h = (Hdr43B4 *)arg0 - 1;
     u32 mask = osSetIntMask(1);
 
@@ -367,13 +372,14 @@ void func_100043B4(s32 *arg0, u32 arg1) {
     osSetIntMask(mask);
 }
 // NON-MATCHING: missing an addiu
-// void func_100043B4(s32 *arg0, u32 arg1) {
+// void heap_set_block_tag(s32 *arg0, u32 arg1) {
 //     OSIntMask mask = osSetIntMask(1);
 //     *(arg0 - 1) = (arg1 << 24) | *(arg0 - 1) & 0xFFFFFF;
 //     osSetIntMask(mask);
 // }
 
-void func_1000440C(void) {
+/* was func_1000440C */
+void heap_update_largest_free(void) {
     struct54 *foo;
     struct54 *last_good_foo;
     s32 tmp0;

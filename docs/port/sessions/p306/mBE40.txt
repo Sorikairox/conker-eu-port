@@ -23,7 +23,7 @@ s/tbl\[0\] = D_800A21A4\[side\];/tbl[0] = D_800A21BC[side];/ % aim0
 s/tbl\[1\] = aimed ? D_800A21D4\[side\] : alt;/tbl[1] = aimed ? D_800A21EC[side] : alt;/ % aim0
 s/tbl\[2\] = D_800A21EC\[side\];/tbl[2] = D_800A21EC[0];/ % aim1
 s/out\[1\] = aimed ? side0 : tip;/out[1] = tip;/ % aim0
-s/func_15145EA4(tbl, out, bone, aimed ? 3 : 2);/func_15145EA4(tbl, out, bone, aimed ? 3 : 3);/ % noaim
+s/mtx_transform_points(tbl, out, bone, aimed ? 3 : 2);/mtx_transform_points(tbl, out, bone, aimed ? 3 : 3);/ % noaim
 s/side0\[1\] -= pos\[1\];/side0[1] -= pos[0];/ % aim0
 s/side1\[2\] -= pos\[2\];/side1[2] += pos[2];/ % aim0
 s/p = (f32 \*)(aim + 0x13C);/p = (f32 *)(aim + 0x130);/ % aim0
@@ -39,7 +39,7 @@ s/tip\[1\] -= pos\[1\];/tip[1] -= pos[2];/ % noaim
 1,/kind = /s/mask = 0xFF;/mask = 0x7F;/ % noaim
 s/kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;/kind = (D_800BE9F0 == 0x34) ? 5 : 4;/ % lvl26
 s/kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;/kind = (D_800BE9F0 == 0x26) ? 5 : 4;/ % lvl34
-s/func_151C284C(pos, aimed ? NULL : tip,/func_151C284C(pos, tip,/ % aim0
+s/tracer_spawn(pos, aimed ? NULL : tip,/tracer_spawn(pos, tip,/ % aim0
 s/aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,/aimed ? hit : NULL, aimed ? dir : NULL, 1, 0, 252.0f,/ % noaim
 s/aimed ? 1 : 0, 0, 252.0f,/aimed ? 1 : 0, 0, 250.0f,/ % aim0
 s/static const f32 gunfire_tracer_k\[1\] = { 0.003968254f };/static const f32 gunfire_tracer_k[1] = { 0.00396825f };/ % aim0
@@ -81,6 +81,6 @@ s/flash.w24\[1\] = 0x200004;/flash.w24[1] = 0x200005;/ % aim0
 s/flash.w24\[6\] = 0x20;/flash.w24[6] = 0x21;/ % aim0
 s/flash.b41 = 7;/flash.b41 = 6;/ % aim0
 s/flash.mask = \*((u8 \*)owner->camera + 0x23D);/flash.mask = *((u8 *)owner->camera + 0x23C);/ % aim0
-s/func_151559FC(\&flash, 0, 0, 0, 0, 0, fxowner);/func_151559FC(\&flash, 0, 0, 0, 0, fxflag, fxowner);/ % aim0
+s/sprite2d_spawn(\&flash, 0, 0, 0, 0, 0, fxowner);/sprite2d_spawn(\&flash, 0, 0, 0, 0, fxflag, fxowner);/ % aim0
 s/ev.side = side;/ev.side = 0;/ % aim1
-s/func_15155C9C(\&ev, 0x37);/func_15155C9C(\&ev, 0x38);/ % aim0
+s/sprite2d_broadcast(\&ev, 0x37);/sprite2d_broadcast(\&ev, 0x38);/ % aim0

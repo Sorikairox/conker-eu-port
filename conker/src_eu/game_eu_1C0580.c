@@ -4,15 +4,16 @@
 
 
 s32 floor_flags_surface_type(s32);
-s32 func_15192E20(u8 *, s32 *);
+s32 obj_surface_handler_class(u8 *, s32 *);
 extern void (**D_8008FC00[])(u8 *);
-void func_15192800(u8 *arg0, s32 arg1) {
+/* was func_15192800 */
+void obj_surface_handler_dispatch(u8 *arg0, s32 arg1) {
     s32 sp2C;
     s32 sfpad; // fakematch: frame padding
     void (*fn)(u8 *);
     s32 idx;
 
-    if ((arg0 != NULL) && (func_15192E20(arg0, &sp2C) != 0)) {
+    if ((arg0 != NULL) && (obj_surface_handler_class(arg0, &sp2C) != 0)) {
         switch (floor_flags_surface_type(*(s32 *)(arg0 + 0x184))) {
         case 5:
             if (D_800BE9F0 == 0x14) {
@@ -36,7 +37,8 @@ void func_15192800(u8 *arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15192E20(u8 *arg0, s32 *arg1) {
+/* was func_15192E20 */
+s32 obj_surface_handler_class(u8 *arg0, s32 *arg1) {
     s32 var_v1;
     u8 temp_v0;
 
@@ -59,5 +61,5 @@ s32 func_15192E20(u8 *arg0, s32 *arg1) {
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C0580/func_15192E20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C0580/obj_surface_handler_class.s")
 #endif

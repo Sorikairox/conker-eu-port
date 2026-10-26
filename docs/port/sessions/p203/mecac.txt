@@ -1,4 +1,4 @@
-s/func_151D6310((s32) (p + 0x100), view, 0x40/func_151D6310((s32) (p + 0x104), view, 0x40/
+s/vtx_slot_buffer_get((s32) (p + 0x100), view, 0x40/vtx_slot_buffer_get((s32) (p + 0x104), view, 0x40/
 s/    if (blk == NULL) {/    if (blk != NULL) {/
 s/    if (fresh) {/    if (!fresh) {/
 s/memcpy(\*(u8 \*\*) (p + 0x100 + view \* 4) + 0x40/memcpy(*(u8 **) (p + 0x100 + view * 4) + 0x20/

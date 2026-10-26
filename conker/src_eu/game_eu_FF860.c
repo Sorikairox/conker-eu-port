@@ -4,11 +4,12 @@
 
 
 extern f32 D_800A0CB0;
-void func_150D2050(s32 arg0) {
+/* was func_150D2050 */
+void ambient_red_flicker_bright_update(s32 arg0) {
     f32 *sp28;
     sp28 = (f32 *)((arg0 ^ 0) + 0x28); sp28 = sp28;
-    func_151467A4(arg0 + 0x30, 10.0f, arg0 + 0x2C, 86.0f, 170.0f, 255.0f, D_800A0CB0, sp28);
-    func_1515D4D4(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
+    fx_random_flicker_update(arg0 + 0x30, 10.0f, arg0 + 0x2C, 86.0f, 170.0f, 255.0f, D_800A0CB0, sp28);
+    light_set_level_colour(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
 }
 
 #ifdef NON_MATCHING
@@ -17,7 +18,8 @@ s32 event_dispatch(s32, s32, ...);
 s32 event_dispatch(s32, s32, s32, s32);
 #endif
 
-void func_150D20E0(u8 *arg0) {
+/* was func_150D20E0 */
+void player_sync_flag10_event(u8 *arg0) {
     if (event_dispatch(1, 0x402C, 6, 0x2000) != 0) {
         (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) | 0x10);
         return;

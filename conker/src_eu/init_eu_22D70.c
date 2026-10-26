@@ -6,9 +6,9 @@ typedef struct { OSThread *next; OSPri priority; } __OSThreadTail;
 extern __OSThreadTail D_8002C140; // __osThreadTail
 extern OSThread *D_8002C148;      // __osRunQueue
 void func_10007BA4(OSThread **);             // __osEnqueueAndYield
-void func_10007CC8(OSThread **, OSThread *); // __osEnqueueThread
-OSThread *func_10007D14(OSThread **);        // __osPopThread
-void func_10007D28(void);                    // __osDispatchThread
+void os_enqueue_thread(OSThread **, OSThread *); // __osEnqueueThread
+OSThread *os_pop_thread(OSThread **);        // __osPopThread
+void os_dispatch_thread(void);                    // __osDispatchThread
 void __osDequeueThread(OSThread **, OSThread *);
 
 
@@ -20,21 +20,21 @@ void osStartThread(OSThread *t) {
     switch (t->state) {
         case OS_STATE_WAITING:
             t->state = OS_STATE_RUNNABLE;
-            func_10007CC8(&D_8002C148, t);
+            os_enqueue_thread(&D_8002C148, t);
             break;
         case OS_STATE_STOPPED:
             if (t->queue == NULL || t->queue == &D_8002C148) {
                 t->state = OS_STATE_RUNNABLE;
-                func_10007CC8(&D_8002C148, t);
+                os_enqueue_thread(&D_8002C148, t);
             } else {
                 t->state = OS_STATE_WAITING;
-                func_10007CC8(t->queue, t);
-                func_10007CC8(&D_8002C148, func_10007D14(t->queue));
+                os_enqueue_thread(t->queue, t);
+                os_enqueue_thread(&D_8002C148, os_pop_thread(t->queue));
             }
             break;
     }
     if (__osRunningThread == NULL) {
-        func_10007D28();
+        os_dispatch_thread();
     } else if (__osRunningThread->priority < D_8002C148->priority) {
         __osRunningThread->state = OS_STATE_RUNNABLE;
         func_10007BA4(&D_8002C148);
@@ -52,7 +52,7 @@ void osSetThreadPri(OSThread *t, OSPri pri) {
         t->priority = pri;
         if (t != __osRunningThread && t->state != OS_STATE_STOPPED) {
             __osDequeueThread(t->queue, t);
-            func_10007CC8(t->queue, t);
+            os_enqueue_thread(t->queue, t);
         }
         if (__osRunningThread->priority < D_8002C148->priority) {
             __osRunningThread->state = OS_STATE_RUNNABLE;

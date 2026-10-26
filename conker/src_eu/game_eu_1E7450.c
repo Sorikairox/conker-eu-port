@@ -13,7 +13,8 @@ f32 cosf(f32);
 // direction is angle + 180 +- angSpread / 2 degrees, the start point is moved dist along it, the horizontal speed is
 // speed +- speedSpread / 2 (speedSpread 0 counts as 1) and the vertical speed rise +- riseSpread / 2 (gravity -160).
 // mode 2 tints it 68 38 10, other modes are white; random byte at +0x2B. `unused` (the caller's -80) is not read.
-void func_151B9C40(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32 angle, s16 angSpread, s16 rise,
+/* was func_151B9C40 */
+void spark_sprite_launch(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32 angle, s16 angSpread, s16 rise,
                    s16 riseSpread, s16 speed, s16 speedSpread, s16 dist, s16 hi, s16 size, u8 room, s32 owner) {
     struct {
         /* 0x00 */ void *tex;
@@ -100,16 +101,17 @@ void func_151B9C40(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32 angle
     node_spawn_sprite(&rec, 0, 0, -1, room, owner);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/func_151B9C40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/spark_sprite_launch.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_800AA964;
 extern f32 D_800AA968;
 f32 math_cos_u8(u8);
-s32 func_151722BC(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
+s32 decal_spawn_at(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151B9F14(u8 *arg0) {
+/* was func_151B9F14 */
+void spark_sprite_update(u8 *arg0) {
     f32 sp5C;
     s16 sp5A;
     s32 sp50;
@@ -150,11 +152,11 @@ void func_151B9F14(u8 *arg0) {
         if (temp_a2 == 0) {
             sp5A = (s16) (*(s32 *)((u8 *)arg0 + 0x14));
             if ((random_int() & 0xFF) < 0x40) {
-                func_151722BC((f32) (*(s16 *)((u8 *)arg0 + 0x20)), (f32) sp5A, (f32) (*(s16 *)((u8 *)arg0 + 0x24)), 0xA, 0, 0x13, 0.0f, 0, 0x32, 0xF, 0x100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                decal_spawn_at((f32) (*(s16 *)((u8 *)arg0 + 0x20)), (f32) sp5A, (f32) (*(s16 *)((u8 *)arg0 + 0x24)), 0xA, 0, 0x13, 0.0f, 0, 0x32, 0xF, 0x100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
             if ((random_int() & 0xFF) < 0xF) {
                 random_int();
-                func_10010F88(0x70, 0x1388U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x20)), (s16) (s32) sp5A, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x24)), 0x1F4, 0x7D0);
+                sound_play_at(0x70, 0x1388U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x20)), (s16) (s32) sp5A, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x24)), 0x1F4, 0x7D0);
             }
         }
     } else {
@@ -165,9 +167,10 @@ void func_151B9F14(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/func_151B9F14.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/spark_sprite_update.s")
 #endif
-void func_151BA1A0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA, s16 argB, s16 argC, s32 argD, u8 argE, s32 argF) {
+/* was func_151BA1A0 */
+void spark_sprite_burst_spawn(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA, s16 argB, s16 argC, s32 argD, u8 argE, s32 argF) {
     u8 *temp_v0;
 
     temp_v0 = node_alloc(7, argF, 0x2C, 0, (u8) (s32) argE, 1U);
@@ -190,13 +193,14 @@ void func_151BA1A0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s
 }
 
 #ifdef NON_MATCHING
-void func_151B9C40(s32, s32, s16, s16, s16, s32, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
+void spark_sprite_launch(s32, s32, s16, s16, s16, s32, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
 
 // burst_emitter_finish: emits the object's burst at its anchor (the f32 position at obj+0x10 if any, else the s16
 // position at obj+0x16): obj+0x28 shots with the parameters at obj+0x1C..0x26, then 4 more with the first two
-// widened (x1.5 / x2), all through func_151B9C40 (types obj+0x14 / 0x15, angle -80, spread 360, life 15). Then counts
+// widened (x1.5 / x2), all through spark_sprite_launch (types obj+0x14 / 0x15, angle -80, spread 360, life 15). Then counts
 // obj+0x2A down by the frame step D_800BE9E4 and frees the object when it goes negative (node_destroy).
-void func_151BA260(u8 *obj) {
+/* was func_151BA260 */
+void spark_sprite_burst_update(u8 *obj) {
     f32 *anchor = *(f32 **) (obj + 0x10);
     s16 x;
     s16 y;
@@ -214,12 +218,12 @@ void func_151BA260(u8 *obj) {
         z = (s32) anchor[2];
     }
     for (i = 0; i < *(s16 *) (obj + 0x28); i++) {
-        func_151B9C40(obj[0x14], obj[0x15], x, y, z, -0x50, 0.0f, 0x168, *(s16 *) (obj + 0x1C), *(s16 *) (obj + 0x1E),
+        spark_sprite_launch(obj[0x14], obj[0x15], x, y, z, -0x50, 0.0f, 0x168, *(s16 *) (obj + 0x1C), *(s16 *) (obj + 0x1E),
                       *(s16 *) (obj + 0x20), *(s16 *) (obj + 0x22), 0xF, *(s16 *) (obj + 0x24), *(s16 *) (obj + 0x26),
                       obj[0xC], obj[1]);
     }
     for (i = 0; i < 4; i++) {
-        func_151B9C40(obj[0x14], obj[0x15], x, y, z, -0x50, 0.0f, 0x168, (*(s16 *) (obj + 0x1C) * 3) / 2,
+        spark_sprite_launch(obj[0x14], obj[0x15], x, y, z, -0x50, 0.0f, 0x168, (*(s16 *) (obj + 0x1C) * 3) / 2,
                       *(s16 *) (obj + 0x1E) * 2, *(s16 *) (obj + 0x20), *(s16 *) (obj + 0x22), 0xF,
                       *(s16 *) (obj + 0x24), *(s16 *) (obj + 0x26), obj[0xC], obj[1]);
     }
@@ -231,5 +235,5 @@ void func_151BA260(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/func_151BA260.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/spark_sprite_burst_update.s")
 #endif

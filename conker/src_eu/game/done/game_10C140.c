@@ -5,6 +5,6 @@
 
 
 void func_150DEC90(s32 arg0) {
-    func_15179008(0);
+    rain_update(0);
     D_800DD444 = 0;
 }

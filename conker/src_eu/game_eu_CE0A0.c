@@ -3,27 +3,28 @@
 #include "variables.h"
 
 
-s32 func_150A2D44(s32, s32);
+s32 trigger_set_disabled(s32, s32);
 
-s32 func_150A0890(s32 arg0, u32 arg1, u8 *arg2) {
+/* was func_150A0890 */
+s32 event_action_trigger(s32 arg0, u32 arg1, u8 *arg2) {
     switch (arg1) {
     case 0:
-        func_150A2D44(arg0, 0);
+        trigger_set_disabled(arg0, 0);
         return 1;
     case 1:
-        func_150A2D44(arg0, 1);
+        trigger_set_disabled(arg0, 1);
         return 1;
     case 2:
-        func_150A2E20(arg0, (*(s32 *)(arg2 + 8)), (*(s32 *)(arg2 + 0xC)));
+        trigger_set_kind_args(arg0, (*(s32 *)(arg2 + 8)), (*(s32 *)(arg2 + 0xC)));
         return 1;
     case 3:
-        func_150A3924(arg0, (*(s16 *)(arg2 + 0xA)), (*(s16 *)(arg2 + 0xE)), (*(s16 *)(arg2 + 0x12)));
+        trigger_set_position(arg0, (*(s16 *)(arg2 + 0xA)), (*(s16 *)(arg2 + 0xE)), (*(s16 *)(arg2 + 0x12)));
         return 0;
     case 4:
-        func_150A3878(arg0, (u16) (*(s16 *)(arg2 + 0xA)), (*(s32 *)(arg2 + 0xC)), (*(s32 *)(arg2 + 0x10)), (*(s32 *)(arg2 + 0x14)), (*(s32 *)(arg2 + 0x18)));
+        trigger_set_fields_masked(arg0, (u16) (*(s16 *)(arg2 + 0xA)), (*(s32 *)(arg2 + 0xC)), (*(s32 *)(arg2 + 0x10)), (*(s32 *)(arg2 + 0x14)), (*(s32 *)(arg2 + 0x18)));
         return 0;
     case 5:
-        func_151C9CBC(*(s32 *)(arg2 + 8) == 0x3E7 ? 2 : (*(s32 *)(arg2 + 8) != 0 ? 0 : 1), (arg0 * 0x34) + D_800D34B8);
+        laser_switch_broadcast(*(s32 *)(arg2 + 8) == 0x3E7 ? 2 : (*(s32 *)(arg2 + 8) != 0 ? 0 : 1), (arg0 * 0x34) + D_800D34B8);
         break;
     }
     return 0;
@@ -31,22 +32,23 @@ s32 func_150A0890(s32 arg0, u32 arg1, u8 *arg2) {
 
 #ifdef NON_MATCHING
 /* Sequence-slot query handler: entry 3 of event_dispatch's handler table D_80088838, called as
- * handler(slot, cmd, args) like func_1509A024 (args[2] = first extra argument, D_800D3C60 = number of words).
+ * handler(slot, cmd, args) like event_query_object (args[2] = first extra argument, D_800D3C60 = number of words).
  * `slot` indexes the 0x34-byte records at D_800D34B8 (the per-slot words +0x17 / +0x18 / +0x1C / +0x20 that
- * func_150A3810 / func_150A3878 read and write). Object ids passed as arguments drop bits 12..15; their kind is
+ * trigger_get_fields / trigger_set_fields_masked read and write). Object ids passed as arguments drop bits 12..15; their kind is
  * bits 12..15: 0x2000 = an object (obj_find_by_spawn, index in D_800CC2D0), 0x9000 = a player / character id. */
-s32 func_150A3184(s32);
-s32 func_150A3264(s32, u32);
-s32 func_150A33C4(s32, s32);
-s32 func_150A3484(s32, s32);
-void func_150A3810(s32, s32 *, s32 *, s32 *, s32 *);
+s32 trigger_find_touching_player(s32);
+s32 trigger_test_camera(s32, u32);
+s32 trigger_plane_side_object(s32, s32);
+s32 trigger_plane_side_camera(s32, s32);
+void trigger_get_fields(s32, s32 *, s32 *, s32 *, s32 *);
 extern s32 D_800D3C60;
 
 #define B9B8_SLOT(i) (D_800D34B8 + (i) * 0x34)
 #define B9B8_OBJ(i) ((u8 *)D_800CC2D0 + (i) * 0x32C)   /* object i of D_800CC2D0 (0x32C each) */
 #define B9B8_INDEX(p) (((u8 *)(p) - (u8 *)D_800CC2D0) / 0x32C)
 
-s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
+/* was func_150A09B8 */
+s32 event_query_trigger(s32 slot, s32 cmd, s32 *args) {
     s32 arg;
     s32 r;
     s32 a, b, flag, c;
@@ -64,10 +66,10 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
             if (obj == NULL) {
                 return 0;
             }
-            r = func_150A29C8(B9B8_INDEX(obj), slot);
+            r = trigger_test_player(B9B8_INDEX(obj), slot);
             break;
         case 0x9000:
-            r = func_150A3264(arg & 0xFFFF0FFF, slot);
+            r = trigger_test_camera(arg & 0xFFFF0FFF, slot);
             break;
         }
         return r == 0;
@@ -75,7 +77,7 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
         return B9B8_SLOT(slot)[0x14];
     case 8:
     case 9:
-        func_150A3810(slot, &a, &b, &flag, &c);
+        trigger_get_fields(slot, &a, &b, &flag, &c);
         if (flag == 0) {
             return 0;
         }
@@ -90,7 +92,7 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
     case 0xC: /* first object of D_800CC2D0 with id args[2] that is attached to this slot */
         for (i = 0; i < 25; i++) {
             obj = B9B8_OBJ(i);
-            if (*(s32 *)obj == args[2] && func_150A29C8(i, slot) == 0) {
+            if (*(s32 *)obj == args[2] && trigger_test_player(i, slot) == 0) {
                 if (cmd == 0xB) {
                     return obj[0x13F] | 0x2000;
                 }
@@ -104,23 +106,23 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
         switch (arg & 0xF000) {
         case 0x2000:
             obj = (u8 *)obj_find_by_spawn(arg & 0xFFFF0FFF);
-            r = func_150A33C4(B9B8_INDEX(obj), slot);
+            r = trigger_plane_side_object(B9B8_INDEX(obj), slot);
             break;
         case 0x9000:
-            r = func_150A3484(arg & 0xFFFF0FFF, slot);
+            r = trigger_plane_side_camera(arg & 0xFFFF0FFF, slot);
             break;
         }
         return r;
     case 0xE:
         return *(s16 *)(B9B8_SLOT(slot) + 2);
     case 0xF:
-        return func_150A3184(slot) != -1;
+        return trigger_find_touching_player(slot) != -1;
     case 0x10:
-        if (func_150A3184(slot) != -1) {
+        if (trigger_find_touching_player(slot) != -1) {
             return 1;
         }
         for (i = 0; i < D_80090130; i++) {
-            if (func_150A3264(i, slot) != 0) {
+            if (trigger_test_camera(i, slot) != 0) {
                 continue;
             }
             /* character i is attached: with a second argument it must not be in state 3 and not attached to
@@ -128,7 +130,7 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
             if (D_800D3C60 == 2 || args[3] == 0) {
                 return 1;
             }
-            if ((*(u8 **)(B9B8_OBJ(i) + 0x31C))[0x78] != 3 && func_150A3264(i, args[2] & 0xFFFF0FFF) == 0) {
+            if ((*(u8 **)(B9B8_OBJ(i) + 0x31C))[0x78] != 3 && trigger_test_camera(i, args[2] & 0xFFFF0FFF) == 0) {
                 return 1;
             }
         }
@@ -152,5 +154,5 @@ s32 func_150A09B8(s32 slot, s32 cmd, s32 *args) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE0A0/func_150A09B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE0A0/event_query_trigger.s")
 #endif

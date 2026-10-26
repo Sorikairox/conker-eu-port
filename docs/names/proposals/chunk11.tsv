@@ -1,0 +1,279 @@
+old	new	confidence	description
+func_151307F0	particle_spawn_ex	high	Allocates a sprite particle node (type 0x2B/0x52/0x47 by kind), copies the 0x70-byte request and an optional 24-byte extra block
+func_151308E4	particle_spawn_basic	high	Wrapper of particle_spawn_ex without the extra block
+func_1513092C	particle_spawn_default	high	Wrapper of particle_spawn_basic with alpha 0xFF and no owner
+func_1513095C	particle_sprite_update	high	Per-tick sprite particle update: life timer, gravity, velocity, alpha fade, size change, animation frames, update/death handlers
+func_1513100C	particle_draw_sprite	high	Draw handler of sprite particles: projects, sizes, culls and emits one textured rectangle with prim/env colours
+func_151318EC	particle_calc_prim_color	med	Computes a particle's primitive RGBA from its colour mode byte +0x70
+func_15131A84	particle_calc_env_color	med	Computes a particle's environment RGBA from its colour mode byte +0x71
+func_15131BBC	particle_calc_colors	med	Computes both env and prim colours of a particle
+func_15131C1C	particle_upd_damp_vel_y	high	Update handler: damps the y velocity by +0xA8 per tick; keeps the particle
+func_15131C4C	particle_upd_damp_vel_xz	high	Update handler: damps the x/z velocity by +0xA8 per tick; keeps the particle
+func_15131C7C	particle_upd_damp_vel	high	Update handler: damps the whole velocity by +0xA8 per tick; keeps the particle
+func_15131CAC	particle_die_retire	high	Death handler: retires the particle node
+func_15131CCC	particle_die_free	high	Death handler: unlinks and frees the particle node
+func_15131CEC	particle_run_hook_bb4	low	Calls the D_80089BB4 handler selected by +0x75 (flag 0x4000) else entry 0
+func_15131D38	particle_run_hook_be4	low	Calls the D_80089BE4 handler selected by +0x75 (flag 0x4000) else entry 0
+func_15131D84	particle_upd_kill	high	Update handler that always returns 0 so the particle dies
+func_15131D98	particle_update_wobble_offset	med	Sets the particle x/z draw offset (+0x4C/+0x54) from cosines of two phase bytes and advances the phases
+func_15131E58	vec_damp_y_per_tick	high	Multiplies vector y by a factor once per frame tick
+func_15131E88	vec_damp_xz_per_tick	high	Multiplies vector x and z by a factor once per frame tick
+func_15131EC8	vec_damp_xyz_per_tick	high	Multiplies vector x, y and z by a factor once per frame tick
+func_15131F14	particle_check_surface_hit	high	Runs the surface hit dispatch with the particle's hit config at +0xA8
+func_15131F34	particle_surface_hit_dispatch	high	When below the reference height, probes the floor and calls the hit config's handler; returns its verdict
+func_1513206C	particle_upd_damp_hit	high	Update handler: damps velocity and checks surface hits (config +0xB0)
+func_151320AC	particle_upd_damp_xz_hit	high	Update handler: damps x/z velocity and checks surface hits (config +0xB0)
+func_151320EC	particle_hit_bounce	high	Surface hit handler: sits the particle on the floor and bounces it; stops all motion when slow
+func_1513219C	particle_run_msg_hook	low	Calls the D_80089C18 message handler selected by +0x75 when flag 0x4000 is set
+func_151321F4	particle_calc_wobble	med	Advances two phase bytes and outputs base + amplitude * cos for each
+func_151322BC	particle_broadcast	high	Broadcasts a message to all sprite particle node types (0x2B, 0x47, 0x52)
+func_1513230C	particle_upd_wobble_size	high	Update handler: wobbles the particle width/height via particle_calc_wobble
+func_1513235C	particle_upd_expand_fade	high	Update handler: size grows with sqrt(t), alpha falls with t^2; dies when t passes its end time
+func_15132454	particle_spawn_smoke_puff	med	Spawns an expanding fading puff particle at a position with random life and lift
+func_15132740	mdl_particle_update	high	Per-frame update of a model particle: motion/landing handlers, life timer, alpha fade, bounds check; destroys when done
+func_1513291C	mdl_particle_run_hook_d50	low	Calls the D_80089D50 handler selected by +0x68 (flag 0x100) else entry 0
+func_15132968	mdl_particle_run_hook_d74	low	Calls the D_80089D74 handler selected by +0x68 (flag 0x100) else entry 0
+func_151329B4	mdl_particle_release	high	Drops the particle count and the model's reference count, unloading the model when unused, then frees its lights
+func_15132AE0	mdl_particle_die_retire	high	Releases a model particle and retires its node
+func_15132B0C	mdl_particle_die_free	high	Releases a model particle and unlinks/frees its node
+func_15132B38	mdl_particle_free_lights	med	Frees the per-player light buffers and the lookat buffer of a model particle
+func_15132BBC	mdl_particle_spawn_ex	high	Creates a model particle from a 0x7C-byte request, loading its model, bounds and per-player light buffers
+func_15132FBC	mdl_particle_spawn	high	Wrapper of mdl_particle_spawn_ex without bounds
+func_15132FF8	mdl_particle_update_matrix	high	Builds the particle's matrix via its D_80089D2C matrix handler; hides, shows or destroys it by the result
+func_151330F0	mdl_particle_draw	med	Draws a model particle: render mode, colour, matrix and its model display list
+func_1513334C	mdl_particle_collide_update	high	Integrates motion and probes floor and walls, calling the landing/wall handlers; 0 ends the particle
+func_1513384C	mdl_particle_squash_update	high	Resets scale, spins and applies the landing squash-and-stretch wobble, restoring the rest position at the end
+func_15133A80	mdl_particle_mtx_rot_scale	high	Matrix handler: rotation, uniform scale and translation from the particle fields
+func_15133AF8	mdl_particle_handle_msg	med	Message handler: retargets or clears the attach target on object swap/delete messages, then the kind hook
+func_15133C18	mdl_particle_model_load	high	Loads a particle model file by id, resolves its display list and registers it
+func_15133CD0	mdl_particle_mtx_rot_scale3	high	Matrix handler: rotation, per-axis scale and translation from the particle fields
+func_15133D30	mdl_particle_integrate	high	Integrates position (with half gravity term), y velocity and rotation by the frame time
+func_15133E04	mdl_particle_fall_update	high	Moves the particle and probes the floor when falling, letting the landing handler decide
+func_15133F44	mdl_particle_land_bounce	high	Landing handler: puts the particle on the floor and scales velocity and spin by restitution (y reflected)
+func_15133FC0	mdl_particle_land_stop	high	Landing handler: puts the particle on the floor and zeroes velocity and spin
+func_15134004	mdl_particle_mtx_attach_bone	high	Matrix handler: copies the bone matrix of the attach target; -1 when gone, 0 when no bones
+func_15134108	mdl_particle_land_bounce_settle	med	Landing handler: bounces with restitution and settles when the vertical speed gets small
+func_151341C8	mdl_particle_land_bounce_sfx_a	med	Bounce landing handler that randomly plays one of 9 impact sounds (0x2DE+)
+func_15134290	mdl_particle_land_bounce_sfx_b	med	Bounce landing handler that randomly plays one of 10 impact sounds (0x1B8+)
+func_15134358	mdl_particle_kill_on_target_msg	med	Message hook: destroys the particle on message 0 naming its attach target
+func_151343AC	mdl_particle_broadcast	high	Broadcasts a message to the model particle node types
+func_151343F4	mdl_particle_emit_tex_seg_a	med	Emits the texture segment commands for the entry at +0x170
+func_15134428	mdl_particle_emit_tex_seg_b	med	Emits the texture segment commands for the entry at +0x174
+func_1513445C	gfx_emit_sprite_tex_segment	med	Emits gSPSegment command(s) for sprite texture frame (and palette) into segment slot arg2
+func_15134548	mdl_particle_emit_tex_segs	med	Emits texture segment commands for every entry of the list at +0x170
+func_151429E0	fx_pick_random_color	high	Picks one of 4 random RGB triples from colour set arg0 of D_8008A500
+func_15142A5C	obj_sub_counter_positive	low	Returns 1 when the s16 at +0x3C of the object's +0x2D0 record is above 0
+func_15142A80	lagrange_cubic_w0	high	Cubic Lagrange basis weight for the sample at -1: (1-t)(t-2)t/6
+func_15142AC0	lagrange_cubic_w1	high	Cubic Lagrange basis weight for the sample at 0: (t+1)(t-1)(t-2)/2
+func_15142B04	lagrange_cubic_w2	high	Cubic Lagrange basis weight for the sample at 1: (2-t)(t+1)t/2
+func_15142B44	lagrange_cubic_w3	high	Cubic Lagrange basis weight for the sample at 2: (t+1)(t-1)t/6
+func_15142B7C	gfx_geometry_mode_cached	high	Emits clear/set geometry mode commands only for bits not already in the cached state
+func_15142C10	gfx_env_color_cached	high	Emits gDPSetEnvColor (with a pending pipe sync) only when the colour differs from the cached one
+func_15142CF0	gfx_prim_color_cached	high	Emits gDPSetPrimColor (with a pending pipe sync) only when the values differ from the cached ones
+func_15142E24	gfx_load_texture_cached	med	Loads a material texture (func_150953F8) only when address or parameters differ from the cached ones
+func_15142FBC	gfx_other_mode_cached	high	Emits gDPSetOtherMode (with a pending pipe sync) only when the mode differs from the cached one
+func_15143044	fx_layer_to_prim_depth	med	Returns the primitive depth 0x7FFF - layer
+func_1514306C	fx_material_tex_addr	med	Returns a material's texture address from the source table selected by kind arg3
+func_15143134	mtx_transform_point_or_origin	high	Transforms a local offset by a model matrix (Mtx or float); a zero/NULL offset yields the matrix translation
+func_151432BC	spawn_region_random_point	high	Random x/z point and vertical span inside a spawn region (disc, deep disc, rotated box or centre line)
+func_151436B4	vec3_from_angles_rad	high	Builds a vector of length arg2 from yaw and pitch in radians
+func_1514373C	vec2_from_angle_rad	high	Splits length arg1 at angle arg0 (radians) into sin/cos components
+func_15143794	vec3_from_angles_byte	high	Builds a vector of length arg2 from byte-angle yaw and pitch
+func_15143834	vec3_from_angles_byte_w	high	Wrapper of vec3_from_angles_byte
+func_15143874	vec2_from_angle_byte	high	Splits length arg1 at byte angle arg0 into sin/cos components
+func_151438D8	map_marker_find	med	Searches map markers (D_800D34B8, index range) for one matching the key fields selected by flag bits
+func_15143D18	clamp_range_to_bounds	high	Orders a min/max pair and clamps it into the (ordered) bounds arg2..arg3
+func_15143DA8	clamp_int_report	high	Clamps *v into the ordered range; returns 1 when raised to the min, 2 when cut to the max, else 0
+func_15143E08	obj_get_yaw_byte	med	Returns the object's yaw (+0x7A) as a byte angle plus a quarter turn
+func_15143E24	obj_get_local_yaw_byte	med	Returns the object's yaw as a byte angle relative to its parent (+0x31C) when it has one
+func_15143E64	vec3_length	high	Returns the length of a 3-float vector
+func_15143E94	fx_try_camera_shake	med	When a player is alive and one passes the check against arg1, starts camera shake arg0 and a random rumble
+func_1514401C	sprite_anim_advance	high	Advances a sprite animation frame by speed * ticks with end flags: die, stop, bounce or wrap
+func_151441A4	fx_calc_color_mode_a	low	Picks an RGBA quadruple from two colour sets by mode argD (fixed, blended or scaled)
+func_151442FC	fx_calc_color_mode_b	low	Picks an RGBA quadruple from two colour sets by mode argD (second variant with more modes)
+func_151444DC	wrap_int_range	high	Wraps an integer into the inclusive range arg2..arg1
+func_15144528	wrap_float_range	high	Wraps a float into the range arg2..arg1
+func_15144598	spawn_region_area	high	Returns the ground area of a spawn region by its shape (disc or box)
+func_1514462C	spawn_region_volume	high	Returns the volume of a spawn region by its shape (cylinder, box, sphere)
+func_1514470C	spawn_region_random_point_3d	high	Random 3D point inside a spawn region (disc, sphere or rotated box) around its centre
+func_15144A74	vec3_dot	high	Returns the dot product of two 3-float vectors
+func_15144AA8	camera_get_yaw_deg	med	Returns camera arg0's angle (+0x380) wrapped into 0..360 degrees
+func_15144B34	camera_get_pos	med	Returns a pointer to camera arg0's position (+0x2F8)
+func_15144B68	wrap_angle_rad	high	Wraps a radian angle into 0..2pi
+func_15144BC8	wrap_angle_deg	high	Wraps a degree angle into 0..360
+func_15144C2C	wrap_byte_angle	high	Wraps an s16 into 0..255 (by steps of 255)
+func_15144C8C	angle_diff_rad	high	Returns the absolute shortest difference between two radian angles
+func_15144CEC	world_to_screen	high	Projects a world point with a view's matrix into viewport x/y, z, w and 1/w; 0 when behind or too far
+func_15144E80	tri_calc_normal	med	Computes the (unnormalised) normal of an s16 triangle from edge cross products; 0 when degenerate
+func_151450B4	vec3_cross	high	Cross product of two 3-float vectors
+func_15145128	vec3_normalize_len	high	Normalises a vector into out, returning its length and inverse; 0 for a zero vector
+func_151451F0	segment_sphere_hit	high	Tests a ray segment of length arg4 against a sphere via ray_sphere_intersect
+func_151452C4	ray_sphere_intersect	high	Intersects a ray with a sphere, outputting the two hit distances; 0 when it misses
+func_151454BC	camera_within_dist	high	Returns 1 when point arg2 lies within distance arg1 of camera arg0
+func_15145548	segment_closest_point	high	Closest point on segment a + t*d to p, with t clamped to 0..1
+func_1514563C	line_closest_point	high	Closest point on line a + t*d to p and its parameter t; 0 for a zero direction
+func_15145740	obj_get_aim_vectors	med	Computes the object's facing vector (yaw and pitch) and optional aim direction vectors
+func_15145974	vec3_to_yaw_pitch_deg	high	Converts a vector to yaw and optional pitch in degrees
+func_15145A0C	curve_table_lookup	low	Returns D_800A548C[arg0 * arg2 * 100] scaled by arg1
+func_15145A50	obj_set_destroyed	med	Ends an object's breaking: state 5 (clearing its parent link) or func_15053694, outside level 51
+func_15145AD8	ray_obj_ellipsoid_hit	med	Tests a ray against an object's y-scaled bounding sphere, returning entry/exit points
+func_15145C90	prop_is_flagged	low	Returns 1 for a negative index, else whether prop arg0 has flag 0x80 at +0x6F
+func_15145CD0	xform_points_ptrs	high	Transforms n points (pointer lists) by a rotation + translation transform
+func_15145DB4	xform_points_array	high	Transforms n points (arrays) by a rotation + translation transform
+func_15145EA4	mtx_transform_points	high	Transforms n points (pointer lists) by an Mtx or float matrix
+func_15146078	vec3_make_basis	med	Builds two vectors perpendicular to normal n (orthonormal basis); 0 for a zero normal
+func_151462C8	model_part_emit_lights	med	Emits the lights of a model part: the object's own set, the level defaults or nearest point lights
+func_151464B8	player_mask_hides_all	med	Returns 1 when none of the active players' bits is set in mask word arg0[1]
+func_15146508	obj_broadcast_replace	med	Broadcasts message 45 telling nodes object arg0 is replaced by arg1
+func_1514654C	model_node_points_to_world	high	Transforms local points by the matrix of a model node of an instance; 0 when something is missing
+func_1514672C	pos_in_world_bounds	high	Returns 1 when a position lies inside the world limits (+-19500, y -9500..19500)
+func_151467A4	fx_random_flicker_update	med	Counts down a timer, picks a new random target in one of two ranges when it expires, eases a value to it
+func_15146E00	obj_fx_point_probe_floor	med	Gets model node 0x13 (point 1) or 0x17 (point 2) position of an object and optionally probes the floor below it
+func_15146EE0	interaction_hook_map_mode	med	Interaction hook: maps interaction mode 0..8 to an entry of D_8008A0B4 with level and object checks; -1 = none
+func_15147008	obj_fx_point_spawn_burst	low	Spawns a kind 5/0x16 effect (func_15151500) with fixed parameters at an object's effect point
+func_15147128	obj_fx_point_impact_b	med	Effect handler: impact particle kind 0xB at the object's effect point
+func_15147148	obj_fx_point_impact_c	med	Effect handler: impact particle kind 0xC at the object's effect point
+func_15147168	obj_fx_point_impact	med	Spawns impact particle kind 0xB/0xC at the object's effect point, plus burst 2 for strength >= 0x73
+func_151472D0	obj_fx_point_effect10	med	Effect handler: impact particle kind 10 at the object's effect point
+func_151473F4	obj_fx_point_splash	med	Effect handler: at the surface below the effect point spawns a debris ring or splash ring, plus a burst when strong
+func_151475B0	obj_fx_point_spawn_sparkle	low	Effect handler: spawns a func_1514CBE8 effect with random size and life at the object's effect point
+func_1514766C	fx_spawn_dust_puff	med	Spawns a brownish puff sprite particle at a position with random direction, size and alpha
+func_15147888	obj_fx_point_impact_a4	med	Effect handler: impact particle from D_800900A4 at the effect point, plus burst 0 when strong
+func_151479E8	obj_fx_point_impact_bc	med	Effect handler: impact particle from D_800900BC at the effect point, plus burst 6 when strong
+func_15147B48	obj_fx_point_impact_d0	med	Effect handler: impact particle from D_800900D0 at the effect point, plus burst 0xB when strong
+func_15147CB0	fxrec_update	high	Per-frame update of an effect record: life timer and three kind handler tables; destroys the node when done
+func_15147E40	fxrec_free_data	low	Releases the effect record's +0x84 block via func_151D5E30
+func_15147E64	fxrec_die_retire	high	Frees an effect record's data and lights and retires its node
+func_15147E98	fxrec_die_free	high	Frees an effect record's data and lights and unlinks/frees its node
+func_15147ECC	fxrec_free_lights	med	Frees the per-player light buffers and the lookat buffer of an effect record
+func_15147F50	fxrec_dispatch_free	high	Calls the record kind's (+0x20) free handler from D_8008A690
+func_15147FA0	fxrec_dispatch_b	low	Calls the record kind's (+0x20) handler from D_8008A6E0
+func_15147FF0	fxrec_spawn	high	Allocates an effect record node (type 0x22/0x4D) with data blocks, handler kinds and optional per-player lights
+func_151481BC	fxrec_draw	med	Emits the record's lights then calls its draw handler D_8008A644[+0x31]
+func_1514828C	fxrec_handle_msg	med	Calls the record kind's message handler D_8008A730 when present
+func_151482D4	fxrec_broadcast	high	Broadcasts a message to the effect record node types
+func_15148310	trail_spawn	high	Creates a trail effect record (fxrec_spawn) and fills its motion block and render block from the requests
+func_15148428	trail_step	high	Per-frame step of a trail: motion handlers, alpha fade-in, end handler; stores the oldest point
+func_151485AC	trail_draw	high	Draws a trail as a camera-facing triangle strip with texture, colours and render mode
+func_15148E34	trail_grow	high	Motion handler 1: moves the points and adds one at the head per frame until the ring is full
+func_15149064	trail_move_points	high	Motion handler 2: moves all trail points by velocity and gravity
+func_15149114	trail_fall	high	Motion handler 3: moves the points and tests the oldest for a floor hit, calling the hit handler
+func_15149350	trail_shrink	high	Motion handler 4: drops the newest point per frame and re-ramps texture t; ends below 3 points
+func_15149468	trail_start_shrink	high	Hit handler: switches the trail's motion handler to 4 (shrink); keeps it
+func_1514948C	trail_spawn_directed	high	Spawns a trail of type n at a position with velocity from speed and byte pitch/yaw angles
+func_15149638	trail_alpha_from_timer	med	Sets the trail alpha to timer * 8 (max 255)
+func_15149674	trail_die_retire	med	Free handler: frees the record and retires the node (fxrec_die_retire)
+func_15149AC0	spark_spawn_from_desc	high	Spawns a spark sprite record from a 0x48-byte descriptor and copies its three wave channels to +0x110
+func_15149DA8	spark_wave_update	med	Spark handler: randomly retargets width, height and colour from the wave channels and eases toward them
+func_1514A004	spark_grow_in	med	Spark handler: eases width/height to their targets, then switches to handler 0xD; resets near end of life
+func_1514A164	spark_shrink	high	Spark handler: shrinks width/height by a factor; dies below size 2
+func_1514A1C8	spark_shrink_rise	high	Spark handler: shrinks, accelerates upward; dies above a height limit or below size 4
+func_1514A288	spark_build_quad_vtx_a	low	Builds the double-buffered 4-vertex quad of a spark record (variant A)
+func_1514A434	spark_die_spawn_burst	med	Death handler: spawns a func_1518CFF0 burst with random colours at the spark position; returns 0
+func_1514A540	spark_build_quad_vtx_b	low	Builds the double-buffered 4-vertex quad of a spark record (variant B)
+func_1514A70C	spark_flicker_update	med	Spark handler: random timed retargets of size and colour, eased each frame
+func_1514A8F0	spark_grow_in_fast	med	Spark handler: eases width/height to their targets (0.7), then switches to handler 4
+func_1514AA08	spark_shrink_fade	high	Spark handler: shrinks by a factor and fades alpha with the timer near the end
+func_1514AA5C	streak_move	med	Streak handler: tail takes the old head position; head moves by damped velocity with gravity
+func_1514AB04	streak_move_lag_tail	med	Streak handler: moves head and tail by velocity, then pulls the tail toward the head by a lag factor
+func_1514AC10	streak_build_vtx	low	Builds the double-buffered vertices of a streak record from head/tail and camera
+func_1514B0CC	spark_spawn_burst	med	Spawns count sparks at a position with random directions, speeds, sizes and lives
+func_1514B30C	spark_spawn_random	med	Spawns one spark with random size, speed and life at a position
+func_1514B4E4	spark_shrink_fall	high	Spark handler: shrinks and falls with gravity; dies below size 10
+func_1514B5A4	lava_spark_fountain	med	Spawns a ring fountain of sparks with random speeds and lives (third burst of lava_splash_effect)
+func_1514B8D4	lava_splash_effect	high	When ground is near, spawns the lava impact bursts, spark fountain and a glow particle at the point
+func_1514BDB4	trail_fade_out	med	Trail handler: fades the record alpha over the last 16 timer frames
+func_1514BDEC	effect3d_grow_size	high	Effect handler: grows width and height by the rate at +0x4C
+func_1514BE20	effect3d_fade_out	high	Effect handler: fades the alpha (+0x5C) over the last 16 timer frames
+func_1514BE54	flame_spawn	med	Spawns a flickering flame sprite (effect3d_spawn_full, template D_800A4AA0) with flicker params at +0x110
+func_1514C178	flame_flicker_update	med	Randomly retargets flame width, height and colour over time and eases toward them
+func_1514C370	flame_flicker	med	Flame handler: flickers using the parameter block at +0x110
+func_1514C390	effect3d_look_follow	high	Moves the look point toward 100 above the position and keeps it at distance 100
+func_1514C4C0	effect3d_look_set_up	high	Sets the look point 100 above the position
+func_1514C4EC	flame_flicker_b	med	Second flame handler entry: flickers using the parameter block at +0x110
+func_1514C50C	flame_drift_update	low	Damps the drift velocity in the +0x110 block per tick and moves the flame toward a target with D_800BEDC8
+func_1514C7C8	flame_drift_look_follow	med	Flame handler: drifts and lets the look point follow
+func_1514C7F8	flame_drift_look_up	med	Flame handler: drifts and snaps the look point straight up
+func_1514C828	flame_start_end	low	Switches the flame to handler 0x24, resets the timer from +0x164 and sets flag 0x08000000
+func_1514C860	spawn_ring_emit	high	Emits count points on a horizontal circle to the spawn handler D_8008ADA0[kind] (mode 1)
+func_1514C9E0	spawn_line_emit	high	Emits evenly spaced points on a segment to the spawn handler D_8008ADA0[kind] (mode 0)
+func_1514CBE8	spawn_circle_random_emit	high	Emits count points at random byte angles on a horizontal circle to the spawn handler (mode 2)
+func_1514CDC8	spawn_arc_emit	high	Emits random points on a vertical arc facing yaw to the spawn handler D_8008ADA0[kind] (mode 3)
+func_1514CFF0	char_fx_handler_indices	high	Picks the attach handler indices for a character by type, game mode and sub-type; returns which were set
+func_1514D6CC	char_fx_init	high	Clears old effects and runs the character's attach handlers (D_8008AE10) by type, mode and sub-type
+func_1514D880	char_fx_clear_all	high	Runs each attached effect node's end handler and destroys every node in the object's list (+0x2F4)
+func_1514DA28	char_fx_slot_derives	high	Returns 1 when effect slot state arg0 is arg1 or derives from it (recursive over D_8008AF88)
+func_1514D3B0	char_fx_send_event	high	Sends an event to every attached effect node whose slot matches or derives from the given one
+func_1514DAD4	char_fx_fixed_beam	high	Attach handler: spawns a beam from a fixed world point to the object and attaches it in slot 0x15
+func_1514DBBC	char_fx_glow_light_j5	med	Attach handler: sprite effect on joint 5 (slot 0xA) plus a red light on joint 5
+func_1514DEDC	char_fx_nop_a	high	Empty attach handler
+func_1514DEE8	char_fx_rec32_attach	low	Attach handler: creates a func_15159140 record with a 0x20-byte block (size 12) and attaches it in slot 0x13
+func_1514DF64	char_fx_rec32_ad010_attach	low	Attach handler: char_fx_rec32_attach plus a func_151AD010 effect (20) in slot 0x14
+func_1514DFA8	char_fx_rec28_attach	low	Attach handler: creates a func_15159140 record with a 0x1C-byte block and attaches it in slot 0x13
+func_1514E014	char_fx_rec8_attach	low	Attach handler: sets flag 2 at +0x94, creates a func_15159140 record with an 8-byte block in slot 0x13
+func_1514E088	char_fx_rec0_attach	low	Attach handler: creates a func_15159140 record without data and attaches it in slot 0x13
+func_1514E0C8	char_fx_nop_b	high	Empty attach handler
+func_1514E0D4	char_fx_level14_attach	low	Attach handler: calls func_151B2610 only in level 0x14
+func_1514E108	char_fx_bundle_attach_a	med	Attach handler: forwards to char_fx_bundle_attach
+func_1514E128	char_fx_light_j2	med	Attach handler: adds a white light on joint 2
+func_1514E1A8	char_fx_1500ee18_attach	low	Attach handler: calls func_1500EE18 for the object
+func_1514E1CC	char_fx_1d1510_attach	low	Attach handler: calls func_151D1510 kind 0 for the object
+func_1514E1F4	char_fx_set_flag2	high	Attach handler: sets flag 2 in the object's +0x94 word
+func_1514E208	char_fx_set_flags710	high	Attach handler: sets flags 0x710 in the object's +0x94 word
+func_1514E21C	char_fx_setup_attachments	med	Sets +0x9C to 0x6000 and runs setup command lists 0x23 and 0x44 on the object
+func_1514E264	char_fx_setup_vehicle	low	Sets byte +0x94 of the object's parent (+0x31C) and runs setup command list 0x17
+func_1514E29C	char_fx_setup_attachments_1	med	Attach handler: char_fx_setup_attachments (entry 1)
+func_1514E2BC	char_fx_setup_attachments_2	med	Attach handler: char_fx_setup_attachments (entry 2)
+func_1514E2DC	char_fx_setup_attachments_3	med	Attach handler: char_fx_setup_attachments (entry 3)
+func_1514E2FC	char_fx_setup_attachments_4	med	Attach handler: char_fx_setup_attachments (entry 4)
+func_1514E31C	char_fx_setup_attachments_5	med	Attach handler: char_fx_setup_attachments (entry 5)
+func_1514E33C	char_fx_setup_attachments_6	med	Attach handler: char_fx_setup_attachments (entry 6)
+func_1514E35C	char_fx_setup_attachments_7	med	Attach handler: char_fx_setup_attachments (entry 7)
+func_1514E37C	char_fx_setup_attachments_8	med	Attach handler: char_fx_setup_attachments (entry 8)
+func_1514E39C	char_fx_nop_c	high	Empty attach handler
+func_1514E3A8	char_fx_nop_d	high	Empty attach handler
+func_1514E3B4	char_fx_nop_e	high	Empty attach handler
+func_1514E3C0	char_fx_setup_attachments_if	med	Attach handler: char_fx_setup_attachments when bit 8 of D_800D2E4C[0x11] is set
+func_1514E3F8	char_fx_nop_f	high	Empty attach handler
+func_1514E404	char_fx_beam_light_setup	med	Attach handler: beam light, setup list 0x3C and a joint light attached in slot 0x19
+func_1514E540	char_fx_set_variant	low	Sets +0x65 to func_15083FB0(9) + 1 and flags 0x34 at +0x101
+func_1514E57C	char_fx_glow_attach_a	low	Attach handler: sprite effect (size 20) attached in slot 6 plus func_151D7A60 kind 5
+func_1514E704	char_fx_glow_attach_b	low	Attach handler: sprite effect (size 16) attached in slot 6 plus func_151D7A60 kind 5
+func_1514E88C	char_fx_object_glow	high	Attach handler: sprite glow on joint 0xC in slot 7 plus a light on joint 0xC
+func_1514EA78	char_fx_effect_a5cb0	med	Attach handler: character effect preset D_800A5CB0 (slot 0xD) plus a positional light (slot 0x18)
+func_1514EB28	char_fx_effect_a5cc4	med	Attach handler: character effect preset D_800A5CC4 (slot 0xD) plus a positional light (slot 0x18)
+func_1514EBD8	char_fx_effect_a5cd8	med	Attach handler: character effect preset D_800A5CD8 (slot 0xD) plus a positional light (slot 0x18)
+func_1514EC88	char_fx_effect_a5cec	med	Attach handler: character effect preset D_800A5CEC (slot 0xE) plus a positional light (slot 0x18)
+func_1514ED38	char_fx_effect_a5d00	med	Attach handler: character effect preset D_800A5D00 (kind 7) in slot 0xF
+func_1514ED94	char_fx_end_nop	high	Empty end handler of an attached effect
+func_1514EDA0	char_fx_end_destroy	high	End handler: destroys the attached effect node
+func_1514EDC0	char_fx_end_char_effect	med	End handler: cleans up a character effect record and destroys it
+func_1514EDEC	char_fx_end_15f10c	low	End handler: passes the effect to func_1515F10C
+func_1514EE0C	char_fx_evt_visibility	high	Event handler: 0 toggles, 1 sets, 2 clears the effect's visible flag; other events unhandled
+func_1514EE90	char_fx_evt_visibility_linked	med	Event handler: visibility events that also clear the linked record's flag +0x30 when hiding
+func_1514EF4C	char_fx_evt_visibility_linked_b	med	Event handler: forwards to char_fx_evt_visibility_linked
+func_1514EF6C	char_fx_evt_visibility_b	med	Event handler: forwards to char_fx_evt_visibility
+func_1514EF8C	char_fx_evt_set_mode	med	Event handler: events 3..12 switch the character effect mode (func_1518E8EC) 2/3/5/6; else visibility
+func_1514F0DC	char_fx_evt_visibility_c	med	Event handler: forwards to char_fx_evt_visibility
+func_1514F0FC	char_fx_evt_accept	high	Event handler that accepts every event and does nothing
+func_1514F114	char_fx_node_alloc	high	Allocates an attached-effect node (type 0x24) holding the effect pointer and its slot
+func_1514F18C	char_fx_attach	high	Links an effect into the object's attached list in a slot; on failure runs its end handler or destroys it
+func_1514F250	char_fx_find_slot	high	Finds the first attached node with the given slot; returns found and the node
+func_1514F2AC	char_fx_find_effect	high	Finds the first attached node holding the given effect pointer; returns found and the node
+func_1514F2FC	char_fx_detach	high	Unlinks an attached node from the object's list, runs the end handler and destroys the node
+func_1514EDF0	char_fx_detach_effect	high	Detaches every attached node that holds the given effect
+func_1514F3E0	char_fx_15c3c0_attach	low	Attach handler: func_1515C3C0 effect for the object (300 frames) in slot 0x16
+func_1514F43C	char_fx_fire_start	high	Attach handler: light on joint 1 (slot 0x19) plus a fire sprite effect on joint 1
+func_1514F680	char_fx_bundle_attach_b	med	Attach handler: forwards to char_fx_bundle_attach
+func_1514F6A0	char_fx_evt_link_flag	med	Event handler: 0xD / 0xE clear / set byte 9 of the linked record; else visibility events
+func_1514F704	char_fx_bundle_attach	med	Spawns a character's effect bundle: several effect spawners and two joint-1 lights (one in slot 0x19)
+func_1514F878	char_fx_beam_light_j5	med	Attach handler: beam light on joint 5
+func_1514F93C	char_fx_spawn_linked_3a	low	Attach handler: spawns a type 0x3A effect object (300 frames) linked to the object
+func_1514F9BC	char_fx_effect_a5d68	med	Attach handler: character effect preset D_800A5D68 in slot 0xD
+func_1514FA18	char_fx_d7a60_kind1	low	Attach handler: func_151D7A60 kind 1 for the object
+func_1514FA48	char_fx_d7a60_kind2	low	Attach handler: func_151D7A60 kind 2 for the object
+func_1514FA78	char_fx_d7a60_kind3	low	Attach handler: func_151D7A60 kind 3 for the object
+func_1514FAA8	char_fx_d7a60_kind4	low	Attach handler: func_151D7A60 kind 4 for the object
+func_1514FAD8	char_fx_glow_spawn	med	Attach handler: object_glow_spawn of the default kind for the object
+func_1514FB00	char_fx_glow_smoke	med	Attach handler: obj_glow_smoke_attach plus obj_spawn_effect_85
+func_1514FB3C	char_fx_0c0fc0_attach	low	Attach handler: func_150C0FC0 with a block (obj, id, 0.35, 20, 300, 4)

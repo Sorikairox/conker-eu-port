@@ -1,4 +1,4 @@
-# P259 func_1508A41C (mode_pick_mid_range_object) mutants: sed % setup names
+# P259 mode_pick_mid_range_object (mode_pick_mid_range_object) mutants: sed % setup names
 s/f32 best = -1000000.0f;/f32 best = -999990.0f;/ % justlow
 s/s32 best_i = -1;/s32 best_i = 0;/ % nomask verylow
 s/state + player \* 4 + 0x15C/state + player * 4 + 0x160/ % p0 p0far

@@ -1,4 +1,4 @@
-# P249 func_151893B8 (trail_matrix_history_push) mutants: sed % setup names
+# P249 afterimage_history_push (trail_matrix_history_push) mutants: sed % setup names
 s/n = rec\[1\];/n = rec[2];/ % n3c0
 s/(rec + 0x10))\[4\]);/(rec + 0x10))[5]);/ % n3c0
 s/total = per \* n;/total = per * (n + 1);/ % n3c1

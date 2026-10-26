@@ -1,5 +1,5 @@
 # P259 obj_slots_swap (object_slots_swap) mutants: sed % setup names
-s/func_15146508(a, b);/func_15146508(b, a);/ % base
+s/obj_broadcast_replace(a, b);/obj_broadcast_replace(b, a);/ % base
 s/bcopy(b, \&tmp, sizeof(struct127));/bcopy(a, \&tmp, sizeof(struct127));/ % base
 s/bcopy(a, b, sizeof(struct127));/bcopy(b, a, sizeof(struct127));/ % base
 s/b->unk127 = ib;/b->unk127 = ia;/ % base
@@ -15,7 +15,7 @@ s/a->unk144 = p144;/;/ % base
 s/(u8 \*) \&D_800DBFF0\[ib\] + 0x3D4)/(u8 *) \&D_800DBFF0[ib] + 0x3D0)/ % base
 s/= b->unk31C;/= a->unk31C;/ % base
 s/b->unk31C + 0x197) = 0;/a->unk31C + 0x197) = 0;/ % base
-s/func_150341B4(b->unique_id, a->unique_id);/func_150341B4(a->unique_id, b->unique_id);/ % base
+s/attachment_swap_owner_ids(b->unique_id, a->unique_id);/attachment_swap_owner_ids(a->unique_id, b->unique_id);/ % base
 s/        b->unk2D4 = NULL;/        ;/ % base
 s/if (b->unk2D4 != NULL) {/if (a->unk2D4 != NULL) {/ % base a2d4
 s/node_destroy((struct102 \*) a->unk2D4);/node_destroy((struct102 *) b->unk2D4);/ % both2d4 a2d4

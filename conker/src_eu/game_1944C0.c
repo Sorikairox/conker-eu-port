@@ -307,7 +307,7 @@ void *node_render_layers_draw(void *arg0, s32 group, s16 arg2, s32 list) {
 #endif
 /* was func_15167A68 */
 void *node_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5) {
-    struct_eu_node *node = (struct_eu_node *)func_10003C6C(arg2, 1, arg3, 0, arg5);
+    struct_eu_node *node = (struct_eu_node *)heap_alloc_tagged(arg2, 1, arg3, 0, arg5);
 
     if (node != NULL) {
         node->unk1 = arg1;
@@ -371,9 +371,9 @@ void node_sprite_quad_update(struct_eu_15167B44 *arg0) {
     }
 }
 #ifdef NON_MATCHING
-Gfx *func_15142E24(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-Gfx *func_15095B70(Gfx *gfx, u8 *quad);
+Gfx *gfx_load_texture_cached(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
+Gfx *sprite_draw_at_world_depth(Gfx *gfx, u8 *quad);
 extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
 
 // sprite_quad_draw: P210: render-layer draw callback (D_8008B848 layer 3): draws the textured quad of node `obj`.
@@ -396,7 +396,7 @@ s32 node_sprite_quad_draw(s32 gdl, u8 *obj, s16 player) {
 
     /* the asm stores the word 1 at the flag's address; the byte the callees read (big-endian) is 0 */
     flag = 0;
-    gfx = func_15142E24((Gfx *)gdl, (s32)tex, frame << 8, 2, 0x100, 0x100, (*(s32 **)tex)[frame >> 8], 5, (s32)&quad,
+    gfx = gfx_load_texture_cached((Gfx *)gdl, (s32)tex, frame << 8, 2, 0x100, 0x100, (*(s32 **)tex)[frame >> 8], 5, (s32)&quad,
                         &flag, 3);
     quad.x = *(s16 *)(obj + 0x18);
     quad.y = *(s16 *)(obj + 0x1A);
@@ -407,8 +407,8 @@ s32 node_sprite_quad_draw(s32 gdl, u8 *obj, s16 player) {
     quad.bD = 0;
     /* the asm compares the s8 at obj +0x22 with 0xFF (entry 9), which never matches: always entry 3 */
     mode = &D_800A4EA8[3 * 2];
-    gfx = func_15142FBC(gfx, 0x2C00, (mode[1] | mode[0]) | 4, &flag);
-    return (s32)func_15095B70(gfx, (u8 *)&quad);
+    gfx = gfx_other_mode_cached(gfx, 0x2C00, (mode[1] | mode[0]) | 4, &flag);
+    return (s32)sprite_draw_at_world_depth(gfx, (u8 *)&quad);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_sprite_quad_draw.s")
@@ -536,13 +536,13 @@ void node_sprite_update(u8 *n) {
 #endif
 #ifdef NON_MATCHING
 /* P186 */
-Gfx *func_15142E24(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
+Gfx *gfx_load_texture_cached(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
 Gfx *gfx_set_combine_mode(Gfx *gfx, u8 combine, u8 *flag);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *flag);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *flag);
-Gfx *func_15095B70(Gfx *gfx, u8 *quad);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
+Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *flag);
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *flag);
+Gfx *sprite_draw_at_world_depth(Gfx *gfx, u8 *quad);
 extern s32 D_800D30BC;
 extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
 extern u8 D_80090BAC[];
@@ -580,7 +580,7 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
     if ((u32) img >= 0x10000000) {
         img = ((s32 *) img)[*(s16 *) (obj + 0x1C) >> 8];
     }
-    gfx = func_15142E24(gfx, (s32) tex, *(s16 *) (obj + 0x1C) << 8, 2, 0x100, 0x100, img, 5, (s32) &quad, &flag, 3);
+    gfx = gfx_load_texture_cached(gfx, (s32) tex, *(s16 *) (obj + 0x1C) << 8, 2, 0x100, 0x100, img, 5, (s32) &quad, &flag, 3);
 
     quad.x = *(s16 *) (obj + 0x20);
     quad.y = *(s16 *) (obj + 0x22);
@@ -620,25 +620,25 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
         u8 combine = obj[0x15];
         u8 entry = obj[0x17];
 
-        gfx = func_15142B7C(gfx, 5, 0);
+        gfx = gfx_geometry_mode_cached(gfx, 5, 0);
         gfx = gfx_set_combine_mode(gfx, combine, &flag);
         mode = &D_800A4EA8[entry * 2];
-        gfx = func_15142FBC(gfx, ((flags & 0x200) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
+        gfx = gfx_other_mode_cached(gfx, ((flags & 0x200) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
                             (mode[1] | mode[0]) | 4, &flag);
     } else if (tex[0xA] != 5) {
         gfx = gfx_set_combine_mode(gfx, 13, &flag);
-        gfx = func_15142FBC(gfx, D_800D30BC | 0x2CA0, (D_800A4EA8[3 * 2 + 1] | D_800A4EA8[3 * 2]) | 4, &flag);
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (D_800A4EA8[3 * 2 + 1] | D_800A4EA8[3 * 2]) | 4, &flag);
     } else if (flags & 0x10) {
         /* (the asm also holds an unreachable kind 3 branch here: combiner 14 / entry 3) */
         gfx = gfx_set_combine_mode(gfx, 13, &flag);
-        gfx = func_15142FBC(gfx, D_800D30BC | 0x2CA0, (D_800A4EA8[18 * 2 + 1] | D_800A4EA8[18 * 2]) | 4, &flag);
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, (D_800A4EA8[18 * 2 + 1] | D_800A4EA8[18 * 2]) | 4, &flag);
     } else {
         gfx = gfx_set_combine_mode(gfx, 15, &flag);
-        gfx = func_15142FBC(gfx, D_800D30BC | 0x100000 | 0x2CA0, (D_800A4EA8[17 * 2 + 1] | D_800A4EA8[17 * 2]) | 4,
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x100000 | 0x2CA0, (D_800A4EA8[17 * 2 + 1] | D_800A4EA8[17 * 2]) | 4,
                             &flag);
     }
 
-    gfx = func_15142CF0(gfx, 1, 0, obj[0x3C], obj[0x3D], obj[0x3E], obj[0x3F], &flag);
+    gfx = gfx_prim_color_cached(gfx, 1, 0, obj[0x3C], obj[0x3D], obj[0x3E], obj[0x3F], &flag);
     if (flags & 1) {
         r = obj[0x40];
         g = obj[0x41];
@@ -654,8 +654,8 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player) {
     } else {
         r = g = b = 0;
     }
-    gfx = func_15142C10(gfx, r, g, b, 0, &flag);
-    return (s32) func_15095B70(gfx, (u8 *) &quad);
+    gfx = gfx_env_color_cached(gfx, r, g, b, 0, &flag);
+    return (s32) sprite_draw_at_world_depth(gfx, (u8 *) &quad);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/node_billboard_draw.s")
@@ -858,7 +858,7 @@ void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2) {
         }
     }
 }
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 extern s16 D_800DD5F0;
 extern s16 D_800DD5F2;
 extern s16 D_800DD5F4;
@@ -887,7 +887,7 @@ Gfx *node_model_fx_draw(Gfx *gfx, u8 *arg1, s32 arg2) {
         break;
     }
     flag = 0;
-    gfx = func_15142FBC(gfx, 0x8ACA0, mode, &flag);
+    gfx = gfx_other_mode_cached(gfx, 0x8ACA0, mode, &flag);
     if (arg1[0xED] == 1) {
         gDPSetCombineLERP(gfx++, TEXEL0, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0, TEXEL0, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0);
     }
@@ -990,13 +990,13 @@ void node_broadcast_all(s32 arg0, u8 arg1) {
     node_broadcast_range(0, 0x68, arg0, arg1);
 }
 void node_free_if_owner_msg(struct102 *arg0, u8 *arg1, u8 arg2);
-void func_15143D18(s32 *, s32 *, s32, s32);
+void clamp_range_to_bounds(s32 *, s32 *, s32, s32);
 /* was func_15169070 */
 void node_broadcast_range(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     s32 j;
     s32 i;
 
-    func_15143D18(&arg0, &arg1, 2, 0x68);
+    clamp_range_to_bounds(&arg0, &arg1, 2, 0x68);
     for (j = arg0; j < arg1; j++) {
         struct_eu_node *node;
 
@@ -1179,7 +1179,7 @@ void node_retire(struct102 *arg0) {
 /* was func_15169824 */
 void node_unlink_free(struct102 *arg0) {
     node_list_unlink(arg0);
-    func_10004074(arg0);
+    heap_free(arg0);
 }
 
 /* was func_15169850 */

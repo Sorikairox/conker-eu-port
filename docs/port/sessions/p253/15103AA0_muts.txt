@@ -2,7 +2,7 @@
 s/e->x = (s32) \*(f32 \*) (obj + 0x14);/e->x = (s32) *(f32 *) (obj + 0x18);/ % q
 s/s32 timer = state & 0x7FFF;/s32 timer = state \& 0xFFFF;/ % cnt flagfire
 s/(\*sound << 16) | (state & 0xFFFF);/(*sound << 16) | (state \& 0x7FFF);/ % q
-s/func_10010344(0x5B0, (struct127 \*) obj, -25000, e->unkA, e->unk8);/func_10010344(0x5B0, (struct127 *) obj, 25000, e->unkA, e->unk8);/ % q
+s/actor_sound_play2(0x5B0, (struct127 \*) obj, -25000, e->unkA, e->unk8);/actor_sound_play2(0x5B0, (struct127 *) obj, 25000, e->unkA, e->unk8);/ % q
 s/if ((u32) timer <= (u32) D_800BE9E4)/if ((u32) timer < (u32) D_800BE9E4)/ % fire
 s/e->state &= ~0x7FFF;/e->state \&= ~0xFFFF;/ % fire
 s/e->sound = state >> 16;/e->sound = state;/ % fire
@@ -11,7 +11,7 @@ s/if (e->voice == 0) {/if (e->voice != 0) {/ % novoice stop
 s/return 1;/return 0;/ % novoice
 s/if (state != 0) {/if (state != 0x56788000) {/ % flag zero
 s/if (!(state & 0x8000))/if (!(state \& 0x4000))/ % flag
-s/func_1000F85C(e->voice, -0x8000, 2);/func_1000F85C(e->voice, -0x8000, 3);/ % stop
+s/sound_voice_set_param(e->voice, -0x8000, 2);/sound_voice_set_param(e->voice, -0x8000, 3);/ % stop
 s/^            e->state = 0;$/            ;/ % stop
 s/e->flags &= ~0x80;/e->flags \&= ~0x88;/ % zero
 s/(state & ~0x7FFF) | timer/(state \& ~0xFFFF) | timer/ % cnt

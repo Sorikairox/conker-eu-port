@@ -3,29 +3,31 @@
 #include "variables.h"
 
 
-s32 func_1504715C(s32, u8 *);
-s32 func_15046F70(f32 *, s32, f32, s32);
+s32 hitinfo_from_obj_floor(s32, u8 *);
+s32 collision_floor_probe(f32 *, s32, f32, s32);
 extern f32 D_800A09B0[3];
 extern f32 D_800A09BC[3];
 
-s32 func_150CB5E0(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
+/* was func_150CB5E0 */
+s32 obj_fx_point_water_entry(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     f32 sp2C[3];
 
     if ((arg3 != 1) && (arg3 != 2)) {
         return 0;
     }
-    func_15143134((arg3 == 1) ? D_800A09BC : D_800A09B0, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0xA00 : *(u8 **)(arg1 + 0x1D4) + 0xBC0);
+    mtx_transform_point_or_origin((arg3 == 1) ? D_800A09BC : D_800A09B0, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0xA00 : *(u8 **)(arg1 + 0x1D4) + 0xBC0);
     if (arg2 == 0) {
         return 1;
     }
     sp2C[0] = arg0[0];
     sp2C[1] = arg0[1] + 100.0f;
     sp2C[2] = arg0[2];
-    func_1504715C(arg2, arg1);
-    return func_15046F70(sp2C, 0, arg0[1] - 500.0f, arg2);
+    hitinfo_from_obj_floor(arg2, arg1);
+    return collision_floor_probe(sp2C, 0, arg0[1] - 500.0f, arg2);
 }
 
-s32 func_150CB6E0(s32 arg0, s32 arg1) {
+/* was func_150CB6E0 */
+s32 water_entry_effect_id(s32 arg0, s32 arg1) {
     return 11;
 }
 
@@ -33,9 +35,9 @@ s32 func_150CB6E0(s32 arg0, s32 arg1) {
 /* P296 */
 extern s32 D_800BEE08;
 extern u8 *D_800D9D00;
-void func_150CD2A0(f32, f32 *, f32 *, f32 *);
-void func_1514CBE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
-s32 func_1518B140(u8 *arg0, s32 arg1, u8 arg2);
+void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
+void spawn_circle_random_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
+s32 timed_queue_push(u8 *arg0, s32 arg1, u8 arg2);
 void *memcpy(void *, const void *, s32);
 
 /* rodata D_800A09C8 / D_800A09CC / D_800A09D0 (bit-exact copies: the NM link drops this file's .late_rodata) */
@@ -46,12 +48,13 @@ static const f32 sDiveScaleB[1] = { 0.001f };      /* 0x3A83126F */
 /* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
 #define DIVE_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
 
-// object_water_entry_splash: D_8008A0B4 handler (sibling of func_151AFC84): when obj has a model (+0x1D4) and
-// func_150CB5E0 finds its effect point (pos) and the surface under it for mode arg1 (1 / 2), sends event 7 to the
-// current player record, starts a ripple (func_151D5404) unless obj flag 0x2000 (+0xF4) is set, spawns a type 0x4C
-// (mode 1) / 0x4B splash particle tinted by func_150CD2A0's colour of pos z (registered with func_1518B140, else
-// released) and two rings (func_1514CBE8: white, then tinted). arg2 unused.
-void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
+// object_water_entry_splash: D_8008A0B4 handler (sibling of object_ground_splash): when obj has a model (+0x1D4) and
+// obj_fx_point_water_entry finds its effect point (pos) and the surface under it for mode arg1 (1 / 2), sends event 7 to the
+// current player record, starts a ripple (rumble_all_players_at) unless obj flag 0x2000 (+0xF4) is set, spawns a type 0x4C
+// (mode 1) / 0x4B splash particle tinted by ground_colour_by_depth's colour of pos z (registered with timed_queue_push, else
+// released) and two rings (spawn_circle_random_emit: white, then tinted). arg2 unused.
+/* was func_150CB6F4 */
+void object_water_entry_splash(u8 *obj, s32 arg1, s32 arg2) {
     struct {
         s16 r, g, b, a, z;
     } verts[4];
@@ -76,7 +79,7 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
     } tail;
     u8 ringCol[4];
     f32 r, g, b;
-    s32 ground[9];          /* func_150CB5E0's surface record: [0] = height (f32), +4 passed on */
+    s32 ground[9];          /* obj_fx_point_water_entry's surface record: [0] = height (f32), +4 passed on */
     f32 pos[3];
     u8 cr, cg, cb;
     s32 i;
@@ -88,14 +91,14 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
     if (*(void **) (obj + 0x1D4) == NULL) {
         return;
     }
-    if (func_150CB5E0(pos, obj, (s32) ground, (u8) arg1) == 0) {
+    if (obj_fx_point_water_entry(pos, obj, (s32) ground, (u8) arg1) == 0) {
         return;
     }
     camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
     if (!(*(s32 *) (obj + 0xF4) & 0x2000)) {
-        func_151D5404((struct17 *) pos, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
+        rumble_all_players_at((struct17 *) pos, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
     }
-    func_150CD2A0(pos[2], &r, &g, &b);
+    ground_colour_by_depth(pos[2], &r, &g, &b);
     cr = DIVE_F2U(r);
     cg = DIVE_F2U(g);
     cb = DIVE_F2U(b);
@@ -137,25 +140,26 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
                              0xFF, 0);
     if (p != NULL) {
         memcpy(p + 0x128, &tail, 8);
-        if (func_1518B140(D_800D9D00, (s32) p, 2) == 0) {
+        if (timed_queue_push(D_800D9D00, (s32) p, 2) == 0) {
             node_destroy((struct102 *) p);
         }
     }
     ringLife = (random_int() & 0xF) + 0xA;
     rnd = random_float();
-    func_1514CBE8(pos[0], pos[1], pos[2], rnd * 59.0f + 80.0f, 0, 0xFF, ringLife, 0xE, 0, 0.0f, 0, 0xFF);
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], rnd * 59.0f + 80.0f, 0, 0xFF, ringLife, 0xE, 0, 0.0f, 0, 0xFF);
     ringLife = (random_int() & 0xF) + 5;
     ringCol[0] = cr;
     ringCol[1] = cg;
     ringCol[2] = cb;
     rnd = random_float();
-    func_1514CBE8(pos[0], pos[1], pos[2], rnd * 59.0f + 70.0f, 0, 0xFF, ringLife, 0xF, 0, 0.0f, (s32) ringCol, 0xFF);
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], rnd * 59.0f + 70.0f, 0, 0xFF, ringLife, 0xF, 0, 0.0f, (s32) ringCol, 0xFF);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F8DF0/func_150CB6F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F8DF0/object_water_entry_splash.s")
 #endif
 
-s32 func_150CBCDC(u8 *arg0) {
+/* was func_150CBCDC */
+s32 splash_fade_in_update(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);
     if (temp_v0 < 32) {
         if ((temp_v0 * 8) < arg0[0x28]) {
@@ -165,9 +169,10 @@ s32 func_150CBCDC(u8 *arg0) {
     return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 
-s32 func_150CBD10(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+/* was func_150CBD10 */
+s32 splash_chunk_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         f32 u28[13];
         s32 u5C;
@@ -216,7 +221,7 @@ s32 func_150CBD10(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u7E = 0x20;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    func_15143794(arg8, (s16) (((u32) random_int() % 36U) - 0x37), ((random_float() * 200.0f) + 200.0f) * 0.1f, &sp.u5C);
+    vec3_from_angles_byte(arg8, (s16) (((u32) random_int() % 36U) - 0x37), ((random_float() * 200.0f) + 200.0f) * 0.1f, &sp.u5C);
     sp.u68 = ((random_float() * 300.0f) + -149.0f) * 0.1f;
     sp.u70 = ((random_float() * 300.0f) + -149.0f) * 0.1f;
     sp.u7C = (random_int() % 33U) + 0x20;
@@ -239,11 +244,12 @@ s32 func_150CBD10(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u98 = 0;
     sp.u9A = 0x20;
     sp.u9C = 7;
-    func_15132FBC(&sp, 3, 0xFF, 0, (s32) argE, 0);
+    mdl_particle_spawn(&sp, 3, 0xFF, 0, (s32) argE, 0);
     return 1;
 }
 
-s32 func_150CBF40(u8 *arg0) {
+/* was func_150CBF40 */
+s32 splash_grow_fade_update(u8 *arg0) {
     f32 temp_f0;
     s16 temp_v0;
     s32 temp_v1;
@@ -266,9 +272,10 @@ s32 func_150CBF40(u8 *arg0) {
     return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_150CBFCC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+/* was func_150CBFCC */
+s32 splash_puff_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         s32 u34;
         s32 u38;
@@ -331,7 +338,7 @@ s32 func_150CBFCC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((random_int() % 26U) - 0x19), ((random_float() * 500.0f) + 1000.0f) * 0.01f, sp.u7C);
+    vec3_from_angles_byte(arg8, (s16) ((random_int() % 26U) - 0x19), ((random_float() * 500.0f) + 1000.0f) * 0.01f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
     if (random_int() & 1) {
@@ -347,14 +354,15 @@ s32 func_150CBFCC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u56 = 0x3C;
     sp.u58 = 1.02f;
     scale = 0.9620001f;
-    obj = func_151308E4(&sp, 1, 4, argE, 1);
+    obj = particle_spawn_basic(&sp, 1, 4, argE, 1);
     if (obj != 0) {
         memcpy(obj + 0xA8, &scale, 4);
     }
     return 1;
 }
 
-s32 func_150CC1F0(u8 *arg0, s32 arg1) {
+/* was func_150CC1F0 */
+s32 particle_shrink_update_c(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
     for (i = D_800BE9E4; i != 0; i--) {
@@ -364,7 +372,8 @@ s32 func_150CC1F0(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-s32 func_150CC398(u8 *arg0) {
+/* was func_150CC398 */
+s32 particle_ballistic_update_c(u8 *arg0) {
     *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
     *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
     *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
@@ -375,7 +384,8 @@ s32 func_150CC398(u8 *arg0) {
     return 1;
 }
 
-void func_150CC46C(u8 *arg0) {
+/* was func_150CC46C */
+void splash_start_fade_out(u8 *arg0) {
     *(s32 *)(arg0 + 0x58) |= 1;
     *(s16 *)(arg0 + 0x1C) = 0x20;
 }

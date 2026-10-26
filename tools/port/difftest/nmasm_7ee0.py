@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P148: hand-asm trampoline func_150A7EE0 (D5650: j func_150A7E40 with $ra = func_150A7EF4, which adds the w row)
+"""P148: hand-asm trampoline mtxf_transform_point_w (D5650: j mtxf_transform_point with $ra = mtxf_transform_point_w_tail, which adds the w row)
 vs its NON_MATCHING C, whole. Inputs: random / special float matrices and points (0, -0, +-1, large, fractions).
 Reference: VR4300 interpreter (nmasm_vr.Ref) on the ROM code; candidate: Unicorn on the NM build. Compared: all RDRAM
 outside the stack pages, s0-s7 / fp / sp.
@@ -41,7 +41,7 @@ def main():
             r1 = ref.run(m1, a=a, stack=stack, entry=0x150A7EE0, regs=sreg)
         except RuntimeError as e:
             print('REF', t, e); bad += 1; continue
-        r2 = cand.run(m2, a=a, stack=stack, entry=os.environ.get('NMASM_CAND', 'func_150A7EE0'), regs=sreg)  # NMASM_CAND: harness self-check
+        r2 = cand.run(m2, a=a, stack=stack, entry=os.environ.get('NMASM_CAND', 'mtxf_transform_point_w'), regs=sreg)  # NMASM_CAND: harness self-check
         k1 = [r1['gpr'][i] for i in list(range(16, 24)) + [29, 30]]
         k2 = [r2['gpr'][i] for i in list(range(16, 24)) + [29, 30]]
         d = memdiff(m1, m2, skip=[(SP0 - 0x400, SP0 + 0x100)])

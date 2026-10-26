@@ -35,21 +35,21 @@ extern u8 D_800ABBD4[];
 extern u8 D_800ABBD8[];
 extern u8 D_800ABBDC[];
 extern u8 D_800ABBE0[];
-s32 func_1517F54C();
+s32 screen_fade_all_active();
 void text_printf(s32, ...);   /* varargs, as its definition (game_70200) */
 void text_printf_at(s32, s32, u8, s32, ...);
 void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
-void func_151E2FCC(void);
-void func_10024190(void *, s32); /* osWritebackDCache (hand-written cache loop) */
+void menu_game_start(void);
+void os_writeback_dcache(void *, s32); /* osWritebackDCache (hand-written cache loop) */
 
 // game_pause_update: P127: menu handler of mode 0 (story game, D_8009018C[0]): counts the play time (D_800BE3E8
 // seconds), shows the time limit (multiplayer, settings byte 3 >= 3), and runs the pause menu: START (0x1000) on a
-// controller that is not disabled (D_800D18A0) opens it (D_800BEAC1) unless blocked (func_1517F54C, scene states);
+// controller that is not disabled (D_800D18A0) opens it (D_800BEAC1) unless blocked (screen_fade_all_active, scene states);
 // the stick moves the cursor D_800901CC over the 2 (story) / 3 (multiplayer) items with sfx 0x62D; past the last item
-// is the quit confirmation (D_80090138 no / yes). A on "yes" quits to the menu (D_800E0EB8 = func_151DE080, in
-// multiplayer func_151E2FCC to restart when the cursor was on "restart"); A on "no" goes back after Rare's cartridge
+// is the quit confirmation (D_80090138 no / yes). A on "yes" quits to the menu (D_800E0EB8 = pause_quit_to_menu, in
+// multiplayer menu_game_start to restart when the cursor was on "restart"); A on "no" goes back after Rare's cartridge
 // check (2 words at ROM 0xF80; a mismatch DMAs 0x100 bytes to a random 0x803xxxxx address); START / B closes it.
-void func_151DE100(void) {
+void game_pause_update(void) {
     u8 dmaBuf[0x20];
     u8 *p;
     s32 sfx;
@@ -74,7 +74,7 @@ void func_151DE100(void) {
         simple = 1;
     }
     if (D_800C35EA != 1 || D_800BE9F0 != 0x18 || D_800C3A08 != 1) {
-        if (func_1517F54C() != 0) {
+        if (screen_fade_all_active() != 0) {
             blocked = 1;
         }
     }
@@ -228,13 +228,13 @@ void func_151DE100(void) {
         if (D_800E0FCA & 0x8000) {
             if (D_80090138 != 0) {
                 D_800E0B94 = 7;
-                D_800E0EB8 = (s32 *) func_151DE080;
+                D_800E0EB8 = (s32 *) pause_quit_to_menu;
                 D_80090114 = 8;
                 if (D_800BE616 != 0) {
                     D_80090174[0x3F] = 4; /* MenuState mainPage */
                     if (count == (s8) D_800901CC) {
                         D_8009013C = 1;
-                        D_800E0EB8 = (s32 *) func_151E2FCC;
+                        D_800E0EB8 = (s32 *) menu_game_start;
                     }
                 } else if (D_8008FDA8 >= 0) {
                     save_request_slot_write(D_8008FDA8);
@@ -248,8 +248,8 @@ void func_151DE100(void) {
                         p += 4;
                     } while ((u32) p & 0xF);
                 }
-                i = func_151DE074(-0xF81);
-                func_10024190(p, 0x10);
+                i = pause_bit_invert(-0xF81);
+                os_writeback_dcache(p, 0x10);
                 osPiStartDma(&D_80038C40, 0, 0, i, p, 0x10, &gMessageQueue[0]);
                 osRecvMesg(&gMessageQueue[0], NULL, 1);
                 osInvalDCache(p, 0x10);
@@ -269,9 +269,9 @@ void func_151DE100(void) {
         }
     }
     if (sfx != 0) {
-        func_10010F30(sfx, 0x5DC0, 0x40, 0, 0);
+        sound_play_2d(sfx, 0x5DC0, 0x40, 0, 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151DE100.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/game_pause_update.s")
 #endif

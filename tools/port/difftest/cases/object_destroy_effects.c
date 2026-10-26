@@ -1,27 +1,27 @@
 extern u8 D_800BE616;
 extern s32 D_800BE9F0;
 extern u8 D_800C35EA;
-void func_150B0828(u8 *arg0, u8 arg1, s32 arg2);
-void func_150C04E0(u8 *obj);
+void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void object_land_puff(u8 *obj);
 void explosion_ground_effect(struct127 *arg0);
 void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2);
-void func_151C9740(struct127 *obj, u8 arg1, s32 arg2);
-void func_151CFFFC(u8 *obj, u8 flag, s32 arg2);
-void func_150BE994(u8 *arg0, s32 arg1, s32 arg2);
+void object_explode_big(struct127 *obj, u8 arg1, s32 arg2);
+void object_shatter_effects(u8 *obj, u8 flag, s32 arg2);
+void obj_debris_dust_burst(u8 *arg0, s32 arg1, s32 arg2);
 void object_set_all_flags(s32 arg0, s32 arg1);
 void owner_spawn_children(u8 *owner);
 s32 player_hit_reaction(struct127 *obj, s32 kind);
-void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2);
-void func_15145A50(struct127 *arg0);
+void object_model_shatter(u8 *obj, u8 arg1, s32 arg2);
+void obj_set_destroyed(struct127 *arg0);
 u8 *world_record_find(u8 id);
 struct127 *player_find_owned_object(struct127 *owner); // test copy: callee ignores a1 / a2
 s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
-void func_150B8020(u8 *obj, u8 owner, s32 arg2);
-void func_150BC968(u8 *obj);
-void func_150BC03C(u8 *obj);
-void func_151A7240(u8 *obj, u8 arg1, s32 arg2);
+void object_break_effects(u8 *obj, u8 owner, s32 arg2);
+void object_impact_debris_hard(u8 *obj);
+void object_impact_debris(u8 *obj);
+void object_explosion_effects(u8 *obj, u8 arg1, s32 arg2);
 void object_explode(u8 *obj, u8 owner, s32 arg2);
-void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2);
+void destroy_burst_spawn(struct127 *arg0, u8 arg1, s32 arg2);
 /* object_destroy_effects: the break / death effects of an object by its type (byte +4): one effect function per
  * type (owner 0xFF, flag 1), the type-0x20 crate picks the hard / soft debris by its y speed +0x20. Types 5 /
  * 0xAD..0xAF clear +0x328, release (object_set_all_flags / owner_spawn_children) and return 1. Types 0x28 / 0x77 shatter the
@@ -43,30 +43,30 @@ s32 object_destroy_effects(struct127 *arg0) {
             owner_spawn_children(obj);
             return 1;
         case 0x0D:
-            func_150B8020(obj, 0xFF, 1);
+            object_break_effects(obj, 0xFF, 1);
             break;
         case 0x10:
         case 0x38:
         case 0x91:
-            func_150C04E0(obj);
+            object_land_puff(obj);
             break;
         case 0x20:
             if (*(f32 *) (obj + 0x20) < -20.0f) {
-                func_150BC968(obj);
+                object_impact_debris_hard(obj);
             } else {
-                func_150BC03C(obj);
+                object_impact_debris(obj);
             }
             break;
         case 0x25:
             if (*(s32 *) (obj + 0x2EC) != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
-                func_151CFFFC(obj, 0xFF, 1);
+                object_shatter_effects(obj, 0xFF, 1);
             }
             break;
         case 0x28:
         case 0x77:
             rec = NULL;
-            func_151BAAC8(obj, 0xFF, 1);
-            func_15145A50(arg0);
+            object_model_shatter(obj, 0xFF, 1);
+            obj_set_destroyed(arg0);
             if (D_800BE616 != 0) {
                 player_hit_reaction(arg0, 6);
                 rec = world_record_find(obj[0x127] + 0xB);
@@ -101,17 +101,17 @@ s32 object_destroy_effects(struct127 *arg0) {
             explosion_ground_effect(arg0);
             break;
         case 0x44:
-            func_151D2860(arg0, 0xFF, 1);
+            destroy_burst_spawn(arg0, 0xFF, 1);
             break;
         case 0x47:
-            func_151C9740((struct127 *) obj, 0xFF, 1);
+            object_explode_big((struct127 *) obj, 0xFF, 1);
             break;
         case 0x4A:
             fx_big_explosion_at_obj(obj, 0xFF, 1);
             break;
         case 0x4F:
         case 0x83:
-            func_151A7240(obj, 0xFF, 1);
+            object_explosion_effects(obj, 0xFF, 1);
             break;
         case 0x53:
             if (D_800BE616 != 0) {
@@ -120,10 +120,10 @@ s32 object_destroy_effects(struct127 *arg0) {
             }
             break;
         case 0x79:
-            func_150BE994(obj, 0xFF, 1);
+            obj_debris_dust_burst(obj, 0xFF, 1);
             break;
         case 0x7F:
-            func_150B0828(obj, 0xFF, 1);
+            obj_impact_burst_spawn(obj, 0xFF, 1);
             break;
         case 0x90:
             if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {

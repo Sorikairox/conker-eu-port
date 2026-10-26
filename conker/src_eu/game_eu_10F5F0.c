@@ -10,10 +10,10 @@ extern f32 D_80088D50[4];
 extern s32 D_80088D60[4];
 extern s32 D_80088D70[4];
 s32 event_dispatch(s32, s32, s32, s32);
-void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 
 // door_lights_update: for each of the 4 lights, flag 0x9000 of event 0x4039 + i (event_dispatch) picks the target
-// level (192 on, 255 off); the level eases toward it (func_150498A0: speed 4, rate 6, frame step obj+0x7B4) and is
+// level (192 on, 255 off); the level eases toward it (math_spring_approach: speed 4, rate 6, frame step obj+0x7B4) and is
 // sent as byte parameter 0x12 of sound / effect 0x30E4 + i (event_dispatch_alt). obj+0x84 gets 0x10, plus 0x80021010
 // while any light is on (else those bits are cleared); bit 31 is set unless event 0x403D has flag 0x2000.
 /* was func_150E1DE0 */
@@ -30,7 +30,7 @@ void map_door_lights_update(u8 *obj) {
         } else {
             D_80088D40[i] = 255.0f;
         }
-        func_150498A0(&D_80088D30[i], D_80088D40[i], &D_80088D50[i], 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+        math_spring_approach(&D_80088D30[i], D_80088D40[i], &D_80088D50[i], 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
         event_dispatch_alt(1, D_80088D70[i], 0x12, (u8) (u32) D_80088D30[i]);
     }
     if (!any) {

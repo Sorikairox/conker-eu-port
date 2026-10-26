@@ -1,8 +1,8 @@
 /* P174 DIAGNOSTIC ?p174ev=1 / PORT_P174EV=1: event-script queries / actions of the first room (level 0x22, event 0xCA
- * "First Death"). Wraps the VM natives func_150AE5F8 (native 5 = D_80088838 queries) and func_150AE60C (native 6 =
+ * "First Death"). Wraps the VM natives event_native_query (native 5 = D_80088838 queries) and event_native_action (native 6 =
  * D_80088874 actions), reached through D_80088A44 (n64mem_tab refs -> --wrap applies). Logs every change of
- * (id, arg, result) per id, and every native-6 action. For table entry 0 (func_1509CBD8, scene queries) and entry 13 /
- * id 0x19 (func_1509DFCC, "no object in lists D_800A6440[0..2] has +0x48 == 2") it also computes what the asm answers.
+ * (id, arg, result) per id, and every native-6 action. For table entry 0 (event_query_scene, scene queries) and entry 13 /
+ * id 0x19 (event_query_effect, "no object in lists D_800A6440[0..2] has +0x48 == 2") it also computes what the asm answers.
  *
  * P185: the ?p174fix test (return the asm answer) is gone: both handlers are fixed in the game C since P176 (port); the log
  * still prints C and asm answers side by side. */
@@ -32,7 +32,7 @@ static s32 asm_CBD8(s32 a0, s32 a1) {
     }
     return 0;
 }
-/* the asm walk of func_1509DFCC case 0x19 / 4 (every node's +0x48); logs the nodes when the summary changes */
+/* the asm walk of event_query_effect case 0x19 / 4 (every node's +0x48); logs the nodes when the summary changes */
 static s32 asm_DFCC19(void) {
     static unsigned lastkey = ~0u;
     char buf[768]; int k = 0, r = 1; unsigned key = 2166136261u;
@@ -60,10 +60,10 @@ static s32 asm_DFCC19(void) {
     return r;
 }
 
-/* the running event block (func_150ADFD0 = event VM, called from game_C8950.c) */
+/* the running event block (event_vm_run = event VM, called from game_C8950.c) */
 static int cur_ev = -1;
-void __real_func_150ADFD0(void *blk, s32 entry);
-void __wrap_func_150ADFD0(void *blk, s32 entry) {
+void __real_event_vm_run(void *blk, s32 entry);
+void __wrap_event_vm_run(void *blk, s32 entry) {
     int sv = cur_ev;
     /* blk is the script block (no id in it): tell the events of this route apart by their entry offsets +0x10 / +0x12
      * (ROM headers: CA 003E 0114, BF 00A0 01DC, CB 0190 01E0) */
@@ -77,15 +77,15 @@ void __wrap_func_150ADFD0(void *blk, s32 entry) {
         if ((chg || port_frame_count >= 22760) && nb++ < 80) port_log("[p178bf] frame %u VM BF blk %08x entry %d flags %04x (before)\n", port_frame_count,
                                 (unsigned)(uintptr_t)blk, (int)entry, vbe_ld16(blk));
     }
-    __real_func_150ADFD0(blk, entry);
+    __real_event_vm_run(blk, entry);
     cur_ev = sv;
 }
 /* native 5: D_80088838[n - 1](id & 0xFFFF0FFF, args[1], args) */
-s32 __real_func_150AE5F8(s32 *args);
-s32 __wrap_func_150AE5F8(s32 *args) {
-    if (!on()) return __real_func_150AE5F8(args);
+s32 __real_event_native_query(s32 *args);
+s32 __wrap_event_native_query(s32 *args) {
+    if (!on()) return __real_event_native_query(args);
     s32 id = args[0], arg = args[1], n = (id & 0xF000) >> 12;
-    s32 r = __real_func_150AE5F8(args), ra = r, fixed = 0;
+    s32 r = __real_event_native_query(args), ra = r, fixed = 0;
     if (n == 1) { ra = asm_CBD8(id & 0xFFF, arg); }
     else if (n == 14 && (id & 0xFFF) == 0x19 && arg == 4) { ra = asm_DFCC19(); }
     if (on()) {
@@ -104,7 +104,7 @@ s32 __wrap_func_150AE5F8(s32 *args) {
     return r;
 }
 /* native 6: game-state actions D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args) */
-s32 __real_func_150AE60C(s32 *args);
+s32 __real_event_native_action(s32 *args);
 extern u8 D_800877B0[]; extern s32 D_800D3268; extern u8 *D_800D2E4C; void *event_find(s32);
 static void p178fin(const char *w, s32 id) {   /* P178: state around action 1 (finish event) */
     u8 *e = (u8 *)event_find(id);
@@ -112,11 +112,11 @@ static void p178fin(const char *w, s32 id) {   /* P178: state around action 1 (f
              (unsigned)id, vbe_ld8(D_800877B0 + 1), (unsigned)D_800D3268, (unsigned)(id >> 3),
              D_800D2E4C ? vbe_ld8(D_800D2E4C + (id >> 3)) : 0xFFu, (unsigned)(id & 7), (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0);
 }
-s32 __wrap_func_150AE60C(s32 *args) {
+s32 __wrap_event_native_action(s32 *args) {
     static unsigned nf;
     int fin = on() && (args[0] & 0xF000) == 0x5000 && args[1] == 1 && nf < 40;
     if (fin) nf++, p178fin("before", args[0] & 0xFFF);
-    s32 r = __real_func_150AE60C(args);
+    s32 r = __real_event_native_action(args);
     if (fin) p178fin("after ", args[0] & 0xFFF);
     if (on()) {
         static unsigned nlog; static s32 lid[1024], la1[1024]; static int nl;

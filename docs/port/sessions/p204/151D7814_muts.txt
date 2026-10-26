@@ -13,4 +13,4 @@ s/d\[2\] = \*(f32 \*) (obj + 0x38) - pos\[2\];/d[2] = *(f32 *) (obj + 0x38) - po
 s/< \*(f32 \*) (obj + 0x3C)/<= *(f32 *) (obj + 0x3C)/
 s/if (\*(u8 \*\*) (obj + 0x28) == NULL) {/if (1) {/
 s/            return;/            ;/
-s/func_151D7DE0(obj);/func_151D7D78(obj);/
+s/fx_carrier_attach_trail(obj);/fx_carrier_release(obj);/

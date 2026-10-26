@@ -1,8 +1,8 @@
 /* P165 DIAGNOSTIC ?p165hits=1 / PORT_P165HITS=1: first-room checks of the P157 conversions (port).
- * Per-250-retrace call counts of the object sound emitters func_10010154 / func_10010344 (with the number of calls
- * that returned a voice handle != 0 and up to 6 distinct sound ids), the variant picker func_1000F568, the move
- * animation func_15064F50 (with how often it returned an animation id other than 0 / 999) and the B / context action
- * func_15064668. Every func_15064668 call with B pressed or a pending context action (ctx+0x7B) is logged with the
+ * Per-250-retrace call counts of the object sound emitters actor_sound_play / actor_sound_play2 (with the number of calls
+ * that returned a voice handle != 0 and up to 6 distinct sound ids), the variant picker sound_pick_variant, the move
+ * animation player_move_animation (with how often it returned an animation id other than 0 / 999) and the B / context action
+ * player_context_action. Every player_context_action call with B pressed or a pending context action (ctx+0x7B) is logged with the
  * context bytes 0x7B / 0x75 / 0x7C / 0x4E / 0x198. Linker --wrap: calls from other translation units only.
  * Signatures = the NM definitions (init_EB00.c, game_eu_90F50.c). */
 #include <stdint.h>
@@ -32,28 +32,28 @@ static void tick(int i) {
 }
 static void sfx(unsigned id) { for (unsigned k = 0; k < nid; k++) if (ids[k] == id) return; if (nid < 6) ids[nid++] = id; }
 
-u16 __real_func_10010154(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4);
-u16 __wrap_func_10010154(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4) {
-    u16 r = __real_func_10010154(sfx_, obj, vol, a3, a4);
+u16 __real_actor_sound_play(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4);
+u16 __wrap_actor_sound_play(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4) {
+    u16 r = __real_actor_sound_play(sfx_, obj, vol, a3, a4);
     if (on()) { tick(S154); sfx(sfx_); if (r) cnt[S154V]++; }
     return r;
 }
-u16 __real_func_10010344(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4);
-u16 __wrap_func_10010344(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4) {
-    u16 r = __real_func_10010344(sfx_, obj, vol, a3, a4);
+u16 __real_actor_sound_play2(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4);
+u16 __wrap_actor_sound_play2(u16 sfx_, void *obj, s32 vol, s16 a3, u16 a4) {
+    u16 r = __real_actor_sound_play2(sfx_, obj, vol, a3, a4);
     if (on()) { tick(S344); sfx(sfx_); if (r) cnt[S344V]++; }
     return r;
 }
-u16 __real_func_1000F568(s32 base, u16 n);
-u16 __wrap_func_1000F568(s32 base, u16 n) { if (on()) tick(SF568); return __real_func_1000F568(base, n); }
-s32 __real_func_15064F50(void *pl, f32 v, f32 m, s32 a, f32 p);
-s32 __wrap_func_15064F50(void *pl, f32 v, f32 m, s32 a, f32 p) {
-    s32 r = __real_func_15064F50(pl, v, m, a, p);
+u16 __real_sound_pick_variant(s32 base, u16 n);
+u16 __wrap_sound_pick_variant(s32 base, u16 n) { if (on()) tick(SF568); return __real_sound_pick_variant(base, n); }
+s32 __real_player_move_animation(void *pl, f32 v, f32 m, s32 a, f32 p);
+s32 __wrap_player_move_animation(void *pl, f32 v, f32 m, s32 a, f32 p) {
+    s32 r = __real_player_move_animation(pl, v, m, a, p);
     if (on()) { tick(SF50); if (r != 0 && r != 999) cnt[SF50A]++; }
     return r;
 }
-void __real_func_15064668(void *pl, s32 buttons, f32 h, s32 a3, s32 noPad);
-void __wrap_func_15064668(void *pl, s32 buttons, f32 h, s32 a3, s32 noPad) {
+void __real_player_context_action(void *pl, s32 buttons, f32 h, s32 a3, s32 noPad);
+void __wrap_player_context_action(void *pl, s32 buttons, f32 h, s32 a3, s32 noPad) {
     if (on()) {
         tick(S668);
         u8 *ctx = pl ? *(u8 **)((u8 *)pl + 0x31C) : 0;
@@ -65,5 +65,5 @@ void __wrap_func_15064668(void *pl, s32 buttons, f32 h, s32 a3, s32 noPad) {
                          *(f32 *)((u8 *)pl + 0x14), *(f32 *)((u8 *)pl + 0x18), *(f32 *)((u8 *)pl + 0x1C));
         }
     }
-    __real_func_15064668(pl, buttons, h, a3, noPad);
+    __real_player_context_action(pl, buttons, h, a3, noPad);
 }

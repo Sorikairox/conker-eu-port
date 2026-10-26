@@ -23,8 +23,8 @@
 \#^    part.b6A = 2;$#s/2/4/
 \#^    part.h72 = 1;$#s/1/0/
 \#^    part.h74 = 0xFF;$#s/0xFF/0xFE/
-\#^    p = func_15132FBC(&part#s/0x24, arg2, arg3/0x24, arg3, arg2/
-\#^    p = func_15132FBC(&part#s/3, 0xFF/3, 0xFE/
+\#^    p = mdl_particle_spawn(&part#s/0x24, arg2, arg3/0x24, arg3, arg2/
+\#^    p = mdl_particle_spawn(&part#s/3, 0xFF/3, 0xFE/
 \#^    memcpy(p + 0x170, swing#s/0x170/0x174/
 \#^    link.particle = p;$#s/p;/NULL;/
 \#^    link.invScale = 1.0f#s/1.0f \/ \*scale/*scale/

@@ -4,15 +4,15 @@
 #include "variables.h"
 #ifdef NON_MATCHING
 void player_lose_life(s32); /* P59: was implicitly int */
-void func_1507F640(void); /* P60: idle animation, was implicitly int */
-s32 func_151AABC4(struct127 *, s32); /* P192: C on port-b (returns 0), was implicit */
-s32 func_150CA150(u8 *); /* P204: C on port-b (P201, returns 0), was implicit */
-u8 *func_15196438(u8 *, s32, u8, s32); /* P230 (port-b P229): returns the emitter, was implicit */
-void func_150CBF80(struct127 *, u8, s32, u8); /* P295: hand C (void), was implicit */
+void player_idle_animation(void); /* P60: idle animation, was implicitly int */
+s32 footstep_splash(struct127 *, s32); /* P192: C on port-b (returns 0), was implicit */
+s32 landing_dust_burst(u8 *); /* P204: C on port-b (P201, returns 0), was implicit */
+u8 *object_emitter_spawn(u8 *, s32, u8, s32); /* P230 (port-b P229): returns the emitter, was implicit */
+void ground_puff_spawn(struct127 *, u8, s32, u8); /* P295: hand C (void), was implicit */
 #endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_151C0698();   /* still asm; called by objfx_gun_fire */
-void func_1507E7E4(struct127 *, u8, u8, u16, s32);
+s32 projectile_fire();   /* still asm; called by objfx_gun_fire */
+void face_anim_start(struct127 *, u8, u8, u16, s32);
 void objev_play_sound(void);  /* P68 hand C; called by objev_sound_if_above_water */
 void *attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32); /* P262: the C definition's exact types (game_eu_1306B0) */
 extern u8 D_eu_80099F30[];
@@ -431,7 +431,7 @@ void objev_allow_run_pick_idle(void) {
 void objev_allow_run_idle(void) {
     D_800D154C->disable_run = 0;
     D_800D154C->unk83 = 0;
-    func_1507F640();
+    player_idle_animation();
 }
 
 /* was func_1506B860 */
@@ -449,7 +449,7 @@ void objev_reset_state_idle(void) {
     D_800D154C->unk31C->unk78 = (u8)0;
     D_800D154C->disable_run = (u8)0;
     D_800D154C->unk83 = (u8)0;
-    func_1507F640();
+    player_idle_animation();
 }
 
 /* was func_1506B8F4 */
@@ -490,21 +490,21 @@ void objev_finish_and_idle(void) {
         D_800D2E60[D_800D1940 >> 3] |=  (1 << (D_800D1940 & 7));
     }
 #ifdef NON_MATCHING
-    func_1507F640(); /* takes no arguments (a0 is left over) */
+    player_idle_animation(); /* takes no arguments (a0 is left over) */
 #else
-    func_1507F640(temp_a0);
+    player_idle_animation(temp_a0);
 #endif
 }
 
 /* was func_1506BA4C */
 void objev_sound_or_stop(s32 arg0, s32 arg1) {
     if (D_800D1580 == 0) {
-        func_100109D0(D_800D154C);
+        actor_sound_stop(D_800D154C);
     } else {
         if (D_800D154C->camera == 0) {
-            func_10010154(D_800D1580, D_800D154C, 28000, arg0, arg1);
+            actor_sound_play(D_800D1580, D_800D154C, 28000, arg0, arg1);
         } else {
-            func_10010154(D_800D1580, D_800D154C, 24000, 500, 2500);
+            actor_sound_play(D_800D1580, D_800D154C, 24000, 500, 2500);
         }
     }
 }
@@ -512,36 +512,36 @@ void objev_sound_or_stop(s32 arg0, s32 arg1) {
 /* was func_1506BAD8 */
 void objev_sound_alt_or_stop(s32 arg0, s32 arg1) {
     if (D_800D1580 == 0) {
-        func_10010A3C(D_800D154C);
+        actor_sound2_stop(D_800D154C);
     } else {
         if (D_800D154C->camera == 0) {
-            func_10010344(D_800D1580, D_800D154C, 28000, arg0, arg1);
+            actor_sound_play2(D_800D1580, D_800D154C, 28000, arg0, arg1);
         } else {
-            func_10010344(D_800D1580, D_800D154C, 24000, 500, 2500);
+            actor_sound_play2(D_800D1580, D_800D154C, 24000, 500, 2500);
         }
     }
 }
 
 /* was func_1506BB64 */
 void objev_sound_hi_word_3(s32 arg0, s32 arg1) {
-    func_10012718(D_800D1582, D_800D154C, 28000, arg0, arg1);
+    mp3_voice_play_at_object(D_800D1582, D_800D154C, 28000, arg0, arg1);
 }
 
 /* was func_1506BBA8 */
 void objev_sound_hi_word(s32 arg0, s32 arg1) {
     if (D_800D154C->camera == 0) {
-        func_10010154(D_800D1582, D_800D154C, 14000, arg0, arg1);
+        actor_sound_play(D_800D1582, D_800D154C, 14000, arg0, arg1);
     } else {
-        func_10010154(D_800D1582, D_800D154C, 12000, 500, 2500);
+        actor_sound_play(D_800D1582, D_800D154C, 12000, 500, 2500);
     }
 }
 
 /* was func_1506BC24 */
 void objev_sound_hi_word_alt(s32 arg0, s32 arg1) {
     if (D_800D154C->camera == 0) {
-        func_10010344(D_800D1582, D_800D154C, 0x36B0, arg0, arg1);
+        actor_sound_play2(D_800D1582, D_800D154C, 0x36B0, arg0, arg1);
     } else {
-        func_10010344(D_800D1582, D_800D154C, 0x2EE0, 0x1F4, 0x9C4);
+        actor_sound_play2(D_800D1582, D_800D154C, 0x2EE0, 0x1F4, 0x9C4);
     }
 }
 
@@ -551,7 +551,7 @@ void objev_set_y_velocity(void) {
 }
 
 // ???
-s32 func_151EFDD0(void);
+s32 game_gu_random(void);
 /* was func_1506BCC8 */
 void objev_hop(void)
 {
@@ -562,7 +562,7 @@ void objev_hop(void)
   {
     if (D_800D154C->y_position == D_800D154C->unk180)
     {
-      D_800D154C->y_velocity = (f32) ((func_151EFDD0() % 8) + D_800D1580);
+      D_800D154C->y_velocity = (f32) ((game_gu_random() % 8) + D_800D1580);
       if (0.0f != D_800D154C->xz_velocity)
       {
         D_800D154C->y_velocity = D_800D154C->y_velocity * (D_800D154C->xz_velocity / 40.0f);
@@ -636,17 +636,17 @@ void objev_sound_if_above_water(void) {
  * D_800D1C90[id]->unk4 is set) equals bits 24..31; 0x8000: only when it differs. With bit 16 the command
  * word + 1 is stored in D_800D1C9C (which is cleared otherwise) and nothing plays.
  * Modes (volume 0x7D00, 500 / 2500 = the distance / time arguments of the sound calls):
- *   0x0000 func_10010154, 0x1000 func_10010344, 0x3000 func_10010630,
- *   0x3800 func_10010154 unless func_1001147C(obj->unk8E) already returns that sound,
+ *   0x0000 actor_sound_play, 0x1000 actor_sound_play2, 0x3000 actor_sound_play_untracked,
+ *   0x3800 actor_sound_play unless sound_voice_get_id(obj->unk8E) already returns that sound,
  *   0x2000 footstep (at most 1 player, D_80082FA0 < 2): the sound comes from the floor surface
- *          (floor_flags_surface_type(obj->unk184) -> func_10011EB8, which may also lower the volume; in the air: surface 8;
- *          surface 12 = water while obj->unkCC > -17: func_1000F568(0x9C, 2)); the volume scales with the
+ *          (floor_flags_surface_type(obj->unk184) -> sound_surface_footstep, which may also lower the volume; in the air: surface 8;
+ *          surface 12 = water while obj->unkCC > -17: sound_pick_variant(0x9C, 2)); the volume scales with the
  *          fall speed (obj->unk31C's first float, else y_velocity), 0.5 .. 1.0 over 0 .. 10 (water) or 30.
- *          Surface 8 plays with func_10010630, the others with func_10010154. */
+ *          Surface 8 plays with actor_sound_play_untracked, the others with actor_sound_play. */
 extern s32 D_800D1C9C;
 extern u8 *D_8008704C[];
-s32 func_1000F568(s32, s32);
-s32 func_10011EB8(s32 surface, u16 *volume, s32 sound);
+s32 sound_pick_variant(s32, s32);
+s32 sound_surface_footstep(s32 surface, u16 *volume, s32 sound);
 
 /* was func_1506BF5C */
 void objev_play_sound(void) {
@@ -683,20 +683,20 @@ void objev_play_sound(void) {
     volume = 0x7D00;
     mode = cmd & 0x3800;
     if (mode == 0x0000) {
-        func_10010154(sound, obj, volume, 500, 2500);
+        actor_sound_play(sound, obj, volume, 500, 2500);
         return;
     }
     if (mode == 0x1000) {
-        func_10010344(sound, obj, 0x7D00, 500, 2500);
+        actor_sound_play2(sound, obj, 0x7D00, 500, 2500);
         return;
     }
     if (mode == 0x3000) {
-        func_10010630(sound, obj, 0x7D00, 500, 2500);
+        actor_sound_play_untracked(sound, obj, 0x7D00, 500, 2500);
         return;
     }
     if (mode == 0x3800) {
-        if (func_1001147C(obj->unk8E) != sound) {
-            func_10010154(sound, D_800D154C, volume, 500, 2500);
+        if (sound_voice_get_id(obj->unk8E) != sound) {
+            actor_sound_play(sound, D_800D154C, volume, 500, 2500);
         }
         return;
     }
@@ -710,12 +710,12 @@ void objev_play_sound(void) {
     }
     surface = floor_flags_surface_type(obj->unk184);
     if (surface == 12 && -17.0f < D_800D154C->unkCC) {
-        sound = func_1000F568(0x9C, 2);
+        sound = sound_pick_variant(0x9C, 2);
     } else if (D_800D154C->unk118 != -10000.0f && D_800D154C->unk118 >= D_800D154C->y_position) {
-        sound = func_10011EB8(8, NULL, sound);
+        sound = sound_surface_footstep(8, NULL, sound);
         surface = 8;
     } else {
-        sound = func_10011EB8(surface, &volume, sound);
+        sound = sound_surface_footstep(surface, &volume, sound);
     }
     if (sound == 0) {
         return;
@@ -736,10 +736,10 @@ void objev_play_sound(void) {
     }
     volume = (u32)volume * (speed * scale + 0.5f);
     if (surface == 8) {
-        func_10010630(sound, obj, volume, 500, 2500);
+        actor_sound_play_untracked(sound, obj, volume, 500, 2500);
         return;
     }
-    func_10010154(sound, obj, volume, 500, 2500);
+    actor_sound_play(sound, obj, volume, 500, 2500);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_play_sound.s")
@@ -747,13 +747,13 @@ void objev_play_sound(void) {
 
 #ifdef NON_MATCHING
 extern s32 D_800D1C9C;
-s32 func_1000F568(s32, s32);
+s32 sound_pick_variant(s32, s32);
 /* objev_play_sound: void (P68 NM definition above; prototype at the top of the file) */
 
 /*
  * P80: script command "random jump": while the counter D_800D1C9C is not 0, count it down and pick one of up to four
  * 11-bit targets: the counter's own low 11 bits (after the decrement) and the command word's fields 0..10 / 11..21
- * / 22..32; with n = the highest non-zero field (2 / 3 / 4, else 0) the pick is func_1000F568(base, n) - base.
+ * / 22..32; with n = the highest non-zero field (2 / 3 / 4, else 0) the pick is sound_pick_variant(base, n) - base.
  * A non-zero pick goes into D_800D1580 (with the counter's bits other than 0..10 and 16) and objev_play_sound runs.
  */
 /* was func_1506C32C */
@@ -780,7 +780,7 @@ void objev_play_random_sound(void) {
         n = 0;
     }
     if (n != 0) {
-        n = func_1000F568(v[0], n) - v[0];
+        n = sound_pick_variant(v[0], n) - v[0];
     }
     if (v[n] != 0) {
         keep = D_800D1C9C & 0xFFFEF800;
@@ -795,24 +795,24 @@ void objev_play_random_sound(void) {
 
 /* was func_1506C418 */
 void objev_stop_sound_alt(void) {
-    func_10010A3C(D_800D154C);
+    actor_sound2_stop(D_800D154C);
 }
 
 /* was func_1506C43C */
 void objev_stop_sound(void) {
-    func_100109D0(D_800D154C);
+    actor_sound_stop(D_800D154C);
 }
 
 // requires jump table
 #ifdef NON_MATCHING
 struct127 *obj_find_by_state(s32, s32 *);
 void *obj_alloc_slot(void);
-u8 *func_1515D9F0(s32 arg0);
-void *func_1515D9B0(void);
+u8 *light_alloc_light_buf(s32 arg0);
+void *light_alloc_lookat_buf(void);
 s32 obj_find_visible_target(u8 *, u16 *, s32, s32, s32);
 void *allocate_memory(s32, s32, s32, s32);
-u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2);
-void func_1506B04C(u8 *, s32, void *);
+u8 *move_watch_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void obj_effect_run_handler(u8 *, s32, void *);
 extern f32 D_800CC704;
 extern f32 D_800CC70C;
 extern u8 D_80099E84[];
@@ -897,7 +897,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
             } else {
                 m = (f32 (*)[4]) (mtx + attach[3] * 0x40);
             }
-            func_150A7E40(m, (f32) attach[0], (f32) attach[1], (f32) attach[2], &pos[0], &pos[1], &pos[2]);
+            mtxf_transform_point(m, (f32) attach[0], (f32) attach[1], (f32) attach[2], &pos[0], &pos[1], &pos[2]);
             *(f32 *) (obj + 0x14) = pos[0];
             *(f32 *) (obj + 0x18) = pos[1];
             *(f32 *) (obj + 0x1C) = pos[2];
@@ -917,12 +917,12 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
     } else {
         obj[5] = 5;
         for (i = 0; i <= D_80082FA0; i++) {
-            *(u8 **) (obj + 0x304 + i * 4) = func_1515D9F0(1);
+            *(u8 **) (obj + 0x304 + i * 4) = light_alloc_light_buf(1);
         }
         if (*(s32 *) (obj + 0x300 + i * 4) != 0) {
             obj[0x301] = 1;
         }
-        *(void **) (obj + 0x314) = func_1515D9B0();
+        *(void **) (obj + 0x314) = light_alloc_lookat_buf();
         switch (mode) {
         case 2:
             obj[0x103] = 1;
@@ -956,7 +956,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
             sound = 0x50;
             break;
         }
-        func_15083568((struct127 *) obj, sound, 1.0f, 0);
+        obj_setup_run((struct127 *) obj, sound, 1.0f, 0);
     }
 
     angle = (s32) (yaw * sCamDegToAngle[0]) - 0x4000;
@@ -1042,23 +1042,23 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
     }
     switch (mode) {
     case 0:
-        func_1506B04C(obj, 8, NULL);
-        func_1514F18C(func_15159140(obj, 1, 0), (struct127 *) obj, 0x13);
+        obj_effect_run_handler(obj, 8, NULL);
+        char_fx_attach(move_watch_spawn(obj, 1, 0), (struct127 *) obj, 0x13);
         break;
     case 1:
-        func_1506B04C(obj, 1, NULL);
-        func_1514F18C(func_15159140(obj, 1, 0), (struct127 *) obj, 0x13);
+        obj_effect_run_handler(obj, 1, NULL);
+        char_fx_attach(move_watch_spawn(obj, 1, 0), (struct127 *) obj, 0x13);
         break;
     case 15:
-        func_1506B04C(obj, 0xD, NULL);
+        obj_effect_run_handler(obj, 0xD, NULL);
         break;
     case 13:
-        func_10010154(0x237, (struct127 *) obj, 0x7530, 0x1F4, 0x7D0);
+        actor_sound_play(0x237, (struct127 *) obj, 0x7530, 0x1F4, 0x7D0);
         // fall through
     case 5:
     case 9:
     case 10:
-        func_1506B04C(obj, 0xC, NULL);
+        obj_effect_run_handler(obj, 0xC, NULL);
         break;
     }
     return (s32) obj;
@@ -1068,7 +1068,7 @@ s32 camera_object_spawn(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 m
 #endif
 // requires jump table
 #ifdef NON_MATCHING
-void func_15145974(void *, f32 *, f32 *);
+void vec3_to_yaw_pitch_deg(void *, f32 *, f32 *);
 // player_camera_view_update: P259: sets up the player camera for D_800D154C (the args the callers leave in a0 / a1
 // are not read) by event mode D_800D1580: yaw = facing angle +0x7A + 90 degrees, pitch 45, distance 323; in modes
 // 5 / 9 / 10 yaw / pitch come from the direction of matrix 3 of the player's +0x1D4 matrices (degrees, folded to
@@ -1118,7 +1118,7 @@ void objev_player_camera_view(void) {
     if (view != -1) {
         if (player->unk1D4 != NULL) {
             mtx = (f32 (*)[4]) ((u8 *) player->unk1D4 + view * 0x40);
-            func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, &dir_x, &dir_y, &dir_z);
+            mtxf_transform_point(mtx, 0.0f, 0.0f, 1.0f, &dir_x, &dir_y, &dir_z);
             dir_x -= mtx[3][0];
             dir_y -= mtx[3][1];
             dir_z -= mtx[3][2];
@@ -1165,7 +1165,7 @@ void objev_player_camera_view(void) {
         break;
     case 3:
         dist = 500.0f;
-        func_15145974(D_800CCA0C + 0xE8, &yaw, &pitch);
+        vec3_to_yaw_pitch_deg(D_800CCA0C + 0xE8, &yaw, &pitch);
         target[0] = *(f32 *) (D_800CCA0C + 0xDC);
         target[1] = *(f32 *) (D_800CCA0C + 0xE0);
         pitch = -pitch;
@@ -1205,7 +1205,7 @@ void objev_player_camera_view(void) {
 
 #ifdef NON_MATCHING
 extern f32 D_8009A104;
-void func_151A3940(u8 *, u8);
+void obj_burning_fx_start(u8 *, u8);
 
 /* was func_1506D2E8 */
 void objev_throw_object(void) {
@@ -1219,10 +1219,10 @@ void objev_throw_object(void) {
     struct127 *temp_v0;
     u16 temp_v0_2;
 
-    temp_v0 = obj_find_by_spawn(func_15083E0C(D_800D1580 & 0xFF));
+    temp_v0 = obj_find_by_spawn(setup_entry_find_by_id(D_800D1580 & 0xFF));
     if (temp_v0 != NULL) {
         sp2C = 0.0f;
-        func_151A3940(temp_v0, 0xFF);
+        obj_burning_fx_start(temp_v0, 0xFF);
         var_f0 = 0.0f;
         if (D_800D1580 & 0xFF00) {
             var_f0 = D_800D154C->camera->unk780 - 15.0f;
@@ -1271,7 +1271,7 @@ void objev_nop_1506d4ec(void) {
 //     struct127 *temp_s0;
 //     f32 phi_f0;
 //
-//     temp_s0 = obj_find_by_spawn(func_15083E0C(D_800D1580 & 0xFF));
+//     temp_s0 = obj_find_by_spawn(setup_entry_find_by_id(D_800D1580 & 0xFF));
 //     if (temp_s0 != NULL) {
 //         sp2C = 0.0f;
 //         func_151A3390(temp_s0, 0xFF);
@@ -1324,7 +1324,7 @@ void objev_clear_6e(void) {
 
 #ifdef NON_MATCHING
 /* Re-issue the current object's packed command D_800D1580 (bytes 3 and 2, low half = a duration in
- * frames scaled by the speed at unk2D0 + 0x10, 0xFFFF = none) through func_1507E7E4, unless the object
+ * frames scaled by the speed at unk2D0 + 0x10, 0xFFFF = none) through face_anim_start, unless the object
  * is in state 0x2A (P15, hand C). The asm returns junk (a %hi) on the early path, so this is void. */
 /* was func_1506D584 */
 void objev_start_anim_cmd(void) {
@@ -1343,7 +1343,7 @@ void objev_start_anim_cmd(void) {
     if (t != 0xFFFF) {
         t = (u32)(t / speed);
     }
-    func_1507E7E4(obj, D_800D1580 >> 24, D_800D1580 >> 16, t, 0);
+    face_anim_start(obj, D_800D1580 >> 24, D_800D1580 >> 16, t, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_start_anim_cmd.s")
@@ -1435,7 +1435,7 @@ void objev_screen_effect_stop(void) {
             D_800D154C->unk83 = (u8)0;
         }
     }
-    func_15174690(D_800C3E78, 0, 24, 0, 409, 4, 170, 0xFF, 0);
+    fx_dust_puff_behind_obj(D_800C3E78, 0, 24, 0, 409, 4, 170, 0xFF, 0);
 }
 
 /* was func_1506DB30 */
@@ -1464,7 +1464,7 @@ void objev_set_1e5_1e6(void) {
 void objev_link_nearby_object(void) {
     struct127 *temp_v0 = obj_find_child_nth(D_800D154C, 0);
     if (temp_v0 != NULL) {
-        func_15054A5C(temp_v0, D_800D154C);
+        obj_release_partner_remove(temp_v0, D_800D154C);
     }
 }
 
@@ -1540,7 +1540,7 @@ void objev_nop_1506ddb8(void) {
 /* was func_1506DDC0 */
 void objev_level_screen_effect(void) {
     if (func_15178E50(D_800BE9F0) != 0) {
-        func_1516EED4(D_800C3E78, D_800D1580, 0xFF, 0);
+        particle_emitter_preset_cooldown(D_800C3E78, D_800D1580, 0xFF, 0);
     }
 }
 
@@ -1548,21 +1548,21 @@ void objev_level_screen_effect(void) {
 void objev_screen_effect_twice(void) {
     s32 i;
     for(i = 0; i < 2; i++) {
-        func_15174690(D_800C3E78, 10, 18, 12, 0x199, 4, 0xAA, 0xFF, 0);
+        fx_dust_puff_behind_obj(D_800C3E78, 10, 18, 12, 0x199, 4, 0xAA, 0xFF, 0);
     }
 }
 
 // jump table
 void objev_dust_square_large(void);
 void objev_shadow_square_small(void);
-s32 func_150B0290();
-void func_150B0344(s32 side);
-void func_1516F730(s32, s32, u8, s32);
-s32 func_1516F868(u8, s32, s32, s32, u8, s32);
+s32 nodes_destroy_for_player();
+void player_joint_beam_spawn(s32 side);
+void particle_emitter_preset_obj_burst(s32, s32, u8, s32);
+s32 particle_emitter_preset_obj_pair(u8, s32, s32, s32, u8, s32);
 #ifdef NON_MATCHING
-void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
+void shard_ring_spawn(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
 #else
-s32 func_15187B50(f32, f32, f32, s32, s32, s32, f32, f32);
+s32 shard_ring_spawn(f32, f32, f32, s32, s32, s32, f32, f32);
 #endif
 
 /* was func_1506DE84 */
@@ -1570,67 +1570,67 @@ void objev_effect_by_mode(void) {
     switch (D_800D1580) {
     case 0:
         if (D_800D154C->unk28 == 0.0f) {
-            func_15187B50(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position, 0x1E, 0x1E, 7, 0.1f, 0.1f);
+            shard_ring_spawn(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position, 0x1E, 0x1E, 7, 0.1f, 0.1f);
             return;
         }
     default:
         return;
     case 1:
         if ((u32) (random_int() & 0xFF) < 0x40U) {
-            func_15187B50(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position, 0xA, 0x14, 7, 0.03f, 0.02f);
+            shard_ring_spawn(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position, 0xA, 0x14, 7, 0.03f, 0.02f);
             D_800D1580 = 0x106;
             objev_sound_or_stop(0x12C, 0x708);
             return;
         }
         break;
     case 2:
-        func_1516F730(D_800C3E78, 0x10, 0xFF, 0);
+        particle_emitter_preset_obj_burst(D_800C3E78, 0x10, 0xFF, 0);
         return;
     case 3:
-        func_1516F730(D_800C3E78, 0x28, 0xFF, 0);
+        particle_emitter_preset_obj_burst(D_800C3E78, 0x28, 0xFF, 0);
         return;
     case 4:
-        func_1516F730(D_800C3E78, 0x28, 0xFF, 0);
+        particle_emitter_preset_obj_burst(D_800C3E78, 0x28, 0xFF, 0);
         return;
     case 5:
-        func_1516F868(D_800C3E78, 0x1E, 0x14, 2, 0xFF, 0);
+        particle_emitter_preset_obj_pair(D_800C3E78, 0x1E, 0x14, 2, 0xFF, 0);
         return;
     case 6:
-        func_1516F868(D_800C3E78, 0x12, 0xC, 2, 0xFF, 0);
+        particle_emitter_preset_obj_pair(D_800C3E78, 0x12, 0xC, 2, 0xFF, 0);
         return;
     case 7:
-        func_1516F868(D_800C3E78, 0x3C, 0x78, 2, 0xFF, 0);
+        particle_emitter_preset_obj_pair(D_800C3E78, 0x3C, 0x78, 2, 0xFF, 0);
         return;
     case 8:
         objev_dust_square_large();
         return;
     case 9:
-        func_150B0344(0);
+        player_joint_beam_spawn(0);
         return;
     case 10:
-        func_150B0344(1);
+        player_joint_beam_spawn(1);
         return;
     case 11:
         objev_shadow_square_small();
         return;
     case 12:
-        func_1516F868(D_800C3E78, 0x12, 0xC, 0, 0xFF, 0);
+        particle_emitter_preset_obj_pair(D_800C3E78, 0x12, 0xC, 0, 0xFF, 0);
         return;
     case 13:
-        func_150B0290();
+        nodes_destroy_for_player();
         break;
     }
 }
 
 #ifdef NON_MATCHING
-void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
-void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
-void func_15170648(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
+void mtxf_transform_point(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
+void shard_ring_spawn(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
+void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
 
 /*
  * P85: script command 8: as objev_shadow_square_small (command 11) with a 540 x 540 square (corners (+-270, 0, +-270) through
- * the object matrix +0x1D4, at the object's height +0x180); each corner also goes to func_15187B50 (corner x,
- * transformed y, z, 30, 20, 7, 0.13, 0.1), and func_15170648 gets 4 and the full +0x14C size.
+ * the object matrix +0x1D4, at the object's height +0x180); each corner also goes to shard_ring_spawn (corner x,
+ * transformed y, z, 30, 20, 7, 0.13, 0.1), and particle_quad_edge_sparks gets 4 and the full +0x14C size.
  */
 /* was func_1506E0EC */
 void objev_dust_square_large(void) {
@@ -1647,11 +1647,11 @@ void objev_dust_square_large(void) {
     z = 270.0f;
     for (i = 0; i < 4; i++) {
         y = 0.0f;
-        func_150A7E40(*(f32 (**)[4]) ((u8 *) D_800D154C + 0x1D4), x, 0.0f, z, &x, &y, &z);
+        mtxf_transform_point(*(f32 (**)[4]) ((u8 *) D_800D154C + 0x1D4), x, 0.0f, z, &x, &y, &z);
         quad[i][0] = x;
         quad[i][1] = *(f32 *) ((u8 *) D_800D154C + 0x180);
         quad[i][2] = z;
-        func_15187B50(x, y, z, 30, 20, 7, 0.13f, 0.1f);
+        shard_ring_spawn(x, y, z, 30, 20, 7, 0.13f, 0.1f);
         if (i == 0) {
             z = 270.0f;
             x = -270.0f;
@@ -1663,20 +1663,20 @@ void objev_dust_square_large(void) {
             z = -270.0f;
         }
     }
-    func_15170648(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 4,
+    particle_quad_edge_sparks(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 4,
                   *(f32 *) ((u8 *) D_800D154C + 0x14C), 0, 4, 4, 0xFF, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_dust_square_large.s")
 #endif
 #ifdef NON_MATCHING
-void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
-void func_15170648(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
+void mtxf_transform_point(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
+void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
 
 /*
  * P85: script command 11: a 200 x 200 square around the current object (D_800D154C) in its model space
  * (corners (+-100, 0, +-100) through the object matrix +0x1D4, at the object's height +0x180) is passed to
- * func_15170648 with the object position (+0x14 / +0x1C) and half the object's +0x14C size. Nothing without a matrix.
+ * particle_quad_edge_sparks with the object position (+0x14 / +0x1C) and half the object's +0x14C size. Nothing without a matrix.
  */
 /* was func_1506E2CC */
 void objev_shadow_square_small(void) {
@@ -1693,7 +1693,7 @@ void objev_shadow_square_small(void) {
     z = 100.0f;
     for (i = 0; i < 4; i++) {
         y = 0.0f;
-        func_150A7E40(*(f32 (**)[4]) ((u8 *) D_800D154C + 0x1D4), x, 0.0f, z, &x, &y, &z);
+        mtxf_transform_point(*(f32 (**)[4]) ((u8 *) D_800D154C + 0x1D4), x, 0.0f, z, &x, &y, &z);
         quad[i][0] = x;
         quad[i][1] = *(f32 *) ((u8 *) D_800D154C + 0x180);
         quad[i][2] = z;
@@ -1708,17 +1708,17 @@ void objev_shadow_square_small(void) {
             z = -100.0f;
         }
     }
-    func_15170648(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 5,
+    particle_quad_edge_sparks(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 5,
                   *(f32 *) ((u8 *) D_800D154C + 0x14C) * 0.5f, 0, 4, 4, 0xFF, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objev_shadow_square_small.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_100107F8(struct127 *arg0);
-s32 func_10010894(struct127 *arg0);
+s32 actor_sound_is_playing(struct127 *arg0);
+s32 actor_sound2_is_playing(struct127 *arg0);
 s32 func_151F2CDC(void);
-s32 func_1000F568(s32, s32);
+s32 sound_pick_variant(s32, s32);
 s32 random_int(void);
 extern s32 *D_800BE9C8[];
 
@@ -1734,11 +1734,11 @@ s32 sound_word_resolve(struct127 *rec, s32 *slot, s32 mode) {
 
     if (w & 0x200000) {
         if (mode == 0) {
-            if (func_100107F8(rec) != 0) {
+            if (actor_sound_is_playing(rec) != 0) {
                 return 0;
             }
         } else if (mode == 1) {
-            if (func_10010894(rec) != 0) {
+            if (actor_sound2_is_playing(rec) != 0) {
                 return 0;
             }
         } else if (mode == 2) {
@@ -1766,7 +1766,7 @@ s32 sound_word_resolve(struct127 *rec, s32 *slot, s32 mode) {
         }
         w &= 0x7FFF;
         if (variants != 0) {
-            w = func_1000F568(w, variants);
+            w = sound_pick_variant(w, variants);
         }
     }
     *slot = w;
@@ -1842,7 +1842,7 @@ void objev_sound_if_grounded(void) {
 
 /* was func_1506E848 */
 void objev_sound_if_not_playing(void) {
-    if ((sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) && (func_1000F4D8((u16)D_800D1582) == 0)) {
+    if ((sound_word_resolve(D_800D154C, &D_800D1580, 0) != 0) && (sound_id_is_playing((u16)D_800D1582) == 0)) {
         objev_sound_or_stop(0x50, 800);
     }
 }
@@ -2027,9 +2027,9 @@ void objev_trail_start_or_stop(void) {
     s32 temp_a1 = D_800D1580 & 0xFFFF;
 
     if (D_800D1580 != 0) {
-        func_15188D80(D_800D154C, temp_a1, D_800D1580 >> 0x10);
+        afterimage_start(D_800D154C, temp_a1, D_800D1580 >> 0x10);
     } else {
-        func_1518900C(D_800D154C, temp_a1);
+        afterimage_stop(D_800D154C, temp_a1);
     }
 }
 // NON-MATCHING: same issue as earlier
@@ -2048,7 +2048,7 @@ void objev_trail_start_or_stop(void) {
 
 /* was func_1506EEAC */
 void objev_trail_set(void) {
-    func_151898C0(D_800D154C, D_800D1580);
+    afterimage_set_skin(D_800D154C, D_800D1580);
 }
 
 /* was func_1506EED8 */
@@ -2095,57 +2095,57 @@ void objev_clear_282(void) {
 /* was func_1506EFC8 */
 void objfx_bb760_unless_8c(s32 arg0) {
     if (D_800D154C->id != 0x8C) {
-        func_150BB760(D_800D154C);
+        obj20_trail_chunk_spawn(D_800D154C);
     }
 }
 
 /* was func_1506F004 */
 void objfx_bcbbc(s32 arg0) {
-    func_150BCBBC(D_800D154C);
+    obj20_side_chunks_spawn(D_800D154C);
 }
 
 /* was func_1506F02C */
 void objfx_ba4c0(s32 arg0) {
-    func_150BA4C0(D_800D154C, 0xFF, 0);
+    crumble_emitter_spawn(D_800D154C, 0xFF, 0);
 }
 
 /* was func_1506F05C */
 void objfx_dust_50(s32 arg0) {
-    func_151925C4(D_800D154C, 0x32, 0xFF, 1);
+    obj_dust_effect(D_800D154C, 0x32, 0xFF, 1);
 }
 
 /* was func_1506F090 */
 void objfx_dust_default(s32 arg0) {
-    func_151925C4(D_800D154C, -1, 0xFF, 1);
+    obj_dust_effect(D_800D154C, -1, 0xFF, 1);
 }
 
 /* was func_1506F0C4 */
 void objfx_c1260_0(s32 arg0) {
-    func_150C1260(D_800D154C, 0);
+    foot_ring_debris_effect(D_800D154C, 0);
 }
 
 /* was func_1506F0F0 */
 void objfx_c1260_1(s32 arg0) {
-    func_150C1260(D_800D154C, 1);
+    foot_ring_debris_effect(D_800D154C, 1);
 }
 
 /* was func_1506F11C */
 void objfx_spray_0(s32 arg0) {
-    func_150BABE0(D_800D154C, 0, 0xFF);
+    foot_splash_effect(D_800D154C, 0, 0xFF);
 }
 
 /* was func_1506F14C */
 void objfx_spray_1(s32 arg0) {
-    func_150BABE0(D_800D154C, 1, 0xFF);
+    foot_splash_effect(D_800D154C, 1, 0xFF);
 }
 
 /* was func_1506F17C */
 void objfx_aeeb0(s32 arg0) {
-    func_150AEEB0(D_800D154C, 0xFF);
+    obj_trail_burst_spawn(D_800D154C, 0xFF);
 }
 
 #ifdef NON_MATCHING
-/* the emitter spec func_15199A28 reads (layout as game_eu_1C3530's Emitter2Spec) */
+/* the emitter spec spec_emitter_spawn reads (layout as game_eu_1C3530's Emitter2Spec) */
 typedef struct {
     /* 0x000 */ s32 u000;
     /* 0x004 */ u8 *u004;
@@ -2242,12 +2242,12 @@ typedef struct {
     /* 0x118 */ s16 u118;
     /* 0x11A */ s16 u11A;
 } EmitterSpec981E0;
-u8 *func_15199A28(s32 arg0, u8 *spec, u8 arg2, s32 arg3);
+u8 *spec_emitter_spawn(s32 arg0, u8 *spec, u8 arg2, s32 arg3);
 #endif
 
 #ifdef NON_MATCHING
 // player_emitter_spawn_c: player action handler (void (s32), argument unused): spawns the kind-0xC emitter on the
-// player D_800D154C (node byte its +0x3B) through func_15199A28 (no extra data, layer 0xFF, owner 0) with a constant
+// player D_800D154C (node byte its +0x3B) through spec_emitter_spawn (no extra data, layer 0xFF, owner 0) with a constant
 // spec (all fields set except padding, as the asm fills them).
 /* was func_1506F1A8 */
 void objfx_emitter_c(s32 arg0) {
@@ -2342,7 +2342,7 @@ void objfx_emitter_c(s32 arg0) {
     spec.u114 = 0.30800003f;
     spec.u118 = 0x14;
     spec.u11A = 0xC;
-    func_15199A28(0, (u8 *) &spec, 0xFF, 0);
+    spec_emitter_spawn(0, (u8 *) &spec, 0xFF, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objfx_emitter_c.s")
@@ -2350,7 +2350,7 @@ void objfx_emitter_c(s32 arg0) {
 
 /* was func_1506F524 */
 void objfx_197a7c(s32 arg0) {
-    func_15197A7C(D_800D154C);
+    emitter_stop_for_obj(D_800D154C);
 }
 
 #ifdef NON_MATCHING
@@ -2449,7 +2449,7 @@ void objfx_emitter_d(s32 arg0) {
     spec.u114 = 0.44300002f;
     spec.u118 = 0xF;
     spec.u11A = 0x11;
-    func_15199A28(0, (u8 *) &spec, 0xFF, 0);
+    spec_emitter_spawn(0, (u8 *) &spec, 0xFF, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objfx_emitter_d.s")
@@ -2481,45 +2481,45 @@ void objfx_arc_c(s32 arg0) {
 /* was func_1506FB60 */
 void objfx_gun_shot(s32 arg0) {
     if (held_obj_byte7d_get() != 0) {
-        func_151C6A28(D_800D154C, (arg0 - 0x13) & 0xFF, 0xFF, 0);
+        object_muzzle_fire(D_800D154C, (arg0 - 0x13) & 0xFF, 0xFF, 0);
     } else {
-        func_151C62D0(D_800D154C, (arg0 - 0x13) & 0xFF, 0, 0, -1, 0xFF, 0);
+        object_gun_fire(D_800D154C, (arg0 - 0x13) & 0xFF, 0, 0, -1, 0xFF, 0);
     }
 }
 
 /* was func_1506FBE8 */
 void objfx_1a0a10_70(s32 arg0) {
-    func_151A0A10(D_800D154C, 0x46, 0xFF, 0);
+    ground_dust_spawn(D_800D154C, 0x46, 0xFF, 0);
 }
 
 /* was func_1506FC1C */
 void objfx_1a0a10_40(s32 arg0) {
-    func_151A0A10(D_800D154C, 0x28, 0xFF, 0);
+    ground_dust_spawn(D_800D154C, 0x28, 0xFF, 0);
 }
 
 /* was func_1506FC50 */
 void objfx_buddy_marker_clear(s32 arg0) {
-    func_1519E688();
+    buddy_marker_clear_all();
 }
 
 /* was func_1506FC74 */
 void objfx_buddy_marker_create(s32 arg0) {
-    func_1519E6BC(D_800D154C);
+    buddy_marker_create(D_800D154C);
 }
 
 /* was func_1506FC9C */
 void objfx_b3ab0(s32 arg0) {
-    func_150B3AB0(D_800D154C, 0xFF);
+    obj_joint_blast_fx(D_800D154C, 0xFF);
 }
 
 /* was func_1506FCC8 */
 void objfx_emitter_kind6(s32 arg0) {
-    func_15196438((u8 *) D_800D154C, 6, 0xFF, 0);
+    object_emitter_spawn((u8 *) D_800D154C, 6, 0xFF, 0);
 }
 
 /* was func_1506FCFC */
 void objfx_emitter_kind5(s32 arg0) {
-    func_15196438((u8 *) D_800D154C, 5, 0xFF, 0);
+    object_emitter_spawn((u8 *) D_800D154C, 5, 0xFF, 0);
 }
 
 /* was func_1506FD30 */
@@ -2530,93 +2530,93 @@ void objfx_arc_d(s32 arg0) {
 
 /* was func_1506FDF0 */
 void objfx_1aabc4_0(s32 arg0) {
-    func_151AABC4(D_800D154C, 0);
+    footstep_splash(D_800D154C, 0);
 }
 
 /* was func_1506FE1C */
 void objfx_1aabc4_1(s32 arg0) {
-    func_151AABC4(D_800D154C, 1);
+    footstep_splash(D_800D154C, 1);
 }
 
 /* was func_1506FE48 */
 void objfx_1aabc4_0_b(s32 arg0) {
-    func_151AABC4(D_800D154C, 0);
+    footstep_splash(D_800D154C, 0);
 }
 
 /* was func_1506FE74 */
 void objfx_1aabc4_1_b(s32 arg0) {
-    func_151AABC4(D_800D154C, 1);
+    footstep_splash(D_800D154C, 1);
 }
 
 /* was func_1506FEA0 */
 void objfx_1aabc4_2(s32 arg0) {
-    func_151AABC4(D_800D154C, 2);
+    footstep_splash(D_800D154C, 2);
 }
 
 /* was func_1506FECC */
 void objfx_1aabc4_3(s32 arg0) {
-    func_151AABC4(D_800D154C, 3);
+    footstep_splash(D_800D154C, 3);
 }
 
 /* was func_1506FEF8 */
 void objfx_1ab920_0(s32 arg0) {
-    func_151AB920(D_800D154C, 0);
+    char_handler_nop_b(D_800D154C, 0);
 }
 
 /* was func_1506FF24 */
 void objfx_1ab920_1(s32 arg0) {
-    func_151AB920(D_800D154C, 1);
+    char_handler_nop_b(D_800D154C, 1);
 }
 
 /* was func_1506FF50 */
 void objfx_1ab930(s32 arg0) {
-    func_151AB930(D_800D154C);
+    char_state_fx_start(D_800D154C);
 }
 
 /* was func_1506FF78 */
 void objfx_cbf80_0(s32 arg0) {
-    func_150CBF80(D_800D154C, 0, 1, 0xFF);
+    ground_puff_spawn(D_800D154C, 0, 1, 0xFF);
 }
 
 /* was func_1506FFAC */
 void objfx_cbf80_1(s32 arg0) {
-    func_150CBF80(D_800D154C, 1, 1, 0xFF);
+    ground_puff_spawn(D_800D154C, 1, 1, 0xFF);
 }
 
 /* was func_1506FFE0 */
 void objfx_cbf80_2(s32 arg0) {
-    func_150CBF80(D_800D154C, 2, 1, 0xFF);
+    ground_puff_spawn(D_800D154C, 2, 1, 0xFF);
 }
 
 /* was func_15070014 */
 void objfx_ca150(s32 arg0) {
-    func_150CA150((u8 *) D_800D154C);
+    landing_dust_burst((u8 *) D_800D154C);
 }
 
 /* was func_1507003C */
 void objfx_1b01b8_1b09bc(s32 arg0) {
-    func_151B01B8(D_800D154C, 0);
-    func_151B09BC(D_800D154C, 0, 0x3E8, 0xFF, 0);
+    object_hit_flash_spawn(D_800D154C, 0);
+    object_link_effect_spawn(D_800D154C, 0, 0x3E8, 0xFF, 0);
 }
 
 /* was func_15070084 */
 void objfx_1aeca0(s32 arg0) {
-    func_151AECA0(D_800D154C, 0xFF, 1);
+    ground_burst_spawn(D_800D154C, 0xFF, 1);
 }
 
 /* was func_150700B4 */
 void objfx_1b03b8(s32 arg0) {
-    func_151B03B8(D_800D154C, 0xFF, 1);
+    ground_burst_spawn_b(D_800D154C, 0xFF, 1);
 }
 
 /* was func_150700E4 */
 void objfx_193660(s32 arg0) {
-    func_15193660(D_800D154C, 0xFF, 1);
+    obj_head_particle_burst(D_800D154C, 0xFF, 1);
 }
 
 /* was func_15070114 */
 void objfx_1937f4(s32 arg0) {
-    func_151937F4(D_800D154C, 0xFF, 1);
+    obj_bone_debris_emitter_attach(D_800D154C, 0xFF, 1);
 }
 
 /* was func_15070144 */
@@ -2634,18 +2634,18 @@ void objfx_shot_self(s32 arg0) {
     } else {
         tmp0 = 0;
     }
-    func_151C0698(D_800D154C, 0, &tmp, tmp0 & 0xFF, 0xFF, 1);
-    func_151C1FB8(D_800D154C);
+    projectile_fire(D_800D154C, 0, &tmp, tmp0 & 0xFF, 0xFF, 1);
+    obj_rider_cam_shake(D_800D154C);
 }
 
 /* was func_150701C4 */
 void objfx_1c5280(s32 arg0) {
-    func_151C5280(D_800D154C, 0xFF, 1);
+    gun_muzzle_smoke_spawn(D_800D154C, 0xFF, 1);
 }
 
 /* was func_150701F4 */
 void objfx_1c9740(s32 arg0) {
-    func_151C9740(D_800D154C, 0xFF, 1);
+    object_explode_big(D_800D154C, 0xFF, 1);
 }
 
 /* was func_15070224 */
@@ -2665,8 +2665,8 @@ void objfx_debris_burst(s32 arg0) {
 #ifdef NON_MATCHING
 void objev_player_camera_view(void); // P259: reads D_800D154C itself (the asm ignores a0 / a1)
 struct127 *player_find_owned_object(struct127 *, struct127 *, s32);
-void func_15145EA4(f32 **, f32 **, void *, s32);
-void func_151C1E10(u8 *, u8, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+void muzzle_flash_light_spawn(u8 *, u8, s32);
 extern s32 D_800E0FFE;
 
 /* was func_15070300 */
@@ -2735,12 +2735,12 @@ void objfx_gun_fire(s32 arg0) {
 block_10:
         sp.uAF = var_a1;
         sp.uA7 = var_a3;
-        func_151C1FB8(sp.uA8);
+        obj_rider_cam_shake(sp.uA8);
         var_a3_2 = var_a3;
         if (sp.uA0 != NULL) {
             sp.uAF = var_a1;
             sp.uA7 = var_a3_2;
-            func_151C1FB8(sp.uA0);
+            obj_rider_cam_shake(sp.uA0);
         }
         if (D_800BE616 != 0) {
             if (D_800D154C->unk31C->unk128 & 0x10) {
@@ -2759,7 +2759,7 @@ block_10:
             sp.u90 = sp.uA8;
             sp.u94 = sp.uA0;
             sp.u98 = D_800D154C;
-            func_151C0698(sp.uA8, sp.uA0, &sp.u8C, var_a3_2, 0xFF, 1);
+            projectile_fire(sp.uA8, sp.uA0, &sp.u8C, var_a3_2, 0xFF, 1);
         } else {
             objev_player_camera_view();
         }
@@ -2778,11 +2778,11 @@ block_10:
                 sp.u5C = &sp.u80;
                 sp.u58 = &sp.u60;
                 sp.u70 = temp_f18 + 3.5900002f;
-                func_15145EA4(&sp.u5C, &sp.u58, &D_800D154C->unk1D4->pad0[0x100], 1);
+                mtx_transform_points(&sp.u5C, &sp.u58, &D_800D154C->unk1D4->pad0[0x100], 1);
                 sp4C = random_int();
                 sp50 = random_int();
                 attached_particle_spawn((u8 *)D_800D154C, 4U, (f32 *)&sp.u80, (f32 *)&sp.u74, &sp.u6C, ((u32) sp4C % 5U) + 5, ((u32) sp50 % 56U) + 0xC8, (random_float() * 510.0f) + 1296.0f, (u8 *)&sp.u60, 0xFF, 0, -1, 0xFF, 1);
-                func_151C1E10(&sp.u60, 0xFF, 1);
+                muzzle_flash_light_spawn(&sp.u60, 0xFF, 1);
             }
         }
     }
@@ -2936,7 +2936,7 @@ void objfx_emitter_9(s32 arg0) {
     spec.u114 = 0.37600002f;
     spec.u118 = 0xA;
     spec.u11A = 0x19;
-    func_15199A28(0, (u8 *) &spec, 0xFF, 0);
+    spec_emitter_spawn(0, (u8 *) &spec, 0xFF, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/objfx_emitter_9.s")
@@ -2944,7 +2944,7 @@ void objfx_emitter_9(s32 arg0) {
 
 /* was func_15070C18 */
 void objfx_199834(s32 arg0) {
-    func_15199834(D_800D154C);
+    spec_emitter_stop_for_obj(D_800D154C);
 }
 
 /* was func_15070C40 */
@@ -3010,7 +3010,7 @@ void objfx_sparks_joint1(s32 arg0) {
     if ((D_800D154C->unk1D4 != NULL) && ((D_800D154C->unk74 & 0xF) != 0xF)) {
         f[0] = (random_float() * 101.0f) + 151.0f;
         f[1] = (random_float() * 4.0f) + 4.0f;
-        func_15143134(&a, pos, (u8 *)D_800D154C->unk1D4 + 0x40);
+        mtx_transform_point_or_origin(&a, pos, (u8 *)D_800D154C->unk1D4 + 0x40);
         attached_particle_spawn((u8 *)D_800D154C, 1, (f32 *)&a, (f32 *)&b, f, (random_int() % 6U) + 5, (random_int() % 156U) + 0x64, (random_float() * 2496.0f) + 3496.0f, (u8 *)pos, 0xFF, 0, -1, 0xFF, 0);
         header.unk0 = 3;
         header.unk1 = -1;
@@ -3022,7 +3022,7 @@ void objfx_sparks_joint1(s32 arg0) {
         light_create_with_ctrl(&header, &header2, (random_int() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
     }
 }
-void func_151D58E4(s32 arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
+void cam_shake_all_players(s32 arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
 extern struct17 D_80099F60;
 extern struct17 D_80099F6C;
 
@@ -3040,7 +3040,7 @@ void objfx_sparks_shake(u8 arg0) {
     if ((D_800D154C->unk1D4 != NULL) && ((D_800D154C->unk74 & 0xF) != 0xF)) {
         f[0] = (random_float() * 180.0f) + 150.0f;
         f[1] = (random_float() * 2.0f) + 2.5f;
-        func_15143134(&a, pos, (u8 *)D_800D154C->unk1D4 + ((arg0 ? 1 : 2) << 6));
+        mtx_transform_point_or_origin(&a, pos, (u8 *)D_800D154C->unk1D4 + ((arg0 ? 1 : 2) << 6));
         attached_particle_spawn((u8 *)D_800D154C, arg0 ? 1 : 2, (f32 *)&a, (f32 *)&b, f, (random_int() % 5U) + 5, (random_int() % 156U) + 0x64, (random_float() * 4000.0f) + 4000.0f, (u8 *)pos, 0xFF, 0, -1, 0xFF, 0);
         header.unk0 = 3;
         header.unk1 = -1;
@@ -3050,8 +3050,8 @@ void objfx_sparks_shake(u8 arg0) {
         header2.unk4 = pos[1];
         header2.unk8 = pos[2];
         light_create_with_ctrl(&header, &header2, (random_int() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-        func_151D5404((struct17 *)pos, 506.0f, 1013.0f, 0.0009871668880805373f, 0xF, 0x14, 0xFF, 0);
-        func_151D58E4((s32)pos, 506.0f, 1013.0f, 0.0009871668880805373f, 5, 0xFF, 0);
+        rumble_all_players_at((struct17 *)pos, 506.0f, 1013.0f, 0.0009871668880805373f, 0xF, 0x14, 0xFF, 0);
+        cam_shake_all_players((s32)pos, 506.0f, 1013.0f, 0.0009871668880805373f, 5, 0xFF, 0);
     }
 }
 /* was func_15071230 */
@@ -3080,7 +3080,7 @@ void objfx_fede0_cam_shake(s32 arg0) {
         sp18.unk5 = 1 << D_800D154C->camera->unk23D;
         sp18.unk4 = (random_int() % 7U) + 2;
         sp18.unk6 = -1;
-        func_151D8E18(&sp18, 0, 0xFF, 1);
+        rumble_request(&sp18, 0, 0xFF, 1);
     }
 }
 /* was func_15071360 */
@@ -3098,7 +3098,7 @@ void objfx_ff2b0_cam_shake(s32 arg0) {
         sp18.unk5 = 1 << D_800D154C->camera->unk23D;
         sp18.unk4 = (random_int() & 3) + 3;
         sp18.unk6 = -1;
-        func_151D8E18(&sp18, 0, 0xFF, 1);
+        rumble_request(&sp18, 0, 0xFF, 1);
     }
 }
 
@@ -3119,25 +3119,25 @@ void objfx_ff840_0_1(s32 arg0) {
 
 /* was func_150714E8 */
 void objfx_1d5714_a(s32 arg0) {
-    func_151D5714(D_800D154C, &D_800A2148, &D_800A2154, D_80088BB0, 1.0f, 0xFF, 1);
+    bone_beam_spawn(D_800D154C, &D_800A2148, &D_800A2154, D_80088BB0, 1.0f, 0xFF, 1);
 }
 
 /* was func_15071544 */
 void objfx_1d469c_4(s32 arg0) {
-    func_151D4668(D_800D154C);
-    func_151D469C(D_800D154C, 4, 0x78, 0xFF, 1);
+    obj_point_fx_broadcast_kill(D_800D154C);
+    object_point_effect_spawn(D_800D154C, 4, 0x78, 0xFF, 1);
 }
 
 /* was func_1507158C */
 void objfx_1d469c_2(s32 arg0) {
-    func_151D4668(D_800D154C);
-    func_151D469C(D_800D154C, 2, 0x78, 0xFF, 1);
+    obj_point_fx_broadcast_kill(D_800D154C);
+    object_point_effect_spawn(D_800D154C, 2, 0x78, 0xFF, 1);
 }
 
 /* was func_150715D4 */
 void objfx_1d469c_3(s32 arg0) {
-    func_151D4668(D_800D154C);
-    func_151D469C(D_800D154C, 3, 0x78, 0xFF, 1);
+    obj_point_fx_broadcast_kill(D_800D154C);
+    object_point_effect_spawn(D_800D154C, 3, 0x78, 0xFF, 1);
 }
 
 /* was func_1507161C */
@@ -3147,12 +3147,12 @@ void objfx_nop_1507161c(s32 arg0) {
 
 /* was func_15071628 */
 void objfx_1d0058(s32 arg0) {
-    func_151D0058(D_800D154C, (arg0 - 0x55) & 0xFF, 0xFF, 1);
+    obj_aura_fx_spawn(D_800D154C, (arg0 - 0x55) & 0xFF, 0xFF, 1);
 }
 
 /* was func_15071668 */
 void objfx_1d0024(s32 arg0) {
-    func_151D0024(D_800D154C);
+    obj_fx_broadcast_kill(D_800D154C);
 }
 
 /* was func_15071690 */
@@ -3163,8 +3163,8 @@ void objfx_b5c38(s32 arg0) {
 
     temp_a0 = D_800D154C;
     if ((temp_a0->unk1D4 != 0) && ((temp_a0->unk74 & 0xF) != 0xF)) {
-        func_150B60E0(temp_a0, &sp1C);
-        func_150B5C38(&sp1C, 0xFF, 1);
+        obj_get_skel_point_down205(temp_a0, &sp1C);
+        zap_burst_spawn(&sp1C, 0xFF, 1);
     }
 }
 
@@ -3177,12 +3177,12 @@ void objfx_shake_large(s32 arg0) {
     tmp.unk0 = temp_v0->x_position;
     tmp.unk4 = temp_v0->y_position;
     tmp.unk8 = temp_v0->z_position;
-    func_151D5404(&tmp, 1502.0f, 3000.0f, 0.00033333332976326346f, 0xC, 0xF, 0xFF, 0);
+    rumble_all_players_at(&tmp, 1502.0f, 3000.0f, 0.00033333332976326346f, 0xC, 0xF, 0xFF, 0);
 }
 
 /* was func_15071764 */
 void objfx_kind18_activate(s32 arg0) {
-    struct127 *sp34 = func_15083E90(18);
+    struct127 *sp34 = obj_find_by_setup_id(18);
     if (sp34 != NULL) {
         obj_glow_spawn(sp34);
         obj_trail_emitter_spawn(sp34);
@@ -3198,11 +3198,11 @@ void objfx_kind18_notify_43(s32 arg0) {
     } sp20;
     struct127 *temp_v0;
 
-    temp_v0 = func_15083E90(0x12);
+    temp_v0 = obj_find_by_setup_id(0x12);
     if (temp_v0 != NULL) {
         sp20.unk0 = temp_v0;
         sp20.unk4 = temp_v0->unique_id;
-        func_151322BC((s32)&sp20, 0x43);
+        particle_broadcast((s32)&sp20, 0x43);
         func_151494E0((s32)&sp20, 0x43);
     }
 }
@@ -3213,7 +3213,7 @@ void objfx_kind18_notify_43(s32 arg0) {
 //     void **temp_a0;
 //     void *temp_v0;
 //
-//     temp_v0 = func_15083E90(0x12);
+//     temp_v0 = obj_find_by_setup_id(0x12);
 //     temp_a0 = &sp20;
 //     if (temp_v0 != 0) {
 //         sp20 = temp_v0;
@@ -3231,12 +3231,12 @@ void objfx_f9bb0(s32 arg0) {
 
 /* was func_15071860 */
 void objfx_19072c(s32 arg0) {
-    func_1519072C(D_800D154C);
+    object_effects_detach_all(D_800D154C);
 }
 
 /* was func_15071888 */
 void objfx_1d5714_b(s32 arg0) {
-    func_151D5714(D_800D154C, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
+    bone_beam_spawn(D_800D154C, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
 /* was func_150718E4 */
@@ -3246,9 +3246,9 @@ void objfx_1c384c_random_joint(s32 arg0) {
 
     sp20 = D_80099F78;
     if ((D_800D154C->unk1D4 != NULL) || ((D_800D154C->unk74 & 0xF) == 0xF)) {
-        func_15143134(D_800A5860, sp24, (u8 *)D_800D154C->unk1D4 + (((u8 *)&sp20)[random_int() & 3] << 6));
+        mtx_transform_point_or_origin(D_800A5860, sp24, (u8 *)D_800D154C->unk1D4 + (((u8 *)&sp20)[random_int() & 3] << 6));
         sp24[1] = D_800D154C->unk180 + 20.0f;
-        func_151C384C(sp24, 0xFF, 1);
+        fire_embers_spawn(sp24, 0xFF, 1);
     }
 }
 
@@ -3269,7 +3269,7 @@ void objfx_fa520_2(s32 arg0) {
 
 /* was func_15071A34 */
 void objfx_1d09a8(s32 arg0) {
-    func_151D09A8(D_800D154C, 0xFF, 1);
+    objfx_joint_flash_burst(D_800D154C, 0xFF, 1);
 }
 
 /* was func_15071A64 */
@@ -3279,13 +3279,13 @@ void objfx_1dc484_vs_player(s32 arg0) {
 
     if (!(random_int() & 1) && (D_800D154C->unk1D4 != NULL) && ((D_800D154C->unk74 & 0xF) != 0xF) &&
         (D_800CC2D0[0].stunned != 0) && (D_800CC2D0[0].health > 0)) {
-        func_1504715C(sp28, D_800D154C);
-        func_15143134(D_80099F7C, sp4C, (u8 *)D_800D154C->unk1D4 + 0x3C0);
+        hitinfo_from_obj_floor(sp28, D_800D154C);
+        mtx_transform_point_or_origin(D_80099F7C, sp4C, (u8 *)D_800D154C->unk1D4 + 0x3C0);
         impact_blast_spawn_small(sp4C, sp28, 0, 0xFF, 1);
     }
 }
 void impact_blast_spawn_large(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_15152700(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7);
+void emit_textured_burst(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7);
 extern f32 D_80099F88[3][3];
 extern u8 D_80099FAC[];
 extern u8 D_80099FC4[];
@@ -3314,8 +3314,8 @@ void objfx_joint7_burst(s32 arg0) {
     } s;
 
     if ((D_800D154C->unk1D4 != NULL) && ((D_800D154C->unk74 & 0xF) != 0xF)) {
-        func_15143134(D_80099F88[random_int() % 3U], &pos, (u8 *)D_800D154C->unk1D4 + 0x1C0);
-        func_1504715C(m, D_800D154C);
+        mtx_transform_point_or_origin(D_80099F88[random_int() % 3U], &pos, (u8 *)D_800D154C->unk1D4 + 0x1C0);
+        hitinfo_from_obj_floor(m, D_800D154C);
         if (random_int() & 1) {
             if (random_int() & 1) {
                 impact_blast_spawn_large(&pos, m, 0, 0xFF, 1);
@@ -3342,7 +3342,7 @@ void objfx_joint7_burst(s32 arg0) {
             s.u64 = 0.096f;
             s.u68 = 0.07f;
             s.u6C = 21.892f;
-            func_15152700(&s, D_80099FAC, D_80099FC4, 6, 25.0f, 0, 0xFF, 1);
+            emit_textured_burst(&s, D_80099FAC, D_80099FC4, 6, 25.0f, 0, 0xFF, 1);
         }
     }
 }
@@ -3383,7 +3383,7 @@ void objev_141a7c(void) {
 
 /* was func_15071DF4 */
 void objev_192800(void) {
-    func_15192800(D_800D154C, D_800D1580);
+    obj_surface_handler_dispatch(D_800D154C, D_800D1580);
 }
 
 /* was func_15071E20 */
@@ -3560,7 +3560,7 @@ void objev_or_mask_94(void) {
 
 /* was func_150723AC */
 void objev_remove_kind(void) {
-    struct127 *temp_v0 = func_15083E90(D_800D1583);
+    struct127 *temp_v0 = obj_find_by_setup_id(D_800D1583);
     if (temp_v0 != NULL) {
         obj_remove(temp_v0, 0);
     }
@@ -3568,7 +3568,7 @@ void objev_remove_kind(void) {
 
 /* was func_150723E0 */
 void objev_remove_kind_owned(void) {
-    struct127 *temp_v0 = func_15083E90(D_800D1583);
+    struct127 *temp_v0 = obj_find_by_setup_id(D_800D1583);
     if ((temp_v0 != 0) && (temp_v0->unk65 != 0)) {
         obj_remove(temp_v0, 0);
     }
@@ -3576,14 +3576,14 @@ void objev_remove_kind_owned(void) {
 
 #ifdef NON_MATCHING
 // event_respawn_record_object: P256: event-script command (request word D_800D1580): byte 0 = record id (looked up
-// with func_15083E0C, -1 = none), bits 8..14 = the new object's +0x5C, bit 15 = no +0x101 mode (else 4), bits
+// with setup_entry_find_by_id, -1 = none), bits 8..14 = the new object's +0x5C, bit 15 = no +0x101 mode (else 4), bits
 // 16..23 = state (+0x232 gets the low 7 bits; bit 7 keeps the record's current object, otherwise that object is
 // released first: obj_remove(obj, 0) + obj_reset). Clears the record's flag bytes (D_800D252C[rec], record
-// +2), spawns it again (func_15082E44, 1-based object number) and places the object on the current object
+// +2), spawns it again (setup_entry_spawn, 1-based object number) and places the object on the current object
 // D_800D154C, owned by it (+0x65 = its index + 1, +0x124 = D_800C3E78 + 1). With D_800BE616 set and the current
 // object of kind 0x53 that one remembers the new index (+0x222); kind 0x16 objects on level 0x3F get +0x94 bit 2.
 extern u8 *D_800D252C;
-s32 func_15082E44(u8 *, s32, s32, s32, s32);
+s32 setup_entry_spawn(u8 *, s32, s32, s32, s32);
 void obj_reset(struct127 *);
 /* was func_15072420 */
 void objev_respawn_record_object(void) {
@@ -3596,7 +3596,7 @@ void objev_respawn_record_object(void) {
     struct127 *old;
     struct127 *obj;
 
-    rec = func_15083E0C(req & 0xFF);
+    rec = setup_entry_find_by_id(req & 0xFF);
     if (rec == -1) {
         return;
     }
@@ -3609,7 +3609,7 @@ void objev_respawn_record_object(void) {
         }
     }
     ((u8 *) D_800D20FC + rec * 0x30)[2] = 0;
-    n = func_15082E44((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
+    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
     if (n == 0) {
         return;
     }
@@ -3659,7 +3659,7 @@ void objev_adopt_remembered_obj(void)
     temp_a1->unkF0 = 1.0f;
     temp_a1->unkDC = 1.0f;
     temp_a1->unkE0 = 1.0f;
-    func_151B6150(&D_800CC2D0[D_800C3E78], temp_a1);
+    obj_dust_trail_on_link(&D_800CC2D0[D_800C3E78], temp_a1);
   }
 }
 
@@ -3717,21 +3717,21 @@ void objev_set_2e4(void) {
 /* was func_150729D0 */
 void objev_action21_idle(void) {
     D_800D154C->unk31C->unk8 = (u16)1;
-    func_1507EB4C(D_800D154C, 21);
+    face_set_default_anim(D_800D154C, 21);
     objev_allow_run_idle();
 }
 
 /* was func_15072A14 */
 void objev_clear_66_idle(void) {
     D_800D154C->unk31C->unk66 = (u16)0;
-    func_1507F640();
+    player_idle_animation();
 }
 
 /* was func_15072A40 */
 void objev_clear_19b_idle(void) {
     D_800D154C->unk31C->unk19B = (u8)0;
     D_800D154C->unk31C->unk78 = (u8)0;
-    func_1507F640();
+    player_idle_animation();
 }
 
 /* was func_15072A7C */
@@ -3752,7 +3752,7 @@ void objev_anim_next_blend6(void) {
 #ifdef NON_MATCHING
 // player_anim_follow_up: when the player's (D_800D154C) animation +0x84 ends, start the one that follows it (blend 4):
 // fixed pairs (0x35 / 0x3F -> 0x3A, 0x1CD / 0x1CF -> 0x1CE, the 0x26F..0x274 cycle, ...); for 0x10C, 0x156 and 0x167
-// the follow-up depends on the player's flag +0x31C->+0x197, without it the idle animation (func_1507F640) starts;
+// the follow-up depends on the player's flag +0x31C->+0x197, without it the idle animation (player_idle_animation) starts;
 // 0xBE, and 0xC1 without flag 0x2000 in +0x31C->+0x38, go to 0xBF. Anything else starts nothing.
 /* was func_15072B44 */
 void objev_anim_follow_up(void) {
@@ -3774,7 +3774,7 @@ void objev_anim_follow_up(void) {
             if (D_800D154C->unk31C->unk197 != 0) {
                 next = 0x10A;
             } else {
-                func_1507F640();
+                player_idle_animation();
             }
             break;
         case 0x12C:
@@ -3788,14 +3788,14 @@ void objev_anim_follow_up(void) {
             if (D_800D154C->unk31C->unk197 != 0) {
                 next = 0x157;
             } else {
-                func_1507F640();
+                player_idle_animation();
             }
             break;
         case 0x167:
             if (D_800D154C->unk31C->unk197 != 0) {
                 next = 0x165;
             } else {
-                func_1507F640();
+                player_idle_animation();
             }
             break;
         case 0x175:
@@ -3846,7 +3846,7 @@ void objev_set_2f8_low3(void) {
 
 /* was func_15072DD8 */
 void objev_loop_sound_start(void) {
-    func_15083568(D_800D154C, D_800D1580, 1.0f, 0);
+    obj_setup_run(D_800D154C, D_800D1580, 1.0f, 0);
 
     if ((D_800D154C->unk31C != 0) && (D_800D154C->unk31C->unk11A == 1)) {
         D_800D154C->unk31C->unk11A = (u8)2U;
@@ -3855,7 +3855,7 @@ void objev_loop_sound_start(void) {
 
 /* was func_15072E38 */
 void objev_loop_sound_stop(void) {
-    func_150836CC(D_800D154C, D_800D1580);
+    obj_setup_undo(D_800D154C, D_800D1580);
 
     if (D_800D154C->unk31C != 0) {
         D_800D154C->unk31C->unk11A = (u8)0;
@@ -3944,9 +3944,9 @@ void objev_toggle_2f8_100(void) {
 
 #ifdef NON_MATCHING
 void *obj_alloc_slot(void);
-u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2);
-u8 *func_1515D9F0(s32 arg0);
-void *func_1515D9B0(void);
+u8 *move_watch_spawn(u8 *arg0, u8 arg1, s32 arg2);
+u8 *light_alloc_light_buf(s32 arg0);
+void *light_alloc_lookat_buf(void);
 
 #define O_U8(o, off)  (*(u8 *) ((u8 *) (o) + (off)))
 #define O_S16(o, off) (*(s16 *) ((u8 *) (o) + (off)))
@@ -3977,7 +3977,7 @@ u8 *obj_spawn_child_at_joint(struct127 *parent, s32 joint, s32 kind, f32 x, f32 
             guMtxL2F(mf, (Mtx *) m);   /* fixed-point joint matrices */
             m = mf;
         }
-        func_150A7E40(m, x, y, z, &px, &py, &pz);
+        mtxf_transform_point(m, x, y, z, &px, &py, &pz);
     } else {
         px = O_F32(parent, 0x14);
         py = O_F32(parent, 0x18);
@@ -4012,15 +4012,15 @@ u8 *obj_spawn_child_at_joint(struct127 *parent, s32 joint, s32 kind, f32 x, f32 
     O_S16(o, 0x278) = kind;
     O_U8(o, 0x5) = 5;
     O_U8(o, 0x3B) = 0xFF - (s32) ((u8 *) o - (u8 *) D_800CC2D0) / 0x32C;
-    func_15083568(o, kind, 1.0f, 0);
+    obj_setup_run(o, kind, 1.0f, 0);
     for (i = 0; i <= D_80082FA0; i++) {
-        O_S32(o, 0x304 + i * 4) = (s32) func_1515D9F0(1);
+        O_S32(o, 0x304 + i * 4) = (s32) light_alloc_light_buf(1);
     }
     if (O_S32(o, 0x300 + i * 4) != 0) {   /* the last slot written (i == 0: the word at 0x300) */
         O_U8(o, 0x301) = 1;
     }
-    O_S32(o, 0x314) = (s32) func_1515D9B0();
-    func_1514F18C(func_15159140((u8 *) o, 1, 0), o, 0x13);
+    O_S32(o, 0x314) = (s32) light_alloc_lookat_buf();
+    char_fx_attach(move_watch_spawn((u8 *) o, 1, 0), o, 0x13);
     return (u8 *) o;
 }
 #else
@@ -4030,14 +4030,14 @@ u8 *obj_spawn_child_at_joint(struct127 *parent, s32 joint, s32 kind, f32 x, f32 
 /* Script command: spawn a projectile / effect object from the current object D_800D154C through
  * obj_spawn_child_at_joint (owner, type, model, then offsets and speeds; 100 = lifetime). D_800D1580 picks the kind:
  *   0: type 0x17 model 0x1F, flagged 0x1000000 in unkF8. When the owner's camera (unk318) is within 30
- *      of the owner (func_15037988) and a 1-in-5 roll passes, it is aimed at the camera: unk2E4 = 1, no
+ *      of the owner (look_point_in_joint_range) and a 1-in-5 roll passes, it is aimed at the camera: unk2E4 = 1, no
  *      gravity, heading unk76 / unk7A from func_150484A0 (degrees -> 0x10000 units, -0x4000), vertical
  *      speed = xz speed * dy / horizontal distance. Otherwise unk2E4 = 0.
  *   1: type 0xE model 0x42, offsets jittered by +-20 * owner->unk2E4 / 100.
  *   2: type 9 model 0x35, flagged 0x1000000, unkB8 = 180.
  *   3: type 0xE model 0x88, offsets jittered by +-200.
  * Jitter = (rand % 40 - 20) * scale (random_int, unsigned modulo). */
-s32 func_15037988(s32 index, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, void *out, f32 radius, s32 arg8, s32 arg9);
+s32 look_point_in_joint_range(s32 index, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, void *out, f32 radius, s32 arg8, s32 arg9);
 /* obj_spawn_child_at_joint (u8 *, defined above under NON_MATCHING since P89) returns the new object. */
 #define JITTER(scale) ((f32)((s32)((u32)random_int() % 40) - 20) * (scale))
 
@@ -4047,7 +4047,7 @@ void objev_spawn_shot_kind(void) {
     struct127 *shot;
     u8 *cam;
     s32 aim;
-    u8 hitInfo[0x20];   /* sp68, filled by func_15037988 */
+    u8 hitInfo[0x20];   /* sp68, filled by look_point_in_joint_range */
     f32 dx, dy, dz;
     f32 angle;
     f32 heading;
@@ -4060,7 +4060,7 @@ void objev_spawn_shot_kind(void) {
         obj = D_800D154C;
         aim = FALSE;
         cam = (u8 *)obj->camera;
-        if (func_15037988(obj - D_800CC2D0, 0x17, 0x17, *(f32 *)(cam + 0x2F8), *(f32 *)(cam + 0x2FC),
+        if (look_point_in_joint_range(obj - D_800CC2D0, 0x17, 0x17, *(f32 *)(cam + 0x2F8), *(f32 *)(cam + 0x2FC),
                           *(f32 *)(cam + 0x300), hitInfo, 30.0f, 0, 0) != 0) {
             if ((u32)random_int() % 1000 < 200) {
                 aim = TRUE;
@@ -4190,7 +4190,7 @@ void objev_set_31c_a8_ac_ad(void)
 
 /* was func_15073C28 */
 void objev_idle(void) {
-    func_1507F640();
+    player_idle_animation();
 }
 
 /* was func_15073C48 */
@@ -4227,7 +4227,7 @@ void objev_set_inner_extent_height(void) {
 void objev_unlink_kind(void) {
     struct127 *temp_v0;
 
-    temp_v0 = func_15083E90(D_800D1583);
+    temp_v0 = obj_find_by_setup_id(D_800D1583);
     if (temp_v0 != 0) {
         temp_v0->unk65 = (u8)0;
     }
@@ -4281,12 +4281,12 @@ void objev_clear_flags_10b(void) {
 extern u8 *D_800D252C;
 extern f32 D_800CC704;
 extern f32 D_800CC70C;
-u8 *func_15031C4C(u8 *, s32, s32);
-s32 func_15082E44(u8 *, s32, s32, s32, s32);
-void func_100100E0(s32, s32, s32, s32, s32, s32);
-void func_1506B04C(u8 *, s32, void *);
+u8 *attachment_find_by_slot(u8 *, s32, s32);
+s32 setup_entry_spawn(u8 *, s32, s32, s32, s32);
+void sfx_emitter_replace_callback(s32, s32, s32, s32, s32, s32);
+void obj_effect_run_handler(u8 *, s32, void *);
 void obj_limb_muzzle_burst(u8 *, u8, u8, u8, s32);
-s32 func_15033ECC();
+s32 attachment_sound_cb();
 
 /* struct126 (the owner's control block, me->unk31C) fields past the declared ones */
 #define CTL_F32(c, off) (*(f32 *) ((u8 *) (c) + (off)))
@@ -4315,13 +4315,13 @@ void objev_spawn_helper_object(void) {
     f32 dx, dy, dz;
     s32 r1, r2, turn;
 
-    rec = func_15083E0C(arg & 0xFF);
+    rec = setup_entry_find_by_id(arg & 0xFF);
     if (rec == -1) {
         return;
     }
     state = 1;
     D_800D252C[rec] = 0;
-    n = func_15082E44((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
+    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
     if (n == 0) {
         return;
     }
@@ -4353,7 +4353,7 @@ void objev_spawn_helper_object(void) {
             break;
         }
         if (!usePos) {
-            func_15143134(NULL, &obj->x_position, (u8 *) me->unk1D4 + sel * 64);
+            mtx_transform_point_or_origin(NULL, &obj->x_position, (u8 *) me->unk1D4 + sel * 64);
             me = D_800D154C;
         }
     }
@@ -4380,10 +4380,10 @@ void objev_spawn_helper_object(void) {
         } else {
             obj->y_velocity = 50.0f;
         }
-        snd = func_15031C4C((u8 *) me, (me->id == 0x75) ? 0x64 : 0x2C, 0);
+        snd = attachment_find_by_slot((u8 *) me, (me->id == 0x75) ? 0x64 : 0x2C, 0);
         if (snd != NULL) {
             obj->unk8E = *(s32 *) (snd + 0x3C);
-            func_100100E0((s32) func_15033ECC, (s32) snd, (s32) D_800D154C, (s32) func_1000EE70, (s32) obj,
+            sfx_emitter_replace_callback((s32) attachment_sound_cb, (s32) snd, (s32) D_800D154C, (s32) sfx_cb_follow_object, (s32) obj,
                           obj->unique_id);
         }
         me = D_800D154C;
@@ -4402,7 +4402,7 @@ void objev_spawn_helper_object(void) {
     case 0x4A:
         state = 5;
         obj->xz_velocity = 0.0f;
-        func_151A3940((u8 *) obj, 0xFF);
+        obj_burning_fx_start((u8 *) obj, 0xFF);
         OBJ_MODEL_S16(obj, 8) = (s16) (s32) D_800CC704;
         OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) D_800CC70C;
         break;
@@ -4413,7 +4413,7 @@ void objev_spawn_helper_object(void) {
             OBJ_MODEL_S16(obj, 0xA) = 0x3D4;
             OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) D_800CC70C;
             obj->unique_id = 0xFF - (n - 1);
-            func_1506B04C((u8 *) obj, 0xC, NULL);
+            obj_effect_run_handler((u8 *) obj, 0xC, NULL);
             r1 = random_int();
             r2 = random_int();
             obj_limb_muzzle_burst((u8 *) D_800D154C, r1 & 1, r2 & 3, 0xFF, 1);
@@ -4461,9 +4461,9 @@ void objev_set_31c_11a(void) {
 void objev_set_music_mode(void) {
     if (D_800D154C->unk31C != NULL) {
         if (D_800D1580 == 1) {
-            func_10011FDC(5);
+            audio_mixer_set_base_mode(5);
         } else if ((u8)D_800D154C->unk31C->unk94 == 1) {
-            func_10011FDC(0);
+            audio_mixer_set_base_mode(0);
         }
         D_800D154C->unk31C->unk94 = D_800D1580;
     }
@@ -4489,7 +4489,7 @@ void objev_damage(void) {
             var_a0->health -= D_800D1580;
             if (var_a0->unk31C != NULL) {
                 if ((var_a0->camera != NULL) && (var_a0->unk31C->unk197 != 0)) {
-                    func_1517F9F8(0xFF, 0, 0, 0xB4, 0x14, var_a0->camera->unk23D);
+                    screen_tint_start(0xFF, 0, 0, 0xB4, 0x14, var_a0->camera->unk23D);
                 }
             }
         }
@@ -4676,17 +4676,17 @@ void objhit_burst_state5(s32 arg0, struct127 *arg1, s32 arg2) {
     struct199 tmp; // is this actually 2 structs?
 
     if (((u8)arg1->unk239 & 0x7F) == 5) {
-        func_1504715C(&tmp, arg1);   /* P80: a1 still holds arg1 at the jal; the callee reads the object */
+        hitinfo_from_obj_floor(&tmp, arg1);   /* P80: a1 still holds arg1 at the jal; the callee reads the object */
         tmp.unk24 = D_800CC2C0;
         tmp.unk28 = D_800CC2C4;
         tmp.unk2C = D_800CC2C8;
-        func_150C04C0(&tmp.unk24, &tmp, 0x16, 1, 0xFF, 0);
+        spark_burst_at(&tmp.unk24, &tmp, 0x16, 1, 0xFF, 0);
     }
 }
 
-s32 func_150335C8(u8 *, u8 *, s32, s32, s32, s32);
-s32 func_15166688(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_15194858(u8 *, u8 *);
+s32 attachment_spawn_at_joint(u8 *, u8 *, s32, s32, s32, s32);
+s32 water_ring_spawn_ex(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 hit_react_impact_small(u8 *, u8 *);
 
 // P214: entry of hit-handler table D_80086A34, whose other 36 entries are void (a, b, s32): the NM build takes the
 // third (unused) argument too, so the port's indirect call type matches. The extra parameter changes IDO's frame
@@ -4700,7 +4700,7 @@ void objhit_camera_object(u8 *arg0, u8 *arg1) {
     s32 var_a2;
 
     if ((*(u16 *)((u8 *)arg0 + 0x278)) == 0x11) {
-        func_15194858(arg0, arg1);
+        hit_react_impact_small(arg0, arg1);
     }
     if (((*(u16 *)((u8 *)arg0 + 0x278)) == 2) || ((*(u16 *)((u8 *)arg0 + 0x278)) == 0x12) || ((*(u16 *)((u8 *)arg0 + 0x278)) == 3) || ((*(u16 *)((u8 *)arg0 + 0x278)) == 6)) {
         if ((*(u8 *)((u8 *)arg1 + 0x1CA)) == 0) {
@@ -4713,12 +4713,12 @@ void objhit_camera_object(u8 *arg0, u8 *arg1) {
             } else {
                 var_a2 = 0x51;
             }
-            func_150335C8(arg0, arg1, var_a2, 0xC, 1, 0);
+            attachment_spawn_at_joint(arg0, arg1, var_a2, 0xC, 1, 0);
         }
         (*(s8 *)((u8 *)arg0 + 0x1CA)) = 0;
     }
     if ((*(s32 *)((u8 *)arg1 + 0)) == 0x19) {
-        func_15166688((s32) (256.0f - (func_150484A0((*(f32 *)((u8 *)arg0 + 0x20)), (*(f32 *)((u8 *)arg0 + 0x3C))) * 40.743664f)), 0xC0 - ((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8), (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s32) (*(f32 *)((u8 *)arg0 + 0x18)), (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), 0x10, 0x14, 0, 0xFF, 0);
+        water_ring_spawn_ex((s32) (256.0f - (func_150484A0((*(f32 *)((u8 *)arg0 + 0x20)), (*(f32 *)((u8 *)arg0 + 0x3C))) * 40.743664f)), 0xC0 - ((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8), (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s32) (*(f32 *)((u8 *)arg0 + 0x18)), (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), 0x10, 0x14, 0, 0xFF, 0);
     }
 }
 
@@ -4729,14 +4729,14 @@ void objhit_set_2e8(struct127 *arg0, s32 arg1, s32 arg2) {
 
 /* was func_15074E04 */
 void objhit_screen_flash_b(s32 arg0, s32 arg1, s32 arg2) {
-    func_1516FE1C((s32) (arg1 - (s32)&D_800CC2D0) / (s32) sizeof(struct127), 0xB4, 0xFF, 0);
-    func_1518D1C0(arg1, 0xB, 0, 1, 0xFF, 0, &D_80099C1C);
+    particle_emitter_preset_obj_twin((s32) (arg1 - (s32)&D_800CC2D0) / (s32) sizeof(struct127), 0xB4, 0xFF, 0);
+    character_effect_attach(arg1, 0xB, 0, 1, 0xFF, 0, &D_80099C1C);
 }
 
 /* was func_15074E80 */
 void objhit_grab_player_6(struct127 *arg0, struct127 *arg1, s32 arg2) {
     s8 sp1F = 0;
-    func_15194794(arg0, arg1, &sp1F);
+    hit_react_class_fx_steam(arg0, arg1, &sp1F);
     if (arg1->interaction_state == 1) {
         arg0->immune = (u8)0xFF;
         arg1->immune = (u8)0xC8;
@@ -4768,7 +4768,7 @@ void objhit_fling_to_point(struct127 *arg0, struct127 *arg1, s32 arg2) {
 
     arg1->unk76 = math_atan2_u16(dx, dz, 0);
     arg1->xz_velocity = sqrtf((dx * dx) + (dz * dz)) * 0.03f;
-    func_15194978(arg0, arg1);
+    hit_react_puff_burst(arg0, arg1);
 }
 
 /* was func_15074FD4 */
@@ -4782,7 +4782,7 @@ void objhit_grab_player_and_hit(struct127 *arg0, struct127 *arg1, s32 arg2) {
         }
         objev_own_remembered_obj();
     }
-    func_151942B0(arg0, arg1, arg2);
+    hit_react_impact_large(arg0, arg1, arg2);
 }
 
 /* was func_15075050 */
@@ -4806,9 +4806,9 @@ void objhit_kill_b(struct127 *arg0, struct127 *arg1, u8 *arg2) {
     if ((arg1->id  == 0x88) && ((s32) arg0->unk107 < 0x37)) {
         arg0->unk138 += 3;
     }
-    func_15194794(arg0, arg1, arg2);
+    hit_react_class_fx_steam(arg0, arg1, arg2);
     if (arg1->id != 0x53) {
-        func_15145A50(arg1);
+        obj_set_destroyed(arg1);
         arg1->health = (u8)0;
         player_hit_reaction(arg1, 8);
         *arg2 = (u8)39;

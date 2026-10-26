@@ -1,5 +1,5 @@
-s#    func_1500F328(0x1612, -0x553, -0x2DC, -0x69F);#    func_1500F328(0x1613, -0x553, -0x2DC, -0x69F);# % base
-s#    func_1500F328(0x1633, -0x553, -0x3C2, -0x69F);#    func_1500F328(0x1633, -0x553, -0x3C3, -0x69F);# % base
+s#    level_fx_spawn_box_a(0x1612, -0x553, -0x2DC, -0x69F);#    level_fx_spawn_box_a(0x1613, -0x553, -0x2DC, -0x69F);# % base
+s#    level_fx_spawn_box_a(0x1633, -0x553, -0x3C2, -0x69F);#    level_fx_spawn_box_a(0x1633, -0x553, -0x3C3, -0x69F);# % base
 s#D_80096600_c\[0\], 0\.0f);#D_80096600_c[0], 1.0f);# % base
 s#D_80096600_c\[0\], -78\.0f);#D_80096600_c[0], -77.0f);# % base
 s#    D_800D9CF0\[3\] =#    D_800D9CF0[2] =# % base
@@ -17,4 +17,4 @@ s#        spec\.pos\[2\] = seg\[2\];#        spec.pos[2] = seg[1];# % base
 s#\* D_80096634_c\[0\]) - 0x40;#* D_80096634_c[0]) - 0x41;# % base base2
 s#spec\.dir\[2\]) \* D_80096634_c\[0\])#spec.dir[1]) * D_80096634_c[0])# % base
 s#    for (i = 0; i < 9; i++) {#    for (i = 0; i < 8; i++) {# % base
-s#        func_15189E70(\&spec, 1);#        func_15189E70(\&spec, 0);# % base
+s#        area_drift_emitter_create(\&spec, 1);#        area_drift_emitter_create(\&spec, 0);# % base

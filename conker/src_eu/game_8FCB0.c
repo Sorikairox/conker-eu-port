@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15195564(struct127 *obj, struct127 *target, u8 attached);
+void character_hit_react(struct127 *obj, struct127 *target, u8 attached);
 
 
 void obj_water_buoyancy(struct127 *arg0, f32, f32);
@@ -17,11 +17,11 @@ s32 obj_receive_hit(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 
 // EU: split from game_83300.c, EU pads to a file boundary before this.
 
 #ifdef NON_MATCHING
-void func_150341B4(s32, s32);
-// object_slots_swap: P259: swaps the objects `a` and `b` of D_800CC2D0 (after func_15146508(a, b)), then fixes up
+void attachment_swap_owner_ids(s32, s32);
+// object_slots_swap: P259: swaps the objects `a` and `b` of D_800CC2D0 (after obj_broadcast_replace(a, b)), then fixes up
 // what is tied to the slot rather than the object: each object's index fields (+0x127 / +0x13F = index, unique_id =
 // index + 1) and its +0x144 pointer (kept in the slot); `b` gets the camera record D_800DBFF0[index of b] (whose
-// +0x3D4 takes b's +0x31C, and that record's byte +0x197 is cleared), `a` none; func_150341B4 swaps the unique ids;
+// +0x3D4 takes b's +0x31C, and that record's byte +0x197 is cleared), `a` none; attachment_swap_owner_ids swaps the unique ids;
 // both objects' +0x2D4 handles are released (node_destroy); other live objects' +0x65 links (unique id) to either
 // slot are swapped; when b's +0x13C names a carrier (>= 100), that object's +0x13D = 100 + b's index; then
 // obj_fade_reset(b) / obj_model_reset(b).
@@ -35,7 +35,7 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
     s32 i;
     u8 link;
 
-    func_15146508(a, b);
+    obj_broadcast_replace(a, b);
     bcopy(b, &tmp, sizeof(struct127));
     bcopy(a, b, sizeof(struct127));
     bcopy(&tmp, a, sizeof(struct127));
@@ -54,7 +54,7 @@ void obj_slots_swap(struct127 *a, struct127 *b) {
     a->unk144 = p144;
     *(struct126 **) ((u8 *) &D_800DBFF0[ib] + 0x3D4) = b->unk31C;
     *((u8 *) b->unk31C + 0x197) = 0;
-    func_150341B4(b->unique_id, a->unique_id);
+    attachment_swap_owner_ids(b->unique_id, a->unique_id);
     if (b->unk2D4 != NULL) {
         node_destroy((struct102 *) b->unk2D4);
         b->unk2D4 = NULL;
@@ -193,10 +193,10 @@ void gfx_tile_scroll_coords(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
 #endif
 #ifdef NON_MATCHING
 extern u8 *D_800C5758[]; /* per object type: 12-byte texture entries, u16 size at +8 / +0xA */
-void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
+void uv_rotate(u8 *, s32 *, s32, f32, s32, s32);
 
 // type_texture_scroll_apply: for every live object (+0x0) of `type` (+0x4) with +0x2FA set and a display list
-// for the current screen (+0x28C[D_800BE9C0]), calls func_15094EC8 on entry `dl` (16-byte steps) of it with the
+// for the current screen (+0x28C[D_800BE9C0]), calls uv_rotate on entry `dl` (16-byte steps) of it with the
 // type's texture-command table D_800C6360[type] at `cmd`, `arg2`, the amount `amount`, and the size of texture
 // `tex` of D_800C5758[type] (doubled when `twice`).
 /* was func_15062E24 */
@@ -226,7 +226,7 @@ void obj_type_tex_scroll_apply(s32 type, s32 dl, s32 arg2, s32 cmd, s32 amount, 
         list = ((u8 **) &D_800CC2D0[i].unk28C)[D_800BE9C0];
         if (list != NULL) {
             table = (s32 *) D_800C6360[type];
-            func_15094EC8(list + dl * 16, &table[cmd], arg2, (f32) amount, h, w);
+            uv_rotate(list + dl * 16, &table[cmd], arg2, (f32) amount, h, w);
         }
     }
 }
@@ -335,17 +335,17 @@ void obj_hit_react_other_players(struct127 *arg0) {
     for (i = 0; i < D_8008FD8C; i++) {
         if ((i != (arg0 - D_800CC2D0)) && ((1 << i) & D_800CC268)) {
             if ((D_800CC2D0[i].unk31C != NULL) && (((u8 *)D_800CC2D0[i].unk31C)[0x1AC] == 0)) {
-                func_15195564(arg0, &D_800CC2D0[i], 1);
+                character_hit_react(arg0, &D_800CC2D0[i], 1);
             }
         }
     }
 }
 #ifdef NON_MATCHING
 void obj_remove(struct127 *obj, s32 mode);
-s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
+s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 
 // obj_model_swap_keep_pose: sets the object's model record (+0x144: +4 = `a1`, +3 = `a2`, +0x20 / +0x24 = `scale`,
-// +2 = 0), resets the object (obj_remove mode 0) and reloads model slot +0x13F (func_15082E44, owner = object
+// +2 = 0), resets the object (obj_remove mode 0) and reloads model slot +0x13F (setup_entry_spawn, owner = object
 // index + 1), then puts back what the reset clears: position (+0x14..+0x1C, copied to +0x2C..+0x34, y also to
 // +0x1CC), +0x318 (whose +0x3D4 gets the object's +0x31C), +0xB8, +0x40, +0xC4 and the yaw (+0x76, also +0x7A).
 /* was func_15063254 */
@@ -376,7 +376,7 @@ void obj_model_swap_keep_pose(struct127 *obj, s32 a1, s32 a2, f32 scale) {
     fC4 = *(f32 *) (o + 0xC4);
     yaw = *(u16 *) (o + 0x76);
     obj_remove(obj, 0);
-    func_15082E44(e, slot, 0, 0, (obj - D_800CC2D0) + 1);
+    setup_entry_spawn(e, slot, 0, 0, (obj - D_800CC2D0) + 1);
     *(f32 *) (o + 0x14) = x;
     *(f32 *) (o + 0x18) = y;
     *(u8 **) (o + 0x318) = link;

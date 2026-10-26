@@ -12,7 +12,8 @@ extern u8 D_8008D450[];
  * buffer: h = sin(angle) * amplitude; vertices 2 and 3 get x = h, the seven vertices of the rodata list
  * D_800A75F0 (4, 9, 13, 14, 15, 17, 19) x = -h / 2,
  * vertex 6 x = -h / 2 + 18 and vertex 8 x = -h / 2 - 18; then the angle advances by its speed, wrapped below 360. */
-void func_1517A320(u8 i) {
+/* was func_1517A320 */
+void flag_wave_update(u8 i) {
     static const u8 rows[7] = { 4, 9, 13, 14, 15, 17, 19 };
     s32 *slot;
     u8 *e;
@@ -49,7 +50,7 @@ void func_1517A320(u8 i) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A320.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/flag_wave_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -62,7 +63,8 @@ void func_1517A320(u8 i) {
  * +0xB3 = 0xFF. Mode 5 starts it one 4x velocity step ahead (x += 4 vx, y -= 4 vy, z += 4 vz). Nothing when
  * the object cannot be created.
  */
-void func_1517A550(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, u8 spread, u8 jitter, u8 arg9,
+/* was func_1517A550 */
+void puff_drift_spawn(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, u8 spread, u8 jitter, u8 arg9,
                    s32 type) {
     u8 *obj = node_alloc(type, 0, 0xB8, 1, 0xFF, 1);
 
@@ -95,17 +97,18 @@ void func_1517A550(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, 
     *(s16 *) (obj + 0xAE) = arg9;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A550.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/puff_drift_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-// sprite_particle_update: update handler of the func_1517A550 sprite particles (tables next to func_1517A910).
+// sprite_particle_update: update handler of the puff_drift_spawn sprite particles (tables next to puff_sprite_draw).
 // Moves the screen position +0x90 / +0x92 / +0x94 by the velocity +0xA0 / -+0xA2 / +0xA4 and the rotation
 // +0x96..+0x9A by the s8 spins +0x9C..+0x9E; mode 5 (+0xAC) adds gravity (+0xA2 += 1). While the life +0xA6 is
 // below the mode value, the x / z velocities lose a random part (rand % +0xAE) towards zero. The life runs down by the
 // frame step D_800BE9E4; once out, alpha +0xB3 fades by 4 per step. Freed (node_destroy) at alpha 0, or when the
 // frame counter +0xB2 is non-zero and its low and high nibbles are equal.
-void func_1517A75C(u8 *obj) {
+/* was func_1517A75C */
+void puff_drift_update(u8 *obj) {
     s32 vy = *(s16 *) (obj + 0xA2);
     u32 mode;
     s32 life;
@@ -160,17 +163,18 @@ void func_1517A75C(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A75C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/puff_drift_update.s")
 #endif
 
-s32 func_1517A904(s32 arg0) {
+/* was func_1517A904 */
+s32 puff_identity_stub(s32 arg0) {
     return arg0;
 }
 
 #ifdef NON_MATCHING
 s32 view_point_cull_test(u8 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-s32 func_1517AF18(s32 arg0, s32 arg1);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+s32 puff_texture_set(s32 arg0, s32 arg1);
 extern f32 D_800D9F40;     /* screen width */
 extern f32 D_800D9F3C;     /* screen height */
 extern f32 D_800D3A00[2];  /* frustum side slopes */
@@ -181,9 +185,10 @@ extern s32 D_800D30BC;
 // puff_sprite_draw: draw handler of the puff sprite objects (types 8, 9, 0xC, 0x59) for `player`. Except for
 // types 0xC and 0x59, a puff outside the player's view (view_point_cull_test) is skipped; a culled type 8 puff that was seen
 // by this player (obj + 0xB2 bit 1 << player) also gets bit 0x10 << player. Otherwise it marks itself seen (all but
-// type 9), sets the texture (func_1517AF18, obj + 0x9F), builds its matrix (rotation 0x96.., scale 0xA8, position
+// type 9), sets the texture (puff_texture_set, obj + 0x9F), builds its matrix (rotation 0x96.., scale 0xA8, position
 // 0x90..) and draws D_8008D190 with alpha obj + 0xB3 (prim colour reloaded only when it changed, D_800DD880).
-s32 func_1517A910(s32 gfxArg, u8 *obj, s16 player) {
+/* was func_1517A910 */
+s32 puff_sprite_draw(s32 gfxArg, u8 *obj, s16 player) {
     Gfx *gfx;
     Mtx *mtx;
     f32 scale;
@@ -203,7 +208,7 @@ s32 func_1517A910(s32 gfxArg, u8 *obj, s16 player) {
     if (obj[0] != 9) {
         obj[0xB2] |= 1 << player;
     }
-    gfx = (Gfx *) func_1517AF18(gfxArg, obj[0x9F]);
+    gfx = (Gfx *) puff_texture_set(gfxArg, obj[0x9F]);
     scale = *(f32 *) (obj + 0xA8);
     mtx = &((Mtx *) (obj + 0x10))[D_800BE9C0];
     mtx_build_rot_scale_trans(mtx, *(s16 *) (obj + 0x96), *(s16 *) (obj + 0x98), *(s16 *) (obj + 0x9A), scale, scale, scale,
@@ -220,17 +225,18 @@ s32 func_1517A910(s32 gfxArg, u8 *obj, s16 player) {
     } else {
         mode = 0x504240;
     }
-    gfx = (Gfx *) func_15142FBC((s32) gfx, D_800D30BC | 0x82CA0, mode, &flag);
+    gfx = (Gfx *) gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x82CA0, mode, &flag);
     gSPDisplayList(gfx++, D_8008D190);
     return (s32) gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A910.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/puff_sprite_draw.s")
 #endif
 
 s32 collision_find_floor_default_range(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 
-void func_1517ABB4(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4)
+/* was func_1517ABB4 */
+void puff_ground_chip_spawn(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4)
 {
   u8 *obj;
   s32 n;
@@ -266,7 +272,8 @@ void func_1517ABB4(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4)
   }
 }
 
-void func_1517ADBC(struct102 *arg0) {
+/* was func_1517ADBC */
+void puff_ground_chip_update(struct102 *arg0) {
     s32 t;
     s16 v;
     t = *(u16 *)((u8 *)arg0 + 0xA6);
@@ -303,28 +310,31 @@ void func_1517ADBC(struct102 *arg0) {
     }
 }
 
-s32 func_1517AEC8(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1517AEC8 */
+s32 puff_draw_begin(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     D_800DD880 = -1;
     if ((arg1 == 0xC) || (arg1 == 0x59)) {
-        arg0 = func_1517A904(arg0);
+        arg0 = puff_identity_stub(arg0);
     }
     return arg0;
 }
 
 extern s32 D_800DD5E0;
 extern u8 D_800909C4[];
-s32 func_1517AF18(s32 arg0, s32 arg1) {
+/* was func_1517AF18 */
+s32 puff_texture_set(s32 arg0, s32 arg1) {
     s32 sp30[6]; // fakematch: stack layout guess (frame 0x48, &sp30[1] at 0x34)
     if (arg1 != D_800DD5E0) {
-        arg0 = func_15095380(arg0, D_800909C4, (u32)arg1 << 8, &sp30[1], 0, 0, 0, 2, 3);
+        arg0 = sprite_load_texture(arg0, D_800909C4, (u32)arg1 << 8, &sp30[1], 0, 0, 0, 2, 3);
         D_800DD5E0 = arg1;
     }
     return arg0;
 }
 
-void func_1517ABB4(f32, u8, s16, s16, s16);
+void puff_ground_chip_spawn(f32, u8, s16, s16, s16);
 
-void func_1517AF90(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
+/* was func_1517AF90 */
+void puff_ground_chips_burst(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 {
   s32 i;
   s32 x;
@@ -345,11 +355,12 @@ void func_1517AF90(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
     x -= 0x20;
     z -= 0x20;
     f = ((((u32) random_int()) % m) >> 4) + arg0;
-    func_1517ABB4(f, random_int() & 1, arg1 + x, arg2, arg3 + z);
+    puff_ground_chip_spawn(f, random_int() & 1, arg1 + x, arg2, arg3 + z);
   }
 
 }
 
-void func_1517B0EC(s32 arg0, s32 arg1, s16 arg2) {
+/* was func_1517B0EC */
+void puff_view_dl_begin(s32 arg0, s32 arg1, s16 arg2) {
     view_dl_begin(arg0, arg2);
 }

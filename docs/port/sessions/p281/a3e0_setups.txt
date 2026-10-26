@@ -1,4 +1,4 @@
-# P281 func_151FA3E0 (mp3_imdct_short, hand asm). in 80480000 (18 floats, random), out 80481000, prev 80482000.
+# P281 mp3_imdct12_short (mp3_imdct_short, hand asm). in 80480000 (18 floats, random), out 80481000, prev 80482000.
 even ! 0=80480000,1=0,2=80481000,3=80482000 ! ! ! ! ! ! !
 odd ! 0=80480000,1=1,2=80481000,3=80482000 ! ! ! ! ! ! !
 odd3 ! 0=80480000,1=3,2=80481000,3=80482000 ! ! ! ! ! ! !

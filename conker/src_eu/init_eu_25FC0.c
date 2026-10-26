@@ -8,11 +8,11 @@ extern OSPifRam __osPfsPifRam;
 extern u8 _osLastSentSiCmd; // __osContLastCmd
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_10025B60(s32, void *); // __osSiRawStartDma
+s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 u8 __osContAddressCrc(u16 addr);
 u8 __osContDataCrc(u8 *data);
 s32 __osPfsGetStatus(OSMesgQueue *queue, int channel);
-void func_10026204(int channel, u16 address);
+void os_pack_ram_read_data(int channel, u16 address);
 
 s32 __osContRamRead(OSMesgQueue *mq, int channel, u16 address, u8 *buffer) {
     s32 ret;
@@ -26,15 +26,15 @@ s32 __osContRamRead(OSMesgQueue *mq, int channel, u16 address, u8 *buffer) {
     retry = 2;
     __osSiGetAccess();
     _osLastSentSiCmd = CONT_CMD_READ_MEMPACK;
-    func_10026204(channel, address);
-    ret = func_10025B60(OS_WRITE, &__osPfsPifRam);
+    os_pack_ram_read_data(channel, address);
+    ret = os_si_raw_start_dma(OS_WRITE, &__osPfsPifRam);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     do {
         for (i = 0; i < 16; i++) {
             __osPfsPifRam.ramarray[i] = 0xFF;
         }
         __osPfsPifRam.pifstatus = 0;
-        ret = func_10025B60(OS_READ, &__osPfsPifRam);
+        ret = os_si_raw_start_dma(OS_READ, &__osPfsPifRam);
         osRecvMesg(mq, NULL, OS_MESG_BLOCK);
         ptr = (u8 *)&__osPfsPifRam;
         if (channel != 0) {
@@ -67,7 +67,8 @@ s32 __osContRamRead(OSMesgQueue *mq, int channel, u16 address, u8 *buffer) {
 }
 
 // __osPackRamReadData
-void func_10026204(int channel, u16 address) {
+/* was func_10026204 */
+void os_pack_ram_read_data(int channel, u16 address) {
     u8 *ptr;
     __OSContRamReadFormat ramreadformat;
     int i;

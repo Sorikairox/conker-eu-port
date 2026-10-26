@@ -1,4 +1,4 @@
-# P246 func_151EF3A0 (save_screen_frame_draw) mutants: sed % setup names
+# P246 save_screen_frame_draw (save_screen_frame_draw) mutants: sed % setup names
 s/D_800E0EC4 | 0xFFFFFF00/D_800E0EC4 | 0xFFFF0000/ % load
 s/0x7FB, 0, 3, 0/0x7FC, 0, 3, 0/ % load
 s/0x887, 0, 3, 0/0x887, 0, 2, 0/ % load
@@ -23,7 +23,7 @@ s/(u32) entry < (size >> 1)/(s32) entry < (s32) (size >> 1)/ % big
 s/(u32) entry < (size >> 1)/(u32) entry < size/ % past
 s/D_800904EC = 0;/D_800904EC = 1;/ % past
 s/= table\[entry\];/= ((s16 *) table)[entry];/ % last
-s/func_10004074(table);/func_10004074(0);/ % load
+s/heap_free(table);/heap_free(0);/ % load
 s/D_800E10B5 = entry + 1;/D_800E10B5 = entry;/ % load
 s/if (D_800904EC != 0)/if (D_800904EC == 0)/ % load cache
 s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x60, 2, 1, 1.0f, 0/ % cache

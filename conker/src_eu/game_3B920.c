@@ -6,18 +6,18 @@
 
 #ifdef NON_MATCHING
 s32 level_load_look_points(s32);
-void func_1500AC14(void);
-void func_1500BEC0(void);
+void ambient_sounds_load(void);
+void ambient_emitters_build(void);
 void level_objects_reset_state(void);
 void camera_init_player_projections(void);
-void func_15012760(void);
+void level_vertex_colours_backup(void);
 void level_clear_be570(void);
 void level_set_lights_mode(u8);
-void func_15173850(s32);
-void func_15179420(void);
-void func_15187820(s32);
-void func_15195D9C(void);
-void func_151EFE00(u32);
+void fog_init_from_level(s32);
+void rain_init(void);
+void shadow_settings_for_level(s32);
+void texscroll_reset(void);
+void game_os_pi_set_control(u32);
 extern s32 D_80083120;
 extern s8 D_80088F00;
 extern s8 D_800DD834;
@@ -43,11 +43,11 @@ void level_objects_init(s32 arg0) {
     D_eu_800BE900 = 0;
     D_800E0A10 = func_15012720();
     camera_init_player_projections();
-    func_151EFE00(0x40);
-    func_15173850(arg0);
+    game_os_pi_set_control(0x40);
+    fog_init_from_level(arg0);
     level_load_look_points(arg0);
-    func_15012760();
-    func_15195D9C();
+    level_vertex_colours_backup();
+    texscroll_reset();
     func_15008BE0();
     func_15008B90();
     level_objects_reset_state();
@@ -55,11 +55,11 @@ void level_objects_init(s32 arg0) {
     if (temp_v0 != 0) {
         (*(s32 (**)())((u8 *)&D_80083120 + (temp_v0 * 4)))();
     }
-    func_1500ABA0(arg0);
-    func_1500BEC0();
-    func_1500AC14();
-    func_15187820(arg0);
-    func_15179420();
+    ambient_sounds_reset(arg0);
+    ambient_emitters_build();
+    ambient_sounds_load();
+    shadow_settings_for_level(arg0);
+    rain_init();
     level_clear_be570();
     level_set_lights_mode(((D_800D2E4C->unk4 & 0x80) == 0) & 0xFF);
 }
@@ -98,9 +98,9 @@ void level_objects_init(s32 arg0) {
 //     if (D_800B0DF0->unkA) {
 //         D_80082D90[D_800B0DF0->unkA]();
 //     }
-//     func_1500ABA0(arg0);
-//     func_1500BEC0();
-//     func_1500AC14();
+//     ambient_sounds_reset(arg0);
+//     ambient_emitters_build();
+//     ambient_sounds_load();
 //     func_151872B0(arg0);
 //     func_15178EB0();
 //     level_clear_be570();

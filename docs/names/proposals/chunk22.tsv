@@ -1,0 +1,209 @@
+old	new	confidence	description
+func_150B5C38	zap_burst_spawn	med	Spawns a zap burst at a point: streak record kind 0xD/8 plus the zap particle and random light flash (shot hits on target type 0x94)
+func_150B5DD0	obj_adjust_entries_type4b	med	Joint adjustment entries for object type 0x4B: one entry at offset 0x1A from the object's per-slot value (skipped when D_800C35EA == 1)
+func_150B5E30	zap_emitter_update	med	Node update: while its target object is alive and matches, randomly spawns small zap bursts at the object and at its skeleton point
+func_150B5F1C	zap_burst_spawn_small	med	Spawns a smaller zap burst at a point: streak record kind 5/5 plus the zap particle and random light flash
+func_150B60E0	obj_get_skel_point_down205	med	Transforms the point (0, -205, 0) by the object's skeleton root matrix (+0x1D4 + 0x140) into `out`
+func_150B6314	zap_particle_spawn	low	Spawns one particle at a point with random size (500..1000) and random horizontal/vertical flip flags
+func_150B64E0	zap_light_flash	med	Creates a short random-lived white light at a point (light_create_with_ctrl)
+func_150B65F0	bolt_ring_update	med	Node update: accumulates a random rate and spawns lightning bolts between random points on a circle; broadcasts message 0x4A on state 1
+func_150B6930	bolt_ring_on_message	high	Message handler: destroys the bolt ring node on message 0x4A
+func_150B696C	cutscene_beam_spawn	med	Spawns cutscene beam effect record `kind` (0..2) from fixed start points aimed at per-kind ROM targets via func_150B443C
+func_150B6BBC	beam_set_mode_by_state	low	Sets flags in its +0x14 target (byte 9, byte 0x2F = 20 / 40) from the +0x18 object's state byte 0x68 (15..17)
+func_150B6C34	screen_flash_zap	med	Starts a pale blue screen colour fade with random strength and duration (zap hit flash)
+func_150B6CC0	player_carry_state_update	med	Player state handler: zoom mode switch, button-mapped animations, and seating the player on an object slot via camera push/pop
+func_150B70A0	cs_overlay_update	med	Dispatches the pending overlay command D_800D9CB0 (1..10) to the matching overlay create/reset/close function
+func_150B7170	cs_overlay_reset	med	Destroys the overlay tint object, creates a new screen tint, clears the 10 overlay box slots and sets state 3
+func_150B7214	cs_overlay_mark_boxes_closing	low	Sets the close flag (+0x20 = 1) on the live overlay box records and sets state 3
+func_150B7258	cs_overlay_destroy_all	high	Destroys the overlay tint object and all 10 overlay box slots, then sets state 3
+func_150B72DC	overlay_fx_scroll_update	low	Effect update: advances the s16 at +0x34 by frame time * 0x30, wrapping from 0x800 back to -0xC00
+func_150B731C	overlay_fx_pulse_update	low	Effect update: moves the +0x30 position toward its target / wraps it in 140..200 and fades alpha (+0x45) by distance from 170
+func_150B757C	overlay_fx_slide_in_update	low	Effect update: counts +0x18 up to 30 and slides the position (+0x2C/+0x30) from (230,170) to (146,120), then blinks alpha
+func_150B7688	overlay_fx_scale_grow_update	med	Effect update: grows the x scale (+0x38) then the y scale (+0x3A) toward 0x1000 by frame time
+func_150B7700	cs_overlay_spawn_cross	med	Spawns four image effects above, below, left and right of a screen point at the distance to the nearer screen edge
+func_150B78D0	overlay_fx_lerp_pos_update	med	Effect update: sets position (+0x2C/+0x30) by lerping between two s16 points with progress +0x24 / +0x1C
+func_150B7964	cs_overlay_open_box0	low	Replaces overlay box slot 0 with a type-6 image effect from D_80091C8C at (60,60) and sets state 3
+func_150B7A40	cs_overlay_open_box3	low	Clears slot 0 and replaces overlay box slot 3 with a type-0 image effect from D_80091C8C at (60,60); sets state 3
+func_150B7B3C	cs_overlay_open_counter_left	low	Opens the counter box at x 60 in overlay slot 1 and sets state 3
+func_150B7B6C	cs_overlay_open_counter_right	low	Opens the counter box at x 230 in overlay slot 2 and sets state 3
+func_150B7B9C	cs_overlay_counter_box_open	med	Replaces overlay slot `slot` with a type-6 box effect from D_80091C98 at x `width`, y 170
+func_150B7C88	cs_overlay_open_boxes_4_8	low	Clears slot 1 and creates overlay effects in slots 4 (type 4 spinner) and 8 (type 0 box) at (60,170); sets state 3
+func_150B7DFC	cs_overlay_create_bars	med	Recreates overlay slots 5..7 (three bars at y 150/170/190) and 9 (box at 230,170); frees slot 2 first; sets state 3
+func_150B8020	object_break_effects	med	Spawns the break/explode effects of an object: debris burst, flash particle, ground ring, two tumbling chunks and smoke puffs
+func_150B87B0	debris_tumble_burst_spawn	med	Spawns 35..60 tumbling debris pieces at random directions around a point with random rotation, spin, size and life
+func_150B8AA0	break_flash_particle_spawn	low	Spawns one particle at the break centre with random horizontal/vertical flip flags (object_break_effects)
+func_150B8C7C	particle_spawn_dir_flipped	low	Spawns a particle moving at a random speed along a yaw angle with random flip flags and writes scale 0.917 into it
+func_150B8EC0	projectile_bounce_update	med	Thrown object floor handler: stops when slow, breaks with flash, sparks and sound when fast, else bounces and plays a sound
+func_150B9424	projectile_wall_hit	med	Thrown object wall handler: bounces off when slow, else breaks with a surface flash, debris burst and break sound
+func_150B9A40	fx_rise_grow_update	low	Effect update by age (+0x1C): accelerates upward early, grows +0x30 while young and scales size by 1.35 when old
+func_150B9ADC	fx_fade_in_alpha_update	low	Effect update: sets alpha byte +0x5C to age * 8 during the first 32 ticks
+func_150B9AFC	fx_fade_in_28_update	low	Effect update: sets byte +0x28 to age * 4 during the first 64 ticks
+func_150B9B1C	thrown_object_land_check	med	Per-frame check of a thrown object against its holder: knocked away, or lands with dust, sparks and sound, else eases toward holder
+func_150BA1F4	fx_build_look_matrix	med	Builds the effect's matrix with mtx_look_along_scaled from the record's position, direction and scale fields
+func_150BA26C	obj_sprite_fx_spawn	low	Unless +0x98 is -1, spawns a sprite effect at the object's s16 position fields with random frame and flip flags
+func_150BA3B0	water_splash_spawn	med	Casts a ray from above an object toward (x, z) and spawns a splash drop sprite and a ring at the water surface hit
+func_150BA83C	fx_fade_in_byte28_update	low	Effect update: sets the s8 at +0x28 to age * 4 during the first 64 ticks
+func_150BA85C	fx_gravity_spin_update	low	Effect update: applies gravity to the y velocity (+0x114) and integrates position/angles +0x34..+0x44 by their rates
+func_150BA904	effect_fade_by_height	high	Sprite effect update: alpha is the min of life * 16 and height above the floor * 4; ends once below the floor
+func_150BA4C0	crumble_emitter_spawn	low	Spawns a node (type 0x52, life 15..23) carrying a pointer to `obj` that emits crumbling debris from it
+func_150BAA3C	crumble_emitter_update	med	Node update: while its object lives, spawns tumbling debris pieces around the object's fx point at a random rate
+func_150BADD0	crumble_emitter_on_message	low	Message handler: forwards the message to func_15149514 with the node's object fields
+func_150BAE10	obj_get_ground_point	med	Writes the object's position (y from +0x180 when above a threshold) and optionally probes the floor below it
+func_150BAEE0	crumble_return_9	low	Stub callback: always returns 9
+func_150BAEF4	obj_heavy_impact_fx	med	Heavy impact at an object: rumble near players, camera shake and, on the ground, a water ring and circle emit burst
+func_150BABE0	foot_splash_effect	med	Splash at foot bone 0x11/0x1A of an object: sound, water ring, spray bursts and a ground ripple sprite added to a timed list
+func_150BB4CC	puff_particle_spawn_dir	low	Particle spawner callback: spawns a puff moving along a yaw angle with a random upward tilt and flips; sets shrink factor 0.95
+func_150BB740	particle_shrink_update	med	Particle update: multiplies the size fields +0x58/+0x60 by the factor at +0xA8 once per elapsed frame
+func_150BB8E8	sprite_fx_init_fade50	low	Sprite effect init: sets flag 1, life 50, fade step 5 and installs handler set 6
+func_150BB930	sprite_fx_fade_out_update	med	Sprite effect update: caps alpha (+0x28) at remaining life * fade step while life is below its start value
+func_150BB978	chunk_particle_spawn_dir	low	Particle spawner callback: spawns a model particle moving along a yaw angle with a random downward tilt
+func_150BBBE0	player_update_flag_from_btn4047	low	Sets player flag 0x1000 (+0x84) while event/input 0x4047 is active, clears it otherwise
+func_150BB760	obj20_trail_chunk_spawn	low	For a live type-0x20 object with a model: spawns one debris chunk behind it, carried by half its speed
+func_150BC03C	object_impact_debris	med	Landing/crash effect of a type-0x20 object: shadow sprite, debris chunks, sparks, two dust chunks and a crash sound
+func_150BC968	object_impact_debris_hard	med	Hard landing effect of a type-0x20 object: debris chunks, a few sparks and up to two dust chunks
+func_150BCBBC	obj20_side_chunks_spawn	low	For a live type-0x20 object: spawns 0..1 debris chunks thrown to its left or right side
+func_150BD498	debris_floor_settle_bounce	med	Floor handler: stops a slow-falling object (clears velocity and flags) or bounces it, damping all speeds by +0x14
+func_150BD550	blast_debris_and_smoke	med	Explosion at collision cylinders 0x4C/0x4D: tumbling debris, smoke puffs, camera shake and rumble
+func_150BDC20	obj_skel_line_emit_pair	low	Transforms ROM point pairs by the object's model matrix and spawns two line emits between them
+func_150BDE34	trail_spawn_callback	low	Spawner callback: builds three records with random length and calls trail_spawn (type 0xB) at the given point
+func_150BE01C	trail_fade_by_life_update	low	Effect update: caps the linked record's alpha (+0x1B) at remaining life * 8
+func_150BE050	rideable_vehicle_update	med	Per-frame update of a rideable object: follows the rider's aim, runs physics and handles rider pickup/release states
+func_150BE390	sprite2d_emitter_spawn	low	Spawns a node (type 0x4F, life 300) carrying `obj` that periodically emits 2D sprites
+func_150BE40C	sprite2d_emitter_update	low	Node update: counts down a random timer (25..175) and then spawns a 2D sprite with random placement
+func_150BE650	sprite2d_emitter_on_message	med	Message handler: destroys the emitter when its object is freed (0x21) or on message 0 for the player's view
+func_150BE6C4	sprite_rise_update	low	Sprite update: advances y (+0x14) by its rate per frame; ends once above 120
+func_150BE710	scenery_spinner_update	low	Scenery update: drifts the platform, accumulates spin angle +0x84 and stops (flags 3, sound off) past 360
+func_150BE7E8	scenery_ease_pos_update	low	Eases the s16 position +0x10..+0x14 from start to target with a damped progress factor (+0x3C/+0x3E)
+func_150BE938	obj_adjust_entries_type21	med	Joint adjustment entries for object type 0x21: offsets 0x68 / 0xE from the object's +0x2E8 / +0x2E4 values
+func_150BE994	obj_debris_dust_burst	med	At an object's fx point: a debris burst, a textured burst and three spark sprays on the ground hit
+func_150BED50	player_seat_camera_update	med	When event 0x2006/0xBC is set, seats the camera (mode 8) on the followed object, else pops back to the player
+func_150BEEB0	obj_fx_bone_point_a	med	Gets bone 0x17/0x14/0xC/0x10 position by kind (4..7) and optionally probes the floor below it for a hit record
+func_150BEFA8	impact_a_effect_id	low	Returns effect id 0x11 for kinds 0/1, else -1
+func_150BEFCC	impact_effect_a	med	Impact handler: spawns impact particle 0xB at the kind's bone point and a burst when level >= 0x4C
+func_150BF130	obj_fx_bone_point_b	med	Gets bone 0x19/0x16/0xC/0x10 position by kind (4..7) and optionally probes the floor below it for a hit record
+func_150BF228	impact_b_effect_id	low	Returns effect id 0x12 for kinds 0/1, else -1
+func_150BF24C	impact_effect_b	med	Impact handler like impact_effect_a using the impact_b bone points and its own strength/size factors
+func_150BF3B0	player_update_btn_flags	low	Sets/clears player flags 0x1010 and 0x01000000 (+0x84) from input events 0x4063/0x4001 and 0x4069
+func_150BF470	stub_empty_bf470	low	Empty function (does nothing)
+func_150BF47C	twin_particle_emitters_spawn	low	Spawns two particle emitter nodes at mirrored x (+-0x17C) around a fixed point (0x1FDB, 0x25)
+func_150BF5F4	fade_slide_update	med	Element update: fades level +0x1F in/out and slides its s16 position by s8 speeds; returns 1 when done
+func_150BF71C	lift_platform_update	med	World-object callback of a lift: moves its model toward the target height with sounds and bob, transforms its vertices
+func_150BFC60	door_lift_update	med	Per-frame update of an object driven by object 0x14's animation: sway offset, spawning/removing object 0x14 by mode
+func_150BFF7C	sinking_platform_update	med	World-object callback of a platform that shakes and sinks when stood on, then rises back to its rest height
+func_150C04C0	spark_burst_at	low	Builds a spark burst request at a point (flag from arg3) and calls emit_spark_burst
+func_150C04E0	object_land_puff	med	Object destroy callee: object_hit_effects then one particle burst puff above the object's floor height
+func_150C06DC	particle_land_shatter	med	Particle floor handler: spawns a textured burst and a particle burst at the landing point; returns 0 (destroyed)
+func_150C0B48	particle_land_maybe_shatter	med	Particle floor handler: with chance +0x170 shatters into sparks and a burst (returns 0), else lands/bounces/settles
+func_150C0EB0	smoke_trail_on_message	med	Message handler of a smoke trail node: forwards to node_handle_link_message with its link fields
+func_150C0EF0	smoke_trail_retire	med	Destroys all puffs on the smoke trail's used list, then retires the node
+func_150C0F1C	smoke_trail_free	med	Destroys all puffs on the smoke trail's used list, then unlinks and frees the node
+func_150C0F48	smoke_trail_destroy_puffs	med	Walks the smoke trail's used slot list and destroys each puff particle
+func_150C0FC0	smoke_trail_spawn	med	Allocates a smoke trail node (type 0x25) from a template with a free list of `count` puff slots
+func_150C1138	smoke_trail_update	med	Smoke trail update: follows its target, moves its puffs and spawns new smoke puffs while the target moves fast enough
+func_150C1698	pool_slot_release	med	Particle death handler: unlinks the particle's slot from its owner's used list and pushes it on the free list
+func_150C1260	foot_ring_debris_effect	low	At foot bone (kind 0/1) on the floor height: a ring emit, a water ring and 5..12 model debris particles
+func_150C1B60	spawn_ring_kind2_small	med	Emits 25 points of spawn handler kind 2 on a radius-80 ring around (x, y, z)
+func_150C1BC0	emit_point_debris	med	Spawn handler: spawns one kind-5 trail particle flying out along byte angle `a` with random pitch and speed
+func_150C1E78	trail_alpha_by_life_update	low	Effect update: sets the linked record's alpha (+0x1B) to life * 8 (capped at 255)
+func_150C1EC0	obj_fx_point_foot	med	Gets the position of foot bone 0x18 (kind 1) or 0x15 (kind 2) of the object's model
+func_150C1F2C	foot_fx_effect_id	low	Stub callback: always returns effect id 7
+func_150C1F40	foot_step_ring_effect	med	At foot bone (kind 1/2) on the floor height: a heading-aligned ring emit, a water ring and 5..12 model debris particles
+func_150C2334	emit_point_puff	med	Spawn handler: queues one puff sprite at (x, y, z) drifting away from the emitter centre with random palette colours
+func_150C4620	damage_smoke_spawn	med	Spawns a damage smoke node linked to an object plus its glow particle with random colour and tail parameters
+func_150C49A4	damage_smoke_update	med	Damage smoke node update: places the emitter on the owner, moves the glow and emits smoke puffs and sparks
+func_150C4FD8	damage_smoke_destroy_glow	med	Destroys the damage smoke node's glow particle (+0x34) if present
+func_150C5008	damage_smoke_retire	med	Destroys the glow, then retires the damage smoke node (func_1514933C)
+func_150C5034	damage_smoke_free	med	Destroys the glow, then frees the damage smoke node (func_15149368)
+func_150C5060	damage_smoke_on_message	med	Message handler: 0x55 switches the smoke on, 0x56 off, other messages are forwarded to func_15149514
+func_150C5220	scenery_swing_angle_update	low	Scenery update: swings angle +0 with a sine wobble and damping, playing sound 0xF once per 256-tick cycle
+func_150C539C	scenery_vtx_scroll_update	low	Scenery update: scrolls the vertex texture V coords by a mode-ramped speed (100..300) and sets a texture segment
+func_150C572C	fx_slots_9cf0_clear	low	Destroys and clears the four effect node slots D_800D9CF0[0..3]
+func_150C5780	cutscene_is_scene_b_to_d	med	Returns 1 while cutscene mode is on (D_800C35EA == 1) and the scene D_800C3A08 is 0xB, 0xC or 0xD
+func_150C57CC	cutscene_gated_b148_call	low	Returns 0 during cutscene scenes 0xB..0xD, else calls the function pointer D_8008B148(arg)
+func_150C5810	obj_hide_in_cutscene_b_to_d	low	Sets object flag 0x20000 (+0x60) during cutscene scenes 0xB..0xD, clears it otherwise
+func_150C5870	beam_spawn	med	Allocates a beam node (type 0x46) from a 0x24-byte template and stores its start-to-end length at +0xC0
+func_150C5930	beam_retire	med	Retires the beam node (node_retire)
+func_150C5950	beam_free	med	Unlinks and frees the beam node (node_unlink_free)
+func_150C5970	beam_retire_by_kind	low	Calls retire handler D_80088B58[kind] for the beam's kind byte +0x38 (0..1)
+func_150C59C0	beam_free_by_kind	low	Calls free handler D_80088B60[kind] for the beam's kind byte +0x38 (0..1)
+func_150C5A10	beam_detach_retire	med	Detaches the beam from its character effect owner, then retires it
+func_150C5A3C	beam_detach_free	med	Detaches the beam from its character effect owner, then frees it
+func_150C5A68	beam_motion_tick	med	Runs the beam's motion handler; removes it when the handler returns 0, else updates its length if it moved
+func_150C5BA4	beam_quad_draw	high	Draws a camera-facing textured beam quad from start to end for a player view with view-dependent colours
+func_150C6088	beam_follow_obj_pos	med	Motion handler: sets the beam end to its object's position; returns 0 when the object is gone
+func_150C60D4	beam_follow_obj_point	med	Motion handler: sets the beam end to a bone-relative point of its object (or its position); 0 when gone/changed
+func_150C6174	char_fx_event15_start	low	Sends character effect event 0x15 with value 1 to the given character
+func_150C619C	char_fx_event15_stop	low	Sends character effect event 0x15 with value 2 to the given character
+func_150C61C4	beam_on_message_by_kind	low	Message handler: forwards to D_80088B68[kind] for the beam's kind byte +0x38 if set
+func_150C620C	beam_on_message_link	med	Message handler: destroys the beam when its object is freed (0) or relinks it on swap message 0x2D
+func_150C62C0	ground_glow_a_keep_alive	low	Marks the object's ground glow sprite alive for this frame, spawning it (ground_glow_a_spawn) when missing
+func_150C630C	ground_glow_a_flicker_update	low	Ground glow update: returns 0 when not kept alive; eases size/alpha +0x24 toward a random target on a random timer
+func_150C63FC	ground_glow_a_detach	low	Ground glow end: clears the owner's link and the sprite's data pointer, flags it done and resets its handlers
+func_150C6440	ground_trail_a_keep_alive	low	Marks the object's ground trail emitter alive for this frame, spawning it when missing
+func_150C6494	ground_trail_a_spawn	low	Probes the floor under the object and spawns a trail emitter (kind 0xC) linked back to the owner
+func_150C65D8	ground_trail_a_particle_spawn	low	Spawns a default particle at a point with random flip flags and copies a 0x28-byte motion tail into it
+func_150C68EC	ground_trail_a_alive_check	low	Returns 0 when the trail was not kept alive this frame (and clears the alive flag), else 1
+func_150C6910	ground_trail_a_retire	low	Clears the owner's trail link, then moves the object to list 1 (object_list_move_1)
+func_150C6938	ground_trail_a_free	low	Clears the owner's trail link, then frees the object (object_list_free)
+func_150C6960	ground_glow_a_spawn	low	Spawns a camera sprite on the floor under the object's bone point, size 50..100 (8/2), coloured by the current surface kind
+func_150C6BF0	ground_glow_b_keep_alive	low	Marks the object's ground glow sprite alive for this frame, spawning it (ground_glow_b_spawn) when missing
+func_150C6C3C	ground_glow_b_flicker_update	low	Ground glow update: returns 0 when not kept alive; eases size/alpha +0x24 toward a random target on a random timer
+func_150C6D2C	ground_glow_b_detach	low	Ground glow end: clears the owner's link and the sprite's data pointer, flags it done and resets its handlers
+func_150C6D70	ground_trail_b_keep_alive	low	Marks the object's ground trail emitter alive for this frame, spawning it when missing
+func_150C6DC4	ground_trail_b_spawn	low	Probes the floor under the object and spawns a trail emitter (kind 0xC) linked back to the owner
+func_150C6F08	ground_trail_b_particle_spawn	low	Spawns a default particle at a point with random flip flags and copies a 0x28-byte motion tail into it
+func_150C721C	ground_trail_b_alive_check	low	Returns 0 when the trail was not kept alive this frame (and clears the alive flag), else 1
+func_150C7240	ground_trail_b_retire	low	Clears the owner's trail link, then moves the object to list 1 (object_list_move_1)
+func_150C7268	ground_trail_b_free	low	Clears the owner's trail link, then frees the object (object_list_free)
+func_150C7290	ground_glow_b_spawn	low	Spawns a camera sprite on the floor under the object's bone point, size 200..300 (9/3), coloured by the current surface kind
+func_150C7520	obj_bone_emitters_restart	low	Sends message 0x12 to the object's type-0x29 nodes, then spawns one or two bone emitters on it (by `arg1`)
+func_150C76C0	tinted_particle_toward	low	Spawns an impact tinted particle at `from` moving 0.407 of the way toward `to` with random size and life
+func_150C7850	player_update_flags_btn4002	low	Sets player flags 0x80004000 and sets/clears 0x400000 (+0x84) from input events 0x4002..0x4004
+func_150C78E0	light_flicker_update	low	Updates a flickering light's level from its timer, plays a random crackle sound and toggles light control 0x40/0x41
+func_150C7B70	fx_alpha_from_parent_rec	low	Effect update: sets byte +0x70 from its parent record's byte 0x2F scaled by a constant
+func_150C7C3C	fx_copy_default_mtx	low	Copies the 0x40-byte default matrix D_80089810 into `out`; returns 1
+func_150C7C70	player_update_flags_btn401b	low	Input events 0x401B..0x401D trigger event 0x3B; sets player flags 0x400000 and 0x01000000 (+0x84) from 0x4006/0x4030
+func_150C7D70	scenery_drift_by_level_flag	low	Scenery update: unless a level flag is set, drifts the platform with parameters chosen by a level state bit
+func_150C7DE0	scenery_spin_z_level_neg	low	Unless the object's bit 2 is set, copies the negated level spin value into +0x3C and runs scenery_spin_z_update
+func_150C7E30	scenery_spin_z_level	low	Copies the level block's spin value into +0x3C and runs scenery_spin_z_update
+func_150C7E68	obj_shade_from_level	med	Starts the pending scenery anim, then sets the model record's shade byte from the level block's s16 +0x21C / 16
+func_150C7EBC	zone_ambience_update	low	Per player view: switches ambient sound channels when entering/leaving a zone and spawns random drifting puffs there
+func_150C8190	scenery_dl_set_angle_coord	low	Writes a 0..0x3FF value from a world record's s16 +0x12 into the low 12 bits of the scenery display list end word
+func_150C827C	scenery_follow_obj_0c	low	Sets the scenery s16 position to object 0xC's position offset by (-30, +50, +30)
+func_150C8300	player_flight_mode_update	med	Player state handler for a flag-driven mode: camera push/pop, speed/zoom by event values and state cleanup
+func_150C851C	wobblers_set_intensity	med	Calls func_150CE07C(level) and sets the 10 wobbler records' target speeds to random values scaled by `level`
+func_150C8850	wobblers_update	high	Moves the 10 wobbler records' speeds toward their targets and bounces their positions inside 0..0x4FF
+func_150C89F4	wobblers_update_view0	med	Runs wobblers_update only for view 0
+func_150C8B00	wobblers_set_tex_segments	med	Emits a gSPSegment per wobbler (1..10) pointing at the texture chosen by its set and position level (0..4)
+func_150C8C30	obj_spawn_part_at_mtx	low	When the object's anim state is 0x14 (past frame 10) or 0x23, spawns child object 0x4E at the decomposed node matrix
+func_150C8DD0	ring_effect_create	med	Allocates a ring effect node (kind 0x31) from a spec with n points and fills its sin/cos direction table
+func_150C8F68	ring_effect_update	med	Ring effect update: life timer, radius growth, fade, particle spawns around the ring and handler calls; frees when done
+func_150C92B8	ring_effect_draw	high	Draws a ring effect as a textured surface of revolution around its centre at the current radius
+func_150C9EB4	ring_spawn_particle	low	Ring spawn handler: spawns a basic particle at the ring point flying out along the spawn angle with flips
+func_150CA0DC	shockwave_hit_objects	med	Ring node handler: hits players and type-0x53 objects on the ground that the expanding ring has just reached
+func_150CA2C4	ring_spawn_debris	low	Ring spawn handler: spawns a ground-coloured model debris particle at the ring point flying out along the angle
+func_150CA57C	particle_ballistic_update	med	Particle update: integrates position with gravity (+0x5C) and rotates angles +0x20..+0x28 by their rates
+func_150CA150	landing_dust_burst	med	Landing/stamp effect under a character: pad rumble, camera shake, a dust ring, four dust puffs and a debris spray
+func_150CAE30	landing_dust_spray	low	Spawns a circle random emit spray of 10..30 points (radius 170..229) at a point
+func_150CAED0	sprite_fx_fade_in_update	low	Effect update: caps byte +0x28 at age * 8 during the first 32 ticks
+func_150CAF04	dust_puff_spawn_dir	low	Particle spawner callback: spawns a puff moving along a yaw angle with a random tilt; sets shrink factor 0.951
+func_150CB128	particle_shrink_update_b	med	Particle update: multiplies the size fields +0x58/+0x60 by the factor at +0xA8 once per elapsed frame (copy)
+func_150CB2D0	dust_chunk_spawn_dir	low	Particle spawner callback: spawns a model particle moving along a yaw angle with a random tilt
+func_150CB508	particle_ballistic_update_b	med	Particle update: integrates position with gravity and rotates angles by their rates (copy of particle_ballistic_update)
+func_150CB5E0	obj_fx_point_water_entry	med	Transforms the mode's (1/2) ROM point by a model node matrix and optionally probes the surface up to 500 below it
+func_150CB6E0	water_entry_effect_id	low	Stub callback: always returns effect id 11
+func_150CB6F4	object_water_entry_splash	med	Water entry handler: camera shake, ripple rumble, a tinted splash particle on a timed list and two spray rings
+func_150CBCDC	splash_fade_in_update	low	Effect update: caps byte +0x28 at age * 8 during the first 32 ticks
+func_150CBD10	splash_chunk_spawn_dir	low	Particle spawner callback: spawns a model particle moving along a yaw angle with a random upward tilt
+func_150CBF40	splash_grow_fade_update	low	Splash update: grows size +0x2C/+0x30 while its timer +0x128 runs and fades alpha +0x5C at end of life when flagged
+func_150CBFCC	splash_puff_spawn_dir	low	Particle spawner callback: spawns a puff moving along a yaw angle with a random tilt; sets shrink factor 0.962
+func_150CC1F0	particle_shrink_update_c	med	Particle update: multiplies the size fields +0x58/+0x60 by the factor at +0xA8 once per elapsed frame (copy)
+func_150CC398	particle_ballistic_update_c	med	Particle update: integrates position with gravity and rotates angles by their rates (copy of particle_ballistic_update)
+func_150CC46C	splash_start_fade_out	med	Sets the splash's fade flag (+0x58 bit 0) and its remaining life +0x1C to 32
+func_150CBF80	ground_puff_spawn	med	Dust puff where a character bone point meets the floor: floor-tinted puff, two debris sprays, a dust ring and rumble
+func_150CCB48	ground_puff_grow_fade_update	low	Puff update: when flagged, fades alpha +0x5C in its last 32 ticks and grows size +0x2C/+0x30 while life exceeds its cut
+func_150CCBC8	ground_puff_particle_spawn_dir	low	Particle spawner callback: spawns a puff moving along a yaw angle with a random tilt; sets shrink factor 0.901
+func_150CCDE4	particle_shrink_update_d	med	Particle update: multiplies the size fields +0x58/+0x60 by the factor at +0xA8 once per elapsed frame (copy)
+func_150CCF8C	ground_puff_chunk_spawn_dir	low	Particle spawner callback: spawns a model particle moving along a yaw angle with a random upward tilt
+func_150CD1C4	particle_ballistic_update_d	med	Particle update: integrates position with gravity and rotates angles by their rates (copy of particle_ballistic_update)
+func_150CD2A0	ground_colour_by_depth	med	Returns an RGB ground tint from a z coordinate: white above 0, fading to a sandy brown band as z goes further negative

@@ -5,11 +5,11 @@
 
 
 void func_15008A10(void) {
-    D_80088720 = func_15083E90(1);
+    D_80088720 = obj_find_by_setup_id(1);
     D_80088724.x = 0.0f;
     D_80088724.y = 0.0f;
     D_80088724.z = 0.0f;
-    D_80088730 = func_15083E90(1);
+    D_80088730 = obj_find_by_setup_id(1);
 }
 
 void func_15008A60(void) {

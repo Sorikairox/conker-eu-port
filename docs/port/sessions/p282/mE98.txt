@@ -10,7 +10,7 @@
 /for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {/s/i < 4/i < 3/
 /if (\*mask & bit) {/s/\*mask & bit/*mask \& (bit << 1)/
 /spark.u56 = D_800A4548/s/\[i\]/[i + 1]/
-/func_15132FBC(&spark, 3, 0xFF, 1, kind, owner)/s/0xFF, 1/0xFF, 2/
+/mdl_particle_spawn(&spark, 3, 0xFF, 1, kind, owner)/s/0xFF, 1/0xFF, 2/
 /memcpy(p + 0x170/s/0x170/0x171/
 /(obj->unk74 & 0xF) == 0xF/s/== 0xF)/== 0xE)/
 /impact_burst((s32) pos, kind, owner)/s/kind, owner/kind, 0/
@@ -20,15 +20,15 @@
 /smoke.u60\[1\] = 13/s/13/12/
 /smoke.u50 = 0x1039E9/s/E9/E8/
 /smoke.u56 = D_800A4558/s/\[i\]/[2 - i]/
-/func_15143134(D_800A4568\[i\]/s/0x300/0x304/
+/mtx_transform_point_or_origin(D_800A4568\[i\]/s/0x300/0x304/
 /(u32) b . 35 - 84/s/84/83/
 /random_float() \* 6.12f + 3.0f/s/3.0f/3.5f/
 /smoke.u40 = /s/-15.373001f/-15.0f/
 /smoke.u48 = /s/30.746002f/30.0f/
 /smoke.u4C = /s/0.208f/0.2f/
 /smoke.life = /s/60;/61;/
-/func_15132BBC(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/(s32) arg3, 0/(s32) arg3, 1/
-/func_15132BBC(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/(s32) arg3/(s32) pos/
+/mdl_particle_spawn_ex(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/(s32) arg3, 0/(s32) arg3, 1/
+/mdl_particle_spawn_ex(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/(s32) arg3/(s32) pos/
 /^    if (!big) {/s/!big/big/
 /flash.u04 = 0.64900005f/s/0.64900005f/0.649f/
 /flash.pos\[0\] = trans\[0\]/s/trans\[0\]/trans[1]/
@@ -36,11 +36,11 @@
 /flash.u60\[3\] = 11/s/11/9/
 /flash.u56 = 0x48/s/0x48/0x47/
 /flash.u44 = 0.0f/s/0.0f/1.0f/
-/func_15143134(D_800A4598, flash.at/s/flash.at/flash.vel/
-/func_15143794(a & 0xFF, (b & 0xF) - 60/s/0xF) - 60/0x1F) - 60/
-/func_15143794(a & 0xFF, (b & 0xF) - 60/s/10.889999f/10.89f/
+/mtx_transform_point_or_origin(D_800A4598, flash.at/s/flash.at/flash.vel/
+/vec3_from_angles_byte(a & 0xFF, (b & 0xF) - 60/s/0xF) - 60/0x1F) - 60/
+/vec3_from_angles_byte(a & 0xFF, (b & 0xF) - 60/s/10.889999f/10.89f/
 /flash.u40 = /s/48.158f/48.0f/
 /flash.u48 = /s/-24.079f/-24.0f/
 /flash.u4C = /s/-1.4210001f/-1.421f/
 /flash.life = /s/61 + 100/61 + 101/
-/func_15132BBC(&flash, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/kind, owner/kind, 0/
+/mdl_particle_spawn_ex(&flash, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/kind, owner/kind, 0/

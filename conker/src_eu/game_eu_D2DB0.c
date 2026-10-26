@@ -14,7 +14,7 @@ extern u8 *D_800DC278;
 /* P186 */
 extern u8 D_800D3A08[]; /* per-vertex cull flags, 4 bytes per vertex: x' < 0, inside the side planes, in front */
 
-/* mesh_dl_cull_copy: P186: C for the hand-written asm func_150A55A0 (+ its loop func_150A563C / func_150A5654 /
+/* mesh_dl_cull_copy: P186: C for the hand-written asm mesh_dl_cull_copy (+ its loop mesh_dl_cull_copy_loop / func_150A5654 /
  * func_150A5678 / func_150A57D4, which nothing else enters). Copies the F3DEX2 display list `dl` to gdl and drops
  * what the view (matrix mtx: f32[4][4], row vectors; x' = column 0, depth z' = column 2) cannot see:
  * - G_VTX (0x01): the vertices (address w1 + base, count (w0 >> 8) & 0xFFF0 bytes, always loaded from flag slot 0)
@@ -24,7 +24,8 @@ extern u8 D_800D3A08[]; /* per-vertex cull flags, 4 bytes per vertex: x' < 0, in
  *   or when the three x' signs differ (1 or 2 negative), else dropped.
  * - 0xF3 (G_LOADBLOCK): copied; a previous one with no kept triangle since is turned into a no-op (8 zero bytes).
  * - G_ENDDL (0xDF): not copied; returns the output end. Everything else is copied. arg3 / arg4 are not read. */
-Gfx *func_150A55A0(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) {
+/* was func_150A55A0 */
+Gfx *mesh_dl_cull_copy(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) {
     f32 *m = (f32 *) mtx;
     u32 *src = (u32 *) dl;
     u32 *out = (u32 *) gdl;
@@ -86,17 +87,18 @@ Gfx *func_150A55A0(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 base) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/func_150A55A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/mesh_dl_cull_copy.s")
 #endif
 
-#ifndef NON_MATCHING /* P186: the loop of func_150A55A0 (folded into its C) */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/func_150A563C.s")
+#ifndef NON_MATCHING /* P186: the loop of mesh_dl_cull_copy (folded into its C) */
+/* was func_150A563C */
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/mesh_dl_cull_copy_loop.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P34: C for the hand-written asm blob func_150A5858 .. func_150A5F98 (game_eu_D2DB0, 0x150A5858-0x150A606C).
- * The inner glabels func_150A595C / func_150A5A9C / func_150A5AF0 / func_150A5BE8 / func_150A5C70 / func_150A5C78 /
- * func_150A5C7C are loop labels, func_150A5D08 (state flush) and func_150A5F98 (corner outcode, arguments in
+/* P34: C for the hand-written asm blob level_dl_visibility_filter .. level_box_corner_outcode (game_eu_D2DB0, 0x150A5858-0x150A606C).
+ * The inner glabels func_150A595C / func_150A5A9C / func_150A5AF0 / level_dl_filter_loop / func_150A5C70 / func_150A5C78 /
+ * func_150A5C7C are loop labels, level_dl_state_flush (state flush) and level_box_corner_outcode (corner outcode, arguments in
  * t0/t1/t2, result in t3) are private subroutines; nothing outside the blob references them.
  *
  * Level-geometry visibility walk + display-list filter.
@@ -171,7 +173,8 @@ typedef struct {
 #define W_EQ(a, b) ((a).hi == (b).hi && (a).lo == (b).lo)
 #define W_EMIT(v) (out[0] = (v).hi, out[1] = (v).lo, out += 2)
 
-Gfx *func_150A5858(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 mask) {
+/* was func_150A5858 */
+Gfx *level_dl_visibility_filter(s32 dl, Gfx *gdl, u8 *mtx, s32 arg3, s32 arg4, s32 mask) {
     f32 *m = (f32 *)mtx;
     u8 *vis;
     u8 *p;
@@ -417,7 +420,7 @@ walked:
             continue;
         }
         if (flags != 0) {
-            /* func_150A5D08 */
+            /* level_dl_state_flush */
             if (flags & 0xFFFE) {
                 out[0] = 0xE7000000;
                 out[1] = 0;
@@ -477,16 +480,19 @@ walked:
 #undef W_EQ
 #undef W_EMIT
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/func_150A5858.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_dl_visibility_filter.s")
 #endif
 #ifndef NON_MATCHING
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/func_150A5BE8.s")
-#endif
-
-#ifndef NON_MATCHING
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/func_150A5D08.s")
+/* was func_150A5BE8 */
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_dl_filter_loop.s")
 #endif
 
 #ifndef NON_MATCHING
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/func_150A5F98.s")
+/* was func_150A5D08 */
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_dl_state_flush.s")
+#endif
+
+#ifndef NON_MATCHING
+/* was func_150A5F98 */
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D2DB0/level_box_corner_outcode.s")
 #endif

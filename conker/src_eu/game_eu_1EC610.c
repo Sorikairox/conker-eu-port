@@ -32,27 +32,28 @@ typedef struct {
     f32 x;          /* +0x44 */
     f32 y;
     f32 z;
-    s32 u50;        /* room (func_151BEE00); unset by the lives pop-up */
+    s32 u50;        /* room (life_pickup_spawn); unset by the lives pop-up */
     s16 u54;
     s16 u56;
-} LivesSprite;      /* 0x58 bytes, argument of func_15157580 */
-s32 func_151BF444(u8 *arg0);
+} LivesSprite;      /* 0x58 bytes, argument of anim_model_fx_spawn */
+s32 player_slot_is_active(u8 *arg0);
 #endif
 
 #ifdef NON_MATCHING
 /* P142 */
 void collision_select_area(s32);
 s32 zone_tree_find_leaf(s32 x, s32 z);
-void func_151436B4(f32 yaw, f32 pitch, f32 dist, struct17 *out);
-s32 func_15157580(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32);
-s32 func_151BF490(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8);
+void vec3_from_angles_rad(f32 yaw, f32 pitch, f32 dist, struct17 *out);
+s32 anim_model_fx_spawn(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32);
+s32 life_pickup_ring_spawn(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8);
 s32 memcpy(void *, void *, s32);
 /* marker_sprite_spawn: spawns a marker at pos facing `angle` (degrees). size 0..2 (3 or more: nothing,
  * returns 0). In the level types with D_800D2E4C->unk19 & 4, or for size 2, it is a HUD-style sprite (texture
- * 0xA2, func_15157580) placed 39 units out along the angle and 40 lower, with sprite size {3, 1, 2}[size], flag
- * 0x10 set when `flag`; the angle, that position and `kind` go to the sprite object + 0x120 (func_151BF0D0
- * turns it). Otherwise the 3D ring particle func_151BF490. Returns the object (0 when none). arg5 / arg6 unused. */
-s32 func_151BEE00(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, s32 arg6) {
+ * 0xA2, anim_model_fx_spawn) placed 39 units out along the angle and 40 lower, with sprite size {3, 1, 2}[size], flag
+ * 0x10 set when `flag`; the angle, that position and `kind` go to the sprite object + 0x120 (life_pickup_spin_matrix
+ * turns it). Otherwise the 3D ring particle life_pickup_ring_spawn. Returns the object (0 when none). arg5 / arg6 unused. */
+/* was func_151BEE00 */
+s32 life_pickup_spawn(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, s32 arg6) {
     static const u8 sizes[3] = { 3, 1, 2 };
     struct {
         u8 pad50[4];
@@ -81,7 +82,7 @@ s32 func_151BEE00(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, s32 
         sp.spr.z = pos[2];
         sp.kind = kind;
         sp.spr.u50 = room;
-        func_151436B4(angle * 0.017453292f, 0.0f, 39.0f, (struct17 *) dir);
+        vec3_from_angles_rad(angle * 0.017453292f, 0.0f, 39.0f, (struct17 *) dir);
         sp.pos[0] = pos[0] + dir[0];
         sp.pos[1] = pos[1] + dir[1] - 40.0f;
         sp.pos[2] = pos[2] + dir[2];
@@ -115,19 +116,20 @@ s32 func_151BEE00(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, s32 
         sp.spr.color[5] = 0xFF;
         sp.spr.color[6] = 0xFF;
         sp.spr.color[7] = 0xFF;
-        obj = func_15157580(&sp.spr, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
+        obj = anim_model_fx_spawn(&sp.spr, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
         if (obj != 0) {
             memcpy((u8 *) obj + 0x120, &sp.angle, 0x18);
         }
         return obj;
     }
-    return func_151BF490(angle, (s32) pos, 3, 0xFF, size, flag, room, 0xFF, 1);
+    return life_pickup_ring_spawn(angle, (s32) pos, 3, 0xFF, size, flag, room, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BEE00.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/life_pickup_spawn.s")
 #endif
 
-s32 func_151BF0D0(u8 *arg0) {
+/* was func_151BF0D0 */
+s32 life_pickup_spin_matrix(u8 *arg0) {
     mtxf_rotate_xyz_deg(((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0], 0.0f, *(f32 *)(arg0 + 0x120), 0.0f);
     ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][0] = *(f32 *)(arg0 + 0x54);
     ((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][3][1] = *(f32 *)(arg0 + 0x58);
@@ -144,20 +146,22 @@ s32 func_151BF0D0(u8 *arg0) {
     return 1;
 }
 
-s32 func_151BF244(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
+/* was func_151BF244 */
+s32 gfx_passthrough_flag(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
     *arg4 = 1;
     return arg0;
 }
 
 #ifdef NON_MATCHING
-f32 func_15143E64(f32 *);
-void func_1515C710(u8 *, f32 *, f32 *, f32 *);
-s32 func_151BF490(f32, s32, s32, u8, s32, s32, s32, s32, s32);
-void func_151BF678(f32 *);
-void func_151BF8F0(u8, s32);
+f32 vec3_length(f32 *);
+void obj_get_fx_point_a(u8 *, f32 *, f32 *, f32 *);
+s32 life_pickup_ring_spawn(f32, s32, s32, u8, s32, s32, s32, s32, s32);
+void pickup_burst_spawn(f32 *);
+void lives_popup_spawn(u8, s32);
 extern s32 D_800D1968;
 
-s32 func_151BF268(u8 *arg0) {
+/* was func_151BF268 */
+s32 life_pickup_check_collect(u8 *arg0) {
     struct {
         f32 u80;
         f32 u84;
@@ -177,18 +181,18 @@ s32 func_151BF268(u8 *arg0) {
     var_s5 = 1;
     var_s3 = D_800CC2D0;
     do {
-        if (func_151BF444((u8 *) var_s3) != 0) {
+        if (player_slot_is_active((u8 *) var_s3) != 0) {
             temp_s1 = arg0 + 0x120;
-            func_1515C710((u8 *) var_s3, &sp.u8C, &sp.u9C, &sp.u98);
+            obj_get_fx_point_a((u8 *) var_s3, &sp.u8C, &sp.u9C, &sp.u98);
             sp.u80 = sp.u8C - (*(f32 *)((u8 *)temp_s1 + 4));
             sp.u84 = sp.u90 - (*(f32 *)((u8 *)temp_s1 + 8));
             sp.u88 = sp.u94 - (*(f32 *)((u8 *)temp_s1 + 0xC));
-            if ((func_15143E64(&sp.u80) - sp.u9C) < 43.0f) {
+            if ((vec3_length(&sp.u80) - sp.u9C) < 43.0f) {
                 var_s5 = 0;
-                func_15085710((s16) var_s3->unk127, 3, (s32) (*(u8 *)((u8 *)temp_s1 + 0x10)));
-                func_10010F30(0x511, 0x7D00U, 0x40U, 0, 0U);
-                func_151BF8F0((*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
-                func_151BF678((f32 *) (temp_s1 + 4));
+                player_stat_modify((s16) var_s3->unk127, 3, (s32) (*(u8 *)((u8 *)temp_s1 + 0x10)));
+                sound_play_2d(0x511, 0x7D00U, 0x40U, 0, 0U);
+                lives_popup_spawn((*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+                pickup_burst_spawn((f32 *) (temp_s1 + 4));
                 temp_v0 = (*(u8 *)((u8 *)arg0 + 0x48));
                 var_v1 = 0;
                 switch (temp_v0) {                  /* irregular */
@@ -207,7 +211,7 @@ s32 func_151BF268(u8 *arg0) {
                     var_v1 = 2;
                     break;
                 }
-                func_151BF490((*(f32 *)((u8 *)temp_s1 + 0)), arg0 + 0x54, (*(s32 *)((u8 *)arg0 + 0xFC)), (*(u8 *)((u8 *)arg0 + 0x11B)), var_v1, (*(u8 *)((u8 *)arg0 + 0x10)) & 0x10, (*(s32 *)((u8 *)arg0 + 0x60)), (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                life_pickup_ring_spawn((*(f32 *)((u8 *)temp_s1 + 0)), arg0 + 0x54, (*(s32 *)((u8 *)arg0 + 0xFC)), (*(u8 *)((u8 *)arg0 + 0x11B)), var_v1, (*(u8 *)((u8 *)arg0 + 0x10)) & 0x10, (*(s32 *)((u8 *)arg0 + 0x60)), (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
         }
         var_s3 = (struct127 *)((u8 *)var_s3 + (0x32C));
@@ -215,9 +219,10 @@ s32 func_151BF268(u8 *arg0) {
     return var_s5;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BF268.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/life_pickup_check_collect.s")
 #endif
-s32 func_151BF444(u8 *arg0) {
+/* was func_151BF444 */
+s32 player_slot_is_active(u8 *arg0) {
     if (arg0[0x127] == 0xFF) {
         return 0;
     }
@@ -232,7 +237,7 @@ s32 func_151BF444(u8 *arg0) {
 
 #ifdef NON_MATCHING
 /* P139 */
-/* P139: particle request passed to func_15132FBC (0x7C bytes; layout as game_eu_103160.c's DebrisParticle). */
+/* P139: particle request passed to mdl_particle_spawn (0x7C bytes; layout as game_eu_103160.c's DebrisParticle). */
 typedef struct {
     /* 0x00 */ f32 scale[4];
     /* 0x10 */ f32 rot[3];
@@ -260,17 +265,18 @@ typedef struct {
 } ParticleReq1EC;
 
 extern u8 D_8008FF60[3];   /* colours per index 0..2: 4, 2, 3 */
-s32 func_15132FBC(void *req, s32, s32, s32, s32, s32);
-s32 func_15133CD0(s32 arg0, u8 *arg1);
+s32 mdl_particle_spawn(void *req, s32, s32, s32, s32, s32);
+s32 mdl_particle_mtx_rot_scale3(s32 arg0, u8 *arg1);
 
 /*
  * ring_particle_spawn: spawns one ring particle (sprite 0x26, life 300, scale (1, 1, 0.923, 0.923; 0x3F6C49BB), rotated by
  * yaw about y, no motion) at the 3 words at pos (copied as they are), colour D_8008FF60[colour] (only colours 0..2;
  * else nothing and 0), flags 0xC1D00 | 0x4000 when flag (u8) is set, +0x5C = arg6, +0x61 = 0x18 in game mode 7
- * (D_800BE9F0). Request (arg2, (u8) arg3, 0, (u8) arg7, arg8). On success func_15133CD0(p + 0x90 + 0x40 * k, p)
+ * (D_800BE9F0). Request (arg2, (u8) arg3, 0, (u8) arg7, arg8). On success mdl_particle_mtx_rot_scale3(p + 0x90 + 0x40 * k, p)
  * for k = 0, 1. Returns the particle (0 on failure).
  */
-s32 func_151BF490(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8) {
+/* was func_151BF490 */
+s32 life_pickup_ring_spawn(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8) {
     s32 *pos = (s32 *) posArg;
     ParticleReq1EC req;
     u8 *p;
@@ -318,25 +324,26 @@ s32 func_151BF490(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, 
     req.ownerId = 0;
     req.u72 = 1;
     req.u74 = 0xFF;
-    p = (u8 *) func_15132FBC(&req, arg2, arg3, 0, (u8) arg7, arg8);
+    p = (u8 *) mdl_particle_spawn(&req, arg2, arg3, 0, (u8) arg7, arg8);
     if (p != NULL) {
         for (k = 0; k != 0x80; k += 0x40) {
-            func_15133CD0((s32) (p + 0x90 + k), p);
+            mdl_particle_mtx_rot_scale3((s32) (p + 0x90 + k), p);
         }
     }
     return (s32) p;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BF490.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/life_pickup_ring_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P142 */
-void func_15151500(u8 *req, u8, u8, s32);
-void func_15153BA4(u8 *req, s32, s32, s32);
-// pickup_burst_spawn: the burst played when a pickup at pos is collected: a debris spray (func_15151500 request:
-// 24..34 pieces) and a flash particle (func_15153BA4 request, the same layout as in explosion_ground_effect).
-void func_151BF678(f32 *pos) {
+void emit_tumbling_pieces(u8 *req, u8, u8, s32);
+void emit_particle_burst_req(u8 *req, s32, s32, s32);
+// pickup_burst_spawn: the burst played when a pickup at pos is collected: a debris spray (emit_tumbling_pieces request:
+// 24..34 pieces) and a flash particle (emit_particle_burst_req request, the same layout as in explosion_ground_effect).
+/* was func_151BF678 */
+void pickup_burst_spawn(f32 *pos) {
     struct {
         s16 u0;
         s16 u2;
@@ -426,7 +433,7 @@ void func_151BF678(f32 *pos) {
     debris.u30 = -1.0480001f;
     debris.u34 = 0.99500006f;
     debris.u38 = 0.942411f;
-    func_15151500((u8 *) &debris, 1, 0xFF, 1);
+    emit_tumbling_pieces((u8 *) &debris, 1, 0xFF, 1);
 
     flash.u0 = 20;
     flash.u1E = 6;
@@ -472,25 +479,25 @@ void func_151BF678(f32 *pos) {
     flash.u54 = -0.007f;
     flash.u58 = -0.006f;
     flash.u68 = 0.941177f;
-    func_15153BA4((u8 *) &flash, 0xFF, 0xFF, 1);
+    emit_particle_burst_req((u8 *) &flash, 0xFF, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BF678.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/pickup_burst_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 /* Lives pop-up (called when a life pickup is collected, after sound 0x511): a HUD object (func_15149130, type
  * 0x60, 0x18 bytes of state) holding a sprite (texture 0xA3) and the number of lives left, one or two digit
- * sprites from the glyph table D_800AAC94. Lives = func_150859AC(0, 3) minus the current one, at most 99.
+ * sprites from the glyph table D_800AAC94. Lives = player_stat_get(0, 3) minus the current one, at most 99.
  * D_800D2458 (set by the 4:3 / wide screen code) moves the sprite and the digits. `arg0` / `arg1` are passed
  * through as the last two arguments of every HUD call (0xFF / 1 at the level start). */
-s32 func_15157580(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32); /* P97: f32 like the P95 definition */
-s32 func_151559FC(void *digit, s32, s32, s32, s32, s32, s32);
+s32 anim_model_fx_spawn(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32); /* P97: f32 like the P95 definition */
+s32 sprite2d_spawn(void *digit, s32, s32, s32, s32, s32, s32);
 extern s32 D_800AAC94[10];
 
 typedef struct {
-    s32 sprite;     /* func_15157580 handle */
-    s32 digit[2];   /* func_151559FC handles (digit[1] stays 0 for one digit) */
+    s32 sprite;     /* anim_model_fx_spawn handle */
+    s32 digit[2];   /* sprite2d_spawn handles (digit[1] stays 0 for one digit) */
     f32 x;
     f32 angle;
     u8 done;
@@ -526,7 +533,7 @@ typedef struct {
     f32 scaleY;
     f32 u50;
     f32 u54;
-} LivesDigit;       /* 0x58 bytes, argument of func_151559FC */
+} LivesDigit;       /* 0x58 bytes, argument of sprite2d_spawn */
 
 typedef struct {
     f32 pos[3];
@@ -534,7 +541,8 @@ typedef struct {
     f32 scaleY;
 } LivesSpritePos;   /* copied to the sprite + 0x120 */
 
-void func_151BF8F0(u8 arg0, s32 arg1) {
+/* was func_151BF8F0 */
+void lives_popup_spawn(u8 arg0, s32 arg1) {
     LivesSprite spr;
     LivesSpritePos pos;
     LivesDigit dig;
@@ -547,7 +555,7 @@ void func_151BF8F0(u8 arg0, s32 arg1) {
     LivesPopup *popup;
 
     func_151494E0(0, 0x57);
-    lives = func_150859AC(0, 3);
+    lives = player_stat_get(0, 3);
     if (lives != 0) {
         lives -= 1;
     }
@@ -609,7 +617,7 @@ void func_151BF8F0(u8 arg0, s32 arg1) {
     pos.pos[2] = ((f32 *)D_800A5860)[2];
     pos.scaleX = 0.30100003f;
     pos.scaleY = 0.30100003f;
-    popup->sprite = func_15157580(&spr, 0, 1.0f /* P96: f32 parameter (was its float bits) */, 0, 0, 0x14, arg0, arg1);
+    popup->sprite = anim_model_fx_spawn(&spr, 0, 1.0f /* P96: f32 parameter (was its float bits) */, 0, 0, 0x14, arg0, arg1);
     if (popup->sprite != 0) {
         memcpy((u8 *)popup->sprite + 0x120, &pos, sizeof(LivesSpritePos));
     }
@@ -652,24 +660,25 @@ void func_151BF8F0(u8 arg0, s32 arg1) {
     dig.scaleY = 1.0f;
     if (digits[0] == 0) {
         dig.glyph = glyphs[digits[1]];
-        popup->digit[0] = func_151559FC(&dig, 0, 0, 0, 0, arg0, arg1);
+        popup->digit[0] = sprite2d_spawn(&dig, 0, 0, 0, 0, arg0, arg1);
         popup->digit[1] = 0;
         return;
     }
     for (i = 0; i < 2; i++) {
         dig.glyph = glyphs[digits[i]];
-        popup->digit[i] = func_151559FC(&dig, 0, 0, 0, 0, arg0, arg1);
+        popup->digit[i] = sprite2d_spawn(&dig, 0, 0, 0, 0, arg0, arg1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BF8F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/lives_popup_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1517F470(s32, u8 *);
-s32 func_15182238(s32);
+s32 screen_fade_alpha(s32, u8 *);
+s32 hud_lens_is_off(s32);
 
-void func_151BFDCC(u8 *arg0) {
+/* was func_151BFDCC */
+void lives_popup_update(u8 *arg0) {
     u8 *sp1C;
     f32 temp_f0;
     f32 var_f2;
@@ -686,9 +695,9 @@ void func_151BFDCC(u8 *arg0) {
     if (!((*(u8 *)((u8 *)var_v1 + 0x14)) & 1)) {
         if (D_800C35EA != 1) {
             sp1C = var_v1;
-            if (func_15182238(0) != 0) {
+            if (hud_lens_is_off(0) != 0) {
                 sp1C = var_v1;
-                if ((func_1517F470(0, arg0) == 0) && (D_800BE9B4 == 0)) {
+                if ((screen_fade_alpha(0, arg0) == 0) && (D_800BE9B4 == 0)) {
                     (*(u8 *)((u8 *)var_v1 + 0x14)) = (u8) ((*(u8 *)((u8 *)var_v1 + 0x14)) | 1);
                     goto block_9;
                 }
@@ -741,9 +750,10 @@ block_9:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BFDCC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/lives_popup_update.s")
 #endif
-void func_151C00DC(u8 *arg0) {
+/* was func_151C00DC */
+void lives_popup_free_sprites(u8 *arg0) {
     u8 *new_var; // fakematch: pointer temp keeps arg0 out of s-regs (permuter artifact)
     struct102 *temp_a0;
     u8 *v;
@@ -763,17 +773,20 @@ void func_151C00DC(u8 *arg0) {
     } while (i < 2);
 }
 
-void func_151C0154(struct260 * arg0) {
-    func_151C00DC(arg0);
+/* was func_151C0154 */
+void lives_popup_retire(struct260 * arg0) {
+    lives_popup_free_sprites(arg0);
     func_1514933C(arg0);
 }
 
-void func_151C0180(struct260 * arg0) {
-    func_151C00DC(arg0);
+/* was func_151C0180 */
+void lives_popup_delete(struct260 * arg0) {
+    lives_popup_free_sprites(arg0);
     func_15149368(arg0);
 }
 
-void func_151C01AC(struct102 *arg0, s32 arg1, u8 arg2) {
+/* was func_151C01AC */
+void lives_popup_on_message(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x57) {
         node_destroy(arg0);
     }

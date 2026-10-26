@@ -5,10 +5,10 @@ extern f32 D_800A2A10;
 extern f32 D_800A2A14;
 extern f32 D_800A2A18;
 extern f32 D_800A2A1C;
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_151530A8(void *, u8, s32);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+s32 emit_streaks_from_spec(void *, u8, s32);
 
-/* particle template of func_151308E4 (0x70 bytes; bytes 0x5C-0x5F / 0x66-0x6F unset, as in the asm) */
+/* particle template of particle_spawn_basic (0x70 bytes; bytes 0x5C-0x5F / 0x66-0x6F unset, as in the asm) */
 typedef struct {
     s32 u0;           /* 0x00 */
     s32 u4;           /* 0x04 */
@@ -33,7 +33,7 @@ typedef struct {
     u8 pad66[0xA];
 } PartTmpl9DC8;
 
-/* emitter block of func_151530A8 (0x74 bytes; bytes 0x59-0x5B / 0x6B unset, as in the asm) */
+/* emitter block of emit_streaks_from_spec (0x74 bytes; bytes 0x59-0x5B / 0x6B unset, as in the asm) */
 typedef struct {
     s32 u0;           /* 0x00 */
     s32 u4;           /* 0x04 */
@@ -66,7 +66,7 @@ typedef struct {
 // spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by obj_point_effect_emitter_update with the
 // object, the point `pos` and three more points; `dir` = the unit direction): spawns one spark particle (kind 0x2B,
 // random life 10..25, random size 35..60, velocity dir * a random scale, random flip bits 0x40 / 0x80) through
-// func_151308E4 and a small emitter (func_151530A8) at the same point. b / c / d are not used.
+// particle_spawn_basic and a small emitter (emit_streaks_from_spec) at the same point. b / c / d are not used.
 void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     PartTmpl9DC8 t;
     f32 scale;
@@ -113,7 +113,7 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     t.u60[3] = 0xFF;
     t.u60[4] = 0xFF;
     t.u60[5] = 4;
-    func_151308E4(&t, 1, 0, obj[0xC], obj[1]);
+    particle_spawn_basic(&t, 1, 0, obj[0xC], obj[1]);
 
     e.u0 = 1;
     e.u4 = 4;
@@ -166,5 +166,5 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     e.u70[1] = 0;
     e.u70[2] = -1;
     e.u70[3] = -1;
-    func_151530A8(&e, obj[0xC], obj[1]);
+    emit_streaks_from_spec(&e, obj[0xC], obj[1]);
 }

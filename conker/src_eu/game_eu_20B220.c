@@ -6,7 +6,7 @@
 s32 __osSiGetAccess();
 s32 __osSiRelAccess();
 typedef struct { u16 type; u8 status; u8 errno; } St_DDA10;
-s32 func_151DDCC0(s32, St_DDA10 *);
+s32 game_eep_status(s32, St_DDA10 *);
 s32 func_151DDA10(s32 arg0)
 {
     s32 ret;
@@ -14,7 +14,7 @@ s32 func_151DDA10(s32 arg0)
     St_DDA10 st;
 
     __osSiGetAccess();
-    ret = func_151DDCC0(arg0, &st);
+    ret = game_eep_status(arg0, &st);
     type = st.type & 0xC000;
     if (ret != 0) {
         ret = 0;

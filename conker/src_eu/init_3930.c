@@ -3,7 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_10003930(void) {
+/* was func_10003930 */
+void mem_init_region_bounds(void) {
     if (D_80038080) {
         D_80038090 = 0x807F5000;
         D_80038094 = 0x807FE000;

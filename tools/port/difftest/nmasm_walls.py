@@ -2,10 +2,10 @@
 """P56: the hand-asm wall engine (func_150AB6D0 / func_150AC8C4 -> func_150AB708) and the ray cast func_150ACEA0
 vs their NON_MATCHING C (src_eu/nm_asm/D5E90.c + D5E90_walls.inc (asm2c_hand.py); the ray cast is readable C since P291).
 Reference: VR4300 interpreter (nmasm_vr.Ref) on build/conker.eu.elf; candidate: Unicorn on build_nm/conker.eu.elf.
-Callees (func_1507C7C0, quadtree_set_test_box, sinf / cosf, func_150A69A8, func_150A49D0, collision_select_area) run on both sides.
+Callees (obj_collision_cylinder, quadtree_set_test_box, sinf / cosf, func_150A69A8, world_objects_transform_mesh, collision_select_area) run on both sides.
 Synthetic mode: random triangles around a record (walls = vertical quads' halves, slopes, floors, degenerate ones),
 bounds tables (sometimes perturbed), flags D_800DBE5C, a BSP tree (one leaf or nmasm_floorsets' random trees),
-area kind 0 / 1 (level) and 3 (records' own models), record kinds 0 / 4 / 0x2C (func_1507C7C0's sizes), moves of
+area kind 0 / 1 (level) and 3 (records' own models), record kinds 0 / 4 / 0x2C (obj_collision_cylinder's sizes), moves of
 0..200 units, mark flag. Level mode (--level L): level built by nmasm_level's pipeline, func_150A4ED4(area), the
 record placed next to real triangles of areas 0 / 1.
 Compared: v0 and all RDRAM except the stacks.
@@ -154,7 +154,7 @@ def ray_objects(rng, m, nt, pos):
         for k in range(0, 0xA0, 4): W(m, o + k, 'I', rng.getrandbits(32))
         c = [pos[0] + rng.randint(-250, 250), pos[1] + rng.randint(-80, 160), pos[2] + rng.randint(-250, 250)]
         ntr = rng.choice([1, 2, 4, 8])
-        vb = rng.choice([VP - 0x1000, VP + 0x18 * first, 0x80000000])   # != 0: func_150A49D0 keeps it (no transform)
+        vb = rng.choice([VP - 0x1000, VP + 0x18 * first, 0x80000000])   # != 0: world_objects_transform_mesh keeps it (no transform)
         out += walltris(rng, m, ntr, c, rel_base=vb, first=first)
         W(m, OBJVB + 4 * i, 'I', vb)
         W(m, o + 0x10, '3h', *c)

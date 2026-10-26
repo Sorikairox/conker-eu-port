@@ -5,7 +5,8 @@
 const char rodata_pre_193D00[] = "\xff"; // fakematch: unreferenced leading rodata word
 
 
-void func_151664F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8)
+/* was func_151664F0 */
+void water_ring_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8)
 {
   s32 i;
   u8 *temp_v0;
@@ -55,11 +56,12 @@ void func_151664F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     *((s16 *) (((u8 *) temp_v0) + 0x9C)) = (s16) arg3;
     *((s16 *) (((u8 *) temp_v0) + 0x96)) = (s16) arg4;
     *((s8 *) (((u8 *) temp_v0) + 0x94)) = (s8) arg6;
-    func_1517E5CC(arg1, arg2, arg3, temp_v0);
+    ambient_flare_point_set(arg1, arg2, arg3, temp_v0);
   }
 }
 
-void func_15166688(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9)
+/* was func_15166688 */
+void water_ring_spawn_ex(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9)
 {
   u32 i;
   u8 *temp_v0;
@@ -89,11 +91,12 @@ void func_15166688(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     *((s8 *) (((u8 *) temp_v0) + 0x94)) = (s8) arg7;
     *((s8 *) (((u8 *) temp_v0) + 0xA0)) = (s8) arg0;
     *((s8 *) (((u8 *) temp_v0) + 0xA1)) = (s8) arg1;
-    func_1517E5CC(arg2, arg3, arg4);
+    ambient_flare_point_set(arg2, arg3, arg4);
   }
 }
 
-void func_15166774(struct102 *arg0) {
+/* was func_15166774 */
+void water_ring_update(struct102 *arg0) {
     s32 temp_v0;
 
     *(s16 *)((u8 *)arg0 + 0x9E) += *(s16 *)((u8 *)arg0 + 0x96) * D_800BE9E4;
@@ -109,7 +112,8 @@ void func_15166774(struct102 *arg0) {
 #ifdef NON_MATCHING
 f32 math_cos_u8(u8);
 
-u8 *func_151667D8(u8 *arg0, u8 *arg1, s32 arg2) {
+/* was func_151667D8 */
+u8 *water_ring_draw(u8 *arg0, u8 *arg1, s32 arg2) {
     struct {
         f32 u84;
         f32 u88;
@@ -315,7 +319,7 @@ u8 *func_151667D8(u8 *arg0, u8 *arg1, s32 arg2) {
     return var_a3;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/func_151667D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/water_ring_draw.s")
 #endif
 #ifdef NON_MATCHING
 extern s16 D_800DD270;
@@ -326,15 +330,16 @@ extern u8 D_800DD660[];
 extern u8 D_800907A4[];
 extern s32 D_800D30BC;
 extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
-u8 *func_15095380(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+u8 *sprite_load_texture(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 
 /* layer_pre_scroll_texture: P238: `pre` callback of render layer 4 (D_8008B848 + 0xE4, RenderLayer +0x14; called as
  * pre(gdl, layer, list, arg2) by node_render_layers_draw, the other arguments are unused). Advances the s16 scroll D_800DD270 by
  * 0x80 (back to 0 once it reaches 0x500), records texture D_800907A4 / the old scroll / 1 in D_800DD658 / 650 / 654,
- * emits the texture through func_15095380(gdl, D_800DD658, D_800DD650, D_800DD660, 0, 0, 0, 1, 3) and returns the
- * render mode set by func_15142FBC(gdl, D_800D30BC | 0x82CA0, render modes 3 (D_800A4EA8 words 7 | 6), &1). */
-Gfx *func_15166E28(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
+ * emits the texture through sprite_load_texture(gdl, D_800DD658, D_800DD650, D_800DD660, 0, 0, 0, 1, 3) and returns the
+ * render mode set by gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, render modes 3 (D_800A4EA8 words 7 | 6), &1). */
+/* was func_15166E28 */
+Gfx *layer_pre_scroll_texture(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
     u8 one = 1;
     s16 prev = D_800DD270;
 
@@ -345,9 +350,9 @@ Gfx *func_15166E28(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
         D_800DD270 = 0;
     }
     D_800DD654 = 1;
-    gdl = (Gfx *) func_15095380((u8 *) gdl, (s32 *) D_800DD658, D_800DD650, (s32 *) D_800DD660, 0, 0, 0, 1, 3);
-    return func_15142FBC(gdl, D_800D30BC | 0x82CA0, D_800A4EA8[7] | D_800A4EA8[6], &one);
+    gdl = (Gfx *) sprite_load_texture((u8 *) gdl, (s32 *) D_800DD658, D_800DD650, (s32 *) D_800DD660, 0, 0, 0, 1, 3);
+    return gfx_other_mode_cached(gdl, D_800D30BC | 0x82CA0, D_800A4EA8[7] | D_800A4EA8[6], &one);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/func_15166E28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/layer_pre_scroll_texture.s")
 #endif

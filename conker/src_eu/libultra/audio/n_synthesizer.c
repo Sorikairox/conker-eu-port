@@ -85,7 +85,7 @@ typedef struct {
 } SynNewConfig;
 
 extern SynNewSynth *D_8002BA44;
-void *func_1001E4A0(s32, SynNewConfig *, ALHeap *);
+void *n_synth_aux_fx_new(s32, SynNewConfig *, ALHeap *);
 void alN_PVoiceNew(SynNewPVoice *, void *, ALHeap *);
 Acmd *func_1001E530();
 
@@ -126,7 +126,7 @@ void n_alSynNew(SynNewConfig *c) {
         D_8002BA44->auxBus[i].unk18 = 0;
 
         if (c->fxTypes[i]) {
-            D_8002BA44->auxBus[i].fx = func_1001E4A0(i, c, hp);
+            D_8002BA44->auxBus[i].fx = n_synth_aux_fx_new(i, c, hp);
         } else {
             D_8002BA44->auxBus[i].fx = NULL;
         }
@@ -185,7 +185,7 @@ void n_alSynNew(SynNewConfig *c) {
 }
 
 static s32 __n_nextSampleTime(ALPlayer **client);
-Acmd *func_1001FB40(s32 sampleOffset, Acmd *p); // n_alSavePull?
+Acmd *n_main_bus_pull(s32 sampleOffset, Acmd *p); // n_alSavePull?
 s32 _n_timeToSamplesNoRound(s32 micros);
 
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen)
@@ -210,7 +210,7 @@ Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen)
 
     while (outLen > 0) {
         nOut = MIN(n_syn->maxOutSamples, outLen);
-        cmdlEnd = func_1001FB40(n_syn->curSamples, cmdlEnd);
+        cmdlEnd = n_main_bus_pull(n_syn->curSamples, cmdlEnd);
         {
             Acmd *_a = cmdlEnd++;
             _a->words.w0 = 0x0D000000;

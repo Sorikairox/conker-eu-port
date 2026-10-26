@@ -36,27 +36,27 @@ void func_151F2960(s32 arg0, s32 arg1) {
         }
         D_800E0E20 = asset_load(0, 2, 0x17, 4);
         if (D_800E0E20 != 0) {
-            func_100043B4(D_800E0E20, 0xFF);
+            heap_set_block_tag(D_800E0E20, 0xFF);
         }
         D_800E0E24 = asset_load(0, 2, 0x17, 5);
         if (D_800E0E24 != 0) {
-            func_100043B4(D_800E0E24, 0xFF);
+            heap_set_block_tag(D_800E0E24, 0xFF);
         }
         D_800E0E28 = asset_load(0, 2, 0x17, 6);
         if (D_800E0E28 != 0) {
-            func_100043B4(D_800E0E28, 0xFF);
+            heap_set_block_tag(D_800E0E28, 0xFF);
         }
         if ((D_800E0E20 == 0) || (D_800E0E24 == 0) || (D_800E0E28 == 0)) {
             if (D_800E0E20 != 0) {
-                func_10004074(D_800E0E20);
+                heap_free(D_800E0E20);
             }
             if (D_800E0E24 != 0) {
-                func_10004074(D_800E0E24);
+                heap_free(D_800E0E24);
             }
             if (D_800E0E28 != 0) {
-                func_10004074(D_800E0E28);
+                heap_free(D_800E0E28);
             }
-            func_10004074(D_800E0E30);
+            heap_free(D_800E0E30);
             D_800E0E30 = 0;
             D_800E0E2C = 0;
             return;
@@ -331,13 +331,13 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
         }
     } else if ((D_800E0E04 == 3) && (D_800BE9F0 != 0x35)) {
         if (D_800E0E2C != 0) {
-            func_10004074(D_800E0E20);
-            func_10004074(D_800E0E24);
-            func_10004074(D_800E0E28);
+            heap_free(D_800E0E20);
+            heap_free(D_800E0E24);
+            heap_free(D_800E0E28);
             D_800E0E2C = 0;
         }
         if (D_800E0E30 != NULL) {
-            func_10004074(D_800E0E30);
+            heap_free(D_800E0E30);
             D_800E0E30 = NULL;
         }
         D_800E0E04 = 0;

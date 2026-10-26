@@ -5,11 +5,12 @@
 
 #ifdef NON_MATCHING
 void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
-s32 func_151506E8(s16 *, s32 *, s32, u8, s32);
-s32 func_15182BE0(s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151D44C4(u8 *, u8, s32);
+s32 emit_dust_by_angles(s16 *, s32 *, s32, u8, s32);
+s32 screen_colour_fade_fx_start(s32, s32, s32, s32, s32, s32, s32, s32);
+void muzzle_light_small_spawn(u8 *, u8, s32);
 
-void func_151DCC50(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151DCC50 */
+void flash_burst_effects(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s16 u38;
         s16 u3A;
@@ -68,17 +69,18 @@ void func_151DCC50(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u6C = 390.0f;
     sp.u74 = 0.6f;
     sp.u7C = 1.0f;
-    func_151506E8(&sp.u38, &sp.u40, 0, arg1, arg2);
-    func_151D44C4(arg0, arg1, arg2);
+    emit_dust_by_angles(&sp.u38, &sp.u40, 0, arg1, arg2);
+    muzzle_light_small_spawn(arg0, arg1, arg2);
     sp2C = random_int();
-    func_15182BE0(0xFF, 0xFF, 0xFF, (((u32) sp2C % 51U) + 0x96) & 0xFF, (random_int() % 5U) + 8, 0, (s32) arg1, arg2);
+    screen_colour_fade_fx_start(0xFF, 0xFF, 0xFF, (((u32) sp2C % 51U) + 0x96) & 0xFF, (random_int() % 5U) + 8, 0, (s32) arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20A460/func_151DCC50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20A460/flash_burst_effects.s")
 #endif
-void func_151DCC50(u8 *arg0, u8 arg1, s32 arg2);
+void flash_burst_effects(u8 *arg0, u8 arg1, s32 arg2);
 
-void func_151DCE6C(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
+/* was func_151DCE6C */
+void flash_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
     typedef struct {
         s32 w[3];
     } Blk12;
@@ -90,7 +92,7 @@ void func_151DCE6C(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
     struct260 *temp_v0;
 
     if (arg2 != 0) {
-        func_151DCC50(arg0, arg4, arg5);
+        flash_burst_effects(arg0, arg4, arg5);
     }
     tmp.unk0 = *(Blk12 *)arg0;
     tmp.unkC = 0.0f;
@@ -102,11 +104,12 @@ void func_151DCE6C(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern s32 D_800AB8E0;
 extern s32 D_800AB8EC;
 
-void func_151DCF2C(u8 *arg0) {
+/* was func_151DCF2C */
+void flash_smoke_emitter_update(u8 *arg0) {
     struct {
         s32 u90;
         u8 pad94[0x8];
@@ -252,7 +255,7 @@ void func_151DCF2C(u8 *arg0) {
                 sp.uD5 = (*(u8 *)((u8 *)temp_a0 + 1));
                 sp.uD6 = (*(u8 *)((u8 *)temp_a0 + 2));
             }
-            temp_v0 = func_151307F0(&sp.uBC, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = particle_spawn_ex(&sp.uBC, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.uAC, 0x10);
             }
@@ -261,5 +264,5 @@ void func_151DCF2C(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20A460/func_151DCF2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20A460/flash_smoke_emitter_update.s")
 #endif

@@ -32,6 +32,6 @@ s/} else if (\*(s32 \*) (cam + 0x84) \& 0x200000) {/} else if (*(s32 *) (cam + 0
 s/rate = D_800A381C;/rate = D_800A3820;/
 s/gain = 0.75f;/gain = 0.5f;/
 s/if (D_800BEE2C == 0) {/if (D_800BEE2C != 0) {/
-s/func_15049978((f32 \*) (cam + 0x37C), yaw, (f32 \*) (cam + 0x7C8), gain, rate,/func_15049978((f32 *) (cam + 0x37C), yaw, (f32 *) (cam + 0x7C8), rate, gain,/
+s/math_spring_approach_angle((f32 \*) (cam + 0x37C), yaw, (f32 \*) (cam + 0x7C8), gain, rate,/math_spring_approach_angle((f32 *) (cam + 0x37C), yaw, (f32 *) (cam + 0x7C8), rate, gain,/
 s/    camera_update_eye_orbit(arg0);/    ;/
 s/    camera_update_eye_height(cam);/    camera_update_eye_height(0);/

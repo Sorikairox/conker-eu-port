@@ -14,7 +14,7 @@ extern f32 D_8009685C;
 extern f32 D_80096860;
 void storm_controller_spawn(void);
 void collision_select_area(s32);
-s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn(f32 *, s32, s32, s32, s32, s32);
 u8 *mesh_effect_spawn(s8 *, s32, s32, s32, s32);
 s32 memcpy(u8 *, f32 *, s32);
 extern s32 D_80096800;
@@ -249,7 +249,7 @@ void level_obj_init_debris_table(void) {
         temp_f0_4 = (var_f10_2 * D_80096860 * D_80096854) + D_80096850;
         sp.uF4 = temp_f0_4;
         sp.uDC = temp_f0_4;
-        temp_v0 = func_15132FBC(&sp.u154, 3, 0xFF, 0x18, 0xFF, 1);
+        temp_v0 = mdl_particle_spawn(&sp.u154, 3, 0xFF, 0x18, 0xFF, 1);
         if (temp_v0 != 0) {
             memcpy(temp_v0 + 0x170, &sp.uD0, 0x18);
         }

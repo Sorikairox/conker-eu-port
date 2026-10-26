@@ -4,7 +4,8 @@
 
 
 extern s32 D_8008D960;
-void func_1518AF80(u8 *arg0) {
+/* was func_1518AF80 */
+void timed_queue_tick(u8 *arg0) {
     struct102 *n;
     struct102 *a2;
     s16 h;
@@ -36,7 +37,8 @@ void func_1518AF80(u8 *arg0) {
     }
 }
 
-u8 *func_1518AADC(s32 arg0, s16 arg1, u8 arg2)
+/* was func_1518AADC */
+u8 *timed_queue_create(s32 arg0, s16 arg1, u8 arg2)
 {
   u8 *t;
   t = node_alloc(0x1D, 0, 0x28, 1, 0xFFU, 1U);
@@ -54,7 +56,8 @@ u8 *func_1518AADC(s32 arg0, s16 arg1, u8 arg2)
   return t;
 }
 
-u8 *func_1518B0D0(s32 arg0, u8 arg1)
+/* was func_1518B0D0 */
+u8 *timed_queue_item_alloc(s32 arg0, u8 arg1)
 {
   u8 *temp_v0;
   temp_v0 = node_alloc(0x1E, 0, 0x20, 1, 0xFFU, 1U);
@@ -69,7 +72,8 @@ u8 *func_1518B0D0(s32 arg0, u8 arg1)
   return temp_v0;
 }
 
-s32 func_1518B140(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_1518B140 */
+s32 timed_queue_push(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *a1;
     u8 *n;
     u8 *nx;
@@ -78,7 +82,7 @@ s32 func_1518B140(u8 *arg0, s32 arg1, u8 arg2) {
         if (arg2 != 0) { ((void (**)(s32))&D_8008D960)[arg2](arg1); }
         return 0;
     }
-    n = func_1518B0D0(arg1, arg2);
+    n = timed_queue_item_alloc(arg1, arg2);
     if (n == NULL) {
         if (arg2 != 0) { ((void (**)(s32))&D_8008D960)[arg2](arg1); }
         return 0;

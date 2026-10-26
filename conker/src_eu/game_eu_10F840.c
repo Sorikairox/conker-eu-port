@@ -108,8 +108,8 @@ float sqrtf(float);
 f32 func_150484A0(f32, f32);
 extern s32 D_800DC26C;
 extern u8 D_800D9D80[];
-int func_151EFDD0(void);
-f32 func_150ADDE0(u8 *, u8 *);
+int game_gu_random(void);
+f32 vec3f_dot(u8 *, u8 *);
 s32 floor_flags_surface_type(s32);
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 s32 object_ray_hit_nearest(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
@@ -177,9 +177,9 @@ void beam_effect_update(u8 *obj) {
             if (target != NULL && *(u8 **) (target + 0x1D4) != NULL && obj[0xDA] == target[0x3B] &&
                 target[0x127] != 0xFF) {
                 mtx = *(u8 **) (target + 0x1D4) + obj[0xE2] * 0x40;
-                func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xE4), *(f32 *) (obj + 0xE8), *(f32 *) (obj + 0xEC),
+                mtxf_transform_point((f32 (*)[4]) mtx, *(f32 *) (obj + 0xE4), *(f32 *) (obj + 0xE8), *(f32 *) (obj + 0xEC),
                               (f32 *) (obj + 0x94), (f32 *) (obj + 0x98), (f32 *) (obj + 0x9C));
-                func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xF0), *(f32 *) (obj + 0xF4), *(f32 *) (obj + 0xF8),
+                mtxf_transform_point((f32 (*)[4]) mtx, *(f32 *) (obj + 0xF0), *(f32 *) (obj + 0xF4), *(f32 *) (obj + 0xF8),
                               (f32 *) (obj + 0xB0), (f32 *) (obj + 0xB4), (f32 *) (obj + 0xB8));
                 obj[0xE3] = 3;
             }
@@ -193,10 +193,10 @@ void beam_effect_update(u8 *obj) {
                 return;
             }
             mtx = *(u8 **) (target + 0x1D4) + obj[0xE2] * 0x40;
-            func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xE4), *(f32 *) (obj + 0xE8), *(f32 *) (obj + 0xEC),
+            mtxf_transform_point((f32 (*)[4]) mtx, *(f32 *) (obj + 0xE4), *(f32 *) (obj + 0xE8), *(f32 *) (obj + 0xEC),
                           (f32 *) (obj + 0x94), (f32 *) (obj + 0x98), (f32 *) (obj + 0x9C));
             aim = (*(u8 **) (obj + 0xDC))[0x127];
-            func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xF0), *(f32 *) (obj + 0xF4), *(f32 *) (obj + 0xF8),
+            mtxf_transform_point((f32 (*)[4]) mtx, *(f32 *) (obj + 0xF0), *(f32 *) (obj + 0xF4), *(f32 *) (obj + 0xF8),
                           (f32 *) (obj + 0xB0), (f32 *) (obj + 0xB4), (f32 *) (obj + 0xB8));
             alpha = 0.0f;
             if (obj[0xFD]-- == 0) {
@@ -206,7 +206,7 @@ void beam_effect_update(u8 *obj) {
                 ray = FALSE;
             }
             if (*(f32 *) (obj + 0xA8) == 0.0f) {
-                width = (f32) (func_151EFDD0() % 70) + 40.0f;
+                width = (f32) (game_gu_random() % 70) + 40.0f;
             } else {
                 width = *(f32 *) (obj + 0xA8);
             }
@@ -219,21 +219,21 @@ void beam_effect_update(u8 *obj) {
                     *(f32 *) (obj + 0xB0) = *(f32 *) (aimrec + 4);
                     *(f32 *) (obj + 0xB4) = *(f32 *) (aimrec + 8);
                     *(f32 *) (obj + 0xB8) = *(f32 *) (aimrec + 0xC);
-                    if (D_800BE616 == 0 && func_151EFDD0() % 100 < aimrec[3]) {
+                    if (D_800BE616 == 0 && game_gu_random() % 100 < aimrec[3]) {
                         vec[0] = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
                         vec[1] = *(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98);
                         vec[2] = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
                         dir = (f32 *) (aimrec + 0x10);
-                        d = func_150ADDE0((u8 *) dir, (u8 *) vec);
+                        d = vec3f_dot((u8 *) dir, (u8 *) vec);
                         vec3_scale((struct17 *) dir, d + d, (struct17 *) out);
                         vec3_sub((struct17 *) vec, (struct17 *) out, (struct17 *) out);
                         out[0] += *(f32 *) (obj + 0xB0);
                         out[1] += *(f32 *) (obj + 0xB4);
                         out[2] += *(f32 *) (obj + 0xB8);
                         beam_effect_spawn(0, *(f32 *) (obj + 0xB0), *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), out[0],
-                                      out[1], out[2], (f32) (func_151EFDD0() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 0x1E,
+                                      out[1], out[2], (f32) (game_gu_random() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 0x1E,
                                       0x23, 0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-                        func_10010F88(func_151EFDD0() % 6 + 0x2B, 0x2710, 0, 0, aim, (s32) * (f32 *) (obj + 0xB0),
+                        sound_play_at(game_gu_random() % 6 + 0x2B, 0x2710, 0, 0, aim, (s32) * (f32 *) (obj + 0xB0),
                                       (s32) * (f32 *) (obj + 0xB4), (s32) * (f32 *) (obj + 0xB8), 0x1F4, 0x7D0);
                     }
                     alpha = 1.0f;
@@ -244,7 +244,7 @@ void beam_effect_update(u8 *obj) {
                     *(f32 *) (obj + 0xB4) += *(f32 *) (obj + 0x98);
                     *(f32 *) (obj + 0xB8) += *(f32 *) (obj + 0x9C);
                 }
-                *(f32 *) (obj + 0xC0) = (f32) (func_151EFDD0() % 3) * 80.0f + 80.0f;
+                *(f32 *) (obj + 0xC0) = (f32) (game_gu_random() % 3) * 80.0f + 80.0f;
             } else {
                 if (ray) {
                     hit[0] = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
@@ -358,16 +358,16 @@ void beam_effect_update(u8 *obj) {
 
 #ifdef NON_MATCHING
 extern s32 D_800D30BC;
-Gfx *func_15095380(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+Gfx *sprite_load_texture(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 
 // beam_effect_draw: draw handler of the beam objects of beam_effect_spawn (Gfx *(Gfx *, u8 *obj, s16 viewer)). With a
 // texture (+0xD6 > 0) the beam from +0x94 along the direction +0xC4 times the length +0xC0 is drawn as one quad
 // facing character `viewer` (D_800DBFF0 entry, position +0x2F8): at each end the offset cross(end - eye, dir) scaled
 // to the half width +0xBC gives the two corners end +- offset (far end first). The corners go to this frame's 4
 // vertices (obj + 0x10 + D_800BE9C0 * 0x40, s16 x / y / z), then texture D_8008CDEC[+0xD8] is loaded
-// (func_15095380; its sprite-parameter pointer is an unset local, as in the asm), the render mode is set
-// (func_15142FBC) and gSPVertex + 2 triangles are emitted; +0xDB = 1. Returns gfx unchanged without setting +0xDB
+// (sprite_load_texture; its sprite-parameter pointer is an unset local, as in the asm), the render mode is set
+// (gfx_other_mode_cached) and gSPVertex + 2 triangles are emitted; +0xDB = 1. Returns gfx unchanged without setting +0xDB
 // when an end lies on the eye line (zero offset). The asm also computes the squared eye distances of both ends and
 // an unused first offset; neither is read.
 /* was func_150E2E5C */
@@ -428,9 +428,9 @@ Gfx *beam_effect_draw(Gfx *gfx, u8 *obj, s16 viewer) {
             *(s16 *) (obj + D_800BE9C0 * 0x40 + i * 0x10 + 0x10 + j * 2) = (s32) verts[i][j];
         }
     }
-    gfx = func_15095380(gfx, D_8008CDEC[*(s16 *) (obj + 0xD8)], 0, spr, 0, 0, 0, 2, 3);
+    gfx = sprite_load_texture(gfx, D_8008CDEC[*(s16 *) (obj + 0xD8)], 0, spr, 0, 0, 0, 2, 3);
     flag = 0;
-    gfx = func_15142FBC(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);
+    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);
     cmd = (u32 *) gfx;
     cmd[0] = 0x01004008; /* gSPVertex(this frame's 4 vertices) */
     cmd[1] = (u32) (obj + D_800BE9C0 * 0x40 + 0x10);

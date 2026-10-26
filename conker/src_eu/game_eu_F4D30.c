@@ -7,7 +7,8 @@
 s32 bone_emitter_spawn(u8 *, s32);
 void node_broadcast_obj_type(s32, u8 *, u8);
 
-void func_150C7520(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
+/* was func_150C7520 */
+void obj_bone_emitters_restart(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
     struct {
         u8 u1C;
         u8 pad1D[0x3];
@@ -75,7 +76,7 @@ void func_150C7520(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4D30/func_150C7520.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4D30/obj_bone_emitters_restart.s")
 #endif
 #ifdef NON_MATCHING
 s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
@@ -83,7 +84,8 @@ s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4
 s32 impact_tinted_particle_spawn(s32, u8 *, f32 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 #endif
 
-void func_150C76C0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5) {
+/* was func_150C76C0 */
+void tinted_particle_toward(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5) {
     f32 sp54[3];
     s16 sp52;
 

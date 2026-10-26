@@ -1,4 +1,4 @@
-# P281 func_100052A0 (prenmi_thread). Knobs: STOPCALL osWritebackDCacheAll (100252A0) #1 ends the trial before the final
+# P281 prenmi_thread_main (prenmi_thread). Knobs: STOPCALL osWritebackDCacheAll (100252A0) #1 ends the trial before the final
 # `while (1) {}`; RET osGetTime (100252D0) = 0, RETV1 (low words) 0;22ADD6;22ADD7;7270E0;7270DF;7270E0 (a
 # higher first bound ends the first wait on 7270E0, then waits again). Setups b1lo / b2lo (9th field = RETV1, P281) probe
 # the lower side of each bound: the busy waits only show through the number of osGetTime calls.

@@ -5,7 +5,7 @@
 
 #ifdef NON_MATCHING
 /* P155 */
-s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
 typedef struct {
     s16 count;       /* 0x00: pieces */
     u8 pad2[2];
@@ -33,13 +33,14 @@ typedef struct {
     s16 u56;
     s16 u58;
 } Spray74B0;
-// debris_spray_spawn: spawns spray->count debris pieces (func_15132FBC, 0x10 extra bytes at +0x170) around
+// debris_spray_spawn: spawns spray->count debris pieces (mdl_particle_spawn, 0x10 extra bytes at +0x170) around
 // spray->pos, each in a random direction (yaw / pitch byte angles from the ranges, angle_byte_cos = sin) at
 // 0..radius; velocity by `mode`: 0 horizontal along the yaw with a separate vertical speed, 1 along the direction,
 // 2 spray->dir, 3 spray->dir times a random speed. Random size (x30 for the model scale), spin and two rotation
 // speeds. Each piece gets a shadow / trail (point_emitter_spawn kind 4, size x15, 0.358) whose record is kept at its
 // extra +4. Returns 0 (the asm leaves v0 unset; callers ignore it).
-s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
+/* was func_151A74B0 */
+s32 debris_spray_spawn(void *arg0, s32 mode, u8 arg2, s32 arg3) {
     Spray74B0 *s = arg0;
     struct {
         u8 *pos[3];
@@ -180,7 +181,7 @@ s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
         sp.u134 = random_float() * s->spinRange + s->spinMin;
         sp.spin[0] = random_float() * s->rotRange + s->rotMin;
         sp.spin[2] = random_float() * s->rotRange + s->rotMin;
-        p = (u8 *)func_15132FBC(&sp, 0, 0, 0x10, arg2, arg3);
+        p = (u8 *)mdl_particle_spawn(&sp, 0, 0, 0x10, arg2, arg3);
         if (p != NULL) {
             memcpy(p + 0x170, &extra, 0x10);
             trail.pos[0] = p + 0x38;
@@ -202,10 +203,11 @@ s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/func_151A74B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/debris_spray_spawn.s")
 #endif
 
-s32 func_151A799C(u8 *arg0) {
+/* was func_151A799C */
+s32 debris_piece_update(u8 *arg0) {
     u8 *temp_v0;
 
     temp_v0 = arg0 + 0x170;
@@ -219,15 +221,15 @@ s32 func_151A799C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_1514B0CC(f32, f32, f32, f32, s16, f32, f32, f32, f32, s16, s16, u8);
+void spark_spawn_burst(f32, f32, f32, f32, s16, f32, f32, f32, f32, s16, s16, u8);
 #else
-s32 func_1514B0CC(f32, f32, s32, f32, s32, f32, f32, f32, f32, s32, s32, u8);
+s32 spark_spawn_burst(f32, f32, s32, f32, s32, f32, f32, f32, f32, s32, s32, u8);
 #endif
 #ifdef NON_MATCHING
 /* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); arg3 is the f32 the asm passes on */
-s32 func_151A79EC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5)
+s32 debris_piece_on_ground(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5)
 #else
-s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
+s32 debris_piece_on_ground(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
 #endif
 {
   u8 *p;
@@ -260,9 +262,9 @@ s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
         b = 1;
       }
 #ifdef NON_MATCHING
-      func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (random_int() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
+      spark_spawn_burst(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (random_int() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
 #else
-      func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (random_int() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
+      spark_spawn_burst(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (random_int() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
 #endif
     }
   }
@@ -279,22 +281,23 @@ s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
 }
 
 #ifdef NON_MATCHING
-s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
 #else
-s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 #endif
-void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6);
-void func_151A7D70(u8 *arg0);
-void func_151A7E2C(u8 *arg0);
-void func_151A7EB8(u8 *arg0);
+void debris_dust_puff_spawn(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6);
+void debris_sprite_fade_update(u8 *arg0);
+void debris_sprite_fade_update_b(u8 *arg0);
+void debris_piece_free_trail(u8 *arg0);
 
 #ifdef NON_MATCHING
-s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
 #else
-s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 #endif
 
-void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+/* was func_151A7BC0 */
+void debris_dust_puff_spawn(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     f32 sp74[9];
     f32 temp_f18;
     f32 sp6C;
@@ -313,13 +316,14 @@ void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp74[4] = -arg4 * D_800BEDC8 * temp_f2;
     sp74[5] = -arg5 * D_800BEDC8 * temp_f2;
 #ifdef NON_MATCHING
-    func_151A2C9C(&sp74[6], sp74, &sp74[3], 1.0f, ((random_float() * 591.0f) + -600.0f) * 0.001f, ((random_float() * 500.0f) + 400.0f) * sp6C, ((u32) random_int() % 21U) + 0xF, (random_int() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
+    particle_puff_spawn(&sp74[6], sp74, &sp74[3], 1.0f, ((random_float() * 591.0f) + -600.0f) * 0.001f, ((random_float() * 500.0f) + 400.0f) * sp6C, ((u32) random_int() % 21U) + 0xF, (random_int() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 #else
-    func_151A2C9C(&sp74[6], sp74, &sp74[3], 0x3F800000, ((random_float() * 591.0f) + -600.0f) * 0.001f, ((random_float() * 500.0f) + 400.0f) * sp6C, ((u32) random_int() % 21U) + 0xF, (random_int() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+    particle_puff_spawn(&sp74[6], sp74, &sp74[3], 0x3F800000, ((random_float() * 591.0f) + -600.0f) * 0.001f, ((random_float() * 500.0f) + 400.0f) * sp6C, ((u32) random_int() % 21U) + 0xF, (random_int() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
 #endif
 }
 
-void func_151A7D70(u8 *arg0)
+/* was func_151A7D70 */
+void debris_sprite_fade_update(u8 *arg0)
 {
   u8 *p = arg0 + 0x50;
   unsigned char t;
@@ -348,7 +352,8 @@ void func_151A7D70(u8 *arg0)
 
 #define S(o) (*(s16 *)(arg0 + (o)))
 #define S2(o) (*(s16 *)(p + (o)))
-void func_151A7E2C(u8 *arg0)
+/* was func_151A7E2C */
+void debris_sprite_fade_update_b(u8 *arg0)
 {
   u8 *p = arg0 + 0x50;
   unsigned char t;
@@ -369,7 +374,8 @@ void func_151A7E2C(u8 *arg0)
   *((s8 *) (arg0 + 0x40)) = t;
 }
 
-void func_151A7EB8(u8 *arg0) {
+/* was func_151A7EB8 */
+void debris_piece_free_trail(u8 *arg0) {
     u8 *temp_v0;
 
     temp_v0 = arg0 + 0x170;

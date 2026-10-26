@@ -27,7 +27,8 @@ typedef struct {
 extern u32 D_80043ED0[];
 
 /* clear the 0xFE0-byte block at D_80043ED0 */
-void func_10001420(void) {
+/* was func_10001420 */
+void boot_clear_low_block(void) {
     u32 *p = D_80043ED0;
 
     do {
@@ -35,10 +36,10 @@ void func_10001420(void) {
     } while ((u32)p < (u32)D_80043ED0 + 0xFE0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1420/func_10001420.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_1420/boot_clear_low_block.s")
 #endif
 // NOT MATCHING: JUSTREG: uses v0 registers not a1 registers
-// void func_10001420(void) {
+// void boot_clear_low_block(void) {
 //     s32 *tmp = &D_80043B40;
 //     s32 cnt = 4064;
 //
@@ -48,52 +49,56 @@ void func_10001420(void) {
 //     while ((s32)tmp < (u32)&D_80043B40 + cnt);
 // }
 
-void func_10001444(void) {
+/* was func_10001444 */
+void tlb_reset_and_flush_icache(void) {
     u32 saveMask = __osDisableInt();
-    func_100061F8(2, 31);
-    func_10001420();
-    func_10005BE0();
+    tlb_clear_entries(2, 31);
+    boot_clear_low_block();
+    tlb_page_bitmap_reset();
     osInvalICache(&D_1002AAD0, 0x80400000 - (u32)&D_1002AAD0);
     __osRestoreInt(saveMask);
 }
 
-void func_100014A0(void) {
+/* was func_100014A0 */
+void game_thread_stop(void) {
     osStopThread(&D_80031AE0);
 }
 
-void func_100014C4(s32 arg0) {
+/* was func_100014C4 */
+void tlb_remap_game_segment(s32 arg0) {
     u32 saveMask = __osDisableInt();
-    func_100061F8(2, 31);
+    tlb_clear_entries(2, 31);
 
     if (0) {};
 
     if (D_8003BE74) {
-        func_10004074(D_8003BE74 | 0x80000000);
+        heap_free(D_8003BE74 | 0x80000000);
     }
     if (D_8003BE70) {
-        func_10004074(D_8003BE70 | 0x80000000);
+        heap_free(D_8003BE70 | 0x80000000);
     }
-    func_10005B04(arg0);
-    func_10001420();
-    func_10005BE0();
+    tlb_area_init(arg0);
+    boot_clear_low_block();
+    tlb_page_bitmap_reset();
     __osRestoreInt(saveMask);
 }
 
 #ifdef NON_MATCHING
-/* P281: readable C for func_10001550 (compiled C, 296 insns): libc _Ldtob. */
+/* P281: readable C for init_printf_ldtob (compiled C, 296 insns): libc _Ldtob. */
 #include "libc/stdlib.h"
 void *memcpy(void *, const void *, size_t);
 extern const f64 D_8002C270[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
 extern const f64 D_8002C2C8;     /* 1e8 */
 extern const char D_8002C2B8[];  /* "NaN" */
 extern const char D_8002C2BC[];  /* "Inf" */
-s16 func_100019F0(s16 *arg0, struct05 *arg1);
-void func_10001AA8(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
+s16 init_printf_ldunscale(s16 *arg0, struct05 *arg1);
+void init_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 // format_double_digits (libc _Ldtob): converts the double in px->v for printf conversion `code` (e f g E G): default
 // precision 6 (1 for %g with precision 0), "NaN" / "Inf" copied as is, otherwise scales the value by powers of ten
 // to 8-digit groups, generates up to 19 digits, drops leading zeros, rounds to the significant digit count and hands
-// the digits to func_10001AA8 (_Genld).
-void func_10001550(void *arg0, u8 code) {
+// the digits to init_printf_genld (_Genld).
+/* was func_10001550 */
+void init_printf_ldtob(void *arg0, u8 code) {
     _Pft *px = arg0;
     u8 buf[0x20];
     u8 *p;
@@ -118,7 +123,7 @@ void func_10001550(void *arg0, u8 code) {
     } else if (px->prec == 0 && (code == 'g' || code == 'G')) {
         px->prec = 1;
     }
-    err = func_100019F0(&xexp, (struct05 *) px);
+    err = init_printf_ldunscale(&xexp, (struct05 *) px);
     if (err > 0) {
         px->n1 = 3;
         memcpy(px->s, (err == 2) ? D_8002C2B8 : D_8002C2BC, 3);
@@ -195,13 +200,14 @@ void func_10001550(void *arg0, u8 code) {
             }
         }
     }
-    func_10001AA8(px, code, p, nsig, xexp);
+    init_printf_genld(px, code, p, nsig, xexp);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1420/func_10001550.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_1420/init_printf_ldtob.s")
 #endif
 
-s16 func_100019F0(s16 *arg0, struct05 *arg1) {
+/* was func_100019F0 */
+s16 init_printf_ldunscale(s16 *arg0, struct05 *arg1) {
     s16 temp_v1 = (arg1->unk0 & 0x7FF0) >> 4;
 
     if (temp_v1 == 0x7FF) {
@@ -237,7 +243,8 @@ extern u8 D_8002C2C0[]; // "0"
 void *memcpy(void *, const void *, size_t);
 
 // libultra libc xldtob.c _Genld (same source as debugger debug_printf_genld)
-void func_10001AA8(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
+/* was func_10001AA8 */
+void init_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     const u8 point = '.';
 
     if (nsig <= 0) {
@@ -342,7 +349,7 @@ void func_10001AA8(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
 }
 // some kind of memory allocation?
 // NON-MATCHING: 50% of the way there...
-// void func_10001AA8(struct246 *arg0, u8 arg1, u8 *arg2, s16 arg3, s16 arg4) {
+// void init_printf_genld(struct246 *arg0, u8 arg1, u8 *arg2, s16 arg3, s16 arg4) {
 //     s32 temp_v0_3;
 //     s32 temp_v1_2;
 //     s32 phi_v0;

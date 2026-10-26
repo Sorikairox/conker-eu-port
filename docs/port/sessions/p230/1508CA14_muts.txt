@@ -25,7 +25,7 @@ s/                        if (m == 0 || !(d < best\[m - 1\])) {/                
 s/            for (q = idx; q != \&idx\[3\]; q++) {/            for (q = idx; q != \&idx[2]; q++) {/ % tgt_order tgt_one kmask
 s/                if (\*q == -1) {/                if (*q == 0) {/ % one_ai
 s/                ((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[\*q\] \&= ~(0x10001 << i);/                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[*q] \&= ~(0x1 << i);/ % kmask
-s/                func_1508C600(i, \*q);/                func_1508C600(*q, i);/ % base
+s/                rail_pair_sight(i, \*q);/                rail_pair_sight(*q, i);/ % base
 s/    if (refresh != 0) {/    if (refresh != 1) {/ % base r0
 1,/steps = 0/s/        p = \&D_800CC2D0\[a\];/        p = \&D_800CC2D0[b];/ % rr_team_ab rr_team_mix
 1,/steps = 0/s/            aTeam = p->unk128;/            aTeam = 0;/ % rr_team rr_team_mix
@@ -44,7 +44,7 @@ s/                steps++;/                steps += 2;/ % rr_busy_all rr_team
 s/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0\[b\].unk128));/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (2 << b))) != 0) || aTeam == D_800CC2D0[b].unk128));/ % rr_busy rr_busy_all
 s/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0\[b\].unk128));/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) \&\& aTeam == D_800CC2D0[b].unk128));/ % rr_busy rr_team_mix
 s/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0\[b\].unk128));/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0[a].unk128));/ % rr_team_mix
-s/            func_1508C600(a, b);/            func_1508C600(b, a);/ % rr4
+s/            rail_pair_sight(a, b);/            rail_pair_sight(b, a);/ % rr4
 s/        } while (--refresh != 0);/        } while (--refresh > 1);/ % rr4
 s/    \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1700) = a;/    *(u8 *) ((u8 *) D_800D27D0 + 0x1700) = b;/ % rr4
 s/    \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1701) = b;/    *(u8 *) ((u8 *) D_800D27D0 + 0x1701) = a;/ % rr4

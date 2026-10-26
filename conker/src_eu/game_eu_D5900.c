@@ -7,7 +7,8 @@
 /* P279: readable C for the hand asm (40 insns, sd zero x8 then sh of the diagonal). */
 // mtx_scale_fixed: guScale straight into a fixed-point Mtx: m = diag(x, y, z, 1) in s15.16 (integer halves at
 // +0x00, the fraction halves at +0x20). Each factor is truncated toward zero (trunc.w.s) after * 65536.
-void func_150A80F0(Mtx *m, f32 x, f32 y, f32 z) {
+/* was func_150A80F0 */
+void mtx_scale_fixed(Mtx *m, f32 x, f32 y, f32 z) {
     u16 *h = (u16 *) m;
     s32 i;
     s32 sx, sy, sz;
@@ -27,5 +28,5 @@ void func_150A80F0(Mtx *m, f32 x, f32 y, f32 z) {
     h[26] = sz;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5900/func_150A80F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5900/mtx_scale_fixed.s")
 #endif

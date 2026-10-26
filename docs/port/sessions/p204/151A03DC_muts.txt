@@ -18,7 +18,7 @@ s/step += rec\[0x43\];/step += rec[0x42];/
 1,/i = \*(s8 \*) (t + 0x2E) - 1;/s/i = \*(s8 \*) (t + 0x2E) - 1;/i = *(s8 *) (t + 0x2E);/
 s/(s32) D_800911BC, 0, 0, 0, 0, 0x39/(s32) D_800911BC, 0, 0, 0, 0, 0x38/
 s/\&flag, 0x3E);/\&flag, 0x3F);/
-s/func_15142B7C(gfx, 1, 0x160600)/func_15142B7C(gfx, 1, 0x160601)/
+s/gfx_geometry_mode_cached(gfx, 1, 0x160600)/gfx_geometry_mode_cached(gfx, 1, 0x160601)/
 s/rec\[0x2A\], rec\[0x2B\], rec\[0x2C\]/rec[0x2B], rec[0x2A], rec[0x2C]/
 s/0, 0, 0xFF, 0xFF, 0xFF, 0, \&flag/0, 0, 0xFF, 0xFF, 0xFE, 0, \&flag/
 s/gfx_set_combine_mode(gfx, 7,/gfx_set_combine_mode(gfx, 6,/

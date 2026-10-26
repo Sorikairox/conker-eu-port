@@ -13,7 +13,7 @@
 
 #ifdef NON_MATCHING
 /* P133 */
-s32 func_15095380(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 sprite_load_texture(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 f32 math_sin_u8(u8);
 f32 math_cos_u8(u8);
 extern u8 *D_8008CDEC[];
@@ -21,7 +21,7 @@ extern f32 D_800DD600[2]; /* camera yaw: [0] sin, [1] cos (node_billboard_draw's
 extern s32 D_800DD5E4;    /* last sprite texture: the hand asm keeps it in the upper half (lh / sh) */
 extern s32 D_800DD5E8;    /* last sprite frame: upper half, as D_800DD5E4 */
 extern s16 D_800DD5EC;    /* last sprite other-mode (1 / 2 / 3) */
-extern s32 D_800D30BC;    /* TLUT bit of the last loaded texture (func_150954E4) */
+extern s32 D_800D30BC;    /* TLUT bit of the last loaded texture (gfx_load_texture_tile) */
 
 /* cvt.w.s with the default FCSR mode: round to nearest, ties to even (|f| < 2^31) */
 #define SPRITE_RINT(f)                                                                                     \
@@ -38,12 +38,13 @@ extern s32 D_800D30BC;    /* TLUT bit of the last loaded texture (func_150954E4)
  * Flags: 0x8000 hidden while bit 0 of word +0x5F0 of the 0x9A0 record idx is set (Rare's asm takes that record
  * from the address of D_800DBFF0, not from the pointer it holds), 0x200 / 0x4000 quad above / below the origin,
  * 0x8 / 0x10 / 0x400 / 0x1000 / 0x2000 combine modes, 0x800 prim alpha, 0x20 / 0x2000 other modes.
- * Loads the texture (func_15095380) when the texture or frame changed; the combine / other mode / alpha commands
+ * Loads the texture (sprite_load_texture) when the texture or frame changed; the combine / other mode / alpha commands
  * only when they differ from the last sprite's (D_800DD5EE, D_800DD5EC, D_800DD5F6); a pipe sync precedes the
  * first mode change when no texture load did. Then the 4 vertices (camera yaw D_800DD600, optional roll and
  * pitch rotations, rounded, plus the position) and the triangles (0, 2, 1), (0, 3, 2).
  */
-Gfx *func_150A6D40(Gfx *gfx, u8 *rec, s32 idx) {
+/* was func_150A6D40 */
+Gfx *sprite_billboard_draw(Gfx *gfx, u8 *rec, s32 idx) {
     u8 *spr = rec + 0x10;
     u16 flags = *(u16 *) (spr + 0x98);
     s32 *desc;
@@ -77,7 +78,7 @@ Gfx *func_150A6D40(Gfx *gfx, u8 *rec, s32 idx) {
         noLoad = FALSE;
         D_800DD5E8 = (D_800DD5E8 & 0xFFFF) | (frame << 16);
         /* the asm leaves its caller's s0 (a KSEG0 pointer, so a negative age) as the 9th argument */
-        gfx = (Gfx *) func_15095380((s32) gfx, (s32) desc, *(s16 *) (spr + 0x88), 0, 0, 0, 0, 2, (s32) 0x80000000);
+        gfx = (Gfx *) sprite_load_texture((s32) gfx, (s32) desc, *(s16 *) (spr + 0x88), 0, 0, 0, 0, 2, (s32) 0x80000000);
     }
 
     roll = *(u16 *) (spr + 0x9C) >> 8;
@@ -208,5 +209,5 @@ Gfx *func_150A6D40(Gfx *gfx, u8 *rec, s32 idx) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4550/func_150A6D40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4550/sprite_billboard_draw.s")
 #endif

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-s8 func_151E6758(s16);
+s8 mp_human_player_count(s16);
 extern s32 D_800BEE08;
 
 /* was func_15015F40 */
@@ -18,7 +18,7 @@ void mp_set_mode_for_level(s16 arg0, s32 arg1) {
     case 0x34:
     case 0x3F:
         D_800BE616 = 1;
-        D_800BEE08 = func_151E6758(arg0) - 1;
+        D_800BEE08 = mp_human_player_count(arg0) - 1;
         return;
     default:
         D_800BE616 = 0;

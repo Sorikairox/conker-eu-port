@@ -1,9 +1,9 @@
 /* P81 runtime checks of port P76 C (look target, attachment draw).
- *  ?p81look=N   after each func_15036FD8 (Conker's per-frame look callback, via p69's wrap): slot D_800C441A, target
+ *  ?p81look=N   after each look_frame_cb_current (Conker's per-frame look callback, via p69's wrap): slot D_800C441A, target
  *               D_800C4408, aim point D_800C43F0, record +0x2CA, LookTrack (+0x324) yaw / pitch / hold / fade of
  *               the slots, and the joint 7 / 12 matrices (+0x1D4): row lengths and translation (the slerp blend must
  *               keep them). First N calls, then every 64th and every call where a blend (fade) runs (first 300).
- *  ?p81att=N    func_150310F8 / func_15031284 (attachment passes of game_eu_5D910.c, called from game_eu_595D0.c):
+ *  ?p81att=N    attachment_draw_all_for_player / attachment_draw_for_object (attachment passes of game_eu_5D910.c, called from game_eu_595D0.c):
  *               commands written, G_DL part lists and the segment 3 matrix found in them, plus the attachment list
  *               D_800C3EE0 (+0 model, +2 joint, +7 callback, +0x1C timer, +0x1E sub model, +3 alpha, +5 visible, +0x13 / +0x14 mask / parts, +0x24 part DLs). First N
  *               calls, then every 256th.
@@ -41,7 +41,7 @@ static void joint(const char *tag, const unsigned char *mtx, int j) {
              l1, l2, d01, m[0], m[1], m[2], m[12], m[13], m[14], m[15]);
 }
 
-/* called by p69_checks.c's __wrap_func_15036FD8 before (pre = 1) and after (pre = 0) the real function */
+/* called by p69_checks.c's __wrap_look_frame_cb_current before (pre = 1) and after (pre = 0) the real function */
 void p81_look_hook(int pre) {
     static unsigned n, nb;
     static int slot0;
@@ -50,8 +50,8 @@ void p81_look_hook(int pre) {
     {   /* P189 TEST ONLY ?p189y=F: from frame F, 240 calls: Conker's state, y, y_velocity (+0x20), gravity (+0x24),
          * +0x28, floor (+0x118), in_water (+0xAD), +0x31C, xz_velocity */
         static int fy = -1, fsw = -1; static unsigned ny;
-        /* P189 TEST ONLY ?p189swim=1: stand-in for the asm stub func_1504B0FC (swim update, called by the C
-         * func_1504CB98 while in_water != 0): keep a swimming Conker at the water surface (+0x118 - 25) instead of
+        /* P189 TEST ONLY ?p189swim=1: stand-in for the asm stub swim_water_physics (swim update, called by the C
+         * obj_state_walk while in_water != 0): keep a swimming Conker at the water surface (+0x118 - 25) instead of
          * letting the buoyancy (gravity -3) accelerate him upward forever. */
         if (flag(&fsw, "p189swim") && !pre && id <= 64) {
             unsigned char *q = D_800CC2D0 + id * REC;
@@ -119,10 +119,10 @@ static void att_log(const char *fn, unsigned n, unsigned in, unsigned out, int a
                  vbe_ld16(a + 0x1A));
 }
 
-int __real_func_150310F8(int gdl, int a1, int a2);
-int __wrap_func_150310F8(int gdl, int a1, int a2) {
+int __real_attachment_draw_all_for_player(int gdl, int a1, int a2);
+int __wrap_attachment_draw_all_for_player(int gdl, int a1, int a2) {
     static unsigned n, drew, listed;
-    int out = flag(&fnoatt, "p81noatt") ? gdl : __real_func_150310F8(gdl, a1, a2);
+    int out = flag(&fnoatt, "p81noatt") ? gdl : __real_attachment_draw_all_for_player(gdl, a1, a2);
     n++;
     unsigned sig = 0;
     static unsigned lastsig;
@@ -139,30 +139,30 @@ int __wrap_func_150310F8(int gdl, int a1, int a2) {
     return out;
 }
 
-int __real_func_15031284(int gdl, unsigned char *obj, int a2, int a3);
-int __wrap_func_15031284(int gdl, unsigned char *obj, int a2, int a3) {
+int __real_attachment_draw_for_object(int gdl, unsigned char *obj, int a2, int a3);
+int __wrap_attachment_draw_for_object(int gdl, unsigned char *obj, int a2, int a3) {
     static unsigned n;
-    int out = flag(&fnoatt, "p81noatt") ? gdl : __real_func_15031284(gdl, obj, a2, a3);
+    int out = flag(&fnoatt, "p81noatt") ? gdl : __real_attachment_draw_for_object(gdl, obj, a2, a3);
     n++;
     if (flag(&fatt, "p81att") && (n <= (unsigned)fatt || n % 256 == 0))
         att_log("1284", n, (unsigned)gdl, (unsigned)out, obj ? (int)((obj - D_800CC2D0) / REC) : -1, a2);
     return out;
 }
 
-/* P189 TEST ONLY ?p189nopush=1: func_150511E8 (swim_push_update, C since port P179; an asm stub = no-op in the port
+/* P189 TEST ONLY ?p189nopush=1: obj_floor_push_turn (swim_push_update, C since port P179; an asm stub = no-op in the port
  * before) returns without doing anything, as before the merge. Without the flag: the real function, plus a log
  * of the first 40 calls that set a push (+0xF8 bits 19/20) when ?p189y is on. */
-void __real_func_150511E8(unsigned char *obj);
-void __wrap_func_150511E8(unsigned char *obj) {
+void __real_obj_floor_push_turn(unsigned char *obj);
+void __wrap_obj_floor_push_turn(unsigned char *obj) {
     static int fnp = -1, fy2 = -1; static unsigned n;
     if (flag(&fnp, "p189nopush")) return;
     if (flag(&fy2, "p189y") && n < 40 && port_frame_count >= (unsigned)fy2) {
         n++;
         port_log("[p189push] frame %u id %d F8 %08x u28 %.2f before 164 %.3f 168 %.3f\n", port_frame_count, vbe_ld8(obj + 4),
                  W(obj, 0xF8), F(obj, 0x28), F(obj, 0x164), F(obj, 0x168));
-        __real_func_150511E8(obj);
+        __real_obj_floor_push_turn(obj);
         port_log("[p189push]   after 164 %.3f 168 %.3f\n", F(obj, 0x164), F(obj, 0x168));
         return;
     }
-    __real_func_150511E8(obj);
+    __real_obj_floor_push_turn(obj);
 }

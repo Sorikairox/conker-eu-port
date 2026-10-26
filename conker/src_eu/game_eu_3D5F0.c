@@ -4,11 +4,12 @@
 
 
 u8 *allocate_memory(s32, s32, s32, s32);
-s32 func_150C851C(s32);
+s32 wobblers_set_intensity(s32);
 extern u8 *D_eu_800BE900;
 
 typedef struct { s8 a; s8 p1; s8 b; s8 p3; s16 c; s16 d; s16 e; } S0A;
-void func_1500FDE0(void) {
+/* was func_1500FDE0 */
+void level_slots10_init(void) {
     s32 i;
 
     D_eu_800BE900 = allocate_memory(0x64, 1, 0, 0);
@@ -18,13 +19,14 @@ void func_1500FDE0(void) {
         ((S0A *)D_eu_800BE900)[i].b = -1;
         ((S0A *)D_eu_800BE900)[i].c = random_int() % 5U;
     }
-    func_150C851C(0x64);
+    wobblers_set_intensity(0x64);
     for (i = 0; i < 10; i++) {
         ((S0A *)D_eu_800BE900)[i].d = ((S0A *)D_eu_800BE900)[i].e;
     }
 }
 
-void func_1500FF4C(void) {
+/* was func_1500FF4C */
+void level_tex_scroll_create(void) {
     tex_scroll_create(D_80091B68, 0, 0xAD, 0x75);
 }
 
@@ -33,7 +35,8 @@ s32 memcpy(u8 *, f32 *, s32);
 extern s32 D_8009068C;
 extern s32 D_800B1214;
 
-void func_1500FF7C(void) {
+/* was func_1500FF7C */
+void level_tex_scroll_fx_setup(void) {
     struct {
         f32 u38;
         f32 u3C;
@@ -43,10 +46,10 @@ void func_1500FF7C(void) {
     struct260 *temp_v0;
     u8 *temp_v0_2;
 
-    func_15195AA8(*D_800B0E00, D_8009068C, 1, -1, 0, 0, 0, -4);
-    func_15195AA8(D_800B1214, D_8009068C, 1, -1, 0, 1, 0, -4);
-    func_1500FDE0();
-    func_1500FF4C();
+    level_dl_add_texture_scroll(*D_800B0E00, D_8009068C, 1, -1, 0, 0, 0, -4);
+    level_dl_add_texture_scroll(D_800B1214, D_8009068C, 1, -1, 0, 1, 0, -4);
+    level_slots10_init();
+    level_tex_scroll_create();
     sp.u44 = 0.0f;
     temp_v0 = func_151491F4(0x12C, -1, 0x12, 0U, 0xEU, 4, 0xFFU, 0);
     if (temp_v0 != NULL) {
@@ -61,5 +64,5 @@ void func_1500FF7C(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3D5F0/func_1500FF7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3D5F0/level_tex_scroll_fx_setup.s")
 #endif

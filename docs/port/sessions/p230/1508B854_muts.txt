@@ -19,14 +19,14 @@ s/            if (!(dx \* dx + dz \* dz < zone.radius + 100.0f)) {/            i
 s/            if (!(dx \* dx + dz \* dz < zone.radius + 100.0f)) {/            if (!(dx * dx + dz * dz < zone.radius + 101.0f)) {/ % dist rad_edge
 s/            bestD = D_8009DE2C;/            bestD = 60.0f;/ % lim cnt8 asym
 s/            best = 0xFF;/            best = 0;/ % far near_none
-s/                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));/                near = func_15086268(ex, ey, ez, 1, func_15086218(ey));/ % base
-s/                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));/                near = func_15086268(ez, ey, ex, 0, func_15086218(ey));/ % asym
-s/                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));/                near = func_15086268(ex, ey, ez, 0, func_15086218(ex));/ % dist
+s/                near = rail_node_nearest(ex, ey, ez, 0, rail_band_for_height(ey));/                near = rail_node_nearest(ex, ey, ez, 1, rail_band_for_height(ey));/ % base
+s/                near = rail_node_nearest(ex, ey, ez, 0, rail_band_for_height(ey));/                near = rail_node_nearest(ez, ey, ex, 0, rail_band_for_height(ey));/ % asym
+s/                near = rail_node_nearest(ex, ey, ez, 0, rail_band_for_height(ey));/                near = rail_node_nearest(ex, ey, ez, 0, rail_band_for_height(ex));/ % dist
 s/                if (near != -1) {/                if (near != 0) {/ % near_none
 s/                    zone.x = ex;/                    zone.x = ez;/ % asym
 s/                    zone.count = 0;/                    zone.count = 2;/ % base
 s/                    bzero(zone.rest, sizeof(zone.rest));/                    bzero(zone.rest, 0x10);/ % base
-s/                    func_1508B704(near \& 0xFF, \&zone);/                    func_1508B704(near \& 0x7F, \&zone);/ % near_hi
+s/                    rail_zone_flood(near \& 0xFF, \&zone);/                    rail_zone_flood(near \& 0x7F, \&zone);/ % near_hi
 s/            for (i = 0; i < zone.count; i++) {/            for (i = 1; i < zone.count; i++) {/ % base lim
 s/            for (i = 0; i < zone.count; i++) {/            for (i = 0; i <= zone.count; i++) {/ % lim cnt0 asym
 s/                dx = D_800D2778\[zone.node\[i\]\].unk0 - px;/                dx = D_800D2778[zone.node[i]].unk2 - px;/ % base lim

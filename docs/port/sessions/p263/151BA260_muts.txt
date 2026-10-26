@@ -1,4 +1,4 @@
-# P263 func_151BA260 (burst_emitter_finish) mutants: sed % setup names
+# P263 spark_sprite_burst_update (burst_emitter_finish) mutants: sed % setup names
 s/    if (anchor == NULL) {/    if (anchor != NULL) {/ % noanchor
 s/        x = \*(s16 \*) (obj + 0x16);/        x = *(s16 *) (obj + 0x18);/ % noanchor
 s/        z = (s32) anchor\[2\];/        z = (s32) anchor[1];/ % anchor
@@ -12,7 +12,7 @@ s/x, y, z, -0x50, 0.0f, 0x168, (\*(s16 \*) (obj + 0x1C) \* 3)/x, y, z, -0x50, 1.
 s/                      \*(s16 \*) (obj + 0x1E) \* 2, \*(s16 \*) (obj + 0x20)/                      *(s16 *) (obj + 0x1E), *(s16 *) (obj + 0x20)/ % anchor
 s/\*(s16 \*) (obj + 0x22), 0xF, \*(s16 \*) (obj + 0x24)/*(s16 *) (obj + 0x22), 0xE, *(s16 *) (obj + 0x24)/ % anchor
 s/                      obj\[0xC\], obj\[1\]);/                      obj[1], obj[0xC]);/ % anchor
-s/func_151B9C40(obj\[0x14\], obj\[0x15\], x, y, z, -0x50/func_151B9C40(obj[0x15], obj[0x14], x, y, z, -0x50/ % anchor
+s/spark_sprite_launch(obj\[0x14\], obj\[0x15\], x, y, z, -0x50/spark_sprite_launch(obj[0x15], obj[0x14], x, y, z, -0x50/ % anchor
 s/    if (t < 0) {/    if (t <= 0) {/ % die
 s/    t = \*(s16 \*) (obj + 0x2A) - D_800BE9E4;/    t = (s16) (*(s16 *) (obj + 0x2A) - D_800BE9E4);/ % bigstep negstep
 s/        \*(s16 \*) (obj + 0x2A) = t;/        ;/ % noanchor

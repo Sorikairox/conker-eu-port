@@ -5,7 +5,8 @@
 
 u8 *allocate_memory(s32, s32, s32, s32);
 
-void func_1503BAB0(u8 *arg0) {
+/* was func_1503BAB0 */
+void tail_record_alloc(u8 *arg0) {
     (*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C)) = allocate_memory(0x50, 1, 0, 0);
     bzero((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C)), 0x50);
     (*(f32 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x11C))) + 0x44)) = 30.0f;
@@ -23,7 +24,8 @@ extern u16 D_80098B30[88];
  * an animation / model id +0x84 listed in D_80098BE0 (3 ids) sets bit 1 (2), one of D_80098B2C, D_80098B2E or the
  * 88 ids of D_80098B30 sets bit 0 (1). The first table wins.
  */
-void func_1503B840(struct127 *obj) {
+/* was func_1503B840 */
+void obj_set_kind_look_flags(struct127 *obj) {
     u16 kind;
     s32 i;
 
@@ -53,11 +55,12 @@ void func_1503B840(struct127 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/func_1503B840.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/obj_set_kind_look_flags.s")
 #endif
 
 extern u8 D_800CC9EB;
-s32 func_1503BC4C(s32 arg0, u8 *arg1) {
+/* was func_1503BC4C */
+s32 tail_get_mode(s32 arg0, u8 *arg1) {
     s32 temp_v0;
     temp_v0 = *((u8 *)&D_800CC9EB + (arg0 * 0x32C));
     if (temp_v0 & 2) {
@@ -97,11 +100,11 @@ extern f32 D_80098C00;
 extern f32 D_80098C04;
 extern f32 D_80098C08;
 extern f32 D_80098C0C;
-void func_1503BAB0(u8 *);
-s32 func_1503BC4C(s32, u8 *);
-void func_1503CE88(s32, s32, f32, u8 *);
+void tail_record_alloc(u8 *);
+s32 tail_get_mode(s32, u8 *);
+void tail_build_joint_matrices(s32, s32, f32, u8 *);
 
-/* Tail chain record (obj->unk31C->unk11C, 0x50 bytes, allocated by func_1503BAB0). */
+/* Tail chain record (obj->unk31C->unk11C, 0x50 bytes, allocated by tail_record_alloc). */
 typedef struct {
     /* 0x00 */ f32 p[5][3];    /* chain points: p[0] = root joint 24, p[1..4] simulated */
     /* 0x3C */ f32 phase;      /* walk wave phase (degrees) */
@@ -124,9 +127,9 @@ typedef struct {
 #define CAMERA_CLOSE(cam) ((cam) != NULL && CAM_S32(cam, 0x2C) == 0x100 && CAM_F32(cam, 0x388) > -17.0f)
 
 /*
- * P70: Conker's tail (chain of 4 segments hanging from joint 24, called from func_1503482C).
- * The record is created on first use. func_1503BC4C gives the mode: 0 = hidden / not simulated (the chain just
- * follows the joints 24..27), 1 = simulated, 2 = simulated and fading in (+0x4E frames left, given to func_1503CE88
+ * P70: Conker's tail (chain of 4 segments hanging from joint 24, called from obj_update_tail_for_conker).
+ * The record is created on first use. tail_get_mode gives the mode: 0 = hidden / not simulated (the chain just
+ * follows the joints 24..27), 1 = simulated, 2 = simulated and fading in (+0x4E frames left, given to tail_build_joint_matrices
  * as a 0..1 factor). Without joint matrices the object is only marked in D_800C4000 to reset the chain next time.
  * Simulation: per-segment offsets off[] (walk wave from the xz speed, lift by animation, idle sway or a turn towards
  * the close camera) are added to each point's target; each point eases towards it (D_80098AC0 / D_80098AD0 weights,
@@ -135,7 +138,8 @@ typedef struct {
  * D_800C4428 is the anchor before the first point (joint 0). The pause flags D_800BEAC0 / D_800BEE2C freeze the
  * state but still rebuild the chain.
  */
-void func_1503BCAC(s32 arg0) {
+/* was func_1503BCAC */
+void tail_update_conker(s32 arg0) {
     struct127 *obj = &D_800CC2D0[arg0];
     TailRec *rec;
     struct108 *cam;
@@ -155,10 +159,10 @@ void func_1503BCAC(s32 arg0) {
     }
     rec = *(TailRec **) ((u8 *) obj->unk31C + 0x11C);
     if (rec == NULL) {
-        func_1503BAB0((u8 *) obj);
+        tail_record_alloc((u8 *) obj);
         rec = *(TailRec **) ((u8 *) obj->unk31C + 0x11C);
     }
-    mode = func_1503BC4C(arg0, (u8 *) rec);
+    mode = tail_get_mode(arg0, (u8 *) rec);
 
     if (obj->unk1D4 == NULL) {
         D_800C4000 |= 1 << arg0;
@@ -457,10 +461,10 @@ void func_1503BCAC(s32 arg0) {
         p1[1] = len[i] * dir[1] * obj->y_scale + p0[1];
         p1[2] = len[i] * dir[2] * obj->xz_scale + p0[2];
     }
-    func_1503CE88(arg0, mode, fade, (u8 *) rec);
+    tail_build_joint_matrices(arg0, mode, fade, (u8 *) rec);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/func_1503BCAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/tail_update_conker.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -469,13 +473,14 @@ void mtxf_look_at(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 lo
 void mtxf_scale_set_trans(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
 
 /*
- * P70: tail joint matrices from the chain of func_1503BCAC (rec = the 0x50-byte tail record, points p[0..4]).
+ * P70: tail joint matrices from the chain of tail_update_conker (rec = the 0x50-byte tail record, points p[0..4]).
  * Joint 24 + i looks from p[i] to p[i+1], with the up vector of the previous joint (the object's root rotation
  * +0xB8 / +0x40 / +0xC4 for i = 0), then gets the object scale and p[i] as translation. In mode 2 (fading in) both
  * points are first blended towards the animated joints 24..27 (and the tip extrapolated from 26 -> 27) by fade;
  * otherwise the fade counter +0x4E is re-armed to 30 frames.
  */
-void func_1503CE88(s32 idx, s32 mode, f32 fade, u8 *rec) {
+/* was func_1503CE88 */
+void tail_build_joint_matrices(s32 idx, s32 mode, f32 fade, u8 *rec) {
     struct127 *obj = &D_800CC2D0[idx];
     f32 (*pts)[3] = (f32 (*)[3]) rec;
     f32 root[4][4];
@@ -537,5 +542,5 @@ void func_1503CE88(s32 idx, s32 mode, f32 fade, u8 *rec) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/func_1503CE88.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_692C0/tail_build_joint_matrices.s")
 #endif

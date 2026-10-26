@@ -1,4 +1,4 @@
-# P255 func_151B7DA4 (obj_attached_glow_update) mutants: sed % setup names
+# P255 obj_attached_glow_update (obj_attached_glow_update) mutants: sed % setup names
 s/if (D_800BE9E4 > 0) {/if (D_800BE9E4 >= 0) {/ % step0
 s/obj + 0x10) == 0) {/obj + 0x10) != 0) {/ % ok fail
 s/            return 0;/            return 2;/ % fail

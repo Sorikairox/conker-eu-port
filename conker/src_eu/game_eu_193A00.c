@@ -12,7 +12,8 @@ f32 func_150AD78C(f32);
  * vertex rows[k] gets x = -cos * amp, y = sin * amp and the vertex rows[k + n / 2] x = cos * amp, y = sin * amp.
  * Then the angle moves by *speed per frame step (D_800BE9E4); at max or min it is clamped and the speed reversed.
  * func_150AD78C / func_150AD780 are sin / cos of radians. */
-void func_151661F0(f32 *angle, s16 *vtx, f32 amp, f32 *speed, f32 max, f32 min, u8 *rows, u8 n) {
+/* was func_151661F0 */
+void mesh_swing_update(f32 *angle, s16 *vtx, f32 amp, f32 *speed, f32 max, f32 min, u8 *rows, u8 n) {
     f32 rad;
     f32 sp;
     f32 s;
@@ -41,5 +42,5 @@ void func_151661F0(f32 *angle, s16 *vtx, f32 amp, f32 *speed, f32 max, f32 min, 
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193A00/func_151661F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193A00/mesh_swing_update.s")
 #endif

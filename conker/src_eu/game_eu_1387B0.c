@@ -2,14 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15179008(s32);
+void rain_update(s32);
 s32 world_object_sound_play(u8 *, s32, s32, s16, s16, s32);
 #endif
 
 
 /* was func_1510AFA0 */
 void clock_level_callback(s32 arg0) {
-    func_15179008(0);
+    rain_update(0);
 }
 
 #ifdef NON_MATCHING

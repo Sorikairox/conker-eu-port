@@ -6,7 +6,7 @@
 \#^        \*(u16 \*) (obj + 0x1E) |= 4;#s/4/8/
 \#^        st->u34 = \*(V33AB4 \*) (obj + 0x10);#s/0x10/0x14/
 \#^    if (!started \&\& #s/!started \&\& //
-\#^        func_151A544C(obj);#s/obj/(u8 *) st/
+\#^        ribbon_trail_stop(obj);#s/obj/(u8 *) st/
 \#^        fade = func_151491F4(0x12C, #s/0xA, 0, 5/0xA, 0, 6/
 \#^        fade = func_151491F4(0x12C, #s/obj\[0xC\]/obj[0xD]/
 \#^            memcpy((u8 \*) fade + 0x28, #s/0x28/0x2C/

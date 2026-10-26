@@ -4,14 +4,14 @@ s/if (\*(s16 \*) (arg0 + 0x14) < 0) {/if (*(s16 *) (arg0 + 0x14) <= 0) {/
 s/if (!done \&\& (s8) arg0\[0x11\] != -1) {/if ((s8) arg0[0x11] != -1) {/
 s/if (D_8008B730\[(s8) arg0\[0x11\]\](arg0) == 0) {/if (D_8008B730[(s8) arg0[0x11]](arg0) != 0) {/
 s/if (D_8008B730\[(s8) arg0\[0x11\]\](arg0)/if (D_8008B730[(s8) arg0[0x11] + 1](arg0)/
-s/        func_15164DF8(arg0);/        ;/
+s/        cam_wobble_stop_at_half_cycle(arg0);/        ;/
 s/prev\[i\] = arg0\[0x60 + i\];/prev[i] = arg0[0x61 + i];/
 s/scale = 1.0f;/scale = 0.5f;/
 s/if ((arg0\[0x10\] \& 4) \&\& (s8) arg0\[0x12\] != -1) {/if ((s8) arg0[0x12] != -1) {/
 s/scale = D_8008B734\[(s8) arg0\[0x12\]\](arg0);/scale = D_8008B734[(s8) arg0[0x11]](arg0);/
 s/if (\*(f32 \*) (arg0 + 0x30 + i \* 4) != 0.0f) {/if (*(f32 *) (arg0 + 0x30 + i * 4) != 1.0f) {/
 s/+ \*(f32 \*) (arg0 + 0x30 + i \* 4) \* D_800BE9A4);/+ *(f32 *) (arg0 + 0x30 + i * 4));/
-s/phase = func_15144B68(\*(f32 \*) (arg0 + 0x48 + i \* 4)/phase = func_15144B68(*(f32 *) (arg0 + 0x4C + i * 4)/
+s/phase = wrap_angle_rad(\*(f32 \*) (arg0 + 0x48 + i \* 4)/phase = wrap_angle_rad(*(f32 *) (arg0 + 0x4C + i * 4)/
 s/\*(f32 \*) (arg0 + 0x48 + i \* 4) = phase;/*(f32 *) (arg0 + 0x48 + i * 4) = phase + 1.0f;/
 s/arg0\[0x60 + i\] = (phase < (\&D_800A6F00)\[i\]);/arg0[0x60 + i] = (phase <= (\&D_800A6F00)[i]);/
 s/arg0\[0x60 + i\] = (phase < (\&D_800A6F00)\[i\]);/arg0[0x60 + i] = (phase < 3.0f);/

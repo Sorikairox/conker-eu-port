@@ -58,7 +58,7 @@ void pos_debris_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u64 = 0.25100002f;
     sp.u68 = 0.19900002f;
     sp.u6C = 30.696001f;
-    func_15152700(&sp.u34, &sp.u30, &sp.u2C, 1, 0.0f, 1U, (u8) (s32) arg1, arg2);
+    emit_textured_burst(&sp.u34, &sp.u30, &sp.u2C, 1, 0.0f, 1U, (u8) (s32) arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131420/pos_debris_burst_spawn.s")

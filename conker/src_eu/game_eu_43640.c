@@ -8,7 +8,8 @@ Gfx *allocate_memory(s32, s32, s32, s32);
 extern s32 D_800BEFC4;
 
 /* two display-list buffers of N Gfx each (N = the u16 at +0x1C of D_800B0DF0, default 8000, plus 400) */
-void func_15015E30(void) {
+/* was func_15015E30 */
+void gfx_alloc_dl_buffers(void) {
     u16 *count = (u16 *)((u8 *)D_800B0DF0 + 0x1C);
     Gfx **bufs = (Gfx **)&D_800BEDE8;
     Gfx *b;
@@ -25,5 +26,5 @@ void func_15015E30(void) {
     D_800BEFC4 = (((u8 *)b - (u8 *)bufs[0]) >> 3) - 400;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_43640/func_15015E30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_43640/gfx_alloc_dl_buffers.s")
 #endif

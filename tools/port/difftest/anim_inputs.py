@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """P51 research: real ROM inputs for func_150A86B0 (skeleton / animation evaluator, asm/D5E90.s).
 
-Reproduces, in Python, what the game does before func_1502DE74 calls
-  func_150A86B0(&D_800C42A8, m, A = obj+0x2D0, S = D_800C5000[id], n = func_1502DE10(id), buf, remap, h)
+Reproduces, in Python, what the game does before obj_build_model_instance calls
+  func_150A86B0(&D_800C42A8, m, A = obj+0x2D0, S = D_800C5000[id], n = model_joint_mtx_count(id), buf, remap, h)
 for a single (unblended) animation:
-  * func_1503D210(id)          model asset (1, id)            -> S (skeleton), D_800C52F0[id] (joint count)
-  * func_1503D950(id)          anim bank asset (0xF, alias)   -> D_800D1588[id] (u16 key, u16 sfx, s32 ptr; 999 end),
+  * model_load(id)          model asset (1, id)            -> S (skeleton), D_800C52F0[id] (joint count)
+  * anim_bank_load(id)          anim bank asset (0xF, alias)   -> D_800D1588[id] (u16 key, u16 sfx, s32 ptr; 999 end),
                                                                  D_800C5A90[id] (animation count)
-  * func_15083C3C              obj[6] = func_15085170(obj) (model alias), obj+0x58 = dir (2, obj[6])
-  * func_15083D54 -> obj_start_anim -> anim_start_entry (fresh state, t2 = 1 path)
+  * obj_set_type              obj[6] = obj_type_model_group(obj) (model alias), obj+0x58 = dir (2, obj[6])
+  * obj_anim_state_alloc -> obj_start_anim -> anim_start_entry (fresh state, t2 = 1 path)
                                A+0x40 <- header record dir[key] (DMA, (size + 15) & ~15 bytes), A+0x28 <- ROM addr
                                of the key-frame stream dir[key + 1], A+0x18 = (f32)A[0x43], A+8 = start frame ...
-  * func_1502DB14 (per frame, just before the evaluator)
+  * anim_copy_keyframes (per frame, just before the evaluator)
                                copies 2 key frames (A[0x45] bytes each) of the stream from ROM into a stack buffer
                                (dbuf, 0x324 bytes) and sets A+0x30 (pointer to key frame) and A[0x38] (byte offset
                                of the next key frame from A+0x30), wrapping to frame 0 at the end.
@@ -86,7 +86,7 @@ class Elf:
 
 
 def alias(elf, cnt_sym, lst_sym, ngroups, x):
-    """func_1503D8E0 (5 groups, D_80098C38 / D_800847A0) and func_15085170 (7 groups, D_8009DD24 / D_800875E0):
+    """anim_bank_group_index (5 groups, D_80098C38 / D_800847A0) and obj_type_model_group (7 groups, D_8009DD24 / D_800875E0):
     the first id of the group that contains x, else x."""
     c, l = elf.syms[cnt_sym], elf.syms[lst_sym]
     for g in range(ngroups):
@@ -98,7 +98,7 @@ def alias(elf, cnt_sym, lst_sym, ngroups, x):
     return x
 
 
-# ---------------- model (func_1503D210) ----------------
+# ---------------- model (model_load) ----------------
 def model(rom, mid):
     m = asset(rom, [1, mid])
     if m is None:
@@ -111,11 +111,11 @@ def model(rom, mid):
     return dict(raw=m, ent=ent, skel=sk, joints=nj, skel_off=off)
 
 
-def nmat(mid, nj):  # func_1502DE10
+def nmat(mid, nj):  # model_joint_mtx_count
     return nj - 4 if mid in (0x3B, 0x75, 0x82, 0x88, 0x90, 0x96, 0x98, 0x9C, 0x9D, 0x9F, 0xA0, 0xB1, 0xB2, 0xB4) else nj
 
 
-# ---------------- animation bank (func_1503D950 / func_1503D774) ----------------
+# ---------------- animation bank (anim_bank_load / anim_bank_relocate) ----------------
 def bank(rom, elf, mid):
     b = asset(rom, [0xF, alias(elf, 'D_80098C38', 'D_800847A0', 5, mid)])
     if b is None:
@@ -129,7 +129,7 @@ def bank(rom, elf, mid):
     return dict(raw=b, entries=ents, hdr=struct.unpack('>4i', b[:16]))
 
 
-# ---------------- animation state (anim_start_entry + func_1502DB14) ----------------
+# ---------------- animation state (anim_start_entry + anim_copy_keyframes) ----------------
 def anim_state(rom, elf, mid, k, t, base, speed=1.0, obj6=None):
     bk = bank(rom, elf, mid)
     ents = bk['entries']
@@ -137,7 +137,7 @@ def anim_state(rom, elf, mid, k, t, base, speed=1.0, obj6=None):
     if key == 999 or key >= 30000:
         raise SystemExit('anim %d: key %d -> obj_anim_reset (no animation)' % (k, key))
     if obj6 is None:
-        obj6 = alias(elf, 'D_8009DD24', 'D_800875E0', 7, mid)        # obj[6] = func_15085170(obj)
+        obj6 = alias(elf, 'D_8009DD24', 'D_800875E0', 7, mid)        # obj[6] = obj_type_model_group(obj)
     d = walk(rom, [2, obj6])                                           # obj+0x58 = asset_lookup_rom(0, 2, 2, obj[6])
     p = d[0]
     hoff, hinfo = rec(rom, p, key)                                     # asset_rec_fetch_block(p, buf, key, 2)
@@ -159,7 +159,7 @@ def anim_state(rom, elf, mid, k, t, base, speed=1.0, obj6=None):
                 stream_rom=stream_rom, stream_size=sinfo, frames=A[0x43], keybytes=A[0x45], decim=A[0x48],
                 channels_plus1=A[0x41], flags47=A[0x47], time=t)
     s3 = A[0x45]
-    if s3 == 0:                                                         # func_1502DB14: A[0x38] = 0, nothing copied
+    if s3 == 0:                                                         # anim_copy_keyframes: A[0x38] = 0, nothing copied
         A[0x38] = 0
         info['a30_off'] = None
         return A, blob, info
@@ -180,7 +180,7 @@ def anim_state(rom, elf, mid, k, t, base, speed=1.0, obj6=None):
     wrap = cnt <= t + 1.0
     s0 = (s3 if wrap else 2 * s3) + mis
     s1 = 0                                                              # dbuf aligned to 16 (blob offset 0)
-    n = s0 if s0 < 0xC8 else (s0 + 15) & ~15                            # func_1000480C exact / func_10004514 rounded
+    n = s0 if s0 < 0xC8 else (s0 + 15) & ~15                            # rom_read_direct exact / rom_dma_read rounded
     blob[s1:s1 + n] = rom[a0:a0 + n]
     a30 = s1 + mis
     if not wrap:
@@ -226,7 +226,7 @@ def main():
         return
     m = model(rom, a.id)
     b = bank(rom, elf, a.id)
-    print('model %02X: joints (D_800C52F0) %s, func_1502DE10 %s, animations (D_800C5A90) %s' % (
+    print('model %02X: joints (D_800C52F0) %s, model_joint_mtx_count %s, animations (D_800C5A90) %s' % (
         a.id, m and m['joints'], m and nmat(a.id, m['joints']), b and len(b['entries'])))
     if a.list:
         for i, (key, sfx, ptr) in enumerate(b['entries']):

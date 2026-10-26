@@ -29,7 +29,7 @@
 \#^    f = f \* dist - 500.0f;$#s/500/501/ % push
 \#^    if (\*(u16 \*) (obj + 0x74) == 0) {$#s/==/!=/ % push upd
 \#^        if (0.01f < vel) {$#s/0.01f/0.02f/ % nostart mid
-\#^            \*(u16 \*) (obj + 0x74) = func_10010F88(#s/sound, pitch/sound + 1, pitch/ % push
+\#^            \*(u16 \*) (obj + 0x74) = sound_play_at(#s/sound, pitch/sound + 1, pitch/ % push
 \#^                                                  \*(s16 \*) (obj + 0x12)#s/1000, 6000/1000, 6001/ % push
 \#^    } else if (0.01f < vel) {$#s/</<=/ % stop eq
 \#^                      \*(s16 \*) (obj + 0x14), 200, 2000);$#s/200,/201,/ % upd

@@ -31,9 +31,9 @@
 \#^    spec\.u004 = obj;$#s/obj/arg0/
 \#^    spec\.u008 = obj\[0x3B\];$#s/0x3B/0x3A/
 \#^    u8 \*obj = \*(u8 \*\*) (arg0 + 0x28);$#s/0x28/0x2C/
-\#^    e = func_15199A28(8, (u8 \*) &spec, arg0\[0xC\], arg0\[1\]);$#s/(8,/(9,/
-\#^    e = func_15199A28(8, (u8 \*) &spec, arg0\[0xC\], arg0\[1\]);$#s/arg0\[0xC\]/arg0[0xD]/
-\#^    e = func_15199A28(8, (u8 \*) &spec, arg0\[0xC\], arg0\[1\]);$#s/arg0\[1\])/arg0[2])/
+\#^    e = spec_emitter_spawn(8, (u8 \*) &spec, arg0\[0xC\], arg0\[1\]);$#s/(8,/(9,/
+\#^    e = spec_emitter_spawn(8, (u8 \*) &spec, arg0\[0xC\], arg0\[1\]);$#s/arg0\[0xC\]/arg0[0xD]/
+\#^    e = spec_emitter_spawn(8, (u8 \*) &spec, arg0\[0xC\], arg0\[1\]);$#s/arg0\[1\])/arg0[2])/
 \#^    if (e != NULL) {$#s/!=/==/
 \#^        memcpy(\*(u8 \*\*) (e + 0x98) + 0x158, arg0 + 0x30, 8);$#s/0x158/0x150/
 \#^        memcpy(\*(u8 \*\*) (e + 0x98) + 0x158, arg0 + 0x30, 8);$#s/0x30/0x34/

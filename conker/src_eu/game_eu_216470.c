@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-Gfx *func_15096D44(Gfx *arg0);
-Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+Gfx *sprite_gfx_begin_alt(Gfx *arg0);
+Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 extern Gfx D_800903D8[];
 u8 *render_fill_rect_clamped(u8 *, s32, s32, s32, s32);
 extern s32 D_80090410;
 extern s32 D_80091BA8;
-Gfx *func_151EDA54(Gfx *, u8 *, s32 *);
+Gfx *hud_image_tile_setup(Gfx *, u8 *, s32 *);
 extern u8 D_8009E28C[];
 extern u8 D_8009E280[];
 extern u8 D_8009E284[];
@@ -16,7 +16,7 @@ extern u8 D_8009E288[];
 #endif
 
 
-Gfx *func_151ED998(Gfx *gdl);
+Gfx *screen_fade_rect_draw(Gfx *gdl);
 #ifdef NON_MATCHING
 /* P120: the definition (game_70200) is varargs; a fixed-arg prototype gives a different wasm signature. */
 void text_printf_at(s32, s32, s32, void *, ...);
@@ -26,13 +26,14 @@ void text_printf_at(s32, s32, s32, void *);
 extern Gfx *(*D_800903A4[])(Gfx *);
 extern u8 D_800BEB60;
 
-Gfx *func_151E8C60(Gfx *gdl) {
+/* was func_151E8C60 */
+Gfx *hud_overlay_draw_post(Gfx *gdl) {
     s32 msg;
     Gfx *(*fn)(Gfx *);
 
     D_8003C8E0 = 0x09000001;
     msg = 0;
-    gdl = func_151ED998(gdl);
+    gdl = screen_fade_rect_draw(gdl);
     fn = D_800903A4[D_800E0B94];
     if (fn != NULL) {
         gdl = fn(gdl);
@@ -66,7 +67,8 @@ extern Gfx *(*D_80090370[])(Gfx *);
 extern s32 D_80090408;
 extern s32 D_800BEFC4;
 extern s16 D_800E10A8;
-Gfx *func_151E8620(Gfx *arg0) {
+/* was func_151E8620 */
+Gfx *hud_overlay_draw_screen(Gfx *arg0) {
     Gfx *(*temp_a1)(Gfx *);
     Gfx *temp_a2;
     s32 var_v0;
@@ -98,7 +100,8 @@ Gfx *func_151E8620(Gfx *arg0) {
 extern f32 D_800901BC;
 extern f32 D_800901C0;
 
-u8 *func_151E8E94(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
+/* was func_151E8E94 */
+u8 *hud_tex_rect_scaled(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
     s16 var_t0;
     s16 var_t0_2;
     s16 var_t1;
@@ -193,7 +196,7 @@ u8 *func_151E8E94(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return temp_a0 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E8E94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_tex_rect_scaled.s")
 #endif
 #ifdef NON_MATCHING
 extern u16 D_8009015C;           /* HUD state: 0x10 = a player is near the target point */
@@ -204,11 +207,11 @@ extern u8 D_800ABEA0[][4];       /* team colours (r, g, b) */
 extern u8 D_8009041C[4];         /* digit -> sheet column */
 extern u8 D_80090420[];          /* digit -> sheet row */
 extern s32 D_800BEDCC;           /* frame counter */
-s32 func_1508712C(s32, f32 *, f32 *, f32 *);
-s32 func_150871B8(s32);
+s32 rail_node_position(s32, f32 *, f32 *, f32 *);
+s32 rail_node_find_by_tag(s32);
 s32 texture_cache_lookup(s32, s32, s32, s32);
-u8 *func_151E9E1C(u8 *, s32, s32, s32, s32);
-u8 *func_151EA4C8(u8 *, s32, s32);
+u8 *mp_team_marks_draw(u8 *, s32, s32, s32, s32);
+u8 *mp_team_score_draw(u8 *, s32, s32);
 #define HUD_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
 /* mp_hud_draw: the multiplayer HUD overlay; returns the new DL end. `alpha` is the overlay alpha (low byte), the
  * second argument is unused. Marks the players to show in D_800E0FFC (active or flagged players, players of kind
@@ -216,10 +219,11 @@ u8 *func_151EA4C8(u8 *, s32, s32);
  * flagged player's team (+0x128) as the carrier (with D_80090160 0x8000 it becomes the left / right arrow flag
  * instead), and the bonus flag 4 for team 1 with +0x2E4. Every 32 frames the first 11 clear all of that (blink).
  * Then: the team score row (D_80090160 8; texture 0xD16, per team its colour bar and the score in digits from the
- * D_8009041C / D_80090420 sheet), the team panel func_151E9E1C (1), the carried-item / near icons (texture 0xD18,
- * 0xD19 with 0x4000), the side arrows / bonus icon (texture 0xD12, 0xD13 with flag 4) and the timer func_151EA4C8
+ * D_8009041C / D_80090420 sheet), the team panel mp_team_marks_draw (1), the carried-item / near icons (texture 0xD18,
+ * 0xD19 with 0x4000), the side arrows / bonus icon (texture 0xD12, 0xD13 with flag 4) and the timer mp_team_score_draw
  * (0x6340). */
-u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
+/* was func_151E9150 */
+u8 *mp_hud_markers_draw(u8 *buf, s32 unused, s32 alpha) {
     Gfx *gdl = (Gfx *) buf;
     struct127 *p;
     s32 y, pitch, x, team, score, q, div, dx, started, done, tex, id, size, w, off, row, i, sel;
@@ -256,7 +260,7 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
             flags |= 4;
         }
         if ((*(u8 *) ((u8 *) p->unk31C + 0x75) & 0x7F) == 0x25) {
-            func_1508712C(func_150871B8(0x49), &px, &py, &pz);
+            rail_node_position(rail_node_find_by_tag(0x49), &px, &py, &pz);
             ddx = px - p->x_position;
             ddz = pz - p->z_position;
             if (ddx * ddx + ddz * ddz < 6250000.0f) {
@@ -293,17 +297,17 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
         for (team = 0; team < D_800E0FE0; team++) {
             started = 0;
             done = 0;
-            score = func_150859AC((s16) team, 6);
+            score = player_stat_get((s16) team, 6);
             gDPPipeSync(gdl++);
             gDPSetEnvColor(gdl++, D_800ABEA0[team][0], D_800ABEA0[team][1], D_800ABEA0[team][2], alpha & 0xFF);
             dx = (x + 10) * 4;
-            gdl = (Gfx *) func_151E8E94((u8 *) gdl, (x + 3) * 4, y, dx, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+            gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, (x + 3) * 4, y, dx, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
             div = 10000;
             do {
                 q = score / div;
                 if (q != 0 || started || div == 1) {
                     started = 1;
-                    gdl = (Gfx *) func_151E8E94((u8 *) gdl, dx, y, dx + 0x14, y + 0x1C, 0, D_8009041C[q & 3] << 5,
+                    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, dx, y, dx + 0x14, y + 0x1C, 0, D_8009041C[q & 3] << 5,
                                                 D_80090420[q >> 2] << 5, 0x400, 0x400);
                     dx += 0x18;
                 }
@@ -317,7 +321,7 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
         }
     }
     if (D_80090160 & 1) {
-        gdl = (Gfx *) func_151E9E1C((u8 *) gdl, y, sel, 0, 1);
+        gdl = (Gfx *) mp_team_marks_draw((u8 *) gdl, y, sel, 0, 1);
     }
     if (near || sel != -1) {
         id = (D_80090160 & 0x4000) ? 0xD19 : 0xD18;
@@ -336,11 +340,11 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
             gDPSetOtherMode(gdl++, 0x00AC3F, 0x504244);
             gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, alpha & 0xFF);
             if (near) {
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
             }
             if (sel != -1) {
                 if (D_80090160 & 0x4000) {
-                    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
+                    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
                 } else {
                     if (D_80090160 & 1) {
                         row = 0x1A;
@@ -349,7 +353,7 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
                         row = 0x26;
                         off = 0xB;
                     }
-                    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x238, (off + 3) * 4, 0x268, (off + 0xE) * 4, 0, 0x640,
+                    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x238, (off + 3) * 4, 0x268, (off + 0xE) * 4, 0, 0x640,
                                                 row << 5, 0x400, 0x400);
                 }
             }
@@ -379,41 +383,42 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
             gDPSetOtherMode(gdl++, 0x000C3F, 0x504244);
             gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);
             if (flags & 1) {
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0xA0, y - 0x10, 0xE0, y + 0x30, 0, 0, 0x200, 0x400, 0x400);
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0xA0, y - 0x10, 0xE0, y + 0x30, 0, 0, 0x200, 0x400, 0x400);
             }
             if (flags & 2) {
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x3B0, y - 0x10, 0x3F0, y + 0x30, 0, 0x200, 0x200, 0x400, 0x400);
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x3B0, y - 0x10, 0x3F0, y + 0x30, 0, 0x200, 0x200, 0x400, 0x400);
             }
             if (flags & 4) {
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x250, 0xC, 0x280, 0x48, 0, 0, 0x200, 0x400, 0x400);
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x250, 0xC, 0x280, 0x48, 0, 0, 0x200, 0x400, 0x400);
             }
         }
     }
     if (D_80090160 & 0x6340) {
-        gdl = (Gfx *) func_151EA4C8((u8 *) gdl, y, 1);
+        gdl = (Gfx *) mp_team_score_draw((u8 *) gdl, y, 1);
     }
     return (u8 *) gdl;
 }
 #undef HUD_W
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9150.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_hud_markers_draw.s")
 #endif
 
 #ifdef NON_MATCHING
 extern s8 D_80087608;            /* score marks per team */
 extern s16 D_800E0ED0[];         /* team score */
-u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_150859AC(s16, s32);
+u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 player_stat_get(s16, s32);
 #define TM_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
 /* mp_team_marks_draw: the team panel of the multiplayer HUD at row `y`; returns the new DL end (the end so far when
  * a texture is missing). D_800E0FE0 teams share 0x124 pixels. With `loadTex` (s8) it loads texture 0xD16 (32 x 32
  * RGBA32); with `refresh` (u8) it finds the teams out of the game (bit per team: 0xF minus the teams D_800E1030[i] of
- * the D_8008FD8C players for which func_150859AC(i, 3) is set) and re-reads the scores (func_150859AC(team, 6)) into
+ * the D_8008FD8C players for which player_stat_get(i, 3) is set) and re-reads the scores (player_stat_get(team, 6)) into
  * D_800E0ED0. Each live team draws D_80087608 marks in its colour (D_800ABEA0), 8 pixels apart around its column,
  * the marks from its score on (one more for `sel`) greyed (0x40404040). With any team out, texture 0xD19 (64 x 64
  * colour-indexed sheet + TLUT) draws a 16 x 0x40 cross in that team's colour over each team out. Ends with a pipe
  * sync. */
-u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
+/* was func_151E9E1C */
+u8 *mp_team_marks_draw(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
     Gfx *gdl = (Gfx *) buf;
     s32 tex;
     s32 pitch;
@@ -447,7 +452,7 @@ u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
     if ((u8) refresh != 0) {
         out = 0xF;
         for (i = 0; i < D_8008FD8C; i++) {
-            if (func_150859AC((s16) i, 3) != 0) {
+            if (player_stat_get((s16) i, 3) != 0) {
                 out &= ~(1 << D_800E1030[i]);
             }
         }
@@ -455,7 +460,7 @@ u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
     x = pitch >> 1;
     for (i = 0; i < D_800E0FE0; i++, x += pitch) {
         if ((u8) refresh != 0) {
-            score = func_150859AC((s16) i, 6);
+            score = player_stat_get((s16) i, 6);
             D_800E0ED0[i] = score;
         } else {
             score = D_800E0ED0[i];
@@ -474,7 +479,7 @@ u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
                 gDPPipeSync(gdl++);
                 TM_W(gdl, 0xFB000000, 0x40404040); /* SetEnvColor grey */
             }
-            gdl = (Gfx *) func_151E8E94((u8 *) gdl, mx * 4, y, (mx + 7) * 4, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+            gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, mx * 4, y, (mx + 7) * 4, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
         }
     }
     if (out != 0) {
@@ -499,7 +504,7 @@ u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
             if (out & (1 << i)) {
                 gDPPipeSync(gdl++);
                 gDPSetEnvColor(gdl++, D_800ABEA0[i][0], D_800ABEA0[i][1], D_800ABEA0[i][2], 0xFF);
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, (x - 8) * 4, y - 0x18, (x + 8) * 4, y + 0x28, 0, 0x600, 0x280,
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, (x - 8) * 4, y - 0x18, (x + 8) * 4, y + 0x28, 0, 0x600, 0x280,
                                             0x400, 0x400);
             }
         }
@@ -508,26 +513,27 @@ u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
     return (u8 *) gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9E1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_team_marks_draw.s")
 #endif
 
 #ifdef NON_MATCHING
 extern s16 D_800E0ED0[];         /* team score */
 extern char D_800ABEB0[], D_800ABEB4[];
 s32 texture_cache_lookup(s32, s32, s32, s32);
-u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 #define TW_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
-/* mp_team_score_draw: P237. The two-team score panel (Total War and the other team modes; func_151E9150 /
- * func_151EA90C call it with D_80090160 0x6340) at screen row `y` - 16; returns the new DL end (`buf` unchanged
+/* mp_team_score_draw: P237. The two-team score panel (Total War and the other team modes; mp_hud_markers_draw /
+ * mp_scoreboard_draw call it with D_80090160 0x6340) at screen row `y` - 16; returns the new DL end (`buf` unchanged
  * when the texture is not loaded). Texture: 0xD12 (32 x 32) normally, 16 x 16 0xD13 with D_80090160 0x4000 or 0xD14
  * in barrel mode 8 (D_80090174 + 0x42); loaded as RGBA32 with an env colour of white. With `update` the scores are
- * recomputed and stored in D_800E0ED0[0] / [1]: with 0x6040 the team totals func_150859AC(team, 6); with 0x100 the
- * sum of func_150859AC(player, 3) (negative = 0) per team (+0x128 of D_800CC2D0[player]); else the barrel rows'
+ * recomputed and stored in D_800E0ED0[0] / [1]: with 0x6040 the team totals player_stat_get(team, 6); with 0x100 the
+ * sum of player_stat_get(player, 3) (negative = 0) per team (+0x128 of D_800CC2D0[player]); else the barrel rows'
  * s16 +0x46 (negative = 0) by D_800E1030 team, and the icons use the lower half of the sheet (t + 0x200). Without
  * `update` the stored scores are drawn. Two icons (x 0x108 and 0x318, 0x40 high; 32 x 32: the right half of the sheet
  * then the left; 16 x 16: the upper then the lower), then the scores in grey (D_800ABEB0 team 1 at x 0x4F,
  * D_800ABEB4 team 0 at x 0xD3, text row y / 4 - 3). */
-u8 *func_151EA4C8(u8 *buf, s32 y, s32 update) {
+/* was func_151EA4C8 */
+u8 *mp_team_score_draw(u8 *buf, s32 y, s32 update) {
     Gfx *gdl = (Gfx *) buf;
     s32 top, size, tex, ls, lt, score0, score1, i, n, v, lrs, row;
 
@@ -570,11 +576,11 @@ u8 *func_151EA4C8(u8 *buf, s32 y, s32 update) {
     score1 = 0;
     if (update) {
         if (D_80090160 & 0x6040) {
-            score0 = func_150859AC(0, 6);
-            score1 = func_150859AC(1, 6);
+            score0 = player_stat_get(0, 6);
+            score1 = player_stat_get(1, 6);
         } else if (D_80090160 & 0x100) {
             for (i = 0; i < D_8008FD8C; i++) {
-                v = func_150859AC((s16) i, 3);
+                v = player_stat_get((s16) i, 3);
                 if (v < 0) {
                     v = 0;
                 }
@@ -605,8 +611,8 @@ u8 *func_151EA4C8(u8 *buf, s32 y, s32 update) {
         score0 = D_800E0ED0[0];
         score1 = D_800E0ED0[1];
     }
-    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, row, 0x400, 0x400);
-    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row + lt, 0x400, 0x400);
+    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, row, 0x400, 0x400);
+    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row + lt, 0x400, 0x400);
     text_set_color(0xC0, 0xC0, 0xC0, 0xFF);
     text_printf_at(0x4F, (top >> 2) + 1, 0x80, D_800ABEB0, score1);
     text_printf_at(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score0);
@@ -614,7 +620,7 @@ u8 *func_151EA4C8(u8 *buf, s32 y, s32 update) {
 }
 #undef TW_W
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EA4C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_team_score_draw.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -625,12 +631,12 @@ extern s16 D_800E0F00[];         /* per player value (last column) */
 extern s8 D_8009011C;
 extern char D_800ABEB8[], D_800ABEBC[], D_800ABEC0[], D_800ABEC8[], D_800ABECC[], D_800ABED0[], D_800ABED4[];
 s32 texture_cache_lookup(s32, s32, s32, s32);
-u8 *func_151E9E1C(u8 *, s32, s32, s32, s32);
-u8 *func_151EA4C8(u8 *, s32, s32);
+u8 *mp_team_marks_draw(u8 *, s32, s32, s32, s32);
+u8 *mp_team_score_draw(u8 *, s32, s32);
 #define BAR_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
 #define BAR_MODE() (*(s8 *) (D_80090174 + 0x42))
 #define BAR_ROW(i, off) (*(s16 *) (D_80090174 + (i) * 12 + (off)))
-/* mp_scoreboard_draw: the multiplayer score table (barrel menu mode 3 bar of func_151ECE00, and the in-match HUD
+/* mp_scoreboard_draw: the multiplayer score table (barrel menu mode 3 bar of barrel_menu_draw, and the in-match HUD
  * with `hud` set); returns the new DL end. Menu modes 11 / 12: only the controller icons of the player queue
  * D_800901E4 (texture 0x843; nothing in the HUD). Otherwise one row per queued player that is not a spectator
  * (D_80087270 != 10) and has a team (D_800E1030; team 0 too in mode 8): the header (textures 0x887 / 0x888:
@@ -639,8 +645,9 @@ u8 *func_151EA4C8(u8 *, s32, s32);
  * D_800E1003 == 2), the team score D_800E0ED0, the hit percentage (+0x66 * 100 / shots, shots from the player's
  * +0x1AA in the HUD, else +0x6C; at most 9999), the score +0x46, the lives +0x6A (or the D_800ABECC mark for
  * player state 9) unless mode 1, and D_800E0F00. Rows start at `y` (40 higher with D_800E0B94 and D_80090168) and
- * are 15 apart. Ends with the timer func_151EA4C8 (D_80090160 0x6340) and, in the HUD, the team panel. */
-u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
+ * are 15 apart. Ends with the timer mp_team_score_draw (D_80090160 0x6340) and, in the HUD, the team panel. */
+/* was func_151EA90C */
+u8 *mp_scoreboard_draw(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
     s8 *q;
     s32 tex, yy, k, i, team, base, fmt, x, hy, v, pct, r;
     s8 wide, hdr, all;
@@ -668,7 +675,7 @@ u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
         for (q = D_800901E4; q != D_800901E4 + 4; q++) {
             if (*q >= 0) {
                 k = *q & 3;
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x120, (yy - 2) * 4, 0x160, (yy + 0xE) * 4, 0, (k & 1) << 9,
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x120, (yy - 2) * 4, 0x160, (yy + 0xE) * 4, 0, (k & 1) << 9,
                                             (k >> 1) << 9, 0x400, 0x400);
                 yy += 0x12;
             }
@@ -716,14 +723,14 @@ u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
             x = (base - 0x28) * 4;
             hy = (y - 0x11) * 4;
             if (D_80090160 & 1) {
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, x + 0x1D4, hy, x + 0x214, hy + 0x40, 0, 0x200, 0, 0x400, 0x400);
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, x + 0x1D4, hy, x + 0x214, hy + 0x40, 0, 0x200, 0, 0x400, 0x400);
                 x += 0x78;
             }
             x += 0x1D4;
             if (BAR_MODE() == 1) {
                 x -= 0x78;
             }
-            gdl = (Gfx *) func_151E8E94((u8 *) gdl, x + 0x164, hy, x + 0x1A4, hy + 0x3C, 0, 0, 0x200, 0x400, 0x400);
+            gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, x + 0x164, hy, x + 0x1A4, hy + 0x3C, 0, 0, 0x200, 0x400, 0x400);
             if (BAR_MODE() == 1) {
                 x += 0x78;
             }
@@ -739,11 +746,11 @@ u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
             gDPPipeSync(gdl++);
             BAR_W(gdl, 0xF5181000, 0x00094250);
             BAR_W(gdl, 0xF2000000, 0x0007C07C);
-            gdl = (Gfx *) func_151E8E94((u8 *) gdl, x, hy, x + 0x40, hy + 0x40, 0, 0x200, 0, 0x400, 0x400);
+            gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, x, hy, x + 0x40, hy + 0x40, 0, 0x200, 0, 0x400, 0x400);
             x += 0x74;
-            gdl = (Gfx *) func_151E8E94((u8 *) gdl, x, hy, x + 0x40, hy + 0x40, 0, 0, 0, 0x400, 0x400);
+            gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, x, hy, x + 0x40, hy + 0x40, 0, 0, 0, 0x400, 0x400);
             if (BAR_MODE() != 1) {
-                gdl = (Gfx *) func_151E8E94((u8 *) gdl, x + 0x4C, hy, x + 0xCC, hy + 0x40, 0, 0, 0x200, 0x400, 0x400);
+                gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, x + 0x4C, hy, x + 0xCC, hy + 0x40, 0, 0, 0x200, 0x400, 0x400);
             }
             gDPPipeSync(gdl++);
             tex = texture_cache_lookup(0x843, 0, 3, 0);
@@ -762,7 +769,7 @@ u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
         }
         text_set_color(D_800ABEA0[team][0], D_800ABEA0[team][1], D_800ABEA0[team][2], alpha & 0xFF);
         k = D_800901E4[i] & 3;
-        gdl = (Gfx *) func_151E8E94((u8 *) gdl, (base + 8) * 4, (y - 2) * 4, (base + 0x18) * 4, (y + 0xE) * 4, 0,
+        gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, (base + 8) * 4, (y - 2) * 4, (base + 0x18) * 4, (y + 0xE) * 4, 0,
                                     (k & 1) << 9, (k >> 1) << 9, 0x400, 0x400);
         pct = 0;
         if (hud) {
@@ -808,10 +815,10 @@ u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
     if (D_80090160 & 0x6340) {
         gSPDisplayList(gdl++, D_800903D8);
         gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F9);
-        gdl = (Gfx *) func_151EA4C8((u8 *) gdl, 0x320, wide);
+        gdl = (Gfx *) mp_team_score_draw((u8 *) gdl, 0x320, wide);
     }
     if (hud && (D_80090160 & 1)) {
-        gdl = (Gfx *) func_151E9E1C((u8 *) gdl, 0x320, -1, 1, wide);
+        gdl = (Gfx *) mp_team_marks_draw((u8 *) gdl, 0x320, -1, 1, wide);
     }
     return (u8 *) gdl;
 }
@@ -819,16 +826,17 @@ u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
 #undef BAR_MODE
 #undef BAR_ROW
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EA90C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/mp_scoreboard_draw.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32, s32, s32);
-u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_80090424;
 extern s32 D_8009044C;
 
-u8 *func_151EB5AC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_151EB5AC */
+u8 *hud_counter_digits_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct {
         s32 u7C;
         u8 pad80[0x14];
@@ -897,7 +905,7 @@ u8 *func_151EB5AC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
                 temp_s0_6 = temp_s0_5 + 8;
                 (*(s32 *)((u8 *)temp_s0_6 + 0)) = 0xF2000000;
                 (*(s32 *)((u8 *)temp_s0_6 + 4)) = 0x7C07C;
-                var_s0 = func_151E8E94(temp_s0_6 + 8, var_s2, temp_t4, var_s2 + 0x80, temp_t4 + 0x80, 0, 0, 0, 0x400, 0x400);
+                var_s0 = hud_tex_rect_scaled(temp_s0_6 + 8, var_s2, temp_t4, var_s2 + 0x80, temp_t4 + 0x80, 0, 0, 0, 0x400, 0x400);
             }
             var_s2 += 0x60;
         }
@@ -906,24 +914,24 @@ u8 *func_151EB5AC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EB5AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_counter_digits_draw.s")
 #endif
 #ifdef NON_MATCHING
 /* Table D_80090370 slot 0 (the in-game HUD pass): pause/fade overlay, and with D_800BEAC0 set the
  * money/lives counter screen (texture ids 0x7D3.. loaded through texture_cache_lookup, counters drawn by
- * func_151EB5AC). */
+ * hud_counter_digits_draw). */
 u8 * hud_health_draw(Gfx *, s32);
-void func_151EE310(u8 *arg0);
+void hud_anim_model_free(u8 *arg0);
 void func_151F0114(void *, float, float, float, float, float, float, float);
-s8 func_151E5DF8(void);
+s8 mp_is_free_for_all(void);
 void texture_unref_age3(s32);
 u8 *event_get_vars(s32);
-u8 *func_151EB5AC(u8 *, s32, s32, s32);
+u8 *hud_counter_digits_draw(u8 *, s32, s32, s32);
 s32 event_dispatch(s32, s32, ...);
-u8 * func_151E9150(u8 *, s32, s32);
-u8 * func_151EA90C(Gfx *, s32, s16, s32);
-s32 func_151EE0C4(s32, s32, s32, f32);
-u8 * func_151EE394(u8 *, s32, f32, f32, f32);
+u8 * mp_hud_markers_draw(u8 *, s32, s32);
+u8 * mp_scoreboard_draw(Gfx *, s32, s16, s32);
+s32 hud_anim_model_load(s32, s32, s32, f32);
+u8 * hud_anim_model_draw(u8 *, s32, f32, f32, f32);
 extern s32 D_8008955C;
 extern s8 D_8009029C;
 extern s32 D_8009040C;
@@ -932,7 +940,8 @@ extern s16 D_800C40BE;
 extern s16 D_800E1060;
 extern s32 D_800E1068;
 
-u8 *func_151EB81C(u8 *arg0) {
+/* was func_151EB81C */
+u8 *hud_ingame_draw(u8 *arg0) {
     struct {
         s32 u70;
         u8 pad74[0x8];
@@ -978,16 +987,16 @@ u8 *func_151EB81C(u8 *arg0) {
         sp3C = D_8008FDA8 < 0;
     }
     if ((D_800BE616 != 0) && (D_800BEAC0 == 0) && (D_800BEAC1 == 0)) {
-        if ((func_151E5DF8() == 0) || ((*(s8 *)((u8 *)D_80090174 + 0x42)) == 1)) {
-            var_s0 = func_151E9150(var_s0, 0, 0xFF);
+        if ((mp_is_free_for_all() == 0) || ((*(s8 *)((u8 *)D_80090174 + 0x42)) == 1)) {
+            var_s0 = mp_hud_markers_draw(var_s0, 0, 0xFF);
         }
     } else {
         D_800E10A8 = 0;
     }
     if ((D_800BEAC0 == 0) || (D_8009029C != 0)) {
         if (D_80090408 != 0) {
-            func_151EE310((u8 *) D_80090408);
-            func_151EE310((u8 *) D_8009040C);
+            hud_anim_model_free((u8 *) D_80090408);
+            hud_anim_model_free((u8 *) D_8009040C);
             D_80090408 = 0;
         }
         D_8009016C = 0;
@@ -1044,7 +1053,7 @@ u8 *func_151EB81C(u8 *arg0) {
                 texture_cache_lookup(0x80F, (s32) &sp.u70, 3, 0);
             }
             if (temp_v1 == 0) {
-                temp_v0 = func_150859AC(0, 6);
+                temp_v0 = player_stat_get(0, 6);
                 var_v1_3 = temp_v0;
                 if (temp_v0 == 0x7D00) {
                     var_v1_3 = 0xF4240;
@@ -1080,10 +1089,10 @@ u8 *func_151EB81C(u8 *arg0) {
                     sp.u88 = 0;
                 }
                 sp.u90 = var_v1_4;
-                temp_s0_3 = func_151EDBE8(temp_s0_2, &D_80090410, 0x94, 0x3C, 3, 1, 1.0f, 0);
+                temp_s0_3 = hud_image_draw(temp_s0_2, &D_80090410, 0x94, 0x3C, 3, 1, 1.0f, 0);
                 if (D_80090408 == 0) {
-                    D_80090408 = func_151EE0C4(0xA4, 0x17, 0, 1.0f);
-                    D_8009040C = func_151EE0C4(0xA2, 8, 0, 1.0f);
+                    D_80090408 = hud_anim_model_load(0xA4, 0x17, 0, 1.0f);
+                    D_8009040C = hud_anim_model_load(0xA2, 8, 0, 1.0f);
                 }
                 temp_s0_3->words.w0 = 0xD9FFFFFF;
                 temp_s0_3->words.w1 = 0x220404;
@@ -1106,11 +1115,11 @@ u8 *func_151EB81C(u8 *arg0) {
                             } while (var_v0_3 < sp.u90);
                         }
                         sp.u8C = var_t0;
-                        var_s0_2 = func_151EE394(var_s0_2, D_80090408, (f32) var_t0 + -10.0f, -83.0f, 0.26999998f);
+                        var_s0_2 = hud_anim_model_draw(var_s0_2, D_80090408, (f32) var_t0 + -10.0f, -83.0f, 0.26999998f);
                     }
                 }
                 if ((D_8009040C != 0) && (sp3C != 0)) {
-                    var_s0_2 = func_151EE394(var_s0_2, D_8009040C, 70.0f, 80.0f, 0.3f);
+                    var_s0_2 = hud_anim_model_draw(var_s0_2, D_8009040C, 70.0f, 80.0f, 0.3f);
                 }
                 (*(s32 *)((u8 *)var_s0_2 + 0)) = 0xDE000000;
                 temp_s0_5 = var_s0_2 + 8;
@@ -1119,7 +1128,7 @@ u8 *func_151EB81C(u8 *arg0) {
                 (*(s32 *)((u8 *)temp_s0_5 + 4)) = 0x504244;
                 var_s0 = temp_s0_5 + 8;
                 if (sp3C != 0) {
-                    temp_v0_3 = func_150859AC(0, 3);
+                    temp_v0_3 = player_stat_get(0, 3);
                     var_a3 = temp_v0_3;
                     if (temp_v0_3 != 0) {
                         var_a3 = temp_v0_3 - 1;
@@ -1129,7 +1138,7 @@ u8 *func_151EB81C(u8 *arg0) {
                     }
                     (*(s32 *)((u8 *)var_s0 + 0)) = 0xFB000000;
                     (*(s32 *)((u8 *)var_s0 + 4)) = (s32) ((D_8009016C & 0xFF) | ~0xFF);
-                    var_s0 = func_151EB5AC(var_s0 + 8, 0xEC, 0x1E, var_a3);
+                    var_s0 = hud_counter_digits_draw(var_s0 + 8, 0xEC, 0x1E, var_a3);
                 }
                 if (sp.u88 != 0) {
                     (*(s32 *)((u8 *)var_s0 + 0)) = 0xE7000000;
@@ -1138,21 +1147,22 @@ u8 *func_151EB81C(u8 *arg0) {
                     (*(s32 *)((u8 *)temp_s0_6 + 0)) = 0xFB000000;
                     (*(s32 *)((u8 *)temp_s0_6 + 4)) = (s32) ((D_8009016C & 0xFF) | ~0xFF);
                     D_80090410 = 0x7F6;
-                    var_s0 = func_151EB5AC(func_151EDBE8(temp_s0_6 + 8, &D_80090410, sp.u8C + 0xA5, 0xAA, 1, 1, 1.0f, 0), sp.u8C + 0xAD, 0x9B, sp.u90);
+                    var_s0 = hud_counter_digits_draw(hud_image_draw(temp_s0_6 + 8, &D_80090410, sp.u8C + 0xA5, 0xAA, 1, 1, 1.0f, 0), sp.u8C + 0xAD, 0x9B, sp.u90);
                 }
             } else {
-                var_s0 = func_151EA90C(func_151EDBE8(temp_s0_2, &D_80090410, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8009016C, 1);
+                var_s0 = mp_scoreboard_draw(hud_image_draw(temp_s0_2, &D_80090410, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8009016C, 1);
             }
         }
     }
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EB81C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_ingame_draw.s")
 #endif
-s32 func_151EC0E0(s32 arg0) {
+/* was func_151EC0E0 */
+s32 mp_scoreboard_draw_fading(s32 arg0) {
     if (D_8009016C != 0) {
-        arg0 = func_151EA90C(arg0, 0x6A, D_8009016C, 0);
+        arg0 = mp_scoreboard_draw(arg0, 0x6A, D_8009016C, 0);
     }
     return arg0;
 }
@@ -1162,7 +1172,8 @@ extern s16 D_800E0EB0;
 
 /* Table D_80090370 slot 21: centred text screen. Lines D_800E1008[D_800E0EB0...] up to a "*" line;
  * the first line is red, an extra 12 px gap follows it. Fades in over D_800E0EC0 0..63, out at 287..350. */
-Gfx *func_151EC11C(Gfx *gdl) {
+/* was func_151EC11C */
+Gfx *screen_centred_text_draw(Gfx *gdl) {
     s32 pad[2];
     s16 a;
     s16 i;
@@ -1213,7 +1224,7 @@ Gfx *func_151EC11C(Gfx *gdl) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC11C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_centred_text_draw.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_80091B9C;
@@ -1227,7 +1238,8 @@ extern u8 D_89C[];
  * 200 <= t < 450: two sprites (D_80091BA8 at 1/4 alpha, D_80091B9C), 14 text lines, the 16x16 D_89C icon.
  * t >= 450: the 64x64 D_85D image. D_80090410 is a shared sprite descriptor (texture, size, format)
  * that is reset to its 32x32 default afterwards. Skipped (after the clear) when D_80000300 != 0. */
-Gfx *func_151EC300(Gfx *gdl) {
+/* was func_151EC300 */
+Gfx *screen_intro_credits_draw(Gfx *gdl) {
     s32 t;
     s32 a;
     s32 i;
@@ -1278,13 +1290,13 @@ Gfx *func_151EC300(Gfx *gdl) {
         }
         gDPPipeSync(gdl++);
         gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, (a >> 2) & 0xFF);
-        gdl = func_151EDBE8(gdl, &D_80091BA8, 0x92, 0x67, 5, 6, 1.0f, 0);
+        gdl = hud_image_draw(gdl, &D_80091BA8, 0x92, 0x67, 5, 6, 1.0f, 0);
         envcol = (a & 0xFF) | ~0xFF;
         gDPPipeSync(gdl++);
         gdl->words.w0 = 0xFB000000;
         gdl->words.w1 = envcol;
         gdl++;
-        gdl = func_151EDBE8(gdl, &D_80091B9C, 0x92, 0x1C, 2, 1, 1.0f, 0);
+        gdl = hud_image_draw(gdl, &D_80091B9C, 0x92, 0x1C, 2, 1, 1.0f, 0);
         text_set_color(0xFF, 0xFF, 0xFF, a & 0xFF);
         text_printf_at(0x94, 0x9D, 1, *(u8 **) ((u8 *) D_800E1008 + 0x204));
         text_printf_at(0x94, 0xAA, 1, *(u8 **) ((u8 *) D_800E1008 + 0x208));
@@ -1301,7 +1313,7 @@ Gfx *func_151EC300(Gfx *gdl) {
         *(u8 **) (desc + 0) = D_89C;
         *(s16 *) (desc + 6) = 0x10;
         *(s16 *) (desc + 8) = 0x10;
-        gdl = func_151EDBE8(gdl, desc, 0xC7, 0xB0, 1, 1, 1.0f, 0);
+        gdl = hud_image_draw(gdl, desc, 0xC7, 0xB0, 1, 1, 1.0f, 0);
         *(s16 *) (desc + 6) = 0x20;
         *(s16 *) (desc + 8) = 0x20;
     } else {
@@ -1327,7 +1339,7 @@ Gfx *func_151EC300(Gfx *gdl) {
         *(u8 **) (desc + 0) = D_85D;
         *(s16 *) (desc + 6) = 0x40;
         *(s16 *) (desc + 8) = 0x40;
-        gdl = func_151EDBE8(gdl, desc, 0x94, 0x69, 3, 1, 1.0f, 0);
+        gdl = hud_image_draw(gdl, desc, 0x94, 0x69, 3, 1, 1.0f, 0);
         *(s16 *) (desc + 6) = 0x20;
         *(s16 *) (desc + 8) = 0x20;
         desc[0xA] = 0;
@@ -1336,10 +1348,11 @@ Gfx *func_151EC300(Gfx *gdl) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC300.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_intro_credits_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151EC928(s32 arg0) {
+/* was func_151EC928 */
+s32 screen_late_caption_draw(s32 arg0) {
     s32 temp_t6;
     s32 var_v0;
 
@@ -1355,7 +1368,7 @@ s32 func_151EC928(s32 arg0) {
     return arg0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC928.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_late_caption_draw.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_80091BA8;
@@ -1364,7 +1377,8 @@ extern s32 D_80091BC0;
 extern s32 D_800E0EA4;
 #define MW(g, a, b) { Gfx *_g = (g); _g->words.w0 = (a); _g->words.w1 = (b); }
 
-Gfx *func_151EC9A0(Gfx *gdl) {
+/* was func_151EC9A0 */
+Gfx *screen_sprite_fade_draw(Gfx *gdl) {
     s32 temp_v1;
     s32 var_v1;
     s32 var_v1_2;
@@ -1390,14 +1404,14 @@ Gfx *func_151EC9A0(Gfx *gdl) {
     }
     if (var_v1 != 0) {
         gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, var_v1);
-        gdl = func_151EDBE8(gdl, &D_80091BA8, 0x92, 0x63, 5, 6, 1.0f, 0);
+        gdl = hud_image_draw(gdl, &D_80091BA8, 0x92, 0x63, 5, 6, 1.0f, 0);
     }
     gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);
-    gdl = func_151EDBE8(gdl, &D_80091BB4, 0x92, 0xCB, 5, 2, 1.0f, 0);
+    gdl = hud_image_draw(gdl, &D_80091BB4, 0x92, 0xCB, 5, 2, 1.0f, 0);
     MW(gdl++, 0xFCFFD3FF, 0xFFA6FF7F);
     MW(gdl++, 0xFB000000, (u8) D_800E0FC7 | 0x20FF2000);
-    gdl = func_151EDBE8(gdl, &D_80091BC0, 0x92, 0xCB, 5, 2, 1.0f, 0);
-    gdl = func_15096D44(gdl);
+    gdl = hud_image_draw(gdl, &D_80091BC0, 0x92, 0xCB, 5, 2, 1.0f, 0);
+    gdl = sprite_gfx_begin_alt(gdl);
     temp_v1 = 0x1EA - D_800E0EA4;
     if (temp_v1 < 0) {
         var_v1_2 = 0;
@@ -1412,13 +1426,13 @@ Gfx *func_151EC9A0(Gfx *gdl) {
         return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC9A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/screen_sprite_fade_draw.s")
 #endif
 #ifdef NON_MATCHING
-Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
-Gfx *func_151ECE00(Gfx *);
-Gfx *func_151EE93C(Gfx *);
-Gfx *func_151EF3A0(Gfx *, s32);
+Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+Gfx *barrel_menu_draw(Gfx *);
+Gfx *cheat_entry_draw(Gfx *);
+Gfx *save_screen_frame_draw(Gfx *, s32);
 extern Gfx D_800903D8[];
 extern u8 D_80090484;
 extern s8 D_800902A4;
@@ -1437,7 +1451,8 @@ typedef struct {
     s8 x3E;
 } Ent174;
 
-Gfx *func_151ECB98(Gfx *gdl) {
+/* was func_151ECB98 */
+Gfx *frontend_menu_draw(Gfx *gdl) {
     Ent174 *p;
     s32 a;
     s32 v;
@@ -1458,14 +1473,14 @@ Gfx *func_151ECB98(Gfx *gdl) {
     p = (Ent174 *)D_80090174;
     k = p->x3E;
     if (k == 1) {
-        return func_151ECE00(gdl);
+        return barrel_menu_draw(gdl);
     }
     if (k != 0) {
         return gdl;
     }
     t = p->x2C;
     if (t == 1 && D_800902A4 != 0) {
-        gdl = func_151EE93C(gdl);
+        gdl = cheat_entry_draw(gdl);
     } else if (t != 1 || D_800902A8 == 0) {
         v = (p->x0 - 0.5f) * 512.0f;
         if (v < 0) {
@@ -1486,21 +1501,21 @@ Gfx *func_151ECB98(Gfx *gdl) {
         gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, v);
         gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
         D_80090410 = D_8009046C[((Ent174 *)D_80090174)->x2C];
-        gdl = func_151EDBE8(gdl, &D_80090410, 0x94, 0x1E, 3, 1, 1.0f, 0);
+        gdl = hud_image_draw(gdl, &D_80090410, 0x94, 0x1E, 3, 1, 1.0f, 0);
     }
     p = (Ent174 *)D_80090174;
     if (0.5f <= p->x8) {
         if (p->x2C >= 3) {
             e = &D_800BE818[p->x2C - 3];
             if (e->unk8 != -1) {
-                gdl = func_151EF3A0(gdl, e->padC[0]);
+                gdl = save_screen_frame_draw(gdl, e->padC[0]);
             }
         }
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ECB98.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/frontend_menu_draw.s")
 #endif
 #ifdef NON_MATCHING
 typedef struct {
@@ -1531,17 +1546,18 @@ extern u8 D_88C[];
 extern char D_800ABED8[];         /* "#" */
 extern char D_800ABEDC[];         /* "#" */
 extern char D_800ABEE0[];         /* "%d" */
-s8 func_151E2C88(s32);
-void func_151E870C(s32 slot, s32 character);
-/* barrel_menu_draw: draws the multiplayer barrel menu (D_80090174 mode 1 of func_151ECB98) into gdl and returns
+s8 mp_slot_query(s32);
+void menu_spawn_character(s32 slot, s32 character);
+/* barrel_menu_draw: draws the multiplayer barrel menu (D_80090174 mode 1 of frontend_menu_draw) into gdl and returns
  * the new end. A pipe sync, then (unless mode 3) the page banner D_80090488[D_800904A8] faded by the slide offset
  * and the title D_88C faded by +0x08. Mode 0: once faded in on page 4, the ring of five item barrels (D_800904AC,
  * cos ring from the selection +0x41 and the rotation D_80090188), the front one pulsing when at rest; mode 3: the
- * single bar func_151EA90C; mode 4: two or four player slots (page 7: two) that fill while the controller is
- * joined (spawning its character with func_151E870C) and empty otherwise (removing the object), each with its
+ * single bar mp_scoreboard_draw; mode 4: two or four player slots (page 7: two) that fill while the controller is
+ * joined (spawning its character with menu_spawn_character) and empty otherwise (removing the object), each with its
  * frame D_89C, a pulsing highlight, the fill bar D_87B, the slot number and the player's score from
- * func_151E2C88. */
-Gfx *func_151ECE00(Gfx *gdl) {
+ * mp_slot_query. */
+/* was func_151ECE00 */
+Gfx *barrel_menu_draw(Gfx *gdl) {
     BarrelMenu174 *m;
     s32 scores[8];
     s32 alpha, a, x, k, mul, prev, cur, mid, v, i, j, slot, dir, nslots, nscores, si, pulse, step, y;
@@ -1585,7 +1601,7 @@ Gfx *func_151ECE00(Gfx *gdl) {
                 }
             }
             D_80090410 = D_80090488[D_800904A8];
-            gdl = func_151EDBE8(gdl, &D_80090410, 0x94, y, k, mul, sc, 0);
+            gdl = hud_image_draw(gdl, &D_80090410, 0x94, y, k, mul, sc, 0);
             m = (BarrelMenu174 *) D_80090174;
         }
         a = 0xFF - (s32) (m->fade * 300.0f);
@@ -1593,7 +1609,7 @@ Gfx *func_151ECE00(Gfx *gdl) {
             gDPPipeSync(gdl++);
             gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, a);
             D_80090410 = (s32) D_88C;
-            gdl = func_151EDBE8(gdl, &D_80090410, 0x94, 0x1E, 3, 1, 1.0f, 0);
+            gdl = hud_image_draw(gdl, &D_80090410, 0x94, 0x1E, 3, 1, 1.0f, 0);
             m = (BarrelMenu174 *) D_80090174;
         }
     }
@@ -1625,7 +1641,7 @@ Gfx *func_151ECE00(Gfx *gdl) {
                     mid = ((cur - prev) >> 1) + prev;
                     sizef = (f32) (cur - prev) * 0.03125f;
                     D_80090410 = D_800904AC[i];
-                    gdl = func_151EDBE8(gdl, &D_80090410, 0x53, mid, 2, 1, sizef, -1);
+                    gdl = hud_image_draw(gdl, &D_80090410, 0x53, mid, 2, 1, sizef, -1);
                     if (D_80090188 == 0.0f && j == 5 && D_800901CC == 0) {
                         v = (D_800BEDCC * 2) & 0x7F;
                         if (v >= 0x40) {
@@ -1637,7 +1653,7 @@ Gfx *func_151ECE00(Gfx *gdl) {
                         }
                         gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, v);
                         D_80090410 = D_800904AC[i] + 2;
-                        gdl = func_151EDBE8(gdl, &D_80090410, 0x53, mid, 2, 1, sizef, -1);
+                        gdl = hud_image_draw(gdl, &D_80090410, 0x53, mid, 2, 1, sizef, -1);
                     }
                 }
                 i++;
@@ -1656,7 +1672,7 @@ Gfx *func_151ECE00(Gfx *gdl) {
             } else {
                 nslots = 4;
             }
-            nscores = func_151E2C88((s32) scores);
+            nscores = mp_slot_query((s32) scores);
             if (nscores != 0) {
                 si = 0;
             }
@@ -1674,7 +1690,7 @@ Gfx *func_151ECE00(Gfx *gdl) {
                 if (slot != 0 && D_800E0FD0[0] != NULL) {
                     if (*fill != 0xFF) {
                         if (D_800E0FD0[slot] == NULL && j != -1) {
-                            func_151E870C(slot, D_800E0FC0[j]);
+                            menu_spawn_character(slot, D_800E0FC0[j]);
                         }
                     } else if (D_800E0FD0[slot] != NULL) {
                         obj_remove(D_800E0FD0[slot], 1);
@@ -1692,11 +1708,11 @@ Gfx *func_151ECE00(Gfx *gdl) {
                 gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, D_800E0EC5);
                 D_80090410 = (s32) (D_89C + 2);
                 y = 0x8C - (s32) ((f32) v * 0.14285715f);
-                gdl = func_151EDBE8(gdl, &D_80090410, x, y, 1, 1, 1.0f, 0);
+                gdl = hud_image_draw(gdl, &D_80090410, x, y, 1, 1, 1.0f, 0);
                 if (v > 0) {
                     gDPPipeSync(gdl++);
                     gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, pulse);
-                    gdl = func_151EDBE8(gdl, &D_80090410, x, y, 1, 1, 1.0f, 1);
+                    gdl = hud_image_draw(gdl, &D_80090410, x, y, 1, 1, 1.0f, 1);
                     gDPPipeSync(gdl++);
                     step = (D_800E0EC5 * v) >> 8;
                     if (step >= 0xFE) {
@@ -1704,7 +1720,7 @@ Gfx *func_151ECE00(Gfx *gdl) {
                     }
                     gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, step);
                     D_80090410 = (s32) D_87B;
-                    gdl = func_151EDBE8(gdl, &D_80090410, x, 0x82, 1, 1, 1.0f, 0);
+                    gdl = hud_image_draw(gdl, &D_80090410, x, 0x82, 1, 1, 1.0f, 0);
                 }
                 text_set_color(0xFF, 0xFF, 0xFF, D_800E0EC5);
                 text_printf_at(x, 0x41, 0x80, D_800ABED8, slot + 1);
@@ -1717,29 +1733,30 @@ Gfx *func_151ECE00(Gfx *gdl) {
             }
             break;
         case 3:
-            gdl = (Gfx *) func_151EA90C(gdl, 0x6A, 0xFF, 0);
+            gdl = (Gfx *) mp_scoreboard_draw(gdl, 0x6A, 0xFF, 0);
             break;
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ECE00.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/barrel_menu_draw.s")
 #endif
 
 #ifndef NON_MATCHING
-void func_15096D44(Gfx *);
+void sprite_gfx_begin_alt(Gfx *);
 #endif
-Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 extern Gfx D_800903D8[];
 extern u8 D_80091BCC[];
 extern u8 D_80091BD8[];
 
-/* Table D_80090370 slot 17. The original is void in C but its v0 is func_15096D44's return value, which
- * func_151E8620 uses as the new display-list pointer: under NON_MATCHING it returns it explicitly. */
+/* Table D_80090370 slot 17. The original is void in C but its v0 is sprite_gfx_begin_alt's return value, which
+ * hud_overlay_draw_screen uses as the new display-list pointer: under NON_MATCHING it returns it explicitly. */
 #ifdef NON_MATCHING
-Gfx *func_151ED854(Gfx *gdl) {
+/* was func_151ED854 */
+Gfx *screen_logo_glow_draw(Gfx *gdl) {
 #else
-void func_151ED854(Gfx *gdl) {
+void screen_logo_glow_draw(Gfx *gdl) {
 #endif
     s32 a;
 
@@ -1749,19 +1766,20 @@ void func_151ED854(Gfx *gdl) {
         a = 0xFF;
     }
     gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, a);
-    gdl = func_151EDBE8(gdl, D_80091BCC, 0x92, 0x6C, 8, 3, 1.0f, 0);
+    gdl = hud_image_draw(gdl, D_80091BCC, 0x92, 0x6C, 8, 3, 1.0f, 0);
     gDPPipeSync(gdl++);
     gDPSetCombine(gdl++, 0xFFD3FF, 0xFFA6FF7F);
     gDPSetEnvColor(gdl++, 0xFF, 0x80, 0x20, ((u8)D_800E0FC7 * (a + 1)) >> 8);
 #ifdef NON_MATCHING
-    return func_15096D44(func_151EDBE8(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
+    return sprite_gfx_begin_alt(hud_image_draw(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
 #else
-    func_15096D44(func_151EDBE8(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
+    sprite_gfx_begin_alt(hud_image_draw(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
 #endif
 }
 
 u8 *render_fill_rect_clamped(u8 *, s32, s32, s32, s32);
-Gfx *func_151ED998(Gfx *gdl) {
+/* was func_151ED998 */
+Gfx *screen_fade_rect_draw(Gfx *gdl) {
     if ((u8)D_800E0FC6 == 0) {
         return gdl;
     }
@@ -1773,10 +1791,11 @@ Gfx *func_151ED998(Gfx *gdl) {
 }
 
 #ifdef NON_MATCHING
-/* Tile setup for func_151EDBE8: LoadBlock word count (*outBlock, from the D_8009E280/84 size tables), then
+/* Tile setup for hud_image_draw: LoadBlock word count (*outBlock, from the D_8009E280/84 size tables), then
  * SetTile (load tile 7) / SetTile (render tile 0, line = w * D_8009E288[siz] bytes / 8, masks = ceil(log2(w/h)), wrap)
  * and SetTileSize. desc: +6 width, +8 height, +0xA format, +0xB size. */
-Gfx *func_151EDA54(Gfx *gdl, u8 *desc, s32 *outBlock) {
+/* was func_151EDA54 */
+Gfx *hud_image_tile_setup(Gfx *gdl, u8 *desc, s32 *outBlock) {
     s32 w = *(u16 *)(desc + 6);
     s32 h;
     s32 maskS = 1, maskT = 1;
@@ -1813,16 +1832,17 @@ Gfx *func_151EDA54(Gfx *gdl, u8 *desc, s32 *outBlock) {
     return (Gfx *)(g + 8);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDA54.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_image_tile_setup.s")
 #endif
 #ifdef NON_MATCHING
 /* HUD image drawn as cols x rows tiles: each tile's texture comes from the texture cache (texture_cache_lookup, id
  * desc+0 + idOffset, consecutive ids unless a block is larger than 0x1000 bytes and is split in halves), then
  * SetTImg / LoadBlock / scissored TextureRectangle (gSPScisTextureRectangle) at the scaled screen position.
  * desc: +0 base texture id, +6 tile width, +8 tile height (u16), +0xA format, +0xB size. idOffset < 0: x scale 1. */
-Gfx *func_151EDBE8(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f32 scale, s32 idOffset) {
+/* was func_151EDBE8 */
+Gfx *hud_image_draw(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f32 scale, s32 idOffset) {
     u8 *desc = descArg;
-    s32 blockSize; /* spB0, from func_151EDA54 */
+    s32 blockSize; /* spB0, from hud_image_tile_setup */
     s32 texSize;   /* sp98 */
     s32 haveTex;
     s32 tex;
@@ -1835,7 +1855,7 @@ Gfx *func_151EDBE8(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f3
     haveTex = 0;
     tex = 0;
     texSize = 0;
-    gdl = func_151EDA54(gdl, desc, &blockSize);
+    gdl = hud_image_tile_setup(gdl, desc, &blockSize);
     if (idOffset < 0) {
         xscale = 1.0f;
         idOffset = 0;
@@ -1921,13 +1941,13 @@ Gfx *func_151EDBE8(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f3
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDBE8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_image_draw.s")
 #endif
 #ifdef NON_MATCHING
-/* HUD model (0xA8 bytes; func_151EE0C4 builds it, func_151EE394 draws it, func_151EE310 frees it). The pause /
+/* HUD model (0xA8 bytes; hud_anim_model_load builds it, hud_anim_model_draw draws it, hud_anim_model_free frees it). The pause /
  * counter screen keeps two: D_80090408 (file 0xA4, the blinking head) and D_8009040C (file 0xA2). */
 typedef struct {
-    Gfx **dls;          /* 0x00 the model's display lists (func_1503F91C) */
+    Gfx **dls;          /* 0x00 the model's display lists (animmodel_create) */
     Gfx *copies[4];     /* 0x04 HUD copies of the display lists (count entries) */
     u8 count;           /* 0x14 display list count */
     u8 blink;           /* 0x15 frames until the next blink (D_80090408 only) */
@@ -1938,17 +1958,18 @@ typedef struct {
     f32 mtx[2][4][4];   /* 0x28 model matrix, one per frame buffer (D_800BE9C0) */
 } HudModel;
 
-s32 func_1503F91C(s32, s32, void *, void *, void *, void *, void *);
-void func_1503F8A8(u8 *, s32, s32, f32, f32, s32);
-void func_1503F7A0(u8 *);
-void func_10004074(void *);
+s32 animmodel_create(s32, s32, void *, void *, void *, void *, void *);
+void animmodel_start_anim(u8 *, s32, s32, f32, f32, s32);
+void animmodel_update_matrices(u8 *);
+void heap_free(void *);
 u8 *allocate_memory(s32, s32, s32, s32);
 
-/* hud_model_load: allocates a HudModel, loads model `file` with animation table entry `entry` (func_1503F91C),
+/* hud_model_load: allocates a HudModel, loads model `file` with animation table entry `entry` (animmodel_create),
  * starts animation `anim` at `speed`, and makes a HUD copy of each of its display lists: every
  * G_RDPSETOTHERMODE (0xEF) gets bit 16 of w0 cleared and render mode 0x5041C8, every G_SETCOMBINE (0xFC) becomes a
  * no-op, so the caller's combiner applies. Returns the HudModel, or 0 when an allocation or the load fails. */
-s32 func_151EE0C4(s32 file, s32 entry, s32 anim, f32 speed) {
+/* was func_151EE0C4 */
+s32 hud_anim_model_load(s32 file, s32 entry, s32 anim, f32 speed) {
     HudModel *m;
     Gfx *src;
     Gfx *dst;
@@ -1963,15 +1984,15 @@ s32 func_151EE0C4(s32 file, s32 entry, s32 anim, f32 speed) {
         return 0;
     }
     m->blink = 1;
-    if (func_1503F91C(file, entry, &m->dls, &m->count, &m->seg6, &m->u20, &m->inst) != 0) {
-        func_10004074(m);
+    if (animmodel_create(file, entry, &m->dls, &m->count, &m->seg6, &m->u20, &m->inst) != 0) {
+        heap_free(m);
         return 0;
     }
     guMtxIdentF(m->mtx[0]);
     guMtxIdentF(m->mtx[1]);
     *(f32 **) (m->inst + 0x3E0) = (f32 *) m->mtx[0];
     *(f32 **) (m->inst + 0x3E4) = (f32 *) m->mtx[1];
-    func_1503F8A8(m->inst, 1, anim, speed, 0.0f, 0);
+    animmodel_start_anim(m->inst, 1, anim, speed, 0.0f, 0);
 
     /* size of each display list, up to and including its G_ENDDL (0xDF) */
     for (i = 0; i < m->count; i++) {
@@ -1983,9 +2004,9 @@ s32 func_151EE0C4(s32 file, s32 entry, s32 anim, f32 speed) {
         m->copies[i] = (Gfx *) allocate_memory(size, 1, 1, 1);
         if (m->copies[i] == NULL) {
             for (j = 0; j < i; j++) {
-                func_10004074(m->copies[j]);
+                heap_free(m->copies[j]);
             }
-            func_10004074(m);
+            heap_free(m);
             return 0;
         }
     }
@@ -2012,17 +2033,18 @@ s32 func_151EE0C4(s32 file, s32 entry, s32 anim, f32 speed) {
     return (s32) m;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE0C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_anim_model_load.s")
 #endif
 
-void func_151EE310(u8 *arg0) {
+/* was func_151EE310 */
+void hud_anim_model_free(u8 *arg0) {
     s32 i;
 
     if (arg0 != NULL) {
-        func_1503FAA8(*(s32 *)(arg0 + 0x24));
-        func_100043B4(arg0, 4);
+        animmodel_free(*(s32 *)(arg0 + 0x24));
+        heap_set_block_tag(arg0, 4);
         for (i = 0; i < arg0[0x14]; i++) {
-            func_100043B4(((s32 **)(arg0 + 4))[i], 4);
+            heap_set_block_tag(((s32 **)(arg0 + 4))[i], 4);
         }
     }
 }
@@ -2031,14 +2053,15 @@ void func_151EE310(u8 *arg0) {
 extern Gfx D_800904C0[];
 extern Gfx D_800904D8[];
 
-/* hud_model_draw: draws a HudModel (func_151EE0C4) at screen position (x, y), z -100, with uniform `scale` (x and
+/* hud_model_draw: draws a HudModel (hud_anim_model_load) at screen position (x, y), z -100, with uniform `scale` (x and
  * scale times D_800901BC, y times D_800901C0): sets this frame buffer's model matrix, advances the animation
- * (func_1503F7A0), loads the HUD matrices and render state (D_800904C0, env alpha D_800E1060), segment 3 = the
+ * (animmodel_update_matrices), loads the HUD matrices and render state (D_800904C0, env alpha D_800E1060), segment 3 = the
  * instance's matrices for this frame buffer, segment 1 = the model data, then calls the HUD display list copies and
  * D_800904D8. D_80090408 (the head) blinks: a random 15..142 frame timer, texture 0x507 for its last 6 frames, else
  * 0x508, bound to segments 6 / 7; when that texture is not loaded yet (texture_cache_lookup returns 0x80000000) nothing
  * is drawn and gdl is returned unchanged. */
-u8 *func_151EE394(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
+/* was func_151EE394 */
+u8 *hud_anim_model_draw(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
     HudModel *m = (HudModel *) model;
     Gfx *g = (Gfx *) gdl;
     s32 tex;
@@ -2056,7 +2079,7 @@ u8 *func_151EE394(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
     m->mtx[D_800BE9C0][0][0] = scale;
     m->mtx[D_800BE9C0][1][1] = scale;
     m->mtx[D_800BE9C0][2][2] = scale;
-    func_1503F7A0(m->inst);
+    animmodel_update_matrices(m->inst);
 
     g->words.w0 = 0xDA380003; /* gSPMatrix: load modelview */
     g->words.w1 = (u32) D_80089810;
@@ -2118,7 +2141,7 @@ u8 *func_151EE394(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
     return (u8 *) g;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE394.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/hud_anim_model_draw.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2138,7 +2161,8 @@ s32 texture_resolve_dl_ids(s32, s32, s32, s32, s32 *);
 // G_ENDDL (0xDF): G_VTX (1) addresses are relocated into the asset and the first two vertices get colour 0,0,0,0xFF,
 // G_SETCOMBINE (0xFC) becomes 0xFC127E05 / 0xFFFFF3F8, G_SETOTHERMODE_H (0xEF) gets bit 0x100000 and w1 0x0F0A4000.
 // Then clears D_800E10B0..B4 and the block's bytes 0 and 0x20. On allocation failure D_800904E8 stays NULL.
-void func_151EE704(void) {
+/* was func_151EE704 */
+void menu_sprites_load(void) {
     u8 *block;
     s32 *asset;
     u32 *dl;
@@ -2195,15 +2219,15 @@ void func_151EE704(void) {
     D_800E10B4 = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE704.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/menu_sprites_load.s")
 #endif
 
 #ifdef NON_MATCHING
 extern u8 D_800ABEE4[];          /* "-": the blinking text cursor */
 void mtx_translate_fixed(Mtx *, f32, f32, f32);
 s32 aiscript_find_by_kind(s32, s32);
-void func_15042BC4(u8 *, s32 *, s32 *, s32 *);
-// cheat_entry_draw: the cheat-code entry screen (barrel menu page 1 while D_800902A4 is set, from func_151ECB98).
+void text_measure_string(u8 *, s32 *, s32 *, s32 *);
+// cheat_entry_draw: the cheat-code entry screen (barrel menu page 1 while D_800902A4 is set, from frontend_menu_draw).
 // Pad bits at D_80090174 + 0x20 (1 up, 2 down, 4 left, 8 right, 0x10 select) move the cursor over the letter wheel
 // (row D_800E10B1 0..5 wrapping, column D_800E10B0 clamped to 0 / last: rows 0-3 'A'..'X', row 4 delete / '.' / 'Y' /
 // 'Z' / enter, row 5 space) with sound 0x62D; D_800E10B2 tilts the selected letter (+8 / -8 a frame within 0..12
@@ -2213,11 +2237,12 @@ void func_15042BC4(u8 *, s32 *, s32 *, s32 *);
 // each other), sound 0xC3 / 0xC4, message kind 0x10. Else (kind 0x11) the whole-word phrases D_800E1008[0xA3..0xC7]
 // are searched in the text (sound 0xC1 / 0xC2); else 0xC5 / 0xC6, or 0xC7 when the same text is entered a second
 // time in a row (D_800E10B4 counts repeats). The text is kept at D_800E10AC + 0x20, an object of type 9
-// (func_15083E90) gets the kind at +0x232 and becomes D_800D154C, and the text is cleared. Then the wheel is drawn:
+// (obj_find_by_setup_id) gets the kind at +0x232 and becomes D_800D154C, and the text is cleared. Then the wheel is drawn:
 // the 30 sprite display lists of D_800904E8 (12-byte entries) under the matrix built by mtx_build_rot_trans and the
 // projection D_800E1068, the selected one magenta with the tilt matrix, and the text at (75 - width / 2, min 10;
 // 180) with a '-' cursor shown 22 frames out of 32. Returns the display list end.
-Gfx *func_151EE93C(Gfx *gdl) {
+/* was func_151EE93C */
+Gfx *cheat_entry_draw(Gfx *gdl) {
     s32 moved;
     s32 row;
     s32 col;
@@ -2299,7 +2324,7 @@ Gfx *func_151EE93C(Gfx *gdl) {
         D_800E10B0 = 0;
     }
     if (moved) {
-        func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
+        sound_play_2d(0x62D, 0x4650, 0x40, 0, 0);
     }
     sel = D_800E10B1 * 6 + D_800E10B0;
     if (D_800E10B1 == 5) {
@@ -2320,7 +2345,7 @@ Gfx *func_151EE93C(Gfx *gdl) {
     }
 
     if (*(u16 *) (D_80090174 + 0x20) & 0x10) {
-        func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
+        sound_play_2d(0x500, 0x7D00, 0x40, 0, 0);
         ch = sel + 'A';
         if (D_800E10B1 == 5) {
             ch = ' ';
@@ -2427,9 +2452,9 @@ Gfx *func_151EE93C(Gfx *gdl) {
                 }
                 D_800E10AC[n + 0x20] = '\0';
                 if (sfx != 0) {
-                    func_1001263C(sfx, 0x7D00, 0x40);
+                    mp3_voice_play(sfx, 0x7D00, 0x40);
                 }
-                obj = func_15083E90(9);
+                obj = obj_find_by_setup_id(9);
                 if (obj != NULL) {
                     obj->unk232 = kind;
                     D_800D154C = obj;
@@ -2476,7 +2501,7 @@ Gfx *func_151EE93C(Gfx *gdl) {
 
     /* the text and its cursor */
     text_set_color(0xFF, 0xB1, 0x1E, D_800E0EC5);
-    func_15042BC4(D_800E10AC, &w, &h, &d);
+    text_measure_string(D_800E10AC, &w, &h, &d);
     x = 75 - (w >> 1);
     if (x < 10) {
         x = 10;
@@ -2490,11 +2515,11 @@ Gfx *func_151EE93C(Gfx *gdl) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE93C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/cheat_entry_draw.s")
 #endif
 
 #ifdef NON_MATCHING
-/* save_screen_frame_draw: draws the save / load screen frame (D_80090174 mode of func_151ECB98, padC[0] = selected
+/* save_screen_frame_draw: draws the save / load screen frame (D_80090174 mode of frontend_menu_draw, padC[0] = selected
  * entry): environment alpha D_800E0EC4, two halves of texture 0x7FB (RGBA16, second half mirrored in S), two pieces of
  * texture 0x887 (RGBA32), then the caption string. The caption id comes from asset table 0x1D (u16 per entry), reloaded
  * only when the entry changes (D_800E10B5 = entry + 1) and cached in D_800904EC (0 = no caption). Returns the DL end. */
@@ -2502,13 +2527,14 @@ extern u8 D_800E0EC4;
 extern u8 D_800E10B5;
 extern s32 D_800904EC;
 s32 asset_load_ptr(s32 *, s32, ...);
-void func_10004074(void *);
+void heap_free(void *);
 s32 texture_cache_lookup(s32, s32, s32, s32);
-u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+u8 *hud_tex_rect_scaled(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 #define SAVE_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
 
-Gfx *func_151EF3A0(Gfx *gdl, s32 entry) {
+/* was func_151EF3A0 */
+Gfx *save_screen_frame_draw(Gfx *gdl, s32 entry) {
     s32 tex;
     u16 *table;
     u32 size;
@@ -2525,8 +2551,8 @@ Gfx *func_151EF3A0(Gfx *gdl, s32 entry) {
         SAVE_W(gdl, 0xF5101800, 0x00054260); /* SetTile (render) */
         SAVE_W(gdl, 0xF2000000, 0x000BC07C); /* SetTileSize 48x32 */
         gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
-        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x190, 0x100, 0x250, 0x200, 0, 0, 0, 0x400, 0x400);
-        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x250, 0x100, 0x310, 0x200, 0, 0x5E0, 0, -0x400, 0x400);
+        gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x190, 0x100, 0x250, 0x200, 0, 0, 0, 0x400, 0x400);
+        gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x250, 0x100, 0x310, 0x200, 0, 0x5E0, 0, -0x400, 0x400);
     }
     gDPPipeSync(gdl++);
     tex = texture_cache_lookup(0x887, 0, 3, 0);
@@ -2538,8 +2564,8 @@ Gfx *func_151EF3A0(Gfx *gdl, s32 entry) {
         gDPPipeSync(gdl++);
         SAVE_W(gdl, 0xF5181000, 0x00094250); /* SetTile (render) */
         SAVE_W(gdl, 0xF2000000, 0x0007C07C); /* SetTileSize 32x32 */
-        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x250, 0xBC, 0x290, 0xFC, 0, 0, 0, 0x400, 0x400);
-        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x180, 0xBC, 0x1D0, 0xFC, 0, 0x200, 0x200, 0x400, 0x400);
+        gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x250, 0xBC, 0x290, 0xFC, 0, 0, 0, 0x400, 0x400);
+        gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x180, 0xBC, 0x1D0, 0xFC, 0, 0x200, 0x200, 0x400, 0x400);
     }
     if (entry + 1 != D_800E10B5) {
         table = NULL;
@@ -2549,16 +2575,16 @@ Gfx *func_151EF3A0(Gfx *gdl, s32 entry) {
         } else {
             D_800904EC = 0;
         }
-        func_10004074(table);
+        heap_free(table);
         D_800E10B5 = entry + 1;
     }
     if (D_800904EC != 0) {
         gDPPipeSync(gdl++);
-        gdl = func_151EDBE8(gdl, &D_800904EC, 0x94, 0x60, 1, 2, 1.0f, 0);
+        gdl = hud_image_draw(gdl, &D_800904EC, 0x94, 0x60, 1, 2, 1.0f, 0);
     }
     return gdl;
 }
 #undef SAVE_W
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EF3A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/save_screen_frame_draw.s")
 #endif

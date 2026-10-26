@@ -1,4 +1,4 @@
-# P238 func_150C1B60 (spawn_ring_kind2_small): x / y / z in f12 / f14 / a2, tag in a3. func_1514C860 = jal 1514C860
+# P238 spawn_ring_kind2_small (spawn_ring_kind2_small): x / y / z in f12 / f14 / a2, tag in a3. spawn_ring_emit = jal 1514C860
 tagFF ! 0=41200000,1=C2C80000,2=43480000,3=FF ! ! ! ! ! ! !
 tag1234 ! 0=C1200000,1=42C80000,2=C3480000,3=1234 ! ! ! ! ! ! !
 tagneg ! 0=3F800000,1=40000000,2=40400000,3=FFFFFF80 ! ! ! ! ! ! !

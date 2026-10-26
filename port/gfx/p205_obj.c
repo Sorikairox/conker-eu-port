@@ -60,7 +60,7 @@ void p205_obj_hook(void) {
                  vbe_ld8(r + 0xAD));
     }
     {   /* P236 DIAGNOSTIC ?p236race=1 (with ?p205obj): the race / rail records D_80087640[humans + cpus] (0x84 bytes,
-         * func_15088E84 rail_param_step): f32 param +8, s32 lap start +0x18 / time +0x1C / lap time +0x20, s16 node
+         * rail_param_step rail_param_step): f32 param +8, s32 lap start +0x18 / time +0x1C / lap time +0x20, s16 node
          * counter +0x24, s8 lap length +0x26, lap +0x27, highest lap +0x28, nodes +0x2B..+0x2E, on rail +0x30, player
          * +0x31; laps D_800E1017, D_800BE616, humans D_80090130. */
         static int fr = -1;
@@ -361,11 +361,11 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
                  go_i, d, x, F(r, 0x18), z, cam, go_base, *sx, *sy);
 }
 
-/* P205 DIAGNOSTIC ?p205dust=N: func_150CA150 landing_dust_burst (port-b P201 C; only caller objfx_ca150 in
+/* P205 DIAGNOSTIC ?p205dust=N: landing_dust_burst landing_dust_burst (port-b P201 C; only caller objfx_ca150 in
  * game_981E0.c, so the --wrap sees every call): frame, character, position and floor (+0x180) before the call, first N
  * calls then every 16th. */
-int __real_func_150CA150(unsigned char *obj);
-int __wrap_func_150CA150(unsigned char *obj) {
+int __real_landing_dust_burst(unsigned char *obj);
+int __wrap_landing_dust_burst(unsigned char *obj) {
     static int f = -1; static unsigned n;
     int r;
     if (f < 0) f = port_flag("p205dust");
@@ -376,16 +376,16 @@ int __wrap_func_150CA150(unsigned char *obj) {
                      port_frame_count, (unsigned)(uintptr_t)obj, obj ? vbe_ld8(obj + 0x3B) : 0, obj ? F(obj, 0x14) : 0.f,
                      obj ? F(obj, 0x18) : 0.f, obj ? F(obj, 0x1C) : 0.f, obj ? F(obj, 0x20) : 0.f, obj ? F(obj, 0x180) : 0.f);
     }
-    r = __real_func_150CA150(obj);
+    r = __real_landing_dust_burst(obj);
     if (f > 0 && n <= (unsigned)f) port_log("[p205dust] call %u done\n", n);
     return r;
 }
 
-/* P236 DIAGNOSTIC: count func_150877C0 rail_track_update calls per rail record (callers: script cmd 18 in
- * game_eu_CBB40.c func_1509E3D4, thrown objects in game_eu_78230.c func_150538CC); printed by ?p236race. */
+/* P236 DIAGNOSTIC: count rail_track_update rail_track_update calls per rail record (callers: script cmd 18 in
+ * game_eu_CBB40.c event_action_rail, thrown objects in game_eu_78230.c obj_state_rail_follow); printed by ?p236race. */
 unsigned p236_rail_calls[8], p236_rail_mode[8];
-void __real_func_150877C0(int player, int mode, float speed);
-void __wrap_func_150877C0(int player, int mode, float speed) {
+void __real_rail_track_update(int player, int mode, float speed);
+void __wrap_rail_track_update(int player, int mode, float speed) {
     static int rw = -1;
     extern unsigned char *D_80087640;
     const unsigned char *q = D_80087640 ? D_80087640 + (player & 7) * 0x84 : 0;
@@ -395,7 +395,7 @@ void __wrap_func_150877C0(int player, int mode, float speed) {
     if (rw < 0) rw = port_flag("p236rw");   /* ?p236rw=F: log player 0's tracking for retraces F .. F+600 */
     lg = rw > 0 && player == 0 && q && port_frame_count >= (unsigned)rw && port_frame_count < (unsigned)rw + 600;
     if (lg) { t0 = F(q, 8); c0 = (short)vbe_ld16(q + 0x24); n0 = vbe_ld8(q + 0x2C); }
-    __real_func_150877C0(player, mode, speed);
+    __real_rail_track_update(player, mode, speed);
     if (lg) {
         const unsigned char *o = D_800CC2D0 + (signed char)vbe_ld8(q + 0x31) * REC;
         port_log("[p236rw] %u pos %.0f %.0f %.0f | t %.3f cnt %d n %d -> t %.3f cnt %d nodes %d %d %d %d alt %d off %.2f n(%.2f %.2f)\n",
@@ -405,15 +405,15 @@ void __wrap_func_150877C0(int player, int mode, float speed) {
     }
 }
 
-/* P240 DIAGNOSTIC: count func_151B61A0 ripple_spawn_flat calls (P234 C; only caller object_break_effects_floor in game_161520.c,
+/* P240 DIAGNOSTIC: count ripple_spawn_flat ripple_spawn_flat calls (P234 C; only caller object_break_effects_floor in game_161520.c,
  * so the --wrap sees every call). ?p240rip=N logs the first N calls and then every 64th: frame, position, life,
  * result. Calls through unchanged. */
-int __real_func_151B61A0(float *pos, float *vel, float scale, float *dir, float *acc, float speed, short life,
+int __real_ripple_spawn_flat(float *pos, float *vel, float scale, float *dir, float *acc, float speed, short life,
                          unsigned char alpha, int a8, float a9, unsigned char aA, unsigned char aB, unsigned char aC, int aD);
-int __wrap_func_151B61A0(float *pos, float *vel, float scale, float *dir, float *acc, float speed, short life,
+int __wrap_ripple_spawn_flat(float *pos, float *vel, float scale, float *dir, float *acc, float speed, short life,
                          unsigned char alpha, int a8, float a9, unsigned char aA, unsigned char aB, unsigned char aC, int aD) {
     static int f = -1; static unsigned n;
-    int r = __real_func_151B61A0(pos, vel, scale, dir, acc, speed, life, alpha, a8, a9, aA, aB, aC, aD);
+    int r = __real_ripple_spawn_flat(pos, vel, scale, dir, acc, speed, life, alpha, a8, a9, aA, aB, aC, aD);
     if (f < 0) f = port_flag("p240rip");
     n++;
     if (f > 0 && (n <= (unsigned)f || n % 64 == 0))

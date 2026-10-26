@@ -14,7 +14,7 @@ s/s.u4A = \*(s16 \*) (p + 0x18);/s.u4A = *(s16 *) (p + 0x16);/
 s/    s.a\[1\] = pt\[1\];/    s.a[1] = pt[0];/
 s/    s.b\[0\] = pt\[3\];/    s.b[0] = pt[0];/
 s/    s.b\[2\] = pt\[5\];/    s.b[2] = pt[4];/
-1,/func_15143794((u8) r1, r2/s//func_15143794((u8) r2, r1/
+1,/vec3_from_angles_byte((u8) r1, r2/s//vec3_from_angles_byte((u8) r2, r1/
 1,/- (spread >> 1) - 0x40,/s//- (spread >> 1),/
 1,/- (spread >> 1) - 0x40,/s//- spread - 0x40,/
 1,/(u32) (spread + 1)/s//(u32) spread/

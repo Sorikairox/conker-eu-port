@@ -56,7 +56,7 @@ extern s32 D_80089004;
 extern s32 D_800A28D4;
 extern u8 D_800A2880[];         /* 12-byte points, read as the segment start / end */
 extern u8 D_800A28F0[];
-s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
 
 /* was func_15109A7C */
 void obj_point_effect_emitter_update(u8 *arg0) {
@@ -129,15 +129,15 @@ void obj_point_effect_emitter_update(u8 *arg0) {
                 sp.u7C = (((*(f32 *)((u8 *)temp_s1 + 0x10)) - temp_f12) * temp_f0) + temp_f12;
                 sp.u80 = (((*(f32 *)((u8 *)temp_s1 + 0x14)) - temp_f14) * temp_f0) + temp_f14;
                 temp_s2 = (*(s32 *)((u8 *)sp.uC0 + 0x1D4)) + 0x240;
-                func_15143134(&sp.u78, &sp.uB4, temp_s2);
-                func_15143134(temp_s1, &sp.uA8, temp_s2);
-                func_15143134(temp_s1 + 0xC, &sp.u9C, temp_s2);
-                func_15143134(D_800A28F0 + temp_s3, &sp.u90, temp_s2);
+                mtx_transform_point_or_origin(&sp.u78, &sp.uB4, temp_s2);
+                mtx_transform_point_or_origin(temp_s1, &sp.uA8, temp_s2);
+                mtx_transform_point_or_origin(temp_s1 + 0xC, &sp.u9C, temp_s2);
+                mtx_transform_point_or_origin(D_800A28F0 + temp_s3, &sp.u90, temp_s2);
                 temp_f0_2 = random_float();
                 sp.u84 = (((sp.u90 - sp.u9C) * temp_f0_2) + sp.u9C) - sp.uA8;
                 sp.u88 = (((sp.u94 - sp.uA0) * temp_f0_2) + sp.uA0) - sp.uAC;
                 sp.u8C = (((sp.u98 - sp.uA4) * temp_f0_2) + sp.uA4) - sp.uB0;
-                func_15145128(&sp.u84, &sp.u84, 0, 0);
+                vec3_normalize_len(&sp.u84, &sp.u84, 0, 0);
                 ((s32 (*)()) *(s32 *)((u8 *)&D_80089004 + ((*(s8 *)((u8 *)temp_s4 + 0x11)) * 4)))(arg0, &sp.uB4, &sp.uA8, &sp.u9C, &sp.u90, &sp.u84);
                 (*(f32 *)((u8 *)temp_s4 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s4 + 8)) > 1.0f);
@@ -163,12 +163,12 @@ extern f32 D_800A2A10;
 extern f32 D_800A2A14;
 extern f32 D_800A2A18;
 extern f32 D_800A2A1C;
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_151530A8(void *, u8, s32);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+s32 emit_streaks_from_spec(void *, u8, s32);
 s32 random_int(void);
 f32 random_float(void);
 
-/* particle template of func_151308E4 (0x70 bytes; bytes 0x5C-0x5F / 0x66-0x6F unset, as in the asm) */
+/* particle template of particle_spawn_basic (0x70 bytes; bytes 0x5C-0x5F / 0x66-0x6F unset, as in the asm) */
 typedef struct {
     s32 u0;           /* 0x00 */
     s32 u4;           /* 0x04 */
@@ -193,7 +193,7 @@ typedef struct {
     u8 pad66[0xA];
 } PartTmpl9DC8;
 
-/* emitter block of func_151530A8 (0x74 bytes; bytes 0x59-0x5B / 0x6B unset, as in the asm) */
+/* emitter block of emit_streaks_from_spec (0x74 bytes; bytes 0x59-0x5B / 0x6B unset, as in the asm) */
 typedef struct {
     s32 u0;           /* 0x00 */
     s32 u4;           /* 0x04 */
@@ -226,7 +226,7 @@ typedef struct {
 // spark_burst_spawn: P232. Handler 0 of the D_80089004 point-effect table (called by obj_point_effect_emitter_update with the
 // object, the point `pos` and three more points; `dir` = the unit direction): spawns one spark particle (kind 0x2B,
 // random life 10..25, random size 35..60, velocity dir * a random scale, random flip bits 0x40 / 0x80) through
-// func_151308E4 and a small emitter (func_151530A8) at the same point. b / c / d are not used.
+// particle_spawn_basic and a small emitter (emit_streaks_from_spec) at the same point. b / c / d are not used.
 /* was func_15109DC8 */
 void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     PartTmpl9DC8 t;
@@ -274,7 +274,7 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     t.u60[3] = 0xFF;
     t.u60[4] = 0xFF;
     t.u60[5] = 4;
-    func_151308E4(&t, 1, 0, obj[0xC], obj[1]);
+    particle_spawn_basic(&t, 1, 0, obj[0xC], obj[1]);
 
     e.u0 = 1;
     e.u4 = 4;
@@ -327,7 +327,7 @@ void point_spark_spawn(u8 *obj, f32 *pos, f32 *b, f32 *c, f32 *d, f32 *dir) {
     e.u70[1] = 0;
     e.u70[2] = -1;
     e.u70[3] = -1;
-    func_151530A8(&e, obj[0xC], obj[1]);
+    emit_streaks_from_spec(&e, obj[0xC], obj[1]);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1371A0/point_spark_spawn.s")

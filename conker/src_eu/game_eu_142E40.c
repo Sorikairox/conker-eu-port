@@ -345,9 +345,9 @@ void scenery_trigger_move_update(u8 *arg0) {
                     sp68 = 0;
                     sp7A = (s16) temp_t4;
                     sp72 = -0x64;
-                    func_100111C8(var_s1 & 0xFFFF);
+                    sound_voice_stop(var_s1 & 0xFFFF);
                     var_s1 = 0;
-                    func_10010F88(0x83, 0x5000U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0xC8, 0x3E8);
+                    sound_play_at(0x83, 0x5000U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0xC8, 0x3E8);
                     var_t3 = sp68;
                     var_t5 = -0x64;
                 }
@@ -356,7 +356,7 @@ void scenery_trigger_move_update(u8 *arg0) {
                 sp68 = var_t3;
                 sp7A = (s16) temp_t4;
                 sp72 = (s16) var_t5;
-                var_s1 = func_10010E78(var_s1 & 0xFFFF, (s32) sp62, 0x7FFFU, 0, 0U, 0, (s16) (s32) temp_t0, (s16) (s32) temp_t1, (s16) (s32) temp_t2, 0xC8, 0x3E8) & 0xFFFF;
+                var_s1 = sound_voice_play_at(var_s1 & 0xFFFF, (s32) sp62, 0x7FFFU, 0, 0U, 0, (s16) (s32) temp_t0, (s16) (s32) temp_t1, (s16) (s32) temp_t2, 0xC8, 0x3E8) & 0xFFFF;
             }
             temp_f0 = (f32) var_t3 * 0.003921569f;
             (*(s16 *)((u8 *)arg0 + 0x10)) = (s16) (s32) ((f32) (s16) temp_t4 + ((f32) ((s16) ((s16) temp_t4 + sp94) - (s16) temp_t4) * temp_f0));
@@ -381,7 +381,7 @@ void scenery_trigger_move_update(u8 *arg0) {
                 sp72 = 0x64;
                 sp68 = var_t3;
                 var_t5 = 0x64;
-                var_s1 = func_10010E78(var_s1 & 0xFFFF, sp4C, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0xC8, 0x3E8) & 0xFFFF;
+                var_s1 = sound_voice_play_at(var_s1 & 0xFFFF, sp4C, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0xC8, 0x3E8) & 0xFFFF;
             }
             if (var_t3 >= 0x100) {
                 var_t3 = 0xFF;
@@ -393,8 +393,8 @@ void scenery_trigger_move_update(u8 *arg0) {
                 var_s1 = 0;
                 sp68 = 0xFF;
                 sp72 = temp_t9_2;
-                func_100111C8(temp_a0);
-                func_10010F88(0x83, 0x5000U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0xC8, 0x3E8);
+                sound_voice_stop(temp_a0);
+                sound_play_at(0x83, 0x5000U, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0xC8, 0x3E8);
                 var_t3 = 0xFF;
                 var_t5 = (s8) sp72;
             }
@@ -514,7 +514,7 @@ void scenery_uv_scroll_update(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_uv_scroll_update.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
+s32 texture_anim_start_for(u8 *, s32, s32, s32, s32, s32, s32);
 
 // object_start_pending_anim: if the object has no animation handle yet (+0x7C), starts the one requested in +0x3C
 // (bits 0-14 id, bits 15+ passed as is, bits 16-23 / 24-31 as the last two arguments) and clears the request.
@@ -526,7 +526,7 @@ void scenery_start_pending_anim(u8 *obj) {
         return;
     }
     req = *(s32 *)(obj + 0x3C);
-    *(s32 *)(obj + 0x7C) = func_15195FB0(obj, req & 0x7FFF, req >> 15, -1, 0, (req >> 24) & 0xFF, (req >> 16) & 0xFF);
+    *(s32 *)(obj + 0x7C) = texture_anim_start_for(obj, req & 0x7FFF, req >> 15, -1, 0, (req >> 24) & 0xFF, (req >> 16) & 0xFF);
     *(s32 *)(obj + 0x3C) = 0;
 }
 #else
@@ -718,14 +718,14 @@ void scenery_platform_drift_update(u8 *obj, s32 flags, s32 sound, f32 dist) {
     f = f * dist - 500.0f;
     if (*(u16 *) (obj + 0x74) == 0) {
         if (0.01f < vel) {
-            *(u16 *) (obj + 0x74) = func_10010F88(sound, pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10),
+            *(u16 *) (obj + 0x74) = sound_play_at(sound, pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10),
                                                   *(s16 *) (obj + 0x12), *(s16 *) (obj + 0x14), 1000, 6000);
         }
     } else if (0.01f < vel) {
-        func_1000F91C(*(u16 *) (obj + 0x74), pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
+        sound_voice_update_3d(*(u16 *) (obj + 0x74), pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
                       *(s16 *) (obj + 0x14), 200, 2000);
     } else {
-        func_100111C8(*(u16 *) (obj + 0x74));
+        sound_voice_stop(*(u16 *) (obj + 0x74));
         *(u16 *) (obj + 0x74) = 0;
     }
 }
@@ -967,7 +967,7 @@ extern Morph15117424 D_800896C0[];
 extern s32 D_8002AE00[][2]; /* ROM start / end of each block */
 
 // mesh_morph_update: per-frame vertex morph of a mesh object. The keyframes (`frames` sets of s16 x, y, z
-// records, 6 bytes per vertex) are loaded from ROM (func_10004514) into a buffer at +0x80 on first use. The
+// records, 6 bytes per vertex) are loaded from ROM (rom_dma_read) into a buffer at +0x80 on first use. The
 // position +0x84 (0..0xFFFF over the whole morph) picks keyframe k = frames * pos / 65535 and the blend fraction
 // (the last keyframe blends to itself at 1); each vertex (0x10-byte records in the current buffer, +0x20 / +0x24 by
 // D_800BE9C0) becomes the blended point plus the object origin (+0x10 / +0x12 / +0x14; keyframe y goes to vertex +4,
@@ -995,7 +995,7 @@ void scenery_mesh_morph_update(u8 *obj) {
 
     if (*(u8 **) (obj + 0x80) == NULL) {
         *(s16 **) (obj + 0x80) = allocate_memory(size, 1, 2, 0);
-        func_10004514(block[0], *(u8 **) (obj + 0x80), size, 1);
+        rom_dma_read(block[0], *(u8 **) (obj + 0x80), size, 1);
     }
     buf = *(u8 **) (obj + 0x80);
     t = (f32) frames * ((f32) pos * 1.5259022e-05f); /* D_800A33A4 = 0x37800080 */
@@ -1713,17 +1713,17 @@ void scenery_door_swing_update_alt(s32 arg0) {
 // (0 closed, 1 closing, 2 opening, 3 open; bit 2 picks the other default constants, which hold the same values), +0x7C = acceleration (0 -> 0.3), +0x80 = top speed
 // (0 -> 0.075), +0x84 = angular velocity. Starting from rest plays the row's open / close sound; arriving bounces back
 // (velocity * -accel) until it is below 1, then snaps, sets state 3 / 0 and plays the open / close stop sound. The new
-// yaw is stored unless the netplay owner check says otherwise; on level 2 it sets func_1000E75C's level from the open
-// fraction, elsewhere a light slot is dimmed by it (func_151885BC / func_151741D0, plus func_15174200 for slot 0 on level 1).
+// yaw is stored unless the netplay owner check says otherwise; on level 2 it sets music_set_b070_mode's level from the open
+// fraction, elsewhere a light slot is dimmed by it (light_fx_set_blend / vtx_colour_world_blend, plus vtx_colour_record_blend for slot 0 on level 1).
 // scenery_door_swing_update / scenery_door_swing_update_alt pass arg1 (0 / 3) through to scenery_door_group_sync. Reached through the D_800893D8 table.
 void scenery_door_group_sync(u8 *arg0, s32 arg1);
 f32 math_angle_diff_deg(f32 arg0, f32 arg1);
 s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
-s32 func_15022BB0(s32 arg0, s32 arg1);
-void func_1000E75C(s32 arg0);
-void func_151885BC(s32 arg0, f32 arg1);
-void func_151741D0(s32 arg0, s32 arg1);
-void func_15174200(s32 arg0, s32 arg1, s32 arg2);
+s32 cutscene_room_has_actor(s32 arg0, s32 arg1);
+void music_set_b070_mode(s32 arg0);
+void light_fx_set_blend(s32 arg0, f32 arg1);
+void vtx_colour_world_blend(s32 arg0, s32 arg1);
+void vtx_colour_record_blend(s32 arg0, s32 arg1, s32 arg2);
 
 /* was func_15118F2C */
 void scenery_mover_swing_step(s32 arg0, s32 arg1) {
@@ -1821,25 +1821,25 @@ void scenery_mover_swing_step(s32 arg0, s32 arg1) {
     if (D_800BE9B4 == 0 && yaw == *(f32 *) (rec + 4)) {
         return;
     }
-    if (D_800C35EA == 1 && func_15022BB0((rec - (u8 *) D_800DBEF4) / 0xA0, 0) != 0) {
+    if (D_800C35EA == 1 && cutscene_room_has_actor((rec - (u8 *) D_800DBEF4) / 0xA0, 0) != 0) {
         yaw = *(f32 *) (rec + 4);
     } else {
         *(f32 *) (rec + 4) = yaw;
     }
     slot = (u8) (*(s32 *) (rec + 0x3C) >> 24);
     if (D_800BE9F0 == 2) {
-        func_1000E75C((s32) (255.0f - fabsf((yaw - open) * 255.0f / open)));
+        music_set_b070_mode((s32) (255.0f - fabsf((yaw - open) * 255.0f / open)));
         return;
     }
     if (slot == 0) {
         return;
     }
     frac = 1.0f - fabsf((fabsf(yaw) - (f32) (angle < 0 ? -angle : angle)) / open);
-    func_151885BC(slot - 1, frac);
+    light_fx_set_blend(slot - 1, frac);
     level = (s32) (frac * 255.0f);
-    func_151741D0(level, slot - 1);
+    vtx_colour_world_blend(level, slot - 1);
     if (D_800BE9F0 == 1 && slot - 1 == 0) {
-        func_15174200(level, 0, 0xF8);
+        vtx_colour_record_blend(level, 0, 0xF8);
     }
 }
 #else
@@ -1847,19 +1847,19 @@ void scenery_mover_swing_step(s32 arg0, s32 arg1) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5);
-void func_151885BC(s32 arg0, f32 arg1);
-void func_151741D0(s32, s32);
+void flash_blades_spawn(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5);
+void light_fx_set_blend(s32 arg0, f32 arg1);
+void vtx_colour_world_blend(s32, s32);
 
 // bell_swing_update: per-frame swing of a hanging object (angle +0x8 in degrees, velocity +0x84). Mode (+0x73 & 3):
 // 0 = at rest, 1 = swinging to 0, 2 = swinging to +0x3E, 3 = held at +0x3E. Gravity pulls the velocity towards the
 // rest angle by +0x80 * (angle, or 180 - angle past 90) (+0.1 when it starts from rest, with sound 0x4BA unless the
 // rest angle is 0), capped at +-10. When the angle passes the rest angle (math_angle_diff_deg difference smaller than the
-// step) it bounces back at velocity * -(+0x7C), with a thud (func_15166F10); a bounce slower than +0x80 * 133.3
+// step) it bounces back at velocity * -(+0x7C), with a thud (flash_blades_spawn); a bounce slower than +0x80 * 133.3
 // stops it at rest (mode 3, sound 0x4BB; mode 0 when the rest angle is 0), else +0x80 halves. +0x7C / +0x80 default
 // to 0.3 / 0.0075. The angle wraps to [0, 360). When it changed (or D_800BE9B4 is set) it is stored and, for a
-// light slot (+0x3C >> 24, 1-based) and a non-zero +0x3E, the slot gets 1 - |angle - rest| / rest (func_151885BC /
-// func_151741D0 * 255).
+// light slot (+0x3C >> 24, 1-based) and a non-zero +0x3E, the slot gets 1 - |angle - rest| / rest (light_fx_set_blend /
+// vtx_colour_world_blend * 255).
 /* was func_151194A4 */
 void scenery_bell_swing_update(u8 *obj) {
     s32 restInt;
@@ -1907,7 +1907,7 @@ void scenery_bell_swing_update(u8 *obj) {
         }
         if (vel == 0.0f) {
             if (rest != 0.0f) {
-                func_10010F88(0x4BA, 0x5DC0, 0, 0, 0, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
+                sound_play_at(0x4BA, 0x5DC0, 0, 0, 0, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
                               *(s16 *) (obj + 0x14), 200, 2500);
             }
             pull += 0.1f;
@@ -1923,13 +1923,13 @@ void scenery_bell_swing_update(u8 *obj) {
                 if (rest == 0.0f) {
                     mode = 0;
                 } else {
-                    func_10010F88(0x4BB, 0x5DC0, 0, 0, 0, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
+                    sound_play_at(0x4BB, 0x5DC0, 0, 0, 0, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
                                   *(s16 *) (obj + 0x14), 200, 2500);
                 }
             } else {
                 *(f32 *) (obj + 0x80) *= 0.5f;
             }
-            func_15166F10(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12), *(s16 *) (obj + 0x14), 0.15f, 0xFF, 0);
+            flash_blades_spawn(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12), *(s16 *) (obj + 0x14), 0.15f, 0xFF, 0);
         } else if (0.0f < diff) {
             vel += pull;
             if (10.0f < vel) {
@@ -1959,8 +1959,8 @@ void scenery_bell_swing_update(u8 *obj) {
     }
     if (restInt != 0) {
         level = 1.0f - fabsf((angle - restF) / restF);
-        func_151885BC(slot - 1, level);
-        func_151741D0((s32) (level * 255.0f), slot - 1);
+        light_fx_set_blend(slot - 1, level);
+        vtx_colour_world_blend((s32) (level * 255.0f), slot - 1);
     }
 }
 #else
@@ -2160,7 +2160,7 @@ void scenery_mesh_cluster_spin(u8 *obj) {
 u8 *obj_find_by_link(s32);
 f32 math_cos_u8(u8);
 void scenery_mesh_cluster_spin(u8 *);
-s32 func_151EFDD0(void);
+s32 game_gu_random(void);
 f32 sinf(f32);
 
 /* rodata copies (NM link drops the asm rodata) */
@@ -2219,9 +2219,9 @@ void scenery_mesh_cluster_flap_update(u8 *obj) {
             }
         }
     } else {
-        i = func_151EFDD0() % 6;
+        i = game_gu_random() % 6;
         *(f32 *) (obj + 0x80) += (0.01953125f + 0.00390625f * (f32) i) * D_800BE9A4;
-        i = func_151EFDD0() % 3;
+        i = game_gu_random() % 3;
         *(s32 *) (obj + 0x7C) -= i;
         if (*(s32 *) (obj + 0x7C) < 0x14) {
             *(s32 *) (obj + 0x7C) = 0xEC;
@@ -2298,13 +2298,13 @@ void scenery_mesh_cluster_flap_update(u8 *obj) {
 // timer, in ticks) is 0, the first live player (D_800CC2D0, D_8008FD8C of them; +0x3C >= 0) within 80 units on the
 // ground plane and in its height band fades it in by distance; touching it with +0x1CA set gives the item
 // (obj_add_health): respawning pickups (+0x3C high half = respawn time / 50) start their timer and set +0x70 bit 2,
-// others are marked taken (+0x6E) and saved through func_1508F26C(2, index); then sound 0x1CF and the effect
-// func_151D6F64. +0x8A is the alpha, +0x4F the draw flags (0x21 idle, 0x31 fading, 0x20 taken).
-s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
+// others are marked taken (+0x6E) and saved through link_group_remove_members(2, index); then sound 0x1CF and the effect
+// pickup_spin_sparkle_spawn. +0x8A is the alpha, +0x4F the draw flags (0x21 idle, 0x31 fading, 0x20 taken).
+s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *);
 s32 obj_add_health(struct127 *arg0, s32 arg1);
-void func_1508F26C(s32 arg0, s32 arg1);
-u16 func_10010344(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4);
-void func_151D6F64(s16 *arg0, struct127 *arg1);
+void link_group_remove_members(s32 arg0, s32 arg1);
+u16 actor_sound_play2(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4);
+void pickup_spin_sparkle_spawn(s16 *arg0, struct127 *arg1);
 
 /* was func_1511A540 */
 void scenery_pickup_spin_update(u8 *rec) {
@@ -2349,7 +2349,7 @@ void scenery_pickup_spin_update(u8 *rec) {
                     rec[0x4F] = 0x21;
                     continue;
                 }
-                func_1507C7C0((struct127 *) p, &height, &unk4C, &unk4A);
+                obj_collision_cylinder((struct127 *) p, &height, &unk4C, &unk4A);
                 rec[0x4F] = 0x31;
                 y = *(s16 *) (rec + 0x12);
                 if (*(f32 *) (p + 0x18) < y + 80.0f && y - 80.0f < *(f32 *) (p + 0x18) + height && p[0x1CA] != 0) {
@@ -2360,11 +2360,11 @@ void scenery_pickup_spin_update(u8 *rec) {
                             rec[0x70] |= 4;
                         } else {
                             rec[0x6E] = 1;
-                            func_1508F26C(2, ((rec - (u8 *) D_800DBEF4) / 0xA0) & 0xFFFF);
+                            link_group_remove_members(2, ((rec - (u8 *) D_800DBEF4) / 0xA0) & 0xFFFF);
                         }
                         rec[0x4F] = 0x20;
-                        func_10010344(0x1CF, (struct127 *) p, 0x7D00, 0xC8, 0x9C4);
-                        func_151D6F64((s16 *) rec, (struct127 *) p);
+                        actor_sound_play2(0x1CF, (struct127 *) p, 0x7D00, 0xC8, 0x9C4);
+                        pickup_spin_sparkle_spawn((s16 *) rec, (struct127 *) p);
                     } else {
                         rec[0x4F] = 0x31;
                         rec[0x8A] = (u32) ((0.25f + d2 * 0.0001171875f) * 255.0f);
@@ -2516,12 +2516,12 @@ void scenery_anim_and_tex_update(u8 *arg0) {
     scenery_texture_anim_step(arg0, arg0 + 0x80, arg0 + 0x84);
 }
 
-s32 func_15022BB0(s32, s32);
+s32 cutscene_room_has_actor(s32, s32);
 void scenery_bob_update(u8 *);
 
 /* was func_1511ACC0 */
 void scenery_bob_and_tex_update(u8 *arg0) {
-    if ((D_800C35EA == 1) && (func_15022BB0((arg0 - (u8 *)D_800DBEF4) / 160, 0) != 0)) {
+    if ((D_800C35EA == 1) && (cutscene_room_has_actor((arg0 - (u8 *)D_800DBEF4) / 160, 0) != 0)) {
         *(s32 *)(arg0 + 0x7C) = 0;
         *(f32 *)(arg0 + 0x18) = 0.0f;
     }
@@ -2556,7 +2556,7 @@ void scenery_wobble_start_wave(u8 *arg0) {
 s16 *allocate_memory(s32, s32, s32, s32);
 f32 sqrtf(f32);
 f32 math_cos_u8(u8);
-void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 void world_record_build_matrix(f32 (*)[4], u8 *);
 void scenery_texture_anim_step(u8 *obj, s32 *slots, s32 *state);
 void scenery_wobble_start_wave(u8 *arg0);
@@ -2696,7 +2696,7 @@ void scenery_mesh_wobble_update(u8 *obj) {
     up = 0;
     for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8, dst += 8) {
         if (*(u16 *) &dst[3] & 0x4000) {
-            func_150A7E40(mtx, v[0], v[1], v[2], &ox, &oy, &oz);
+            mtxf_transform_point(mtx, v[0], v[1], v[2], &ox, &oy, &oz);
         } else {
             a = ph[phase[i] & 3] + phase[i];
             if (phase[i] & 0x80) {
@@ -2707,7 +2707,7 @@ void scenery_mesh_wobble_update(u8 *obj) {
             if (st->active) {
                 up = (s32) (lift[i] * wave[i]);
             }
-            func_150A7E40(mtx, (f32) v[0] + sx, v[1] + up, (f32) v[2] + cz, &ox, &oy, &oz);
+            mtxf_transform_point(mtx, (f32) v[0] + sx, v[1] + up, (f32) v[2] + cz, &ox, &oy, &oz);
         }
         dst[0] = (s32) ox;
         dst[1] = (s32) oy;
@@ -2770,14 +2770,14 @@ void scenery_jitter_tilt_update(u8 *arg0) {
 #endif
 #ifdef NON_MATCHING
 // sliding_door_update: per-frame update of a sliding door / gate (type +0x3C & 0x3FF, 0..7). On a networked game
-// (D_800C35EA == 1) nothing happens when func_15022BB0 (object index) says so. The closed position (x +0x10,
+// (D_800C35EA == 1) nothing happens when cutscene_room_has_actor (object index) says so. The closed position (x +0x10,
 // z +0x14) is saved at +0x7C (bit 31 = saved) / +0x80 on first use. Mode +0x73 & 3: 0 = closed, 1 = closing,
 // 2 = opening, 3 = open. While opening / open each type has its open position (x first, or z first for types 4 /
 // 7; types 0 / 1 / 7 move x without waiting for z) and speed (7, 15 for types 4 / 7); closing goes back to the saved
 // position. A start sound plays when the move begins (world_object_sound_play; 0x4E, type 5: 0x4C1). Modes 0 / 3 snap to the
 // target. The speed +0x84 eases towards the type's speed (3% per frame) and each frame moves one axis by at most
 // the speed; x reaching its target stops (sound 0x4E for type 0). When both axes are there, opening becomes open and
-// closing closed, the looping sound +0x74 is stopped (func_100111C8) and sound 0x4C8 plays.
+// closing closed, the looping sound +0x74 is stopped (sound_voice_stop) and sound 0x4C8 plays.
 /* was func_1511B604 */
 void scenery_sliding_door_update(u8 *obj) {
     f32 maxSpeed = 7.0f;
@@ -2793,7 +2793,7 @@ void scenery_sliding_door_update(u8 *obj) {
     f32 vel;
     f32 d;
 
-    if (D_800C35EA == 1 && func_15022BB0((s32) (obj - (u8 *) D_800DBEF4) / 0xA0, 0) != 0) {
+    if (D_800C35EA == 1 && cutscene_room_has_actor((s32) (obj - (u8 *) D_800DBEF4) / 0xA0, 0) != 0) {
         return;
     }
     if (*(s32 *) (obj + 0x7C) == 0) {
@@ -2917,7 +2917,7 @@ void scenery_sliding_door_update(u8 *obj) {
     } else if (mode == 2 || mode == 1) {
         obj[0x73] = (obj[0x73] & 0xFC) | (mode == 2 ? 3 : 0);
         if (*(u16 *) (obj + 0x74) != 0) {
-            func_100111C8(*(u16 *) (obj + 0x74));
+            sound_voice_stop(*(u16 *) (obj + 0x74));
             *(u16 *) (obj + 0x74) = 0;
             world_object_sound_play(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
@@ -2929,8 +2929,8 @@ void scenery_sliding_door_update(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-void func_151741D0(s32, s32);
-void func_151885BC(s32 arg0, f32 arg1);
+void vtx_colour_world_blend(s32, s32);
+void light_fx_set_blend(s32 arg0, f32 arg1);
 
 // door_swing_update: swings the door angle obj +0x8 (velocity +0x84) by the state in the low 2 bits of +0x73:
 // 0 closed / 3 open (angle pinned to 0 / the open angle s16 +0x3E), 1 closing (target 0), 2 opening (target
@@ -2938,7 +2938,7 @@ void func_151885BC(s32 arg0, f32 arg1);
 // velocity bounces back scaled by +0x7C (0.45 when 0) and the door settles (state 0 / 3) once it is below 0.05 *
 // +0x80 (0.5 when 0); else the velocity accelerates towards +-(+0x80) by 1%. The angle wraps into [0, 360). When it
 // changes (or D_800BE9B4 is set) it is stored and, for a door with a light slot (byte +0x3C), the slot's light
-// (func_151885BC) and vertex colours (func_151741D0) follow the open fraction.
+// (light_fx_set_blend) and vertex colours (vtx_colour_world_blend) follow the open fraction.
 /* was func_1511BAA4 */
 void scenery_door_swing_angle_update(u8 *obj) {
     s16 open = *(s16 *) (obj + 0x3E);
@@ -3006,8 +3006,8 @@ void scenery_door_swing_angle_update(u8 *obj) {
         return;
     }
     frac = fabsf((angle - openAngle) / openAngle);
-    func_151885BC(slot - 1, frac);
-    func_151741D0((s32) ((1.0f - frac) * 255.0f), slot - 1);
+    light_fx_set_blend(slot - 1, frac);
+    vtx_colour_world_blend((s32) ((1.0f - frac) * 255.0f), slot - 1);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/scenery_door_swing_angle_update.s")
@@ -3080,7 +3080,7 @@ void scenery_part_vertices_follow_refs(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15188580(s32, f32 *);
+void light_fx_get_blend(s32, f32 *);
 
 /* was func_1511BFAC */
 void scenery_alpha_from_level_value(u8 *arg0) {
@@ -3090,7 +3090,7 @@ void scenery_alpha_from_level_value(u8 *arg0) {
     u32 temp_t7;
 
     sp.u1C = 0.0f;
-    func_15188580((*(s32 *)((u8 *)arg0 + 0x3C)), &sp.u1C);
+    light_fx_get_blend((*(s32 *)((u8 *)arg0 + 0x3C)), &sp.u1C);
     temp_t7 = (u32) (sp.u1C * 255.0f);
     (*(s8 *)((u8 *)arg0 + 0x8A)) = (s8) temp_t7;
     if (!(temp_t7 & 0xFF)) {
@@ -3209,7 +3209,7 @@ void scenery_tex_follow_object_update(u8 *arg0)
   if (s != NULL) {
     v = s;
   } else {
-    v = (u8 *)func_15083E90(arg0[0x3F]);
+    v = (u8 *)obj_find_by_setup_id(arg0[0x3F]);
   }
   if (v != NULL) {
     scenery_tex_project_follow(arg0, *(s32 *)(v + 0x14), *(s32 *)(v + 0x1C), 1.0f, 1.0f);
@@ -3368,7 +3368,7 @@ loop_21:
                         sp5C = 2;
                         sp3C = var_t1;
                         sp48 = 0;
-                        func_10010F88(0x1A4, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0x5DC, 0xDAC);
+                        sound_play_at(0x1A4, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0x5DC, 0xDAC);
                         var_t0 = sp48;
                         goto block_45;
                     }
@@ -3386,7 +3386,7 @@ loop_21:
                         sp5C = 3;
                         sp3C = 0;
                         sp48 = var_t0;
-                        func_10010F88(0x1A5, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0x5DC, 0xDAC);
+                        sound_play_at(0x1A5, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x12)), (s16) (s32) (*(s16 *)((u8 *)arg0 + 0x14)), 0x5DC, 0xDAC);
                         var_t1 = 0;
 block_45:
                         var_t2 = sp5C;
@@ -3471,10 +3471,10 @@ void scenery_sway_xz_update(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 8)) = temp_f8;
     (*(f32 *)((u8 *)arg0 + 0x80)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x80)) + (0.073f * D_800BE9A4));
     (*(f32 *)((u8 *)arg0 + 0x84)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x84)) + (0.065f * D_800BE9A4));
-    (*(f32 *)((u8 *)arg0 + 0x80)) = func_15144B68((*(f32 *)((u8 *)arg0 + 0x80)));
+    (*(f32 *)((u8 *)arg0 + 0x80)) = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x80)));
     {
         s32 blk_t; // fakematch: block boundary keeps the 0x84 store before the compare load
-        (*(f32 *)((u8 *)arg0 + 0x84)) = func_15144B68((*(f32 *)((u8 *)arg0 + 0x84)));
+        (*(f32 *)((u8 *)arg0 + 0x84)) = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x84)));
     }
     if (((*(f32 *)((u8 *)arg0 + 8)) == 0.0f) && ((*(f32 *)((u8 *)arg0 + 0x84)) == 0.0f)) {
         (*(f32 *)((u8 *)arg0 + 0)) = 7.5f;
@@ -3483,12 +3483,12 @@ void scenery_sway_xz_update(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150B2C20(s32, s32);
-void func_151714BC(u8 *, u8, s32); /* P274: 3 arguments, void (the asm caller also sets a3 = 1, unused) */
-void func_151741D0(s32, s32);
+s32 pipe_explode_effects(s32, s32);
+void debris_barrel_break_pieces(u8 *, u8, s32); /* P274: 3 arguments, void (the asm caller also sets a3 = 1, unused) */
+void vtx_colour_world_blend(s32, s32);
 /* D_800A3354 (rodata in scenery_part_vertices_follow_refs's GLOBAL_ASM): the three hit sound ids, copied to the stack table */
 static const u16 D_800A3354_ids[3] = { 0x2B6, 0x2BD, 0x2BE };
-s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
+s32 sfx_cb_delayed_play_2d(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
 
 /* was func_1511CBC0 */
 void scenery_smash_reveal_update(u8 *arg0) {
@@ -3532,7 +3532,7 @@ void scenery_smash_reveal_update(u8 *arg0) {
         }
         temp_a1 = (*(s32 *)((u8 *)arg0 + 0x3C));
         if (temp_a1 != 0xFF) {
-            func_151741D0(0, temp_a1);
+            vtx_colour_world_blend(0, temp_a1);
         }
     }
     if (D_800BE9B4 != 0) {
@@ -3565,8 +3565,8 @@ void scenery_smash_reveal_update(u8 *arg0) {
                 case 2:
                     break;
                 case 1:
-                    func_151714BC(sp48, 0xFF, 0);
-                    func_10010F30(0x2BE, 0x7FFFU, 0x40U, 0, 0U);
+                    debris_barrel_break_pieces(sp48, 0xFF, 0);
+                    sound_play_2d(0x2BE, 0x7FFFU, 0x40U, 0, 0U);
                     break;
                 case 0:
                     temp_t9 = random_int() % 3U;
@@ -3577,23 +3577,23 @@ void scenery_smash_reveal_update(u8 *arg0) {
                     temp_t1 = (&sp.u50[0])[((u32) ((random_int() & 1) + sp.u5A + 1) % 3U) & 0xFFFF];
                     sp.u5A = (&sp.u50[0])[sp.u5A];
                     sp.u58 = temp_t1;
-                    func_10010F30(0x2B7, 0x7FFFU, 0x40U, 0, 0U);
-                    func_10010F30((s32) sp.u5A, 0x7FFFU, 0xAU, 0, 0U);
-                    func_10010F30((s32) sp.u58, 0x7FFFU, 0x36U, 0, 0U);
+                    sound_play_2d(0x2B7, 0x7FFFU, 0x40U, 0, 0U);
+                    sound_play_2d((s32) sp.u5A, 0x7FFFU, 0xAU, 0, 0U);
+                    sound_play_2d((s32) sp.u58, 0x7FFFU, 0x36U, 0, 0U);
                     sp.u5A = (u16) (random_int() % 5U);
                     temp_t5 = (u32) ((random_int() & 3) + sp.u5A + 1) % 5U;
-                    sp44 = (s32 *)&func_1000EC24;
+                    sp44 = (s32 *)&sfx_cb_delayed_play_2d;
                     sp.u58 = (u16) temp_t5;
-                    func_1000FA64((sp.u5A + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) &func_1000EC24, (u8 *)0x1001E, 0, 0x200, 0);
-                    func_1000FA64((sp.u58 + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x1001E, 0, 0, 0);
+                    sfx_emitter_start((sp.u5A + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) &sfx_cb_delayed_play_2d, (u8 *)0x1001E, 0, 0x200, 0);
+                    sfx_emitter_start((sp.u58 + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x1001E, 0, 0, 0);
                     sp.u5A = (u16) (random_int() % 5U);
                     temp_hi = (u32) ((random_int() & 3) + sp.u5A + 1) % 5U;
                     sp.u58 = (u16) temp_hi;
-                    func_1000FA64((sp.u5A + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x32, 0, 0x300, 0);
-                    func_1000FA64((temp_hi + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x32, 0, 0x100, 0);
+                    sfx_emitter_start((sp.u5A + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x32, 0, 0x300, 0);
+                    sfx_emitter_start((temp_hi + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x32, 0, 0x100, 0);
                     break;
                 case 3:
-                    func_150B2C20((temp_v1 >> 8) & 0xFF, 0xFF);
+                    pipe_explode_effects((temp_v1 >> 8) & 0xFF, 0xFF);
                     break;
                 }
             }
@@ -3610,7 +3610,7 @@ void scenery_smash_reveal_update(u8 *arg0) {
             }
             temp_a1_2 = (*(s32 *)((u8 *)arg0 + 0x3C));
             if (temp_a1_2 != 0xFF) {
-                func_151741D0((*(s32 *)((u8 *)arg0 + 0x80)), temp_a1_2);
+                vtx_colour_world_blend((*(s32 *)((u8 *)arg0 + 0x80)), temp_a1_2);
             }
             if (sp.u64 == 3) {
                 (*(s32 *)((u8 *)arg0 + 0x7C)) = 0;
@@ -3634,8 +3634,8 @@ void scenery_ripple_top_height(s32 arg0, f32 *arg1) {
 s16 *allocate_memory(s32, s32, s32, s32);
 f32 math_cos_u8(u8);
 void scenery_ripple_top_height(s32 arg0, f32 *arg1);
-s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
-void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
+s32 texture_anim_start_for(u8 *, s32, s32, s32, s32, s32, s32);
+void uv_rotate(u8 *, s32 *, s32, f32, s32, s32);
 extern s32 D_80090688;
 
 /* rodata copies (NM link drops the asm rodata) */
@@ -3650,7 +3650,7 @@ typedef struct {
     u16 time;       /* 0x04 ripple clock (high byte = angle) */
     u16 speed;      /* 0x06 */
     f32 height;     /* 0x08 ripple height */
-    s32 sound;      /* 0x0C func_15195FB0 (level 0x13) */
+    s32 sound;      /* 0x0C texture_anim_start_for (level 0x13) */
     u8 glowTimer;   /* 0x10 */
     u8 glowPhase;   /* 0x11 */
     u8 glow;        /* 0x12 1: +0x8A glows, vertex colours untouched */
@@ -3662,8 +3662,8 @@ typedef struct {
 // rippling_wall_update: per-frame update of a rippling vertical surface (levels D_800BE9F0 4 and 0x13 only; vertex
 // records 0x10 bytes, template +0x28, output +0x20 + D_800BE9C0 * 4). The top is 22000 (scenery_ripple_top_height) above +0x14.
 // First call: the +0x7C state; level 4: speed 0x1DA, height 100, phase = (top - z) * 0.1; level 0x13: speed 0x259,
-// height 36, phase = top - z, a sound (func_15195FB0 D_80090688), and for the +0x72 == 0xFE variant a texture that
-// turns 0.453 degrees a frame (uv copy at +0x18, func_15094EC8 32 x 32). Level 4 objects other than 0xF2 glow
+// height 36, phase = top - z, a sound (texture_anim_start_for D_80090688), and for the +0x72 == 0xFE variant a texture that
+// turns 0.453 degrees a frame (uv copy at +0x18, uv_rotate 32 x 32). Level 4 objects other than 0xF2 glow
 // (+0x8A, phase 0 for 0xF1, else 0x80) instead of shading their vertices. Every frame each vertex gets
 // y = template y + +0x12 + cos(phase + clock) * height and the shade 32.5 * (cos + 1) + 190; on level 4 vertices
 // below z 12000 are pulled towards it (by 0.81 .. 1 of the distance) and the clock speed swings with
@@ -3751,7 +3751,7 @@ void scenery_rippling_wall_update(u8 *obj) {
             st->glow = 1;
         }
         if (lvl13 == TRUE) {
-            st->sound = func_15195FB0(obj, D_80090688, 0, 0, 0, 0, 8);
+            st->sound = texture_anim_start_for(obj, D_80090688, 0, 0, 0, 0, 8);
         }
     }
 
@@ -3792,7 +3792,7 @@ void scenery_rippling_wall_update(u8 *obj) {
         obj[0x8A] = (u32) ((c + 1.0f) * 0.5f * 205.0f + 50.0f);
     }
     if (spin != 0.0f) {
-        func_15094EC8(*(u8 **) (obj + 0x20 + D_800BE9C0 * 4), (s32 *) st->uv, *(u16 *) (obj + 0x16), st->rot, uh, uw);
+        uv_rotate(*(u8 **) (obj + 0x20 + D_800BE9C0 * 4), (s32 *) st->uv, *(u16 *) (obj + 0x16), st->rot, uh, uw);
         st->rot += spin;
         if (st->rot >= 360.0f) {
             st->rot -= 360.0f;
@@ -3971,12 +3971,12 @@ void scenery_mesh_tex_wave_update(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
+void uv_rotate(u8 *, s32 *, s32, f32, s32, s32);
 
 // mesh_tex_scroll_update: handler (table EU 80089318) for a mesh object: on first use caches each source vertex's
 // texture coordinates minus 0x2000 (+0x7C, allocated) and writes the source positions plus the offset (+0x10..+0x14)
 // into both vertex buffers (+0x24, +0x20); every frame advances the scroll (+0x80) by speed * 0.01 * D_800BE9E4
-// (speed = low half of +0x3C) and rebuilds the current buffer's texture coordinates (func_15094EC8) with the two
+// (speed = low half of +0x3C) and rebuilds the current buffer's texture coordinates (uv_rotate) with the two
 // packed bytes of +0x3C (top byte signed).
 /* was func_1511DF6C */
 void scenery_mesh_tex_scroll_update(u8 *obj) {
@@ -4006,7 +4006,7 @@ void scenery_mesh_tex_scroll_update(u8 *obj) {
     }
     packed = *(s32 *)(obj + 0x3C);
     *(f32 *)(obj + 0x80) += (f32)((f32)(s16)packed * 0.01) * (f32)D_800BE9E4;
-    func_15094EC8(*(u8 **)(obj + 0x20 + D_800BE9C0 * 4), (s32 *)uv, *(u16 *)(obj + 0x16), *(f32 *)(obj + 0x80),
+    uv_rotate(*(u8 **)(obj + 0x20 + D_800BE9C0 * 4), (s32 *)uv, *(u16 *)(obj + 0x16), *(f32 *)(obj + 0x80),
                   packed >> 24, (packed >> 16) & 0xFF);
 }
 #else
@@ -4083,7 +4083,7 @@ void scenery_lid_open_update(u8 *arg0)
   *((u8 *) (arg0 + 0x73)) |= var_v0;
 }
 
-s32 func_10010558(s32, struct127 *, s32, s32, s32, s32);
+s32 actor_sound_play2_delayed(s32, struct127 *, s32, s32, s32, s32);
 
 /* was func_1511E320 */
 void pickup_collect_sound_play(u8 *arg0, struct127 *arg1) {
@@ -4103,9 +4103,9 @@ void pickup_collect_sound_play(u8 *arg0, struct127 *arg1) {
     case 0x5D:
     case 0x5E:
         if (isA) {
-            func_10010630(0x542, arg1, 0x6590, 0x64, 0x3E8);
+            actor_sound_play_untracked(0x542, arg1, 0x6590, 0x64, 0x3E8);
         } else if (isB) {
-            func_10010630(0x567, arg1, 0x6590, 0x64, 0x3E8);
+            actor_sound_play_untracked(0x567, arg1, 0x6590, 0x64, 0x3E8);
         }
         snd = 0x2B0;
         break;
@@ -4150,12 +4150,12 @@ void pickup_collect_sound_play(u8 *arg0, struct127 *arg1) {
     case 0x53:
         snd = 0x2AF;
         if (isB) {
-            func_10010558(0x567, arg1, 0x7D00, 0x64, 0x3E8, 0x19);
+            actor_sound_play2_delayed(0x567, arg1, 0x7D00, 0x64, 0x3E8, 0x19);
         }
         break;
     case 0x56:
         if (isB) {
-            func_10010630(0x567, arg1, 0x6590, 0x64, 0x3E8);
+            actor_sound_play_untracked(0x567, arg1, 0x6590, 0x64, 0x3E8);
         }
         snd = 0x5AE;
         break;
@@ -4172,14 +4172,14 @@ void pickup_collect_sound_play(u8 *arg0, struct127 *arg1) {
         break;
     }
     if (snd != 0) {
-        func_10010630(snd, arg1, vol, 0x64, 0x3E8);
+        actor_sound_play_untracked(snd, arg1, vol, 0x64, 0x3E8);
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_15031C4C(struct127 *, s32, s32);
+s32 attachment_find_by_slot(struct127 *, s32, s32);
 u8 *event_get_vars(s32);
-void func_151D6F20(s32, s32);
+void pickup_burst_in_mp_level(s32, s32);
 f32 cosf(f32);
 typedef struct {
     u16 phase0;  /* 0x0: bob phase (x) */
@@ -4196,12 +4196,12 @@ typedef struct {
 /* pickup_update: world-object callback of type 0x28 (D_80089030[0x28][0], obj +0x38): a floating pickup. On the
  * first call it allocates its 0x10-byte state into obj +0x7C (the full scale from +0x2C; the scales +0x2C..+0x34
  * start at 0). Unless the object kind (+0x54) is 0x59 / 0x5A it spins (+4 += 1.52 per tick) and bobs (+0 / +0x18 from
- * two cosine phases). Kind 0x54 uses item 0x17 for func_15031C4C and is disabled on level 0x2D while object 0xBA's
+ * two cosine phases). Kind 0x54 uses item 0x17 for attachment_find_by_slot and is disabled on level 0x2D while object 0xBA's
  * +0x1FE4 is <= 0. While not taken (state < 3) the first player that is active (+0x0), alive (+0x1CA), not 0xFF
  * (+0x127), playing (+0x300), on the right team for the +0x84 filter (1 team 0, 2 not team 0, 3 even teams), that
  * does not already hold the item, and is within 100 * size (ctl +0x1AF / 64, * 1.4 with ctl +0x84) horizontally and
- * overlaps vertically (func_1507C7C0 height) takes it: +0x80 = the player's +0x3B, state 3, pickup_collect_sound_play and
- * func_151D6F20. Then the scale animation: grow by 0.26 * scale per tick, wobble (amplitude 0.3 falling by 0.02 *
+ * overlaps vertically (obj_collision_cylinder height) takes it: +0x80 = the player's +0x3B, state 3, pickup_collect_sound_play and
+ * pickup_burst_in_mp_level. Then the scale animation: grow by 0.26 * scale per tick, wobble (amplitude 0.3 falling by 0.02 *
  * scale) and shrink to 0 after being taken (then +0x6E = 1). */
 /* was func_1511E4F4 */
 void pickup_update(u8 *obj) {
@@ -4258,7 +4258,7 @@ void pickup_update(u8 *obj) {
             if (*(s32 *) (obj + 0x84) == 3 && (PK_U8(p, 0x128) & 1)) {
                 continue;
             }
-            if (item != -1 && func_15031C4C(p, item, 0) != 0) {
+            if (item != -1 && attachment_find_by_slot(p, item, 0) != 0) {
                 continue;
             }
             dx = (f32) PK_S16(obj, 0x10) - p->x_position;
@@ -4269,13 +4269,13 @@ void pickup_update(u8 *obj) {
             }
             r = 100.0f * size;
             if (dx * dx + dz * dz < r * r) {
-                func_1507C7C0(p, &h, &t1, &t2);
+                obj_collision_cylinder(p, &h, &t1, &t2);
                 y = (f32) PK_S16(obj, 0x12);
                 if (y < PK_F32(p, 0x17C) && PK_F32(p, 0x18) < y + r && y - r < PK_F32(p, 0x18) + (f32) h) {
                     *(s32 *) (obj + 0x80) = PK_U8(p, 0x3B);
                     s->state = 3;
                     pickup_collect_sound_play(obj, p);
-                    func_151D6F20((s32) p, (s32) obj);
+                    pickup_burst_in_mp_level((s32) p, (s32) obj);
                     break;
                 }
             }
@@ -4543,8 +4543,8 @@ void scenery_slide_z_update(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1508712C(s32, f32 *, s32 *, f32 *);
-s32 func_150871B8(s32);
+s32 rail_node_position(s32, f32 *, s32 *, f32 *);
+s32 rail_node_find_by_tag(s32);
 
 /* was func_1511F4C8 */
 void scenery_carry_player_arc_update(u8 *arg0) {
@@ -4596,7 +4596,7 @@ void scenery_carry_player_arc_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) ((s32) temp_v1->y_position + 0x64);
         (*(s16 *)((u8 *)arg0 + 0x14)) = (s16) (s32) temp_v1->z_position;
         sp.u4C = temp_v1;
-        func_1508712C(func_150871B8(0x28), &sp.u48, &sp.u44, &sp.u40);
+        rail_node_position(rail_node_find_by_tag(0x28), &sp.u48, &sp.u44, &sp.u40);
         (*(f32 *)((u8 *)var_s0 + 0x14)) = (f32) ((sp.u48 - sp.u4C->x_position) * 0.5f);
         temp_f2 = (*(f32 *)((u8 *)var_s0 + 0x14));
         (*(f32 *)((u8 *)var_s0 + 0x18)) = (f32) ((sp.u40 - sp.u4C->z_position) * 0.5f);
@@ -4665,7 +4665,7 @@ void scenery_attach_to_record(u8 *arg0) {
         temp_v0 = world_record_find(t);
         if (temp_v0 != 0) {
             world_record_build_matrix(sp48, temp_v0);
-            func_150A7E40(sp48, -3.0f, 223.0f, 549.0f, &sp44, &sp40, &sp3C);
+            mtxf_transform_point(sp48, -3.0f, 223.0f, 549.0f, &sp44, &sp40, &sp3C);
             *(s16 *)(arg0 + 0x10) = (s32)sp44;
             *(s16 *)(arg0 + 0x12) = (s32)sp40;
             *(s16 *)(arg0 + 0x14) = (s32)sp3C;

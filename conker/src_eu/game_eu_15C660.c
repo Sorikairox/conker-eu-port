@@ -4,9 +4,9 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15086268(f32, f32, f32, s32, s32);
-f32 func_150ADDE0(f32 *, f32 *);
-void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+s32 rail_node_nearest(f32, f32, f32, s32, s32);
+f32 vec3f_dot(f32 *, f32 *);
+void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 void camera_set_followed_obj(struct108 *, s32);
 void camera_update_target_height(struct108 *, f32 *);
 void camera_lean_from_heading(struct108 *, f32 *, f32 *);
@@ -50,11 +50,11 @@ extern u8 *D_800DC454;   /* the record of the current fixed position */
  * when +0x6CC is set and nothing is pending or easing, the mode is applied:
  *  4: hold (+0x272 = -1, +0x6C8 = 1, copy +0x1B4 / +0x1E0);
  *  7: follow the camera node graph (D_800D2778, 16-byte nodes, links at +9..+13): the eye (+0x2F8/2FC/300) is
- *     moved toward the closest point of the node's links (eased with func_150498A0 at rates +0x908 / +0x90C unless
+ *     moved toward the closest point of the node's links (eased with math_spring_approach at rates +0x908 / +0x90C unless
  *     +0x23C snaps); flags from the argument (+0x920): 0x10 keeps x/z, 8 keeps the height (cam +0x2FC);
  *  5: fixed position record D_800DC450[A] (argument 5 / 0x11: jump there once, camera_snap_to_object);
  *  0xB: store A / B / argument as floats in state +0x24..+0x2C;
- *  0xA / 0xE: look at object obj_find_by_spawn(func_15083E0C(A low byte)) (target +0x618, 0xE via camera_set_followed_obj);
+ *  0xA / 0xE: look at object obj_find_by_spawn(setup_entry_find_by_id(A low byte)) (target +0x618, 0xE via camera_set_followed_obj);
  *  0xF: camera_orbit_point_init; 3: look at the request point; 2 / 1 / 0: keep distance A from the target, pushing the eye
  *     out along the heading +0x39C; 0xD: camera_push_mode only.
  * Any other mode (or an inactive / pending request) settles: the state point (+0x18 / +0x20) blends into the
@@ -128,7 +128,7 @@ void camera_apply_request(struct108 *arg0) {
             return;
         }
         if (mode == 7) {
-            node = (u8 *)D_800D2778 + func_15086268(EF(0x2F8), EF(0x2FC), EF(0x300), 7, 0) * 16;
+            node = (u8 *)D_800D2778 + rail_node_nearest(EF(0x2F8), EF(0x2FC), EF(0x300), 7, 0) * 16;
             bestD = 1e14f;
             if (ES32(0x2C) & 0x100) {
                 return;
@@ -145,7 +145,7 @@ void camera_apply_request(struct108 *arg0) {
                     linkPos[1] = *(s16 *)(link + 2);
                     linkPos[2] = *(s16 *)(link + 4);
                     vec3_dir_to((struct17 *)nodePos, (struct17 *)linkPos, (struct17 *)axis);
-                    vec3_scale((struct17 *)axis, func_150ADDE0(axis, toEye), (struct17 *)along);
+                    vec3_scale((struct17 *)axis, vec3f_dot(axis, toEye), (struct17 *)along);
                     vec3_add((struct17 *)nodePos, (struct17 *)along, (struct17 *)cand);
                     dx = EF(0x2F8) - cand[0];
                     dy = EF(0x2FC) - cand[1];
@@ -199,8 +199,8 @@ void camera_apply_request(struct108 *arg0) {
                 EF(0x91C) = 0.0f;
                 EF(0x90C) = EF(0x914);
             } else {
-                func_150498A0((f32 *)(p + 0x908), EF(0x910), (f32 *)(p + 0x918), 1.5f, 2.0f, EF(0x7B4));
-                func_150498A0((f32 *)(p + 0x90C), EF(0x914), (f32 *)(p + 0x91C), 1.5f, 2.0f, EF(0x7B4));
+                math_spring_approach((f32 *)(p + 0x908), EF(0x910), (f32 *)(p + 0x918), 1.5f, 2.0f, EF(0x7B4));
+                math_spring_approach((f32 *)(p + 0x90C), EF(0x914), (f32 *)(p + 0x91C), 1.5f, 2.0f, EF(0x7B4));
             }
             if (!(EU16(0x920) & 0x10)) {
                 if (p[0x23C] != 0) {
@@ -209,8 +209,8 @@ void camera_apply_request(struct108 *arg0) {
                     EF(0x2F8) = best[0];
                     EF(0x300) = best[2];
                 } else {
-                    func_150498A0((f32 *)(p + 0x2F8), best[0], (f32 *)(p + 0x8F4), EF(0x908), EF(0x90C), EF(0x7B4));
-                    func_150498A0((f32 *)(p + 0x300), best[2], (f32 *)(p + 0x904), EF(0x908), EF(0x90C), EF(0x7B4));
+                    math_spring_approach((f32 *)(p + 0x2F8), best[0], (f32 *)(p + 0x8F4), EF(0x908), EF(0x90C), EF(0x7B4));
+                    math_spring_approach((f32 *)(p + 0x300), best[2], (f32 *)(p + 0x904), EF(0x908), EF(0x90C), EF(0x7B4));
                 }
             }
             if (!(EU16(0x920) & 8)) {
@@ -218,7 +218,7 @@ void camera_apply_request(struct108 *arg0) {
                     EF(0x2FC) = best[1];
                     EF(0x8FC) = 0.0f;
                 } else {
-                    func_150498A0((f32 *)(p + 0x2FC), best[1], (f32 *)(p + 0x8FC), EF(0x908), EF(0x90C), EF(0x7B4));
+                    math_spring_approach((f32 *)(p + 0x2FC), best[1], (f32 *)(p + 0x8FC), EF(0x908), EF(0x90C), EF(0x7B4));
                 }
             }
             camera_sync_angles(arg0);
@@ -273,7 +273,7 @@ void camera_apply_request(struct108 *arg0) {
             return;
         }
         if (mode == 0xA || mode == 0xE) {
-            obj = (u8 *)obj_find_by_spawn(func_15083E0C(req[0x1F]));
+            obj = (u8 *)obj_find_by_spawn(setup_entry_find_by_id(req[0x1F]));
             if (obj == NULL) {
                 return;
             }

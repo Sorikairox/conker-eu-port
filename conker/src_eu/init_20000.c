@@ -129,7 +129,7 @@ typedef struct CustomPVoice {
 } CustomPVoice;
 #define n_alEnvmixerPull func_10020000
 #define _pullSubFrame func_10020ABC
-#define func_global_asm_807407A8 func_10021C40
+#define func_global_asm_807407A8 n_adpcm_load_param
 #define __n_freeParam _n_freeParam
 #define D_global_asm_807FF0F0 D_800428C0
 #define D_global_asm_807FF0F1 D_800428C1

@@ -4,11 +4,13 @@
 #include "variables.h"
 
 
-void func_10011FA0(s32 *arg0) {
+/* was func_10011FA0 */
+void audio_mixer_request_mode(s32 *arg0) {
     D_80042770 = arg0;
 }
 
-void func_10011FB0(s32 arg0) {
+/* was func_10011FB0 */
+void audio_mixer_set_override_mode(s32 arg0) {
     s32 tmp = D_80042774;
     if (tmp == 3) {
         D_80041FD9 = 1;
@@ -16,16 +18,18 @@ void func_10011FB0(s32 arg0) {
     D_80042774 = arg0;
 }
 
-void func_10011FDC(s32 arg0) {
+/* was func_10011FDC */
+void audio_mixer_set_base_mode(s32 arg0) {
     D_80042778 = arg0;
 }
 
-void func_10011FEC(void) {
+/* was func_10011FEC */
+void audio_mixer_reset_modes(void) {
     D_80042770 = D_80042774 = D_80042778 = D_8004277C = 0;
 }
 
-// s129: music mixer per frame (mode from D_80042770/74/78: 1..5 set the master volume (func_10008BC0, 3 buses)
-// and voice 0/1 frequency + volume targets (func_10008B60 params 9/8)); written from asm. Every declared local
+// s129: music mixer per frame (mode from D_80042770/74/78: 1..5 set the master volume (music_player_set_master_gain, 3 buses)
+// and voice 0/1 frequency + volume targets (music_player_set_voice_param params 9/8)); written from asm. Every declared local
 // gets a stack slot at -O2, so the declaration order (mode, master, i, vol, freq, scale) fixes the frame.
 extern s32 D_8002BD68;
 f32 sinf(f32);
@@ -40,7 +44,8 @@ extern f32 D_80042B30;
 extern f32 D_80042B34;
 extern f32 D_80042B38;
 
-void func_10012020(void) {
+/* was func_10012020 */
+void audio_mixer_update_frame(void) {
     s32 mode;
     f32 master;
     s32 i;
@@ -114,18 +119,18 @@ void func_10012020(void) {
     if (master != D_80042B30 || D_80042B34 != 1.0f) {
         scale = master / 127.0f;
         for (i = 0; i < 3; i++) {
-            func_10008BC0(i, scale, 1.0f);
+            music_player_set_master_gain(i, scale, 1.0f);
         }
         D_80042B30 = master;
         D_80042B34 = 1.0f;
     }
     for (i = 0; i < 2; i++) {
         if (freq.v[i] != D_80042B20[i]) {
-            func_10008B60(i, i, 9, 0, freq.v[i]);
+            music_player_set_voice_param(i, i, 9, 0, freq.v[i]);
             D_80042B20[i] = freq.v[i];
         }
         if (vol.v[i] != D_80042B28[i]) {
-            func_10008B60(i, i, 8, 0, vol.v[i]);
+            music_player_set_voice_param(i, i, 8, 0, vol.v[i]);
             D_80042B28[i] = vol.v[i];
         }
     }

@@ -59,11 +59,11 @@ block_11:
             arg0->pad1A[0] = 1;
             D_800BEE2C = 1;
             func_100176C4();
-            func_10010F30(0x5B2, 0x7FFFU, 0U, 0, 0U);
-            func_10010F30(0x5B2, 0x7FFFU, 0x7FU, -0x64, 0U);
-            func_10010F30(0x5B2, 0x7FFFU, 0U, 0, 0U);
-            func_10010F30(0x5B2, 0x7FFFU, 0x7FU, -0x64, 0U);
-            func_151D6CA0(0xD2, 2);
+            sound_play_2d(0x5B2, 0x7FFFU, 0U, 0, 0U);
+            sound_play_2d(0x5B2, 0x7FFFU, 0x7FU, -0x64, 0U);
+            sound_play_2d(0x5B2, 0x7FFFU, 0U, 0, 0U);
+            sound_play_2d(0x5B2, 0x7FFFU, 0x7FU, -0x64, 0U);
+            fb_ghost_set_mode(0xD2, 2);
             camera_set_followed_obj((*(u8 **)((u8 *)sp30 + 0x318)), (*(u8 *)((u8 *)sp34 + 0x13F)));
             (*(f32 *)((u8 *)((*(u8 **)((u8 *)sp30 + 0x318))) + 0x674)) = 0.0f;
             return;
@@ -87,7 +87,7 @@ block_11:
         }
         D_800BEE2C = 0;
         sp28 = (*(u8 **)((u8 *)arg0 + 0x10));
-        func_1000E2F4(0, arg0);
+        music_set_all_paused(0, arg0);
         camera_set_followed_obj((*(u8 **)((u8 *)sp28 + 0x318)), (*(u8 *)((u8 *)sp28 + 0x13F)));
         (*(f32 *)((u8 *)((*(u8 **)((u8 *)sp28 + 0x318))) + 0x674)) = 0.0f;
         arg0->pad1A[0] = 3;
@@ -96,11 +96,11 @@ block_11:
         temp_v0_5 = arg0->pad1A[1] - (D_800BEA08 * 0xA);
         if (temp_v0_5 <= 0) {
             node_destroy(arg0);
-            func_151D6CA0(0, 0);
+            fb_ghost_set_mode(0, 0);
             return;
         }
         sp24 = temp_v0_5;
-        func_151D6CA0((s32) (temp_v0_5 * 0xD2) >> 8, 2, arg0);
+        fb_ghost_set_mode((s32) (temp_v0_5 * 0xD2) >> 8, 2, arg0);
         arg0->pad1A[1] = (u8) temp_v0_5;
         break;
     }
@@ -109,16 +109,16 @@ block_11:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_131F00/camera_cut_fade_update.s")
 #endif
 #ifdef NON_MATCHING
-Gfx *func_1517F5FC(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i);
+Gfx *screen_view_fill_colour(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i);
 #endif
 
 #ifdef NON_MATCHING
-// obj_fog_alpha_gfx: with i == 0 and a non-zero alpha byte at obj +0x1B, appends func_1517F5FC's colour command
+// obj_fog_alpha_gfx: with i == 0 and a non-zero alpha byte at obj +0x1B, appends screen_view_fill_colour's colour command
 // (alpha * 63 / 256, colour 0, 0, 0, index 0) to gfx; returns the new display list end (gfx unchanged otherwise).
 /* was func_15104A0C */
 Gfx *obj_fog_alpha_gfx(Gfx *gfx, u8 *obj, s16 i) {
     if (i == 0 && obj[0x1B] != 0) {
-        return func_1517F5FC(gfx, (obj[0x1B] * 63) >> 8, 0, 0, 0, i);
+        return screen_view_fill_colour(gfx, (obj[0x1B] * 63) >> 8, 0, 0, 0, i);
     }
     return gfx;
 }

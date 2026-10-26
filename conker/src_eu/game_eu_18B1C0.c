@@ -2,28 +2,30 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1515F4E4(s16 *arg0);
-void func_1515E7E8(s32, s32, s32, s32, u8 *, s32, s32);
-void func_1515E9AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-void func_1515F1E8(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+void light_viewport_to_fixed(s16 *arg0);
+void light_get_zone_colour(s32, s32, s32, s32, u8 *, s32, s32);
+void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
+void light_fill_point_light(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 #endif
-// hoisted forward declaration(s) for func_1515D5F8
-s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
+// hoisted forward declaration(s) for light_add_point
+s32 light_add_point(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
 
-void func_1515F61C(f32, s32);
+void light_store_int(f32, s32);
 
-f32 func_1515F578(s16 *, s32);
+f32 mtx_fixed_get_element(s16 *, s32);
 
 s32 obj_send_hit();
 
 
-void *func_1515D9B0(void) {
+/* was func_1515D9B0 */
+void *light_alloc_lookat_buf(void) {
     void *sp1C = allocate_memory(0x10, 1, 2, 0);
     bzero(sp1C, 0x10);
     return sp1C;
 }
 
-u8 *func_1515D9F0(s32 arg0) {
+/* was func_1515D9F0 */
+u8 *light_alloc_light_buf(s32 arg0) {
     u8 *p;
     s32 n;
     s32 *q = &arg0; // fakematch: address-taken arg
@@ -34,7 +36,8 @@ u8 *func_1515D9F0(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_1515D4D4(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+/* was func_1515D4D4 */
+void light_set_level_colour(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     s32 temp_t6;
 
     temp_t6 = arg3 & 0xFF;
@@ -47,10 +50,11 @@ void func_1515D4D4(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515D4D4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_set_level_colour.s")
 #endif
 struct lnode_1515DA90 { struct lnode_1515DA90 *next; };
-struct lnode_1515DA90 *func_1515DA90(void) {
+/* was func_1515DA90 */
+struct lnode_1515DA90 *light_list_append_new(void) {
     struct lnode_1515DA90 *p;
     struct lnode_1515DA90 *cur;
 
@@ -72,15 +76,17 @@ struct lnode_1515DA90 *func_1515DA90(void) {
 }
 
 
-s32 func_1515DB1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9) {
-    return func_1515D5F8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+/* was func_1515DB1C */
+s32 light_add_point_ext(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9) {
+    return light_add_point(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
-s32 func_1515D5F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9) {
+/* was func_1515D5F8 */
+s32 light_add_point(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9) {
     u8 *temp_v0;
 
 
-    temp_v0 = (u8 *)func_1515DA90();
+    temp_v0 = (u8 *)light_list_append_new();
     if (temp_v0 != NULL) {
         (*(s8 *)((u8 *)temp_v0 + 4)) = 0;
         (*(s8 *)((u8 *)temp_v0 + 5)) = (s8) arg4;
@@ -101,7 +107,8 @@ s32 func_1515D5F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return (s32) temp_v0;
 }
 
-void func_1515DC0C(void) {
+/* was func_1515DC0C */
+void light_list_clear_frame_flags(void) {
     u8 *var_v0 = (u8 *)D_800DCD78;
     while (var_v0 != NULL) {
         var_v0[0xC] = 0;
@@ -110,24 +117,26 @@ void func_1515DC0C(void) {
     }
 }
 
-void func_1515DC38(void) {
+/* was func_1515DC38 */
+void light_stub(void) {
 }
 
 #ifdef NON_MATCHING
 extern s32 D_800DD140;
 
-/* Per-player view setup: no lights, lighting on, then func_1515F4E4 turns the player's current viewport
+/* Per-player view setup: no lights, lighting on, then light_viewport_to_fixed turns the player's current viewport
  * (D_800BE628 + player * 0x180 + 0x100 + frame * 0x40) into the s15.16 values D_800DD140[0..3], which are
  * loaded with the custom G_MOVEWORD index 0x10: integer halves at offsets 0x00..0x0C, fractions at 0x10..0x1C,
  * then 0x20..0x2C. */
-Gfx *func_1515DC40(Gfx *gdl, s32 player) {
+/* was func_1515DC40 */
+Gfx *light_setup_view(Gfx *gdl, s32 player) {
     s32 *m = &D_800DD140;
 
     gdl->words.w0 = 0xDB020000; /* G_MOVEWORD G_MW_NUMLIGHT: 0 */
     gdl->words.w1 = 0;
     gdl++;
     gSPSetGeometryMode(gdl++, G_LIGHTING);
-    func_1515F4E4((s16 *)(D_800BE628 + player * 0x180 + D_800BE9C0 * 0x40 + 0x100));
+    light_viewport_to_fixed((s16 *)(D_800BE628 + player * 0x180 + D_800BE9C0 * 0x40 + 0x100));
 
     gdl->words.w0 = 0xDB100000;
     gdl->words.w1 = ((m[0] >> 16) << 16) | ((m[1] >> 16) & 0xFFFF);
@@ -168,15 +177,16 @@ Gfx *func_1515DC40(Gfx *gdl, s32 player) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DC40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_setup_view.s")
 #endif
 #ifdef NON_MATCHING
-/* Per-object lighting: colours from func_1515E7E8 (fog/tint blend when flags & 2), then the (maxLights - 1) nearest
+/* Per-object lighting: colours from light_get_zone_colour (fog/tint blend when flags & 2), then the (maxLights - 1) nearest
  * enabled point lights of the D_800DCD78 list (insertion sort by squared distance; flags & 1: from the player's camera
  * direction, flags & 4: no range cut-off), light structs (0x30 each) at base + (D_800BE9C0 * maxLights + i) * 0x30
- * (func_1515F1E8 fills point lights), then gSPNumLights + one G_MOVEMEM per light, ambient and lookat (arg8).
+ * (light_fill_point_light fills point lights), then gSPNumLights + one G_MOVEMEM per light, ambient and lookat (arg8).
  * The asm keeps the previous light's distance for directional lights (+4 != 0); the first one gets an uninitialised value. */
-Gfx *func_1515DE84(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 arg5, s32 base, s32 maxLights, u8 *arg8,
+/* was func_1515DE84 */
+Gfx *light_apply_object_lights(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 arg5, s32 base, s32 maxLights, u8 *arg8,
                    u8 *outCount, s32 mask, s32 arg11, s32 flags, u8 *outLights) {
     s32 dist[11];  /* spB8 */
     u8 *sel[12];   /* spE4 */
@@ -194,9 +204,9 @@ Gfx *func_1515DE84(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 arg5, s32 base
     u8 *lp;
     u32 *g = (u32 *)gdl;
 
-    func_1515E7E8(x, y, z, mask, col, arg5, flags);
+    light_get_zone_colour(x, y, z, mask, col, arg5, flags);
     if (flags & 2) {
-        func_1515E9AC(x, y, z, mask, tintA, tintB, &fa, &fb);
+        light_get_tint_zone(x, y, z, mask, tintA, tintB, &fa, &fb);
         for (i = 0; i < 3; i++) {
             s32 v = col[i];
             s32 inv = 0xFF - v;
@@ -330,7 +340,7 @@ Gfx *func_1515DE84(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 arg5, s32 base
                 s[0xC] |= 1 << player;
             }
             if (s[4] == 0) {
-                func_1515F1E8(s, player, lp, x, y, z, flags);
+                light_fill_point_light(s, player, lp, x, y, z, flags);
             }
             g[0] = ((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
             g[1] = (u32)lp;
@@ -353,16 +363,17 @@ Gfx *func_1515DE84(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 arg5, s32 base
     return (Gfx *)g;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DE84.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_apply_object_lights.s")
 #endif
-u8 *func_1515F0F4(s32, s32, s32, s32, u8 **);
+u8 *light_zone_find_at(s32, s32, s32, s32, u8 **);
 
 #ifdef NON_MATCHING
 /* Starting light colour of a position (P43): the colour zone of the D_800DCD80 list that contains (x, y, z) (word +0x18,
  * bytes R, G, B from the low end), else the level colour D_800DCD20 scaled by (0x100 - ((arg5 >> 5) & 3) * 0x40) >> 8.
- * flags & 0x10: blend with the fog / tint zone of func_1515E9AC: c' = (tintB * (c + ((0xFF - c) * fb >> 8))) >> 8,
+ * flags & 0x10: blend with the fog / tint zone of light_get_tint_zone: c' = (tintB * (c + ((0xFF - c) * fb >> 8))) >> 8,
  * plus 7/8 of (tintA * (c + ((0xFF - c) * fa >> 8))) >> 8, clamped to 0xFF. The asm returns no value. */
-void func_1515E7E8(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32 flags) {
+/* was func_1515E7E8 */
+void light_get_zone_colour(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32 flags) {
     u8 tintA[4];  /* sp4C */
     u8 tintB[4];  /* sp48 */
     u8 fa, fb;    /* sp47, sp46 */
@@ -370,7 +381,7 @@ void func_1515E7E8(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32 flags) 
     u8 *p;
     s32 i;
 
-    p = func_1515F0F4(x, y, z, mask, (u8 **)D_800DCD80);
+    p = light_zone_find_at(x, y, z, mask, (u8 **)D_800DCD80);
     if (p != NULL) {
         col[0] = *(u32 *)(p + 0x18);
         col[1] = *(u32 *)(p + 0x18) >> 8;
@@ -382,7 +393,7 @@ void func_1515E7E8(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32 flags) 
         }
     }
     if (flags & 0x10) {
-        func_1515E9AC(x, y, z, mask, tintA, tintB, &fa, &fb);
+        light_get_tint_zone(x, y, z, mask, tintA, tintB, &fa, &fb);
         for (i = 0; i < 3; i++) {
             u32 v = col[i];
             s32 c;
@@ -398,13 +409,14 @@ void func_1515E7E8(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32 flags) 
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515E7E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_get_zone_colour.s")
 #endif
 
-void func_1515E9AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
+/* was func_1515E9AC */
+void light_get_tint_zone(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
     u8 *p;
 
-    p = func_1515F0F4(arg0, arg1, arg2, 0, (u8 **)D_800DCD84);
+    p = light_zone_find_at(arg0, arg1, arg2, 0, (u8 **)D_800DCD84);
     if (p != NULL) {
         arg4[0] = (*(u32 *)(p + 0x18)) & 0xFF;
         arg4[1] = (*(u32 *)(p + 0x18) >> 8) & 0xFF;
@@ -427,7 +439,8 @@ void func_1515E9AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u
 }
 
 #ifdef NON_MATCHING
-u8 *func_1515EAB4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4) {
+/* was func_1515EAB4 */
+u8 *light_write_light_cmds(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4) {
     s32 *temp_t3;
     s32 *temp_v0;
     s32 *var_a0;
@@ -529,14 +542,15 @@ block_8:
     return temp_a0 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515EAB4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_write_light_cmds.s")
 #endif
 #ifdef NON_MATCHING
-void func_1515E7E8(s32, s32, s32, s32, u8 *, s32, s32);
+void light_get_zone_colour(s32, s32, s32, s32, u8 *, s32, s32);
 extern u8 D_800DA241;
 extern u8 *D_800DA248;
 
-void func_1515EDF8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7) {
+/* was func_1515EDF8 */
+void light_compute_point_colour(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7) {
     f32 sp64;
     f32 sp60;
     f32 sp5C;
@@ -570,7 +584,7 @@ void func_1515EDF8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s
     u8 **var_a0;
     u8 *temp_v0;
 
-    func_1515E7E8(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    light_get_zone_colour(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     temp_t8 = (*(u8 *)((u8 *)arg5 + 0));
     var_f6 = (f32) temp_t8;
     if ((s32) temp_t8 < 0) {
@@ -652,9 +666,10 @@ void func_1515EDF8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s
     (*(u8 *)((u8 *)arg5 + 2)) = (u8) var_v0_3;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515EDF8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_compute_point_colour.s")
 #endif
-u8 *func_1515F0F4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
+/* was func_1515F0F4 */
+u8 *light_zone_find_at(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
     struct127 sp;
     s32 pad[2]; // 8 bytes below the struct (frame 0x360)
     u8 *p;
@@ -673,7 +688,7 @@ u8 *func_1515F0F4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
         if ((p[0x15] >> 2) != 0x18 && (*(u32 *)(p + 0x18) >> 31) != 0) {
             continue;
         }
-        if (func_150A2280(&sp, p, 0) != 0) {
+        if (trigger_test_object(&sp, p, 0) != 0) {
             continue;
         }
         return arg4[1];
@@ -684,7 +699,8 @@ u8 *func_1515F0F4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
 #ifdef NON_MATCHING
 extern s32 D_800DA030;
 
-void func_1515F1E8(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/* was func_1515F1E8 */
+void light_fill_point_light(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
     struct {
         s32 u48;
         s32 u4C;
@@ -767,7 +783,7 @@ void func_1515F1E8(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s
         sp.u50 = (s32) (*(s16 *)((u8 *)temp_v0_2 + 0x18));
     } else {
         sp40 = temp_v1;
-        func_150A7E40(((s32 *)((u8 *)&D_800DA030 + (arg1 << 6))), (f32) sp.u48, (f32) sp.u4C, (f32) sp.u50, &sp.u70, &sp.u74, &sp.u78);
+        mtxf_transform_point(((s32 *)((u8 *)&D_800DA030 + (arg1 << 6))), (f32) sp.u48, (f32) sp.u4C, (f32) sp.u50, &sp.u70, &sp.u74, &sp.u78);
         temp_f8_2 = (s32) sp.u70;
         temp_v0_3 = arg0 + (arg1 * 6);
         sp.u48 = temp_f8_2;
@@ -799,25 +815,28 @@ void func_1515F1E8(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s
     (*(u8 *)((u8 *)arg2 + 0xC)) = (u8) (*(u8 *)((u8 *)arg0 + 0x2F));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F1E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/light_fill_point_light.s")
 #endif
-void func_1515F5B0(f32, s32);
+void light_store_fixed(f32, s32);
 
-void func_1515F4E4(s16 *arg0) {
-    func_1515F5B0(1.0f / func_1515F578(arg0, 0), 0);
-    func_1515F5B0(1.0f / func_1515F578(arg0, 5), 1);
-    func_1515F5B0(1.0f / func_1515F578(arg0, 0xA), 2);
-    func_1515F61C(-func_1515F578(arg0, 0xE), 3);
+/* was func_1515F4E4 */
+void light_viewport_to_fixed(s16 *arg0) {
+    light_store_fixed(1.0f / mtx_fixed_get_element(arg0, 0), 0);
+    light_store_fixed(1.0f / mtx_fixed_get_element(arg0, 5), 1);
+    light_store_fixed(1.0f / mtx_fixed_get_element(arg0, 0xA), 2);
+    light_store_int(-mtx_fixed_get_element(arg0, 0xE), 3);
 }
 
-f32 func_1515F578(s16 *arg0, s32 arg1) {
+/* was func_1515F578 */
+f32 mtx_fixed_get_element(s16 *arg0, s32 arg1) {
     s32 v = arg0[arg1];
     v = (u16)arg0[arg1 + 0x10] | (v << 16);
     return v * (1.0f / 65536.0f);
 }
 
 extern s32 D_800DD140;
-void func_1515F5B0(f32 arg0, s32 arg1) {
+/* was func_1515F5B0 */
+void light_store_fixed(f32 arg0, s32 arg1) {
     if (arg0 >= 32767.0f) {
         arg0 = 32767.0f;
     } else if (arg0 < -32768.0f) {
@@ -828,7 +847,8 @@ void func_1515F5B0(f32 arg0, s32 arg1) {
 }
 
 extern s32 D_800DD140;
-void func_1515F61C(f32 arg0, s32 arg1) {
+/* was func_1515F61C */
+void light_store_int(f32 arg0, s32 arg1) {
     if (arg0 >= 32767.0f) {
         arg0 = 32767.0f;
     } else if (arg0 < -32768.0f) {
@@ -837,7 +857,8 @@ void func_1515F61C(f32 arg0, s32 arg1) {
     *(s32 *)((u8 *)&D_800DD140 + (arg1 * 4)) = (s32) arg0;
 }
 
-void func_1515F10C(s32 **arg0) {
+/* was func_1515F10C */
+void light_remove(s32 **arg0) {
     s32 **prev = NULL;
     s32 **cur = (s32 **)D_800DCD78;
 
@@ -850,10 +871,11 @@ void func_1515F10C(s32 **arg0) {
     } else {
         D_800DCD78 = (s32)*cur;
     }
-    func_10004074(cur);
+    heap_free(cur);
 }
 
-void func_1515F170(s32 arg0, u8 arg1) {
+/* was func_1515F170 */
+void light_group_set_disabled(s32 arg0, u8 arg1) {
     u8 *var_v0 = (u8 *)D_800DCD78;
     while (var_v0 != NULL) {
         if (arg0 == var_v0[0xB]) {
@@ -863,12 +885,13 @@ void func_1515F170(s32 arg0, u8 arg1) {
     }
 }
 
-u8 *func_1515F1B0(struct_eu_15144598 *arg0) {
+/* was func_1515F1B0 */
+u8 *spawn_region_entry_alloc(struct_eu_15144598 *arg0) {
     s32 var_v1;
     s32 temp_v0;
     s32 sp2C;
 
-    temp_v0 = func_10003C6C(0x10, 1, 2, 0, 1);
+    temp_v0 = heap_alloc_tagged(0x10, 1, 2, 0, 1);
     var_v1 = temp_v0;
     if (temp_v0 == 0) {
         return NULL;
@@ -876,13 +899,13 @@ u8 *func_1515F1B0(struct_eu_15144598 *arg0) {
     (*(struct_eu_15144598 **)temp_v0) = arg0;
     if (arg0 != NULL) {
         sp2C = var_v1;
-        (*(f32 *)((u8 *)var_v1 + 4)) = func_1514462C(arg0);
+        (*(f32 *)((u8 *)var_v1 + 4)) = spawn_region_volume(arg0);
     } else {
         (*(f32 *)((u8 *)temp_v0 + 4)) = 0.0f;
     }
     if (arg0 != NULL) {
         sp2C = var_v1;
-        (*(f32 *)((u8 *)var_v1 + 8)) = func_15144598(arg0);
+        (*(f32 *)((u8 *)var_v1 + 8)) = spawn_region_area(arg0);
     } else {
         (*(f32 *)((u8 *)var_v1 + 8)) = 0.0f;
     }
@@ -890,12 +913,14 @@ u8 *func_1515F1B0(struct_eu_15144598 *arg0) {
     return (u8 *) var_v1;
 }
 
-void func_1515F25C(s32 *arg0, s32 *arg1) {
+/* was func_1515F25C */
+void spawn_region_list_push(s32 *arg0, s32 *arg1) {
     arg1[3] = *arg0;
     *arg0 = (s32)arg1;
 }
 
-void func_1515F7E0(void *arg0, u8 *arg1) {
+/* was func_1515F7E0 */
+void obj_kind9_dispatch(void *arg0, u8 *arg1) {
     s32 idx = *(s32 *)(arg1 + 0x18);
     if ((idx >= 0) && (idx < 12)) {
         void (*fp)(void *, void *) = D_8008B430[idx];
@@ -905,12 +930,14 @@ void func_1515F7E0(void *arg0, u8 *arg1) {
     }
 }
 
-void func_1515F828(u8 *arg0, s32 arg1) {
+/* was func_1515F828 */
+void obj_send_hit_6001d(u8 *arg0, s32 arg1) {
     obj_send_hit(arg0, 0x6001D, *(u16 *)(arg0 + 0x7A), -1);
 }
 
 extern void (*D_8008B460[])(u8 *, u8 *);
-void func_1515F858(u8 *arg0, u8 *arg1) {
+/* was func_1515F858 */
+void obj_kind_dispatch_active(u8 *arg0, u8 *arg1) {
     s32 v;
 
     if (arg0[0x3B] == 1) {
@@ -921,7 +948,8 @@ void func_1515F858(u8 *arg0, u8 *arg1) {
     }
 }
 
-void func_1515F8A8(s32 arg0, s32 arg1) {
+/* was func_1515F8A8 */
+void light_ease_level_colour_grey(s32 arg0, s32 arg1) {
     u8 var_t0;
     u8 var_t1;
     u8 var_v1;
@@ -941,10 +969,11 @@ void func_1515F8A8(s32 arg0, s32 arg1) {
         D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
         var_t1 = D_800DCD9C;
     }
-    func_1515D4D4(var_v1, var_t0, var_t1, 0);
+    light_set_level_colour(var_v1, var_t0, var_t1, 0);
 }
 
-void func_1515FB34(s32 arg0, s32 arg1) {
+/* was func_1515FB34 */
+void light_ease_level_colour_warm(s32 arg0, s32 arg1) {
     u8 var_t0;
     u8 var_t1;
     u8 var_v1;
@@ -964,5 +993,5 @@ void func_1515FB34(s32 arg0, s32 arg1) {
         D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
         var_t1 = D_800DCD9C;
     }
-    func_1515D4D4(var_v1, var_t0, var_t1, 0);
+    light_set_level_colour(var_v1, var_t0, var_t1, 0);
 }

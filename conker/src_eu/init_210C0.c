@@ -34,7 +34,8 @@ extern S210C0_Synth *D_8002BA44;
 Acmd *func_10020000(S210C0_PVoice *, s32, Acmd *);
 f32 sqrtf(f32);
 
-Acmd *func_100210C0(s32 arg0, Acmd *arg1, s32 arg2, s32 *arg3) {
+/* was func_100210C0 */
+Acmd *n_aux_bus_pull(s32 arg0, Acmd *arg1, s32 arg2, s32 *arg3) {
     Acmd *sp3C;
     S210C0_AuxBus *sp38;
     S210C0_PVoice *sp34;

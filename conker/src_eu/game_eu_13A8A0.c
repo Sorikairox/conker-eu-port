@@ -179,10 +179,10 @@ extern u16 D_800920D0[];
 extern u16 D_800B8BB8[];
 extern s32 D_800B1268[];
 extern u8 D_800DC1DC;
-s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
-void func_10004074(s16 *);
-s32 func_10006530(s32, s32 *, u32);
+s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 rom_dma_read(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
+void heap_free(s16 *);
+s32 rzip_inflate(s32, s32 *, u32);
 
 #define TEXCACHE_MISSING 0x80000000
 
@@ -232,18 +232,18 @@ s32 texture_cache_lookup(s32 id, s32 *outSize, s32 age, s32 addRef) {
             size += 1;
         }
         size = (size + 15) & ~15;
-        tmp = func_10003C6C(size, 1, 2, 1, 2);
+        tmp = heap_alloc_tagged(size, 1, 2, 1, 2);
         if (tmp == 0) {
             return TEXCACHE_MISSING;
         }
-        func_10004514(rom, (void *)tmp, size, 1);
-        dst = func_10003C6C(D_800B8BB8[id], 1, 1, 0, 2);
+        rom_dma_read(rom, (void *)tmp, size, 1);
+        dst = heap_alloc_tagged(D_800B8BB8[id], 1, 1, 0, 2);
         if (dst == 0) {
-            func_10004074((s16 *)tmp);
+            heap_free((s16 *)tmp);
             return TEXCACHE_MISSING;
         }
-        func_10006530(tmp + skew, (s32 *)dst, D_8003809C);
-        func_10004074((s16 *)tmp);
+        rzip_inflate(tmp + skew, (s32 *)dst, D_8003809C);
+        heap_free((s16 *)tmp);
         *slot = dst;
         D_800DA388[id] = 0;
     }
@@ -282,8 +282,8 @@ extern u8 D_800DC1DC;
 extern u8 D_800DA380;
 extern s32 D_800DC1E0;
 extern s32 D_800B1268[];
-void func_10004074(s16 *);
-s32 func_10006530(s32, s32 *, u32);
+void heap_free(s16 *);
+s32 rzip_inflate(s32, s32 *, u32);
 void func_150ADC50(void);
 
 /* Texture cache ageing, once per frame. Slots lo..hi (D_800DA378..D_800DA37C) are pending: an age 1..3
@@ -324,15 +324,15 @@ void texture_cache_age_tick(void) {
             D_800BC860[i] = age - 1;
             if (D_800BC860[i] == 0) {
                 D_800DC1E0 = i;
-                func_10004074((s16 *)D_800B1268[i]);
+                heap_free((s16 *)D_800B1268[i]);
                 D_800B1268[i] = -1;
                 continue;
             }
         } else if (age & 0x40) {
             slot = (s32 *)D_800B1268[i];
             buf = slot[0];
-            func_10006530(buf + slot[1], slot, D_8003809C);
-            func_10004074((s16 *)buf);
+            rzip_inflate(buf + slot[1], slot, D_8003809C);
+            heap_free((s16 *)buf);
             D_800BC860[i] &= ~0x40;
         } else {
             continue;
@@ -359,7 +359,7 @@ void texture_cache_set_age(s32 arg0, s32 arg1) {
 }
 
 void texture_unref_age3(s32);
-void func_10004074(s16 *);
+void heap_free(s16 *);
 /* was func_1510DBB0 */
 void texture_id_list_release(s16 *arg0)
 {
@@ -380,7 +380,7 @@ void texture_id_list_release(s16 *arg0)
     }
     while (end != p);
   }
-  func_10004074(q);
+  heap_free(q);
 }
 
 /* was func_1510DC14 */
@@ -424,7 +424,7 @@ void texture_unref_age2(s32 arg0) {
 #ifdef NON_MATCHING
 /* P130 */
 extern s32 D_800B1268[];  /* texture cache: expanded data per texture id */
-void func_10004074(s16 *);  /* free (as the file's other callers) */
+void heap_free(s16 *);  /* free (as the file's other callers) */
 
 // texture_cache_release: drops one reference to texture id (D_800DA388[id]); when the last one goes and the
 // texture is cached (D_800BC860[id] != 0), frees its data (and first the block its first word points to when
@@ -442,9 +442,9 @@ s32 texture_cache_release(s32 id, s32 unused1, u16 unused2) {
         return 0;
     }
     if (state & 0x40) {
-        func_10004074(*(s16 **) D_800B1268[id]);
+        heap_free(*(s16 **) D_800B1268[id]);
     }
-    func_10004074((s16 *) D_800B1268[id]);
+    heap_free((s16 *) D_800B1268[id]);
     D_800B1268[id] = -1;
     D_800BC860[id] = 0;
     return 0;

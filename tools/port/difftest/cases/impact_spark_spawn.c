@@ -1,10 +1,10 @@
 #ifdef NON_MATCHING
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                   s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern u8 D_800AB7D4[];
 extern u8 D_800AB7E4[];
 
-/* Spawn one particle of kind `kind` (0x10 = spark / debris sprite) through func_15148310:
+/* Spawn one particle of kind `kind` (0x10 = spark / debris sprite) through trail_spawn:
  * - spawn block (0x1C bytes): position `pos`, sprite `sprite` + 0x10, model 0x35, count 1, -1, `tint`, `owner`;
  * - motion block (0x20 bytes): speed, velocity `vel`, scale, floor -10000, flags (8 | 0x40, 0x20 / 0x80 from the
  *   per-type tables D_800AB7E4 / D_800AB710, 3 when `fade`), D_800AB7D4[type], 0xFF, alpha, two s16 timers;
@@ -103,7 +103,7 @@ u8 *impact_spark_spawn(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 sp
         a10 = 0;
         a11 = 0;
     }
-    p = func_15148310((u8 *) &sb, (s32) &mb, 0x10, 1, 0, 0, a7, a8, 0, a10, a11, (u8 *) &rb, argC, arg10, arg11);
+    p = trail_spawn((u8 *) &sb, (s32) &mb, 0x10, 1, 0, 0, a7, a8, 0, a10, a11, (u8 *) &rb, argC, arg10, arg11);
     if (p != NULL) {
         memcpy(*(s32 *) (p + 0x98) + 0x48, (s32) &extra, 0xC);
     }

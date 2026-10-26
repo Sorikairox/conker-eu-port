@@ -3,36 +3,38 @@
 #include "variables.h"
 
 
-s32 func_15046F70(f32 *, s32, f32, f32 *);
-s32 func_1504715C(f32 *, struct127 *);
+s32 collision_floor_probe(f32 *, s32, f32, f32 *);
+s32 hitinfo_from_obj_floor(f32 *, struct127 *);
 #ifdef NON_MATCHING
-void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 #else
-s32 func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+s32 spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 #endif
-void func_150CE0C0(u8 *arg0, u8 arg1, s32 arg2)
+/* was func_150CE0C0 */
+void obj_spawn_ground_dust_rings(u8 *arg0, u8 arg1, s32 arg2)
 {
   f32 sp6C[3];
   f32 sp48[9];
   if (arg0 != 0)
   {
-    func_1504715C(sp48, arg0);
+    hitinfo_from_obj_floor(sp48, arg0);
     sp6C[0] = *((f32 *) (((u8 *) arg0) + 0x14));
     sp6C[1] = (*((f32 *) (((u8 *) arg0) + 0x18))) + 1000.0f;
     sp6C[2] = *((f32 *) (((u8 *) arg0) + 0x1C));
-    if (func_15046F70(sp6C, 0, (*((f32 *) (((u8 *) arg0) + 0x18))) - 3000.0f, sp48) != 0)
+    if (collision_floor_probe(sp6C, 0, (*((f32 *) (((u8 *) arg0) + 0x18))) - 3000.0f, sp48) != 0)
     {
       sp6C[1] = sp48[0];
       dummy_label_506575: ; // fakematch: empty label keeps the sp6C[1] store out of the jal delay slot
-      func_1514CBE8(sp6C[0], sp6C[1], sp6C[2], 251.0f, 0, 0xFF, (random_int() & 0xF) + 0x23, 0x17, 0, 0.0f, 0, arg1);
-      func_1514CBE8(sp6C[0], sp6C[1], sp6C[2], 290.0f, 0, 0xFF, (random_int() % 21U) + 0x1E, 0x18, 0, 0.0f, 0, arg1);
+      spawn_circle_random_emit(sp6C[0], sp6C[1], sp6C[2], 251.0f, 0, 0xFF, (random_int() & 0xF) + 0x23, 0x17, 0, 0.0f, 0, arg1);
+      spawn_circle_random_emit(sp6C[0], sp6C[1], sp6C[2], 290.0f, 0, 0xFF, (random_int() % 21U) + 0x1E, 0x18, 0, 0.0f, 0, arg1);
     }
   }
 }
 
-void func_15143794(s16, s16, f32, void *);
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_150CE204(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+/* was func_150CE204 */
+s32 spawn_emit_dust_sprite(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         s32 u34;
         s32 u38;
@@ -95,7 +97,7 @@ s32 func_150CE204(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((random_int() % 20U) - 0x13), ((random_float() * 150.0f) + 150.0f) * 0.1f, sp.u7C);
+    vec3_from_angles_byte(arg8, (s16) ((random_int() % 20U) - 0x13), ((random_float() * 150.0f) + 150.0f) * 0.1f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
     if (random_int() & 1) {
@@ -111,16 +113,17 @@ s32 func_150CE204(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u56 = 0x46;
     sp.u58 = 1.0196f;
     scale = 0.95091f;
-    obj = func_151308E4(&sp, 1, 4, argE, 1);
+    obj = particle_spawn_basic(&sp, 1, 4, argE, 1);
     if (obj != 0) {
         memcpy(obj + 0xA8, &scale, 4);
     }
     return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 
-s32 func_150CE420(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+/* was func_150CE420 */
+s32 spawn_emit_debris_chunk(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         f32 u28[13];
         s32 u5C;
@@ -169,7 +172,7 @@ s32 func_150CE420(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u7E = 0x20;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    func_15143794(arg8, (s16) (((u32) random_int() % 41U) - 0x3D), ((random_float() * 101.0f) + 150.0f) * 0.1f, &sp.u5C);
+    vec3_from_angles_byte(arg8, (s16) (((u32) random_int() % 41U) - 0x3D), ((random_float() * 101.0f) + 150.0f) * 0.1f, &sp.u5C);
     sp.u68 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
     sp.u70 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
     sp.u7C = (random_int() % 21U) + 0x32;
@@ -192,6 +195,6 @@ s32 func_150CE420(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u98 = 0;
     sp.u9A = 0x20;
     sp.u9C = 7;
-    func_15132FBC(&sp, 3, 0xFF, 0, (s32) argE, 0);
+    mdl_particle_spawn(&sp, 3, 0xFF, 0, (s32) argE, 0);
     return 1;
 }

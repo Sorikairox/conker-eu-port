@@ -6,19 +6,21 @@
 // libultra libc/sprintf.c (game copy, -O2 without -g3); proutSprintf comes first in this version
 
 void *memcpy(void *, const void *, unsigned int);
-int func_100020D0(void *(*prout)(void *, const char *, unsigned int), char *s, const char *fmt, va_list ap); // _Printf
+int init_printf_xprintf(void *(*prout)(void *, const char *, unsigned int), char *s, const char *fmt, va_list ap); // _Printf
 
 // proutSprintf
-void *func_151F0730(void *s, const char *buf, unsigned int n) {
+/* was func_151F0730 */
+void *game_prout_sprintf(void *s, const char *buf, unsigned int n) {
     return (char *)memcpy(s, buf, n) + n;
 }
 
 // sprintf
-int func_151F0754(char *s, const char *fmt, ...) {
+/* was func_151F0754 */
+int game_sprintf(char *s, const char *fmt, ...) {
     int ans;
     va_list ap;
     va_start(ap, fmt);
-    ans = func_100020D0(func_151F0730, s, fmt, ap);
+    ans = init_printf_xprintf(game_prout_sprintf, s, fmt, ap);
     if (ans >= 0) {
         s[ans] = 0;
     }

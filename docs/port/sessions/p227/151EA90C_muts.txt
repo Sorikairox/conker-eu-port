@@ -62,7 +62,7 @@ s/text_printf_at(x, y, 0x81, D_800ABED0, BAR_ROW(i, 0x6A));/text_printf_at(x, y,
 s/text_printf_at(x, y, 0x81, D_800ABED4, D_800E0F00\[i\]);/text_printf_at(x, y, 0x81, D_800ABED4, D_800E0F00[team]);/ % base
 s/y += 0xF;/y += 0x10;/ % base
 s/if (D_80090160 \& 0x6340) {/if (D_80090160 \& 0x6300) {/ % hud_noteam
-s/gdl = (Gfx \*) func_151EA4C8((u8 \*) gdl, 0x320, wide);/gdl = (Gfx *) func_151EA4C8((u8 *) gdl, 0x320, 1);/ % hud
+s/gdl = (Gfx \*) mp_team_score_draw((u8 \*) gdl, 0x320, wide);/gdl = (Gfx *) mp_team_score_draw((u8 *) gdl, 0x320, 1);/ % hud
 s/if (hud \&\& (D_80090160 \& 1)) {/if (D_80090160 \& 1) {/ % base
-s/func_151E9E1C((u8 \*) gdl, 0x320, -1, 1, wide)/func_151E9E1C((u8 *) gdl, 0x320, -1, 0, wide)/ % hud
-s/func_151E9E1C((u8 \*) gdl, 0x320, -1, 1, wide)/func_151E9E1C((u8 *) gdl, 0x320, -1, 1, 0)/ % wide_hud
+s/mp_team_marks_draw((u8 \*) gdl, 0x320, -1, 1, wide)/mp_team_marks_draw((u8 *) gdl, 0x320, -1, 0, wide)/ % hud
+s/mp_team_marks_draw((u8 \*) gdl, 0x320, -1, 1, wide)/mp_team_marks_draw((u8 *) gdl, 0x320, -1, 1, 0)/ % wide_hud

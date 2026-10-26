@@ -38,7 +38,7 @@ void camera_orbit_point_init(u8 *arg0) {
     sp.u20 = 2.0f * temp_f0_2;
     sp.u24 = 2.0f * temp_f12;
     sp.u28 = 2.0f * temp_f14;
-    temp_f2_2 = 1.0f / func_150AD930(&sp.u20);
+    temp_f2_2 = 1.0f / vec3f_magnitude(&sp.u20);
     temp_v0 = arg0 + 0x870;
     temp_v1 = arg0 + 0x6FC;
     (*(f32 *)((u8 *)temp_v0 + 0x1C)) = temp_f2_2;
@@ -91,7 +91,7 @@ void camera_orbit_point_init(u8 *arg0) {
 //     tmp.unk4 = 2.0f * temp_f12;
 //     tmp.unk8 = 2.0f * temp_f14;
 //
-//     temp_f2 = 1.0f / func_150AD930(&tmp);
+//     temp_f2 = 1.0f / vec3f_magnitude(&tmp);
 //     temp_v0 = arg0->unk870;
 //     temp_v0->unk1C = temp_f2;
 //     temp_v0->unk10 = temp_f2 * tmp.unk0;
@@ -106,14 +106,14 @@ void camera_orbit_point_init(u8 *arg0) {
 // }
 
 #ifdef NON_MATCHING
-void func_150498A0(f32 *cur, f32 target, f32 *vel, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach(f32 *cur, f32 target, f32 *vel, f32 arg3, f32 arg4, f32 arg5);
 float sqrtf(float);
 
 // camera_orbit_point_update: camera block at +0x870 (mode byte +0x870, unit direction +0x880..+0x888, side speed
 // +0x890, vertical speed +0x894). Sets the point +0x8A8..+0x8B0 to +0x874 plus the direction times the distance
 // from +0x2BC to +0x874, then moves it by (vx, +0x894, vz): (vx, vz) = speed times (dz, -dx) / (-dz, dx) / (dx, dz)
 // / (-dx, -dz) for modes 0..3 (the asm leaves them unset for other modes). With +0x23C set the camera position
-// +0x2F8 jumps to the point and the rates +0x898 / +0x89C become 40; else the rates ease to 10 (func_150498A0,
+// +0x2F8 jumps to the point and the rates +0x898 / +0x89C become 40; else the rates ease to 10 (math_spring_approach,
 // 0.6, 1.4, frame step +0x7B4) and the position eases towards the point (velocity +0x3C0).
 /* was func_1512DEA4 */
 void camera_orbit_point_update(struct108 *arg0) {
@@ -159,11 +159,11 @@ void camera_orbit_point_update(struct108 *arg0) {
         c[10] = 40.0f;
         c[11] = 40.0f;
     } else {
-        func_150498A0(&c[10], 10.0f, &c[12], 0.6f, 1.4f /* D_800A3AF0 */, *(f32 *) (p + 0x7B4));
-        func_150498A0(&c[11], 10.0f, &c[13], 0.6f, 1.4f /* D_800A3AF4 */, *(f32 *) (p + 0x7B4));
-        func_150498A0((f32 *) (p + 0x2F8), c[14], (f32 *) (p + 0x3C0), c[10], c[11], *(f32 *) (p + 0x7B4));
-        func_150498A0((f32 *) (p + 0x2FC), c[15], (f32 *) (p + 0x3C4), c[10], c[11], *(f32 *) (p + 0x7B4));
-        func_150498A0((f32 *) (p + 0x300), c[16], (f32 *) (p + 0x3C8), c[10], c[11], *(f32 *) (p + 0x7B4));
+        math_spring_approach(&c[10], 10.0f, &c[12], 0.6f, 1.4f /* D_800A3AF0 */, *(f32 *) (p + 0x7B4));
+        math_spring_approach(&c[11], 10.0f, &c[13], 0.6f, 1.4f /* D_800A3AF4 */, *(f32 *) (p + 0x7B4));
+        math_spring_approach((f32 *) (p + 0x2F8), c[14], (f32 *) (p + 0x3C0), c[10], c[11], *(f32 *) (p + 0x7B4));
+        math_spring_approach((f32 *) (p + 0x2FC), c[15], (f32 *) (p + 0x3C4), c[10], c[11], *(f32 *) (p + 0x7B4));
+        math_spring_approach((f32 *) (p + 0x300), c[16], (f32 *) (p + 0x3C8), c[10], c[11], *(f32 *) (p + 0x7B4));
     }
 }
 #else

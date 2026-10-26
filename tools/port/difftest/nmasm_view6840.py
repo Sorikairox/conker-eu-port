@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P38: compare the hand-asm view test func_150A6840 (game_eu_D3880; FR=1 odd FPRs f13/f15/f17 as singles) with its
+"""P38: compare the hand-asm view test camera_view_test_sphere (game_eu_D3880; FR=1 odd FPRs f13/f15/f17 as singles) with its
 NON_MATCHING C, whole.
 
 Reference: the VR4300 interpreter of nmasm_vis5858.py on build/conker.eu.elf (float32 ops computed in double and
@@ -101,7 +101,7 @@ def main():
             mem = bytearray(RAM)
             args, cls = case(rng, mem, base, addrs)
             try:
-                v0 = ref.run(mem, args, entry='func_150A6840') if who == 'ref' else cand.run(mem, args, entry='func_150A6840')
+                v0 = ref.run(mem, args, entry='camera_view_test_sphere') if who == 'ref' else cand.run(mem, args, entry='camera_view_test_sphere')
             except RuntimeError as e:
                 if 'cvt.w.s range' in str(e): v0 = None
                 else: raise

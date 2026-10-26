@@ -1,8 +1,8 @@
 #ifdef NON_MATCHING
 /* P292 */
-void func_1514373C(f32, f32, f32 *, f32 *);
-void func_15145DB4(u8 *, f32 *, f32 *, s32);
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
+void xform_points_array(u8 *, f32 *, f32 *, s32);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void *memcpy(void *, const void *, s32);
 
 /* rodata D_800A7830..3C (bit-exact copies: the NM link drops this file's .late_rodata) */
@@ -13,10 +13,10 @@ static const f32 sRingScale[1] = { 0.001f };        /* 0x3A83126F */
 
 // object_ring_burst_particles: spawns 25..35 particles (texture 0x6C, kind 0x200005) on a half ring around obj:
 // the ring points (angle pi..2pi, radius 114, then x + 111, y = -90; the last point is the centre (111, -90, 0)) go
-// through obj's transform (func_15145DB4) into world space, and each particle starts on its point and moves away
-// from the centre with a random speed, size, life, alpha and flip bits, for owner / ownerArg (func_151307F0); each
+// through obj's transform (xform_points_array) into world space, and each particle starts on its point and moves away
+// from the centre with a random speed, size, life, alpha and flip bits, for owner / ownerArg (particle_spawn_ex); each
 // new particle's +0xA8 gets 0.853381f. Does nothing when an allocation fails (the first buffer is then leaked).
-void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
+void object_ring_burst_particles(u8 *obj, u8 owner, s32 ownerArg) {
     struct {
         s32 handlers;   /* +0x00 */
         s32 u04;
@@ -66,14 +66,14 @@ void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
     if (count <= 0) {
         return;
     }
-    ring = (f32 *) func_10003C6C((count + 1) * 12, 3, 1, 0, 1);
-    world = (f32 *) func_10003C6C((count + 1) * 12, 3, 1, 0, 1);
+    ring = (f32 *) heap_alloc_tagged((count + 1) * 12, 3, 1, 0, 1);
+    world = (f32 *) heap_alloc_tagged((count + 1) * 12, 3, 1, 0, 1);
     if (ring == NULL || world == NULL) {
         return;
     }
     for (i = 0; i < count; i++) {
         pt = ring + i * 3;
-        func_1514373C(random_float() * sRingPi[0] + sRingPi[0], 114.0f, &pt[0], &pt[2]);
+        vec2_from_angle_rad(random_float() * sRingPi[0] + sRingPi[0], 114.0f, &pt[0], &pt[2]);
         pt[1] = -90.0f;
         pt[0] = pt[0] + 111.0f;
     }
@@ -81,7 +81,7 @@ void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
     pt[0] = 111.0f;
     pt[1] = -90.0f;
     pt[2] = 0.0f;
-    func_15145DB4(obj, ring, world, count + 1);
+    xform_points_array(obj, ring, world, count + 1);
 
     req.u24 = sRingU24[0];
     extra = sRingExtra[0];
@@ -130,12 +130,12 @@ void func_1518D290(u8 *obj, u8 owner, s32 ownerArg) {
         req.vel[2] = (pt[2] - centre[2]) * speed;
         req.value = (random_float() * 880.0f + 13.0f) * sRingScale[0];
         req.alpha = random_int() % 176U + 0x50;
-        p = (u8 *) func_151307F0((s32) &req, 1, 0, 4, owner, ownerArg);
+        p = (u8 *) particle_spawn_ex((s32) &req, 1, 0, 4, owner, ownerArg);
         if (p != NULL) {
             memcpy(p + 0xA8, &extra, 4);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518D290.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/object_ring_burst_particles.s")
 #endif

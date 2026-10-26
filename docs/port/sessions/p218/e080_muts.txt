@@ -5,18 +5,18 @@ s/} else if (ext\[0x19B\] > 0) {/} else if (ext[0x19B] > 1) {/
 s/cur = weapon\[slotOf\[i\]\];/cur = weapon[i];/
 s/} else if (cur == 0x457) {/} else if (cur == 0x456) {/
 s/have = ext\[0x128\] \& ~0x20;/have = ext[0x128];/
-s/func_1508EFEC(i, 0x4C, item);/func_1508EFEC(i, 0x4B, item);/
-s/func_1508EFEC(i, 0x4C, 0x1E);/func_1508EFEC(i, 0x4C, 0x1D);/
+s/rail_racer_send_event(i, 0x4C, item);/rail_racer_send_event(i, 0x4B, item);/
+s/rail_racer_send_event(i, 0x4C, 0x1E);/rail_racer_send_event(i, 0x4C, 0x1D);/
 s/((u8 \*) obj->unk31C)\[0x11A\] = 0;\n            }/X/
 s/if (item > 0x1000) {/if (item >= 0x1000) {/
-s/func_1508EFEC(i, 0x4B, item \& ~0x1000);/func_1508EFEC(i, 0x4B, item);/
+s/rail_racer_send_event(i, 0x4B, item \& ~0x1000);/rail_racer_send_event(i, 0x4B, item);/
 s/\*((u8 \*) obj + 0x125) = 0;/*((u8 *) obj + 0x124) = 0;/
 s/((u8 \*) obj->unk31C)\[0x128\] = cur;/((u8 *) obj->unk31C)[0x128] = have;/
 s/+ 0x12C) = 1500;/+ 0x12C) = 1501;/
-s/func_1502ECFC(obj, 0, 0, 0xFF, 0xBF, 4);/func_1502ECFC(obj, 0, 0, 0xFF, 0xBF, 3);/
-s/func_15080A20(i, 1, cur, 0);/func_15080A20(i, 1, have, 0);/
+s/obj_tint_set_pulse(obj, 0, 0, 0xFF, 0xBF, 4);/obj_tint_set_pulse(obj, 0, 0, 0xFF, 0xBF, 3);/
+s/context_action_lock(i, 1, cur, 0);/context_action_lock(i, 1, have, 0);/
 s/if (cur == 0 \&\& have != 3) {/if (cur == 0) {/
-s/func_1508EFEC(i, 0x45, 4);/func_1508EFEC(i, 0x45, 3);/
+s/rail_racer_send_event(i, 0x45, 4);/rail_racer_send_event(i, 0x45, 3);/
 s/if (D_800876E0 != i ||/if (D_800876E0 != 0 ||/
 s/if (n == 0 \&\& ((u8 \*) obj->unk31C)\[0x11A\] == 2/if (n == 0 \&\& ((u8 *) obj->unk31C)[0x11A] != 0/
 s/item != 0x55 \&\& item != 0x2E) {/item != 0x55) {/
@@ -54,7 +54,7 @@ s/\*(s32 \*) (pick + 0x80) = 0;/;/
 s/if (weapon\[i\] == 0x8AE) {/if (weapon[i] == 0x8AD) {/
 s/ext\[0x19A\] += 3;/ext[0x19A] += 2;/
 s/\[0x19A\] >= 7) {/[0x19A] >= 6) {/
-s/func_1508DF48(r, 0);/func_1508DF48(r, 1);/
+s/rail_pickup_slot_release(r, 0);/rail_pickup_slot_release(r, 1);/
 s/if (flags\[i\] \& 2) {/if (flags[i] \& 1) {/
 s/hidden\[i\] = r | 0x2000;/hidden[i] = r;/
 s/                point\[i\] = -1;/                ;/

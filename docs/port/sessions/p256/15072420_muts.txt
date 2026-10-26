@@ -2,7 +2,7 @@
 s/(req >> 8) \& 0x7F/(req >> 8) \& 0xFF/ % flag
 s/(req >> 15) \& 1/(req >> 14) \& 1/ % flag base
 s/(req >> 16) \& 0xFF/(req >> 16) \& 0x7F/ % keep
-s/func_15083E0C(req \& 0xFF)/func_15083E0C(req \& 0x7F)/ % rec5
+s/setup_entry_find_by_id(req \& 0xFF)/setup_entry_find_by_id(req \& 0x7F)/ % rec5
 s/if (rec == -1)/if (rec == 0)/ % norec
 s/D_800D252C\[rec\] = 0;/D_800D252C[rec] = 1;/ % base
 s/if (!(state \& 0x80))/if (state \& 0x80)/ % keep base

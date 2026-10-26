@@ -1,4 +1,4 @@
-# P286 mutants for func_150C1138 (smoke_trail_update)
+# P286 mutants for smoke_trail_update (smoke_trail_update)
 /if (!(obj->flags & 2)) {/s/& 2/\& 4/
 /if (\*(s32 \*) obj->target == 0) {/s/== 0/!= 0/
 /if (obj->targetId != obj->target\[0x3B\]) {/s/0x3B/0x3A/
@@ -36,8 +36,8 @@
 /flipX = (random_int() & 1) ? 0x80 : 0;/s/0x80/0x40/
 /t.life = t.u22 = (u32) random_int()/s/t.u22 = //
 /t.u24 = 1.0352269f;/s/1.0352269f/1.035227f + 0.001f/
-/func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/0, 4,/0, 0x1C,/
-/func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/obj->room, obj->owner/obj->owner, obj->room/
+/particle_spawn_ex((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/0, 4,/0, 0x1C,/
+/particle_spawn_ex((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/obj->room, obj->owner/obj->owner, obj->room/
 /if (rec != NULL) {/s/rec != NULL/rec == NULL/
 /memcpy(rec + 0xA8, &self, 4);/s/0xA8/0xA4/
 /obj->free = obj->slots\[slot\].next;/s/obj->slots\[slot\].next/-1/

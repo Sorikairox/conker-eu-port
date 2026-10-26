@@ -9,7 +9,7 @@
 \#^    if (!(1\.0f < d->accum)) {#s/1\.0f </1.0f <=/
 \#^    yaw = #s/>> 8/>> 7/
 \#^    yaw = #s/0x40/0x41/
-\#^    func_15143134(d->offset#s/d->bone << 6/d->bone << 5/
+\#^    mtx_transform_point_or_origin(d->offset#s/d->bone << 6/d->bone << 5/
 \#^    t\.u02 = 0;#s/0;/1;/
 \#^    t\.count = (s32) d->accum;#s/d->accum/(d->accum + 0.5f)/
 \#^    d->accum -= (f32) t\.count;#s/t\.count/(s32) d->accum/
@@ -40,5 +40,5 @@
 \#^    t\.colour\[8\] = 0;#s/0;/1;/
 \#^    t\.colour\[9\] = 0xFF;#s/0xFF/0/
 \#^    t\.u61 = -1;#s/-1/1/
-\#^    func_15153BA4((u8 \*) &t, 0xFF, obj\[0xC\], obj\[1\]);#s/0xFF/0xFE/
-\#^    func_15153BA4((u8 \*) &t, 0xFF, obj\[0xC\], obj\[1\]);#s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+\#^    emit_particle_burst_req((u8 \*) &t, 0xFF, obj\[0xC\], obj\[1\]);#s/0xFF/0xFE/
+\#^    emit_particle_burst_req((u8 \*) &t, 0xFF, obj\[0xC\], obj\[1\]);#s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/

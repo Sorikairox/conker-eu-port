@@ -2,7 +2,7 @@ s#    \*(f32 \*) (obj + 0x3C) = \*(f32 \*) (obj + 0x10) + w;#    *(f32 *) (obj +
 s#    if (!(15\.0f < speed)) {#    if (!(15.0f <= speed)) {# % stop15
 s#        obj\[0x78\] = 1;#        obj[0x78] = 2;# % stop
 s#        \*(s32 \*) (obj + 0x60) \&= ~0xFF;#        *(s32 *) (obj + 0x60) \&= ~0xF;# % stop
-s#        func_150A7E40(mtx, 0\.0f, 0\.0f, 200\.0f, (f32 \*) (obj + 0x20), (f32 \*) (obj + 0x24), (f32 \*) (obj + 0x28));#        func_150A7E40(mtx, 0.0f, 200.0f, 0.0f, (f32 *) (obj + 0x20), (f32 *) (obj + 0x24), (f32 *) (obj + 0x28));# % stop
+s#        mtxf_transform_point(mtx, 0\.0f, 0\.0f, 200\.0f, (f32 \*) (obj + 0x20), (f32 \*) (obj + 0x24), (f32 \*) (obj + 0x28));#        mtxf_transform_point(mtx, 0.0f, 200.0f, 0.0f, (f32 *) (obj + 0x20), (f32 *) (obj + 0x24), (f32 *) (obj + 0x28));# % stop
 s#        \*(f32 \*) (obj + 0x24) += \*(f32 \*) (obj + 0x3C);#        *(f32 *) (obj + 0x24) += *(f32 *) (obj + 0x38);# % stop
 s#        return 1;#        return 0;# % stop
 s#    if (30\.0f < speed) {#    if (30.0f <= speed) {# % bounce30
@@ -32,9 +32,9 @@ s#        b\.u68 = 0x1D0600;#        b.u68 = 0x1D0601;# % break
 s#        b\.u78 = 0x20;#        b.u78 = 0x21;# % break
 s#        b\.u82 = 0x19;#        b.u82 = 0x18;# % break
 s#        b\.u84 = \*(s32 \*) (obj + 0x128);#        b.u84 = *(s32 *) (obj + 0x168);# % break
-s#        func_15151FA8((u8 \*) \&b, obj\[0xC\], obj\[1\]);#        func_15151FA8((u8 *) \&b, obj[1], obj[0xC]);# % break
-s#        func_10010F88(D_80088AD4\[random_int() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), w + 25\.0f,#        func_10010F88(D_80088AD4[random_int() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 20.0f,# % break
+s#        emit_sparks_by_angles((u8 \*) \&b, obj\[0xC\], obj\[1\]);#        emit_sparks_by_angles((u8 *) \&b, obj[1], obj[0xC]);# % break
+s#        sound_play_at(D_80088AD4\[random_int() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), w + 25\.0f,#        sound_play_at(D_80088AD4[random_int() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 20.0f,# % break
 s#        return 0;#        return 1;# % break
 s#    \*(f32 \*) (obj + 0x48) = -\*(f32 \*) (obj + 0x48) \* k;#    *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x48) * k;# % bounce
 s#    \*(f32 \*) (obj + 0x54) \*= k;#    *(f32 *) (obj + 0x54) *= -k;# % bounce
-s#    func_10010F88(D_80088ADC, 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C), \*(f32 \*) (obj + 0x40),#    func_10010F88(D_80088ADC, 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40), *(f32 *) (obj + 0x40),# % bounce
+s#    sound_play_at(D_80088ADC, 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C), \*(f32 \*) (obj + 0x40),#    sound_play_at(D_80088ADC, 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40), *(f32 *) (obj + 0x40),# % bounce

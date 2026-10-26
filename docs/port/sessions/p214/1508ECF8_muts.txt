@@ -4,9 +4,9 @@ s/if (D_800D1CC2 \& mask) {/if (D_800D1CC2 \& jbit) {/
 s/    D_800D18A0 \&= ~mask;/    ;/
 s/    D_800D1CC2 |= mask;/    D_800D1CC2 |= jbit;/
 s/    D_800D18A0 |= jbit;/    D_800D18A0 |= mask;/
-s/func_15085710(i, 2, func_150859AC(j, 3));/func_15085710(i, 2, func_150859AC(i, 3));/
-s/func_150859AC(j, 3)/func_150859AC(j, 2)/
-s/func_15085710(j, 2, 0);/func_15085710(j, 2, 1);/
+s/player_stat_modify(i, 2, player_stat_get(j, 3));/player_stat_modify(i, 2, player_stat_get(i, 3));/
+s/player_stat_get(j, 3)/player_stat_get(j, 2)/
+s/player_stat_modify(j, 2, 0);/player_stat_modify(j, 2, 1);/
 s/        RAIL_WORDS(0x18)\[0\] \&= ~mask;/        ;/
 s/        RAIL_WORDS(0x18)\[0\] |= jbit;/        RAIL_WORDS(0x18)[0] |= mask;/
 s/RAIL_WORDS(0x9C)\[i\] = RAIL_WORDS(0x9C)\[j\];/RAIL_WORDS(0x9C)[j] = RAIL_WORDS(0x9C)[i];/

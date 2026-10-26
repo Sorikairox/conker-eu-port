@@ -31,7 +31,8 @@ void *osViGetCurrentFramebuffer(void) {
 }
 
 // osViGetNextFramebuffer
-void *func_10025210(void) {
+/* was func_10025210 */
+void *os_vi_get_next_framebuffer(void) {
     register u32 saveMask = __osDisableInt();
     void *framep = D_8002C134->framep;
 

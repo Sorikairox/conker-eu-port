@@ -5,10 +5,10 @@ s/ case 0x9D: case 0x9F:/ case 0x9D:/
 s/        case 0xA0: case 0xB0: case 0xB1: case 0xB2: case 0xB4:/        case 0xA0: case 0xB0: case 0xB1: case 0xB2: case 0xB4: case 0xB3:/
 s/        case 0xA0: case 0xB0: case 0xB1: case 0xB2: case 0xB4:/        case 0xA0: case 0xB0: case 0xB1: case 0xB2:/
 s/ case 0x74: case 0x75: case 0x7A:/ case 0x74: case 0x75: case 0x7B:/
-s/            object_hit_effects((s32) obj, 1, 1, 1, 1, 0, 0xFF, 1);\n            func_15145A50((struct127 \*) obj);\n            player_hit_reaction/X/
+s/            object_hit_effects((s32) obj, 1, 1, 1, 1, 0, 0xFF, 1);\n            obj_set_destroyed((struct127 \*) obj);\n            player_hit_reaction/X/
 s/            player_hit_reaction((struct127 \*) obj, 6);/            player_hit_reaction((struct127 *) obj, 5);/
 s/            if (model != NULL \&\& model\[0x19B\] != 0) {/            if (model != NULL) {/
-s/                func_15063F14((struct127 \*) obj, 0);/                func_15063F14((struct127 *) obj, 1);/
+s/                obj_detonate_attachment((struct127 \*) obj, 0);/                obj_detonate_attachment((struct127 *) obj, 1);/
 s/            \/\* fallthrough \*\//            break;/
 s/        case 0x16:/        case 0x15:/
 s/        case 0x7C:/        case 0x7D:/

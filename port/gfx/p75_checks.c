@@ -2,15 +2,15 @@
  *  ?p75sky=1     level_setup_sky_backdrop (game_2DF70.c, sky / backdrop buffers; called by level_load per level): level,
  *                header +5..+8 (mode), D_80082FA0, the buffers D_800DC2E0 / D_800DC2B8[p][0..1] / D_800DC2B0, and in
  *                mode 2 the gradient texture (rows 0 / 32 / ... / 255) and the first quad's vertices. Also, every
- *                256 frames (from the tail wrap), the quad vertex t coordinates and the first Mtx word that func_150D1D20 writes (it is
+ *                256 frames (from the tail wrap), the quad vertex t coordinates and the first Mtx word that view_scroll_overlay_draw writes (it is
  *                no longer wrapped: P72's TEMPORARY NULL guard is gone).
- *  ?p75tail=N    func_1503BCAC (P70 tail chain, called by func_1503482C in game_eu_61AE0.c): arg0, calls per frame,
+ *  ?p75tail=N    tail_update_conker (P70 tail chain, called by obj_update_tail_for_conker in game_eu_61AE0.c): arg0, calls per frame,
  *                tail record of D_800CC2D0[arg0] (points p[0..4], phase, sway, timer, fade): first N calls, then
  *                every 64th.
- *  ?p75brk=N     func_1503E238 (P74 breakable state machine, called per object in game_eu_595D0.c when D_800C6A8F[slot * 16] != 0):
+ *  ?p75brk=N     breakable_update_slot (P74 breakable state machine, called per object in game_eu_595D0.c when D_800C6A8F[slot * 16] != 0):
  *                slot, kind, state before -> after, piece buffer, first piece; first N calls + every state change.
- *  ?p75break=FRAME&p75bslot=SLOT&p75bkind=KIND  DIAGNOSTIC: at FRAME request a break of record SLOT with kind KIND (func_1503E1FC,
- *                what the level-script commands of game_A28B0.c / game_A9D90.c do via func_1503DE70). */
+ *  ?p75break=FRAME&p75bslot=SLOT&p75bkind=KIND  DIAGNOSTIC: at FRAME request a break of record SLOT with kind KIND (breakable_request_flags,
+ *                what the level-script commands of game_A28B0.c / game_A9D90.c do via breakable_request_flag_entry). */
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -78,8 +78,8 @@ void __wrap_level_setup_sky_backdrop(int level) {
 }
 
 static unsigned tail_calls, tail_frame, tail_inframe, tail_maxinframe, tail_nonzero;
-void __real_func_1503BCAC(int arg0);
-void __wrap_func_1503BCAC(int arg0) {
+void __real_tail_update_conker(int arg0);
+void __wrap_tail_update_conker(int arg0) {
     const unsigned char *obj = D_800CC2D0 + arg0 * REC;
     if (port_frame_count != tail_frame) {
         if (tail_inframe > tail_maxinframe) tail_maxinframe = tail_inframe;
@@ -87,7 +87,7 @@ void __wrap_func_1503BCAC(int arg0) {
         static unsigned next = 256;
         if (flag(&fsky, "p75sky") && port_frame_count >= next) { next = port_frame_count + 256; quad_dump("frame"); }
         { /* P78: ?p78sky=N: every N frames the inputs of view_background_draw's backdrop dispatch (game_eu_13DC30.c):
-           * D_800C3682 (viewport-clear path instead), mode = header +8 (index into D_80089578: 2 = func_150D1D20),
+           * D_800C3682 (viewport-clear path instead), mode = header +8 (index into D_80089578: 2 = view_scroll_overlay_draw),
            * and sky_level_distance's level-0 case: handle 0 (no backdrop call) when player y < 1600 and yaw > 26 */
             static int f78 = -1; static unsigned n78;
             extern unsigned char D_800C3682_[] __asm__("D_800C3682"), D_800BE9F0_[] __asm__("D_800BE9F0"),
@@ -126,7 +126,7 @@ void __wrap_func_1503BCAC(int arg0) {
     }
     brk_req();
     if (arg0 != 0) tail_nonzero++;
-    __real_func_1503BCAC(arg0);
+    __real_tail_update_conker(arg0);
     if (!flag(&ftail, "p75tail")) return;
     if (tail_calls++ < (unsigned)ftail || (tail_calls & 63) == 0) {
         const unsigned char *x = W(obj, 0x31C) ? (const unsigned char *)(uintptr_t)W(obj, 0x31C) : 0;
@@ -155,20 +155,20 @@ static void brk_req(void) {
     if (done || port_frame_count < fr) return;
     done = 1;
     {
-        void func_1503E1FC(int, int, int, int);
+        void breakable_request_flags(int, int, int, int);
         const unsigned char *obj = D_800CC2D0 + slot * REC;
         port_log("[p75] DIAGNOSTIC break request frame %u: slot %u (id %02X joints %08X) kind %u\n", port_frame_count,
                  slot, vbe_ld8(obj + 4), W(obj, 0x1D4), kind);
-        func_1503E1FC((int)slot, (int)kind, -1, -1);
+        breakable_request_flags((int)slot, (int)kind, -1, -1);
     }
 }
 
-void __real_func_1503E238(int i);
-void __wrap_func_1503E238(int i) {
+void __real_breakable_update_slot(int i);
+void __wrap_breakable_update_slot(int i) {
     static unsigned calls;
     unsigned char *r = D_800C6660_ + i * 16;
     unsigned s0 = vbe_ld8(r + 0xF), s1;
-    __real_func_1503E238(i);
+    __real_breakable_update_slot(i);
     s1 = vbe_ld8(r + 0xF);
     if (!flag(&fbrk, "p75brk")) return;
     if (calls++ < (unsigned)fbrk || s0 != s1 || (calls & 7) == 0) {

@@ -26,6 +26,6 @@
 \#^        spr.colour\[3\] = (u32) random_int()#s/ 101 + 100/ 101 + 101/
 \#^            spr.flags |= 2;$#s/2/8/
 \#^            spr.flags |= 4;$#s/4/8/
-\#^        e = (u8 \*) func_151559FC(&spr, 2, 0, 0, 0x18, 0xFF, 1);$#s/0x18/0x19/
-\#^        e = (u8 \*) func_151559FC(&spr, 2, 0, 0, 0x18, 0xFF, 1);$#s/&spr, 2/\&spr, 3/
+\#^        e = (u8 \*) sprite2d_spawn(&spr, 2, 0, 0, 0x18, 0xFF, 1);$#s/0x18/0x19/
+\#^        e = (u8 \*) sprite2d_spawn(&spr, 2, 0, 0, 0x18, 0xFF, 1);$#s/&spr, 2/\&spr, 3/
 \#^            memcpy((s32) (e + 0x70), (f32 \*) &blk, 0x18);$#s/0x70/0x74/

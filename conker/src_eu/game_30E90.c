@@ -350,9 +350,9 @@ void world_objects_noop(void) {
 #ifdef NON_MATCHING
 void world_objects_clear_arrays(void);
 void world_record_build_matrix(f32 (*arg0)[4], u8 *arg1);
-void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 void collision_select_area(s32 arg0);
-s32 func_150A49D0(s32 count, s32 *idList, s32 force);
+s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 void scenery_handler_noop();
 void scenery_uv_scroll_update();
@@ -365,7 +365,7 @@ extern u16 D_800D3C00;
 /* Level start for the D_800DC320 world objects (0xA0-byte records at D_800DBEF4): reset, identity camera matrices,
  * then per object: kind 3 for no/known callbacks, its matrix (world_record_build_matrix) into both DL buffers' D_800895F0
  * arrays unless static (+0x70 bit 0); static objects get their vertices (+0x28, 0x10 stride) transformed once into
- * +0x20 and copied to +0x24; func_150A49D0 for flagged ones. Second pass: collision_find_floor per visible object
+ * +0x20 and copied to +0x24; world_objects_transform_mesh for flagged ones. Second pass: collision_find_floor per visible object
  * (bounds from +0x10/+0x12/+0x14, range -10000..20000) into +0x80/+0x84. arg0 (the level) is unused. */
 /* was func_150045C4 */
 void world_objects_level_start(s32 arg0) {
@@ -403,7 +403,7 @@ void world_objects_level_start(s32 arg0) {
             world_record_build_matrix(mf, r);
             for (j = 0; j < *(u16 *)(r + 0x16); j++) {
                 v = (s16 *)(*(u8 **)(r + 0x28) + j * 0x10);
-                func_150A7E40(mf, v[0], v[1], v[2], &ox, &oy, &oz);
+                mtxf_transform_point(mf, v[0], v[1], v[2], &ox, &oy, &oz);
                 w = (s16 *)(*(u8 **)(r + 0x20) + j * 0x10);
                 w[0] = (s32)ox;
                 w = (s16 *)(*(u8 **)(r + 0x20) + j * 0x10);
@@ -416,7 +416,7 @@ void world_objects_level_start(s32 arg0) {
         collision_select_area(2);
         if ((r[0x6F] & 0x80) == 0x80 && (r[0x4F] & 0x60) != 0x20) {
             D_800D3C00 = i;
-            func_150A49D0(1, (s32 *)&D_800D3C00, 1);
+            world_objects_transform_mesh(1, (s32 *)&D_800D3C00, 1);
         }
     }
     for (i = 0; i < D_800DC320; i++) {

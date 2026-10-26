@@ -1,11 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-void func_151D91B0(u8 *arg0, f32 *arg1);
+void rumble_strength_by_distance(u8 *arg0, f32 *arg1);
 
 
 extern u8 D_800BED64[];
-s32 func_151D8D90(u8 arg0) {
+/* was func_151D8D90 */
+s32 rumble_mask_has_pak(u8 arg0) {
     u8 i;
     u8 t;
     for (i = 0; i < 4; i++) {
@@ -23,14 +24,15 @@ s32 func_151D8D90(u8 arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1501BFF0(s32, u8);
-s32 func_1517F470(s32);
-s32 func_15182238(s32);
+s32 rumble_start_strength(s32, u8);
+s32 screen_fade_alpha(s32);
+s32 hud_lens_is_off(s32);
 s32 memcpy(u8 *, structEU_151D8E18 *, s32);
 extern u8 D_800BEEE2;
 extern u8 D_800BEEE3;
 
-s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_151D8E18 */
+s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     s32 var_s0;
     s32 var_s0_2;
     s32 var_s1;
@@ -40,7 +42,7 @@ s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     if (D_800E0B94 != 0) {
         return 0;
     }
-    if (func_151D8D90(arg0->unk5) == 0) {
+    if (rumble_mask_has_pak(arg0->unk5) == 0) {
         return 0;
     }
     if ((D_800BEAC0 != 0) || (D_800BEAC1 != 0) || (D_800BEEE2 != 0) || (D_800BEEE3 != 0)) {
@@ -50,7 +52,7 @@ s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     var_s0 = 0;
     if (D_80082FA0 >= 0) {
 loop_10:
-        if ((arg0->unk5 & (1 << var_s0)) && ((func_15182238(var_s0) == 0) || (func_1517F470(var_s0) != 0))) {
+        if ((arg0->unk5 & (1 << var_s0)) && ((hud_lens_is_off(var_s0) == 0) || (screen_fade_alpha(var_s0) != 0))) {
             return 0;
         }
         var_s0 = (var_s1 + 1) & 0xFF;
@@ -70,7 +72,7 @@ block_15:
     var_v1 = 0;
     do {
         if ((*(u8 *)((u8 *)temp_v0 + 0x13)) & (1 << var_v1)) {
-            func_1501BFF0(var_s0_2 & 0xFF, arg0->unk4);
+            rumble_start_strength(var_s0_2 & 0xFF, arg0->unk4);
         }
         var_v1 = (var_s0_2 + 1) & 0xFF;
         var_s0_2 = var_v1;
@@ -79,18 +81,19 @@ block_15:
     return (s32) temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_151D8E18.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/rumble_request.s")
 #endif
 #ifdef NON_MATCHING
-/* P241: readable C for func_eu_151D8FD4 (game_eu_2065A0, 64 insns). */
-// rumble_effect_update: update of the kind-0x3F effect made by func_151D8E18 (rumble for the players in the mask
+/* P241: readable C for rumble_record_update (game_eu_2065A0, 64 insns). */
+// rumble_effect_update: update of the kind-0x3F effect made by rumble_request (rumble for the players in the mask
 // +0x13, strength +0x12 0..8). With flag +0xE bit 0 the s16 life +0x10 counts down by D_800BE9E4 and the effect ends
 // (node_destroy, after the rest) once it is negative. Runs the D_80090060 handler of index +0x14 (-1 = none); when
 // the strength changed since the last frame (+0x16), restarts the rumble of every player in the mask
-// (func_1501C15C, func_1501BFF0) and remembers the new strength. func_1501BFF0 is declared in the func_151D8E18 block above.
+// (rumble_stop, rumble_start_strength) and remembers the new strength. rumble_start_strength is declared in the rumble_request block above.
 extern void (*D_80090060[])(u8 *);
-void func_1501C15C(u8);
-void func_eu_151D8FD4(u8 *fx) {
+void rumble_stop(u8);
+/* was func_eu_151D8FD4 */
+void rumble_record_update(u8 *fx) {
     u8 done = FALSE;
     u8 i;
 
@@ -106,8 +109,8 @@ void func_eu_151D8FD4(u8 *fx) {
     if (fx[0x12] != fx[0x16]) {
         for (i = 0; i < 4; i++) {
             if (fx[0x13] & (1 << i)) {
-                func_1501C15C(i);
-                func_1501BFF0(i, fx[0x12]);
+                rumble_stop(i);
+                rumble_start_strength(i, fx[0x12]);
             }
         }
         fx[0x16] = fx[0x12];
@@ -117,47 +120,52 @@ void func_eu_151D8FD4(u8 *fx) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_eu_151D8FD4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/rumble_record_update.s")
 #endif
 
-void func_1501C15C(u8);
-void func_151D90D4(u8 *arg0) {
+void rumble_stop(u8);
+/* was func_151D90D4 */
+void rumble_stop_players(u8 *arg0) {
     u8 i;
     for (i = 0; i < 4; i++) {
         if (arg0[0x13] & (1 << i)) {
-            func_1501C15C(i);
+            rumble_stop(i);
         }
     }
 }
 
-void func_151D9138(void *arg0) {
-    func_151D90D4(arg0);
+/* was func_151D9138 */
+void rumble_die_retire(void *arg0) {
+    rumble_stop_players(arg0);
     node_retire(arg0);
 }
 
-void func_151D9164(void *arg0) {
-    func_151D90D4(arg0);
+/* was func_151D9164 */
+void rumble_die_free(void *arg0) {
+    rumble_stop_players(arg0);
     node_unlink_free(arg0);
 }
 
-void func_151D9190(u8 *arg0) {
-    func_151D91B0(arg0, (f32 *)(arg0 + 0x18));
+/* was func_151D9190 */
+void rumble_falloff_update(u8 *arg0) {
+    rumble_strength_by_distance(arg0, (f32 *)(arg0 + 0x18));
 }
 
-f32 func_15143E64(f32 *, f32 *);
+f32 vec3_length(f32 *, f32 *);
 
-void func_151D91B0(u8 *arg0, f32 *arg1) {
+/* was func_151D91B0 */
+void rumble_strength_by_distance(u8 *arg0, f32 *arg1) {
     f32 *p;
     f32 d[3];
     f32 dist;
     f32 lo;
     f32 v;
 
-    p = func_15144B34(((u8 *)arg1)[0x18]);
+    p = camera_get_pos(((u8 *)arg1)[0x18]);
     d[0] = arg1[0] - p[0];
     d[1] = arg1[1] - p[1];
     d[2] = arg1[2] - p[2];
-    dist = func_15143E64(d, arg1);
+    dist = vec3_length(d, arg1);
     lo = arg1[3];
     if (dist < lo) {
         v = 1.0f;
@@ -169,7 +177,8 @@ void func_151D91B0(u8 *arg0, f32 *arg1) {
     arg0[0x12] = v * 8.0f;
 }
 
-void func_151D930C(struct102 *arg0, s32 arg1, u8 arg2) {
+/* was func_151D930C */
+void rumble_on_message(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x58) {
         node_destroy(arg0);
     } else if (arg2 == 0x47) {
@@ -177,13 +186,15 @@ void func_151D930C(struct102 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-void func_151D9364(s32 arg0, u8 arg1) {
+/* was func_151D9364 */
+void rumble_broadcast(s32 arg0, u8 arg1) {
     node_broadcast_types(&D_800AB6E0, 1, arg0, arg1);
 }
 
 extern s8 D_eu_800E0E30;
 
-void func_151D9398(void) {
+/* was func_151D9398 */
+void rumble_records_clear_all(void) {
     D_eu_800E0E30 = 1;
-    func_151D9364(0, 0x58U);
+    rumble_broadcast(0, 0x58U);
 }

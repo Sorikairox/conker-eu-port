@@ -35,15 +35,16 @@ extern u64 D_80042D40;           /* __osCurrentTime */
 extern u32 D_80042D48;           /* __osBaseCounter */
 extern u32 D_80042D4C;           /* __osViIntrCount */
 void __osTimerServicesInit(void);
-void func_10024720(void);        /* __osViInit */
+void os_vi_init(void);        /* __osViInit */
 OSViContext_s86 *__osGetActiveQueue(void); /* __osViGetCurrentContext */
 void __osViSwapContext(void);
 void __osTimerInterrupt(void);
 u32 __osDisableInt(void);
 void __osRestoreInt(u32);
-void func_100036E8(void *arg);
+void os_vi_manager_main(void *arg);
 
-void func_10003570(OSPri pri) {
+/* was func_10003570 */
+void os_create_vi_manager(OSPri pri) {
     u32 savedMask;
     OSPri oldPri;
     OSPri myPri;
@@ -75,8 +76,8 @@ void func_10003570(OSPri pri) {
     D_8002AEB0.acsQueue = NULL;
     D_8002AEB0.dma = NULL;
     D_8002AEB0.edma = NULL;
-    osCreateThread(&D_80036F00, 0, func_100036E8, &D_8002AEB0, &D_80037130[0x1000], pri);
-    func_10024720();
+    osCreateThread(&D_80036F00, 0, os_vi_manager_main, &D_8002AEB0, &D_80037130[0x1000], pri);
+    os_vi_init();
     osStartThread(&D_80036F00);
     __osRestoreInt(savedMask);
     if (oldPri != -1) {
@@ -85,12 +86,13 @@ void func_10003570(OSPri pri) {
 }
 
 #ifdef NON_MATCHING
-/* P281: readable C for func_100036E8 (libultra viMgrMain, compiled C, 110 insns). Verified with difftest up to the
+/* P281: readable C for os_vi_manager_main (libultra viMgrMain, compiled C, 110 insns). Verified with difftest up to the
    N-th osRecvMesg (DIFFTEST_STOPCALL): the loop never returns. */
 // vi_manager_main: the VI manager thread. Waits on the event queue: a retrace message swaps the VI context, counts
 // down the retrace interval (sending the client's message when it expires and reloading it), counts the interrupt
 // and advances __osCurrentTime by the counter ticks since the last retrace; a counter message runs the timers.
-void func_100036E8(void *arg) {
+/* was func_100036E8 */
+void os_vi_manager_main(void *arg) {
     OSDevMgr_s86 *dm = arg;
     OSViContext_s86 *vc;
     OSMesg mesg = NULL;
@@ -126,5 +128,5 @@ void func_100036E8(void *arg) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_3570/func_100036E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_3570/os_vi_manager_main.s")
 #endif

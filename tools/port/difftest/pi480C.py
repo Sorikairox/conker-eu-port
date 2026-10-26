@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P62: func_1000480C (init_4470, blocking cartridge read through KSEG1) asm vs its NON_MATCHING C.
+"""P62: rom_read_direct (init_4470, blocking cartridge read through KSEG1) asm vs its NON_MATCHING C.
 Both sides run in Unicorn MIPS32 (the asm is plain mips2 code): reference = .init of build/conker.eu.elf (EU
 0x10004A5C), candidate = .init of build_nm/conker.eu.elf. Emulated hardware: PI_STATUS (0xA4600010) reads 0 (idle),
 a fake cartridge of random bytes at physical 0x10200000 (read as 0xB0200000 + off), D_80000308 = 0x10000000 (ROM
@@ -22,7 +22,7 @@ ROMP = 0x10200000
 class Side:
     def __init__(self, elf, entry=None):
         s = syms(elf)
-        self.entry = entry or s['func_1000480C']
+        self.entry = entry or s['rom_read_direct']
         self.ost = s['osStartThread']
         self.init = section(elf, '.init')
     def run(self, mem, rom, a):
@@ -82,7 +82,7 @@ def main():
         if d or c1 != c2 or g1 != g2:
             bad += 1
             if bad <= 6: print('DIFF', t, hex(a[0]), hex(dst), size, [hex(x) for x in d], c1, c2, g1 == g2)
-    print('func_1000480C trials', sum(hist.values()), 'diffs', bad, hist)
+    print('rom_read_direct trials', sum(hist.values()), 'diffs', bad, hist)
 
 if __name__ == '__main__':
     main()

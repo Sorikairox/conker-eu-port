@@ -1,4 +1,4 @@
-# P246 func_151A11BC (emit_point_blob) mutants: sed % setup names
+# P246 spawn_emit_sprite_blob (emit_point_blob) mutants: sed % setup names
 s/15U - 0x3F/15U - 0x3E/ % c0
 s/15U - 0x3F/14U - 0x3F/ % c1
 s/sp = angle_byte_cos(pitch \& 0xFF)/sp = angle_byte_cos(pitch \& 0x7F)/ % c0 c1

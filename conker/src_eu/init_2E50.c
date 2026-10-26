@@ -9,7 +9,8 @@ extern u8 D_8003A8D2;
 extern u8 D_8003A8D3;
 extern u8 D_8003A8D5;
 
-void func_10002E50(void *args) {
+/* was func_10002E50 */
+void pi_dev_mgr_main(void *args) {
     OSIoMesg *mb;
     OSMesg em;
     OSMesg dummy;

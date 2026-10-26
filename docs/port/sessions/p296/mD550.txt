@@ -13,11 +13,11 @@
 \#^        debris.size\[0\] = debris.size\[1\] = #s/debris.size\[1\] = //
 \#^        debris.rot\[1\] = random_float() \* 360.0f;#s/360.0f/180.0f/
 \#^        debris.spinB = #s/sBlastSpinBase/sBlastSizeBase/
-\#^        func_1514470C(cyl\[random_int() & 1\], (u8 \*) debris.pos);#s/debris.pos/debris.vel/
-\#^        func_15143794((u32) r1 . 31 - 0x54, (u32) r2 . 26 - 0x2D, rf#s/- 0x54/- 0x55/
-\#^        func_15143794((u32) r1 . 31 - 0x54, (u32) r2 . 26 - 0x2D, rf#s/(u32) r2/(u32) r1/
+\#^        spawn_region_random_point_3d(cyl\[random_int() & 1\], (u8 \*) debris.pos);#s/debris.pos/debris.vel/
+\#^        vec3_from_angles_byte((u32) r1 . 31 - 0x54, (u32) r2 . 26 - 0x2D, rf#s/- 0x54/- 0x55/
+\#^        vec3_from_angles_byte((u32) r1 . 31 - 0x54, (u32) r2 . 26 - 0x2D, rf#s/(u32) r2/(u32) r1/
 \#^        debris.u4C = #s/sBlastU4CBase/sBlastU4CRange/
-\#^        func_15132BBC(&debris, 3, 0xFF, 0, 0, arg0, owner);#s/3, 0xFF/2, 0xFF/
+\#^        mdl_particle_spawn_ex(&debris, 3, 0xFF, 0, 0, arg0, owner);#s/3, 0xFF/2, 0xFF/
 \#^    n = random_int() . 9U + 17;#s/+ 17/+ 16/
 \#^    smoke.type = 0x5103;#s/0x5103/0x5102/
 \#^    smoke.u14\[0\] = 0xD4;#s/0xD4/0xD5/
@@ -33,15 +33,15 @@
 \#^        smoke.life2 = smoke.life = #s/smoke.life2 = //
 \#^        smoke.u14\[7\] = random_int() . 101U + 0x9B;#s/101U/100U/
 \#^        smoke.size\[0\] = smoke.size\[1\] = #s/sSmokeSizeBase/sSmokeSizeRange/
-\#^        func_15143794((u32) r1 . 41 - 0x59, (u32) r2 . 51 - 0x40, rf#s/51 - 0x40/50 - 0x40/
-\#^        func_15143794((u32) r1 . 41 - 0x59, (u32) r2 . 51 - 0x40, rf#s/sSmokeSpeedBase/sSmokeSpeedRange/
+\#^        vec3_from_angles_byte((u32) r1 . 41 - 0x59, (u32) r2 . 51 - 0x40, rf#s/51 - 0x40/50 - 0x40/
+\#^        vec3_from_angles_byte((u32) r1 . 41 - 0x59, (u32) r2 . 51 - 0x40, rf#s/sSmokeSpeedBase/sSmokeSpeedRange/
 \#^        smoke.u54 = #s/sSmokeU54Base\[0\]/0.0f/
-\#^        p = (u8 \*) func_151307F0((s32 \*) &smoke, 1, 0, 4, arg0, owner);#s/0, 4,/0, 3,/
+\#^        p = (u8 \*) particle_spawn_ex((s32 \*) &smoke, 1, 0, 4, arg0, owner);#s/0, 4,/0, 3,/
 \#^        if (p != NULL) {#s/!=/==/
 \#^            memcpy(p + 0xA8, &tail, 4);#s/0xA8/0xA4/
 \#^    at\[1\] = ((s16 \*) cyl\[0\])\[1\];#s/cyl\[0\]/cyl[1]/
-\#^    func_151D58E4((struct17 \*) at, 0.0f, 1000.0f, 0.001f, 5, arg0, owner);#s/5, arg0/4, arg0/
+\#^    cam_shake_all_players((struct17 \*) at, 0.0f, 1000.0f, 0.001f, 5, arg0, owner);#s/5, arg0/4, arg0/
 \#^    at2\[2\] = ((s16 \*) cyl\[0\])\[2\];#s/\[2\];/[1];/
-\#^    func_151D5404((struct17 \*) at2, 506.0f, 1013.0f#s/0xF, 0x14/0x14, 0xF/
+\#^    rumble_all_players_at((struct17 \*) at2, 506.0f, 1013.0f#s/0xF, 0x14/0x14, 0xF/
 1,/^static const f32 sBlastSpinRange/s/45.466003f/45.466f/
 1,/^static const u8 sBlastCyl/s/0x4C, 0x4D/0x4C, 0x4E/

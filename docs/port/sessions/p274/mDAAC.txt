@@ -1,5 +1,5 @@
-\#^    func_151D6310(arg0 + 0x100, arg1, 0x40, &vtx, &fresh);$#s/0x100/0x104/
-\#^    func_151D6310(arg0 + 0x100, arg1, 0x40, &vtx, &fresh);$#s/0x40,/0x3C,/
+\#^    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &vtx, &fresh);$#s/0x100/0x104/
+\#^    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &vtx, &fresh);$#s/0x40,/0x3C,/
 \#^    if (vtx == NULL) {$#s/==/!=/
 \#^    if (fresh) {$#s/fresh/!fresh/
 \#^        buf = \*(u8 \*\*) (arg0 + 0x100 + arg1 \* 4);$#s/arg1 \* 4/arg1 * 8/
@@ -12,8 +12,8 @@
 \#^    p\[2\]\[2\] = 0\.0f;$#s/0\.0f/1.0f/
 \#^    mtxf_rotate_xyz_deg(mtx, \*(f32 \*) (arg0 + 0x40)#s/(arg0 + 0x48)/(arg0 + 0x44)/
 \#^    for (i = 0; i < 4; i++) {$#s/< 4/< 3/
-\#^        func_150A7E40(mtx, p\[i\]\[0\], p\[i\]\[1\], 0\.0f#s/p\[i\]\[1\], 0\.0f/p[i][1], 1.0f/
-\#^        func_150A7E40(mtx, p\[i\]\[0\], p\[i\]\[1\], 0\.0f#s/&p\[i\]\[1\], &p\[i\]\[2\]/\&p[i][2], \&p[i][1]/
+\#^        mtxf_transform_point(mtx, p\[i\]\[0\], p\[i\]\[1\], 0\.0f#s/p\[i\]\[1\], 0\.0f/p[i][1], 1.0f/
+\#^        mtxf_transform_point(mtx, p\[i\]\[0\], p\[i\]\[1\], 0\.0f#s/&p\[i\]\[1\], &p\[i\]\[2\]/\&p[i][2], \&p[i][1]/
 \#^        vtx\[1\] = (s32) p\[i\]\[1\];$#s/p\[i\]\[1\]/p[i][0]/
 \#^        vtx\[2\] = (s32) p\[i\]\[2\];$#s/vtx\[2\]/vtx[3]/
 \#^        vtx\[3\] = 0;$#s/0;/1;/

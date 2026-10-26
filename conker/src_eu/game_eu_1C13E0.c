@@ -4,9 +4,10 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15152A90(void *, u8, s32); /* P98: asm reads a0 = sp+0x20 block, a1 & 0xFF, a2 */
+s32 emit_burst_from_spec_b(void *, u8, s32); /* P98: asm reads a0 = sp+0x20 block, a1 & 0xFF, a2 */
 
-void func_15193660(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_15193660 */
+void obj_head_particle_burst(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u20;
         s32 u24;
@@ -93,12 +94,12 @@ void func_15193660(u8 *arg0, u8 arg1, s32 arg2) {
             sp.u74 = 0.0f;
             sp.u80 = 0.0f;
             sp.u68 = 0.307f;
-            func_15152A90(&sp.u20, arg1, arg2);
+            emit_burst_from_spec_b(&sp.u20, arg1, arg2);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C13E0/func_15193660.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C13E0/obj_head_particle_burst.s")
 #endif
 typedef struct {
     u8 u0;
@@ -125,7 +126,8 @@ typedef struct {
 s32 bone_emitter_spawn(SpA3C *, s32, ...);
 extern f32 D_800A85C4;
 
-void func_151937F4(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_151937F4 */
+void obj_bone_debris_emitter_attach(u8 *arg0, s32 arg1, s32 arg2) {
     SpA3C s;
 
     if (arg0 != NULL && *(s32 *)arg0 != 0) {
@@ -152,16 +154,18 @@ void func_151937F4(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-s32 func_15193E54(struct102 *arg0) {
+/* was func_15193E54 */
+s32 bone_debris_emitter_init(struct102 *arg0) {
     *(f32 *)((u8 *)arg0 + 0x74) = D_800A85C8;
     return 1;
 }
 
 #ifdef NON_MATCHING
-s32 func_15157E08(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
-s32 func_1515C668(u8 *, u8 **, u8 *);
+s32 anim_model_fx_spawn_moving(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
+s32 motion_track_get_delta(u8 *, u8 **, u8 *);
 
-void func_15193E6C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
+/* was func_15193E6C */
+void bone_debris_emit(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
     struct {
         u8 * u50;
         f32 u54;
@@ -227,7 +231,7 @@ void func_15193E6C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
     f32 temp_f6;
     f32 temp_f8;
 
-    if ((func_1515C668((*(u8 **)((u8 *)arg5 + 0x1C)), &sp.u50, arg0) != 0) && ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg5 + 0x1C))) + 0xAD)) == 0)) {
+    if ((motion_track_get_delta((*(u8 **)((u8 *)arg5 + 0x1C)), &sp.u50, arg0) != 0) && ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg5 + 0x1C))) + 0xAD)) == 0)) {
         temp_f2 = (*(f32 *)((u8 *)sp.u50 + 0));
         temp_f12 = (*(f32 *)((u8 *)sp.u50 + 4));
         temp_f14 = (*(f32 *)((u8 *)sp.u50 + 8));
@@ -288,10 +292,10 @@ void func_15193E6C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
             sp.u84 = 0xF;
             sp.u80 = 0.982883f;
             sp.u7C = temp_f18 * 0.001f;
-            func_15157E08(&sp.u88, &sp.u54, 0, random_float() * 1814.0f * 0.001f, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg5 + 0xC)), (s32) (*(u8 *)((u8 *)arg5 + 1)));
+            anim_model_fx_spawn_moving(&sp.u88, &sp.u54, 0, random_float() * 1814.0f * 0.001f, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg5 + 0xC)), (s32) (*(u8 *)((u8 *)arg5 + 1)));
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C13E0/func_15193E6C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C13E0/bone_debris_emit.s")
 #endif

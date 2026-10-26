@@ -26,7 +26,8 @@ s32 osPiRawStartDma(s32 direction, u32 devAddr, void *dramAddr, u32 size) {
 }
 
 // osEPiRawStartDma
-s32 func_10023DA0(OSPiHandle *pihandle, s32 direction, u32 devAddr, void *dramAddr, u32 size) {
+/* was func_10023DA0 */
+s32 os_epi_raw_start_dma(OSPiHandle *pihandle, s32 direction, u32 devAddr, void *dramAddr, u32 size) {
     register u32 stat;
 
     stat = IO_READ(PI_STATUS_REG);
@@ -50,7 +51,7 @@ s32 func_10023DA0(OSPiHandle *pihandle, s32 direction, u32 devAddr, void *dramAd
 
 #ifdef NON_MATCHING
 /* P279: readable C for libultra's hand-asm bcopy (also replaced on PC by port/ultra/pc_libc.c vbe.bcopy). The asm
- * also returns dst in v0; the libultra prototype is void (v0use.py: only func_15177F90 passes it on as its own
+ * also returns dst in v0; the libultra prototype is void (v0use.py: only swarm_spawn passes it on as its own
  * return value, and nothing reads that). */
 // bcopy: memmove(dst, src, n) for n >= 0: copies forward when dst is below src or past the source's end (signed
 // address compares, as the asm), backward otherwise, so overlapping ranges are safe. The asm's word / 16-byte
@@ -78,4 +79,5 @@ void bcopy(const void *src, void *dst, int n) {
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23CC0/bcopy.s")
 #endif
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23CC0/func_10024190.s")
+/* was func_10024190 */
+#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23CC0/os_writeback_dcache.s")

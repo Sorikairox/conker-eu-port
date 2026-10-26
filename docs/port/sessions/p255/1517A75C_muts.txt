@@ -1,4 +1,4 @@
-# P255 func_1517A75C (sprite_particle_update) mutants: sed % setup names
+# P255 puff_drift_update (sprite_particle_update) mutants: sed % setup names
 s/(obj + 0x90) += \*(s16 \*) (obj + 0xA0);/(obj + 0x90) += *(s16 *) (obj + 0xA4);/ % live
 s/(obj + 0x92) -= vy;/(obj + 0x92) += vy;/ % live
 s/(obj + 0x94) += \*(s16 \*) (obj + 0xA4);/(obj + 0x94) -= *(s16 *) (obj + 0xA4);/ % live

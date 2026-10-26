@@ -5,7 +5,7 @@
 void vec3_diff(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 f32 vec3_heading_deg(struct17 *arg0);
 f32 math_angle_diff_deg(f32 arg0, f32 arg1);
-void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void camera_update_eye_orbit(u8 *);
 void camera_update_eye_base(u8 *);
 void camera_update_eye_height(u8 *);
@@ -33,7 +33,7 @@ extern f32 D_800A3868;  /* 0.15 */
 // it is 999 (then the target's +0xB8, +10 when +0x102, 0 when its +0x1CA is clear), halved when +0x102, clamped to
 // +-88 deg and kept at the previous value D_80089860 within 10 deg. Distance 150 when flag 0x10 of *(+0x36C), else
 // +0x374 (the shorter +0x370 when +0x102 and not +0x3E8). The new eye (height clamped to +-200 around the target) is set at
-// once (+0x23C) or eased per axis by func_150498A0 (speeds +0x3C0.., rate 2 / 2.2+2.2, doubled when +0x102), kept
+// once (+0x23C) or eased per axis by math_spring_approach (speeds +0x3C0.., rate 2 / 2.2+2.2, doubled when +0x102), kept
 // at least 120 away from the target, at least 30 above the floor +0x35C. Also eases +0x5E8 to +0x5EC, sets
 // +0x3DC (pitch), +0x344 / +0x348 (eye height over +0x354) and +0x370 (horizontal distance).
 /* was func_151229B0 */
@@ -115,9 +115,9 @@ void camera_orbit_update(u8 *cam) {
             speed += speed;
             rate += rate;
         }
-        func_150498A0(&CAMF(0x2F8), v[0], &CAMF(0x3C0), speed, rate, CAMF(0x7B4));
-        func_150498A0(&CAMF(0x2FC), v[1], &CAMF(0x3C4), speed, rate, CAMF(0x7B4));
-        func_150498A0(&CAMF(0x300), v[2], &CAMF(0x3C8), speed, rate, CAMF(0x7B4));
+        math_spring_approach(&CAMF(0x2F8), v[0], &CAMF(0x3C0), speed, rate, CAMF(0x7B4));
+        math_spring_approach(&CAMF(0x2FC), v[1], &CAMF(0x3C4), speed, rate, CAMF(0x7B4));
+        math_spring_approach(&CAMF(0x300), v[2], &CAMF(0x3C8), speed, rate, CAMF(0x7B4));
     }
     if ((*(u8 **) (cam + 0x3D0))[0x102] == 0 && !(*(u16 *) (cam + 0x36A) & 0x10)) {
         dx = CAMF(0x2F8) - CAMF(0x2BC);
@@ -171,7 +171,7 @@ void camera_follow_mode_update(u8 *arg0) {
             v = 0.5f;
         }
         *(f32 *)(arg0 + 0x8D4) = v;
-        func_150498A0((f32 *)(arg0 + 0x8DC), *(f32 *)(arg0 + 0x8D4), (f32 *)(arg0 + 0x8D8), 1.0f, 2.0f,
+        math_spring_approach((f32 *)(arg0 + 0x8DC), *(f32 *)(arg0 + 0x8D4), (f32 *)(arg0 + 0x8D8), 1.0f, 2.0f,
                       *(f32 *)(arg0 + 0x7B4));
         *(f32 *)(arg0 + 0x37C) = *(f32 *)(arg0 + 0x37C) + math_angle_diff_deg(a, b) * *(f32 *)(arg0 + 0x8DC);
         *(f32 *)(arg0 + 0x39C) = *(f32 *)(arg0 + 0x37C) * 0.017453292f;

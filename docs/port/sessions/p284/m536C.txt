@@ -4,21 +4,21 @@
 \#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/0.153000012f/0.15f/
 \#^    em->acc += (0.0510000028f + random_float() \* 0.153000012f) \* D_800BE9A4;$#s/ \* D_800BE9A4//
 \#^    if (!(1.0f < em->acc)) {$#s/1.0f/2.0f/
-\#^    cam = func_15144B34(em->owner\[0x23D\]);$#s/0x23D/0x23C/
+\#^    cam = camera_get_pos(em->owner\[0x23D\]);$#s/0x23D/0x23C/
 \#^    angle = (s32) ((\*(f32 \*) (em->owner + 0x380) + 180.0f) \* 0.7111111283f);$#s/0x380/0x384/
 \#^    angle = (s32) ((\*(f32 \*) (em->owner + 0x380) + 180.0f) \* 0.7111111283f);$#s/180.0f/90.0f/
 \#^    angle = (s32) ((\*(f32 \*) (em->owner + 0x380) + 180.0f) \* 0.7111111283f);$#s/0.7111111283f/0.7f/
 \#^    left = angle - 21;$#s/21/20/
 \#^    right = angle + 21;$#s/21/22/
-\#^        func_15143874(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/381.0f/380.0f/
-\#^        func_15143874(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/right/left/
-\#^        func_15143874(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/254.0f/250.0f/
+\#^        vec2_from_angle_byte(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/381.0f/380.0f/
+\#^        vec2_from_angle_byte(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/right/left/
+\#^        vec2_from_angle_byte(right, random_float() \* 381.0f + 254.0f, &a.v\[0\], &a.v\[2\]);$#s/254.0f/250.0f/
 \#^        a.v\[1\] = random_float() \* 212.0f + -133.0f;$#s/-133.0f/-130.0f/
 \#^        a.v\[1\] = random_float() \* 212.0f + -133.0f;$#s/212.0f/210.0f/
 \#^        a.v\[0\] += cam\[0\];$#s/cam\[0\]/cam[1]/
 \#^        a.v\[2\] += cam\[2\];$#s/+=/=/
 \#^        b.v\[1\] += cam\[1\];$#s/+=/-=/
-\#^        func_15143874(left, random_float() \* 381.0f + 254.0f, &b.v\[0\], &b.v\[2\]);$#s/&b.v\[0\], &b.v\[2\]/\&b.v[2], \&b.v[0]/
+\#^        vec2_from_angle_byte(left, random_float() \* 381.0f + 254.0f, &b.v\[0\], &b.v\[2\]);$#s/&b.v\[0\], &b.v\[2\]/\&b.v[2], \&b.v[0]/
 \#^        b.v\[1\] = random_float() \* 212.0f + -133.0f;$#s/b.v\[1\] =/b.v[1] +=/
 \#^        if (random_int() & 1) {$#s/& 1/\& 2/
 \#^            a = b;$#s/a = b;//

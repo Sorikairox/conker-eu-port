@@ -130,7 +130,7 @@ void aud_out_push_game(const void *buf, unsigned frames) {
 
 unsigned aud_out_queued(void) { return (wr - rd) & (RING - 1); }
 
-/* P147: AI_LEN as the game sees it. The audio manager (init_8F90.c func_100095A0) makes a short audio frame
+/* P147: AI_LEN as the game sees it. The audio manager (init_8F90.c audio_do_frame) makes a short audio frame
  * (736 instead of 920 samples at 22020 Hz, 25 audio frames/s at PAL 50 Hz VI) when AI_LEN >= 249 samples, so it
  * keeps AI_LEN near 249: on the N64 that is the rest of the DMA in flight. Here the ring is drained by a
  * ScriptProcessor in 2048-frame bursts, so reporting the whole ring would hold it near empty and every burst would

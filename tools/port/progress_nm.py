@@ -25,8 +25,8 @@ _PRAGMA = re.compile(r'^\s*#pragma GLOBAL_ASM\("[^"]*/(\w+)\.s"\)')
 
 def nm_funcs_scan(text):
     """P234: every GLOBAL_ASM pragma that the NON_MATCHING build leaves out (its code is C there: an NM body, or a
-    private entry folded into another function's NM C, e.g. func_1000661C.. in func_1000654C's inflate, the
-    func_150A5480 loop pieces in D2DB0, func_150A661C in D3880). A conditional stack: each level says whether its current branch is live
+    private entry folded into another function's NM C, e.g. rzip_inflate_loop.. in rzip_inflate_impl's inflate, the
+    floor_collect_record_tris loop pieces in D2DB0, shadow_project_vertex_entry in D3880). A conditional stack: each level says whether its current branch is live
     with NON_MATCHING defined (None = unrelated condition, inherits). Before P234 one regex required `#endif` right
     after the pragma: zap_sound_release_cb (game_eu_110DB0) keeps `extern s32 zap_sound_release_cb;` in the #else part and was
     counted asm-only although its NM body exists (P190). --old = the old regex."""

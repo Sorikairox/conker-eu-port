@@ -1,8 +1,8 @@
 \#^    if (obj == NULL) {$#s/== NULL/!= NULL/
 \#^    bones = \*(u8 \*\*) (obj + 0x1D4);$#s/0x1D4/0x1D8/
 \#^    mtx = bones + (D_80088CC8\[idx\] << 6);$#s/<< 6/<< 5/
-\#^    func_15143134(D_80088CB0\[idx\], a, mtx);$#s/D_80088CB0/D_80088CBC/
-\#^    func_15143134(D_80088CBC\[idx\], b, mtx);$#s/mtx/bones/
+\#^    mtx_transform_point_or_origin(D_80088CB0\[idx\], a, mtx);$#s/D_80088CB0/D_80088CBC/
+\#^    mtx_transform_point_or_origin(D_80088CBC\[idx\], b, mtx);$#s/mtx/bones/
 \#^    scale = D_80088CCC\[idx\];$#s/idx/0/ % idx1 idx2
 \#^    dir\[0\] = scale \* (b\[0\] - a\[0\]);$#s/b\[0\] - a\[0\]/a[0] - b[0]/
 \#^    dir\[1\] = scale \* (b\[1\] - a\[1\]);$#s/scale \* //

@@ -9,8 +9,8 @@ s/emit.u58 = 0x24;/emit.u58 = 0x23;/ %
 s/emit.u60 = 0x60600;/emit.u60 = 0x60601;/ %
 s/emit.u6C = 1.0f;/emit.u6C = 0.0f;/ %
 s/emit.u71 = 0;/emit.u71 = -1;/ %
-s/func_151530A8((s32 \*) &emit, room, owner);/func_151530A8((s32 *) \&emit, 0, owner);/ %
-s/func_151530A8((s32 \*) &emit, room, owner);/func_151530A8((s32 *) \&emit, room, 1);/ %
+s/emit_streaks_from_spec((s32 \*) &emit, room, owner);/emit_streaks_from_spec((s32 *) \&emit, 0, owner);/ %
+s/emit_streaks_from_spec((s32 \*) &emit, room, owner);/emit_streaks_from_spec((s32 *) \&emit, room, 1);/ %
 s/req.texture = 0x2B;/req.texture = 0x2A;/ %
 s/req.u04 = 0x20000;/req.u04 = 0;/ %
 s/req.life = random_int() . 7U + 6;/req.life = random_int() \& 7U + 6;/ %
@@ -26,8 +26,8 @@ s/flipB = (random_int() & 1) ? 0x80 : 0;/flipB = (random_int() \& 2) ? 0x80 : 0;
 s/req.flags = (flipB | 1) | flipA | 0xC200;/req.flags = flipB | flipA | 0xC200;/ %
 s/req.update = 6;/req.update = 5;/ %
 s/req.u65 = 4;/req.u65 = 0;/ %
-s/func_151307F0((s32) &req, 1, 0, 0, room, owner);/func_151307F0((s32) \&req, 0, 0, 0, room, owner);/ %
-s/func_151307F0((s32) &req, 1, 0, 0, room, owner);/func_151307F0((s32) \&req, 1, 0, 0, owner, room);/ %
+s/particle_spawn_ex((s32) &req, 1, 0, 0, room, owner);/particle_spawn_ex((s32) \&req, 0, 0, 0, room, owner);/ %
+s/particle_spawn_ex((s32) &req, 1, 0, 0, room, owner);/particle_spawn_ex((s32) \&req, 1, 0, 0, owner, room);/ %
 s/flash.unk1 = -1;/flash.unk1 = 0;/ %
 s/flash.unk2 = random_int() . 7U + 6;/flash.unk2 = random_int() . 7U + 5;/ %
 s/flash.unk4 = 0;/flash.unk4 = 1;/ %

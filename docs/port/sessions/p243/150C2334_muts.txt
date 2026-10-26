@@ -1,4 +1,4 @@
-# P243 func_150C2334 (emit_point_puff) mutants: sed % setup names
+# P243 emit_point_puff (emit_point_puff) mutants: sed % setup names
 s/(x - x0) \* 10.0f/(x - y0) * 10.0f/ % base
 s/(z - z0) \* 10.0f/(z - x0) * 10.0f/ % base
 s/arg9 \* 0.1757/arg9 * 0.1758/ % base neg
@@ -7,12 +7,12 @@ s/s.h24 = 20;/s.h24 = 21;/ % base
 s/s.h26 = 600;/s.h26 = 601;/ % base
 s/s.h18 = size;/s.h18 = sizeB;/ % base
 s/s.h1C = sizeB;/s.h1C = size;/ % base
-s/func_151429E0(0, \&s.c0/func_151429E0(1, \&s.c0/ % col
+s/fx_pick_random_color(0, \&s.c0/fx_pick_random_color(1, \&s.c0/ % col
 s/\&s.c1\[0\], \&s.c1\[1\]/\&s.c1[1], \&s.c1[0]/ % col
 s/s.b2F = 0xFF;/s.b2F = 0xFE;/ % base
 s/\& 0xF) + 12/\& 0x1F) + 12/ % col
 s/s.b31 = 1;/s.b31 = 0;/ % base
 s/return 1;/return 0;/ % base
 s/s.pos\[1\] = y;/s.pos[1] = z;/ % base
-s/func_1518CFF0(\&s, 1)/func_1518CFF0(\&s, 2)/ % base
+s/puff_sprite_spawn(\&s, 1)/puff_sprite_spawn(\&s, 2)/ % base
 s/size = (s32) arg9;/size = (s32) r;/ % base

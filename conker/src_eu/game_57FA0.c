@@ -79,7 +79,7 @@ s32 asset_rec_read_cached(u8 *arg0, s32 arg1, s32 *arg2) {
     }
     D_800C4180++;
     buf = (u8 *)(((u32)raw + 15) & ~15);
-    func_10004514(key & 0x7FFFFFF0, buf, ((key & 0xE) + 0x1F) & ~0xF, 1);
+    rom_dma_read(key & 0x7FFFFFF0, buf, ((key & 0xE) + 0x1F) & ~0xF, 1);
     rec = (s32 *)(buf + (key & 0xF));
     i = rec[0];
     *arg2 = rec[1];
@@ -102,7 +102,7 @@ s32 asset_rec_fetch_block(s32 base, s32 buf, s32 index, u32 n) {
     s32 *rec;
     u32 i;
 
-    func_10004514(src & ~0xF, (void *) dst, ((src & 0xE) + n * 8 + 0xF) & ~0xF, 1);
+    rom_dma_read(src & ~0xF, (void *) dst, ((src & 0xE) + n * 8 + 0xF) & ~0xF, 1);
     rec = (s32 *) (dst + (src & 0xF));
     for (i = 0; i < n; i++) {
         rec[i * 2] += base;
@@ -167,11 +167,11 @@ s32 asset_lookup_records(u8 *arg0, s32 arg1, s32 arg2, u32 arg3, ...) {
 }
 s32 *allocate_memory(s32, s32, s32, s32);
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
-void func_10004074(s32 *);
+void heap_free(s32 *);
 #else
-s32 func_10004074(s32 *);
+s32 heap_free(s32 *);
 #endif
-s32 func_10006530(s32 *, s32, u32);
+s32 rzip_inflate(s32 *, s32, u32);
 s32 func_150ADC50();
 
 /* was func_1502B224 */
@@ -195,18 +195,18 @@ s32 asset_dma_into(u8 *arg0, s32 arg1, s32 arg2, s32 arg3)
     {
       return 0;
     }
-    func_10004514((s32) arg0, temp_v0, (var_s1 + 0xF) & (~0xF), 1);
+    rom_dma_read((s32) arg0, temp_v0, (var_s1 + 0xF) & (~0xF), 1);
     sp24 = (*temp_v0) & 0x7FFFFFFF;
-    var_s1 = func_10006530(temp_v0, arg1, D_8003809C);
+    var_s1 = rzip_inflate(temp_v0, arg1, D_8003809C);
     if (sp24 != ((0, var_s1))) // fakematch: comma expression flips beq operand order
     {
       D_8003C8E0 = 0x0C000036;
       func_150ADC50();
     }
-    func_10004074(temp_v0);
+    heap_free(temp_v0);
     goto block_10;
   }
-  func_10004514((s32) arg0, (u8 *) arg1, (var_s1 + 0xF) & (~0xF), 1);
+  rom_dma_read((s32) arg0, (u8 *) arg1, (var_s1 + 0xF) & (~0xF), 1);
   block_10:
   return (s32) var_s1;
 
@@ -227,7 +227,7 @@ s32 asset_load_alloc(u8 *rom, s32 info, s32 *size_out) {
     if (buf == NULL) {
         return 0;
     }
-    func_10004514((s32) rom, buf, (size + 0xF) & ~0xF, 1);
+    rom_dma_read((s32) rom, buf, (size + 0xF) & ~0xF, 1);
     if ((info & 0x70000000) != 0x10000000) {
         *size_out = size;
         return (s32) buf;
@@ -239,10 +239,10 @@ s32 asset_load_alloc(u8 *rom, s32 info, s32 *size_out) {
     if (n != 0 && n < 1000000) {
         out = allocate_memory(n, 1, 2, 2);
         if (out != NULL) {
-            got = func_10006530(buf, (s32) out, D_8003809C);
+            got = rzip_inflate(buf, (s32) out, D_8003809C);
         }
     }
-    func_10004074(buf);
+    heap_free(buf);
     *size_out = got;
     return (s32) out;
 }
@@ -463,7 +463,7 @@ s32 asset_get_size(s32 arg0, ...) {
             if ((u32)q & 8) {
                 q = (s32 *)(buf + 8);
             }
-            func_10004514((s32)p, q, 0x10, 1);
+            rom_dma_read((s32)p, q, 0x10, 1);
             ok = *q;
         }
     }
@@ -499,7 +499,7 @@ s32 asset_get_size(s32 arg0, ...) {
 //             if (((s32) &stack1 & 8) != 0) {
 //                 *stack1 = &stack2;
 //             }
-//             func_10004514(offset, stack1, 0x10, 1); // decompress?
+//             rom_dma_read(offset, stack1, 0x10, 1); // decompress?
 //             more = *stack1;
 //         }
 //     }

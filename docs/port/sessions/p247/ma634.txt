@@ -23,9 +23,9 @@
 \#^    memcpy(view, D_800DA130 + slot \* 0x40, 0x40);$#s/slot \* 0x40/slot * 0x10/
 \#^    view\[2\]\[3\] = 0\.0f;$#s/0\.0f/2.0f/
 \#^    view\[3\]\[3\] = 1\.0f;$#s/1\.0f/2.0f/
-\#^    func_150A7E40(m, 0\.0f, 67\.0f, 159\.0f, &ox, &oy, &oz);$#s/67\.0f/68.0f/
-\#^    func_150A7E40(m, 0\.0f, 67\.0f, 159\.0f, &ox, &oy, &oz);$#s/159\.0f/158.0f/
-\#^    func_150A7E40(view, ox, oy, oz, &cx, &cy, &cz);$#s/ox, oy/oy, ox/
+\#^    mtxf_transform_point(m, 0\.0f, 67\.0f, 159\.0f, &ox, &oy, &oz);$#s/67\.0f/68.0f/
+\#^    mtxf_transform_point(m, 0\.0f, 67\.0f, 159\.0f, &ox, &oy, &oz);$#s/159\.0f/158.0f/
+\#^    mtxf_transform_point(view, ox, oy, oz, &cx, &cy, &cz);$#s/ox, oy/oy, ox/
 \#^    cx \*= 2\.002f;$#s/2\.002f/2.0f/
 \#^    cy \*= 2\.002f;$#s/cy \*=/cy +=/
 \#^    baseX = (s32) (cx \* (1\.0f / 1024\.0f)) \* 1024\.0f;$#s/(1\.0f \/ 1024\.0f)) \* 1024\.0f/(1.0f \/ 512.0f)) * 512.0f/
@@ -34,8 +34,8 @@
 \#^        v = \*(Vtx \*\*) (rec + D_800BE9C0 \* 0x10 + slot \* 4 + 0x58) + i;$#s/D_800BE9C0 \* 0x10/D_800BE9C0 * 0x8/
 \#^        v = \*(Vtx \*\*) (rec + D_800BE9C0 \* 0x10 + slot \* 4 + 0x58) + i;$#s/slot \* 4/slot * 8/
 \#^        v = \*(Vtx \*\*) (rec + D_800BE9C0 \* 0x10 + slot \* 4 + 0x58) + i;$#s/0x58)/0x5C)/
-\#^        func_150A7E40(m, v->v\.ob\[0\], v->v\.ob\[1\], v->v\.ob\[2\], &wx, &wy, &wz);$#s/v->v\.ob\[2\]/v->v.ob[1]/
-\#^        func_150A7E40(view, wx, wy, wz, &sx, &sy, &sz);$#s/wz, &sx/wy, \&sx/
+\#^        mtxf_transform_point(m, v->v\.ob\[0\], v->v\.ob\[1\], v->v\.ob\[2\], &wx, &wy, &wz);$#s/v->v\.ob\[2\]/v->v.ob[1]/
+\#^        mtxf_transform_point(view, wx, wy, wz, &sx, &sy, &sz);$#s/wz, &sx/wy, \&sx/
 \#^        sx \*= 2\.002f;$#s/2\.002f/2.001f/
 \#^        sy \*= 2\.002f;$#s/2\.002f/2.003f/
 \#^        v->v\.tc\[0\] = (s32) (sx - baseX);$#s/sx - baseX/sx - baseY/

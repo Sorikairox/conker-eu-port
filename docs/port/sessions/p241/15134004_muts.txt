@@ -1,4 +1,4 @@
-# P241 func_15134004 (attached_bone_matrix) mutants: sed % setup names
+# P241 mdl_particle_mtx_attach_bone (attached_bone_matrix) mutants: sed % setup names
 s/    if (target == NULL || \*(s32 \*) target == 0 || target\[4\] == 0xFF || obj\[0x80\] != target\[0x3B\]) {/    if (target == NULL || target[4] == 0xFF || obj[0x80] != target[0x3B]) {/ % dead
 s/obj\[0x80\] != target\[0x3B\]/obj[0x81] != target[0x3B]/ % fixed
 s/obj\[0x80\] != target\[0x3B\]/obj[0x80] == target[0x3B]/ % fixed

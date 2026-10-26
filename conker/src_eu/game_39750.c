@@ -22,7 +22,7 @@ void debris_counts_reset(void) {
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 zone_tree_find_leaf(s32, s32);
-s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn(f32 *, s32, s32, s32, s32, s32);
 extern u16 D_800964A0[9]; /* sound ids; the heavy ones (0x48, 0x4B, 0x4E..0x51) get smaller pieces */
 extern f32 D_800964D0;    /* pieces per unit of record length x scale */
 extern f32 D_800964D4;    /* 1 / 65535 */
@@ -33,10 +33,10 @@ extern f32 D_800964E4;
 extern f32 D_800964E8;
 
 // record_debris_spawn: D_80082EA0 entry 0x22 (level-start record). With n = length x scale x D_800964D0
-// (length = func_1514462C(rec)), spawns a piece while n > 1 (n -= 1 each): at a random point of the record
+// (length = spawn_region_volume(rec)), spawns a piece while n > 1 (n -= 1 each): at a random point of the record
 // (spawn_zone_pick_point: x / z and the height range lo..hi), at a random height in the middle half of the range, with
 // a random radius (up to the distance to the nearer end), angle, spins and one of the D_800964A0 sounds, on the
-// ground level of (x, z) (zone_tree_find_leaf), spawned by func_15132FBC (kind 3). The start dispatcher passes no scale
+// ground level of (x, z) (zone_tree_find_leaf), spawned by mdl_particle_spawn (kind 3). The start dispatcher passes no scale
 // (N64: a1 = the dispatcher's own address as an f32, ~3e-26), so nothing is spawned from there.
 /* was func_1500C2F0 */
 void record_debris_spawn(struct_eu_15144598 *rec, f32 scale) {
@@ -81,7 +81,7 @@ void record_debris_spawn(struct_eu_15144598 *rec, f32 scale) {
     s32 i;
 
 #define RND() (c = osGetCount(), (f32) ((c * random_int()) & 0xFFFF) * D_800964D4)
-    n = func_1514462C(rec) * scale * D_800964D0;
+    n = spawn_region_volume(rec) * scale * D_800964D0;
     if (!(1.0f < n)) {
         return;
     }
@@ -135,7 +135,7 @@ void record_debris_spawn(struct_eu_15144598 *rec, f32 scale) {
         blk.size[1] = blk.size[0];
         collision_select_area(0);
         blk.ground = zone_tree_find_leaf((s32) blk.pos[0], (s32) blk.pos[2]);
-        func_15132FBC((f32 *) &blk, 3, 0xFF, 0, 0xFF, 1);
+        mdl_particle_spawn((f32 *) &blk, 3, 0xFF, 0, 0xFF, 1);
         n -= 1.0f;
     } while (1.0f < n);
 #undef RND
@@ -146,7 +146,7 @@ void record_debris_spawn(struct_eu_15144598 *rec, f32 scale) {
 #ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
-s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
 /* was func_1500C8D0 */
@@ -243,7 +243,7 @@ void record_particle_spawn_a(struct_eu_15144598 *arg0, f32 arg1) {
     u32 temp_s0_8;
     u32 temp_s0_9;
 
-    var_f26 = func_1514462C(arg0) * arg1 * 0.000002f;
+    var_f26 = spawn_region_volume(arg0) * arg1 * 0.000002f;
     if (var_f26 > 1.0f) {
         sp.uB0 = 0x4403;
         sp.uA8 = 0x200005;
@@ -368,7 +368,7 @@ void record_particle_spawn_a(struct_eu_15144598 *arg0, f32 arg1) {
             sp.uF8 = (var_f10_3 * 0.000015259022f * 0.013f) + 0.0050000004f;
             collision_select_area(0);
             sp.u104 = zone_tree_find_leaf((s32) sp.uD8, (s32) sp.uE0);
-            temp_v0 = func_151307F0(&sp.uA8, 2, 0, 0x1C, 0xFF, 1);
+            temp_v0 = particle_spawn_ex(&sp.uA8, 2, 0, 0x1C, 0xFF, 1);
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u8C, 0x1C);
             }
@@ -465,7 +465,7 @@ void record_scatter_spawn(struct_eu_15144598 *arg0, f32 arg1) {
     u32 temp_s0_9;
     u8 *temp_v0;
 
-    var_f26 = func_1514462C(arg0) * arg1 * 0.0000002f;
+    var_f26 = spawn_region_volume(arg0) * arg1 * 0.0000002f;
     if (var_f26 > 1.0f) {
         sp.uB8 = 0x57;
         sp.uB9 = 0;
@@ -587,7 +587,7 @@ void record_scatter_spawn(struct_eu_15144598 *arg0, f32 arg1) {
 #ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
-s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn(f32 *, s32, s32, s32, s32, s32);
 
 /* was func_1500D3AC */
 void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
@@ -676,7 +676,7 @@ void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
     u32 temp_s0_8;
     u32 temp_s0_9;
 
-    var_f30 = func_1514462C(arg0) * arg1 * 0.0000002f;
+    var_f30 = spawn_region_volume(arg0) * arg1 * 0.0000002f;
     if (var_f30 > 1.0f) {
         sp.u94 = 1.0f;
         sp.u98 = 1.0f;
@@ -788,7 +788,7 @@ void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
             sp.uA0 = temp_f0_2;
             collision_select_area(0);
             sp.uF0 = zone_tree_find_leaf((s32) sp.uBC, (s32) sp.uC4);
-            func_15132FBC(&sp.u94, 3, 0xFF, 0, 0xFF, 1);
+            mdl_particle_spawn(&sp.u94, 3, 0xFF, 0, 0xFF, 1);
             var_f30 -= 1.0f;
         } while (var_f30 > 1.0f);
     }
@@ -805,7 +805,7 @@ void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
 //     f32 phi_f30; // main tmp
 //
 //
-//     phi_f30 = func_1514462C(arg0) * arg1 * D_8009616C;
+//     phi_f30 = spawn_region_volume(arg0) * arg1 * D_8009616C;
 //
 //     if (phi_f30 > 1.0f) {
 //         tmp.unk8 = 1.0f;
@@ -885,7 +885,7 @@ void record_debris_spawn_c(struct_eu_15144598 *arg0, f32 arg1) {
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
 s32 zone_tree_find_leaf(s32, s32);
-s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn(f32 *, s32, s32, s32, s32, s32);
 extern u16 D_800964B4[14]; /* sound ids; 0x39 gets D_80096554-scaled pieces */
 extern f32 D_80096538;    /* pieces per unit of record length x scale */
 extern f32 D_8009653C;    /* 1 / 65535 */
@@ -942,7 +942,7 @@ void record_debris_spawn_b(struct_eu_15144598 *rec, f32 scale) {
     s32 i;
 
 #define RND() (c = osGetCount(), (f32) ((c * random_int()) & 0xFFFF) * D_8009653C)
-    n = func_1514462C(rec) * scale * D_80096538;
+    n = spawn_region_volume(rec) * scale * D_80096538;
     if (!(1.0f < n)) {
         return;
     }
@@ -995,7 +995,7 @@ void record_debris_spawn_b(struct_eu_15144598 *rec, f32 scale) {
         }
         collision_select_area(0);
         blk.ground = zone_tree_find_leaf((s32) blk.pos[0], (s32) blk.pos[2]);
-        func_15132FBC((f32 *) &blk, 3, 0xFF, 0, 0xFF, 1);
+        mdl_particle_spawn((f32 *) &blk, 3, 0xFF, 0, 0xFF, 1);
         n -= 1.0f;
     } while (1.0f < n);
 #undef RND
@@ -1007,7 +1007,7 @@ void record_debris_spawn_b(struct_eu_15144598 *rec, f32 scale) {
 #ifdef NON_MATCHING
 s32 spawn_zone_pick_point(struct_eu_15144598 *, f32 *, f32 *, f32 *, f32 *);
 void collision_select_area(s32);
-s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
 /* was func_1500DE88 */
@@ -1105,7 +1105,7 @@ void record_particle_spawn_b(struct_eu_15144598 *arg0, f32 arg1) {
     u32 temp_s0_8;
     u32 temp_s0_9;
 
-    var_f24 = func_1514462C(arg0) * arg1 * 0.000002f;
+    var_f24 = spawn_region_volume(arg0) * arg1 * 0.000002f;
     if (var_f24 > 1.0f) {
         sp.uA8 = 0x5103;
         sp.uA0 = 0x200005;
@@ -1224,7 +1224,7 @@ void record_particle_spawn_b(struct_eu_15144598 *arg0, f32 arg1) {
             sp.uF0 = (var_f10_3 * 0.000015259022f * 0.010000001f) + 0.002f;
             collision_select_area(0);
             sp.uFC = zone_tree_find_leaf((s32) sp.uD0, (s32) sp.uD8);
-            temp_v0 = func_151307F0(&sp.uA0, 2, 0, 0x1C, 0xFF, 1);
+            temp_v0 = particle_spawn_ex(&sp.uA0, 2, 0, 0x1C, 0xFF, 1);
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u84, 0x1C);
             }
@@ -1249,7 +1249,7 @@ void record_particle_spawn_b(struct_eu_15144598 *arg0, f32 arg1) {
 //     struct170 tmp;
 //
 //
-//     f32 phi_f24 = func_1514462C(arg0) * arg1 * D_800961A8;
+//     f32 phi_f24 = spawn_region_volume(arg0) * arg1 * D_800961A8;
 //
 //     if (phi_f24 > 1.0f) {
 //         tmp.unk48 = 20739;

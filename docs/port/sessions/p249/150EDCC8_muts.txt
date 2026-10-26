@@ -50,12 +50,12 @@ s/^    ob\[0x247\] = 0x32;$/    ob[0x247] = 0x33;/ % gone
 s/|| TANK_PART(o)\[0x120\] == 0) {/|| TANK_PART(o)[0x120] != 0) {/ % mp_view sp_boost
 s/if (\*(s32 \*) ob == 0) {/if (*(s32 *) ob != 0) {/ % gone sp_boost
 s/if (ob\[0x232\] == 0xD) {/if (ob[0x232] == 0xE) {/ % hit_d
-s/func_15052F9C(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);/func_15052F9C(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 1);/ % hit_d
+s/obj_carry_release(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);/obj_carry_release(o, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 1);/ % hit_d
 s/(D_800CC268 \& 1)) {/(D_800CC268 \& 2)) {/ % squash
 s/(\*(u32 \*) (ob + 0x25C) \& 0x400)/(*(u32 *) (ob + 0x25C) \& 0x800)/ % squash
 s/(u8 \*) tgt + 0x44) > 15.0f/(u8 *) tgt + 0x44) > 25.0f/ % squash
 s/tgt->y_velocity > 10.0f/tgt->y_velocity > 13.0f/ % squash
-s/func_1505327C(o, 68.0f, 4.0f, 0xD, 5);/func_1505327C(o, 68.0f, 4.0f, 0xD, 6);/ % squash
+s/obj_carry_pickup(o, 68.0f, 4.0f, 0xD, 5);/obj_carry_pickup(o, 68.0f, 4.0f, 0xD, 6);/ % squash
 s/(u8 \*) tgt + 0x28) > 70.0f/(u8 *) tgt + 0x28) > 90.0f/ % bounce
 s/obj_dist_xz(tgt, o) < 100.0f/obj_dist_xz(tgt, o) < 300.0f/ % bounce_far
 s/0x10, 0xFF, 0, 1, 0);/0x10, 0xFF, 0, 0, 0);/ % bounce

@@ -1,4 +1,4 @@
-# P255 func_151473F4 (object_splash_spawn) mutants: sed % setup names
+# P255 obj_fx_point_splash (object_splash_spawn) mutants: sed % setup names
 s/(obj + 0x1D4) != 0/(obj + 0x1D4) == 0/ % nomodel ring
 s/(s32) sp.rec, id) != 0/(s32) sp.rec, id) == 0/ % ring nofind
 s/sp.rec, id)/sp.rec, 1)/ % id2

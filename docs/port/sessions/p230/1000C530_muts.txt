@@ -18,28 +18,28 @@ s/            timer = 0;/            timer = 1;/ % timer_end2 req_timer_end
 s/            mode = 0;/            mode = 1;/ % timer_end2 req_timer_end
 s/    if (mode != oldMode) {/    if (mode == oldMode) {/ % req1 timer_end
 s/        if (oldMode != 0) {/        if (oldMode != 1) {/ % req3_from1 timer_end
-s/            func_100085F8(ch, oldMode + 9);/            func_100085F8(ch, mode + 9);/ % req3_from1 timer_end
+s/            music_chan_mute(ch, oldMode + 9);/            music_chan_mute(ch, mode + 9);/ % req3_from1 timer_end
 s/        if (mode != 0) {/        if (mode != 3) {/ % req3_from1 timer_end
-s/            func_10008824(ch, mode + 9, a);/            func_10008824(ch, mode + 9, b);/ % req1 req2
-s/^            func_100086FC(ch, mode + 9, b >> 7);/            func_100086FC(ch, mode + 9, b >> 6);/ % req2 req3_from1
-1,/else if/s/            func_10008744(ch, mode + 9, b \& 0x7F);/            func_10008744(ch, mode + 9, b \& 0xFF);/ % req2 req3_from1
+s/            music_chan_set_volume(ch, mode + 9, a);/            music_chan_set_volume(ch, mode + 9, b);/ % req1 req2
+s/^            music_chan_set_cc41(ch, mode + 9, b >> 7);/            music_chan_set_cc41(ch, mode + 9, b >> 6);/ % req2 req3_from1
+1,/else if/s/            music_chan_set_pan(ch, mode + 9, b \& 0x7F);/            music_chan_set_pan(ch, mode + 9, b \& 0xFF);/ % req2 req3_from1
 s/    } else if (oldMode != 0 \&\& req != 0 \&\& ((u32) state >> 8) != (u32) D_80041F0C) {/    } else if (req != 0 \&\& ((u32) state >> 8) != (u32) D_80041F0C) {/ % req_timer_end
 s/    } else if (oldMode != 0 \&\& req != 0 \&\& ((u32) state >> 8) != (u32) D_80041F0C) {/    } else if (oldMode != 0 \&\& req != 0 \&\& ((u32) state >> 16) != (u32) D_80041F0C) {/ % par0
 s/        if (a != oldA) {/        if (a == oldA) {/ % same_mode_newA same_mode_newB
-s/            func_10008824(ch, oldMode + 9, a);/            func_10008824(ch, oldMode + 9, oldA);/ % same_mode_newA
+s/            music_chan_set_volume(ch, oldMode + 9, a);/            music_chan_set_volume(ch, oldMode + 9, oldA);/ % same_mode_newA
 s/        if (b != oldB) {/        if (b == oldB) {/ % same_mode_newB same_mode_newA
 s/            if ((b ^ oldB) \& 0x80) {/            if ((b ^ oldB) \& 0x40) {/ % same_mode_newB same_mode_newB_lo
-s/                func_100086FC(ch, mode + 9, b >> 7);/                func_100086FC(ch, mode + 9, b >> 8);/ % newB_set
-/else if/,$s/            func_10008744(ch, mode + 9, b \& 0x7F);/            func_10008744(ch, mode + 9, b \& 0x3F);/ % newB_lv
+s/                music_chan_set_cc41(ch, mode + 9, b >> 7);/                music_chan_set_cc41(ch, mode + 9, b >> 8);/ % newB_set
+/else if/,$s/            music_chan_set_pan(ch, mode + 9, b \& 0x7F);/            music_chan_set_pan(ch, mode + 9, b \& 0x3F);/ % newB_lv
 s/    if (D_80041F04 \& 0x10) {/    if (D_80041F04 \& 0x20) {/ % flag10_nofade flag10_fade
 s/        D_80041F04 \&= ~0x10;/        D_80041F04 \&= ~0x11;/ % flag10_nofade
 s/        if (fade == 0) {/        if (fade != 0) {/ % flag10_nofade flag10_fade
-s/            func_1000886C(ch, 0xC0, 0x80);/            func_1000886C(ch, 0xC0, 0x81);/ % flag10_nofade
+s/            music_chans_set_volume(ch, 0xC0, 0x80);/            music_chans_set_volume(ch, 0xC0, 0x81);/ % flag10_nofade
 s/        fade = 0xFF000000;/        fade = 0xFE000000;/ % flag10_nofade flag10_fade
 s/        d = (D_800BE9E4 << 23) \& 0xFF000000;/        d = (D_800BE9E4 << 24) \& 0xFF000000;/ % fade_dec fade_end
 s/        d = (D_800BE9E4 << 23) \& 0xFF000000;/        d = (D_800BE9E4 << 23);/ % fade_odd
 s/        if (d < fade) {/        if (d <= fade) {/ % fade_eq1
-s/            func_10008790(ch, 0xC0, 0, 0x5A);/            func_10008790(ch, 0xC0, 0, 0x5B);/ % fade_eq1 fade_big_dt
+s/            music_chans_fade_volume(ch, 0xC0, 0, 0x5A);/            music_chans_fade_volume(ch, 0xC0, 0, 0x5B);/ % fade_eq1 fade_big_dt
 s/            fade = 0;/            fade = 0x1000000;/ % fade_eq1 fade_big_dt
 s/    D_80041F08 = 0;/    D_80041F08 = 1;/ % idle
 s/    return (timer << 2) | mode | (a << 8) | (b << 16) | fade;/    return (timer << 2) | mode | (a << 8) | (b << 16);/ % fade_dec

@@ -7,7 +7,8 @@
 extern OSTimer *D_8002C0C0;
 void __osSetTimerIntr(OSTime tim);
 OSTime __osInsertTimer(OSTimer *t);
-int func_151F0180(OSTimer *t, OSTime value, OSTime interval, OSMesgQueue *mq, OSMesg msg) {
+/* was func_151F0180 */
+int game_os_set_timer(OSTimer *t, OSTime value, OSTime interval, OSMesgQueue *mq, OSMesg msg) {
     OSTime tim;
 
     t->next = NULL;

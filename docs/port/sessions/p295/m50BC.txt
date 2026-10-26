@@ -1,4 +1,4 @@
-# P295 mutants for func_151C50BC (beam_hit_update)
+# P295 mutants for tracer_hit_update (beam_hit_update)
 /^        \*hit = \*src;/d
 1,/if (hit->start\[0\] != pos\[0\] || hit->start\[1\] != pos\[1\] || hit->start\[2\] != pos\[2\]) {/s/ || hit->start\[1\] != pos\[1\]//
 1,/if (hit->start\[0\] != pos\[0\] || hit->start\[1\] != pos\[1\] || hit->start\[2\] != pos\[2\]) {/s/ || hit->start\[2\] != pos\[2\]//
@@ -36,7 +36,7 @@
 1,/(u8 \*) &hit->extra, 0.0f);/s/(u8 \*) &hit->extra, 0.0f);/(u8 *) \&hit->extra, 1.0f);/
 /^    if (!found) {/s/!found/found == 1/
 /^        return dir != NULL || to != NULL;/s/|| to != NULL/|| from != NULL/
-/func_151C2600(caster, (u8 \*) hit->point/s/hit->extra, hit->dist/hit->extra, lenScale/
-/func_151C2600(caster, (u8 \*) hit->point/s/(u8 \*) hit->dir/(u8 *) hit->start/
+/hit_spark_sound_play(caster, (u8 \*) hit->point/s/hit->extra, hit->dist/hit->extra, lenScale/
+/hit_spark_sound_play(caster, (u8 \*) hit->point/s/(u8 \*) hit->dir/(u8 *) hit->start/
 /^    if (matIdx == -1) {/s/-1/0/
 /hit->material = (u8 \*) D_800DBEF4 + matIdx \* 0xA0;/s/0xA0/0x9C/

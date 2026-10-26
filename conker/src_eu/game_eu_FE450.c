@@ -4,19 +4,20 @@
 
 
 #ifdef NON_MATCHING
-void func_15182D40(void);
+void water_waves_update(void);
 s32 random_int(void);
-// level_ambient_cue_update: level update handler (D_8008D0A4[14]): runs func_15182D40, then counts the cue timer
+// level_ambient_cue_update: level update handler (D_8008D0A4[14]): runs water_waves_update, then counts the cue timer
 // (byte at D_800D9D10) down by the frame delta D_800BE9E4; when it has run out, the first of the objects 0x15 /
-// 0x1A / 0x1B / 0x1C / 0x1D / 0x20 that func_150A29C8 reports absent (0) gets a random sound 0x6C..0x6E played at
+// 0x1A / 0x1B / 0x1C / 0x1D / 0x20 that trigger_test_player reports absent (0) gets a random sound 0x6C..0x6E played at
 // its point in D_800D34B8 (0x34-byte records), and the timer restarts at 0x80..0xFF.
-void func_150D0C40(s32 arg0) {
+/* was func_150D0C40 */
+void level_ambient_cue_update(s32 arg0) {
     u8 *timer = (u8 *) D_800D9D10;
     s16 *pos;
     s32 id;
 
     id = 0;
-    func_15182D40();
+    water_waves_update();
     if (*timer != 0) {
         if (D_800BE9E4 < *timer) {
             *timer -= D_800BE9E4;
@@ -25,17 +26,17 @@ void func_150D0C40(s32 arg0) {
         }
         return;
     }
-    if (func_150A29C8(0, 0x15) == 0) {
+    if (trigger_test_player(0, 0x15) == 0) {
         id = 0x15;
-    } else if (func_150A29C8(0, 0x1A) == 0) {
+    } else if (trigger_test_player(0, 0x1A) == 0) {
         id = 0x1A;
-    } else if (func_150A29C8(0, 0x1B) == 0) {
+    } else if (trigger_test_player(0, 0x1B) == 0) {
         id = 0x1B;
-    } else if (func_150A29C8(0, 0x1C) == 0) {
+    } else if (trigger_test_player(0, 0x1C) == 0) {
         id = 0x1C;
-    } else if (func_150A29C8(0, 0x1D) == 0) {
+    } else if (trigger_test_player(0, 0x1D) == 0) {
         id = 0x1D;
-    } else if (func_150A29C8(0, 0x20) == 0) {
+    } else if (trigger_test_player(0, 0x20) == 0) {
         id = 0x20;
     }
     if (id == 0) {
@@ -43,8 +44,8 @@ void func_150D0C40(s32 arg0) {
     }
     *timer = (random_int() & 0x7F) + 0x80;
     pos = (s16 *) (D_800D34B8 + id * 0x34);
-    func_10010F88((u32) random_int() % 3 + 0x6C, 0x5DC0, 0, 0, 0, pos[0], pos[1], pos[2], 0x320, 0x5DC);
+    sound_play_at((u32) random_int() % 3 + 0x6C, 0x5DC0, 0, 0, 0, pos[0], pos[1], pos[2], 0x320, 0x5DC);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE450/func_150D0C40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE450/level_ambient_cue_update.s")
 #endif

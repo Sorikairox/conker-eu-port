@@ -5,14 +5,14 @@ s/    if (\*(u8 \*\*) (obj + 0x1D4) != NULL \&\& (s\[0x24\] \& 1) \&\& (obj\[0x7
 s/    if (\*(u8 \*\*) (obj + 0x1D4) != NULL \&\& (s\[0x24\] \& 1) \&\& (obj\[0x74\] \& 0xF) != 0xF) {/    if (*(u8 **) (obj + 0x1D4) != NULL \&\& (s[0x24] \& 1)) {/ % hidden
 s/        src\[0\] = (f32 \*) (s + 8);/        src[0] = (f32 *) (s + 0xC);/ % world
 s/        src\[1\] = (f32 \*) (s + 0x14);/        src[1] = (f32 *) (s + 8);/ % world
-s/        func_15145EA4(src, dst, \*(u8 \*\*) (obj + 0x1D4) + (s\[5\] << 6), 2);/        func_15145EA4(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 4), 2);/ % world
-s/        func_15145EA4(src, dst, \*(u8 \*\*) (obj + 0x1D4) + (s\[5\] << 6), 2);/        func_15145EA4(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 6), 1);/ % world
-# harness limit: func_15145EA4's outputs (through a pointer array) stay stack fill, so start == dir and a swapped
+s/        mtx_transform_points(src, dst, \*(u8 \*\*) (obj + 0x1D4) + (s\[5\] << 6), 2);/        mtx_transform_points(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 4), 2);/ % world
+s/        mtx_transform_points(src, dst, \*(u8 \*\*) (obj + 0x1D4) + (s\[5\] << 6), 2);/        mtx_transform_points(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 6), 1);/ % world
+# harness limit: mtx_transform_points's outputs (through a pointer array) stay stack fill, so start == dir and a swapped
 # subtraction is equivalent here; '+' instead of '-' is visible (fill + fill != 0)
 s/        dir\[0\] = dir\[0\] - start\[0\];/        dir[0] = dir[0] + start[0];/ % world
 s/        dir\[2\] = dir\[2\] - start\[2\];/        dir[2] = dir[2] + start[2];/ % world
-s/        if (func_15145128(dir, dir, \&tmp0, \&tmp1) != 0) {/        if (func_15145128(dir, dir, \&tmp0, \&tmp1) == 0) {/ % world
-s/            func_15081A90((struct127 \*) obj, start\[0\], start\[1\], start\[2\], dir\[0\], dir\[1\], dir\[2\], (u8 \*) \&ray, 0.0f,/            func_15081A90((struct127 *) obj, start[0], start[1], start[2], dir[0], dir[1], dir[2], (u8 *) \&ray, 1.0f,/ % world
+s/        if (vec3_normalize_len(dir, dir, \&tmp0, \&tmp1) != 0) {/        if (vec3_normalize_len(dir, dir, \&tmp0, \&tmp1) == 0) {/ % world
+s/            ray_cast_world((struct127 \*) obj, start\[0\], start\[1\], start\[2\], dir\[0\], dir\[1\], dir\[2\], (u8 \*) \&ray, 0.0f,/            ray_cast_world((struct127 *) obj, start[0], start[1], start[2], dir[0], dir[1], dir[2], (u8 *) \&ray, 1.0f,/ % world
 s/                          0, 0, 1, -1, 0, 0);/                          0, 0, 0, -1, 0, 0);/ % world
 s/            if (ray.hit != 0) {/            if (ray.hit > 1) {/ % world
 s/                if ((s\[0x24\] \& 2) \&\& ray.hit >= 2 \&\& ((u8 \*) ray.obj)\[4\] == 0x9E) {/                if ((s[0x24] \& 2) \&\& ((u8 *) ray.obj)[4] == 0x9E) {/ % world

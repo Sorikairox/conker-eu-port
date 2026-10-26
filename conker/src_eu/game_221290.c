@@ -2189,7 +2189,7 @@ extern struct mp3decfourbytes *var8009c650[];
 extern f32 D_800E14B0[]; /* var8009c6d8 (an array here) */
 extern f32 D_800E18B0[]; /* var8009c6dc */
 
-s32 func_151F9150(u8 *buffer, s32 *offset, s32 numbits); /* mp3util_get_bits */
+s32 mp3_get_bits(u8 *buffer, s32 *offset, s32 numbits); /* mp3util_get_bits */
 
 
 
@@ -2427,7 +2427,7 @@ s32 mp3dec_unpack_scale_fac(struct asistream *stream, u32 gr, u32 ch)
 			for (sfb = 0; sfb < 8; sfb++) {
 				stream->scalefac[gr][ch].l[sfb] =
 					var70057b7c[0][stream->scalefac_compress[gr][ch]]
-					? func_151F9150(stream->unk1c, &stream->unk2020, var70057b7c[0][stream->scalefac_compress[gr][ch]])
+					? mp3_get_bits(stream->unk1c, &stream->unk2020, var70057b7c[0][stream->scalefac_compress[gr][ch]])
 					: 0;
 			}
 
@@ -2435,7 +2435,7 @@ s32 mp3dec_unpack_scale_fac(struct asistream *stream, u32 gr, u32 ch)
 				for (window = 0; window < 3; window++) {
 					stream->scalefac[gr][ch].s[window][sfb] =
 						var70057b7c[0][stream->scalefac_compress[gr][ch]]
-						? func_151F9150(stream->unk1c, &stream->unk2020, var70057b7c[0][stream->scalefac_compress[gr][ch]])
+						? mp3_get_bits(stream->unk1c, &stream->unk2020, var70057b7c[0][stream->scalefac_compress[gr][ch]])
 						: 0;
 				}
 			}
@@ -2444,7 +2444,7 @@ s32 mp3dec_unpack_scale_fac(struct asistream *stream, u32 gr, u32 ch)
 				for (window = 0; window < 3; window++) {
 					stream->scalefac[gr][ch].s[window][sfb] =
 						var70057b7c[1][stream->scalefac_compress[gr][ch]]
-						? func_151F9150(stream->unk1c, &stream->unk2020, var70057b7c[1][stream->scalefac_compress[gr][ch]])
+						? mp3_get_bits(stream->unk1c, &stream->unk2020, var70057b7c[1][stream->scalefac_compress[gr][ch]])
 						: 0;
 				}
 			}
@@ -2454,7 +2454,7 @@ s32 mp3dec_unpack_scale_fac(struct asistream *stream, u32 gr, u32 ch)
 					for (window = 0; window < 3; window++) {
 						stream->scalefac[gr][ch].s[window][sfb] =
 							var70057b7c[i][stream->scalefac_compress[gr][ch]]
-							? func_151F9150(stream->unk1c, &stream->unk2020, var70057b7c[i][stream->scalefac_compress[gr][ch]])
+							? mp3_get_bits(stream->unk1c, &stream->unk2020, var70057b7c[i][stream->scalefac_compress[gr][ch]])
 							: 0;
 					}
 				}
@@ -2470,7 +2470,7 @@ s32 mp3dec_unpack_scale_fac(struct asistream *stream, u32 gr, u32 ch)
 				for (sfb = var70057b74[i]; sfb < var70057b74[i + 1]; sfb++) {
 					stream->scalefac[gr][ch].l[sfb] =
 						var70057b7c[i < 2 ? 0 : 1][stream->scalefac_compress[gr][ch]]
-						? func_151F9150(stream->unk1c, &stream->unk2020, var70057b7c[i < 2 ? 0 : 1][stream->scalefac_compress[gr][ch]])
+						? mp3_get_bits(stream->unk1c, &stream->unk2020, var70057b7c[i < 2 ? 0 : 1][stream->scalefac_compress[gr][ch]])
 						: 0;
 				}
 			} else {
@@ -2595,7 +2595,7 @@ s32 mp3dec_unpack_scale_fac_lsf(struct asistream *stream, u32 gr, u32 ch)
 			sp1c = (1 << sp20) - 1;
 
 			for (j = 0; j < sp28[i]; j++) {
-				stream->scalefac[0][ch].l[sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
+				stream->scalefac[0][ch].l[sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
 
 				if (ch != 0) {
 					stream->unk3efc[sfb] = sp1c;
@@ -2611,9 +2611,9 @@ s32 mp3dec_unpack_scale_fac_lsf(struct asistream *stream, u32 gr, u32 ch)
 				sp1c = (1 << sp20) - 1;
 
 				for (j = 0; j < sp28[i]; j += 3) {
-					stream->scalefac[0][ch].s[0][sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
-					stream->scalefac[0][ch].s[1][sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
-					stream->scalefac[0][ch].s[2][sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
+					stream->scalefac[0][ch].s[0][sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
+					stream->scalefac[0][ch].s[1][sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
+					stream->scalefac[0][ch].s[2][sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
 
 					if (ch != 0) {
 						stream->unk3f14[sfb] = sp1c;
@@ -2627,7 +2627,7 @@ s32 mp3dec_unpack_scale_fac_lsf(struct asistream *stream, u32 gr, u32 ch)
 			sp1c = (1 << sp20) - 1;
 
 			for (j = 0; j < 6; j++) {
-				stream->scalefac[0][ch].l[sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
+				stream->scalefac[0][ch].l[sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
 
 				if (ch != 0) {
 					stream->unk3efc[sfb] = sp1c;
@@ -2644,9 +2644,9 @@ s32 mp3dec_unpack_scale_fac_lsf(struct asistream *stream, u32 gr, u32 ch)
 				sp1c = (1 << sp20) - 1;
 
 				for (j = 0; j < sp28[i]; j += 3) {
-					stream->scalefac[0][ch].s[0][sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
-					stream->scalefac[0][ch].s[1][sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
-					stream->scalefac[0][ch].s[2][sfb] = sp20 ? func_151F9150(stream->unk1c, &stream->unk2020, sp20) : 0;
+					stream->scalefac[0][ch].s[0][sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
+					stream->scalefac[0][ch].s[1][sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
+					stream->scalefac[0][ch].s[2][sfb] = sp20 ? mp3_get_bits(stream->unk1c, &stream->unk2020, sp20) : 0;
 
 					if (ch != 0) {
 						stream->unk3f14[sfb] = sp1c;
@@ -2664,8 +2664,8 @@ extern struct mp3decfourbytes **D_800E0E20;
 f32 func_1504A6F0(f32 arg0, f32 arg1);
 void func00046650(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
 void func00047550(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
-s32 func_151F9184(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
-s32 func_151F933C(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5, u8 **arg6);
+s32 mp3_huff_decode_big_values(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
+s32 mp3_huff_decode_count1(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5, u8 **arg6);
 /* was func_151F63C4 */
 s32 mp3dec_read_granule(struct asistream *stream, u32 gr, u32 ch)
 {
@@ -2739,13 +2739,13 @@ s32 mp3dec_read_granule(struct asistream *stream, u32 gr, u32 ch)
 			sp40 += sp2c;
 			sp48 = sp30;
 		} else {
-			sp48 = func_151F9184(stream->unk1c, &stream->unk2020, sp38, sp48, sp34, sp30, &sp44, &sp40);
+			sp48 = mp3_huff_decode_big_values(stream->unk1c, &stream->unk2020, sp38, sp48, sp34, sp30, &sp44, &sp40);
 		}
 	}
 
 	sp38 = stream->count1table_select[gr][ch] + 32;
 	sp28 = stream->part2_3_length[gr][ch] + sp64;
-	sp48 = func_151F933C(stream->unk1c, &stream->unk2020, sp38, sp48, sp28, &sp44, &sp40);
+	sp48 = mp3_huff_decode_count1(stream->unk1c, &stream->unk2020, sp38, sp48, sp28, &sp44, &sp40);
 	stream->unk2020 = sp28;
 
 	if (sp48 > 576) {
@@ -2878,24 +2878,24 @@ s32 mp3dec_set_side_info(struct asistream *stream)
 	stream->numgranules = stream->version != VERSION_2 ? 2 : 1;
 
 	if (stream->version != VERSION_2) {
-		stream->main_data_begin = func_151F9150(stream->buffer, &stream->offset, 9);
+		stream->main_data_begin = mp3_get_bits(stream->buffer, &stream->offset, 9);
 
 		// skip private bits
 		stream->numchannels == 1
-			? func_151F9150(stream->buffer, &stream->offset, 5)
-			: func_151F9150(stream->buffer, &stream->offset, 3);
+			? mp3_get_bits(stream->buffer, &stream->offset, 5)
+			: mp3_get_bits(stream->buffer, &stream->offset, 3);
 	} else {
-		stream->main_data_begin = func_151F9150(stream->buffer, &stream->offset, 8);
+		stream->main_data_begin = mp3_get_bits(stream->buffer, &stream->offset, 8);
 
 		stream->numchannels == 1
-			? func_151F9150(stream->buffer, &stream->offset, 1)
-			: func_151F9150(stream->buffer, &stream->offset, 2);
+			? mp3_get_bits(stream->buffer, &stream->offset, 1)
+			: mp3_get_bits(stream->buffer, &stream->offset, 2);
 	}
 
 	if (stream->version != VERSION_2) {
 		for (ch = 0; ch < stream->numchannels; ch++) {
 			for (scfsi_band = 0; scfsi_band < 4; scfsi_band++) {
-				stream->scfsi[ch][scfsi_band] = func_151F9150(stream->buffer, &stream->offset, 1);
+				stream->scfsi[ch][scfsi_band] = mp3_get_bits(stream->buffer, &stream->offset, 1);
 			}
 		}
 	}
@@ -2908,43 +2908,43 @@ s32 mp3dec_set_side_info(struct asistream *stream)
 
 	for (gr = 0; gr < stream->numgranules; gr++) {
 		for (ch = 0; ch < stream->numchannels; ch++) {
-			stream->part2_3_length[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 12);
-			stream->big_value[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 9);
-			stream->global_gain[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 8);
-			stream->scalefac_compress[gr][ch] = sp28 ? func_151F9150(stream->buffer, &stream->offset, sp28) : 0;
-			stream->window_switching[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 1);
+			stream->part2_3_length[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 12);
+			stream->big_value[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 9);
+			stream->global_gain[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 8);
+			stream->scalefac_compress[gr][ch] = sp28 ? mp3_get_bits(stream->buffer, &stream->offset, sp28) : 0;
+			stream->window_switching[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 1);
 
 			if (stream->window_switching[gr][ch]) {
-				stream->block_type[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 2);
-				stream->mixed_block_flag[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 1);
+				stream->block_type[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 2);
+				stream->mixed_block_flag[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 1);
 
 				for (region = 0; region < 2; region++) {
-					stream->table_select[gr][ch][region] = func_151F9150(stream->buffer, &stream->offset, 5);
+					stream->table_select[gr][ch][region] = mp3_get_bits(stream->buffer, &stream->offset, 5);
 				}
 
 				stream->table_select[gr][ch][2] = 0;
 
 				for (window = 0; window < 3; window++) {
-					stream->subblock_gain[gr][ch][window] = func_151F9150(stream->buffer, &stream->offset, 3);
+					stream->subblock_gain[gr][ch][window] = mp3_get_bits(stream->buffer, &stream->offset, 3);
 				}
 			} else {
 				stream->block_type[gr][ch] = 0;
 				stream->mixed_block_flag[gr][ch] = 0;
 
 				for (region = 0; region < 3; region++) {
-					stream->table_select[gr][ch][region] = func_151F9150(stream->buffer, &stream->offset, 5);
+					stream->table_select[gr][ch][region] = mp3_get_bits(stream->buffer, &stream->offset, 5);
 				}
 
-				stream->region0_count[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 4);
-				stream->region1_count[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 3);
+				stream->region0_count[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 4);
+				stream->region1_count[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 3);
 			}
 
 			if (stream->version != VERSION_2) {
-				stream->preflag[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 1);
+				stream->preflag[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 1);
 			}
 
-			stream->scalefac_scale[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 1);
-			stream->count1table_select[gr][ch] = func_151F9150(stream->buffer, &stream->offset, 1);
+			stream->scalefac_scale[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 1);
+			stream->count1table_select[gr][ch] = mp3_get_bits(stream->buffer, &stream->offset, 1);
 		}
 	}
 
@@ -2962,8 +2962,8 @@ s32 mp3dec_set_side_info(struct asistream *stream)
 	return 1;
 }
 f32 func_1504A6F0(f32 arg0, f32 arg1);
-void func_151F94E0(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
-void func_151FA3E0(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
+void mp3_imdct36_hybrid(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
+void mp3_imdct12_short(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
 s32 mp3util000462f8(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
 s32 mp3util000464a8(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5, u8 **arg6);
 s32 mp3main_fill_buffer(struct_eu_221290 *arg0);
@@ -3030,11 +3030,11 @@ s32 mp3dec_decode_frame(struct asistream *stream)
 
 		if (sp940 == 2) {
 			for (i = 0; i < 2; i++) {
-				func_151FA3E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
+				mp3_imdct12_short(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
 			}
 		} else {
 			for (i = 0; i < 2; i++) {
-				func_151F94E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
+				mp3_imdct36_hybrid(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
 			}
 		}
 
@@ -3046,11 +3046,11 @@ s32 mp3dec_decode_frame(struct asistream *stream)
 
 		if (sp940 == 2) {
 			for (i = 2; i < sp948; i++) {
-				func_151FA3E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
+				mp3_imdct12_short(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
 			}
 		} else {
 			for (i = 2; i < sp948; i++) {
-				func_151F94E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
+				mp3_imdct36_hybrid(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
 			}
 		}
 
@@ -3164,18 +3164,18 @@ s32 mp3main_read_frame(struct asistream *stream, s32 arg1)
 
 	stream->offset = 12;
 
-	stream->version = func_151F9150(stream->buffer, &stream->offset, 1);
-	stream->layer = func_151F9150(stream->buffer, &stream->offset, 2);
-	stream->crctype = func_151F9150(stream->buffer, &stream->offset, 1);
-	stream->bitrateindex = func_151F9150(stream->buffer, &stream->offset, 4);
-	stream->samplerateindex = func_151F9150(stream->buffer, &stream->offset, 2);
-	stream->haspadding = func_151F9150(stream->buffer, &stream->offset, 1);
-	stream->privatebit = func_151F9150(stream->buffer, &stream->offset, 1);
-	stream->channelmode = func_151F9150(stream->buffer, &stream->offset, 2);
-	stream->channelmodeext = func_151F9150(stream->buffer, &stream->offset, 2);
-	stream->copyright = func_151F9150(stream->buffer, &stream->offset, 1);
-	stream->isoriginal = func_151F9150(stream->buffer, &stream->offset, 1);
-	stream->emphasis = func_151F9150(stream->buffer, &stream->offset, 2);
+	stream->version = mp3_get_bits(stream->buffer, &stream->offset, 1);
+	stream->layer = mp3_get_bits(stream->buffer, &stream->offset, 2);
+	stream->crctype = mp3_get_bits(stream->buffer, &stream->offset, 1);
+	stream->bitrateindex = mp3_get_bits(stream->buffer, &stream->offset, 4);
+	stream->samplerateindex = mp3_get_bits(stream->buffer, &stream->offset, 2);
+	stream->haspadding = mp3_get_bits(stream->buffer, &stream->offset, 1);
+	stream->privatebit = mp3_get_bits(stream->buffer, &stream->offset, 1);
+	stream->channelmode = mp3_get_bits(stream->buffer, &stream->offset, 2);
+	stream->channelmodeext = mp3_get_bits(stream->buffer, &stream->offset, 2);
+	stream->copyright = mp3_get_bits(stream->buffer, &stream->offset, 1);
+	stream->isoriginal = mp3_get_bits(stream->buffer, &stream->offset, 1);
+	stream->emphasis = mp3_get_bits(stream->buffer, &stream->offset, 2);
 
 	if (stream->bitrateindex == 15 || stream->samplerateindex == 3) { /* bad/reserved values */
 		return mp3main_read_frame(stream, -1);

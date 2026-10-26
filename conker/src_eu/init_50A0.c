@@ -6,7 +6,8 @@
 
 u64 D_8003B260; // bss
 
-void func_100050A0(OSMesgQueue *queue) {
+/* was func_100050A0 */
+void sched_init(OSMesgQueue *queue) {
     D_8003B260 = 0x00000000FEFEFEFE;
     D_8003B234 = 0;
     D_8003B230 = queue;
@@ -16,37 +17,41 @@ void func_100050A0(OSMesgQueue *queue) {
     osCreateMesgQueue(&D_8003B1E8, &D_8003B660, 3);
     osCreateMesgQueue(&D_8003B200, &D_8003B670, 1);
     // EU: no third queue and no osViSetEvent here
-    func_100039C0();
+    video_init_screen();
     osSetEventMesg(OS_EVENT_DP, &D_8003B218, (OSMesg *) 1);
     osSetEventMesg(OS_EVENT_SP, &D_8003B218, (OSMesg *) 2);
-    osCreateThread(&D_8003B6A0, 0x14, (void *) func_100049E0, 0, &D_8003B660, 13);
+    osCreateThread(&D_8003B6A0, 0x14, (void *) sched_thread_main, 0, &D_8003B660, 13);
     osStartThread(&D_8003B6A0);
 }
 
-void func_100051C8(OSPfs *pfs, OSMesgQueue *queue) {
+/* was func_100051C8 */
+void sched_add_client(OSPfs *pfs, OSMesgQueue *queue) {
     pfs->queue = queue;
     pfs->status = (s32)D_8003B234;
     D_8003B234 = pfs;
 }
 
-void func_100051E8(void) {
+/* was func_100051E8 */
+void sched_send_retrace_msg(void) {
     osSendMesg(D_8003B230, &D_8003B240, 0);
 }
 
-void func_10005218(void) {
+/* was func_10005218 */
+void prenmi_thread_start(void) {
     osCreateMesgQueue(&D_8003B9D0, &D_8003B9E8, 2);
     osSetEventMesg(OS_EVENT_PRENMI, &D_8003B9D0, (OSMesg *)5);
-    osCreateThread(&D_8003B9F0, 0x15, (void *) func_100052A0, 0, &D_8003B9D0, OS_PRIORITY_RMON);
+    osCreateThread(&D_8003B9F0, 0x15, (void *) prenmi_thread_main, 0, &D_8003B9D0, OS_PRIORITY_RMON);
     osStartThread(&D_8003B9F0);
 }
 
-void func_10005298(void) {
+/* was func_10005298 */
+void prenmi_stub_noop(void) {
 }
 
 #ifdef NON_MATCHING
-/* P281: readable C for func_100052A0 (compiled C, 195 insns; replaces the US-era `#if 0` draft). */
+/* P281: readable C for prenmi_thread_main (compiled C, 195 insns; replaces the US-era `#if 0` draft). */
 extern s32 D_8002C068;            /* set: do not wait for the PRE-NMI message */
-extern OSMesgQueue D_8003BD70;    /* PRE-NMI queue (osSetEventMesg(OS_EVENT_PRENMI) in func_10005218) */
+extern OSMesgQueue D_8003BD70;    /* PRE-NMI queue (osSetEventMesg(OS_EVENT_PRENMI) in prenmi_thread_start) */
 extern OSThread D_80035C70;
 extern u64 D_8003BFC0;            /* time of the PRE-NMI */
 extern u8 D_8002AE14;             /* rumble paks were probed */
@@ -59,13 +64,14 @@ extern s8 D_8002AE24;             /* RDP in use */
 extern void __osSpSetStatus(u32);
 extern s32 __osSpSetPc(u32);
 extern void osDpSetStatus(u32);
-extern s32 func_10005AD0(OSMesgQueue *mq, OSPfs *pfs, int channel);
-extern s32 func_10005860(OSPfs *pfs);
-// prenmi_thread: thread entry started by func_10005218. Waits for the PRE-NMI message (unless D_8002C068), stops the
+extern s32 os_motor_init(OSMesgQueue *mq, OSPfs *pfs, int channel);
+extern s32 os_motor_stop(OSPfs *pfs);
+// prenmi_thread: thread entry started by prenmi_thread_start. Waits for the PRE-NMI message (unless D_8002C068), stops the
 // game threads, lowers its priority, stops every running rumble pak (taking the controller queue first when needed),
 // waits 0x22ADD7 then 0x7270E0 counter ticks after the PRE-NMI, halts the RSP (and the RDP when it was in use),
 // writes back the data cache and spins until the reset.
-void func_100052A0(s32 arg0) {
+/* was func_100052A0 */
+void prenmi_thread_main(s32 arg0) {
     OSMesg mesg;
     s32 any;
     s32 i;
@@ -77,7 +83,7 @@ void func_100052A0(s32 arg0) {
     D_8002AC5C = 1;
     osStopThread(&D_80035C70);
     osStopThread(&D_80031AE0);
-    func_100093CC();
+    audio_thread_stop();
     D_8003BFC0 = osGetTime();
     osSetThreadPri(NULL, 11);
     if (D_8002AE14 != 0) {
@@ -92,8 +98,8 @@ void func_100052A0(s32 arg0) {
         }
         for (i = 0; i < 4; i++) {
             if (D_800BED64[i] != 0) {
-                func_10005AD0(&D_800BE900, &D_800BEB80[i], i);
-                func_10005860(&D_800BEB80[i]);
+                os_motor_init(&D_800BE900, &D_800BEB80[i], i);
+                os_motor_stop(&D_800BEB80[i]);
                 D_800BED68[i] = 0;
             }
         }
@@ -112,5 +118,5 @@ void func_100052A0(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_50A0/func_100052A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_50A0/prenmi_thread_main.s")
 #endif

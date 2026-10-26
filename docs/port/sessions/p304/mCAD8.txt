@@ -56,7 +56,7 @@ s/    \*(s16 \*) (pt + 0x14) = 0xBE;/    *(s16 *) (pt + 0x14) = 0xBF;/ % none
 s/    if (d->u116 != 0) {/    if (d->u116 == 0) {/ % none snd
 s/        if (t > 0) {/        if (t >= 0) {/ % snd3
 s/            d->u114 = t;/            d->u114 = t + 1;/ % snd
-s/            func_10010F30((u32) random_int() .*/            func_10010F30(d->u116, 0x7FFF, 0x40, 0, 0);/ % snd2
+s/            sound_play_2d((u32) random_int() .*/            sound_play_2d(d->u116, 0x7FFF, 0x40, 0, 0);/ % snd2
 s/            d->u114 = random_int() \& 0xC;/            d->u114 = random_int() \& 0xE;/ % snd2
 s/    if (\*(s8 \*) (obj + 0x2C) > 0) {/    if (*(s8 *) (obj + 0x2C) != 0) {/ % cntneg
 s/        \*(s32 \*) (obj + 0x58) = \*(s32 \*) (pt + 0x4);/        *(s32 *) (obj + 0x58) = *(s32 *) (pt + 0x8);/ % none

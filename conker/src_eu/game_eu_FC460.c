@@ -3,9 +3,9 @@
 #include "variables.h"
 
 #ifdef NON_MATCHING
-void func_15052590(struct127 *);
-f32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void obj_state_common_update(struct127 *);
+f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+s32 obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 void obj_hit_react_other_players(struct127 *);
 extern u16 D_800BEB30[];
 extern u8 *D_800CC6A4;
@@ -14,7 +14,7 @@ extern s32 D_800CC6A0;
 /* rodata copies (NM link drops the asm rodata) */
 /* D_800A0BDF[1..7]: state for (1 bump / 2 nudge) + 4 (rider type 0x21) + 2 (multiplayer) */
 static const u8 D_800A0BE0_c[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
-/* D_800A0BE8: per rider type (0: other, 1: type 0x21) [0] attack state, [2] / [4] its func_15052F9C arguments */
+/* D_800A0BE8: per rider type (0: other, 1: type 0x21) [0] attack state, [2] / [4] its obj_carry_release arguments */
 static const u8 D_800A0BE8_c[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
 static const f32 D_800A0BF0_c[1] = { 182.04445f };  /* 0x43360B61, 0x10000 / 360 */
 static const f32 D_800A0BF4_c[1] = { 0.005f };      /* 0x3BA3D70A */
@@ -23,17 +23,18 @@ static const f32 D_800A0BF8_c[1] = { 0.15f };       /* 0x3E19999A */
 #define P(o, T) (*(T *) (obj + (o)))
 // rider_ai_control: AI controller (table entry, `void (struct127 *)`) of a rider / vehicle object (type 0x21 =
 // `twin`, else plain). Runs while +0x13C (pad index) is set or in multiplayer (D_800BE616). Reads the pad word
-// D_800CC288 (multiplayer: func_1504C854 for human +0x31C[0x84] players, else D_800BEB30[player]; single player:
+// D_800CC288 (multiplayer: ctl_decay_button_latches for human +0x31C[0x84] players, else D_800BEB30[player]; single player:
 // D_800BEA68[+0x13C]): button 0x8000 with no +0x8A and no speed (+0x28) bumps, 0x6000 at rest nudges; either one
 // starts the state D_800A0BDF[...] with a 180-frame cool-down (+0x89; state 0x22 counts +0x31C +0x1AA when +0x2E4
 // is 0). Otherwise, once +0x89 is 0, it steers: multiplayer from the stick (D_800CC6A4: math_atan2_u16 heading +
 // camera yaw, pad_stick_speed speed), single player follows player 0 (its speed * 1.75, yaw from +0x31C +0x4C).
 // Type 0x21 riders wander (random yaw within +-5000, speed 20..80 when slow) and turn (state 0x10) when the target
 // is behind; plain riders stop below speed 5 or turn (+0x223 == 1: states 3 / 4 / 5 by +0x3C vs 35). Then
-// func_15052590 (unless a multiplayer +0x31C[0x120] player beyond D_8008FD8C), the attack (D_800A0BE8 state:
-// func_15052F9C, or func_1505327C on a 0x400 hit), a lean +0xC4 easing to the clamped yaw error * 0.005 and, for
+// obj_state_common_update (unless a multiplayer +0x31C[0x120] player beyond D_8008FD8C), the attack (D_800A0BE8 state:
+// obj_carry_release, or obj_carry_pickup on a 0x400 hit), a lean +0xC4 easing to the clamped yaw error * 0.005 and, for
 // 0x21, the body sway +0x2E4 / +0x2E8; finally obj_hit_react_other_players for multiplayer human riders.
-void func_150CEC50(struct127 *self) {
+/* was func_150CEC50 */
+void rider_ai_control(struct127 *self) {
     u8 *obj = (u8 *) self;
     u8 *pl;
     const u8 *atk;
@@ -52,7 +53,7 @@ void func_150CEC50(struct127 *self) {
         act = 0;
         if (D_800BE616 != 0) {
             if ((*(u8 **) (obj + 0x31C))[0x84] != 0) {
-                func_1504C854(self);
+                ctl_decay_button_latches(self);
             } else {
                 D_800CC288 = D_800BEB30[D_800C3E78];
             }
@@ -137,7 +138,7 @@ void func_150CEC50(struct127 *self) {
     }
 
     if (D_800BE616 == 0 || D_800C3E78 >= D_8008FD8C || (*(u8 **) (obj + 0x31C))[0x120] == 0) {
-        func_15052590(self);
+        obj_state_common_update(self);
     }
     pl = *(u8 **) ((u8 *) D_800CC2D0 + 0x31C);
     if (pl[0x27] != 0 && (obj[0x232] != D_800A0BE8_c[twin] || obj[0x104] != 0)) {
@@ -151,11 +152,11 @@ void func_150CEC50(struct127 *self) {
     atk = &D_800A0BE8_c[twin];
     if (D_800BE616 == 0) {
         if (obj[0x232] == atk[0]) {
-            func_15052F9C(self, 156.0f, atk[4], 4, 0, atk[2], 0xFF, 0, 0, 0);
+            obj_carry_release(self, 156.0f, atk[4], 4, 0, atk[2], 0xFF, 0, 0, 0);
         } else if ((D_800CC268 & 1) && ((u8 *) D_800CC2D0 + obj[0x124] * 0x32C)[0x65] == 0
                    && (P(0x25C, s32) & 0x400)) {
             obj[0x124] = 0;
-            func_1505327C(self, 50.0f, 3.0f, atk[0], atk[4]);
+            obj_carry_pickup(self, 50.0f, 3.0f, atk[0], atk[4]);
         }
     }
 
@@ -185,5 +186,5 @@ void func_150CEC50(struct127 *self) {
 }
 #undef P
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FC460/func_150CEC50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FC460/rider_ai_control.s")
 #endif

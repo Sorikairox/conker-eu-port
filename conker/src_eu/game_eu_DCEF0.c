@@ -8,11 +8,12 @@ extern u8 D_8009FB60[];
 u8 *world_record_find(u8);
 
 // The callee (game_eu_1FB080.c) takes only the first three arguments.
-void func_151CFE48(s32 arg0, f32 arg1, f32 arg2, s16 *arg3);
+void ground_fx_spawn_random(s32 arg0, f32 arg1, f32 arg2, s16 *arg3);
 
 
 extern s32 * D_800DC3C4;
-void func_150AF6E0(s32 arg0, u8 arg1) {
+/* was func_150AF6E0 */
+void world_pair_hit_player(s32 arg0, u8 arg1) {
     s32 i;
     if (D_800CC3D4[0] == 0) {
         i = (struct131 *)world_record_find(arg0) - D_800DBEF4;
@@ -27,15 +28,17 @@ void func_150AF6E0(s32 arg0, u8 arg1) {
     }
 }
 
-void func_150AF7C0(s32 arg0, s16 *arg1) {
-    func_151CFE48(arg0, (f32)(arg1[4] + arg1[1]), (f32)arg1[1], arg1);
+/* was func_150AF7C0 */
+void ground_fx_spawn_at_span(s32 arg0, s16 *arg1) {
+    ground_fx_spawn_random(arg0, (f32)(arg1[4] + arg1[1]), (f32)arg1[1], arg1);
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, s8 *, s32);
 
-void func_150AF808(u8 *arg0) {
+/* was func_150AF808 */
+void smoke_emitter_update_small(u8 *arg0) {
     struct {
         s8 u8C;
         s8 u8D;
@@ -154,7 +157,7 @@ void func_150AF808(u8 *arg0) {
             temp_f6 = (random_float() * 71.0f) + 80.0f;
             sp.uC8 = temp_f6;
             sp.uC4 = temp_f6;
-            temp_v0 = func_151307F0(&sp.u9C, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = particle_spawn_ex(&sp.u9C, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u8C, 0x10);
             }
@@ -163,33 +166,35 @@ void func_150AF808(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AF808.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/smoke_emitter_update_small.s")
 #endif
 #ifdef NON_MATCHING
-// P230 (implicit_scan): func_15131EC8 takes (f32 *, f32); the matching C below calls it without a prototype and
+// P230 (implicit_scan): vec_damp_xyz_per_tick takes (f32 *, f32); the matching C below calls it without a prototype and
 // passes the f32's bit pattern as an int (lands in a1 either way on N64, wrong type on the port).
-void func_15131D98(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3);
-void func_15131EC8(f32 *arg0, f32 arg1);
-s32 func_150AFBC4(u8 *arg0, s32 arg1) {
+void particle_update_wobble_offset(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3);
+void vec_damp_xyz_per_tick(f32 *arg0, f32 arg1);
+/* was func_150AFBC4 */
+s32 particle_wobble_damp_update(u8 *arg0, s32 arg1) {
     u8 *p = arg0 + 0xA8;
 
-    func_15131D98(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
-    func_15131EC8((f32 *)(arg0 + 0x58), *(f32 *)(p + 0xC));
+    particle_update_wobble_offset(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
+    vec_damp_xyz_per_tick((f32 *)(arg0 + 0x58), *(f32 *)(p + 0xC));
     return 1;
 }
 #else
-s32 func_150AFBC4(u8 *arg0, s32 arg1) {
+s32 particle_wobble_damp_update(u8 *arg0, s32 arg1) {
     u8 *p = arg0 + 0xA8;
 
-    func_15131D98(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
-    func_15131EC8(arg0 + 0x58, *(s32 *)(p + 0xC));
+    particle_update_wobble_offset(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
+    vec_damp_xyz_per_tick(arg0 + 0x58, *(s32 *)(p + 0xC));
     return 1;
 }
 #endif
 
-u8 * func_151604E4(void *arg0, s32 arg1, u8 arg2, s32 arg3);
+u8 * fb_fx_spawn(void *arg0, s32 arg1, u8 arg2, s32 arg3);
 
-void func_150AFC18(s16 arg0, u8 arg1, s32 arg2) {
+/* was func_150AFC18 */
+void fb_fx_spawn_simple(s16 arg0, u8 arg1, s32 arg2) {
     struct {
         s8 unk0;
         s8 unk1;
@@ -203,20 +208,22 @@ void func_150AFC18(s16 arg0, u8 arg1, s32 arg2) {
     sp18.unk2 = 2;
     sp18.unk6 = 0;
     sp18.unk4 = arg0;
-    func_151604E4(&sp18, 0, arg1, arg2);
+    fb_fx_spawn(&sp18, 0, arg1, arg2);
 }
 
-void func_150B2290(u16 *start, u16 *end);
+void framebuffer_green_to_gray(u16 *start, u16 *end);
 
-void func_150AFC70(s32 arg0, s32 arg1) {
-    func_150B2290((u16 *)arg1, (u16 *)(arg1 + 0x1ECC0));
+/* was func_150AFC70 */
+void fb_fx_gray_callback(s32 arg0, s32 arg1) {
+    framebuffer_green_to_gray((u16 *)arg1, (u16 *)(arg1 + 0x1ECC0));
 }
 
 #ifdef NON_MATCHING
-s32 func_151559FC(f32 *, s32, s32, s32, s32, s32, s32);
+s32 sprite2d_spawn(f32 *, s32, s32, s32, s32, s32, s32);
 u8 impact_puff_tex_kind0(void);
 
-void func_150AFCA4(u8 *arg0) {
+/* was func_150AFCA4 */
+void sprite_emitter_update(u8 *arg0) {
     struct {
         f32 u40;
         f32 u44;
@@ -341,7 +348,7 @@ void func_150AFCA4(u8 *arg0) {
         sp.uEC = 0;
         sp.uED = 0xA;
         sp.uF0 = 0;
-        temp_v0 = func_151559FC(&sp.uAC, 6, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        temp_v0 = sprite2d_spawn(&sp.uAC, 6, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         if (temp_v0 != 0) {
             memcpy(temp_v0 + 0x70, (s8 *) &sp.u9C, 0x10);
         }
@@ -396,29 +403,32 @@ void func_150AFCA4(u8 *arg0) {
         sp.u80 = 0;
         sp.u81 = 7;
         sp.u84 = 0;
-        func_151559FC(&sp.u40, 0, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        sprite2d_spawn(&sp.u40, 0, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         (*(s16 *)((u8 *)sp34 + 2)) = (s16) ((random_int() % 11U) + 3);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AFCA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/sprite_emitter_update.s")
 #endif
-s32 func_150B00D4(u8 *arg0) {
+/* was func_150B00D4 */
+s32 fx_bob_update(u8 *arg0) {
     u8 *v = arg0 + 0x70;
     *(f32 *)(arg0 + 0x78) = *(f32 *)(arg0 + 0x7C) * D_800BE9A4 + *(f32 *)(arg0 + 0x78);
-    *(f32 *)(v + 8) = func_15144B68(*(f32 *)(arg0 + 0x78));
+    *(f32 *)(v + 8) = wrap_angle_rad(*(f32 *)(arg0 + 0x78));
     *(f32 *)(arg0 + 0x10) = *(f32 *)v + *(f32 *)(v + 4) * sinf(*(f32 *)(v + 8));
     return 1;
 }
 
-s32 func_1516DF0C(s16, s16, s16, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, s16, s16, s16, s16, u16, u8, u8, u8, u8, s16, u16, u16, u8, u8, u8, u8, u8, s32, u8, u8, u8, s32);
+s32 particle_emitter_node_spawn(s16, s16, s16, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, s16, s16, s16, s16, u16, u8, u8, u8, u8, s16, u16, u16, u8, u8, u8, u8, u8, s32, u8, u8, u8, s32);
 
-void func_150B0148(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    func_1516DF0C(1, 0, 0, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 1, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, arg2, arg3, 0, arg0, 0xF0, 0x50, 0x50, 1, 4, 0, 1, 0, 0, 0, arg1, 0, (s32) arg4, arg5);
+/* was func_150B0148 */
+void particle_emitter_preset_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+    particle_emitter_node_spawn(1, 0, 0, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 1, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, arg2, arg3, 0, arg0, 0xF0, 0x50, 0x50, 1, 4, 0, 1, 0, 0, 0, arg1, 0, (s32) arg4, arg5);
 }
 
 extern struct_eu_node *D_800DD2C4;
-void func_150B0290(void) {
+/* was func_150B0290 */
+void nodes_destroy_for_player(void) {
     struct_eu_node *node;
 
     node = D_800DD2C4;
@@ -443,7 +453,8 @@ void beam_effect_spawn_attached(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4,
 // of the player's (D_800D154C) matrix block at +0x1D4 (64 bytes per matrix; nothing when it is NULL); transforms the
 // local points (0, 0, -20) and (0, 0, -150) to world space, spawns the line effect beam_effect_spawn between them
 // (40, 0, 2, 120, 60, 35) and attaches effect beam_effect_spawn_attached to that joint ((0, 0, -39) .. (0, 0, -150), 3, 255, 4).
-void func_150B0344(s32 side) {
+/* was func_150B0344 */
+void player_joint_beam_spawn(s32 side) {
     u8 *mtx = (u8 *)D_800D154C->unk1D4;
     f32 x0, y0, z0;
     f32 x1, y1, z1;
@@ -462,40 +473,42 @@ void func_150B0344(s32 side) {
     x0 = 0.0f;
     y0 = 0.0f;
     z0 = -20.0f;
-    func_150A7E40(m, x0, y0, z0, &x0, &y0, &z0);
+    mtxf_transform_point(m, x0, y0, z0, &x0, &y0, &z0);
     x1 = 0.0f;
     y1 = 0.0f;
     z1 = -150.0f;
-    func_150A7E40(m, x1, y1, z1, &x1, &y1, &z1);
+    mtxf_transform_point(m, x1, y1, z1, &x1, &y1, &z1);
     beam_effect_spawn(0, x0, y0, z0, x1, y1, z1, 40.0f, 0.0f, 2.0f, 120.0f, 0x3C, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                   0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     beam_effect_spawn_attached((s32)D_800D154C, D_800D154C->unique_id, (s16)joint, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f, 3, 0xFF,
                   4, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0344.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/player_joint_beam_spawn.s")
 #endif
 
-void func_150B051C(s32 arg0) {
+/* was func_150B051C */
+void world_pair_hit_player_level(s32 arg0) {
     if (D_800BE9F0 == 6) {
-        func_15179008(0);
-        func_150AF6E0(0xE2, 0xE1);
+        rain_update(0);
+        world_pair_hit_player(0xE2, 0xE1);
     } else {
-        func_150AF6E0(0xDF, 0xDE);
+        world_pair_hit_player(0xDF, 0xDE);
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
-void func_15145974(f32 *, f32 *, f32 *);
-u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner);
-u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4);
+s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
+void vec3_to_yaw_pitch_deg(f32 *, f32 *, f32 *);
+u8 *mdl_particle_spawn_ex(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner);
+u8 *obj_attached_glow_spawn(void *src, u8 type, s32 size, u8 alpha, s32 arg4);
 
-// beam_trail_spawn: spawns a 3-strand trail (func_15132BBC, request below, 4 extra bytes) from `from` along
-// (to - from) when that direction is non-zero (func_15145128): scale (1, 1, 0.7, 0.7), heading / pitch of the
-// direction * 80 (func_15145974), colour 1, start `from`, speed (to - from) * 80, life 0x19A0 / 300 / 210; then
-// records an effect of type 1 (func_151B78D8, size 8, owner = the trail) in the trail's extra word (+0x170).
-void func_150B0574(f32 *from, f32 *to, u8 alpha, s32 arg3) {
+// beam_trail_spawn: spawns a 3-strand trail (mdl_particle_spawn_ex, request below, 4 extra bytes) from `from` along
+// (to - from) when that direction is non-zero (vec3_normalize_len): scale (1, 1, 0.7, 0.7), heading / pitch of the
+// direction * 80 (vec3_to_yaw_pitch_deg), colour 1, start `from`, speed (to - from) * 80, life 0x19A0 / 300 / 210; then
+// records an effect of type 1 (obj_attached_glow_spawn, size 8, owner = the trail) in the trail's extra word (+0x170).
+/* was func_150B0574 */
+void beam_trail_spawn(f32 *from, f32 *to, u8 alpha, s32 arg3) {
     struct {
         f32 u00;
         f32 u04;
@@ -548,7 +561,7 @@ void func_150B0574(f32 *from, f32 *to, u8 alpha, s32 arg3) {
     dir[0] = to[0] - from[0];
     dir[1] = to[1] - from[1];
     dir[2] = to[2] - from[2];
-    if (func_15145128(dir, dir, &o44, &o40) == 0) {
+    if (vec3_normalize_len(dir, dir, &o44, &o40) == 0) {
         return;
     }
     req.u00 = 1.0f;
@@ -561,7 +574,7 @@ void func_150B0574(f32 *from, f32 *to, u8 alpha, s32 arg3) {
     req.vel[0] = dir[0] * 80.0f;
     req.vel[1] = dir[1] * 80.0f;
     req.vel[2] = dir[2] * 80.0f;
-    func_15145974(req.vel, &req.yaw, &req.pitch);
+    vec3_to_yaw_pitch_deg(req.vel, &req.yaw, &req.pitch);
     req.u1C = 1.0f;
     req.u20 = 1.0f;
     req.u24 = 1.0f;
@@ -590,39 +603,43 @@ void func_150B0574(f32 *from, f32 *to, u8 alpha, s32 arg3) {
     req.u74 = 0xFF;
     req.u78 = 0;
     req.u4C = 0.0f;
-    trail = func_15132BBC((u8 *)&req, 3, 0xFF, NULL, 4, alpha, arg3);
+    trail = mdl_particle_spawn_ex((u8 *)&req, 3, 0xFF, NULL, 4, alpha, arg3);
     if (trail == NULL) {
         return;
     }
     memcpy((s32)(trail + 0x170), (s8 *)&zero, 4);
     src = trail;
-    *(u8 **)(trail + 0x170) = func_151B78D8(&src, 1, 8, alpha, arg3);
+    *(u8 **)(trail + 0x170) = obj_attached_glow_spawn(&src, 1, 8, alpha, arg3);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0574.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/beam_trail_spawn.s")
 #endif
 
-void func_150B07A0(struct102 **arg0) {
+/* was func_150B07A0 */
+void beam_trail_free_extra(struct102 **arg0) {
     if (*(s32 *)&arg0[0x170 / 4] != 0) {
         node_destroy(arg0[0x170 / 4]);
     }
 }
 
-void func_150B07D0(u8 *arg0) {
-    func_150B07A0(arg0);
-    func_15132AE0(arg0);
+/* was func_150B07D0 */
+void beam_trail_die_retire(u8 *arg0) {
+    beam_trail_free_extra(arg0);
+    mdl_particle_die_retire(arg0);
 }
 
-void func_150B07FC(u8 *arg0) {
-    func_150B07A0(arg0);
-    func_15132B0C(arg0);
+/* was func_150B07FC */
+void beam_trail_die_free(u8 *arg0) {
+    beam_trail_free_extra(arg0);
+    mdl_particle_die_free(arg0);
 }
 
 #ifdef NON_MATCHING
-void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_8009FB74;
 
-void func_150B0828(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150B0828 */
+void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u2C;
         s32 u30;
@@ -738,7 +755,7 @@ void func_150B0828(u8 *arg0, u8 arg1, s32 arg2) {
     sp.uBC = 0.008f;
     sp.uC0 = 0.266f;
     sp.uD0 = 0.938608f;
-    func_15153BA4(&sp.u68, 0xFF, arg1, arg2);
+    emit_particle_burst_req(&sp.u68, 0xFF, arg1, arg2);
     sp.u2C = 0x24;
     sp.u30 = 0xA;
     (*(s32 *)((u8 *)(&sp.u34) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.uD4) + 0));
@@ -757,12 +774,13 @@ void func_150B0828(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u5C = 0.30200002f;
     sp.u60 = 0.31800002f;
     sp.u64 = 9.687f;
-    func_15152700(&sp.u2C, ((u8 *)&D_8009FB60), &D_8009FB74, 5, 65.0f, 0U, (u8) (s32) arg1, arg2);
+    emit_textured_burst(&sp.u2C, ((u8 *)&D_8009FB60), &D_8009FB74, 5, 65.0f, 0U, (u8) (s32) arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0828.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/obj_impact_burst_spawn.s")
 #endif
-s32 func_150B0AEC(u8 arg0, u8 *arg1) {
+/* was func_150B0AEC */
+s32 world_record_anchor_init(u8 arg0, u8 *arg1) {
     u8 *temp_v0;
     u8 *temp_v1;
 

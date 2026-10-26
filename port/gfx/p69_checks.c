@@ -1,17 +1,17 @@
 /* P69 runtime checks of port P65 / port-b P67 C (link-time wraps; only cross-TU calls are seen).
- *  ?p69attach=N  func_15030758 (attachment list D_800C3EE0, game_eu_5D910.c): on the first call the callback table
+ *  ?p69attach=N  attachment_update_all (attachment list D_800C3EE0, game_eu_5D910.c): on the first call the callback table
  *                D_80084550[1..24] as loaded (wasm table index, registered signature, port_n64_to_wasm of the ROM
  *                word: they must be equal), then the list (model, callback, sub-model, timer, mtx, target) whenever
  *                its shape changes, for the first N changes.
- *  ?p69look=N    func_1503AB20 (head / eye aim, called by func_1502C074): record, id, mode +0x276, timer +0x282,
+ *  ?p69look=N    look_aim_head_eyes (head / eye aim, called by obj_update_one): record, id, mode +0x276, timer +0x282,
  *                angles +0x27A..+0x280 before -> after, look target D_800C4408 and the call counter D_800C441A
- *                (written by func_15036FD8): first N calls, then every 128th and every angle change of record 0
+ *                (written by look_frame_cb_current): first N calls, then every 128th and every angle change of record 0
  *                (first 200).
- *  ?p69tri=N     func_150028BC (per-model triangle tables, called by func_1503D210 / func_1503DD8C): id -> result.
- *  ?p69att=N     attack_hit_test (attack hit test, from func_1504CB98 when +0xD0 != 0), debris_burst_destroyed_object (debris burst),
- *                func_1507E7E4 (object animation start): every call up to N each, with the attacker's attack entry,
+ *  ?p69tri=N     model_build_collision_tables (per-model triangle tables, called by model_load / model_make_ready): id -> result.
+ *  ?p69att=N     attack_hit_test (attack hit test, from obj_state_walk when +0xD0 != 0), debris_burst_destroyed_object (debris burst),
+ *                face_anim_start (object animation start): every call up to N each, with the attacker's attack entry,
  *                health of the 25 records before -> after (hits), return value.
- *  ?p69floor=N   func_15046C6C (floor / wall probe pair; its func_150453BC call is in the same TU): position, max y,
+ *  ?p69floor=N   collision_floor_all (floor / wall probe pair; its collision_floor_static call is in the same TU): position, max y,
  *                result, hit t and flags, first N calls. */
 #include <stdint.h>
 #include "../ultra/pc_mem.h"
@@ -27,8 +27,8 @@ extern unsigned char D_800C4408_[] __asm__("D_800C4408");
 extern unsigned char D_800C441A_[] __asm__("D_800C441A");
 extern unsigned char D_800DD280_[] __asm__("D_800DD280");
 static unsigned w_n;
-/* ?p69stub=MASK DIAGNOSTIC (bisecting the respawn hang): skip the game C like the old asm stubs did: 1 func_1507E7E4,
- * 2 func_15030758, 4 func_150028BC (returns 0), 8 func_1503AB20, 16 func_15046C6C (returns 0), 32 func_15036FD8. */
+/* ?p69stub=MASK DIAGNOSTIC (bisecting the respawn hang): skip the game C like the old asm stubs did: 1 face_anim_start,
+ * 2 attachment_update_all, 4 model_build_collision_tables (returns 0), 8 look_aim_head_eyes, 16 collision_floor_all (returns 0), 32 look_frame_cb_current. */
 static int fstub = -1;
 static int stubbed(int b) { if (fstub < 0) fstub = port_flag("p69stub"); return fstub & b; }
 
@@ -45,15 +45,15 @@ static const unsigned cb_rom[25] = {0, 0x150D87CC, 0x1503211C, 0x1503216C, 0x150
 static int fa = -1, fl = -1, ft = -1, fk = -1, ff = -1, fd = -1, fw = -1;
 
 static void p69_scan_lists(void);
-void __real_func_15030758(void);
-void __wrap_func_15030758(void) {
+void __real_attachment_update_all(void);
+void __wrap_attachment_update_all(void) {
     if (stubbed(2)) return;
     static unsigned calls, changes, lastsig;
     const unsigned char *p;
     unsigned sig = 0, n = 0;
     p69_scan_lists();
     { void p69_watch_frame(void); p69_watch_frame(); }
-    if (!flag(&fa, "p69attach")) { __real_func_15030758(); return; }
+    if (!flag(&fa, "p69attach")) { __real_attachment_update_all(); return; }
     if (calls++ == 0) {
         int i, bad = 0;
         for (i = 1; i <= 24; i++) {
@@ -84,7 +84,7 @@ void __wrap_func_15030758(void) {
                          F(r, 0x18), F(r, 0x1C), vbe_ld16(r + 0x84), vbe_ld8(r + 0xD0));
         }
     }
-    __real_func_15030758();
+    __real_attachment_update_all();
 }
 
 static void look_state(const unsigned char *r, int *o) {
@@ -94,15 +94,15 @@ static void look_state(const unsigned char *r, int *o) {
     o[5] = vbe_ld16(r + 0x282);
 }
 
-void __real_func_1503AB20(void *obj);
-void __wrap_func_1503AB20(void *obj) {
+void __real_look_aim_head_eyes(void *obj);
+void __wrap_look_aim_head_eyes(void *obj) {
     if (stubbed(8)) return;
     static unsigned n, ch;
     int a[6], b[6], diff, i;
     const unsigned char *r = obj;
-    if (!flag(&fl, "p69look") || !r) { __real_func_1503AB20(obj); return; }
+    if (!flag(&fl, "p69look") || !r) { __real_look_aim_head_eyes(obj); return; }
     look_state(r, a);
-    __real_func_1503AB20(obj);
+    __real_look_aim_head_eyes(obj);
     look_state(r, b);
     n++;
     for (diff = 0, i = 0; i < 6; i++) diff |= a[i] != b[i];
@@ -113,11 +113,11 @@ void __wrap_func_1503AB20(void *obj) {
                  F(D_800C4408_, 4), F(D_800C4408_, 8), vbe_ld8(D_800C441A_), F(r, 0x14), F(r, 0x18), F(r, 0x1C));
 }
 
-int __real_func_150028BC(int id);
-int __wrap_func_150028BC(int id) {
+int __real_model_build_collision_tables(int id);
+int __wrap_model_build_collision_tables(int id) {
     if (stubbed(4)) return 0;
     static unsigned n;
-    int v = __real_func_150028BC(id);
+    int v = __real_model_build_collision_tables(id);
     if (flag(&ft, "p69tri") && n++ < (unsigned)ft)
         port_log("[p69] tri tables call %u frame %u: id %d -> %d\n", n, port_frame_count, id, v);
     return v;
@@ -161,23 +161,23 @@ void __wrap_debris_burst_destroyed_object(void *obj, int a1, int a2) {
     __real_debris_burst_destroyed_object(obj, a1, a2);
 }
 
-void __real_func_1507E7E4(void *obj, int anim, int prio, int time, int a4);
-void __wrap_func_1507E7E4(void *obj, int anim, int prio, int time, int a4) {
+void __real_face_anim_start(void *obj, int anim, int prio, int time, int a4);
+void __wrap_face_anim_start(void *obj, int anim, int prio, int time, int a4) {
     if (stubbed(1)) return;
     static unsigned n;
     const unsigned char *r = obj;
-    __real_func_1507E7E4(obj, anim, prio, time, a4);
+    __real_face_anim_start(obj, anim, prio, time, a4);
     if (flag(&fk, "p69att") && n++ < (unsigned)fk)
         port_log("[p69] obj anim call %u frame %u: rec %d id %02X anim %d prio %d time %d a4 %d -> +6F %d +71 %d +72 %d\n",
                  n, port_frame_count, recno(r), vbe_ld8(r + 4), anim & 0xFF, prio & 0xFF, time & 0xFFFF, a4,
                  vbe_ld8(r + 0x6F), vbe_ld8(r + 0x71), vbe_ld16(r + 0x72));
 }
 
-int __real_func_15046C6C(void *pos, int a1, float maxY, void *hit);
-int __wrap_func_15046C6C(void *pos, int a1, float maxY, void *hit) {
+int __real_collision_floor_all(void *pos, int a1, float maxY, void *hit);
+int __wrap_collision_floor_all(void *pos, int a1, float maxY, void *hit) {
     if (stubbed(16)) return 0;
     static unsigned n;
-    int v = __real_func_15046C6C(pos, a1, maxY, hit);
+    int v = __real_collision_floor_all(pos, a1, maxY, hit);
     if (flag(&ff, "p69floor") && n++ < (unsigned)ff)
         port_log("[p69] floor probe call %u frame %u: pos %.1f %.1f %.1f a1 %d maxY %.1f -> %d t %.2f flags %02X "
                  "type %08X\n", n, port_frame_count, F(pos, 0), F(pos, 4), F(pos, 8), a1 & 0xFFFF, maxY, v,
@@ -185,12 +185,12 @@ int __wrap_func_15046C6C(void *pos, int a1, float maxY, void *hit) {
     return v;
 }
 
-/*  ?p69free=1    func_10004074 (free): a block whose header tag is already 0 (free) is a double free: log it with the
+/*  ?p69free=1    heap_free (free): a block whose header tag is already 0 (free) is a double free: log it with the
  *                JS stack and the first words of the block; =2 also skips such frees (DIAGNOSTIC, keeps the heap). */
 void port_js_stack(int skip, int n);
-void __real_func_10004074(int p);
+void __real_heap_free(int p);
 static void p69_watch(const char *where);
-void __wrap_func_10004074(int p) {
+void __wrap_heap_free(int p) {
     static unsigned n;
     if (fw > 0) p69_watch("free");
     if (fw > 0 && p >= 0x10000000 && W(D_800DD280_, 0x1A0) && W(D_800DD280_, 0x1A0) < 0x10000000u && w_n < 100) {
@@ -226,10 +226,10 @@ void __wrap_func_10004074(int p) {
             port_js_stack(1, 6);
         }
     }
-    __real_func_10004074(p);
+    __real_heap_free(p);
 }
 
-/* ?p69free also scans the object lists D_800DD280[2][104] once per frame (from the func_15030758 wrap): the first
+/* ?p69free also scans the object lists D_800DD280[2][104] once per frame (from the attachment_update_all wrap): the first
  * node pointer outside wasm memory >= 0x10000000 is logged with its list and the node that links to it. */
 static void p69_scan_lists(void) {
     static int done;
@@ -288,9 +288,9 @@ void p69_watch_frame(void) {
     if (fw) p69_watch("frame");
 }
 
-void __real_func_15036FD8(void);
+void __real_look_frame_cb_current(void);
 void p81_look_hook(int pre);
-void __wrap_func_15036FD8(void) { if (!stubbed(32)) { p81_look_hook(1); __real_func_15036FD8(); p81_look_hook(0); } }
+void __wrap_look_frame_cb_current(void) { if (!stubbed(32)) { p81_look_hook(1); __real_look_frame_cb_current(); p81_look_hook(0); } }
 
 /* debris_follow_owner_update (P67 debris piece; reached through a ROM function table, so the wrap also replaces the table entry):
  * ?p69att logs the first N calls; ?p69stub bit 64 skips it (returns 0). */

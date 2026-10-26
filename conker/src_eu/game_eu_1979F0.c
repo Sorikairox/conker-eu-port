@@ -6,10 +6,10 @@
 #ifdef NON_MATCHING
 void collision_select_area(s32);
 s32 collision_level_nearest_height(s32, s32, s32, s32 *);
-void func_1518CF74(s32);
-s32 func_15171770(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
-void func_15171E60(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
-void func_15170F24(s32, s32, s32, s32, f32, s32, s32);
+void shared_dl_release(s32);
+s32 debris_cloud_spawn(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
+void particle_spark_ring_spawn(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
+void particle_burst_random_spawn(s32, s32, s32, s32, f32, s32, s32);
 extern f32 D_800A7090; /* 0.4: wobble amplitude */
 extern f32 D_800A7094; /* 57.29578: radians -> degrees */
 extern f32 D_800A7098; /* 57.29578 */
@@ -25,7 +25,8 @@ extern f32 D_800A70A4; /* -0.7 */
 // +0xD8, vertical by +0xDC, a ripple; stop under 2.0; kind 2 may get a random spin, kind 5 a dust burst; spin rates
 // scaled by +0xE0). The timer +0xCC then counts down; at 0 the object fades (+0xE5 by 4 per tick, +0xEC = 2) and is
 // freed when the fade ends.
-void func_1516A1E0(u8 *obj) {
+/* was func_1516A1E0 */
+void falling_debris_update(u8 *obj) {
     f32 dt;
     f32 ground;
     s32 left;
@@ -57,29 +58,29 @@ void func_1516A1E0(u8 *obj) {
         *(f32 *) (obj + 0x94) = ground;
         switch (obj[0xEB]) {
             case 1:
-                func_15171770(4, 0xB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98),
+                debris_cloud_spawn(4, 0xB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98),
                               *(f32 *) (obj + 0xAC) * *(f32 *) (obj + 0xDC), 0.5f, 1.0f, 60.0f, 2, 0xFF, D_800A709C,
                               obj[0xC], obj[1]);
-                func_15171E60(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 30.0f,
+                particle_spark_ring_spawn(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 30.0f,
                               *(f32 *) (obj + 0x98), 50.0f, 0x28, 0.0030517578f, 0, 0x14, obj[0xC], obj[1]);
-                func_15171E60(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 15.0f,
+                particle_spark_ring_spawn(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 15.0f,
                               *(f32 *) (obj + 0x98), 30.0f, 0x28, 0.0030517578f, 0, 0xA, obj[0xC], obj[1]);
-                func_1518CF74(obj[0xEA]);
+                shared_dl_release(obj[0xEA]);
                 node_destroy((struct102 *) obj);
                 return;
             case 4:
-                func_15171770(3, 0xB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98),
+                debris_cloud_spawn(3, 0xB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98),
                               *(f32 *) (obj + 0xAC) * *(f32 *) (obj + 0xDC), 0.5f, D_800A70A0, 40.0f, 2, 0x3C, -0.5f,
                               obj[0xC], obj[1]);
-                func_1518CF74(obj[0xEA]);
+                shared_dl_release(obj[0xEA]);
                 node_destroy((struct102 *) obj);
                 return;
             case 3:
-                func_15171770(2, 0xCB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), 6.0f,
+                debris_cloud_spawn(2, 0xCB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), 6.0f,
                               0.5f, 1.0f, 60.0f, 5, 0x3C, D_800A70A4, obj[0xC], obj[1]);
-                func_15170F24(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94) + 10.0f, *(f32 *) (obj + 0x98), 4,
+                particle_burst_random_spawn(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94) + 10.0f, *(f32 *) (obj + 0x98), 4,
                               *(f32 *) (obj + 0xAC) * 200.0f, obj[0xC], obj[1]);
-                func_1518CF74(obj[0xEA]);
+                shared_dl_release(obj[0xEA]);
                 node_destroy((struct102 *) obj);
                 return;
             case 6:
@@ -94,7 +95,7 @@ void func_1516A1E0(u8 *obj) {
                 *(s32 *) (obj + 0xCC) = 60;
                 return;
             case 8:
-                func_1518CF74(obj[0xEA]);
+                shared_dl_release(obj[0xEA]);
                 node_destroy((struct102 *) obj);
                 return;
             default:
@@ -109,14 +110,14 @@ void func_1516A1E0(u8 *obj) {
                     *(f32 *) (obj + 0xB8) = 0.0f;
                     *(f32 *) (obj + 0xBC) = 0.0f;
                 } else {
-                    func_15171E60(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 15.0f,
+                    particle_spark_ring_spawn(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 15.0f,
                                   *(f32 *) (obj + 0x98), 20.0f, 0x32, 0.00045776367f, 0, 4, obj[0xC], obj[1]);
                     if (obj[0xEB] == 2) {
                         if (random_int() & 0x8000) {
                             *(f32 *) (obj + 0xB4) = (random_int() >> 16) * 0.00015258789f + 40.0f;
                         }
                     } else if (obj[0xEB] == 5) {
-                        func_15170F24(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94) + 10.0f, *(f32 *) (obj + 0x98), 4,
+                        particle_burst_random_spawn(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94) + 10.0f, *(f32 *) (obj + 0x98), 4,
                                       *(f32 *) (obj + 0xAC) * 200.0f, obj[0xC], obj[1]);
                     }
                 }
@@ -139,19 +140,20 @@ void func_1516A1E0(u8 *obj) {
             *(s32 *) (obj + 0xCC) = 1;
             return;
         }
-        func_1518CF74(obj[0xEA]);
+        shared_dl_release(obj[0xEA]);
         node_destroy((struct102 *) obj);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1979F0/func_1516A1E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1979F0/falling_debris_update.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A70A8;
 extern s32 D_8008CE7C;
 
-void func_1516A964(u8 *arg0) {
+/* was func_1516A964 */
+void particle_ground_splash_check(u8 *arg0) {
     struct {
         s32 u2C;
         s16 u30;
@@ -208,11 +210,12 @@ void func_1516A964(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1979F0/func_1516A964.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1979F0/particle_ground_splash_check.s")
 #endif
-s32 func_151722BC(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
+s32 decal_spawn_at(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_1516AAA8(u8 *arg0) {
+/* was func_1516AAA8 */
+void particle_spawn_decal_if_old(u8 *arg0) {
     s32 pad; // fakematch: frame slot
     u32 sp48;
     s32 sp44;
@@ -220,11 +223,12 @@ void func_1516AAA8(u8 *arg0) {
     if ((*(s16 *)((u8 *)arg0 + 0x14)) >= 0x300) {
         sp48 = random_int() % 3U;
         sp44 = (s32) (*(u8 *)((u8 *)arg0 + 0x25));
-        func_151722BC((f32) (*(s16 *)((u8 *)arg0 + 0x18)), (f32) ((*(s16 *)((u8 *)arg0 + 0x1A)) - 0xA), (f32) (*(s16 *)((u8 *)arg0 + 0x1C)), 0x64, 0, sp48 + 0x20, (f32) (random_int() % 360U), 0, ((s32) (sp44 * 0x19) / 255) + 0x19, 0, 0x100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        decal_spawn_at((f32) (*(s16 *)((u8 *)arg0 + 0x18)), (f32) ((*(s16 *)((u8 *)arg0 + 0x1A)) - 0xA), (f32) (*(s16 *)((u8 *)arg0 + 0x1C)), 0x64, 0, sp48 + 0x20, (f32) (random_int() % 360U), 0, ((s32) (sp44 * 0x19) / 255) + 0x19, 0, 0x100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     }
 }
 
-s32 func_1516ABB8(u8 *arg0) {
+/* was func_1516ABB8 */
+s32 particle_bounce_fall_step(u8 *arg0) {
     s32 a;
     s32 h;
 
@@ -248,14 +252,14 @@ s32 func_1516ABB8(u8 *arg0) {
         return 1;
     }
     *(s16 *)(arg0 + 0x18) -= 300;
-    func_1516FDD4(arg0);
+    particle_move_xz(arg0);
     h = collision_level_nearest_height(*(s16 *)(arg0 + 0xE), *(s16 *)(arg0 + 0x10), *(s16 *)(arg0 + 0x12), 0) + 10;
     arg0[0x2C] = h >> 8;
     arg0[0x2D] = h & 0xFF;
     if (*(s16 *)(arg0 + 0x10) < h) {
         *(s16 *)(arg0 + 0x10) = h;
         *(s16 *)(arg0 + 0x18) = *(s16 *)(arg0 + 0x18) * -0.5f;
-        func_1516FEBC(arg0, 0xE6);
+        particle_scale_vel_xz(arg0, 0xE6);
     }
     return 0;
 }

@@ -7,8 +7,8 @@
 \#^        st\[0xC\] = 3;#s/3/2/
 \#^        \*(f32 \*) (st + 8) = 0\.0f;#s/0\.0f/1.0f/
 \#^    st\[5\] = owner\[0x222\];#s/st\[5\]/st[6]/
-\#^        func_1502ED88((u8 \*) D_800CC2D0 #s/0x32C/0x328/
-\#^        func_1502ED88((u8 \*) D_800CC2D0 #s/0x50, 0, 0xF/0x50, 0, 0xE/
+\#^        obj_tint_set_flash((u8 \*) D_800CC2D0 #s/0x32C/0x328/
+\#^        obj_tint_set_flash((u8 \*) D_800CC2D0 #s/0x50, 0, 0xF/0x50, 0, 0xE/
 \#^    if (\*(u8 \*\*) (owner + 0x1D4) == NULL) {#s/==/!=/
 \#^    if (\*(s8 \*) (st + 0xC) <= 0) {#s/<= 0/< 0/
 \#^    \*(f32 \*) (st + 8) += #s/D_800A1D38 \* D_800BE9A4/D_800A1D38/
@@ -18,10 +18,10 @@
 \#^        trail\.speed = random_float() \* 40\.0f + 60\.0f;#s/40/50/
 \#^        trail\.accel = #s/trail\.size \* trail\.size/trail.size/
 \#^        in\[1\] = (f32 \*) D_800A1D2C;#s/D_800A1D2C/D_800A1D20/
-\#^        func_15145EA4(in, out, #s/0x3C0/0x380/
-\#^        func_15145EA4(in, out, #s/, 2)/, 1)/
+\#^        mtx_transform_points(in, out, #s/0x3C0/0x380/
+\#^        mtx_transform_points(in, out, #s/, 2)/, 1)/
 \#^        dir\[1\] -= spr\.pos\[1\];#s/-=/+=/
-\#^        if (func_15146078(dir, trail\.hit, trail\.normal) == 0) {#s/trail\.hit, trail\.normal/trail.normal, trail.hit/
+\#^        if (vec3_make_basis(dir, trail\.hit, trail\.normal) == 0) {#s/trail\.hit, trail\.normal/trail.normal, trail.hit/
 \#^        spr\.alpha = (u32) trail\.speed;#s/speed/size/
 \#^        spr\.type = 0x79;#s/0x79/0x78/
 \#^        spr\.tex = 0x4405;#s/0x4405/0x4404/

@@ -1,4 +1,4 @@
-# P301: func_1513334C's 3 P282 survivors as named lines on the s334Cb setups (memcpy OUTA fills old[]; len1* = |v| 1.0)
+# P301: mdl_particle_collide_update's 3 P282 survivors as named lines on the s334Cb setups (memcpy OUTA fills old[]; len1* = |v| 1.0)
 /^                if (1.0f < len) {/s/1.0f < len/1.0f <= len/ % len1a len1c f7F_t1_0o
 /D_80089CD4\[p\[0x73\]\](p, old\[0\], old\[1\], old\[2\]/s/old\[1\], old\[2\]/old[2], old[1]/ % f7F_t1_0o f6F_t1_0o f7B_t1_0o f11_t1_0o f15_t1_0o f7F_t2_1o slowo len1a
 /D_80089D14\[p\[0x75\]\](p, &req, old\[0\], old\[1\], old\[2\])/s/old\[0\], old\[1\]/old[1], old[0]/ % f7F_t1_0o f7F_t3_0o f15_t1_0o f14_t1_0o f04_t1_0o t75_3o len1a

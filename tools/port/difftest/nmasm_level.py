@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """P40: whole-pipeline check of the level visibility data build, asm vs NON_MATCHING C, on real level data.
 
-Reference: build/conker.eu.elf (collision_build_level_tris / collision_scan_level_dl / func_15001A08 / func_15002008 / func_15002248 /
-func_150183D0 + func_150184B0 are asm). Candidate: build_nm/conker.eu.elf (all C), on the reference's .game_data
+Reference: build/conker.eu.elf (collision_build_level_tris / collision_scan_level_dl / quadtree_alloc_node_pool / quadtree_write_leaf_list / quadtree_filter_box_tris /
+pvs_setup + pvs_build_huffman_tree are asm). Candidate: build_nm/conker.eu.elf (all C), on the reference's .game_data
 image (+ its own .nm_rodata). Both run in Unicorn MIPS32 (no 64-bit instructions on this path).
 
 Per trial:
@@ -12,10 +12,10 @@ Per trial:
   - knobs: D_800DBE63 (full-range bounds), the cart word at ROM 0xD24 (pool size x1 / x2), D_80082FA0 (grid),
     segment table D_800D3048, PVS assets (2, 5, level * 2 / + 1) present or not;
   - collision_build_level_tris(level) then collision_build_quadtrees() run; allocate_memory is a bump allocator (zeroed blocks),
-    asset_load returns the PVS buffers, func_10004074 / PI access are no-ops.
+    asset_load returns the PVS buffers, heap_free / PI access are no-ops.
 Compared: all RDRAM except the stack and the candidate's .nm_rodata. Reported: triangle counts per area, node /
 leaf counts, PVS index size.
-Smoke: func_150A5858 (C) on the C-built area-0 tree with sample view matrices: emitted commands / triangles, and the
+Smoke: level_dl_visibility_filter (C) on the C-built area-0 tree with sample view matrices: emitted commands / triangles, and the
 same call through the VR4300 reference (nmasm_vis5858.Ref) on the same memory.
 Synthetic mode (--synth N): random DLs (VTX incl. segment addresses, TRI1 / TRI2 / 0x1x, other commands) through
 collision_scan_level_dl alone.
@@ -94,8 +94,8 @@ class Emu:
         self.code = [(v, b) for v, b in self.secs if v < 0x80000000]
         for v, b in self.code: mu.mem_write(v, b)
         self.mu = mu
-        self.stubs = {self.s['allocate_memory']: self.st_alloc, self.s['func_10004074']: self.st_nop,
-                      self.s['func_10023BC0']: self.st_nop, self.s['func_10023C04']: self.st_nop,
+        self.stubs = {self.s['allocate_memory']: self.st_alloc, self.s['heap_free']: self.st_nop,
+                      self.s['os_pi_get_access']: self.st_nop, self.s['os_pi_rel_access']: self.st_nop,
                       self.s['asset_load']: self.st_asset}
         for a in self.stubs: mu.hook_add(UC_HOOK_CODE, self.hook, begin=a, end=a)
 
@@ -257,7 +257,7 @@ def compare(ref, cand, m1, m2):
 
 
 def smoke(ref_vr, cand, m, rng, nview):
-    """func_150A5858 (C) on the C-built area-0 tree; also the asm through the VR4300 interpreter."""
+    """level_dl_visibility_filter (C) on the C-built area-0 tree; also the asm through the VR4300 interpreter."""
     out = []
     dl = R(m, A['D_800B0E00'], 'I')
     OUT, MTX = 0x80705000, 0x80715000
@@ -276,7 +276,7 @@ def smoke(ref_vr, cand, m, rng, nview):
         args = [dl, OUT, MTX, 0, 0, mask]
         cand.load(mm, {})
         try:
-            v0 = cand.call('func_150A5858', args)
+            v0 = cand.call('level_dl_visibility_filter', args)
         except RuntimeError as e:
             out.append(('cand fault', str(e))); continue
         cm = cand.ram()
@@ -416,7 +416,7 @@ def main():
                 print('   cand', bytes(res[1][0][d[0] - 8:d[0] + 24]).hex())
         if t == 0 and 'nosmoke' not in opts:
             for r in smoke(ref_vr, cand, res[1][0], rng, int(opts.get('views', '6'))):
-                print('   smoke func_150A5858 (C tree):', r)
+                print('   smoke level_dl_visibility_filter (C tree):', r)
     print('EQUIV' if bad == 0 else 'DIFFER')
 
 

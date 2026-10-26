@@ -4,11 +4,12 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_151429E0(u8, u8 *, u8 *, u8 *);
-void func_1518CFF0(u8 *, s32);
+s32 mdl_particle_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void fx_pick_random_color(u8, u8 *, u8 *, u8 *);
+void puff_sprite_spawn(u8 *, s32);
 
-void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
+/* was func_1518BC20 */
+void rubble_burst_with_dust(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
     struct {
         f32 u94;
         f32 u98;
@@ -136,7 +137,7 @@ void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
             sp.uE4 = random_float() * 360.0f;
             sp.u10C = 25.0f - (random_float() * 50.0f);
             sp.u110 = 25.0f - (random_float() * 50.0f);
-            func_15132FBC(&sp.uCC, 3, 0xFF, 0, arg3 & 0xFF, arg4);
+            mdl_particle_spawn(&sp.uCC, 3, 0xFF, 0, arg3 & 0xFF, arg4);
             var_s2 -= 1;
         } while (var_s2 != 0);
     }
@@ -152,14 +153,14 @@ void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
     sp.uB6 = (random_int() % 201U) + 0x12C;
     sp.uB8 = 0;
     sp.uBA = 0x258;
-    func_151429E0(1, &sp.uBC, &(*(s32 *)((u8 *)&sp + 0x29)), &(*(s32 *)((u8 *)&sp + 0x2A)));
-    func_151429E0(1, &(*(s32 *)((u8 *)&sp + 0x2B)), &sp.uC0, &(*(s32 *)((u8 *)&sp + 0x2D)));
+    fx_pick_random_color(1, &sp.uBC, &(*(s32 *)((u8 *)&sp + 0x29)), &(*(s32 *)((u8 *)&sp + 0x2A)));
+    fx_pick_random_color(1, &(*(s32 *)((u8 *)&sp + 0x2B)), &sp.uC0, &(*(s32 *)((u8 *)&sp + 0x2D)));
     (*(s8 *)((u8 *)&sp + 0x2E)) = 0xFF;
     (*(s8 *)((u8 *)&sp + 0x2F)) = 0xFF;
     sp.uC4 = 0xA;
     sp.uC5 = 0;
-    func_1518CFF0(&sp.u94, 1);
+    puff_sprite_spawn(&sp.u94, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9430/func_1518BC20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9430/rubble_burst_with_dust.s")
 #endif

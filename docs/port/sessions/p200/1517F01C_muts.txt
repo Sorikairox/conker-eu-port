@@ -5,7 +5,7 @@ s/-\*(f32 \*) (cam + 0x388), -\*(f32 \*) (cam + 0x380)/*(f32 *) (cam + 0x388), -
 s/, \*(f32 \*) (cam + 0x5EC));/, 0.0f);/
 s/    vp = (u8 \*) D_800BE628 + D_80082FA4 \* 0x180;/    vp = (u8 *) D_800BE628;/
 s/    hw = \*(f32 \*) (vp + 0xC);/    hw = *(f32 *) (vp + 0x10);/
-s/    func_150A7EE0(mtx, x, y, z, \&sx, \&sy, \&sz, \&w);/    func_150A7EE0(mtx, x, z, y, \&sx, \&sy, \&sz, \&w);/
+s/    mtxf_transform_point_w(mtx, x, y, z, \&sx, \&sy, \&sz, \&w);/    mtxf_transform_point_w(mtx, x, z, y, \&sx, \&sy, \&sz, \&w);/
 s/    if (10.0f < w) {/    if (10.0f <= w) {/
 s/    if (10.0f < w) {/    if (0.0f < w) {/
 s/        sx = sx \* hw \* inv;/        sx = sx * hw;/

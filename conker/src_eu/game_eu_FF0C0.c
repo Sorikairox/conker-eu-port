@@ -7,7 +7,8 @@ extern f32 D_800A0C80;
 extern f32 D_800A0C84;
 extern f32 D_800A0C88;
 void obj_update_ground_tilt(struct127 *);
-void func_150D18B0(u8 *arg0) {
+/* was func_150D18B0 */
+void obj_spin_decay_update(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f2;
     temp_f0 = *(f32 *)(arg0 + 0xBC);
@@ -21,7 +22,8 @@ void func_150D18B0(u8 *arg0) {
 }
 
 u8 *world_record_find(s32);
-void func_150D1920(u8 *arg0) {
+/* was func_150D1920 */
+void world_rec_f9_set_player0_flag(u8 *arg0) {
     u8 *temp_v0;
     temp_v0 = world_record_find(0xF9);
     if (temp_v0 != NULL) {
@@ -33,7 +35,8 @@ void func_150D1920(u8 *arg0) {
     }
 }
 
-void func_150D197C(s32 arg0) {
+/* was func_150D197C */
+void world_rec_f9_set_flag(s32 arg0) {
     u8 *temp_v0 = world_record_find(0xF9);
     if (temp_v0 != NULL) {
         temp_v0[0x6E] = 1;
@@ -41,9 +44,10 @@ void func_150D197C(s32 arg0) {
 }
 
 extern f32 D_800A0C90;
-void func_150D19AC(s32 arg0) {
+/* was func_150D19AC */
+void ambient_red_flicker_dim_update(s32 arg0) {
     f32 *sp28;
     sp28 = (f32 *)((arg0 ^ 0) + 0x28); sp28 = sp28;
-    func_151467A4(arg0 + 0x30, 10.0f, arg0 + 0x2C, 50.0f, 100.0f, 123.0f, D_800A0C90, sp28);
-    func_1515D4D4(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
+    fx_random_flicker_update(arg0 + 0x30, 10.0f, arg0 + 0x2C, 50.0f, 100.0f, 123.0f, D_800A0C90, sp28);
+    light_set_level_colour(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
 }

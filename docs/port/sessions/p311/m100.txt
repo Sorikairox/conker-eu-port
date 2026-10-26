@@ -37,7 +37,7 @@ s#vz -= \*(f32 \*) (obj + 0x3C)#vz -= *(f32 *) (obj + 0x40)# % obj
 s#x = (s32) ax;#x = (s32) bx;# % obj
 s#y = (s32) ay;#y = (s32) az;# % obj
 s#if (e->flags & 8) {#if (e->flags \& 0x10) {# % vel8
-s#func_151705A4(e->flags, &vx#func_151705A4(0, \&vx# % vel8
+s#particle_random_direction(e->flags, &vx#particle_random_direction(0, \&vx# % vel8
 s#speed = (s32) (e->speedScale \* 16);#speed = (s32) (e->speedScale * 8);# % vel8
 s#offset = e->offsetScale;#offset = e->speedScale;# % vel8
 s#y = (s32) ((f32) y + offset \* vy);#y = (s32) ((f32) y + speed * vy);# % vel8
@@ -45,8 +45,8 @@ s#rise = (s32) vy;#rise = (s32) vx;# % obj vel8
 s#^                random_int();$#                ;# % vel8
 s#x = (s32) ((f32) x + vx \* offset);#x = (s32) ((f32) x + vx * speed);# % vel8
 s#vz = vz \* speed;#vz = vz * offset;# % vel8
-/func_151705A4(e->flags/,/a10 = vi/s/a0E = vi & 0xFF;/a0E = (vi >> 1) \& 0xFF;/ % vel8
-/func_151705A4(e->flags/,/a10 = vi/s/a0F = (vi >> 8) & 0xFF;/a0F = (vi >> 9) \& 0xFF;/ % vel8 vel8clamp
+/particle_random_direction(e->flags/,/a10 = vi/s/a0E = vi & 0xFF;/a0E = (vi >> 1) \& 0xFF;/ % vel8
+/particle_random_direction(e->flags/,/a10 = vi/s/a0F = (vi >> 8) & 0xFF;/a0F = (vi >> 9) \& 0xFF;/ % vel8 vel8clamp
 s#dirB = math_cos_u8(r & 0xFF);#dirB = math_sin_u8(r \& 0xFF);# % scatter
 s#\* e->scatterXZ) \* 1.52587890625e-05f;#* e->scatterXZ) * 3.0517578125e-05f;# % scatter
 s#z = (s32) ((f32) z + dist \* dirB);#z = (s32) ((f32) z + dist * dirA);# % scatter

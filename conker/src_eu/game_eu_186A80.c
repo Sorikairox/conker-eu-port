@@ -2,8 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15159270(void **arg0) {
-    func_1514EDF0(arg0, arg0[0x18 / 4]);
+/* was func_15159270 */
+void move_watch_free(void **arg0) {
+    char_fx_detach_effect(arg0, arg0[0x18 / 4]);
     node_unlink_free(arg0);
 }
 
@@ -14,12 +15,12 @@ void func_15159270(void **arg0) {
  * data symbol inside its ROM mirror at the N64 address, and relocates D_8008B3CC's five words there. */
 extern u32 D_800A65E0[28][2];     /* per rule: required old-state bits, required new-state bits */
 extern s8 *D_8008B3CC[5];         /* per object kind (obj+0x1D): handler index per rule, -1 = none */
-s32 func_151595F4(u8 *, u8);
-s32 func_15159690(u8 *, u8);
-s32 func_151596F4(u8 *, u8);
-s32 func_151597A0(u8 *, u8 *, u8);
-s32 func_15159828(u8 *, s32);
-s32 func_1513092C(void *, s32, s32); /* P290: hoisted (func_1515A178; the NM caller above it used it undeclared) */
+s32 move_watch_is_airborne(u8 *, u8);
+s32 move_watch_is_out_of_water(u8 *, u8);
+s32 move_watch_is_near_ground(u8 *, u8);
+s32 move_watch_moving_state(u8 *, u8 *, u8);
+s32 move_watch_anim_state(u8 *, s32);
+s32 particle_spawn_default(void *, s32, s32); /* P290: hoisted (dust_disc_emitter_update; the NM caller above it used it undeclared) */
 
 /* sllv uses the low 5 bits of the shift count */
 #define STATE_BIT(n) (1 << ((n) & 0x1F))
@@ -29,7 +30,8 @@ s32 func_1513092C(void *, s32, s32); /* P290: hoisted (func_1515A178; the NM cal
 // watcher_state_update: recomputes the five state bytes (obj+0x2C..0x30) of a watcher object for its target
 // (obj+0x18) and, when the watcher is armed (obj+0x31 bit 0), calls the transition handlers of its kind whose
 // old/new state masks match.
-void func_1515929C(u8 *obj) {
+/* was func_1515929C */
+void move_watch_update(u8 *obj) {
     u8 old0 = obj[0x2C];
     u8 old1 = obj[0x2D];
     u8 old2 = obj[0x2E];
@@ -41,9 +43,9 @@ void func_1515929C(u8 *obj) {
     s32 i;
     s8 h;
 
-    obj[0x2C] = func_151595F4(*(u8 **)(obj + 0x18), obj[0x1D]);
+    obj[0x2C] = move_watch_is_airborne(*(u8 **)(obj + 0x18), obj[0x1D]);
     if (obj[0x2C] == 0) {
-        obj[0x2D] = func_15159690(*(u8 **)(obj + 0x18), obj[0x1D]);
+        obj[0x2D] = move_watch_is_out_of_water(*(u8 **)(obj + 0x18), obj[0x1D]);
     } else {
         obj[0x2D] = 2;
     }
@@ -52,14 +54,14 @@ void func_1515929C(u8 *obj) {
     } else if (obj[0x2D] == 0) {
         obj[0x2E] = 1;
     } else {
-        obj[0x2E] = func_151596F4(*(u8 **)(obj + 0x18), obj[0x1D]);
+        obj[0x2E] = move_watch_is_near_ground(*(u8 **)(obj + 0x18), obj[0x1D]);
     }
-    obj[0x2F] = func_151597A0(*(u8 **)(obj + 0x18), obj + 0x20, obj[0x2F]);
+    obj[0x2F] = move_watch_moving_state(*(u8 **)(obj + 0x18), obj + 0x20, obj[0x2F]);
     target = *(u8 **)(obj + 0x18);
     *(f32 *)(obj + 0x20) = *(f32 *)(target + 0x14);
     *(f32 *)(obj + 0x24) = *(f32 *)(target + 0x18);
     *(f32 *)(obj + 0x28) = *(f32 *)(target + 0x1C);
-    s4 = func_15159828(target, obj[0x1D]);
+    s4 = move_watch_anim_state(target, obj[0x1D]);
     obj[0x30] = s4;
     if (!(obj[0x31] & 1)) {
         return;
@@ -82,10 +84,11 @@ void func_1515929C(u8 *obj) {
 #undef STATE_MASK
 #undef STATE_BIT
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515929C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/move_watch_update.s")
 #endif
 
-void func_15159514(u8 *arg0, u8 *arg1, u8 arg2)
+/* was func_15159514 */
+void move_watch_on_message(u8 *arg0, u8 *arg1, u8 arg2)
 {
   s32 t;
   s32 *key = (s32 *)(arg0 + 0x18);
@@ -115,12 +118,13 @@ void func_15159514(u8 *arg0, u8 *arg1, u8 arg2)
   {
     if ((*key == *(s32 *)arg1) || (arg0[0x1C] == arg1[4]))
     {
-      func_1519F970(arg0);
+      foot_trails_stop(arg0);
     }
   }
 }
 
-s32 func_151595F4(u8 *arg0, u8 arg1) {
+/* was func_151595F4 */
+s32 move_watch_is_airborne(u8 *arg0, u8 arg1) {
     s32 flags = *(s32 *)(arg0 + 0x184) & 0x1F;
     s32 ret;
 
@@ -136,7 +140,8 @@ s32 func_151595F4(u8 *arg0, u8 arg1) {
     return ret;
 }
 
-s32 func_15159690(u8 *arg0, u8 arg1) {
+/* was func_15159690 */
+s32 move_watch_is_out_of_water(u8 *arg0, u8 arg1) {
     s32 r;
     if (arg1 == 2 || arg1 == 3) {
         r = 1;
@@ -148,7 +153,8 @@ s32 func_15159690(u8 *arg0, u8 arg1) {
     return r;
 }
 
-s32 func_151596F4(u8 *arg0, u8 arg1) {
+/* was func_151596F4 */
+s32 move_watch_is_near_ground(u8 *arg0, u8 arg1) {
     s32 r;
 
     if (arg1 == 2 || arg1 == 3) {
@@ -169,7 +175,8 @@ s32 func_151596F4(u8 *arg0, u8 arg1) {
     return r;
 }
 
-s32 func_151597A0(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_151597A0 */
+s32 move_watch_moving_state(u8 *arg0, u8 *arg1, u8 arg2) {
     s32 r;
     if (*(f32 *)(arg1 + 0) != *(f32 *)(arg0 + 0x14) || *(f32 *)(arg1 + 4) != *(f32 *)(arg0 + 0x18) || *(f32 *)(arg1 + 8) != *(f32 *)(arg0 + 0x1C)) { if (arg2 == 1 || arg2 == 2) { r = 2; } else { r = 1; } } else { r = 0; }
     return r;
@@ -178,7 +185,8 @@ s32 func_151597A0(u8 *arg0, u8 *arg1, u8 arg2) {
 #ifdef NON_MATCHING
 extern u16 D_8008B3E0;
 
-s32 func_15159828(u8 *arg0, s32 arg1) {
+/* was func_15159828 */
+s32 move_watch_anim_state(u8 *arg0, s32 arg1) {
     struct {
         u16 uC;
         u8 padE[0xA];
@@ -220,9 +228,10 @@ loop_2:
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159828.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/move_watch_anim_state.s")
 #endif
-s32 func_151598E0(struct127 *arg0, u8 *arg1) {
+/* was func_151598E0 */
+s32 move_watch_pick_kind(struct127 *arg0, u8 *arg1) {
     s32 ret = 0;
 
     if (D_800BE616 != 0) {
@@ -256,7 +265,8 @@ s32 func_151598E0(struct127 *arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-u8 func_1515999C(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5) {
+/* was func_1515999C */
+u8 move_watch_state_matches(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5) {
     struct_eu_link *sp38;
     u8 sp37;
     s32 temp_v0;
@@ -270,7 +280,7 @@ u8 func_1515999C(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5) {
 
     sp37 = 0;
     var_t2 = sp37;
-    if (func_1514F250((*(struct_eu_link **)((u8 *)arg0 + 0x2F4)), 0x13, &sp38) == 0) {
+    if (char_fx_find_slot((*(struct_eu_link **)((u8 *)arg0 + 0x2F4)), 0x13, &sp38) == 0) {
         return 0U;
     }
     temp_a1 = sp38->unk10;
@@ -306,22 +316,23 @@ u8 func_1515999C(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5) {
     return var_t2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515999C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/move_watch_state_matches.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15046EF0(f32 *, s32, f32, u8 *); /* P95: f32 parameter */
+s32 collision_ceiling_probe(f32 *, s32, f32, u8 *); /* P95: f32 parameter */
 #else
-s32 func_15046EF0(f32 *, s32, s32, u8 *);
+s32 collision_ceiling_probe(f32 *, s32, s32, u8 *);
 #endif
-s32 func_1514672C(f32 *);
-s32 func_15159C2C(u8 *, u8 *);
+s32 pos_in_world_bounds(f32 *);
+s32 smoke_wobble_step(u8 *, u8 *);
 s32 impact_current_kind();
 
-u8 func_15159B04(u8 *arg0, u8 *arg1)
+/* was func_15159B04 */
+u8 smoke_wobble_update_ground(u8 *arg0, u8 *arg1)
 {
   u8 flag;
   flag = 1;
-  if (func_15159C2C(arg0, arg1) != 0)
+  if (smoke_wobble_step(arg0, arg1) != 0)
   {
     f32 v[4];
     if ((*((f32 *) (arg0 + 0x5C))) > 0.0f)
@@ -329,14 +340,14 @@ u8 func_15159B04(u8 *arg0, u8 *arg1)
       v[0] = (*((f32 *) (arg0 + 0x4C))) + (*((f32 *) (arg0 + 0x40)));
       v[1] = *((f32 *) (arg1 + 4));
       v[2] = (*((f32 *) (arg0 + 0x54))) + (*((f32 *) (arg0 + 0x48)));
-      if (func_1514672C(v) == 0)
+      if (pos_in_world_bounds(v) == 0)
       {
         return 0;
       }
 #ifdef NON_MATCHING
-      if (func_15046EF0(v, 0, *((f32 *) (arg0 + 0x44)), arg0 + 0x80) != 0) /* P95: f32 field (prototype param is f32 in NM) */
+      if (collision_ceiling_probe(v, 0, *((f32 *) (arg0 + 0x44)), arg0 + 0x80) != 0) /* P95: f32 field (prototype param is f32 in NM) */
 #else
-      if (func_15046EF0(v, 0, *((s32 *) (arg0 + 0x44)), arg0 + 0x80) != 0)
+      if (collision_ceiling_probe(v, 0, *((s32 *) (arg0 + 0x44)), arg0 + 0x80) != 0)
 #endif
       {
         flag = 3; // fakematch: permuter, flag reused as the 3 constant (makes flag = 0 share the tail)
@@ -366,7 +377,8 @@ u8 func_15159B04(u8 *arg0, u8 *arg1)
  * +0xC1 (unsigned speeds +0xC2 / +0xC3) gives obj +0x4C / +0x54 = +0xC4 / +0xC8 * sin(phase - 0x40) * +0x5C * +0xBC.
  * Returns 0 when flag 0x2000 of +0x68 is set and +0xCC < obj +0x50 + obj +0x44, else 1.
  */
-s32 func_15159C2C(u8 *obj, u8 *arg1) {
+/* was func_15159C2C */
+s32 smoke_wobble_step(u8 *obj, u8 *arg1) {
     u8 *rec = obj + 0xA8;
     u8 ok = 1;
     f32 s0, s1, k;
@@ -395,13 +407,14 @@ s32 func_15159C2C(u8 *obj, u8 *arg1) {
     return ok;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159C2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_wobble_step.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
 
-s32 func_15159E00(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
+/* was func_15159E00 */
+s32 smoke_wobble_spawn(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     struct {
         f32 u1C;
         s8 u20;
@@ -521,7 +534,7 @@ s32 func_15159E00(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     sp.u38 = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
     sp.u3C = ((random_float() * 0.1f) + 0.08f) * sp.u1C;
     sp.u9C = ((random_float() * 254.0f) + 108.0f) * 0.001f;
-    temp_v0 = func_1513092C(&sp.u48, 2, 0x28);
+    temp_v0 = particle_spawn_default(&sp.u48, 2, 0x28);
     var_v1 = temp_v0;
     if (temp_v0 != 0) {
         sp.u44 = temp_v0;
@@ -531,9 +544,10 @@ s32 func_15159E00(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159E00.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_wobble_spawn.s")
 #endif
-void func_1515A120(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6) {
+/* was func_1515A120 */
+void smoke_wobble_spawn_at(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6) {
     f32 sp24[3];
     f32 sp18[3];
 
@@ -543,12 +557,12 @@ void func_1515A120(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u
     sp18[1] = 0.0f;
     sp18[2] = 0.0f;
     sp24[2] = arg2;
-    func_15159E00(sp24, sp18, *(u8 *)(arg6 + 0xC), *(u8 *)(arg6 + 1));
+    smoke_wobble_spawn(sp24, sp18, *(u8 *)(arg6 + 0xC), *(u8 *)(arg6 + 1));
 }
 
 #ifdef NON_MATCHING
 extern u8 D_800BEE0B;
-s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2);
+s32 camera_within_dist(u8 arg0, f32 arg1, struct17 *arg2);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 f32 sinf(f32);
 f32 cosf(f32);
@@ -600,12 +614,13 @@ typedef struct {
 } DustExtra;      /* 0x24 bytes copied to the particle's +0xA8 */
 
 // dust_emitter_update: object update of a dust / spray emitter (state at obj+0x28). Only near the camera
-// (func_151454BC, 3000 units). Adds rate + rand * rateRand per tick (frame scale D_800BE9A4) to the owed count and
-// spawns one particle (func_1513092C, template type 0x200005, 0x24 extra bytes at +0xA8) per whole unit above 1:
+// (camera_within_dist, 3000 units). Adds rate + rand * rateRand per tick (frame scale D_800BE9A4) to the owed count and
+// spawns one particle (particle_spawn_default, template type 0x200005, 0x24 extra bytes at +0xA8) per whole unit above 1:
 // a random point on the disc of the given radius (r = rand * radius, so denser near the centre) rotated by
 // rotA / rotB, random angle / spin, lifetime life * 1 / k and fade from random ranges, velocity vel * k
 // (k = 4.46..6.07), random shade 0x7C..0xAE, size 240..340 and flip flags 0x40 / 0x80.
-void func_1515A178(u8 *obj) {
+/* was func_1515A178 */
+void dust_disc_emitter_update(u8 *obj) {
     DustEmitter *e = (DustEmitter *) (obj + 0x28);
     DustTemplate t;
     DustExtra ex;
@@ -616,7 +631,7 @@ void func_1515A178(u8 *obj) {
     s16 fadeI;
     u8 *p;
 
-    if (func_151454BC(D_800BEE0B, 3000.0f, (struct17 *) e) == 0) {
+    if (camera_within_dist(D_800BEE0B, 3000.0f, (struct17 *) e) == 0) {
         return;
     }
     e->acc += (e->rate + random_float() * e->rateRand) * D_800BE9A4;
@@ -660,7 +675,7 @@ void func_1515A178(u8 *obj) {
         x = sinf(ang) * r;
         z = cosf(ang) * r;
         mtxf_rotate_xyz_deg(mtx, e->rotA, e->rotB, 0.0f);
-        func_150A7E40(mtx, x, 0.0f, z, &ex.pos[0], &ex.pos[1], &ex.pos[2]);
+        mtxf_transform_point(mtx, x, 0.0f, z, &ex.pos[0], &ex.pos[1], &ex.pos[2]);
         ex.angle = random_float() * 6.2831855f;
         ex.spin = (random_float() * 320.0f + -160.0f) * 0.001f; /* 0x3A83126F */
         k = (random_float() * 161.0f + 446.0f) * 0.01f;       /* 0x3C23D70A */
@@ -694,7 +709,7 @@ void func_1515A178(u8 *obj) {
         ex.spinB = (u32) random_int() % 5 + 4;
         ex.growA = (random_float() * 0.25f + 0.15f) * ex.size; /* 0.15f = 0x3E19999A */
         ex.growB = (random_float() * 0.25f + 0.15f) * ex.size;
-        p = (u8 *) func_1513092C(&t, 2, 0x24);
+        p = (u8 *) particle_spawn_default(&t, 2, 0x24);
         if (p != NULL) {
             memcpy((s32) (p + 0xA8), (f32 *) &ex, 0x24); /* memcpy is declared (s32, f32 *, s32) above */
         }
@@ -702,10 +717,11 @@ void func_1515A178(u8 *obj) {
     } while (1.0f < e->acc);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A178.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/dust_disc_emitter_update.s")
 #endif
 
-s32 func_1515A68C(u8 *arg0, s32 arg1) {
+/* was func_1515A68C */
+s32 smoke_wobble_step_pulse(u8 *arg0, s32 arg1) {
     u8 *p;
     f32 s;
     f32 t;
@@ -721,7 +737,7 @@ s32 func_1515A68C(u8 *arg0, s32 arg1) {
     if (D_800BE9E4 && D_800BE9E4 && D_800BE9E4) { // fakematch: permuter; orders the p[0x20] / D_800BE9A4 loads
     }
     *(f32 *)(p + 0x1C) += *(f32 *)(p + 0x20) * D_800BE9A4;
-    *(f32 *)(p + 0x1C) = t = func_15144B68(*(f32 *)(p + 0x1C));
+    *(f32 *)(p + 0x1C) = t = wrap_angle_rad(*(f32 *)(p + 0x1C));
     s = sinf(t);
     *(f32 *)(arg0 + 0x4C) = *(f32 *)(p + 0x10) * s;
     *(f32 *)(arg0 + 0x50) = *(f32 *)(p + 0x14) * s;
@@ -735,10 +751,11 @@ extern f32 D_800A67CC;
 extern f32 D_800A67D0;
 extern f32 D_800A67DC;
 extern f32 D_800A67E0;
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, f32 *, s32);
 
-s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA) {
+/* was func_1515A7A8 */
+s32 smoke_puff_spawn_grounded(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA) {
     struct {
         u8 u2C;
         u8 pad2D[0x1B];
@@ -884,8 +901,8 @@ s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s
         } else {
             sp.u48 = 0;
         }
-        if (func_1514672C(arg0) != 0) {
-            if (func_15046EF0(arg0, 0, 19500.0f, &sp.u2C) != 0) { /* P95: was 0x46985800 as an int */
+        if (pos_in_world_bounds(arg0) != 0) {
+            if (collision_ceiling_probe(arg0, 0, 19500.0f, &sp.u2C) != 0) { /* P95: was 0x46985800 as an int */
                 arg4 = &sp.u2C;
                 sp.u70 = (f32) sp.u2C;
             } else {
@@ -895,7 +912,7 @@ s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s
             sp.u70 = D_800A67E0;
         }
     }
-    temp_v0 = func_151307F0(&sp.u74, 2, arg4, 0x24, (s32) arg9, argA);
+    temp_v0 = particle_spawn_ex(&sp.u74, 2, arg4, 0x24, (s32) arg9, argA);
     var_v1 = temp_v0;
     if (temp_v0 != 0) {
         sp.uE4 = temp_v0;
@@ -905,11 +922,12 @@ s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A7A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_puff_spawn_grounded.s")
 #endif
 typedef struct { f32 unk0; u8 unk4; u8 unk5; s8 unk6; s8 unk7; f32 unk8; f32 unkC; u8 unk10; u8 unk11; u8 unk12; u8 unk13; f32 unk14; f32 unk18; f32 unk1C; } SubAB7C;
 f32 angle_byte_cos(u8);
-s32 func_1515AB7C(u8 *arg0, s32 arg1) {
+/* was func_1515AB7C */
+s32 smoke_sway_step(u8 *arg0, s32 arg1) {
     SubAB7C *p;
     s32 i;
 
@@ -931,7 +949,8 @@ s32 func_1515AB7C(u8 *arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-u8 func_1515ACFC(u8 *arg0, s32 arg1) {
+/* was func_1515ACFC */
+u8 smoke_sway_step_ground(u8 *arg0, s32 arg1) {
     struct {
         f32 u3C;
         f32 u40;
@@ -943,7 +962,7 @@ u8 func_1515ACFC(u8 *arg0, s32 arg1) {
     f32 temp_f0;
 
     sp.u4B = 1;
-    func_1515AB7C(arg0, arg1);
+    smoke_sway_step(arg0, arg1);
     if ((*(f32 *)((u8 *)arg0 + 0x5C)) < 0.0f) {
         return 1U;
     }
@@ -953,10 +972,10 @@ u8 func_1515ACFC(u8 *arg0, s32 arg1) {
     sp.u44 = (*(f32 *)((u8 *)arg0 + 0x48)) + (*(f32 *)((u8 *)arg0 + 0x54));
     temp_f0 = (*(f32 *)((u8 *)(&arg0[0xA8]) + 0x20));
     if (temp_f0 == -99999.9f) {
-        if (func_1514672C(&sp.u3C) == 0) {
+        if (pos_in_world_bounds(&sp.u3C) == 0) {
             return 0U;
         }
-        if (func_15046EF0(&sp.u3C, 0, (*(f32 *)((u8 *)arg0 + 0x44)), arg0 + 0x80) != 0) { /* P95: f32 field (prototype param is f32 in NM) */
+        if (collision_ceiling_probe(&sp.u3C, 0, (*(f32 *)((u8 *)arg0 + 0x44)), arg0 + 0x80) != 0) { /* P95: f32 field (prototype param is f32 in NM) */
             sp.u4B = 0;
             sp.u40 = (*(f32 *)((u8 *)arg0 + 0x80));
         }
@@ -973,13 +992,14 @@ block_9:
     return sp.u4B;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515ACFC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_sway_step_ground.s")
 #endif
-s32 func_1515AE90(u8 *arg0, u8 **arg1) {
+/* was func_1515AE90 */
+s32 move_watch_get_data(u8 *arg0, u8 **arg1) {
     struct_eu_link *sp1C;
     u8 *temp_v1;
 
-    if (func_1514F250(*(struct_eu_link **)(arg0 + 0x2F4), 0x13, &sp1C) == 0) {
+    if (char_fx_find_slot(*(struct_eu_link **)(arg0 + 0x2F4), 0x13, &sp1C) == 0) {
         return 0;
     }
     temp_v1 = (u8 *)sp1C->unk10;
@@ -989,18 +1009,19 @@ s32 func_1515AE90(u8 *arg0, u8 **arg1) {
 
 #ifdef NON_MATCHING
 /* P133 */
-struct260 *func_151A8B20(void *, s16, s32, u8, s32);
+struct260 *ground_emitter_spawn(void *, s16, s32, u8, s32);
 typedef struct { u8 b[0x2C]; } Blk_AEE4;
 typedef struct { f32 x, y; Blk_AEE4 blk; } Tab_AEE4; /* 0x34 bytes */
 extern Tab_AEE4 D_800A674C[];
 
 /*
  * object_attach_effect_start: for an object whose byte +0x1F is 0 (<= 0), spawns its attached effect through
- * func_151A8B20 (kind 0xF, owner obj, x / y from D_800A674C[obj[0x1F]], 0x2C bytes of extra data) and copies the
+ * ground_emitter_spawn (kind 0xF, owner obj, x / y from D_800A674C[obj[0x1F]], 0x2C bytes of extra data) and copies the
  * table entry's 0x2C-byte block to the new record at +0x80. arg1 (the handler table's second argument) is unused.
  * The asm leaves the spawn block's padding bytes uninitialised; the C zeroes them.
  */
-void func_1515AEE4(u8 *obj, s32 arg1) {
+/* was func_1515AEE4 */
+void watch_attach_effect_start(u8 *obj, s32 arg1) {
     struct {
         u8 kind;
         u8 pad1[3];
@@ -1028,19 +1049,20 @@ void func_1515AEE4(u8 *obj, s32 arg1) {
     spawn.b26 = 2;
     spawn.pad27 = 0;
     blk = e->blk;
-    p = func_151A8B20(&spawn, -1, 0x2C, 0xFF, 0);
+    p = ground_emitter_spawn(&spawn, -1, 0x2C, 0xFF, 0);
     if (p != NULL) {
         memcpy((u8 *) p + 0x80, &blk, 0x2C);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515AEE4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/watch_attach_effect_start.s")
 #endif
 
 typedef struct { f32 x, y, z; } V3_AFF4;
 typedef struct { s32 w[10]; } Blk_AFF4;
 typedef struct { f32 u0; V3_AFF4 pos; f32 u10; Blk_AFF4 blk; } Sp_AFF4;
-void func_1515AFF4(u8 *arg0, V3_AFF4 *arg1, f32 arg2, s32 arg3) {
+/* was func_1515AFF4 */
+void watch_spawn_random_effect(u8 *arg0, V3_AFF4 *arg1, f32 arg2, s32 arg3) {
     Sp_AFF4 sp;
     s16 *r;
     struct260 *p;
@@ -1057,10 +1079,11 @@ void func_1515AFF4(u8 *arg0, V3_AFF4 *arg1, f32 arg2, s32 arg3) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, f32 *, s32);
 
-void func_1515B0F8(u8 *arg0) {
+/* was func_1515B0F8 */
+void smoke_emitter_update(u8 *arg0) {
     struct {
         f32 u74;
         s8 u78;
@@ -1193,7 +1216,7 @@ void func_1515B0F8(u8 *arg0) {
                 var_v0 = 0;
             }
             sp.uF4 = var_v0 | 6 | var_s1 | 0xF000;
-            temp_v0 = func_151307F0(&sp.u9C, 2, 0, 0x28, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = particle_spawn_ex(&sp.u9C, 2, 0, 0x28, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u74, 0x28);
             }
@@ -1202,5 +1225,5 @@ void func_1515B0F8(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515B0F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/smoke_emitter_update.s")
 #endif

@@ -1,4 +1,4 @@
-# P279 func_150A80F0 (game_eu_D5900.c) harness mutants
+# P279 mtx_scale_fixed (game_eu_D5900.c) harness mutants
 s/    h\[15\] = 1;              \/\* \[3\]\[3\] = 1.0 \*\//    h[15] = 0;/
 s/    h\[21\] = sy;/    h[21] = sx;/
 s/    h\[10\] = (u32) sz >> 16; \/\* \[2\]\[2\] \*\//    h[10] = (u32) sz >> 15;/

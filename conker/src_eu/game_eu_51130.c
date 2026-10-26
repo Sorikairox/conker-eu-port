@@ -5,7 +5,8 @@
 
 extern s32 D_800C3A10;
 
-void func_15023920(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_15023920 */
+void setup_link_spawned_obj(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct127 *temp_v0;
 
     if ((arg0 == 0xB) && (arg1 == 2)) {

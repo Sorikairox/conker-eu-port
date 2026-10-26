@@ -6,12 +6,13 @@ extern u8 D_800AB490[];
 #endif
 
 #ifdef NON_MATCHING
-void func_1504715C(void *, u8 *);
-s32 func_15150D7C(s32 *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32 *, f32, s32, s32, s32, s32);
-void func_15151FA8(u8 *, s32, s32);
-void func_1515C7B4(u8 *, f32 *, f32 *, f32 *);
+void hitinfo_from_obj_floor(void *, u8 *);
+s32 emit_debris_burst(s32 *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32 *, f32, s32, s32, s32, s32);
+void emit_sparks_by_angles(u8 *, s32, s32);
+void obj_get_fx_point_b(u8 *, f32 *, f32 *, f32 *);
 
-void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2) {
+/* was func_151D2860 */
+void destroy_burst_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u54;
         u8 pad58[0x8];
@@ -106,11 +107,11 @@ void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2) {
     } sp;
 
     if (arg0 != NULL) {
-        func_10010154(0xAAU, arg0, 0x7FFF, 0x3E8, 0xBB8U);
-        func_10010A3C(arg0);
+        actor_sound_play(0xAAU, arg0, 0x7FFF, 0x3E8, 0xBB8U);
+        actor_sound2_stop(arg0);
         sp.u180 = (arg0->xz_scale + arg0->y_scale) * 0.5f;
-        func_1515C7B4(arg0, &sp.u18C, &sp.u188, &sp.u184);
-        func_1504715C(&sp.u15C, arg0);
+        obj_get_fx_point_b(arg0, &sp.u18C, &sp.u188, &sp.u184);
+        hitinfo_from_obj_floor(&sp.u15C, arg0);
         sp.u118 = 5;
         sp.u11C = 5;
         (*(s32 *)((u8 *)(&sp.u120) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 0));
@@ -131,7 +132,7 @@ void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u158 = 0xB;
         sp.u150 = 20.248001f;
         sp.u154 = 1.0f;
-        func_15150D7C(&sp.u118, ((u8 *)&D_800AB490), &D_800AB4C0, 0xC, 0, 0, 0, 1, -1, &sp.u15C, 20.0f, 0, 0, (s32) arg1, arg2);
+        emit_debris_burst(&sp.u118, ((u8 *)&D_800AB490), &D_800AB4C0, 0xC, 0, 0, 0, 1, -1, &sp.u15C, 20.0f, 0, 0, (s32) arg1, arg2);
         sp.uDC = 0xF;
         sp.uE0 = 7;
         (*(s32 *)((u8 *)(&sp.uE4) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 0));
@@ -150,7 +151,7 @@ void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u10C = 0.10700001f;
         sp.u110 = 0.3f;
         sp.u114 = 19.238f;
-        func_15152700(&sp.uDC, ((u8 *)&D_800AB4F0), &D_800AB4F4, 1, 0.0f, 0U, (u8) (s32) arg1, arg2);
+        emit_textured_burst(&sp.uDC, ((u8 *)&D_800AB4F0), &D_800AB4F4, 1, 0.0f, 0U, (u8) (s32) arg1, arg2);
         (*(s32 *)((u8 *)(&sp.u54) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 0));
         (*(s32 *)((u8 *)(&sp.u54) + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 4));
         (*(s32 *)((u8 *)(&sp.u54) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u18C) + 8));
@@ -195,9 +196,9 @@ void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u6C = 0.70400006f;
         sp.u70 = 20.0f;
         sp.u74 = 25.0f;
-        func_15151FA8(&sp.u54, arg1, arg2);
+        emit_sparks_by_angles(&sp.u54, arg1, arg2);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_200070/func_151D2860.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_200070/destroy_burst_spawn.s")
 #endif

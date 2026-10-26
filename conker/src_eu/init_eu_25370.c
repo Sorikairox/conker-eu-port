@@ -9,7 +9,7 @@ extern u8 _osLastSentSiCmd;
 extern u8 _osContNumControllers;
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_10025B60(s32, void *); // __osSiRawStartDma
+s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 void __osPfsRequestData(u8 cmd);
 void func_1002560C(u8 *pattern, OSContStatus *data); // __osPfsGetInitData
 
@@ -29,9 +29,9 @@ s32 osPfsIsPlug(OSMesgQueue *queue, u8 *pattern)
     while (TRUE)
     {
         __osPfsRequestData(CONT_CMD_REQUEST_STATUS);
-        ret = func_10025B60(OS_WRITE, &__osPfsPifRam);
+        ret = os_si_raw_start_dma(OS_WRITE, &__osPfsPifRam);
         osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
-        ret = func_10025B60(OS_READ, &__osPfsPifRam);
+        ret = os_si_raw_start_dma(OS_READ, &__osPfsPifRam);
         osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
         func_1002560C(&bitpattern, data);
         for (channel = 0; channel < _osContNumControllers; channel++)

@@ -4,9 +4,10 @@
 
 
 #ifdef NON_MATCHING
-s32 func_151A74B0(s16 *, s32, s32, s32);
+s32 debris_spray_spawn(s16 *, s32, s32, s32);
 
-void func_1506A9B0(u8 *arg0, s32 arg1) {
+/* was func_1506A9B0 */
+void obj_effect_debris_spray(u8 *arg0, s32 arg1) {
     struct {
         s16 u1C;
         u8 pad1E[0x2];
@@ -63,26 +64,30 @@ void func_1506A9B0(u8 *arg0, s32 arg1) {
     sp.u68 = -4.0f;
     sp.u64 = 0.0f;
     sp.u6C = 8.0f;
-    func_151A74B0(&sp.u1C, 1, 0xFF, 1);
+    debris_spray_spawn(&sp.u1C, 1, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506A9B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/obj_effect_debris_spray.s")
 #endif
-void func_1506AABC(s32 arg0, s32 arg1) {
+/* was func_1506AABC */
+void obj_effect_emitter_trail(s32 arg0, s32 arg1) {
     obj_emitter_trail_spawn(arg0, 0xFF, 1);
 }
 
-void func_1506AAE4(s32 arg0, s32 arg1) {
-    func_151BBBCC(arg0, D_800D1980, D_eu_800D1990, 0xFF, 1);
+/* was func_1506AAE4 */
+void obj_effect_shot_impact(s32 arg0, s32 arg1) {
+    shot_impact_effects(arg0, D_800D1980, D_eu_800D1990, 0xFF, 1);
 }
 
-void func_1506AB20(s32 arg0, s32 arg1) {
-    func_151BC04C(arg0, D_800D1980, D_eu_800D1990, 0xFF, 1);
+/* was func_1506AB20 */
+void obj_effect_explosion(s32 arg0, s32 arg1) {
+    explosion_effects_at(arg0, D_800D1980, D_eu_800D1990, 0xFF, 1);
 }
 
-s32 func_151D3A30(f32 *, f32 *, s32, s32, s32, s32);
+s32 bullet_impact_effects(f32 *, f32 *, s32, s32, s32, s32);
 
-void func_1506AB5C(u8 *arg0, s32 arg1) {
+/* was func_1506AB5C */
+void obj_effect_directed_burst(u8 *arg0, s32 arg1) {
     f32 sp2C[3];
     f32 sp20[3];
 
@@ -92,16 +97,18 @@ void func_1506AB5C(u8 *arg0, s32 arg1) {
     sp20[0] = ((f32 *)D_eu_800D1990)[0] - ((f32 *)D_800D1980)[0];
     sp20[1] = ((f32 *)D_eu_800D1990)[1] - ((f32 *)D_800D1980)[1];
     sp20[2] = ((f32 *)D_eu_800D1990)[2] - ((f32 *)D_800D1980)[2];
-    func_151D3A30(sp2C, sp20, 0, 0, 0xFF, 1);
+    bullet_impact_effects(sp2C, sp20, 0, 0, 0xFF, 1);
 }
 
-void func_1506ABFC(s32 arg0, s32 arg1) {
-    func_151BC6B4(arg0, 0xFF, 1);
+/* was func_1506ABFC */
+void obj_effect_trail_smoke_light(s32 arg0, s32 arg1) {
+    obj_trail_smoke_light_spawn(arg0, 0xFF, 1);
 }
 
 extern f32 D_80099DE8;
 
-void func_1506AC24(struct127 *arg0, s32 arg1) {
+/* was func_1506AC24 */
+void obj_effect_flash_light(struct127 *arg0, s32 arg1) {
     struct225 *temp_v0;
     Header header;
     struct {
@@ -129,9 +136,10 @@ void func_1506AC24(struct127 *arg0, s32 arg1) {
     }
 }
 
-s32 func_151D3A30(f32 *, f32 *, s32, s32, s32, s32);
+s32 bullet_impact_effects(f32 *, f32 *, s32, s32, s32, s32);
 
-void func_1506AD28(u8 *arg0, s32 arg1) {
+/* was func_1506AD28 */
+void obj_effect_directed_burst_alt(u8 *arg0, s32 arg1) {
     f32 sp2C[3];
     f32 sp20[3];
 
@@ -141,15 +149,17 @@ void func_1506AD28(u8 *arg0, s32 arg1) {
     sp20[0] = ((f32 *)D_eu_800D1990)[0] - ((f32 *)D_800D1980)[0];
     sp20[1] = ((f32 *)D_eu_800D1990)[1] - ((f32 *)D_800D1980)[1];
     sp20[2] = ((f32 *)D_eu_800D1990)[2] - ((f32 *)D_800D1980)[2];
-    func_151D3A30(sp2C, sp20, 0, 1, 0xFF, 1);
+    bullet_impact_effects(sp2C, sp20, 0, 1, 0xFF, 1);
 }
 
-void func_1506ADC8(s32 arg0, s32 arg1) {
-    func_151B76F4(arg0, 0xFF, 1);
-    func_151B68D0(arg0, 0xFF, 1);
+/* was func_1506ADC8 */
+void obj_effect_smoke_ribbon(s32 arg0, s32 arg1) {
+    obj_smoke_puff_spawn(arg0, 0xFF, 1);
+    obj_ribbon_trail_spawn(arg0, 0xFF, 1);
 }
 
-void func_1506AE08(u8 *arg0, u8 *arg1) {
+/* was func_1506AE08 */
+void obj_effect_task_spawn(u8 *arg0, u8 *arg1) {
     typedef struct { s32 w[2]; } Blk8;
     struct260 *temp_v0;
     struct {
@@ -175,9 +185,10 @@ void object_impact_effects(u8 *, f32 *, f32 *, f32 *, s32, s32);
 
 #ifdef NON_MATCHING
 // players_effect_at_point: for every player whose bit is set in D_800CC680, object_impact_effects(player, D_800D1980,
-// D_eu_800D1990, NULL, 0xFF, 1) (the point / vector func_1506B04C fills in).
-// P184: handler 10 of func_1506B04C's D_800864B0 table, so it takes the dispatch arguments (unused).
-void func_1506AEA0(u8 *obj, void *arg) {
+// D_eu_800D1990, NULL, 0xFF, 1) (the point / vector obj_effect_run_handler fills in).
+// P184: handler 10 of obj_effect_run_handler's D_800864B0 table, so it takes the dispatch arguments (unused).
+/* was func_1506AEA0 */
+void obj_effect_players_impact(u8 *obj, void *arg) {
     s32 mask = D_800CC680;
     u8 *player = (u8 *) D_800CC2D0;
 
@@ -190,18 +201,21 @@ void func_1506AEA0(u8 *obj, void *arg) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506AEA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/obj_effect_players_impact.s")
 #endif
 
-void func_1506AF3C(struct127 *arg0, u8 *arg1) {
+/* was func_1506AF3C */
+void obj_effect_ground_blast(struct127 *arg0, u8 *arg1) {
     ground_explosion(arg0, *(struct127 **)arg1, (f32 *)(arg1 + 4), 1, *(s32 *)(arg1 + 0x10), 0xFF, 1);
 }
 
-void func_1506AF84(struct127 *arg0, u8 *arg1) {
+/* was func_1506AF84 */
+void obj_effect_ground_blast_alt(struct127 *arg0, u8 *arg1) {
     ground_explosion(arg0, *(struct127 **)arg1, (f32 *)(arg1 + 4), 2, *(s32 *)(arg1 + 0x10), 0xFF, 1);
 }
 
-void func_1506AFCC(u8 *arg0, s32 arg1) {
+/* was func_1506AFCC */
+void obj_effect_attached_glow(u8 *arg0, s32 arg1) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -209,20 +223,22 @@ void func_1506AFCC(u8 *arg0, s32 arg1) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151B78D8(&tmp, 0, 8, 0xFF, 1);
+    obj_attached_glow_spawn(&tmp, 0, 8, 0xFF, 1);
 }
 
-void func_1506B018(s32 arg0, s32 arg1) {
-    func_151CF05C(arg0, 0, 1, 0xFF, 1);
+/* was func_1506B018 */
+void obj_effect_misc_spawn(s32 arg0, s32 arg1) {
+    obj_ribbon_spawn(arg0, 0, 1, 0xFF, 1);
 }
 
 #ifdef NON_MATCHING
 extern f32 D_800CC674[3];   /* vector copied to D_eu_800D1990 for the effect handlers */
 typedef void (*ObjEffectHandler)(u8 *obj, void *arg);
-extern ObjEffectHandler D_800864B0[15];   /* .data: func_1506A9B0 .. func_1506AF84 */
+extern ObjEffectHandler D_800864B0[15];   /* .data: obj_effect_debris_spray .. obj_effect_ground_blast_alt */
 // obj_effect_dispatch: effect `type` (0..14) on obj: publishes obj's vector at +0x2C as the effect point D_800D1980 and
 // D_800CC674 as the effect vector D_eu_800D1990, then runs the type's handler D_800864B0[type](obj, arg) (NULL = none).
-void func_1506B04C(u8 *obj, s32 type, void *arg) {
+/* was func_1506B04C */
+void obj_effect_run_handler(u8 *obj, s32 type, void *arg) {
     f32 *point = (f32 *) D_800D1980;
     f32 *vec = (f32 *) D_eu_800D1990;
     void (*handler)(u8 *obj, void *arg);
@@ -242,5 +258,5 @@ void func_1506B04C(u8 *obj, s32 type, void *arg) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506B04C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/obj_effect_run_handler.s")
 #endif

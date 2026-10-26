@@ -2,7 +2,7 @@
 extern u16 D_80088EA0[3];
 
 /*
- * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (func_150348D4's case 0x7B; obj7b_joint_swing_entries below
+ * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (obj_postprocess_joints's case 0x7B; obj7b_joint_swing_entries below
  * builds the same object's joint entries). A shared phase (the s16 at D_800CC298 + 0x14) advances by
  * D_80088EA0[sel] * D_800BE9E4 (speeds 720 / 2000 / 3000: sel 1 when the object's +0x2E4 flags have both bits 0-1
  * set, sel 2 when both bits 2-3 are set, else 0); the scale 0.9 + 0.35 * (cos(phase) + 1) / 2 (0.9 .. 1.25, the

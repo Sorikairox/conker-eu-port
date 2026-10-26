@@ -3,15 +3,16 @@
 #include "variables.h"
 
 
-void func_10023BC0(void); // __osPiGetAccess
-void func_10023C04(void); // __osPiRelAccess
+void os_pi_get_access(void); // __osPiGetAccess
+void os_pi_rel_access(void); // __osPiRelAccess
 
 // osPiReadIo
-s32 func_151EF800(u32 devAddr, u32 *data) {
+/* was func_151EF800 */
+s32 game_os_pi_read_io(u32 devAddr, u32 *data) {
     register s32 ret;
 
-    func_10023BC0();
+    os_pi_get_access();
     ret = osPiRawReadIo(devAddr, data);
-    func_10023C04();
+    os_pi_rel_access();
     return ret;
 }

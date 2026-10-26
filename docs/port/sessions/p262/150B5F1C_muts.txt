@@ -1,4 +1,4 @@
-# P262 func_150B5F1C (smoke_puff_spawn) mutants: sed % setup names
+# P262 zap_burst_spawn_small (smoke_puff_spawn) mutants: sed % setup names
 s/rec.kind = 5;/rec.kind = 0xD;/ % base
 s/rec.sub = 5;/rec.sub = 8;/ % base
 s/rec.pos\[1\] = pos\[1\];/rec.pos[1] = pos[2];/ % base
@@ -23,7 +23,7 @@ s/rec.u82 = 0x1F;/rec.u82 = 0x1E;/ % base
 s/rec.u88 = 1.0f;/rec.u88 = 0.5f;/ % base
 s/rec.u8D = 0;/rec.u8D = -1;/ % base
 s/rec.u8F = -1;/;/ % base
-s/func_151530A8(\&rec.kind, arg1, arg2);/func_151530A8(\&rec.kind, arg1, 1);/ % wide
-s/func_150B6314((u8 \*)pos, arg1, arg2);/func_150B6314((u8 *)pos, arg2, arg1);/ % base
-s/func_150B64E0((u8 \*)pos, arg1, arg2);/func_150B64E0((u8 *)pos, 0, arg2);/ % base
-s/func_150B64E0((u8 \*)pos, arg1, arg2);/func_150B64E0((u8 *)pos, arg1, (u8)arg2);/ % wide
+s/emit_streaks_from_spec(\&rec.kind, arg1, arg2);/emit_streaks_from_spec(\&rec.kind, arg1, 1);/ % wide
+s/zap_particle_spawn((u8 \*)pos, arg1, arg2);/zap_particle_spawn((u8 *)pos, arg2, arg1);/ % base
+s/zap_light_flash((u8 \*)pos, arg1, arg2);/zap_light_flash((u8 *)pos, 0, arg2);/ % base
+s/zap_light_flash((u8 \*)pos, arg1, arg2);/zap_light_flash((u8 *)pos, arg1, (u8)arg2);/ % wide

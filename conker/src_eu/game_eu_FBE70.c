@@ -9,8 +9,9 @@ extern u8 D_800A0BC0[];
 #ifdef NON_MATCHING
 s32 memcpy(s32, u8 **, s32);
 
-/* P80: arg3 goes on to func_151604E4 (its 2nd node_alloc argument); the only caller, func_150268BC, passes 0 */
-s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
+/* P80: arg3 goes on to fb_fx_spawn (its 2nd node_alloc argument); the only caller, scene_event_run_b, passes 0 */
+/* was func_150CE660 */
+s32 fb_zoom_fx_spawn(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
     struct {
         u8 * u20;
         u8 u24;
@@ -43,20 +44,21 @@ s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
     sp.u914 = arg1;
     sp.u20 = arg0;
     sp.u24 = (*(u8 *)((u8 *)arg0 + 0x3B));
-    var_v0 = func_151604E4(&sp.u910, 0x8F0, arg2 & 0xFF, arg3);
+    var_v0 = fb_fx_spawn(&sp.u910, 0x8F0, arg2 & 0xFF, arg3);
     if (var_v0 != 0) {
         var_v0 = memcpy(var_v0 + 0x18, &sp.u20, 0x8F0);
     }
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/func_150CE660.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/fb_zoom_fx_spawn.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A0BD0;
-s32 func_15144CEC(s32 *, u8 *, s32 *, s32 *, f32 *, s32);
+s32 world_to_screen(s32 *, u8 *, s32 *, s32 *, f32 *, s32);
 
-s32 func_150CE710(u8 *arg0) {
+/* was func_150CE710 */
+s32 fb_zoom_fx_update(u8 *arg0) {
     struct {
         f32 u34;
         s32 u38;
@@ -91,8 +93,8 @@ s32 func_150CE710(u8 *arg0) {
         (*(u8 *)((u8 *)temp_v1 + 0x14)) = (u8) ((*(u8 *)((u8 *)temp_v1 + 0x14)) & 0xFFFE);
     } else {
         sp28 = temp_v1;
-        func_15143134(((u8 *)&D_800A0BC0), &sp.u40, temp_a3 + 0xD00);
-        if (func_15144CEC(&sp.u40, sp28 + 0x28, &sp.u3C, &sp.u38, &sp.u34, D_80082FA4) != 0) {
+        mtx_transform_point_or_origin(((u8 *)&D_800A0BC0), &sp.u40, temp_a3 + 0xD00);
+        if (world_to_screen(&sp.u40, sp28 + 0x28, &sp.u3C, &sp.u38, &sp.u34, D_80082FA4) != 0) {
             temp_f12 = (*(f32 *)((u8 *)sp28 + 0x28));
             temp_f0 = (*(f32 *)((u8 *)sp28 + 8)) * sp.u34;
             temp_f14 = (*(f32 *)((u8 *)sp28 + 0x2C));
@@ -132,7 +134,7 @@ block_22:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/func_150CE710.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/fb_zoom_fx_update.s")
 #endif
 #ifdef NON_MATCHING
 /* the zoom effect state at arg0 + 0x18 */
@@ -152,7 +154,8 @@ typedef struct {
 /* Nearest-neighbour zoom of the rectangle (x0, y0) .. (x1, y1) of the 16-bit frame buffer `fb` (rows of
  * D_800BE620 pixels) in place, when arg0[0x2C] bit 0 is set. Rows are done bottom-up and right to left so a source
  * pixel is read before it is overwritten; a row with the same source as the row below is a copy of it. */
-void func_150CE960(u8 *arg0, u16 *fb) {
+/* was func_150CE960 */
+void fb_zoom_fx_apply(u8 *arg0, u16 *fb) {
     Zoom150CE960 *z;
     u32 acc;
     u32 src;
@@ -195,10 +198,11 @@ void func_150CE960(u8 *arg0, u16 *fb) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/func_150CE960.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/fb_zoom_fx_apply.s")
 #endif
 
-void func_150CEBA4(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150CEBA4 */
+void fb_zoom_fx_handle_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x18;
     if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {

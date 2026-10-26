@@ -2,14 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1515F10C(s32);
+void light_remove(s32);
 #endif
 
-struct_eu_node *func_15156544(s32 arg0);
+struct_eu_node *head_icon_find(s32 arg0);
 
 
-s32 func_1518C900(s32);
-struct_eu_node *func_15155CF0(s32 arg0, s32 arg1)
+s32 shared_dl_acquire(s32);
+/* was func_15155CF0 */
+struct_eu_node *head_icon_create(s32 arg0, s32 arg1)
 {
   struct_eu_node *temp_v0;
   temp_v0 = node_alloc(0x50, 0, 0xA0, 1, (u8) arg1, 1U);
@@ -21,18 +22,19 @@ struct_eu_node *func_15155CF0(s32 arg0, s32 arg1)
   *((s8 *) (((u8 *) temp_v0) + 0x11)) = 0;
   *((s32 *) (((u8 *) temp_v0) + 0x14)) = 0;
   *((f32 *) (((u8 *) temp_v0) + 0x98)) = 0.0f;
-  func_1518C900(0xA6);
+  shared_dl_acquire(0xA6);
   return temp_v0;
 }
 
-struct_eu_node *func_15155CF0(s32, s32);
+struct_eu_node *head_icon_create(s32, s32);
 
-void func_15155D6C(s32 arg0, s32 arg1, f32 arg2) {
+/* was func_15155D6C */
+void head_icon_show_timed(s32 arg0, s32 arg1, f32 arg2) {
     struct_eu_node *var_v0;
 
-    var_v0 = func_15156544(arg0);
+    var_v0 = head_icon_find(arg0);
     if (var_v0 == NULL) {
-        var_v0 = func_15155CF0(arg0, 0xFF);
+        var_v0 = head_icon_create(arg0, 0xFF);
     }
     if (var_v0 != NULL) {
         (*(f32 *)((u8 *)var_v0 + 0x98)) = arg2;
@@ -47,9 +49,10 @@ void func_15155D6C(s32 arg0, s32 arg1, f32 arg2) {
 }
 
 #ifdef NON_MATCHING
-u8 *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+u8 *light_add_point(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_15155E0C(u8 *arg0) {
+/* was func_15155E0C */
+void head_icon_update(u8 *arg0) {
     struct127 *sp48;
     f32 sp38;
     f32 var_f2;
@@ -79,12 +82,12 @@ void func_15155E0C(u8 *arg0) {
         if (!(var_v0 & 0x80) && (var_v0 != 0x2A) && (var_v0 != 0x2B) && ((var_v0 != 0x42) || !(D_800D2E68 & 4)) && (var_v0 != 0x2C) && (temp_v1_2->unk197 == 0) && (var_v0 != 0) && (var_v0 != 0x1F) && (temp_t0->in_water == 0)) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 1U;
             (*(s16 *)((u8 *)arg0 + 0xE)) = 0x78;
-            func_10010F30(0x1EB, 0x7FFFU, 0x40U, 0, 0U);
+            sound_play_2d(0x1EB, 0x7FFFU, 0x40U, 0, 0U);
             return;
         }
         temp_a1 = (*(u8 **)((u8 *)arg0 + 0x14));
         if (temp_a1 != NULL) {
-            func_1515F10C((s32) temp_a1);
+            light_remove((s32) temp_a1);
             (*(u8 **)((u8 *)arg0 + 0x14)) = NULL;
             return;
         }
@@ -111,7 +114,7 @@ void func_15155E0C(u8 *arg0) {
             (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x12)) = (s16) (s32) temp_t0->z_position;
             return;
         }
-        var_v0_3 = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+        var_v0_3 = light_add_point(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
 block_38:
         (*(u8 **)((u8 *)arg0 + 0x14)) = var_v0_3;
         break;
@@ -121,7 +124,7 @@ block_38:
         }
         temp_a1_3 = (*(u8 **)((u8 *)arg0 + 0x14));
         if (temp_a1_3 != NULL) {
-            func_1515F10C((s32) temp_a1_3);
+            light_remove((s32) temp_a1_3);
             (*(u8 **)((u8 *)arg0 + 0x14)) = NULL;
             return;
         }
@@ -143,12 +146,12 @@ block_38:
             (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x14))) + 0x12)) = (s16) (s32) temp_t0->z_position;
             return;
         }
-        var_v0_3 = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+        var_v0_3 = light_add_point(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         goto block_38;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/func_15155E0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/head_icon_update.s")
 #endif
 extern Gfx **D_800E0810;
 typedef struct {
@@ -160,9 +163,10 @@ typedef struct {
     /* 0x18 */ Mtx mtx[2];
     /* 0x98 */ f32 yoff;
 } Unk1515626C;
-Gfx *func_15096D44(Gfx *arg0);
+Gfx *sprite_gfx_begin_alt(Gfx *arg0);
 
-Gfx *func_1515626C(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
+/* was func_1515626C */
+Gfx *head_icon_draw(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
     u8 mode;
     u8 obj;
     struct127 *p;
@@ -181,7 +185,7 @@ Gfx *func_1515626C(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
             h = 0.0f;
         }
         rot = D_800DBFF0[arg2].unk380;
-        gdl = func_15096D44(gdl);
+        gdl = sprite_gfx_begin_alt(gdl);
         mtx_build_rot_scale_trans(&arg1->mtx[D_800BE9C0], 0.0f, rot, 0.0f, 2.25f, 2.25f, 2.25f, p->x_position,
                       math_sin_u8(arg1->ang) * 15.0f + (p->y_position + 160.0f + h + arg1->yoff), p->z_position);
         gSPMatrix(gdl++, &arg1->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -192,26 +196,28 @@ Gfx *func_1515626C(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
     return gdl;
 }
 
-void func_1515F10C(s32);
-s32 func_1518CF74(s32);
-void func_15156468(struct102 *arg0)
+void light_remove(s32);
+s32 shared_dl_release(s32);
+/* was func_15156468 */
+void head_icon_free(struct102 *arg0)
 {
   u8 *p = (u8 *) arg0;
   s32 temp_a2;
   temp_a2 = *((s32 *) (p + 0x14));
   if (temp_a2 != 0)
   {
-    func_1515F10C(temp_a2);
+    light_remove(temp_a2);
   }
   if (((!arg0) && (!arg0)) && (!arg0)) // fakematch: dead test from the permuter
   {
   }
   node_retire(p);
-  func_1518CF74(0xA6);
+  shared_dl_release(0xA6);
 }
 
-void func_151564AC(void) {
-    u8 *temp_v0 = (u8 *)func_15156544(D_800C3E78);
+/* was func_151564AC */
+void head_icon_hide_current(void) {
+    u8 *temp_v0 = (u8 *)head_icon_find(D_800C3E78);
 
     if (temp_v0 != NULL) {
         if (temp_v0[0x11] == 2) {
@@ -222,15 +228,17 @@ void func_151564AC(void) {
     }
 }
 
-void func_15156500(void) {
-    u8 *temp_v0 = (u8 *)func_15156544(D_800C3E78);
+/* was func_15156500 */
+void head_icon_set_bobbing(void) {
+    u8 *temp_v0 = (u8 *)head_icon_find(D_800C3E78);
 
     if ((temp_v0 != NULL) && (temp_v0[0x11] == 3)) {
         temp_v0[0x11] = 1;
     }
 }
 
-struct_eu_node *func_15156544(s32 arg0) {
+/* was func_15156544 */
+struct_eu_node *head_icon_find(s32 arg0) {
     s32 i;
     struct_eu_node *node;
 
@@ -244,7 +252,8 @@ struct_eu_node *func_15156544(s32 arg0) {
     return NULL;
 }
 
-void func_15156598(u8 *arg0, struct127 **arg1, u8 arg2) {
+/* was func_15156598 */
+void head_icon_on_message(u8 *arg0, struct127 **arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 a;
         a = arg1[0] - D_800CC2D0;

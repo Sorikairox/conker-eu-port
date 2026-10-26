@@ -24,9 +24,9 @@
 \#^    t\.colour\[6\] = 0xFF;$#s/0xFF/0/
 \#^    t\.u24 = 1\.0f;$#s/1\.0f/2.0f/
 \#^    t\.u6C = 20\.0f;$#s/20/21/
-\#^    r->fx\[0\] = func_151307F0((s32) &t, 1, 0, 0, ((u8 \*) o)\[0xC\], ((u8 \*) o)\[1\]);$#s/\[0xC\]/[0xD]/
-\#^    r->fx\[0\] = func_151307F0#s/((u8 \*) o)\[1\]/((u8 *) o)[0]/
+\#^    r->fx\[0\] = particle_spawn_ex((s32) &t, 1, 0, 0, ((u8 \*) o)\[0xC\], ((u8 \*) o)\[1\]);$#s/\[0xC\]/[0xD]/
+\#^    r->fx\[0\] = particle_spawn_ex#s/((u8 \*) o)\[1\]/((u8 *) o)[0]/
 \#^    t\.colour\[4\] = 0xFF;$#s/0xFF/0/
 \#^    t\.colour\[5\] = 0;$#s/0;/1;/
-\#^    r->fx\[1\] = func_151307F0#s/fx\[1\]/fx[0]/
+\#^    r->fx\[1\] = particle_spawn_ex#s/fx\[1\]/fx[0]/
 \#^    return o;$#s/o;/r;/

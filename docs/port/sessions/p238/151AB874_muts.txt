@@ -1,4 +1,4 @@
-# P238 func_151AB874 (character_spawn_ring_fx) mutants: sed % setup names
+# P238 character_spawn_ring_fx (character_spawn_ring_fx) mutants: sed % setup names
 s/    rec.zero = 0;/    rec.zero = 2;/ % made
 s/    rec.one = 1;/    rec.one = 2;/ % made
 s/    rec.owner = owner;/    rec.owner = chr;/ % made

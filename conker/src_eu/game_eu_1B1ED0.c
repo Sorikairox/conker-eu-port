@@ -4,9 +4,10 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1502DE10(s32);
+s32 model_joint_mtx_count(s32);
 
-struct124 *func_151846C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* was func_151846C0 */
+struct124 *shadow_obj_box_extents(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     s32 sp3C;
     struct127 *sp1C;
     f32 temp_f2;
@@ -27,7 +28,7 @@ struct124 *func_151846C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
         return NULL;
     }
     sp1C = temp_t0;
-    var_v0 = func_1502DE10(sp3C);
+    var_v0 = model_joint_mtx_count(sp3C);
     if (var_v0 > 0) {
         var_a0 = 0;
         temp_t2 = var_v0 << 6;
@@ -67,7 +68,7 @@ struct124 *func_151846C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     return (struct124 *) var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151846C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_obj_box_extents.s")
 #endif
 #ifdef NON_MATCHING
 /* P122 */
@@ -101,11 +102,11 @@ extern u8 D_800DE478[];       /* shadow texture buffer (D_800DF4B8 = its 64-byte
 extern s32 D_800DF4B8;
 extern f32 D_800DE45C;        /* shadow alpha */
 s32 approx_dist3_int(s32, s32, s32);
-void func_15047680(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void mtxf_look_at_f(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
+void mtxf_mul(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 void vec3_diff(struct17 *, struct17 *, struct17 *);
-f32 func_150AD930(f32 *);
-void func_150A7E40(f32 mf[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
+f32 vec3f_magnitude(f32 *);
+void mtxf_transform_point(f32 mf[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
 void mtxf_scale(f32 mtx[4][4], s32, s32, s32);
 f32 func_150484A0(f32, f32);
 
@@ -123,7 +124,8 @@ f32 func_150484A0(f32, f32);
  * alpha D_800DE45C = 255 - (+0x1DD >> 1), at most 185, fades when +0xCC is below -10 (0 returned at <= 5).
  * Returns the light distance (1 for the default light), or 0 when no shadow is cast; D_800D3AA8 / D_800D3AAC are
  * cleared then (except for the early returns before the light is moved). */
-f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
+/* was func_151848D8 */
+f32 shadow_light_projection(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
     struct127 *rec;
     ShadowLight *light;
     f32 pos[3];
@@ -202,7 +204,7 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
     }
 
     vec3_diff((struct17 *) pos, (struct17 *) lit, (struct17 *) dir);
-    D_800DFB28 = func_150AD930(dir);
+    D_800DFB28 = vec3f_magnitude(dir);
     if (D_800DFB28 < 200.0f) {
         /* at least 200 units away along the same direction */
         k = 200.0f / D_800DFB28;
@@ -245,12 +247,12 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
     }
 
     view = (f32 (*)[4]) ((u8 *) &D_800DF528 + slot * 0x40);
-    func_15047680(view, lit[0], lit[1], lit[2], pos[0], pos[1], pos[2], 0.0f, 1.0f, 0.0f);
+    mtxf_look_at_f(view, lit[0], lit[1], lit[2], pos[0], pos[1], pos[2], 0.0f, 1.0f, 0.0f);
     max_y = 0.0f;
     max_x = 0.0f;
     max_z = -1000000.0f;
     for (i = 0; i < 8; i++) {
-        func_150A7E40(view, D_8008D798[i][0] * sx + pos[0], D_8008D798[i][1] * sy + pos[1],
+        mtxf_transform_point(view, D_8008D798[i][0] * sx + pos[0], D_8008D798[i][1] * sy + pos[1],
                       D_8008D798[i][2] * sz + pos[2], &px, &py, &pz);
         if (pz == 0.0f) {
             pz = 0.0001f;
@@ -297,7 +299,7 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
         fovy = func_150484A0(1.0f, D_800D3AA0[1]);
         guPerspectiveF(mf, &D_800DF500[slot], fovy * 57.295776f, func_150484A0(1.0f, D_800D3AA0[0]) * 57.295776f,
                        -D_800D3AAC, -D_800D3AA8, persp_scale);
-        func_150A7A48(view, mf, mf);
+        mtxf_mul(view, mf, mf);
         for (i = 0; i < 16; i++) {
             d = mf[i >> 2][i & 3];
             if (d < 0.0f) {
@@ -314,7 +316,7 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
         }
     } while (done == 0);
     mtxf_scale(scale_mf, 0x3F000000, 0x3F000000, 0x3F800000); /* f32 bits: scale (0.5, 0.5, 1) */
-    func_150A7A48(mf, scale_mf, mf);
+    mtxf_mul(mf, scale_mf, mf);
     guMtxF2L(mf, (Mtx *) (D_800DF728 + slot * 0x80 + D_800BE9C0 * 0x40));
     D_800DF4B8 = ((s32) D_800DE478 + 0x3F) & ~0x3F;
 
@@ -332,17 +334,18 @@ f32 func_151848D8(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_dist) {
     return best;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151848D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_light_projection.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 approx_dist3_int(s32, s32, s32);
 
 /* Aim offset from player `player` to object `obj`: d = distance (approx_dist3_int of the truncated delta between the
- * object position and the player's +0x2F8 vector). Beyond 2000 units, or when the offset func_151846C0 writes to
+ * object position and the player's +0x2F8 vector). Beyond 2000 units, or when the offset shadow_obj_box_extents writes to
  * (*x, *y, *z) (scaled by 1.3, D_800A7758) has a zero component, the clip heights D_800D3AA8 / D_800D3AAC are
  * cleared and 0 is returned; else d. */
-s32 func_15185360(s32 obj, s32 player, f32 *x, f32 *y, f32 *z) {
+/* was func_15185360 */
+s32 shadow_obj_light_distance(s32 obj, s32 player, f32 *x, f32 *y, f32 *z) {
     struct127 *o = &D_800CC2D0[obj];
     struct108 *p = &D_800DBFF0[player];
     s32 d;
@@ -354,7 +357,7 @@ s32 func_15185360(s32 obj, s32 player, f32 *x, f32 *y, f32 *z) {
         D_800D3AAC = D_800D3AA8;
         return 0;
     }
-    func_151846C0(obj, x, y, z);
+    shadow_obj_box_extents(obj, x, y, z);
     *x *= 1.3f;
     *y *= 1.3f;
     *z *= 1.3f;
@@ -366,7 +369,7 @@ s32 func_15185360(s32 obj, s32 player, f32 *x, f32 *y, f32 *z) {
     return d;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185360.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_obj_light_distance.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -381,7 +384,7 @@ extern s32 D_8008D788;
 extern s32 D_89810;
 Gfx *render_set_color_image(Gfx *);
 s32 render_set_scissor(s32, s16, s32, s32, s32, s32);
-Gfx *func_1502CFEC(Gfx *, s32, s32, s32, s32, s32 *, s32, s32);
+Gfx *obj_draw_model_dl(Gfx *, s32, s32, s32, s32, s32 *, s32, s32);
 s32 obj_get_player_alpha(struct127 *, s32);
 u8 *view_dl_begin(u8 *, s32);
 
@@ -391,11 +394,12 @@ u8 *view_dl_begin(u8 *, s32);
 // shadow_render_caster: starts the display list that renders object obj (light slot) into the shadow texture
 // D_800DF4B8: pipe sync, colour image = the texture (16-bit, 64 wide), the static setup DL D_8008D7E8,
 // perspNorm D_800DF500[slot], viewport D_8008D788, projection D_800DF728[slot][frame] and view D_89810, then the
-// object's model (func_1502CFEC with an all-zero colour and the object's shadow level). Shadow level 0 / 1
+// object's model (obj_draw_model_dl with an all-zero colour and the object's shadow level). Shadow level 0 / 1
 // (unk1C8, + 1 when unk127 == 0xFF) blurs the texture twice / once with a 64x64 TEX rectangle over itself.
 // Ends with geometry mode on (D9FFFFFF / 0x200001), then render_set_color_image / render_set_scissor / view_dl_begin
 // restore the frame state. Marks the object (unk123 = 1). Returns the display list end.
-u8 *func_15185514(u8 *dl, s32 obj, s32 slot, s32 arg3) {
+/* was func_15185514 */
+u8 *shadow_render_caster(u8 *dl, s32 obj, s32 slot, s32 arg3) {
     struct127 *o = &D_800CC2D0[obj];
     Gfx *g = (Gfx *) dl;
     s32 col[4];
@@ -418,7 +422,7 @@ u8 *func_15185514(u8 *dl, s32 obj, s32 slot, s32 arg3) {
     col[1] = 0;
     col[2] = 0;
     col[3] = level;
-    g = func_1502CFEC(g, obj, arg3, (s32) o->unk1D4, obj_get_player_alpha(o, arg3), col, 3, 1);
+    g = obj_draw_model_dl(g, obj, arg3, (s32) o->unk1D4, obj_get_player_alpha(o, arg3), col, 3, 1);
     SHADOW_GFX(g, 0xD7000002, 0xFFFFFFFF);                          /* gSPTexture on */
     SHADOW_GFX(g, 0xE7000000, 0);
     if (level < 2) {
@@ -450,10 +454,11 @@ u8 *func_15185514(u8 *dl, s32 obj, s32 slot, s32 arg3) {
     return dl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185514.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_render_caster.s")
 #endif
 
-u8 *func_151859C4(u8 *arg0, u8 *arg1, u8 *arg2) {
+/* was func_151859C4 */
+u8 *shadow_clip_isect_ymin(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 q;
     f32 temp_f16;
 
@@ -468,11 +473,13 @@ u8 *func_151859C4(u8 *arg0, u8 *arg1, u8 *arg2) {
     return arg2 + 0x14;
 }
 
-s32 func_15185AC4(f32 *arg0) {
+/* was func_15185AC4 */
+s32 shadow_clip_in_ymin(f32 *arg0) {
     return arg0[2] < arg0[1];
 }
 
-u8 *func_15185AEC(u8 *arg0, u8 *arg1, u8 *arg2) {
+/* was func_15185AEC */
+u8 *shadow_clip_isect_xmax(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 q;
 
     q = (*(f32 *)(arg0 + 8) + *(f32 *)(arg0 + 0)) / ((*(f32 *)(arg0 + 8) - *(f32 *)(arg1 + 8)) + (*(f32 *)(arg0 + 0) - *(f32 *)(arg1 + 0)));
@@ -485,11 +492,13 @@ u8 *func_15185AEC(u8 *arg0, u8 *arg1, u8 *arg2) {
     return arg2 + 0x14;
 }
 
-s32 func_15185BEC(f32 *arg0) {
+/* was func_15185BEC */
+s32 shadow_clip_in_xmax(f32 *arg0) {
     return arg0[0] < -arg0[2];
 }
 
-u8 *func_15185C18(u8 *arg0, u8 *arg1, u8 *arg2) {
+/* was func_15185C18 */
+u8 *shadow_clip_isect_ymax(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 q;
 
     q = (*(f32 *)(arg0 + 8) + *(f32 *)(arg0 + 4)) / ((*(f32 *)(arg0 + 8) - *(f32 *)(arg1 + 8)) + (*(f32 *)(arg0 + 4) - *(f32 *)(arg1 + 4)));
@@ -502,11 +511,13 @@ u8 *func_15185C18(u8 *arg0, u8 *arg1, u8 *arg2) {
     return arg2 + 0x14;
 }
 
-s32 func_15185D20(f32 *arg0) {
+/* was func_15185D20 */
+s32 shadow_clip_in_ymax(f32 *arg0) {
     return arg0[1] < -arg0[2];
 }
 
-u8 *func_15185D4C(u8 *arg0, u8 *arg1, u8 *arg2) {
+/* was func_15185D4C */
+u8 *shadow_clip_isect_xmin(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 q;
 
     q = (*(f32 *)(arg0 + 8) - *(f32 *)(arg0 + 0)) / ((*(f32 *)(arg1 + 0) - *(f32 *)(arg0 + 0)) - (*(f32 *)(arg1 + 8) - *(f32 *)(arg0 + 8)));
@@ -519,11 +530,13 @@ u8 *func_15185D4C(u8 *arg0, u8 *arg1, u8 *arg2) {
     return arg2 + 0x14;
 }
 
-s32 func_15185E44(f32 *arg0) {
+/* was func_15185E44 */
+s32 shadow_clip_in_xmin(f32 *arg0) {
     return arg0[2] < arg0[0];
 }
 
-u8 *func_15185E6C(u8 *arg0, u8 *arg1, u8 *arg2) {
+/* was func_15185E6C */
+u8 *shadow_clip_isect_far(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 q;
 
     q = (D_800D3AA8 - *(f32 *)(arg0 + 8)) / (*(f32 *)(arg1 + 8) - *(f32 *)(arg0 + 8));
@@ -536,11 +549,13 @@ u8 *func_15185E6C(u8 *arg0, u8 *arg1, u8 *arg2) {
     return arg2 + 0x14;
 }
 
-s32 func_15185F6C(f32 *arg0) {
+/* was func_15185F6C */
+s32 shadow_clip_in_far(f32 *arg0) {
     return D_800D3AA8 < arg0[2];
 }
 
-u8 *func_15185F98(u8 *arg0, u8 *arg1, u8 *arg2) {
+/* was func_15185F98 */
+u8 *shadow_clip_isect_near(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 q;
 
     q = (D_800D3AAC - *(f32 *)(arg0 + 8)) / (*(f32 *)(arg1 + 8) - *(f32 *)(arg0 + 8));
@@ -553,7 +568,8 @@ u8 *func_15185F98(u8 *arg0, u8 *arg1, u8 *arg2) {
     return arg2 + 0x14;
 }
 
-s32 func_15186098(f32 *arg0) {
+/* was func_15186098 */
+s32 shadow_clip_in_near(f32 *arg0) {
     return arg0[2] < D_800D3AAC;
 }
 
@@ -561,7 +577,8 @@ typedef struct {
     f32 x, y, z;
     s16 s, t, u;
 } ClipVtx_60C4;
-ClipVtx_60C4 *func_151860C4(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out) {
+/* was func_151860C4 */
+ClipVtx_60C4 *shadow_clip_isect_x0(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out) {
     f32 t;
 
     t = a->x / (a->x - b->x);
@@ -574,11 +591,13 @@ ClipVtx_60C4 *func_151860C4(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out)
     return out + 1;
 }
 
-s32 func_151861B4(f32 *arg0) {
+/* was func_151861B4 */
+s32 shadow_clip_in_x_neg(f32 *arg0) {
     return *arg0 <= 0.0f;
 }
 
-ClipVtx_60C4 *func_151861DC(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out) {
+/* was func_151861DC */
+ClipVtx_60C4 *shadow_clip_isect_y0(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out) {
     f32 t;
 
     t = a->y / (a->y - b->y);
@@ -591,21 +610,25 @@ ClipVtx_60C4 *func_151861DC(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out)
     return out + 1;
 }
 
-s32 func_151862CC(f32 *arg0) {
+/* was func_151862CC */
+s32 shadow_clip_in_y_neg(f32 *arg0) {
     return arg0[1] <= 0.0f;
 }
 
-s32 func_151862F4(f32 *arg0) {
+/* was func_151862F4 */
+s32 shadow_clip_in_x_pos(f32 *arg0) {
     return *arg0 > 0.0f;
 }
 
-s32 func_1518631C(f32 *arg0) {
+/* was func_1518631C */
+s32 shadow_clip_in_y_pos(f32 *arg0) {
     return arg0[1] > 0.0f;
 }
 
 extern ClipVtx_60C4 *(*D_8008D838[])(ClipVtx_60C4 *, ClipVtx_60C4 *, ClipVtx_60C4 *);
 extern s32 (*D_8008D860[])(ClipVtx_60C4 *);
-ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *out) {
+/* was func_15186344 */
+ClipVtx_60C4 *shadow_clip_polygon_plane(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *out) {
     ClipVtx_60C4 *prev = &in[n - 1];
     ClipVtx_60C4 *(*isect)(ClipVtx_60C4 *, ClipVtx_60C4 *, ClipVtx_60C4 *) = D_8008D838[plane];
     s32 (*inside)(ClipVtx_60C4 *) = D_8008D860[plane];
@@ -632,7 +655,7 @@ ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *ou
 #ifdef NON_MATCHING
 /* P130 */
 extern f32 D_800DE45C;  /* shadow alpha at the near depth */
-ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *out);
+ClipVtx_60C4 *shadow_clip_polygon_plane(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *out);
 
 // shadow_clip_triangle: clips one projected shadow polygon (n 20-byte shadow vertices at in: x, y, w, source
 // vertex pointer) and converts it into 16-byte Vtx at out. The polygon (with the source vertex's s16 x / y / z
@@ -642,7 +665,8 @@ ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *ou
 // without split all four pieces are the whole polygon (counts = 0, n, n, n, n). Each output vertex: position =
 // the source vertex, texture s = 1024 - 1020 x / w, t = 1020 y / w + 1024, colour 0, alpha fading from
 // D_800DE45C at the near depth D_800D3AAC to 0 at the far depth D_800D3AA8. Returns the number of vertices.
-s32 func_15186494(s32 inAddr, s32 n, s32 unused, s32 outAddr, s32 *counts, s32 split) {
+/* was func_15186494 */
+s32 shadow_clip_triangle(s32 inAddr, s32 n, s32 unused, s32 outAddr, s32 *counts, s32 split) {
     u8 *in = (u8 *) inAddr;
     u8 *out = (u8 *) outAddr;
     ClipVtx_60C4 buf[2][26];
@@ -665,7 +689,7 @@ s32 func_15186494(s32 inAddr, s32 n, s32 unused, s32 outAddr, s32 *counts, s32 s
     }
     for (plane = 0; plane != 6; plane++) {
         dst = buf[(plane & 1) ^ 1];
-        n = (u32) ((u8 *) func_15186344(buf[plane & 1], n, plane, dst) - (u8 *) dst) / 20;
+        n = (u32) ((u8 *) shadow_clip_polygon_plane(buf[plane & 1], n, plane, dst) - (u8 *) dst) / 20;
     }
     half[0] = 0;
     counts[0] = 0;
@@ -673,15 +697,15 @@ s32 func_15186494(s32 inAddr, s32 n, s32 unused, s32 outAddr, s32 *counts, s32 s
         src = buf[plane & 1];
         dst = buf[(plane & 1) ^ 1];
         for (i = 0; i < 2; i++) {
-            half[i + 1] = (u32) ((u8 *) func_15186344(src, n, i + 6, dst + half[i]) - (u8 *) dst) / 20;
+            half[i + 1] = (u32) ((u8 *) shadow_clip_polygon_plane(src, n, i + 6, dst + half[i]) - (u8 *) dst) / 20;
         }
         plane++;
         src = buf[plane & 1];
         dst = buf[(plane & 1) ^ 1];
         for (i = 0; i < 4; i += 2) {
-            counts[i + 1] = (u32) ((u8 *) func_15186344(src + half[0], half[1] - half[0], (i >> 1) + 8,
+            counts[i + 1] = (u32) ((u8 *) shadow_clip_polygon_plane(src + half[0], half[1] - half[0], (i >> 1) + 8,
                                                         dst + counts[i]) - (u8 *) dst) / 20;
-            counts[i + 2] = (u32) ((u8 *) func_15186344(src + half[1], half[2] - half[1], ((i + 1) >> 1) + 8,
+            counts[i + 2] = (u32) ((u8 *) shadow_clip_polygon_plane(src + half[1], half[2] - half[1], ((i + 1) >> 1) + 8,
                                                         dst + counts[i + 1]) - (u8 *) dst) / 20;
         }
         n = counts[4];
@@ -720,13 +744,13 @@ s32 func_15186494(s32 inAddr, s32 n, s32 unused, s32 outAddr, s32 *counts, s32 s
     return n;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186494.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_clip_triangle.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P130 */
 extern s8 D_800DE471;   /* != 0: only level triangles whose D_800D3668 flag is 1 cast shadows */
-extern s32 D_800D3AB0;  /* triangle table for func_150A6070 / func_150A6324 */
+extern s32 D_800D3AB0;  /* triangle table for shadow_level_triangles / shadow_object_triangles */
 extern s32 D_800D3AB4;  /* end of the triangle bit mask */
 extern s32 D_800DC26C;  /* level triangle table: 3 vertex pointers per triangle */
 extern s32 D_800DF518;  /* shadow box x min, x max, z min, z max */
@@ -735,14 +759,15 @@ extern s32 D_800DF520;
 extern s32 D_800DF524;
 void collision_select_area(s32);
 s32 zone_tree_collect_near(s32, s32, s32, u8 **);
-s32 func_150A6070(u32 *, s32, f32 *, s32);
+s32 shadow_level_triangles(u32 *, s32, f32 *, s32);
 
 // shadow_level_vertices: collects the level triangles under a shadow (box x / z +- r) and projects them.
 // zone_tree_collect_near returns up to 16 level cells around (x, z); each cell holds at +0xE a 0-terminated triangle list
 // (byte < 0x80: index += byte; else ((byte << 8) | next byte) & 0x7FFF is the index). The triangles (< 0x1760,
-// and with flag 1 in D_800D3668 when D_800DE471) become bits of a stack mask; func_150A6070 projects them with the
+// and with flag 1 in D_800D3668 when D_800DE471) become bits of a stack mask; shadow_level_triangles projects them with the
 // light matrix (4x4 f32) into the 20-byte shadow vertices at buf (up to end). Returns the number of vertices written.
-s32 func_15186A9C(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
+/* was func_15186A9C */
+s32 shadow_level_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
     u8 *cells[16];
     u32 mask[0x2EC / 4];
     s32 n;
@@ -787,25 +812,25 @@ s32 func_15186A9C(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
     D_800DF51C = x + r;
     D_800DF520 = z - r;
     D_800DF524 = z + r;
-    return (func_150A6070(mask, buf, (f32 *) light, end) - buf) / 20;
+    return (shadow_level_triangles(mask, buf, (f32 *) light, end) - buf) / 20;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186A9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_level_vertices.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P38: shadow display list (m2c draft from P32, fixed by hand). UNVERIFIED: the strip emitter (TRI4 / TRI2 / TRI1 split, 16-vertex flushes); see P38.md */
 s32 allocate_memory(s32, s32, s32, s32);
-void func_10004074();
-s32 func_1503DD8C(struct127 *, u8, s32, s32);
-u8 func_15084E34(struct127 *, s32 *);
+void heap_free();
+s32 model_make_ready(struct127 *, u8, s32, s32);
+u8 obj_current_part_model_idx(struct127 *, s32 *);
 u8 *view_dl_begin(u8 *, s32);
-f32 func_151848D8(s32, s32, f32, f32, f32, f32);
-s32 func_15185360(s32, s32, f32 *, f32 *, f32 *);
-u8 *func_15185514(u8 *, s32, s32, s32);
-s32 func_15186494(s32, s32, s32, s32, s32 *, s32);
-s32 func_15186A9C(s32, s32, s32, s32, u8 *, s32);
-u32 func_15187954(s32, s32, s32, s32, u8 *, s32, s32);
+f32 shadow_light_projection(s32, s32, f32, f32, f32, f32);
+s32 shadow_obj_light_distance(s32, s32, f32 *, f32 *, f32 *);
+u8 *shadow_render_caster(u8 *, s32, s32, s32);
+s32 shadow_clip_triangle(s32, s32, s32, s32, s32 *, s32);
+s32 shadow_level_vertices(s32, s32, s32, s32, u8 *, s32);
+u32 shadow_object_vertices(s32, s32, s32, s32, u8 *, s32, s32);
 s32 memcpy(u8 *, s32, s32);
 extern s32 D_8008D780;
 extern s32 D_8008D7B0;
@@ -823,7 +848,8 @@ extern u8 D_800DF510;
 extern s8 D_800DF511;
 extern s32 D_800DF528;
 
-u8 *func_15186D04(u8 *arg0, s32 arg1) {
+/* was func_15186D04 */
+u8 *shadow_draw_all(u8 *arg0, s32 arg1) {
     s32 sp134;
     u32 sp130;
     s32 sp120;
@@ -933,7 +959,7 @@ u8 *func_15186D04(u8 *arg0, s32 arg1) {
     temp_v0_2 = allocate_memory(D_8008D780 * 0x14, 2, 1, 1);
     sp134 = temp_v0_2;
     if (temp_v0_2 == 0) {
-        func_10004074(var_s6);
+        heap_free(var_s6);
         goto block_88;
     }
     temp_s1 = (u8 *) &D_800DF4C0 + arg1 * 0x10;
@@ -950,9 +976,9 @@ u8 *func_15186D04(u8 *arg0, s32 arg1) {
             var_v0_2 = spF8 + 1;
         } else {
             if (sp74->unk2C8 != 0) {
-                temp_v0_4 = func_15084E34(sp74, &spE0);
+                temp_v0_4 = obj_current_part_model_idx(sp74, &spE0);
                 var_s1 = temp_v0_4;
-                func_1503DD8C(sp74, temp_v0_4, spE0, 0);
+                model_make_ready(sp74, temp_v0_4, spE0, 0);
             } else {
                 var_s1 = sp74->id;
                 spE0 = 0;
@@ -962,25 +988,25 @@ u8 *func_15186D04(u8 *arg0, s32 arg1) {
 
             } else {
                 var_v0_2 = spF8 + 1;
-                if (func_15185360(spF8, arg1, &spD8, &spD4, &spD0) == 0) {
+                if (shadow_obj_light_distance(spF8, arg1, &spD8, &spD4, &spD0) == 0) {
 
                 } else {
                     var_f20 = 0.0f;
                     sp11C = 0;
                     if ((D_800DE468 != 0) && (spF4 < 8) && (var_s7 < (u32) D_8008D780)) {
 loop_42:
-                        temp_f0 = func_151848D8(spF8, spF4, spD8, spD4, spD0, var_f20);
+                        temp_f0 = shadow_light_projection(spF8, spF4, spD8, spD4, spD0, var_f20);
                         temp_cond = temp_f0 == 0.0f;
                         var_f20 = temp_f0;
                         if (!temp_cond) {
                             temp_s1_2 = (u8 *) &D_800DF528 + (spF4 << 6);
-                            temp_v0_5 = func_15187954((s32) sp74->x_position, (s32) sp74->z_position, 0xE6, sp134, temp_s1_2, ((D_8008D780 * 0x14) + sp134) - 0x28, func_15186A9C((s32) sp74->x_position, (s32) sp74->z_position, 0xE6, sp134, temp_s1_2, ((D_8008D780 * 0x14) + sp134) - 0x28));
+                            temp_v0_5 = shadow_object_vertices((s32) sp74->x_position, (s32) sp74->z_position, 0xE6, sp134, temp_s1_2, ((D_8008D780 * 0x14) + sp134) - 0x28, shadow_level_vertices((s32) sp74->x_position, (s32) sp74->z_position, 0xE6, sp134, temp_s1_2, ((D_8008D780 * 0x14) + sp134) - 0x28));
                             sp130 = temp_v0_5;
                             if (temp_v0_5 != 0) {
                                 sp6C = (u8 *) &D_800DF4C0 + arg1 * 0x10;
                                 var_fp = 0;
                                 var_s1_2 = 0;
-                                temp_v0_6 = func_15185514(var_s0, spF8, spF4, arg1);
+                                temp_v0_6 = shadow_render_caster(var_s0, spF8, spF4, arg1);
                                 temp_s0 = temp_v0_6 + 8;
                                 if ((sp74->unk127 != 0xFF) && ((s32) sp74->unk1C8 < 2)) {
                                     sp120 = 1;
@@ -1026,7 +1052,7 @@ loop_42:
                                 if ((sp130 != 0) && (var_s7 < (u32) D_8008D780)) {
 loop_54:
                                     if ((var_fp % 3) == 2) {
-                                        func_15186494(((var_fp * 0x14) + sp134) - 0x28, 3, 0x1A, var_s6, spFC, sp120);
+                                        shadow_clip_triangle(((var_fp * 0x14) + sp134) - 0x28, 3, 0x1A, var_s6, spFC, sp120);
                                         var_t4 = spFC;
                                         do {
                                             temp_t6_2 = (*(s32 *)((u8 *)var_t4 + 4));
@@ -1130,7 +1156,7 @@ loop_54:
     }
     D_800DF510 = 0;
     D_800DF511 = 0;
-    func_10004074(sp134);
+    heap_free(sp134);
     if (D_800BEFC4 < (((s32) var_s0 - (s32) D_800BEDE8[D_800BE9C0]) >> 3)) {
         var_v0_3 = 1;
     } else {
@@ -1143,7 +1169,7 @@ block_88:
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186D04.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_draw_all.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_800DE44C;
@@ -1156,7 +1182,8 @@ extern f32 D_800DE46C;
 extern s8 D_800DE470;
 extern s8 D_800DE471;
 
-void func_15187820(s32 arg0) {
+/* was func_15187820 */
+void shadow_settings_for_level(s32 arg0) {
     D_800DE44C = 0x258;
     D_800DE450 = 0xB4;
     D_800DE454 = 0x5A;
@@ -1194,28 +1221,29 @@ void func_15187820(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187820.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_settings_for_level.s")
 #endif
 #ifdef NON_MATCHING
 /* P130 */
 extern s32 D_800D3AB0;
 extern s32 D_800DC26C;
-extern s32 D_800DF514;  /* number of world object ids for func_150A6324 */
+extern s32 D_800DF514;  /* number of world object ids for shadow_object_triangles */
 extern s32 D_800DF518;
 extern s32 D_800DF51C;
 extern s32 D_800DF520;
 extern s32 D_800DF524;
 extern s16 D_800D3C00[]; /* visible world object ids */
 void collision_select_area(s32);
-s32 func_150A49D0(s32 count, s32 *idList, s32 force);
-s32 func_150A6324(u16 *, s32, f32 *, s32);
+s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
+s32 shadow_object_triangles(u16 *, s32, f32 *, s32);
 
 // shadow_object_vertices: adds the world objects' triangles under a shadow (box x / z +- r) after the count level
 // shadow vertices at buf. Takes the D_800DC320 world objects (0xA0-byte records at D_800DBEF4) that are shown
 // (+0x6E == 0, no 0x60 flag at +0x4F) and whose x / z (s16 +0x10 / +0x14) +- their size (max of u16 +0x50, +0x52)
-// meet the box, refreshes their triangles (func_150A49D0) and projects them (func_150A6324).
+// meet the box, refreshes their triangles (world_objects_transform_mesh) and projects them (shadow_object_triangles).
 // Returns count plus the number of vertices added.
-u32 func_15187954(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32 count) {
+/* was func_15187954 */
+u32 shadow_object_vertices(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32 count) {
     u8 *obj;
     s32 size;
     s32 i, n;
@@ -1246,21 +1274,22 @@ u32 func_15187954(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32 count) {
         D_800D3C00[n++] = i;
     }
     if (n != 0) {
-        func_150A49D0(n, (s32 *) D_800D3C00, 0);
+        world_objects_transform_mesh(n, (s32 *) D_800D3C00, 0);
         D_800D3AB0 = D_800DC26C;
         D_800DF514 = n;
-        count += (func_150A6324((u16 *) D_800D3C00, buf, (f32 *) light, end) - buf) / 20;
+        count += (shadow_object_triangles((u16 *) D_800D3C00, buf, (f32 *) light, end) - buf) / 20;
     }
     return count;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187954.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shadow_object_vertices.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
 
-void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7) {
+/* was func_15187B50 */
+void shard_ring_spawn(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7) {
     f32 var_f10;
     f32 var_f16;
     f32 var_f18;
@@ -1372,10 +1401,11 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187B50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shard_ring_spawn.s")
 #endif
 #ifdef NON_MATCHING
-void func_15187EE8(struct102 *arg0) {
+/* was func_15187EE8 */
+void shard_ring_tick(struct102 *arg0) {
     f32 temp_f0;
     s16 temp_v0;
     s16 temp_v0_2;
@@ -1388,7 +1418,7 @@ void func_15187EE8(struct102 *arg0) {
 
     temp_v0 = (*(s16 *)((u8 *)arg0 + 0xA8));
     if (temp_v0 < 0) {
-        func_10004074((*(s32 *)((u8 *)arg0 + 0xA4)), arg0);
+        heap_free((*(s32 *)((u8 *)arg0 + 0xA4)), arg0);
         node_destroy(arg0);
         return;
     }
@@ -1422,23 +1452,24 @@ void func_15187EE8(struct102 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187EE8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shard_ring_tick.s")
 #endif
 #ifdef NON_MATCHING
 void mtxf_translate(u8 *mtx, s32 x, s32 y, s32 z);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
-void func_151882DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3);
+void shard_quad_rotation_matrix(u8 *arg0, f32 arg1, f32 arg2, f32 arg3);
 void guMtxF2L2(float mf[4][4], Mtx *m);
 extern u8 D_8008D8D8[];         /* the 4-vertex quad */
 
-// shard_ring_draw: draw handler (table D_8008B988) of the twelve-quad ring built by func_15187B50 / stepped by
-// func_15187EE8; nothing (gfx returned unchanged) when obj + 0xA8 < 0. Loads the object matrix (translation obj
+// shard_ring_draw: draw handler (table D_8008B988) of the twelve-quad ring built by shard_ring_spawn / stepped by
+// shard_ring_tick; nothing (gfx returned unchanged) when obj + 0xA8 < 0. Loads the object matrix (translation obj
 // + 0x90, this frame's Mtx at obj + 0x10 + D_800BE9C0 * 64), then for each 0xA0-byte quad record (obj + 0xA4):
 // translation (rec + 0x90, 0, 0) scaled by obj + 0xA0 (x) / obj + 0x9C (y, z) times its rotation (rec + 0x80..0x88;
-// mtxf_rotate_xyz_deg, or func_151882DC when rec + 0x98 is set) into its own frame Mtx (rec + D_800BE9C0 * 64), prim alpha
+// mtxf_rotate_xyz_deg, or shard_quad_rotation_matrix when rec + 0x98 is set) into its own frame Mtx (rec + D_800BE9C0 * 64), prim alpha
 // (life - age) * 255 / life (rec + 0x96 / + 0x94), and the quad D_8008D8D8 as two triangles. arg2 is unused.
-Gfx *func_15188008(Gfx *gfx, u8 *obj, s32 arg2) {
+/* was func_15188008 */
+Gfx *shard_ring_draw(Gfx *gfx, u8 *obj, s32 arg2) {
     f32 mtx[4][4];
     f32 rot[4][4];
     u8 *rec;
@@ -1463,9 +1494,9 @@ Gfx *func_15188008(Gfx *gfx, u8 *obj, s32 arg2) {
         if (rec[0x98] == 0) {
             mtxf_rotate_xyz_deg(rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
         } else {
-            func_151882DC((u8 *) rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
+            shard_quad_rotation_matrix((u8 *) rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
         }
-        func_150A7A48(mtx, rot, mtx);
+        mtxf_mul(mtx, rot, mtx);
         guMtxF2L(mtx, (Mtx *) (*(u8 **) (obj + 0xA4) + i * 0xA0 + D_800BE9C0 * 64));
         rec = *(u8 **) (obj + 0xA4) + i * 0xA0;
         /* gDPSetPrimColor: white, alpha by remaining life */
@@ -1494,14 +1525,15 @@ Gfx *func_15188008(Gfx *gfx, u8 *obj, s32 arg2) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15188008.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shard_ring_draw.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_151F05C0(u8 *);
+s32 game_gu_mtx_ident_f(u8 *);
 extern f32 D_8008D918;
 
-void func_151882DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
+/* was func_151882DC */
+void shard_quad_rotation_matrix(u8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     f32 sp44;
     f32 sp3C;
     f32 sp34;
@@ -1522,7 +1554,7 @@ void func_151882DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     sp34 = cosf(arg2);
     sp3C = sinf(arg3);
     sp30 = cosf(arg3);
-    func_151F05C0(arg0);
+    game_gu_mtx_ident_f(arg0);
     temp_f0 = sp44 * temp_f22;
     (*(f32 *)((u8 *)arg0 + 0x18)) = sp44;
     (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((sp34 * sp30) - (temp_f0 * sp3C));
@@ -1536,5 +1568,5 @@ void func_151882DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     (*(f32 *)((u8 *)arg0 + 0x24)) = (f32) ((temp_f22 * sp3C) - (temp_f0_2 * sp30));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151882DC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/shard_quad_rotation_matrix.s")
 #endif

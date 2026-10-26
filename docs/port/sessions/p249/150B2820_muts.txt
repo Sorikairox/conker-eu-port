@@ -1,4 +1,4 @@
-# P249 func_150B2820 (view_progress_setup) mutants: sed % setup names
+# P249 view_progress_setup (view_progress_setup) mutants: sed % setup names
 s/event_dispatch(0, 0x2007, 0xB7) | 0x2000, 0xBC)/event_dispatch(0, 0x2007, 0xB7) | 0x4000, 0xBC)/ % both
 s/(0, 0x2007, 0xB7)/(0, 0x2007, 0xB6)/ % both
 s/b = event_dispatch(0, 0x2000, 0xBB);/b = event_dispatch(0, 0x2000, 0xBA);/ % both

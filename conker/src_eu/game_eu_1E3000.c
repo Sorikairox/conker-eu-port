@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-struct260 *func_151B57F0(s16 arg0, u8 arg1, s32 arg2) {
+/* was func_151B57F0 */
+struct260 *electric_bolt_spawn(s16 arg0, u8 arg1, s32 arg2) {
     extern f32 D_800AA7F8;
     struct260 *temp_v0;
     struct {
@@ -24,8 +25,8 @@ struct260 *func_151B57F0(s16 arg0, u8 arg1, s32 arg2) {
 
     tmp.unk584 = 0x17;
     tmp.unk58C = 0x16;
-    tmp.unk580 = func_15083E90(0x17);
-    tmp.unk588 = func_15083E90(tmp.unk58C);
+    tmp.unk580 = obj_find_by_setup_id(0x17);
+    tmp.unk588 = obj_find_by_setup_id(tmp.unk58C);
     tmp.unk598 = 250.0f;
     tmp.unk590 = 18.0f;
     tmp.unk594 = 0.0f;
@@ -39,13 +40,13 @@ struct260 *func_151B57F0(s16 arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, u8 *);
-s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, u8 *);
+s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, u8 *);
+s32 gfx_prim_color_cached(s32, s32, s32, s32, s32, s32, s32, u8 *);
 s32 gfx_set_combine_mode(s32, s32, u8 *);
-s32 func_15142FBC(s32, s32, s32, u8 *);
-f32 func_15143E64(f32 *);
+s32 gfx_other_mode_cached(s32, s32, s32, u8 *);
+f32 vec3_length(f32 *);
 f32 sinf(f32);
 extern f32 D_800AA7E0[3]; /* bolt end offset on object A (-3, 11, -4) */
 extern f32 D_800AA7EC[3]; /* bolt end offset on object B (0, -5, -7) */
@@ -69,14 +70,15 @@ extern s32 D_800A4EA8[];
         *(s16 *) ((v) + 0xA) = (t); \
     } while (0)
 
-// electric_bolt_draw: D_8008A670 draw handler (kind 1) of the bolt record of func_151B57F0 (state at +0x28: object
+// electric_bolt_draw: D_8008A670 draw handler (kind 1) of the bolt record of electric_bolt_spawn (state at +0x28: object
 // A +0x580 / id +0x584, object B +0x588 / id +0x58C, half width +0x590, min / max length +0x594 / +0x598, 1 / max
 // +0x59C, wobble +0x5A0). When either object is gone or reused, the record is marked dead (+0xE = -1). Otherwise,
 // when both have matrices (+0x1D4), the ends are D_800AA7E0 / D_800AA7EC transformed by matrix D_8008FF20 /
-// D_8008FF24 (func_15143134). The bolt is a camera-facing strip of 10 quads from A to B (vertex buffer D_800BE9C0 of
+// D_8008FF24 (mtx_transform_point_or_origin). The bolt is a camera-facing strip of 10 quads from A to B (vertex buffer D_800BE9C0 of
 // the record, 0x2C0 bytes each) whose width wobbles with 1 - sin(phase) * amplitude, the phase stepping pi / 10 and
 // t by 204.8 per quad; the amplitude is 0 below the min length, ramps up to the wobble at the max length.
-s32 func_151B58D8(s32 gfx, u8 *obj, s16 player) {
+/* was func_151B58D8 */
+s32 electric_bolt_draw(s32 gfx, u8 *obj, s16 player) {
     u8 *st;
     u8 *v;
     f32 *cam;
@@ -100,21 +102,21 @@ s32 func_151B58D8(s32 gfx, u8 *obj, s16 player) {
         dead = 1;
     }
     if (!dead && *(u8 **) (*(u8 **) (st + 0x580) + 0x1D4) != NULL && *(u8 **) (b + 0x1D4) != NULL) {
-        func_15143134(D_800AA7E0, pa, *(u8 **) (*(u8 **) (st + 0x580) + 0x1D4) + D_8008FF20 * 0x40);
-        func_15143134(D_800AA7EC, pb, *(u8 **) (*(u8 **) (st + 0x588) + 0x1D4) + D_8008FF24 * 0x40);
+        mtx_transform_point_or_origin(D_800AA7E0, pa, *(u8 **) (*(u8 **) (st + 0x580) + 0x1D4) + D_8008FF20 * 0x40);
+        mtx_transform_point_or_origin(D_800AA7EC, pb, *(u8 **) (*(u8 **) (st + 0x588) + 0x1D4) + D_8008FF24 * 0x40);
         v = st + D_800BE9C0 * 0x2C0;
         cam = (f32 *) ((u8 *) D_800DBFF0 + player * 0x9A0 + 0x2F8);
         flag = 1;
-        gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-        gfx = func_15142E24(gfx, &D_80091318, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
-        gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-        gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+        gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x60600);
+        gfx = gfx_load_texture_cached(gfx, &D_80091318, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
+        gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+        gfx = gfx_prim_color_cached(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gfx = gfx_set_combine_mode(gfx, 0x2E, &flag);
-        gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[5 * 2 + 1] | D_800A4EA8[5 * 2], &flag);
+        gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[5 * 2 + 1] | D_800A4EA8[5 * 2], &flag);
         dir[0] = pb[0] - pa[0];
         dir[1] = pb[1] - pa[1];
         dir[2] = pb[2] - pa[2];
-        dist = func_15143E64(dir);
+        dist = vec3_length(dir);
         mx = dir[0] * 0.5f + pa[0] - cam[0];
         my = dir[1] * 0.5f + pa[1] - cam[1];
         mz = dir[2] * 0.5f + pa[2] - cam[2];
@@ -181,10 +183,11 @@ s32 func_151B58D8(s32 gfx, u8 *obj, s16 player) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3000/func_151B58D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3000/electric_bolt_draw.s")
 #endif
 
-void func_151B604C(u8 *arg0, u8 *arg1, u8 arg2)
+/* was func_151B604C */
+void electric_bolt_handle_message(u8 *arg0, u8 *arg1, u8 arg2)
 {
   u8 *v = arg0 + 0x28;
   if (arg2 == 0x2D)

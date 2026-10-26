@@ -3,7 +3,7 @@
 #include "variables.h"
 
 extern OSThread *__osActiveQueue;
-void func_10007D28(void); // __osDispatchThread
+void os_dispatch_thread(void); // __osDispatchThread
 void __osDequeueThread(OSThread **, OSThread *);
 
 u8 __osContAddressCrc(u16 addr) {
@@ -77,7 +77,7 @@ void osDestroyThread(OSThread *t) {
         }
     }
     if (t == __osRunningThread) {
-        func_10007D28();
+        os_dispatch_thread();
     }
     __osRestoreInt(saveMask);
 }

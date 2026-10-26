@@ -12,21 +12,21 @@ typedef struct {
 
 
 #ifdef NON_MATCHING
-s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
-s32 func_150A44A4(f32, f32, s32, u8 *, f32 *);
+s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *);
+s32 floor_tri_height(f32, f32, s32, u8 *, f32 *);
 void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 void camera_update_state_flags(struct108 *); /* P68: void, v0 is undefined in the asm */
 s32 camera_target_deep_in_water(struct108 *arg0);
 void camera_calc_pitch(struct108 *arg0);
 void camera_snap_to_object(struct108 *arg0, struct127 *arg1);
-void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 
 /* P43: camera eye base / floor height of the followed object (+0x3D0). Floor (+0x35C, triangle +0x648) from
- * func_150A44A4 or the collision query collision_find_floor_no_fallback (also when the floor is lost: +0x84 |= 0x800000, 10000.0), water
+ * floor_tri_height or the collision query collision_find_floor_no_fallback (also when the floor is lost: +0x84 |= 0x800000, 10000.0), water
  * level +0x360 (from +0x364), ceiling check camera_snap_to_object; then +0x354 (eye base) = floor, raised to +0x360 when the
  * object is between water and eye, to the object's y (+0x180) when that differs by more than +0x928 (mode +0x92C),
  * or to +0x2A8; +0x348 = eye height (+0x730 with +0x6C8, else +0x34C); +0x360 + 50 in water (+0xAD == 1) unless
- * camera_target_deep_in_water (flag 0x4000); flag 0x40 of +0x5F0: swim bob (+0x8C4 / +0x8CC eased by func_150498A0, +0x8D0
+ * camera_target_deep_in_water (flag 0x4000); flag 0x40 of +0x5F0: swim bob (+0x8C4 / +0x8CC eased by math_spring_approach, +0x8D0
  * direction, +0x848 latch, flag 0x10000000); eye y (+0x2FC) >= floor + 40 outside mode 0x100.
  * The asm's early test `(+0x84 == 0) & 0x40` is always false; the mode-0x80 branch after the 0x80 test is dead. */
 #define A390_F(o) (*(f32 *)(p + (o)))
@@ -52,7 +52,7 @@ void camera_update_eye_base(struct108 *arg0) {
         size = *(s16 *)(t + 0x114);
     } else {
         swim = 0;
-        func_1507C7C0((struct127 *)obj, &h0, &h1, &h2);
+        obj_collision_cylinder((struct127 *)obj, &h0, &h1, &h2);
         size = h0;
     }
     flags = *(s32 *)(p + 0x84);
@@ -65,7 +65,7 @@ void camera_update_eye_base(struct108 *arg0) {
     floorTri = (s32 *)(p + 0x648);
     floorY = (f32 *)(p + 0x35C);
     if (p[0x23C] != 0 || (flags & 0x400000) || (*(s32 *)(p + 0x5F0) & 0x40)
-        || func_150A44A4(A390_F(0x2F8), A390_F(0x300), *(s32 *)(p + 0x644), (u8 *)floorTri, floorY) == 0) {
+        || floor_tri_height(A390_F(0x2F8), A390_F(0x300), *(s32 *)(p + 0x644), (u8 *)floorTri, floorY) == 0) {
         collision_find_floor_no_fallback((s32)(p + 0x644), (s32)floorTri, (s32)floorY, (s32)(p + 0x360), (s32)(p + 0x640), 0,
                       A390_F(0x2F8), A390_F(0x35C), A390_F(0x300), A390_F(0x308), 0, 0, 0xC61C4000,
                       *(s32 *)(p + 0x2FC), 1);
@@ -194,7 +194,7 @@ void camera_update_eye_base(struct108 *arg0) {
         } else {
             A390_F(0x8C4) = (300.0f < g) ? 300.0f : g;
         }
-        func_150498A0((f32 *)(p + 0x8CC), A390_F(0x8C4), (f32 *)(p + 0x8C8), 1.0f, 1.5f, A390_F(0x7B4));
+        math_spring_approach((f32 *)(p + 0x8CC), A390_F(0x8C4), (f32 *)(p + 0x8C8), 1.0f, 1.5f, A390_F(0x7B4));
         f = A390_F(0x2A8) + A390_F(0x8CC) + size * 0.85f;
         A390_F(0x354) = f;
         lim = *(f32 *)(*(u8 **)(p + 0x3D0) + 0x180) + A390_F(0x348);
@@ -351,9 +351,9 @@ void freecam_auto_step(u8 *arg0) {
             speed = 6.0f * 1.2f;
             rate = 8.0f * 1.2f;
         }
-        func_150498A0((f32 *)(p + 0x2F8), sp[0], (f32 *)(p + 0x3FC), speed, rate, *(f32 *)(p + 0x7B4));
-        func_150498A0((f32 *)(p + 0x2FC), sp[1], (f32 *)(p + 0x400), speed, rate, *(f32 *)(p + 0x7B4));
-        func_150498A0((f32 *)(p + 0x300), sp[2], (f32 *)(p + 0x404), speed, rate, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x2F8), sp[0], (f32 *)(p + 0x3FC), speed, rate, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x2FC), sp[1], (f32 *)(p + 0x400), speed, rate, *(f32 *)(p + 0x7B4));
+        math_spring_approach((f32 *)(p + 0x300), sp[2], (f32 *)(p + 0x404), speed, rate, *(f32 *)(p + 0x7B4));
         *(s16 *)(p + 0x5F8) = 0;
     } else {
         *(s16 *)(p + 0x5F8) = 1;
@@ -631,9 +631,9 @@ s32 freecam_turn(u8 *cam, f32 *turn, f32 *unused) {
 #ifdef NON_MATCHING
 /* Camera eye collision. Unless collision is off (+0x84 flags 0x40000 / 0x80 / 0x200, the followed object
  * +0x3D4 has +0x95 set, or mode +0x2C == 0x40: then +0x3E8 = 1), the eye's collision ellipsoid size
- * (+0x94C width, +0x950 height) is picked from the situation and eased into +0x95C / +0x960 (func_150498A0,
+ * (+0x94C width, +0x950 height) is picked from the situation and eased into +0x95C / +0x960 (math_spring_approach,
  * speeds +0x954 / +0x958; set at once while +0x23C is set). A probe object (struct127, type 0x2D, camera
- * = this one) at the eye (+0x2F8; y raised by +0x18C with flag 0x800 of +0x5F0) is moved by func_15044670
+ * = this one) at the eye (+0x2F8; y raised by +0x18C with flag 0x800 of +0x5F0) is moved by collision_obj_walls
  * from the previous eye (+0x304) with the collision globals D_800CC1F2..F4 and D_800894C0[1..2] set for the
  * call and restored after it. The probe's final position is the new eye (y not in mode 0x100);
  * +0x3E8 = no collision, +0x26C eases to 1.0 (0.1 per frame) or drops to 0.005 on a hit. After a hit the
@@ -643,7 +643,7 @@ extern u8 D_800894C0[];
 extern u8 D_800CC1F2;
 extern u8 D_800CC1F3;
 extern u8 D_800CC1F4;
-s32 func_15044670(f32 fromX, f32 fromY, s32 fromZBits, struct127 *probe, s32 arg4, s32 arg5);
+s32 collision_obj_walls(f32 fromX, f32 fromY, s32 fromZBits, struct127 *probe, s32 arg4, s32 arg5);
 #define C080_F(o) (*(f32 *)(p + (o)))
 #define C080_W(o) (*(s32 *)(p + (o)))
 /* was func_1512C080 */
@@ -710,8 +710,8 @@ void camera_eye_collision(struct108 *arg0) {
         C080_F(0x958) = 0.0f;
         C080_F(0x960) = C080_F(0x950);
     } else {
-        func_150498A0((f32 *)(p + 0x95C), C080_F(0x94C), (f32 *)(p + 0x954), 4.0f, 6.0f, C080_F(0x7B4));
-        func_150498A0((f32 *)(p + 0x960), C080_F(0x950), (f32 *)(p + 0x958), 4.0f, 6.0f, C080_F(0x7B4));
+        math_spring_approach((f32 *)(p + 0x95C), C080_F(0x94C), (f32 *)(p + 0x954), 4.0f, 6.0f, C080_F(0x7B4));
+        math_spring_approach((f32 *)(p + 0x960), C080_F(0x950), (f32 *)(p + 0x958), 4.0f, 6.0f, C080_F(0x7B4));
     }
 
     /* the probe */
@@ -741,7 +741,7 @@ void camera_eye_collision(struct108 *arg0) {
     D_800CC1F3 = (((u8 *)*(u8 **)(p + 0x3D0))[0x102] != 0) ? 1 : 0;
     saved1F4 = D_800CC1F4;
     D_800CC1F4 = (p[0x23C] != 0 || (C080_W(0x2C) == 0x100 && !small)) ? 1 : 0;
-    hit = func_15044670(C080_F(0x304), C080_F(0x308), C080_W(0x30C), &probe, 0, 0);
+    hit = collision_obj_walls(C080_F(0x304), C080_F(0x308), C080_W(0x30C), &probe, 0, 0);
     D_800CC1F4 = saved1F4;
     D_800CC1F2 = 0;
     D_800CC1F3 = saved1F3;

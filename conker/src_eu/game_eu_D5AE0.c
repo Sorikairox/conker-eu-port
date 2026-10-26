@@ -7,7 +7,8 @@
 /* Hand asm in the original: fixed-point rotation matrix from three angles in degrees (rx, ry, rz; 0.017453292 = pi/180):
  * row 0 = (cy cz, cy sz, -sy), row 1 = (sx sy cz - cx sz, sx sy sz + cx cz, sx cy),
  * row 2 = (cx sy cz + sx sz, cx sy sz - sx cz, cx cy), no translation. The asm keeps the angles in f20-f30 (saved). */
-void func_150A82D0(Mtx *m, f32 rx, f32 ry, f32 rz) {
+/* was func_150A82D0 */
+void mtx_rotate_xyz_deg_fixed(Mtx *m, f32 rx, f32 ry, f32 rz) {
     s16 *h = (s16 *)m;
     f32 v[12];
     f32 cx, sx, cy, sy, cz, sz, t;
@@ -51,5 +52,5 @@ void func_150A82D0(Mtx *m, f32 rx, f32 ry, f32 rz) {
     h[31] = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5AE0/func_150A82D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5AE0/mtx_rotate_xyz_deg_fixed.s")
 #endif

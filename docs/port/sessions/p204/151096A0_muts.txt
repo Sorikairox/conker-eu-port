@@ -5,7 +5,7 @@ s/mtx\[0\]\[1\] \*= 0.157f;/;/
 s/mtx\[1\]\[2\] \*= 0.157f;/;/
 s/mtx\[2\]\[2\] \*= 0.157f;/mtx[2][3] *= 0.157f;/
 s/(rec + 0x78 + D_800BE9C0 \* 0x40)/(rec + 0x78)/
-s/func_15144B34((s16) slot)/func_15144B34(0)/
+s/camera_get_pos((s16) slot)/camera_get_pos(0)/
 s/fabsf(cam\[1\]) > 0.0001f/fabsf(cam[2]) > 0.0001f/
 s/fabsf(cam\[0\]) > 0.0001f ||/fabsf(cam[0]) >= 0.0001f ||/
 s/cam\[0\] \* cam\[0\] + cam\[2\] \* cam\[2\]/cam[0] * cam[0] + cam[1] * cam[1]/

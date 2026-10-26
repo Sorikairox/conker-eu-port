@@ -73,7 +73,7 @@ s32 anim_fx_emitter_reset_phase(u8 *arg0) {
 }
 
 typedef struct { f32 x, y, z; } V3s99;
-s32 func_1513092C(void *, s32, s32);
+s32 particle_spawn_default(void *, s32, s32);
 /* was func_150EA69C */
 void anim_fx_puff_spawn(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
     struct {
@@ -192,7 +192,7 @@ void anim_fx_puff_spawn(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *
     b.u38 = ((random_float() * 0.1f) + 0.08f) * b.scale;
     b.u3C = ((random_float() * 0.1f) + 0.08f) * b.scale;
     sp.u88 = ((random_float() * 70.0f) + 73.0f) * 0.001f;
-    obj = func_1513092C(&sp, 2, 0x28);
+    obj = particle_spawn_default(&sp, 2, 0x28);
     if (obj != 0) {
         memcpy(obj + 0xA8, &b, 0x28);
     }
@@ -263,7 +263,7 @@ void anim_fx_trail_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     emitter_trail_spawn(&sp, 0, 0xFF, 0);
 }
 
-s32 func_1513092C(void *, s32, s32);
+s32 particle_spawn_default(void *, s32, s32);
 /* was func_150EAB4C */
 void anim_fx_puff_spawn_large(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
@@ -384,7 +384,7 @@ void anim_fx_puff_spawn_large(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
     b.u38 = ((random_float() * 0.1f) + 0.08f) * b.scale;
     b.u3C = ((random_float() * 0.1f) + 0.08f) * b.scale;
     sp.u88 = ((random_float() * 60.0f) + 21.0f) * 0.001f;
-    obj = func_1513092C(&sp, 2, 0x28);
+    obj = particle_spawn_default(&sp, 2, 0x28);
     if (obj != 0) {
         memcpy(obj + 0xA8, &b, 0x28);
     }

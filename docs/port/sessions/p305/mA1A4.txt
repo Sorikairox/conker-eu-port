@@ -28,7 +28,7 @@ s/pt->size = E2F(0x2C);/pt->size = E2F(0x30);/ % base
 s/pt->u1C = 0.0f;/pt->u1C = 1.0f;/ % base
 s/pt->alpha = rec->u3A;/pt->alpha = rec->u3B[0];/ % base
 s/pt->texS = rec->u144;/pt->texS = rec->u140;/ % base
-s/func_1519C38C(pt->pos, pt->vel, E2F(0x20), time);/func_1519C38C(pt->pos, pt->vel, E2F(0x24), time);/ % base
+s/point_integrate_gravity(pt->pos, pt->vel, E2F(0x20), time);/point_integrate_gravity(pt->pos, pt->vel, E2F(0x24), time);/ % base
 s/pt->size += E2F(0x30) \* time;/pt->size += E2F(0x30);/ % base
 /advance the ring head/,/e\[0x2C\]++;/s/e\[0x2E\] = 0;/e[0x2E] = 1;/ % wrap full
 s/if (\*(s8 \*) (e + 0x2D) == \*(s8 \*) (e + 0x2E)) {/if (*(s8 *) (e + 0x2D) == *(s8 *) (e + 0x2C)) {/ % full
@@ -55,9 +55,9 @@ s/(u32) (spr->shadeRnd + 1) + spr->shade;/(u32) (spr->shadeRnd) + spr->shade;/ %
 s/(u32) (spr->lifeRnd + 1) + spr->life;/(u32) (spr->lifeRnd + 1) + spr->lifeRnd;/ % base
 s/sparkMove.size = random_float() \* spr->sizeRnd + spr->size;/sparkMove.size = random_float() * spr->sizeRnd;/ % base
 s/off\[0\] = tgt\[0\] - spark.pos\[0\];/off[0] = tgt2[0] - spark.pos[0];/ % base
-s/if (func_15146078(off, u, v)) {/if (!func_15146078(off, u, v)) {/ % base nobasis
+s/if (vec3_make_basis(off, u, v)) {/if (!vec3_make_basis(off, u, v)) {/ % base nobasis
 s/speed = random_float() \* spr->speedRnd + spr->speed;/speed = random_float() * spr->speedRnd + spr->speed2;/ % base
-1,/spr->spreadRnd/s/func_15143874(angle & 0xFF,/func_15143874(angle \& 0x7F,/ % base rndmod
+1,/spr->spreadRnd/s/vec2_from_angle_byte(angle & 0xFF,/vec2_from_angle_byte(angle \& 0x7F,/ % base rndmod
 s/sparkMove.vel\[0\] = (u\[0\] \* cs + v\[0\] \* sn + off\[0\]) \* speed;/sparkMove.vel[0] = (u[0] * sn + v[0] * cs + off[0]) * speed;/ % base
 s/sparkMove.vel\[2\] = (u\[2\] \* cs + v\[2\] \* sn + off\[2\]) \* speed;/sparkMove.vel[2] = (u[2] * cs + v[2] * sn + off[1]) * speed;/ % base
 s/sparkMove.u10 = random_float() \* spr->u10Rnd + spr->u10;/sparkMove.u10 = random_float() * spr->u10 + spr->u10Rnd;/ % base
@@ -83,8 +83,8 @@ s/speed = random_float() \* spr->speed2Rnd + spr->speed2;/speed = random_float()
 s/random_float() \* spr->spread2Rnd, &cs, &sn);/random_float() * spr->spread2Rnd, \&sn, \&cs);/ % base
 s/sprite.vel\[1\] = (u\[1\] \* cs + v\[1\] \* sn + off\[1\]) \* speed;/sprite.vel[1] = (u[1] * cs + v[1] * sn + off[1]);/ % base
 s/sprite.u54 = random_float() \* spr->u54Rnd + spr->u54;/sprite.u54 = random_float() * spr->u54Rnd;/ % base
-s/func_151307F0((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/func_151307F0((s32) \&sprite, 2, 0, 0, e[0xC], e[1]);/ % base
-s/func_151307F0((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/func_151307F0((s32) \&sprite, 1, 0, 0, e[0xC], e[0]);/ % base
+s/particle_spawn_ex((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/particle_spawn_ex((s32) \&sprite, 2, 0, 0, e[0xC], e[1]);/ % base
+s/particle_spawn_ex((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/particle_spawn_ex((s32) \&sprite, 1, 0, 0, e[0xC], e[0]);/ % base
 s/rec->u13C -= 1.0f;/rec->u13C -= 2.0f;/ % spray3
 /second spray/,/r = random_float/s/(obj\[0x74\] & 0xF) != 0xF/(obj[0x74] \& 0xF) != 0xE/ % hidden
 s/if (1.0f < rec->u13C) {/if (1.5f < rec->u13C) {/ % base spray2one
@@ -101,6 +101,6 @@ s/ 21 + 20;/ 20 + 20;/ % flag8fire
 s/(obj + 0x318))\[0x23D\];/(obj + 0x318))[0x23C];/ % flag8fire
 s/ 7 + 2;/ 7 + 3;/ % flag8fire
 s/burst.unk6 = -1;/burst.unk6 = 0;/ % flag8fire
-s/func_151D8E18(&burst, 0, e\[0xC\], e\[1\]);/func_151D8E18(\&burst, 1, e[0xC], e[1]);/ % flag8fire
+s/rumble_request(&burst, 0, e\[0xC\], e\[1\]);/rumble_request(\&burst, 1, e[0xC], e[1]);/ % flag8fire
 s/ 21 + 0x78;/ 21 + 0x77;/ % flag8fire
 s/^    return 1;$/    return 2;/ % base

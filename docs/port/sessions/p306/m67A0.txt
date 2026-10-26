@@ -14,8 +14,8 @@ s/if (victim->health == 0 \&\& D_800E1030/if (victim->health != 0 \&\& D_800E103
 s/MP_KILLS(player) < 9999/MP_KILLS(player) < 9998/ % kill9998
 s/MP_KILLS(player)++;/MP_KILLS(vi)++;/ % kill
 s/\& 0x200) {/\& 0x400) {/ % kill killnoflag
-s/func_15085710(D_800E1030\[player\] != 0, 10, 1);/func_15085710(D_800E1030[vi] != 0, 10, 1);/ % killt0
-s/func_15085710(D_800E1030\[player\] != 0, 10, 1);/func_15085710(D_800E1030[player], 10, 1);/ % killt0
+s/player_stat_modify(D_800E1030\[player\] != 0, 10, 1);/player_stat_modify(D_800E1030[vi] != 0, 10, 1);/ % killt0
+s/player_stat_modify(D_800E1030\[player\] != 0, 10, 1);/player_stat_modify(D_800E1030[player], 10, 1);/ % killt0
 s/if (vi < D_80090130) {/if (vi <= D_80090130) {/ % s80v80bot
 s/MP_ROW(vi, 0x6E)++;/MP_ROW(vi, 0x70)++;/ % hit
 s/if (src == victim || /if (/ % selfhit
@@ -23,7 +23,7 @@ s/|| victim->unk31C == NULL ||/||/ % nochar
 s/|| src->health == 0) {/|| src->health == 1) {/ % srcdead hit
 s/\*((u8 \*)src->unk31C + 0xAF) = 0;/*((u8 *)src->unk31C + 0xAE) = 0;/ % hit
 s/if (r == 0x21 || r == 0x22) {/if (r == 0x21) {/ % k33b
-s/func_10010630(0x510, victim,/func_10010630(0x510, src,/ % k33a
+s/actor_sound_play_untracked(0x510, victim,/actor_sound_play_untracked(0x510, src,/ % k33a
 s/if (src->id == 0x75 \&\& victim->health == 0) {/if (src->id == 0x75) {/ % s75alive
 s/if (victim->id == 0x75) {/if (victim->id == 0x76) {/ % s75v75
 1,/MP_ROW(vi, 0x70) >= 4/s/MP_ROW(vi, 0x70) >= 4/MP_ROW(vi, 0x70) > 4/ % s75v75
@@ -75,7 +75,7 @@ s/sound = 0x41A;/sound = 0x41B;/ % s88k21
 s/sound = 0x415;/sound = 0x416;/ % s88
 s/n = 5;/n = 4;/ % s88
 s/0x6D60, 0x320, 0xBB8, arg5)/0x6D60, 0x320, 0xBB8, 0)/ % s88
-s/sound = func_1000F568(sound, n);/sound = n;/ % s75 hit s3Bk2e s88
+s/sound = sound_pick_variant(sound, n);/sound = n;/ % s75 hit s3Bk2e s88
 s/if (n != 0) {/if (n != 1) {/ % s3Bk21
 s/if (sound == 0) {/if (sound == 1) {/ % s80k40
 s/\&\& D_800E1030\[player\] != D_800E1030\[vi\]) {/\&\& 1) {/ % teamkill

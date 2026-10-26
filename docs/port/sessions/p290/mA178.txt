@@ -26,7 +26,7 @@ s/r = rr \* e->radius;/r = rr * e->life;/
 s/x = sinf(ang) \* r;/x = sinf(ang) * rr;/
 s/z = cosf(ang) \* r;/z = cosf(ang) * rr;/
 s/mtxf_rotate_xyz_deg(mtx, e->rotA, e->rotB, 0.0f);/mtxf_rotate_xyz_deg(mtx, e->rotB, e->rotA, 0.0f);/
-s/func_150A7E40(mtx, x, 0.0f, z,/func_150A7E40(mtx, z, 0.0f, x,/
+s/mtxf_transform_point(mtx, x, 0.0f, z,/mtxf_transform_point(mtx, z, 0.0f, x,/
 s/ex.angle = random_float() \* 6.2831855f;/ex.angle = random_float();/
 s/\* 320.0f + -160.0f) \* 0.001f;/* 320.0f + -150.0f) * 0.001f;/
 s/\* 161.0f + 446.0f) \* 0.01f;/* 161.0f + 446.0f) * 0.02f;/
@@ -48,7 +48,7 @@ s/t.sizeB = size;/t.sizeB = 0.0f;/
 s/ex.spinB = (u32) random_int() /ex.spinB = 1 + (u32) random_int() /
 s/ex.growA = (random_float() \* 0.25f + 0.15f) \* ex.size;/ex.growA = (random_float() * 0.25f + 0.15f);/
 s/ex.growB = (random_float() \* 0.25f + 0.15f)/ex.growB = (random_float() * 0.5f + 0.15f)/
-s/func_1513092C(&t, 2, 0x24);/func_1513092C(\&t, 1, 0x24);/
+s/particle_spawn_default(&t, 2, 0x24);/particle_spawn_default(\&t, 1, 0x24);/
 s/if (p != NULL) {/if (p == NULL) {/
 s/memcpy((s32) (p + 0xA8), (f32 \*) &ex, 0x24);/memcpy((s32) (p + 0xA4), (f32 *) \&ex, 0x24);/
 s/e->acc -= 1.0f;/e->acc -= 0.5f;/

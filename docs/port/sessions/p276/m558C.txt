@@ -10,9 +10,9 @@
 \#^    if ((\*(s32 \*) (s + 0x88) & 0x1F) == 9) {$#s/0x1F/0xF/
 \#^    if ((\*(s32 \*) (s + 0x88) & 0x1F) == 9) {$#s/== 9/== 1/
 \#^        if (random_float() < 0.4f) {$#s/0.4f/0.6f/
-\#^            func_151C384C(pos, p\[0xC\], p\[1\]);$#s/p\[1\]/p[2]/
+\#^            fire_embers_spawn(pos, p\[0xC\], p\[1\]);$#s/p\[1\]/p[2]/
 \#^    if (random_float() < 0.1f) {$#s/0.1f/0.05f/
-\#^        func_151C384C(pos, p\[0xC\], p\[1\]);$#s/p\[0xC\]/p[0xD]/
+\#^        fire_embers_spawn(pos, p\[0xC\], p\[1\]);$#s/p\[0xC\]/p[0xD]/
 \#^    if (random_float() < 0.4f) {$#s/0.4f/0.2f/
 \#^        frames\[0\] = 0x85;$#s/0x85/0x84/
 \#^        scales\[0\] = 0.1f;$#s/0.1f/0.2f/
@@ -32,4 +32,4 @@
 \#^        flash.u4C = 0.060000002f;$#s/0.06/0.07/
 \#^        flash.u50 = 0.142f;$#s/0.142f/0.143f/
 \#^        flash.u54 = 25.777f;$#s/25.777f/25.0f/
-\#^        func_151522DC(&flash, frames, scales, 1, p\[0xC\], p\[1\]);$#s/scales, 1,/scales, 2,/
+\#^        emit_impact_flash_spray(&flash, frames, scales, 1, p\[0xC\], p\[1\]);$#s/scales, 1,/scales, 2,/

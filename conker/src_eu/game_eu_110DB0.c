@@ -110,17 +110,17 @@ void zap_bolt_spawn_path(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3) {
 }
 
 #ifdef NON_MATCHING
-void func_1000E7A0(u32, s32);
+void music_post_event_request(u32, s32);
 /*
- * sound_handle_release_cb: P190. Callback that zap_bolt_spawn_with_sound passes to func_1000FA64: 1 while the handle *handle is
- * 0, else releases it (func_1000E7A0(2, handle)) and returns 0.
+ * sound_handle_release_cb: P190. Callback that zap_bolt_spawn_with_sound passes to sfx_emitter_start: 1 while the handle *handle is
+ * 0, else releases it (music_post_event_request(2, handle)) and returns 0.
  */
 /* was func_150E394C */
 s32 zap_sound_release_cb(s32 arg0, s32 arg1, s32 *handle, s32 arg3) {
     if (*handle == 0) {
         return 1;
     }
-    func_1000E7A0(2, *handle);
+    music_post_event_request(2, *handle);
     return 0;
 }
 #else
@@ -137,7 +137,7 @@ s32 zap_bolt_spawn_with_sound(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, 
     temp_v0 = zap_bolt_spawn(arg3, arg4, arg5, 0, 0, 0, arg7, arg8, arg6, (f32) arg0, (f32) arg1, (f32) arg2, 0, -0x63);
     if (temp_v0 != 0) {
         sp44 = temp_v0;
-        (*(u16 *)((u8 *)sp44 + 0x4A)) = func_1000FA64(0x2D0U, (s16) arg0, (s16) arg1, (s16) arg2, 0x5DC0, 0x1770U, 0x3E8, (s32) &zap_sound_release_cb, NULL, 0, 0, 0);
+        (*(u16 *)((u8 *)sp44 + 0x4A)) = sfx_emitter_start(0x2D0U, (s16) arg0, (s16) arg1, (s16) arg2, 0x5DC0, 0x1770U, 0x3E8, (s32) &zap_sound_release_cb, NULL, 0, 0, 0);
         return (*(u8 *)((u8 *)sp44 + 0x48)) + 1;
     }
     return 0;
@@ -156,9 +156,9 @@ void zap_bolt_free(struct102 *arg0) {
         }
     }
     if (*(u16 *)((u8 *)arg0 + 0x4A) != 0) {
-        func_100111C8(*(u16 *)((u8 *)arg0 + 0x4A));
+        sound_voice_stop(*(u16 *)((u8 *)arg0 + 0x4A));
         *(u16 *)((u8 *)arg0 + 0x4A) = 0;
-        func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, (s16)(s32)*(f32 *)((u8 *)arg0 + 0x28), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x2C), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x30), 0x3E8, 0x1770);
+        sound_play_at(0x2D7, 0x5DC0, 0, 0, 0, (s16)(s32)*(f32 *)((u8 *)arg0 + 0x28), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x2C), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x30), 0x3E8, 0x1770);
     }
     node_destroy(arg0);
 }
@@ -203,10 +203,10 @@ extern f32 D_800A1410;
 extern f32 D_800A1414;
 extern f32 D_800A1418;
 extern f32 D_800A141C;
-void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_15046F70(f32 *, s32, f32, f32 *);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_151C284C(f32 *, s32, s32, s32, u8, void *, f32, f32, f32, f32, f32, u8, s32, u8, u8, u8, u8, u8, u8, s8, s32,
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+s32 collision_floor_probe(f32 *, s32, f32, f32 *);
+s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
+s32 tracer_spawn(f32 *, s32, s32, s32, u8, void *, f32, f32, f32, f32, f32, u8, s32, u8, u8, u8, u8, u8, u8, s8, s32,
                   f32, u8, s8, s32, u8, s32);
 void flip_sprite_particle_spawn(s16, u8, f32, u8 *, u8, u8, s32);
 
@@ -219,8 +219,8 @@ typedef struct {
 // (+0x3C, its +0x14 position; freed when that object's first word is 0) or the path point (+0x78), and moves its head
 // (+0x10) by speed (+0x34) * D_800BE9E4 frames toward the target (+0x1C). When it arrives (no path), a followed
 // target makes it shoot 500 lengths further for 25 frames (+0x44); otherwise it is freed. The +0x4C accumulator then
-// spawns beam segments from the anchor (+0x28) to a random point near the head (func_151C284C, ground snapped with
-// func_15046F70 and shortened by a random amount), and without a path the +0x50 accumulator spawns sparks
+// spawns beam segments from the anchor (+0x28) to a random point near the head (tracer_spawn, ground snapped with
+// collision_floor_probe and shortened by a random amount), and without a path the +0x50 accumulator spawns sparks
 // (flip_sprite_particle_spawn) at the anchor.
 /* was func_150E3CB8 */
 void zap_bolt_update(u8 *obj) {
@@ -349,20 +349,20 @@ void zap_bolt_update(u8 *obj) {
         start[2] = anchor[2];
         t = random_float();
         r = random_int();
-        func_15143874((u8) r, random_float() * 129.0f, &ox, &oz);
+        vec2_from_angle_byte((u8) r, random_float() * 129.0f, &ox, &oz);
         tip[0] = t * vel[0] + old[0] + ox;
         tip[1] = t * vel[1] + old[1] + 200.0f;
         tip[2] = t * vel[2] + old[2] + oz;
         end[0] = tip[0];
         end[1] = tip[1];
         end[2] = tip[2];
-        if (func_15046F70(tip, 0, tip[1] - 1000.0f, (f32 *) (obj + 0x54))) {
+        if (collision_floor_probe(tip, 0, tip[1] - 1000.0f, (f32 *) (obj + 0x54))) {
             end[1] = *(f32 *) (obj + 0x54);
         }
         dir[0] = end[0] - start[0];
         dir[1] = end[1] - start[1];
         dir[2] = end[2] - start[2];
-        if (func_15145128(dir, dir, &len, &unused)) {
+        if (vec3_normalize_len(dir, dir, &len, &unused)) {
             k = 190.0f * (random_float() * D_800BE9A4);
             start[0] += dir[0] * k;
             start[1] += dir[1] * k;
@@ -401,7 +401,7 @@ void zap_bolt_update(u8 *obj) {
         b = random_float();
         r = random_int();
         mode = (hit != 0 || *(s32 *) (obj + 0x78) != 0) ? 2 : 1;
-        if (func_151C284C(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410, a * 50.0f + 10.0f, b * 191.0f + 160.0f, 80.0f,
+        if (tracer_spawn(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410, a * 50.0f + 10.0f, b * 191.0f + 160.0f, 80.0f,
                           r % 176U + 80, 0, 0, 0, 0, 0, 0, 1, mode, *(s32 *) (obj + 0x40), 0.0f, 0xFF, -1, 0, obj[0xC],
                           obj[1]) != 0) {
             hit = 1;
@@ -441,7 +441,7 @@ extern f32 D_800A1424;
 
 /* was func_150E469C */
 void fx_set_tint_preset(s32 arg0) {
-    func_151C40BC(arg0, 0.35200003f, 0.70100003f, 0.56600004f, D_800A1424, 0xFF, 0xFF, 0xFF);
+    surface_impact_effects(arg0, 0.35200003f, 0.70100003f, 0.56600004f, D_800A1424, 0xFF, 0xFF, 0xFF);
 }
 
 /* was func_150E46F4 */

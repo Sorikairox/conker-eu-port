@@ -7,8 +7,8 @@ s|case 0x5E:|case 0x5F:|
 s|kind >= 0x5F|kind >= 0x5E|
 s|+= 0xAA;|+= 0xAB;|
 s|fire_smoke_trail_spawn(arg1, 0xFF, 1);|fire_smoke_trail_spawn(arg1, 0xFF, 0);|
-s|func_151D7A60(arg1, 0, 2, 0xFF, 1);|func_151D7A60(arg1, 0, 1, 0xFF, 1);|
-s|func_151D7A60(arg1, 6, -1, 0xFF, 1);|func_151D7A60(arg1, 6, 1, 0xFF, 1);|
+s|char_glow_trail_spawn(arg1, 0, 2, 0xFF, 1);|char_glow_trail_spawn(arg1, 0, 1, 0xFF, 1);|
+s|char_glow_trail_spawn(arg1, 6, -1, 0xFF, 1);|char_glow_trail_spawn(arg1, 6, 1, 0xFF, 1);|
 s|< 0x64|<= 0x64|
 s#|= 0xE00#|= 0x600#
 s#|= 0x70#|= 0x60#

@@ -33,6 +33,6 @@ void func_1501214C(struct127 *arg0) {
         tmp.unk8 = 0;
         tmp.unk9 = 0;
         tmp.unkA = 2;
-        func_15190770(&tmp, 0, 255, 1);
+        model_drip_create(&tmp, 0, 255, 1);
     }
 }

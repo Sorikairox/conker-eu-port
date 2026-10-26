@@ -1,25 +1,25 @@
 \#if (obj\[0x10\] & 4)#s/& 4/\& 1/
 \#if (obj\[0x10\] & 8)#s/& 8/\& 0x80/
 \#if (obj\[0x10\] & 2)#s/& 2/\& 0x20/
-\#func_151D6310((s32 \*) (obj + 0x140), id, 0x190#s/0x190/0x180/
-\#func_151D6310((s32 \*) (obj + 0x140), id#s/0x140/0x144/
+\#vtx_slot_buffer_get((s32 \*) (obj + 0x140), id, 0x190#s/0x190/0x180/
+\#vtx_slot_buffer_get((s32 \*) (obj + 0x140), id#s/0x140/0x144/
 \#^    if (v == NULL) {#s/==/!=/
 \#^    cam = (f32 \*)#s/0x9A0/0x9A4/
 \#^    cam = (f32 \*)#s/0x2F8/0x2FC/
 \#^    flag = 1;#s/= 1;/= 0;/
 \#if (!D_8008FEB0#s/if (!D_8008FEB0/if (D_8008FEB0/
 \#if (!D_8008FEB0#s/obj\[0x2E\]/obj[0x2D]/
-\#gfx = func_15142B7C(gfx, geoSet, geoClr)#s/geoSet, geoClr/geoClr, geoSet/
-\#gfx = func_15142C10(gfx#s/primG, primB/primB, primG/
-\#gfx = func_15142CF0(gfx#s/0, 0, envR/0, 1, envR/
-\#gfx = func_15142CF0(gfx#s/envA, &flag/primA, \&flag/
+\#gfx = gfx_geometry_mode_cached(gfx, geoSet, geoClr)#s/geoSet, geoClr/geoClr, geoSet/
+\#gfx = gfx_env_color_cached(gfx#s/primG, primB/primB, primG/
+\#gfx = gfx_prim_color_cached(gfx#s/0, 0, envR/0, 1, envR/
+\#gfx = gfx_prim_color_cached(gfx#s/envA, &flag/primA, \&flag/
 \#gfx = gfx_set_combine_mode(gfx, tex#s/tex/rmodePair/
-\#gfx = func_15142E24(gfx#s/0x36/0x37/
-\#gfx = func_15142E24(gfx#s/&flag, 3)/\&flag, 2)/
-\#gfx = func_15142FBC(gfx#s/| 0x80000 |/| 0x40000 |/
-\#gfx = func_15142FBC(gfx#s/0x2CA0/0x2C20/
+\#gfx = gfx_load_texture_cached(gfx#s/0x36/0x37/
+\#gfx = gfx_load_texture_cached(gfx#s/&flag, 3)/\&flag, 2)/
+\#gfx = gfx_other_mode_cached(gfx#s/| 0x80000 |/| 0x40000 |/
+\#gfx = gfx_other_mode_cached(gfx#s/0x2CA0/0x2C20/
 \#D_800A4EA8\[rmodePair \* 2 + 1\]#s/\* 2 + 1\]/* 2 + 3]/
-\#gfx = func_15142FBC(gfx#s/rmode |/geoSet |/
+\#gfx = gfx_other_mode_cached(gfx#s/rmode |/geoSet |/
 \#^    bx = pts\[6\];#s/pts\[6\]/pts[7]/
 \#^    ROPE_NORMAL(ax, ay, az);#s/(ax, ay, az)/(bx, by, bz)/
 \#ROPE_VTX(ax + nx, ay + ny, az + nz, 0, 0);#s/0, 0);/0, 1);/

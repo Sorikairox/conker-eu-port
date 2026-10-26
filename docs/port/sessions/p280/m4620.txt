@@ -38,6 +38,6 @@
 \#^    g.u62 = 0x26;$#s/26/27/ % k34
 \#^    g.u66 = 0xFF;$#d % k34
 \#^    g.u68 = 0;$#d % k34
-\#^    e = (u8 \*) func_151307F0(#s/0x10, flag/0x11, flag/ % k34
+\#^    e = (u8 \*) particle_spawn_ex(#s/0x10, flag/0x11, flag/ % k34
 \#^    l->glow = e;$#d % noglow
 \#^        memcpy(e + 0xA8, &tail, 0x10);$#s/0xA8/0xA4/ % k34

@@ -1,0 +1,231 @@
+old	new	confidence	description
+func_151CA150	aim_hud_spawn_for_mode	med	Builds the aim/look HUD overlay for the current camera aim mode (bars, reticles, gauges, side bars); called on look enter/update
+func_151CA398	aim_hud_spawn_track_mode	low	Spawns the full aim HUD set (bar kind 4, gauges, slot rows, side bars) for a track/group; also used by game_eu_51190
+func_151CA484	aim_hud_clear	high	Removes all aim HUD elements: broadcasts message 0x21 to the fb-fx, sprite2d, screen-tint and 0x494E0 lists; clears D_8008D0A0
+func_151CA4E8	aim_hud_bar_spawn	high	Spawns a two-part HUD bar (front and back sprite) of kind 0..4 for the player obj (list 0x58)
+func_151CAC50	aim_hud_quad_reticle_spawn	low	Spawns a four-piece reticle (sprite kind 0x73/0x5D, mirrored quadrants) plus a centre sprite 0x99 for the aim HUD
+func_151CB07C	aim_hud_sprite_on_message	med	Aim HUD sprite message handler: destroys itself on owner removal (0x21/0), then forwards to the D_8008FFB0 handler for its kind
+func_151CB128	aim_hud_crosshair_spawn	med	Spawns the default single-sprite crosshair (kind 0x64) for the player's aim HUD
+func_151CB2D8	aim_hud_lens_reticle_spawn	low	Spawns a four-piece reticle (kind 0x72/0x65) and, when no tint is active, a lens-warp framebuffer effect (0x498) for the aim HUD
+func_151CB6C0	fb_lens_warp_draw	high	Framebuffer handler: copies a 24x24 pixel block and writes it back mirrored around a screen point with a radial lens falloff
+func_151CBA4C	aim_fbfx_on_message	med	Fb-effect message handler: destroys the effect when its owner (+0x18) is removed (message 0x21 or 0)
+func_151CBAC0	aim_hud_fade_update	low	Aim HUD sprite update: eases its alpha toward the target value while the owner holds button 0x2000, else toward 0
+func_151CBBAC	aim_hud_side_bars_spawn	high	Spawns four side-bar HUD sprites (kinds 0x7B/0x7C, right and mirrored left) for the player's aim HUD
+func_151CBEC8	aim_hud_side_bar_on_message	med	Side-bar message handler: on message 0x37 for its owner and side, restarts its bounce (phase 0, flag 1)
+func_151CBF20	aim_hud_side_bar_update	med	Side-bar update: places it by the zoom gauge value and runs the sine bounce started by message 0x37
+func_151CC11C	aim_tint_on_message	med	Screen-tint message handler: destroys the tint when its owner (+0x20) is removed (message 0x21 or 0)
+func_151CC190	aim_hud_dial_update	low	Aim HUD dial sprite update: when the gauge value changes, moves the sprite around a 55-unit circle by the value
+func_151CC210	aim_hud_gauge_scale_update	low	Aim HUD gauge update: scales the sprite by the gauge value and fades the glow colour back after a flash (flag 2)
+func_151CC784	aim_hud_gauge_value	med	Returns the aim HUD gauge value: a height clamped to the record's [+0x88, +0x8C] range from a table or the owner's bounds
+func_151CC840	aim_hud_send_flash	med	Broadcasts message 0x46 (glow flash) with key arg0 to the sprite2d list; used by the scope motion sound update
+func_151CC86C	aim_hud_glow_on_message	high	On message 0x46 for its key: sets the flash flag, a 35-frame fade and copies the glow colour floats to the colour bytes
+func_151CCAD4	aim_hud_gauge_spawn	low	Spawns the aim HUD gauge sprites (single-player layout) with the given colour and group
+func_151CCD2C	aim_hud_target_angle_update	low	Aim HUD sprite update: points the sprite at the camera target's yaw (kind 0x9A) or pitch
+func_151CCDF0	aim_hud_gauge_marks_spawn	low	Spawns the aim HUD gauge marker sprites that track the gauge value (single-player layout)
+func_151CD2CC	aim_hud_gauge_small_spawn	low	Spawns the compact aim HUD gauge sprite used in multiplayer (D_80082FA0 != 0)
+func_151CD444	aim_hud_tint_spawn	med	When D_800BE616 is set, creates a screen tint for the player and stores the owner pointer in it
+func_151CD4B8	aim_hud_slot_rows_spawn	high	Spawns two rows of four aim HUD slot sprites (kinds D_8008FFC8) above and below the view
+func_151CD7D4	aim_hud_slot_row_update	med	Slot row update: moves the row in or out vertically by the gauge value (row 4 bottom, row 5 top)
+func_151CD2C0	spout_ctrl_spawn	low	Spawns a 300-frame controller node (handler 0x1E) that keeps the record's spout params (pos ptr, id, kind)
+func_151CD90C	spout_broadcast_start	med	Broadcasts message 0x17 (start spout) with id arg0 (0..3) to the effect controller list
+func_151CD944	spout_broadcast_stop	med	Broadcasts message 0x18 (stop spout) with id arg0 (0..3) to the effect controller list
+func_151CD97C	spout_ctrl_on_message	med	Spout controller message handler: 0x17 spawns its spout effect if none, 0x18 releases it; then link messages
+func_151CDA70	spout_effect_spawn	med	Spawns a 300-frame point-stream effect (kind 0x34/11/7/0x23) at an s16 point, sized by the source, with a 0x50 param block
+func_151CDC24	spout_update_fall	med	Spout path update: moves each point down under gravity and drops points that fall below the floor height
+func_151CDD6C	spout_emit_swirl	low	Spout path update: swirls the emitter around its centre with sine wobble and emits new rising points into the ring
+func_151CE144	spout_smooth_points	low	Spout path update: walks the point ring and pulls neighbouring points toward a set segment length
+func_151CE3D0	spout_draw	med	Draw handler: renders the spout's point ring as a textured strip (texture D_800AB2C0[kind], 0x1C-byte points)
+func_151CEA2C	path_fx_release	med	Releases a path effect: clears its owner byte (+0x30), clears flag 2 and sets flag 8 (finish) on +0x1E
+func_151CEA4C	spout_die_retire	med	Spout death handler: broadcasts message 0x23 with its id, then fxrec_die_retire
+func_151CEA8C	spout_die_free	med	Spout death handler: broadcasts message 0x23 with its id, then fxrec_die_free
+func_151CEACC	spout_check_obj_hit	low	If the spout with the object's id (+0x18) covers the object's height span, sends hit 0x60019 to the object
+func_151CEBE4	spout_find_by_id	high	Searches two node lists for a kind-11 effect whose params (+0x98) have id arg0; NULL if none
+func_151CEC80	drip_fx_update	low	Effect update: advances a timer and spawns random falling drip effects (effect3d) that land on the ground below
+func_151CEFD0	fx_rise_fade_update	med	Effect update: integrates vertical velocity with acceleration into +0x38 and grows the fade value +0x50 up to 1
+func_151CF05C	obj_ribbon_spawn	med	Spawns a ribbon trail fxrec (0x28-byte points) following an object or a second anchor, with random length and twist
+func_151CF1C0	obj_ribbon_anchor_pos	high	Writes the ribbon anchor position: the second anchor's +0x40 vector if given, else the object's position
+func_151CF204	obj_ribbon_record	med	Ribbon trail update: once per frame records the anchor's position as a new head point with width and side direction
+func_151CF6D0	obj_ribbon_wave_update	low	Ribbon trail update: drops points past the trail length and offsets the rest by a travelling sine wave
+func_151CF930	obj_ribbon_draw	high	Draws a ribbon trail: two vertices per ring point offset by the side vector, one quad per segment, flat colour
+func_151CFDF4	obj_ribbon_on_message	med	Ribbon trail message handler: forwards link messages to node_handle_link_message when its owner is set
+func_151CFE48	ground_fx_spawn_random	low	22% chance: spawns a random ground effect node up to 2000 units in front of the player, on the floor below
+func_151CFFFC	object_shatter_effects	high	Break-up effects of an object: 7 model sparks, a flash and debris ring above it and 7..10 debris pieces on the floor
+func_151D0024	obj_fx_broadcast_kill	med	Broadcasts message 0x18 with the object and its id byte to the effect controller list (removes its effects)
+func_151D0058	obj_aura_fx_spawn	low	Spawns a 300-frame effect node (handler 0x31) on the object at its mid height with a random alpha 200..255
+func_151D06D8	limb_band_check_anim	med	Ends the band effect (+0xE = -1) when the owner's animation id (+0x84) differs from the one stored at +0x2E
+func_151D06FC	limb_band_draw	high	Draws a stretchy band between two skeleton points of the owner as 6 pinched quads with a texture
+func_151D0EA0	limb_band_on_message	med	Band message handler: destroys it on owner removal (0/24), swaps its owner on message 0x2D
+func_151D09A8	objfx_joint_flash_burst	low	Object effect: at bone points of its model spawns flashes, sparks and random particles (several spawners)
+func_151D1488	fx_kill_linked_node	high	Destroys the node linked at +0xA8 if any
+func_151D14B8	fx_linked_die_retire	med	Death handler: kills the linked node, then particle_die_retire
+func_151D14E4	fx_linked_die_free	med	Death handler: kills the linked node, then particle_die_free
+func_151D1510	obj_point_trail_spawn	med	Spawns a 300-frame object point trail controller (handler 0x48) on point arg1 of the object (D_8008FFD0)
+func_151D1624	object_point_above_pos	high	Point query 0 of D_8008FFD0: object position with y = +0x180 + 8
+func_151D1654	object_offset_point_0	high	Point query 1 of D_8008FFD0: object matrix applied to offset 0 (100, 8, -20)
+func_151D1674	object_offset_point_1	high	Point query 2 of D_8008FFD0: object matrix applied to offset 1 (-100, 8, -20)
+func_151D1694	object_offset_point	high	Transforms offset D_800AB37C[which] by the object's matrix; 0 when it has no matrix
+func_151D16E8	obj_point_trail_update	high	Per-frame update of an object point trail controller: follows the point, releases or recreates its trail effect
+func_151D18D8	obj_point_trail_on_message	med	Point trail controller message handler: forwards link messages to node_handle_link_message
+func_151D1918	obj_point_trail_stop	med	Wrapper: releases the controller's trail effect (func_151D1990)
+func_151D1938	obj_point_trail_die_retire	med	Death handler: releases the trail effect, then func_1514933C
+func_151D1964	obj_point_trail_die_free	med	Death handler: releases the trail effect, then func_15149368
+func_151D1990	obj_point_trail_release	med	Detaches the controller's trail effect: marks it finished (flags 8 and 1, 40-frame fade) and clears the link
+func_151D19F8	obj_point_trail_create	med	Creates the trail fxrec (0x28-byte points, handlers 0x11/0x12) for a point trail controller and links it
+func_151D1B80	tank_track_record	high	Path update: records the owner object's position as a new track point with speed, width 100 and side direction
+func_151D1F2C	obj_point_trail_fade	low	Trail update: drops expired points and sets each point's width and alpha by its age along the trail
+func_151D2248	tank_track_draw	high	Draws a path as a textured ribbon (texture 0xBC), two vertices per point and a quad per segment, handling t wrap
+func_151D27EC	path_owner_clear_link	med	Clears the owner's +0x30 link field through the path effect's params (+0x98)
+func_151D2808	path_owner_die_retire	med	Death handler: clears the owner's link, then fxrec_die_retire
+func_151D2834	path_owner_die_free	med	Death handler: clears the owner's link, then fxrec_die_free
+func_151D2860	destroy_burst_spawn	low	Spawns the textured burst and sparks used when an object is destroyed (called by object_destroy_effects)
+func_151D2C70	scroll_banner_spawn	low	Allocates a type-0x18 node (0x3C bytes) with id arg0 that scrolls across the screen
+func_151D2CC8	scroll_banner_stop	med	Marks every type-0x18 node with id arg0 for removal (+0x16 = -2)
+func_151D2D0C	scroll_banner_update	low	Moves the banner by frame time, fades its alpha in/out up to 0x80, wraps its texture offset, destroys it off-screen
+func_151D2DE0	scroll_banner_draw	low	Draws the banner nodes matching id arg2 into the display list (texture, rectangles)
+func_151DD390	bounce_dust_spawn	low	Spawns a small textured burst at a point; used by a bouncing debris object on impact
+func_151DD4A0	eeprom_async_write_start	high	Waits for a previous async write, stores the EEPROM write request and arms a 12 ms timer to write 8 bytes per tick
+func_151DD588	eeprom_async_write_step	high	Async EEPROM write pump: on timer message writes the next 8-byte block and re-arms; returns 1 while busy
+func_151DD6F0	game_eeprom_read	high	Game copy of osEepromRead: reads one 8-byte EEPROM block through the PIF
+func_151DD8B4	game_eep_pack_read_data	high	Game copy of __osPackEepReadData: builds the PIF read command for an EEPROM block
+func_151DD950	game_eeprom_long_read	high	Game copy of osEepromLongRead (waits for async writes first): reads nbytes in 8-byte blocks
+func_151DDA90	game_eeprom_write	high	Game copy of osEepromWrite: writes one 8-byte EEPROM block through the PIF
+func_151DDC0C	game_eep_pack_write_data	high	Game copy of __osPackEepWriteData: builds the PIF write command for an EEPROM block
+func_151DDCC0	game_eep_status	high	Game copy of __osEepStatus: queries the EEPROM type/status through the PIF
+func_151DDE70	demo_input_play_next	med	Demo playback: copies the next recorded 6-byte input frame (stick, buttons, frame time) to the controller state
+func_151D3A30	bullet_impact_effects	high	Impact effects at a hit point by kind (bullet etc.): ricochet sound, sparks, debris or puff particle and a decal
+func_151D4300	impact_puff_wobble_update	med	Particle update: while its timer (+0x170) runs, wobbles the puff's y position by a sine; then restores the base position
+func_151D43B4	obj_bone_point_or_pos	med	Transforms a point by bone arg3 of the object's matrices, or returns its position raised by arg4 without a model
+func_151D441C	object_effect_between	med	Spawns effect/sound `sound` at the midpoint of a and b for the object, facing its yaw relative to its parent
+func_151D44C4	muzzle_light_small_spawn	med	Creates a short (4..6 frame) warm-white light flash at a position (radius 20..32)
+func_151D45A4	explosion_light_spawn	med	Creates a longer (20..30 frame) orange light flash at a position (radius 34..57)
+func_151D4684	object_effects_at	med	Spawns two effects/sounds at pos for the object, from a point behind along dir or raised by half the model height
+func_151D4898	object_effect_at	med	Spawns effect/sound `sound` at pos for the object, facing along dir (or 0 without dir)
+func_151D49B8	bone_streak_fx_start	low	Starts a streak/beam effect from a point along a direction attached to an object bone (scale, alpha, flags)
+func_151D4668	obj_point_fx_broadcast_kill	med	Broadcasts message 0x3C with the object and its id byte (removes its point effects)
+func_151D469C	object_point_effect_spawn	high	Spawns event 0x41 kind 0x35 with a 0x20-byte record holding the object, kind and its bone point for that kind
+func_151D4D44	object_trail_smoke_update	high	Update of the object point effect: follows the bone point and emits smoke particles along its movement
+func_151D51E8	obj_point_fx_on_message	med	Point effect message handler: 0x3C for its object destroys it, 4 clears its flag 1, others go to func_15149514
+func_151D52B4	trail_smoke_particle_update	med	Smoke particle update: wobble offset from its data (+0xA8) and damping of its velocity
+func_151D5308	object_bone_point_effects	high	Spawns the point effects of bone points 0 and 1 of the object (object_point_effect_spawn kinds 0, 1)
+func_151D535C	object_take_hit	high	Applies a hit to an object: spark for some body kinds, wears the shield count, impact effects and hit message
+func_151D56F8	weapon_count_shot	med	Weapon fired: decrements the control block's ammo (+0x24) if positive and increments its shot count (+0x1AA)
+func_151D5724	weapon_find_aim_target	low	Searches the impact point/target along the aim ray from the object's model for a weapon (results via pointers)
+func_151D58E4	cam_shake_all_players	med	Starts camera wobble preset arg4 at a position with given strengths for every player's camera
+func_151D5404	rumble_all_players_at	med	Requests a rumble (random duration arg4..arg4+arg5, distance falloff from a position) on every player's controller
+func_151D5AC4	smoke_cloud_spawn	high	Spawns a smoke cloud at pos with a fixed emitter block (9 puffs over 3 frames)
+func_151D5BF8	explosion_smoke_flash_spawn	med	Explosion effects at pos: smoke cloud, orange light flash and a spark shower
+func_151D5714	bone_beam_spawn	high	Transforms points a/b by an object bone and starts the streak effect at a along b - a
+func_151D5DA8	mouth_aim_ray	high	For mouth 0/1 computes the aim point and target, stores the far point and casts the aim ray
+func_151D5FC8	object_mouth_point	high	Mouth point of the object: a point transformed by a bone, or its position offset 49 up and 34 sideways
+func_151D611C	objects_hit_by_segment	high	Tests a segment against all live objects as spheres; returns a mask with bit i cleared for each hit object
+func_151D6310	vtx_slot_buffer_get	med	Allocates a double vertex buffer for slot arg1 on first use and returns the half for the current frame
+func_151D5E30	vtx_slot_buffers_free	med	Frees the four per-slot vertex buffers of an effect
+func_151D6440	fb_ghost_copy_draw	low	Framebuffer ghost effect: draws a copy of the frame buffer (saved image or current buffer) into the display list
+func_151D6760	fb_blur_average	low	Averages neighbouring RGBA5551 pixels of the frame buffer rows (blur pass) when the ghost effect is on
+func_151D69C8	fb_ghost_image_draw	low	Draws the saved ghost image (D_800BE570) as textured rectangles with alpha arg3
+func_151D6CA0	fb_ghost_set_mode	med	Sets the framebuffer ghost/blur strength and mode (D_800BE574/575); frees the saved image when turned off
+func_151D6D28	fb_ghost_render	med	Renders the framebuffer ghost/blur overlay for the frame when enabled (or in levels 0x32/0x33)
+func_151D6F20	pickup_burst_in_mp_level	med	In levels 50/51 only, spawns the object's sprite burst (obj_sprite_burst_spawn)
+func_151D6F64	pickup_spin_sparkle_spawn	low	Spawns the sparkle effect of a spinning scenery pickup at its position (fixed emitter block)
+func_151D71AC	money_collect_popup_spawn	med	Money pickup collected: spawns a model effect and a "$ amount" popup record whose amount depends on event 0x83
+func_151D7410	money_popup_mtx_update	med	Builds the popup matrix: yaw facing the camera, 120 units above the owner, scaled by 0.551
+func_151D75B0	money_popup_draw	high	Prints "$ %d" above the owner with fading-in alpha; returns 0 once the owner is gone
+func_151D767C	money_popup_on_message	med	Popup record message handler: forwards link messages to node_handle_link_message
+func_151D76BC	banner_sprite_set_segment	med	Sets segment 8 (opaque or translucent table by alpha) and loads two sprite texture parts for a banner sprite
+func_151D7760	fx_carrier_spawn	med	Spawns an effect-carrier node (handler 0x36) with kind arg2 and distance threshold arg3; copies its 0x18-byte record
+func_151D7814	effect_follow_update	high	Effect-carrier update: runs its kind update, retires on 0, attaches a trail while active and still, else releases it
+func_151D7958	fx_carrier_on_message	high	Effect-carrier message handler: forwards to the kind's handler in D_80090044 when there is one
+func_151D79B4	fx_carrier_stop	med	Wrapper: releases the carrier's attached trail effect (func_151D7D78)
+func_151D79D4	fx_carrier_die_retire	med	Death handler: releases the attached trail, then func_1514933C
+func_151D7A00	fx_carrier_die_free	med	Death handler: releases the attached trail, then func_15149368
+func_151D7A2C	char_glow_broadcast_kill	med	Broadcasts message 0x3D with the object and its id byte (removes its glow trails)
+func_151D7A60	char_glow_trail_spawn	med	Spawns an effect carrier on a character bone point (point arg1, check kind arg2) for its glow trail
+func_151D7AE8	char_glow_on_message	high	Glow carrier message handler: 0x3D for its object (id or key) destroys it; others go to func_15149514
+func_151D7B74	char_glow_bone_point_update	med	Kind update: tracks the character's bone point D_800AB660 and sets the active bit unless hidden/held; runs a check
+func_151D7CD4	char_glow_check_anim_a	low	Glow check: clears the active bit when the object has flag 2 at +0x94 or animation 4, 10 or 12
+func_151D7D20	char_glow_check_anim_idle	low	Glow check: clears the active bit when the object's animation (+0x84) is 0
+func_151D7D4C	char_glow_check_flag_ad	low	Glow check: clears the active bit when the object's +0xAD byte is set
+func_151D7D78	fx_carrier_release	med	Detaches the carrier's trail effect: marks it finished (flags 8 and 1, 20-frame fade) and clears the link
+func_151D7DE0	fx_carrier_attach_trail	med	Creates the glow trail fxrec at the carrier's position and links it (+0x28)
+func_151D7EDC	glow_trail_points_update	high	Trail update: advances each ring point with gravity (func_151D8CC8); head = oldest point; ends when finished
+func_151D7FE8	glow_trail_emit_points	low	Trail update: follows the carrier position and emits new ring points along the movement; 0 when inactive
+func_151D8280	glow_trail_limit_length	high	Trail update: cuts the trail to 80 units, scrolls texture coordinates and fades alpha along its length
+func_151D8674	char_glow_trail_draw	med	Draw handler: renders the glow trail ring as a textured strip of quads
+func_151D8CC8	trail_point_apply_gravity	high	Advances a point's y by velocity * dt + a * dt^2 and adds acceleration to the velocity
+func_151D8D14	glow_trail_clear_link	med	Clears the carrier's link field (+0x28) through the trail's params (+0x98)
+func_151D8D30	glow_trail_die_retire	med	Death handler: clears the carrier link, then fxrec_die_retire
+func_151D8D5C	glow_trail_die_free	med	Death handler: clears the carrier link, then fxrec_die_free
+func_151D8D90	rumble_mask_has_pak	high	Returns 1 if any player in the mask has a controller with a rumble pak (D_800BED64), else 0
+func_151D8E18	rumble_request	med	Creates a rumble record for the players in the mask unless paused/blocked or no pak; copies its params
+func_eu_151D8FD4	rumble_record_update	med	Rumble record update: counts down its duration, runs its strength callback and starts/stops the motors on change
+func_151D90D4	rumble_stop_players	med	Stops the rumble motor of every player in the record's mask (func_1501C15C)
+func_151D9138	rumble_die_retire	med	Death handler: stops the record's motors, then node_retire
+func_151D9164	rumble_die_free	med	Death handler: stops the record's motors, then node_unlink_free
+func_151D9190	rumble_falloff_update	med	Strength callback: rumble falloff by the player's distance from the record's position (+0x18)
+func_151D91B0	rumble_strength_by_distance	med	Sets rumble strength from the distance between a point and a player: full inside lo, fading out over the range
+func_151D930C	rumble_on_message	high	Rumble record message handler: messages 0x58 and 0x47 destroy it
+func_151D9364	rumble_broadcast	med	Broadcasts message arg1 with arg0 to the rumble record list (D_800AB6E0)
+func_151D9398	rumble_records_clear_all	med	Sets the rumble-block flag and broadcasts message 0x58 to remove every rumble record (level load)
+func_151DCC50	flash_burst_effects	low	Bright flash effects at a point: sparks, glow sprite, small light flash and a short white screen flash
+func_151DCE6C	flash_smoke_emitter_spawn	low	Optionally plays the flash effects, then spawns a smoke emitter node at the point for arg1 frames
+func_151DCF2C	flash_smoke_emitter_update	low	Smoke emitter update: accumulates time and emits random rising smoke particles
+func_151DDF20	settings_reset_defaults	high	Resets the 0x1C settings bytes D_800E1010 to their defaults D_800901F4
+func_151DDF6C	settings_clamp_to_range	high	Resets each settings byte outside its [min, max] range to its default (after a bad save checksum)
+func_151DE074	pause_bit_invert	low	Returns ~arg0 (helper used by the pause menu's cartridge check)
+func_151DE080	pause_quit_to_menu	med	Quit callback: clears pause state, starts level 0x1D in mode 3 (title menu), resets the player order and sounds
+func_151DE100	game_pause_update	high	Game mode 0 handler: counts play time, shows the time limit and runs the pause menu (resume / quit / restart)
+func_151DEBB4	intro_mode_update	low	Mode handler of the intro sequence: hides player 0, lets a button skip ahead, then starts level 0x21 in mode 1
+func_151DECB4	menu_reset_and_enter	med	Clears the menu timers and blink state and enters the title menu (func_151DED3C)
+func_151DECFC	menu_fade_load_options	low	Sets the fade speed to 4, clears the fade and requests the options load unless D_800901D0 is set
+func_151DED3C	menu_enter_title	med	Starts level 0x1D in mode 3 (title menu) with a pending scene start and resets the menu record's page state
+func_151DEDC8	game_mode_stub	low	Empty game-mode handler
+func_151DEDD0	menu_mode_update	high	Game mode 3 handler (title / main menu): setup frames, input, attract mode, music and the current page handler
+func_151DF6A4	title_press_start_page	high	Title menu page 1: press-start page with the info and screen-position sub-screens
+func_151DFD0C	title_chapter_select_page	high	Title menu page 2: chapter / scene select; starts the chosen scene
+func_151E06D0	title_slot_page	high	Title menu pages 3..5: save slot page with continue / erase / start
+func_151E0BBC	menu_mode_select_page	high	Main menu page 0: multiplayer mode list with yes/no confirmation
+func_151E1174	main_settings_page	high	Main menu page 2: settings list of the chosen mode; saves the settings when leaving if changed
+func_151E1308	menu_player_join_page	high	Multiplayer character page: controllers join/leave and pick characters (spawning their menu objects)
+func_151E19AC	main_players_page	high	Main menu page 5: player / controller slot queue; accept starts the game
+func_151E1EDC	menu_team_select_page	high	Multiplayer team page: moves players between teams, sets team sizes and CPU players
+func_151E2A1C	menu_run_level_start	med	Runs the level-start page once (pending start 3): fade update and func_151E4B40, then clears the pending flag
+func_151E2A54	settings_load_from_save	high	Inverse of settings_save: copies the mode's 10-byte save record into the settings bytes and clamps them
+func_151E2B9C	settings_save	high	Copies the settings bytes into the mode's 10-byte save record and writes the save
+func_151E2C88	mp_slot_query	low	Multiplayer helper returning an s8 per player/slot (used for slot types in mode 8 and team page scores)
+func_151E2FCC	menu_game_start	high	Main menu start callback: applies the chosen mode's settings, fills player slots and starts the level
+func_151E3864	chapter_scene_start	high	Chapter-select start callback: resolves the scene's level/route, resets game state and starts the level
+func_151E3A1C	slot_game_start	med	Save-slot start callback: resets single-player game state and starts the slot's saved level
+func_151E3AE4	settings_list_draw	high	Draws and edits the settings list (ring or column layout) with cursor arrows and value fades
+func_151E49C8	level_intro_mode_update	med	Mode 5 handler: waits for input or the intro scene to end, then fades into menu_game_start
+func_151E4A78	mp_start_intro_scene	med	Starts the chosen mode's intro scene (mode 5) when it has one, else calls menu_game_start directly
+func_151E4B40	menu_level_start_page	high	Level-start / results page: fades in, lists players or the winner and asks yes/no to continue
+func_151E533C	mp_match_end_continue	high	Fade callback after a multiplayer match: picks the next level, a replay or the menu and restarts
+func_151E5528	game_mode_set_10	low	Sets the game mode D_800E0B94 to 10
+func_151E553C	wait_button_mode_update	low	Mode handler: A or B (0x8020) switches to mode 4
+func_151E5564	menu_return_to_title	med	Resets the player order and fade, then starts level 0x1D in mode 3 (title menu)
+func_151E55C8	end_screen_mode_update	low	Mode handler: fade and blink update; after 1000 frames or any input fades back to the title menu
+func_151E564C	fade_mode_update	med	Mode 7 handler: fades the screen out at D_80090114 per tick, then runs the callback D_800E0EB8
+func_151E5798	menu_state_reset	med	Clears the menu record (zoom, fades, pages, flags) at D_80090174
+func_151E582C	menu_init	med	Menu init: default settings, text bank reset, menu record setup and state reset
+func_151E5928	game_mode_frame_step	high	Per-frame game-mode step: screen offset/scale, input snapshot, text bank, mode handler D_8009018C[mode]
+func_151E5AB8	screen_fade_update	med	Fades the screen fade value D_800E0FC6 down per tick; during menu zoom sets it from the zoom amount
+func_151E5B94	mp_match_end	med	Ends a multiplayer match: saves shot counts, sets the fade callback (continue or quit to menu)
+func_151E5D28	player_order_reset	high	Resets the controller-to-player order D_800843F0 to 0, 1, 2, 3
+func_151E5D54	menu_blink_update	med	Ping-pongs the blink value D_800E0FC7 by 8 per tick between 0 and 255
+func_151E5DD8	menu_clear_flag_ebc	low	Clears D_800E0EBC if set (level load)
+func_151E5DF8	mp_is_free_for_all	med	Returns D_80090168 (free-for-all match flag)
+func_151E5E08	mp_match_check_over	high	Checks whether the multiplayer match is over (time, score, players/teams left) and writes the placings
+func_151E6710	mp_player_team	med	Returns the player's team (D_800E1030) in multiplayer or menu modes, else the player index
+func_151E6758	mp_human_player_count	med	Returns the number of human players (D_80090130, or D_8008FD8C with D_800E101B under 5)
+func_151E67A0	mp_report_hit	high	Multiplayer hit report: updates hit/kill counters and scores, marks the last hitter, may play a taunt
+func_151E7110	text_bank_load	high	Loads the text bank for the current language: frees old banks and loads strings (group 3, type 0x1C)
+func_151E73A8	text_bank_reset	high	Clears the loaded text bank state (D_800E1003, D_800E1004, D_80090178)
+func_151E73C8	menu_camera_update	high	Menu camera: carousel and zoom between menu stops along the point graph; sets the shown page
+func_151E856C	menu_show_stop_objects	med	Makes the world objects of the current menu stop visible (+0x80 = 2)
+func_151E8648	settings_apply_sound_mode	high	Applies the sound mode setting (D_800E1019: 0 stereo, 2 mono, else headphones) via func_10017870
+func_151E86A4	menu_settings_apply_checked	high	Applies the sound mode (the N64 build also ran an anti-tamper code checksum)
+func_151E870C	menu_spawn_character	high	Replaces a menu slot's character object with a freshly spawned one of the given character
+func_151E8998	menu_char_slots_clear	high	Clears the four menu character slot pointers and D_80090124
+func_151E89C0	credits_start	low	Unless already in mode 8, after enough idle time enters mode 8 (credits) with a single player
+func_151E8A64	credits_mode_update	low	Mode 8 handler: steps through the credit text lines ('*' separated, '=' ends) then starts the title in mode 9
+func_151E8B94	credits_end_mode_update	low	Mode 9 handler: starts the menu scene, then after 100 frames resets the menu and starts level 0x21 in mode 1

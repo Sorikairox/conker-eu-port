@@ -3,20 +3,20 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 extern s32 D_8008704C;
-void func_15036F60(u8 *arg0);
+void look_record_alloc(u8 *arg0);
 struct197 *allocate_memory(s32, s32, s32, s32);
 void obj_reset(struct127 *);
 struct127 *obj_alloc_slot(void);
-void func_150848F0(u8 *, s32, s32);
-s32 func_151E6710(s32);
-void func_15083E20(u8 *, u16, u8 *);
-void func_15083C3C(s32, s32, s32);
-s32 func_15083D54(struct127 *, u16, s32, f32);
-s32 func_1503DD8C(struct127 *, s32, s32, s32);
-void func_15083784(struct127 *, s32);
-s32 func_15085118(s32);
-s32 func_1514D6CC(struct127 *);
-void func_15085098(u8 *);
+void obj_load_part_models(u8 *, s32, s32);
+s32 mp_player_team(s32);
+void obj_copy_type_params(u8 *, u16, u8 *);
+void obj_set_type(s32, s32, s32);
+s32 obj_anim_state_alloc(struct127 *, u16, s32, f32);
+s32 model_make_ready(struct127 *, s32, s32, s32);
+void obj_apply_setup_variant(struct127 *, s32);
+s32 level_list_index_of(s32);
+s32 char_fx_init(struct127 *);
+void obj_randomize_anim_frame(u8 *);
 extern s8 D_8008FD8C;
 extern u8 *D_800D252C;
 extern s8 D_800901E4[];
@@ -26,10 +26,10 @@ extern u8 D_800C67F0;
 extern u8 D_80038080;
 extern u8 D_800A7610[];
 extern u8 D_800A7620[];
-u8 func_15085170(u8 *arg0);
+u8 obj_type_model_group(u8 *arg0);
 u8 *asset_lookup_rom(s32 *arg0, s32 arg1, ...);
-s32 func_15083F30(struct127 *, u8, u8, s32, s32, s32, s32, s32, f32);
-struct127 *func_15030DE4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 *arg9, s32 argA, s32 argB, s32 argC);
+s32 obj_spawn_attached(struct127 *, u8, u8, s32, s32, s32, s32, s32, f32);
+struct127 *attachment_create(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 *arg9, s32 argA, s32 argB, s32 argC);
 extern s32 D_80087064;
 #endif
 
@@ -45,8 +45,8 @@ typedef struct {
 #ifdef NON_MATCHING
 /* P146 */
 extern s32 (*D_80087030[])(u8 *, s32, s32);
-s32 func_1508154C(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32 *, s32 *, s16 *);
-s32 func_15082020(f32 *, f32 *, u8 *, f32 *, f32 *, f32 *, f32 *);
+s32 obj_ray_hit_model(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32 *, s32 *, s16 *);
+s32 ray_hit_object_bounds(f32 *, f32 *, u8 *, f32 *, f32 *, f32 *, f32 *);
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
 // ray_cast_world: casts the ray (x, y, z) + t * (dx, dy, dz) against the level (unless noLevel) and the 25 objects
 // of D_800CC2D0 (unless noObjects) and keeps the nearest hit closer than maxDist (0 = 9999999) in hit:
@@ -55,10 +55,11 @@ s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *
 // 2 object bounds, 3 object model), +0x5C level material (D_800DBEF4 entry), +0x60 level hit extra. Objects are
 // skipped when in skipMask, the caster's own slot (+0x124 - 1) or the caster itself, inactive, of type 3
 // (+0x5), not hittable (+0xF8 bit 0x40), or rejected by filter D_80087030[filter](obj, caster, filterArg)
-// (-1 = none). Without boundsOnly the object model is tested (func_1508154C) and its bounds only when that
+// (-1 = none). Without boundsOnly the object model is tested (obj_ray_hit_model) and its bounds only when that
 // returns -1; an object linked (+0x65) to the previous model hit is not taken again. The original returns
 // nothing (callers ignore the value); 0 here.
-s32 func_15081A90(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *hit, f32 maxDist, s32 noLevel,
+/* was func_15081A90 */
+s32 ray_cast_world(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *hit, f32 maxDist, s32 noLevel,
                   s32 noObjects, s32 boundsOnly, s32 filter, s32 filterArg, s32 skipMask) {
     f32 start[3];
     f32 dir[3];
@@ -154,7 +155,7 @@ s32 func_15081A90(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz
             continue;
         }
         if (boundsOnly == 0) {
-            res = func_1508154C(obj, start, dir, point, exitPoint, normal, &dist, &modelA, &modelB, &modelC, modelD);
+            res = obj_ray_hit_model(obj, start, dir, point, exitPoint, normal, &dist, &modelA, &modelB, &modelC, modelD);
             if (res > 0 && dist < maxDist &&
                 (*(f32 *)(hit + 0x4) == -1.0f || dist < *(f32 *)(hit + 0x4)) && last != link[i]) {
                 *(f32 *)(hit + 0x4) = dist;
@@ -178,7 +179,7 @@ s32 func_15081A90(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz
                 continue;
             }
         }
-        if (func_15082020(start, dir, obj, point, exitPoint, &dist, &dist2) != 0 && dist < maxDist &&
+        if (ray_hit_object_bounds(start, dir, obj, point, exitPoint, &dist, &dist2) != 0 && dist < maxDist &&
             (*(f32 *)(hit + 0x4) == -1.0f || dist < *(f32 *)(hit + 0x4)) && last != link[i]) {
             *(f32 *)(hit + 0x4) = dist;
             *(u8 **)(hit + 0x0) = obj;
@@ -195,18 +196,19 @@ s32 func_15081A90(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15081A90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/ray_cast_world.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P146 */
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-f32 func_15143E64(f32 *);
+s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
+f32 vec3_length(f32 *);
 // ray_hit_object_bounds: intersects the ray start + t * dir with an object's bounding sphere, squashed vertically:
 // centre = the object position (+0x14) raised by +0xD6, radius +0xD2, y scaled by +0xDC into sphere space and by
 // +0xE0 back. Returns 0 for a zero-length direction or a miss; on a hit stores the entry / exit points (hitIn,
 // hitOut) and their distances from start (distIn, distOut) and returns 1.
-s32 func_15082020(f32 *start, f32 *dir, u8 *obj, f32 *hitIn, f32 *hitOut, f32 *distIn, f32 *distOut) {
+/* was func_15082020 */
+s32 ray_hit_object_bounds(f32 *start, f32 *dir, u8 *obj, f32 *hitIn, f32 *hitOut, f32 *distIn, f32 *distOut) {
     f32 center[3];
     f32 p[3];
     f32 d[3];
@@ -226,13 +228,13 @@ s32 func_15082020(f32 *start, f32 *dir, u8 *obj, f32 *hitIn, f32 *hitOut, f32 *d
     d[0] = dir[0];
     d[1] = dir[1] * ys;
     d[2] = dir[2];
-    if (func_15145128(d, d, NULL, NULL) == 0) {
+    if (vec3_normalize_len(d, d, NULL, NULL) == 0) {
         return 0;
     }
     c[0] = center[0];
     c[1] = center[1] * ys;
     c[2] = center[2];
-    if (func_151452C4((struct17 *)p, (struct17 *)d, (struct17 *)c, *(s16 *)(obj + 0xD2), (s32)hitIn, (s32)hitOut, distIn,
+    if (ray_sphere_intersect((struct17 *)p, (struct17 *)d, (struct17 *)c, *(s16 *)(obj + 0xD2), (s32)hitIn, (s32)hitOut, distIn,
                       distOut) == 0) {
         return 0;
     }
@@ -241,19 +243,20 @@ s32 func_15082020(f32 *start, f32 *dir, u8 *obj, f32 *hitIn, f32 *hitOut, f32 *d
     rel[0] = hitIn[0] - start[0];
     rel[1] = hitIn[1] - start[1];
     rel[2] = hitIn[2] - start[2];
-    *distIn = func_15143E64(rel);
+    *distIn = vec3_length(rel);
     rel[0] = hitOut[0] - start[0];
     rel[1] = hitOut[1] - start[1];
     rel[2] = hitOut[2] - start[2];
-    *distOut = func_15143E64(rel);
+    *distOut = vec3_length(rel);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082020.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/ray_hit_object_bounds.s")
 #endif
 
 void obj_set_hit_flags_by_kind(u8 *, s32, u8);
-void func_1508220C(u8 *arg0, u16 v, u8 arg2) {
+/* was func_1508220C */
+void obj_apply_hit_flags(u8 *arg0, u16 v, u8 arg2) {
     if (D_800BE616 == 0) {
         if (arg0[0x1CA] != 0) {
             arg0[0x1CA] = 7;
@@ -268,12 +271,12 @@ void func_1508220C(u8 *arg0, u16 v, u8 arg2) {
 s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2);
 void bullet_impact_effect(f32 *normal, f32 *pos, f32 *dir, s32 arg3, s32 arg4);
 void stub_hit_point_noop(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
-void func_150B5C38(u8 *arg0, u8 arg1, s32 arg2);
-void func_150B6C34(u8 arg0, s32 arg1);
+void zap_burst_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void screen_flash_zap(u8 arg0, s32 arg1);
 void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2);
 extern u8 D_80099E84[];   /* per weapon kind: the hit-effect id passed to obj_send_hit */
 extern f32 D_8009CFF8;    /* 65536 / 360 */
-/* the hit record a ray cast fills (func_15081A90); only the fields used here */
+/* the hit record a ray cast fills (ray_cast_world); only the fields used here */
 typedef struct {
     u8 *target;          /* 0x00: the object hit */
     f32 dist;            /* 0x04 */
@@ -291,7 +294,7 @@ typedef struct {
     u8 type;             /* 0x59: 0 nothing, 1 world, 2 / 3 objects */
     u8 u5A;              /* 0x5A */
 } Hit15082278;
-/* the stack block func_150335C8 gets (only the fields set here; the rest is stack garbage on N64 too) */
+/* the stack block attachment_spawn_at_joint gets (only the fields set here; the rest is stack garbage on N64 too) */
 typedef struct {
     u8 pad0[0x14];
     f32 pos[3];          /* 0x14 */
@@ -306,20 +309,21 @@ typedef struct {
     u8 pad154[0x32C - 0x154];
 } Reaction15082278;
 
-// shot_hit_apply: P194. Applies a weapon ray hit `h` (filled by func_15081A90) of shooter obj with weapon kind `kind`;
+// shot_hit_apply: P194. Applies a weapon ray hit `h` (filled by ray_cast_world) of shooter obj with weapon kind `kind`;
 // counts the shot in the shooter's controller (+0x31C, +0x1AA). Returns 0 when nothing was hit. World hits (type 1):
-// per-kind impact effect func_151D3A30 (kind 2: 1, 6: 0, 7: 5, 11: 3, 12: 2, 18: 4, others 5); kind 13 a decal
-// bullet_impact_effect instead, kinds 5 / 9 / 10 a ricochet (stub_hit_point_noop, an empty function, and func_1506B04C(obj, 2)),
+// per-kind impact effect bullet_impact_effects (kind 2: 1, 6: 0, 7: 5, 11: 3, 12: 2, 18: 4, others 5); kind 13 a decal
+// bullet_impact_effect instead, kinds 5 / 9 / 10 a ricochet (stub_hit_point_noop, an empty function, and obj_effect_run_handler(obj, 2)),
 // with on level 0xE kind 5 also the probe target_volume_hit_check 5 units around the point; returns 1.
-// Object hits (types 2 / 3, target h->target): kinds 5 / 9 / 10 call func_1506B04C(obj, 3); a target that is
+// Object hits (types 2 / 3, target h->target): kinds 5 / 9 / 10 call obj_effect_run_handler(obj, 3); a target that is
 // invulnerable (+0x125 / +0x104) and already reacting (+0x1CA) is skipped (return 2). Type 2: target type 0x94 gets
-// func_150B5C38 / func_150B6C34 and no blood (object_impact_effects). Type 3: with sub 10 (head shot) and no earlier head shot
+// zap_burst_spawn / screen_flash_zap and no blood (object_impact_effects). Type 3: with sub 10 (head shot) and no earlier head shot
 // (controller +0x1AD) the target dies (obj_set_dying_flags, its sounds 0x2E3.. / object_hit_effect / sound 0xAA, effect 0x20 /
 // 0x3D) or, for kinds 2 / 11 / 12 / 18, only plays sound 0x107; targets 0x9F / 0xA0 (unless D_800BE616) farther than
-// 1000 call func_1508220C instead. Kinds 2 / 18 / 12 / 11 start the reaction func_150335C8 (0x2A / 0x22 / 0x6B / 0x6D)
+// 1000 call obj_apply_hit_flags instead. Kinds 2 / 18 / 12 / 11 start the reaction attachment_spawn_at_joint (0x2A / 0x22 / 0x6B / 0x6D)
 // while +0x1CA < 2. Then the blood / sparks object_impact_effects, kind 13 impact_burst_effect, and when the target was already
 // reacting, obj_send_hit(target, effect | 0x80000, (direction - 90) as a u16 angle, shooter player index). Returns 2.
-s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
+/* was func_15082278 */
+s32 shot_hit_apply(u8 *obj, u8 *hit, s32 kind) {
     Hit15082278 *h = (Hit15082278 *) hit;
     Reaction15082278 r;
     u8 *target;
@@ -368,21 +372,21 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
             case 10:
                 effect = -1;
                 stub_hit_point_noop(h->pos[0], h->pos[1], *(s32 *) &h->pos[2], obj[0x124]);
-                func_1506B04C((struct127 *) obj, 2, NULL);
+                obj_effect_run_handler((struct127 *) obj, 2, NULL);
                 break;
             default:
                 effect = 5;
                 break;
         }
         if (effect != -1) {
-            func_151D3A30(h->pos, h->dir, (s32) h->normal, effect & 0xFF, 0xFF, 1);
+            bullet_impact_effects(h->pos, h->dir, (s32) h->normal, effect & 0xFF, 0xFF, 1);
         }
         return 1;
     }
 
     target = h->target;
     if (kind == 5 || kind == 9 || kind == 10) {
-        func_1506B04C((struct127 *) obj, 3, NULL);
+        obj_effect_run_handler((struct127 *) obj, 3, NULL);
     }
     fresh = (target[0x1CA] == 0);
     if ((target[0x125] != 0 || target[0x104] != 0) && !fresh) {
@@ -392,12 +396,12 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
     if (kind == 7 && D_800BE9F0 == 0x2B) {
         effect = 0x27;
     }
-    func_15145974(h->dir, &yaw, &pitch);
+    vec3_to_yaw_pitch_deg(h->dir, &yaw, &pitch);
     if (h->type == 2) {
         if (target[4] == 0x94) {
             blood = FALSE;
-            func_150B5C38(h->pos, 0xFF, 1);
-            func_150B6C34(0xFF, 1);
+            zap_burst_spawn(h->pos, 0xFF, 1);
+            screen_flash_zap(0xFF, 1);
         }
     } else if (h->type == 3) {
         far = FALSE;
@@ -427,7 +431,7 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
                 target[0x1CA] = 1;
             }
         } else if (target[4] == 0x9F || target[4] == 0xA0) {
-            func_1508220C(target, h->sub, far);
+            obj_apply_hit_flags(target, h->sub, far);
         }
         switch (kind) {
             case 2: reaction = 0x2A; break;
@@ -445,7 +449,7 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
             r.uC4 = 0.0f;
             r.u14C[0] = *(f32 *) (target + 0x14C);
             r.u14C[1] = *(f32 *) (target + 0x150);
-            func_150335C8((u8 *) &r, target, reaction, h->part, 1, 0);
+            attachment_spawn_at_joint((u8 *) &r, target, reaction, h->part, 1, 0);
             if (h->sub == 10) {
                 effect = 0x20;
             }
@@ -474,23 +478,24 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
     return 2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082278.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/shot_hit_apply.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
-s32 func_150A6840(s32, s32 *, f32, f32, f32, f32, f32, f32);
+s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
+s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 extern s32 D_800DA030[];
 
-/* P36: level-setup entry idx (0x30 bytes at D_800D20FC): spawn it with func_15082E44(e, idx, 0, 0, 0) and return
+/* P36: level-setup entry idx (0x30 bytes at D_800D20FC): spawn it with setup_entry_spawn(e, idx, 0, 0, 0) and return
  * that, or return 0 when: already spawned (D_800D252C[idx] != 0); a placeholder (e[2] == 1); no position
  * (x == 0x7FFF); its respawn timer D_800D2530[idx] is running (lowered by D_800BE9A0 this frame); idx >= 5 with a
  * range class e[1] & 6 (2: 650, 4: 1300, else 2750 units) and no player object D_800CC2D0[0 .. D_8008FD8C)
  * (+0 != 0, +0x127 != 0xFF and enabled in the u16 mask at D_800D2138 + 0x208) within that XZ distance; or
  * e[1] & 8 and the spot (x, y + 150, z), radius 150, is in view of one of the cameras 0 .. D_80082FA0
- * (func_150A6840 on D_800BE628 + i * 0x180, D_800DA030 + i * 0x10). Player slots (idx < 5) skip the range test.
+ * (camera_view_test_sphere on D_800BE628 + i * 0x180, D_800DA030 + i * 0x10). Player slots (idx < 5) skip the range test.
  * arg1 is unused. */
-s32 func_150829C0(s32 idx, s32 arg1) {
+/* was func_150829C0 */
+s32 setup_entry_try_spawn(s32 idx, s32 arg1) {
     u8 *e;
     u16 *timer;
     u8 *obj;
@@ -555,7 +560,7 @@ s32 func_150829C0(s32 idx, s32 arg1) {
         ok = 1;
         for (i = 0; i <= D_80082FA0; i++) {
             e = (u8 *) D_800D20FC + idx * 0x30;
-            if (func_150A6840(D_800BE628 + i * 0x180, D_800DA030 + i * 0x10, (f32) *(s16 *) (e + 6),
+            if (camera_view_test_sphere(D_800BE628 + i * 0x180, D_800DA030 + i * 0x10, (f32) *(s16 *) (e + 6),
                               (f32) (*(s16 *) (e + 8) + 150), (f32) *(s16 *) (e + 0xA), 150.0f, 150.0f, 20000.0f) != 0) {
                 ok = 0;
             }
@@ -564,16 +569,17 @@ s32 func_150829C0(s32 idx, s32 arg1) {
             return 0;
         }
     }
-    return func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
+    return setup_entry_spawn((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150829C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/setup_entry_try_spawn.s")
 #endif
 
-s32 func_150829C0(s32, s32);
+s32 setup_entry_try_spawn(s32, s32);
 extern u8 D_800D2520;
 extern u8 D_800D2521;
-void func_15082D5C(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_15082D5C */
+void setup_entries_spawn_range(s32 arg0, s32 arg1, s32 arg2) {
     s32 lo;
     s32 hi;
     s32 i;
@@ -587,13 +593,14 @@ void func_15082D5C(s32 arg0, s32 arg1, s32 arg2) {
     i = lo;
     if (lo < hi) {
         do {
-            func_150829C0(i, arg1);
+            setup_entry_try_spawn(i, arg1);
             i += 1;
         } while (i != hi);
     }
 }
 
-void func_15082DD8(u8 *arg0) {
+/* was func_15082DD8 */
+void obj_set_spawn_flags(u8 *arg0) {
     u8 *temp_v0;
 
     *(s32 *)(arg0 + 0xF8) &= 0xF7FFFFFD;
@@ -627,14 +634,15 @@ void func_15082DD8(u8 *arg0) {
  * slot = reuse+reset (obj_reset) of slot reuse - 1 when reuse != 0, of slot idx when idx < D_8008FD8C (the
  * player / character slots), else a new one (obj_alloc_slot). Returns slot + 1, or 0 when D_800D252C[idx] & 0x7F
  * (already spawned) or no slot is free (25). Fills position (+0x14.., from e+6/8/A), angle (e+0xC << 8), the setup
- * flags e+0x18 (+0xF8), model / type (e+4) via func_15083E20 / func_15083C3C / func_15083D54, the player record
+ * flags e+0x18 (+0xF8), model / type (e+4) via obj_copy_type_params / obj_set_type / obj_anim_state_alloc, the player record
  * (+0x31C, 0x1C0 bytes) for character slots and types 0x98 / 0x28, and the other per-type defaults. */
 #define O8(o) (*(u8 *)(obj + (o)))
 #define O16(o) (*(s16 *)(obj + (o)))
 #define O32(o) (*(s32 *)(obj + (o)))
 #define OF(o) (*(f32 *)(obj + (o)))
 #define REC(o) (*(u8 *)(*(u8 **)(obj + 0x31C) + (o)))
-s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
+/* was func_15082E44 */
+s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     u8 *obj;
     s32 type;
     s32 slot;
@@ -645,8 +653,8 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     u8 *p;
     u8 *t;
     s32 found;
-    void func_150836AC();
-    u8 func_15084E08(struct_eu_AF2A0 *);
+    void obj_alloc_light_bufs();
+    u8 obj_current_part_model(struct_eu_AF2A0 *);
 
     if (D_800D252C[idx] & ~0x80) {
         return 0;
@@ -679,7 +687,7 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
         }
     }
     *(u8 **)(obj + 0x144) = e;
-    func_150848F0(e, O8(0x13F), arg3);
+    obj_load_part_models(e, O8(0x13F), arg3);
     if (slot < D_8008FD8C || type == 0x98 || type == 0x28) {
         *(struct197 **)(obj + 0x31C) = allocate_memory(0x1C0, 1, 0, 0);
         bzero(*(void **)(obj + 0x31C), 0x1C0);
@@ -713,7 +721,7 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
         O8(0x232) = 1;
     }
     if (O8(0x127) != 0xFF) {
-        O8(0x128) = func_151E6710(O8(0x127));
+        O8(0x128) = mp_player_team(O8(0x127));
         REC(0x19A) = D_800D2550;
         REC(0x1AF) = 0x40;
         REC(0x1B0) = 0xFF;
@@ -755,35 +763,35 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     O8(0x248) = 0x64;
     O8(0x1FC) |= 2;
     O8(0x66) = e[0x10];
-    func_15083E20(obj, type, e);
+    obj_copy_type_params(obj, type, e);
     O16(0x92) = ((e[0x13] & 0x80) << 8) | (e[0x13] & 0x7F);
     O16(0x90) = *(s16 *)(e + 0x14);
-    func_15083C3C(slot, type, 1);
+    obj_set_type(slot, type, 1);
     if (type != 0xFF) {
-        func_15083D54((struct127 *)obj, 0, 0, 1.0f);
+        obj_anim_state_alloc((struct127 *)obj, 0, 0, 1.0f);
     } else {
         O8(5) = 3;
     }
     if (O32(0xF8) & 0x4000) {
-        func_1503DD8C((struct127 *)obj, O8(4), 0, 0);
+        model_make_ready((struct127 *)obj, O8(4), 0, 0);
     }
     if (e[0x29] != 0) {
-        func_15083568((struct127 *)obj, e[0x29], 1.0f, 0);
+        obj_setup_run((struct127 *)obj, e[0x29], 1.0f, 0);
     }
     if (O8(0x127) != 0xFF) {
-        O8(0x1CA) = func_150859AC((s16)O8(0x127), 4);
+        O8(0x1CA) = player_stat_get((s16)O8(0x127), 4);
         O16(0xB2) = (s16)D_800D2132;
-        func_15082DD8(obj);
-        func_15083784((struct127 *)obj, func_150859AC((s16)slot, 1));
+        obj_set_spawn_flags(obj);
+        obj_apply_setup_variant((struct127 *)obj, player_stat_get((s16)slot, 1));
     }
     if ((O8(0x66) & 0xC) == 8 || (O8(0x66) & 0xC) == 0xC) {
-        func_150836AC(obj);
+        obj_alloc_light_bufs(obj);
     } else {
         O32(0x314) = 0;
     }
-    O8(0x288) = func_15085118(type);
+    O8(0x288) = level_list_index_of(type);
     if (D_800BE616 != 0) {
-        v = func_151E6710(O8(0x127));
+        v = mp_player_team(O8(0x127));
         if (v >= 4) {
             v = 3;
         }
@@ -805,8 +813,8 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
     if (D_800BE9F0 == 0x1D) {
         O8(0x66) &= 0xDF;
     }
-    func_1514D6CC((struct127 *)obj);
-    v = func_15084E08((struct_eu_AF2A0 *)obj);
+    char_fx_init((struct127 *)obj);
+    v = obj_current_part_model((struct_eu_AF2A0 *)obj);
     found = 0;
     for (t = D_800A7610; t != D_800A7620; t += 8) {
         if (v == t[0]) {
@@ -824,7 +832,7 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
             *(f32 *)(p + 4) = 1.0f;
         }
     }
-    func_15085098(obj);
+    obj_randomize_anim_frame(obj);
     return slot + 1;
 }
 #undef O8
@@ -833,7 +841,7 @@ s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
 #undef OF
 #undef REC
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082E44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/setup_entry_spawn.s")
 #endif
 typedef struct {
     u8 pad0[0x127];
@@ -847,9 +855,10 @@ typedef struct {
     s32 unk304[4];
     s32 unk314;
 } S836AC;
-s32 func_1515D9F0(s32);
-s32 func_1515D9B0(void);
-void func_150836AC(S836AC *arg0)
+s32 light_alloc_light_buf(s32);
+s32 light_alloc_lookat_buf(void);
+/* was func_150836AC */
+void obj_alloc_light_bufs(S836AC *arg0)
 {
     s32 i;
     s32 sel;
@@ -859,17 +868,18 @@ void func_150836AC(S836AC *arg0)
         tmp = arg0->unk144[0x2F];
         if (tmp == 0) { if (arg0->unk127 == 0) sel = 5; else sel = 3; } else { sel = tmp; }
         for (i = 0; i <= D_80082FA0; i++) {
-            arg0->unk304[i] = func_1515D9F0(sel);
+            arg0->unk304[i] = light_alloc_light_buf(sel);
         }
         if (arg0->unk304[i - 1] != 0) {
             arg0->unk301 = sel;
         }
-        arg0->unk314 = func_1515D9B0();
+        arg0->unk314 = light_alloc_lookat_buf();
     }
 }
 
 #ifdef NON_MATCHING
-void func_15083784(struct127 *arg0, s32 arg1) {
+/* was func_15083784 */
+void obj_apply_setup_variant(struct127 *arg0, s32 arg1) {
     s32 sp1C;
     s32 temp_t5;
     s32 temp_v0_2;
@@ -953,17 +963,18 @@ void func_15083784(struct127 *arg0, s32 arg1) {
         break;
     }
     if (sp1C != -1) {
-        func_15083568(arg0, sp1C, 0.0f, 0);
+        obj_setup_run(arg0, sp1C, 0.0f, 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083784.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_apply_setup_variant.s")
 #endif
 #ifdef NON_MATCHING
 /* P36: run the setup command list D_80087064[arg1 - 1] ({list, count} of 0x10-byte commands) on obj: type 0 ->
- * func_15083F30, else func_15030DE4 (attachment spawn; arg10 = cmd[6] for type 2, else -1). Returns the last result. */
+ * obj_spawn_attached, else attachment_create (attachment spawn; arg10 = cmd[6] for type 2, else -1). Returns the last result. */
 
-s32 func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
+/* was func_15083568 */
+s32 obj_setup_run(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
     s32 temp_s4;
     s32 var_s1;
     s32 var_v0;
@@ -982,14 +993,14 @@ s32 func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
         do {
             temp_v0 = (*(u8 *)((u8 *)var_s0 + 3));
             if (temp_v0 == 0) {
-                var_v0 = func_15083F30(arg0, (*(u8 *)((u8 *)var_s0 + 1)), (*(u8 *)((u8 *)var_s0 + 0)), 0, (s32) (*(u8 *)((u8 *)var_s0 + 2)), (s32) (*(u8 *)((u8 *)var_s0 + 4)), (s32) (*(u8 *)((u8 *)var_s0 + 5)), (s32) (*(u8 *)((u8 *)var_s0 + 6)), arg2);
+                var_v0 = obj_spawn_attached(arg0, (*(u8 *)((u8 *)var_s0 + 1)), (*(u8 *)((u8 *)var_s0 + 0)), 0, (s32) (*(u8 *)((u8 *)var_s0 + 2)), (s32) (*(u8 *)((u8 *)var_s0 + 4)), (s32) (*(u8 *)((u8 *)var_s0 + 5)), (s32) (*(u8 *)((u8 *)var_s0 + 6)), arg2);
             } else {
                 if (temp_v0 == 2) {
                     var_v0_2 = (*(u8 *)((u8 *)var_s0 + 6));
                 } else {
                     var_v0_2 = -1;
                 }
-                var_v0 = (s32) func_15030DE4((u8 *) arg0, (*(u8 *)((u8 *)var_s0 + 0)), (*(u8 *)((u8 *)var_s0 + 1)), (*(u8 *)((u8 *)var_s0 + 7)), (s32) (*(u8 *)((u8 *)var_s0 + 4)), (s32) (*(u8 *)((u8 *)var_s0 + 5)), arg3, temp_s4 + 1, (s32) (*(u8 *)((u8 *)var_s0 + 2)), var_s0 + 8, (s32) var_v0_2, (s32) (*(u8 *)((u8 *)var_s0 + 0xE)), (s32) (*(u8 *)((u8 *)var_s0 + 0xF)));
+                var_v0 = (s32) attachment_create((u8 *) arg0, (*(u8 *)((u8 *)var_s0 + 0)), (*(u8 *)((u8 *)var_s0 + 1)), (*(u8 *)((u8 *)var_s0 + 7)), (s32) (*(u8 *)((u8 *)var_s0 + 4)), (s32) (*(u8 *)((u8 *)var_s0 + 5)), arg3, temp_s4 + 1, (s32) (*(u8 *)((u8 *)var_s0 + 2)), var_s0 + 8, (s32) var_v0_2, (s32) (*(u8 *)((u8 *)var_s0 + 0xE)), (s32) (*(u8 *)((u8 *)var_s0 + 0xF)));
             }
             var_v1 = var_v0;
             var_s1 += 1;
@@ -999,26 +1010,27 @@ s32 func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083568.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_setup_run.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_80087064;
-void func_150305E0(s32 arg0, s32 arg1);
+void attachment_remove_by_slot(s32 arg0, s32 arg1);
 struct127 *obj_find_by_id(s32 arg0);
-void func_15054A5C(struct127 *arg0, struct127 *arg1);
+void obj_release_partner_remove(struct127 *arg0, struct127 *arg1);
 void obj_remove(struct127 *arg0, s32 arg1);
 
-// object_setup_undo: undoes setup command list D_80087064[n - 1] on obj (the list func_15083568 runs): first
-// func_150305E0(obj, n), then for every type-0 command (+3 == 0) the object it spawned (obj_find_by_id(cmd[0])) is
+// object_setup_undo: undoes setup command list D_80087064[n - 1] on obj (the list obj_setup_run runs): first
+// attachment_remove_by_slot(obj, n), then for every type-0 command (+3 == 0) the object it spawned (obj_find_by_id(cmd[0])) is
 // removed if it is still attached to obj (+0x65 == obj's index + 1): kinds 0x1D / 0x6E / 0x2F are detached with
-// func_15054A5C(o, owner), other kinds removed with obj_remove(o, 0). No return value (callers ignore v0).
-s32 func_150836CC(struct127 *obj, s32 n) {
+// obj_release_partner_remove(o, owner), other kinds removed with obj_remove(o, 0). No return value (callers ignore v0).
+/* was func_150836CC */
+s32 obj_setup_undo(struct127 *obj, s32 n) {
     u8 *list = (u8 *) &D_80087064 + (n - 1) * 8;
     u8 *cmd;
     u8 *o;
     s32 i;
 
-    func_150305E0((s32) obj, n);
+    attachment_remove_by_slot((s32) obj, n);
     cmd = *(u8 **) list;
     for (i = 0; i < list[4]; i++, cmd += 0x10) {
         if (cmd[3] != 0) {
@@ -1029,7 +1041,7 @@ s32 func_150836CC(struct127 *obj, s32 n) {
             continue;
         }
         if (o[4] == 0x1D || o[4] == 0x6E || o[4] == 0x2F) {
-            func_15054A5C((struct127 *) o, (struct127 *) ((u8 *) D_800CC2D0 + o[0x65] * 0x32C - 0x32C));
+            obj_release_partner_remove((struct127 *) o, (struct127 *) ((u8 *) D_800CC2D0 + o[0x65] * 0x32C - 0x32C));
         } else {
             obj_remove((struct127 *) o, 0);
         }
@@ -1037,13 +1049,14 @@ s32 func_150836CC(struct127 *obj, s32 n) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150836CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_setup_undo.s")
 #endif
 #ifdef NON_MATCHING
 /* P36: set object slot's type (+4). 0xFF (no type): clears +0xE4/E6/E8, +0xD2 = +0xD4 = 0x46, +0xD6, +0x160, +0xC8 = 0.
  * Else +0xC8 = type record D_800D1C90[type]->+6 (s16), obj_set_scale(obj, +0x14C, +0x150), +5 = record +0x12.
- * Then +6 = func_15085170(obj) (model id); +0x58 = asset_lookup_rom(0, 2, 2, id) when D_800C5A90[id] != 0. arg2 unused. */
-void func_15083C3C(s32 slot, s32 type, s32 arg2) {
+ * Then +6 = obj_type_model_group(obj) (model id); +0x58 = asset_lookup_rom(0, 2, 2, id) when D_800C5A90[id] != 0. arg2 unused. */
+/* was func_15083C3C */
+void obj_set_type(s32 slot, s32 type, s32 arg2) {
     u8 *obj = (u8 *) D_800CC2D0 + slot * 0x32C;
     u8 *rec;
     u8 id;
@@ -1064,19 +1077,20 @@ void func_15083C3C(s32 slot, s32 type, s32 arg2) {
         obj_set_scale((struct127 *) obj, *(f32 *) (obj + 0x14C), *(f32 *) (obj + 0x150));
         obj[5] = ((u8 *) D_800D1C90[type])[0x12];
     }
-    id = func_15085170(obj);
+    id = obj_type_model_group(obj);
     obj[6] = id;
     if ((u16) D_800C5A90[id] != 0) {
         *(u8 **) (obj + 0x58) = asset_lookup_rom(0, 2, 2, id);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083C3C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_set_type.s")
 #endif
 #ifdef NON_MATCHING
 struct197 *allocate_memory(s32, s32, s32, s32);
 
-s32 func_15083D54(struct127 *arg0, u16 arg1, s32 arg2, f32 arg3) {
+/* was func_15083D54 */
+s32 obj_anim_state_alloc(struct127 *arg0, u16 arg1, s32 arg2, f32 arg3) {
     struct197 *temp_v0_2;
     u8 temp_v0;
 
@@ -1098,11 +1112,12 @@ block_7:
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083D54.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_anim_state_alloc.s")
 #endif
 #ifdef NON_MATCHING
 /* Copy an object's per-type parameters from its type record D_800D1C90[type] (P15, hand C). */
-void func_15083E20(u8 *arg0, u16 type, u8 *arg2) {
+/* was func_15083E20 */
+void obj_copy_type_params(u8 *arg0, u16 type, u8 *arg2) {
     u8 *t;
 
     if (type == 0xFF) {
@@ -1138,30 +1153,31 @@ void func_15083E20(u8 *arg0, u16 type, u8 *arg2) {
     }
     arg0[0x2C9] = arg0[0x2C8] + t[0x38];
     if (t[0x29] != 0) {
-        func_15036F60(arg0);
+        look_record_alloc(arg0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_copy_type_params.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1503D950(s32, s32);
-s32 func_1503DA64(s32, s32);
+s32 anim_bank_load(s32, s32);
+s32 model_header_load(s32, s32);
 struct127 *obj_alloc_slot(void);
 void obj_fade_reset(struct127 *arg0);
-s32 func_1515D9F0(s32);
-s32 func_1515D9B0(void);
-void func_15083E20(u8 *, u16, u8 *);
-void func_15083C3C(s32 slot, s32 type, s32 arg2);
-s32 func_15083D54(struct127 *, u16, s32, f32);
+s32 light_alloc_light_buf(s32);
+s32 light_alloc_lookat_buf(void);
+void obj_copy_type_params(u8 *, u16, u8 *);
+void obj_set_type(s32 slot, s32 type, s32 arg2);
+s32 obj_anim_state_alloc(struct127 *, u16, s32, f32);
 
-// object_spawn_attached: setup command type 0 (func_15083568): makes a new object of kind `kind` in a free slot
+// object_spawn_attached: setup command type 0 (obj_setup_run): makes a new object of kind `kind` in a free slot
 // (obj_alloc_slot; no NULL check, as the asm) attached to owner: +0x65 = owner slot + 1, +0x3B = 0xFF - own slot,
 // +0x5C = mode, +0xAB = arg3, +0 = arg4, +0xAC = flags (bit 0: +0xF8 |= 0x4000 and +0x270 = kind record +0xE * scale;
-// bit 1: passed to func_15083D54), +0x101 = keepScale (0: scales 1.0, else the owner's), copies of the owner's
+// bit 1: passed to obj_anim_state_alloc), +0x101 = keepScale (0: scales 1.0, else the owner's), copies of the owner's
 // +0x66 (without bit 4) and +0x1DD..+0x1E2 (+0x1DF takes the owner's +0x1DE, as the asm does), per-camera slots
-// +0x304.. from func_1515D9F0(1). While D_800C35EA == 1 the D_800C3638 byte is 0 during the kind setup. Returns it.
-s32 func_15083F30(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 flags, s32 keepScale, s32 arg7,
+// +0x304.. from light_alloc_light_buf(1). While D_800C35EA == 1 the D_800C3638 byte is 0 during the kind setup. Returns it.
+/* was func_15083F30 */
+s32 obj_spawn_attached(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 flags, s32 keepScale, s32 arg7,
                          f32 arg8) {
     u8 *ow = (u8 *) owner;
     u8 *o;
@@ -1170,8 +1186,8 @@ s32 func_15083F30(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 fl
     s32 flag2;
     s32 single;
 
-    func_1503DA64(kind, 0);
-    func_1503D950(kind, 0);
+    model_header_load(kind, 0);
+    anim_bank_load(kind, 0);
     o = (u8 *) obj_alloc_slot();
     o[0x3B] = 0xFF - (o - (u8 *) D_800CC2D0) / 0x32C;
     o[0xAB] = arg3;
@@ -1204,7 +1220,7 @@ s32 func_15083F30(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 fl
     }
     o[0x101] = keepScale;
     o[0xAC] = flags;
-    func_1503DA64(kind, 0);
+    model_header_load(kind, 0);
     if (flags & 1) {
         *(s32 *) (o + 0xF8) |= 0x4000;
         *(f32 *) (o + 0x270) = (f32) *(u16 *) ((u8 *) D_800D1C90[kind] + 0xE) * *(f32 *) (o + 0x14C);
@@ -1212,28 +1228,29 @@ s32 func_15083F30(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 fl
     flag2 = (flags & 2) ? 1 : 0;
     slot = (s32 *) (o + 0x304);
     for (i = 0; i <= D_80082FA0; i++) {
-        slot[i] = func_1515D9F0(1);
+        slot[i] = light_alloc_light_buf(1);
     }
     if (slot[i - 1] != 0) {
         o[0x301] = 1;
     }
-    *(s32 *) (o + 0x314) = func_1515D9B0();
+    *(s32 *) (o + 0x314) = light_alloc_lookat_buf();
     single = D_800C35EA == 1;
     if (single) {
         D_800C3638 = 0;
     }
-    func_15083E20(o, kind, NULL);
-    func_15083C3C((o - (u8 *) D_800CC2D0) / 0x32C, kind, 1);
-    func_15083D54((struct127 *) o, arg7, flag2, arg8);
+    obj_copy_type_params(o, kind, NULL);
+    obj_set_type((o - (u8 *) D_800CC2D0) / 0x32C, kind, 1);
+    obj_anim_state_alloc((struct127 *) o, arg7, flag2, arg8);
     if (single) {
         D_800C3638 = 1;
     }
     return (s32) o;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083F30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_spawn_attached.s")
 #endif
-s32 func_15084208(void) {
+/* was func_15084208 */
+s32 setup_next_free_id(void) {
     s32 id;
     s32 i;
     id = 1;
@@ -1256,7 +1273,8 @@ s32 func_15084208(void) {
 #ifdef NON_MATCHING
 /* P95: index of the level-setup entry (0x30 bytes at D_800D20FC, D_800D2520 of them) whose byte +0x28 is `id`;
  * -1 when id is 0 or not found. */
-s32 func_15083E0C(u8 id) {
+/* was func_15083E0C */
+s32 setup_entry_find_by_id(u8 id) {
     s32 i;
 
     if (id == 0) {
@@ -1270,14 +1288,15 @@ s32 func_15083E0C(u8 id) {
     return -1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/setup_entry_find_by_id.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P222: readable C for func_15083E90 (game_eu_AF2A0, 72 words); replaces the m2c-style NM body (goto loop). */
+/* P222: readable C for obj_find_by_setup_id (game_eu_AF2A0, 72 words); replaces the m2c-style NM body (goto loop). */
 // object_find_by_id: returns the live object (word +0 != 0) of D_800CC2D0 whose id byte +0x3B is `id`, scanning all
 // 26 slots (the asm peels slots 0 and 1 and unrolls the rest by 4); NULL for id 0 or when none matches.
-struct127 *func_15083E90(u8 id) {
+/* was func_15083E90 */
+struct127 *obj_find_by_setup_id(u8 id) {
     struct127 *o;
     s32 i;
 
@@ -1292,10 +1311,11 @@ struct127 *func_15083E90(u8 id) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_find_by_setup_id.s")
 #endif
-s32 func_15083FB0(u8 arg0) {
-    struct127 *p = func_15083E90(arg0);
+/* was func_15083FB0 */
+s32 obj_slot_by_setup_id(u8 arg0) {
+    struct127 *p = obj_find_by_setup_id(arg0);
 
     if (p != NULL) {
         return p - D_800CC2D0;
@@ -1304,7 +1324,8 @@ s32 func_15083FB0(u8 arg0) {
 }
 
 /* P80: one argument (obj_find_by_spawn reads only the id); the callers in game_CB1C0.c pass one */
-s32 func_15084000(s32 arg0) {
+/* was func_15084000 */
+s32 obj_slot_by_spawn(s32 arg0) {
     struct127 *temp_v0 = obj_find_by_spawn(arg0);
 
     if (temp_v0 != NULL) {
@@ -1315,11 +1336,11 @@ s32 func_15084000(s32 arg0) {
 
 #ifdef NON_MATCHING
 extern u16 D_800C5BC0[]; /* vertex block size of each model slot, in 16-byte vertices */
-void func_10004074(void *);
+void heap_free(void *);
 
 /*
  * P62: vertex blocks of object o for variant var: the two frame words o +0x28C + var * 8 (+0 / +4) that
- * func_1502CFEC draws from. The model slot is ((u8 *)o +0x2C4)[var]; its shared block is D_800D19A0[slot] with the
+ * obj_draw_model_dl draws from. The model slot is ((u8 *)o +0x2C4)[var]; its shared block is D_800D19A0[slot] with the
  * user count D_800D1F80[slot]. The sharing mode is (rec +0x10) & 3, rec being the record +0x144 of the parent object
  * o[0x65] - 1 (or o's own when o[0x65] is 0); no record: mode 0; slot 0: mode 2.
  *   both words set, or no shared block: nothing (0);
@@ -1332,7 +1353,8 @@ void func_10004074(void *);
  *   mode 3: nothing.
  * Returns 1 when an allocation failed, else 0.
  */
-s32 func_150844AC(struct127 *o, s32 var) {
+/* was func_150844AC */
+s32 obj_model_vertex_blocks_get(struct127 *o, s32 var) {
     u8 *obj = (u8 *)o;
     u32 *words = (u32 *)(obj + 0x28C + var * 8);
     u8 *rec;
@@ -1402,7 +1424,7 @@ s32 func_150844AC(struct127 *o, s32 var) {
                     failed = 1;
                     if (w == 1) {
                         if (words[0] != *shared) {
-                            func_10004074((void *)words[0]);
+                            heap_free((void *)words[0]);
                         } else {
                             *count -= 1;
                         }
@@ -1424,12 +1446,13 @@ s32 func_150844AC(struct127 *o, s32 var) {
     return failed;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150844AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_model_vertex_blocks_get.s")
 #endif
 
-void func_15084814(struct127 *, s32);
+void obj_model_refs_release(struct127 *, s32);
 
-void func_150847B4(u8 *arg0) {
+/* was func_150847B4 */
+void obj_model_refs_release_all(u8 *arg0) {
     s32 var_s0;
     u8 var_s1;
 
@@ -1440,7 +1463,7 @@ void func_150847B4(u8 *arg0) {
     var_s0 = 0;
     if ((s32) var_s1 > 0) {
         do {
-            func_15084814(arg0, var_s0);
+            obj_model_refs_release(arg0, var_s0);
             var_s0 += 1;
         } while (var_s0 != var_s1);
     }
@@ -1450,8 +1473,9 @@ void func_150847B4(u8 *arg0) {
 /* P150 */
 // object_model_refs_release: drops entry slot's two model block references (struct127 words +0x28C + slot * 8).
 // A reference to the slot's shared block D_800D19A0[model] (model = ((u8 *)+0x2C4)[slot]) only lowers its user
-// count D_800D1F80[model] (bytes); any other block is freed with func_100043B4(block, 3).
-void func_15084814(struct127 *obj, s32 slot) {
+// count D_800D1F80[model] (bytes); any other block is freed with heap_set_block_tag(block, 3).
+/* was func_15084814 */
+void obj_model_refs_release(struct127 *obj, s32 slot) {
     s32 **ref;
     s32 model;
     s32 i;
@@ -1468,20 +1492,21 @@ void func_15084814(struct127 *obj, s32 slot) {
         if (ref[i] == ((s32 **)&D_800D19A0)[model]) {
             ((u8 *)D_800D1F80)[model]--;
         } else {
-            func_100043B4(ref[i], 3);
+            heap_set_block_tag(ref[i], 3);
         }
         ref[i] = NULL;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084814.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_model_refs_release.s")
 #endif
 
-s32 func_1503D950(s32, s32);
-s32 func_1503DA64(s32, s32);
+s32 anim_bank_load(s32, s32);
+s32 model_header_load(s32, s32);
 extern s32 D_8008704C;
 
-void func_150848F0(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_150848F0 */
+void obj_load_part_models(u8 *arg0, s32 arg1, s32 arg2) {
     s32 var_s1;
     struct124 *temp_v0;
     u8 *var_s0;
@@ -1491,7 +1516,7 @@ void func_150848F0(u8 *arg0, s32 arg1, s32 arg2) {
 
     temp_s0 = arg0[4];
     if (temp_s0 != 0xFF) {
-        func_1503DA64(temp_s0, arg2);
+        model_header_load(temp_s0, arg2);
         temp_v0 = D_800D1C90[temp_s0];
         var_v1 = arg0 + 4;
         var_s2 = temp_v0->unk4;
@@ -1505,8 +1530,8 @@ void func_150848F0(u8 *arg0, s32 arg1, s32 arg2) {
         var_s2 += *(u8 *)((u8 *)temp_v0 + 0x38);
         if (var_s2 > 0) {
             do {
-                func_1503DA64(*var_s0, arg2);
-                func_1503D950(*var_s0, arg2);
+                model_header_load(*var_s0, arg2);
+                anim_bank_load(*var_s0, arg2);
                 var_s1 += 1;
                 var_s0 += 1;
             } while (var_s1 != var_s2);
@@ -1515,9 +1540,9 @@ void func_150848F0(u8 *arg0, s32 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-void func_150847B4(u8 *arg0);
-void func_100043B4(s32 *arg0, u32 arg1);
-void func_10004074(void *);
+void obj_model_refs_release_all(u8 *arg0);
+void heap_set_block_tag(s32 *arg0, u32 arg1);
+void heap_free(void *);
 
 // object_release_models: release the shared model resources of an object that goes away (called by the object
 // removal obj_remove for kinds other than 2 / 3). For each part id of the object (+0x2C4 list, +0x2C9 count):
@@ -1525,7 +1550,8 @@ void func_10004074(void *);
 // +4 != 0xFF, +5 != 2) has a part that uses the same block; then every D_800D1588 slot holding that block is
 // cleared. When no other object has the same part id, the per-kind buffers D_800C5C08 / D_800C6070 / D_800C6360
 // (indexed by the object's kind +4, as the asm does) are freed.
-void func_150849C0(struct127 *obj) {
+/* was func_150849C0 */
+void obj_release_models(struct127 *obj) {
     u8 *o = (u8 *) obj;
     u8 *parts;
     u8 *other;
@@ -1548,7 +1574,7 @@ void func_150849C0(struct127 *obj) {
     }
     nparts = o[0x2C9];
     parts = *(u8 **) (o + 0x2C4);
-    func_150847B4(o);
+    obj_model_refs_release_all(o);
     self = obj - D_800CC2D0;
     lastUser = 1;
     for (j = 0; j < nparts; j++) {
@@ -1579,7 +1605,7 @@ void func_150849C0(struct127 *obj) {
             }
         }
         if (freeModel && (model = D_800D1588[parts[j]]) != 0) {
-            func_100043B4((s32 *) (model - 0x10), 3);
+            heap_set_block_tag((s32 *) (model - 0x10), 3);
             for (k = 0; k < 187; k++) {
                 if (D_800D1588[k] == model) {
                     D_800D1588[k] = 0;
@@ -1587,18 +1613,18 @@ void func_150849C0(struct127 *obj) {
             }
         }
         if (freeRecord && D_800D1C90[parts[j]] != NULL) {
-            func_100043B4((s32 *) ((u8 *) D_800D1C90[parts[j]] - 0x10), 3);
+            heap_set_block_tag((s32 *) ((u8 *) D_800D1C90[parts[j]] - 0x10), 3);
             D_800D1C90[parts[j]] = NULL;
         }
         if (lastUser && (&D_800D19A0)[parts[j]] != 0) {
             if (D_800C5C08[kind] != 0) {
-                func_10004074((void *) D_800C5C08[kind]);
+                heap_free((void *) D_800C5C08[kind]);
                 D_800C5C08[kind] = 0;
-                func_10004074((void *) D_800C6070[kind]);
+                heap_free((void *) D_800C6070[kind]);
                 D_800C6070[kind] = 0;
             }
             if (D_800C6360[kind] != 0) {
-                func_10004074((void *) D_800C6360[kind]);
+                heap_free((void *) D_800C6360[kind]);
                 D_800C6360[kind] = 0;
             }
         }
@@ -1606,10 +1632,11 @@ void func_150849C0(struct127 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150849C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/obj_release_models.s")
 #endif
 
-u8 func_15084E08(struct_eu_AF2A0 *arg0) {
+/* was func_15084E08 */
+u8 obj_current_part_model(struct_eu_AF2A0 *arg0) {
     s32 temp_v1 = arg0->unk1C9;
 
     if (temp_v1 != 0) {
@@ -1618,7 +1645,8 @@ u8 func_15084E08(struct_eu_AF2A0 *arg0) {
     return arg0->unk2C4[0];
 }
 
-u8 func_15084E34(struct_eu_AF2A0 *arg0, s32 *arg1) {
+/* was func_15084E34 */
+u8 obj_current_part_model_idx(struct_eu_AF2A0 *arg0, s32 *arg1) {
     s32 temp_v1;
 
     if (arg0->unk1C9 != 0) {
@@ -1637,13 +1665,14 @@ u8 func_15084E34(struct_eu_AF2A0 *arg0, s32 *arg1) {
  * byte timer per slot (0 = idle, 0xFF = pinned). When a timer reaches 1 and the slot owns a block
  * (D_800D19A0[i]) that is not locked (D_800C5C08[i] == 0), the block is released: object references to
  * it (struct127 words 0x28C.., two per entry, unk2C9 entries) are cleared, objects whose entry list
- * (unk2C4) names slot i are notified through func_15084814, the slot's 12-byte records
+ * (unk2C4) names slot i are notified through obj_model_refs_release, the slot's 12-byte records
  * (D_800C5758[i], D_800C5A48[i] of them) free their texture through texture_unref_age2, then the block
  * (minus its 0x38-byte header) goes back to the allocator. */
 void texture_unref_age2(s32);
 extern u16 D_800C5A48[];         /* record count per slot */
 extern u8 *D_800C5758[];         /* 12-byte records per slot */
-void func_15084E80(void) {
+/* was func_15084E80 */
+void model_slots_age_release(void) {
     u8 *timers = (u8 *)D_800D2040;
     s32 *blocks = &D_800D19A0;
     u16 *counts = D_800C5A48;
@@ -1675,7 +1704,7 @@ void func_15084E80(void) {
                         ref[1] = 0;
                     }
                     if (((u8 *)obj->unk2C4)[j] == i) {
-                        func_15084814(obj, j);
+                        obj_model_refs_release(obj, j);
                     }
                 }
             }
@@ -1685,7 +1714,7 @@ void func_15084E80(void) {
                     texture_unref_age2(*(s32 *)(rec + 4));
                 }
             }
-            func_10004074(blocks[i] - 0x38);
+            heap_free(blocks[i] - 0x38);
             ((u8 *)D_800D1F80)[i] = 0;
             blocks[i] = 0;
             t = timers[i];
@@ -1694,9 +1723,10 @@ void func_15084E80(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084E80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/model_slots_age_release.s")
 #endif
-void func_15085098(u8 *arg0) {
+/* was func_15085098 */
+void obj_randomize_anim_frame(u8 *arg0) {
     u8 *p;
     f32 r;
     if (arg0[4] == 0x94) {
@@ -1708,7 +1738,8 @@ void func_15085098(u8 *arg0) {
 
 extern u8 D_800BE9B0;
 extern u16 D_800BE9B8[];
-s32 func_15085118(s32 arg0) {
+/* was func_15085118 */
+s32 level_list_index_of(s32 arg0) {
     s32 ret = 0;
     s32 i;
 

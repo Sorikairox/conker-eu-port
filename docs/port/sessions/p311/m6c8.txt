@@ -33,7 +33,7 @@ s#reach = PF32(0x370) < cam->distLimit;#reach = PF32(0x370) <= cam->dist;# % m1n
 s#if (reach || cam->force != 0) {#if (reach) {# % m1force
 s#&cam->yawVel, 10.0f, 18.0f#\&cam->yawVel, 10.0f, 17.0f# % m1force
 s#&cam->yawVel, 5.0f, 9.0f, PF32(0x7B4));#\&cam->yawVel, 5.0f, 9.5f, PF32(0x7B4));# % m1run m3
-s#func_150498A0(&PF32(0x194), PF32(0x198), &PF32(0x7D0), 5.0f#func_150498A0(\&PF32(0x194), PF32(0x194), \&PF32(0x7D0), 5.0f# % m1run
+s#math_spring_approach(&PF32(0x194), PF32(0x198), &PF32(0x7D0), 5.0f#math_spring_approach(\&PF32(0x194), PF32(0x194), \&PF32(0x7D0), 5.0f# % m1run
 s#PF32(0x190), &PF32(0x7D4), 5.0f, 9.0f#PF32(0x190), \&PF32(0x7D0), 5.0f, 9.0f# % m1run
 /PF32(0x7D4), 5.0f, 9.0f/,/}/s#PF32(0x39C) = PF32(0x37C) \* 0.017453292f;#PF32(0x39C) = PF32(0x37C);# % m1run
 /moving into place/,/free orbit/s#PS16(0x73C) = 2;#PS16(0x73C) = 3;# % m1nofol m1expire
@@ -42,7 +42,7 @@ s#PF32(0x190), &PF32(0x7D4), 5.0f, 9.0f#PF32(0x190), \&PF32(0x7D0), 5.0f, 9.0f# 
 s#rate = (mode != 0) ? 0.0128f : 0.025f;#rate = (mode != 0) ? 0.025f : 0.0128f;# % m2base m2mode0
 /free orbit/,/CAM_MODE_RIDE/s#cam->yawTarget = \*(f32 \*) (PPTR(0x3D0) + 0x40);#cam->yawTarget = *(f32 *) (PPTR(0x3D0) + 0x44);# % m2snapS
 /free orbit/,/CAM_MODE_RIDE/s#PF32(0x194) = PF32(0x198);#PF32(0x194) = PF32(0x190);# % m2snap
-s#func_151CA150(arg0, mode);#func_151CA150(arg0, 0);# % m2ride
+s#aim_hud_spawn_for_mode(arg0, mode);#aim_hud_spawn_for_mode(arg0, 0);# % m2ride
 s#PU8(0x84C) = 1;#PU8(0x84C) = 2;# % m2ride
 s#} else if (PU8(0x84C) != 0) {#} else if (PU8(0x84C) == 0) {# % m2leave
 s#if (cam->follow == 0) {#if (cam->force == 0) {# % m2base
@@ -113,8 +113,8 @@ s#off = -35.0f;#off = -36.0f;# % m0 m2aimb
 s#ox = sinf(PF32(0x39C) - 1.5707964f) \* off;#ox = sinf(PF32(0x39C) + 1.5707964f) * off;# % m2aim
 s#cam->offXVel = 0.0f;#cam->offZVel = 0.0f;# % m0
 s#cam->offZ = oz;#cam->offZ = ox;# % m0
-s#func_150498A0(&cam->offZ, oz, &cam->offZVel, 4.0f#func_150498A0(\&cam->offZ, oz, \&cam->offXVel, 4.0f# % m2aim
-s#func_150498A0(&cam->offX, 0.0f, &cam->offXVel, 4.0f, 9.0f#func_150498A0(\&cam->offX, 0.0f, \&cam->offXVel, 4.0f, 8.0f# % m2base
+s#math_spring_approach(&cam->offZ, oz, &cam->offZVel, 4.0f#math_spring_approach(\&cam->offZ, oz, \&cam->offXVel, 4.0f# % m2aim
+s#math_spring_approach(&cam->offX, 0.0f, &cam->offXVel, 4.0f, 9.0f#math_spring_approach(\&cam->offX, 0.0f, \&cam->offXVel, 4.0f, 8.0f# % m2base
 s#\*(f32 \*) (view + 0x150) = \*(f32 \*) (view + 0x150) + cam->offZ;#*(f32 *) (view + 0x150) = *(f32 *) (view + 0x150) + cam->offX;# % m0
 s#\*(f32 \*) (view + 0x13C) = \*(f32 \*) (view + 0x13C) + cam->offX;#*(f32 *) (view + 0x13C) = *(f32 *) (view + 0x13C) - cam->offX;# % m0
 s#(struct17 \*) (view + 0x130));#(struct17 *) (view + 0x134));# % m2base

@@ -7,7 +7,7 @@
 /impact_glow_spawn(&a.x/s/type, kind/kind, type/
 /for (n = (random_int() & 3) + 4; n > 0; n--) {/s/+ 4/+ 3/
 /r = random_float() \* 0.0929f + 0.0643f;/s/0.0643f/0.0644f/
-/func_15143874(x & 0xFF, random_float() \* 50.0f/s/50.0f/49.0f/
+/vec2_from_angle_byte(x & 0xFF, random_float() \* 50.0f/s/50.0f/49.0f/
 /vel\[0\] = /s/side.x \* sc\[0\]/side.x * sc[1]/
 /vel\[1\] = /s/up.y/up.x/
 /vel\[2\] = /s/dir.z \* 100.0f/dir.z * 99.0f/
@@ -27,13 +27,13 @@
 /(u32) y . 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner/s/1.0f, 1.0f, 1/1.0f, 2.0f, 1/
 /if (!splash || !D_800BE616) {/s/!D_800BE616/D_800BE616/
 /for (n = (random_int() & 3) + 3; n != 0; n--) {/s/+ 3/+ 2/
-/func_15143874(x & 0xFF, random_float() \* 140.0f/s/140.0f/141.0f/
+/vec2_from_angle_byte(x & 0xFF, random_float() \* 140.0f/s/140.0f/141.0f/
 /if (func_150ACEA0(b.x, b.y, b.z, dir.x/s/b.y, b.z/b.z, b.y/
 /dir.y \* 100.0f + side.y \* sc3\[0\] + up.y \* sc3\[1\],/s/side.y/side.x/
 /dir.z \* 100.0f + side.z \* sc3\[0\] + up.z \* sc3\[1\], 0, surf/s/, 0, surf/, 1, surf/
 /&dist, &obj, 0, 0.0f) != 0/s/0.0f) != 0/1.0f) != 0/
-/&& func_15145C90(obj) != 0 && dist < 1999.0f) {/s/1999.0f/1000.0f/
-/&& func_15145C90(obj) != 0 && dist < 1999.0f) {/s/!= 0 \&\&/== 0 \&\&/
+/&& prop_is_flagged(obj) != 0 && dist < 1999.0f) {/s/1999.0f/1000.0f/
+/&& prop_is_flagged(obj) != 0 && dist < 1999.0f) {/s/!= 0 \&\&/== 0 \&\&/
 /impact_debris_spawn(type, r \* 16.0f + 25.0f/s/25.0f/26.0f/
 /impact_debris_spawn(type, r \* 16.0f + 25.0f/s/(s32) surf, &hit/(s32) \&hit, \&hit/
 /(u32) y . 101 + 100, 1, 1, 1,/s/1, 1, 1,/1, 1, 0,/

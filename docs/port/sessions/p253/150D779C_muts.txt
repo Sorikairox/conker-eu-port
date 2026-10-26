@@ -2,13 +2,13 @@
 s/rec.normal\[1\] = -dir\[1\];/rec.normal[1] = dir[1];/ % tri notri
 s/if (tri != NULL)/if (tri == NULL)/ % tri notri
 s/rec.tri = \*tri;/rec.tri.v[0] = tri->v[0];/ % tri tri_odd
-s/func_151C0B54(pos, kind/func_151C0B54(dir, kind/ % tri
-s/func_151C0BA0(pos, kind, arg4)/func_151C0BA0(pos, kind, 0)/ % tri
-s/func_1515016C((u8 \*) &rec, kind, arg4)/func_1515016C((u8 *) \&rec, 0xFF, arg4)/ % tri
-s/func_15150108((u8 \*) &rec, kind, arg4)/func_15150108((u8 *) \&rec.info, kind, arg4)/ % notri
-s/func_151C0AA8((u8 \*) pos, kind, arg4)/func_151C0AA8((u8 *) pos, kind, 1)/ % tri
+s/impact_rumble_spawn(pos, kind/impact_rumble_spawn(dir, kind/ % tri
+s/impact_cam_shake_spawn(pos, kind, arg4)/impact_cam_shake_spawn(pos, kind, 0)/ % tri
+s/emit_spray_from_surface((u8 \*) &rec, kind, arg4)/emit_spray_from_surface((u8 *) \&rec, 0xFF, arg4)/ % tri
+s/emit_spray_along_normal((u8 \*) &rec, kind, arg4)/emit_spray_along_normal((u8 *) \&rec.info, kind, arg4)/ % notri
+s/impact_spark_flash_spawn((u8 \*) pos, kind, arg4)/impact_spark_flash_spawn((u8 *) pos, kind, 1)/ % tri
 s/^        \*(s32 \*) &rec.info.pos\[0\] = \*(s32 \*) &pos\[0\];$/        ;/ % notri
 s/= \*(s32 \*) &pos\[2\];/= *(s32 *) \&pos[1];/ % tri notri
 s/s16 v\[9\];/s16 v[8];/ % tri
 s/rec.normal\[2\] = -dir\[2\];/rec.normal[2] = -dir[1];/ % tri notri
-s/func_151C01F0((f32 \*) &rec.info, &rec.size);/func_151C01F0((f32 *) \&rec.info, \&rec.normal[0]);/ % tri notri
+s/impact_spray_params_init((f32 \*) &rec.info, &rec.size);/impact_spray_params_init((f32 *) \&rec.info, \&rec.normal[0]);/ % tri notri

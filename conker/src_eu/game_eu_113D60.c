@@ -5,8 +5,8 @@
 
 #ifdef NON_MATCHING
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-s32 func_15145C90(s32);
-f32 func_15144A74(void *, void *);
+s32 prop_is_flagged(s32);
+f32 vec3_dot(void *, void *);
 s32 memcpy(s32, s32, s32);
 
 /* effect3d_spawn_default's request (type 0x41) */
@@ -36,15 +36,15 @@ typedef struct {
     /* 0x10 */ s32 u10;      /* func_150ACEA0 outputs */
     /* 0x14 */ s32 u14;
     /* 0x18 */ u8 pad18[0x10];
-    /* 0x28 */ f32 side;     /* -1 / 1: sign of func_15144A74(hit - from, hit point) */
+    /* 0x28 */ f32 side;     /* -1 / 1: sign of vec3_dot(hit - from, hit point) */
     /* 0x2C */ s8 u2C;
 } Rec6550;
 #endif
 
 #ifdef NON_MATCHING
 // beam_ray_spawn: builds a type-0x41 effect3d_spawn_default request (from, to, a2 / a3 / arg4 floats, arg8 / arg9 bytes) and,
-// when `cast` is set, ray casts from -> to (func_150ACEA0): on a hit whose object passes func_15145C90 the record
-// gets hit bit 0, the hit point and side = sign of func_15144A74(hit - from, hit). Spawns the object (effect3d_spawn_default
+// when `cast` is set, ray casts from -> to (func_150ACEA0): on a hit whose object passes prop_is_flagged the record
+// gets hit bit 0, the hit point and side = sign of vec3_dot(hit - from, hit). Spawns the object (effect3d_spawn_default
 // 0xF / 0x15, flags random bits 2 | 1, size 0x30, room arg5, owner arg6) and copies the record to its +0x110.
 // Returns the object (0 when the spawn fails).
 /* was func_150E6550 */
@@ -86,12 +86,12 @@ s32 beam_ray_spawn(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 own
     if (cast != 0
         && func_150ACEA0(((f32 *) from)[0], ((f32 *) from)[1], ((f32 *) from)[2], to[0], to[1], to[2], &r.u10, &r.u14,
                          &r.pos[0], &r.pos[1], &r.pos[2], 0, &hitObj, 0, 0.0f) != 0
-        && func_15145C90(hitObj) != 0) {
+        && prop_is_flagged(hitObj) != 0) {
         d[0] = r.pos[0] - q.from[0];
         d[1] = r.pos[1] - q.from[1];
         d[2] = r.pos[2] - q.from[2];
         r.hit |= 1;
-        if (func_15144A74(d, r.pos) < 0.0f) {
+        if (vec3_dot(d, r.pos) < 0.0f) {
             r.side = -1.0f;
         } else {
             r.side = 1.0f;
@@ -110,7 +110,7 @@ s32 beam_ray_spawn(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 own
 #endif
 
 #ifdef NON_MATCHING
-f32 func_15144A74(void *, void *);
+f32 vec3_dot(void *, void *);
 extern s32 D_80088DB0;
 
 /* was func_150E67B0 */
@@ -138,7 +138,7 @@ s8 beam_ray_update(u8 *arg0) {
         sp20 = temp_v0;
         sp.u38 = (*(f32 *)((u8 *)temp_v0 + 0xC)) - (*(f32 *)((u8 *)arg0 + 0x3C));
         var_a3 = sp.u47;
-        if (func_15144A74(&sp.u30, temp_v0 + 4) < 0.0f) {
+        if (vec3_dot(&sp.u30, temp_v0 + 4) < 0.0f) {
             var_f0 = -1.0f;
         } else {
             var_f0 = 1.0f;
@@ -161,7 +161,7 @@ s8 beam_ray_update(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/beam_ray_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
 /* was func_150E6920 */
@@ -207,7 +207,7 @@ s16 *beam_ray_build_verts(u8 *arg0, s16 arg1) {
     s32 temp_a1;
     u8 *temp_v0;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u48, &sp.u43);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u48, &sp.u43);
     sp.u44 = sp.u48;
     if (sp.u48 != NULL) {
         if (sp.u43 != 0) {

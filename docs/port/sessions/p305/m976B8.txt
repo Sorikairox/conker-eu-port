@@ -18,7 +18,7 @@ s/0x160600/0x160601/ % base bigneg
 s/gfx_set_combine_mode(gfx, 0xB/gfx_set_combine_mode(gfx, 0xA/ % base bigneg
 s/D_800D30BC | 0x80000 | 0x2CA0/D_800D30BC | 0x2CA0/ % base bigneg
 s/0x5049D8/0x5049D9/ % base bigneg
-s/gfx = func_15142C10(gfx,/gfx = func_15142C10((Gfx *) gfxArg,/ % base bigneg
+s/gfx = gfx_env_color_cached(gfx,/gfx = gfx_env_color_cached((Gfx *) gfxArg,/ % base bigneg
 \#^    if (\*(u16 \*) (e + 0x1E) & 2) {#s/& 2/\& 4/ % base live
 \#^        a = \*(EmitterVec \*) (e + 0x10);#s/0x10/0x14/ % live
 \#^        width = rec->u5C;#s/u5C/u58/ % live

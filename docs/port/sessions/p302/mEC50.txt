@@ -38,10 +38,10 @@ s#    if (D_800BE616 == 0 || D_800C3E78 >= D_8008FD8C || (\*(u8 \*\*) (obj + 0x3
 s#    if (pl\[0x27\] != 0 \&\& (obj\[0x232\] != D_800A0BE8_c\[twin\] || obj\[0x104\] != 0)) {#    if (pl[0x27] != 0 \&\& obj[0x232] != D_800A0BE8_c[twin]) {# % hold104
 s#        ((u8 \*) D_800CC2D0)\[0x83\] = 0;#        ((u8 *) D_800CC2D0)[0x84] = 0;# % holdx
 s#        obj\[0x232\] = 0x11;#        obj[0x232] = 0x12;# % holdx
-s#            func_15052F9C(self, 156\.0f, atk\[4\], 4, 0, atk\[2\], 0xFF, 0, 0, 0);#            func_15052F9C(self, 156.0f, atk[4], 4, 0, atk[3], 0xFF, 0, 0, 0);# % atk atkt
+s#            obj_carry_release(self, 156\.0f, atk\[4\], 4, 0, atk\[2\], 0xFF, 0, 0, 0);#            obj_carry_release(self, 156.0f, atk[4], 4, 0, atk[3], 0xFF, 0, 0, 0);# % atk atkt
 s#        } else if ((D_800CC268 \& 1) \&\& ((u8 \*) D_800CC2D0 + obj\[0x124\] \* 0x32C)\[0x65\] == 0#        } else if ((D_800CC268 \& 1) \&\& ((u8 *) D_800CC2D0 + obj[0x124] * 0x32C)[0x66] == 0# % hitb65
 s#                   \&\& (P(0x25C, s32) \& 0x400)) {#                   \&\& (P(0x25C, s32) \& 0x600)) {# % hitno
-s#            func_1505327C(self, 50\.0f, 3\.0f, atk\[0\], atk\[4\]);#            func_1505327C(self, 50.0f, 3.0f, atk[0], atk[2]);# % hit
+s#            obj_carry_pickup(self, 50\.0f, 3\.0f, atk\[0\], atk\[4\]);#            obj_carry_pickup(self, 50.0f, 3.0f, atk[0], atk[2]);# % hit
 s#    if ((twin \&\& 5\.0f < P(0x3C, f32)) || (!twin \&\& P(0x84, u16) == 0xA)) {#    if ((twin \&\& 5.0f <= P(0x3C, f32)) || (!twin \&\& P(0x84, u16) == 0xA)) {# % twleanslow
 s#        if (err > 0x3000) {#        if (err > 0x2000) {# % splean spleanmid
 s#            err = -0x3000;#            err = -0x2000;# % spleanneg

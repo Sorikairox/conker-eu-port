@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
+/* was func_15166F10 */
+void flash_blades_spawn(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
     u8 *temp_v0;
     s32 var_s0;
     s32 var_s2;
@@ -32,7 +33,7 @@ void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
             var_s1 += 0x40;
             var_s0 += 0x5A;
         } while (var_s2 != 0xC0);
-        func_1517E5CC(arg0, arg1, arg2);
+        ambient_flare_point_set(arg0, arg1, arg2);
     }
 }
 
@@ -41,10 +42,11 @@ extern s32 D_8008CDEC;
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
 // spark_burst_tick: per-frame countdown of a spark burst object (obj+0xD0). At 5 it emits one particle record per
-// joint matrix (3 matrices at obj+0x10, 0x40 apart): the point (-400, 10, 0) in that matrix (func_150A7E40) becomes the
+// joint matrix (3 matrices at obj+0x10, 0x40 apart): the point (-400, 10, 0) in that matrix (mtxf_transform_point) becomes the
 // record position, with a random 0x55..0xD4 value, size obj+0xD8 * 4000 and the owner bytes obj+0xC / obj+1
 // (node_spawn_sprite). At 0 the object is freed (node_destroy).
-void func_eu_151670C0(u8 *obj) {
+/* was func_eu_151670C0 */
+void flash_blades_update(u8 *obj) {
     struct {
         s32 u00;
         s32 u04;
@@ -101,7 +103,7 @@ void func_eu_151670C0(u8 *obj) {
         rec.u34 = 0;
         for (i = 0; i < 3; i++) {
             guMtxL2F(mf, (Mtx *) (obj + 0x10 + i * 0x40));
-            func_150A7E40(mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
+            mtxf_transform_point(mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
             rec.u0E = (random_int() & 0x7F) + 0x55;
             rec.pos[0] = (s32) x;
             rec.pos[1] = (s32) y;
@@ -113,12 +115,13 @@ void func_eu_151670C0(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/func_eu_151670C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/flash_blades_update.s")
 #endif
 
 extern Vtx D_8008B780[];
 
-Gfx *func_151672D8(Gfx *gdl, u8 *arg1, s32 arg2) {
+/* was func_151672D8 */
+Gfx *flash_blades_draw(Gfx *gdl, u8 *arg1, s32 arg2) {
     s32 i;
     s32 t;
 
@@ -145,14 +148,16 @@ extern u8 *D_800DD658;
 extern s32 D_800DD650;
 extern s32 D_800DD654;
 extern u8 D_800DD660[];
-void func_151674DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_151674DC */
+void layer_pre_flash_texture(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 **p = &D_800DD658;
 
     *p = D_800908FC;
-    func_15095380(arg0, *p, D_800DD650, D_800DD660, 0, 0, 0, D_800DD654, 3);
+    sprite_load_texture(arg0, *p, D_800DD650, D_800DD660, 0, 0, 0, D_800DD654, 3);
 }
 
-Gfx *func_15167548(Gfx *arg0, s32 arg1, s32 arg2) {
+/* was func_15167548 */
+Gfx *layer_pre_identity_mtx(Gfx *arg0, s32 arg1, s32 arg2) {
     gSPMatrix(arg0++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     return arg0;
 }

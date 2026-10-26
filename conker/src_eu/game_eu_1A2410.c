@@ -7,7 +7,8 @@
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CDEC;
 
-void func_15174690(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8) {
+/* was func_15174690 */
+void fx_dust_puff_behind_obj(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8) {
     struct {
         s32 u40;
         s32 u44;
@@ -99,9 +100,10 @@ void func_15174690(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2410/func_15174690.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2410/fx_dust_puff_behind_obj.s")
 #endif
-void func_15174E90(u8 *arg0)
+/* was func_15174E90 */
+void fx_puff_fade_grow_tick(u8 *arg0)
 {
   s32 v;
   s32 temp_v1;

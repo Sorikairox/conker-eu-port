@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-/* P289: func_151B8DB0's records (the N64 layouts: the callees copy / read them by offset) */
-typedef struct {            /* func_15132FBC's particle spec (0x76 bytes; same layout as game_eu_201240's ImpactParticle) */
+/* P289: swinging_lamp_spawn's records (the N64 layouts: the callees copy / read them by offset) */
+typedef struct {            /* mdl_particle_spawn's particle spec (0x76 bytes; same layout as game_eu_201240's ImpactParticle) */
     f32 scale[4];           /* 0x00 */
     f32 rot[3];             /* 0x10 */
     f32 one[3];             /* 0x1C */
@@ -60,7 +60,7 @@ typedef struct {            /* copied to the light_ctrl_alloc object's +0x18 (0x
     s32 emitter;            /* the particle_emitter_spawn result, stored afterwards */
     f32 invScale;
 } DripLink;
-u8 *func_15132FBC(DripParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+u8 *mdl_particle_spawn(DripParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 u8 *light_ctrl_alloc(Header *header, s32 arg1, s32 size, u8 arg3, s32 arg4);
 s32 particle_emitter_spawn(DripEmit *emit, s32 emitSize, DripSpawn *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
@@ -73,10 +73,11 @@ static const f32 sDripPos[6][3] = { /* D_800AA8C0 */
 static const f32 sDripScale[6] = { 1.0f, 1.0f, 2.0f, 2.0f, 2.0f, 2.0f }; /* D_800AA908 */
 
 // level_drip_spawn: spawns drip `which` (0..5) of a level at its fixed place (D_800AA8C0, size D_800AA908): a
-// swinging particle (func_15132FBC, kind 0x22, 9-float swing block at +0x170, flag 0x400 when zone_tree_find_leaf finds
+// swinging particle (mdl_particle_spawn, kind 0x22, 9-float swing block at +0x170, flag 0x400 when zone_tree_find_leaf finds
 // the place in water), a link object (light_ctrl_alloc, type 7) holding the particle and 1 / size, and a falling
 // emitter (particle_emitter_spawn) from the place to 500 below whose handle goes into the link.
-void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
+/* was func_151B8DB0 */
+void swinging_lamp_spawn(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     DripParticle part;
     DripSpawn spawn;
     DripEmit emit;
@@ -127,7 +128,7 @@ void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     part.b70 = 0;
     part.h72 = 1;
     part.h74 = 0xFF;
-    p = func_15132FBC(&part, 3, 0xFF, 0x24, arg2, arg3);
+    p = mdl_particle_spawn(&part, 3, 0xFF, 0x24, arg2, arg3);
     if (p == NULL) {
         return;
     }
@@ -185,12 +186,13 @@ void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     ((DripLink *)(obj + 0x18))->emitter = particle_emitter_spawn(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, arg2, arg3);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/func_151B8DB0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/swinging_lamp_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_800AA944;   /* ~0.0234f (rodata) */
-s32 func_151B97C4(u8 *arg0) {
+/* was func_151B97C4 */
+s32 swinging_lamp_swing_update(u8 *arg0) {
     u8 *temp_v0;
     f32 temp_f2;
     f32 temp_f12;
@@ -199,7 +201,7 @@ s32 func_151B97C4(u8 *arg0) {
     u8 *sp18;
 
     (*(f32 *)((u8 *)arg0 + 0x178)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x178)) + ((*(f32 *)((u8 *)arg0 + 0x17C)) * D_800BE9A4));
-    temp_f0 = func_15144B68((*(f32 *)((u8 *)arg0 + 0x178)));
+    temp_f0 = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x178)));
     temp_v0 = arg0 + 0x170;
     (*(f32 *)((u8 *)temp_v0 + 8)) = temp_f0;
     sp18 = temp_v0;
@@ -218,9 +220,10 @@ s32 func_151B97C4(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/func_151B97C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/swinging_lamp_swing_update.s")
 #endif
-s32 func_151B98C0(Mtx *arg0, u8 *arg1) {
+/* was func_151B98C0 */
+s32 swinging_lamp_get_matrix(Mtx *arg0, u8 *arg1) {
     f32 mf[4][4];
     u8 *p;
 
@@ -243,15 +246,16 @@ s32 func_151B98C0(Mtx *arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 /* searchlight_light_update: P237. D_8008B0F0 handler of the swinging searchlight (object at effect +0x18, which
- * func_151B97C4 swings: angle +0x170, position +0x38, scale +0x18 / +0x1C). The lamp point (0, -150, 0) of the
- * object's model matrix (func_151B98C0's matrix: rotation by +0x170, x / z scaled by +0x18, y by +0x1C, at +0x38)
+ * swinging_lamp_swing_update swings: angle +0x170, position +0x38, scale +0x18 / +0x1C). The lamp point (0, -150, 0) of the
+ * object's model matrix (swinging_lamp_get_matrix's matrix: rotation by +0x170, x / z scaled by +0x18, y by +0x1C, at +0x38)
  * becomes the light position (+0xE / +0x10 / +0x12 of effect +0x14). When the effect has a beam record (+0x1C), its
  * two points run from the object along the direction object -> lamp (scaled by effect +0x20 / 150): the first at
  * 65 * y scale from the object, the second 500 further. Returns 1. */
 #define B9B8_BEAM (*(u8 **) ((u8 *) arg0 + 0x1C))
-s32 func_151B99B8(struct225 *arg0) {
+/* was func_151B99B8 */
+s32 swinging_lamp_light_update(struct225 *arg0) {
     u8 *obj = *(u8 **) ((u8 *) arg0 + 0x18);
     f32 mf[4][4];
     f32 x, y, z;
@@ -270,7 +274,7 @@ s32 func_151B99B8(struct225 *arg0) {
     mf[2][0] *= *(f32 *) (obj + 0x18);
     mf[2][1] *= *(f32 *) (obj + 0x18);
     mf[2][2] *= *(f32 *) (obj + 0x18);
-    func_150A7E40(mf, 0.0f, -150.0f, 0.0f, &x, &y, &z);
+    mtxf_transform_point(mf, 0.0f, -150.0f, 0.0f, &x, &y, &z);
     arg0->unk14->unkE = x;
     arg0->unk14->unk10 = y;
     arg0->unk14->unk12 = z;
@@ -293,10 +297,11 @@ s32 func_151B99B8(struct225 *arg0) {
 }
 #undef B9B8_BEAM
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/func_151B99B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/swinging_lamp_light_update.s")
 #endif
 
-void func_151B9C10(f32 *arg0) {
+/* was func_151B9C10 */
+void swinging_lamp_kick(f32 *arg0) {
     arg0[0x188 / 4] = 5.0f;
     arg0[0x18C / 4] = D_800AA94C;
     arg0[0x190 / 4] = D_800AA950;

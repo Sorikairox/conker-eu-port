@@ -1,8 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#ifdef NON_MATCHING // hoisted: func_1517ABB0 calls it before func_1517B270's block
-void func_10004074(s32);
+#ifdef NON_MATCHING // hoisted: player_morph_cache_age calls it before player_morph_blend's block
+void heap_free(s32);
 #endif
 
 
@@ -17,7 +17,8 @@ typedef struct {
 } DescABB0;
 extern DescABB0 D_800A7610[];
 extern u16 D_800C4730[];
-void func_1517ABB0(void) {
+/* was func_1517ABB0 */
+void player_morph_cache_age(void) {
     s32 i;
     s32 j;
     s32 k;
@@ -30,7 +31,7 @@ void func_1517ABB0(void) {
                         if (((EntABB0 ***)D_800DD460)[i][j][k].t != 0) {
                             ((EntABB0 ***)D_800DD460)[i][j][k].t--;
                         } else {
-                            func_10004074(((EntABB0 ***)D_800DD460)[i][j][k].h);
+                            heap_free(((EntABB0 ***)D_800DD460)[i][j][k].h);
                             ((EntABB0 ***)D_800DD460)[i][j][k].h = 0;
                         }
                     }
@@ -41,9 +42,9 @@ void func_1517ABB0(void) {
 }
 
 #ifdef NON_MATCHING
-u8 func_15084E08(struct127 *);
+u8 obj_current_part_model(struct127 *);
 s32 asset_load(s32 *arg0, s32 arg1, ...);
-void func_10024190(void *, s32); /* osWritebackDCache */
+void os_writeback_dcache(void *, s32); /* osWritebackDCache */
 s32 allocate_memory(s32, s32, s32, s32);
 extern s32 D_800C4440;
 
@@ -58,14 +59,15 @@ typedef struct {
 
 /*
  * player_morph_blend: blends player `idx`'s (D_800CC2D0) morph target from the previous shape to shape `target`
- * over `frames` ticks. The shape set D_800A7610[i] is picked by the player's type (func_15084E08); a player with
+ * over `frames` ticks. The shape set D_800A7610[i] is picked by the player's type (obj_current_part_model); a player with
  * +0x1C8 set and no vertex buffer (+0x28C[D_800BE9C0]) or no D_800D19A0 entry only advances the blend factor. On
  * a new target the old one becomes `prev` and t restarts at 0. Shape vertex sets (one per part j, loaded on demand
  * with asset_load and cached in D_800DD460[i][j][shape]) are lerped s16 x / y / z by t into the player's vertex
  * buffer at the part's index D_800C4440[type][j] (16-byte vertices), then written back from the cache. The finished
  * blend (t == 1) counts +0xA down; returns 0, or -1 when nothing was written.
  */
-s32 func_1517B270(s32 target, s32 frames, s32 idx) {
+/* was func_1517B270 */
+s32 player_morph_blend(s32 target, s32 frames, s32 idx) {
     u8 *ply = (u8 *)D_800CC2D0 + idx * 0x32C;
     DescABB0 *desc;
     Blend1A8930 *b;
@@ -85,7 +87,7 @@ s32 func_1517B270(s32 target, s32 frames, s32 idx) {
     s32 args[4];
 
     type = ply[4];
-    found = func_15084E08((struct127 *)ply);
+    found = obj_current_part_model((struct127 *)ply);
     desc = NULL;
     for (i = 0; i < 2; i++) {
         if (found == D_800A7610[i].type) {
@@ -164,7 +166,7 @@ s32 func_1517B270(s32 target, s32 frames, s32 idx) {
         if (fail) {
             for (j = 0; j < D_800C4730[desc->type]; j++) {
                 if ((*cache)[j] != NULL) {
-                    func_10004074((s32)(*cache)[j]);
+                    heap_free((s32)(*cache)[j]);
                 }
             }
             return -1;
@@ -191,7 +193,7 @@ s32 func_1517B270(s32 target, s32 frames, s32 idx) {
             ents[b->prev].h = asset_load(args, 4, 0x13, i, j, b->prev);
             ents = (*cache)[j];
             if (ents[b->prev].h == 0) {
-                func_10004074(ents[b->cur].h);
+                heap_free(ents[b->cur].h);
                 (*cache)[j][b->cur].h = 0;
                 return -1;
             }
@@ -208,7 +210,7 @@ s32 func_1517B270(s32 target, s32 frames, s32 idx) {
             dst[k * 8 + 1] = (s32)(((f32)to[k * 3 + 1] - (f32)from[k * 3 + 1]) * b->t + (f32)from[k * 3 + 1]);
             dst[k * 8 + 2] = (s32)(((f32)to[k * 3 + 2] - (f32)from[k * 3 + 2]) * b->t + (f32)from[k * 3 + 2]);
         }
-        func_10024190(dst, cnt * 16);
+        os_writeback_dcache(dst, cnt * 16);
     }
     if (1.0f == b->t) {
         b->hold--;
@@ -218,5 +220,5 @@ s32 func_1517B270(s32 target, s32 frames, s32 idx) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A8930/func_1517B270.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A8930/player_morph_blend.s")
 #endif

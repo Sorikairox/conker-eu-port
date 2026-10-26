@@ -42,15 +42,15 @@
 \#^    if (rec\.soundFn != -1) {$#s/!= -1/!= 0/ %
 \#^        rec\.voice = 0;$#s/= 0;/= 1;/ %
 \#^    mtx = \*(u8 \*\*)(rec\.obj + 0x1D4) + (rec\.node << 6);$#s/<< 6/<< 5/ %
-\#^    func_15143134(&rec\.at, &rec\.pos, mtx);$#s/&rec.pos,/\&rec.pos2,/ %
-\#^    func_15143134(&rec\.at2, &rec\.pos2, mtx);$#s/&rec.at2/\&rec.at/ %
+\#^    mtx_transform_point_or_origin(&rec\.at, &rec\.pos, mtx);$#s/&rec.pos,/\&rec.pos2,/ %
+\#^    mtx_transform_point_or_origin(&rec\.at2, &rec\.pos2, mtx);$#s/&rec.at2/\&rec.at/ %
 \#^    req\.pos\.x = rec\.pos\.x;$#s/rec.pos.x/rec.pos.y/ %
 \#^    req\.pos\.z = rec\.pos\.z;$#s/rec.pos.z/rec.pos2.z/ %
 \#^    rec\.u3C = 0\.0f;$#s/0.0f/1.0f/ %
 \#^    req\.u10 = 3;$#s/= 3;/= 2;/ %
-\#^    e = func_15147FF0(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/0x90, 0x24/0x90, 0x20/ %
-\#^    e = func_15147FF0(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/0, 0, 0, arg2/0, 0, 1, arg2/ %
-\#^    e = func_15147FF0(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/arg2, arg3/arg3, arg2/ %
+\#^    e = fxrec_spawn(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/0x90, 0x24/0x90, 0x20/ %
+\#^    e = fxrec_spawn(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/0, 0, 0, arg2/0, 0, 1, arg2/ %
+\#^    e = fxrec_spawn(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/arg2, arg3/arg3, arg2/ %
 \#^    if (e != NULL) {$#s/!= NULL/== NULL/ %
 \#^        dst = \*(EmitterRecord \*\*)(e + 0x98);$#s/0x98/0x94/ %
 \#^        if (dst->speedFn != -1) {$#s/!= -1/!= 0/ %

@@ -1,9 +1,9 @@
 /* P84 runtime checks after merging port-b P68 / P73 / P77 / P82.
- *  ?p84text=N      func_151E5928 (per game mode text bank choice, game_eu_20B730.c, called from game_45B80.c) ->
- *                  func_151E7110 (text bank loader, P68 C): language D_800E101A / D_800BEECB, loaded bank D_800E1003,
+ *  ?p84text=N      game_mode_frame_step (per game mode text bank choice, game_eu_20B730.c, called from game_45B80.c) ->
+ *                  text_bank_load (text bank loader, P68 C): language D_800E101A / D_800BEECB, loaded bank D_800E1003,
  *                  bank D_800E1004, string table D_800E1008, bank-1 extras D_80090178 / D_800E0FB8 when they change
  *                  (first N changes).
- *  DIAGNOSTIC ?p84notext=1  func_151E5928 does nothing (the pre-merge asm stub behaviour): bisects the text bank load. */
+ *  DIAGNOSTIC ?p84notext=1  game_mode_frame_step does nothing (the pre-merge asm stub behaviour): bisects the text bank load. */
 #include <stdint.h>
 #include "../ultra/pc_mem.h"
 
@@ -27,8 +27,8 @@ static unsigned B(const unsigned char *p) { return *(const unsigned char *)((uin
 static unsigned W(const unsigned char *p) { return *(const unsigned *)p; }
 static int ftext = -1, fnotext = -1;
 
-void __real_func_151E5928(void);
-void __wrap_func_151E5928(void) {
+void __real_game_mode_frame_step(void);
+void __wrap_game_mode_frame_step(void) {
     static unsigned last[6], n;
     unsigned cur[6];
     int i, changed = 0;
@@ -39,7 +39,7 @@ void __wrap_func_151E5928(void) {
     p88_watch_init();
     p84_frame();
     if (flag(&fnotext, "p84notext")) return;
-    __real_func_151E5928();
+    __real_game_mode_frame_step();
     { void p103_frame(void); p103_frame(); } /* P103 ?p103boot */
     if (!flag(&ftext, "p84text")) return;
     cur[0] = B(D_800E101A_) | B(D_800BEECB_) << 8 | B(D_800E1003_) << 16;
@@ -61,7 +61,7 @@ void __wrap_func_151E5928(void) {
 }
 
 /* ?p84lang=N: watch the language byte D_800E101A at every asm-stub hit (port_stub_trace_hook; don't combine with
- * ?p69watch / ?p49walk) and at each func_151E5928 call; log the first N changes with the last stub and the JS stack. */
+ * ?p69watch / ?p49walk) and at each game_mode_frame_step call; log the first N changes with the last stub and the JS stack. */
 extern void (*port_stub_trace_hook)(const char *name);
 void port_js_stack(int skip, int n);
 static int flang = -1;
@@ -79,7 +79,7 @@ static void lang_watch(const char *where) {
 }
 static void lang_hook(const char *name) { lang_watch("stub"); l_last = name; }
 /* P88 ?p88scene=N: scene slots 0 / 1 (state D_800C35EA[slot], counter D_800C39D0[slot], length D_eu_800C3A60[slot],
- * func_1501CE34 C since the P83 merge) and the language byte, logged when the state or length changes (first N). */
+ * cutscene_compute_length C since the P83 merge) and the language byte, logged when the state or length changes (first N). */
 extern unsigned char p88_D_800C35EA[] __asm__("D_800C35EA");
 extern unsigned char p88_D_800C39D0[] __asm__("D_800C39D0");
 extern unsigned char p88_D_eu_800C3A60[] __asm__("D_eu_800C3A60");
@@ -118,7 +118,7 @@ void p84_frame(void) {
 
 /* ?p84hang=N: hang finder. At every asm-stub hit (port_stub_trace_hook; don't combine with ?p84lang / ?p69watch /
  * ?p49walk): when port_frame_count has not moved for 3 s of wall time, log the stub and the JS stack (N times, 3 s
- * apart). Installed from main via p84_hang_init (called by the func_151E5928 wrap on its first call). */
+ * apart). Installed from main via p84_hang_init (called by the game_mode_frame_step wrap on its first call). */
 #include <emscripten.h>
 static int fhang = -1;
 static unsigned h_frame, h_n, h_hits;
@@ -138,15 +138,15 @@ void p84_hang_init(void) {
     if (fhang < 0) { fhang = port_flag("p84hang"); if (fhang) port_stub_trace_hook = hang_hook; }
 }
 
-/* P88: the TEMPORARY __wrap_func_1501E364 guard (P84, scene length 0) was removed: the port-b branch converted the
- * scene length func_1501CE34 in P83 (game_eu_4A070.c, NON_MATCHING). */
+/* P88: the TEMPORARY __wrap_cutscene_check_finished guard (P84, scene length 0) was removed: the port-b branch converted the
+ * scene length cutscene_compute_length in P83 (game_eu_4A070.c, NON_MATCHING). */
 
-/* P91: the P88 TEMPORARY guard __wrap_func_1501E364 (scene end: state + cutscene flag D_800C3638) was removed: the
- * port-b branch converted func_1501E888 in P87 (game_eu_4A070.c, NON_MATCHING). */
+/* P91: the P88 TEMPORARY guard __wrap_cutscene_check_finished (scene end: state + cutscene flag D_800C3638) was removed: the
+ * port-b branch converted cutscene_end in P87 (game_eu_4A070.c, NON_MATCHING). */
 
 /* P88 ?p88watch=N: from frame 960 watch player record 0 position (+0x14 / +0x18 / +0x1C) at every asm-stub hit
  * (port_stub_trace_hook; don't combine with ?p84lang / ?p84hang / ?p69watch / ?p49walk); log the first N changes with
- * the previous stub, the current stub and the JS stack. Installed from p88_watch_init (func_151E5928 wrap). */
+ * the previous stub, the current stub and the JS stack. Installed from p88_watch_init (game_mode_frame_step wrap). */
 static int fwatch = -1;
 static unsigned w_val[3], w_n;
 static const char *w_last = "-";
@@ -169,18 +169,18 @@ void p88_watch_init(void) {
     if (fwatch < 0) { fwatch = port_flag("p88watch"); if (fwatch) port_stub_trace_hook = watch_hook; }
 }
 
-/* P91: the P88 TEMPORARY guard __wrap_func_1501D348 (restore of object records moved from uninitialised
- * D_800C3958 blocks) was removed: the port-b branch converted the producer func_1501ECA4 (and func_15020F6C) in P87. */
+/* P91: the P88 TEMPORARY guard __wrap_cutscene_scene_load (restore of object records moved from uninitialised
+ * D_800C3958 blocks) was removed: the port-b branch converted the producer cutscene_camera_track_pass (and cutscene_apply_cameras) in P87. */
 
-/* P105: the P97 TEMPORARY guard (__wrap_func_1501FD34 / __wrap_func_1501FF10 skipped the P92 path C while its
- * producer func_15020920 was an asm stub) was removed: port-b P96 converted func_15020920 (segment cubic). */
+/* P105: the P97 TEMPORARY guard (__wrap_cutscene_actor_place_at / __wrap_cutscene_actor_heading_at skipped the P92 path C while its
+ * producer cutscene_path_prepare_segment was an asm stub) was removed: port-b P96 converted cutscene_path_prepare_segment (segment cubic). */
 
 /* P110: the P105 TEMPORARY guard __wrap_impact_spark_spawn (skipped the P100 C particle spawner while its trail
- * handlers were asm stubs) was removed: port-b P108 converted the trail chain func_15148428 / func_151485AC /
- * func_15148E34 / func_15149114 / func_15149350. */
+ * handlers were asm stubs) was removed: port-b P108 converted the trail chain trail_step / trail_draw /
+ * trail_grow / trail_fall / trail_shrink. */
 
 /* P110 DIAGNOSTIC ?p110part=1 (node PORT_P110PART=1): counts the particle spawner impact_spark_spawn (P100 C) and the trail
- * step / draw handlers func_15148428 / func_151485AC (P108 C); logs the first 3 calls of each and every 500th.
+ * step / draw handlers trail_step / trail_draw (P108 C); logs the first 3 calls of each and every 500th.
  * Pure pass-through. */
 static int fp110 = -1; static unsigned np110[3];
 static void p110log(int k, const char *n, void *r) {
@@ -196,10 +196,10 @@ void *__wrap_impact_spark_spawn(void *pos, void *vel, float scale, int sprite, i
     p110log(0, "impact_spark_spawn (spawn)", r);
     return r;
 }
-int __real_func_15148428(void *obj);
-int __wrap_func_15148428(void *obj) { int r = __real_func_15148428(obj); p110log(1, "func_15148428 (trail step)", (void *)(long)r); return r; }
-int __real_func_151485AC(void *obj, int gfx, int a2);
-int __wrap_func_151485AC(void *obj, int gfx, int a2) { int r = __real_func_151485AC(obj, gfx, a2); p110log(2, "func_151485AC (trail draw)", (void *)(long)r); return r; }
+int __real_trail_step(void *obj);
+int __wrap_trail_step(void *obj) { int r = __real_trail_step(obj); p110log(1, "trail_step (trail step)", (void *)(long)r); return r; }
+int __real_trail_draw(void *obj, int gfx, int a2);
+int __wrap_trail_draw(void *obj, int gfx, int a2) { int r = __real_trail_draw(obj, gfx, a2); p110log(2, "trail_draw (trail draw)", (void *)(long)r); return r; }
 
 /* P97 DIAGNOSTIC ?p97camh=N: first N calls (every 20th frame) of camera_update_target_height (camera target height, P92 C): the
  * eased height +0x2C0 before / after, the holder's (+0x3D0) y +0x18, floor +0x180, height above floor +0x28, model

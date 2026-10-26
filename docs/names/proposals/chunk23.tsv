@@ -1,0 +1,241 @@
+old	new	confidence	description
+func_150CD3C0	spark_record_spawn	high	Spawns one type 0x57 spinning spark effect record from a spark description (life, colour, size, position, velocity)
+func_150CD68C	spark_record_update_motion	med	Moves a spark record by velocity and gravity, applies drag per frame, flutters it when falling and adds its spin
+func_150CDAAC	spark_record_quad_build	med	Draw-table entry: builds the spark record's rotated 4-corner quad vertices in the view slot buffer
+func_150CDD08	shooting_star_sky_update	high	Sky effect: accumulates a rate and spawns shooting-star streaks on five lanes when they are near the camera heading
+func_150CE07C	shooting_star_set_rate	med	Sets the shooting-star spawn rate (+0x2C of the D_80088C10 object) from a 0..255 value
+func_150CE0C0	obj_spawn_ground_dust_rings	med	Probes the floor under an object and emits two random circles of effect points (kinds 0x17 / 0x18) there
+func_150CE204	spawn_emit_dust_sprite	low	Spawn handler: spawns one sprite particle (func_151308E4) with random size, life, direction and flip bits
+func_150CE420	spawn_emit_debris_chunk	low	Spawn handler: spawns one kind-3 model particle (func_15132FBC) flung at a random direction with random spin
+func_150CE660	fb_zoom_fx_spawn	med	Spawns a frame-buffer zoom effect node (func_151604E4) bound to an object, with the 0x8F0-byte state copied in
+func_150CE710	fb_zoom_fx_update	med	Projects the bound object's bone point to the screen to place the frame-buffer zoom rectangle; 0 when gone
+func_150CE960	fb_zoom_fx_apply	high	Nearest-neighbour zoom of a frame-buffer rectangle in place, bottom-up and right to left
+func_150CEBA4	fb_zoom_fx_handle_event	med	Zoom effect message handler: follows an object swap (0x2D) and destroys the node when its object goes (0)
+func_150CEC50	rider_ai_control	high	AI controller of a rider / vehicle object: pad bump / nudge actions, steering toward the player or stick, attack
+func_150CF470	level_light2_orbit	high	Level update handler: turns light slot 2 around a centre by the angle of world record 4 and ticks the frame counter
+func_150CF550	math_angle_offset_scaled	low	Returns func_150484A0(arg0 + 1, arg1 - 0x2C) times the constant D_800A0C08
+func_150CF590	obj_set_flag84_4000	low	Sets bit 0x4000 of the object's +0x84 flags
+func_150CF5B0	scenery_pendulum_trigger_update	low	Scenery handler: when flagged, switches world records 0xFE / 0xFD to mode 2; in mode 2 runs the pendulum swing
+func_150CF650	obj_dust_emitter_update	med	Effect bound to an object: advances a timer and spawns random impact dust clouds at the object's effect point
+func_150CF994	obj_dust_emitter_handle_event	med	Dust emitter message handler: destroys the node when its object goes (0), follows an object swap (0x2D)
+func_150CFA40	ground_fx_spawn_above_player	med	Spawns a random ground effect (func_151CFE48) for the player, probing from 300 units above
+func_150CFA88	tex_scroll_step_offsets	med	Advances the texture scroll offsets D_80088C30..38 by the frame step
+func_150CFAF8	tex_scroll_set_tile_sizes	high	Emits gDPSetTileSize for tiles 0 and 1 from the scroll offsets D_80088C30..3C
+func_150CFB90	screen_bar_spawn	med	Spawns a 2D sprite effect kind 0xC1 at (-300, 72) with the given span, copying a motion block to +0x70
+func_150CFD10	screen_bar_update_burst	low	2D sprite update: grows its +0x70 progress; when full, spawns 2..5 bouncing 2D sprites with random motion
+func_150D00FC	bouncing_sprite_handle_drop	med	2D sprite message 0x52: starts the sprite falling with the floor height taken from the message
+func_150D0148	bouncing_sprites_broadcast_drop	med	Broadcasts message 0x52 (drop to floor height arg0) to every 2D sprite node
+func_150D0170	bouncing_sprite_update	med	Moves a 2D sprite by velocity and gravity; bounces it off its floor with damping
+func_150D0230	text_find_line_end	high	Returns a pointer to the next 0xBD line separator or the terminating 0 of a string
+func_150D026C	text_find_string_end	high	Returns a pointer to the terminating 0 of a string
+func_150D0294	text_line_length	high	Returns the length of the current line (up to 0xBD or 0) and stores its end pointer
+func_150D02C8	text_max_line_length	high	Returns the length of the longest 0xBD-separated line of a string
+func_150D034C	text_pager_copy_line	med	Copies the current line of a text pager into its active line buffer and terminates it
+func_150D03A8	text_pager_next_line	med	Advances a text pager to the next line (flipping its double buffer) and flags the change
+func_150D0420	text_pager_spawn	med	Spawns a text pager effect node (kind 0x47) for a 0xBD-separated string with line buffers and a style state
+func_150D0544	text_pager_update	med	Text pager update: runs its style's draw handler (D_80088C40) and kills the node when that returns 0
+func_150D05D0	text_pager_handle_event	med	Text pager message handler: 0x51 with its id advances the line, other messages go to the style handler table
+func_150D0644	text_pager_spawn_caption	med	Spawns a style-0 (caption crossfade) text pager
+func_150D06B0	text_pager_draw_caption	med	Style 0 draw: crossfades the previous and current line in gold at (0x92, 0xBE)
+func_150D07C4	text_pager_spawn_console	med	Spawns a style-1 (console typing) text pager
+func_150D083C	text_pager_draw_console	high	Style 1 draw: types the line out after a "C:> " prompt with a cursor, in green at (15, 190)
+func_150D09D4	text_pager_spawn_title	med	Spawns a style-2 (title crossfade) text pager
+func_150D0A44	text_pager_draw_title	med	Style 2 draw: crossfades the previous and current line in white at (20, 20)
+func_150D0B60	camera_toggle_follow_on_event	low	Camera handler: pushes a follow mode on event 0xBB (following object D_800CC335 - 1), pops it otherwise
+func_150D0C40	level_ambient_cue_update	high	Level update: water waves, then on a random timer plays a random sound 0x6C..0x6E at the first absent cue object
+func_150D0DD0	player_tint_update	high	Player state handler: picks a screen tint target from event flags and eases the tint, publishing it to event flags
+func_150D13A0	level_item_flags_update	med	Level update: advances the scroll counters and reacts to flagged items 0xF8..0xFB (split / reset the player)
+func_150D15F4	bone_spark_emitter_spawn	low	Spawns a bone emitter (bone_emitter_spawn) on an object with a +/-30 side offset
+func_150D16C4	bone_spark_emitter_init	low	Emitter init: sets its +0x74 speed factor to a random 350..500 times D_800A0C64
+func_150D1714	bone_spark_emitter_emit	low	Emits a tinted impact particle between two offset points, moving along their difference
+func_150D18B0	obj_spin_decay_update	low	Object update: integrates two angular velocities with decay, shrinks +0x3C, then updates the ground tilt
+func_150D1920	world_rec_f9_set_player0_flag	low	Sets byte +0x6E of world record 0xF9 to 1 when the object is player 0, else 0
+func_150D197C	world_rec_f9_set_flag	low	Sets byte +0x6E of world record 0xF9 to 1
+func_150D19AC	ambient_red_flicker_dim_update	med	Random flicker (50..123) of the ambient light's red channel
+func_150D1A40	camera_update_ride_chase	low	Camera handler: while riding, pushes a chase mode whose distance and height follow the ride speed
+func_150D1D20	view_scroll_overlay_draw	med	Camera callback: draws a textured quad over the player's view, rotated by angle and scrolled vertically
+func_150D2050	ambient_red_flicker_bright_update	med	Random flicker (86..255) of the ambient light's red channel
+func_150D20E0	player_sync_flag10_event	low	Sets or clears bit 0x10 of the object's +0x84 flags from event flag 0x402C
+func_150D2140	beam_rays_update	high	Moves the beam and traces six rays from its source, showing each ray sprite at its hit point
+func_150D247C	beam_rays_handle_event	med	Beam message handler: sets the source (0x32), toggles on/off (0x30 / 0x31), resets velocity (0x4E), dies (0x4F)
+func_150D2564	beam_rays_free_parts	high	Destroys the beam's six ray part nodes
+func_150D25C0	beam_rays_delete	high	Frees the beam's ray parts, then deletes it through func_15149368
+func_150D25EC	beam_rays_retire	high	Frees the beam's ray parts, then retires it through func_1514933C
+func_150D2620	sky_flash_spawn	med	Spawns a lightning flash node (period, on-time, alphas) and counts it in D_800D9D20
+func_150D26DC	sky_flash_update	med	Advances the flash phase; while in its on-time sets the ambient white and marks it lit
+func_150D278C	sky_flash_retire	med	Uncounts the flash, then retires it through func_1514933C
+func_150D27B8	sky_flash_delete	med	Uncounts the flash, then deletes it through func_15149368
+func_150D27E4	sky_flash_uncount	med	Decrements the live lightning flash count D_800D9D20
+func_150D2804	sky_flash_draw	med	Fills the view white (lit) or black with the flash's alpha
+func_150D2884	sky_flash_spawner_update	med	Counts down and spawns a lightning flash with random kind / timing, then picks the next random delay
+func_10001050	boot_entry_main	high	Boot entry: clears BSS, initialises the OS and FPU and starts the idle thread
+func_100010F8	boot_idle_thread_main	high	Idle thread: creates the message queues, starts the boot thread, drops to priority 0 and spins
+func_10001194	boot_game_thread_main	high	Boot thread: clears memory, sets up heap and frame buffers, decompresses the game code and enters the game
+func_10011FA0	audio_mixer_request_mode	med	Sets the requested music mixer mode D_80042770 (consumed each frame)
+func_10011FB0	audio_mixer_set_override_mode	med	Sets the override mixer mode D_80042774 (leaving mode 3 sets D_80041FD9)
+func_10011FDC	audio_mixer_set_base_mode	med	Sets the fallback mixer mode D_80042778
+func_10011FEC	audio_mixer_reset_modes	high	Clears all music mixer mode variables
+func_10012020	audio_mixer_update_frame	med	Per frame: picks the mixer mode and eases master volume and the two voice frequency / volume targets
+func_10012560	mp3_id3_text_enqueue	high	MP3 decoder text callback: pushes the ID3 text record into the text ring buffer D_800427A0
+func_10012588	mp3_voice_init	med	Initialises the audio mixer record, the text ring buffer and installs the MP3 text callback
+func_100125CC	mp3_voice_stop	med	Stops (or fades out) the playing MP3 voice unless the call comes from level 27 with arg 30
+func_1001263C	mp3_voice_play	med	Looks up MP3 voice asset arg0 and starts it with volume and pan, remembering the id in D_800427F4
+func_100126E8	text_queue_read	high	Takes the next record of the text ring buffer D_800427A0 into a buffer and returns its length
+func_10012718	mp3_voice_play_at_object	high	Plays an MP3 voice at an object: direct when it is the camera, else with distance volume and pan
+func_100127D0	mp3_voice_is_playing	med	Returns 1 when the MP3 player state is 1, 2 or 5
+func_10001420	boot_clear_low_block	med	Clears the 0xFE0-byte block at D_80043ED0
+func_10001444	tlb_reset_and_flush_icache	low	With interrupts off: resets the TLB state, clears the low block and invalidates the instruction cache
+func_100014A0	game_thread_stop	high	Stops the main game thread D_80031AE0
+func_100014C4	tlb_remap_game_segment	low	With interrupts off: frees the two segment buffers, maps segment arg0 and resets the TLB state
+func_10001550	init_printf_ldtob	high	libc _Ldtob: converts a double to digits for printf e / f / g conversions
+func_100019F0	init_printf_ldunscale	high	libc _Ldunscale: splits a double's exponent, returning NaN / Inf / zero / finite class
+func_10001AA8	init_printf_genld	high	libc _Genld: lays out generated digits for printf e / f / g conversions
+func_10002070	init_printf_null_out	high	printf output callback that discards the text (returns 1)
+func_10002088	init_debug_printf_stub	med	Debug printf stub: formats into the null output (nothing is printed)
+func_100020D0	init_printf_xprintf	high	libc _Printf: formats a printf string through an output callback
+func_10002718	init_printf_put_arg	high	libc _Putfld: converts one printf argument by conversion character
+func_10002E50	pi_dev_mgr_main	high	libultra __osDevMgrMain with a Rare hook that pauses a thread around cartridge DMA reads
+func_100038C0	init_stub_noop4	low	Empty function taking four arguments
+func_100038E0	debug_port_write_4040	low	Writes 0x4040 to the cartridge-domain register 0xBC000C02 (debug hardware)
+func_1000390C	init_stub_return_zero	low	Returns 0
+func_10003920	mem_clear_expansion_flag	med	Clears the 8 MB memory flag D_80038080
+func_10003930	mem_init_region_bounds	med	Sets the top-of-memory region bounds (heap end, stacks) for 4 MB or 8 MB
+func_100039B0	init_stub_noop	low	Empty function
+func_100039C0	video_init_screen	med	Sets the 292x216 screen size and scale, allocates the depth buffer and clears the frame buffers
+func_10003ACC	framebuffer_fill_color	high	Fills both frame buffers with one RGBA5551 colour
+func_10003C10	vi_mode_set_window	med	EU: resizes the VI mode window (origin and scale) for the given offset and scale
+func_10003BD0	heap_init	high	Heap init: one free block spanning D_800EA140 .. D_80038098
+func_10003C6C	heap_alloc_tagged	high	Heap allocator: size, tag, alignment class, bottom / top fit, may-fail flag; returns the data or 0
+func_10004074	heap_free	high	Frees a heap block, merging it with free neighbours and keeping the free list sorted
+func_10004250	heap_age_tagged_blocks	med	Frees tag-2 heap blocks and steps tags 3 / 4 down by one
+func_10004308	heap_free_tags_1_to_4	med	Frees every heap block tagged 1..4
+func_100043B4	heap_set_block_tag	high	Sets the tag (top byte of the info word) of a heap block
+func_1000440C	heap_update_largest_free	high	Finds the largest free block and stores it and its size (D_800380B0 / D_8002AC30)
+func_10004470	pi_init_dma_queues	high	Creates the PI manager and the DMA message queues
+func_10004514	rom_dma_read	high	Reads ROM to RAM by PI DMA, blocking or queued (small reads from the main thread read directly)
+func_10004674	rom_dma_wait_queued	high	Waits for all queued asynchronous ROM DMA reads
+func_100046E4	rom_dma_read_chunked	high	Blocking ROM read in 0x14000-byte PI DMA chunks
+func_1000480C	rom_read_direct	high	Blocking read of ROM bytes through uncached KSEG1 loads, waiting for the PI to be idle
+func_100049E0	sched_thread_main	high	Scheduler thread: retrace, SP / DP done, task timeout and controller messages
+func_10004DB0	sched_try_start_gfx_task	med	Starts the next graphics task when its frame buffer is free and the frame pacing allows it
+func_10004F00	sched_start_gfx_task	high	Loads and starts the pending graphics task and updates the frame pacing counters
+func_10004FE0	sched_try_swap_buffer	med	Swaps the frame buffer when the pacing counter allows it, else waits (state 6)
+func_10005020	sched_swap_framebuffer	high	Swaps to the finished task's frame buffer (unblanking the VI once) and notifies its client
+func_100050A0	sched_init	high	Scheduler init: queues, client list, video setup, SP / DP events and the scheduler thread
+func_100051C8	sched_add_client	high	Adds a client (message queue) to the scheduler's retrace list
+func_100051E8	sched_send_retrace_msg	med	Sends the retrace message to the scheduler's main queue
+func_10005218	prenmi_thread_start	high	Creates the PRE-NMI queue and event and starts the PRE-NMI thread
+func_10005298	prenmi_stub_noop	low	Empty function
+func_100052A0	prenmi_thread_main	high	PRE-NMI thread: stops the game, the rumble paks, the RSP / RDP and waits for the reset
+func_1001AAE0	n_seqp_unmap_voice	high	__n_unmapVoice: moves a voice's state from the allocated list to the free list
+func_1001ADA4	n_seqp_cancel_voice_kill	med	Removes a pending voice-kill event for the voice if due after time; returns 0 when it is due earlier
+func_1001AFEC	n_seqp_lookup_voice	high	__n_lookupVoice: finds a non-released voice playing key on channel
+func_1001B07C	n_seqp_lookup_sound_quick	high	__n_lookupSoundQuick: binary search of the channel instrument's sounds by key and velocity
+func_1001B310	n_seqp_voice_fx_mix	med	Fx mix of a voice: channel fxmix plus the player's unk7C, scaled by unk80, clamped to 0..127
+func_1001B7D0	n_cseqp_set_inst_chan_state	med	Program change: loads the instrument, releases the old one and copies its parameters into the channel
+func_1001BD34	n_synth_load_instrument	med	Loads an instrument (or one sound) through the synth's loader callback; 0 on failure
+func_1001BE1C	n_synth_release_instrument	med	Releases an instrument (or one sound) through the synth's release callback
+func_1001C4F0	n_evtq_flush_type_first	med	n_alEvtqFlushType that also returns the time of the first flushed event
+func_1001E4A0	n_synth_aux_fx_new	med	Creates the effect of aux bus arg0 (n_alFxNew) and returns it
+func_1001F978	n_reverb_filter_buffer	med	Reverb _filterBuffer: emits the ADPCM load and pole filter commands of a delay line's low-pass
+func_1001FA78	n_reverb_do_mod_func	high	Reverb _doModFunc: steps the triangle modulation and returns its gain-scaled value
+func_1001FB40	n_main_bus_pull	med	Main bus pull: mixes each aux bus into the output with per-bus gains and the bus pole filters
+func_100210C0	n_aux_bus_pull	high	n_alAuxBusPull: pulls the bus voices, loud ones first with a level compensation command
+func_100214F0	n_adpcm_pull	high	n_alAdpcmPull: ADPCM decoder pull with looping
+func_10021C40	n_adpcm_load_param	high	n_alLoadParam: sets ADPCM loader parameters
+func_10021E4C	n_adpcm_decode_chunk	med	ADPCM _decodeChunk: emits the commands that load and decode one chunk of frames
+func_10008180	audio_system_init	high	Audio init: heap, synthesizer, instrument bank, sequence table, three sequence players and the sound player
+func_100084D8	music_player_play	high	Starts music player idx when it is stopped
+func_1000853C	music_player_get_state	high	Returns the state of music player idx
+func_10008570	music_player_set_msg_queue	med	Sets the message queue (unk84) of music player idx
+func_100085A4	music_stub_noop3	low	Empty function taking three arguments
+func_100085B8	music_player_set_chan_flag17	low	Sets the per-channel byte +0x17 of music player idx
+func_100085F8	music_chan_mute	med	Mutes channel arg1 of music player idx (controller 0xFC = 0)
+func_1000862C	music_chan_unmute	med	Unmutes channel arg1 of music player idx (mask bit, controller 0xFC = 0xFF)
+func_10008660	music_chan_fade_volume	med	Fades channel volume of music player idx to a target over a time (controllers 0xFD / 0xFF)
+func_100086FC	music_chan_set_cc41	low	Sends controller 0x41 with a value to a channel of music player idx
+func_10008744	music_chan_set_pan	high	Sends pan (controller 10) to a channel of music player idx
+func_10008790	music_chans_fade_volume	med	Fades the volume of every channel in the mask of music player idx
+func_10008824	music_chan_set_volume	med	Sets channel volume (controller 0xFC) of music player idx
+func_1000886C	music_chans_set_volume	med	Sets the volume of every channel in the mask of music player idx
+func_100088F0	music_chans_set_muted	med	Mutes or unmutes every channel in the mask of music player idx
+func_10008988	music_chans_set_enabled	med	Sets or clears the channel mask bits of music player idx
+func_10008A4C	music_chan_get_volume	low	Returns the channel byte +0xD (volume?) of music player idx
+func_10008A94	music_chans_set_cc92	low	Sends controller 92 with a value to every channel in the mask of music player idx
+func_10008B2C	music_player_get_tempo	med	Reads the tempo of music player idx (result discarded)
+func_10008B60	music_player_set_voice_param	low	Posts event 0x1A (three bytes and a value) to music player idx
+func_10008BC0	music_player_set_master_gain	low	Posts event 25 (two floats) to music player idx
+func_10008C04	music_seq_new_marker	low	Creates marker arg1 of sequence idx at ticks arg2 (func_10018790)
+func_10008C6C	music_seq_jump_marker	low	Sets sequence idx to marker arg1 (func_100186DC)
+func_10008CE8	music_player_start_seq	high	Stops music player idx, loads sequence arg1 (cached) and starts it; -1 when out of memory
+func_10008EE0	music_player_set_volume	high	Sets the volume of music player idx
+func_10008F24	music_player_end_track	med	Posts AL_TRACK_END to music player idx
+func_10008F58	music_player_stop	high	Stops music player idx
+func_10008F90	audio_mgr_init	high	Audio manager init: synthesizer callbacks, n_alInit, DMA buffers, audio queues and the audio thread
+func_100093CC	audio_thread_stop	high	Stops the audio thread when it is running
+func_10009400	audio_thread_main	high	Audio thread: builds an audio frame on each retrace message until told to quit
+func_100095A0	audio_do_frame	high	Builds one audio frame (n_alAudioFrame) and sends the audio task to the scheduler
+func_100097CC	audio_dma_callback	high	Synth DMA callback: returns a cached DMA buffer for a ROM sample address, starting a DMA when needed
+func_10009980	audio_dma_new	high	Initialises the DMA buffer state and returns the DMA callback
+func_100099BC	audio_clear_dma	high	Waits for this frame's sample DMAs and frees buffers unused since the previous frame
+func_10009B2C	snd_cache_entry_unref	med	Decrements a loaded sound cache entry's use count
+func_10009B4C	snd_cache_entry_release	med	Decrements a sound cache entry's use count and frees it at 0
+func_10009B90	snd_cache_entry_ref	med	Increments a sound cache entry's use count (once for a just-loaded entry)
+func_10009BE4	snd_cache_entry_free	med	Restores a sound cache entry's ROM reference and moves it to the release list
+func_10009CBC	snd_cache_load_on_demand	high	Sound bank on-demand loader: replaces a packed ROM reference by a cache entry and starts its DMA
+func_10009FFC	snd_cache_dma_new	high	Initialises the sound cache lists and returns the on-demand loader callback
+func_1000A03C	snd_cache_update_dmas	high	Polls finished sound bank DMAs, moves them to the loaded list and frees released unused entries
+func_1000A348	snd_cache_flush_unused	med	Restores and frees every loaded sound cache entry that is not in use
+func_1000A420	sound_calc_pan_volume	high	Stereo pan, volume and distance of a sound source relative to the listener
+func_1000A750	sound_path_calc_pan_volume	high	Pan / volume / distance for a sound running along a path, using the nearest path point or segment
+func_1000B060	sound_calc_pan_from_xz	med	Returns a pan byte (with behind flag 0x80) for direction (x, z) turned by an angle
+func_1000B1B0	music_find_song	high	Returns the music player state playing song arg0, or NULL
+func_1000B1FC	music_find_song_or_queued	high	Returns the player state playing or queued (unk60) for song arg0, or NULL
+func_1000B294	music_clear_link_refs	med	Points every player's linked-song reference (unk10) that equals arg0 back to itself
+func_1000B2F4	music_song_slot_alloc	high	Allocates and initialises a free song slot (D_800419A8) for song arg0
+func_1000B3D4	music_queue_song	med	Queues a song slot on a player (replacing its queued song) or on a free player
+func_1000B548	music_get_playing_songs	med	Writes the ids of up to three playing songs and returns their count
+func_1000B638	music_song_cb_mute_layers	low	Song callback: mutes / restores channel groups on a flag (D_80041F04 bit 0); level 0x27 mixer mode 4
+func_1000B830	music_song_cb_duck_song16	low	Song callback: sets song 16's volume to 1000 or 18000 from the player's +0x5F0 bit 0
+func_1000B8B8	music_song_cb_level4_meter	low	Song callback: in level 4 drives song 19's channels from the accumulated D_80041F08 meter, else channel effects
+func_1000BA18	music_song_cb_pos_song4d	low	Song callback: sets song 0x4D channel volume from a fixed emitter's distance, then channel effects
+func_1000BAFC	music_song_cb_pos_song93	low	Song callback: sets song 0x93 channel volume from the inverse origin emitter volume, then channel effects
+func_1000BBE8	music_song_cb_start_song20	low	Song callback: enables song 20's channels once
+func_1000BC28	music_song_cb_sync_level	low	Song callback: sums channel 0 and 6 levels and sends the change to func_150C851C
+func_1000BCBC	music_song_cb_level19_ambience	med	Song callback: sets channel levels from the listener distance and height in level 0x13
+func_1000BF60	music_song_cb_level1d_voices	med	Song callback: level 0x1D voice with three emitter points, pan / volume and fade modes
+func_1000C350	music_song_cb_level1d_mode	low	Song callback: starts song 0x23 then switches channel sets by mode D_80041F08 in level 0x1D
+func_1000C530	music_song_cb_channel_effect	med	Song callback: packed channel effect state (mode, timer, two params, fade) driven by D_80041F08 / 0C requests
+func_1000C7E8	music_song_cb_level31_distance	low	Song callback: in level 0x31 starts song 0x3E chain once, else sets song 0x3E volume by distance
+func_1000C934	music_song_cb_level37_song54	low	Song callback: in level 0x37 sets song 0x54 volume from an emitter distance (max by player flag)
+func_1000CA18	music_song_cb_level37_song54_b	low	Song callback: song 0x54 volume from an emitter in level 0x37 (0 with the player flag), else 24000
+func_1000CAE4	music_song_cb_level42_song58	low	Song callback: in level 0x42 mixer mode 4 and song 0x58 channels on, else off and volume 16000
+func_1000CBA8	music_players_set_fade_target	low	Sets the fade target (unk4E) with rate 0x500 of music players 0 and 1
+func_1000CBF0	music_players_set_volume_ramp	med	Sets the volume ramp target and rate (unk5A / unk5C) of the players in the mask
+func_1000CC54	music_player_apply_volume	high	Combines a player's volume factors and sends the result when it changed (muting at 0)
+func_1000CD40	music_step_toward	high	Moves a value toward a target by rate times the frame step without overshoot
+func_1000CDA0	music_song_can_start	low	Whether a queued song may start now given the playing player's state and flags
+func_1000CEAC	music_player_process_messages	med	Drains a music player's sequencer message queue and steps its channel volume ramps
+func_1000D2F8	music_player_update_frame	med	Per frame: starts pending fades, switches to the queued song, runs the song callback and steps ramps
+func_1000D758	music_update_all	med	Per frame: ducks players by song type and voice playback, then processes and updates all three players
+func_1000D96C	music_play_song	med	Starts song arg0 (replacing or following song arg1, mode arg2) on a music player
+func_1000DE1C	music_stop_song	med	Stops song arg0, or every playing song when it is 0
+func_1000DEC4	music_release_stopped_slots	med	Frees song slots whose player has stopped and clears queued links
+func_1000DF68	music_song_set_fade	med	Sets a song's fade target, immediately or over a number of steps
+func_1000E054	music_song_set_paused	med	Pauses or resumes the player of a song
+func_1000E0F8	music_song_is_playing	med	Returns 1 when song arg0 is playing (not just queued)
+func_1000E134	music_song_type_is_1_or_3	low	Returns 1 when song arg0's type (table D_8002B078) is 1 or 3
+func_1000E17C	music_restart_type13_songs	low	Clears dead type 1 / 3 song slots and links, then restarts the playing ones
+func_1000E2F4	music_set_all_paused	med	Pauses (volume 0, stop) or resumes every playing song and records the flag D_800422A0
+func_1000E40C	music_song_set_volume	high	Sets a song's volume (clamped to 0..0x7FFF)
+func_1000E46C	music_song_set_chans_level	med	Sets the level (percent) of a song's channels in a mask, faded or immediate
+func_1000E588	music_song_set_chans_volume	med	Sets the volume (percent) of a song's channels in a mask, or their enable bits when not playing
+func_1000E654	music_song_set_marker	low	Jumps a song to a marker now or records a marker jump and linked song for later
+func_1000E704	music_song_set_chans_cc92	low	Sends controller 92 to the masked channels of a playing song
+func_1000E75C	music_set_b070_mode	low	Sets D_8002B070 to arg0 / 2
+func_1000E770	music_get_event_request	med	Returns the music event flags D_80041F04 and the request words D_80041F08 / 0C
+func_1000E7A0	music_post_event_request	med	Records a music event request (flag, meter add, mode set, effect select, fade) in D_80041F04..0C
+func_1000E8C4	music_clear_event_flag1	med	Clears bit 0 of the music event flags D_80041F04 when arg0 is odd
+func_1000E8F0	music_song_get_player_flags	low	Returns the D_800418AC flags of a playing song's player, else 0
+func_1000E934	music_system_reset	high	Resets the music system: channel ramp tables, players and the song slots
+func_1000EA94	music_play_menu_song	low	Plays song 82 / 81 / 83 for arg0 0 / 2 / 1 and returns its id

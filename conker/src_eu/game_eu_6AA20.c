@@ -2,21 +2,21 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1503D728(s32 *arg0, s32 arg1);
+void model_relocate_word(s32 *arg0, s32 arg1);
 #endif
 
 
 #ifdef NON_MATCHING
 s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
-void func_1503D658(s8 *arg0, s32 arg1);
-s32 func_1503DF2C(s32 arg0);
-void func_1503DC74(s32 arg0);
-s32 func_1503DAF4(s32 arg0);
-s32 func_150028BC(s32 arg0);
-s32 func_1503DA64(s32 arg0, s32 arg1);
-s32 func_1503D950(s32 arg0, s32 arg1);
-void func_1503E00C(s32 arg0);
-void func_10004074(s32);
+void model_dl_relocate(s8 *arg0, s32 arg1);
+s32 model_textures_acquire(s32 arg0);
+void model_count_triangles(s32 arg0);
+s32 model_alloc_vertex_table(s32 arg0);
+s32 model_build_collision_tables(s32 arg0);
+s32 model_header_load(s32 arg0, s32 arg1);
+s32 anim_bank_load(s32 arg0, s32 arg1);
+void model_textures_release(s32 arg0);
+void heap_free(s32);
 s32 texture_resolve_dl_ids(Gfx *, s32, s32, s32, s16 **);
 extern s32 D_800C48A8[];
 extern s32 D_800C4D10[];
@@ -35,11 +35,12 @@ extern s32 D_800C6070[187];
  * through asset_load_with_subfiles (7 relocated {offset, size} pairs): D_800D19A0[id] = base + 0x38, D_800C4440 (+0),
  * D_800C48A8 (+8, display lists), D_800C4D10 (+0x28), D_800C5000 (+0x10, skeleton), D_800C5758 (+0x18),
  * D_800C5468 (+0x20), the counts D_800C4730 (+4 / 4), D_800C5BC0, D_800C4B98 (+0xC / 4), D_800C5A48 (+0x1C / 12),
- * D_800C52F0 (+0x14 / 16, joints). The display lists of +8 and +0x28 are relocated (func_1503D728 / func_1503D658).
- * Then (arg3) func_1503DF2C and texture_resolve_dl_ids per display list, func_1503DC74 / func_1503DAF4, (arg2 +0x18 & 0x4000
- * or arg4 & 1) func_150028BC, func_1503DA64, func_1503D950 (animation bank); any error frees everything again.
+ * D_800C52F0 (+0x14 / 16, joints). The display lists of +8 and +0x28 are relocated (model_relocate_word / model_dl_relocate).
+ * Then (arg3) model_textures_acquire and texture_resolve_dl_ids per display list, model_count_triangles / model_alloc_vertex_table, (arg2 +0x18 & 0x4000
+ * or arg4 & 1) model_build_collision_tables, model_header_load, anim_bank_load (animation bank); any error frees everything again.
  * Returns 0, 1 (no asset) or the error bits. */
-s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_1503D210 */
+s32 model_load(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 id = arg0;
     s32 sz;
     u8 *m;
@@ -76,18 +77,18 @@ s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_800C5BC0[id] = (u32)(base - (s32)m - 0x38) >> 4;
     D_800C4B98[id] = *(u32 *)(m + 0xC) >> 2;
     for (i = 0; i < D_800C4B98[id]; i++) {
-        func_1503D728((s32 *)D_800C48A8[id] + i, (s32)m);
-        func_1503D658(((s8 **)D_800C48A8[id])[i], (s32)m);
+        model_relocate_word((s32 *)D_800C48A8[id] + i, (s32)m);
+        model_dl_relocate(((s8 **)D_800C48A8[id])[i], (s32)m);
     }
     n = *(u32 *)(m + 0x2C) >> 2;
     for (i = 0; (u32)i < n; i++) {
-        func_1503D728((s32 *)D_800C4D10[id] + i, (s32)m);
-        func_1503D658(((s8 **)D_800C4D10[id])[i], (s32)m);
+        model_relocate_word((s32 *)D_800C4D10[id] + i, (s32)m);
+        model_dl_relocate(((s8 **)D_800C4D10[id])[i], (s32)m);
     }
     ((u16 *)&D_800C5A48)[id] = *(u32 *)(m + 0x1C) / 12;
     D_800C52F0[id] = *(u32 *)(m + 0x14) >> 4;
     if (arg3 != 0) {
-        err = func_1503DF2C(id);
+        err = model_textures_acquire(id);
         if (err == 0) {
             for (i = 0; i < D_800C4B98[id]; i++) {
                 texture_resolve_dl_ids(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
@@ -95,48 +96,49 @@ s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         }
     }
     if (err == 0) {
-        func_1503DC74(id);
-        err |= func_1503DAF4(id);
+        model_count_triangles(id);
+        err |= model_alloc_vertex_table(id);
     }
     if (err == 0) {
         if ((arg2 != 0 && (*(s32 *)(arg2 + 0x18) & 0x4000)) || (arg4 & 1)) {
-            if (func_150028BC(id) != 0) {
+            if (model_build_collision_tables(id) != 0) {
                 err |= 8;
             }
         }
     }
     if (err == 0) {
-        err |= func_1503DA64(id, 0);
+        err |= model_header_load(id, 0);
         if (err == 0) {
-            err |= func_1503D950(id, 0);
+            err |= anim_bank_load(id, 0);
         }
     }
     if (err != 0) {
         if (D_800C6360[id] != 0) {
-            func_10004074(D_800C6360[id]);
+            heap_free(D_800C6360[id]);
         }
-        func_1503E00C(id);
+        model_textures_release(id);
         if (D_800C5C08[id] != 0) {
-            func_10004074(D_800C5C08[id]);
+            heap_free(D_800C5C08[id]);
             D_800C5C08[id] = 0;
         }
         if (D_800C6070[id] != 0) {
-            func_10004074(D_800C6070[id]);
+            heap_free(D_800C6070[id]);
             D_800C6070[id] = 0;
         }
         if (((s32 *)&D_800D19A0)[id] != 0) {
-            func_10004074(((s32 *)&D_800D19A0)[id] - 0x38);
+            heap_free(((s32 *)&D_800D19A0)[id] - 0x38);
             ((s32 *)&D_800D19A0)[id] = 0;
         }
     }
     return err;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D210.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/model_load.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1503D658(s8 *arg0, s32 arg1) {
+/* was func_1503D658 */
+void model_dl_relocate(s8 *arg0, s32 arg1) {
     s32 var_s0;
     s8 *var_v0;
     s8 var_v1;
@@ -149,10 +151,10 @@ void func_1503D658(s8 *arg0, s32 arg1) {
             do {
                 if (var_v1 != -0x24) {
                     if (var_v1 == 1) {
-                        func_1503D728(var_v0 + 4, arg1);
+                        model_relocate_word(var_v0 + 4, arg1);
                     }
                 } else if ((*(u8 *)((u8 *)var_v0 + 3)) == 0xE) {
-                    func_1503D728(var_v0 + 4, arg1);
+                    model_relocate_word(var_v0 + 4, arg1);
                 }
                 var_s0 += 1;
                 var_v0 = (var_s0 * 8) + arg0;
@@ -162,28 +164,31 @@ void func_1503D658(s8 *arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D658.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/model_dl_relocate.s")
 #endif
-void func_1503D728(s32 *arg0, s32 arg1) {
+/* was func_1503D728 */
+void model_relocate_word(s32 *arg0, s32 arg1) {
     s32 temp_v0 = *arg0;
     if ((temp_v0 != 0) && !(temp_v0 & 0x0F000000)) {
         *arg0 = temp_v0 + arg1;
     }
 }
 
-void func_1503D74C(s32 *arg0, s32 arg1) {
+/* was func_1503D74C */
+void model_relocate_pairs(s32 *arg0, s32 arg1) {
     while (*arg0 != 0) {
         *arg0 += arg1;
         arg0 += 2;
     }
 }
 
-void func_1503D774(u8 *arg0, s32 arg1)
+/* was func_1503D774 */
+void anim_bank_relocate(u8 *arg0, s32 arg1)
 {
   u8 *start = arg0;
   while (*(u16 *)arg0 != 0x3E7) {
     if (*(s32 *)(arg0 + 4) != 0) {
-      func_1503D728(arg0 + 4, start);
+      model_relocate_word(arg0 + 4, start);
     }
     arg0 += 8;
   }
@@ -194,7 +199,8 @@ void func_1503D774(u8 *arg0, s32 arg1)
 extern s32 D_800847A0;
 extern u8 D_80098C38;
 
-void func_1503D800(s32 arg0) {
+/* was func_1503D800 */
+void anim_bank_share_group(s32 arg0) {
     s16 *temp_t3;
     s32 var_v0;
     s32 var_v0_2;
@@ -245,13 +251,14 @@ block_9:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D800.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/anim_bank_share_group.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_800847A0;
 extern u8 D_80098C38;
 
-s32 func_1503D8E0(s32 arg0) {
+/* was func_1503D8E0 */
+s32 anim_bank_group_index(s32 arg0) {
     s32 var_v0;
     s32 var_v1;
     u8 *temp_a3;
@@ -287,33 +294,34 @@ block_6:
     goto loop_1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D8E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/anim_bank_group_index.s")
 #endif
-s32 func_1503D8E0(s32);
-void func_1503D800(s32);
+s32 anim_bank_group_index(s32);
+void anim_bank_share_group(s32);
 s32 asset_load_alloc(u8 *, s32, s32 *);
 s32 asset_load(s32 *, s32, ...);
-void func_1503D74C(s32 *arg0, s32 arg1);
-void func_1503D774(u8 *arg0, s32 arg1);
+void model_relocate_pairs(s32 *arg0, s32 arg1);
+void anim_bank_relocate(u8 *arg0, s32 arg1);
 
-s32 func_1503D950(s32 arg0, s32 arg1) {
+/* was func_1503D950 */
+s32 anim_bank_load(s32 arg0, s32 arg1) {
     s32 sp34;
     s32 *p;
 
     if (*(s32 **)&D_800D1588[arg0] != NULL) {
         return 0;
     }
-    p = (s32 *)asset_load(&sp34, 2, 0xF, func_1503D8E0(arg0));
+    p = (s32 *)asset_load(&sp34, 2, 0xF, anim_bank_group_index(arg0));
     if (p == NULL) {
         *(s32 **)&D_800D1588[arg0] = NULL;
         D_800C5A90[arg0] = 0;
-        func_1503D800(arg0);
+        anim_bank_share_group(arg0);
         return 4;
     }
     *(s32 **)&D_800D1588[arg0] = p;
     if ((*(s32 **)&D_800D1588[arg0])[0] != 0) {
         (*(s32 **)&D_800D1588[arg0])[0] += (s32)*(s32 **)&D_800D1588[arg0];
-        func_1503D74C((s32 *)(*(s32 **)&D_800D1588[arg0])[0], (s32)*(s32 **)&D_800D1588[arg0] + 0x10);
+        model_relocate_pairs((s32 *)(*(s32 **)&D_800D1588[arg0])[0], (s32)*(s32 **)&D_800D1588[arg0] + 0x10);
     }
     if ((*(s32 **)&D_800D1588[arg0])[1] != 0) {
         (*(s32 **)&D_800D1588[arg0])[1] += (s32)*(s32 **)&D_800D1588[arg0];
@@ -322,14 +330,15 @@ s32 func_1503D950(s32 arg0, s32 arg1) {
         (*(s32 **)&D_800D1588[arg0])[2] += (s32)*(s32 **)&D_800D1588[arg0];
     }
     *(s32 **)&D_800D1588[arg0] = (s32 *)((u8 *)*(s32 **)&D_800D1588[arg0] + 0x10);
-    func_1503D774((u8 *)*(s32 **)&D_800D1588[arg0], arg0);
-    func_1503D800(arg0);
+    anim_bank_relocate((u8 *)*(s32 **)&D_800D1588[arg0], arg0);
+    anim_bank_share_group(arg0);
     return 0;
 }
 
 s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, ...);
 
-s32 func_1503DA64(s32 arg0, s32 arg1) {
+/* was func_1503DA64 */
+s32 model_header_load(s32 arg0, s32 arg1) {
     s32 sp2C;
     s32 *v;
 
@@ -352,7 +361,8 @@ s32 func_1503DA64(s32 arg0, s32 arg1) {
 s32 allocate_memory(s32, s32, s32, s32);
 extern s32 D_800C4440;
 
-s32 func_1503DAF4(s32 arg0) {
+/* was func_1503DAF4 */
+s32 model_alloc_vertex_table(s32 arg0) {
     s32 sp34;
     s32 sp2C;
     s32 *sp18;
@@ -439,14 +449,15 @@ block_18:
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DAF4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/model_alloc_vertex_table.s")
 #endif
 #ifdef NON_MATCHING
 extern u16 D_800C5D38[];
 extern s32 D_800C48A8[];
 /* P51: triangle count of model arg0's first display list (D_800C48A8[arg0][0]; the asm's loop over the list
  * stops after one): G_TRI1 1, G_TRI2 2, opcodes 0x10-0x1F 4, up to G_ENDDL; into D_800C5D38[arg0]. */
-void func_1503DC74(s32 arg0) {
+/* was func_1503DC74 */
+void model_count_triangles(s32 arg0) {
     u32 **lst = (u32 **)D_800C48A8[arg0];
     u32 *c;
     s32 n = 0;
@@ -472,10 +483,11 @@ void func_1503DC74(s32 arg0) {
     D_800C5D38[arg0] = n;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DC74.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/model_count_triangles.s")
 #endif
 
-u8 func_1503DD2C(s32 arg0, s32 arg1) {
+/* was func_1503DD2C */
+u8 model_get_face_joint(s32 arg0, s32 arg1) {
     u8 *p = ((u8 **)&D_800D19A0)[arg0];
     u8 *q = p - 0x38; // fakematch: computed before the NULL test (delay-slot addiu)
     u8 *r;
@@ -497,41 +509,42 @@ u8 func_1503DD2C(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150844AC(struct127 *, s32);
-/* func_1503DD8C (P57): make model id ready for object obj (variant var). Not loaded (D_800D19A0[id] == 0):
- * func_1503D210(id, 0, obj+0x144, flag, obj[0xAC]). Loaded: func_150028BC(id) once (D_800C5C08[id] == 0) when
+s32 obj_model_vertex_blocks_get(struct127 *, s32);
+/* model_make_ready (P57): make model id ready for object obj (variant var). Not loaded (D_800D19A0[id] == 0):
+ * model_load(id, 0, obj+0x144, flag, obj[0xAC]). Loaded: model_build_collision_tables(id) once (D_800C5C08[id] == 0) when
  * obj+0x144 has +0x18 & 0x4000 or obj[0xAC] & 1; with flag, a vertex block (D_800C5A48[id]) and its first word
- * still below 0x10000000 (not yet relocated): func_1503DF2C(id) and texture_resolve_dl_ids on each display list.
- * If that all returned 0: func_150844AC(obj, var). Non-zero = not drawable (func_1502CFEC returns). */
-s32 func_1503DD8C(struct127 *obj, s32 id, s32 var, s32 flag) {
+ * still below 0x10000000 (not yet relocated): model_textures_acquire(id) and texture_resolve_dl_ids on each display list.
+ * If that all returned 0: obj_model_vertex_blocks_get(obj, var). Non-zero = not drawable (obj_draw_model_dl returns). */
+/* was func_1503DD8C */
+s32 model_make_ready(struct127 *obj, s32 id, s32 var, s32 flag) {
     u8 *o = (u8 *)obj;
     u8 *rec = *(u8 **)(o + 0x144);
     s32 r;
     s32 i;
 
     if (((s32 *)&D_800D19A0)[id] == 0) {
-        r = func_1503D210(id, 0, (s32)rec, flag, o[0xAC]);
+        r = model_load(id, 0, (s32)rec, flag, o[0xAC]);
     } else {
         r = 0;
         if ((rec != NULL && (*(u32 *)(rec + 0x18) & 0x4000)) || (o[0xAC] & 1)) {
             if (D_800C5C08[id] == 0) {
-                func_150028BC(id);
+                model_build_collision_tables(id);
             }
         }
         if (flag != 0 && ((u16 *)&D_800C5A48)[id] != 0 && **(u32 **)&((s32 *)&D_800C5758)[id] < 0x10000000) {
-            r = func_1503DF2C(id);
+            r = model_textures_acquire(id);
             for (i = 0; i < D_800C4B98[id]; i++) {
                 texture_resolve_dl_ids(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
             }
         }
     }
     if (r == 0) {
-        r = func_150844AC(obj, var);
+        r = obj_model_vertex_blocks_get(obj, var);
     }
     return r;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DD8C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/model_make_ready.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -539,7 +552,8 @@ s32 texture_cache_lookup(s32, s32, s32, s32);
 extern s32 D_800C5758;
 extern s32 D_800C5A48;
 
-s32 func_1503DF2C(s32 arg0) {
+/* was func_1503DF2C */
+s32 model_textures_acquire(s32 arg0) {
     s32 *temp_s0;
     s32 var_s1;
     s32 var_s3;
@@ -569,14 +583,15 @@ s32 func_1503DF2C(s32 arg0) {
     return var_s4;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DF2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/model_textures_acquire.s")
 #endif
 #ifdef NON_MATCHING
 s32 texture_cache_release(s32, s32, u16);
 extern s32 D_800C5758;
 extern s32 D_800C5A48;
 
-void func_1503E00C(s32 arg0) {
+/* was func_1503E00C */
+void model_textures_release(s32 arg0) {
     s32 temp_a1;
     s32 temp_v1;
     s32 var_s0;
@@ -603,5 +618,5 @@ void func_1503E00C(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503E00C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/model_textures_release.s")
 #endif

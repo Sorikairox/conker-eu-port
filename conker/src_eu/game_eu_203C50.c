@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-u8 *func_151D6440(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_151D6440 */
+u8 *fb_ghost_copy_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     u32 sp8C;
     s32 sp84;
     u32 sp34;
@@ -127,10 +128,11 @@ u8 *func_151D6440(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return var_a0 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/func_151D6440.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_ghost_copy_draw.s")
 #endif
 #ifdef NON_MATCHING
-void func_151D6760(u8 *arg0) {
+/* was func_151D6760 */
+void fb_blur_average(u8 *arg0) {
     s16 temp_t7;
     s32 temp_t3;
     s32 var_a2;
@@ -173,10 +175,11 @@ void func_151D6760(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/func_151D6760.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_blur_average.s")
 #endif
 #ifdef NON_MATCHING
-u8 *func_151D69C8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_151D69C8 */
+u8 *fb_ghost_image_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 sp34;
     s32 var_t5;
     u32 temp_a2;
@@ -282,9 +285,10 @@ u8 *func_151D69C8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return var_a0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/func_151D69C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_ghost_image_draw.s")
 #endif
-void func_151D6CA0(s32 arg0, s32 arg1) {
+/* was func_151D6CA0 */
+void fb_ghost_set_mode(s32 arg0, s32 arg1) {
     if (D_800BE9F0 == 6 && D_80038080 == 0) {
         return;
     }
@@ -298,7 +302,7 @@ void func_151D6CA0(s32 arg0, s32 arg1) {
         D_800BE575 = 0;
     }
     if (arg0 == 0 && D_800BE570 != 0) {
-        func_100043B4((s32 *)D_800BE570, 3);
+        heap_set_block_tag((s32 *)D_800BE570, 3);
         D_800BE570 = 0;
     }
 }
@@ -306,10 +310,11 @@ void func_151D6CA0(s32 arg0, s32 arg1) {
 #ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);
 u8 *render_set_color_image(u8 *);
-u8 *func_151D6440(u8 *, s32, s32, s32);
-u8 *func_151D69C8(u8 *, s32, s32, s32);
+u8 *fb_ghost_copy_draw(u8 *, s32, s32, s32);
+u8 *fb_ghost_image_draw(u8 *, s32, s32, s32);
 
-u8 *func_151D6D28(u8 *arg0) {
+/* was func_151D6D28 */
+u8 *fb_ghost_render(u8 *arg0) {
     s32 temp_v0;
     u8 *temp_s0;
     u8 *temp_v0_2;
@@ -323,7 +328,7 @@ u8 *func_151D6D28(u8 *arg0) {
         (*(s32 *)((u8 *)var_s0 + 4)) = 0;
         var_s0 += 8;
         if (D_800BE570 != 0) {
-            var_s0 = func_151D69C8(var_s0, D_800BE570, 0, D_800BE574);
+            var_s0 = fb_ghost_image_draw(var_s0, D_800BE570, 0, D_800BE574);
             goto block_10;
         }
         temp_v0 = allocate_memory(D_800BE620 * D_800BE624 * 2, 1, 3, 1);
@@ -337,7 +342,7 @@ block_10:
             (*(s32 *)((u8 *)var_s0 + 4)) = (s32) D_800BE570;
             (*(s32 *)((u8 *)temp_s0 + 0)) = 0xED000000;
             (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((((s32) ((f32) D_800BE620 * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) D_800BE624 * 4.0f) & 0xFFF));
-            temp_v0_2 = func_151D6440(temp_s0 + 8, D_8002AAE8[D_800BE9C0], 0, 4);
+            temp_v0_2 = fb_ghost_copy_draw(temp_s0 + 8, D_8002AAE8[D_800BE9C0], 0, 4);
             (*(s32 *)((u8 *)temp_v0_2 + 0)) = 0xEF082C3F;
             (*(s32 *)((u8 *)temp_v0_2 + 4)) = 0x552230;
             (*(s32 *)((u8 *)temp_v0_2 + 8)) = 0xD9FFFFFF;
@@ -348,5 +353,5 @@ block_10:
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/func_151D6D28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_203C50/fb_ghost_render.s")
 #endif

@@ -5,7 +5,8 @@
 
 u8 * world_record_find(u8);
 s32 scenery_pendulum_z_update();
-void func_150CF5B0(u8 *arg0) {
+/* was func_150CF5B0 */
+void scenery_pendulum_trigger_update(u8 *arg0) {
     u8 *p;
     if ((arg0[0x73] & 3) != 2) {
         if ((arg0[0x4F] & 4) && ((u8 *)D_800CCA0C)[0x57] != 0) {

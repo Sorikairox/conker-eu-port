@@ -20,7 +20,7 @@ void camera_follow_keep_offset(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void camera_update_eye_base(struct108 *arg0);
 void camera_update_eye_orbit(u8 *);
 void camera_update_eye_height(u8 *);
@@ -30,7 +30,7 @@ float sqrtf(float);
 // (+0x614) or with the target straight above, it only runs camera_follow_mode_update. Else the extra yaw +0x5DC decays by 8%,
 // +0x6C4 = 0, camera_calc_yaw runs, and the yaw from the camera (+0x2BC / +0x2C4) to the target (heading from
 // math_asinf of -dx / dist, in degrees, plus +0x5DC) wrapped into [0, 360] becomes the yaw +0x37C: directly with
-// +0x23C (rate +0x630 = 0), else eased (func_15049978: 3 / 6 with +0x84 bit 30 or 26, else 1.5 / 2; frame step
+// +0x23C (rate +0x630 = 0), else eased (math_spring_approach_angle: 3 / 6 with +0x84 bit 30 or 26, else 1.5 / 2; frame step
 // +0x7B4); +0x39C = yaw in radians. Skipped while +0x698 is set. Then camera_update_eye_base / camera_update_eye_orbit /
 // camera_update_eye_height, and with +0x84 bit 30 another camera_update_eye_orbit + camera_update_eye_height with +0x190 = 30.
 /* was func_151226E0 */
@@ -82,9 +82,9 @@ void camera_follow_target_update(struct108 *arg0) {
         } else {
             flags = *(s32 *) (p + 0x84);
             if ((flags & 0x40000000) || (flags & 0x04000000)) {
-                func_15049978((f32 *) (p + 0x37C), yaw, (f32 *) (p + 0x630), 3.0f, 6.0f, *(f32 *) (p + 0x7B4));
+                math_spring_approach_angle((f32 *) (p + 0x37C), yaw, (f32 *) (p + 0x630), 3.0f, 6.0f, *(f32 *) (p + 0x7B4));
             } else {
-                func_15049978((f32 *) (p + 0x37C), yaw, (f32 *) (p + 0x630), 1.5f, 2.0f, *(f32 *) (p + 0x7B4));
+                math_spring_approach_angle((f32 *) (p + 0x37C), yaw, (f32 *) (p + 0x630), 1.5f, 2.0f, *(f32 *) (p + 0x7B4));
             }
         }
         *(f32 *) (p + 0x39C) = *(f32 *) (p + 0x37C) * 0.0174532924f; /* D_800A384C */

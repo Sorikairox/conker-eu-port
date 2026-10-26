@@ -1,11 +1,11 @@
-\#^    gdl = func_15142B7C(gdl, 0x200205, 0x70400);$#s/0x200205/0x200204/ %
-\#^    gdl = func_15142B7C(gdl, 0x200205, 0x70400);$#s/0x70400/0x70000/ %
-\#^    gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, \&flag/0xFE, \&flag/ %
-\#^    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xF2, 0,/0xF2, 1,/ %
-\#^    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, 0xFF, \&flag/0xFF, 0, \&flag/ %
+\#^    gdl = gfx_geometry_mode_cached(gdl, 0x200205, 0x70400);$#s/0x200205/0x200204/ %
+\#^    gdl = gfx_geometry_mode_cached(gdl, 0x200205, 0x70400);$#s/0x70400/0x70000/ %
+\#^    gdl = gfx_env_color_cached(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, \&flag/0xFE, \&flag/ %
+\#^    gdl = gfx_prim_color_cached(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xF2, 0,/0xF2, 1,/ %
+\#^    gdl = gfx_prim_color_cached(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, 0xFF, \&flag/0xFF, 0, \&flag/ %
 \#^    gdl = gfx_set_combine_mode(gdl, 0x21, &flag);$#s/0x21/0x20/ %
-\#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/\[29\] | /[27] | / %
-\#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
+\#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/\[29\] | /[27] | / %
+\#^    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
 \#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %
 \#^    tex = texture_cache_lookup(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 3, 1)/ %
 \#^    RING_DL(0xFD500000, tex);        /\* texture image: CI, 16-bit words (block load) \*/$#s/tex)/tex + 1)/ %
@@ -40,8 +40,8 @@
 \#^            v->v\.tc\[0\] = -((x \* 0\.03988662f + z \* 0\.03713737f + 110\.230064f) \* 32\.0f);$#s/-((/((/ %
 \#^            v->v\.tc\[0\] = -((x \* 0\.03988662f + z \* 0\.03713737f + 110\.230064f) \* 32\.0f);$#s/32.0f/16.0f/ %
 \#^            v->v\.tc\[1\] = -((x \* 0\.054123953f + z \* -0\.058144543f + 50\.14429f) \* 32\.0f);$#s/-0.058144543f/0.058144543f/ %
-\#^            func_150CD2A0(z, &r, &g, &b);$#s/(z,/(x,/ %
-\#^            func_150CD2A0(z, &r, &g, &b);$#s/\&r, \&g/\&g, \&r/ %
+\#^            ground_colour_by_depth(z, &r, &g, &b);$#s/(z,/(x,/ %
+\#^            ground_colour_by_depth(z, &r, &g, &b);$#s/\&r, \&g/\&g, \&r/ %
 \#^            v->v\.cn\[0\] = (u32) r;$#s/(u32) r/(u32) g/ %
 \#^            v->v\.cn\[2\] = (u32) b;$#s/(u32) b/(u32) r/ %
 \#^            v->v\.cn\[3\] = near ? 0xFF : 0;$#s/0xFF : 0/0xFF : 1/ %

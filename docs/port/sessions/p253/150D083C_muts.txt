@@ -1,4 +1,4 @@
-# P253 func_150D083C (console_text_type) mutants: sed % setup names
+# P253 text_pager_draw_console (console_text_type) mutants: sed % setup names
 s/if (p\[0x30\] & 1)/if (p[0x30] \& 2)/ % restart
 s/st->n = 0;/st->n = 1;/ % restart
 s/st->t = 0.0f;/st->t = 0.5f;/ % restart

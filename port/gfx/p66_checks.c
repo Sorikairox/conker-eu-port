@@ -1,12 +1,12 @@
-/* P66 runtime checks of port-b P64's jump / idle C and of func_15085710 (link-time wraps; only cross-TU calls).
- *  ?p66jump=N  obj_jump_swim_glide_update (jump / swim / glide handler, called by func_1504CB98): record 0's buttons, anim id
+/* P66 runtime checks of port-b P64's jump / idle C and of player_stat_modify (link-time wraps; only cross-TU calls).
+ *  ?p66jump=N  obj_jump_swim_glide_update (jump / swim / glide handler, called by obj_state_walk): record 0's buttons, anim id
  *              (+0x84), y (+0x18), y_velocity (+0x20), height (+0x28), in_water (+0xAD), hanging (+0x137), target
  *              speed (+0xC0) before -> after. Logged for the first N calls, every 64th, and for every call where the
  *              buttons, the anim id or the sign of y_velocity change or the record is airborne (+0x28 > 0.5) for the
  *              first 400 such calls; plus the idle-chooser state (ctl +0x58..+0x65, P64 IdleState) when it changes.
  *  ?p66lowg=1  DIAGNOSTIC: D_800CC69C = 1 during calls with A pressed on the floor (reaches P64's low-gravity jump
  *              branches: Z long jump +0x81 = 0x81, y_velocity * 1.4); logged as "[p66] lowg".
- *  ?p66hud=N   func_15085710 (per-player HUD / status records, game_eu_B2980.c; called by func_150447B0 users,
+ *  ?p66hud=N   player_stat_modify (per-player HUD / status records, game_eu_B2980.c; called by func_150447B0 users,
  *              player_lose_life's restart path, ...): arguments of the first N calls (proves it is the C body). */
 #include <stdint.h>
 #include "../ultra/pc_mem.h"
@@ -78,12 +78,12 @@ void __wrap_obj_jump_swim_glide_update(void *rec, void *pad) {
     }
 }
 
-void __real_func_15085710(short idx, short field, int value);
-void __wrap_func_15085710(short idx, short field, int value) {
+void __real_player_stat_modify(short idx, short field, int value);
+void __wrap_player_stat_modify(short idx, short field, int value) {
     static unsigned n;
     if (fh < 0) fh = port_flag("p66hud");
     if (fh && ++n <= (unsigned)fh)
-        port_log("[p66] func_15085710 call %u frame %u: idx %d field %d value %d (C body, game_eu_B2980.c)\n",
+        port_log("[p66] player_stat_modify call %u frame %u: idx %d field %d value %d (C body, game_eu_B2980.c)\n",
                  n, port_frame_count, idx, field, value);
-    __real_func_15085710(idx, field, value);
+    __real_player_stat_modify(idx, field, value);
 }

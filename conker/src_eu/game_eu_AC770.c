@@ -2,11 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1508039C(u8 *arg0);
+void obj_broadcast_bored(u8 *arg0);
 #endif
 
 
-void func_1507EF60(u8 *arg0, s32 *arg1, u8 arg2) {
+/* was func_1507EF60 */
+void idle_list_add(u8 *arg0, s32 *arg1, u8 arg2) {
     if ((*arg1 + 1) < 40) {
         arg0[*arg1] = arg2;
         (*arg1)++;
@@ -15,7 +16,8 @@ void func_1507EF60(u8 *arg0, s32 *arg1, u8 arg2) {
 
 extern u8 *D_80086FC4[];
 extern u8 D_8009BFC0[];
-void func_1507EF98(s32 arg0, s32 *arg1, s32 arg2) {
+/* was func_1507EF98 */
+void idle_list_add_group(s32 arg0, s32 *arg1, s32 arg2) {
     u8 *src;
     s32 len;
     s32 v;
@@ -29,7 +31,8 @@ void func_1507EF98(s32 arg0, s32 *arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1507F018(u8 *arg0, s32 arg1, u8 *arg2, s32 *arg3, u8 *arg4) {
+/* was func_1507F018 */
+s32 idle_list_filter_recent(u8 *arg0, s32 arg1, u8 *arg2, s32 *arg3, u8 *arg4) {
     struct {
         s32 u2C;
     } sp;
@@ -172,18 +175,20 @@ loop_33:
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F018.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/idle_list_filter_recent.s")
 #endif
-void func_1507F238(u8 arg0, u8 *arg1) {
-    func_1507F298(arg0, arg1);
+/* was func_1507F238 */
+void idle_recent_push(u8 arg0, u8 *arg1) {
+    idle_recent_push_one(arg0, arg1);
     if (arg0 == 0x11) {
-        func_1507F298(0x12, arg1);
+        idle_recent_push_one(0x12, arg1);
     } else if (arg0 == 0x12) {
-        func_1507F298(0x11, arg1);
+        idle_recent_push_one(0x11, arg1);
     }
 }
 
-void func_1507F298(u8 arg0, u8 *arg1) {
+/* was func_1507F298 */
+void idle_recent_push_one(u8 arg0, u8 *arg1) {
     s32 i;
 
     for (i = 4; i > 0; i--) {
@@ -192,7 +197,8 @@ void func_1507F298(u8 arg0, u8 *arg1) {
     arg1[0] = arg0;
 }
 
-void func_1507F2D4(void)
+/* was func_1507F2D4 */
+void idle_mode_update(void)
 {
   u8 *p;
   s32 type;
@@ -216,7 +222,8 @@ void func_1507F2D4(void)
   }
 }
 
-void func_1507F380(s32 arg0, u8 *arg1) {
+/* was func_1507F380 */
+void idle_recent_remove(s32 arg0, u8 *arg1) {
     s32 i;
 
     for (i = 4; i >= 0; i--) {
@@ -228,13 +235,13 @@ void func_1507F380(s32 arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1507F8A0(s32);
-s32 func_150803E0(struct127 *);
-u8 func_1515999C(u8 *, s16, s16, s16, s16, s16);
-u8 *func_15031C4C(u8 *, s32, s32);
+s32 idle_delay_random(s32);
+s32 obj_near_reachable_node(struct127 *);
+u8 move_watch_state_matches(u8 *, s16, s16, s16, s16, s16);
+u8 *attachment_find_by_slot(u8 *, s32, s32);
 extern u8 *D_80086F40[];
 
-/* P64: the idle-chooser state of a player controller, ctl +0x58 (func_1507F2D4 / F640 / F834 / F3B0). */
+/* P64: the idle-chooser state of a player controller, ctl +0x58 (idle_mode_update / F640 / F834 / F3B0). */
 typedef struct {
     /* 0x0 */ u8  active;     /* ctl +0x58 */
     /* 0x1 */ u8  delay;      /* ctl +0x59 */
@@ -243,20 +250,21 @@ typedef struct {
     /* 0x5 */ u8  entry;      /* ctl +0x5D: position inside the set */
     /* 0x6 */ u8  pad6;
     /* 0x7 */ u8  recent[5];  /* ctl +0x5F: last chosen sets, newest first */
-    /* 0xC */ u8  mode;       /* ctl +0x64: 0 / 1 / 2 (func_1507F2D4) */
+    /* 0xC */ u8  mode;       /* ctl +0x64: 0 / 1 / 2 (idle_mode_update) */
     /* 0xD */ u8  count;      /* ctl +0x65: sets played in this mode */
 } IdleState;
 
-/* P64: picks the next idle set. Collects candidate set ids into list[40] (func_1507EF60 adds one id,
- * func_1507EF98 appends the D_80086FC4 group n): a forced set (rec +0x13A / +0x139), the D_800D18C0 & 2
+/* P64: picks the next idle set. Collects candidate set ids into list[40] (idle_list_add adds one id,
+ * idle_list_add_group appends the D_80086FC4 group n): a forced set (rec +0x13A / +0x139), the D_800D18C0 & 2
  * request (3), the "bored" set 0xB / 0xC (ctl +0x66 with no character idle, 0xC after 100 frames, which also
- * resets the mode and calls func_1508039C), 0 when hurt (health < 2), held (func_1515999C) or the timer is
- * still below func_1507F8A0(mode). Otherwise func_1507F2D4 updates the mode and a group is chosen: by state /
+ * resets the mode and calls obj_broadcast_bored), 0 when hurt (health < 2), held (move_watch_state_matches) or the timer is
+ * still below idle_delay_random(mode). Otherwise idle_mode_update updates the mode and a group is chosen: by state /
  * character / level (D_800BE9F0) / D_800D18C0 & 1, else by the mode (0, 1, plus 3 in mode 2 after 4 sets
- * when func_150803E0). func_1507F018 filters the list against the recent sets; a random survivor becomes
- * ctl +0x5C (entry 0) and is pushed onto recent[] (func_1507F238; func_1507F380 first drops it when
- * func_1507F018 says it was already there). */
-void func_1507F3B0(void) {
+ * when obj_near_reachable_node). idle_list_filter_recent filters the list against the recent sets; a random survivor becomes
+ * ctl +0x5C (entry 0) and is pushed onto recent[] (idle_recent_push; idle_recent_remove first drops it when
+ * idle_list_filter_recent says it was already there). */
+/* was func_1507F3B0 */
+void idle_choose_next_set(void) {
     struct127 *rec = D_800D154C;
     IdleState *st = (IdleState *)((u8 *)rec->unk31C + 0x58);
     struct126 *ctl;
@@ -270,12 +278,12 @@ void func_1507F3B0(void) {
 
     if (rec->unk13A != 0) {
         if (rec->pad139 <= 0x20) {
-            func_1507EF60(list, &n, rec->pad139);
+            idle_list_add(list, &n, rec->pad139);
         }
         goto choose;
     }
     if (D_800D18C0 & 2) {
-        func_1507EF60(list, &n, 3);
+        idle_list_add(list, &n, 3);
         D_800D18C0 = 0;
         goto choose;
     }
@@ -287,19 +295,19 @@ void func_1507F3B0(void) {
             id = 0xC;
             st->timer = 0;
             st->mode = 0;
-            func_1508039C((u8 *)D_800D154C);
+            obj_broadcast_bored((u8 *)D_800D154C);
         }
-        func_1507EF60(list, &n, id);
+        idle_list_add(list, &n, id);
         goto choose;
     }
     if (rec->health < 2
-        || func_1515999C((u8 *)&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0
-        || st->timer < func_1507F8A0(st->mode)) {
-        func_1507EF60(list, &n, 0);
+        || move_watch_state_matches((u8 *)&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0
+        || st->timer < idle_delay_random(st->mode)) {
+        idle_list_add(list, &n, 0);
         goto choose;
     }
 
-    func_1507F2D4();
+    idle_mode_update();
     rec = D_800D154C;
     group = -1;
     if (rec->unk2F8 & 0x200) {
@@ -310,7 +318,7 @@ void func_1507F3B0(void) {
         group = 9;
     } else if (rec->unk31C->unk78 == 0x16) {
         group = 0xA;
-    } else if (func_15031C4C((u8 *)rec, 0x17, 0) != NULL) {
+    } else if (attachment_find_by_slot((u8 *)rec, 0x17, 0) != NULL) {
         group = 6;
     } else if (D_800BE9F0 == 0x31) {
         group = (D_800D18C0 & 4) ? 8 : 7;
@@ -333,18 +341,18 @@ void func_1507F3B0(void) {
         }
     }
     if (group != -1) {
-        func_1507EF98((s32)list, &n, group);
+        idle_list_add_group((s32)list, &n, group);
     } else if (st->mode == 1) {
-        func_1507EF98((s32)list, &n, 0);
+        idle_list_add_group((s32)list, &n, 0);
     } else {
-        func_1507EF98((s32)list, &n, 1);
-        if (st->mode == 2 && st->count >= 4 && func_150803E0(D_800D154C) != 0) {
-            func_1507EF98((s32)list, &n, 3);
+        idle_list_add_group((s32)list, &n, 1);
+        if (st->mode == 2 && st->count >= 4 && obj_near_reachable_node(D_800D154C) != 0) {
+            idle_list_add_group((s32)list, &n, 3);
         }
     }
 
 choose:
-    seen = func_1507F018(list, n, picked, &npicked, st->recent);
+    seen = idle_list_filter_recent(list, n, picked, &npicked, st->recent);
     i = 0;
     if (npicked >= 2) {
         i = (u32)random_int() % (u32)npicked;
@@ -356,15 +364,16 @@ choose:
         st->timer = 0;
     }
     if (seen != 0) {
-        func_1507F380(st->set, st->recent);
+        idle_recent_remove(st->set, st->recent);
     }
-    func_1507F238(st->set, st->recent);
+    idle_recent_push(st->set, st->recent);
 }
 
 
 /* P64: advances the current idle set (ctl +0x5C) to its next entry. Returns 1 when a new set must be chosen
  * (no set, or the set's list ends with 0: then set and entry are cleared), else 0. */
-s32 func_1507F834(void) {
+/* was func_1507F834 */
+s32 idle_set_advance(void) {
     IdleState *st = (IdleState *)((u8 *)D_800D154C->unk31C + 0x58);
 
     if (st->set == 0) {
@@ -379,12 +388,13 @@ s32 func_1507F834(void) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F3B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/idle_choose_next_set.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F834.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/idle_set_advance.s")
 #endif
 
-s32 func_1507F8A0(s32 arg0) {
+/* was func_1507F8A0 */
+s32 idle_delay_random(s32 arg0) {
     s32 pad;
     s32 var_v1;
     u32 var_a0;
@@ -410,7 +420,8 @@ block_7:
 
 extern u8 D_800B89C4[];
 
-void func_1507F92C(struct127 *arg0) {
+/* was func_1507F92C */
+void player_play_idle_base_anim(struct127 *arg0) {
     s32 v;
 
     if (arg0->unk13C >= 0x64) {
@@ -441,8 +452,8 @@ void func_1507F92C(struct127 *arg0) {
 
 #ifdef NON_MATCHING
 s32 player_hit_reaction(struct127 *, s32);
-void func_1507F3B0(void);
-s32 func_1507F834(void);
+void idle_choose_next_set(void);
+s32 idle_set_advance(void);
 extern u8 *D_80086F40[];
 extern u8 D_8009BC80[][8];
 
@@ -451,9 +462,10 @@ extern u8 D_8009BC80[][8];
  * delay ctl +0x59 runs it counts down. Out of health: player_hit_reaction(rec, 0). Else the run / jump locks and the
  * turn are reset and an idle animation is chosen: ctl +0x17 (random 0x4F / 0x4D), a per-character idle
  * (ctl +0x78, below), carried items / states (ctl +0x1B2, +0x4E, +0x8, +0x1A, +0x32), held by another record
- * (func_1507F92C), the cutscene idle 0xF (D_800BE616), else the idle sets D_80086F40 / D_8009BC80 (u16 anim,
- * speed / 100, blend / 10, delay) chosen by ctl +0x5C / +0x5D after func_1507F834 / func_1507F3B0. */
-void func_1507F640(void) {
+ * (player_play_idle_base_anim), the cutscene idle 0xF (D_800BE616), else the idle sets D_80086F40 / D_8009BC80 (u16 anim,
+ * speed / 100, blend / 10, delay) chosen by ctl +0x5C / +0x5D after idle_set_advance / idle_choose_next_set. */
+/* was func_1507F640 */
+void player_idle_animation(void) {
     struct127 *rec;
     struct126 *ctl;
     u8 *e;
@@ -552,7 +564,7 @@ void func_1507F640(void) {
         return;
     }
     if (rec->unk13C >= 100) {
-        func_1507F92C(rec);
+        player_play_idle_base_anim(rec);
         return;
     }
     if (D_800BE616 != 0 && ch != 0x23 && ch != 0x16 && ch != 9) {
@@ -560,7 +572,7 @@ void func_1507F640(void) {
         return;
     }
 
-    if (func_1507F834() != 0) {
+    if (idle_set_advance() != 0) {
         rec = D_800D154C;
         if (rec->unk31C->unk198 != 0 && ctl->unk5C == 0) {
             switch (rec->unk31C->unk78) {
@@ -569,13 +581,13 @@ void func_1507F640(void) {
                 case 0x16: anim = 0xBD; break;
                 case 0x23: anim = 0x165; break;
                 default:
-                    func_1507F92C(rec);
+                    player_play_idle_base_anim(rec);
                     return;
             }
             obj_start_anim(rec, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
             return;
         }
-        func_1507F3B0();
+        idle_choose_next_set();
     }
 
     e = D_8009BC80[D_80086F40[ctl->unk5C][ctl->unk5D]];
@@ -602,15 +614,15 @@ void func_1507F640(void) {
     ctl->unk59 = e[4];
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F640.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/player_idle_animation.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1000D96C(s32, s32, s32);
-void func_1000DE1C(s32, s32);
-void func_1000E7A0(u32, s32);
-void func_1000E8C4(s32);
-void func_100109D0(struct127 *arg0);
+void music_play_song(s32, s32, s32);
+void music_stop_song(s32, s32);
+void music_post_event_request(u32, s32);
+void music_clear_event_flag1(s32);
+void actor_sound_stop(struct127 *arg0);
 extern u8 *D_80086F40[];
 extern u8 D_8009BC80[][8];
 extern s32 D_80041C50[];
@@ -619,9 +631,10 @@ extern s32 D_800D1CE4;
 
 /* Per-frame surface effects of the record's current floor material (ctl = rec->unk31C + 0x58: +4 material set,
  * +5 index, +6 the flags applied last frame). Flags (D_8009BC80[mat][6]): 0x10 scales the model's +0x08 by the
- * D_80041C50 level, and on change 1 = record flag unk2F8 bit 0, 2 = func_1000E7A0 / func_1000E8C4, 4 = ambient
- * loop 0x15 / 0x16 (D_800D1CE4) start / stop, 8 cleared = func_100109D0. */
-void func_1508000C(struct127 *rec) {
+ * D_80041C50 level, and on change 1 = record flag unk2F8 bit 0, 2 = music_post_event_request / music_clear_event_flag1, 4 = ambient
+ * loop 0x15 / 0x16 (D_800D1CE4) start / stop, 8 cleared = actor_sound_stop. */
+/* was func_1508000C */
+void obj_surface_effects_update(struct127 *rec) {
     u8 *ctl = (u8 *)rec->unk31C + 0x58;
     u8 set = ctl[4];
     u8 flags = 0;
@@ -652,9 +665,9 @@ void func_1508000C(struct127 *rec) {
         rec->unk2F8 &= ~1;
     }
     if (gained & 2) {
-        func_1000E7A0(1, 0);
+        music_post_event_request(1, 0);
     } else if (lost & 2) {
-        func_1000E8C4(1);
+        music_clear_event_flag1(1);
     }
     if (gained & 4) {
         if (D_800D1CE4 == 0) {
@@ -662,22 +675,23 @@ void func_1508000C(struct127 *rec) {
         } else if (D_800D1CE4++ == 0x17) { /* 0x15 -> 0x16 -> 0x17 -> 0x15 */
             D_800D1CE4 = 0x15;
         }
-        func_1000D96C(D_800D1CE4, 0, 0);
+        music_play_song(D_800D1CE4, 0, 0);
     } else if (lost & 4) {
-        func_1000DE1C(D_800D1CE4, 0);
+        music_stop_song(D_800D1CE4, 0);
     }
     if (lost & 8) {
-        func_100109D0(rec);
+        actor_sound_stop(rec);
     }
     ctl[6] = flags;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1508000C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/obj_surface_effects_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_1508000C(struct127 *);
+void obj_surface_effects_update(struct127 *);
 
-void func_150802A8(struct127 *arg0) {
+/* was func_150802A8 */
+void player_idle_state_update(struct127 *arg0) {
     s16 temp_v0_2;
     struct126 *temp_a1;
     struct126 *temp_a1_3;
@@ -710,17 +724,18 @@ void func_150802A8(struct127 *arg0) {
             if (D_800BE9E4 < temp_v0_2) {
                 temp_a1_3->unk66 = temp_v0_2 - D_800BE9E4;
             } else {
-                func_1508039C((u8 *) arg0);
+                obj_broadcast_bored((u8 *) arg0);
                 arg0->unk31C->unk66 = 0;
             }
         }
-        func_1508000C(arg0);
+        obj_surface_effects_update(arg0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_150802A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/player_idle_state_update.s")
 #endif
-void func_1508039C(u8 *arg0)
+/* was func_1508039C */
+void obj_broadcast_bored(u8 *arg0)
 {
   u8 *sp20[2];
   s32 sp1C;
@@ -731,23 +746,24 @@ void func_1508039C(u8 *arg0)
   {
     sp1C = (s32) sp20;
     ((u8 *) sp20)[4] = arg0[0x3B];
-    func_151920FC(sp1C, 0xD);
+    model_drip_broadcast(sp1C, 0xD);
   }
   func_151494E0(0xFFFFFFFFFFFFFFFF & sp1C, 0xD);
 }
 
 #ifdef NON_MATCHING
-// obj_near_reachable_node: P256: 1 when `obj` stands in a zone of kind 5 or 0xB (func_150A3674(4, kind, truncated
+// obj_near_reachable_node: P256: 1 when `obj` stands in a zone of kind 5 or 0xB (trigger_find_at_point(4, kind, truncated
 // x, y, z)) and one of the nodes of the lists D_800DD280[0][0x15 / 0x16 / 0x17] (position at node +0x98) lies within
-// 1000 units (squared distance < D_8009C0DC = 1e6) and passes func_15037988(obj index, joints 0 / 0, node position,
+// 1000 units (squared distance < D_8009C0DC = 1e6) and passes look_point_in_joint_range(obj index, joints 0 / 0, node position,
 // out, 90.0f, 0, 0); else 0. The list ids come from D_80086FF0 {0x15, 0x16, 0x17} (struct copy to the stack).
-s32 func_150A3674(s32, s32, s32 x, s32 y, s32 z);
-s32 func_15037988(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
+s32 trigger_find_at_point(s32, s32, s32 x, s32 y, s32 z);
+s32 look_point_in_joint_range(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
 typedef struct {
     s32 id[3];
 } ListIds3;
 extern ListIds3 D_80086FF0;
-s32 func_150803E0(struct127 *obj) {
+/* was func_150803E0 */
+s32 obj_near_reachable_node(struct127 *obj) {
     ListIds3 lists = D_80086FF0;
     f32 out[7];
     struct_eu_node *node;
@@ -755,8 +771,8 @@ s32 func_150803E0(struct127 *obj) {
     f32 dx, dy, dz;
     s32 k;
 
-    if (func_150A3674(4, 5, obj->x_position, obj->y_position, obj->z_position) == 0 &&
-        func_150A3674(4, 0xB, obj->x_position, obj->y_position, obj->z_position) == 0) {
+    if (trigger_find_at_point(4, 5, obj->x_position, obj->y_position, obj->z_position) == 0 &&
+        trigger_find_at_point(4, 0xB, obj->x_position, obj->y_position, obj->z_position) == 0) {
         return 0;
     }
     for (k = 0; k < 3; k++) {
@@ -766,7 +782,7 @@ s32 func_150803E0(struct127 *obj) {
             dy = pos[1] - obj->y_position;
             dz = pos[2] - obj->z_position;
             if (dx * dx + dy * dy + dz * dz < 1000000.0f &&
-                func_15037988(obj - D_800CC2D0, 0, 0, pos[0], pos[1], pos[2], out, 90.0f, 0, 0) != 0) {
+                look_point_in_joint_range(obj - D_800CC2D0, 0, 0, pos[0], pos[1], pos[2], out, 90.0f, 0, 0) != 0) {
                 return 1;
             }
         }
@@ -774,5 +790,5 @@ s32 func_150803E0(struct127 *obj) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_150803E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/obj_near_reachable_node.s")
 #endif

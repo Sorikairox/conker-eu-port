@@ -12,35 +12,35 @@ void game_init_message_queues(void) {
     {
         msgQueue = &D_80041E58[i];
         osCreateMesgQueue(msgQueue, &D_80041EA0[i], 8);
-        func_10008570(i, msgQueue);
+        music_player_set_msg_queue(i, msgQueue);
     }
 
-    func_100085A4(0, 6, 1); // stub function
-    func_1000E934();
+    music_stub_noop3(0, 6, 1); // stub function
+    music_system_reset();
 }
 
 /* was func_15000090 */
 void level_music_stop_all(void) {
-    func_1000DEC4();
+    music_release_stopped_slots();
 }
 
 #ifdef NON_MATCHING
-void func_1000DEC4(void);
-void func_1000E40C(s32 arg0, s32 arg1);
-void func_1000DF68(s32 arg0, s32 arg1, s32 arg2);
-s32 func_1000E46C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void music_release_stopped_slots(void);
+void music_song_set_volume(s32 arg0, s32 arg1);
+void music_song_set_fade(s32 arg0, s32 arg1, s32 arg2);
+s32 music_song_set_chans_level(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_10017944(s32 arg0, u32 arg1);
-void func_1000E2F4(s32 arg0);
-s32 func_1000B548(s32 *arg0);
-void func_1000DE1C(s32 arg0, s32 arg1);
-void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
+void music_set_all_paused(s32 arg0);
+s32 music_get_playing_songs(s32 *arg0);
+void music_stop_song(s32 arg0, s32 arg1);
+void music_play_song(s32 arg0, s32 arg1, s32 arg2);
 extern s8 D_800422A0;
 
 // Level music block, level header (D_800B0DF0) +0x2C..+0x39.
 typedef struct {
     s16 songA;  // +0x0: first song (< 0: none, 0: silence)
-    u16 volA;   // +0x2: func_1000E40C
-    u16 fadeA;  // +0x4: func_1000E46C
+    u16 volA;   // +0x2: music_song_set_volume
+    u16 fadeA;  // +0x4: music_song_set_chans_level
     s16 songB;  // +0x6: second song
     u16 volB;   // +0x8
     u16 fadeB;  // +0xA
@@ -88,18 +88,18 @@ void level_start_music(void) {
     switch (m.mode) {
     case 0:
     case 4:
-        func_1000DEC4();
+        music_release_stopped_slots();
         break;
     case 2:
         restart = TRUE;
-        func_1000DEC4();
+        music_release_stopped_slots();
         break;
     case 3:
         restart = TRUE;
         /* fallthrough */
     case 1:
         if (D_800BE9B4 == 2) {
-            func_1000DEC4();
+            music_release_stopped_slots();
         } else if (D_800BE9F8 != 0x22) {
             restart = FALSE;
             m.songA = -1;
@@ -108,7 +108,7 @@ void level_start_music(void) {
         break;
     }
 
-    count = func_1000B548(playing);
+    count = music_get_playing_songs(playing);
     for (i = count; i < 3; i++) {
         playing[i] = -1;
     }
@@ -136,7 +136,7 @@ void level_start_music(void) {
         }
     }
 
-    func_1000E2F4(0);
+    music_set_all_paused(0);
 
     if (!restart) {
         // Keep the wanted songs that are already playing.
@@ -145,18 +145,18 @@ void level_start_music(void) {
                 continue;
             }
             if (m.songA == playing[i]) {
-                func_1000E46C(m.songA, 0, m.fadeA, 0);
-                func_1000E46C(m.songA, 100, m.fadeA ^ 0xFFFF, 0);
-                func_1000E40C(m.songA, m.volA);
-                func_1000DF68(m.songA, 0x7FFF, 0);
+                music_song_set_chans_level(m.songA, 0, m.fadeA, 0);
+                music_song_set_chans_level(m.songA, 100, m.fadeA ^ 0xFFFF, 0);
+                music_song_set_volume(m.songA, m.volA);
+                music_song_set_fade(m.songA, 0x7FFF, 0);
                 playing[i] = -1;
                 m.songA = -1;
                 count--;
             } else if (m.songB == playing[i]) {
-                func_1000E46C(m.songB, 0, m.fadeB, 0);
-                func_1000E46C(m.songB, 100, m.fadeB ^ 0xFFFF, 0);
-                func_1000E40C(m.songB, m.volB);
-                func_1000DF68(m.songB, 0x7FFF, 0);
+                music_song_set_chans_level(m.songB, 0, m.fadeB, 0);
+                music_song_set_chans_level(m.songB, 100, m.fadeB ^ 0xFFFF, 0);
+                music_song_set_volume(m.songB, m.volB);
+                music_song_set_fade(m.songB, 0x7FFF, 0);
                 playing[i] = -1;
                 m.songB = -1;
                 count--;
@@ -176,7 +176,7 @@ void level_start_music(void) {
         if (excess != 0) {
             for (p = &playing[2]; p >= playing && excess != 0; p--) {
                 if (*p != -1) {
-                    func_1000DE1C(*p, 4);
+                    music_stop_song(*p, 4);
                     *p = -1;
                     excess--;
                 }
@@ -194,19 +194,19 @@ void level_start_music(void) {
         }
         if (slot == -1) {
             if (m.songA > 0) {
-                func_1000D96C(m.songA, 0, 0);
+                music_play_song(m.songA, 0, 0);
             }
         } else {
             if (m.songA > 0) {
-                func_1000D96C(m.songA, playing[slot], 5);
+                music_play_song(m.songA, playing[slot], 5);
             } else {
-                func_1000DE1C(playing[slot], 4);
+                music_stop_song(playing[slot], 4);
             }
             playing[slot] = -1;
         }
         if (m.songA > 0) {
-            func_1000E46C(m.songA, 0, m.fadeA, 0);
-            func_1000E40C(m.songA, m.volA);
+            music_song_set_chans_level(m.songA, 0, m.fadeA, 0);
+            music_song_set_volume(m.songA, m.volA);
         }
     }
 
@@ -219,19 +219,19 @@ void level_start_music(void) {
         }
         if (slot == -1) {
             if (m.songB > 0) {
-                func_1000D96C(m.songB, 0, 0);
+                music_play_song(m.songB, 0, 0);
             }
         } else {
             if (m.songB > 0) {
-                func_1000D96C(m.songB, playing[slot], 5);
+                music_play_song(m.songB, playing[slot], 5);
             } else {
-                func_1000DE1C(playing[slot], 4);
+                music_stop_song(playing[slot], 4);
             }
             playing[slot] = -1;
         }
         if (m.songB > 0) {
-            func_1000E46C(m.songB, 0, m.fadeB, 0);
-            func_1000E40C(m.songB, m.volB);
+            music_song_set_chans_level(m.songB, 0, m.fadeB, 0);
+            music_song_set_volume(m.songB, m.volB);
         }
     }
 
@@ -257,7 +257,7 @@ extern u8 D_800D9F10;
 extern f32 D_800D9F18[][2];       /* per player projection request: first float = -1 (none) */
 extern u8 D_800D9F38;             /* projection request count / pending flag */
 void level_init_color_tables(s32 arg0);
-s32 func_1515D9F0(s32 arg0);
+s32 light_alloc_light_buf(s32 arg0);
 
 /* Per-level setup of the screen / projection-request state: screen size floats, level_init_color_tables, clear the
  * D_800D9F88 / D_800D9F98 4x3 tables and the small flags, then per player (0..D_80082FA0): D_800DA230 handle,
@@ -285,7 +285,7 @@ s32 level_setup_screen_projection(s32 arg0) {
     D_800D9FAC = 0xFF;
     D_800DA240 = 0xB;
     for (i = 0; i <= D_80082FA0; i++) {
-        D_800DA230[i] = func_1515D9F0(D_800DA240);
+        D_800DA230[i] = light_alloc_light_buf(D_800DA240);
     }
     for (i = 0; i <= D_80082FA0; i++) {
         for (j = 0; j < 2; j++) {

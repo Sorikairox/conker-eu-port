@@ -7,7 +7,7 @@
 struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 void *memcpy(void *, const void *, s32);
 
-/* func_150CD3C0's input (func_15152DE4's S_2de4) */
+/* spark_record_spawn's input (emit_coloured_points's S_2de4) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 vel[3];
@@ -54,12 +54,13 @@ typedef struct {
     /* 0x3C */ f32 z;
 } SparkExtra_D3C0;
 
-// spark_record_spawn: spawns one type 0x57 effect record (effect3d_spawn_default, flags 0x2D03, 0xC03E1) for func_15152DE4's
+// spark_record_spawn: spawns one type 0x57 effect record (effect3d_spawn_default, flags 0x2D03, 0xC03E1) for emit_coloured_points's
 // spark description: life, colour (alpha 0xFF; the 4th byte goes to +0x44), size and position from `in`, a random
 // orientation (0..360 each axis). The record's +0x110 block gets in's velocity, b, a, z and random spins
 // ((rand * 20000 - 10000) / 1000 per axis) and rates. room / group go to the spawner's last two arguments.
 // The asm returns the record; every caller ignores it (void as in their prototypes).
-void func_150CD3C0(SparkIn_D3C0 *in, u8 room, u8 group) {
+/* was func_150CD3C0 */
+void spark_record_spawn(SparkIn_D3C0 *in, u8 room, u8 group) {
     SparkExtra_D3C0 x;
     SparkSpec_D3C0 s;
     u8 *rec;
@@ -110,13 +111,14 @@ void func_150CD3C0(SparkIn_D3C0 *in, u8 room, u8 group) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CD3C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/spark_record_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_151436B4(f32, f32, f32, void *);
+void vec3_from_angles_rad(f32, f32, f32, void *);
 
-s32 func_150CD68C(u8 *arg0) {
+/* was func_150CD68C */
+s32 spark_record_update_motion(u8 *arg0) {
     u8 *sp20;
     f32 temp_f0;
     f32 temp_f0_2;
@@ -249,7 +251,7 @@ block_14:
     }
     if ((*(f32 *)((u8 *)temp_v1_3 + 4)) < 0.0f) {
         sp20 = temp_v1_3;
-        func_151436B4((*(f32 *)((u8 *)temp_v1_3 + 0x2C)), ((*(f32 *)((u8 *)temp_v1_3 + 0x38)) * sinf((*(f32 *)((u8 *)temp_v1_3 + 0x30)))) + 1.5707964f, (*(f32 *)((u8 *)temp_v1_3 + 0x24)), arg0 + 0x4C);
+        vec3_from_angles_rad((*(f32 *)((u8 *)temp_v1_3 + 0x2C)), ((*(f32 *)((u8 *)temp_v1_3 + 0x38)) * sinf((*(f32 *)((u8 *)temp_v1_3 + 0x30)))) + 1.5707964f, (*(f32 *)((u8 *)temp_v1_3 + 0x24)), arg0 + 0x4C);
         (*(f32 *)((u8 *)temp_v1_3 + 0x24)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x24)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x28)) * D_800BE9A4));
         (*(f32 *)((u8 *)temp_v1_3 + 0x30)) = (f32) ((*(f32 *)((u8 *)temp_v1_3 + 0x30)) + ((*(f32 *)((u8 *)temp_v1_3 + 0x34)) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_v1_3 + 0x30)) > 6.2831855f) {
@@ -269,19 +271,20 @@ block_14:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CD68C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/spark_record_update_motion.s")
 #endif
 #ifdef NON_MATCHING
-void func_151D6310(void *, s16, s32, void *, u8 *);
+void vtx_slot_buffer_get(void *, s16, s32, void *, u8 *);
 void *memcpy(void *, const void *, s32);
 
-// sprite_quad_build: entry of the D_8008A1E0 draw table (`s16 *(u8 *, s16 slot)`, same family as func_15198180).
-// Gets 0x40 bytes of vertices for the view slot from the record's buffers at +0x100 (func_151D6310; on a fresh
+// sprite_quad_build: entry of the D_8008A1E0 draw table (`s16 *(u8 *, s16 slot)`, same family as beam_quad_build).
+// Gets 0x40 bytes of vertices for the view slot from the record's buffers at +0x100 (vtx_slot_buffer_get; on a fresh
 // buffer the matrix at +0xC0 is copied into both halves of it) and returns them (NULL when none). The four corners
 // (+/- half width +0x2C, +/- half height +0x30, z 0) are rotated by the angles +0x40 / +0x44 / +0x48
-// (mtxf_rotate_xyz_deg / func_150A7E40) and stored as s16 x, y, z with flag 0. (The asm also sums the position +0x34 and,
+// (mtxf_rotate_xyz_deg / mtxf_transform_point) and stored as s16 x, y, z with flag 0. (The asm also sums the position +0x34 and,
 // when +0x114 < 0, the offset +0x4C into a stack vector it never reads; that dead code is left out.)
-s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
+/* was func_150CDAAC */
+s16 *spark_record_quad_build(u8 *arg0, s16 arg1) {
     s16 *vtx;
     s16 *ret;
     u8 fresh;
@@ -290,7 +293,7 @@ s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
     f32 p[4][3];
     s32 i;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &vtx, &fresh);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &vtx, &fresh);
     ret = vtx;
     if (vtx == NULL) {
         return NULL;
@@ -314,7 +317,7 @@ s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
     p[3][2] = 0.0f;
     mtxf_rotate_xyz_deg(mtx, *(f32 *) (arg0 + 0x40), *(f32 *) (arg0 + 0x44), *(f32 *) (arg0 + 0x48));
     for (i = 0; i < 4; i++) {
-        func_150A7E40(mtx, p[i][0], p[i][1], 0.0f, &p[i][0], &p[i][1], &p[i][2]);
+        mtxf_transform_point(mtx, p[i][0], p[i][1], 0.0f, &p[i][0], &p[i][1], &p[i][2]);
         vtx[0] = (s32) p[i][0];
         vtx[1] = (s32) p[i][1];
         vtx[2] = (s32) p[i][2];
@@ -324,12 +327,12 @@ s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CDAAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/spark_record_quad_build.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1514373C(f32, f32, f32 *, f32 *);
-void func_15152DE4(u8 *arg0, u8 arg1, s32 arg2);
+void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
+void emit_coloured_points(u8 *arg0, u8 arg1, s32 arg2);
 extern f32 D_80088C14[5];   /* base angles (radians) of the five shooting-star lanes */
 extern f32 D_800A0B24, D_800A0B28, D_800A0B2C;
 extern f64 D_800A0B30, D_800A0B38;
@@ -339,9 +342,10 @@ extern f32 D_800A0B60, D_800A0B64, D_800A0B68, D_800A0B6C, D_800A0B70;
 // shooting_star_sky_update: sky effect object. Its accumulator (+0x28) grows by D_800A0B24 * frame time * rate
 // (+0x2C); every whole unit picks one of the five lane angles D_80088C14 (+ random * D_800A0B40) and, when that
 // direction is within D_800A0B48 of the current camera heading (camera +0x380 - 180, wrapped to 0..360, times
-// D_800A0B44 = degrees to radians), spawns a streak (func_15152DE4) placed by func_1514373C at a random distance
+// D_800A0B44 = degrees to radians), spawns a streak (emit_coloured_points) placed by vec2_from_angle_rad at a random distance
 // (D_800A0B30 + random * D_800A0B38) and height (500 + D_800A0B50 + random * D_800A0B4C).
-void func_150CDD08(u8 *obj) {
+/* was func_150CDD08 */
+void shooting_star_sky_update(u8 *obj) {
     struct {
         s32 type;
         s32 life;
@@ -399,7 +403,7 @@ void func_150CDD08(u8 *obj) {
         if (fabsf(ang - h * D_800A0B44) < D_800A0B48) {
             r = random_float();
             spr.y = r * D_800A0B4C + D_800A0B50 + 500.0f;
-            func_1514373C(ang, (f32) (r * D_800A0B38 + D_800A0B30), &spr.x, &spr.z);
+            vec2_from_angle_rad(ang, (f32) (r * D_800A0B38 + D_800A0B30), &spr.x, &spr.z);
             spr.type = 0xF;
             spr.life = 0x14;
             spr.unk16 = 0xC;
@@ -414,16 +418,17 @@ void func_150CDD08(u8 *obj) {
             spr.unk28 = D_800A0B6C;
             spr.unk2C = D_800A0B70;
             spr.rot = (s32) (((ang + D_800A0B58) - D_800A0B5C) * D_800A0B60);
-            func_15152DE4((u8 *) &spr, obj[0xC], obj[1]);
+            emit_coloured_points((u8 *) &spr, obj[0xC], obj[1]);
         }
         *(f32 *) (obj + 0x28) -= 1.0f;
     } while (1.0f < *(f32 *) (obj + 0x28));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CDD08.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/shooting_star_sky_update.s")
 #endif
 
-void func_150CE07C(s32 arg0) {
+/* was func_150CE07C */
+void shooting_star_set_rate(s32 arg0) {
     u8 *temp_v1;
 
     if ((arg0 >= 0) && (arg0 < 0x100) && (D_80088C10 != NULL)) {

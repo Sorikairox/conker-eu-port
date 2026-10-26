@@ -8,7 +8,8 @@ extern f32 D_800A0880;
 extern f32 D_800A0884;
 void light_ctrl_broadcast(u8, u8, s32);
 
-s32 func_150C78E0(u8 *arg0, u8 *arg1) {
+/* was func_150C78E0 */
+s32 light_flicker_update(u8 *arg0, u8 *arg1) {
     f32 temp_f0;
     f32 var_f0;
     f32 var_f16;
@@ -50,7 +51,7 @@ s32 func_150C78E0(u8 *arg0, u8 *arg1) {
         (*(s32 *)((u8 *)arg0 + 0x3C)) = (s32) (var_f0 * 255.0f);
         if (var_f0 != 0.0f) {
             if ((*(u8 *)((u8 *)arg0 + 0x13)) != 2) {
-                func_10010F30((random_int() & 7) + 0x44B, 0x7D00U, 0x40U, 0, 0U);
+                sound_play_2d((random_int() & 7) + 0x44B, 0x7D00U, 0x40U, 0, 0U);
             }
             (*(u8 *)((u8 *)arg0 + 0x13)) = 2U;
             if ((*(s32 *)((u8 *)arg1 + 0x2E4)) != 1) {
@@ -68,5 +69,5 @@ s32 func_150C78E0(u8 *arg0, u8 *arg1) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F50F0/func_150C78E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F50F0/light_flicker_update.s")
 #endif

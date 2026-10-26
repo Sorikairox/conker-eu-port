@@ -27,6 +27,6 @@ s/                nsig--;/                n2--;/
 s/                p\[n2\]++;/                p[n2]--;/
 s/            if (n2 < 0) {/            if (n2 <= 0) {/
 s/                ++xexp;/                --xexp;/
-s/debug_printf_genld(px, code, p, nsig, xexp);/func_10001AA8(px, code, p, xexp, nsig);/
+s/debug_printf_genld(px, code, p, nsig, xexp);/init_printf_genld(px, code, p, xexp, nsig);/
 s/            gen = 19;/            gen = 20;/
 s/val = (val - lo) \* 1.0e8;/val = (val - lo) * 1.0e7;/

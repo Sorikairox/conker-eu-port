@@ -12,12 +12,13 @@ typedef struct {
     /* 0xA8 */ f32 unkA8;
 } struct_eu_15E000;
 
-void func_15131E58(f32 *arg0, f32 arg1);
-void func_15131E88(f32 *arg0, f32 arg1);
-void func_15131EC8(f32 *arg0, f32 arg1);
+void vec_damp_y_per_tick(f32 *arg0, f32 arg1);
+void vec_damp_xz_per_tick(f32 *arg0, f32 arg1);
+void vec_damp_xyz_per_tick(f32 *arg0, f32 arg1);
 
 
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+/* was func_151307F0 */
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     u8 *obj;
     s32 type;
 
@@ -48,15 +49,17 @@ s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     return (s32)obj;
 }
 
-s32 func_151307F0(s32, u8, s32, s32, u8, s32);
-s32 func_151308E4(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    return func_151307F0(arg0, arg1, 0, arg2, arg3, arg4);
+s32 particle_spawn_ex(s32, u8, s32, s32, u8, s32);
+/* was func_151308E4 */
+s32 particle_spawn_basic(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    return particle_spawn_ex(arg0, arg1, 0, arg2, arg3, arg4);
 }
 
-s32 func_151308E4(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4);
+s32 particle_spawn_basic(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4);
 
-s32 func_1513092C(s32 arg0, u8 arg1, s32 arg2) {
-    return func_151308E4(arg0, arg1, arg2, 0xFF, 0);
+/* was func_1513092C */
+s32 particle_spawn_default(s32 arg0, u8 arg1, s32 arg2) {
+    return particle_spawn_basic(arg0, arg1, arg2, 0xFF, 0);
 }
 
 #ifdef NON_MATCHING
@@ -64,7 +67,7 @@ extern s32 (*D_80089B00[])(u8 *, f32 *);
 extern void (*D_80089BA0[])(u8 *);
 
 /*
- * particle_update: per-tick update of a 0x2B / 0x52 / 0x47 particle (record from func_151307F0). Flag word +0x68:
+ * particle_update: per-tick update of a 0x2B / 0x52 / 0x47 particle (record from particle_spawn_ex). Flag word +0x68:
  * 1 life timer +0x1A counts down by the frame ticks (D_800BE9E4), dead below 0; 2 vertical speed +0x5C gains
  * gravity +0x64; 4 position +0x40 moves by the velocity +0x58 (scaled by D_800BE9A4); 0x200 alpha +0x2B fades
  * as timer * +0x30 below timer +0x2E; 0x400 size +0x38 / +0x3C changes by +0x34 below timer +0x32 (0x800 =
@@ -73,7 +76,8 @@ extern void (*D_80089BA0[])(u8 *);
  * end / start, 8 = bounce, else wrap. Then update handler D_80089B00[+0x72] (with the old position; 0 = die);
  * a dead particle runs death handler D_80089BA0[+0x73] and is freed.
  */
-void func_1513095C(u8 *arg0) {
+/* was func_1513095C */
+void particle_sprite_update(u8 *arg0) {
     s32 dead = FALSE;
     u32 flags;
     f32 old[3];
@@ -179,7 +183,7 @@ void func_1513095C(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_1513095C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_sprite_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -187,28 +191,29 @@ extern s32 (*D_80089BA4[])(u8 *, s32);
 extern f32 D_800A3BDC;
 extern u8 D_800A4EA8[];
 extern s32 D_800D30BC;
-s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
-void func_151318EC(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_);
-void func_15131BBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-void func_1515EDF8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7);
+s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
+void particle_calc_prim_color(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_);
+void particle_calc_colors(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+void light_compute_point_colour(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7);
 Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
-Gfx *func_15142CF0(s32, s32, s32, s16, s32, s32, s32, u8 *);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-u8 *func_15142FBC(Gfx *, s32, s32, u8 *);
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
+Gfx *gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, u8 *);
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 
 /*
  * particle_draw_sprite: draw handler of the sprite particles (draw tables at 0x8008C10C / 0x8008C6BC / 0x8008C8F8):
  * one textured rectangle for particle `p` in view `view`. Skipped when flag 0x40000 hides it in this view (+0x76
  * view mask), when the visibility handler D_80089BA4[+0x74] (0x8000) says no, or when flag 0x20000's owner +0x6C
- * is not in this view. Projects the position (+0x40, plus +0x4C when 0x1000) with func_15144CEC, sizes the
+ * is not in this view. Projects the position (+0x40, plus +0x4C when 0x1000) with world_to_screen, sizes the
  * half-extents from +0x38 / +0x3C (clamped to at most +0x7C with 0x200000, at least +0x78 with 0x400000), culls
- * against the view's screen box, then emits pipe sync (once), prim depth, combine / colour (func_151318EC +
- * func_1515EDF8 lighting with 0x10000, else func_15131BBC), texture D_80090F10[+0x2D] and the rectangle with
+ * against the view's screen box, then emits pipe sync (once), prim depth, combine / colour (particle_calc_prim_color +
+ * light_compute_point_colour lighting with 0x10000, else particle_calc_colors), texture D_80090F10[+0x2D] and the rectangle with
  * flipped S (0x40) / T (0x80) and clipped texture start at the left / top screen edge. Returns the new DL end.
  */
-Gfx *func_1513100C(Gfx *gfx, u8 *p, s16 view) {
+/* was func_1513100C */
+Gfx *particle_draw_sprite(Gfx *gfx, u8 *p, s16 view) {
     u8 sync;
     u8 blend;
     u8 combine;
@@ -274,7 +279,7 @@ Gfx *func_1513100C(Gfx *gfx, u8 *p, s16 view) {
         pos[1] = *(f32 *)(p + 0x44);
         pos[2] = *(f32 *)(p + 0x48);
     }
-    if (!func_15144CEC(pos, scr, &oz, &ow, &inv, view)) {
+    if (!world_to_screen(pos, scr, &oz, &ow, &inv, view)) {
         return gfx;
     }
     cam = (u8 *)D_800BE628 + view * 0x180;
@@ -357,23 +362,23 @@ Gfx *func_1513100C(Gfx *gfx, u8 *p, s16 view) {
         dtdy = -dtdy & 0xFFFF;
     }
     if (flags & 0x10000) {
-        func_151318EC((s32)&prim[0], (s32)&prim[1], (s32)&prim[2], (s32)&prim[3], (s32)p);
-        func_1515EDF8(view, (s32)pos[0], (s32)pos[1], (s32)pos[2], 0xFF, rgb, 0, 0);
+        particle_calc_prim_color((s32)&prim[0], (s32)&prim[1], (s32)&prim[2], (s32)&prim[3], (s32)p);
+        light_compute_point_colour(view, (s32)pos[0], (s32)pos[1], (s32)pos[2], 0xFF, rgb, 0, 0);
         env[0] = rgb[0];
         env[1] = rgb[1];
         env[2] = rgb[2];
         env[3] = p[0x2B];
     } else {
-        func_15131BBC((s32)&prim[0], (s32)&prim[1], (s32)&prim[2], (s32)&prim[3], (s32)&env[0], (s32)&env[1],
+        particle_calc_colors((s32)&prim[0], (s32)&prim[1], (s32)&prim[2], (s32)&prim[3], (s32)&env[0], (s32)&env[1],
                       (s32)&env[2], (s32)&env[3], (s32)p);
     }
     gfx = gfx_set_combine_mode(gfx, blend, &sync);
-    gfx = func_15142B7C(gfx, *(s32 *)(p + 0x10), *(s32 *)(p + 0x14) | 0x10000 | 0x100000);
-    gfx = func_15142CF0((s32)gfx, 0, 0, prim[0], prim[1], prim[2], prim[3], &sync);
-    gfx = func_15142C10(gfx, env[0], env[1], env[2], env[3], &sync);
-    gfx = (Gfx *)func_15142E24((s32)gfx, (s32)spr, *(s32 *)(p + 0x1C), 2, 0, 0, p[0x2D], 0, 0, &sync,
+    gfx = gfx_geometry_mode_cached(gfx, *(s32 *)(p + 0x10), *(s32 *)(p + 0x14) | 0x10000 | 0x100000);
+    gfx = gfx_prim_color_cached((s32)gfx, 0, 0, prim[0], prim[1], prim[2], prim[3], &sync);
+    gfx = gfx_env_color_cached(gfx, env[0], env[1], env[2], env[3], &sync);
+    gfx = (Gfx *)gfx_load_texture_cached((s32)gfx, (s32)spr, *(s32 *)(p + 0x1C), 2, 0, 0, p[0x2D], 0, 0, &sync,
                                (*(u32 *)(p + 0x68) & 0x800000) ? 0x3E : 3);
-    g = (Gfx *)func_15142FBC(gfx, ((*(u32 *)(p + 0x68) & 0x100) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
+    g = (Gfx *)gfx_other_mode_cached(gfx, ((*(u32 *)(p + 0x68) & 0x100) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
                              *(s32 *)(D_800A4EA8 + combine * 8 + 4) | *(s32 *)(D_800A4EA8 + combine * 8) | 4, &sync);
 
     /* texture rectangle: lower right, upper left (10.2 screen coordinates clamped at 0) */
@@ -414,7 +419,7 @@ Gfx *func_1513100C(Gfx *gfx, u8 *p, s16 view) {
     return g + 3;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_1513100C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_draw_sprite.s")
 #endif
 
 typedef struct {
@@ -432,7 +437,8 @@ typedef struct {
     u8 u70;
     u8 u71;
 } struct_15E000_col;
-void func_151318EC(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
+/* was func_151318EC */
+void particle_calc_prim_color(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
     s16 *arg0 = (s16 *)arg0_;
     s16 *arg1 = (s16 *)arg1_;
     s16 *arg2 = (s16 *)arg2_;
@@ -485,7 +491,8 @@ void func_151318EC(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
     }
 }
 
-void func_15131A84(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
+/* was func_15131A84 */
+void particle_calc_env_color(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
     s16 *arg0 = (s16 *)arg0_;
     s16 *arg1 = (s16 *)arg1_;
     s16 *arg2 = (s16 *)arg2_;
@@ -536,56 +543,67 @@ void func_15131A84(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
     }
 }
 
-void func_15131BBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
-    func_15131A84(arg4, arg5, arg6, arg7, arg8);
-    func_151318EC(arg0, arg1, arg2, arg3, arg8);
+/* was func_15131BBC */
+void particle_calc_colors(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    particle_calc_env_color(arg4, arg5, arg6, arg7, arg8);
+    particle_calc_prim_color(arg0, arg1, arg2, arg3, arg8);
 }
 
-s32 func_15131C1C(struct_eu_15E000 *arg0, s32 arg1) {
-    func_15131E58(arg0->unk58, arg0->unkA8);
+/* was func_15131C1C */
+s32 particle_upd_damp_vel_y(struct_eu_15E000 *arg0, s32 arg1) {
+    vec_damp_y_per_tick(arg0->unk58, arg0->unkA8);
     return 1;
 }
 
-s32 func_15131C4C(struct_eu_15E000 *arg0, s32 arg1) {
-    func_15131E88(arg0->unk58, arg0->unkA8);
+/* was func_15131C4C */
+s32 particle_upd_damp_vel_xz(struct_eu_15E000 *arg0, s32 arg1) {
+    vec_damp_xz_per_tick(arg0->unk58, arg0->unkA8);
     return 1;
 }
 
-s32 func_15131C7C(struct_eu_15E000 *arg0, s32 arg1) {
-    func_15131EC8(arg0->unk58, arg0->unkA8);
+/* was func_15131C7C */
+s32 particle_upd_damp_vel(struct_eu_15E000 *arg0, s32 arg1) {
+    vec_damp_xyz_per_tick(arg0->unk58, arg0->unkA8);
     return 1;
 }
 
-void func_15131CAC(struct102 *arg0) {
+/* was func_15131CAC */
+void particle_die_retire(struct102 *arg0) {
     node_retire(arg0);
 }
 
-void func_15131CCC(struct102 *arg0) {
+/* was func_15131CCC */
+void particle_die_free(struct102 *arg0) {
     node_unlink_free(arg0);
 }
 
-void func_15131CEC(u8 *arg0) {
+/* was func_15131CEC */
+void particle_run_hook_bb4(u8 *arg0) {
     s32 idx = (*(s32 *)(arg0 + 0x68) & 0x4000) ? arg0[0x75] : 0;
     D_80089BB4[idx](arg0);
 }
 
-void func_15131D38(u8 *arg0) {
+/* was func_15131D38 */
+void particle_run_hook_be4(u8 *arg0) {
     s32 idx = (*(s32 *)(arg0 + 0x68) & 0x4000) ? arg0[0x75] : 0;
     D_80089BE4[idx](arg0);
 }
 
-s32 func_15131D84(s32 arg0, s32 arg1) {
+/* was func_15131D84 */
+s32 particle_upd_kill(s32 arg0, s32 arg1) {
     return 0;
 }
 
-void func_15131D98(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
+/* was func_15131D98 */
+void particle_update_wobble_offset(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
     (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0)) * angle_byte_cos((*(u8 *)((u8 *)arg2 + 0)) - 0x40));
     (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) ((*(f32 *)((u8 *)arg1 + 4)) * angle_byte_cos((*(u8 *)((u8 *)arg2 + 1)) - 0x40));
     (*(u8 *)((u8 *)arg2 + 0)) = (u8) (((*(u8 *)((u8 *)arg3 + 0)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 0)));
     (*(u8 *)((u8 *)arg2 + 1)) = (u8) (((*(u8 *)((u8 *)arg3 + 1)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 1)));
 }
 
-void func_15131E58(f32 *arg0, f32 arg1) {
+/* was func_15131E58 */
+void vec_damp_y_per_tick(f32 *arg0, f32 arg1) {
     s32 i = D_800BE9E4;
 
     while (i > 0) {
@@ -594,7 +612,8 @@ void func_15131E58(f32 *arg0, f32 arg1) {
     }
 }
 
-void func_15131E88(f32 *arg0, f32 arg1) {
+/* was func_15131E88 */
+void vec_damp_xz_per_tick(f32 *arg0, f32 arg1) {
     s32 i = D_800BE9E4;
 
     while (i > 0) {
@@ -604,7 +623,8 @@ void func_15131E88(f32 *arg0, f32 arg1) {
     }
 }
 
-void func_15131EC8(f32 *arg0, f32 arg1) {
+/* was func_15131EC8 */
+void vec_damp_xyz_per_tick(f32 *arg0, f32 arg1) {
     s32 i = D_800BE9E4;
 
     while (i > 0) {
@@ -616,24 +636,26 @@ void func_15131EC8(f32 *arg0, f32 arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15131F34(); // callers pass s32 / pointers; the NM definition below takes (u8 *, u8 *, u8 *)
+s32 particle_surface_hit_dispatch(); // callers pass s32 / pointers; the NM definition below takes (u8 *, u8 *, u8 *)
 #endif
 
-void func_15131F14(s32 arg0, s32 arg1) {
-    func_15131F34(arg0, arg1, arg0 + 0xA8);
+/* was func_15131F14 */
+void particle_check_surface_hit(s32 arg0, s32 arg1) {
+    particle_surface_hit_dispatch(arg0, arg1, arg0 + 0xA8);
 }
 
 #ifdef NON_MATCHING
-extern s32 (*D_80089C14[])(u8 *, s32, u8 *, u8 *); // only entry 0: func_151320EC (reads cfg as arg3)
-s32 func_1514672C(f32 *);
-s32 func_15046F70(f32 *, s32, f32, f32 *);
+extern s32 (*D_80089C14[])(u8 *, s32, u8 *, u8 *); // only entry 0: particle_hit_bounce (reads cfg as arg3)
+s32 pos_in_world_bounds(f32 *);
+s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 
 // surface_hit_dispatch: when the hit config `cfg` is on (bit 0 of cfg[0]) with a handler (D_80089C14[(s8) cfg[1]],
 // -1 = none) and the object (+0x40 / 0x44 / 0x48 x / y / z) is below `other`'s y (+4): probes the point (obj x,
-// other y, obj z) (func_1514672C; 0 = outside: returns 0) and the floor down to obj y - 0.06 * obj +0x3C
-// (func_15046F70, height into obj + 0x80); on a hit calls the handler with (obj, other, {x, floor height, z}, cfg)
+// other y, obj z) (pos_in_world_bounds; 0 = outside: returns 0) and the floor down to obj y - 0.06 * obj +0x3C
+// (collision_floor_probe, height into obj + 0x80); on a hit calls the handler with (obj, other, {x, floor height, z}, cfg)
 // and returns its low byte. Returns 1 in every other case.
-s32 func_15131F34(u8 *obj, u8 *other, u8 *cfg) {
+/* was func_15131F34 */
+s32 particle_surface_hit_dispatch(u8 *obj, u8 *other, u8 *cfg) {
     f32 p[3];
     f32 q[3];
 
@@ -646,10 +668,10 @@ s32 func_15131F34(u8 *obj, u8 *other, u8 *cfg) {
     p[0] = *(f32 *) (obj + 0x40);
     p[1] = *(f32 *) (other + 4);
     p[2] = *(f32 *) (obj + 0x48);
-    if (func_1514672C(p) == 0) {
+    if (pos_in_world_bounds(p) == 0) {
         return 0;
     }
-    if (func_15046F70(p, 0, *(f32 *) (obj + 0x44) - *(f32 *) (obj + 0x3C) * 0.060000002f, (f32 *) (obj + 0x80)) == 0) {
+    if (collision_floor_probe(p, 0, *(f32 *) (obj + 0x44) - *(f32 *) (obj + 0x3C) * 0.060000002f, (f32 *) (obj + 0x80)) == 0) {
         return 1;
     }
     q[0] = p[0];
@@ -658,20 +680,23 @@ s32 func_15131F34(u8 *obj, u8 *other, u8 *cfg) {
     return D_80089C14[(s8) cfg[1]](obj, (s32) other, (u8 *) q, cfg) & 0xFF;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_15131F34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_surface_hit_dispatch.s")
 #endif
 
-void func_1513206C(struct_eu_15E000 *arg0, s32 arg1) {
-    func_15131EC8(arg0->unk58, arg0->unkA8);
-    func_15131F34(arg0, arg1, (u8 *)arg0 + 0xB0);
+/* was func_1513206C */
+void particle_upd_damp_hit(struct_eu_15E000 *arg0, s32 arg1) {
+    vec_damp_xyz_per_tick(arg0->unk58, arg0->unkA8);
+    particle_surface_hit_dispatch(arg0, arg1, (u8 *)arg0 + 0xB0);
 }
 
-void func_151320AC(struct_eu_15E000 *arg0, s32 arg1) {
-    func_15131E88(arg0->unk58, arg0->unkA8);
-    func_15131F34(arg0, arg1, (u8 *)arg0 + 0xB0);
+/* was func_151320AC */
+void particle_upd_damp_xz_hit(struct_eu_15E000 *arg0, s32 arg1) {
+    vec_damp_xz_per_tick(arg0->unk58, arg0->unkA8);
+    particle_surface_hit_dispatch(arg0, arg1, (u8 *)arg0 + 0xB0);
 }
 
-s32 func_151320EC(u8 *arg0, s32 arg1, u8 *arg2, u8 *arg3) {
+/* was func_151320EC */
+s32 particle_hit_bounce(u8 *arg0, s32 arg1, u8 *arg2, u8 *arg3) {
     *(f32 *)(arg0 + 0x44) = *(f32 *)(arg0 + 0x3C) * 0.060000002f + *(f32 *)(arg2 + 4);
     *(f32 *)(arg0 + 0x58) *= *(f32 *)(arg3 + 4);
     *(f32 *)(arg0 + 0x5C) = -*(f32 *)(arg3 + 4) * *(f32 *)(arg0 + 0x5C);
@@ -688,7 +713,8 @@ s32 func_151320EC(u8 *arg0, s32 arg1, u8 *arg2, u8 *arg3) {
 }
 
 extern void (*D_80089C18[])(u8 *, u8 *, u8);
-void func_1513219C(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_1513219C */
+void particle_run_msg_hook(u8 *arg0, u8 *arg1, u8 arg2) {
     void (*f)(u8 *, u8 *, u8);
     if (*(s32 *)(arg0 + 0x68) & 0x4000) {
         f = D_80089C18[arg0[0x75]];
@@ -698,7 +724,8 @@ void func_1513219C(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-void func_151321F4(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, f32 *arg4, f32 *arg5)
+/* was func_151321F4 */
+void particle_calc_wobble(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, f32 *arg4, f32 *arg5)
 {
   u8 temp_a0;
   f32 r;
@@ -712,18 +739,21 @@ void func_151321F4(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, f32 *arg4, f32 *arg5)
   *arg5 = ((*((f32 *) (((u8 *) arg3) + 4))) * (0, r)) + arg2;  // fakematch: comma flips mul.s operand order
 }
 
-void func_151322BC(s32 arg0, u8 arg1) {
+/* was func_151322BC */
+void particle_broadcast(s32 arg0, u8 arg1) {
     const s32 sp1C[3] = {0x2B, 0x47, 0x52};
 
     node_broadcast_types(sp1C, 0x3, arg0, arg1);
 }
 
-s32 func_1513230C(u8 *arg0, s32 arg1) {
-    func_151321F4(arg0 + 0xA8, arg0 + 0xAA, *(f32 *)(arg0 + 0xAC), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C);
+/* was func_1513230C */
+s32 particle_upd_wobble_size(u8 *arg0, s32 arg1) {
+    particle_calc_wobble(arg0 + 0xA8, arg0 + 0xAA, *(f32 *)(arg0 + 0xAC), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C);
     return 1;
 }
 
-s32 func_1513235C(u8 *arg0, s32 arg1) {
+/* was func_1513235C */
+s32 particle_upd_expand_fade(u8 *arg0, s32 arg1) {
     f32 temp_f12;
     f32 temp_f2;
 
@@ -740,7 +770,8 @@ s32 func_1513235C(u8 *arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
+/* was func_15132454 */
+s32 particle_spawn_smoke_puff(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     struct {
         f32 u2C;
         f32 u30;
@@ -855,7 +886,7 @@ s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     sp.u68 = 0.0f;
     sp.u6C = 0.0f;
     sp.u94 = 0.0f;
-    temp_v0 = func_151307F0((s32) &sp.u40, 1U, 0, 0x14, (u8) (s32) arg2, arg3);
+    temp_v0 = particle_spawn_ex((s32) &sp.u40, 1U, 0, 0x14, (u8) (s32) arg2, arg3);
     var_v1 = temp_v0;
     if (temp_v0 != 0) {
         sp28 = temp_v0;
@@ -865,5 +896,5 @@ s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3) {
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_15132454.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/particle_spawn_smoke_puff.s")
 #endif

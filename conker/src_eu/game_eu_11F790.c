@@ -28,7 +28,7 @@ void light_ctrl_free(void *arg0);
 extern u16 D_80088EA0[3];
 
 /*
- * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (func_150348D4's case 0x7B; obj7b_joint_swing_entries below
+ * object_7B_pulse_scale: per-frame "breathing" of object type 0x7B (obj_postprocess_joints's case 0x7B; obj7b_joint_swing_entries below
  * builds the same object's joint entries). A shared phase (the s16 at D_800CC298 + 0x14) advances by
  * D_80088EA0[sel] * D_800BE9E4 (speeds 720 / 2000 / 3000: sel 1 when the object's +0x2E4 flags have both bits 0-1
  * set, sel 2 when both bits 2-3 are set, else 0); the scale 0.9 + 0.35 * (cos(phase) + 1) / 2 (0.9 .. 1.25, the
@@ -74,7 +74,7 @@ void obj7b_update_pulse_scale(struct127 *object) {
 
 #ifdef NON_MATCHING
 /*
- * P62: adjustment entries of object type 0x7B for func_150342D0 (object i, buffer p): a shared angle (the s16 at
+ * P62: adjustment entries of object type 0x7B for obj_adjust_list_build (object i, buffer p): a shared angle (the s16 at
  * D_800CC298 + 0x12) swings down by D_800BE9E4 * 0x222 per call while object i's +0x84 is 0x21 (to at least
  * -0x1999, -6553.6 as a float) and back up otherwise (below 0x1555, 5461.33); the sum is compared as an int, not
  * an s16. Then six entries {joint * 6 + 4, angle} for joints 29..34; returns the end of the entries.
@@ -128,13 +128,13 @@ void obj7b_set_anim_ids(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15150D7C(s32 *, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32);
-s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32); /* P95: f32 (was the bit pattern as an int) */
-s32 func_151D5AC4(f32 *, s32, s32);
+s32 emit_debris_burst(s32 *, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32);
+s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32); /* P95: f32 (was the bit pattern as an int) */
+s32 smoke_cloud_spawn(f32 *, s32, s32);
 extern s32 D_800A1C9C;
 extern s32 D_800A1CB0;
 
-void func_151D58E4(void *, f32, f32, f32, u8, u8, s32); /* P95 */
+void cam_shake_all_players(void *, f32, f32, f32, u8, u8, s32); /* P95 */
 /* was func_150F2290 */
 void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
@@ -191,18 +191,18 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
         sp.uE8 = (*(f32 *)((u8 *)arg0 + 0x18)) + 20.0f;
         sp.uEC = (*(f32 *)((u8 *)arg0 + 0x1C));
         sp.uE0 = ((*(f32 *)((u8 *)arg0 + 0x14C)) + (*(f32 *)((u8 *)arg0 + 0x150))) * 0.5f;
-        func_151D5404((struct17 *) &sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, temp_s1, arg2);
-        func_151D58E4(&sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 5, temp_s1, arg2); /* P95: was 0x43FD0000 as an int */
-        func_151D5AC4(&sp.uE4, temp_s1 & 0xFF, arg2);
-        func_10010F88((random_int() & 8) + 0x2B6, 0x7FFFU, 0, 0U, 0, (s16) (s32) sp.uE4, (s16) (s32) sp.uE8, (s16) (s32) sp.uEC, 0xFA0, 0x1770);
-        func_151D45A4(&sp.uE4, temp_s1 & 0xFF, arg2);
+        rumble_all_players_at((struct17 *) &sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, temp_s1, arg2);
+        cam_shake_all_players(&sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 5, temp_s1, arg2); /* P95: was 0x43FD0000 as an int */
+        smoke_cloud_spawn(&sp.uE4, temp_s1 & 0xFF, arg2);
+        sound_play_at((random_int() & 8) + 0x2B6, 0x7FFFU, 0, 0U, 0, (s16) (s32) sp.uE4, (s16) (s32) sp.uE8, (s16) (s32) sp.uEC, 0xFA0, 0x1770);
+        explosion_light_spawn(&sp.uE4, temp_s1 & 0xFF, arg2);
         sp58 = random_float();
         temp_t8 = (random_int() % 56U) + 0xC8;
         var_f10 = (f32) temp_t8;
         if (temp_t8 < 0) {
             var_f10 += 4294967296.0f;
         }
-        func_15154728(&sp.uE4, (sp58 * 4.0f) + 12.0f, 1.6409999f, var_f10, 0.0f, temp_s1, arg2); /* P95: was 0x3FD20C49 as an int */
+        spark_shower_spawn(&sp.uE4, (sp58 * 4.0f) + 12.0f, 1.6409999f, var_f10, 0.0f, temp_s1, arg2); /* P95: was 0x3FD20C49 as an int */
         sp.u9C = 3;
         sp.uA0 = 0;
         (*(f32 *)((u8 *)(&sp.uA4) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.uE4) + 0));
@@ -223,7 +223,7 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
         sp.uDC = 0xC;
         sp.uC4 = 0.698f;
         sp.uD4 = 8.990001f;
-        func_15150D7C(&sp.u9C, ((u8 *)&D_800A1C90), &D_800A1C9C, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, temp_s1, arg2);
+        emit_debris_burst(&sp.u9C, ((u8 *)&D_800A1C90), &D_800A1C9C, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, temp_s1, arg2);
         sp.u60 = 5;
         sp.u64 = 3;
         (*(f32 *)((u8 *)(&sp.u68) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.uE4) + 0));
@@ -242,7 +242,7 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
         sp.u90 = 0.503f;
         sp.u94 = 0.256f;
         sp.u98 = 13.933001f;
-        func_15152700(&sp.u60, ((u8 *)&D_800A1CA8), &D_800A1CB0, 2, 0.0f, 0U, (u8) temp_s1, arg2);
+        emit_textured_burst(&sp.u60, ((u8 *)&D_800A1CA8), &D_800A1CB0, 2, 0.0f, 0U, (u8) temp_s1, arg2);
     }
 }
 #else
@@ -252,9 +252,9 @@ void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2) {
 /* P249: readable C for ambient_far_sound_update (game_eu_11F790, 80 insns). */
 // ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown D_800D9D10 (u8) counts
 // down by D_800BE9E4 per frame (to 0); when it is 0 and x^4 + z^4 of D_800CC2D0[slot] exceeds 6760000, plays sound
-// 0x6C..0x6E (random_int() % 3) at volume 0x5DC0 with the pan of func_100114D0(0, y, 0, 0x7FFF, 20000, 19000)
+// 0x6C..0x6E (random_int() % 3) at volume 0x5DC0 with the pan of sound_source_mix(0, y, 0, 0x7FFF, 20000, 19000)
 // (+0x80, low byte) and restarts the cooldown at 0x80..0xFF frames.
-s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist);
+s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist);
 s32 random_int(void);
 /* was func_150F2670 */
 void ambient_far_sound_update(s32 slot) {
@@ -274,10 +274,10 @@ void ambient_far_sound_update(s32 slot) {
         return;
     }
     if (x2 * x2 + z2 * z2 > 6760000.0f) {
-        func_100114D0(0, (s32) obj->y_position, 0, 0x7FFF, 0x4E20, 0x4A38, &pan, &vol, &dist);
+        sound_source_mix(0, (s32) obj->y_position, 0, 0x7FFF, 0x4E20, 0x4A38, &pan, &vol, &dist);
         pan += 0x80;
         *timer = (random_int() & 0x7F) + 0x80;
-        func_10010F30((u32) random_int() % 3 + 0x6C, 0x5DC0, (u8) pan, 0, 0);
+        sound_play_2d((u32) random_int() % 3 + 0x6C, 0x5DC0, (u8) pan, 0, 0);
     }
 }
 #else
@@ -285,9 +285,9 @@ void ambient_far_sound_update(s32 slot) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15143874(s16, f32, f32 *, f32 *); /* P95: f32 parameter */
+s32 vec2_from_angle_byte(s16, f32, f32 *, f32 *); /* P95: f32 parameter */
 #else
-s32 func_15143874(s16, s32, f32 *, f32 *);
+s32 vec2_from_angle_byte(s16, s32, f32 *, f32 *);
 #endif
 
 /* was func_150F2230 */
@@ -300,11 +300,11 @@ void obj_bone_smoke_puff(u8 *arg0, u8 arg1, s32 arg2) {
         sp2C[1] = 0.0f;
         sp2C[2] = 0.0f;
 #ifdef NON_MATCHING
-        func_15143874(random_int() & 0xFF, 100.0f, sp2C, &sp2C[2]); /* P95: float literal (asm passes the bits 0x42C80000) */
+        vec2_from_angle_byte(random_int() & 0xFF, 100.0f, sp2C, &sp2C[2]); /* P95: float literal (asm passes the bits 0x42C80000) */
 #else
-        func_15143874(random_int() & 0xFF, 0x42C80000, sp2C, &sp2C[2]);
+        vec2_from_angle_byte(random_int() & 0xFF, 0x42C80000, sp2C, &sp2C[2]);
 #endif
-        func_15143134(sp2C, sp20, *(s32 *)(arg0 + 0x1D4) + 0x4C0);
-        func_151C384C(sp20, arg1, arg2);
+        mtx_transform_point_or_origin(sp2C, sp20, *(s32 *)(arg0 + 0x1D4) + 0x4C0);
+        fire_embers_spawn(sp20, arg1, arg2);
     }
 }

@@ -6,7 +6,8 @@
 s32 memcpy(u8 *, s32, s32);
 extern f32 D_800AA770;
 
-u8 *func_151B3660(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_151B3660 */
+u8 *cord_spawn(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     u8 *temp_v0;
     f32 temp_f0;
     u8 *sp24;
@@ -28,7 +29,8 @@ u8 *func_151B3660(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
 typedef struct { u8 pad0[0x10]; u8 flags; u8 pad11; s16 y; f32 x14[3]; f32 x20[3]; s8 x2C; s8 x2D; u8 pad2E[6]; s8 x34; } Obj_151B3734;
 extern s32 (*D_8008FE90[])(Obj_151B3734 *, f32 *, s32);
 extern s32 (*D_8008FE98[])(Obj_151B3734 *);
-void func_151B3734(Obj_151B3734 *arg0) {
+/* was func_151B3734 */
+void cord_update(Obj_151B3734 *arg0) {
     s32 pad; // fakematch: moves the byte spill slot
     u8 done = 0;
 
@@ -63,13 +65,13 @@ void func_151B3734(Obj_151B3734 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
-s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, Vtx **, u8 *);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
+s32 gfx_prim_color_cached(s32, s32, s32, s32, s32, s32, s32, s8 *);
 s32 gfx_set_combine_mode(s32, u8, s8 *);
-s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-s32 func_15142FBC(s32, s32, s32, s8 *);
+s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
 /* rope style getters (by obj +0x2E): geometry mode set / clear, prim colour, env colour, combine, render mode,
    render-mode pair index; 0 = draw nothing */
 extern s32 (*D_8008FEB0[])(u8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, u8 *,
@@ -117,13 +119,14 @@ extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
     } while (0)
 
 // rope_draw: draws the 10-point rope (obj +0x48, 0x18 bytes per point) as a camera-facing ribbon for view `id`
-// (camera at D_800DBFF0 + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when func_151D6310 gives
+// (camera at D_800DBFF0 + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when vtx_slot_buffer_get gives
 // no vertices (0x190 bytes from the cache at obj +0x140) or when the style getter D_8008FEB0[obj +0x2E] returns 0.
 // The getter's values set the geometry mode, prim / env colours, combine, render mode (| 0x80000 | 0x2CA0 |
 // D_800D30BC with the D_800A4EA8 pair) and the texture D_80091198. Each point gets two vertices offset by +-n
 // (ROPE_NORMAL), s = 0 / 0x3C0 across, t growing by obj +0x13C per point; each segment loads 4 vertices and draws
 // two triangles. Returns the display list end.
-s32 func_151B3878(s32 gfx, u8 *obj, s16 id) {
+/* was func_151B3878 */
+s32 cord_draw(s32 gfx, u8 *obj, s16 id) {
     Vtx *v;
     f32 *cam;
     f32 *pts;
@@ -149,7 +152,7 @@ s32 func_151B3878(s32 gfx, u8 *obj, s16 id) {
     if (obj[0x10] & 2) {
         return gfx;
     }
-    func_151D6310((s32 *) (obj + 0x140), id, 0x190, &v, NULL);
+    vtx_slot_buffer_get((s32 *) (obj + 0x140), id, 0x190, &v, NULL);
     if (v == NULL) {
         return gfx;
     }
@@ -159,12 +162,12 @@ s32 func_151B3878(s32 gfx, u8 *obj, s16 id) {
                                &rmode, &rmodePair, &tex)) {
         return gfx;
     }
-    gfx = func_15142B7C(gfx, geoSet, geoClr);
-    gfx = func_15142C10(gfx, primR, primG, primB, primA, &flag);
-    gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &flag);
+    gfx = gfx_geometry_mode_cached(gfx, geoSet, geoClr);
+    gfx = gfx_env_color_cached(gfx, primR, primG, primB, primA, &flag);
+    gfx = gfx_prim_color_cached(gfx, 0, 0, envR, envG, envB, envA, &flag);
     gfx = gfx_set_combine_mode(gfx, tex, &flag);
-    gfx = func_15142E24(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
-    gfx = func_15142FBC(gfx, rmode | 0x80000 | D_800D30BC | 0x2CA0,
+    gfx = gfx_load_texture_cached(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
+    gfx = gfx_other_mode_cached(gfx, rmode | 0x80000 | D_800D30BC | 0x2CA0,
                         D_800A4EA8[rmodePair * 2 + 1] | D_800A4EA8[rmodePair * 2], &flag);
 
     /* the first point, offset across the first segment */
@@ -205,10 +208,11 @@ s32 func_151B3878(s32 gfx, u8 *obj, s16 id) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B3878.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_draw.s")
 #endif
 
-void func_151B3FE4(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_151B3FE4 */
+void cord_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     void (*fp)(void *, s32, u8) = D_8008FF08[arg0[0x44]];
     if (fp != NULL) {
         fp(arg0, arg1, arg2);
@@ -218,9 +222,10 @@ void func_151B3FE4(u8 *arg0, s32 arg1, u8 arg2) {
 #ifdef NON_MATCHING
 // rope_nodes_reset: lays the 10 rope nodes (obj + 0x48, 0x18 bytes: pos, vel) evenly from the start point +0x14
 // towards the end point +0x20 (step = (end - start) / 9, D_800AA774 .. D_800AA77C), zeroes their velocities and
-// clears flag 2 at +0x10. Returns 1. (Table entry next to func_151B42A0; also the fallback of func_151B458C /
-// func_151B4854, which call it with their own a0.)
-s32 func_151B402C(u8 *obj) {
+// clears flag 2 at +0x10. Returns 1. (Table entry next to cord_shape_arc; also the fallback of cord_shape_ellipse /
+// cord_update_sag, which call it with their own a0.)
+/* was func_151B402C */
+s32 cord_nodes_reset_straight(u8 *obj) {
     f32 *start = (f32 *) (obj + 0x14);
     f32 *end = (f32 *) (obj + 0x20);
     f32 p[3];
@@ -250,10 +255,11 @@ s32 func_151B402C(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B402C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_nodes_reset_straight.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151B42A0(u8 *arg0) {
+/* was func_151B42A0 */
+s32 cord_shape_arc(u8 *arg0) {
     f32 sp80;
     f32 sp78;
     f32 sp74;
@@ -342,10 +348,11 @@ s32 func_151B42A0(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B42A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_shape_arc.s")
 #endif
 extern f32 D_800AA78C;
-s32 func_151B44D8(u8 *arg0, f32 *arg1, u8 arg2)
+/* was func_151B44D8 */
+s32 cord_end_get_obj_pos(u8 *arg0, f32 *arg1, u8 arg2)
 {
   s32 var_v1 = 1;
   u8 *p;
@@ -372,9 +379,10 @@ s32 func_151B44D8(u8 *arg0, f32 *arg1, u8 arg2)
 }
 
 #ifdef NON_MATCHING
-s32 func_151B402C(u8 *);
+s32 cord_nodes_reset_straight(u8 *);
 
-s32 func_151B458C(u8 *arg0) {
+/* was func_151B458C */
+s32 cord_shape_ellipse(u8 *arg0) {
     f32 sp110;
     f32 sp108;
     f32 sp104;
@@ -472,7 +480,7 @@ s32 func_151B458C(u8 *arg0) {
         temp_f6 = temp_f4 * 0.25f;
         sp6C = temp_f6;
         if (temp_f10_2 < sp6C) {
-            return func_151B402C(arg0); /* P274: was (temp_f12, temp_f14); the asm passes its own a0 */
+            return cord_nodes_reset_straight(arg0); /* P274: was (temp_f12, temp_f14); the asm passes its own a0 */
         }
         var_f20 = 0.0f;
         var_s1 = 0;
@@ -496,21 +504,22 @@ block_6:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B458C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_shape_ellipse.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P292 */
 
-// rope_update_sag: entry 5 of the rope handler table at EU 0x8008FE90 (siblings func_151B402C / func_151B458C).
+// rope_update_sag: entry 5 of the rope handler table at EU 0x8008FE90 (siblings cord_nodes_reset_straight / cord_shape_ellipse).
 // The rope of obj runs from end0 (+0x14) to end1 (+0x20); its 10 points (+0x48, 0x18 bytes: pos, vel) hang on an
 // ellipse in the vertical plane through both ends (half axes |end1 - end0| / 2 and sqrt(+0x138 - len^2 / 4), +0x138 =
 // the squared half rope length). When the ends are closer than 0.0001 horizontally nothing moves; when they are too
-// far apart the rope goes taut (func_151B402C, whose result is returned). Each point i takes the ellipse point at
+// far apart the rope goes taut (cord_nodes_reset_straight, whose result is returned). Each point i takes the ellipse point at
 // angle i * 0.349 (20 degrees): placed there with zero speed while flag 2 of +0x10 is set (then cleared), or with the
 // rest speed D_800A5860 while D_800DBFF4 is set; otherwise it springs towards it (pull (old - target) * sin(angle) *
 // +0x40, acceleration * +0x3C over the frame time D_800BE9A4). Returns 1 except for the taut case.
-s32 func_151B4854(u8 *obj) {
+/* was func_151B4854 */
+s32 cord_update_sag(u8 *obj) {
     f32 *seg;
     f32 old[3];
     f32 target[3];
@@ -568,7 +577,7 @@ s32 func_151B4854(u8 *obj) {
         sinA = dv * inv;
         quarter = lenSq * 0.25f;
         if (*(f32 *) (obj + 0x138) < quarter) {
-            ret = func_151B402C(obj);
+            ret = cord_nodes_reset_straight(obj);
         } else {
             sag = sqrtf(*(f32 *) (obj + 0x138) - quarter);
             angle = 0.0f;
@@ -629,11 +638,12 @@ s32 func_151B4854(u8 *obj) {
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4854.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_update_sag.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_151B4D88(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {
+/* was func_151B4D88 */
+s32 cord_end_get_bone_pos(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {
     s32 var_a2;
     s32 temp_t6;
     u8 *temp_v0;
@@ -666,14 +676,15 @@ s32 func_151B4D88(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {
     } else {
         var_a2_2 = (*(s32 *)((u8 *)temp_v1 + 0x1D4)) + ((*(u8 *)((u8 *)arg1 + 0x19)) << 6);
     }
-    func_15143134(var_a0, arg2, var_a2_2);
+    mtx_transform_point_or_origin(var_a0, arg2, var_a2_2);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4D88.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_end_get_bone_pos.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151B4E8C(u8 *arg0) {
+/* was func_151B4E8C */
+s32 cord_nodes_reset_x_line(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f12;
     f32 temp_f14;
@@ -720,9 +731,10 @@ s32 func_151B4E8C(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4E8C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_nodes_reset_x_line.s")
 #endif
-s32 func_151B4F3C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s8 *argC, s8 *argD) {
+/* was func_151B4F3C */
+s32 cord_style_default(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s8 *argC, s8 *argD) {
     *arg1 = 0x220005;
     *arg2 = 0x40600;
     *arg3 = 0xFF;
@@ -739,8 +751,9 @@ s32 func_151B4F3C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg
     return 1;
 }
 
-void func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
-u8 func_151B4FC4(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s8 *argC, s8 *argD) {
+void obj_tint_get_colour(u8 *, s32 *, s32 *, s32 *, s32 *);
+/* was func_151B4FC4 */
+u8 cord_style_owner_colour(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s8 *argC, s8 *argD) {
     u8 ret;
     s32 pad[2]; // fakematch: frame slots between ret and t
     u8 *t;
@@ -753,7 +766,7 @@ u8 func_151B4FC4(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5
 
     ret = 1;
     t = *(u8 **)(arg0 + 0x150);
-    func_1502EF24(t, &sp54, &sp50, &sp4C, (s32 *)&sp48);
+    obj_tint_get_colour(t, &sp54, &sp50, &sp4C, (s32 *)&sp48);
     if (t[0xA4] & 1) {
         *arg1 = 0x200005;
         *arg2 = 0x60600;
@@ -769,13 +782,14 @@ u8 func_151B4FC4(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5
         *argC = 5;
         *argD = 0x2F;
     } else {
-        ret = func_151B4F3C(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD);
+        ret = cord_style_default(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD);
     }
     return ret;
 }
 
 #ifdef NON_MATCHING
-s32 func_151B5128(u8 *arg0) {
+/* was func_151B5128 */
+s32 cord_nodes_reset_preset(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f0_2;
     f32 temp_f0_3;
@@ -818,27 +832,30 @@ s32 func_151B5128(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B5128.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/cord_nodes_reset_preset.s")
 #endif
-void func_151D5E30();
+void vtx_slot_buffers_free();
 
-void func_151B51CC(void *arg0) {
+/* was func_151B51CC */
+void cord_release(void *arg0) {
     void (*fp)(void *);
-    func_151D5E30((u8 *)arg0 + 0x140, arg0);
+    vtx_slot_buffers_free((u8 *)arg0 + 0x140, arg0);
     fp = D_8008FF10[((u8 *)arg0)[0x44]];
     if (fp != NULL) {
         fp(arg0);
     }
 }
 
-void func_151B51CC(void *arg0);
+void cord_release(void *arg0);
 
-void func_151B521C(void *arg0) {
-    func_151B51CC(arg0);
+/* was func_151B521C */
+void cord_free(void *arg0) {
+    cord_release(arg0);
     node_unlink_free(arg0);
 }
 
-void func_151B5248(void *arg0) {
-    func_151B51CC(arg0);
+/* was func_151B5248 */
+void cord_free_alt(void *arg0) {
+    cord_release(arg0);
     node_unlink_free(arg0);
 }

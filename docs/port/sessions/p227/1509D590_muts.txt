@@ -1,8 +1,8 @@
-s/func_150B58B0((u8 \*) obj_find_by_spawn(args\[1\] \& 0xFFF), (s16) args\[2\], 0xFF, 1);/func_150B58B0((u8 *) obj_find_by_spawn(args[1] \& 0xFFF), (s16) args[3], 0xFF, 1);/ % c00
+s/obj_electrify_fx_spawn((u8 \*) obj_find_by_spawn(args\[1\] \& 0xFFF), (s16) args\[2\], 0xFF, 1);/obj_electrify_fx_spawn((u8 *) obj_find_by_spawn(args[1] \& 0xFFF), (s16) args[3], 0xFF, 1);/ % c00
 s/        return 1;/        return 2;/ % c01
-s/func_150BF47C(args\[1\]);/func_150BF47C(args[2]);/ % c01
+s/twin_particle_emitters_spawn(args\[1\]);/twin_particle_emitters_spawn(args[2]);/ % c01
 s/D_800D9D40 = 1;/D_800D9D40 = 2;/ % c02
-s/func_1517946C(args\[1\]);/func_1517946C(args[0]);/ % c03
+s/rain_request(args\[1\]);/rain_request(args[0]);/ % c03
 s/args\[6\], args\[7\], args\[8\]);/args[6], args[7], args[7]);/ % c04
 1,/ret = (ret << 6) | 0xE004;/s/ret = (ret << 6) | 0xE004;/ret = (ret << 5) | 0xE004;/ % c04
 1,/if (ret != 0) {/s/if (ret != 0) {/if (ret != 1) {/ % c04_zero
@@ -17,34 +17,34 @@ s/pos\[1\] = (f32) args\[3\];/pos[1] = (f32) args[2];/ % c07_999
 s/big_explosion_spawn(pos, 0xFF, 1);/big_explosion_spawn(pos, 0xFF, 0);/ % c07_999
 s/fx_scripted_blast(args\[1\] \& 0xFF, 0xFF, 1);/fx_scripted_blast(args[1] \& 0xFFF, 0xFF, 1);/ % c07_other
 s/    case 0x0F:/    case 0x0E:/ % c0F
-s/func_1000E7A0(0x10, 0);/func_1000E7A0(0x11, 0);/ % c10
+s/music_post_event_request(0x10, 0);/music_post_event_request(0x11, 0);/ % c10
 s/light_ctrl_broadcast(0x16, 0x1F, 0);/light_ctrl_broadcast(0x16, 0x1E, 0);/ % c10
-s/func_151CD90C(args\[1\]);/func_151CD90C(args[1] \& 0xFFF);/ % c12
-s/func_151D2C70((s16) args\[1\]);/func_151D2C70((s8) args[1]);/ % c13
+s/spout_broadcast_start(args\[1\]);/spout_broadcast_start(args[1] \& 0xFFF);/ % c12
+s/scroll_banner_spawn((s16) args\[1\]);/scroll_banner_spawn((s8) args[1]);/ % c13
 s/fx_model_emitter_spawn((u8) args\[1\], 0xFF, 1);/fx_model_emitter_spawn((u8) args[2], 0xFF, 1);/ % c14
 s/light_ctrl_broadcast(0x24, 0x27, 0);/light_ctrl_broadcast(0x24, 0x28, 0);/ % c16
 s/light_create_obj_pulse((u8) args\[1\], 0xFF, 1);/light_create_obj_pulse((u8) args[1], 0x7F, 1);/ % c17
 s/tbl\[0\] = D_8009F4A0;/tbl[0] = D_8009F4A0 + 1;/ % c18
-s/func_15083E90((u8) args\[1\]), tbl\[args\[2\]\], (s16) args\[3\], -1, -1, -1,/func_15083E90((u8) args[1]), tbl[args[2]], (s16) args[3], -1, 0, -1,/ % c18
+s/obj_find_by_setup_id((u8) args\[1\]), tbl\[args\[2\]\], (s16) args\[3\], -1, -1, -1,/obj_find_by_setup_id((u8) args[1]), tbl[args[2]], (s16) args[3], -1, 0, -1,/ % c18
 s/(s16) args\[3\], -1, -1, -1, 0, 0, 0xFF, 1)/(s16) args[2], -1, -1, -1, 0, 0, 0xFF, 1)/ % c18
 s/    case 0x1B:/    case 0x1C:/ % c1B
 s/debris_burst_destroyed_object(obj_find_by_spawn(args\[1\] \& 0xFFF), 0xFF, 1);/debris_burst_destroyed_object(obj_find_by_spawn(args[1] \& 0xFFF), 0xFF, 0);/ % c20
 s/pos\[1\] = obj->y_position + 50.0f;/pos[1] = obj->y_position + 40.0f;/ % c21
 s/pos\[2\] = obj->z_position;/pos[2] = obj->x_position;/ % c21
-s/func_151C0648((u8 \*) pos, (s32) obj, 1, 0xFF, 1);/func_151C0648((u8 *) pos, (s32) obj, 0, 0xFF, 1);/ % c21
+s/explosion_ground_effects((u8 \*) pos, (s32) obj, 1, 0xFF, 1);/explosion_ground_effects((u8 *) pos, (s32) obj, 0, 0xFF, 1);/ % c21
 s/hit.u14 = 0;/hit.u14 = 1;/ % c22_hit
 s/hit.u19 = 0;/hit.u19 = 1;/ % c22_hit
 s/hit.u1C = 0;/hit.u1C = 1;/ % c22_hit
 s/pos\[1\] = 20000.0f;/pos[1] = 2000.0f;/ % c22_miss
 s/pos\[2\] = (f32) args\[2\];/pos[2] = (f32) args[1];/ % c22_miss
-s/if (func_15046F70(pos, 0, -10000.0f, \&ground) != 0) {/if (func_15046F70(pos, 0, -1000.0f, \&ground) != 0) {/ % c22_miss
+s/if (collision_floor_probe(pos, 0, -10000.0f, \&ground) != 0) {/if (collision_floor_probe(pos, 0, -1000.0f, \&ground) != 0) {/ % c22_miss
 s/            pos\[1\] = ground;/            pos[1] = -ground;/ % c22_hit
 s/dir\[1\] = -1.0f;/dir[1] = 1.0f;/ % c22_hit
 s/ground = -10000.0f;/ground = -1000.0f;/ % c22_hit
-s/func_151C0434((u8 \*) \&hit, pos, dir, 1, 0xFF, 1);/func_151C0434((u8 *) \&hit, pos, dir, 0, 0xFF, 1);/ % c22_hit
+s/impact_effects_spawn((u8 \*) \&hit, pos, dir, 1, 0xFF, 1);/impact_effects_spawn((u8 *) \&hit, pos, dir, 0, 0xFF, 1);/ % c22_hit
 s/object_hit_effects((u8 \*) obj_find_by_spawn(args\[1\] \& 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);/object_hit_effects((u8 *) obj_find_by_spawn(args[1] \& 0xFFF), 1, 1, 0, 1, 0, 0xFF, 1);/ % c23
-s/func_1514F18C(glow_pair_spawn(obj), obj, 0x1B);/func_1514F18C(glow_pair_spawn(obj), obj, 0x1A);/ % c24
-s/func_15155D6C(args\[1\] \& 0xFFF, 0x78, (f32) args\[2\]);/func_15155D6C(args[1] \& 0xFFF, 0x78, (f32) args[3]);/ % c25
+s/char_fx_attach(glow_pair_spawn(obj), obj, 0x1B);/char_fx_attach(glow_pair_spawn(obj), obj, 0x1A);/ % c24
+s/head_icon_show_timed(args\[1\] \& 0xFFF, 0x78, (f32) args\[2\]);/head_icon_show_timed(args[1] \& 0xFFF, 0x78, (f32) args[3]);/ % c25
 s/bound_cloud_spawn(obj, 0xFF, 1);/bound_cloud_spawn(obj, 0xFF, 2);/ % c2A
 s/    case 0x2B:/    case 0x2D:/ % c2B
 s/    case 0x2C:/    case 0x2D:/ % c2C
@@ -52,6 +52,6 @@ s/obj_hit_green_tint((s32) obj, 0xFF, 1);/obj_hit_green_tint((s32) obj, 0xFE, 1)
 s/obj_impact_burst(obj, 0xFF, 1);/obj_impact_burst(obj, 0xFF, 0);/ % c2F
 s/arc_bolts_spawn_once(0xFF, 1);/arc_bolts_spawn_once(0xFF, 0);/ % c30
 s/    case 0x31:/    case 0x32:/ % c31
-s/func_150BD550(0xFF, 1);/func_150BD550(0x7F, 1);/ % c33
+s/blast_debris_and_smoke(0xFF, 1);/blast_debris_and_smoke(0x7F, 1);/ % c33
 s/    s32 ret = 0;/    s32 ret = 1;/ % gap8
 s/    switch ((u32) id) {/    switch ((s16) id) {/ % gap10001

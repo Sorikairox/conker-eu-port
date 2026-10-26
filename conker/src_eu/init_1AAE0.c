@@ -38,7 +38,8 @@ typedef struct {
 } struct_eu_1AAE0;
 
 // __n_unmapVoice
-void func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
+/* was func_1001AAE0 */
+void n_seqp_unmap_voice(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
     N_ALVoiceState *prev = 0;
     N_ALVoiceState *vs;
 
@@ -108,7 +109,8 @@ void __n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime del
 
 // removes a pending type 5 (voice) event for this voice if it is due after time
 // removes a pending type 5 (voice) event for this voice if it is due after time
-u8 func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime time) {
+/* was func_1001ADA4 */
+u8 n_seqp_cancel_voice_kill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime time) {
     N_ALEventListItem *thisNode;
     N_ALEventListItem *nextNode;
     N_ALEventListItem *thisItem;
@@ -173,7 +175,8 @@ N_ALVoiceState *__n_mapVoice(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 channel)
 
 // __n_lookupVoice
 // __n_lookupVoice
-N_ALVoiceState *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
+/* was func_1001AFEC */
+N_ALVoiceState *n_seqp_lookup_voice(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
     N_ALVoiceState *vs = seqp->vAllocHead;
 
     while (vs != NULL) {
@@ -187,7 +190,8 @@ N_ALVoiceState *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
 }
 
 // __n_lookupSoundQuick
-ALSound *func_1001B07C(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan) {
+/* was func_1001B07C */
+ALSound *n_seqp_lookup_sound_quick(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan) {
     ALInstrument *inst = seqp->chanState[chan].instrument;
     s32 l = 1;
     s32 r;
@@ -233,7 +237,8 @@ s16 __n_vsVol(N_ALVoiceState *vs, N_ALSeqPlayer *seqp)
 }
 
 // fx mix for a voice, scaled by the player's unk7C/unk80
-u8 func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
+/* was func_1001B310 */
+u8 n_seqp_voice_fx_mix(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
     s32 hi;
     s32 mix;
 
@@ -321,7 +326,7 @@ void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan) {
 }
 
 // s129: DK64 n_seqplayer.c __n_setInstChanState turned into Conker's program-change handler:
-// loads the instrument (func_1001BD34), releases the channel's previous one, prepares the
+// loads the instrument (n_synth_load_instrument), releases the channel's previous one, prepares the
 // sounds' envelopes, copies the instrument params into the channel; returns 1 when the load failed
 typedef struct {
     /* 0x00 */ ALInstrument *instrument;
@@ -372,15 +377,16 @@ typedef struct {
 
 #define CSP_CHAN(c) (((CSPChanState *)seqp->chanState)[c])
 
-s32 func_1001BD34(struct_eu_1AAE0 *arg0, ALInstrument **arg1, s32 arg2);
+s32 n_synth_load_instrument(struct_eu_1AAE0 *arg0, ALInstrument **arg1, s32 arg2);
 void func_10012C5C(ALSound *sound, ALInstrument *inst, s32 arg2);
 
-s32 func_1001B7D0(N_ALCSPlayer *seqp, s32 id, s32 chan) {
+/* was func_1001B7D0 */
+s32 n_cseqp_set_inst_chan_state(N_ALCSPlayer *seqp, s32 id, s32 chan) {
     ALSound *sound;
     ALInstrument *inst;
     s32 i;
 
-    inst = (ALInstrument *)func_1001BD34((struct_eu_1AAE0 *)seqp->drvr, &seqp->bank->instArray[id], -1);
+    inst = (ALInstrument *)n_synth_load_instrument((struct_eu_1AAE0 *)seqp->drvr, &seqp->bank->instArray[id], -1);
     if (CSP_CHAN(chan).instrument != NULL) {
         ((CSPSynth *)seqp->drvr)->unk34(seqp->bank->instArray[CSP_CHAN(chan).unk38]);
         CSP_CHAN(chan).instrument = NULL;
@@ -432,7 +438,8 @@ s32 func_1001B7D0(N_ALCSPlayer *seqp, s32 id, s32 chan) {
     return 0;
 }
 
-s32 func_1001BD34(struct_eu_1AAE0 *arg0, ALInstrument **arg1, s32 arg2) {
+/* was func_1001BD34 */
+s32 n_synth_load_instrument(struct_eu_1AAE0 *arg0, ALInstrument **arg1, s32 arg2) {
     struct_eu_1AAE0_cb cb;
     s32 ret = 0;
 
@@ -452,7 +459,8 @@ s32 func_1001BD34(struct_eu_1AAE0 *arg0, ALInstrument **arg1, s32 arg2) {
     return ret;
 }
 
-void func_1001BE1C(struct_eu_1AAE0 *arg0, ALInstrument *arg1, s32 arg2) {
+/* was func_1001BE1C */
+void n_synth_release_instrument(struct_eu_1AAE0 *arg0, ALInstrument *arg1, s32 arg2) {
     if (arg2 == -1) {
         arg0->unk30(arg1);
     } else {

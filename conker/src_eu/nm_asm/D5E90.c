@@ -327,9 +327,9 @@ f32 func_150AD780(f32 x) {
 extern u8 D_8009FAC0[], D_8009FAC8[], D_8009FACC[], D_8009FAD0[], D_800C5D38[], D_800CC1B0[], D_800CC1B4[];
 extern u8 D_800CC1B8[], D_800CC1C0[], D_800CC1F2[], D_800CC1F3[], D_800CC1F4[], D_800CC1F8[], D_800CC1FC[];
 extern u8 D_800D3C00[], D_800DC26C[], D_800DC270[], D_800DC274[], D_800DC278[], D_800DC3C4[];
-s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
+s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *);
 s32 func_150A69A8(s32, s32, s32 *, s32);
-s32 func_150A49D0(s32, s32 *, s32);
+s32 world_objects_transform_mesh(s32, s32 *, s32);
 void collision_select_area(s32);
 
 /* BSP node of the level collision tree (D_800DBE08): a square of half size `half` around (cx, cz); `next` = byte
@@ -574,8 +574,8 @@ typedef struct {
     s32 listPos;         /* 0x154 kind 2: position in D_800D3C00 */
     s32 count;           /* 0x154 kind 3: triangles of the current record's model */
     s32 recNo;           /* 0x144 kind 3: 1 + index of the current record */
-    s32 margin;          /* 0x158 widening of the xz box (s16 from func_1507C7C0) */
-    s32 radius;          /* 0x15C (s16 from func_1507C7C0) */
+    s32 margin;          /* 0x158 widening of the xz box (s16 from obj_collision_cylinder) */
+    s32 radius;          /* 0x15C (s16 from obj_collision_cylinder) */
     f32 radiusF;         /* 0x160 walls: how far triangles push the position away */
     s32 moved;           /* 0x164 result: 1 once a triangle pushed the position */
     s32 mark;            /* 0x168 kind 2: mark the objects touched */
@@ -1130,7 +1130,7 @@ static void nmw_ledge_triangle(NmwState *w) {
 }
 
 /* wall_engine (func_150AB708): see the block comment above. Area kind D_800DC280: 2 = the objects func_150A69A8
- * lists near the target (sorted by func_150A49D0; nothing listed or no vertex base -> 0), 3 = the other records'
+ * lists near the target (sorted by world_objects_transform_mesh; nothing listed or no vertex base -> 0), 3 = the other records'
  * models, else the level. Returns 1 if a wall moved the record (walls; ledges return 0). */
 static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
     NmwState w;
@@ -1152,14 +1152,14 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
     w.tgt[0] = x;
     w.tgt[1] = y;
     w.tgt[2] = z.f;
-    func_1507C7C0((struct127 *) rec, &yo.h[0], &mg, &rd);
+    obj_collision_cylinder((struct127 *) rec, &yo.h[0], &mg, &rd);
     w.nObjs = 0;
     if (D_800DC280 == 2) {
         w.nObjs = func_150A69A8(nmD5E90_rint(x), nmD5E90_rint(z.f), &yo.w, nmD5E90_rint(y) + yo.h[0]);
         if (w.nObjs == 0) {
             return 0;
         }
-        func_150A49D0(w.nObjs, (s32 *) D_800D3C00, 0);
+        world_objects_transform_mesh(w.nObjs, (s32 *) D_800D3C00, 0);
         w.cur = *(u16 *) D_800D3C00;
         w.curFirst = NMR_OBJ_U16((u8 *) D_800DBEF4 + w.cur * NMR_OBJ_SIZE, NMR_OBJ_TRI0);
         w.vbase = D_800DC328[w.cur];
@@ -1457,7 +1457,7 @@ static NmrNode *nmr_find_leaf(f32 x, f32 z, NmrNode *skip) {
  * point 10 units past the exit side of the current square, until a hit, no leaf, or the exit point is maxDist or
  * more away in xz); in each leaf the triangles whose xz bounds the ray's xz line crosses are tested
  * (func_150AD844). Objects: those whose bounding sphere the ray's line meets (in front of the origin) are listed in
- * D_800D3C00, sorted by func_150A49D0, and all their triangles tested the same way.
+ * D_800D3C00, sorted by world_objects_transform_mesh, and all their triangles tested the same way.
  * Outputs (each optional): *outRec = the hit triangle's D_800DC26C record, *outX / Y / Z = the point, outVerts = its
  * 3 vertices (s16 x, y, z each), *outDist, *outObj = the object index (-1: level), *outFlags = the triangle's flags
  * (level: D_800DBE5C[tri]; object: its table +0x44 [tri - first], or +0x40 for all). Returns 1 on a hit, else 0.
@@ -1615,7 +1615,7 @@ s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRec, s3
         } while (obj != objEnd);
 
         if (n != 0) {
-            func_150A49D0(n, (s32 *) D_800D3C00, 0);
+            world_objects_transform_mesh(n, (s32 *) D_800D3C00, 0);
             ind = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 0 : 1);
             dep = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 1 : 0);
             idx = (u16 *) D_800D3C00;

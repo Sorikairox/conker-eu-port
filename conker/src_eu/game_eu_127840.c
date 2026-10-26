@@ -126,7 +126,7 @@ typedef struct {
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
-s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
+s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
 s32 light_create_obj_joint(u8 *, u8, void *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
 s32 random_int(void);
 void *memcpy(void *, const void *, size_t);
@@ -150,7 +150,7 @@ extern f32 D_800A2160;
 // exists, two particles (effect3d_spawn_full texture 0x5F, D_800A4AA0 list, random blend 1 / 3) and two emitters
 // (particle_emitter_spawn texture 0x60, 0x2A) around `obj`, each told its index, the object, its room byte and the group
 // (particles at +0x110 also get the mid height (obj +0x14C + +0x150) / 2); the group records them at +0x30 / +0x38.
-// Always then calls func_151D8E18 {1, 0x46, 8, 1, -1} and light_create_obj_joint (D_800A2090, 3, 0x46, 0x28).
+// Always then calls rumble_request {1, 0x46, 8, 1, -1} and light_create_obj_joint (D_800A2090, 3, 0x46, 0x28).
 // `alpha` / `owner` are passed to every spawner.
 /* was func_150F9BB0 */
 void aura_group_spawn(u8 *obj, u8 alpha, s32 owner) {
@@ -310,7 +310,7 @@ void aura_group_spawn(u8 *obj, u8 alpha, s32 owner) {
     shake.unk5 = 1;
     shake.unk4 = 8;
     shake.unk6 = -1;
-    func_151D8E18(&shake, 0, alpha, owner);
+    rumble_request(&shake, 0, alpha, owner);
     light_create_obj_joint(obj, 1, &D_800A2090, 3, 0x46, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, alpha, owner);
 }
 #else
@@ -318,7 +318,7 @@ void aura_group_spawn(u8 *obj, u8 alpha, s32 owner) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15145EA4(f32 **, f32 **, void *, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
 extern f32 D_800A209C[3]; /* the two emitter offsets (bone space) */
 extern f32 D_800A20A8[3];
 extern f32 D_800A20B4[3]; /* the two direction points */
@@ -326,7 +326,7 @@ extern f32 D_800A20C0[3];
 extern f32 D_800A2164;
 // twin_emitters_follow_owner: handler 15 of D_8008A980 (`void (u8 *)`). Ends the effect (+0xE = -1) when the owner
 // (+0x28) is gone or its id +0x3B no longer matches +0x2C. With the owner's bone matrices (+0x1D4) it transforms the
-// four offsets D_800A209C..C0 by the first matrix (func_15145EA4) and gives each of the two emitter pairs (+0x30 / +0x38
+// four offsets D_800A209C..C0 by the first matrix (mtx_transform_points) and gives each of the two emitter pairs (+0x30 / +0x38
 // and +0x34 / +0x3C) its position and direction: the first kind gets the flag 1 at +0x168, the second the flag 2 (and
 // loses 4) at +0x58. Without matrices both flags are cleared. Then the first kind's +0x158 / +0x15C become 0 / 0 while
 // +0xE < 10, else 6 / 15, and the second kind's +0x174 becomes 0, else D_800A2164 (1.306).
@@ -355,7 +355,7 @@ void aura_group_follow_owner(u8 *arg0) {
         dst[1] = pos[1];
         dst[2] = dir[0];
         dst[3] = dir[1];
-        func_15145EA4(src, dst, *(u8 **) (owner + 0x1D4) + 0x40, 4);
+        mtx_transform_points(src, dst, *(u8 **) (owner + 0x1D4) + 0x40, 4);
         for (i = 0; i < 2; i++) {
             p = a[i];
             if (p != NULL) {
@@ -421,7 +421,7 @@ void screen_flash_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     temp_t6 = arg2;
     if (temp_t6 == 0x4C) {
         (*(s8 *)((u8 *)arg0 + 0x11)) = -1;
-        func_1515D4D4(0U, 0U, 0U, 0xFF);
+        light_set_level_colour(0U, 0U, 0U, 0xFF);
         return;
     }
     if (temp_t6 == 0x4D) {
@@ -434,12 +434,12 @@ void screen_flash_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
     }
     if (temp_t6 == 0x4F) {
         (*(s8 *)((u8 *)arg0 + 0x11)) = -1;
-        func_1515D4D4(0xFFU, 0xFFU, 0xFFU, 0xFF);
+        light_set_level_colour(0xFFU, 0xFFU, 0xFFU, 0xFF);
     }
 }
 
 #ifdef NON_MATCHING
-/* func_151506E8's spec (same layout as game_2062D0's S06E8). */
+/* emit_dust_by_angles's spec (same layout as game_2062D0's S06E8). */
 typedef struct {
     /* 0x00 */ s16 u0[4];
     /* 0x08 */ struct17 pos;
@@ -462,7 +462,7 @@ typedef struct {
     /* 0x44 */ f32 u44;
 } RingSpecFA520;
 
-/* func_151307F0's particle request (same layout as game_2062D0's impact_dust_cloud_spawn request). */
+/* particle_spawn_ex's particle request (same layout as game_2062D0's impact_dust_cloud_spawn request). */
 typedef struct {
     /* 0x00 */ s32 handlers;
     /* 0x04 */ s32 u04;
@@ -498,12 +498,12 @@ typedef struct {
     /* 0x6C */ f32 range;
 } ParticleReqFA520;
 
-void func_15143134(void *arg0, void *arg1, void *arg2);
-void func_1504715C(void *, u8 *);
-void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
-s32 func_151506E8(RingSpecFA520 *, struct17 *, s32, u8, s32);
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_151C384C(void *arg0, u8 arg1, s32 arg2);
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
+void hitinfo_from_obj_floor(void *, u8 *);
+void emit_sparks_in_angle_range(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
+s32 emit_dust_by_angles(RingSpecFA520 *, struct17 *, s32, u8, s32);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void fire_embers_spawn(void *arg0, u8 arg1, s32 arg2);
 s32 random_int(void);
 f32 random_float(void);
 void *memcpy(void *, const void *, size_t);
@@ -518,10 +518,10 @@ extern f32 D_800A2180;
 extern f32 D_800A2184;
 
 // object_point_burst_spawn: when `obj` has a matrix list (+0x1D4), takes model point D_800A20CC[point] through
-// matrix 5 and spawns there: a func_15154488 burst and a func_151506E8 ring (both clipped to the object's bounds from
-// func_1504715C), a glow particle (func_151307F0, texture 0x79, life 300, blend 0x27, random flip flags 0x40 / 0x80,
+// matrix 5 and spawns there: a emit_sparks_in_angle_range burst and a emit_dust_by_angles ring (both clipped to the object's bounds from
+// hitinfo_from_obj_floor), a glow particle (particle_spawn_ex, texture 0x79, life 300, blend 0x27, random flip flags 0x40 / 0x80,
 // alpha = size = 100..200 random) whose +0xA8 gets a 0x14-byte growth block (0, rate 10..13, D_800A2184, size,
-// size / rate^2), and func_151C384C at the point. `alpha` / `owner` are passed to every spawner.
+// size / rate^2), and fire_embers_spawn at the point. `alpha` / `owner` are passed to every spawner.
 /* was func_150FA520 */
 void obj_point_burst_spawn(u8 *obj, u8 point, u8 alpha, s32 owner) {
     struct {
@@ -547,8 +547,8 @@ void obj_point_burst_spawn(u8 *obj, u8 point, u8 alpha, s32 owner) {
     if (mtx == NULL) {
         return;
     }
-    func_15143134(&D_800A20CC[point], &pos, mtx + 0x140);
-    func_1504715C(bounds, obj);
+    mtx_transform_point_or_origin(&D_800A20CC[point], &pos, mtx + 0x140);
+    hitinfo_from_obj_floor(bounds, obj);
 
     burst.unk8 = pos;
     burst.unk14 = 4.0f;
@@ -574,7 +574,7 @@ void obj_point_burst_spawn(u8 *obj, u8 point, u8 alpha, s32 owner) {
     burst.unk48 = 0;
     burst.unk3C = 1;
     burst.unk40 = 1.0f;
-    func_15154488(&burst, &burst.unk8, (s32)bounds, alpha, owner);
+    emit_sparks_in_angle_range(&burst, &burst.unk8, (s32)bounds, alpha, owner);
 
     ring.pos = pos;
     ring.u18 = 8.0f;
@@ -598,7 +598,7 @@ void obj_point_burst_spawn(u8 *obj, u8 point, u8 alpha, s32 owner) {
     ring.u38 = 1;
     ring.u39 = 1;
     ring.u40 = 1;
-    func_151506E8(&ring, &ring.pos, (s32)bounds, alpha, owner);
+    emit_dust_by_angles(&ring, &ring.pos, (s32)bounds, alpha, owner);
 
     extra.u00 = 0.0f;
     extra.u08 = D_800A2184;
@@ -650,11 +650,11 @@ void obj_point_burst_spawn(u8 *obj, u8 point, u8 alpha, s32 owner) {
     req.halfW = 0.0f;
     req.halfH = 0.0f;
     req.value = 0.0f;
-    fx = func_151307F0((s32)&req, 1, 0, 0x14, alpha, owner);
+    fx = particle_spawn_ex((s32)&req, 1, 0, 0x14, alpha, owner);
     if (fx != 0) {
         memcpy((u8 *)fx + 0xA8, &extra, 0x14);
     }
-    func_151C384C(&pos, alpha, owner);
+    fire_embers_spawn(&pos, alpha, owner);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/obj_point_burst_spawn.s")
@@ -686,14 +686,14 @@ void arc_bolts_spawn_once(u8 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_1514470C(u8 *node, u8 *pos);
+void spawn_region_random_point_3d(u8 *node, u8 *pos);
 void lightning_bolt_spawn(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 extern u8 D_80088ECC;   /* number of bolt styles */
 extern u8 *D_80088ED0;  /* per style: 2 bytes, [1] = colour index */
 extern f32 *D_80088ED4; /* per style: width */
 // arc_bolts_emit: handler 25 of D_8008A980 (`void (u8 *)`). Accumulates (0.08 + 0.18 * random) * D_800BE9A4 bolts
 // per frame in +0x30; for each whole bolt it spawns one (lightning_bolt_spawn) between the positions of the nodes +0x28 and
-// +0x2C (func_1514470C), with a random style (D_80088ECC styles: colour D_80088ED0[2 * i + 1], width D_80088ED4[i] *
+// +0x2C (spawn_region_random_point_3d), with a random style (D_80088ECC styles: colour D_80088ED0[2 * i + 1], width D_80088ED4[i] *
 // (1..2)), length 30..55 (and 1 / length), life 750..752, and the object's +0x0C / +0x01 bytes.
 /* was func_150FB06C */
 void arc_bolts_emit(u8 *arg0) {
@@ -706,8 +706,8 @@ void arc_bolts_emit(u8 *arg0) {
 
     ((f32 *) ends)[2] += (0.0800000057f + random_float() * 0.18f) * D_800BE9A4;
     while (1.0f < ((f32 *) ends)[2]) {
-        func_1514470C(((u8 **) ends)[0], (u8 *) from);
-        func_1514470C(((u8 **) ends)[1], (u8 *) to);
+        spawn_region_random_point_3d(((u8 **) ends)[0], (u8 *) from);
+        spawn_region_random_point_3d(((u8 **) ends)[1], (u8 *) to);
         style = (u8) ((u32) random_int() % D_80088ECC);
         len = random_float() * 25.0f + 30.0f;
         width = random_float();
@@ -729,16 +729,16 @@ void arc_bolts_handle_event(struct102 *arg0, s32 arg1, u8 arg2) {
 
 /* was func_150FB2A8 */
 void level_cue_switch_on(void) {
-    func_1515F170(8, 0);
-    func_1515F170(0xB, 1);
+    light_group_set_disabled(8, 0);
+    light_group_set_disabled(0xB, 1);
     func_151494E0((s32)(D_800D34B8 + 0x514), 0x30);
     func_151494E0(0, 0x4D);
 }
 
 /* was func_150FB2F8 */
 void level_cue_switch_off(void) {
-    func_1515F170(8, 1);
-    func_1515F170(7, 0);
+    light_group_set_disabled(8, 1);
+    light_group_set_disabled(7, 0);
     func_151494E0((s32)(D_800D34B8 + 0x514), 0x31);
     func_151494E0(0, 0x4C);
 }
@@ -753,7 +753,7 @@ void effect_flag2_handle_event(u8 *arg0, s32 arg1, u8 arg2) {
 }
 
 #ifdef NON_MATCHING
-/* func_15157580's spec (0x58 bytes, the model effect it spawns). */
+/* anim_model_fx_spawn's spec (0x58 bytes, the model effect it spawns). */
 typedef struct {
     /* 0x00 */ u8 u00;
     /* 0x01 */ u8 u01;
@@ -784,7 +784,7 @@ typedef struct {
     /* 0x56 */ s16 u56;
 } ModelFxSpecFB398;
 
-/* func_151559FC's spec (0x58 bytes; same layout as game_eu_FCE60's SpawnSpecCFB90). */
+/* sprite2d_spawn's spec (0x58 bytes; same layout as game_eu_FCE60's SpawnSpecCFB90). */
 typedef struct {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
@@ -814,11 +814,11 @@ typedef struct {
     /* 0x54 */ f32 u54;
 } SpriteSpecFB398;
 
-s32 func_15157580(void *spec, s32, f32, s32, s32, s32, s32, s32);
-s32 func_151559FC(void *spec, s32 list, s32, s32, s32, s32, s32);
+s32 anim_model_fx_spawn(void *spec, s32, f32, s32, s32, s32, s32, s32);
+s32 sprite2d_spawn(void *spec, s32 list, s32, s32, s32, s32, s32);
 extern s16 D_800A20F0[]; /* 8 sprite kinds: 0xCE, 0xC5, then 0xC4 */
 
-// score_banner_spawn: spawns the model effect 0x61 (func_15157580) and a row of 8 sprites (list 0xE, kinds
+// score_banner_spawn: spawns the model effect 0x61 (anim_model_fx_spawn) and a row of 8 sprites (list 0xE, kinds
 // D_800A20F0, x = -65 + 24.75 * i, y = 62, scale 16) for `span`, copying `span` into each new record (+0x120 for the
 // model effect, +0x70 for the sprites). `flag` / `owner` are passed through to both spawners.
 /* was func_150FB398 */
@@ -857,7 +857,7 @@ void score_banner_spawn(s16 span, u8 flag, s32 owner) {
     fx.angle.z = ((s32 *)D_800A5860)[2];
     fx.u54 = 0xA;
     fx.u56 = 0x19;
-    rec = func_15157580(&fx, 0, 1.0f, 0, 0, 2, flag, owner);
+    rec = anim_model_fx_spawn(&fx, 0, 1.0f, 0, 0, 2, flag, owner);
     if (rec != 0) {
         memcpy((u8 *)rec + 0x120, &span, sizeof(span));
     }
@@ -890,7 +890,7 @@ void score_banner_spawn(s16 span, u8 flag, s32 owner) {
     for (i = 0; i < 8; i++) {
         spr.x = i * 24.75f + -65.0f;
         spr.kind = D_800A20F0[i];
-        rec = func_151559FC(&spr, 0xE, 0, 0, 2, flag, owner);
+        rec = sprite2d_spawn(&spr, 0xE, 0, 0, 2, flag, owner);
         if (rec != 0) {
             memcpy((u8 *)rec + 0x70, &span, sizeof(span));
         }
@@ -901,7 +901,7 @@ void score_banner_spawn(s16 span, u8 flag, s32 owner) {
 #endif
 
 #ifdef NON_MATCHING
-void func_1515835C(u8 *arg0, u8 *arg1);
+void anim_model_fx_build_mtx(u8 *arg0, u8 *arg1);
 
 /* was func_150FB708 */
 s32 score_banner_model_update(u8 *arg0) {
@@ -921,17 +921,17 @@ s32 score_banner_model_update(u8 *arg0) {
     sp.u24 = 0.0f;
     sp.u28 = 0.3f;
     sp.u2C = 0.3f;
-    func_1515835C(arg0, &sp.u1C);
+    anim_model_fx_build_mtx(arg0, &sp.u1C);
     return 1;
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/score_banner_model_update.s")
 #endif
-s32 func_151584F0(s32, s32, s32, s32, s32);
-s32 func_151D76BC(s32, s32, s32, s32, s32);
+s32 anim_model_fx_load_screen_mtx(s32, s32, s32, s32, s32);
+s32 banner_sprite_set_segment(s32, s32, s32, s32, s32);
 /* was func_150FB768 */
 void banner_sprite_draw(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_151584F0(func_151D76BC(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
+    anim_model_fx_load_screen_mtx(banner_sprite_set_segment(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
 }
 
 /* was func_150FB7C0 */
@@ -957,8 +957,8 @@ s32 banner_sprite_fade_update(u8 *arg0) {
 
 #ifdef NON_MATCHING
 void bone_point_spark_spray(s32, u8, s32, s32, s32, u8, s32);
-void func_15145EA4(f32 **, f32 **, void *, s32);
-void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+void bone_streak_fx_start(u8 *, u8 *, s32, u8 *, f32, u8, s32);
 extern s32 D_800A2100;
 extern s32 D_800A210C;
 extern s32 D_800A2118;
@@ -1013,12 +1013,12 @@ void obj_bone14_spark_burst(u8 *arg0, u8 arg1, s32 arg2) {
         sp.u34 = &sp.u7C;
         temp_a2 = (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x380;
         sp.u78 = temp_a2;
-        func_15145EA4(&sp.u38, &sp.u2C, temp_a2, 3);
+        mtx_transform_points(&sp.u38, &sp.u2C, temp_a2, 3);
         sp.u7C -= sp.u88;
         sp.u80 -= sp.u8C;
         sp.u84 -= sp.u90;
         bone_point_spark_spray(arg0, 0xE, &sp.u68, &sp.u5C, &sp.u94, (s32) arg1, arg2);
-        func_151D49B8(&sp.u88, &sp.u7C, sp.u78, arg0, 1.0f, (s32) arg1, arg2);
+        bone_streak_fx_start(&sp.u88, &sp.u7C, sp.u78, arg0, 1.0f, (s32) arg1, arg2);
     }
 }
 #else

@@ -6,7 +6,8 @@
 #ifdef NON_MATCHING
 extern u8 *D_800DC278;
 
-s32 func_1503FAF0(u8 *arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4) {
+/* was func_1503FAF0 */
+s32 zone_point_allowed(u8 *arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4) {
     s16 temp_a0;
     s16 temp_a0_2;
     s16 temp_a0_3;
@@ -56,22 +57,24 @@ block_15:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D300/func_1503FAF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D300/zone_point_allowed.s")
 #endif
-s32 func_1503FAF0(u8 *, s16, s16, s32, s32);
+s32 zone_point_allowed(u8 *, s16, s16, s32, s32);
 
 #ifdef NON_MATCHING
-/* P48: the matched void body leaves func_1503FAF0's v0 in place and func_1502E7B4 tests it: return it explicitly. */
-s32 func_1503FBF4(u8 *arg0, s32 arg1, s32 arg2) {
-    return func_1503FAF0(arg0 + 0x320, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), arg1, 1);
+/* P48: the matched void body leaves zone_point_allowed's v0 in place and obj_update_visibility tests it: return it explicitly. */
+/* was func_1503FBF4 */
+s32 obj_zone_point_allowed(u8 *arg0, s32 arg1, s32 arg2) {
+    return zone_point_allowed(arg0 + 0x320, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), arg1, 1);
 }
 #else
-void func_1503FBF4(u8 *arg0, s32 arg1, s32 arg2) {
-    func_1503FAF0(arg0 + 0x320, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), arg1, 1);
+void obj_zone_point_allowed(u8 *arg0, s32 arg1, s32 arg2) {
+    zone_point_allowed(arg0 + 0x320, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), arg1, 1);
 }
 #endif
 
-void func_1503FC54(void)
+/* was func_1503FC54 */
+void obj_select_next_flagged(void)
 {
   int new_var; // fakematch: permuter temp for start + 1
   s32 i;

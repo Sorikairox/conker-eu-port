@@ -3,4 +3,5 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_8410/func_10008410.s")
+/* was func_10008410 */
+#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_8410/os_map_tlb_rdb.s")

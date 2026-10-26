@@ -8,7 +8,8 @@
 // into its red and blue fields (alpha kept). Rare's asm (hand-written) does 8 pixels per step with 64-bit masks
 // D_8009FCA0 = 0x07C0 (green) / D_8009FCA8 = 0x07C1 (green + alpha) in every halfword; it always does at least one
 // step and stops when start reaches end (signed compare). The port does the same per 16-bit pixel.
-void func_150B2290(u16 *start, u16 *end) {
+/* was func_150B2290 */
+void framebuffer_green_to_gray(u16 *start, u16 *end) {
     u16 *px = start;
     s32 i;
 
@@ -22,7 +23,7 @@ void func_150B2290(u16 *start, u16 *end) {
     } while (px < end);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2290.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/framebuffer_green_to_gray.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -31,7 +32,8 @@ s32 event_dispatch(s32, s32, ...);
 s32 event_dispatch(s32, s32, s32, s32);
 #endif
 
-void func_150B2300(u8 *arg0) {
+/* was func_150B2300 */
+void camera_flags_from_events(u8 *arg0) {
     u8 *temp_v0;
 
     if (event_dispatch(1, 0x4054, 6, 0x9000) != 0) {
@@ -45,7 +47,8 @@ void func_150B2300(u8 *arg0) {
     }
 }
 
-void func_150B23C0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
+/* was func_150B23C0 */
+void smoke_emitter_spawn(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     typedef struct { s32 w[3]; } Blk12;
     struct {
         Blk12 unk0;
@@ -62,9 +65,10 @@ void func_150B23C0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
-void func_150B2470(u8 *arg0) {
+/* was func_150B2470 */
+void smoke_emitter_update_large(u8 *arg0) {
     struct {
         s8 u8C;
         s8 u8D;
@@ -183,7 +187,7 @@ void func_150B2470(u8 *arg0) {
             temp_f16 = (random_float() * 503.0f) + 405.0f;
             sp.uC8 = temp_f16;
             sp.uC4 = temp_f16;
-            temp_v0 = func_151307F0(&sp.u9C, 1, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = particle_spawn_ex(&sp.u9C, 1, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u8C, 0x10);
             }
@@ -192,16 +196,17 @@ void func_150B2470(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2470.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/smoke_emitter_update_large.s")
 #endif
 #ifdef NON_MATCHING
-/* P249: readable C for func_150B2820 (game_eu_DFAA0, 79 insns; compiled C, not hand asm: IDO prologue / delay slots). */
+/* P249: readable C for view_progress_setup (game_eu_DFAA0, 79 insns; compiled C, not hand asm: IDO prologue / delay slots). */
 // view_progress_setup: configures a view record (+0x84 flags, +0x190, +0x348 / +0x34C / +0x374, +0x5F0) from the game
 // progress queries event_dispatch (kind 0 = 3 arguments, kind 1 = 4). Query 0x5043 / 0x1A set: +0x84 |= 0x400000
 // (and 0x4000 when 0x5045 / 0x1A is set too), +0x190 = 0; else 0x4030 (kind 1): +0x190 = 235; else +0x348 / +0x34C =
 // 114, +0x374 = 384, +0x190 = 60. +0x5F0 bit 0x100 = (query (0x2007 / 0xB7 | 0x2000) / 0xBC != 0 and query
 // 0x2000 / 0xBB != -1).
-void func_150B2820(u8 *v) {
+/* was func_150B2820 */
+void view_progress_setup(u8 *v) {
     s32 a;
     s32 b;
 
@@ -228,5 +233,5 @@ void func_150B2820(u8 *v) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2820.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/view_progress_setup.s")
 #endif

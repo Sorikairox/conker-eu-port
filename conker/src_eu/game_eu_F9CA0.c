@@ -5,11 +5,11 @@
 
 #ifdef NON_MATCHING
 #include "libc/string.h"
-void func_1504715C(void *, u8 *);
-s32 func_15046F70(u8 *, u16, f32, u8 *);
-void func_150CD2A0(f32, f32 *, f32 *, f32 *);
-u8 *func_150C8DD0(u8 *spec, s32 extra, s32 view, s32 arg3);
-void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+void hitinfo_from_obj_floor(void *, u8 *);
+s32 collision_floor_probe(u8 *, u16, f32, u8 *);
+void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
+u8 *ring_effect_create(u8 *spec, s32 extra, s32 view, s32 arg3);
+void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 
 typedef struct {
     u8 kind;            /* +0x00 the puff's kind (blk +0x00) */
@@ -87,15 +87,16 @@ typedef struct {
     f32 f24, f28;       /* +0x24 span / 25, 0 */
     s8 b2C, b2D;        /* +0x2C -1, -1 */
     u8 pad2E[2];
-} GroundPuffRing;       /* func_150C8DD0's spec */
+} GroundPuffRing;       /* ring_effect_create's spec */
 
 // ground_puff_spawn: a dust puff where the character's bone point `which` (0..2 of D_800A0A10: bone 0x1B, offset
 // / kind / size ranges per entry) meets the floor. Nothing without the object or its matrices (+0x1D4), or when no
-// floor lies within 200 above / 2000 below the point (func_15046F70). The floor colour (func_150CD2A0 at z) tints a
+// floor lies within 200 above / 2000 below the point (collision_floor_probe). The floor colour (ground_colour_by_depth at z) tints a
 // effect3d_spawn_oriented_simple puff (class 0x18, facing obj +0x7A >> 8 plus the entry's yaw, arg2 / arg3 passed on) whose record
-// gets a life / growth tail at +0x128, then two debris sprays (func_1514CBE8 kinds 0x11 and 0x12, the second in the
-// floor colour), a 12-point ring (func_150C8DD0) and func_151D5404 at the point. arg3 = alpha for the sprays.
-void func_150CBF80(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
+// gets a life / growth tail at +0x128, then two debris sprays (spawn_circle_random_emit kinds 0x11 and 0x12, the second in the
+// floor colour), a 12-point ring (ring_effect_create) and rumble_all_players_at at the point. arg3 = alpha for the sprays.
+/* was func_150CBF80 */
+void ground_puff_spawn(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
     const GroundPuffSrc *src;
     f32 pos[3];
     f32 probe[3];
@@ -114,17 +115,17 @@ void func_150CBF80(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
     if (obj == NULL || obj->unk1D4 == NULL) {
         return;
     }
-    func_1504715C(hit, (u8 *) obj);
+    hitinfo_from_obj_floor(hit, (u8 *) obj);
     src = &sGroundPuffSrc[which];
-    func_15143134((void *) src->point, pos, (u8 *) obj->unk1D4 + src->bone * 64);
+    mtx_transform_point_or_origin((void *) src->point, pos, (u8 *) obj->unk1D4 + src->bone * 64);
     probe[0] = pos[0];
     probe[1] = pos[1] + 200.0f;
     probe[2] = pos[2];
-    if (func_15046F70((u8 *) probe, 0, pos[1] - 2000.0f, (u8 *) hit) == 0) {
+    if (collision_floor_probe((u8 *) probe, 0, pos[1] - 2000.0f, (u8 *) hit) == 0) {
         return;
     }
     pos[1] = hit[0];
-    func_150CD2A0(pos[2], &r, &g, &b);
+    ground_colour_by_depth(pos[2], &r, &g, &b);
     cr = (u32) r;
     cg = (u32) g;
     cb = (u32) b;
@@ -165,7 +166,7 @@ void func_150CBF80(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
     }
 
     random_int(); /* drawn and dropped */
-    func_1514CBE8(pos[0], pos[1], pos[2], random_float() * 50.0f + 80.0f, 0, 0xFF, 0x29, 0x11, 0, 0.0f, 0, arg3);
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], random_float() * 50.0f + 80.0f, 0, 0xFF, 0x29, 0x11, 0, 0.0f, 0, arg3);
 
     ring.pos[0] = pos[0];
     ring.pos[1] = pos[1];
@@ -182,20 +183,21 @@ void func_150CBF80(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
     ring.f28 = 0.0f;
     ring.f1C = sGroundRingSpan[0] / 10.0f;
     ring.f24 = sGroundRingSpan[0] / 25.0f;
-    func_150C8DD0((u8 *) &ring, 0, 0xFF, 1);
+    ring_effect_create((u8 *) &ring, 0, 0xFF, 1);
 
     n = (u32) random_int() % 14 + 15;
     rgb[0] = cr;
     rgb[1] = cg;
     rgb[2] = cb;
-    func_1514CBE8(pos[0], pos[1], pos[2], random_float() * 70.0f + 70.0f, 0, 0xFF, n, 0x12, 0, 0.0f, (s32) rgb, arg3);
-    func_151D5404((struct17 *) pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], random_float() * 70.0f + 70.0f, 0, 0xFF, n, 0x12, 0, 0.0f, (s32) rgb, arg3);
+    rumble_all_players_at((struct17 *) pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F9CA0/func_150CBF80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F9CA0/ground_puff_spawn.s")
 #endif
 
-s32 func_150CCB48(u8 *arg0)
+/* was func_150CCB48 */
+s32 ground_puff_grow_fade_update(u8 *arg0)
 {
   f32 temp_f0;
   s32 temp_v1;
@@ -223,9 +225,10 @@ s32 func_150CCB48(u8 *arg0)
   return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_150CCBC8(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+/* was func_150CCBC8 */
+s32 ground_puff_particle_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         s32 u34;
         s32 u38;
@@ -288,7 +291,7 @@ s32 func_150CCBC8(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((random_int() % 21U) - 0x19), ((random_float() * 200.0f) + 350.0f) * 0.1f, sp.u7C);
+    vec3_from_angles_byte(arg8, (s16) ((random_int() % 21U) - 0x19), ((random_float() * 200.0f) + 350.0f) * 0.1f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
     if (random_int() & 1) {
@@ -304,14 +307,15 @@ s32 func_150CCBC8(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u56 = 0x1B;
     sp.u58 = 1.04f;
     scale = 0.901f;
-    obj = func_151308E4(&sp, 1, 4, argE, 1);
+    obj = particle_spawn_basic(&sp, 1, 4, argE, 1);
     if (obj != 0) {
         memcpy(obj + 0xA8, &scale, 4);
     }
     return 1;
 }
 
-s32 func_150CCDE4(u8 *arg0, s32 arg1) {
+/* was func_150CCDE4 */
+s32 particle_shrink_update_d(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
     for (i = D_800BE9E4; i != 0; i--) {
@@ -321,9 +325,10 @@ s32 func_150CCDE4(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 
-s32 func_150CCF8C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+/* was func_150CCF8C */
+s32 ground_puff_chunk_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         f32 u28[13];
         s32 u5C;
@@ -372,7 +377,7 @@ s32 func_150CCF8C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u7E = 0x20;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    func_15143794(arg8, (s16) (((u32) random_int() % 44U) - 0x3F), ((random_float() * 200.0f) + 300.0f) * 0.1f, &sp.u5C);
+    vec3_from_angles_byte(arg8, (s16) (((u32) random_int() % 44U) - 0x3F), ((random_float() * 200.0f) + 300.0f) * 0.1f, &sp.u5C);
     sp.u68 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
     sp.u70 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
     sp.u7C = (random_int() % 51U) + 0x32;
@@ -395,11 +400,12 @@ s32 func_150CCF8C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u98 = 0;
     sp.u9A = 0x20;
     sp.u9C = 7;
-    func_15132FBC(&sp, 3, 0xFF, 0, (s32) argE, 0);
+    mdl_particle_spawn(&sp, 3, 0xFF, 0, (s32) argE, 0);
     return 1;
 }
 
-s32 func_150CD1C4(u8 *arg0) {
+/* was func_150CD1C4 */
+s32 particle_ballistic_update_d(u8 *arg0) {
     *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
     *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
     *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;

@@ -1,4 +1,4 @@
-# P255 HARNESS test: func_150A44A4 (game_eu_D1760.c) mutants for tools/port/nmharness_mut.sh (whole-file sed)
+# P255 HARNESS test: floor_tri_height (game_eu_D1760.c) mutants for tools/port/nmharness_mut.sh (whole-file sed)
 s/if (pz < az) return 0;/if (pz <= az) return 0;/
 s/        for (i = 8; i < 16; i++) {/        for (i = 9; i < 16; i++) {/
 s/    dz1 = cz - az + 1;/    dz1 = cz - az + 2;/

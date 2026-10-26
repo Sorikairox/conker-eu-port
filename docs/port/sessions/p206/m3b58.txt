@@ -14,7 +14,7 @@ s/    if (tex == 0x80000000) {/    if (tex == 0) {/
 s/    gdl->words.w1 = 0x07094250;/    gdl->words.w1 = 0x07094251;/
 s/    gdl->words.w0 = 0xEF000000 | ((mode | 0xF) \& 0xFFFFFF);/    gdl->words.w0 = 0xEF000000 | (mode \& 0xFFFFFF);/
 s/    for (p = 0; p < D_80090130; p++) {/    for (p = 0; p <= D_80090130; p++) {/
-s/        if (func_150859AC((s16)p, 3) <= 0) {/        if (func_150859AC((s16)p, 3) < 0) {/
+s/        if (player_stat_get((s16)p, 3) <= 0) {/        if (player_stat_get((s16)p, 3) < 0) {/
 s/        x0 = ((s32)view->unk30 - table\[7\] - half) \* 4;/        x0 = ((s32)view->unk30 - table[7] + half) * 4;/
 s/        y0 = (table\[21\] + (s32)view->unk24 + half) \* 4;/        y0 = (table[21] + (s32)view->unk24 - half) * 4;/
 s/            x0 -= 0x1C6;/            x0 -= 0x1C4;/
@@ -35,16 +35,16 @@ s/            self = 0;/            self = 2;/
 s/            if (me->camera != NULL \&\& me->camera->unk23D == 3) {/            if (me->camera != NULL \&\& me->camera->unk23D == 2) {/
 s/            ref = \&D_800CC2D0\[self\];/            ref = me;/
 s/        rz = ref->z_position;/        rz = ref->y_position;/
-s/        my_level = func_15086218(ref->y_position);/        my_level = func_15086218(me->y_position);/
+s/        my_level = rail_band_for_height(ref->y_position);/        my_level = rail_band_for_height(me->y_position);/
 s/        for (i = 0; i < 25; i++) {/        for (i = 0; i < 24; i++) {/
 s/            if (i == p || i == self) {/            if (i == p) {/
 s/            if (obj->interaction_state == 0 || obj->unk328 == 0) {/            if (obj->unk328 == 0) {/
 s/            if (obj->interaction_state == 0 || obj->unk328 == 0) {/            if (obj->interaction_state == 0) {/
 s/            team = obj->unk328 - 1;/            team = obj->unk328;/
 s/            if (i < D_8008FD8C) {/            if (i <= D_8008FD8C) {/
-s/                if (func_150859AC((s16)i, 3) <= 0 || func_150859AC((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (func_150859AC((s16)i, 3) <= 0 || func_150859AC((s16)i, 3) <= 0 || (D_800E0FFC \& (1 << i)) ||/
-s/                if (func_150859AC((s16)i, 3) <= 0 || func_150859AC((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (func_150859AC((s16)i, 3) < 0 || func_150859AC((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/
-s/                if (func_150859AC((s16)i, 3) <= 0 || func_150859AC((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (func_150859AC((s16)i, 3) <= 0 || func_150859AC((s16)i, 4) <= 0 || (D_800E0FFC \& (2 << i)) ||/
+s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 3) <= 0 || (D_800E0FFC \& (1 << i)) ||/
+s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) < 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/
+s/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (1 << i)) ||/                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC \& (2 << i)) ||/
 s/                    obj->health == 0 || (((u8 \*)obj->unk31C)\[0x75\] \& 0x7F) == 0x21) {/                    obj->health == 1 || (((u8 *)obj->unk31C)[0x75] \& 0x7F) == 0x21) {/
 s/                    obj->health == 0 || (((u8 \*)obj->unk31C)\[0x75\] \& 0x7F) == 0x21) {/                    obj->health == 0 || ((u8 *)obj->unk31C)[0x75] == 0x21) {/
 s/            dx = (obj->x_position - rx) \* scale;/            dx = (obj->x_position - rx) * zoom;/
@@ -56,7 +56,7 @@ s/            gdl->words.w1 = (col\[0\] << 24) | (col\[1\] << 16) | (col\[2\] <<
 s/            cx = (s32)((dx \* c - dz \* s) \* zoom) + x0;/            cx = (s32)((dx * c + dz * s) * zoom) + x0;/
 s/            cy = (s32)((dx \* s + dz \* c) \* zoom) + y0;/            cy = (s32)((dx * s + dz * c) * scale) + y0;/
 s/            gSPScisTextureRectangle(gdl++, cx - dot, cy - dot, cx + dot, cy + dot, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);/            gSPScisTextureRectangle(gdl++, cx - dot, cy - dot, cx + dot + 1, cy + dot, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);/
-s/            level = func_15086218(obj->y_position);/            level = func_15086218(obj->x_position);/
+s/            level = rail_band_for_height(obj->y_position);/            level = rail_band_for_height(obj->x_position);/
 s/            if (level == my_level) {/            if (level == my_level + 1) {/
 s/            gdl->words.w1 = 0x000000FF;/            gdl->words.w1 = 0x000000FE;/
 s/            if (my_level < level) {/            if (my_level > level) {/

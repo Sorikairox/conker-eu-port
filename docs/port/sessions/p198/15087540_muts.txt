@@ -1,5 +1,5 @@
 s/    D_80087640 = NULL;/    ;/
-s/start = func_150871B8(tag);/start = func_150871B8(0);/
+s/start = rail_node_find_by_tag(tag);/start = rail_node_find_by_tag(0);/
 s/    if (start == 0xFF) {/    if (start == 0xFE) {/
 s/    best = D_800D27C8 \* 0xFF;/    best = 0;/
 s/    best = D_800D27C8 \* 0xFF;/    best = D_800D27C8;/
@@ -9,12 +9,12 @@ s/        if (D_800D27C8 == 0) {/        if (D_800D27C8 <= 0) {/
 s/            if (q\[0xF\] >= best) {/            if (q[0xF] > best) {/
 s/        } else if (q\[0xF\] <= best) {/        } else if (q[0xF] < best) {/
 s/link = p\[9 + i\];/link = p[8 + i];/
-s/after = func_15088D24(start, next, 0);/after = func_15088D24(next, start, 0);/
-s/back = func_15088D24(next, start, 0);/back = func_15088D24(start, next, 0);/
+s/after = rail_link_pick(start, next, 0);/after = rail_link_pick(next, start, 0);/
+s/back = rail_link_pick(next, start, 0);/back = rail_link_pick(start, next, 0);/
 s/    if (next == 0xFF || back == 0xFF || after == 0xFF) {/    if (next == 0xFF || back == 0xFF) {/
 s/    if (next == 0xFF || back == 0xFF || after == 0xFF) {/    if (next == 0xFF || after == 0xFF) {/
 s/    cur = after;/    cur = next;/
-s/nx = func_15088D24(prev, cur, 0);/nx = func_15088D24(cur, prev, 0);/
+s/nx = rail_link_pick(prev, cur, 0);/nx = rail_link_pick(cur, prev, 0);/
 s/        if (prev == start) {/        if (cur == start) {/
 s/    D_800D27B9 = cpus;/    D_800D27B9 = humans;/
 s/    D_800D27B8 = humans;/    D_800D27B8 = cpus;/
@@ -31,4 +31,4 @@ s/((u8 \*) rec)\[0x26\] = laps;/((u8 *) rec)[0x26] = laps + 1;/
 s/= !(i < D_80090130);/= !(i <= D_80090130);/
 s/= !(i < D_80090130);/= (i < D_80090130);/
 s/    D_800D27BA = 1;/    D_800D27BA = 0;/
-s/        func_15088CA0((u8 \*) rec);/        func_15088CA0((u8 *) D_80087640);/
+s/        rail_record_reset((u8 \*) rec);/        rail_record_reset((u8 *) D_80087640);/

@@ -24,7 +24,8 @@ void guMtxF2L2(float mf[4][4], Mtx *m)
 	}
 }
 
-void func_151F05C0(float mf[4][4])
+/* was func_151F05C0 */
+void game_gu_mtx_ident_f(float mf[4][4])
 {
 	int	i, j;
 
@@ -34,10 +35,11 @@ void func_151F05C0(float mf[4][4])
 		else mf[i][j] = 0.0;
 }
 
-void func_151F0648(Mtx *arg0) {
+/* was func_151F0648 */
+void game_gu_mtx_ident(Mtx *arg0) {
     f32 mf[4][4];
 
-    func_151F05C0(mf);
+    game_gu_mtx_ident_f(mf);
     guMtxF2L2(mf, arg0);
 }
 

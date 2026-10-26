@@ -1,7 +1,7 @@
 /* P58: runtime checks of P51's model path (link-time wraps), and a posed-skeleton preview.
  *
  * ?p58model=N  log the first N calls (then every 256th) of
- *   - func_1503D210 (P51 C model load): arguments, result, D_800D19A0[id] / D_800C5000[id] after;
+ *   - model_load (P51 C model load): arguments, result, D_800D19A0[id] / D_800C5000[id] after;
  *   - func_150A86B0 (P51 C skeleton evaluator, nm_asm/D5E90_anim.c): object, animation state, joint count, remap
  *     slots and the callback table entries they select, the adjustment buffer (how far the 0x1000 scan runs), the
  *     asm stubs reached inside (the callbacks), and a sanity check of the n joint matrices written: finite, the
@@ -11,10 +11,10 @@
  * (P61: ?p58noterm is gone with the terminator; see below.)
  * ?p58pose=1   preview: after every game gfx task, draw Conker's ROM model (the P6/P14 viewer asset whose bone table
  *              equals D_800C5000[id]) in a box on the right with the joint matrices of record 0's last evaluation
- *              (gfx_demo.c gfx_pose_overlay). Diagnostic only (P61: the game draws its own model through func_1502CFEC now).
+ *              (gfx_demo.c gfx_pose_overlay). Diagnostic only (P61: the game draws its own model through obj_draw_model_dl now).
  *
- * P61: the P58 TEMPORARY 0x1000 terminator written before func_150342D0 is removed: func_150342D0 and
- * func_15034B50 are C since port P57 (`*func_15034B50(...) = 0x1000`). The wrap only remembers the record for the
+ * P61: the P58 TEMPORARY 0x1000 terminator written before obj_adjust_list_build is removed: obj_adjust_list_build and
+ * obj_adjust_entries_face are C since port P57 (`*obj_adjust_entries_face(...) = 0x1000`). The wrap only remembers the record for the
  * evaluator check below, which still measures how far the 0x1000 scan runs (`adjust scan N`). */
 #include <stdint.h>
 #include <string.h>
@@ -30,11 +30,11 @@ extern unsigned D_800D19A0[], D_800C5000[], D_800D1C90[];
 extern unsigned char D_800CC2D0[];
 extern unsigned D_800C42A8;
 extern int D_8008891C;
-void func_15036FD8(void);
-int func_15037224(void);
-void func_1503A8FC(void);
-int func_1503A968(void);
-void func_1503AAE0(void);
+void look_frame_cb_current(void);
+int look_head_body_by_kind(void);
+void obj_cb_pin_joint1_position(void);
+int obj22_cb_scale_joint(void);
+void look_joint_cb_combined(void);
 void gfx_pose_overlay_set(const float (*J)[16], int n, const float *root, const unsigned char *skel);
 
 #define REC 0x32C  /* sizeof(struct127), D_800CC2D0[] */
@@ -45,31 +45,31 @@ static void p58_flags(void) {
     fl_pose = port_flag("p58pose"); fl_anim = port_flag("p58anim"); fl_speed = port_flag("p58speed");
 }
 
-/* ---- func_1503D210 */
-int __real_func_1503D210(int id, int a1, int a2, int a3, int a4);
-int __wrap_func_1503D210(int id, int a1, int a2, int a3, int a4) {
+/* ---- model_load */
+int __real_model_load(int id, int a1, int a2, int a3, int a4);
+int __wrap_model_load(int id, int a1, int a2, int a3, int a4) {
     static unsigned calls;
     int r;
     p58_flags();
-    r = __real_func_1503D210(id, a1, a2, a3, a4);
+    r = __real_model_load(id, a1, a2, a3, a4);
     calls++;
     if (fl_model && (calls <= (unsigned)fl_model || calls % 256 == 0)) {
         unsigned id8 = (unsigned)id & 0xFF;
-        port_log("[p58] func_1503D210 call %u frame %u: id %d a1 %d a2 %08X a3 %d a4 %d -> %d | D_800D19A0[id] %08X "
+        port_log("[p58] model_load call %u frame %u: id %d a1 %d a2 %08X a3 %d a4 %d -> %d | D_800D19A0[id] %08X "
                  "D_800C5000[id] %08X D_800D1C90[id] %08X\n", calls, port_frame_count, id, a1, a2, a3, a4, r,
                  D_800D19A0[id8], D_800C5000[id8], D_800D1C90[id8]);
     }
     return r;
 }
 
-/* ---- func_150342D0 (P57 C; record for the scan check) */
+/* ---- obj_adjust_list_build (P57 C; record for the scan check) */
 static int cur_rec = -1;
 static unsigned g_scan, g_scan_max, g_edit_ang, g_edit_scl, g_scan_long;
-void __real_func_150342D0(void *buf, int rec);
-void __wrap_func_150342D0(void *buf, int rec) {
+void __real_obj_adjust_list_build(void *buf, int rec);
+void __wrap_obj_adjust_list_build(void *buf, int rec) {
     p58_flags();
     cur_rec = rec;
-    __real_func_150342D0(buf, rec);
+    __real_obj_adjust_list_build(buf, rec);
 }
 
 /* ---- func_150A86B0 */
@@ -109,11 +109,11 @@ static void p58_mul4(const float *a, const float *b, float *r) {
  * from the ROM ((size + 15) & ~15 bytes, dir = obj +0x58, key = D_800D1588[id][anim].key), A+0x28 <- the ROM address
  * of the key-frame stream dir[key + 1] (1 when A[0x45] = 0), A+8 = the frame time (advanced by p58speed / 10 per
  * evaluation, default 0.5, wrapping at A[0x43]), A+0x10 = 1, A+0x18 = (f32)A[0x43], A+0x3C = 0. Then the game's C
- * func_1502DB14(A, 0, buf) copies the two key frames by DMA, as func_1502DE74 does just before the evaluator. */
+ * anim_copy_keyframes(A, 0, buf) copies the two key frames by DMA, as obj_build_model_instance does just before the evaluator. */
 extern unsigned char *port_rom;
 extern unsigned port_rom_size;
 extern unsigned D_800D1588[];
-void func_1502DB14(void *a, int arg1, int arg2);
+void anim_copy_keyframes(void *a, int arg1, int arg2);
 static unsigned char p58_dbuf[0x340] __attribute__((aligned(16)));
 static float p58_t;
 static unsigned rom32(unsigned o) { return o + 4 <= port_rom_size ? (unsigned)port_rom[o] << 24 | port_rom[o + 1] << 16 | port_rom[o + 2] << 8 | port_rom[o + 3] : 0; }
@@ -138,7 +138,7 @@ static int p58_anim_setup(unsigned char *A, const unsigned char *obj) {
     if (p58_t >= (float)vbe_ld8(A + 0x43)) p58_t = 0;
     *(float *)(A + 8) = p58_t;
     p58_t += (fl_speed > 0 ? fl_speed : 5) / 10.0f;
-    func_1502DB14(A, 0, (int)(uintptr_t)p58_dbuf);
+    anim_copy_keyframes(A, 0, (int)(uintptr_t)p58_dbuf);
     if (logged < 4) {
         char hb[200], db[200]; int q = 0, r = 0;
         const unsigned char *d = (const unsigned char *)(uintptr_t)*(unsigned *)(A + 0x30);
@@ -309,9 +309,9 @@ void __wrap_func_150A86B0(int *arena, float (*m)[4], int anim, int skel, int n, 
 /* the callback table: one log line at the first evaluator log, from the table words in game memory */
 void p58_check_cbtable(void) {
     static const struct { void *f; const char *n; } fn[] = {
-        {(void *)func_15036FD8, "func_15036FD8"}, {(void *)func_15037224, "func_15037224"},
-        {(void *)func_1503A8FC, "func_1503A8FC"}, {(void *)func_1503A968, "func_1503A968"},
-        {(void *)func_1503AAE0, "func_1503AAE0"}};
+        {(void *)look_frame_cb_current, "look_frame_cb_current"}, {(void *)look_head_body_by_kind, "look_head_body_by_kind"},
+        {(void *)obj_cb_pin_joint1_position, "obj_cb_pin_joint1_position"}, {(void *)obj22_cb_scale_joint, "obj22_cb_scale_joint"},
+        {(void *)look_joint_cb_combined, "look_joint_cb_combined"}};
     const unsigned *t = (const unsigned *)&D_8008891C;
     for (int k = 1; k <= 5; k++) {
         const char *nm = "?";

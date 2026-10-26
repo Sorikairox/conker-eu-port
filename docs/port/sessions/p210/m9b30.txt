@@ -1,5 +1,5 @@
 s/if (D_800D1891 == 0 || D_800D1891 == 1) {/if (D_800D1891 == 0) {/
-s/idx = func_15083FB0(D_800D1891 - 2);/idx = func_15083FB0(D_800D1891 - 1);/
+s/idx = obj_slot_by_setup_id(D_800D1891 - 2);/idx = obj_slot_by_setup_id(D_800D1891 - 1);/
 s/        if (idx == -1) {/        if (idx == -2) {/
 s/var = \&D_800CC2D0\[idx\].unk2E4;/var = \&D_800CC2D0[idx].unk2E8;/
 s/var = \&D_800CC2D0\[idx\].unk2E8;/var = \&D_800CC2D0[idx].unk2EC;/

@@ -7,7 +7,8 @@
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CDEC;
 
-void func_1518CFF0(u8 *arg0, s32 arg1) {
+/* was func_1518CFF0 */
+void puff_sprite_spawn(u8 *arg0, s32 arg1) {
     struct {
         s32 u30;
         s32 u34;
@@ -89,11 +90,12 @@ void func_1518CFF0(u8 *arg0, s32 arg1) {
     node_spawn_sprite(&sp.u30, 0, 0, -1, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BA800/func_1518CFF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BA800/puff_sprite_spawn.s")
 #endif
 extern void (*D_8008D970[])();
 
-void func_1518D218(u8 *arg0) {
+/* was func_1518D218 */
+void sprite_uv_scroll_update(u8 *arg0) {
     s32 *new_var; // fakematch: permuter temporaries pin the lw register
     u16 new_var2; // fakematch: permuter temporary
     s32 idx;

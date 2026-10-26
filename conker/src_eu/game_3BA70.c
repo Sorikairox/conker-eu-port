@@ -150,7 +150,7 @@ void level_obj_init_area_points(void) {
 }
 
 #ifdef NON_MATCHING
-void func_15189E70(void *arg0, u8 arg1);
+void area_drift_emitter_create(void *arg0, u8 arg1);
 extern s32 D_800B1214;
 
 /* was func_1500E8C0 */
@@ -183,8 +183,8 @@ void level_obj_init_drift_scene(void) {
     } sp;
     s16 var_v0;
 
-    func_15195AA8(*D_800B0E00, D_800902E8, 0, -1, 0, 0, 0, -6);
-    func_15195AA8(D_800B1214, D_800902E8, 0, -1, 0, 1, 0, -6);
+    level_dl_add_texture_scroll(*D_800B0E00, D_800902E8, 0, -1, 0, 0, 0, -6);
+    level_dl_add_texture_scroll(D_800B1214, D_800902E8, 0, -1, 0, 1, 0, -6);
     sp.u68 = 0.21428572f;
     sp.u70 = 5.0f;
     sp.u74 = 6.0f;
@@ -209,13 +209,13 @@ void level_obj_init_drift_scene(void) {
     sp.u80 = 0.39999998f;
     sp.u48 = 800.0f;
     sp.u4C = -3000.0f;
-    func_15189E70(&sp.u40, 1);
+    area_drift_emitter_create(&sp.u40, 1);
     if (D_800BE9F0 == 6) {
         var_v0 = 0x34;
     } else {
         var_v0 = 7;
     }
-    func_1000FA64(0x61FU, var_v0, 0, 0, 0x2EE0, 0x3E8U, 0x190, (s32) func_1000EF40, NULL, 0, 0x48, 0);
+    sfx_emitter_start(0x61FU, var_v0, 0, 0, 0x2EE0, 0x3E8U, 0x190, (s32) sfx_cb_keep_until_silent, NULL, 0, 0x48, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/level_obj_init_drift_scene.s")
@@ -225,8 +225,8 @@ void level_obj_init_drift_scene(void) {
 //     struct145 tmp;
 //     s32 phi_v0;
 //
-//     func_15195AA8(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
-//     func_15195AA8(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
+//     level_dl_add_texture_scroll(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
+//     level_dl_add_texture_scroll(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
 //     tmp.unk28 = D_80096210; // 0.2142857164144516
 //     tmp.unk30 = 5.0f;
 //     tmp.unk34 = 6.0f;
@@ -257,11 +257,11 @@ void level_obj_init_drift_scene(void) {
 //     } else {
 //         phi_v0 = 7;
 //     }
-//     func_1000FA64(1567, (s16)phi_v0, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
+//     sfx_emitter_start(1567, (s16)phi_v0, 0, 0, 12000, 1000, 400, sfx_cb_keep_until_silent, 0, 0, 72, 0);
 // }
 
 /* was func_1500EAA0 */
 void level_obj_init_tex_scroll(void) {
-    func_15195AA8(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
-    func_15195AA8(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
+    level_dl_add_texture_scroll(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
+    level_dl_add_texture_scroll(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
 }

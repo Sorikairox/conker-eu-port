@@ -126,7 +126,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param) {
     switch (paramID) {
         case 4:
             filter->unkA2 = 0;
-            func_10021C40(filter, 4, param);
+            n_adpcm_load_param(filter, 4, param);
             break;
         case 18:
             filter->unkA2 = param;
@@ -140,7 +140,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param) {
             filter->unk99 = param;
             break;
         default:
-            func_10021C40(filter, paramID, param);
+            n_adpcm_load_param(filter, paramID, param);
             break;
     }
 

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_15192E90(u8 *arg0) {
+/* was func_15192E90 */
+void slide_dust_effect_start(u8 *arg0) {
     struct260 *temp_v0;
     struct {
         u8 *unk0;
@@ -23,11 +24,12 @@ void func_15192E90(u8 *arg0) {
     }
 }
 
-s32 func_151308E4(void *, s32, s32, u8, s32);
-void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_1515C668(void *, f32 **);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+s32 motion_track_get_delta(void *, f32 **);
 extern f32 D_800BE9A4;
-void func_15192F14(u8 *arg0) {
+/* was func_15192F14 */
+void slide_dust_effect_update(u8 *arg0) {
     u8 *p;
     s32 r; // fakematch: unused, keeps the s100 frame layout (two scalars above the struct)
     struct {
@@ -75,7 +77,7 @@ void func_15192F14(u8 *arg0) {
     p = arg0 + 0x28;
     *(f32 *)(p + 8) += (312.0f + random_float() * 599.0f) * 0.001f * D_800BE9A4;
     if (*(f32 *)(p + 8) > 1.0f) {
-        if (func_1515C668(*(u8 **)p, &out) != 0) {
+        if (motion_track_get_delta(*(u8 **)p, &out) != 0) {
             sp.u51 = 0x29;
             sp.u3C = 0xE03;
             sp.u34 = 0x200005;
@@ -106,7 +108,7 @@ void func_15192F14(u8 *arg0) {
                 sp.u3E = (random_int() % 31U) + 0x14;
                 sp.u4F = (random_int() % 156U) + 0x64;
                 sp.u5C = sp.u60 = (random_float() * 150.0f) + 100.0f;
-                func_15143874(*(u16 *)(*(u8 **)p + 0x7A) >> 8, a ? 20.0f : -20.0f, &sp.u64[0], &sp.u64[2]);
+                vec2_from_angle_byte(*(u16 *)(*(u8 **)p + 0x7A) >> 8, a ? 20.0f : -20.0f, &sp.u64[0], &sp.u64[2]);
                 sp.u64[0] += *(f32 *)(*(u8 **)p + 0x14);
                 sp.u64[2] += *(f32 *)(*(u8 **)p + 0x1C);
                 sp.u64[1] = *(f32 *)(*(u8 **)p + 0x180) + 20.0f;
@@ -120,7 +122,7 @@ void func_15192F14(u8 *arg0) {
                 sp.u7C[0] = out[0] * -1.516f;
                 sp.u7C[1] = out[1] * -1.516f;
                 sp.u7C[2] = out[2] * -1.516f;
-                obj = func_151308E4(&sp, 1, 4, arg0[0xC], arg0[1]);
+                obj = particle_spawn_basic(&sp, 1, 4, arg0[0xC], arg0[1]);
                 if (obj != 0) {
                     memcpy(obj + 0xA8, &scale, 4);
                 }
@@ -130,7 +132,8 @@ void func_15192F14(u8 *arg0) {
     }
 }
 
-struct260 *func_151932B8(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+/* was func_151932B8 */
+struct260 *body_dust_effect_start(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct260 *temp_v0;
     struct {
         u8 *unk0;
@@ -152,8 +155,9 @@ struct260 *func_151932B8(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-void func_15143794(s16, s16, f32, void *);
-void func_15193360(u8 *arg0) {
+void vec3_from_angles_byte(s16, s16, f32, void *);
+/* was func_15193360 */
+void body_dust_effect_update(u8 *arg0) {
     u8 *p;
     s32 r;
     struct {
@@ -246,9 +250,9 @@ void func_15193360(u8 *arg0) {
                 sp.u3E = (random_int() % 11U) + 0x1E;
                 sp.u4F = (random_int() % 101U) + 0x64;
                 sp.u5C = sp.u60 = (random_float() * 150.0f) + 100.0f;
-                func_15143134(v, sp.u64, *(s32 *)(*(u8 **)p + 0x1D4) + 0x40);
+                mtx_transform_point_or_origin(v, sp.u64, *(s32 *)(*(u8 **)p + 0x1D4) + 0x40);
                 r = random_int();
-                func_15143794(ang, (s16)((u32)r % 28U - 0x19), random_float() * 3998.0f * 0.001f, sp.u7C);
+                vec3_from_angles_byte(ang, (s16)((u32)r % 28U - 0x19), random_float() * 3998.0f * 0.001f, sp.u7C);
                 sp.u8C &= ~0xC0;
                 if (random_int() & 1) {
                     sp.u8C |= 0x40;
@@ -256,7 +260,7 @@ void func_15193360(u8 *arg0) {
                 if (random_int() & 1) {
                     sp.u8C |= 0x80;
                 }
-                obj = func_151308E4(&sp, 1, 4, arg0[0xC], arg0[1]);
+                obj = particle_spawn_basic(&sp, 1, 4, arg0[0xC], arg0[1]);
                 if (obj != 0) {
                     memcpy(obj + 0xA8, &scale, 4);
                 }
@@ -266,7 +270,8 @@ void func_15193360(u8 *arg0) {
     }
 }
 
-void func_151937A4(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_151937A4 */
+void slide_dust_effect_on_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *temp_v0;
     s32 temp_v1;
     temp_v0 = (u8 *)arg0 + 0x28;
@@ -289,7 +294,8 @@ void func_151937A4(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-void func_15193850(u8 *arg0, s32 *arg1, u8 arg2)
+/* was func_15193850 */
+void body_dust_effect_on_event(u8 *arg0, s32 *arg1, u8 arg2)
 {
   s32 new_var;
   u8 *v = arg0 + 0x28;

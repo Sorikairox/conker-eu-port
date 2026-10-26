@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* P162: E10 / D_eu_800BE900 moved up from below func_150C89F4 (used by func_150C8850's NM C) */
+/* P162: E10 / D_eu_800BE900 moved up from below wobblers_update_view0 (used by wobblers_update's NM C) */
 typedef struct { u8 u0; u8 pad1[3]; s16 u4; u8 pad6[4]; } E10;
 extern E10 *D_eu_800BE900;
 
@@ -10,7 +10,8 @@ extern E10 *D_eu_800BE900;
 // wobblers_update: the 10 records at D_eu_800BE900 (s8 dir +2, s16 pos +4, s16 speed +6, s16 target speed +8):
 // speed moves toward the target (sign follows the current speed) by at most D_800BE9E4 * 16, then pos advances by
 // speed * dir * D_800BE9A0 and bounces inside 0 .. 0x4FF (dir flips)
-void func_150C8850(void) {
+/* was func_150C8850 */
+void wobblers_update(void) {
     s32 i;
     u8 *r;
     s32 speed;
@@ -54,24 +55,26 @@ void func_150C8850(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8850.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/wobblers_update.s")
 #endif
 
-void func_150C89F4(s32 arg0) {
+/* was func_150C89F4 */
+void wobblers_update_view0(s32 arg0) {
     if (arg0 == 0) {
-        func_150C8850();
+        wobblers_update();
     }
 }
 
-s32 func_150CE07C(s32);
-void func_150C851C(s32 arg0) {
+s32 shooting_star_set_rate(s32);
+/* was func_150C851C */
+void wobblers_set_intensity(s32 arg0) {
     s32 i;
     s32 v;
     s32 lo;
     s32 range;
 
     if (D_eu_800BE900 != NULL) {
-        func_150CE07C(arg0);
+        shooting_star_set_rate(arg0);
         range = ((arg0 * 50) >> 8) + 50;
         lo = (arg0 * 300) >> 8;
         for (i = 0; i < 10; i++) {
@@ -85,7 +88,8 @@ void func_150C851C(s32 arg0) {
 typedef struct { s32 *a[2]; } P2;
 extern P2 D_eu_80088BB0;
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
-Gfx *func_150C8B00(Gfx *gfx) {
+/* was func_150C8B00 */
+Gfx *wobblers_set_tex_segments(Gfx *gfx) {
     s32 i;
     s32 buf[3];
     s32 lvl;
@@ -108,12 +112,13 @@ Gfx *func_150C8B00(Gfx *gfx) {
 }
 
 u8 *obj_spawn_child_at_joint(struct127 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
-void func_1503E5F8(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+void mtxf_decompose(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern f32 D_800A08C0;
 extern f32 D_800A08C4;
 extern f32 D_800A08C8;
 extern f32 D_800A08CC;
-s32 func_150C8C30(u8 *arg0, struct127 *arg1) {
+/* was func_150C8C30 */
+s32 obj_spawn_part_at_mtx(u8 *arg0, struct127 *arg1) {
     u8 *v;
     u8 *e;
     u8 i;
@@ -144,7 +149,7 @@ s32 func_150C8C30(u8 *arg0, struct127 *arg1) {
         m[1][3] = 0.0f;
         m[2][3] = 0.0f;
         m[3][3] = 1.0f;
-        func_1503E5F8((f32 *)m, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
+        mtxf_decompose((f32 *)m, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
         e = obj_spawn_child_at_joint(arg1, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, D_800A08C0, D_800A08C4, D_800A08C8, 0xC8);
         *(f32 *)(e + 0x14) = x;
         *(f32 *)(e + 0x18) = y;
@@ -171,7 +176,8 @@ f32 cosf(f32);
 // +0x368 (+0x360 points at it) for angles 0, 2pi/n, ... (step at +0x48), then areas at +0x54 (+0x368 + 8n),
 // +0x58 (+0x3B8 + 0x58n) and +0x364 (+0x408 + 0xA8n); +0x40 / +0x44 / +0x50 = 0, s16 +0x4C = s16 +0x28.
 // Returns the record, NULL when there is none.
-u8 *func_150C8DD0(u8 *spec, s32 extra, s32 view, s32 arg3) {
+/* was func_150C8DD0 */
+u8 *ring_effect_create(u8 *spec, s32 extra, s32 view, s32 arg3) {
     u8 *rec;
     s32 i;
     f32 a;
@@ -197,15 +203,15 @@ u8 *func_150C8DD0(u8 *spec, s32 extra, s32 view, s32 arg3) {
     return rec;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8DD0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_effect_create.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P220: readable C for func_150C8F68 (game_eu_F6060, 212 words): update of the kind-0x31 ring effect (descriptor
- * at D_8008C238: update func_150C8F68, draw func_150C92B8). */
-extern void (*D_80088BF8[])(u8 *, f32 *, u8, f32, f32); /* spawn handlers: func_150C9EB4, func_150CA2C4 */
-extern s32 (*D_80088C00[])(u8 *);                        /* node handlers (0 = free the node): [1] func_150CA0DC */
-extern s32 (*D_80088C04[])(u8 *);                        /* = D_80088C00 + 1: [0] func_150CA0DC */
+/* P220: readable C for ring_effect_update (game_eu_F6060, 212 words): update of the kind-0x31 ring effect (descriptor
+ * at D_8008C238: update ring_effect_update, draw ring_effect_draw). */
+extern void (*D_80088BF8[])(u8 *, f32 *, u8, f32, f32); /* spawn handlers: ring_spawn_particle, ring_spawn_debris */
+extern s32 (*D_80088C00[])(u8 *);                        /* node handlers (0 = free the node): [1] shockwave_hit_objects */
+extern s32 (*D_80088C04[])(u8 *);                        /* = D_80088C00 + 1: [0] shockwave_hit_objects */
 extern f32 D_800A08FC; /* 2 pi */
 extern f32 D_800A0900; /* max squared horizontal distance of a spawn point: 10894295 (3300.6^2) */
 extern f32 D_800A0904; /* 256 / 360: degrees -> angle byte */
@@ -218,7 +224,8 @@ void node_destroy(struct102 *arg0);
 // +0x30), spawns handler +0x3C's particles at a rate of +0x38 per radian of ring per second (each at a random angle
 // around the camera's view direction, only within D_800A0900 of the world origin), calls handler +0x3D with the old
 // radius (the only entry ignores it) and handler +0x1D; frees the node when the timer runs out or +0x1D returns 0.
-void func_150C8F68(u8 *node) {
+/* was func_150C8F68 */
+void ring_effect_update(u8 *node) {
     u8 dead = 0;
 
     if (node[0x1C] & 1) {
@@ -256,7 +263,7 @@ void func_150C8F68(u8 *node) {
             }
         }
         if ((s8)node[0x3D] != -1) {
-            /* the asm also passes oldRadius in a1; the table's only entry (func_150CA0DC) takes the node alone */
+            /* the asm also passes oldRadius in a1; the table's only entry (shockwave_hit_objects) takes the node alone */
             D_80088C04[(s8)node[0x3D]](node);
         }
         if ((s8)node[0x1D] != -1) {
@@ -270,12 +277,12 @@ void func_150C8F68(u8 *node) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8F68.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_effect_update.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P222: readable C for func_150C92B8 (game_eu_F6060, 767 words): draw callback of render layer 0x31 (the ring
- * effect; layer at D_8008B848 + 0x31 * 0x34: update func_150C8F68, draw func_150C92B8). */
+/* P222: readable C for ring_effect_draw (game_eu_F6060, 767 words): draw callback of render layer 0x31 (the ring
+ * effect; layer at D_8008B848 + 0x31 * 0x34: update ring_effect_update, draw ring_effect_draw). */
 typedef struct {
     s32 n;          /* 5 */
     f32 (*pt)[2];   /* D_800A08D0: (radial offset, height) */
@@ -284,12 +291,12 @@ extern RingProfile D_80088BC0;
 extern s32 *D_80091234;  /* the ring texture's id */
 extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7);
+Gfx *gfx_other_mode_cached(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
-void func_150CD2A0(f32, f32 *, f32 *, f32 *);
+void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 
 #define RING_DL(a, b) (gdl->words.w0 = (a), gdl->words.w1 = (b), gdl++)
 
@@ -298,10 +305,11 @@ void func_150CD2A0(f32, f32 *, f32 *, f32 *);
 // the last 0x20 bytes) and a surface of revolution: the cross-section D_80088BC0 (radial offset, height, scaled by
 // +0x40) swept around the centre +0x10 / +0x14 / +0x18 at radius +0x44, one vertex column per direction (+0x360:
 // cos / sin pairs, +0x24 of them, the last column repeats the first). Columns farther than 3300.6 from the world
-// origin (x / z) are flat and transparent. Vertex colours: func_150CD2A0(z); texture coordinates from x / z. The
+// origin (x / z) are flat and transparent. Vertex colours: ground_colour_by_depth(z); texture coordinates from x / z. The
 // vertices go to the node's buffer for this frame (+0x54[D_800BE9C0]); after each new column, gSPVertex of it and
 // the previous one and two triangles per cross-section edge. arg2 (the layer's argument) is unused. Returns the DL end.
-Gfx *func_150C92B8(Gfx *gdl, u8 *node, s16 arg2) {
+/* was func_150C92B8 */
+Gfx *ring_effect_draw(Gfx *gdl, u8 *node, s16 arg2) {
     u8 flag = 1;
     s32 size;
     s32 tex;
@@ -313,11 +321,11 @@ Gfx *func_150C92B8(Gfx *gdl, u8 *node, s16 arg2) {
     s32 nv = 0;
     s32 col, i, n;
 
-    gdl = func_15142B7C(gdl, 0x200205, 0x70400);
-    gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gdl = gfx_geometry_mode_cached(gdl, 0x200205, 0x70400);
+    gdl = gfx_env_color_cached(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gdl = gfx_prim_color_cached(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = gfx_set_combine_mode(gdl, 0x21, &flag);
-    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8[29] | D_800A4EA8[28], &flag);
+    gdl = gfx_other_mode_cached(gdl, 0x1DACA0, D_800A4EA8[29] | D_800A4EA8[28], &flag);
     tex = texture_cache_lookup(*D_80091234, &size, 3, 0);
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     RING_DL(0xFD500000, tex);        /* texture image: CI, 16-bit words (block load) */
@@ -359,7 +367,7 @@ Gfx *func_150C92B8(Gfx *gdl, u8 *node, s16 arg2) {
             v->v.ob[2] = z;
             v->v.tc[0] = -((x * 0.03988662f + z * 0.03713737f + 110.230064f) * 32.0f);
             v->v.tc[1] = -((x * 0.054123953f + z * -0.058144543f + 50.14429f) * 32.0f);
-            func_150CD2A0(z, &r, &g, &b);
+            ground_colour_by_depth(z, &r, &g, &b);
             nv++;
             v->v.cn[0] = (u32) r;
             v->v.cn[1] = (u32) g;
@@ -379,15 +387,16 @@ Gfx *func_150C92B8(Gfx *gdl, u8 *node, s16 arg2) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C92B8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_effect_draw.s")
 #endif
 
-s32 func_151308E4(void *, s32, s32, u8, s32);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 typedef struct {
     s32 x[3];
 } V3i_B8AA0;
-void func_15143794(s16, s16, f32, void *);
-void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: arg3 / arg4 = sin / cos of the spawn angle (unused) */
+void vec3_from_angles_byte(s16, s16, f32, void *);
+/* was func_150C9EB4 */
+void ring_spawn_particle(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: arg3 / arg4 = sin / cos of the spawn angle (unused) */
     struct {
         s32 u34;
         s32 u38;
@@ -475,12 +484,12 @@ void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: 
     sp.u97 = -1;
     r = (random_int() % 11U) - 0x12;
     f = (*(f32 *)(arg0 + 0x20) * 0.961f) + ((*(f32 *)(arg0 + 0x20) * 0.24300002f) * random_float());
-    func_15143794(arg2, r, f, sp.u7C);
-    func_151308E4(&sp, 1, 0, arg0[0xC], arg0[1]);
+    vec3_from_angles_byte(arg2, r, f, sp.u7C);
+    particle_spawn_basic(&sp, 1, 0, arg0[0xC], arg0[1]);
 }
 
 #ifdef NON_MATCHING
-// shockwave_hit_objects: P213: handler 1 of the effect node table D_80088C00 (dispatched by func_150C8F68 with the
+// shockwave_hit_objects: P213: handler 1 of the effect node table D_80088C00 (dispatched by ring_effect_update with the
 /* node only; the node is freed when the result is 0). Every live object (state != 0) on the ground (unk28 < 20)
  * and not immune, that is a player (state 1) or type 0x53, is hit when the ring of radius node +0x44 has reached
  * it: ring - (horizontal distance to the node centre +0x10 / +0x18 - 100, 150 more for an unlifted type 0x53)
@@ -489,7 +498,8 @@ void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: 
  * The asm returns its leftover v0: the state of the last object, or obj_send_hit's result when that one was hit;
  * the C keeps that value. */
 s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
-s32 func_150CA0DC(u8 *node) {
+/* was func_150CA0DC */
+s32 shockwave_hit_objects(u8 *node) {
     struct127 *o;
     s32 ret = 0;
     f32 dx;
@@ -529,7 +539,7 @@ s32 func_150CA0DC(u8 *node) {
     return ret;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA0DC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/shockwave_hit_objects.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -539,12 +549,13 @@ extern f32 D_800A0958;
 extern f32 D_800A0960;
 extern f32 D_800A0964;
 extern f32 D_800A0968;
-/* P201: func_150CD2A0 was called here without a prototype, with arg0 (a pointer) as its float argument: the
- * N64 code leaves f12 (whatever the caller func_150C8F68 had there) and a0 is ignored, and on wasm the call has the
- * wrong signature. The port passes the effect position's z (as func_150CA150 does with its own position). */
-void func_150CD2A0(f32, f32 *, f32 *, f32 *);
+/* P201: ground_colour_by_depth was called here without a prototype, with arg0 (a pointer) as its float argument: the
+ * N64 code leaves f12 (whatever the caller ring_effect_update had there) and a0 is ignored, and on wasm the call has the
+ * wrong signature. The port passes the effect position's z (as landing_dust_burst does with its own position). */
+void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
 
-void func_150CA2C4(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: arg3 / arg4 = the spawn angle's sin / cos (func_150C8F68 passes them; unused) */
+/* was func_150CA2C4 */
+void ring_spawn_debris(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: arg3 / arg4 = the spawn angle's sin / cos (ring_effect_update passes them; unused) */
     struct {
         s32 u28;
         s32 u2C;
@@ -596,7 +607,7 @@ void func_150CA2C4(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: a
     f32 temp_f2;
     f32 temp_f4;
 
-    func_150CD2A0(*(f32 *) (arg1 + 8), &sp.u30, &sp.u2C, &sp.u28);
+    ground_colour_by_depth(*(f32 *) (arg1 + 8), &sp.u30, &sp.u2C, &sp.u28);
     (*(s32 *)((u8 *)(&sp.u5C) + 0)) = (s32) (*(s32 *)((u8 *)arg1 + 0));
     (*(s32 *)((u8 *)(&sp.u5C) + 4)) = (s32) (*(s32 *)((u8 *)arg1 + 4));
     (*(s32 *)((u8 *)(&sp.u5C) + 8)) = (s32) (*(s32 *)((u8 *)arg1 + 8));
@@ -613,7 +624,7 @@ void func_150CA2C4(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: a
     sp.u78 = 0.0f;
     sp.u34 = 1.0f;
     sp20 = random_int();
-    func_15143794((s16) arg2, (s16) (((u32) sp20 % 26U) - 0x2D), ((random_float() * 81.0f) + 60.0f) * (*(f32 *)((u8 *)arg0 + 0x20)) * D_800A0954, &sp.u68);
+    vec3_from_angles_byte((s16) arg2, (s16) (((u32) sp20 % 26U) - 0x2D), ((random_float() * 81.0f) + 60.0f) * (*(f32 *)((u8 *)arg0 + 0x20)) * D_800A0954, &sp.u68);
     sp.u74 = ((random_float() * 260.0f) + -130.0f) * D_800A0958;
     sp.u7C = ((random_float() * 260.0f) + -130.0f) * D_800A0958;
     sp.u88 = (random_int() % 41U) + 0x28;
@@ -638,12 +649,13 @@ void func_150CA2C4(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4) { /* P220: a
     sp.uA4 = 0;
     sp.uA6 = 0x20;
     sp.uA8 = 7;
-    func_15132FBC(&sp.u34, 3, 0xFF, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    mdl_particle_spawn(&sp.u34, 3, 0xFF, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA2C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/ring_spawn_debris.s")
 #endif
-s32 func_150CA57C(u8 *arg0) {
+/* was func_150CA57C */
+s32 particle_ballistic_update(u8 *arg0) {
     *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
     *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
     *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;
@@ -656,21 +668,21 @@ s32 func_150CA57C(u8 *arg0) {
 
 #ifdef NON_MATCHING
 // landing_dust_burst: P201: the burst of effects under the character `obj` (the only caller, objfx_ca150, passes
-// D_800D154C) when it lands / stamps: position = obj x, y + 100, z; the ground below it (func_15046F70 down to
-// y - 300, HitInfo started by func_1504715C) gives y, else the floor height obj +0x180. Rumbles the current
-// player's pad (camera_shake_start(view, 7, 1)), takes the ground colour at the position (func_150CD2A0, three floats
-// -> bytes), shakes the camera (func_151D5404) and creates a 13-point dust ring (func_150C8DD0, view 0xFF, group 1).
+// D_800D154C) when it lands / stamps: position = obj x, y + 100, z; the ground below it (collision_floor_probe down to
+// y - 300, HitInfo started by hitinfo_from_obj_floor) gives y, else the floor height obj +0x180. Rumbles the current
+// player's pad (camera_shake_start(view, 7, 1)), takes the ground colour at the position (ground_colour_by_depth, three floats
+// -> bytes), shakes the camera (rumble_all_players_at) and creates a 13-point dust ring (ring_effect_create, view 0xFF, group 1).
 // On real ground it also throws four dust puffs (sprite_fx_spawn_quad kinds 0x51..0x54) at the corners of a square of
-// half-size (rand * 96 + 352) / 2 turned by the character's yaw (obj +0x7A), then func_150CAE30 and a debris spray
-// func_1514CBE8 in the ground colour. The N64 code also sums the code words func_15194210..func_151942B0 and on a
+// half-size (rand * 96 + 352) / 2 turned by the character's yaw (obj +0x7A), then landing_dust_spray and a debris spray
+// spawn_circle_random_emit in the ground colour. The N64 code also sums the code words hit_impact_effect..hit_react_impact_large and on a
 // mismatch (anti-tamper) clears the matrix count D_800C3E7C; the port has no MIPS code there, so the
-// NON_MATCHING build skips the check (as owner_spawn_children, func_151E86A4). Returns 0: game_981E0 calls it without a
+// NON_MATCHING build skips the check (as owner_spawn_children, menu_settings_apply_checked). Returns 0: game_981E0 calls it without a
 // prototype (implicit int); the asm leaves a callee's v0 that nobody reads (tested as the void variant d_a150.c).
-s32 func_15046F70(u8 *, u16, f32, u8 *);
-void func_1504715C(void *, u8 *);
-u8 *func_150C8DD0(u8 *spec, s32 extra, s32 view, s32 arg3);
-void func_150CAE30(u8 *arg0);
-void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+s32 collision_floor_probe(u8 *, u16, f32, u8 *);
+void hitinfo_from_obj_floor(void *, u8 *);
+u8 *ring_effect_create(u8 *spec, s32 extra, s32 view, s32 arg3);
+void landing_dust_spray(u8 *arg0);
+void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 extern s32 D_800BEE08;
 
 typedef struct {
@@ -706,7 +718,8 @@ typedef struct {
     u8 pad2E[2];
 } DustRing;
 
-s32 func_150CA150(u8 *obj) {
+/* was func_150CA150 */
+s32 landing_dust_burst(u8 *obj) {
     f32 pos[3];
     f32 r, g, b;
     u8 cr, cg, cb;
@@ -724,22 +737,22 @@ s32 func_150CA150(u8 *obj) {
     if (obj == NULL) {
         return 0;
     }
-    func_1504715C(hit, obj);
+    hitinfo_from_obj_floor(hit, obj);
     camera_shake_start((struct108 *) ((u8 *) D_800DBFF0 + D_800BEE08 * 0x9A0), 7, 1);
     pos[0] = *(f32 *) (obj + 0x14);
     pos[1] = *(f32 *) (obj + 0x18) + 100.0f;
     pos[2] = *(f32 *) (obj + 0x1C);
-    if (func_15046F70((u8 *) pos, 0, *(f32 *) (obj + 0x18) - 300.0f, (u8 *) hit)) {
+    if (collision_floor_probe((u8 *) pos, 0, *(f32 *) (obj + 0x18) - 300.0f, (u8 *) hit)) {
         found = 1;
         pos[1] = hit[0];
     } else {
         pos[1] = *(f32 *) (obj + 0x180);
     }
-    func_150CD2A0(pos[2], &r, &g, &b);
+    ground_colour_by_depth(pos[2], &r, &g, &b);
     cr = (u32) r;
     cg = (u32) g;
     cb = (u32) b;
-    func_151D5404((struct17 *) pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
+    rumble_all_players_at((struct17 *) pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
 
     ring.pos[0] = pos[0];
     ring.pos[1] = pos[1];
@@ -756,7 +769,7 @@ s32 func_150CA150(u8 *obj) {
     ring.f28 = 8e-05f;
     ring.b2C = 1;
     ring.b2D = 0;
-    func_150C8DD0((u8 *) &ring, 0, 0xFF, 1);
+    ring_effect_create((u8 *) &ring, 0, 0xFF, 1);
     if (!found) {
         return 0;
     }
@@ -801,37 +814,39 @@ s32 func_150CA150(u8 *obj) {
     puff.kind = 0x54;
     sprite_fx_spawn_quad((s32) &puff, (s32) col, 0xC, 0, (ns + pos[0]) - nc, pos[1] + 10.0f, (ns + pos[2]) + nc, size, size,
                   angle, 0, 0, 0xFF, 0);
-    func_150CAE30((u8 *) pos);
+    landing_dust_spray((u8 *) pos);
     i = random_int() % 21U + 0xA;
     rgb[0] = cr;
     rgb[1] = cg;
     rgb[2] = cb;
-    func_1514CBE8(pos[0], pos[1], pos[2], random_float() * 81.0f + 150.0f, 0, 0xFF, (s16) i, 0x14, 0, 0.0f,
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], random_float() * 81.0f + 150.0f, 0, 0xFF, (s16) i, 0x14, 0, 0.0f,
                   (s32) rgb, 0xFF);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA150.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/landing_dust_burst.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 #else
-s32 func_1514CBE8(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+s32 spawn_circle_random_emit(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 #endif
 
-void func_150CAE30(u8 *arg0) {
+/* was func_150CAE30 */
+void landing_dust_spray(u8 *arg0) {
     s16 sp3E;
 
     sp3E = (random_int() % 21U) + 0xA;
 #ifdef NON_MATCHING
-    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
+    spawn_circle_random_emit((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
 #else
-    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(s32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
+    spawn_circle_random_emit((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(s32 *)((u8 *)arg0 + 8)), (random_float() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
 #endif
 }
 
-s32 func_150CAED0(u8 *arg0) {
+/* was func_150CAED0 */
+s32 sprite_fx_fade_in_update(u8 *arg0) {
     s16 temp_v0;
     s32 temp_v1;
 
@@ -845,9 +860,10 @@ s32 func_150CAED0(u8 *arg0) {
     return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_150CAF04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+/* was func_150CAF04 */
+s32 dust_puff_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         s32 u34;
         s32 u38;
@@ -910,7 +926,7 @@ s32 func_150CAF04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((random_int() % 12U) - 0x15), ((random_float() * 300.0f) + 498.0f) * 0.1f, sp.u7C);
+    vec3_from_angles_byte(arg8, (s16) ((random_int() % 12U) - 0x15), ((random_float() * 300.0f) + 498.0f) * 0.1f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
     if (random_int() & 1) {
@@ -926,14 +942,15 @@ s32 func_150CAF04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u56 = 0x20;
     sp.u58 = 1.04f;
     scale = 0.95100003f;
-    obj = func_151308E4(&sp, 1, 4, argE, 1);
+    obj = particle_spawn_basic(&sp, 1, 4, argE, 1);
     if (obj != 0) {
         memcpy(obj + 0xA8, &scale, 4);
     }
     return 1;
 }
 
-s32 func_150CB128(u8 *arg0, s32 arg1) {
+/* was func_150CB128 */
+s32 particle_shrink_update_b(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
     for (i = D_800BE9E4; i != 0; i--) {
@@ -943,9 +960,10 @@ s32 func_150CB128(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 
-s32 func_150CB2D0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+/* was func_150CB2D0 */
+s32 dust_chunk_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         f32 u28[13];
         s32 u5C;
@@ -994,7 +1012,7 @@ s32 func_150CB2D0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u7E = 0x20;
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
-    func_15143794(arg8, (s16) (((u32) random_int() % 21U) - 0x28), ((random_float() * 204.0f) + 500.0f) * 0.1f, &sp.u5C);
+    vec3_from_angles_byte(arg8, (s16) (((u32) random_int() % 21U) - 0x28), ((random_float() * 204.0f) + 500.0f) * 0.1f, &sp.u5C);
     sp.u68 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
     sp.u70 = ((random_float() * 260.0f) + -130.0f) * 0.1f;
     sp.u7C = (random_int() % 51U) + 0x32;
@@ -1017,11 +1035,12 @@ s32 func_150CB2D0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u98 = 0;
     sp.u9A = 0x20;
     sp.u9C = 7;
-    func_15132FBC(&sp, 3, 0xFF, 0, (s32) argE, 0);
+    mdl_particle_spawn(&sp, 3, 0xFF, 0, (s32) argE, 0);
     return 1;
 }
 
-s32 func_150CB508(u8 *arg0) {
+/* was func_150CB508 */
+s32 particle_ballistic_update_b(u8 *arg0) {
     *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
     *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);
     *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x4C) * D_800BE9A4;

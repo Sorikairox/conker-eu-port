@@ -1,125 +1,150 @@
 rank	tier	kind	caller	callee_or_table	TU	passed	declC	callee_asm_in(I:max_of_table)	asm_n	match	site	severity	asm_regs
-1	3	I	func_1507C170	?	game_eu_A9980	1	-	-	4	exact	0	3	a0:WE a1:W a2:E a3:W
-2	2	I	func_1504A730	D_800863B4[func_1504CB98,func_15052590,func_15053894,func_150538CC,+33]	game_eu_78230	1	-	2	2	exact	1	1	a0:W a1:W
-3	2	I	func_151C4B0C	D_8008FF70[func_151C34F8,obj_spawn_linked_effect,fx_set_tint_preset,fx_set_tint_white,+2]	game_eu_1EFE10	1	-	2	3	exact	1	1	a0:W a1:E a2:W
-4	2	D3	func_150183D0	func_150184B0	game_eu_45B90	1	1	18	4	exact	0	3	a0:E a1:E a2:E a3:E
-5	1	D1	func_15074C80	func_15194858	game_981E0	2	3	3	-	-	0	1	-
-6	1	I	func_100020D0	?	init_2070	3	-	-	9	exact	0	6	a0:W a1:W a2:W a3:W stk:5
-7	1	I	func_1517485C	D_8008A420	game_eu_1A1A80	4	-	-	8	exact	0	4	a0:W a1:W a2:W a3:W stk:4
-8	1	I	node_render_layers_draw	?	game_1944C0	3	-	-	6	exact	1	3	a0:W a1:W a2:W a3:W stk:2
-9	1	I	node_render_layers_draw	?	game_1944C0	3	-	-	6	exact	2	3	a0:W a1:W a2:W a3:W stk:2
-10	1	I	node_render_layers_draw	?	game_1944C0	3	-	-	6	exact	3	3	a0:W a1:W a2:W a3:W stk:2
-11	1	I	func_15174AA4	D_8008D114	game_eu_1A2720	2	-	-	4	exact	0	2	a0:W a1:W a2:E a3:W
-12	1	I	func_15174B48	D_8008D11C	game_eu_1A2720	2	-	-	4	exact	0	2	a0:W a1:W a2:E a3:W
-13	1	I	light_ctrl_handle_message	D_8008B4F0[light_obj_handle_message_a,light_obj_handle_message_b,light_follow_handle_message,light_track_handle_message,+4]	game_18D770	1	-	3	3	exact	0	2	a0:W a1:E a2:W
-14	1	I	node_render_layers_draw	?	game_1944C0	4	-	-	6	exact	0	2	a0:W a1:W a2:W a3:W stk:2
-15	1	I	effect3d_update	D_8008A100[func_150B9ADC,func_150BA904,effect_sync_link_pos,func_1514A70C,+39]	game_169510	1	-	2	4	exact	1	1	a0:WE a3:W
-16	1	I	func_150C5970	D_80088B58[func_150C5930,func_150C5A10]	game_eu_F3080	0	-	1	1	exact	0	1	a0:E
-17	1	I	func_150C59C0	D_80088B60[func_150C5950,func_150C5A3C]	game_eu_F3080	0	-	1	1	exact	0	1	a0:E
-18	1	I	func_150C8F68	D_80088C04[func_150CA0DC]	game_eu_F6060	1	-	2	2	exact	1	1	a0:W a1:W
-19	1	I	func_15158794	D_8008B1A0[func_15158BF4,func_1518AB64,func_1515906C]	game_eu_185E30	0	-	1	1	exact	0	1	a0:E
-20	1	I	func_1516055C	D_8008B470[func_15160648,func_150CE710]	game_eu_18DB20	0	-	1	1	exact	0	1	a0:E
-21	1	I	func_1518D218	D_8008D970[sprite_node_init_fade]	game_eu_1BA800	0	-	1	1	exact	0	1	a0:E
-22	1	I	func_151B3734	D_8008FE98[func_151B402C,func_151B42A0,func_151B458C,func_151B4854,+2]	game_eu_1E0E70	1	-	2	2	exact	2	1	a0:WE a1:W
-23	1	I	func_151C4B0C	D_800E0940	game_eu_1EFE10	2	-	-	3	exact	0	1	a0:W a1:W a2:W
-24	1	I	light_beh_track_ptrs	D_8008B70C[func_151BD86C]	game_18D770	0	-	1	1	exact	0	1	a0:E
-25	1	I	node_run_end_callback	D_8008CDC0[func_1516A1E0,func_1516AAA8,func_150B72DC,func_150B731C,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
-26	1	I	node_sprite_quad_update	D_8008CDC0[func_1516A1E0,func_1516AAA8,func_150B72DC,func_150B731C,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
-27	1	D3	func_15063DE8	func_15063D6C	game_eu_90F50	1	1	2	3	exact	0	1	a0:E a1:W a2:E
-28	1	D3	func_15179008	func_15179A38	game_eu_1A6C30	0	0	1	1	exact	0	1	a0:E
-29	0	I	func_16000B14	?	debugger__debugger	0	-	-	9	exact	0	9	a0:W a1:W a2:W a3:W stk:5
-30	0	I	debug_printf_core	?	debugger_257350	3	-	-	9	exact	0	6	a0:W a1:W a2:W a3:W stk:5
-31	0	I	func_151A929C	func_151A951C	game_eu_1D5710	4	-	-	8	exact	1	4	a0:W a1:W a2:W a3:W stk:4
-32	0	I	func_151E564C	D_800E0EB8	game_eu_20B730	0	-	-	4	exact	0	4	a1:W a2:W a3:W
-33	0	I	func_1001BD34	?	init_1AAE0	0	-	-	3	exact	0	3	a0:E a1:E a2:E
-34	0	I	func_151F3C4C	D_8002BA44	libultra__audio__game_21FC90	1	-	-	4	exact	0	3	a0:W a1:E a2:E a3:E
-35	0	I	func_1001BE1C	?	init_1AAE0	1	-	-	3	exact	0	2	a0:W a1:E a2:E
-36	0	I	func_1001BE1C	?	init_1AAE0	1	-	-	3	exact	1	2	a0:W a1:E a2:E
-37	0	I	func_1509D274	?	game_eu_CA630	1	-	-	3	exact	0	2	a0:W a1:E a2:E
-38	0	I	func_1515C050	D_8008B41C	game_eu_189860	1	-	-	3	exact	1	2	a0:W a1:W a2:W
-39	0	I	streak_update_points	D_8008B420	game_1897A0	2	-	-	4	exact	0	2	a0:W a1:W a2:W a3:W
-40	0	I	__n_seqpStopOsc	?	init_1AAE0	1	-	-	2	exact	0	1	a0:W a1:E
-41	0	I	func_10021E4C	?	init_214F0	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
-42	0	I	func_15132740	D_80089C50	game_eu_15FF50	1	-	-	2	exact	1	1	a0:W a1:W
-43	0	I	func_1516AFE0	?	game_eu_1984F0	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:W
-44	0	I	func_1516AFE0	?	game_eu_1984F0	3	-	-	4	exact	1	1	a0:W a1:W a2:W a3:W
-45	0	I	func_1516AFE0	?	game_eu_1984F0	3	-	-	4	exact	2	1	a0:W a1:W a2:W a3:W
-46	0	I	func_151C1C04	D_800E0D64	game_eu_1EDA00	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
-47	0	I	obj_interaction_update	?	game_16EE20	3	-	-	4	exact	1	1	a0:W a1:W a2:W a3:W
-48	3	I	func_1500BEC0	D_8008D258[func_1500B1F4]	game_eu_38360	6	-	6	9	exact	0	0	a0:W a1:W a2:W a3:W stk:5
-49	2	I	func_15005A60	D_80082B40[func_15005AB0,func_15005AF0,func_15005B00,func_15005B10,+22]	game__done__game_32F10	1	-	1	2	exact	0	0	a0:E a1:E
-50	2	I	func_1503E238	D_800847CC[func_1503F2B4,func_1503F3F8,func_1503F45C]	game_eu_6B970	1	-	1	3	exact	1	0	a0:W a1:W a2:W
-51	2	I	func_1504A730	D_800863A4[func_150D1920]	game_eu_78230	1	-	1	2	exact	0	0	a0:W a1:W
-52	2	I	func_1504A730	D_800863AC[func_150D197C]	game_eu_78230	1	-	1	2	exact	2	0	a0:W a1:W
-53	2	I	func_1506B04C	D_800864B0[func_1506A9B0,func_1506AABC,func_1506AAE4,func_1506AB20,+11]	game_eu_981C0	2	-	2	4	exact	0	0	a0:E a1:W a2:W a3:W
-54	2	I	func_15081A90	D_80087030[gunfire_target_filter,beam_target_filter,func_151C6840,func_151C1EF0,+1]	game_eu_AF2A0	3	-	3	8	exact	0	0	a0:W a1:W a2:W a3:W stk:4
-55	2	I	func_1514D3B0	D_8008AF04[func_1514EE0C,func_1514EE90,func_1514EF4C,func_1514EF6C,+4]	game_eu_17A800	3	-	3	8	exact	0	0	a0:W a1:W a2:W a3:E stk:4
-56	2	I	func_1514F18C	D_8008AEF8[func_1514EDA0,func_1514EDC0,func_1514EDEC]	game_eu_17A800	1	-	1	4	exact	0	0	a0:W a3:W
-57	2	I	func_15186344	D_8008D860[func_15185AC4,func_15185BEC,func_15185D20,func_15185E44,+6]	game_eu_1B1ED0	1	-	1	7	exact	0	0	a0:W a1:E a2:E a3:E stk:3
-58	2	I	func_15196438	D_8008FC30[func_151991D0]	game_eu_1C3530	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
-59	2	I	func_15196438	D_8008FC10[func_15197F68,func_15197F7C,func_15197FD8]	game_eu_1C3530	1	-	1	2	exact	1	0	a0:W a1:W
-60	2	I	func_15196438	D_8008FC1C[func_15199954]	game_eu_1C3530	1	-	1	2	exact	2	0	a0:W a1:W
-61	2	I	func_151D611C	D_80087030[gunfire_target_filter,beam_target_filter,func_151C6840,func_151C1EF0,+1]	game_eu_201240	3	-	3	9	exact	0	0	a0:W a1:W a2:W a3:E stk:5
-62	2	I	func_151E8620	D_80090370[func_151EB81C,func_151ECB98,func_151EC0E0,func_151EC300]	game_eu_216470	1	-	1	3	exact	0	0	a0:E a1:W a2:W
-63	2	I	impact_debris_spawn	D_800900A4[impact_debris_tex_kind0,impact_debris_tex_kind2,impact_debris_tex_kind3,impact_debris_tex_kind1,+2]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
-64	2	I	impact_dust_cloud_spawn	D_80090070[impact_puff_tex_kind0,impact_puff_tex_kind1,impact_puff_tex_kind2,impact_puff_tex_kind3,+8]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
-65	2	I	impact_tinted_particle_spawn	D_800900D8[impact_tint_red,impact_tint_yellow,impact_tint_red_green_a,impact_tint_red_green_b,+9]	game_2062D0	1	-	1	4	exact	0	0	a0:W a1:E a2:E a3:E
-66	1	I	attach_ctrl_update	D_8008FFF8[func_1518FDC8]	game_1FFF60	1	-	1	2	exact	0	0	a0:E a1:W
-67	1	I	attach_ctrl_update	D_8008FFF0[func_1518FE0C]	game_1FFF60	1	-	1	2	exact	1	0	a0:E a1:W
-68	1	I	attach_ctrl_update	D_8008FFF4[attach_ctrl_destroy_children]	game_1FFF60	1	-	1	2	exact	2	0	a0:E a1:W
-69	1	I	attach_ctrl_update	D_8008FFEC[func_1518FD34]	game_1FFF60	1	-	1	2	exact	3	0	a0:WE a1:W
-70	1	I	bone_emitter_stop_dispatch_a	D_80089F10[bone_emitter_retire,func_151AB100,bone_emitter_retire,bone_emitter_retire,+2]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
-71	1	I	bone_emitter_stop_dispatch_b	D_80089F28[bone_emitter_free]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
-72	1	I	bone_emitter_update	D_80089F0C[func_151AB150]	game_161520	1	-	1	3	exact	3	0	a0:W a1:W a2:W
-73	1	I	effect3d_update	D_8008A058[effect3d_apply_velocity,func_1518A604,func_150B9A40,func_150BA85C,+6]	game_169510	1	-	1	4	exact	0	0	a0:E a3:W
-74	1	I	effect3d_update	D_8008A1B0[func_1514A434,func_1514C828]	game_169510	1	-	1	4	exact	2	0	a0:WE a1:W a2:W a3:W
-75	1	I	effect_destroy_delete	D_8008A384[effect_free_buffers_delete,obj_glow_emitter_free,effect_free_buffers_delete,effect_free_buffers_delete,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
-76	1	I	effect_destroy_retire	D_8008A33C[effect_free_buffers_retire,obj_glow_emitter_retire,effect_free_buffers_retire,effect_free_buffers_retire,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
-77	1	I	func_150C5A68	D_80088B00[func_150C6088,func_150C60D4]	game_eu_F3080	1	-	1	2	exact	0	0	a0:W a1:W
-78	1	I	func_150D0544	D_80088C40[func_150D06B0,func_150D083C,func_150D0A44,func_151D75B0]	game_eu_FCE60	1	-	1	3	exact	0	0	a0:W a1:E a2:W
-79	1	I	func_1513095C	D_80089B00[func_151A4DEC,func_151A4EB0,func_150BB740,func_15159B04,+36]	game_eu_15E000	2	-	2	4	exact	0	0	a0:E a1:W a2:W a3:W
-80	1	I	func_1513095C	D_80089BA0[func_150C1698]	game_eu_15E000	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
-81	1	I	func_1513100C	D_80089BA4[obj_glow_spark_visible,obj_glow_halo_visible,stub_return_one_b,func_15131D84]	game_eu_15E000	2	-	2	3	exact	0	0	a0:W a1:W a2:E
-82	1	I	func_15132740	D_80089D28[func_1513384C]	game_eu_15FF50	1	-	1	2	exact	0	0	a0:W a1:W
-83	1	I	func_15132740	D_80089CB4[func_150B9B1C,func_1518B290,func_1518B71C,func_1518B748,+3]	game_eu_15FF50	1	-	1	2	exact	2	0	a0:W a1:W
-84	1	I	func_15132740	D_80089D1C[func_151A7EB8,func_151B657C]	game_eu_15FF50	1	-	1	2	exact	3	0	a0:W a1:W
-85	1	I	func_15147888	D_800900A4[impact_debris_tex_kind0,impact_debris_tex_kind2,impact_debris_tex_kind3,impact_debris_tex_kind1,+2]	game_eu_174610	0	-	0	1	exact	0	0	a0:W
-86	1	I	func_15147CB0	D_8008A5A0[func_15148428,func_15196CB8,func_1519D7B0,fountain_step,+10]	game_eu_1754C0	1	-	1	2	exact	0	0	a0:E a1:W
-87	1	I	func_15147CB0	D_8008A5DC[trail_emit_update,func_151970BC,func_1519D9C4,fountain_emit,+13]	game_eu_1754C0	1	-	1	2	exact	1	0	a0:WE a1:W
-88	1	I	func_15147CB0	D_8008A624[func_1519AF14,track_trail_update,func_151B7F48,func_151CF6D0,+4]	game_eu_1754C0	1	-	1	2	exact	2	0	a0:WE a1:W
-89	1	I	func_15148428	D_8008A780[func_15148E34,func_15149064,func_15149114,func_15149350,+1]	game_eu_175B20	1	-	1	3	exact	0	0	a0:E a2:W
-90	1	I	func_15148428	D_8008A798[func_1518CAB0,sprite_fade_in_alpha,func_150AF6A0,sprite_fade_in_alpha_b,+1]	game_eu_175B20	1	-	1	3	exact	1	0	a0:WE a2:W
-91	1	I	func_15155200	D_8008B068[fx_rising_particle_update,func_1515BF04,blood_drop_update,func_151CBAC0,+10]	game_eu_182A10	1	-	1	2	exact	0	0	a0:E a1:W
-92	1	I	func_15157840	D_8008B130[func_15158018,func_151BF268,func_151B9204,banner_model_fade_update]	game_eu_185050	1	-	1	3	exact	0	0	a0:W a1:W a2:W
-93	1	I	func_15157840	D_8008B140[func_15157DD0,func_15157E88]	game_eu_185050	1	-	1	3	exact	1	0	a0:W a1:W a2:W
-94	1	I	func_15158838	D_8008B1AC[func_15158AFC,func_1518AE84,func_15158E90]	game_eu_185E30	2	-	2	3	exact	0	0	a0:W a1:W a2:E
-95	1	I	func_1518AF80	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	3	exact	0	0	a0:W a1:W a2:W
-96	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	0	0	a0:W a1:E a2:W a3:W
-97	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	1	0	a0:W a2:W a3:W
-98	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W
-99	1	I	func_1518FDC8	D_8008DA1C[func_15190B2C]	game_eu_1BAF40	1	-	1	2	exact	0	0	a0:E a1:E
-100	1	I	func_15196CB8	D_8008FC34[func_15199200]	game_eu_1C3530	1	-	1	4	exact	0	0	a0:W a1:W a2:W a3:W
-101	1	I	func_15196CB8	D_8008FC3C[func_151992EC]	game_eu_1C3530	1	-	1	4	exact	1	0	a0:W a1:W a2:W a3:W
-102	1	I	func_15196CB8	D_8008FC20[func_15198AE0,func_15198EEC,func_15198D3C]	game_eu_1C3530	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W
-103	1	I	func_15199F80	D_8008FC5C[func_1519C52C]	game_eu_1C3530	1	-	1	3	exact	1	0	a0:W a2:W
-104	1	I	func_1519AF14	D_8008FC48[func_1519CEB8,func_1519CEE0,func_1519CF08]	game_eu_1C3530	1	-	1	2	exact	0	0	a0:W a1:W
-105	1	I	func_151B51CC	D_8008FF10[func_151B2F00]	game_eu_1E0E70	1	-	1	2	exact	0	0	a0:W a1:W
-106	1	I	func_151B7DA4	D_8008FF30[func_151B7C28,func_151B7C7C]	game_eu_1E40E0	2	-	2	3	exact	0	0	a0:W a1:W a2:W
-107	1	I	func_151D1510	D_8008FFD0[func_151D1624,func_151D1654,func_151D1674]	game_eu_1FB080	2	-	2	4	exact	0	0	a0:E a1:W a2:E a3:E
-108	1	I	func_151D16E8	D_8008FFD0[func_151D1624,func_151D1654,func_151D1674]	game_eu_1FB080	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
-109	1	I	func_151D469C	D_80090010[func_151C6F24,func_151C6F50,weapon_b_bone_effect,weapon_a_bone_effect,+3]	game_eu_201240	3	-	3	4	exact	0	0	a0:E a1:W a2:W a3:E
-110	1	I	func_151D4D44	D_80090010[func_151C6F24,func_151C6F50,weapon_b_bone_effect,weapon_a_bone_effect,+3]	game_eu_201240	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
-111	1	I	func_151D7814	D_80090040[func_151D7B74]	game_eu_204F70	1	-	1	2	exact	0	0	a0:W a1:W
-112	1	I	func_151D7B74	D_80090048[func_151D7CD4,func_151D7D20,func_151D7D4C]	game_eu_204F70	1	-	1	4	exact	0	0	a0:W a3:W
-113	1	I	impact_splash_ring_spawn	D_80090070[impact_puff_tex_kind0,impact_puff_tex_kind1,impact_puff_tex_kind2,impact_puff_tex_kind3,+8]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
-114	1	I	light_beh_follow_joint	D_8008B598[light_beh_joint_pulse,func_150B6BBC,mat_toggle_by_flag,func_151CA0E0]	game_18D770	1	-	1	4	exact	0	0	a0:W a1:W a3:W
-115	1	I	light_ctrl_delete	D_8008B2B0[light_ctrl_free,light_ctrl_free,light_ctrl_free,light_ctrl_free,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
-116	1	I	light_ctrl_destroy	D_8008B208[light_ctrl_retire,light_ctrl_retire,light_ctrl_retire,light_ctrl_retire,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
-117	1	I	mesh_effect_draw	D_80089FC8[mesh_effect_load_identity,swing_lamp_matrix_build,mesh_effect_handler_false,func_151BA634,+3]	game_168A90	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
-118	1	I	node_sprite_update	D_8008CD68[func_151B9F14,func_15179D20,node_fade_delay_update,func_15174E90,+15]	game_1944C0	1	-	1	4	exact	0	0	a0:E a3:W
-119	1	I	node_sprite_update	D_8008CDC0[func_1516A1E0,func_1516AAA8,func_150B72DC,func_150B731C,+5]	game_1944C0	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
-120	1	I	node_vtx_sprite_update	D_8008CD68[func_151B9F14,func_15179D20,node_fade_delay_update,func_15174E90,+15]	game_1944C0	1	-	1	3	exact	0	0	a0:E a1:W a2:W
-121	1	I	sprite_fx_update	D_8008A010[fx_fade_alpha_by_life,func_150B9AFC,func_150BA83C,sprite_fade_in_age,+9]	game_169510	1	-	1	4	exact	0	0	a0:E a3:W
-122	1	I	sprite_fx_update	D_8008A048[func_151AB730,func_150C63FC,func_150C6D2C]	game_169510	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
-123	1	I	streak_update_fade	D_8008B424[streak_push_point,streak_pop_point]	game_1897A0	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
-124	0	I	light_follow_handle_message	D_8008B6F8[fx_target_light_on_message]	game_18D770	3	-	3	4	exact	0	0	a0:W a1:WE a2:W a3:W
+1	2	I	objects_run_state_handlers	D_800863B4[obj_state_walk,obj_state_common_update,obj_state_wait_remove,obj_state_rail_follow,+33]	game_eu_78230	1	-	2	2	exact	1	1	a0:W a1:W
+2	2	I	tracer_tick_life	D_8008FF70[tracer_impact_sparks,obj_spawn_linked_effect,fx_set_tint_preset,fx_set_tint_white,+2]	game_eu_1EFE10	1	-	2	3	exact	1	1	a0:W a1:E a2:W
+3	2	D3	pvs_setup	pvs_build_huffman_tree	game_eu_45B90	1	1	18	4	exact	0	3	a0:E a1:E a2:E a3:E
+4	2	D3	camera_build_view_matrix	camera_calc_pitch	game_eu_15A210	1	1	2	2	exact	0	1	a0:W a1:W
+5	2	D3	camera_build_view_matrix	camera_calc_pitch	game_eu_15A210	1	1	2	2	exact	1	1	a0:W a1:W
+6	2	D3	camera_pivot_follow_update	camera_yaw_fade_in	game_eu_156A30	1	1	2	3	exact	0	1	a0:W a2:W
+7	2	D3	camera_update_controller	camera_yaw_fade_in	game_14FF90	1	1	2	2	exact	0	1	a0:W a1:W
+8	2	D3	camera_update_eye_base	camera_calc_pitch	game_eu_158110	1	1	2	2	exact	0	1	a0:W a1:W
+9	1	D1	objhit_camera_object	hit_react_impact_small	game_981E0	2	3	3	3	exact	0	1	a0:W a1:W a2:E
+10	1	I	init_printf_xprintf	?	init_2070	3	-	-	9	exact	0	6	a0:W a1:W a2:W a3:W stk:5
+11	1	I	world_records_dispatch_touches	D_800DBEF4	game_eu_13DC30	4	-	-	9	exact	0	5	a0:W a1:W a2:W a3:W stk:5
+12	1	I	occlusion_probes_update	D_8008A420	game_eu_1A1A80	4	-	-	8	exact	0	4	a0:W a1:W a2:W a3:W stk:4
+13	1	I	anim_advance_frame	?	game_eu_A9980	1	-	-	4	exact	0	3	a0:WE a1:W a2:E a3:W
+14	1	I	node_render_layers_draw	?	game_1944C0	3	-	-	6	exact	1	3	a0:W a1:W a2:W a3:W stk:2
+15	1	I	node_render_layers_draw	?	game_1944C0	3	-	-	6	exact	2	3	a0:W a1:W a2:W a3:W stk:2
+16	1	I	node_render_layers_draw	?	game_1944C0	3	-	-	6	exact	3	3	a0:W a1:W a2:W a3:W stk:2
+17	1	I	light_ctrl_handle_message	D_8008B4F0[light_obj_handle_message_a,light_obj_handle_message_b,light_follow_handle_message,light_track_handle_message,+4]	game_18D770	1	-	3	3	exact	0	2	a0:W a1:E a2:W
+18	1	I	node_render_layers_draw	?	game_1944C0	4	-	-	6	exact	0	2	a0:W a1:W a2:W a3:W stk:2
+19	1	I	render_level_post_layer	D_8008D11C	game_eu_1A2720	2	-	-	4	exact	0	2	a0:W a1:W a2:E a3:W
+20	1	I	render_level_pre_layer	D_8008D114	game_eu_1A2720	2	-	-	4	exact	0	2	a0:W a1:W a2:E a3:W
+21	1	I	world_records_run_callbacks	D_800DBEF4	game_eu_13DC30	1	-	-	3	exact	1	2	a0:W a1:W a2:W
+22	1	I	aiscript_run	D_80086730[aiscript_nop_d,aiscript_move_setup,aiscript_set_reaction_script,aiscript_if_level,+207]	game_A28B0	0	-	2	1	exact	0	1	a0:W
+23	1	I	beam_free_by_kind	D_80088B60[beam_free,beam_detach_free]	game_eu_F3080	0	-	1	1	exact	0	1	a0:E
+24	1	I	beam_retire_by_kind	D_80088B58[beam_retire,beam_detach_retire]	game_eu_F3080	0	-	1	1	exact	0	1	a0:E
+25	1	I	cord_update	D_8008FE98[cord_nodes_reset_straight,cord_shape_arc,cord_shape_ellipse,cord_update_sag,+2]	game_eu_1E0E70	1	-	2	2	exact	2	1	a0:WE a1:W
+26	1	I	dl_fx_update	D_8008B1A0[dl_fx_beh_move,tumble_debris_update,dl_fx_beh_fade_out]	game_eu_185E30	0	-	1	1	exact	0	1	a0:E
+27	1	I	effect3d_update	D_8008A100[fx_fade_in_alpha_update,effect_fade_by_height,effect_sync_link_pos,spark_flicker_update,+39]	game_169510	1	-	2	4	exact	1	1	a0:WE a3:W
+28	1	I	fb_fx_update	D_8008B470[fb_fx_debug_tweak,fb_zoom_fx_update]	game_eu_18DB20	0	-	1	1	exact	0	1	a0:E
+29	1	I	light_beh_track_ptrs	D_8008B70C[fx_owner_alive_check]	game_18D770	0	-	1	1	exact	0	1	a0:E
+30	1	I	node_run_end_callback	D_8008CDC0[falling_debris_update,particle_spawn_decal_if_old,overlay_fx_scroll_update,overlay_fx_pulse_update,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
+31	1	I	node_sprite_quad_update	D_8008CDC0[falling_debris_update,particle_spawn_decal_if_old,overlay_fx_scroll_update,overlay_fx_pulse_update,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
+32	1	I	record_dispatch_82f40	D_80082F40[record_register_e0900,record_clear_d987c,record_effect44_start,record_dispatch_82f70,+2]	game_40490	0	-	1	1	exact	0	1	a0:E
+33	1	I	record_dispatch_82f70	D_80082F70[record_quad_zone_start,func_1500EE94]	game_40490	0	-	1	1	exact	0	1	a0:E
+34	1	I	ring_effect_update	D_80088C04[shockwave_hit_objects]	game_eu_F6060	1	-	2	2	exact	1	1	a0:W a1:W
+35	1	I	sprite_uv_scroll_update	D_8008D970[sprite_node_init_fade]	game_eu_1BA800	0	-	1	1	exact	0	1	a0:E
+36	1	I	tracer_tick_life	D_800E0940	game_eu_1EFE10	2	-	-	3	exact	0	1	a0:W a1:W a2:W
+37	1	D3	impact_scatter_ahead	camera_calc_point_ahead	game_eu_111F50	0	0	1	1	exact	0	1	a0:E
+38	1	D3	player_aim_turn_update	player_aim_yaw_delta	game_eu_90F50	1	1	2	3	exact	0	1	a0:E a1:W a2:E
+39	1	D3	rain_update	rain_centre_follow_camera	game_eu_1A6C30	0	0	1	1	exact	0	1	a0:E
+40	0	I	func_16000B14	?	debugger__debugger	0	-	-	9	exact	0	9	a0:W a1:W a2:W a3:W stk:5
+41	0	I	debug_printf_core	?	debugger_257350	3	-	-	9	exact	0	6	a0:W a1:W a2:W a3:W stk:5
+42	0	I	fade_mode_update	D_800E0EB8	game_eu_20B730	0	-	-	4	exact	0	4	a1:W a2:W a3:W
+43	0	I	ground_emitter_update	ground_emitter_point_disc	game_eu_1D5710	4	-	-	8	exact	1	4	a0:W a1:W a2:W a3:W stk:4
+44	0	I	func_151F3C4C	D_8002BA44	libultra__audio__game_21FC90	1	-	-	4	exact	0	3	a0:W a1:E a2:E a3:E
+45	0	I	n_synth_load_instrument	?	init_1AAE0	0	-	-	3	exact	0	3	a0:E a1:E a2:E
+46	0	I	scenery_press_button_update	prop_owner_effects_clear	game_eu_142E40	1	-	-	4	exact	0	3	a0:E a1:W a2:W a3:W
+47	0	I	event_list_unlock	?	game_eu_CA630	1	-	-	3	exact	0	2	a0:W a1:E a2:E
+48	0	I	n_synth_release_instrument	?	init_1AAE0	1	-	-	3	exact	0	2	a0:W a1:E a2:E
+49	0	I	n_synth_release_instrument	?	init_1AAE0	1	-	-	3	exact	1	2	a0:W a1:E a2:E
+50	0	I	quad_fx_update	D_8008B41C	game_eu_189860	1	-	-	3	exact	1	2	a0:W a1:W a2:W
+51	0	I	segment_effect_update	D_80089000	game_eu_1379B0	1	-	-	3	exact	1	2	a0:W a2:W
+52	0	I	streak_update_points	D_8008B420	game_1897A0	2	-	-	4	exact	0	2	a0:W a1:W a2:W a3:W
+53	0	I	__n_seqpStopOsc	?	init_1AAE0	1	-	-	2	exact	0	1	a0:W a1:E
+54	0	I	bullet_hit_mark_spawn	D_800E0D64	game_eu_1EDA00	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
+55	0	I	mdl_particle_update	D_80089C50	game_eu_15FF50	1	-	-	2	exact	1	1	a0:W a1:W
+56	0	I	n_adpcm_decode_chunk	?	init_214F0	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
+57	0	I	obj_interaction_update	?	game_16EE20	3	-	-	4	exact	1	1	a0:W a1:W a2:W a3:W
+58	0	I	text_box_update	?	game_eu_1984F0	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:W
+59	0	I	text_box_update	?	game_eu_1984F0	3	-	-	4	exact	1	1	a0:W a1:W a2:W a3:W
+60	0	I	text_box_update	?	game_eu_1984F0	3	-	-	4	exact	2	1	a0:W a1:W a2:W a3:W
+61	2	I	ambient_emitters_build	D_8008D258[ambient_place_points]	game_eu_38360	6	-	6	9	exact	0	0	a0:W a1:W a2:W a3:W stk:5
+62	2	I	arc_spark_spawn	D_80088DC0[arc_point_random_box2,arc_point_random_marker,arc_point_random_box6]	game_eu_114640	1	-	1	3	exact	1	0	a0:W a1:W a2:W
+63	2	I	breakable_update_slot	D_800847CC[breakable_cb_init_random_spin,breakable_cb_init_timer140,breakable_cb_init_flags]	game_eu_6B970	1	-	1	3	exact	1	0	a0:W a1:W a2:W
+64	2	I	char_fx_attach	D_8008AEF8[char_fx_end_destroy,char_fx_end_char_effect,char_fx_end_15f10c]	game_eu_17A800	1	-	1	4	exact	0	0	a0:W a3:W
+65	2	I	char_fx_send_event	D_8008AF04[char_fx_evt_visibility,char_fx_evt_visibility_linked,char_fx_evt_visibility_linked_b,char_fx_evt_visibility_b,+4]	game_eu_17A800	3	-	3	8	exact	0	0	a0:W a1:W a2:W a3:E stk:4
+66	2	I	effect_run_init_hooks	D_80082F64[func_150089D0]	game_35D20	0	-	0	1	exact	0	0	a0:E
+67	2	I	event_dispatch	D_80088838[event_query_scene,event_query_object,event_query_world_object,event_query_trigger,+10]	game_C8950	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
+68	2	I	event_dispatch_alt	D_80088874[event_action_scene,event_action_object,event_action_world_object,event_action_trigger,+10]	game_C8950	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
+69	2	I	func_15005A60	D_80082B40[func_15005AB0,func_15005AF0,func_15005B00,func_15005B10,+22]	game__done__game_32F10	1	-	1	2	exact	0	0	a0:E a1:E
+70	2	I	hud_overlay_draw_screen	D_80090370[hud_ingame_draw,frontend_menu_draw,mp_scoreboard_draw_fading,screen_intro_credits_draw]	game_eu_216470	1	-	1	3	exact	0	0	a0:E a1:W a2:W
+71	2	I	impact_debris_spawn	D_800900A4[impact_debris_tex_kind0,impact_debris_tex_kind2,impact_debris_tex_kind3,impact_debris_tex_kind1,+2]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
+72	2	I	impact_dust_cloud_spawn	D_80090070[impact_puff_tex_kind0,impact_puff_tex_kind1,impact_puff_tex_kind2,impact_puff_tex_kind3,+8]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
+73	2	I	impact_tinted_particle_spawn	D_800900D8[impact_tint_red,impact_tint_yellow,impact_tint_red_green_a,impact_tint_red_green_b,+9]	game_2062D0	1	-	1	4	exact	0	0	a0:W a1:E a2:E a3:E
+74	2	I	obj_apply_hit	D_80086A34[objhit_nop_15074bd8,objhit_nop_15074bec,hit_react_lava_boulder,objhit_burst_state5,+33]	game_83300	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:WE
+75	2	I	obj_effect_run_handler	D_800864B0[obj_effect_debris_spray,obj_effect_emitter_trail,obj_effect_shot_impact,obj_effect_explosion,+11]	game_eu_981C0	2	-	2	4	exact	0	0	a0:E a1:W a2:W a3:W
+76	2	I	obj_receive_hit	D_80086A34[objhit_nop_15074bd8,objhit_nop_15074bec,hit_react_lava_boulder,objhit_burst_state5,+33]	game_83300	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
+77	2	I	object_emitter_spawn	D_8008FC30[emitter_sound_start]	game_eu_1C3530	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
+78	2	I	object_emitter_spawn	D_8008FC10[emitter_speed_const_a,emitter_speed_debug_power,emitter_speed_const_b]	game_eu_1C3530	1	-	1	2	exact	1	0	a0:W a1:W
+79	2	I	object_emitter_spawn	D_8008FC1C[emitter_owner_flag_clear]	game_eu_1C3530	1	-	1	2	exact	2	0	a0:W a1:W
+80	2	I	objects_hit_by_segment	D_80087030[gunfire_target_filter,beam_target_filter,obj_kind_can_take_hit,object_filter_not_listed,+1]	game_eu_201240	3	-	3	9	exact	0	0	a0:W a1:W a2:W a3:E stk:5
+81	2	I	objects_run_state_handlers	D_800863A4[world_rec_f9_set_player0_flag]	game_eu_78230	1	-	1	2	exact	0	0	a0:W a1:W
+82	2	I	objects_run_state_handlers	D_800863AC[world_rec_f9_set_flag]	game_eu_78230	1	-	1	2	exact	2	0	a0:W a1:W
+83	2	I	player_state_handler_dispatch	D_80089A10[player_update_flags_btn401b,camera_update_event_modes,func_150C4BF0,camera_update_event_lock,+31]	game_eu_15DFB0	1	-	1	2	exact	0	0	a0:E a1:E
+84	2	I	ray_cast_world	D_80087030[gunfire_target_filter,beam_target_filter,obj_kind_can_take_hit,object_filter_not_listed,+1]	game_eu_AF2A0	3	-	3	8	exact	0	0	a0:W a1:W a2:W a3:W stk:4
+85	2	I	shadow_clip_polygon_plane	D_8008D860[shadow_clip_in_ymin,shadow_clip_in_xmax,shadow_clip_in_ymax,shadow_clip_in_xmin,+6]	game_eu_1B1ED0	1	-	1	7	exact	0	0	a0:W a1:E a2:E a3:E stk:3
+86	2	I	anim_events_run	D_8008679C[objev_nop_1506d950,objev_set_y_velocity,objev_hop,objev_set_gravity,+155]	game_981E0	4	-	2	9	exact	0	-2	a0:W a1:W a2:W a3:W stk:5
+87	1	I	anim_model_fx_update	D_8008B130[anim_model_fx_beh_move,life_pickup_check_collect,particle_bob_scale_update,banner_model_fade_update]	game_eu_185050	1	-	1	3	exact	0	0	a0:W a1:W a2:W
+88	1	I	anim_model_fx_update	D_8008B140[anim_model_fx_beh_identity,anim_model_fx_beh_rotate]	game_eu_185050	1	-	1	3	exact	1	0	a0:W a1:W a2:W
+89	1	I	attach_ctrl_update	D_8008FFF8[bone_sparks_release]	game_1FFF60	1	-	1	2	exact	0	0	a0:E a1:W
+90	1	I	attach_ctrl_update	D_8008FFF0[bone_sparks_burst]	game_1FFF60	1	-	1	2	exact	1	0	a0:E a1:W
+91	1	I	attach_ctrl_update	D_8008FFF4[attach_ctrl_destroy_children]	game_1FFF60	1	-	1	2	exact	2	0	a0:E a1:W
+92	1	I	attach_ctrl_update	D_8008FFEC[bone_sparks_tick]	game_1FFF60	1	-	1	2	exact	3	0	a0:WE a1:W
+93	1	I	beam_motion_tick	D_80088B00[beam_follow_obj_pos,beam_follow_obj_point]	game_eu_F3080	1	-	1	2	exact	0	0	a0:W a1:W
+94	1	I	beam_ray_update	D_80088DB0[beam_ray_hit_spark]	game_eu_113D60	1	-	1	4	exact	0	0	a0:W a2:W a3:W
+95	1	I	bolt_arc_free	D_80088FB8[bolt_arc_unlink_from_bolt]	game_eu_133A70	1	-	1	2	exact	0	0	a0:W a1:W
+96	1	I	bone_emitter_stop_dispatch_a	D_80089F10[bone_emitter_retire,char_bone_emitter_retire,bone_emitter_retire,bone_emitter_retire,+2]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
+97	1	I	bone_emitter_stop_dispatch_b	D_80089F28[bone_emitter_free]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
+98	1	I	bone_emitter_update	D_80089F0C[fx_alive_flag_check]	game_161520	1	-	1	3	exact	3	0	a0:W a1:W a2:W
+99	1	I	bone_sparks_release	D_8008DA1C[bone_sparks_tick_hurt]	game_eu_1BAF40	1	-	1	2	exact	0	0	a0:E a1:E
+100	1	I	char_glow_bone_point_update	D_80090048[char_glow_check_anim_a,char_glow_check_anim_idle,char_glow_check_flag_ad]	game_eu_204F70	1	-	1	4	exact	0	0	a0:W a3:W
+101	1	I	cord_release	D_8008FF10[cord_rig_rope_unlink]	game_eu_1E0E70	1	-	1	2	exact	0	0	a0:W a1:W
+102	1	I	dl_fx_draw	D_8008B1AC[dl_fx_mtx_rotate_scale,tumble_debris_build_matrix,dl_fx_mtx_scaled_template]	game_eu_185E30	2	-	2	3	exact	0	0	a0:W a1:W a2:E
+103	1	I	dl_trace_segments	D_80084840[dldump_spnoop,dldump_vtx,dldump_modifyvtx,dldump_culldl,+24]	game_6D800	1	-	1	4	exact	0	0	a0:W a1:WE a2:W a3:W
+104	1	I	effect3d_update	D_8008A058[effect3d_apply_velocity,effect_follow_bone,fx_rise_grow_update,fx_gravity_spin_update,+6]	game_169510	1	-	1	4	exact	0	0	a0:E a3:W
+105	1	I	effect3d_update	D_8008A1B0[spark_die_spawn_burst,flame_start_end]	game_169510	1	-	1	4	exact	2	0	a0:WE a1:W a2:W a3:W
+106	1	I	effect_destroy_delete	D_8008A384[effect_free_buffers_delete,obj_glow_emitter_free,effect_free_buffers_delete,effect_free_buffers_delete,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
+107	1	I	effect_destroy_retire	D_8008A33C[effect_free_buffers_retire,obj_glow_emitter_retire,effect_free_buffers_retire,effect_free_buffers_retire,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
+108	1	I	effect_follow_update	D_80090040[char_glow_bone_point_update]	game_eu_204F70	1	-	1	2	exact	0	0	a0:W a1:W
+109	1	I	emitter2_path_update	D_8008FC5C[emitter2_sound_update]	game_eu_1C3530	1	-	1	3	exact	1	0	a0:W a2:W
+110	1	I	emitter2_trail_update	D_8008FC48[emitter2_path_fx_quarter,emitter2_path_fx_half,emitter2_path_fx_dense]	game_eu_1C3530	1	-	1	2	exact	0	0	a0:W a1:W
+111	1	I	emitter_path_update	D_8008FC34[emitter_sound_update]	game_eu_1C3530	1	-	1	4	exact	0	0	a0:W a1:W a2:W a3:W
+112	1	I	emitter_path_update	D_8008FC3C[emitter_sound_noop]	game_eu_1C3530	1	-	1	4	exact	1	0	a0:W a1:W a2:W a3:W
+113	1	I	emitter_path_update	D_8008FC20[path_flame_touch_player,path_hit_scene_nodes,path_pass_points_near_objects]	game_eu_1C3530	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W
+114	1	I	fxrec_update	D_8008A5A0[trail_step,emitter_path_update,spray_trail_update_points,fountain_step,+10]	game_eu_1754C0	1	-	1	2	exact	0	0	a0:E a1:W
+115	1	I	fxrec_update	D_8008A5DC[trail_emit_update,emitter_update_points,spray_trail_record,fountain_emit,+13]	game_eu_1754C0	1	-	1	2	exact	1	0	a0:WE a1:W
+116	1	I	fxrec_update	D_8008A624[emitter2_trail_update,track_trail_update,trail_ring_trim_fade,obj_ribbon_wave_update,+4]	game_eu_1754C0	1	-	1	2	exact	2	0	a0:WE a1:W
+117	1	I	impact_splash_ring_spawn	D_80090070[impact_puff_tex_kind0,impact_puff_tex_kind1,impact_puff_tex_kind2,impact_puff_tex_kind3,+8]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
+118	1	I	light_beh_follow_joint	D_8008B598[light_beh_joint_pulse,beam_set_mode_by_state,mat_toggle_by_flag,laser_light_sync]	game_18D770	1	-	1	4	exact	0	0	a0:W a1:W a3:W
+119	1	I	light_ctrl_delete	D_8008B2B0[light_ctrl_free,light_ctrl_free,light_ctrl_free,light_ctrl_free,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
+120	1	I	light_ctrl_destroy	D_8008B208[light_ctrl_retire,light_ctrl_retire,light_ctrl_retire,light_ctrl_retire,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
+121	1	I	light_follow_handle_message	D_8008B6F8[fx_target_light_on_message]	game_18D770	3	-	3	4	exact	0	0	a0:W a1:WE a2:W a3:W
+122	1	I	mdl_particle_update	D_80089D28[mdl_particle_squash_update]	game_eu_15FF50	1	-	1	2	exact	0	0	a0:W a1:W
+123	1	I	mdl_particle_update	D_80089CB4[thrown_object_land_check,rubble_piece_hit_ground,rubble_piece_above_ground,rubble_piece_fade,+3]	game_eu_15FF50	1	-	1	2	exact	2	0	a0:W a1:W
+124	1	I	mdl_particle_update	D_80089D1C[debris_piece_free_trail,ripple_stop_sound]	game_eu_15FF50	1	-	1	2	exact	3	0	a0:W a1:W
+125	1	I	mesh_effect_draw	D_80089FC8[mesh_effect_load_identity,swing_lamp_matrix_build,mesh_effect_handler_false,object_screen_uv_project,+3]	game_168A90	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
+126	1	I	node_sprite_update	D_8008CD68[spark_sprite_update,rain_drop_update,node_fade_delay_update,fx_puff_fade_grow_tick,+15]	game_1944C0	1	-	1	4	exact	0	0	a0:E a3:W
+127	1	I	node_sprite_update	D_8008CDC0[falling_debris_update,particle_spawn_decal_if_old,overlay_fx_scroll_update,overlay_fx_pulse_update,+5]	game_1944C0	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
+128	1	I	node_vtx_sprite_update	D_8008CD68[spark_sprite_update,rain_drop_update,node_fade_delay_update,fx_puff_fade_grow_tick,+15]	game_1944C0	1	-	1	3	exact	0	0	a0:E a1:W a2:W
+129	1	I	obj_attached_glow_update	D_8008FF30[glow_attach_follow_obj,glow_attach_follow_model_point]	game_eu_1E40E0	2	-	2	3	exact	0	0	a0:W a1:W a2:W
+130	1	I	obj_fx_point_impact_a4	D_800900A4[impact_debris_tex_kind0,impact_debris_tex_kind2,impact_debris_tex_kind3,impact_debris_tex_kind1,+2]	game_eu_174610	0	-	0	1	exact	0	0	a0:W
+131	1	I	obj_point_trail_spawn	D_8008FFD0[object_point_above_pos,object_offset_point_0,object_offset_point_1]	game_eu_1FB080	2	-	2	4	exact	0	0	a0:E a1:W a2:E a3:E
+132	1	I	obj_point_trail_update	D_8008FFD0[object_point_above_pos,object_offset_point_0,object_offset_point_1]	game_eu_1FB080	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
+133	1	I	object_point_effect_spawn	D_80090010[object_bone_point_0,object_bone_point_1,weapon_b_bone_effect,weapon_a_bone_effect,+3]	game_eu_201240	3	-	3	4	exact	0	0	a0:E a1:W a2:W a3:E
+134	1	I	object_trail_smoke_update	D_80090010[object_bone_point_0,object_bone_point_1,weapon_b_bone_effect,weapon_a_bone_effect,+3]	game_eu_201240	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
+135	1	I	particle_draw_sprite	D_80089BA4[obj_glow_spark_visible,obj_glow_halo_visible,stub_return_one_b,particle_upd_kill]	game_eu_15E000	2	-	2	3	exact	0	0	a0:W a1:W a2:E
+136	1	I	particle_sprite_update	D_80089B00[spark_burst_update,spark_burst_update_tail,particle_shrink_update,smoke_wobble_update_ground,+36]	game_eu_15E000	2	-	2	4	exact	0	0	a0:E a1:W a2:W a3:W
+137	1	I	particle_sprite_update	D_80089BA0[pool_slot_release]	game_eu_15E000	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
+138	1	I	sprite2d_update	D_8008B068[fx_rising_particle_update,screen_smoke_beh_rise,blood_drop_update,aim_hud_fade_update,+10]	game_eu_182A10	1	-	1	2	exact	0	0	a0:E a1:W
+139	1	I	sprite_fx_update	D_8008A010[fx_fade_alpha_by_life,fx_fade_in_28_update,fx_fade_in_byte28_update,sprite_fade_in_age,+9]	game_169510	1	-	1	4	exact	0	0	a0:E a3:W
+140	1	I	sprite_fx_update	D_8008A048[char_ground_glow_free,ground_glow_a_detach,ground_glow_b_detach]	game_169510	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
+141	1	I	streak_update_fade	D_8008B424[streak_push_point,streak_pop_point]	game_1897A0	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
+142	1	I	tether_smoke_emitter_spawn	D_800900A0[impact_puff_tex_kind11]	game_eu_11CB90	0	-	0	4	exact	0	0	a0:E a1:W a2:E a3:E
+143	1	I	text_pager_update	D_80088C40[text_pager_draw_caption,text_pager_draw_console,text_pager_draw_title,money_popup_draw]	game_eu_FCE60	1	-	1	3	exact	0	0	a0:W a1:E a2:W
+144	1	I	timed_queue_push	D_8008D960[sprite_fx_init_fade50,splash_start_fade_out]	game_eu_1B8790	1	-	1	4	exact	0	0	a0:W a1:E a2:W a3:W
+145	1	I	timed_queue_push	D_8008D960[sprite_fx_init_fade50,splash_start_fade_out]	game_eu_1B8790	1	-	1	4	exact	1	0	a0:W a2:W a3:W
+146	1	I	timed_queue_push	D_8008D960[sprite_fx_init_fade50,splash_start_fade_out]	game_eu_1B8790	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W
+147	1	I	timed_queue_tick	D_8008D960[sprite_fx_init_fade50,splash_start_fade_out]	game_eu_1B8790	1	-	1	3	exact	0	0	a0:W a1:W a2:W
+148	1	I	trail_step	D_8008A780[trail_grow,trail_move_points,trail_fall,trail_shrink,+1]	game_eu_175B20	1	-	1	3	exact	0	0	a0:E a2:W
+149	1	I	trail_step	D_8008A798[drip_stream_fade,sprite_fade_in_alpha,trail_alpha_from_life,sprite_fade_in_alpha_b,+1]	game_eu_175B20	1	-	1	3	exact	1	0	a0:WE a2:W

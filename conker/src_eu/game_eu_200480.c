@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_151D2C70(s16 arg0) {
+/* was func_151D2C70 */
+void scroll_banner_spawn(s16 arg0) {
     u8 *temp_v0;
 
     temp_v0 = node_alloc(0x3C, 1, 0x18, 0, 0xFFU, 1U);
@@ -14,7 +15,8 @@ void func_151D2C70(s16 arg0) {
     (*(s16 *)((u8 *)temp_v0 + 0x10)) = arg0;
 }
 
-void func_151D2CC8(s16 arg0) {
+/* was func_151D2CC8 */
+void scroll_banner_stop(s16 arg0) {
     u8 *var_v0;
 
     for (var_v0 = D_800DD510; var_v0 != NULL; var_v0 = *(u8 **)(var_v0 + 8)) {
@@ -33,7 +35,8 @@ typedef struct {
     s8 x16;
 } Obj2D0C;
 
-void func_151D2D0C(Obj2D0C *arg0) {
+/* was func_151D2D0C */
+void scroll_banner_update(Obj2D0C *arg0) {
     arg0->xE += D_800BE9E4 * arg0->x16;
     if (arg0->x16 > 0 && arg0->xE >= 0xED) {
         arg0->x14 = (0x128 - arg0->xE) << 2;
@@ -59,7 +62,8 @@ void func_151D2D0C(Obj2D0C *arg0) {
 s32 texture_cache_lookup(s32 *, s32, s32, s32);
 extern s32 D_A4A;
 
-u8 *func_151D2DE0(u8 *arg0, u8 *arg1, s16 arg2) {
+/* was func_151D2DE0 */
+u8 *scroll_banner_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     s32 temp_v0;
     u8 *temp_s0;
     u8 *temp_s0_10;
@@ -151,5 +155,5 @@ u8 *func_151D2DE0(u8 *arg0, u8 *arg1, s16 arg2) {
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_200480/func_151D2DE0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_200480/scroll_banner_draw.s")
 #endif

@@ -125,9 +125,9 @@ Gfx *anim_segments_set(Gfx *gdl) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150889D8(struct127 *, s32);
-s32 func_15088A68(s32, s32, s32);
-s32 func_15088B08(s32, s32);
+s32 rail_record_index_of(struct127 *, s32);
+s32 rail_record_copy(s32, s32, s32);
+s32 cpu_player_slot_claim(s32, s32);
 
 /* was func_150D7CA0 */
 void obj_fire_weapon_kind(struct127 *arg0, s32 arg1) {
@@ -162,12 +162,12 @@ void obj_fire_weapon_kind(struct127 *arg0, s32 arg1) {
             if ((temp_v0_2 != 0) && (temp_v1 != 0x1E)) {
                 (*(s8 *)((u8 *)temp_v0_2 + 0x221)) = -1;
                 sp40 = temp_v0_2;
-                temp_v0_3 = func_150889D8(arg0, temp_v0_2);
+                temp_v0_3 = rail_record_index_of(arg0, temp_v0_2);
                 if (temp_v0_3 != -1) {
                     sp48 = temp_v0_3;
-                    temp_v0_4 = func_15088B08(temp_v0_2, temp_v0_2);
+                    temp_v0_4 = cpu_player_slot_claim(temp_v0_2, temp_v0_2);
                     if (temp_v0_4 != -1) {
-                        func_15088A68(sp48, temp_v0_4, sp48);
+                        rail_record_copy(sp48, temp_v0_4, sp48);
                     }
                 }
             }
@@ -182,7 +182,7 @@ void obj_fire_weapon_kind(struct127 *arg0, s32 arg1) {
                 (*(s16 *)((u8 *)temp_v0 + 0x12C)) = 0x78;
                 temp_v0_6 = arg0->unk31C;
                 (*(s8 *)((u8 *)temp_v0_6 + 0x1AE)) = (s8) ((*(s8 *)((u8 *)temp_v0_6 + 0x1AE)) - 1);
-                func_10010154(0x628U, arg0, 0x7FFF, 0x1F4, 0x3E8U);
+                actor_sound_play(0x628U, arg0, 0x7FFF, 0x1F4, 0x3E8U);
                 return;
             }
             break;
@@ -193,21 +193,21 @@ void obj_fire_weapon_kind(struct127 *arg0, s32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/obj_fire_weapon_kind.s")
 #endif
 #ifdef NON_MATCHING
-u8 *func_15034174(u8 *arg0);
+u8 *attachment_find_first_of_owner(u8 *arg0);
 s32 attack_hit_test(struct127 *self, s32 skip);
 f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
-f32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_10010FFC(s32, s32, s32, s32, s32, u8 *);
-void func_1001091C(u8 *arg0, s32 arg1);
-s32 func_150535F4(struct127 *arg0);
+f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+s32 obj_carry_pickup(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void sound_play_for_actor(s32, s32, s32, s32, s32, u8 *);
+void actor_sound_set_volume(u8 *arg0, s32 arg1);
+s32 obj_check_death(struct127 *arg0);
 
 // carried_object_update: interaction state 0x20 handler (entry 32 of D_800863B4, called as `(obj)` by
-// func_1504A730) of a liftable object (id 0x48 rides on a partner object of kind 0x7A; id 0x7F is held). While a
+// objects_run_state_handlers) of a liftable object (id 0x48 rides on a partner object of kind 0x7A; id 0x7F is held). While a
 // player holds it (unk13C, player D_800CC2D0[unk124] with unk31C +0x4E set) it copies the player's position block,
 // turn and speed; otherwise it falls / spins (obj_approach_speed / obj_physics_step), lets a player land on it
-// (func_15052F9C when unk232 == 4) or picks a player to latch on (func_1505327C). Then the scale bounce, spin
-// angle, carry height (player unkCC) and the rolling sound (0x678), and finally func_150535F4.
+// (obj_carry_release when unk232 == 4) or picks a player to latch on (obj_carry_pickup). Then the scale bounce, spin
+// angle, carry height (player unkCC) and the rolling sound (0x678), and finally obj_check_death.
 /* was func_150D7E38 */
 void liftable_object_update(struct127 *self) {
     struct127 *pl;
@@ -234,7 +234,7 @@ void liftable_object_update(struct127 *self) {
     id = self->id;
     partner = -1;
     if (id == 0x48) {
-        u8 *other = func_15034174((u8 *) self);
+        u8 *other = attachment_find_first_of_owner((u8 *) self);
         if (other != NULL) {
             partner = other[6];
         }
@@ -307,8 +307,8 @@ void liftable_object_update(struct127 *self) {
             if (id == 0x48) {
                 D_800CC2D0[0].unk1E4 = 1; /* EU 800CC8D4 */
             }
-            func_15052F9C(self, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0);
-            /* func_15052F9C returns nothing; the asm tests its leftover v0: self->unk124 when no player landed
+            obj_carry_release(self, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0);
+            /* obj_carry_release returns nothing; the asm tests its leftover v0: self->unk124 when no player landed
                (or self is not in state 0x20), self->unk7A after a landing (unk13C set) in state 0x20 */
             if ((self->unk13C != 0 && self->interaction_state == 0x20) ? self->unk7A != 0 : self->unk124 != 0) {
                 return;
@@ -324,7 +324,7 @@ void liftable_object_update(struct127 *self) {
                         pl->stunned = 0;
                         dist = 0.0f;
                     }
-                    func_1505327C(self, dist, 3.0f, 4, -1);
+                    obj_carry_pickup(self, dist, 3.0f, 4, -1);
                 }
             }
         }
@@ -363,8 +363,8 @@ void liftable_object_update(struct127 *self) {
                     D_800CC2D0[self->unk124].in_water = 0;
                     D_800CC2D0[self->unk124].gravity = 4.0f;
                 }
-                func_100109D0(self);
-                func_10010FFC(0, 0x51, 0x6D60, 0, 0, (u8 *) self);
+                actor_sound_stop(self);
+                sound_play_for_actor(0, 0x51, 0x6D60, 0, 0, (u8 *) self);
                 self->health = 0;
             }
         }
@@ -398,17 +398,17 @@ void liftable_object_update(struct127 *self) {
             if (vol > 0x4650) {
                 vol = 0x4650;
             }
-            if (func_100107F8(self) == 0) {
-                func_10010154(0x678, self, vol, 0x3E8, 0x7D0);
+            if (actor_sound_is_playing(self) == 0) {
+                actor_sound_play(0x678, self, vol, 0x3E8, 0x7D0);
             } else {
-                func_1001091C((u8 *) self, vol);
+                actor_sound_set_volume((u8 *) self, vol);
             }
         } else {
-            func_100109D0(self);
+            actor_sound_stop(self);
         }
-        func_15052490(self, self->unk76, speed, 0.55f);
+        obj_roll_pitch_step(self, self->unk76, speed, 0.55f);
     }
-    func_150535F4(self);
+    obj_check_death(self);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105140/liftable_object_update.s")

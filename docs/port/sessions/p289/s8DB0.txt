@@ -1,4 +1,4 @@
-# func_151B8DB0 setups: arg0 80480000; func_15132FBC = EU 15132FBC (particle 80460000), light_ctrl_alloc = EU 151608EC (link obj 80470000), zone_tree_find_leaf = EU 151102A0 (water), random_float = EU 150ADF48 (rnd), particle_emitter_spawn = EU 15140D40, memcpy 10023360
+# swinging_lamp_spawn setups: arg0 80480000; mdl_particle_spawn = EU 15132FBC (particle 80460000), light_ctrl_alloc = EU 151608EC (link obj 80470000), zone_tree_find_leaf = EU 151102A0 (water), random_float = EU 150ADF48 (rnd), particle_emitter_spawn = EU 15140D40, memcpy 10023360
 w0dry ! 0=80480000,1=0,2=10,3=1 ! ! 15132FBC=80460000,151608EC=80470000,151102A0=0,15140D40=80490040 ! 150ADF48=3F000000 ! ! !
 w0wet ! 0=80480000,1=0,2=10,3=1 ! ! 15132FBC=80460000,151608EC=80470000,151102A0=1,15140D40=80490040 ! 150ADF48=3E99999A ! ! !
 w1dry ! 0=80480000,1=1,2=FF,3=1 ! ! 15132FBC=80460000,151608EC=80470000,151102A0=0,15140D40=80490140 ! 150ADF48=3F000000 ! ! !

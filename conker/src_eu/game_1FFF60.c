@@ -29,7 +29,7 @@ void attach_fx_asset_release(s32 arg0) {
     if ((&D_800E0950)[arg0] != 0) {
         (&D_800E0950)[arg0] = (&D_800E0950)[arg0] - 1;
         if ((&D_800E0950)[arg0] == 0) {
-            func_100043B4(D_800E0990[arg0], 4);
+            heap_set_block_tag(D_800E0990[arg0], 4);
         }
     }
 }
@@ -55,8 +55,8 @@ struct224 *attach_fx_spawn(void *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 ar
 // (node, &pos) returning 0 frees it; else the position is stored at +0x34.
 // NON_MATCHING copy: the handler table at 0x8008FFE0 (D_8008FFE0 [0..6], D_8008FFE8 = [2..6]) is called through one
 // signature, s32 (child *, void *) (wasm call_indirect); variables.h declares D_8008FFE8 void-returning, so the
-// end-handler call casts. The one-argument entries take and ignore the position (func_1518FD34, func_1518FE0C,
-// attach_ctrl_destroy_children, func_1518FDC8).
+// end-handler call casts. The one-argument entries take and ignore the position (bone_sparks_tick, bone_sparks_burst,
+// attach_ctrl_destroy_children, bone_sparks_release).
 /* was func_151D2C40 */
 void attach_fx_update(struct_eu_1FFF60_child *arg0) {
     struct_eu_1FFF60_parent *parent = arg0->unk10;
@@ -67,7 +67,7 @@ void attach_fx_update(struct_eu_1FFF60_child *arg0) {
         node_destroy(arg0);
         return;
     }
-    func_15143134(&arg0->unk18, &pos, parent->unk1D4 + (arg0->unk24 << 6));
+    mtx_transform_point_or_origin(&arg0->unk18, &pos, parent->unk1D4 + (arg0->unk24 << 6));
     if (arg0->unk28 & 1) {
         arg0->unk26 -= D_800BE9E4;
         if (arg0->unk26 < 0) {
@@ -97,7 +97,7 @@ void attach_fx_update(struct_eu_1FFF60_child *arg0) {
         node_destroy(arg0);
         return;
     }
-    func_15143134(&arg0->unk18, &pos, parent->unk1D4 + (arg0->unk24 << 6));
+    mtx_transform_point_or_origin(&arg0->unk18, &pos, parent->unk1D4 + (arg0->unk24 << 6));
     if (arg0->unk28 & 1) {
         arg0->unk26 -= D_800BE9E4;
         if (arg0->unk26 < 0) {
@@ -269,7 +269,7 @@ void attach_ctrl_update(u8 *arg0) {
 #ifdef NON_MATCHING
 // effect_node_release: runs the node's release hook D_8008FFFC[+0x1D] (if any), then for every child (list +0x24,
 // next +0x40) its end handler D_8008FFE8[+0x2A] (child, &child +0x34) and frees it (node_destroy), then releases
-// the node (func_1514EDF0 with +0x10).
+// the node (char_fx_detach_effect with +0x10).
 // NON_MATCHING copy: the end handler is called through the table's common signature s32 (child *, void *) (see
 // attach_fx_update).
 /* was func_151D3130 */
@@ -289,7 +289,7 @@ void attach_ctrl_cleanup(struct_eu_1FFF60 *arg0) {
         node_destroy(child);
         child = next;
     }
-    func_1514EDF0(arg0, arg0->unk10);
+    char_fx_detach_effect(arg0, arg0->unk10);
 }
 #else
 void attach_ctrl_cleanup(struct_eu_1FFF60 *arg0) {
@@ -308,7 +308,7 @@ void attach_ctrl_cleanup(struct_eu_1FFF60 *arg0) {
         node_destroy(child);
         child = next;
     }
-    func_1514EDF0(arg0, arg0->unk10);
+    char_fx_detach_effect(arg0, arg0->unk10);
 }
 #endif
 

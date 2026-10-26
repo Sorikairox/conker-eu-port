@@ -239,7 +239,7 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
     # s113: a late region with no compiler literal and no GLOBAL_ASM owner (only items that C names
     # as externs, plus padding) has no late neighbour to go to; with no C late_rodata in the object
     # those words may just as well be plain .rodata after the last regular item, so attach them
-    # to a GLOBAL_ASM function of the regular region (func_150BDE34, game_eu_EB430)
+    # to a GLOBAL_ASM function of the regular region (trail_spawn_callback, game_eu_EB430)
     lc = [c for c in chunks if c[2] == 'late']
     if base == 'rodata' and lc and all(c[3] in ('CX', None) for c in lc) and any(
             c[2] == base and c[3] in asmnames for c in chunks):

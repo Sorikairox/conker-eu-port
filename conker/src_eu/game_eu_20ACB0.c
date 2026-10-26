@@ -11,12 +11,13 @@ extern OSMesgQueue *D_800E0E50;
 extern u8 D_800E0E54;
 extern void *D_800E0E58;
 extern s32 D_800E0E5C;
-s32 func_151DD4A0(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes) {
+/* was func_151DD4A0 */
+s32 eeprom_async_write_start(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes) {
     s32 temp_v0;
-    temp_v0 = func_151DD588(1);
+    temp_v0 = eeprom_async_write_step(1);
     if (temp_v0 != 0) {
         do {
-        } while (func_151DD588(1) != 0);
+        } while (eeprom_async_write_step(1) != 0);
     }
     D_800E0E50 = mq;
     D_800E0E54 = address;
@@ -25,7 +26,8 @@ s32 func_151DD4A0(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes) {
     return osSetTimer(&D_80042DE8, (12000ULL * D_8002C060) / 1000000ULL, 0, &D_80042E08, &D_80042E20);
 }
 
-int func_151DD588(s32 flag) {
+/* was func_151DD588 */
+int eeprom_async_write_step(s32 flag) {
     if (D_800E0E50 == NULL) {
         return 0;
     }
@@ -35,7 +37,7 @@ int func_151DD588(s32 flag) {
             D_800E0E5C = 0;
             return 0;
         }
-        if (func_151DDA90(D_800E0E50, D_800E0E54, D_800E0E58) != 0) {
+        if (game_eeprom_write(D_800E0E50, D_800E0E54, D_800E0E58) != 0) {
             D_800E0E50 = NULL;
             D_800E0E5C = 0;
             return 0;

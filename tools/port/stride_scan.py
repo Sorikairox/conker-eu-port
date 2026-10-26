@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """P270: pointer-stride scan.  Lists C where a typed non-byte pointer (s16 *, f32 *, s32 *, T **, ...) gets a constant
 offset (`p + 0xC`, `p += 0x10`, `p - 0x60`) without a `(u8 *)` cast.  C scales the constant by the element size; old m2c
-batch bodies (P17 era) often meant bytes (P269: func_151D7FE8 `f32 *temp_a0 + 0xC` = +0x30 bytes, asm addiu 0xC).
+batch bodies (P17 era) often meant bytes (P269: glow_trail_emit_points `f32 *temp_a0 + 0xC` = +0x30 bytes, asm addiu 0xC).
 
 For each hit the function's asm (asm/nonmatchings/<file>/<func>.s) is searched for the immediate K (byte reading) and
 K*size (element reading):  BYTE = only K found (likely bug), ELEM = only K*size found (C is right), BOTH / NONE = check

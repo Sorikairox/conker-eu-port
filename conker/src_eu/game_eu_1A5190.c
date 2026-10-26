@@ -21,7 +21,8 @@ u8 *world_record_find(u8 id);
  * t = d - range * 0.01 is negative, else 0; kind 2: +0x28[i] = the direction byte (flag 0x10: angle * 256 / 360,
  * else func_150484A0 (atan2) of the squared x / z offsets * 128 / pi, as Rare wrote it).
  */
-void func_15177410(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 range, f32 intensity, s8 arg8, s8 scale,
+/* was func_15177410 */
+void vtx_anim_light_create(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 range, f32 intensity, s8 arg8, s8 scale,
                    u8 r0, u8 g0, u8 b0, u8 r1, u8 g1, u8 b1) {
     u8 *light;
     u8 *model;
@@ -132,19 +133,19 @@ void func_15177410(u8 flags, u8 id, s16 x, s16 y, s16 z, f32 angle, u16 range, f
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5190/func_15177410.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5190/vtx_anim_light_create.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P122 */
 u8 *world_record_find(u8 id);
 void world_record_build_matrix(f32 (*mf)[4], u8 *model);
-void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-void func_150A7480(Vtx *out, s32 count, u8 *state, u8 *phase, f32 *amp, Vtx *base);
-void func_150A75A0(Vtx *out, s32 count, u8 *state, u8 *phase, Vtx *base);
-void func_150A76A8(Vtx *out, s32 count, u8 *state, u8 *colour, u8 *phase, Vtx *base);
-void func_150A7840(Vtx *out, s32 count, u8 *state, u8 *colour, u8 *phase, f32 *amp, Vtx *base);
-void func_150A79FC(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase, f32 *amp, Vtx *base);
+void mtxf_transform_point(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void vtx_wave_y_per_vertex(Vtx *out, s32 count, u8 *state, u8 *phase, f32 *amp, Vtx *base);
+void vtx_wave_y(Vtx *out, s32 count, u8 *state, u8 *phase, Vtx *base);
+void vtx_wave_y_colour(Vtx *out, s32 count, u8 *state, u8 *colour, u8 *phase, Vtx *base);
+void vtx_wave_y_colour_per_vertex(Vtx *out, s32 count, u8 *state, u8 *colour, u8 *phase, f32 *amp, Vtx *base);
+void vtx_wave_y_normal_colour(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase, f32 *amp, Vtx *base);
 
 /* Model record (world_record_find(id)): f32 position +0x0..+0x8, s16 integer offset +0x10..+0x14, u16 vertex count
  * +0x16, Vtx *frame[2] +0x20 (the buffer drawn in frame D_800BE9C0), Vtx *base +0x28, f32 scale +0x2C..+0x34,
@@ -162,7 +163,8 @@ void func_150A79FC(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase, f32 *amp,
  * writes the model's frame buffer. Then the animations on the base vertices are moved to the model's place:
  * the integer offset +0x10 when the model is not moved / scaled (x, z from the base, y added), else the model
  * matrix (world_record_build_matrix) applied to (base x, wave y, base z), truncated. */
-void func_15178004(void) {
+/* was func_15178004 */
+void vtx_anims_update(void) {
     u8 *anim;
     u8 *model;
     Vtx *src;
@@ -185,24 +187,24 @@ void func_15178004(void) {
         switch (mode & 3) {
             case 1:
                 if ((mode & 4) == 4) {
-                    func_150A7840(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, anim + 0x18,
+                    vtx_wave_y_colour_per_vertex(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, anim + 0x18,
                                   *(u8 **) (anim + 0x24), *(f32 **) (anim + 0x20), src);
                 } else {
-                    func_150A76A8(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, anim + 0x18,
+                    vtx_wave_y_colour(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, anim + 0x18,
                                   *(u8 **) (anim + 0x24), src);
                 }
                 break;
             case 0:
                 if ((mode & 4) == 4) {
-                    func_150A7480(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, *(u8 **) (anim + 0x24),
+                    vtx_wave_y_per_vertex(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, *(u8 **) (anim + 0x24),
                                   *(f32 **) (anim + 0x20), src);
                 } else {
-                    func_150A75A0(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, *(u8 **) (anim + 0x24), src);
+                    vtx_wave_y(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, *(u8 **) (anim + 0x24), src);
                 }
                 break;
             case 2:
                 if ((mode & 4) == 4) {
-                    func_150A79FC(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, *(u8 **) (anim + 0x28),
+                    vtx_wave_y_normal_colour(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, *(u8 **) (anim + 0x28),
                                   *(u8 **) (anim + 0x24), *(f32 **) (anim + 0x20), src);
                 }
                 break;
@@ -229,7 +231,7 @@ void func_15178004(void) {
             world_record_build_matrix(mf, model);
             for (j = 0; j < VTXANIM_COUNT(model); j++) {
                 base = &VTXANIM_BASE(model)[j];
-                func_150A7E40(mf, base->v.ob[0], VTXANIM_FRAME(model)[j].v.ob[1], base->v.ob[2], &x, &y, &z);
+                mtxf_transform_point(mf, base->v.ob[0], VTXANIM_FRAME(model)[j].v.ob[1], base->v.ob[2], &x, &y, &z);
                 VTXANIM_FRAME(model)[j].v.ob[0] = (s32) x;
                 VTXANIM_FRAME(model)[j].v.ob[1] = (s32) y;
                 VTXANIM_FRAME(model)[j].v.ob[2] = (s32) z;
@@ -238,5 +240,5 @@ void func_15178004(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5190/func_15178004.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5190/vtx_anims_update.s")
 #endif

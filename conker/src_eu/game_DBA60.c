@@ -43,7 +43,7 @@ void camera_update_event_modes(struct108 *arg0) {
 
 #ifdef NON_MATCHING
 void mtx_get_translation(void *, s32, void *);
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CEB4;
 
@@ -171,7 +171,7 @@ void owner_child_spark_burst(u8 *arg0) {
                         sp.u12C = temp_f2 * temp_f26;
                         sp.u130 = -temp_f20 * temp_f22;
                         sp.u134 = temp_f2 * temp_f24;
-                        func_15148310(&sp.u148, &sp.u128, 0, 1, 2, 0, 0, 0, 0, 0, 0, &sp.u104, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                        trail_spawn(&sp.u148, &sp.u128, 0, 1, 2, 0, 0, 0, 0, 0, 0, &sp.u104, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                         var_s2 -= 1;
                     } while (var_s2 != 0);
                 }
@@ -218,13 +218,13 @@ void owner_child_spark_burst(u8 *arg0) {
 #endif
 // some funky xor going on
 // spawns the objects of D_80088A80[0]; also checksums the code range
-// func_15001A08..D_15001B08 and, if it was modified, clears object list 35 (anti-tamper)
+// quadtree_alloc_node_pool..D_15001B08 and, if it was modified, clears object list 35 (anti-tamper)
 #ifdef NON_MATCHING
 // owner_spawn_children: spawns the objects of spawn list D_80088A80[0] (func_151491F4 kind 0x27) for `owner`
 // (P151): each new object gets the owner (+0x28), its sub-type (+0x2C = owner +0x3B) and the entry byte (+0x2D);
-// stops when a spawn fails. The N64 code also sums the code words func_15001A08..D_15001B08 and on a mismatch
+// stops when a spawn fails. The N64 code also sums the code words quadtree_alloc_node_pool..D_15001B08 and on a mismatch
 // (anti-tamper) clears the object lists D_800DD280 +0x8C / +0x22C; the port has no MIPS code there, so the
-// NON_MATCHING build skips the check (as func_151E86A4, P127).
+// NON_MATCHING build skips the check (as menu_settings_apply_checked, P127).
 /* was func_150AEB9C */
 void owner_spawn_children(u8 *owner) {
     s32 i;
@@ -246,7 +246,7 @@ void owner_spawn_children(u8 *owner) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/owner_spawn_children.s")
 #endif
-// NON-MATCHING: regalloc; checksums code func_15001A08..D_15001B08 against 0x1B61AF60 (anti-tamper), clears object list 35 on mismatch
+// NON-MATCHING: regalloc; checksums code quadtree_alloc_node_pool..D_15001B08 against 0x1B61AF60 (anti-tamper), clears object list 35 on mismatch
 // void owner_spawn_children(u8 *arg0) {
 //     u32 *p;
 //     u32 sum;
@@ -257,7 +257,7 @@ void owner_spawn_children(u8 *owner) {
 //         return;
 //     }
 //     sum = 0;
-//     for (p = (u32 *)func_15001A08; p < D_15001B08; p++) {
+//     for (p = (u32 *)quadtree_alloc_node_pool; p < D_15001B08; p++) {
 //         sum ^= *p;
 //         sum <<= 1;
 //     }

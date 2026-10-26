@@ -7,7 +7,8 @@ extern u8 D_800A0340[];
 #endif
 
 #ifdef NON_MATCHING
-void func_150BDC20(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150BDC20 */
+void obj_skel_line_emit_pair(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         f32 u8C;
         f32 u90;
@@ -59,9 +60,9 @@ void func_150BDC20(u8 *arg0, u8 arg1, s32 arg2) {
             var_s4 = &sp.uD8;
             var_s0 = &sp.uA8;
             do {
-                func_15143134(var_s1, var_s2, (*(u8 **)((u8 *)arg0 + 0x1D4)));
-                func_15143134(var_s3, var_s4, (*(u8 **)((u8 *)arg0 + 0x1D4)));
-                func_15143134(var_s5, var_s0, (*(u8 **)((u8 *)arg0 + 0x1D4)));
+                mtx_transform_point_or_origin(var_s1, var_s2, (*(u8 **)((u8 *)arg0 + 0x1D4)));
+                mtx_transform_point_or_origin(var_s3, var_s4, (*(u8 **)((u8 *)arg0 + 0x1D4)));
+                mtx_transform_point_or_origin(var_s5, var_s0, (*(u8 **)((u8 *)arg0 + 0x1D4)));
                 var_s0 = (s32 *)((u8 *)var_s0 + (0xC));
                 var_s1 = (f32 *)((u8 *)var_s1 + (0xC));
                 var_s2 = (f32 *)((u8 *)var_s2 + (0xC));
@@ -72,23 +73,23 @@ void func_150BDC20(u8 *arg0, u8 arg1, s32 arg2) {
             sp.u8C = sp.uC0 - sp.uF0;
             sp.u90 = sp.uC4 - sp.uF4;
             sp.u94 = sp.uC8 - sp.uF8;
-            func_1514C9E0(sp.u120, sp.u124, sp.u128, sp.u12C, sp.u130, sp.u134, (random_float() * 6.0f) + 14.0f, 0xDU, 0, 0.0f, (s32) &sp.u8C, (u8) (s32) arg1);
+            spawn_line_emit(sp.u120, sp.u124, sp.u128, sp.u12C, sp.u130, sp.u134, (random_float() * 6.0f) + 14.0f, 0xDU, 0, 0.0f, (s32) &sp.u8C, (u8) (s32) arg1);
             sp.u98 = sp.uCC - sp.uFC;
             sp.u9C = sp.uD0 - sp.u100;
             sp.uA0 = sp.uD4 - sp.u104;
-            func_1514C9E0(sp.u12C, sp.u130, sp.u134, sp.u108, sp.u10C, sp.u110, (random_float() * 6.0f) + 14.0f, 0xDU, 0, 0.0f, (s32) &sp.u98, (u8) (s32) arg1);
+            spawn_line_emit(sp.u12C, sp.u130, sp.u134, sp.u108, sp.u10C, sp.u110, (random_float() * 6.0f) + 14.0f, 0xDU, 0, 0.0f, (s32) &sp.u98, (u8) (s32) arg1);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EB430/func_150BDC20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EB430/obj_skel_line_emit_pair.s")
 #endif
 s32 random_int(void);
 f32 random_float(void);
 #ifdef NON_MATCHING
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 #else
-s32 func_15148310(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32);
+s32 trail_spawn(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32);
 #endif
 extern f32 D_800A03A0;
 extern f32 D_800A03A4;
@@ -96,7 +97,8 @@ extern f32 D_800A03A8;
 extern f32 D_800A03AC;
 extern f32 D_800A03B0;
 extern f32 D_800A03B4;
-s32 func_150BDE34(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, f32 *argD, u8 argE)
+/* was func_150BDE34 */
+s32 trail_spawn_callback(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, f32 *argD, u8 argE)
 {
   struct { f32 u0; f32 u4; f32 u8; s16 uC; s16 uE; s32 u10; u8 u14; u8 u15; u8 pad[0xA]; } c;
   struct { f32 u0; f32 u4; f32 u8; f32 uC; f32 u10; f32 u14; u8 u18; u8 u19; u8 u1A; u8 u1B; s32 pad; } b;
@@ -129,11 +131,12 @@ s32 func_150BDE34(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
   c.uC = (random_int() % 31U) + 0x27;
   b.u0 = ((random_float() * D_800A03A4) + D_800A03A8) * D_800A03AC;
   b.u10 = ((random_float() * 356.0f) + D_800A03B0) * D_800A03B4;
-  func_15148310(&c, &b, 0, 1, 0xB, 0, 0, 0, 0, 0, 0, &a, 0, argE, 1);
+  trail_spawn(&c, &b, 0, 1, 0xB, 0, 0, 0, 0, 0, 0, &a, 0, argE, 1);
   return 1;
 }
 
-s32 func_150BE01C(u8 *arg0) {
+/* was func_150BE01C */
+s32 trail_fade_by_life_update(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
     if ((*(s16 *)(arg0 + 0x1C) << 3) < temp_v0[0x1B]) {
         temp_v0[0x1B] = *(s16 *)(arg0 + 0x1C) << 3;

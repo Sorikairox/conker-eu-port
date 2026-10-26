@@ -1,0 +1,222 @@
+old	new	confidence	description
+func_15063740	obj_yaw_to_linked_obj	med	Returns the u16 yaw from obj to the object whose slot is at obj +0x222 (math_atan2_u16 on the x/z deltas)
+func_150637B4	obj_knockdown_start	high	Sets the object's state +0x78 = 9, runs setup lists 0x1D/0x1E, 60-frame timer, state +0x11A = 2 and starts anim 0x7F
+func_15063894	obj_knockdown_clear	med	Clears the object's state +0x78 / +0x11A, undoes setup lists 0x1D/0x1E and zeroes rec +0x8A / +0x89 / +0x83
+func_15063920	obj_hit_react_start	high	Sets the object's state +0x78 = 0x3B and +0x11A = 2, runs setup list 0x89 and starts anim 0x221
+func_150639D8	obj_ray_cast_from_ctl	med	Casts a world ray from the controller's aim position/direction (+0x13C / +0x130) into hit record ctl +0xB0, then notifies the target
+func_15063A54	obj_notify_hit_target	med	Marks the hit record (ctl +0xB0) target: its controller +0x195 = 30 and +0x196 = attacker slot
+func_15063AA0	obj_run_pending_actions	high	Per frame: runs the pending-action bits (ctl +0x1B4) of every live object with a controller (hits, item actions) and clears them
+func_15063D6C	player_aim_yaw_delta	med	Yaw from the player's aim yaw (+0x7A minus ctl +0x12) to its linked target, clamped to +-0x3E80, stored in D_800CC6D2
+func_15063DE8	player_aim_turn_update	med	When the aim button is held, turns the aim offset ctl +0x12 by stick X (or toward the target), clamped to +-0x2328 with body yaw spill
+func_15063F14	obj_detonate_attachment	med	If the object has its kind 100/44 attachment, runs effect 0xB (ground explosion) at it, undoes that setup list, clears +0x11A
+func_1506401C	obj_find_held	high	Returns the first live object of the given kind whose holder byte +0x65 is owner's slot + 1, or NULL
+func_15064240	player_try_begin_action	med	If the use button is pressed on the ground and the player is idle, sets state +0x11A / +0x78 for the action and returns anim; else 999
+func_1506435C	obj_spawn_hit_shot	med	Computes a muzzle position/direction from the controller (aim angles or target) and spawns a shot of kind arg1 via camera_object_spawn
+func_15064594	obj_pick_attack_anim	med	Picks anim arg1 or arg2 at random (arg3 after a repeat, 999 to keep), turns toward a visible target and returns it
+func_15064668	player_context_action	high	Runs the player's pending context action (sit, pick up, open, push...) or starts the B-button attack animation
+func_15064D5C	obj_slot_sync_anim_frame	med	Copies the animation frame (+0x2D0 +0x8) of object arg0 to object arg1, clamped below its frame count
+func_15064DD0	obj_play_carried_anim	med	Starts the carried-object animation chosen from the holder's kind/anim (0xC, 0x53, 0x21, 0x8A) and syncs its frame to the holder
+func_15064F50	player_move_animation	high	Picks and starts the player's walk/run/carry/swim animation from movement speed and state; returns the anim id, 0 or 999
+func_15065E18	player_item_action	high	Per-frame action of the held item / pad mode kind for the player: picks and plays the animation, returns it (999 keep, 1000 done)
+func_1506A9B0	obj_effect_debris_spray	med	Effect handler 0: sprays debris (debris_spray_spawn) at the object's position with fixed spray parameters
+func_1506AABC	obj_effect_emitter_trail	med	Effect handler 1: spawns an emitter trail on the object
+func_1506AAE4	obj_effect_shot_impact	med	Effect handler 2: shot impact effects at the published effect point / vector
+func_1506AB20	obj_effect_explosion	med	Effect handler 3: explosion effects at the published effect point / vector
+func_1506AB5C	obj_effect_directed_burst	low	Effect handler 4: func_151D3A30 burst (mode 0) at the object's position along the effect vector minus point
+func_1506ABFC	obj_effect_trail_smoke_light	med	Effect handler 5: spawns the trail smoke light on the object
+func_1506AC24	obj_effect_flash_light	med	Effect handler 6: creates a 300-frame light 50 units above the object
+func_1506AD28	obj_effect_directed_burst_alt	low	Effect handler 7: func_151D3A30 burst (mode 1) at the object's position along the effect vector minus point
+func_1506ADC8	obj_effect_smoke_ribbon	med	Effect handler 8: spawns a smoke puff and a ribbon trail on the object
+func_1506AE08	obj_effect_task_spawn	low	Effect handler 9: starts a kind-0xA task record (func_15149130) carrying the object, its +0x3B byte and 8 bytes of arg
+func_1506AEA0	obj_effect_players_impact	high	Effect handler 10: object impact effects at the effect point for every player whose bit is set in D_800CC680
+func_1506AF3C	obj_effect_ground_blast	med	Effect handler 11: ground explosion (kind 1) from the arg block (source object, position, value)
+func_1506AF84	obj_effect_ground_blast_alt	med	Effect handler 12: ground explosion (kind 2) from the arg block (source object, position, value)
+func_1506AFCC	obj_effect_attached_glow	med	Effect handler 13: spawns an attached glow on the object (with its +0x3B byte)
+func_1506B018	obj_effect_misc_spawn	low	Effect handler 14: calls func_151CF05C(obj, 0, 1)
+func_1506B04C	obj_effect_run_handler	high	Runs effect handler `type` (0..14) on obj after publishing its +0x2C vector and D_800CC674 as the effect point/vector
+func_1507C170	anim_advance_frame	high	Advances an animation by one frame (speed, looping, hold, end callback, events) optionally scaled for a record
+func_1507C608	obj_anims_advance_all	high	Advances the animation of every active object (only model kind 4 when arg0), skipping ones cutscenes freeze
+func_1507C700	obj_sync_anim_frame	high	Copies the animation frame of obj arg1 to obj arg0, clamped below its last frame (carrier link)
+func_1507C370	obj_collision_sizes_update	high	For each object with a controller, stores its collision cylinder (height/width/radius) in ctl +0x114/+0x116/+0x118
+func_1507C7C0	obj_collision_cylinder	high	Returns a record's collision cylinder height/width/radius by state, model kind and id
+func_1507E690	face_eye_blink_update	high	Eye blink of the object: toggles the eyelid states +0x6A/+0x6B when the +0x6E countdown runs out; reopened eyes wait 10 + rand % 140
+func_1507E7A0	face_update_hide_mask	high	For model types 0xF/0x46/0x4C, builds the face DL hide mask +0x94 from the eye/mouth selector bytes +0x6C/+0x6D
+func_1507E7E4	face_anim_start	high	Starts face animation anim (+0x6F) with priority and duration unless a stronger timed one runs; plays its first-frame sound
+func_1507E8E0	face_anim_set	high	Switches the object to face animation anim if it is in the object's table and applies it with the given variant
+func_1507E9A8	face_anim_apply	high	Applies the current face animation: model/frame pair, animation set +0x134/+0x135, selector bytes and +0x68/+0x69 defaults
+func_1507EA98	face_blink_allowed	med	Returns 1 when the object can blink: blink flag +0x1CA set and either the default face anim runs or a type-specific case
+func_1507EB1C	face_anim_timer_step	high	Per-record face animation timer step: counts +0x72 down, blinks when allowed, returns to the default animation at 0
+func_1507EB4C	face_set_default_anim	high	Sets the object's default face animation +0x70 and, if it changed, restarts it
+func_1507ECE8	face_anim_entry_get	med	Returns the face animation table entry index (anim * 10 + base) of the object's type from D_800D1C90, or 0
+func_1507ED48	face_anim_count	med	Returns the number of face animations in the table of the object's type (D_800D1C90), 0 for none
+func_1507EDC8	face_anim_stub	low	Empty function (two unused arguments)
+func_1507EDD8	face_anim_body_table	low	Returns the body animation byte table D_8009DCE0 (count 5) for face type 0, else NULL (count 0)
+func_1507EE24	face_anim_play_body	low	Starts the body animation listed at index arg1 of the face body table for the object at speed arg2 scaled
+func_1507EE9C	face_anim_reset_default	high	Restarts the default face animation +0x70 at priority 3 forever, clears the timer and resets out-of-range selectors
+func_1507EF0C	face_clear_default_anim	med	Sets the object's default face animation to 0 (face_set_default_anim(obj, 0))
+func_15080600	lipsync_reset	med	Clears the lip-sync state words D_800D1D48 / D_800D1D4C / D_800D1D50
+func_15080628	lipsync_poll_text_queue	high	Drains the text queue and forwards every 'L' record (face anim, decoded length / 441) to the current player's object
+func_15080748	lipsync_update_mouth	med	While lip-sync is active sets the mouth flag +0x1FF from the voice level D_80042B90 or cycles the face set +0x134 randomly
+func_15080830	lipsync_apply_event	med	Applies a lip-sync event: 0 resets to face anim 0, 1 starts level-driven talking, else sets face anim arg1 for arg2 clamped
+func_15080900	context_action_set	high	Offers context action `action` to the player in slot 0 (B) or 1 (hotspot target); tutorial actions show as the hint action first
+func_15080A20	context_action_lock	med	Writes a context action into the player's slot 0 (+0x74) or 1 (+0x75) with bit 7 set (locked) when non-zero
+func_15080AA8	context_action_clear	med	Clears the player's two context action slots unless they are locked (bit 7)
+func_15080B18	flag_bit_position	med	Splits a flag index into its byte index (>> 3) and bit mask (1 << (i & 7))
+func_15080B38	hint_action_has_hint	med	Returns 1 if the action's bit is set in the hint table D_eu_800BE9A0 (actions with a tutorial hint)
+func_15080B84	hint_play_next_voice	med	Plays the next voice sample of the hint's sample list D_800D1998 (index D_800D1994 up to D_800D1995)
+func_15080BF4	hint_text_event_cb	med	Text box callback: on event 0x20 plays the next hint voice sample
+func_15080C28	hint_box_open	med	Loads the hint text D_800D1940 (optionally prefixed by text 0x43) with its voice list and opens the hint text box
+func_15080FE8	hint_box_close	med	Closes the hint text box, frees the hint text/voice buffers and plays sound 0x5622
+func_15081064	hint_box_update	med	When the open hint box has finished, closes it, marks the hint as seen and releases the hotspot D_800D1DBC
+func_150810F4	hint_box_is_closed	med	Returns 1 when no hint text box is open (D_800D1941 == 0)
+func_15081120	obj_reach_hit	high	Whether the attacker's reach point (reach ahead, turned by its angles) hits the target's hit spheres; returns bone + 1 or 0
+func_1508148C	obj_hit_model_kind	high	Returns the hit-sphere model kind (0..0x16) for the object's id, or -1 when it has none
+func_1508154C	obj_ray_hit_model	high	Intersects a ray with the object's hit spheres; returns 1 on hit with entry/exit point, normal and sphere info, 0 miss, -1 none
+func_15081974	obj_find_reach_hit	high	Finds the first live object of id arg5 with hit spheres that the attacker's reach point hits; stores it and returns the result
+func_15081A90	ray_cast_world	high	Casts a ray against the level and the 25 objects and keeps the nearest hit closer than maxDist in the hit record
+func_15082020	ray_hit_object_bounds	high	Intersects a ray with an object's vertically squashed bounding sphere; stores entry/exit points and distances
+func_1508220C	obj_apply_hit_flags	med	Unless D_800BE616 is set, resets a non-zero +0x1CA to 7 and sets the hit flags by kind (skipped for v 10 with arg2)
+func_15082278	shot_hit_apply	high	Applies a weapon ray hit of the shooter: world impact effects / decals / ricochets or object damage and effects
+func_150829C0	setup_entry_try_spawn	high	Spawns level-setup entry idx unless already spawned, a placeholder, on respawn timer or out of range; returns slot + 1 or 0
+func_15082D5C	setup_entries_spawn_range	med	Tries to spawn the level-setup entries of the first part (arg2 != 0) or of the rest (arg2 == 0)
+func_15082DD8	obj_set_spawn_flags	med	Sets the object's flags +0xF8 bit 2 (clearing bits 1 and 27) and bit 1 for player records outside a list of levels
+func_15082E44	setup_entry_spawn	high	Spawns a level-setup entry into an object slot: position, angle, flags, type/model, player record and defaults
+func_15083568	obj_setup_run	high	Runs setup command list n (D_80087064) on obj: attached objects (type 0) or attachments; returns the last result
+func_150836AC	obj_alloc_light_bufs	med	Allocates the object's per-frame light buffers (+0x304) and look-at buffer (+0x314) from its record's light kind
+func_150836CC	obj_setup_undo	high	Undoes setup command list n on obj: removes its attachments and detaches/removes the objects it spawned
+func_15083784	obj_apply_setup_variant	med	Applies setup variant arg1 to the object: DL hide mask +0x94 combos, flags, or the setup list 0x76/0x77/0x78
+func_15083C3C	obj_set_type	high	Sets object slot's type (+4) and its type defaults (+0xC8, scale, model kind, model id, ROM asset)
+func_15083D54	obj_anim_state_alloc	med	Allocates the object's 0x3E0-byte animation state (+0x2D0) when its model has animations and starts anim arg1
+func_15083E0C	setup_entry_find_by_id	high	Returns the index of the level-setup entry whose id byte +0x28 is id; -1 when id is 0 or not found
+func_15083E20	obj_copy_type_params	high	Copies an object's per-type parameters from its type record D_800D1C90[type]
+func_15083E90	obj_find_by_setup_id	high	Returns the live object whose id byte +0x3B is id, or NULL for id 0 or no match
+func_15083F30	obj_spawn_attached	high	Setup command type 0: makes a new object of kind `kind` in a free slot attached to owner, with its model and anim
+func_15083FB0	obj_slot_by_setup_id	high	Returns the slot index of the live object with id byte +0x3B == id, or -1
+func_15084000	obj_slot_by_spawn	high	Returns the slot index of the object found by obj_find_by_spawn(arg0), or -1
+func_15084208	setup_next_free_id	med	Returns the lowest id (from 1, capped 0xFF) not used by any level-setup entry's byte +0x28
+func_150844AC	obj_model_vertex_blocks_get	high	Gets the two vertex block words of object variant var: shares the slot's block or makes private copies; 1 on alloc failure
+func_150847B4	obj_model_refs_release_all	med	Releases the model block references of every part entry of the object (count +0x2C9, at least 1)
+func_15084814	obj_model_refs_release	high	Drops a part entry's two model block references: lowers the shared block's user count or frees a private block
+func_150848F0	obj_load_part_models	med	Loads the model header and animation bank of the object's type and of each of its part models
+func_150849C0	obj_release_models	high	Releases the shared model resources of an object that goes away unless another live object uses them
+func_15084E08	obj_current_part_model	high	Returns the model id of the object's current part (+0x1C9, 1-based) or its first part
+func_15084E34	obj_current_part_model_idx	med	Returns the model id of the current part (+0x1C9, else +0x2C8) and stores its part index
+func_15084E80	model_slots_age_release	high	Per-frame countdown of the 187 model resource slots; frees an unlocked slot's block and texture refs when its timer hits 1
+func_15085098	obj_randomize_anim_frame	med	For objects of type 0x94, sets the animation frame to a random value below its frame count
+func_15085118	level_list_index_of	low	Returns the index of arg0 in the u16 list D_800BE9B8 (D_800BE9B0 entries), or 0
+func_15085170	obj_type_model_group	med	Maps the object's type (+4) to the first type of its model group (7 lists in D_800875E0), or returns the type itself
+func_150851E0	level_start_point_get	high	Looks up a level start point (position, angle, flags) for the player and start index; multiplayer picks the farthest start
+func_15085710	player_stat_modify	med	Sets or adds/subtracts field arg1 (0..11) of player arg0's 0x1C-byte stats record (health, lives, money ...), clamped
+func_15085880	player_start_index_set	high	Stores the player's saved level start index in its record (+0x31C +0x11B)
+func_15085890	player_start_index_get	high	Returns the player's saved level start index from its record (+0x31C +0x11B)
+func_150858A0	obj_place_at_start	high	Places an object record at level start arg1: position, yaw, anim events and the camera's start eye
+func_150859AC	player_stat_get	high	Returns field `field` of player `player`'s stats record (0: the bit in D_800D2340); 0 for players >= 0xFF
+func_15085ABC	player_stats_store_health	med	In single player, stores each masked player's current health into stats field 5
+func_1508F120	link_group_find_partner	med	Finds the link group containing key (arg0 << 12 | arg1) and returns the id of another member of type arg2, or -1
+func_1508F21C	link_group_clear	high	Clears link group arg0 of D_800D23C0 (count, word +4 and halfword +0) when in range
+func_1508F26C	link_group_remove_members	med	For the link group containing key (arg0 << 12 | arg1), removes its world records (type 2) and look points (type 3), then clears it
+func_15094CD0	skin_transform_points	low	Transforms the 16 point slots returned by func_15094DAC through the matrix D_800D3040 into 12-byte vectors
+func_15094DAC	skin_point_table_build	low	Fills a 16-entry pointer table from the header: first (b1 & 0xF) NULL, then consecutive 16-byte entries, rest NULL
+func_15094EC8	uv_rotate	high	Writes count texture coordinates rotated by angle degrees about the texture centre to the vertices (s, t at +8 / +0xA)
+func_150952B0	camera_build_view_proj	med	Combines player view's modelview matrix and its camera projection matrix into the float matrix D_800D30C8[view]
+func_1507EF60	idle_list_add	high	Appends one idle set id to the candidate list (max 40 entries) and bumps its count
+func_1507EF98	idle_list_add_group	high	Appends idle set group n (D_80086FC4[n], D_8009BFC0[n] ids) to the candidate list if it fits in 40
+func_1507F018	idle_list_filter_recent	med	Filters the idle candidate list against the recently played sets into the output list; flags when nothing is left
+func_1507F238	idle_recent_push	high	Pushes an idle set onto the recent list; sets 0x11 and 0x12 are pushed together
+func_1507F298	idle_recent_push_one	high	Shifts the 5-entry recent idle set list down and stores the new set at the front
+func_1507F2D4	idle_mode_update	med	Updates the current player's idle mode ctl +0x64 / count +0x65: switches between modes 1 and 2 after enough sets
+func_1507F380	idle_recent_remove	high	Removes a set id from the 5-entry recent idle set list (clears its entry)
+func_1507F3B0	idle_choose_next_set	high	Picks the next idle set for the current player from forced, bored, state and mode groups, avoiding recent sets
+func_1507F640	player_idle_animation	high	Idle animation of the current player: counts down the idle delay, then plays entries of the chosen idle set
+func_1507F834	idle_set_advance	high	Advances the current idle set to its next entry; returns 1 when a new set must be chosen
+func_1507F8A0	idle_delay_random	med	Returns a random idle delay for mode arg0 (150..199, 50..99 or 0..29 frames; 0 in level 0x31)
+func_1507F92C	player_play_idle_base_anim	med	Starts the base idle animation, or a carried-character variant chosen from the holder's kind when +0x13C >= 100
+func_1508000C	obj_surface_effects_update	high	Per-frame floor material effects of the record: model scale, flags, ambient loops and sounds on material change
+func_150802A8	player_idle_state_update	med	Per frame: counts idle frames ctl +0x5A (or resets the idle state), the bored timer ctl +0x66, then surface effects
+func_1508039C	obj_broadcast_bored	low	Broadcasts message 0xD carrying the object and its id byte +0x3B (func_151920FC / func_151494E0)
+func_150803E0	obj_near_reachable_node	high	Returns 1 when the object is in a zone of kind 5 or 0xB and a node of lists 0x15..0x17 within 1000 units is reachable
+func_15095350	sprite_gfx_begin	med	Appends the sprite setup display list D_80087770 and forgets the last loaded texture (D_800D30C0 = 0)
+func_15095380	sprite_load_texture	med	Fills the texture descriptor from the sprite texture and frame, then emits its TMEM load with a 0x100 x 0x100 tile origin
+func_150953F8	sprite_load_texture_at	med	As sprite_load_texture but with caller-given tile origin (uls, ult); returns the new display-list end
+func_15095470	sprite_tex_desc_set	med	Fills the shared texture descriptor D_800D30B0 (address or frame entry, size, format, animated flag) from a texture
+func_150954E4	gfx_load_texture_tile	high	Appends the display-list commands that load a texture (and CI palette / I4 plane) into TMEM and set up its render tile
+func_15095A4C	sprite_project_point	high	Projects a world point with the current player's view matrix to viewport screen coordinates; 0 when culled by depth
+func_15095B70	sprite_draw_at_world_depth	med	Projects the sprite's world position and draws it there with a prim depth from its distance (max 4000)
+func_15095CC0	sprite_prepare_at_world	low	Projects the sprite's world position, computes its screen rect and emits a prim depth when visible; no draw
+func_15095E58	sprite_draw_at_screen	med	Draws a sprite at screen point (x, y) at depth 4096 if visible
+func_15095EA0	sprite_draw_if_visible	med	Computes the sprite's screen rect at (x, y, depth) and draws it when it overlaps the viewport
+func_15095F18	sprite_screen_rect	high	Computes the sprite's screen rectangle at a screen point and depth in the current viewport; sets visible
+func_1509611C	sprite_draw_rect_plain	med	Draws the sprite in the last computed screen rectangle with no texture offset (sprite_draw_rect(gfx, spr, 0, 0, 0))
+func_15096144	sprite_draw_rect	high	Draws the sprite (alpha, animation frame, flip) as one textured rectangle in the last computed screen rectangle
+func_150966AC	image_draw_tiled	med	Draws an image as a grid of TMEM-sized textured rectangles at (x, y) with scale, border fix and frame
+func_15096D44	sprite_gfx_begin_alt	low	Appends the setup display list D_800877A8 and clears D_800D31CB
+func_15085FE0	rail_nodes_load	high	Loads the level's rail node asset (counts and node array D_800D2778, or none) and builds the height bands
+func_15086058	rail_bands_build	high	Groups the rail nodes by height band and stores used bands and split heights; returns 1 when two bands overlap
+func_15086218	rail_band_for_height	high	Returns the rail height band containing height y (first split height above it)
+func_15086268	rail_node_nearest	high	Returns the rail node of the given band and kind nearest to (x, y, z), wall-checked for kind 0; 0xFF when none
+func_15086508	rail_point_pick	high	Picks the rail node for a position: nearest in its band, then route choice or the closest link line
+func_150867D4	rail_route_next	high	Dijkstra over the rail nodes from start to the nearest target node (avoid set penalised); returns the next node
+func_15087040	rail_node_distance	high	Straight-line distance between two rail nodes (0 when either is 0xFF)
+func_150870E0	rail_node_in_zone	med	Returns whether rail node arg0's position lies in a zone of kind 0xB (func_150A3674(3, 0xB, x, y, z))
+func_1508712C	rail_node_position	high	Stores rail node arg0's position as floats; returns 0 when the index is out of range
+func_150871B8	rail_node_find_by_tag	high	Returns the index of the rail node whose tag byte +7 is arg0, or 0xFF
+func_15087204	rail_wall_hit	high	Returns where a move first crosses a rail wall segment in its height band (move length times fraction), or -1
+func_15087540	rail_records_init	high	Sets up the rail records from the tagged start node: lap nodes, human / CPU record counts and allocation
+func_150877C0	rail_track_update	high	Moves the player's rail record along its spline to the point nearest the player object; updates direction and lap
+func_15088130	rail_cameras_update	high	Runs the rail or spline camera of every player record whose player has a camera
+func_1508823C	rail_record_set_alt	med	Sets rail record arg0's alternate route flag; when turning it on, re-picks its next two control nodes on the alt band
+func_150882C4	obj_yaw_clamp_to_track	high	Keeps the object's yaw within 0x2400 of a quarter turn past the player's track direction
+func_15088360	player_face_track_side	high	Turns the object a quarter turn from the player's track direction, side chosen by its track position
+func_15088434	rail_record_set_player	high	Sets rail record arg0's player object index (+0x31)
+func_1508845C	rail_record_set_target_pos	med	Sets rail record arg0's target track position (+4) to arg1 / 256
+func_1508849C	rail_record_start_script	med	Unless player-controlled or masked, puts the record's object in state 0xC running AI script kind arg2; record state 2
+func_15088568	rail_record_start	med	Starts rail record arg0 (script start or record state 2) and gives it the next start order D_800D27BA
+func_1508863C	rail_record_get_pos	high	Returns rail record arg0's track position (+0) times 256, 0 without records
+func_15088688	rail_record_get_progress	high	Returns rail record arg0's progress: lap +0x24 * 16 plus the spline parameter * 16
+func_150886E0	rail_record_get_speed	med	Returns rail record arg0's +0x14 value times 0.8 (speed), 0 without records
+func_1508872C	rail_record_get_lap	low	Returns rail record arg0's byte +0x27, 0 without records
+func_15088760	player_place_gap	high	Returns the track progress gap to the player at place + delta (gap << 8 | index), 16 when none
+func_1508882C	rail_find_ahead	high	Returns the nearest other racer in front of the player along its track direction, with its distance
+func_150889D8	rail_record_index_of	high	Returns the rail record index of the object (0 for slot 0), or -1
+func_15088A68	rail_record_copy	high	Copies rail record arg0 over arg1, keeping arg1's player index and state byte
+func_15088B08	cpu_player_slot_claim	high	Takes the first free computer-player rail record, resets it and binds it to the object; returns its index or -1
+func_15088BFC	cpu_player_slot_release	med	Clears the object's rail record player and frees its computer-player slot bit in D_800D27B4
+func_15088C74	rail_first_record_idle	low	Returns 1 when the first rail record's byte +0x46 is 0xFF, 0 otherwise or without records
+func_15088CA0	rail_record_reset	high	Resets a rail record: control nodes, lap, spline parameter 0, positions 0.5, direction (0, 1)
+func_15088D24	rail_link_pick	high	Picks the next rail node after node coming from prev among its type-0 links, preferring the wanted band
+func_15088E84	rail_param_step	high	Moves the rail record's spline parameter by dt, shifting its four control nodes on wrap and picking the camera mode
+func_150891D4	rail_record_resync	med	Resets the object's rail record to the start of its segment and places the object on the spline facing along it
+func_150893AC	rail_spline_points	high	Fills the four spline control points of a rail record as x / y / z float arrays
+func_150894F8	rail_node_next	high	Returns the rail node after node coming from prev with a link of the given type and band (or the last of the type)
+func_15089664	rail_camera_follow	high	Rail camera of one player record: follows the camera rail nodes segment by segment
+func_15089B68	rail_camera_spline	high	Spline camera of one player record through four type-6 nodes, or releases it to camera mode 10 then 6
+func_15089BB0	rail_state_clear	high	Clears the rail AI state block pointer D_800D27D0
+func_1508A040	rail_state_init	med	Binds the rail AI state block to the race-mode event vars (mode 0xB9 ...), shuffles lanes and resets counters by difficulty
+func_1508A41C	mode_pick_mid_range_object	high	Returns the eligible object whose ground distance to the player lies closest to the middle of the mode's range
+func_1508A63C	rail_rank_rivals	high	Script command 5: advances the rail cursor and rebuilds that racer's 16-entry rival list sorted by distance
+func_1508AB7C	rail_racers_update	high	Script command 6: per-frame update of every rail racer (timers, input, node, activity, events, steering)
+func_1508B20C	rail_event_add	high	Adds a pending rail event at (x, y, z) with squared radius (up to 8) to the rail state
+func_1508B5F0	mp_human_counter_get	low	Returns the s16 at +0x70 of human player arg0's 12-byte record in D_80090174, 0 for non-humans
+func_1508B630	mp_human_counter_clear	low	Clears the s16 at +0x70 of human player arg0's 12-byte record in D_80090174
+func_1508B704	rail_zone_flood	high	Flood fills the rail node graph from node, collecting up to 8 boundary nodes outside the zone radius
+func_1508B854	rail_events_assign_nodes	high	For each pending rail event, gives every computer racer near it the nearest node of the event's zone
+func_1508BE18	rail_pick_chase_target	high	Script command 13: refreshes rivals and picks the racer the current one should chase by link cost
+func_1508C07C	rail_lane_shuffle	high	For each racer, writes a triangle wave of lane values from a random free start column into its row
+func_1508C370	rail_assign_targets	high	Script command 7: assigns each racer of the current team the cheapest unassigned rival target
+func_1508C5F0	rail_cmd_stub	low	Returns 0 (unused script command stub)
+func_1508C600	rail_pair_sight	high	Line-of-sight test between rail racers a and b; updates the pair bits in the +0x16C0 masks
+func_1508CA14	rail_pair_rivals	high	Pairs human and computer racers for line-of-sight checks, refreshing the per-racer pair masks
+func_1508CE28	player_next_active	high	Round-robin over player records from the cursor: returns the next live, active, unmasked one, or -1
+func_1508CEE4	rail_human_cursor_next	med	Advances the rail state's human-player cursor +0x1703 (wraps at D_80090130) and returns it
+func_1508CF34	rail_racer_steer	high	Script command 9 / per-racer steering: racer i aims at rail node `node`, with obstacle and replan handling
+func_1508DCAC	rail_rival_pace	high	Script command 14: paces object i toward its rail slot target by distance band and difficulty
+func_1508DE78	rail_state_reset	high	Script command 10: frees the rail pickup slots and resets the per-entry tables
+func_1508DF48	rail_pickup_slot_release	med	Releases racer arg0's pickup slot (+0xEB0); with arg1 == 1 respawns the pickup at the racer's position
+func_1508E080	rail_weapons_update	high	Script command 11: chooses and swaps each racer's weapon, handles pickups and ammo
+func_1508EB24	rail_stub_empty	low	Empty function
+func_1508EB2C	rail_weapon_range	med	Returns the engagement range for a weapon / item kind (500 .. 100000)
+func_1508EBDC	rail_weapon_pickup_id	low	Returns the pickup id for a weapon kind (another table in race mode 0xB8), or -1
+func_1508ECF8	rail_racer_take_over	high	Script command 15: racer i takes over racer j's place, slots, flags and object
+func_1508EFEC	rail_racer_send_event	med	Dispatches event (1, racer tag | 0x2000, arg1, arg2) for racer arg0
+func_1508F054	rail_racer_send_event_14	low	Dispatches event (1, racer tag | 0x2000, 0x14, arg1) for racer arg0
+func_1508F0B8	rail_racer_send_event_61	low	Dispatches event (1, racer tag | 0x2000, 0x61, arg1) for racer arg0

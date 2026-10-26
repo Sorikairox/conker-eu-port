@@ -11,7 +11,7 @@ void camera_calc_relative_yaw(u8 *);
 void camera_update_object_state9(struct108 *arg0) {
     s32 temp_t9;
 
-    if (func_150859AC((s16) arg0->unk3D0->unk127, 1) == 9) {
+    if (player_stat_get((s16) arg0->unk3D0->unk127, 1) == 9) {
         camera_pop_mode(arg0, 2);
         if (camera_push_mode(arg0, 8, 0, arg0->unk134, 3) != 0) {
             arg0->unk73C = 0;

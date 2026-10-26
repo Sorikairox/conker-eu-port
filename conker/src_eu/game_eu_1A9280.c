@@ -3,9 +3,10 @@
 #include "variables.h"
 
 
-s32 func_151EFDD0();
+s32 game_gu_random();
 extern u8 D_80096091[];
-s32 func_1517BA70(u8 *arg0, u8 *arg1, s32 *arg2, s32 arg3) {
+/* was func_1517BA70 */
+s32 ambient_placer_flicker(u8 *arg0, u8 *arg1, s32 *arg2, s32 arg3) {
     s32 d;
     s32 lim;
     s32 r;
@@ -20,13 +21,13 @@ s32 func_1517BA70(u8 *arg0, u8 *arg1, s32 *arg2, s32 arg3) {
     *(s16 *)(arg1 + 4) = *(s16 *)(arg0 + 4);
     d = 0x29 - *(s8 *)(arg0 + 0xD);
     if (d == 0) {
-        *(s8 *)(arg0 + 0xD) = *(s8 *)(arg0 + 0xD) - func_151EFDD0() % 8 + 4;
+        *(s8 *)(arg0 + 0xD) = *(s8 *)(arg0 + 0xD) - game_gu_random() % 8 + 4;
     } else if (d < 0) {
-        r = func_151EFDD0();
-        *(s8 *)(arg0 + 0xD) = *(s8 *)(arg0 + 0xD) - (func_151EFDD0() % -d >> 1) - r % 8 + 4;
+        r = game_gu_random();
+        *(s8 *)(arg0 + 0xD) = *(s8 *)(arg0 + 0xD) - (game_gu_random() % -d >> 1) - r % 8 + 4;
     } else {
-        r = func_151EFDD0();
-        *(s8 *)(arg0 + 0xD) += (func_151EFDD0() % d >> 1) + r % 8 - 4;
+        r = game_gu_random();
+        *(s8 *)(arg0 + 0xD) += (game_gu_random() % d >> 1) + r % 8 - 4;
     }
     *(s16 *)(arg1 + 0) = *(s16 *)(arg0 + 0);
     *(s16 *)(arg1 + 2) = *(s16 *)(arg0 + 2);
@@ -34,7 +35,8 @@ s32 func_1517BA70(u8 *arg0, u8 *arg1, s32 *arg2, s32 arg3) {
     return 0;
 }
 
-s32 func_1517BC58(s16 *arg0, s16 *arg1, s32 *arg2, u8 *arg3) {
+/* was func_1517BC58 */
+s32 ambient_placer_rise_fade(s16 *arg0, s16 *arg1, s32 *arg2, u8 *arg3) {
     s32 t;
     if (*arg2 >= 0x600) {
         arg1[1] = (arg0[1] + (*arg2 >> 6)) - 0x18;
@@ -52,7 +54,8 @@ s32 func_1517BC58(s16 *arg0, s16 *arg1, s32 *arg2, u8 *arg3) {
     return 0;
 }
 
-s32 func_1517BD18(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
+/* was func_1517BD18 */
+s32 ambient_placer_loop_mid(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
     if (*arg2 >= 0x300) {
         if (*arg2 >= 0x501) {
             *arg2 -= 0x200;
@@ -66,7 +69,8 @@ s32 func_1517BD18(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
     return 0;
 }
 
-s32 func_1517BD68(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
+/* was func_1517BD68 */
+s32 ambient_placer_hop(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
     s32 v;
     s32 d;
 
@@ -104,7 +108,7 @@ typedef struct {
     u8 flare;       /* +B 0x21 / 0x22: flare-up state (0x22 counts down to 0x21) */
     s8 halfWidth;   /* +C quad half width */
     s8 height;      /* +D quad height / 4 */
-} AmbientEmitterRec;  /* 14 bytes (func_1500AF08 layout) */
+} AmbientEmitterRec;  /* 14 bytes (ambient_emitter_add layout) */
 extern AmbientEmitterRec *D_800DE148;
 extern s32 D_8008D254;   /* sort key: 0 = x, else z */
 #endif
@@ -116,7 +120,7 @@ typedef struct {
     s32 romAddr;    /* +0 sample data in ROM (0 = none) */
     s32 size;       /* +4 */
     s32 handle;     /* +8 loaded sample (0 = none) */
-    u8 heard;       /* +C an emitter of this voice was in range this frame (cleared by func_1517E3CC) */
+    u8 heard;       /* +C an emitter of this voice was in range this frame (cleared by ambient_slots_refresh) */
     u8 padD[3];
 } AmbientVoice;     /* D_800DDA90[15] */
 extern struct { void *place; AmbientUpdater update; s32 unk8; } D_8008D258[];  /* placers by type (.game_data) */
@@ -138,16 +142,17 @@ f32 sinf(f32);
 f32 cosf(f32);
 void *allocate_memory(s32, s32, s32, s32);
 s32 approx_dist3_int(s32 dx, s32 dy, s32 dz);
-void func_15170A70(s32 x, s32 y, s32 z, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-void func_10004074(s32);
-void func_1517BE0C(s32 lo, s32 hi);
-s32 func_151EFDD0(void);
+void particle_spark_spawn(s32 x, s32 y, s32 z, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+void heap_free(s32);
+void ambient_emitters_sort(s32 lo, s32 hi);
+s32 game_gu_random(void);
 #endif
 
 #ifdef NON_MATCHING
 // ambient_emitters_sort: quicksort of the emitter records D_800DE148[lo..hi] (14 bytes) by x, or by z when
 // D_8008D254 is set; pivot = the last record (Rare's partition loop, literal).
-void func_1517BE0C(s32 lo, s32 hi) {
+/* was func_1517BE0C */
+void ambient_emitters_sort(s32 lo, s32 hi) {
     AmbientEmitterRec tmp;
     s32 i = lo;
     s32 j = hi;
@@ -178,22 +183,23 @@ void func_1517BE0C(s32 lo, s32 hi) {
     tmp = D_800DE148[i];
     D_800DE148[i] = D_800DE148[hi];
     D_800DE148[hi] = tmp;
-    func_1517BE0C(lo, i - 1);
-    func_1517BE0C(i + 1, hi);
+    ambient_emitters_sort(lo, i - 1);
+    ambient_emitters_sort(i + 1, hi);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517BE0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_emitters_sort.s")
 #endif
 
 #ifdef NON_MATCHING
 // ambient_emitters_update: per frame, the level's ambient emitters (fires, torches: the records sorted by
-// func_1517BE0C) within radius of (x, y, z) along the axis the camera angle (degrees) faces: nearest distance per
+// ambient_emitters_sort) within radius of (x, y, z) along the axis the camera angle (degrees) faces: nearest distance per
 // slot (D_800DE070), the slot's voice loaded (D_800DD478 slot words + D_800DDA90 voice) or marked "heard" (read by
-// func_1517E3CC), flare-ups near the point D_800DD8A0 / close to the camera, one camera-facing 4-Vtx quad per
+// ambient_slots_refresh), flare-ups near the point D_800DD8A0 / close to the camera, one camera-facing 4-Vtx quad per
 // emitter at D_800DDD10[D_800BE9C0] (count D_800DE188; emitters within 0x8C of the player (px, py, pz) are skipped,
 // fade in up to 0xF0), the per-slot phase animation, a random spark, and finally the quads turned to the angle.
 // Clears D_800DD8A0[0] when quads were allocated.
-void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s32 pz) {
+/* was func_1517C11C */
+void ambient_emitters_update(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s32 pz) {
     AmbientEmitterRec *e;
     AmbientVoice *v;
     AmbientUpdater update;
@@ -239,7 +245,7 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
     }
     if (byZ != D_8008D254) {
         D_8008D254 = byZ;
-        func_1517BE0C(0, D_800DDD20 - 1);
+        ambient_emitters_sort(0, D_800DDD20 - 1);
     }
     axis = byZ ? 2 : 0;
     if (dir == 1) {
@@ -310,24 +316,24 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                 if (v->romAddr != 0) {
                     info = &D_80096090[D_800DDFF0[voice] * 10];
                     n = info[1] * *(u16 *) (info + 2);
-                    v->handle = func_10003C6C(v->size, 1, 2, 1, 0);
+                    v->handle = heap_alloc_tagged(v->size, 1, 2, 1, 0);
                     if (v->handle != 0) {
-                        slot[0] = func_10003C6C(n, 4, 1, 0, 0);
+                        slot[0] = heap_alloc_tagged(n, 4, 1, 0, 0);
                         if (slot[0] != 0) {
-                            func_10004514(v->romAddr, (void *) v->handle, v->size, 1);
+                            rom_dma_read(v->romAddr, (void *) v->handle, v->size, 1);
                             v->heard = 1;
                             step = *(u16 *) &D_80096090[D_800DDFF0[voice] * 10 + 2];
                             for (k = 1; k < 26; k++) {
                                 slot[k] = slot[k - 1] + step;
                             }
                         } else {
-                            func_10004074(v->handle);
+                            heap_free(v->handle);
                         }
                     }
                 }
             } else if (v->heard == 0) {
                 v->heard = 1;
-                func_100043B4((s32 *) slot[0], 4);
+                heap_set_block_tag((s32 *) slot[0], 4);
             }
 
             quad = (Vtx *) (D_800DDD10[D_800BE9C0] + count * 64);
@@ -340,7 +346,7 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                 approx_dist3_int(e->pos[0] - D_800DD8A0[0], e->pos[1] - D_800DD8A0[1], e->pos[2] - D_800DD8A0[2]) < 0x50 &&
                 D_800DDFF0[voice] == 0 && e->flare != 0x21) {
                 e->flare = 0x21;
-                func_15170A70(e->pos[0], e->pos[1] + 0x44, e->pos[2], 0, 0, 0xFF, 0);
+                particle_spark_spawn(e->pos[0], e->pos[1] + 0x44, e->pos[2], 0, 0, 0xFF, 0);
             }
             if (e->flare >= 0x21) {
                 if (e->flare >= 0x22) {
@@ -348,7 +354,7 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                 }
             } else if (dist < 0x30 && D_800DDFF0[voice] == 0) {
                 e->flare = 0x22;
-                func_15170A70(e->pos[0], e->pos[1] + 0x44, e->pos[2], 0, 0, 0xFF, 0);
+                particle_spark_spawn(e->pos[0], e->pos[1] + 0x44, e->pos[2], 0, 0, 0xFF, 0);
             }
             quad[3].v.flag = e->height;
             quad[2].v.flag = e->halfWidth;
@@ -405,12 +411,12 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
             if (bit & D_800DDC04) {
                 flags = &D_800DE040[i];
                 if (bit & D_800DDC08) {
-                    r = func_151EFDD0() % 10;
+                    r = game_gu_random() % 10;
                     if (r == 0) {
-                        *flags |= func_151EFDD0() % 16;
+                        *flags |= game_gu_random() % 16;
                         step = 0;
                     } else if (r == 1) {
-                        *flags &= func_151EFDD0() % 16;
+                        *flags &= game_gu_random() % 16;
                         step = 1;
                     } else {
                         step = D_800BE9E4 << 5;
@@ -446,12 +452,12 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
     }
 
     // A random quad on its slot's first frame sparks (D_800DDD0C == 0 here divides by zero, as on N64).
-    r = (u32) func_151EFDD0() % (u32) D_800DDD0C;
+    r = (u32) game_gu_random() % (u32) D_800DDD0C;
     if ((u32) r < (u32) D_800DE188) {
         quad = (Vtx *) (D_800DDD10[D_800BE9C0] + r * 64);
         frame = quad[0].v.flag;
         if (frame % 26 == 0 && D_800DDFF0[frame / 26] == 0) {
-            func_15170A70(quad[0].v.ob[0], quad[0].v.ob[1] + 0x44, quad[0].v.ob[2], 0, 1, 0xFF, 0);
+            particle_spark_spawn(quad[0].v.ob[0], quad[0].v.ob[1] + 0x44, quad[0].v.ob[2], 0, 1, 0xFF, 0);
         }
     }
 
@@ -483,24 +489,25 @@ void func_1517C11C(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
     D_800DD8A0[0] = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517C11C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_emitters_update.s")
 #endif
 
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
-void func_10004074(s32);
+void heap_free(s32);
 #else
-s32 func_10004074(s32);
+s32 heap_free(s32);
 #endif
-s32 func_10006530(s32, s32, u32);
+s32 rzip_inflate(s32, s32, u32);
 
-void func_1517D534(void)
+/* was func_1517D534 */
+void ambient_slots_free_all(void)
 {
   int pad;
   s32 *var_s0;
   s32 temp_a0;
   s32 temp_a1;
   s32 var_s1;
- do { var_s0 = &D_800DDA90; var_s1 = 0; do { temp_a0 = *((s32 *) (((u8 *) var_s0) + 8)); if (temp_a0 != 0) { temp_a1 = (&D_800DD478)[var_s1 * 0x1A]; if (temp_a1 != 0) { func_10006530(temp_a0, temp_a1, D_8003809C); func_10004074(*((s32 *) (((u8 *) var_s0) + 8))); } *((s32 *) (((u8 *) var_s0) + 8)) = 0; } var_s1 += 1; var_s0 += 4; } while (var_s1 != 0xF); } while (0);
+ do { var_s0 = &D_800DDA90; var_s1 = 0; do { temp_a0 = *((s32 *) (((u8 *) var_s0) + 8)); if (temp_a0 != 0) { temp_a1 = (&D_800DD478)[var_s1 * 0x1A]; if (temp_a1 != 0) { rzip_inflate(temp_a0, temp_a1, D_8003809C); heap_free(*((s32 *) (((u8 *) var_s0) + 8))); } *((s32 *) (((u8 *) var_s0) + 8)) = 0; } var_s1 += 1; var_s0 += 4; } while (var_s1 != 0xF); } while (0);
 }
 
 #ifdef NON_MATCHING
@@ -510,7 +517,8 @@ extern s32 D_8008D340;
 // D_800DDD0C slots are used). It stands on (x, y, z), turned by angle (degrees) around the vertical axis, half width
 // radius, height 2 * halfHeight. tex is a w x h RGBA16 image followed by its w x h I4 mask: both are loaded with one
 // LoadBlock (rows (h * 5 + 3) >> 2), tile 0 = the image, tile 1 = the mask (TMEM offset w * h / 4 words).
-s32 func_1517D5E4(s32 gfx, s16 x, s16 y, s16 z, f32 angle, s32 radius, s32 halfHeight, s32 w, s32 h, s32 tex) {
+/* was func_1517D5E4 */
+s32 ambient_billboard_quad_draw(s32 gfx, s16 x, s16 y, s16 z, f32 angle, s32 radius, s32 halfHeight, s32 w, s32 h, s32 tex) {
     u32 *g = (u32 *) gfx;
     u32 slot = D_800DE188;
     Vtx *quad = (Vtx *) (D_800DDD10[D_800BE9C0] + slot * 64);
@@ -597,12 +605,13 @@ s32 func_1517D5E4(s32 gfx, s16 x, s16 y, s16 z, f32 angle, s32 radius, s32 halfH
     return (s32) (g + 26);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517D5E4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_billboard_quad_draw.s")
 #endif
 
 extern u8 D_800DE158[];
 
-void func_1517DAE8(s16 arg0, s16 arg1, s16 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
+/* was func_1517DAE8 */
+void ambient_extra_flame_queue(s16 arg0, s16 arg1, s16 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
     u8 *p;
     s32 i = D_8008CEB0;
 
@@ -620,15 +629,17 @@ void func_1517DAE8(s16 arg0, s16 arg1, s16 arg2, f32 arg3, s32 arg4, s32 arg5, u
 }
 
 
-void func_1517DB6C(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    func_1517DAE8(arg0, arg1, arg2, D_800DBFF0[arg3].unk380, arg4, arg5, (s32) D_800DDD1C >> 3);
+/* was func_1517DB6C */
+void ambient_extra_flame_queue_cam(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    ambient_extra_flame_queue(arg0, arg1, arg2, D_800DBFF0[arg3].unk380, arg4, arg5, (s32) D_800DDD1C >> 3);
 }
 
 typedef struct { s16 x, y, z; u8 idx; u8 pad7; u16 a; u16 b; f32 s; } EntDC00;
 extern s32 D_800DE188;
-s32 func_1517D5E4(s32, s16, s16, s16, f32, s32, s32, s32, s32, s32);
+s32 ambient_billboard_quad_draw(s32, s16, s16, s16, f32, s32, s32, s32, s32, s32);
 
-s32 func_1517DC00(s32 arg0, u16 *arg1) {
+/* was func_1517DC00 */
+s32 ambient_extra_flames_draw(s32 arg0, u16 *arg1) {
     s32 saved;
 
     saved = D_800DE188;
@@ -640,7 +651,7 @@ s32 func_1517DC00(s32 arg0, u16 *arg1) {
     while (D_8008CEB0 != 0) {
         D_8008CEB0--;
         if (arg1 != 0) {
-            arg0 = func_1517D5E4(arg0, ((EntDC00 *)D_800DE158)[D_8008CEB0].x, ((EntDC00 *)D_800DE158)[D_8008CEB0].y, ((EntDC00 *)D_800DE158)[D_8008CEB0].z, ((EntDC00 *)D_800DE158)[D_8008CEB0].s, ((EntDC00 *)D_800DE158)[D_8008CEB0].a, ((EntDC00 *)D_800DE158)[D_8008CEB0].b, 16, 32, (s32)(arg1 + ((EntDC00 *)D_800DE158)[D_8008CEB0].idx * 640));
+            arg0 = ambient_billboard_quad_draw(arg0, ((EntDC00 *)D_800DE158)[D_8008CEB0].x, ((EntDC00 *)D_800DE158)[D_8008CEB0].y, ((EntDC00 *)D_800DE158)[D_8008CEB0].z, ((EntDC00 *)D_800DE158)[D_8008CEB0].s, ((EntDC00 *)D_800DE158)[D_8008CEB0].a, ((EntDC00 *)D_800DE158)[D_8008CEB0].b, 16, 32, (s32)(arg1 + ((EntDC00 *)D_800DE158)[D_8008CEB0].idx * 640));
         }
     }
     D_800DE188 = saved;
@@ -652,7 +663,8 @@ s32 tint_emit_prim_env_colors(s32, s32, s32, s32);
 extern s32 D_8008D340;
 extern u16 *D_800DE154;
 
-void func_1517D7B0(s32 *arg0, s32 arg1) {
+/* was func_1517D7B0 */
+void ambient_flames_draw(s32 *arg0, s32 arg1) {
     u32 sp48;
     u32 sp44;
     s32 temp_a0;
@@ -704,7 +716,7 @@ void func_1517D7B0(s32 *arg0, s32 arg1) {
 
     var_s2 = 0xFFFF;
     if (D_800DDD10[D_800BE9C0] != 0) {
-        *arg0 = func_1517DC00(*arg0, D_800DE154);
+        *arg0 = ambient_extra_flames_draw(*arg0, D_800DE154);
         if ((D_800DDD20 != 0) && (D_800DE188 != 0)) {
             temp_v0 = *arg0;
             *arg0 = temp_v0 + 8;
@@ -865,17 +877,18 @@ loop_16:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517D7B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_flames_draw.s")
 #endif
 #ifdef NON_MATCHING
-void func_1517C11C(s32, s32, s32, s32, f32, s32, s32, s32);
+void ambient_emitters_update(s32, s32, s32, s32, f32, s32, s32, s32);
 
 /* Per-frame refresh of the 15 positional sound slots (records of 0x68 bytes at D_800DD478, word 0 = active) and
  * their voices (16-byte records at D_800DDA90: +8 voice handle, +0xC "heard this frame"). With D_800DDD20 set,
- * every "heard" flag is cleared, func_1517C11C marks the slots in range of object 0 / player 0 (radius 1500,
+ * every "heard" flag is cleared, ambient_emitters_update marks the slots in range of object 0 / player 0 (radius 1500,
  * player +0x380, +0x2F8 position), and each active slot that was not marked is switched off together with its
  * voice handle. */
-void func_1517E3CC(void) {
+/* was func_1517E3CC */
+void ambient_slots_refresh(void) {
     u8 *voices = (u8 *) &D_800DDA90;
     u8 *slots = (u8 *) &D_800DD478;
     s32 i;
@@ -886,7 +899,7 @@ void func_1517E3CC(void) {
     for (i = 0; i < 15; i++) {
         voices[i * 0x10 + 0xC] = 0;
     }
-    func_1517C11C((s32) D_800CC2D0[0].x_position, (s32) D_800CC2D0[0].y_position, (s32) D_800CC2D0[0].z_position,
+    ambient_emitters_update((s32) D_800CC2D0[0].x_position, (s32) D_800CC2D0[0].y_position, (s32) D_800CC2D0[0].z_position,
                   1500, D_800DBFF0->unk380, (s32) D_800DBFF0->unk2F8, (s32) D_800DBFF0->unk2FC,
                   (s32) D_800DBFF0->unk300);
     for (i = 0; i < 15; i++) {
@@ -897,10 +910,11 @@ void func_1517E3CC(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517E3CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/ambient_slots_refresh.s")
 #endif
 
-void func_1517E5CC(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1517E5CC */
+void ambient_flare_point_set(s32 arg0, s32 arg1, s32 arg2) {
     D_800DD8A0[0] = arg0;
     D_800DD8A0[1] = arg1;
     D_800DD8A0[2] = arg2;

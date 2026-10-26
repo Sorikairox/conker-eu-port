@@ -2,12 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15179B70(s32 arg0, s32 arg1);
-void func_15179A38(void);
+void rain_drops_add(s32 arg0, s32 arg1);
+void rain_centre_follow_camera(void);
 #endif
 
 
-void func_15179420(void) {
+/* was func_15179420 */
+void rain_init(void) {
     D_800DD864 = 0;
     D_800DD876 = 0;
     D_800DD444 = 600;
@@ -19,11 +20,12 @@ void func_15179420(void) {
 
 extern u16 D_800DD860;
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
-void func_10004074(s32 *);
+void heap_free(s32 *);
 #else
-s32 func_10004074(s32 *);
+s32 heap_free(s32 *);
 #endif
-void func_1517946C(s32 arg0) {
+/* was func_1517946C */
+void rain_request(s32 arg0) {
     s32 i;
 
     if (arg0 == 2) {
@@ -36,10 +38,10 @@ void func_1517946C(s32 arg0) {
                     ((s32 **)D_800DD870)[i] = NULL;
                 }
             }
-            func_10004074((s32 *)(D_800DD870 & 0xFFFFFFFF)); // fakematch: permuter mask (puts the table in v0)
+            heap_free((s32 *)(D_800DD870 & 0xFFFFFFFF)); // fakematch: permuter mask (puts the table in v0)
             D_800DD870 = 0;
         }
-        func_100111C8(D_800DD860);
+        sound_voice_stop(D_800DD860);
         D_800DD444 = 0;
         D_800DD866 = 0;
     } else if (arg0 == 3) {
@@ -56,32 +58,33 @@ void func_1517946C(s32 arg0) {
 
 #ifdef NON_MATCHING
 /* P125 */
-void func_15179B70(s32 arg0, s32 arg1);
-int func_1517A028(void);
-void func_15179A38(void);
-void func_1517A084(s32 count);
-u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
-void func_100111C8(u16 arg0);
-void func_1000F85C(u16 arg0, s16 arg1, s32 arg2);
+void rain_drops_add(s32 arg0, s32 arg1);
+int rain_drop_retire_one(void);
+void rain_centre_follow_camera(void);
+void rain_spawn_splashes(s32 count);
+u16 sound_play_2d(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
+void sound_voice_stop(u16 arg0);
+void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2);
 s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 random_int(void);
 
 /* rain_update: per-frame rain state machine (view index arg0; D_800C35EA[arg0] != 0 pauses the timers).
  * D_800DD862 / D_800DD863: random gust timer and strength (after a strong gust (>= 40) a weak one of 20..50 frames,
- * else a strong one of 60..122). D_800DD876 is the state, D_800DD864 the requested mode (func_1517946C),
+ * else a strong one of 60..122). D_800DD876 is the state, D_800DD864 the requested mode (rain_request),
  * D_800DD874 (US name D_800DD444, s16) the state timer, D_800DD866 the number of drops in the table D_800DD870
  * (300 pointers), D_800DD860 the rain sound.
  * 0 idle: on a request, after 600 frames (or at once for request 4) allocate the drop table, start the sound
  *   (0x6F) and go to 1.
- * 1 starting: add 4 drops per frame (func_15179B70) up to 300, raising the sound volume with the count; at 300 go
+ * 1 starting: add 4 drops per frame (rain_drops_add) up to 300, raising the sound volume with the count; at 300 go
  *   to 2.
  * 2 raining: request 1 -> 4; request 0 or 120 frames -> 3 (request 3 keeps the timer counting).
- * 3 stopping: retire 4 drops per frame (func_1517A028), lowering the volume; with no drops left free the table,
+ * 3 stopping: retire 4 drops per frame (rain_drop_retire_one), lowering the volume; with no drops left free the table,
  *   stop the sound and go to 0.
  * 4 stop now: retire every drop, go to 3, clear the request.
- * While there are drops: move the rain centre with the camera (func_15179A38) and spawn count / 30 splashes
- * (func_1517A084). */
-void func_15179008(s32 arg0) {
+ * While there are drops: move the rain centre with the camera (rain_centre_follow_camera) and spawn count / 30 splashes
+ * (rain_spawn_splashes). */
+/* was func_15179008 */
+void rain_update(s32 arg0) {
     s32 timer;
     s32 i;
     s16 t;
@@ -112,7 +115,7 @@ void func_15179008(s32 arg0) {
                 if (D_800DD870 != 0) {
                     D_800DD876 = 1;
                     D_800DD444 = 0;
-                    D_800DD860 = func_10010F30(0x6F, 200, 0x40, 0, 0x80);
+                    D_800DD860 = sound_play_2d(0x6F, 200, 0x40, 0, 0x80);
                 }
             } else if ((&D_800C35EA)[arg0] == 0) {
                 D_800DD444 = t + D_800BE9E4;
@@ -126,12 +129,12 @@ void func_15179008(s32 arg0) {
             }
             for (i = 0; i < 4; i++) {
                 if (D_800DD866 != 300) {
-                    func_15179B70(1, 1);
+                    rain_drops_add(1, 1);
                 }
             }
             if ((s16) D_800DD444 >= 11 && D_800DD866 < 300) {
-                func_1000F85C(D_800DD860, 8, (D_800DD866 << 14) / 300);
-                func_1000F85C(D_800DD860, 0x2000, 0);
+                sound_voice_set_param(D_800DD860, 8, (D_800DD866 << 14) / 300);
+                sound_voice_set_param(D_800DD860, 0x2000, 0);
             }
             D_800DD444 = (s16) D_800DD444 + D_800BE9E4;
             break;
@@ -150,36 +153,37 @@ void func_15179008(s32 arg0) {
             if (D_800DD866 == 0) {
                 D_800DD876 = 0;
                 D_800DD444 = 0;
-                func_100111C8(D_800DD860);
-                func_10004074((s32 *) D_800DD870);
+                sound_voice_stop(D_800DD860);
+                heap_free((s32 *) D_800DD870);
                 D_800DD870 = 0;
                 break;
             }
             for (i = 0; i < 4; i++) {
-                func_1517A028();
+                rain_drop_retire_one();
             }
             if ((s16) D_800DD444 != 0) {
-                func_1000F85C(D_800DD860, 8, (D_800DD866 << 13) / (s16) D_800DD444);
+                sound_voice_set_param(D_800DD860, 8, (D_800DD866 << 13) / (s16) D_800DD444);
             }
             break;
         case 4:
             for (i = 0; i < D_800DD866; i++) {
-                func_1517A028();
+                rain_drop_retire_one();
             }
             D_800DD876 = 3;
             D_800DD864 = 0;
             break;
     }
     if (D_800DD866 != 0) {
-        func_15179A38();
-        func_1517A084(D_800DD866 / 30);
+        rain_centre_follow_camera();
+        rain_spawn_splashes(D_800DD866 / 30);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179008.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/rain_update.s")
 #endif
 extern s32 D_800DD868[];
-void func_15179A38(void) {
+/* was func_15179A38 */
+void rain_centre_follow_camera(void) {
     s32 x;
     s32 y;
     s32 z;
@@ -236,7 +240,8 @@ typedef struct {
 } Spawn9B70;
 s32 sprite_vtx_quads_init(Spawn9B70 *, s32, s32, s32, s32);
 s32 node_spawn_vtx_sprite(Spawn9B70 *, u8, u8);
-void func_15179B70(s32 arg0, s32 arg1) {
+/* was func_15179B70 */
+void rain_drops_add(s32 arg0, s32 arg1) {
     s32 x2;
     s32 y2;
     s32 z2;
@@ -286,7 +291,8 @@ void func_15179B70(s32 arg0, s32 arg1) {
 #ifdef NON_MATCHING
 f32 math_cos_u8(s32, struct102 *);
 
-void func_15179D20(struct102 *arg0) {
+/* was func_15179D20 */
+void rain_drop_update(struct102 *arg0) {
     f32 sp24;
     s32 sp1C;
     f32 temp_f12;
@@ -364,9 +370,10 @@ block_18:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179D20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/rain_drop_update.s")
 #endif
-int func_1517A028(void)
+/* was func_1517A028 */
+int rain_drop_retire_one(void)
 {
   s32 temp_v0;
   s32 var_v1;
@@ -412,7 +419,8 @@ s32 random_int(void);
  * D_800DD868 (s16 x +0, z +4), finds the ground height there (collision_level_nearest_height from height 10000; -10000 = no ground)
  * and spawns a splash sprite (texture 0x12, flags 0x9804, size 0x19, 0x80 at +0x8A) on it. The spawn record is one
  * stack struct (node_spawn_vtx_sprite copies 0xA8 bytes of it). */
-void func_1517A084(s32 count) {
+/* was func_1517A084 */
+void rain_spawn_splashes(s32 count) {
     Spawn9B70 sp;
     s32 cx;
     s32 cz;
@@ -446,10 +454,11 @@ void func_1517A084(s32 count) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_1517A084.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/rain_spawn_splashes.s")
 #endif
 
-void func_1517A220(u8 *arg0) {
+/* was func_1517A220 */
+void rain_splash_fade_by_distance(u8 *arg0) {
     f32 temp_f12;
     f32 temp_f2;
     f32 dist;

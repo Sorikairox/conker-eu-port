@@ -6,7 +6,7 @@
 
 #ifdef NON_MATCHING
 void *allocate_memory(s32, s32, s32, s32);
-void func_10004074(void *);
+void heap_free(void *);
 extern u8 *D_800C6A70;      /* look points, 0x14-byte records (LookPoint in game_eu_64770.c) */
 extern u32 D_800C6A74;      /* their count */
 
@@ -39,7 +39,7 @@ s32 level_load_look_points(s32 arg0) {
         *(s16 *) (D_800C6A70 + i * 0x14 + 0x12) = src[i * 6 + 5];
     }
     if (src != NULL) {
-        func_10004074(src);
+        heap_free(src);
     }
     return i;
 }
@@ -69,7 +69,7 @@ s32 level_load_look_points(s32 arg0) {
 //         D_800C6650[i].unk12 = sp34[i]->unk14;
 //     }
 //     if (sp34 != NULL) {
-//         func_10004074(sp34);
+//         heap_free(sp34);
 //     }
 //     return i;
 // }

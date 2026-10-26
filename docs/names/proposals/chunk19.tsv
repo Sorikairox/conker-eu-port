@@ -1,0 +1,248 @@
+old	new	confidence	description
+func_15030100	model_asset9_load_refcounted	high	Reference-counted load of asset (9, idx) with several display lists; relocates them on first use and returns header data
+func_150302C8	attachment_load_model	high	Loads the model of attachment record rec once (asset 9 or func_1503F91C entry) and optional vertex copies; 1 on failure
+func_15030448	attachment_free	high	Unlinks and frees an attachment record of the D_800C3EE0 list, now or deferred, releasing its buffers and asset
+func_150305E0	attachment_remove_by_slot	med	Removes all attachments of object arg0 in slot arg1 (func_15030600 with count 0xFF)
+func_15030600	attachment_remove_by_slot_n	med	Frees attachments of object arg0 whose slot (+6) is arg1; arg2 selects which match (0xFF = all); returns 1 if any freed
+func_150306D4	attachment_remove_all_of_owner	high	Frees every attachment record belonging to object arg0 (owner id +0x3B); returns 1 if any was freed
+func_15030758	attachment_update_all	high	Per-frame update of the attachment list: runs callbacks, frees dead ones, builds their joint matrices
+func_15030DE4	attachment_create	high	Allocates and links a new attachment record for an object (model id, slot, flags), loads its model and applies kind effects
+func_15031044	attachment_set_local_transform	med	Stores a 6-float local position/rotation (+0x44) on an attachment and allocates its matrix buffer (+0x34)
+func_150310F8	attachment_draw_all_for_player	med	Draws every visible attachment list entry whose owner is visible to player arg1, filtered by pass mode arg2
+func_15031284	attachment_draw_for_object	high	Draws all visible attachments of object arg1 into the display list
+func_15031360	attachment_get_matrices	med	Returns the matrix pointers for an attachment (from its target, own buffer or parent attachment); 0 when none
+func_150314B4	attachment_draw	high	Draws attachment att of object obj for a player view: alpha, materials, matrix, fog / tint and part display lists
+func_15031C1C	attachment_set_alpha_by_slot	med	Finds the n-th attachment of object arg0 in slot arg1 and sets its alpha byte (+3) to arg2
+func_15031C4C	attachment_find_by_slot	high	Returns the arg2-th attachment record of object arg0 with slot (+6) arg1, or NULL
+func_15031CBC	attachment_find_by_slot_any	med	Finds an attachment in slot arg0 of object arg1, falling back to any owner's attachment in that slot
+func_15031D40	attachment_apply_kind_effects	med	Per-model setup when an attachment is created: owner flag bits, light / fire / aura effects, texture ids
+func_15031F04	attachment_undo_kind_effects	high	Undoes what an attachment's model kind did to its owner object (flag bits, effects, sounds) when it is freed
+func_1503211C	attachment_cb_texture_pingpong	med	Attachment callback: cycles texture id +0x18 back and forth through the D_8009066C table each frame
+func_1503216C	attachment_cb_tile_by_height	high	Attachment callback: animates a texture tile size from the owner record's height / animation id
+func_150322B8	attachment_cb_sync_animation	high	Attachment callback 5: picks the attachment's animation from owner kind, model id and owner animation, syncs frame
+func_150334A8	attachment_cb_anim_from_owner	med	Attachment callback: starts the attachment animation named by the owner's +0x2E4 byte and follows it
+func_1503356C	attachment_cb_play_anim_once	med	Attachment callback: starts animation 0 if not held; returns 1 (free) once it reaches its last frame
+func_15033618	attachment_cb_expire_timer	low	Attachment callback: counts down timer +0x38 while the owner is low / not flagged; frees it when it runs out
+func_15033698	attachment_cb_expire_on_flag	low	Attachment callback: frees the attachment once owner +0xAD is set (clearing its +0x31C link), else updates alpha by height
+func_15033730	attachment_cb_spin_in_state5	med	Attachment callback for models 0x27 / 0x35 / 0x29: resets mode and spins angle +0x22 while the owner is in state 5
+func_150337A8	attachment_tile_scroll_update	low	Rewrites a G_SETTILESIZE command in the attachment's display list from its counters (texture scroll)
+func_150335C8	attachment_spawn_at_joint	med	Creates an attachment on object arg1 at joint arg3 with a local transform computed from object arg0's placement
+func_15033A7C	attachment_cb_keep_during_anims	low	Attachment callback: model 0x11 stays only while the owner plays one of a few animations, others are freed
+func_15033AD4	attachment_cb_blink_texture	med	Attachment callback: toggles texture id +0x18 between two D_800906AC entries every 16 ticks
+func_15033B28	attachment_cb_slot_anim_check	low	Attachment callback for slots 0x16 / 0x89: checks the owner animation and releases the owner effect (func_151027E8)
+func_15033CB8	attachment_cb_loop_sound	med	Attachment callback: tile scroll plus a looping positional sound 0x448 that stops while D_800BEE2C is set
+func_15033DC8	attachment_cb_delayed_sound	med	Attachment callback: after a short delay starts positional sound 0x513 at the owner; optional effect at its position
+func_15033ECC	attachment_sound_cb	high	Sound callback of attachment voices: follows the owner position, changes sound by owner animation, stops when gone
+func_150340F0	attachment_cb_free_in_state3	med	Attachment callback: frees the attachment when its owner is in state 3
+func_15034118	attachment_list_for_owner	high	Collects every attachment record of object arg0 into array arg1; returns the count
+func_15034174	attachment_find_first_of_owner	high	Returns the first attachment record belonging to object arg0, or NULL
+func_150341B4	attachment_swap_owner_ids	high	Swaps owner ids arg0 and arg1 on every attachment record of the list
+func_150341FC	attachment_cb_release_link	low	Attachment callback: clears byte +0x11A of the owner's +0x31C record (unless kind 9 or state 3) and frees itself
+func_15034260	attachment_cb_release_link2	low	Attachment callback: like attachment_cb_release_link but skips linked kinds 0xC / 0x16
+func_150342D0	obj_adjust_list_build	high	Builds an object's {offset, value} adjustment list (0x1000-terminated): player / per-type entries, then face joints
+func_150344AC	obj_adjust_entries_player	med	Adjustment entries for the player object: head / body turn values from its ctl record and facing angle
+func_15034630	obj_adjust_entries_type98	med	Adjustment entries for object type 0x98: one offset-6 entry of +0x1D1 * 200 when set
+func_150346A0	obj_adjust_entries_tilt	med	Adjustment entries for object types 0x5A / 0x74 / 0x7A / 0x8D: one offset-6 entry of +0x1D1 * 200 when set
+func_15034710	obj_adjust_entries_type8a	med	Adjustment entries for object type 0x8A: two entries from its angle field (D_800CC9D4) split in 1/16 and 15/16
+func_15034790	obj_adjust_entries_type28	med	Adjustment entries for object types 0x28 / 0x77: offsets 0x12 / 0xE from its +0x2E6 / +0x2E4 angles
+func_1503482C	obj_update_tail_for_conker	med	Runs the Conker tail chain (func_1503BCAC) for objects of id 0..4, 0x80 or 0xB0
+func_150348D4	obj_postprocess_joints	med	Per-object joint post-processing after animation: Conker tail, joint look-at turns and per-type joint fixes
+func_15034A18	obj_hide_masked_joints	high	Zeroes the 3x3 part of each joint matrix whose bit is set in the object's +0x9C mask (hides those parts)
+func_15034AD8	obj_hide_masked_joints_all	high	Applies obj_hide_masked_joints to every active object with a joint mask, unless D_800BEAC0 is set
+func_15034B50	obj_adjust_entries_face	med	Adjustment entries for the two face joints (eyes / lids) with random blinking and look offsets; sets D_800C4310
+func_150351A4	obj_lower_joints_by_face	low	Lowers joints arg1 (and arg2) of an object by the face value D_800C4310 scaled by the object's size
+func_15035210	reflect_queue_reset	high	Clears the mirrored-draw queue count D_800C4320
+func_15035220	reflect_build_joint_matrices	high	Builds the mirrored (y-flipped) joint matrices of one reflection queue entry and sets its alpha
+func_150359B8	reflect_queue_alloc	high	Returns the next free entry of the 15-entry reflection draw queue D_800C4328, or NULL when full
+func_15035A04	reflect_is_culled	med	Tests the object's (mirrored) bounding box against the view; nonzero when it is outside and need not be drawn
+func_15035AF8	reflect_queue_object	high	Queues the mirrored draw of object idx (and its attachments) with distance fade and joint matrices
+func_1503605C	reflect_emit_entries_dl	low	Emits display-list commands for the reflection queue entries (geometry mode setup, per entry matrices) from att draw
+func_150362D8	reflect_draw_queue	high	Draws all queued reflection entries without the unkB flag after a geometry / othermode setup
+func_15036438	reflect_queue_objects_over_water	med	Queues reflections of active objects standing above a reflecting floor height (+0x118) close enough to it
+func_15036600	obj_joint_look_at_camera	high	Turns joint `joint` of object `index` to face the D_800DBFF0 position (optionally a quarter turn), then applies scale
+func_15036860	player_strip_update_vertices	low	Updates the dynamic strip vertices of object idx from two joint matrices, eased by animation id / height
+func_15036BB4	player_draw_slot8_strip	low	Draws a two-joint vertex strip for the player when it holds a slot-8 attachment (ctl state 2 / 0x13), colours from it
+func_15036F60	look_record_alloc	high	Allocates and clears an object's 0x48-byte look record (+0x324) with all target points set to -99999
+func_15036FD8	look_frame_cb_current	high	Per-frame joint callback of the current object: turns its look joints toward the look target (func_15038910)
+func_15037224	look_head_body_by_kind	high	Head / body look of the current object by kind: picks joint pairs and options, finds a target and turns the joints
+func_15037988	look_point_in_joint_range	high	Tests whether point (x, y, z) lies inside the look range of joint j2 of object id; writes the point to out
+func_15037B70	look_get_fixed_target	med	Fixed look target of object arg0 by its +0x2F8 mode (camera position, look point ...); 1 when one is given
+func_15037CCC	look_find_target	high	Finds the look target of object id (fixed targets, look points, nodes, nearest object); -99999 when none
+func_150383B0	look_search_nearest_object	high	Look target search: nearest other active object whose look point is within the joint range test
+func_15038758	look_angles_to_point	med	Computes yaw / pitch (degrees) toward a relative point (x, y, z) for joint axis convention arg5
+func_15038910	look_turn_joint	high	Turns joint `joint` of object id toward a target point within angle limits, easing per look slot
+func_15039D44	look_get_limits	med	Returns the look-limit set arg1 (D_80098418 entry) for an object
+func_15039D68	look_clamp_default	high	Clamps look angles (*yaw, *pitch) of object id to limit set 0, falling back to rest angles when out of range
+func_15039CC8	look_record_setup	high	Look-record setup after a model reset: resets the look slots for some states and sets the "no look" flag
+func_1503A1C0	look_clamp_angles	med	Clamps look angles with limit set arg0 (set 0: func_15039D68; others use model-specific limits)
+func_1503A37C	obj_bounds_from_skeleton	high	Computes object bounds (+0x1A4.. / +0x1B4) from its skeleton and model header, or the collision cylinder
+func_1503A8FC	obj_cb_pin_joint1_position	low	Joint callback: sets joint 1's translation of the current object to its +0x174 / y / +0x178 position
+func_1503A968	obj22_cb_scale_joint	high	Joint callback of object 0x22: scales joint D_80084794[n] in x / z by 1 + (+0x20A) / 64 (inverse on later calls)
+func_1503AAE0	look_joint_cb_combined	med	Joint callback: runs the head / body look with call counter 0, then the object 0x22 joint scaling
+func_1503AB20	look_aim_head_eyes	high	Head / eye aiming for objects with a look joint: target, timers, random glances and eased angles
+func_1503B9F8	look_find_target_simple	med	Resets the look target to none, then takes the fixed target or the nearest object in range
+func_1503BAB0	tail_record_alloc	high	Allocates and clears the 0x50-byte tail record of an object's ctl record (+0x11C) with a length 30 and random phase
+func_1503B840	obj_set_kind_look_flags	high	Sets the look flag bits of +0x2FB from the object's animation / model id lists (active state 1 only)
+func_1503BC4C	tail_get_mode	med	Tail simulation mode of object arg0 from its flag bits: 0 = hidden / follows joints, 1 = simulated
+func_1503BCAC	tail_update_conker	high	Simulates Conker's 4-segment tail chain hanging from joint 24 (creates the record on first use)
+func_1503CE88	tail_build_joint_matrices	high	Builds tail joint matrices 24..27 from the simulated chain points (look-at from point to point)
+func_1503E0C0	look_point_remove	med	Marks look point arg0 of D_800C6A70 as removed (flag 2) and trims removed entries from the end of the list
+func_1503D210	model_load	high	Loads model id (asset 1): relocates its tables and display lists, loads textures, header and animation bank
+func_1503D658	model_dl_relocate	med	Walks a model display list up to G_ENDDL and relocates the addresses of its commands by base arg1
+func_1503D728	model_relocate_word	high	Adds base arg1 to the word *arg0 when it is non-zero and not a segment address
+func_1503D74C	model_relocate_pairs	high	Adds base arg1 to the first word of each 8-byte pair until a zero word
+func_1503D774	anim_bank_relocate	med	Relocates the animation bank entries of model arg1 (8 bytes each, up to id 999) and stores their count
+func_1503D800	anim_bank_share_group	med	Copies the animation bank (D_800D1588 / D_800C5A90) of model arg0 to every model of its shared group
+func_1503D8E0	anim_bank_group_index	med	Returns the animation bank asset index for model arg0 (the first id of its shared group in D_800847A0, else arg0)
+func_1503D950	anim_bank_load	high	Loads the animation bank (asset 0xF) of model arg0 into D_800D1588 once and shares it with its group; 4 on failure
+func_1503DA64	model_header_load	high	Loads the model header asset (0x11) of model arg0 into D_800D1C90 once; 2 on failure
+func_1503DAF4	model_alloc_vertex_table	low	Allocates and fills model arg0's per-part vertex pointer table D_800C6360 from its header; 1 on failure
+func_1503DC74	model_count_triangles	high	Counts the triangles of model arg0's first display list into D_800C5D38
+func_1503DD2C	model_get_face_joint	med	Returns face joint arg1 of model arg0 from its joint byte table (+0x30), or 0xFF when there is none
+func_1503DD8C	model_make_ready	high	Makes model id ready for object obj: loads it, or prepares its textures / buffers and variant var
+func_1503DF2C	model_textures_acquire	med	Looks up / loads every texture of model arg0 (12-byte entries of D_800C5758) in the texture cache; error bits
+func_1503E00C	model_textures_release	med	Releases every texture of model arg0 from the texture cache
+func_1503DE70	breakable_request_flag_entry	high	Requests the flags of entry `entry` of flag set D_800847FC[set] on object obj's breakable slot (-1 = all bits)
+func_1503E1FC	breakable_request_flags	high	Ors flag words arg2 / arg3 into breakable slot arg0, stores set arg1 as its kind and marks it requested (state 2)
+func_1503E238	breakable_update_slot	high	Per-frame breakable update of slot i: on request builds the pieces, then moves them and writes the joint matrices
+func_1503E4E4	breakable_slot_has_piece_flag	high	Returns 1 when bit arg0 (0..63) is set in breakable slot arg1's flag words D_800C6A84 / D_800C6A88
+func_1503E550	breakable_release	med	Ends breakable slot arg0: frees its piece buffer, clears the record and the object's 0x80 flag
+func_1503E6B4	breakable_init_piece	high	Initialises breakable piece pc of slot i from object i's joint matrix (relative to its parent unless detached)
+func_1503E5F8	mtxf_decompose	high	Decomposes an f32 4x4 matrix into translation, Euler angles in degrees and per-axis scale
+func_1503EB1C	breakable_write_matrices	high	Writes slot i's breakable piece transforms into object i's joint matrices (free pieces get their own rotation)
+func_1503ED44	breakable_move_free_pieces	high	Advances slot i's free breakable pieces by one frame (position, rotation, gravity)
+func_1503EE68	breakable_scatter_pieces	med	Gives the pieces of a breakable random outward / upward velocities (speed arg1, lift arg2, mode arg3)
+func_1503EF90	breakable_pieces_ground_collide	high	Ground collision of slot i's free breakable pieces: falling pieces below the floor stop on it
+func_1503F1A8	breakable_cb_nop	high	Empty breakable kind callback
+func_1503F1B0	breakable_cb_fall_then_remove	high	Breakable callback: ground collision of the pieces, removes the object when the slot timer runs out
+func_1503F23C	breakable_flag_entry_matches	high	Returns 1 when breakable slot i's flags satisfy entry `entry` of flag set D_800847FC[set]
+func_1503F2B4	breakable_cb_init_random_spin	med	Breakable callback: sets the slot timer to 120 and gives each piece a random spin value (+0x4C)
+func_1503F368	breakable_cb_scatter_a	med	Breakable callback: scatters the pieces with speed 2.0, lift 2.0, mode 0
+func_1503F39C	breakable_cb_scatter_b	med	Breakable callback: scatters the pieces with speed 1.0, lift 2.0, mode 1
+func_1503F3C8	breakable_cb_scatter_c	med	Breakable callback: scatters the pieces with speed 2.06, lift 3.0, mode 1
+func_1503F3F8	breakable_cb_init_timer140	low	Breakable callback: sets the slot timer to 140, object field +0x4B4 to 6 and piece +0x1EC to 10.0
+func_1503F45C	breakable_cb_init_flags	high	Breakable callback: slot timer = 300 and object flag changes per satisfied flag-set 2 entry
+func_1503F5A0	breakable_cb_settle	med	Breakable callback: ground collision; when the timer runs out releases the slot and sets object flags per entry
+func_1503F6F4	mtx_decompose	high	Decomposes a Mtx (fixed point when D_800C42B0, else f32) into translation, Euler angles and scale
+func_1503F7A0	animmodel_update_matrices	med	Per-frame update of an animated sub-model record: advances its animation and builds its double-buffered joint matrices
+func_1503F8A8	animmodel_start_anim	high	Starts animation arg2 (bank arg1) on animated sub-model record arg0 with speed / start frame (anim_start_entry)
+func_1503F91C	animmodel_create	high	Allocates a 0x3F8-byte animated sub-model record, loads its asset 9 model and starts its first animation; 1 on failure
+func_1503FAA8	animmodel_free	high	Frees an animated sub-model record and releases its two matrix buffers deferred
+func_1503FAF0	zone_point_allowed	low	Walks the D_800DC278 zone list for the zone containing (x, z); returns 0 when bit arg3 forbids it, else 1
+func_1503FBF4	obj_zone_point_allowed	low	zone_point_allowed for an object's x / z position (record at +0x320)
+func_1503FC54	obj_select_next_flagged	low	Advances D_800C67F1 to the next of the 25 objects that has flag 0x800000 in +0xF8 (when D_800C67F0 is set)
+func_1503FCE0	select_menu_read_stick	med	Reads the stick of controller arg0 as menu directions (-1 / 0 / 1) with a repeat delay counter D_80084814
+func_1503FB08	select_menu_reset	med	Resets the scrolling select menu state (scroll direction, offset, timers, blink)
+func_1503FE30	select_menu_update_draw	med	Updates and draws the scrolling list select menu (unlocked entries, stick scroll, cancel / select buttons)
+func_150415B0	dbgfont_setup_dl	low	Emits the render-mode / texture setup display list for the 8x12 debug font texture rectangles
+func_150416EC	dbgfont_draw_string	med	Draws a zero-terminated string with the 8x12 debug font at (x, y), one texture rectangle per character
+func_15041770	dbgfont_char_index	high	Returns the index of character arg0 in the debug font character table D_80084C60 (0x50 when absent)
+func_150417F8	dbgfont_draw_char	high	Draws glyph idx of the 8x12 debug font (8 per row) as a texture rectangle at (x, y)
+func_150418D0	text_icon_metrics	med	Returns the width, height, scale and flags of special icon characters 0xA8..0xFF used inside text
+func_15041A9C	text_draw_string	high	Draws len characters of a string at (x, y) with colour and scale, including inline icon glyphs
+func_15042BC4	text_measure_string	high	Measures a string: returns its width, height and descender in pixels (icons included)
+func_15042F30	text_char_to_glyph	high	Maps a character (lower case folded to upper, space to 0x60) to its glyph index in the game font table
+func_150498A0	math_spring_approach	med	Moves *value toward target with a spring velocity *vel (stiffness, damping, dt); snaps when it overshoots
+func_15049978	math_spring_approach_angle	med	Angle version of math_spring_approach: eases an angle in degrees toward target along the shortest way, then wraps it
+func_15049AD0	catmull_rom_eval	high	Evaluates a Catmull-Rom spline segment of the f32 key array arg0 at index arg1 for parameter t
+func_15049B94	catmull_rom_eval_deriv	high	Evaluates a Catmull-Rom spline segment at t and also returns its derivative in *arg3
+func_15044660	collision_reset_counter	low	Clears D_800CC1BC at level load (collision bookkeeping counter)
+func_15044670	collision_obj_walls	med	Wall collision of object arg3 at (x, z) against the active collision areas (and optional extra pass); returns pushes
+func_1504481C	collision_tri_to_local	med	Transforms a triangle's three s16 vertices into a local frame: translated by -pos and rotated by (sin, cos) in x / z
+func_15044948	collision_nop	high	Empty function
+func_15044950	collision_set_obj_body_heights	med	Sets the wall-test body height / half height (D_800CC1F8 / D_800CC1FC) for object arg0 by kind and state
+func_15044BC0	timedfx_create_box	med	Creates a timed-effect list entry of 0x20 bytes with box size, angle and two source pointers
+func_15044C54	timedfx_alloc	high	Allocates a timed-effect entry (size arg0), fills its hooks / delay / position and appends it to the D_800CBE00 list
+func_15044D18	timedfx_update_all	high	Per-frame update of the timed-effect list: counts delays, runs update hooks and their trigger hooks, frees done ones
+func_15044E68	timedfx_player_in_box	med	Returns 1 when the player's body is inside the entry's rotated box (position +6, half sizes +0x10, angle +0x16)
+func_15044FD4	timedfx_track_and_test	low	Timed-effect hook: copies the box position from its source vector and size from its source scale, then box-tests
+func_15045030	timedfx_attack_at_pos	med	Timed-effect trigger hook: spawns an attack (damage) at the entry position with its size; returns 0
+func_15045090	timedfx_hit_player_5	med	Timed-effect trigger hook: sends hit kind 5 to the player unless stunned or immune
+func_150450D8	timedfx_hit_player_4	med	Timed-effect trigger hook: sends hit kind 4 to the player unless stunned, immune or in a cutscene
+func_15045130	timedfx_hit_player_40	med	Timed-effect trigger hook: sends hit kind 0x40 to the player unless stunned or immune
+func_15045178	timedfx_hit_player_1	med	Timed-effect trigger hook: sends hit kind 1 to the player unless stunned or immune
+func_150451C0	collision_ceiling_static	med	Lowest static collision triangle above pos (below maxY) under (x, z); copies its vertices / surface to out
+func_150453BC	collision_floor_static	high	Highest static collision triangle at or below pos under (x, z); copies its vertices / surface to out
+func_150455FC	collision_ceiling_static_probe	med	Ceiling probe: override surface first (collision_override_ceiling), else collision_ceiling_static
+func_15045674	collision_ceiling_alt	med	Lowest triangle above pos from the func_150A5480 triangle list; fills out, clears flag 2 when none
+func_1504583C	collision_floor_alt	med	Highest triangle at or below pos from the func_150A5480 triangle list; fills out, clears flag 2 when none
+func_15045A04	collision_query_dynamic_cells	med	Selects collision area 2 and gets the dynamic triangle cells under the object's (x, z) position
+func_15045A70	collision_floor_dynamic_b_probe	med	Floor probe against dynamic triangle set B (D_800D3C50) under the position, above minimum height arg2
+func_15045AF0	collision_floor_dynamic_b_full	med	Floor probe with override surface check first, then collision_floor_dynamic_b_probe
+func_15045B70	collision_ceiling_dynamic_a	med	Lowest dynamic set A (D_800D3C00) triangle above the position; fills the hit info, type 2
+func_15045DD4	collision_floor_dynamic_a	med	Highest dynamic set A (D_800D3C00) triangle at or below the position; fills the hit info
+func_15046038	collision_ceiling_dynamic_b	med	Lowest dynamic set B (D_800D3C50) triangle above the position; fills the hit info, type 3
+func_1504627C	collision_floor_dynamic_b	med	Highest dynamic set B (D_800D3C50) triangle at or below the position; fills the hit info
+func_150464C0	collision_ceiling_dynamic	med	Nearest ceiling of dynamic sets A and B above the position (below arg2)
+func_15046750	collision_floor_dynamic	med	Nearest floor of dynamic sets A and B at or below the position (above arg2)
+func_150469E8	collision_ceiling_all	med	Nearest ceiling of dynamic and static geometry above the position; 1 when found
+func_15046C6C	collision_floor_all	med	Nearest floor of dynamic and static geometry at or below the position; 1 when found
+func_15046EF0	collision_ceiling_probe	med	Ceiling probe with override surface check first, then collision_ceiling_all
+func_15046F70	collision_floor_probe	med	Floor probe with override surface check first, then collision_floor_all
+func_15046FF0	collision_floor_all_alt	med	Nearest floor of collision_floor_alt and collision_floor_all at or below the position
+func_15047274	collision_floor_probe_alt	med	Floor probe with override surface check first, then collision_floor_all_alt
+func_150472F4	collision_override_floor	med	Override surface (hit flag 4) floor test at (x, z): 2 = within range (height set), 1 = present but out, 0 = none
+func_150473A0	collision_override_ceiling	med	Override surface (hit flag 4) ceiling test at (x, z): 2 = within range (height set), 1 = present but out, 0 = none
+func_1504715C	hitinfo_from_obj_floor	med	Fills hit info from an object's floor height (+0x180), with a flat fake triangle when its 0x200000 flag is set
+func_150475B0	hitinfo_from_record	med	Fills hit info (height, triangle, surface, flags) from a stored ground record
+func_15047680	mtxf_look_at_f	high	Builds a float view matrix looking from eye to at with up vector (guLookAtF)
+func_15047978	mtx_look_at	high	Builds a fixed-point view matrix (Mtx) looking from eye to at with up vector
+func_150479F0	mtxf_look_at_reflect	high	Builds a float view matrix and the LookAt reflection light structure (guLookAtReflectF)
+func_15047E70	mtx_look_at_reflect	high	Builds a fixed-point view matrix and LookAt reflection structure (guLookAtReflect)
+func_1504A730	objects_run_state_handlers	high	Per-frame update of all object records: controller / camera angle setup, trigger zones, state handler table, links
+func_1504ADD0	objects_update_tank_views	med	Per-frame pass over the 25 objects outside cutscenes: sets current object and pad, marks tank driver views
+func_1504AEF4	obj_coll_link_resolve_stub	med	Stub resolver for an object's collision link of kind 0; always returns 0
+func_1504AF10	obj_sync_collision_link	med	Keeps an object's linked world collision object (+0x92, kind 3) owned and moved to the object's position
+func_1504B0FC	swim_water_physics	med	Swim physics of a record in water: surfacing, air / drowning damage, bobbing to the surface, leaving shallow water
+func_1504BA38	obj_calc_surface_lean	low	Sets the lean target +0xCE of a slow object from its floor surface table entry (D_800994F0) and speed
+func_1504BAF0	obj_drop_carried	med	Releases the object carried by arg0 (+0x13C link) by its kind, then drops it (objev_drop_carried)
+func_1504BB88	obj_handle_drop_flags	med	Handles request flags of +0x25C: 0x10 starts the 0xD6 knock animation, 0x02 drops the carried object
+func_1504BC38	ctl_tick_timers	med	Counts down the per-object controller timers (run disable, chase, cooldowns) of a record each frame
+func_1504BE2C	walk_idle_variation	low	Idle variations of a walking record: random fidget timers, idle animation speed and turn noise
+func_1504C078	walk_anim_cancel_special	low	Movement-animation helper: cancels the current special move unless ctl +0x58 == 1; returns animation 999
+func_1504C0B8	walk_anim_land_id	low	Returns landing animation 395 on levels 27 / 30, else 27
+func_1504C0E8	walk_select_move_anim	low	Chooses and starts the walking record's movement animation from its speed, state and button input
+func_1504C854	ctl_decay_button_latches	low	Copies ctl +0x8C to D_800CC288 and clears the button latches +0x8A / +0x8C when their timers run out
+func_1504C8BC	obj_half_rate_tick	med	Every-other-frame update for far objects: accumulates skipped time and applies it on their frame; 0 = skip
+func_1504C9E4	obj_step_tilt_toward	med	Steps tilt byte +0x1D1 toward arg1 by 3 (6 when arg2 == 16) without overshooting
+func_1504CA60	obj_float_bob_setup	low	Sets the floating bob band of an object around its floor height (+0x180) by its height above it
+func_1504CB98	obj_state_walk	med	State 1 handler: the main walking / player-character update (input, movement, animation, collision, sounds)
+func_150511E8	obj_floor_push_turn	med	Applies the floor push (slope / conveyor) to a record's x / z velocity and turns it toward it with flag bit 20
+func_15051558	walk_ground_slide_push	high	Per-frame ground push / slide of a walking record from the floor force, its slide start and animation speed
+func_1505210C	obj_slope_to_pitch_roll	med	Converts a floor slope (fx, fz) into pitch / roll angles relative to the object's heading, limited to arg4
+func_15052260	obj_move_to_grab_point	low	Moves a record toward its ctl grab point (+0x6C..) and starts animation 0x14 for grab modes 1..3
+func_15052408	swim_exit_water	med	Leaves the water: clears swim flags, restores control and gives a jump (gravity 4, xz speed 15)
+func_15052458	obj_state_nop	high	Empty object state handler (state 6)
+func_15052464	obj_state_remove_when_dead	high	Object state handler (25): removes the object once its health is 0
+func_15052490	obj_roll_pitch_step	med	Rolling object: faces its movement angle and turns pitch +0xB8 forward or back by speed arg2 * arg3
+func_1505250C	obj_ease_lean	low	Eases lean +0xCC toward target +0xCE by 1/12 of the difference each frame
+func_15052590	obj_state_common_update	med	Object state handler 2 / 17: scale easing, drop flags, walk or stun update, physics, extras and death check
+func_15052760	obj_lean_into_turn	med	Sets an object's roll +0xC4 from its yaw change rate (leaning into turns) by kind
+func_150528C8	obj_state_float_on_water	low	Object state handler 12: floats on the water height of its area with bobbing, walk / stun and physics
+func_15052EF0	obj_state_reset_idle	low	Object state handler 15: immune for 100 ticks, faces its angle and starts animation 0
+func_15052F58	obj_reset_link_state	low	Clears link fields +0x13C / +0x218 of object arg0, sets its +0x232 mode to arg1 and returns it
+func_15052F9C	obj_carry_release	low	Releases an object carried / ridden by the player: player animation and fade, then removes or resets it
+func_1505327C	obj_carry_pickup	low	Starts the player's pick-up of object obj (animation 0x32) toward a joint point unless the player is busy
+func_15053430	obj_death_resolve	high	Resolves what happens to a dead object by its type's death flags: knockback, fade, effects or removal
+func_150535F4	obj_check_death	high	When health is 0, resolves the object's death (by type flags); returns 1 when it was handled
+func_15053694	obj_set_dead_fading	high	Puts an object in state 8 (dead, fading out with fade command 6)
+func_150536D0	obj_set_dead_still	med	Puts an object in state 13 (dead, no fade) and clears its timers
+func_150536E8	obj_state_dead_still	med	Object state handler 13: only keeps the facing angle in sync
+func_1505371C	obj_state_dead_fading	med	Object state handler 8: only keeps the facing angle in sync while fading
+func_15053750	obj_ease_scale	high	Eases an object's xz / y scale toward their targets (+0x154 / +0x158) by step +0x15C
+func_15053894	obj_state_wait_remove	high	Object state handler 3: removes the object after 31 frames
+func_150538CC	obj_state_rail_follow	med	Object state handler 4: follows a rail / path toward its target with floor, turning and sounds
+func_150548D8	obj_state_nop2	high	Empty object state handler (state 5)
+func_150548E4	obj_state_linked_sound	low	Object state handler 18: plays a random positional sound for objects linked to it
+func_15054A0C	obj_state_remove_on_anim_end	high	Object state handler 27: removes the object when its animation reaches the last frame
+func_15054A5C	obj_release_partner_remove	med	Clears the partner's ctl +0x11A link, posts its glow-remove event and removes the object
+func_15054A94	obj_state_partner_anim	low	Object state handler 28: plays a paired animation with its partner object and spawns moves / effects
+func_15054F74	menu_object_update	med	Per-frame extras of some menu / scene objects by id (move steps, pick-ups, positional sounds)
+func_15055260	obj_attach_stuck_projectile	med	Attaches model 0x4D to object arg1 at joint arg2 placed from projectile arg0 (attachment_spawn_at_joint)
+func_1505528C	obj_state_projectile	med	Object state handler 33: flying projectile, pitches with velocity, sticks into hit objects, splashes in water
+func_15055A2C	explosion_sfx_play	med	Plays an explosion sound (fixed 1549 or a random D_8009919C one) at (x, y, z)
+func_15055B0C	obj_set_timed_remove	med	Puts an object in state 39 holding its animation with timer arg1 (+0x21C)
+func_15055B64	obj_state_timed_remove	med	Object state handler 39: counts down +0x21C, then removes the object when it has no skeleton
+func_15055BF8	obj_state_sink_remove	high	Object state handler 42: sinks the object and removes it 100 units below its floor
+func_15055C88	player_start_shrink_death	low	Starts the player's pit / shrink death: sound, fade, control off, velocities cleared, hit reaction 9
+func_15055D48	player_state_shrink_death	low	Object state handler 41: shrinks the player each tick and loses a life after the delay

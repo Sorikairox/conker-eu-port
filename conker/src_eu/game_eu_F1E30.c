@@ -4,13 +4,13 @@
 
 
 #ifdef NON_MATCHING
-/* func_150C4620 records (stack images; pad bytes stay unset like the asm's) */
+/* damage_smoke_spawn records (stack images; pad bytes stay unset like the asm's) */
 typedef struct {
     u8 *obj;        /* 0x00 */
     u8 room;        /* 0x04 obj +0x3B */
     u8 pad5[3];
     f32 u8;         /* 0x08 */
-    void *glow;     /* 0x0C func_151307F0 result */
+    void *glow;     /* 0x0C particle_spawn_ex result */
     f32 u10;        /* 0x10 */
     s16 u14;        /* 0x14 -1, 0x54 for a type 0x34 owner */
     u8 u16;         /* 0x16 */
@@ -62,7 +62,7 @@ typedef struct {
     s16 u68;        /* 0x68 */
     u8 pad6A[2];
     f32 u6C;        /* 0x6C D_800A0784 */
-} Glow4620;         /* func_151307F0 request */
+} Glow4620;         /* particle_spawn_ex request */
 
 typedef struct {
     f32 v[3];
@@ -70,15 +70,16 @@ typedef struct {
 
 extern u32 D_800A0710[4];
 s32 memcpy(void *, void *, s32);
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 #endif
 
 #ifdef NON_MATCHING
 // object_glow_spawn: spawns a type `kind` object (0x12C when kind is -1; func_15149130) linked to obj (record at +0x28:
 // obj, room, the glow at +0xC; field +0x14 = 0x54 / +0x16 = 1 for a type 0x34 owner, else -1 / 0), then a glow
-// (func_151307F0 type 1, radius 700, a random colour of D_800A0710, random flag bits 0x40 / 0x80) whose +0xA8 tail
+// (particle_spawn_ex type 1, radius 700, a random colour of D_800A0710, random flag bits 0x40 / 0x80) whose +0xA8 tail
 // gets two random bytes, two counts 5..10 and two scales (0.2 + [0, 0.25)) * 700.
-void func_150C4620(u8 *obj, s16 kind, u8 flag, s32 arg3) {
+/* was func_150C4620 */
+void damage_smoke_spawn(u8 *obj, s16 kind, u8 flag, s32 arg3) {
     Link4620 link;
     Tail4620 tail;
     Glow4620 g;
@@ -152,23 +153,23 @@ void func_150C4620(u8 *obj, s16 kind, u8 flag, s32 arg3) {
     g.u5C = 0;
     g.u66 = 0xFF;
     g.u68 = 0;
-    e = (u8 *) func_151307F0((s32) &g, 1, 0, 0x10, flag, arg3);
+    e = (u8 *) particle_spawn_ex((s32) &g, 1, 0, 0x10, flag, arg3);
     l->glow = e;
     if (e != NULL) {
         memcpy(e + 0xA8, &tail, 0x10);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/func_150C4620.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/damage_smoke_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1504715C(f32 *, u8 *);
-u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
-s32 func_1514654C(u8 *, u8 *, s32, f32 **, f32 **, s32);
-void func_151C3C88(u8 *arg0, u8 arg1, s32 arg2);
-s32 func_1515C668(u8 *, f32 **);
-void func_15143794(s16, s16, f32, f32 *);
+void hitinfo_from_obj_floor(f32 *, u8 *);
+u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
+s32 model_node_points_to_world(u8 *, u8 *, s32, f32 **, f32 **, s32);
+void fire_embers_spawn_b(u8 *arg0, u8 arg1, s32 arg2);
+s32 motion_track_get_delta(u8 *, f32 **);
+void vec3_from_angles_byte(s16, s16, f32, f32 *);
 
 extern f32 D_800A0720[3][3];    /* offsets by health third */
 extern u8 D_800A0744[3];        /* bone index by health third */
@@ -188,7 +189,7 @@ static const f32 D_800A07A8_c[1] = { 0.25800002f };  /* 0x3E841894 */
 static const f32 D_800A07AC_c[1] = { -0.60800004f }; /* 0xBF1BA5E4 */
 static const f32 D_800A07B0_c[1] = { 0.70000005f };  /* 0x3F333334 */
 
-/* +0x28 record of the effect object (written by func_150C4620) */
+/* +0x28 record of the effect object (written by damage_smoke_spawn) */
 typedef struct {
     u8 *obj;        /* 0x00 owner */
     u8 room;        /* 0x04 owner +0x3B at spawn */
@@ -209,11 +210,12 @@ typedef struct {
 // damage_smoke_update: handler 21 of D_8008A980 (`void (u8 *)`). Ends the effect (+0xE = -1) when the owner is gone
 // or changed room; with the owner switched off (+0x1D4 == 0 or mode bit 1) it only sets the glow's +0x74 to 3.
 // Otherwise starts the 0x96 loop sound once, places the emitter on the owner (mode bit 0: attachment point
-// func_15031C4C / func_1514654C by the +0x2DC * +0x2D8 quarter, fallback owner + (0, 800, 0); else bone
+// attachment_find_by_slot / model_node_points_to_world by the +0x2DC * +0x2D8 quarter, fallback owner + (0, 800, 0); else bone
 // D_800A0744[third] of +0x1D4 by the +0x2E4 / +0x2E8 third), moves the glow there, then emits smoke puffs
-// (func_151C3C88, (0.129 + 0.117 * random) * D_800BE9A4 per frame, skipped in mode 2 when func_150A29C8 says no) and
-// sparks (impact_dust_cloud_spawn, (0.13 + 0.2 * random) * D_800BE9A4 per frame, blown against the owner's func_1515C668 vector).
-void func_150C49A4(u8 *self) {
+// (fire_embers_spawn_b, (0.129 + 0.117 * random) * D_800BE9A4 per frame, skipped in mode 2 when trigger_test_player says no) and
+// sparks (impact_dust_cloud_spawn, (0.13 + 0.2 * random) * D_800BE9A4 per frame, blown against the owner's motion_track_get_delta vector).
+/* was func_150C49A4 */
+void damage_smoke_update(u8 *self) {
     f32 basis[12];
     f32 off[3];
     f32 pos[3];
@@ -246,12 +248,12 @@ void func_150C49A4(u8 *self) {
         }
         return;
     }
-    func_1504715C(basis, obj);
+    hitinfo_from_obj_floor(basis, obj);
     if (rec->sound == 0) {
-        rec->sound = func_10010154(0x96, (struct127 *) obj, 0x36B0, 0x190, 0x4268);
+        rec->sound = actor_sound_play(0x96, (struct127 *) obj, 0x36B0, 0x190, 0x4268);
     }
     if (rec->mode & 1) {
-        u8 *pt = func_15031C4C(obj, rec->point, 0);
+        u8 *pt = attachment_find_by_slot(obj, rec->point, 0);
 
         if (pt == NULL) {
             return;
@@ -267,7 +269,7 @@ void func_150C49A4(u8 *self) {
         off[2] = D_800A0748[i][2] * f;
         offp = off;
         posp = pos;
-        if (func_1514654C(obj, pt, D_800A0778[i], &offp, &posp, 1) == 0) {
+        if (model_node_points_to_world(obj, pt, D_800A0778[i], &offp, &posp, 1) == 0) {
             pos[0] = *(f32 *) (obj + 0x14);
             pos[1] = *(f32 *) (obj + 0x18) + 800.0f;
             pos[2] = *(f32 *) (obj + 0x1C);
@@ -282,7 +284,7 @@ void func_150C49A4(u8 *self) {
         off[0] = D_800A0720[i][0] * f;
         off[1] = D_800A0720[i][1] * f;
         off[2] = D_800A0720[i][2] * f;
-        func_15143134(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 6));
+        mtx_transform_point_or_origin(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 6));
     }
     glow = rec->glow;
     if (glow != NULL) {
@@ -291,13 +293,13 @@ void func_150C49A4(u8 *self) {
     }
 
     enabled = TRUE;
-    if (D_800BE9F0 == 2 && func_150A29C8(((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C, 0x4065) == 0) {
+    if (D_800BE9F0 == 2 && trigger_test_player(((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C, 0x4065) == 0) {
         enabled = FALSE;
     }
     if (enabled) {
         rec->smoke += (D_800A078C_c[0] + random_float() * D_800A0790_c[0]) * D_800BE9A4;
         while (1.0f < rec->smoke) {
-            func_151C3C88((u8 *) pos, self[0xC], self[1]);
+            fire_embers_spawn_b((u8 *) pos, self[0xC], self[1]);
             rec->smoke -= 1.0f;
         }
     }
@@ -306,14 +308,14 @@ void func_150C49A4(u8 *self) {
     if (!(1.0f < rec->sparks)) {
         return;
     }
-    if (func_1515C668(obj, &up) == 0) {
+    if (motion_track_get_delta(obj, &up) == 0) {
         up = (f32 *) D_800A5860;
     }
     do {
         r1 = random_int();
         r2 = random_int();
         f = random_float();
-        func_15143794((s16) (r1 & 0xFF), (s16) ((u32) r2 % 25 - 0x40), f * D_800A07A0_c[0] + D_800A07A4_c[0], vel);
+        vec3_from_angles_byte((s16) (r1 & 0xFF), (s16) ((u32) r2 % 25 - 0x40), f * D_800A07A0_c[0] + D_800A07A4_c[0], vel);
         vel[0] -= up[0] * D_800A079C_c[0];
         vel[2] -= up[2] * D_800A079C_c[0];
         a = random_float();
@@ -328,22 +330,26 @@ void func_150C49A4(u8 *self) {
     } while (1.0f < rec->sparks);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/func_150C49A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/damage_smoke_update.s")
 #endif
 
-void func_150C4FD8(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x34) != 0) { node_destroy(*(struct102 **)(p + 0x34)); } }
+/* was func_150C4FD8 */
+void damage_smoke_destroy_glow(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x34) != 0) { node_destroy(*(struct102 **)(p + 0x34)); } }
 
-void func_150C5008(struct260 *arg0) {
-    func_150C4FD8(arg0);
+/* was func_150C5008 */
+void damage_smoke_retire(struct260 *arg0) {
+    damage_smoke_destroy_glow(arg0);
     func_1514933C(arg0);
 }
 
-void func_150C5034(struct260 *arg0) {
-    func_150C4FD8(arg0);
+/* was func_150C5034 */
+void damage_smoke_free(struct260 *arg0) {
+    damage_smoke_destroy_glow(arg0);
     func_15149368(arg0);
 }
 
-void func_150C5060(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150C5060 */
+void damage_smoke_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     u8 **q = &arg0; // fakematch: address-taken arg0 forces the home-slot reload (shape C)
     u8 *p;
     if (arg2 == 0x55) {

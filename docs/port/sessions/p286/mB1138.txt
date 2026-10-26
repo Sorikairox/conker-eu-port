@@ -1,4 +1,4 @@
-# P286 mutants for func_151B1138 (character_sparks_update)
+# P286 mutants for character_sparks_update (character_sparks_update)
 /if (\*(s32 \*) s->target == 0 || s->targetId != s->target\[0x3B\]) {/s/ || s->targetId != s->target\[0x3B\]//
 /if (\*(s32 \*) s->target == 0 || s->targetId != s->target\[0x3B\]) {/s/0x3B/0x3A/
 /if (\*(s32 \*) (tgt + 0x1D4) == 0 || (tgt\[0x74\] & 0xF) == 0xF) {/s/& 0xF) == 0xF/\& 0x7) == 0x7/
@@ -8,7 +8,7 @@
 /((s32 \*) (rec + 0x40))\[1\] = ((s32 \*) (rec + 0x34))\[1\];/s/\[1\];/[2];/
 /pt = (tgt\[4\] == 0x36) ? &D_800AA5BC\[i\] : &D_800AA50C\[i\];/s/0x36/0x35/
 /pt = (tgt\[4\] == 0x36) ? &D_800AA5BC\[i\] : &D_800AA50C\[i\];/s/&D_800AA50C\[i\]/\&D_800AA50C[i + 1]/
-/func_15143134(pt->ofs, slot->rec + 0x34,/s/pt->bone \* 64/pt->bone * 32/
+/mtx_transform_point_or_origin(pt->ofs, slot->rec + 0x34,/s/pt->bone \* 64/pt->bone * 32/
 /slot->timer -= D_800BE9E4;/s/-=/+=/
 /if (slot->timer < 0) {/s/< 0/<= 0/
 /\*(f32 \*) (rec + 0x114) = 0.0f;/s/0.0f/1.0f/
@@ -43,7 +43,7 @@
 /t.u44 = (u32) random_int()/s/+ 155/+ 154/
 /m.u12 = (u32) random_int()/s/+ 4/+ 3/
 /m.spin = (random_float() \* 506.0f + -703.0f) \* 0.001f;/s/-703.0f/-702.0f/
-/func_15143134(pt->ofs, t.pos,/s/t.pos/t.scale/
+/mtx_transform_point_or_origin(pt->ofs, t.pos,/s/t.pos/t.scale/
 /t.prev\[1\] = \*(s32 \*) &t.pos\[1\];/s/pos\[1\]/pos[0]/
 /free->rec = (u8 \*) effect3d_spawn_default(/s/0x11, 0, 0, 0x10, 2, 0x28/0x11, 0, 0, 0x10, 2, 0x20/
 /free->rec = (u8 \*) effect3d_spawn_default(/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/

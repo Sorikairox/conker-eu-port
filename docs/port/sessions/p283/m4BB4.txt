@@ -1,5 +1,5 @@
 \#^    collision_select_area(0);#s/0/1/
-\#^    n = func_150A3F50((s32) x, (s32) z);#s/(s32) x, (s32) z/(s32) z, (s32) x/
+\#^    n = floor_collect_level_tris((s32) x, (s32) z);#s/(s32) x, (s32) z/(s32) z, (s32) x/
 \#^        return 0;$#s/0/1/
 \#^        for (k = 0; k < 3; k++) {#s/k < 3/k < 2/
 \#^            v = (s16 \*) #s/\[i\]\.off/[0].off/

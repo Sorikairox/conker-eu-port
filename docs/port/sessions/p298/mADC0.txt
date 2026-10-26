@@ -31,8 +31,8 @@ s#            a = ph\[phase\[i\] \& 3\] + phase\[i\];#            a = ph[phase[i
 s#            if (phase\[i\] \& 0x80) {#            if (phase[i] \& 0x40) {# % idle
 s#            cz = math_cos_u8(a) \* amp;#            cz = math_sin_u8(a) * amp;# % idle
 s#                up = (s32) (lift\[i\] \* wave\[i\]);#                up = (s32) (follow[i] * wave[i]);# % act
-s#            func_150A7E40(mtx, (f32) v\[0\] + sx, v\[1\] + up, (f32) v\[2\] + cz, \&ox, \&oy, \&oz);#            func_150A7E40(mtx, (f32) v[0] + sx, v[1] - up, (f32) v[2] + cz, \&ox, \&oy, \&oz);# % act
-s#            func_150A7E40(mtx, v\[0\], v\[1\], v\[2\], \&ox, \&oy, \&oz);#            func_150A7E40(mtx, v[0], v[2], v[1], \&ox, \&oy, \&oz);# % idle allfl
+s#            mtxf_transform_point(mtx, (f32) v\[0\] + sx, v\[1\] + up, (f32) v\[2\] + cz, \&ox, \&oy, \&oz);#            mtxf_transform_point(mtx, (f32) v[0] + sx, v[1] - up, (f32) v[2] + cz, \&ox, \&oy, \&oz);# % act
+s#            mtxf_transform_point(mtx, v\[0\], v\[1\], v\[2\], \&ox, \&oy, \&oz);#            mtxf_transform_point(mtx, v[0], v[2], v[1], \&ox, \&oy, \&oz);# % idle allfl
 s#        dst\[1\] = (s32) oy;#        dst[1] = (s32) oz;# % idle
 s#    ph\[3\] += 4;#    ph[3] += 3;# % idle
 s#    \*(s32 \*) (obj + 0x84) = (ph\[3\] << 24) | ph\[0\] | (ph\[1\] << 8) | (ph\[2\] << 16);#    *(s32 *) (obj + 0x84) = (ph[3] << 24) | ph[0] | (ph[1] << 8) | (ph[1] << 16);# % idle

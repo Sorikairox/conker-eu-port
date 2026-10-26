@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1507E690(u8 *);
-void func_1507EE9C();
-s32 func_1507EA98(u8 *);
-s32 func_1507ECE8(s32 arg0, s32 arg1);
-u32 func_1507ED48(s32 arg0);
-s32 *func_1507EDD8(s32 arg0, s32 *arg1);
-void func_1507E7E4(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
+void face_eye_blink_update(u8 *);
+void face_anim_reset_default();
+s32 face_blink_allowed(u8 *);
+s32 face_anim_entry_get(s32 arg0, s32 arg1);
+u32 face_anim_count(s32 arg0);
+s32 *face_anim_body_table(s32 arg0, s32 *arg1);
+void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
 #endif
 
 
@@ -16,7 +16,8 @@ void func_1507E7E4(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
 /* P48: eye blink of object obj (+0x6A / +0x6B eyelid states, +0x6E countdown in frames of D_800BE9E4). Id 0x2B
  * and D_800C35EA == 1: nothing. A player-controlled object whose controller +0x120 is set keeps both eyes at 1.
  * When the countdown runs out (and +0x6C != 1) both states toggle; reopened eyes wait 10 + random % 140. */
-void func_1507E690(u8 *obj) {
+/* was func_1507E690 */
+void face_eye_blink_update(u8 *obj) {
     if (obj[4] == 0x2B || D_800C35EA == 1) {
         return;
     }
@@ -48,14 +49,15 @@ void func_1507E690(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E690.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_eye_blink_update.s")
 #endif
 
 #ifdef NON_MATCHING
-/* func_1507E7A0 (P57): for model types 0xF / 0x46 / 0x4C, the DL hide mask +0x94 from the selector bytes +0x6C / +0x6D:
+/* face_update_hide_mask (P57): for model types 0xF / 0x46 / 0x4C, the DL hide mask +0x94 from the selector bytes +0x6C / +0x6D:
  * bits 1..6 set, then one of 8 / 0x10 / 4 (first selector 0 / 1 / other) and 0x20 / 0x40 / 2 (second) cleared.
  * Selector: >= 10: (v - 10) == 5 -> 0, == 1 -> 1, else 2; below 2: v + 1; else v. */
-void func_1507E7A0(struct127 *arg0) {
+/* was func_1507E7A0 */
+void face_update_hide_mask(struct127 *arg0) {
     u8 *o = (u8 *)arg0;
     s32 s[2];
     s32 i;
@@ -84,59 +86,61 @@ void func_1507E7A0(struct127 *arg0) {
     else *(u32 *)(o + 0x94) &= ~2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E7A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_update_hide_mask.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150305E0(s32 arg0, s32 arg1);
-void func_1507E9A8(struct127 *, s32);
+void attachment_remove_by_slot(s32 arg0, s32 arg1);
+void face_anim_apply(struct127 *, s32);
 
-// obj_anim_set: switches the object to animation `anim` (+0x6F) if it is inside the object's table (func_1507ED48):
-// plays the old animation's first-frame sound (func_150305E0), applies the new one (func_1507E9A8) and sets the
+// obj_anim_set: switches the object to animation `anim` (+0x6F) if it is inside the object's table (face_anim_count):
+// plays the old animation's first-frame sound (attachment_remove_by_slot), applies the new one (face_anim_apply) and sets the
 // animation variant +0x135 to `variant`, or to the new entry's default (+3) when `variant` is 0. `void` under NM:
 // the callers ignore the result.
-void func_1507E8E0(u8 *arg0, s32 anim, s32 variant) {
+/* was func_1507E8E0 */
+void face_anim_set(u8 *arg0, s32 anim, s32 variant) {
     struct127 *obj = (struct127 *)arg0;
     u8 *entry;
     u8 *sounds;
 
-    if (!(anim < (s32)func_1507ED48((s32)obj))) {
+    if (!(anim < (s32)face_anim_count((s32)obj))) {
         return;
     }
-    entry = (u8 *)func_1507ECE8((s32)obj, obj->unk6F);
+    entry = (u8 *)face_anim_entry_get((s32)obj, obj->unk6F);
     if (entry[4] != 0) {
-        sounds = (u8 *)func_1507EDD8((s32)obj, NULL);
+        sounds = (u8 *)face_anim_body_table((s32)obj, NULL);
         if (sounds != NULL) {
-            func_150305E0((s32)obj, sounds[entry[4] - 1]);
+            attachment_remove_by_slot((s32)obj, sounds[entry[4] - 1]);
         }
     }
     obj->unk6F = anim;
-    func_1507E9A8(obj, variant);
+    face_anim_apply(obj, variant);
     if (variant != 0) {
         obj->unk135 = variant;
     } else {
-        obj->unk135 = ((u8 *)func_1507ECE8((s32)obj, anim))[3];
+        obj->unk135 = ((u8 *)face_anim_entry_get((s32)obj, anim))[3];
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E8E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_set.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1507EE24(s32, s32, s32);
+void face_anim_play_body(s32, s32, s32);
 
-/* Apply the current animation (+0x6F) of `obj`: its entry (func_1507ECE8) gives a model / frame pair for
- * func_1507EE24 (entry +4 / +6), the animation set (+0x134, with +0x135 = `variant`, or the entry's default +3 when
+/* Apply the current animation (+0x6F) of `obj`: its entry (face_anim_entry_get) gives a model / frame pair for
+ * face_anim_play_body (entry +4 / +6), the animation set (+0x134, with +0x135 = `variant`, or the entry's default +3 when
  * `variant` is 0, only when the set changes), two bytes +0x6C / +0x6D = entry +0 / +1 plus 10, and +0x68 / +0x69
  * from entry +8 / +9, or the object type's defaults (D_800D1C90[id] +0x3B / +0x3C) when those are 0. */
-void func_1507E9A8(struct127 *obj, s32 variant) {
-    u8 *entry = (u8 *) func_1507ECE8((s32) obj, obj->unk6F);
+/* was func_1507E9A8 */
+void face_anim_apply(struct127 *obj, s32 variant) {
+    u8 *entry = (u8 *) face_anim_entry_get((s32) obj, obj->unk6F);
     u8 *ob = (u8 *) obj;
 
     if (entry == NULL) {
         return;
     }
-    func_1507EE24((s32) obj, entry[4], *(u16 *) (entry + 6));
+    face_anim_play_body((s32) obj, entry[4], *(u16 *) (entry + 6));
     if (entry[2] != obj->unk134) {
         obj->unk134 = entry[2];
         if (variant != 0) {
@@ -159,12 +163,13 @@ void func_1507E9A8(struct127 *obj, s32 variant) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E9A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_apply.s")
 #endif
 
-s32 func_15084E08();
+s32 obj_current_part_model();
 
-s32 func_1507EA98(u8 *arg0)
+/* was func_1507EA98 */
+s32 face_blink_allowed(u8 *arg0)
 {
   s32 temp_v0;
   u8 new_var;
@@ -181,7 +186,7 @@ s32 func_1507EA98(u8 *arg0)
   {
     return 1;
   }
-  temp_v0 = func_15084E08(arg0);
+  temp_v0 = obj_current_part_model(arg0);
   new_var = *((u8 *) (((u8 *) arg0) + 0x6F));
   if (temp_v0 == 0)
   {
@@ -202,9 +207,10 @@ s32 func_1507EA98(u8 *arg0)
 
 #ifdef NON_MATCHING
 // P45: per-record animation / interaction timer step (after the state handler). +0x72 counts down by D_800BE9E4
-// (0xFFFE = frozen: return; 0xFFFF = forever); when func_1507EA98 says so, func_1507E690; once +0x72 is 0 and
-// +0x70 != +0x6F, func_1507EE9C. Records of type +5 == 2 are skipped.
-void func_1507EB1C(u8 *arg0) {
+// (0xFFFE = frozen: return; 0xFFFF = forever); when face_blink_allowed says so, face_eye_blink_update; once +0x72 is 0 and
+// +0x70 != +0x6F, face_anim_reset_default. Records of type +5 == 2 are skipped.
+/* was func_1507EB1C */
+void face_anim_timer_step(u8 *arg0) {
     s32 t;
     u16 v;
 
@@ -225,26 +231,27 @@ void func_1507EB1C(u8 *arg0) {
             }
         }
     }
-    if (func_1507EA98(arg0) != 0) {
-        func_1507E690(arg0);
+    if (face_blink_allowed(arg0) != 0) {
+        face_eye_blink_update(arg0);
     }
     if (*(u16 *)(arg0 + 0x72) == 0 && arg0[0x70] != arg0[0x6F]) {
-        func_1507EE9C(arg0);
+        face_anim_reset_default(arg0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507EB1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_timer_step.s")
 #endif
 #ifdef NON_MATCHING
-void func_150305E0(s32 arg0, s32 arg1);
-void func_1507E9A8(struct127 *, s32);
+void attachment_remove_by_slot(s32 arg0, s32 arg1);
+void face_anim_apply(struct127 *, s32);
 
 /* P67: start animation `anim` (obj +0x6F) with priority `prio` (+0x71) for `time` frames (+0x72, 0xFFFF = until
  * replaced). Priority 3 always wins; otherwise a running timed animation of equal or higher priority is kept unless
- * it is the default one (+0x70) or `anim` itself. Animations past the object's table (func_1507ED48) are ignored.
- * The first frame's sound of the new animation is played (func_150305E0). `void` under NM: callers ignore the
+ * it is the default one (+0x70) or `anim` itself. Animations past the object's table (face_anim_count) are ignored.
+ * The first frame's sound of the new animation is played (attachment_remove_by_slot). `void` under NM: callers ignore the
  * result and the asm leaves v0 undefined on the early returns. */
-void func_1507E7E4(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4) {
+/* was func_1507E7E4 */
+void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4) {
     u8 *entry;
     u8 *sounds;
 
@@ -254,28 +261,29 @@ void func_1507E7E4(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4) {
     if (prio != 3 && obj->unk70 != obj->unk6F && anim != obj->unk6F && obj->unk72 != 0 && obj->unk71 >= prio) {
         return;
     }
-    if (!((s32)anim < (s32)func_1507ED48((s32)obj))) {
+    if (!((s32)anim < (s32)face_anim_count((s32)obj))) {
         return;
     }
-    entry = (u8 *)func_1507ECE8((s32)obj, obj->unk6F);
+    entry = (u8 *)face_anim_entry_get((s32)obj, obj->unk6F);
     if (entry[4] != 0) {
-        sounds = (u8 *)func_1507EDD8((s32)obj, NULL);
+        sounds = (u8 *)face_anim_body_table((s32)obj, NULL);
         if (sounds != NULL) {
-            func_150305E0((s32)obj, sounds[entry[4] - 1]);
+            attachment_remove_by_slot((s32)obj, sounds[entry[4] - 1]);
         }
     }
     obj->unk6F = anim;
     obj->unk72 = time;
     obj->unk71 = prio;
-    func_1507E9A8(obj, arg4);
+    face_anim_apply(obj, arg4);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E7E4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/face_anim_start.s")
 #endif
-s32 func_1507ECE8(s32 arg0, s32 arg1) {
+/* was func_1507ECE8 */
+s32 face_anim_entry_get(s32 arg0, s32 arg1) {
     s32 *p;
     s32 v;
-    p = (s32 *)D_800D1C90[func_15084E08(arg0)];
+    p = (s32 *)D_800D1C90[obj_current_part_model(arg0)];
     if (p != NULL) {
         p -= 2;
         v = *p;
@@ -286,7 +294,8 @@ s32 func_1507ECE8(s32 arg0, s32 arg1) {
     return 0;
 }
 
-u32 func_1507ED48(s32 arg0)
+/* was func_1507ED48 */
+u32 face_anim_count(s32 arg0)
 {
   s32 *p;
   u32 r;
@@ -294,7 +303,7 @@ u32 func_1507ED48(s32 arg0)
   idx = *((u8 *) (arg0 + 4));
   if (idx != 0x96)
   {
-    idx = func_15084E08(arg0);
+    idx = obj_current_part_model(arg0);
     arg0 = idx;
   }
   else
@@ -314,11 +323,13 @@ u32 func_1507ED48(s32 arg0)
   return r;
 }
 
-void func_1507EDC8(s32 arg0, s32 arg1) {
+/* was func_1507EDC8 */
+void face_anim_stub(s32 arg0, s32 arg1) {
 }
 
-s32 *func_1507EDD8(s32 arg0, s32 *arg1) {
-    if (func_15084E08(arg0) == 0) {
+/* was func_1507EDD8 */
+s32 *face_anim_body_table(s32 arg0, s32 *arg1) {
+    if (obj_current_part_model(arg0) == 0) {
         if (arg1 != NULL) {
             *arg1 = 5;
         }
@@ -331,21 +342,22 @@ s32 *func_1507EDD8(s32 arg0, s32 *arg1) {
 }
 
 extern f32 D_8009BC70;
-void func_1507EE24(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1507EE24 */
+void face_anim_play_body(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_v0;
     if (arg1 != 0) {
-        temp_v0 = func_1507EDD8(arg0, 0);
+        temp_v0 = face_anim_body_table(arg0, 0);
         if (temp_v0 != 0) {
-            func_15083568((struct127 *) arg0, (s32) (*(u8 *)(arg1 + temp_v0 - 1)), (f32) arg2 * D_8009BC70, 0);
+            obj_setup_run((struct127 *) arg0, (s32) (*(u8 *)(arg1 + temp_v0 - 1)), (f32) arg2 * D_8009BC70, 0);
         }
     }
 }
 
-void func_1507E7E4(struct127 *, u8, u8, u16, s32);
-void func_1507EE9C(arg0)
+void face_anim_start(struct127 *, u8, u8, u16, s32);
+void face_anim_reset_default(arg0)
 u8 *arg0;
 {
-    func_1507E7E4(arg0, arg0[0x70], 3, 0xFFFF, 0xA);
+    face_anim_start(arg0, arg0[0x70], 3, 0xFFFF, 0xA);
     arg0[0x71] = 0;
     *(s16 *)(arg0 + 0x72) = 0;
     if (arg0[0x6C] >= 0xA) {
@@ -358,13 +370,15 @@ u8 *arg0;
     }
 }
 
-void func_1507EF0C(struct127 *arg0) {
-    func_1507EB4C(arg0, 0);
+/* was func_1507EF0C */
+void face_clear_default_anim(struct127 *arg0) {
+    face_set_default_anim(arg0, 0);
 }
 
-void func_1507EB4C(struct127 *arg0, s32 arg1) {
+/* was func_1507EB4C */
+void face_set_default_anim(struct127 *arg0, s32 arg1) {
     if (arg1 != arg0->unk70) {
         arg0->unk70 = arg1;
-        func_1507EE9C(arg0, arg1);
+        face_anim_reset_default(arg0, arg1);
     }
 }

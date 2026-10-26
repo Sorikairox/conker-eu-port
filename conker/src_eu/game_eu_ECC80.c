@@ -6,26 +6,28 @@ extern u8 D_800A04D0[];
 #endif
 
 
-void func_150BF470(s32 arg0) {
+/* was func_150BF470 */
+void stub_empty_bf470(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_1516DF0C(s16, s16, s16, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, s16, s16, s16, s16, u16, u8, u8, u8, u8, s16, u16, u16, u8, u8, u8, u8, u8, s32, u8, u8, u8, s32);
+void particle_emitter_node_spawn(s16, s16, s16, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, s16, s16, s16, s16, u16, u8, u8, u8, u8, s16, u16, u16, u8, u8, u8, u8, u8, s32, u8, u8, u8, s32);
 
-void func_150BF47C(s32 arg0) {
+/* was func_150BF47C */
+void twin_particle_emitters_spawn(s32 arg0) {
     s16 var_s0;
     s32 var_s1;
 
     var_s0 = 0x17C;
     var_s1 = 0;
     do {
-        func_1516DF0C(0x1FDB, 0x25, var_s0, 0xD, 0, 0x50, 0x8F, 0, 0, 0, 0, 0, 8, 0xC8, 0xA, 0, 0, 0, 0, 0, 0x28, 0x28, 4, 0, 0, 0, 0, 0x555, 0x555, 0x555, 0x555, arg0 & 0xFFFF, 0x32, 0, 0xFF, 0x14, 0xFA0, 0x7D0, 1, 6, 0, 1, 0, 0, 0, 0, 3, 0xFF, 0);
+        particle_emitter_node_spawn(0x1FDB, 0x25, var_s0, 0xD, 0, 0x50, 0x8F, 0, 0, 0, 0, 0, 8, 0xC8, 0xA, 0, 0, 0, 0, 0, 0x28, 0x28, 4, 0, 0, 0, 0, 0x555, 0x555, 0x555, 0x555, arg0 & 0xFFFF, 0x32, 0, 0xFF, 0x14, 0xFA0, 0x7D0, 1, 6, 0, 1, 0, 0, 0, 0, 3, 0xFF, 0);
         var_s1 += 1;
         var_s0 = -var_s0;
     } while (var_s1 != 2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF47C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/twin_particle_emitters_spawn.s")
 #endif
 #ifdef NON_MATCHING
 /* fade_slide_update: per-frame update of a fading, sliding element (no direct caller; reached through a table, returns
@@ -33,7 +35,8 @@ void func_150BF47C(s32 arg0) {
  * +0x2F per tick down to 0; when it is 0 and +0x24 clear the element is done (1). Otherwise the s16 position +0x14 /
  * +0x16 moves by the s8 speeds +0x2D / +0x2E per tick: once +0x14 is <= 0 both are zeroed and it is done (1), else
  * the counter +0x2C advances by the ticks (capped at 0x7F) and it goes on (0). */
-s32 func_150BF5F4(u8 *e) {
+/* was func_150BF5F4 */
+s32 fade_slide_update(u8 *e) {
     s32 on = e[0x24];
     s32 level = e[0x1F];
     s32 max = e[0x26];
@@ -73,7 +76,7 @@ s32 func_150BF5F4(u8 *e) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF5F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/fade_slide_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -81,7 +84,7 @@ s32 world_object_sound_play(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 fla
 void object_sound_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2);
 void mtxf_translate(u8 *mtx, s32 x, s32 y, s32 z);
 void mtxf_build_basis_trans(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 // lift_platform_update: world-object callback (D_80089030[9][0], obj +0x38) of a lift that moves its model up to the
 // target height +0x3C (s32). The current height is +0x7C, the speed +0x84; while D_800C35EA is set and D_800C3A08 is
@@ -95,7 +98,8 @@ void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 // moving) toward the bob (amp * 3 sin(ph), amp * 4 sin(1.1 ph), amp * 3 cos(ph)); then the vertex list +0x28
 // (+0x16 entries of 16 bytes) is transformed by translate(0, height, 0) * model(pos, scale +0x2C, angles +0x10)
 // into the current buffer +0x20[D_800BE9C0].
-void func_150BF71C(u8 *p) {
+/* was func_150BF71C */
+void lift_platform_update(u8 *p) {
     f32 ease = 0.05f;
     f32 amp = 0.0f;
     f32 height = *(f32 *) (p + 0x7C);
@@ -184,24 +188,24 @@ void func_150BF71C(u8 *p) {
     mtxf_build_basis_trans(model, *(f32 *) (p + 0x0), *(f32 *) (p + 0x4), *(f32 *) (p + 0x8), *(f32 *) (p + 0x2C),
                   *(f32 *) (p + 0x30), *(f32 *) (p + 0x34), *(s16 *) (p + 0x10), *(s16 *) (p + 0x12),
                   *(s16 *) (p + 0x14));
-    func_150A7A48(trans, model, trans);
+    mtxf_mul(trans, model, trans);
     dst = *(s16 **) (p + 0x20 + D_800BE9C0 * 4);
     src = *(s16 **) (p + 0x28);
     for (i = 0; i < *(u16 *) (p + 0x16); i++) {
-        func_150A7E40(trans, src[i * 8 + 0], src[i * 8 + 1], src[i * 8 + 2], &x, &y, &z);
+        mtxf_transform_point(trans, src[i * 8 + 0], src[i * 8 + 1], src[i * 8 + 2], &x, &y, &z);
         dst[i * 8 + 0] = x;
         dst[i * 8 + 1] = y;
         dst[i * 8 + 2] = z;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF71C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/lift_platform_update.s")
 #endif
 
 #ifdef NON_MATCHING
 void scenery_door_swing_angle_update(u8 *);
-s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
-s32 func_150829C0(s32, s32);
+s32 texture_anim_start_for(u8 *, s32, s32, s32, s32, s32, s32);
+s32 setup_entry_try_spawn(s32, s32);
 
 // door_lift_update: per-frame update of the object driven by object 0x14's animation (skipped while D_800C35EA is 1
 // and D_800C3A08 is not). Runs scenery_door_swing_angle_update, starts its looping sound D_800902B8 once (handle at +0x124), and takes
@@ -211,7 +215,8 @@ s32 func_150829C0(s32, s32);
 // animation ends (ratio >= 1); 0: sway 10 sin((ratio - 1) * 4pi/3) from ratio 0.25 and the same end call; 1: the same
 // sway, spawning object 0x14 when missing. Mode 1's state-3 store is only reached when the spawn fails and then
 // writes through NULL, as in the asm.
-void func_150BFC60(u8 *p) {
+/* was func_150BFC60 */
+void door_lift_update(u8 *p) {
     f32 ratio = 0.0f;
     u8 *obj;
     u8 *anim;
@@ -223,9 +228,9 @@ void func_150BFC60(u8 *p) {
     }
     scenery_door_swing_angle_update(p);
     if (*(s32 *) (p + 0x124) == 0) {
-        *(s32 *) (p + 0x124) = func_15195FB0(p, D_800902B8, 1, -1, 0, 0, -8);
+        *(s32 *) (p + 0x124) = texture_anim_start_for(p, D_800902B8, 1, -1, 0, 0, -8);
     }
-    obj = (u8 *) func_15083E90(0x14);
+    obj = (u8 *) obj_find_by_setup_id(0x14);
     mode = p[0x73] & 3;
     if (obj != NULL) {
         anim = *(u8 **) (obj + 0x2D0);
@@ -237,10 +242,10 @@ void func_150BFC60(u8 *p) {
             *(f32 *) (p + 0xA8) = -sinf(ratio * 3.14159274f * 1.33333325f) * 10.0f;
         }
         if (obj == NULL) {
-            idx = func_15083E0C(0x14);
+            idx = setup_entry_find_by_id(0x14);
             ((u8 *) D_800D20FC + idx * 48)[2] = 0;
-            func_150829C0(idx, 0);
-            obj = (u8 *) func_15083E90(0x14);
+            setup_entry_try_spawn(idx, 0);
+            obj = (u8 *) obj_find_by_setup_id(0x14);
         }
         if (obj[0x232] != 2) {
             obj[0x232] = 2;
@@ -262,10 +267,10 @@ void func_150BFC60(u8 *p) {
             *(f32 *) (p + 0xA8) = sinf(ratio * 4.18878937f - 4.18878937f) * 10.0f;
         }
         if (obj == NULL) {
-            idx = func_15083E0C(0x14);
+            idx = setup_entry_find_by_id(0x14);
             ((u8 *) D_800D20FC + idx * 48)[2] = 0;
-            func_150829C0(idx, 0);
-            obj = (u8 *) func_15083E90(0x14);
+            setup_entry_try_spawn(idx, 0);
+            obj = (u8 *) obj_find_by_setup_id(0x14);
         }
         if (obj == NULL && obj[0x232] != 3) {
             obj[0x232] = 3;
@@ -274,28 +279,29 @@ void func_150BFC60(u8 *p) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BFC60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/door_lift_update.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
-void func_1518D290(u8 *obj, s32 arg1, s32 arg2);
-void func_1508F26C(s32 arg0, s32 arg1);
-s32 func_151EFDD0(void);
+void rubble_burst_with_dust(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
+void object_ring_burst_particles(u8 *obj, s32 arg1, s32 arg2);
+void link_group_remove_members(s32 arg0, s32 arg1);
+s32 game_gu_random(void);
 extern u8 D_800BEE0B;
 
 // sinking_platform_update: world-object callback (D_80089030[1] / [2], obj +0x38) of a platform that drops when stood
 // on. kind = +0x3C >> 16: 0 drops 0x82 below its rest height at a speed falling from 16 near the bottom, with a
 // start sound; 1 just follows the rest height + the offset +0x80; 2 drops 0x622 at 48 and, landed, marks itself and
-// the next 0xA0-byte placement (+0x6E / +0x10E = 1, func_1508F26C(2, index)); 4 plays a sound when landed. The rest
+// the next 0xA0-byte placement (+0x6E / +0x10E = 1, link_group_remove_members(2, index)); 4 plays a sound when landed. The rest
 // height (s16 +0x12 the first time) is kept in +0x7C with bit 31 set; the platform rests 0x50 below it. Mode
 // (+0x73 & 3): 0 at rest (height = rest), stepping on it (+0x4F bit 4 with player D_800CC2D0's +0x31C->0x57 == 1)
 // shakes the camera and rumbles (only in mode 0); 2 shakes (+0 / +8 random offsets) for the -(+0x80) ticks of
 // D_800BE9E4, then sinks (offsets random / 12 for 40 ticks) to the bottom, where the rest height and +0x11C move
 // down by the drop, mode 3; 3 sits at the low height until it is no longer stood on (+0x4F / +0x73 bit 4), then
 // mode 1 rises by 3 per tick back to the rest height and mode 0.
-void func_150BFF7C(u8 *p) {
+/* was func_150BFF7C */
+void sinking_platform_update(u8 *p) {
     s32 kind = (*(s32 *) (p + 0x3C) >> 16) & 0xFFFF;
     s32 mode = p[0x73] & 3;
     s32 depth = 0;
@@ -326,16 +332,16 @@ void func_150BFF7C(u8 *p) {
         return;
     }
     if ((p[0x4F] & 4) && (*(u8 **) ((u8 *) D_800CC2D0 + 0x31C))[0x57] == 1) {
-        func_1518BC20(*(f32 *) ((u8 *) D_800CC2D0 + 0x14), *(f32 *) ((u8 *) D_800CC2D0 + 0x18),
+        rubble_burst_with_dust(*(f32 *) ((u8 *) D_800CC2D0 + 0x14), *(f32 *) ((u8 *) D_800CC2D0 + 0x18),
                       *(f32 *) ((u8 *) D_800CC2D0 + 0x1C), 0xFF, 0);
         if (mode == 0) {
-            func_1516547C(3, D_800BEE0B, NULL, 0xFF, 0);
+            cam_wobble_start_preset(3, D_800BEE0B, NULL, 0xFF, 0);
             rumble.unk0 = 1;
             rumble.unk2 = 0x3C;
             rumble.unk5 = 1;
             rumble.unk4 = 8;
             rumble.unk6 = -1;
-            func_151D8E18(&rumble, 0, 0xFF, 0);
+            rumble_request(&rumble, 0, 0xFF, 0);
         }
     }
     if (mode == 3) {
@@ -353,12 +359,12 @@ void func_150BFF7C(u8 *p) {
         t = *(s32 *) (p + 0x80) + D_800BE9E4;
         *(s32 *) (p + 0x80) = t;
         if (t < 0) {
-            *(f32 *) (p + 0x0) = ((f32) (func_151EFDD0() % 5) - 2.0f) * 0.125f;
-            *(f32 *) (p + 0x8) = ((f32) (func_151EFDD0() % 5) - 2.0f) * 0.125f;
+            *(f32 *) (p + 0x0) = ((f32) (game_gu_random() % 5) - 2.0f) * 0.125f;
+            *(f32 *) (p + 0x8) = ((f32) (game_gu_random() % 5) - 2.0f) * 0.125f;
         } else {
             if (t < 0x28) {
-                *(f32 *) (p + 0x0) = ((f32) (func_151EFDD0() % 5) - 2.0f) / 12.0f;
-                *(f32 *) (p + 0x8) = ((f32) (func_151EFDD0() % 5) - 2.0f) / 12.0f;
+                *(f32 *) (p + 0x0) = ((f32) (game_gu_random() % 5) - 2.0f) / 12.0f;
+                *(f32 *) (p + 0x8) = ((f32) (game_gu_random() % 5) - 2.0f) / 12.0f;
             } else {
                 *(f32 *) (p + 0x8) = 0.0f;
                 *(f32 *) (p + 0x0) = 0.0f;
@@ -368,7 +374,7 @@ void func_150BFF7C(u8 *p) {
                 if (kind == 0) {
                     step = (h - bottom + 0x10) * step / depth;
                     if (*(s32 *) (p + 0x84) == 0) {
-                        func_1518D290(p, 0xFF, 0);
+                        object_ring_burst_particles(p, 0xFF, 0);
                         *(s32 *) (p + 0x84) = 1;
                     }
                 }
@@ -385,7 +391,7 @@ void func_150BFF7C(u8 *p) {
                 *(s32 *) (p + 0x80) = 0;
                 *(s32 *) (p + 0x120) = 0;
                 if (kind == 4) {
-                    func_1518D290(p, 0xFF, 0);
+                    object_ring_burst_particles(p, 0xFF, 0);
                 }
                 *(f32 *) (p + 0x8) = 0.0f;
                 *(f32 *) (p + 0x0) = 0.0f;
@@ -393,8 +399,8 @@ void func_150BFF7C(u8 *p) {
                 if (kind == 2) {
                     p[0x6E] = 1;
                     p[0x10E] = 1;
-                    func_1508F26C(2, (u16) ((p - (u8 *) D_800DBEF4) / 0xA0));
-                    func_1508F26C(2, (u16) ((p - (u8 *) D_800DBEF4 + 0xA0) / 0xA0));
+                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4) / 0xA0));
+                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4 + 0xA0) / 0xA0));
                 }
             }
         }
@@ -409,14 +415,14 @@ void func_150BFF7C(u8 *p) {
     p[0x73] |= mode;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BFF7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/sinking_platform_update.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 object_hit_effects(u8 *, s32, s32, s32, s32, s32, s32, s32);
-void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
-/* func_15153BA4 effect request (0x6C bytes; fields named by offset) */
+/* emit_particle_burst_req effect request (0x6C bytes; fields named by offset) */
 typedef struct {
     /* 0x00 */ s16 u00;
     /* 0x02 */ s16 u02;
@@ -455,10 +461,11 @@ typedef struct {
     /* 0x68 */ f32 u68;
 } PuffRequest;
 
-/* object_land_puff: object_destroy_effects callee: object_hit_effects(obj, 0, 0, 1, 0, 0, 0xFF, 1), then one func_15153BA4
+/* object_land_puff: object_destroy_effects callee: object_hit_effects(obj, 0, 0, 1, 0, 0, 0xFF, 1), then one emit_particle_burst_req
  * effect (constant request: model 0x11 / 7, colours 4E 54 7B FF / A4 A1 C8 9B / 64 FF, flags 0x40040E07) 35 above
  * the point 70 over the object's floor height (+0x180) at its x / z. */
-void func_150C04E0(u8 *obj) {
+/* was func_150C04E0 */
+void object_land_puff(u8 *obj) {
     PuffRequest req;
     f32 pos[3];
 
@@ -510,18 +517,19 @@ void func_150C04E0(u8 *obj) {
     req.u63 = 6;
     req.u64 = 1;
     req.u68 = 0.877551f;
-    func_15153BA4((u8 *) &req, 0xFF, 0xFF, 1);
+    emit_particle_burst_req((u8 *) &req, 0xFF, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C04E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/object_land_puff.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04D4;
 
 /* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
-s32 func_150C06DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
+/* was func_150C06DC */
+s32 particle_land_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     struct {
         s16 u34;
         s16 u36;
@@ -615,7 +623,7 @@ s32 func_150C06DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     sp.uD8 = 0.8f;
     sp.uDC = 1.2f;
     sp.uE0 = 15.299001f;
-    func_15152700(&sp.uA8, &sp.uA4, &sp.uA0, 1, 0.0f, 1U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    emit_textured_burst(&sp.uA8, &sp.uA4, &sp.uA0, 1, 0.0f, 1U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     sp.u36 = 8;
     sp.u34 = 5;
     sp.u38 = 0x6C;
@@ -660,17 +668,18 @@ s32 func_150C06DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     sp.u80 = 19.0f;
     sp.u84 = 8.0f;
     sp.u9C = 0.897767f;
-    func_15153BA4(&sp.u34, 0xFF, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+    emit_particle_burst_req(&sp.u34, 0xFF, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C06DC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/particle_land_shatter.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15150970(s32 *, s16 *, u8, s32);
+s32 emit_spark_burst(s32 *, s16 *, u8, s32);
 extern s32 D_800A04D8;
 
-void func_150C04C0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+/* was func_150C04C0 */
+void spark_burst_at(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     struct {
         f32 u20;
         s32 u24;
@@ -748,18 +757,19 @@ void func_150C04C0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     sp.u2E = 0xFF;
     sp.u30 = -0x32;
     sp.u32 = 0x23;
-    func_15150970(&sp.u34, &sp.u2C, arg4, arg5);
+    emit_spark_burst(&sp.u34, &sp.u2C, arg4, arg5);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C04C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/spark_burst_at.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15134108(u8 *, f32, f32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
-void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 mdl_particle_land_bounce_settle(u8 *, f32, f32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
+void emit_particle_burst_req(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04DC;
 
 /* P317: args 1..3 f32 = D_80089CD4's dispatcher type (wasm call_indirect) */
-s32 func_150C0B48(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
+/* was func_150C0B48 */
+s32 particle_land_maybe_shatter(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     struct {
         s16 u34;
         s16 u36;
@@ -887,7 +897,7 @@ s32 func_150C0B48(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
         sp.uAC = -0x2A;
         sp.uAE = 0x19;
         sp2C = temp_f2;
-        func_15150970(&sp.uB0, &sp.uA8, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+        emit_spark_burst(&sp.uB0, &sp.uA8, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
         sp.u34 = 1;
         sp.u36 = 2;
         sp.u38 = 0x6C;
@@ -932,11 +942,11 @@ s32 func_150C0B48(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
         sp.u88 = 0.006f;
         sp.u8C = 0.0f;
         sp.u9C = 0.9536f;
-        func_15153BA4(&sp.u34, 0xFF, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+        emit_particle_burst_req(&sp.u34, 0xFF, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
         return 0;
     }
-    return func_15134108(arg0, arg1, arg2, arg3, arg4, arg5);
+    return mdl_particle_land_bounce_settle(arg0, arg1, arg2, arg3, arg4, arg5);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C0B48.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/particle_land_maybe_shatter.s")
 #endif

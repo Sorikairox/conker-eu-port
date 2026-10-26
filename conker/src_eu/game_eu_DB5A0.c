@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_150ADD90(u8 *arg0, u8 *arg1, u8 *arg2) {
+/* was func_150ADD90 */
+void vec3f_cross(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 temp_f0;
     f32 temp_f10;
     f32 temp_f2;
@@ -23,5 +24,5 @@ void func_150ADD90(u8 *arg0, u8 *arg1, u8 *arg2) {
     (*(f32 *)((u8 *)arg2 + 4)) = (f32) ((temp_f10 * temp_f4) - (temp_f0 * temp_f8));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB5A0/func_150ADD90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB5A0/vec3f_cross.s")
 #endif

@@ -1,0 +1,218 @@
+old	new	confidence	description
+func_1514FBB0	emit_disc_from_surface	med	Builds a disc emitter shape (kind 2) from a surface record: radius from +0x20, plane axes from func_15144E80, normal flipped to face the record
+func_1514FC58	emit_disc_prepare	med	Lazily prepares a disc emitter shape: scales the normal by 1000, builds two perpendicular axes and normalises them, caching progress in flag bits
+func_1514FD78	emit_disc_random_point	med	Picks a random point on a disc emitter (random angle via func_15143874, radius from +0x28) scaled by arg1; writes and returns arg2
+func_1514FE68	emit_spray_particles	high	Spray spawn: base + rand particles (func_151A3084) at the param block's point moving along normal plus a random in-plane offset
+func_15150108	emit_spray_along_normal	med	Builds two axes perpendicular to the record's normal (func_15146078) and sprays particles along it with spread +0xC
+func_1515016C	emit_spray_from_surface	med	Sprays particles from a surface record: three normalised plane axes, normal flipped to face the record, then emit_spray_particles
+func_15150258	emit_random_sprites	low	Spawns base + rand particles through func_151A2FC4 with random angles, sizes and life taken from a base/range definition block
+func_1515046C	emit_dust_on_surface_disc	med	Builds a disc emitter from a surface record (emit_disc_from_surface) and spawns dust particles over it (func_151504B4)
+func_151504B4	emit_dust_on_disc	high	Spawns def-driven impact dust clouds at random points of a prepared disc emitter shape, with random size, life, alpha and speed
+func_151506E8	emit_dust_by_angles	high	Spawns impact dust clouds with random yaw/pitch directions from an angle range block and random size, life, alpha and spin from def
+func_15150970	emit_spark_burst	high	Spark burst: spawns def-count textured particles (func_15132BBC) around a centre at random directions, with random spin, fade, life, size
+func_15150D7C	emit_debris_burst	high	Debris burst: spawns pieces of distinct random kinds from ids/scales tables with random spins, sway, life and size; optional solid flag
+func_1515128C	emit_debris_on_near_surfaces	med	Casts rays in random directions from a point and spawns impact debris on each hit surface closer than the definition's max distance
+func_15151500	emit_tumbling_pieces	low	Spawns base + rand pieces through func_1518A930 with random rotation, velocity from angle ranges and a random x/z offset
+func_1515176C	emit_effect3d_from_surface	low	Spawns base + rand 3D effects (effect3d_spawn_full, D_800A4AA0) over a surface record's disc with random offsets, copying 0x20 extra bytes
+func_15151BE0	emit_sparks_from_surface	med	Spawns base + rand impact sparks (impact_spark_spawn) over a surface record's plane with random in-plane offsets and speed
+func_15151FA8	emit_sparks_by_angles	med	Spawns base + rand impact sparks (impact_spark_spawn) moving in random directions from yaw/pitch ranges at random speed
+func_151522DC	emit_impact_flash_spray	high	Impact flash: spawns kind-3 particles (func_15132FBC) from a surface's axes with random keyframes, scales, rotation, drift and life
+func_15152700	emit_textured_burst	high	Particle burst: spawns kind-3 particles (func_15132FBC) at random directions around a centre with random spin, fade, life and texture
+func_15152A90	emit_burst_from_spec_b	med	Spawns base + rand particles through func_15157E08 from a burst spec (layout B) with random life, angles, direction and colour scalars
+func_15152DE4	emit_coloured_points	low	Spawns base + rand particles (func_150CD3C0) at random directions/sizes, colour from the D_8008B000 picker table or white
+func_1515302C	colour_pick_random_fire	low	Writes a random colour from the 5-entry D_800A63C0 palette and a random alpha 155..255 into a 4-byte colour
+func_151530A8	emit_streaks_from_spec	high	Spawns base + rand streaks (streak_spawn) at the spec's point with random life, scalars, direction and two random colours
+func_151534E0	emit_sparks_by_angles_b	low	Spawns base + rand impact sparks (impact_spark_spawn) in random yaw/pitch directions with random scalars and two random bytes
+func_15153808	emit_sprite_nodes_by_angles	low	Spawns base + rand sprite nodes (node_spawn_sprite) moving in random yaw/pitch directions with several random s16 fields
+func_15153BA4	emit_particle_burst_req	high	Spawns a burst of particles from a request (e.g. pickup flash) through func_151307F0 with random life, size and yaw/pitch velocity
+func_15153F24	emit_line_sparks_by_angles	med	Spawns base + rand line sparks (line_fx_spawn) moving in random yaw/pitch directions, colours copied from the definition
+func_151541F4	emit_sparks_on_surface_disc	med	Builds a disc emitter from a surface record (emit_disc_from_surface) and spawns impact sparks over it (func_1515423C)
+func_1515423C	emit_sparks_on_disc	med	Spawns def-count impact sparks (impact_spark_spawn) at random points of a prepared disc emitter with random speed, life and size
+func_15154488	emit_sparks_in_angle_range	med	Spawns def-count impact sparks (impact_spark_spawn) in random directions from an angle range block, random speed, life and size
+func_15154728	spark_shower_spawn	high	Spawns one spark particle at pos lasting time with size/brightness; flat sparks turn round y, others get random angles and drift
+func_15154A9C	spark_shower_update	med	Spark particle tick: size grows with sqrt(age), alpha fades by bright - fade*age^2, moves by velocity; returns 0 when time runs out
+func_15154BF4	emit_rings_random_yaw	low	Spawns base + rand particles through func_151C64F4 in random yaw directions, pitch/speed/size/life from the definition
+func_15154DF4	glow_pulse_spawn	med	Spawns a pulsing glow particle (func_15132FBC) at a point with life, size and brightness, random rotation; extra data at +0x170
+func_15154FF8	glow_pulse_update	med	Pulse glow tick: size and alpha follow sin(phase), phase advances, moves by velocity; returns 0 when the life runs out
+func_15155200	sprite2d_update	high	2D sprite node tick: counts down life (flag 1), runs the per-behaviour callback D_8008B068, fades alpha near the end (flag 8), destroys when done
+func_151552F0	sprite2d_draw	high	Draws a 2D HUD sprite in a view: texture, colours and render state, then a scissored texture rectangle around (x, y) +- half size
+func_151559FC	sprite2d_spawn	high	Spawns a 2D sprite node (type 0x57 or 0x5D) from a 0x58-byte spec unless an overlapping sprite of the listed kinds exists
+func_15155AD4	sprite2d_handle_message	med	Forwards a message to the 2D sprite's per-kind handler from D_8008B0A4, if any
+func_15155B1C	sprite2d_find_overlap	high	Returns 1 when a live 2D sprite of one of the given kinds overlaps the box around spec (both node lists 0x5D / 0x57, both banks)
+func_15155C9C	sprite2d_broadcast	med	Broadcasts a message to every 2D sprite node (types 0x5D and 0x57)
+func_15155CF0	head_icon_create	med	Allocates a head-icon node (type 0x50) for character arg0, clears its mode/sprite/y offset and acquires asset 0xA6
+func_15155D6C	head_icon_show_timed	med	Finds or creates the head icon of a character and shows it for arg1 frames (mode 3) at extra height arg2, unless the character blocks it
+func_15155E0C	head_icon_update	med	Head-icon tick: state machine that pops the bobbing icon above the character (sound 0x1EB) by its state, times it out and frees its sprite
+func_1515626C	head_icon_draw	high	Draws the head icon model (D_800E0810) above its character, bobbing with a sine and turned to the view, with z-buffer off
+func_15156468	head_icon_free	med	Retires the head-icon node: frees its sprite and releases asset 0xA6
+func_151564AC	head_icon_hide_current	low	For the current player's head icon: mode 2 goes back to 0 and mode 3 (timed) to 2 (hidden)
+func_15156500	head_icon_set_bobbing	low	Switches the current player's head icon from timed mode 3 to bobbing mode 1
+func_15156544	head_icon_find	high	Returns the head-icon node (type 0x50, both banks) belonging to character index arg0, or NULL
+func_15156598	head_icon_on_message	high	Head-icon message handler: message 0 destroys it when its character goes, 0x2D swaps it between two swapped characters
+func_15156700	line_fx_spawn	med	Spawns a line-segment effect node (type 0x2C or 0x53): two end points with their velocities, two colours, width, life and fade
+func_151568F8	line_fx_spawn_default	med	Spawns a line-segment effect with no owner (line_fx_spawn with owner byte 0xFF, extra 0)
+func_15156928	line_fx_update	high	Line effect tick: counts down life (flag 1), moves both end points by their velocities and fades alpha near the end (flag 8)
+func_15156A68	line_fx_draw	med	Draws a line effect as a camera-facing quad of the node's width between its two end points (vertex buffer per frame)
+func_15156E68	line_spark_burst_at	med	Copies a spark spec into an emitter block, spawns line sparks in random directions (emit_line_sparks_by_angles) and calls func_151308E4
+func_151570C4	spark_point_flash_update	high	Timer tick: when it runs out, picks a random point of D_800DCE60, bursts line sparks and a light flash there, then restarts the timer
+func_15157294	line_spark_burst_random_flip	low	Copies a line-spark spec template, randomly sets its flip flags 0x40 / 0x80 and spawns it (line_spark_burst_at)
+func_15157504	line_fx_free_buffers	med	Frees the per-frame vertex buffers of a line effect node (func_151D5E30 on +0x88)
+func_15157528	line_fx_retire	med	Line effect node retire: frees its vertex buffers and retires the node
+func_15157554	line_fx_free	med	Line effect node free: frees its vertex buffers and unlinks and frees the node
+func_15157580	anim_model_fx_spawn	med	Spawns an animated model effect node (type 0x36 / 0x4C / 0x5B) from a 0x58-byte spec: loads the model, starts its animation, allocates light buffers
+func_15157734	anim_model_fx_free_lights	med	Frees the per-player light buffers and the lookat buffer of an animated model effect
+func_151577B8	anim_model_fx_retire	med	Animated model effect retire: frees its light buffers, releases its asset and model, retires the node
+func_151577FC	anim_model_fx_free	med	Animated model effect free: frees its light buffers, releases its asset and model, unlinks and frees the node
+func_15157840	anim_model_fx_update	high	Animated model effect tick: life countdown, runs its two behaviour callbacks (D_8008B130 / D_8008B140), steps its animation, fades out
+func_15157990	anim_model_fx_draw	high	Draws an animated model effect: optional pre/post draw callbacks, render state and colours, optional light, then its model display lists
+func_15157DD0	anim_model_fx_beh_identity	med	Animated model effect behaviour: sets this frame's model matrix to identity; returns 1
+func_15157E08	anim_model_fx_spawn_moving	med	Spawns an animated model effect (anim_model_fx_spawn) and copies 0x38 bytes of motion parameters (rotation, velocity, spin) to +0x120
+func_15157E88	anim_model_fx_beh_rotate	med	Animated model effect behaviour: matrix from the rotation at +0x120, translated to the node position, uniformly scaled; returns 1
+func_15158018	anim_model_fx_beh_move	med	Animated model effect behaviour: integrates velocity with optional drag and gravity into the position and advances the spin; returns 1
+func_151582F8	anim_model_fx_on_message	med	Animated model effect message handler: forwards to node_handle_link_message with its link fields
+func_15158338	anim_model_fx_beh_rotate_scaled	med	Animated model effect behaviour: builds its matrix from the parameters at +0x120 (anim_model_fx_build_mtx); returns 1
+func_1515835C	anim_model_fx_build_mtx	med	Builds this frame's model matrix from rotation params, translated to the node position, scaled by width (x/z) and height (y)
+func_151584F0	anim_model_fx_load_screen_mtx	low	Draw callback: loads the identity modelview and the view's screen projection (D_800DD040) and flags the matrices as set
+func_15158558	anim_model_fx_load_view_proj	low	Draw callback: loads the view's projection matrix and multiplies in its per-frame view matrix from D_800DC6D0
+func_151585E8	anim_model_fx_broadcast	med	Broadcasts a message to every animated model effect node (the three types in D_800A6440)
+func_15158620	dl_fx_spawn	med	Spawns a display-list effect node (type 0x37 or 0x55) from a 0x44-byte spec, optionally allocating per-player light buffers for arg1 lights
+func_15158748	dl_fx_spawn_unlit	med	Spawns a display-list effect node with no light buffers (dl_fx_spawn with 0 lights)
+func_15158794	dl_fx_update	high	Display-list effect tick: counts down life (flag 1), runs its behaviour callback from D_8008B1A0, destroys the node when done
+func_15158838	dl_fx_draw	high	Draws a display-list effect: matrix callback, render state and colours, optional light, then its display list from D_8008B358
+func_15158AFC	dl_fx_mtx_rotate_scale	med	Matrix callback: rotation from the params at +0xF8, translated to the node position, uniformly scaled; converts to a fixed-point Mtx
+func_15158BF4	dl_fx_beh_move	med	Display-list effect behaviour: applies x/z drag and gravity to the velocity, integrates the position and advances the spin; returns 1
+func_15158E90	dl_fx_mtx_scaled_template	med	Matrix callback: copies the template matrix D_8008B1B8, scales it by +0xF8 / 255 and places it at the node position
+func_15158F90	dl_fx_free_lights	med	Frees the per-player light buffers and the lookat buffer of a display-list effect
+func_15159014	dl_fx_retire	med	Display-list effect retire: frees its light buffers and retires the node
+func_15159040	dl_fx_free	med	Display-list effect free: frees its light buffers and unlinks and frees the node
+func_1515906C	dl_fx_beh_fade_out	med	Display-list effect behaviour: once life drops below the fade start, caps alpha at life * fade rate; returns 1
+func_151590AC	dl_fx_on_message	med	Display-list effect message handler: 0x2D moves its owner link to the swapped object, 0 clears the link when the owner goes
+func_15159140	move_watch_spawn	med	Spawns a movement-watcher node (type 0x2E) for a character: picks its kind, records its position and initial states; arg1 arms it
+func_15159244	move_watch_retire	med	Movement watcher retire: unlinks it from its character (func_1514EDF0) and retires the node
+func_15159270	move_watch_free	med	Movement watcher free: unlinks it from its character (func_1514EDF0) and unlinks and frees the node
+func_1515929C	move_watch_update	high	Watcher tick: recomputes the five state bytes for its character and, when armed, calls the kind's transition handlers whose masks match
+func_15159514	move_watch_on_message	high	Movement watcher message handler: 0 destroys it with its character, 0x2D follows a character swap, 4 calls func_1519F970
+func_151595F4	move_watch_is_airborne	med	Watcher state 0: 1 when the character is above its ground height (or has no ground and is not grounded), always 0 for kinds 2 / 3
+func_15159690	move_watch_is_out_of_water	low	Watcher state 1: 1 when the water level (+0x180) is more than 35 below the ground height, always 1 for kinds 2 / 3
+func_151596F4	move_watch_is_near_ground	low	Watcher state 2: 1 when the character is within 75 units above its ground height (kinds 2 / 3 only while D_800C35EA == 1)
+func_151597A0	move_watch_moving_state	low	Watcher state 3: compares the character's position with the last one and returns the moved / still state
+func_15159828	move_watch_anim_state	low	Watcher state 4: 3 when the character's animation is in a list, 2 when flag +0xAD is set, 1 when it has speed, else 4
+func_151598E0	move_watch_pick_kind	med	Picks the watcher kind (0..4) of a character from multiplayer / Conker / type / id 8, 10, 41-42; returns 0 when none applies
+func_1515999C	move_watch_state_matches	med	Returns 1 when a character's movement watcher (link 0x13) is in the given states (-1 = any) for each of the five state bytes
+func_15159B04	smoke_wobble_update_ground	low	Smoke particle behaviour: wobble step, then when falling checks the ground below and spawns a dust particle on landing; 0 = stop
+func_15159C2C	smoke_wobble_step	med	Moves a particle on two oscillators: wobbling sizes (+0x38 / +0x3C) and, while +0x5C > 0, a sideways sway; returns 0 past the height limit
+func_15159E00	smoke_wobble_spawn	low	Spawns a wobbling smoke particle (func_1513092C kind 2, 0x28 extra bytes) at a point with a velocity and random flip flags
+func_1515A120	smoke_wobble_spawn_at	low	Spawns a wobbling smoke particle at (x, y, z) with no velocity, owner from the given object (smoke_wobble_spawn)
+func_1515A178	dust_disc_emitter_update	high	Dust / spray emitter tick near the camera: accumulates rate and spawns particles at random points of a rotated disc
+func_1515A68C	smoke_wobble_step_pulse	low	Particle behaviour: wobbling sizes from two oscillators plus a sine-pulsed offset along a fixed vector; returns 1
+func_1515A7A8	smoke_puff_spawn_grounded	low	Spawns a smoke puff particle (func_151307F0 kind 2, 0x24 extra bytes); without horizontal velocity it snaps to the ground below
+func_1515AB7C	smoke_sway_step	med	Particle behaviour: wobbling sizes and sideways sway from four byte-angle oscillators, velocity damped by a drag factor; returns 1
+func_1515ACFC	smoke_sway_step_ground	low	smoke_sway_step plus a ground check while falling; on the ground may spawn a dust particle; returns whether it continues
+func_1515AE90	move_watch_get_data	low	Finds a character's movement watcher (link 0x13) and returns a pointer to its data at +0x34; 0 when it has none
+func_1515AEE4	watch_attach_effect_start	med	For an object with byte +0x1F 0, spawns its attached effect (func_151A8B20, kind 0xF) with data from D_800A674C
+func_1515AFF4	watch_spawn_random_effect	low	Spawns an effect (func_15149130) of a random kind in the object's range at a point, copying its 0x28-byte block
+func_1515B0F8	smoke_emitter_update	med	Smoke emitter tick: accumulates rate + random and spawns smoke puffs (func_151307F0 kind 2) with random sizes, sway and flip flags
+func_1515B500	dust_drop_spawn_near_char	high	One call in 16 spawns a falling dust object at a random grounded spot 107..2010 units ahead of character idx, +-20 degrees of its yaw
+func_1515B78C	dust_drop_update	low	Falling dust object tick: accumulates its rate and spawns wobbling dust particles (func_1513092C kind 2) with random flip flags
+func_1515BB64	screen_smoke_clear	med	Broadcasts message 0xB with id to all 2D sprites so the screen smoke clouds tagged with that id destroy themselves
+func_1515BB9C	screen_smoke_on_message	med	Screen smoke sprite message handler: message 0xB destroys it when its tag (+0x70) matches the given id
+func_1515BBE4	screen_smoke_burst	high	Spawns 10 drifting 2D smoke sprites tagged with id: random positions, sizes, life, alpha and flips, texture from the current impact kind
+func_1515BF04	screen_smoke_beh_rise	med	Screen smoke sprite behaviour: accelerates it upward and grows its height with the travelled distance; returns 1
+func_1515BF80	cam_zone_outside_tick	low	Camera zone hook while outside the zone: does nothing
+func_1515BF8C	cam_zone_inside_tick	med	Camera zone hook while inside the zone: may spawn falling dust near the player (dust_drop_spawn_near_char)
+func_1515BFB8	cam_zone_leave_alt	low	Camera zone hook on leaving in the flagged mode: does nothing
+func_1515BFC4	cam_zone_leave	med	Camera zone hook on leaving: spawns a burst of screen smoke clouds for the player (screen_smoke_burst)
+func_1515BFF0	cam_zone_enter_alt	med	Camera zone hook on entering in the flagged mode: clears the player's screen smoke clouds
+func_1515C01C	cam_zone_enter	med	Camera zone hook on entering: clears the player's screen smoke clouds (screen_smoke_clear)
+func_1515C050	quad_fx_update	med	Quad effect tick: life countdown, behaviour callback D_8008B418, follow-link check (func_1514401C); on end runs D_8008B41C then destroys
+func_1515C160	quad_fx_draw	med	Draws a quad effect: colours, texture and render state, then its 4 vertices at +0x50 as two triangles
+func_1515C3C0	motion_track_spawn	med	Spawns a motion-tracker node (type 0x32) linked to an object, starting its current and previous positions at the object's
+func_1515C4C0	motion_track_retire	med	Motion tracker retire: unlinks it from its object (func_1514EDF0) and retires the node
+func_1515C4EC	motion_track_free	med	Motion tracker free: unlinks it from its object (func_1514EDF0) and unlinks and frees the node
+func_1515C518	motion_track_update	high	Motion tracker tick: keeps the object's previous and current position and their per-frame difference; destroys when the object goes
+func_1515C628	motion_track_on_message	med	Motion tracker message handler: forwards to node_handle_link_message with its link fields
+func_1515C668	motion_track_get_delta	med	Finds an object's motion tracker (link 0x16) and returns a pointer to its per-frame movement at +0x38; 0 when none
+func_1515C6C8	motion_track_reset_all	med	Clears fields +0x44 (0) and +0x48 (-1) of every motion tracker node (type 0x32, both banks)
+func_1515C710	obj_get_fx_point_a	low	Gets an object's effect point and two sizes from its fields +0xD2..+0xD6 (y offset); non-object types give its position and 1, 1
+func_1515C7B4	obj_get_fx_point_b	low	Gets an object's effect point and two sizes from its fields +0xE4..+0xE8 (y offset), used for debris; others give position and 1, 1
+func_1515D9B0	light_alloc_lookat_buf	med	Allocates and zeroes a 0x10-byte lookat buffer for an effect's lighting
+func_1515D9F0	light_alloc_light_buf	med	Allocates and zeroes a light buffer for n lights (0x60 bytes each: two 0x30 light structs per frame)
+func_1515D4D4	light_set_level_colour	med	Sets the level ambient colour D_800DCD20 to (r, g, b) when priority arg3 is at least the current one, and flags it changed
+func_1515DA90	light_list_append_new	high	Allocates a zeroed 0x34-byte light and appends it to the end of the light list D_800DCD78
+func_1515DB1C	light_add_point_ext	med	Adds a point light (wrapper of light_add_point with the same arguments)
+func_1515D5F8	light_add_point	high	Adds a point light to the light list: position, radius byte, colour, mask and group; returns it or 0
+func_1515DC0C	light_list_clear_frame_flags	med	Clears the per-frame player bytes (+0xC and +0x30) of every light in the list
+func_1515DC38	light_stub	low	Empty function next to the light list code
+func_1515DC40	light_setup_view	high	Per-player view setup: no lights, lighting on, then loads the player's viewport as s15.16 values with custom G_MOVEWORD 0x10
+func_1515DE84	light_apply_object_lights	high	Per-object lighting: zone colour (fog/tint blend) plus the nearest enabled point lights, then gSPNumLights, the lights, ambient and lookat
+func_1515E7E8	light_get_zone_colour	high	Starting light colour of a position: the colour zone of D_800DCD80 containing it, else the scaled level colour; optional fog/tint blend
+func_1515E9AC	light_get_tint_zone	med	Gets the two tint colours and fade bytes of the fog / tint zone containing a point (D_800DCD84), else the level defaults
+func_1515EAB4	light_write_light_cmds	low	Writes the light G_MOVEMEM commands for the selected lights of this frame (0x30 bytes each) plus the ambient light
+func_1515EDF8	light_compute_point_colour	low	Computes the lit colour of a point: zone colour plus the clamped contributions of the level's point lights (D_800DA248)
+func_1515F0F4	light_zone_find_at	med	Returns the first enabled zone of a zone list that contains (x, y, z) and matches the mask (func_150A2280), or NULL
+func_1515F1E8	light_fill_point_light	low	Fills one 0x30-byte point light struct for a light of the list relative to an object position
+func_1515F4E4	light_viewport_to_fixed	med	Converts a viewport's scale / translate fields into the s15.16 values D_800DD140[0..3] for the custom viewport command
+func_1515F578	mtx_fixed_get_element	med	Reads element arg1 of a fixed-point Mtx (integer half + fraction half) as a float
+func_1515F5B0	light_store_fixed	med	Clamps a float to s16 range and stores it as s15.16 into D_800DD140[arg1]
+func_1515F61C	light_store_int	med	Clamps a float to s16 range and stores it as an integer into D_800DD140[arg1]
+func_1515F10C	light_remove	high	Unlinks a light from the light list D_800DCD78 and frees it
+func_1515F170	light_group_set_disabled	med	Sets the disabled byte (+9) of every light of group arg0 (+0xB) to arg1
+func_1515F1B0	spawn_region_entry_alloc	med	Allocates a 0x10-byte spawn region entry holding the region and its volume and area (0 for none)
+func_1515F25C	spawn_region_list_push	med	Pushes an entry onto the front of a singly linked list (next at +0xC)
+func_1515F7E0	obj_kind9_dispatch	low	Calls the handler D_8008B430[record +0x18] (0..11) for an object, if set
+func_1515F828	obj_send_hit_6001d	low	Sends hit / message 0x6001D to an object with its id word +0x7A (obj_send_hit)
+func_1515F858	obj_kind_dispatch_active	low	When object byte +0x3B is 1, calls the handler D_8008B460[record +0x1C] (0..2)
+func_1515F8A8	light_ease_level_colour_grey	low	Eases the level colour halfway toward (97, 96, 98) each call and applies it (light_set_level_colour, priority 0)
+func_1515FB34	light_ease_level_colour_warm	low	Eases the level colour halfway toward (229, 253, 160) each call and applies it (light_set_level_colour, priority 0)
+func_1515FDC0	light_cycle_level_colour	med	Cycles the level colour along a sine (phase D_800DCDA0) between greenish tones, easing halfway each call, and applies it
+func_151600E0	obj_kind_check_stub	low	Does nothing: the asm only loads obj +0x3B and arg1 +0x1C and tests them (stripped debug check)
+func_15160104	obj_send_hit_6002d	low	Sends hit / message 0x6002D to an object with its id word +0x7A (obj_send_hit)
+func_15160134	obj_send_hit_6002e	low	Sends hit / message 0x6002E to an object with the character index held by the arg1 type-0x2E node (or -1)
+func_151601A4	obj_send_hit_33	low	Sends hit / message 0x33 with flags 0xC000 to an object (obj_send_hit)
+func_151601D0	obj_zone_kill	med	Kills a character inside a zone radius (or always without one): hit 0x2F, hit effects, func_15145A50 and state 6
+func_15160310	fb_fx_apply_all	high	Runs the framebuffer handlers (D_8008B478) of every colour-framebuffer effect (type 0x34) on the frame about to be swapped
+func_151604E4	fb_fx_spawn	high	Spawns a colour-framebuffer effect node (type 0x34), copying the 8-byte header (flags, handlers, life) to +0xE
+func_1516055C	fb_fx_update	high	Framebuffer effect tick: counts down life (flag 1), runs its behaviour callback D_8008B470, destroys the node when done
+func_eu_15160600	fb_fx_on_message	med	Forwards a message to the framebuffer effect's handler D_8008B484[+0x14], if any
+func_15160648	fb_fx_debug_tweak	high	Debug-tweak behaviour of the colour framebuffer effect: reads pos s/t, size s/t and pixelation from debug_tweak_int; returns 1
+func_151607E4	fb_fx_broadcast	med	Broadcasts a message to every colour-framebuffer effect node (type 0x34)
+func_15164CF0	cam_wobble_spawn	med	Spawns a camera-wobble node (type 0x39) for a view from a 0x38-byte spec, unless the view's character blocks it; clears its phases
+func_15164DF8	cam_wobble_stop_at_half_cycle	med	Sets flag 2 of a camera wobble so each channel stops at its next half-cycle
+func_15164E0C	cam_wobble_update	high	Camera wobble tick: advances six sine channels and adds them, scaled by an optional fade callback, to the view's offsets D_800DD210
+func_15165454	cam_wobble_clear_offsets	med	Clears the wobble offsets of all views (D_800DD210, 0x60 bytes)
+func_1516547C	cam_wobble_start_preset	high	Starts camera-wobble preset kind (0..7) for a view with its built-in periods and amplitudes; presets 5 / 6 fade with distance from data
+func_15165B98	cam_wobble_spawn_params	med	Spawns a camera wobble from 15 floats (periods, amplitudes, envelope times), turning periods into speeds and copying the envelope
+func_15165E4C	cam_wobble_beh_envelope	med	Camera wobble behaviour: ramps the channel amplitudes up, holds, then ramps them down over the envelope times; 0 when finished
+func_151660F0	cam_wobble_distance_fade	med	Camera wobble fade callback: fade factor from the distance to the point at +0x108 (near / range / scale at +0x114..+0x11C)
+func_15166120	cam_wobble_fade_by_distance	med	Returns 1 within near distance of the view, 0 past near + range, else 1 - (dist - near) * scale
+func_151661F0	mesh_swing_update	high	Swings vertex pairs of a Vtx buffer by an angle (x = -+cos * amp, y = sin * amp), moving the angle and bouncing it between min and max
+func_151664F0	water_ring_spawn	med	Spawns an expanding water ring quad (node type 4) at a point with life, growth speed and alpha; angle -1 = flat ring, else tilted
+func_15166688	water_ring_spawn_ex	low	Spawns an expanding ring quad (node type 4, mode 2) with two extra bytes, life, size, growth speed and alpha at a point
+func_15166774	water_ring_update	med	Water ring tick: grows its radius by its speed and counts down its life, destroying the node at 0
+func_151667D8	water_ring_draw	med	Draws a water ring: slows its growth in the second half of its life, fades it and writes its quad vertices around the centre
+func_15166E28	layer_pre_scroll_texture	high	Render layer 4 pre-draw callback: advances the texture scroll D_800DD270, loads texture D_800907A4 and sets the render mode
+func_15166F10	flash_blades_spawn	med	Spawns a 10-frame flash node (type 0xD) of three blades at random yaw steps around a point, scaled by arg3; sets the flare point
+func_eu_151670C0	flash_blades_update	med	Flash tick: counts down; at 5 spawns a sprite at the tip (-400, 10, 0) of each of the three blade matrices; at 0 destroys the node
+func_151672D8	flash_blades_draw	med	Draws the three flash blades: per matrix, 6 vertices with texture coordinates scrolled by the remaining frames, 4 triangles
+func_151674DC	layer_pre_flash_texture	low	Render layer pre-draw callback: loads texture D_800908FC with the shared scroll state D_800DD650 / D_800DD654
+func_15167548	layer_pre_identity_mtx	low	Render layer pre-draw callback: loads the identity modelview matrix D_80089810
+func_15169E70	image_fx_spawn	high	Spawns a 2D image effect node (type 0x5E, e.g. title cards) and copies its 0x3C-byte template to +0x10
+func_15169ED8	image_fx_spawn_template	med	Spawns a 2D image effect from a template with owner byte 0xFF (image_fx_spawn) and returns it
+func_15169EF8	image_fx_update	high	2D image effect tick: runs its behaviour callback D_8008CDC0, advances the 8.8 frame with wrap-around, counts down life and destroys at 0
+func_15169FB8	image_fx_draw	high	Draws a 2D image effect: combiner, primitive colour, optional second texture, mirror / border flags, render mode, then the scaled image
+func_1516A1E0	falling_debris_update	high	Falling debris tick: gravity, spin and wobble; on landing splashes, rests, bounces or frees by kind; fades out after its timer
+func_1516A964	particle_ground_splash_check	low	Particle ground test: below the floor it stops and may spawn a sprite quad splash near the ground, else damps its velocity
+func_1516AAA8	particle_spawn_decal_if_old	low	Once a particle's age reaches 0x300, spawns a random decal (kinds 0x20..0x22) at its position (decal_spawn_at)
+func_1516ABB8	particle_bounce_fall_step	med	Particle step: fades alpha in or out, applies gravity, moves it and bounces off the floor halving vertical speed; 1 = faded out
+func_1516ACE0	text_split_lines	high	Splits a string in place at 0xBD line marks (replaced by NUL) and returns the line count
+func_1516AD20	text_box_open	high	Opens a text box node (type 0x51) for a string id or caller descriptor, measures its lines for the box size and flags the player
+func_1516AFE0	text_box_update	high	Text box tick: open / grow / dots / line fade-in / wait for A or B / fade-out / next line / shrink-and-close state machine
+func_1516BC2C	text_box_draw	high	Draws a text box: shadow pass, then pointer or thought dots, the box sprite and its text in the descriptor colour, scaled by the fade
+func_1516CDE8	text_box_get_line	high	Returns line arg1 of a text descriptor's string (string table D_800DD684 / D_800DD688 or caller text), skipping NUL separators
+func_1516CEA4	text_box_draw_text	high	Draws a text box's current string line by line from its corner (centred, white, coloured or black with a 1-pixel offset)
+func_1516D1C8	text_box_place	high	Computes a text box's screen position and pointer angle from descriptor percentages or the speaker's projected point
+func_1516D63C	text_box_clamp_to_screen	med	Keeps a text box position inside the viewport margins, rounding the coordinates to whole pixels
+func_1516D850	text_box_close_now	med	Closes a text box immediately: clears its descriptor's active byte and destroys the node (type 0x51 only)
+func_1516D898	text_box_request_finish	med	Requests a text box to advance (flag 0x100, timed skip off) with its line index set to the descriptor's last value, so it closes
+func_1516D8E8	text_box_request_next	med	Requests a text box to advance to the next line (flag 0x100, timed skip off); returns the box or NULL
+func_1516D934	text_box_request_skip	med	Requests a text box to advance and skip its timed steps (flags 0x100 / 0x400); returns the box or NULL

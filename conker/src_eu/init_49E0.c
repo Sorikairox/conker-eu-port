@@ -16,10 +16,11 @@ typedef struct SchedClient {
 extern OSViMode D_8002AF20;          /* the active VI mode (PAL timing tweak below) */
 extern OSTimer D_8003A8E8;           /* gfx task timeout timer */
 extern u16 D_8003A928;
-void func_10003ACC(s32 arg0, s32 arg1, s32 arg2);
-void func_10004DB0(void);
+void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2);
+void sched_try_start_gfx_task(void);
 
-void func_100049E0(s32 arg0) {
+/* was func_100049E0 */
+void sched_thread_main(s32 arg0) {
     OSMesg msg;
     SchedClient *client;
     OSTime countdown;
@@ -43,7 +44,7 @@ void func_100049E0(s32 arg0) {
                 D_8002AF20.fldRegs[1].yScale = 0x400;
                 D_8002AF20.fldRegs[0].vStart = 0x3D01E8;
                 D_8002AF20.fldRegs[1].vStart = 0x3D01E8;
-                func_10003ACC(0, 0, 0);
+                framebuffer_fill_color(0, 0, 0);
             }
             for (client = (SchedClient *)D_8003B234; client != NULL; client = client->next) {
                 if (!(client->flags & 1)) {
@@ -66,12 +67,12 @@ void func_100049E0(s32 arg0) {
                 D_8002AC6C = 1;
             }
             if (D_8003A581 == 0) {
-                func_10004DB0();
+                sched_try_start_gfx_task();
             }
         } else if ((u32)msg == 1) {
             D_8003A584 = 1;
             if (D_8003A583 == 0) {
-                func_10004FE0();
+                sched_try_swap_buffer();
             }
         } else if ((u32)msg == 2) { /* SP task done */
             if (D_8003A582 == 3) {
@@ -99,7 +100,7 @@ void func_100049E0(s32 arg0) {
             } else {
                 D_8003A583 = 0;
                 if (D_8003A584 == 1) {
-                    func_10004FE0();
+                    sched_try_swap_buffer();
                 }
             }
         } else if ((u32)msg == 3) { /* gfx task timeout */
@@ -120,9 +121,9 @@ void func_100049E0(s32 arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_49E0/func_100049E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_49E0/sched_thread_main.s")
 #endif
-// void func_100049E0(s32 arg0) {
+// void sched_thread_main(s32 arg0) {
 //     u32 sp64;
 //     s32 sp5C;
 //     s32 sp58;
@@ -182,7 +183,7 @@ void func_100049E0(s32 arg0) {
 //     if (D_8003A581 != 0) {
 //         goto loop_1;
 //     }
-//     func_10004DB0();
+//     sched_try_start_gfx_task();
 //     goto loop_1;
 // case 2:
 //     if (D_8003A582 == 3) {
@@ -214,14 +215,14 @@ void func_100049E0(s32 arg0) {
 //         if ((u16)1 != D_8003A584) {
 //             goto loop_1;
 //         }
-//         func_10004FE0();
+//         sched_try_swap_buffer();
 //         goto loop_1;
 //     case 1:
 //         D_8003A584 = (u8)1U;
 //         if (D_8003A583 != 0) {
 //             goto loop_1;
 //         }
-//         func_10004FE0();
+//         sched_try_swap_buffer();
 //         goto loop_1;
 //     case 3:
 //         D_8002AC6C = (u8)0;
@@ -243,33 +244,34 @@ void func_100049E0(s32 arg0) {
 //     goto loop_1;
 // }
 
-void *func_10025210();
-void func_10004DB0(void) {
+void *os_vi_get_next_framebuffer();
+/* was func_10004DB0 */
+void sched_try_start_gfx_task(void) {
     if (D_8003A582 == 0) {
         if (osRecvMesg(&D_8003B1E8, (OSMesg *)&D_8002AC50, 0) == 0) {
             if ((osViGetCurrentFramebuffer() != D_8002AC50->framebuffer) &&
-                (func_10025210() != D_8002AC50->framebuffer) &&
+                (os_vi_get_next_framebuffer() != D_8002AC50->framebuffer) &&
                 ((D_8003B23A == 0) || (D_8003B238 >= D_8003B239))) {
                 if (D_8003B238 != 255) {
                     if ((D_8003B238 >= D_8003B239) || (D_8003B23A == 0)) {
                         D_8003B239 = D_8003B238;
                     }
                 }
-                func_10004F00();
+                sched_start_gfx_task();
             } else {
                 D_8003A582 = 2;
             }
         }
     } else if (D_8003A582 == 2) {
         if ((D_8003B23A == 0) || (D_8003B238 >= D_8003B239)) {
-            func_10004F00();
+            sched_start_gfx_task();
         }
     } else if (D_8003A582 == 6) {
-        func_10004FE0();
+        sched_try_swap_buffer();
     }
 }
 // NON-MATCHING: branching is not right
-// void func_10004DB0(void) {
+// void sched_try_start_gfx_task(void) {
 //     if (D_8003A582 == 0) {
 //         if (osRecvMesg(&D_8003B1E8, &D_8002AC50, 0) == 0) {
 //             if ((osViGetCurrentFramebuffer() == D_8002AC50->framebuffer) ||
@@ -282,19 +284,20 @@ void func_10004DB0(void) {
 //                         D_8003B239 = D_8003B238;
 //                     }
 //                 }
-//                 func_10004F00();
+//                 sched_start_gfx_task();
 //             }
 //         }
 //     } else if (D_8003A582 == 2) {
 //         if ((D_8003B23A == 0) || ( D_8003B238 >= D_8003B239)) {
-//             func_10004F00();
+//             sched_start_gfx_task();
 //         }
 //     } else if (D_8003A582 == 6) {
-//         func_10004FE0();
+//         sched_try_swap_buffer();
 //     }
 // }
 
-void func_10004F00(void) {
+/* was func_10004F00 */
+void sched_start_gfx_task(void) {
     if (D_8002AC5C == 0) {
         osSpTaskLoad(&D_8002AC50->list);
         osSpTaskStartGo(&D_8002AC50->list);
@@ -313,23 +316,25 @@ void func_10004F00(void) {
     }
 }
 
-void func_10004FE0(void) {
+/* was func_10004FE0 */
+void sched_try_swap_buffer(void) {
     if (D_8003B238 <= 0) {
         D_8003A582 = 6;
     } else {
-        func_10005020();
+        sched_swap_framebuffer();
     }
 }
 
 extern u8 D_eu_8002AFA8;
 #ifdef NON_MATCHING
-// func_1515FDA0 is the US name of EU func_15160310 (undefined_syms alias); the port has only the EU symbol
-void func_15160310(u16 *);
-#define func_1515FDA0 func_15160310
+// func_1515FDA0 is the US name of EU fb_fx_apply_all (undefined_syms alias); the port has only the EU symbol
+void fb_fx_apply_all(u16 *);
+#define func_1515FDA0 fb_fx_apply_all
 #endif
 extern s8 D_eu_8002AE24;
 
-void func_10005020(void) {
+/* was func_10005020 */
+void sched_swap_framebuffer(void) {
     void *fb;
 
     D_8003A582 = 0;

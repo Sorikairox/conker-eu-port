@@ -3,7 +3,7 @@
 /if (obj->id == 0x41) {/s/0x41/0x42/
 /if (partner->unk84.uh != 0x48 && partner->unk84.uh != 0x4B) {/s/!= 0x4B/!= 0x4C/
 /if (cur == 0 && anim->unk8 == 0.0f) {/s/0.0f/1.0f/
-/func_15188D80(obj, 100, 0);/s/100/101/
+/afterimage_start(obj, 100, 0);/s/100/101/
 /if (cur == 0 && partner->unk84.uh == 0x4B) {/s/cur == 0/cur == 1/
 /obj_start_anim(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);/s/3.0f/2.0f/
 /if (cur == 1 && anim->unk18 - 1.0f <= anim->unk8) {/s/<=/</
@@ -20,7 +20,7 @@
 /if (partner->unk13C != 0 || (obj->id == 0x1D && partner->stunned != 0)) {/s/obj->id == 0x1D \&\& //
 /if (6.0f <= panim->unk8 && panim->unk8 < 11.0f) {/s/6.0f <=/6.0f </
 /if (6.0f <= panim->unk8 && panim->unk8 < 11.0f) {/s/< 11.0f/<= 11.0f/
-/func_15083568(obj, move, 1.0f, 0);/s/1.0f/2.0f/
+/obj_setup_run(obj, move, 1.0f, 0);/s/1.0f/2.0f/
 /} else if (11.0f <= panim->unk8) {/s/11.0f/10.5f/
 /^            cur = partner->unk84.uh;/d
 /} else if (cur == 0xC6) {/s/0xC6/0xC5/

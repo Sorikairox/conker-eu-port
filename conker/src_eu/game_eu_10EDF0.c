@@ -39,8 +39,8 @@ struct260 *fx_model_emitter_spawn(u8 arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151308E4(s32 *, s32, s32, u8, s32);
-void func_15145CD0(void *, void *, void *, s32);
+s32 particle_spawn_basic(s32 *, s32, s32, u8, s32);
+void xform_points_ptrs(void *, void *, void *, s32);
 extern s32 D_800A13B4;
 extern s32 D_800A13CC;
 
@@ -155,7 +155,7 @@ void fx_model_emitter_update(u8 *arg0) {
         sp.uA0 = (u8 *) &D_800A13CC + (*(u8 *)((u8 *)temp_s1 + 0)) * 0xC;
         sp.u94 = &sp.uE4;
         sp.u98 = &sp.uA4;
-        func_15145CD0((*(s32 *)((u8 *)temp_s1 + 4)), &sp.u9C, &sp.u94, 2);
+        xform_points_ptrs((*(s32 *)((u8 *)temp_s1 + 4)), &sp.u9C, &sp.u94, 2);
         sp.uA4 -= sp.uE4;
         sp.uA8 -= sp.uE8;
         sp.uAC -= sp.uEC;
@@ -183,7 +183,7 @@ void fx_model_emitter_update(u8 *arg0) {
             sp.uFC = sp.uA4 * temp_f2_2;
             sp.u100 = sp.uA8 * temp_f2_2;
             sp.u104 = sp.uAC * temp_f2_2;
-            temp_v0 = func_151308E4(&sp.uB4, 1, 4, (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = particle_spawn_basic(&sp.uB4, 1, 4, (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.uB0, 4);
             }

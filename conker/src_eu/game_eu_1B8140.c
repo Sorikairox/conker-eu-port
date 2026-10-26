@@ -4,12 +4,13 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15158620(u8 *, s32, s32, s32, s32, s32, s32);
+s32 dl_fx_spawn(u8 *, s32, s32, s32, s32, s32, s32);
 s32 memcpy(s32, s16 *, s32);
 extern s32 D_8008D950;
 extern s32 D_8008D958;
 
-s32 func_1518A930(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f32 arg6, u8 arg7, s16 arg8, u8 arg9, s32 argA, u8 argB, s32 argC) {
+/* was func_1518A930 */
+s32 tumble_debris_spawn(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f32 arg6, u8 arg7, s16 arg8, u8 arg9, s32 argA, u8 argB, s32 argC) {
     struct {
         s16 u30;
         u8 pad32[0x2];
@@ -105,7 +106,7 @@ s32 func_1518A930(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f3
     (*(s32 *)((u8 *)(&sp.uA0) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 8));
     sp.u30 = 0xC;
     sp.u34 = 0x15;
-    temp_v0 = func_15158620(&sp.u68, 3, 0xFF, 1, argA + 0x38, (s32) argB, argC);
+    temp_v0 = dl_fx_spawn(&sp.u68, 3, 0xFF, 1, argA + 0x38, (s32) argB, argC);
     if (temp_v0 == 0) {
         return 0;
     }
@@ -115,10 +116,11 @@ s32 func_1518A930(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f3
     return sp.uAC;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8140/func_1518A930.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8140/tumble_debris_spawn.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1518AB64(u8 *arg0) {
+/* was func_1518AB64 */
+s32 tumble_debris_update(u8 *arg0) {
     struct {
         f32 u38;
         f32 u3C;
@@ -134,7 +136,7 @@ s32 func_1518AB64(u8 *arg0) {
     s32 var_v0_2;
     u8 *temp_v1;
 
-    func_1515906C(arg0, arg0);
+    dl_fx_beh_fade_out(arg0, arg0);
     temp_v1 = arg0 + 0x100;
     (*(f32 *)((u8 *)(&sp.u38) + 0)) = (*(f32 *)((u8 *)temp_v1 + 0x10));
     (*(f32 *)((u8 *)(&sp.u38) + 4)) = (f32) (*(f32 *)((u8 *)temp_v1 + 0x14));
@@ -209,9 +211,10 @@ block_5:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8140/func_1518AB64.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8140/tumble_debris_update.s")
 #endif
-s32 func_1518AE84(Mtx *arg0, u8 *arg1) {
+/* was func_1518AE84 */
+s32 tumble_debris_build_matrix(Mtx *arg0, u8 *arg1) {
     f32 *r;
     f32 mf[4][4];
 

@@ -20,8 +20,8 @@
 \#^        t\.u24 = (random_int() >> 16) \* 0\.0000762939453125f;$#s/0\.0000762939453125f/0.00006103515625f/
 \#^        t\.u2C = (random_int() >> 16)#s/>> 16/\& 0xFFFF/
 \#^        node_spawn_model_fx((u8 \*) &t, kind, owner);$#s/owner/0/
-\#^    func_15171E60(x, y - 80\.0f, z, 70\.0f, 500, 0\.00457763671875f, 0, 10, kind, owner);$#s/y - 80\.0f/y + 80.0f/
-\#^    func_15171E60(x, y - 80\.0f#s/70\.0f, 500/70.0f, 400/
-\#^    func_15171E60(x, y - 80\.0f#s/0, 10, kind/0, 9, kind/
-\#^    func_15171E60(x, y - 80\.0f#s/0\.00457763671875f/0.0045f/
+\#^    particle_spark_ring_spawn(x, y - 80\.0f, z, 70\.0f, 500, 0\.00457763671875f, 0, 10, kind, owner);$#s/y - 80\.0f/y + 80.0f/
+\#^    particle_spark_ring_spawn(x, y - 80\.0f#s/70\.0f, 500/70.0f, 400/
+\#^    particle_spark_ring_spawn(x, y - 80\.0f#s/0, 10, kind/0, 9, kind/
+\#^    particle_spark_ring_spawn(x, y - 80\.0f#s/0\.00457763671875f/0.0045f/
 \#^    obj\[0x6E\] = 1;$#s/1;/2;/

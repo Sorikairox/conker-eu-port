@@ -11,9 +11,9 @@ void debris_screen_flash(u8 arg0, u8 arg1, s32 arg2);
 #endif
 // hoisted forward declaration(s) for debris_smoke_ring_spawn
 #ifdef NON_MATCHING
-s32 func_15154728(s32, f32, f32, f32, f32, s32, s32); /* P95: f32 parameter */
+s32 spark_shower_spawn(s32, f32, f32, f32, f32, s32, s32); /* P95: f32 parameter */
 #else
-s32 func_15154728(s32, f32, s32, f32, f32, s32, s32);
+s32 spark_shower_spawn(s32, f32, s32, f32, f32, s32, s32);
 #endif
 
 
@@ -36,9 +36,9 @@ void fire_smoke_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_1514373C(f32, f32, f32 *, f32 *);
-s32 func_1515C668(u8 *, u8 **);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
+s32 motion_track_get_delta(u8 *, u8 **);
 
 /* was func_150D59D8 */
 void fire_smoke_trail_update(u8 *arg0) {
@@ -115,10 +115,10 @@ void fire_smoke_trail_update(u8 *arg0) {
     if (((*(f32 *)((u8 *)temp_s2 + 0x28)) < 8.0f) && (((*(s32 *)((u8 *)temp_s2 + 0x184)) & 0x1F) == 0xE)) {
         (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) + ((3.0000002f + (random_float() * 1.0f)) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
-            if (func_1515C668(temp_s2, &sp.u84) == 0) {
+            if (motion_track_get_delta(temp_s2, &sp.u84) == 0) {
                 sp.u84 = ((u8 *)&D_800A5860);
             }
-            func_1514373C((*(f32 *)((u8 *)temp_s2 + 0x40)) * 0.017453292f, 1.0f, &sp.u90, &sp.u94); /* P95: was 0x3F800000 as an int */
+            vec2_from_angle_rad((*(f32 *)((u8 *)temp_s2 + 0x40)) * 0.017453292f, 1.0f, &sp.u90, &sp.u94); /* P95: was 0x3F800000 as an int */
             sp.uB5 = 0x28;
             sp.uAD = 0xFF;
             sp.uA0 = 0x2203;
@@ -197,7 +197,7 @@ void fire_smoke_trail_update(u8 *arg0) {
                     var_v0 = 0;
                 }
                 sp.uF0 |= var_v0 | var_s0;
-                func_151307F0(&sp.u98, 1, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                particle_spawn_ex(&sp.u98, 1, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f);
         }
@@ -237,21 +237,21 @@ void debris_particle_free_b(struct260 *arg0) {
 
 #ifdef NON_MATCHING
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32 *, f32);
-s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
 s32 obj_get_hit_kind(struct127 *);
-void func_15143874(s16, f32, f32 *, f32 *);
-f32 func_15144A74(f32 *, f32 *);
-s32 func_15144E80(s16 *, f32 *, f32 *, f32 *);
-s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
-s32 func_15146078(f32 *, f32 *, f32 *);
-void func_151C0910(s16 *, f32 *, s32, s32);
-void func_151C0B54(f32 *, s32, s32);
-void func_151C0BA0(f32 *, s32, s32);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+f32 vec3_dot(f32 *, f32 *);
+s32 tri_calc_normal(s16 *, f32 *, f32 *, f32 *);
+s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
+s32 vec3_make_basis(f32 *, f32 *, f32 *);
+void impact_scorch_decal_spawn(s16 *, f32 *, s32, s32);
+void impact_rumble_spawn(f32 *, s32, s32);
+void impact_cam_shake_spawn(f32 *, s32, s32);
 extern s32 D_800A0E00[3];   /* sprites of the first burst */
 extern s32 D_800A42F4[];    /* per type: entry count of the D_80089DC0 list */
 extern s32 *D_80089DC0[];   /* per type: sprite list (entries 2.. are used) */
 
-/* P67: particle request passed to func_15132FBC (0x7C bytes). */
+/* P67: particle request passed to mdl_particle_spawn (0x7C bytes). */
 typedef struct {
     /* 0x00 */ f32 scale[4];     /* 1, 1, xz_scale, y_scale */
     /* 0x10 */ f32 rot[3];       /* random degrees */
@@ -314,21 +314,21 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         return;
     }
     if ((arg0->unk184 & 0x1F) == 0xE) {
-        func_10010630(0x434, arg0, 0x7D00, 0x2BC, 0x7D0);
+        actor_sound_play_untracked(0x434, arg0, 0x7D00, 0x2BC, 0x7D0);
     } else {
-        func_10010630(0x4C8, arg0, -0x7D00, 0x2BC, 0x7D0);
+        actor_sound_play_untracked(0x4C8, arg0, -0x7D00, 0x2BC, 0x7D0);
     }
-    func_10010630((random_int() & 1) + 0x2B6, arg0, 0x7D00, 0x3E8, 0xBB8);
-    func_10010630((random_int() & 3) + 0x2B1, arg0, 0x7D00, 0x2BC, 0x7D0);
-    func_151C0B54(pos, id, arg2);
-    func_151C0BA0(pos, id, arg2);
-    func_15145A50(arg0);
+    actor_sound_play_untracked((random_int() & 1) + 0x2B6, arg0, 0x7D00, 0x3E8, 0xBB8);
+    actor_sound_play_untracked((random_int() & 3) + 0x2B1, arg0, 0x7D00, 0x2BC, 0x7D0);
+    impact_rumble_spawn(pos, id, arg2);
+    impact_cam_shake_spawn(pos, id, arg2);
+    obj_set_destroyed(arg0);
     if (arg0->unk1D4 == NULL || (arg0->unk74 & 0xF) == 0xF) {
         return;
     }
 
     /* the surface it was moving into: basis (axisA, axisB, normal) of the hit triangle, facing back */
-    moved = func_15145128(dir, dir, &tmp0, &tmp1) != 0;
+    moved = vec3_normalize_len(dir, dir, &tmp0, &tmp1) != 0;
     if (moved && func_150ACEA0(arg0->old_x_position, arg0->old_y_position, arg0->old_z_position, dir[0], dir[1], dir[2],
                                0, tri, &hit[0], &hit[1], &hit[2], &t, 0, &surface, 0.0f) != 0 && t < 397.0f) {
         hitWall = 1;
@@ -336,13 +336,13 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
     useDefault = 1;
     if (hitWall) {
         useDefault = 0;
-        if (func_15144E80(tri, axisA, axisB, normal) != 0) {
+        if (tri_calc_normal(tri, axisA, axisB, normal) != 0) {
             s32 a, b;
 
-            func_15145128(axisA, axisA, &a, &b);
-            func_15145128(axisB, axisB, &a, &b);
-            func_15145128(normal, normal, &a, &b);
-            if (func_15144A74(normal, dir) > 0.0f) {
+            vec3_normalize_len(axisA, axisA, &a, &b);
+            vec3_normalize_len(axisB, axisB, &a, &b);
+            vec3_normalize_len(normal, normal, &a, &b);
+            if (vec3_dot(normal, dir) > 0.0f) {
                 normal[0] = -normal[0];
                 normal[1] = -normal[1];
                 normal[2] = -normal[2];
@@ -356,7 +356,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
             normal[0] = -dir[0];
             normal[1] = -dir[1];
             normal[2] = -dir[2];
-            func_15146078(normal, axisA, axisB);
+            vec3_make_basis(normal, axisA, axisB);
         } else {
             normal[0] = 0.0f; normal[1] = 1.0f; normal[2] = 0.0f;
             axisA[0] = 1.0f;  axisA[1] = 0.0f;  axisA[2] = 0.0f;
@@ -403,7 +403,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         s32 ang = random_int();
         f32 c, d;
 
-        func_15143874(ang & 0xFF, random_float() * 759.0f, &c, &d);
+        vec2_from_angle_byte(ang & 0xFF, random_float() * 759.0f, &c, &d);
         p.vel[0] = (axisA[0] * c + axisB[0] * d + normal[0]) * speed;
         p.vel[1] = (axisA[1] * c + axisB[1] * d + normal[1]) * speed;
         p.vel[2] = (axisA[2] * c + axisB[2] * d + normal[2]) * speed;
@@ -415,7 +415,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         p.gravity = random_float() * 0.648f + -1.3970001f;
         p.life = (u32)random_int() % 21 + 30;
         p.sprite = D_800A0E00[i];
-        func_15132FBC(&p, 0, 0, 0, id, arg2);
+        mdl_particle_spawn(&p, 0, 0, 0, id, arg2);
     }
 
     /* burst 2: the type's own sprites, entries 2 .. count - 1 */
@@ -426,7 +426,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         s32 ang = random_int();
         f32 c, d;
 
-        func_15143874(ang & 0xFF, random_float() * 723.0f, &c, &d);
+        vec2_from_angle_byte(ang & 0xFF, random_float() * 723.0f, &c, &d);
         p.vel[0] = (axisA[0] * c + axisB[0] * d + normal[0]) * speed;
         p.vel[1] = (axisA[1] * c + axisB[1] * d + normal[1]) * speed;
         p.vel[2] = (axisA[2] * c + axisB[2] * d + normal[2]) * speed;
@@ -438,7 +438,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         p.gravity = random_float() * 0.62600005f + -1.0890001f;
         p.life = (u32)random_int() % 41 + 40;
         p.sprite = D_80089DC0[type][i];
-        func_15132FBC(&p, 0, 0, 0, id, arg2);
+        mdl_particle_spawn(&p, 0, 0, 0, id, arg2);
     }
 
     if (arg0->camera != NULL && D_80082FA0 <= 0) {
@@ -448,7 +448,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         if ((surface & 0x1F) == 0xE) {
             debris_scorch_mark_spawn((s32)tri, (s32)hit, id, arg2);
         } else {
-            func_151C0910(tri, hit, id, arg2);
+            impact_scorch_decal_spawn(tri, hit, id, arg2);
         }
     }
     debris_dust_cloud_spawn((s32)pos, id, arg2);
@@ -470,13 +470,13 @@ void debris_smoke_ring_spawn(s32 arg0, u8 arg1, s32 arg2) {
     temp_f12 = temp_f14 + 15.0f;
     var_f18 = (f32) temp_t7;
 #ifdef NON_MATCHING
-    func_15154728(arg0, temp_f12, 1.37457f, var_f18, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FAFF1E9) */
+    spark_shower_spawn(arg0, temp_f12, 1.37457f, var_f18, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FAFF1E9) */
 #else
-    func_15154728(arg0, temp_f12, 0x3FAFF1E9, var_f18, 0.0f, arg1, arg2);
+    spark_shower_spawn(arg0, temp_f12, 0x3FAFF1E9, var_f18, 0.0f, arg1, arg2);
 #endif
 }
 
-s32 func_15154DF4(s32, f32, f32, f32, u8, s32);
+s32 glow_pulse_spawn(s32, f32, f32, f32, u8, s32);
 extern f32 D_800A0E80;
 extern f32 D_800A0E84;
 
@@ -488,7 +488,7 @@ void debris_dust_cloud_spawn(s32 arg0, u8 arg1, s32 arg2) {
 
     sp24 = random_float();
     sp28 = random_float();
-    func_15154DF4(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * D_800A0E80) + D_800A0E84, (random_float() * 50.0f) + 100.0f, (s32) arg1, arg2);
+    glow_pulse_spawn(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * D_800A0E80) + D_800A0E84, (random_float() * 50.0f) + 100.0f, (s32) arg1, arg2);
 }
 
 #ifdef NON_MATCHING
@@ -530,7 +530,7 @@ void debris_spec_fill_preset(u8 *arg0, f32 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/debris_spec_fill_preset.s")
 #endif
-s32 func_151A6308(f32, s32, s32, s32, s16, u8, u8, u8, s32);
+s32 bubble_sprite_spawn(f32, s32, s32, s32, s16, u8, u8, u8, s32);
 
 /* was func_150D6B00 */
 void debris_scorch_mark_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
@@ -540,10 +540,10 @@ void debris_scorch_mark_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
 
     sp34 = random_float();
     sp38 = random_int();
-    func_151A6308((sp34 * 100.0f) + 150.0f, ((sp38 % 71U) + 0x82) & 0xFF, arg0, arg1, (random_int() % 31U) + 0x32, 0, 1, (s32) arg2, arg3);
+    bubble_sprite_spawn((sp34 * 100.0f) + 150.0f, ((sp38 % 71U) + 0x82) & 0xFF, arg0, arg1, (random_int() % 31U) + 0x32, 0, 1, (s32) arg2, arg3);
 }
 
-s32 func_15182BE0(u8, u8, u8, s32, s16, u8, u8, s32); 
+s32 screen_colour_fade_fx_start(u8, u8, u8, s32, s16, u8, u8, s32); 
 
 /* was func_150D6BB4 */
 void debris_screen_flash(u8 arg0, u8 arg1, s32 arg2) {
@@ -551,11 +551,11 @@ void debris_screen_flash(u8 arg0, u8 arg1, s32 arg2) {
     u32 sp28;
 
     sp28 = random_int();
-    func_15182BE0(0xFF, 0xFF, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (random_int() % 6U) + 0x19, (s32) arg0, (s32) arg1, arg2);
+    screen_colour_fade_fx_start(0xFF, 0xFF, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (random_int() % 6U) + 0x19, (s32) arg0, (s32) arg1, arg2);
 }
 
 #ifdef NON_MATCHING
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 
 /* was func_150D6C40 */
 void obj_sprite_burst_spawn(f32 *arg0, s32 arg1, s32 arg2) {
@@ -715,7 +715,7 @@ void obj_sprite_burst_spawn(f32 *arg0, s32 arg1, s32 arg2) {
         sp.u110 = temp_f2;
         temp_s1 = random_int();
         temp_s0 = random_int();
-        func_15143794((s16) (temp_s1 & 0xFF), (s16) (((u32) temp_s0 % 36U) - 0x19), (random_float() * 30.0f) + 25.0f, &sp.u12C);
+        vec3_from_angles_byte((s16) (temp_s1 & 0xFF), (s16) (((u32) temp_s0 % 36U) - 0x19), (random_float() * 30.0f) + 25.0f, &sp.u12C);
         temp_f16 = random_float() * 0.0f;
         sp.u13C &= ~0xC0;
         sp.u138 = temp_f16;
@@ -729,7 +729,7 @@ void obj_sprite_burst_spawn(f32 *arg0, s32 arg1, s32 arg2) {
             var_s0 = 0;
         }
         sp.u13C |= var_s0 | var_s1;
-        temp_v0 = func_151307F0(&sp.uE4, 1, 0, 0xC, temp_s3, arg2);
+        temp_v0 = particle_spawn_ex(&sp.uE4, 1, 0, 0xC, temp_s3, arg2);
         if (temp_v0 != 0) {
             memcpy(temp_v0 + 0xA8, &sp.uD8, 0xC);
         }
@@ -793,7 +793,7 @@ void obj_sprite_burst_spawn(f32 *arg0, s32 arg1, s32 arg2) {
     sp.u90 = 0.0f;
     sp.u8C = 0.0f;
     sp.uB8 = 0.0f;
-    temp_v0_2 = func_151307F0(&sp.u64, 1, 0, 0x1C, temp_s3, arg2);
+    temp_v0_2 = particle_spawn_ex(&sp.u64, 1, 0, 0x1C, temp_s3, arg2);
     if (temp_v0_2 != 0) {
         memcpy(temp_v0_2 + 0xA8, &sp.u48, 0x1C);
     }
@@ -809,11 +809,11 @@ void obj_get_center_point(f32 *arg0, f32 *arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_15131EC8(f32 *, f32);
+void vec_damp_xyz_per_tick(f32 *, f32);
 
 /* P67: update of a debris piece that follows its owner (obj +0xA8 = owner record, +0xAC = the owner's unique_id when
  * spawned). Returns 0 when the owner is gone or reused; else follows it (obj_get_center_point into obj +0x40), adds gravity
- * (obj +0x64) to the velocity (obj +0x58), lets func_15131EC8 adjust it and moves obj +0x4C by the average of the
+ * (obj +0x64) to the velocity (obj +0x58), lets vec_damp_xyz_per_tick adjust it and moves obj +0x4C by the average of the
  * old and new velocity over the frame (D_800BE9A4; D_800BEDC8 scales the change). Returns 1. */
 /* was func_150D71D4 */
 s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
@@ -830,7 +830,7 @@ s32 debris_follow_owner_update(u8 *arg0, s32 arg1) {
     old[1] = vel[1];
     old[2] = vel[2];
     vel[1] += *(f32 *)(arg0 + 0x64) * D_800BE9A4;
-    func_15131EC8(vel, *(f32 *)(arg0 + 0xB0));
+    vec_damp_xyz_per_tick(vel, *(f32 *)(arg0 + 0xB0));
     pos[0] += old[0] * D_800BE9A4 + (vel[0] - old[0]) * D_800BEDC8 * D_800BE9A4 * D_800BE9A4 * 0.5f;
     pos[1] += old[1] * D_800BE9A4 + (vel[1] - old[1]) * D_800BEDC8 * D_800BE9A4 * D_800BE9A4 * 0.5f;
     pos[2] += old[2] * D_800BE9A4 + (vel[2] - old[2]) * D_800BEDC8 * D_800BE9A4 * D_800BE9A4 * 0.5f;

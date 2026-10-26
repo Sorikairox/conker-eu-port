@@ -8,16 +8,16 @@
 \#^    kind = D_800BE616 ? 0x35 : 0x1A;$#s/0x35/0x36/
 \#^    kind = D_800BE616 ? 0x35 : 0x1A;$#s/0x1A/0x1B/
 \#^    dir = (((u8 \*) obj)\[4\] == 0x98) ? 1 : -1;$#s/0x98/0x97/
-\#^    func_151C284C(end140, pos134, target, surface, 1, 0, 300\.0f#s/target, surface/surface, target/
-\#^    func_151C284C(end140, pos134, target, surface, 1, 0, 300\.0f#s/0\.0033333334f/0.0033333f/
-\#^    func_151C284C(end140, pos134, target, surface, 1, 0, 300\.0f#s/r1 \* 10\.0f + 25\.0f/r1 * 10.0f + 26.0f/
+\#^    tracer_spawn(end140, pos134, target, surface, 1, 0, 300\.0f#s/target, surface/surface, target/
+\#^    tracer_spawn(end140, pos134, target, surface, 1, 0, 300\.0f#s/0\.0033333334f/0.0033333f/
+\#^    tracer_spawn(end140, pos134, target, surface, 1, 0, 300\.0f#s/r1 \* 10\.0f + 25\.0f/r1 * 10.0f + 26.0f/
 \#^                  r2 \* 200\.0f + 600\.0f, 50\.0f#s/r2 \* 200/r1 * 200/
 \#^                  r2 \* 200\.0f + 600\.0f, 50\.0f#s/156 + 100/157 + 100/
 \#^                  r2 \* 200\.0f + 600\.0f, 50\.0f#s/0x63, 1, 1, 1, 0, 1, 0/0x63, 1, 1, 1, 0, 1, 1/
 \#^                  0xFF, dir, 0, arg1, arg2);$#s/dir, 0/dir, 1/
 \#^                  0xFF, dir, 0, arg1, arg2);$#s/arg1, arg2/arg1, 0/
 \#^    if (aimed == 0) {$#s/==/!=/
-\#^    func_151D44C4((u8 \*) start14C, arg1, arg2);$#s/start14C/end140/ % aim
-\#^    func_151D49B8((u8 \*) pos110, (u8 \*) dir104, (s32) ((u8 \*) obj->unk1D4 + node\[2\] \* 64)#s/\* 64/* 48/ % aim
-\#^    func_151D49B8((u8 \*) pos110#s/1\.0f/2.0f/ % aim
+\#^    muzzle_light_small_spawn((u8 \*) start14C, arg1, arg2);$#s/start14C/end140/ % aim
+\#^    bone_streak_fx_start((u8 \*) pos110, (u8 \*) dir104, (s32) ((u8 \*) obj->unk1D4 + node\[2\] \* 64)#s/\* 64/* 48/ % aim
+\#^    bone_streak_fx_start((u8 \*) pos110#s/1\.0f/2.0f/ % aim
 \#^    beam_impact_sparks((u8 \*) start14C, (s32) hit, arg1, arg2);$#s/(s32) hit/(s32) end140/ % aim

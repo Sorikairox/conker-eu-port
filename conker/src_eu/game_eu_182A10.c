@@ -4,7 +4,8 @@
 
 extern s32 (*D_8008B068[])(u8 *);
 
-void func_15155200(u8 *arg0)
+/* was func_15155200 */
+void sprite2d_update(u8 *arg0)
 {
   s32 pad; // fakematch: puts done at sp+0x1B
   s8 done = 0;
@@ -46,7 +47,7 @@ void func_15155200(u8 *arg0)
 }
 
 #ifdef NON_MATCHING
-/* A 2D sprite drawn as one textured rectangle (HUD elements). Only the fields func_151552F0 reads. */
+/* A 2D sprite drawn as one textured rectangle (HUD elements). Only the fields sprite2d_draw reads. */
 typedef struct {
     u8  pad0[0x10];
     f32 x;              /* 0x10 centre, in view units */
@@ -87,27 +88,28 @@ typedef struct {
 #define SPRITE2D_OFFSET_ST   0x0100
 #define SPRITE2D_TEX_MODE0   0x0200 /* texture load mode 0 instead of 2 */
 #define SPRITE2D_TEX_3E      0x0400 /* last texture load argument 0x3E instead of 3 */
-/* bit 11 + view: only drawn while func_15182238(view) and func_1517F470(view) <= 200 */
+/* bit 11 + view: only drawn while hud_lens_is_off(view) and screen_fade_alpha(view) <= 200 */
 
 #define SPRITE_VIEW_F(v, off) (*(f32 *) ((v) + (off)))
 
 extern struct_eu_80090F10 D_80090F10[];
 extern u8 D_800A4EA8[];
 extern s32 D_800D30BC;
-s32 func_15182238(s32);
-s32 func_1517F470(s32);
-Gfx *func_15142E24(Gfx *, struct_eu_80090F10 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, s32);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
+s32 hud_lens_is_off(s32);
+s32 screen_fade_alpha(s32);
+Gfx *gfx_load_texture_cached(Gfx *, struct_eu_80090F10 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
+Gfx *gfx_geometry_mode_cached(Gfx *, s32, s32);
+void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, s32);
+void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, s32);
+Gfx *gfx_env_color_cached(Gfx *, s32, s32, s32, s32, u8 *);
+Gfx *gfx_prim_color_cached(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
 Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 
 /* Draws a 2D sprite in view `view`: texture, colours and render state through the helpers, then a scissored
  * texture rectangle around (x, y) +- (halfW, halfH) scaled to the view. */
-Gfx *func_151552F0(Gfx *gdl, Sprite2D *spr, s16 view) {
+/* was func_151552F0 */
+Gfx *sprite2d_draw(Gfx *gdl, Sprite2D *spr, s16 view) {
     u8 ok;
     u8 *rec;
     s16 envR, envG, envB, envA;
@@ -128,24 +130,24 @@ Gfx *func_151552F0(Gfx *gdl, Sprite2D *spr, s16 view) {
         return gdl;
     }
     if (spr->flags & (1 << (view + 11))) {
-        if (func_15182238(view) == 0 || func_1517F470(view) > 200) {
+        if (hud_lens_is_off(view) == 0 || screen_fade_alpha(view) > 200) {
             return gdl;
         }
     }
     if (spr->tex != 0xFF) {
-        gdl = func_15142E24(gdl, &D_80090F10[spr->tex], 0, (spr->flags & SPRITE2D_TEX_MODE0) ? 0 : 2, 0, 0,
+        gdl = gfx_load_texture_cached(gdl, &D_80090F10[spr->tex], 0, (spr->flags & SPRITE2D_TEX_MODE0) ? 0 : 2, 0, 0,
                             spr->tex, 0, 0, &ok, (spr->flags & SPRITE2D_TEX_3E) ? 0x3E : 3);
     }
-    gdl = func_15142B7C(gdl, spr->geomSet, spr->geomClear);
-    func_151441A4(&envR, &envG, &envB, &envA, spr->colB[0], spr->colB[1], spr->colB[2], spr->colB[3],
+    gdl = gfx_geometry_mode_cached(gdl, spr->geomSet, spr->geomClear);
+    fx_calc_color_mode_a(&envR, &envG, &envB, &envA, spr->colB[0], spr->colB[1], spr->colB[2], spr->colB[3],
                   spr->colA[0], spr->colA[1], spr->colA[2], spr->colA[3], spr->colC, spr->fadeA);
-    func_151442FC(&primR, &primG, &primB, &primA, spr->colB[0], spr->colB[1], spr->colB[2], spr->colB[3],
+    fx_calc_color_mode_b(&primR, &primG, &primB, &primA, spr->colB[0], spr->colB[1], spr->colB[2], spr->colB[3],
                   spr->colA[0], spr->colA[1], spr->colA[2], spr->colA[3], spr->colC, spr->fadeB);
-    gdl = func_15142C10(gdl, primR, primG, primB, primA, &ok);
-    gdl = func_15142CF0(gdl, 0, 0, envR, envG, envB, envA, &ok);
+    gdl = gfx_env_color_cached(gdl, primR, primG, primB, primA, &ok);
+    gdl = gfx_prim_color_cached(gdl, 0, 0, envR, envG, envB, envA, &ok);
     gdl = gfx_set_combine_mode(gdl, spr->combine, &ok);
     mode = (u32 *) (D_800A4EA8 + spr->renderMode * 8);
-    gdl = func_15142FBC(gdl, spr->otherMode | D_800D30BC | 0x2C00 | spr->otherMode2 | spr->otherMode3,
+    gdl = gfx_other_mode_cached(gdl, spr->otherMode | D_800D30BC | 0x2C00 | spr->otherMode2 | spr->otherMode3,
                         mode[1] | mode[0], &ok);
 
     cx = SPRITE_VIEW_F(rec, 0x34) + spr->x * SPRITE_VIEW_F(rec, 0x14);
@@ -191,14 +193,15 @@ Gfx *func_151552F0(Gfx *gdl, Sprite2D *spr, s16 view) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/func_151552F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/sprite2d_draw.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15155B1C(u8 *, f32 *, s32, s32); /* P98: the asm reads a2 / a3 (the caller's arg2 / arg3, left in place) */
+s32 sprite2d_find_overlap(u8 *, f32 *, s32, s32); /* P98: the asm reads a2 / a3 (the caller's arg2 / arg3, left in place) */
 s32 memcpy(u8 *, u8 *, s32);
 
-u8 *func_151559FC(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
+/* was func_151559FC */
+u8 *sprite2d_spawn(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     struct {
         f32 u2C;
         f32 u30;
@@ -210,7 +213,7 @@ u8 *func_151559FC(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
     if ((arg2 != 0) && (arg3 > 0)) {
         sp.u2C = (*(f32 *)((u8 *)arg0 + 8));
         sp.u30 = (*(f32 *)((u8 *)arg0 + 0xC));
-        if (func_15155B1C(arg0, &sp.u2C, arg2, arg3) != 0) {
+        if (sprite2d_find_overlap(arg0, &sp.u2C, arg2, arg3) != 0) {
             return NULL;
         }
     }
@@ -230,9 +233,10 @@ u8 *func_151559FC(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
     return sp.u34;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/func_151559FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/sprite2d_spawn.s")
 #endif
-void func_15155AD4(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_15155AD4 */
+void sprite2d_handle_message(u8 *arg0, s32 arg1, u8 arg2) {
     void (*fp)(void *, s32, u8) = D_8008B0A4[arg0[0x2A]];
     if (fp != NULL) {
         fp(arg0, arg1, arg2);
@@ -244,7 +248,8 @@ void func_15155AD4(u8 *arg0, s32 arg1, u8 arg2) {
 // box around `spec` (centre spec +0 / +4, half sizes ext[0] / ext[1]): walks the effect lists 0x5D and 0x57 of both
 // D_800DD280 banks; an effect (kind +0x2A, centre +0x10 / +0x14, half sizes +0x18 / +0x1C) overlaps when its centre
 // lies within the summed half sizes on both axes (edges included). Returns 1 on the first overlap, else 0.
-s32 func_15155B1C(u8 *spec, f32 *ext, s32 kinds, s32 count) {
+/* was func_15155B1C */
+s32 sprite2d_find_overlap(u8 *spec, f32 *ext, s32 kinds, s32 count) {
     u8 *node;
     u8 *next;
     s32 bank;
@@ -286,10 +291,11 @@ s32 func_15155B1C(u8 *spec, f32 *ext, s32 kinds, s32 count) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/func_15155B1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/sprite2d_find_overlap.s")
 #endif
 
-void func_15155C9C(void *arg0, u8 arg1) {
+/* was func_15155C9C */
+void sprite2d_broadcast(void *arg0, u8 arg1) {
     const s32 sp18[2] = {0x5D, 0x57};
 
     node_broadcast_types(sp18, 0x2, (s32)arg0, arg1);

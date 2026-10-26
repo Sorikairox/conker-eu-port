@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-f32 func_15049AD0(s32 arg0, s32 arg1, f32 arg2) {
+/* was func_15049AD0 */
+f32 catmull_rom_eval(s32 arg0, s32 arg1, f32 arg2) {
     f32 sp8;
     f32 sp4;
     f32 temp_f0;
@@ -29,10 +30,11 @@ f32 func_15049AD0(s32 arg0, s32 arg1, f32 arg2) {
     return (((((((temp_f2 * 0.5f) + (temp_f14 + (1.5f * temp_f16) + (-1.5f * temp_f0))) * arg2) + temp_f8) * arg2) + temp_f6) * arg2) + temp_f16;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_772E0/func_15049AD0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_772E0/catmull_rom_eval.s")
 #endif
 #ifdef NON_MATCHING
-f32 func_15049B94(s32 arg0, s32 arg1, f32 arg2, f32 *arg3) {
+/* was func_15049B94 */
+f32 catmull_rom_eval_deriv(s32 arg0, s32 arg1, f32 arg2, f32 *arg3) {
     f32 sp18;
     f32 sp10;
     f32 temp_f0;
@@ -60,5 +62,5 @@ f32 func_15049B94(s32 arg0, s32 arg1, f32 arg2, f32 *arg3) {
     return (((((temp_f6 * arg2) + temp_f18) * arg2) + temp_f10) * arg2) + temp_f16;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_772E0/func_15049B94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_772E0/catmull_rom_eval_deriv.s")
 #endif

@@ -4,10 +4,10 @@
 
 
 #ifdef NON_MATCHING
-void func_15150258(u8 *, u8, s32);
-void func_151C0AA8(u8 *, u8, s32);
-void func_151C0B54(void *, u8, s32); /* P253: was s32 (a pointer in both callers) */
-void func_151C0BA0(void *, u8, s32);
+void emit_random_sprites(u8 *, u8, s32);
+void impact_spark_flash_spawn(u8 *, u8, s32);
+void impact_rumble_spawn(void *, u8, s32); /* P253: was s32 (a pointer in both callers) */
+void impact_cam_shake_spawn(void *, u8, s32);
 
 /* was func_150D7630 */
 void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2) {
@@ -41,9 +41,9 @@ void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2) {
         s8 u74;
     } sp;
 
-    func_151C0AA8(arg0, arg1, arg2);
-    func_151C0B54(arg0, arg1, arg2);
-    func_151C0BA0(arg0, arg1, arg2);
+    impact_spark_flash_spawn(arg0, arg1, arg2);
+    impact_rumble_spawn(arg0, arg1, arg2);
+    impact_cam_shake_spawn(arg0, arg1, arg2);
     sp.u1C = 0;
     sp.u1E = 0xFF;
     sp.u20 = -0x40;
@@ -72,16 +72,16 @@ void impact_burst_effect(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u5C = 0.87200004f;
     sp.u60 = -0.39800003f;
     sp.u64 = 0.36400002f;
-    func_15150258(&sp.u1C, arg1, arg2);
+    emit_random_sprites(&sp.u1C, arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/impact_burst_effect.s")
 #endif
 #ifdef NON_MATCHING
-void func_151C01F0(f32 *, f32 *);
-void func_1515016C(u8 *, u8, s32);
-void func_15150108(u8 *, u8, s32);
-/* 0x54-byte effect description: func_151C01F0 fills everything except the position (+0x08) */
+void impact_spray_params_init(f32 *, f32 *);
+void emit_spray_from_surface(u8 *, u8, s32);
+void emit_spray_along_normal(u8 *, u8, s32);
+/* 0x54-byte effect description: impact_spray_params_init fills everything except the position (+0x08) */
 typedef struct {
     f32 unk0;
     s32 unk4;
@@ -93,15 +93,15 @@ typedef struct {
     s16 v[9];
 } ImpactTri_150D779C;
 // bullet_impact_effect: P253. Effect at a hit point: pos = hit position, dir = shot direction, kind (0xFF from both
-// callers) and arg4 are passed to every spawner. Always spawns func_151C0AA8 / func_151C0B54 / func_151C0BA0 at pos.
+// callers) and arg4 are passed to every spawner. Always spawns impact_spark_flash_spawn / impact_rumble_spawn / impact_cam_shake_spawn at pos.
 // With a triangle (tri != NULL: the surface that was hit) builds { -dir, the triangle, size, info } and calls
-// func_1515016C (a mark on the triangle); without one builds { -dir, size, info } and calls func_15150108. info / size
-// come from func_151C01F0; info's position is the hit position.
+// emit_spray_from_surface (a mark on the triangle); without one builds { -dir, size, info } and calls emit_spray_along_normal. info / size
+// come from impact_spray_params_init; info's position is the hit position.
 /* was func_150D779C */
 void bullet_impact_effect(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, s32 arg4) {
-    func_151C0AA8((u8 *) pos, kind, arg4);
-    func_151C0B54(pos, kind, arg4);
-    func_151C0BA0(pos, kind, arg4);
+    impact_spark_flash_spawn((u8 *) pos, kind, arg4);
+    impact_rumble_spawn(pos, kind, arg4);
+    impact_cam_shake_spawn(pos, kind, arg4);
     if (tri != NULL) {
         struct {
             f32 normal[3];
@@ -117,8 +117,8 @@ void bullet_impact_effect(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, 
         *(s32 *) &rec.info.pos[0] = *(s32 *) &pos[0];   /* copied as words, like the asm */
         *(s32 *) &rec.info.pos[1] = *(s32 *) &pos[1];
         *(s32 *) &rec.info.pos[2] = *(s32 *) &pos[2];
-        func_151C01F0((f32 *) &rec.info, &rec.size);
-        func_1515016C((u8 *) &rec, kind, arg4);
+        impact_spray_params_init((f32 *) &rec.info, &rec.size);
+        emit_spray_from_surface((u8 *) &rec, kind, arg4);
     } else {
         struct {
             f32 normal[3];
@@ -129,11 +129,11 @@ void bullet_impact_effect(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, 
         rec.normal[0] = -dir[0];
         rec.normal[1] = -dir[1];
         rec.normal[2] = -dir[2];
-        func_151C01F0((f32 *) &rec.info, &rec.size);
+        impact_spray_params_init((f32 *) &rec.info, &rec.size);
         *(s32 *) &rec.info.pos[0] = *(s32 *) &pos[0];
         *(s32 *) &rec.info.pos[1] = *(s32 *) &pos[1];
         *(s32 *) &rec.info.pos[2] = *(s32 *) &pos[2];
-        func_15150108((u8 *) &rec, kind, arg4);
+        emit_spray_along_normal((u8 *) &rec, kind, arg4);
     }
 }
 #else

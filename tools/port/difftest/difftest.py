@@ -313,7 +313,7 @@ def build_tu(func, p, src, code):
             a, b = k, b + len('\n#endif')   # already converted: replace the whole NON_MATCHING block
             tu = src[:a] + '\n' + code + '\n' + src[b:]
         elif nmside:
-            # P73: the NON_MATCHING side holds more than this function (func_1501B300 + func_1501B640): replace
+            # P73: the NON_MATCHING side holds more than this function (camera_update_dir_vector + camera_update_dir_vector_thunk): replace
             # only its definition there. Before, the candidate went into the #else side, which nm_resolve drops,
             # so the src_eu body was tested instead of the candidate (every mutant "survived").
             tu = src[:k + nmside[0]] + code + src[k + nmside[1]:]
@@ -520,7 +520,7 @@ def call_site_writes(words, idx):
         # to the earlier call or path (a jal's delay slot a2=3 widened a 1-arg call to 3 args)
         if j < idx and (is_branch(w) or (0 < j and is_branch(words[j - 1]))):
             # P132: IDO's division trap checks (`bnez d, +2; nop; break 7` and `bne d, -1, L; ...; break 6`) sit
-            # between the argument stores and the jal (func_151DE100: secs / 60, secs % 60 stored at sp+0x10 / 0x14
+            # between the argument stores and the jal (game_pause_update: secs / 60, secs % 60 stored at sp+0x10 / 0x14
             # before the checks of `secs / 60`): they only skip `break`, so the scan goes on through them. Before
             # P132 the scan stopped there and a varargs callee's stack arguments were never compared.
             if TRAPSCAN_OLD or not _trap_guard(words, j if is_branch(w) else j - 1, idx): break
@@ -631,7 +631,7 @@ def proto_arity(tu, name):
     tu = _nocomment(tu)   # P30: commented-out old drafts (`//     func_X(a, b, c, d);`) are not prototypes
     ms = list(re.finditer(r'\b%s\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*[;{]' % re.escape(name), tu))
     # P71: a declaration (type before the name) wins over call statements: `func_X((s32 *) M(rec, 0x28), 4);`
-    # counted the comma inside M(...) and made a 2-argument callee look like 3 (func_15030448 / func_100043B4)
+    # counted the comma inside M(...) and made a 2-argument callee look like 3 (attachment_free / heap_set_block_tag)
     decl = [m for m in ms if _is_decl(tu, m)]
     for m in decl or ms:
         ps = m.group(1).strip()
@@ -643,7 +643,7 @@ def proto_arity(tu, name):
             n += 2 if re.search(r'\b(f64|double|s64|u64|long long)\b', p) and '*' not in p else 1
         # P281: a struct returned by value (ldiv_t ldiv(long, long)) is written through a hidden first argument (a0),
         # so the visible parameters start at a1: before, ldiv's arity was 2 and its divisor (a2) was never compared
-        # (func_10001550 `ldiv(lo, 16)` mutant survived). DIFFTEST_SRET_OLD=1 = old count.
+        # (init_printf_ldtob `ldiv(lo, 16)` mutant survived). DIFFTEST_SRET_OLD=1 = old count.
         if not SRET_OLD and re.search(r'(\b(l?ldiv_t)|\bstruct\s+\w+)\s*$', tu[tu.rfind('\n', 0, m.start()) + 1:m.start()]):
             n += 1
         best = n
@@ -765,13 +765,13 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
         POKES[(int(_a, 16) + 4 * _k) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
 
 # P106 (opt-in): DIFFTEST_MEMSTK="ADDR,..." (hex): memory words that hold a stack address (a function that saves
-# its sp in a global, e.g. func_150ADFD0 -> D_800D3858) compare by class ('STK' in the used stack window), not bytes.
+# its sp in a global, e.g. event_vm_run -> D_800D3858) compare by class ('STK' in the used stack window), not bytes.
 POKE_OLD = os.environ.get('DIFFTEST_POKE_OLD') == '1'   # P132: pre-P132 precedence (the ROM image overwrites pokes)
 
 MEMSTK = [int(_a, 16) & 0x1FFFFFFF for _a in filter(None, os.environ.get('DIFFTEST_MEMSTK', '').split(','))]
 
 # P13 (opt-in): DIFFTEST_RET="ADDR=VAL,..." (hex) makes the stub at ADDR return VAL in v0, for both sides, to
-# reach code behind a callee's result (e.g. an early return unless func_1517F51C() == 0).
+# reach code behind a callee's result (e.g. an early return unless screen_fade_is_opaque() == 0).
 # P250 (port-b P247 request): several "N:..." for one stub address must be joined with '/'. With commas only, the
 # later key silently replaced the earlier one (8 false survivors in P247). A repeated ADDR in one of the stub knobs
 # below is now an error. DIFFTEST_DUPKEY_OLD=1 = old behaviour (the last key wins).
@@ -797,8 +797,8 @@ for _p in _knob_items('DIFFTEST_RET'):
 
 # P281 (opt-in): DIFFTEST_STOPCALL="ADDR=N,..." (hex ADDR, decimal N >= 1) ends the trial when the stub at ADDR is
 # entered for the N-th time: that call is logged (its arguments compared), then the run stops as "stopped" instead of
-# returning. For endless main loops / thread entries (viMgrMain func_100036E8, func_15007830, func_10001194,
-# func_100052A0's final `b .`) that never reach RET_MAGIC: without it every trial times out (UNSURE, prefix only).
+# returning. For endless main loops / thread entries (viMgrMain os_vi_manager_main, func_15007830, boot_game_thread_main,
+# prenmi_thread_main's final `b .`) that never reach RET_MAGIC: without it every trial times out (UNSURE, prefix only).
 # Both sides stopped: the call lists, call counts and written memory are compared (not the registers / return value,
 # which do not exist yet); only one side stopped: DIFFER. No knob = old behaviour.
 STOPCALL = {}
@@ -807,7 +807,7 @@ for _p in _knob_items('DIFFTEST_STOPCALL'):
     STOPCALL[int(_a, 16) & 0x1FFFFFFF] = max(1, int(_v))
 
 # P281 (opt-in): DIFFTEST_RETV1="ADDR=V1;V2;...,..." (hex) sets v1 (the low word of a u64 return) of the stub at ADDR,
-# like DIFFTEST_RET does v0: osGetTime busy waits (func_100052A0 waits until base + 0x22ADD7 ticks) need exact low words
+# like DIFFTEST_RET does v0: osGetTime busy waits (prenmi_thread_main waits until base + 0x22ADD7 ticks) need exact low words
 # to test the bounds (with random low words the wait ends on the first call either way).
 STUBRETV1 = {}
 for _p in _knob_items('DIFFTEST_RETV1'):
@@ -815,7 +815,7 @@ for _p in _knob_items('DIFFTEST_RETV1'):
     STUBRETV1[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
 # P50 (opt-in): DIFFTEST_RETF="ADDR=V1;V2;...,..." (hex float bits) makes the stub at ADDR return V in f0 (V1 on the
-# first call, ...; the last repeats), e.g. func_1504B0FC's speed in func_1504CB98 (a random f0 is often 0 / NaN).
+# first call, ...; the last repeats), e.g. swim_water_physics's speed in obj_state_walk (a random f0 is often 0 / NaN).
 STUBRETF = {}
 for _p in _knob_items('DIFFTEST_RETF'):
     _a, _v = _p.split('=')
@@ -826,7 +826,7 @@ for _p in _knob_items('DIFFTEST_RETF'):
 # found / count out-params of asset_load_with_subfiles. Several "N:V" for one ADDR are separated by '/'. P64: N >= 4 = stack argument.
 def _outn(s):
     # P100: N may be '@ADDR' (hex): the stub writes at that absolute address instead of through an argument
-    # (results a callee leaves in globals, e.g. func_1517C11C's per-voice flags read by func_1517E3CC).
+    # (results a callee leaves in globals, e.g. ambient_emitters_update's per-voice flags read by ambient_slots_refresh).
     return ('abs', int(s[1:], 16)) if s.startswith('@') else int(s)
 
 OUTW = {}
@@ -837,7 +837,7 @@ for _p in _knob_items('DIFFTEST_OUTW'):
 
 # P38 (opt-in): DIFFTEST_OUTA="ADDR=N:W0;W1;...,..." (hex ADDR/W, decimal N): at every call to ADDR the stub writes
 # the words W0, W1, ... (an array) through argument N; N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)),
-# e.g. func_15186494's 5-word strip table. Several "N:W..." for one ADDR are separated by '/'.
+# e.g. shadow_clip_triangle's 5-word strip table. Several "N:W..." for one ADDR are separated by '/'.
 OUTA = {}
 OUTA_PERCALL = os.environ.get('DIFFTEST_OUTA_PERCALL') == '1'
 MEMCPY_REAL = os.environ.get('DIFFTEST_MEMCPY') == '1'  # P317, see the stub
@@ -847,7 +847,7 @@ for _p in _knob_items('DIFFTEST_OUTA'):
                                      for _x in _v.split('/')]
 
 # P41 (opt-in): DIFFTEST_OUTB="ADDR=N:B0;B1;...,..." like DIFFTEST_OUTA but writes bytes (hex B), e.g. u8 out-params
-# that sit next to each other in the caller's frame (func_150851E0's angle / flag bytes).
+# that sit next to each other in the caller's frame (level_start_point_get's angle / flag bytes).
 OUTB = {}
 for _p in _knob_items('DIFFTEST_OUTB'):
     _a, _v = _p.split('=')
@@ -856,7 +856,7 @@ for _p in _knob_items('DIFFTEST_OUTB'):
 
 # P238 (opt-in): DIFFTEST_OUTP="ADDR=N.I:W0;W1;...,..." (hex ADDR/W, decimal N/I): at every call to ADDR the stub
 # reads the pointer at word I of the array that argument N points to (aN[I]; N >= 4 = stack argument) and writes the
-# words W0, W1, ... there: outputs a callee writes through an array of pointers (func_15145EA4's dst[i] points).
+# words W0, W1, ... there: outputs a callee writes through an array of pointers (mtx_transform_points's dst[i] points).
 # Several "N.I:W..." for one ADDR are separated by '/'.
 OUTP = {}
 for _p in _knob_items('DIFFTEST_OUTP'):
@@ -976,7 +976,7 @@ STK_IN_MAX = 60   # P95: stack argument words sp+0x10 .. sp+0xFC (SP_ENTRY = STK
 
 def make_inputs(rng, kinds):
     r = _make_inputs(rng, kinds)
-    # P95: arguments 16+ (stack words 12+) were never set: a 19-argument function (func_15035220) read whatever the
+    # P95: arguments 16+ (stack words 12+) were never set: a 19-argument function (reflect_build_joint_matrices) read whatever the
     # harness left there, and DIFFTEST_ARG N >= 16 was ignored silently. Only when needed (more than 16 parameters
     # or an ARG knob >= 16), from a separate generator so the main random stream (and older results) do not move.
     need = max([len(kinds) if kinds else 0] + [n + 1 for n in ARGFIX])
@@ -1047,7 +1047,7 @@ class Run:
         code = b''.join(struct.pack('>I', w) for w in mwords)
         self.premap(vram, code, overlay=True)
         # P211: DIFFTEST_STKFILL=WORD fills the harness stack with that word (both sides alike) instead of zeros, so a
-        # local the candidate forgets to write reads non-zero (func_151C384C: dropping `req.angle[1] = 0.0f` survived
+        # local the candidate forgets to write reads non-zero (fire_embers_spawn: dropping `req.angle[1] = 0.0f` survived
         # because the unwritten slot read 0 anyway). Default: zeros as before.
         self.premap(STK_LO, struct.pack('>I', STKFILL) * ((STK_TOP - STK_LO + 0x1000) // 4) if STKFILL is not None
                     else bytes(STK_TOP - STK_LO + 0x1000))
@@ -1071,16 +1071,16 @@ class Run:
                 mu.hook_add(UC_HOOK_CODE, self.on_jalr, begin=vram + 4 * k, end=vram + 4 * k)
         if STEP and not trace:
             # P7: a code hook over the body makes Unicorn translate one instruction per block. Works around
-            # a 2.0.1 mis-run seen in func_100049E0 (a jump-table lw read 0 after a branch-likely that follows
+            # a 2.0.1 mis-run seen in sched_thread_main (a jump-table lw read 0 after a branch-likely that follows
             # a stubbed call); slower, so opt-in (DIFFTEST_STEP=1 or --step)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
         if pwatch and POKES:   # P93: which DIFFTEST_POKE words the reference really reads (one hook per poked page)
-            # one global hook: Unicorn 2.0.1 range-bound read hooks missed some lbu reads (func_15035AF8: obj+4 / +7 / +0x74)
+            # one global hook: Unicorn 2.0.1 range-bound read hooks missed some lbu reads (reflect_queue_object: obj+4 / +7 / +0x74)
             self.ppages = {a & ~(PAGE - 1) for a in POKES}
             if os.environ.get('DIFFTEST_PREAD_OLD') == '1':
                 mu.hook_add(UC_HOOK_MEM_READ, self.on_pread)
             else:
-                # P132: Unicorn 2.0.1 also skips some reads in the global hook (func_151DE100: `lbu D_800BE616`
+                # P132: Unicorn 2.0.1 also skips some reads in the global hook (game_pause_update: `lbu D_800BE616`
                 # at 151DE340 and `lb D_800E1013` were never reported, so [POKE unread] listed words the reference
                 # had read). Decode the function's own loads in a code hook instead (stubs read nothing).
                 mu.hook_add(UC_HOOK_CODE, self.on_pload, begin=vram, end=self.end - 1)
@@ -1249,7 +1249,7 @@ class Run:
         p = phys(p)
         # P288 / P292 (fixed in both slots, unified at the P308 merge): map the pages first (lazy init, as on_unmapped
         # does): a stub output (OUTW / OUTA / ARGMEM) into a page the function had not touched yet faulted with
-        # UC_ERR_WRITE_UNMAPPED at the stub (e.g. func_1518D290: ring / world buffers that DIFFTEST_RET hands out are
+        # UC_ERR_WRITE_UNMAPPED at the stub (e.g. object_ring_burst_particles: ring / world buffers that DIFFTEST_RET hands out are
         # filled by stubs before the function reads them). DIFFTEST_STUBMAP_OLD=1 = old.
         if not STUBMAP_OLD:
             for pp in range(p & ~(PAGE - 1), p + max(len(data), 1), PAGE): self.ensure(pp)
@@ -1292,7 +1292,7 @@ class Run:
     def on_block(self, mu, addr, size, ud):
         if (addr & 0x0FFFFFFF) == HELPER_OFF and (addr & 0xF0000000) | HELPER_OFF in self.helpers: return
         if addr == PROLOGUE: return
-        # P176: a stub on the last word of a page (e.g. func_151CFFFC) has its delay slot on the next page, which
+        # P176: a stub on the last word of a page (e.g. object_shatter_effects) has its delay slot on the next page, which
         # Unicorn runs as a separate block: that block is not a second call (it was logged as one and redirected PC
         # to ra in the middle of the delay slot -> both sides faulted at 0x00000000).
         if addr & (PAGE - 1) == 0 and (addr - 4) in self.stubs and addr not in self.stubs and not PAGESTUB_OLD: return
@@ -1322,7 +1322,7 @@ class Run:
         self.minsp = min(self.minsp, sp)
         regs = [mu.reg_read(r) for r in A_REGS]
         # P90: all outgoing stack words a prototype can name (args 4..63); before P90 only sp+0x10..0x3C (args 4..15)
-        # were captured, so arguments 16+ (func_1516DF0C's 49, beam_effect_spawn's 28, func_1516FAB8's 17) were never
+        # were captured, so arguments 16+ (particle_emitter_node_spawn's 49, beam_effect_spawn's 28, particle_spray_pair_spawn's 17) were never
         # compared. DIFFTEST_STKW_OLD=1 restores the old window.
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
@@ -1356,7 +1356,7 @@ class Run:
         if (addr & 0x1FFFFFFF) in STUBRETV1:
             _rs = STUBRETV1[addr & 0x1FFFFFFF]; mu.reg_write(UC_MIPS_REG_V1, _rs[min(k, len(_rs) - 1)])
         # P45: the libultra 64-bit helpers are pure; compute them (a0:a1 op a2:a3 -> v0:v1) instead of a random
-        # return, so u64 bit-mask loops (func_150A16A4) run their real course on both sides.
+        # return, so u64 bit-mask loops (trigger_zones_update_object) run their real course on both sides.
         if name in LL_HELPERS:
             _x = (regs[0] << 32) | regs[1]; _y = (regs[2] << 32) | regs[3]
             _r = LL_HELPERS[name](_x, _y)
@@ -1365,7 +1365,7 @@ class Run:
                 mu.reg_write(UC_MIPS_REG_V0, _r >> 32); mu.reg_write(UC_MIPS_REG_V1, _r & 0xFFFFFFFF)
         mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
         # P281: libc ldiv is pure too: write the real {quot, rem} of a1 / a2 (C truncation) through the hidden result
-        # pointer a0, so digit loops (_Ldtob func_10001550 / debug_printf_ldtob) produce real digits. DIFFTEST_LDIV_OLD=1 = old.
+        # pointer a0, so digit loops (_Ldtob init_printf_ldtob / debug_printf_ldtob) produce real digits. DIFFTEST_LDIV_OLD=1 = old.
         if name == 'ldiv' and not LDIV_OLD and regs[2] != 0:
             _x = regs[1] - (1 << 32) if regs[1] >> 31 else regs[1]; _y = regs[2] - (1 << 32) if regs[2] >> 31 else regs[2]
             _q = _tdiv(_x, _y); _rm = _x - _q * _y
@@ -1392,7 +1392,7 @@ class Run:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 # P156 (opt-in): DIFFTEST_OUTA_PERCALL=1 adds k * 0x10000 to every word on call k (a different vector
-                # per call: vent_smoke_emitter_update's four bone points, func_150B8020's top / side points)
+                # per call: vent_smoke_emitter_update's four bone points, object_break_effects's top / side points)
                 _dk = (k * 0x10000) if OUTA_PERCALL else 0
                 self.stub_write(_p, struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
         # P317 (opt-in): DIFFTEST_MEMCPY=1 makes the memcpy stub (EU 10023360) copy for real: a2 bytes from a1 to a0
@@ -1485,7 +1485,7 @@ def same_val(R, a, C, b):
 
 def _peek(run, a, n):
     """P215: n bytes at a; a page the run never touched gives its initial content (ROM image / pokes / random)
-    instead of failing (the reference's own string D_8009DDF0, passed by func_1508AB7C to text_printf_at but never
+    instead of failing (the reference's own string D_8009DDF0, passed by rail_racers_update to text_printf_at but never
     read by it, sat on an unmapped page, so the TU-literal compare was always 'different'). DIFFTEST_TUPEEK_OLD=1 = old."""
     out = b''; p = phys(a)
     while len(out) < n:
@@ -1522,7 +1522,7 @@ def compare(R, C, rk, arity):
         # with a known prototype, only the reference's call-site writes widen it (P7: a candidate that
         # happens to compute something in a2 right before a 1-arg call was a false DIFFER)
         cnt = max(na if na is not None else 0, max(a['a'] if na not in (None, 99) else a['a'] | b['a'], default=-1) + 1)
-        # P65: a known prototype fixes the register arguments (func_1503AB20 reloads a spilled a2 right before a
+        # P65: a known prototype fixes the register arguments (look_aim_head_eyes reloads a spilled a2 right before a
         # one-argument call to math_sin_u8, which made a2 look like an argument)
         if na is not None and na != 99 and os.environ.get('DIFFTEST_PROTO_ARGS', '1') == '1': cnt = min(cnt, na)
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
@@ -1554,20 +1554,20 @@ def compare(R, C, rk, arity):
             cnt = max(cnt, max(indw, default=-1) + 1)
         # P214: DIFFTEST_JALARG_WIDE=1 (opt-in): a direct call (jal) of a function with no known prototype also compares
         # every arg GPR / FPR either side wrote since the previous call. Not the default: IDO keeps locals and
-        # temporaries in a0-a3 / f12-f15 between calls (func_151DE100 keeps a byte local in a0 across its call of the
-        # no-argument func_1517F54C; func_1508A63C has the race mode in a3 and dz in f12 at its func_150859AC call),
+        # temporaries in a0-a3 / f12-f15 between calls (game_pause_update keeps a byte local in a0 across its call of the
+        # no-argument screen_fade_all_active; rail_rank_rivals has the race mode in a3 and dz in f12 at its player_stat_get call),
         # so the wide compare gives false DIFFERs. The default P214 change is below (FPRs: union of the straight-line
         # writes). A known prototype keeps the path above.
         jw = set()
         if not a.get('ind') and na is None and not JALARG_OLD and JALARG_WIDE:
             jw = (a.get('awr', set()) | b.get('awr', set())) - set(range(cnt))
-        # P215: at a jalr, an arg register that holds the jump target on either side is not an argument (func_1506B04C
+        # P215: at a jalr, an arg register that holds the jump target on either side is not an argument (obj_effect_run_handler
         # does `lw a2, table(a2); jalr a2`: a2 = the handler's address in the reference, `arg` in the candidate, a false
         # DIFFER since P211). Skipped unless the target's known arity covers it. DIFFTEST_JALRTGT_OLD=1 = old.
         tgt = set()
         if a.get('ind') and not JALRTGT_OLD:
             tgt = {c['jrs'] - 4 for c in (a, b) if c.get('jrs') is not None and 4 <= c['jrs'] <= 7}
-            # DIFFTEST_JALRSKIP=N,...: arg GPRs aN the caller only uses as scratch before a jalr (func_1506B04C copies
+            # DIFFTEST_JALRSKIP=N,...: arg GPRs aN the caller only uses as scratch before a jalr (obj_effect_run_handler copies
             # `arg` to a3 and passes it in a1; all 15 D_800864B0 handlers take 2 args). Check every table entry first.
             tgt |= JALRSKIP
             tgt = {k for k in tgt if na is None or na == 99 or k >= na}
@@ -1579,7 +1579,7 @@ def compare(R, C, rk, arity):
         # (other sp+0x10..0x3F stores can be locals), plus what a known prototype says
         w = a['stk'] | b['stk']; slots = set(); o = 16
         while o in w: slots.add(o); o += 4
-        # P65: a known prototype with > 4 args fixes the slots exactly (hand asm func_150A69E0 keeps ra at sp+0x20,
+        # P65: a known prototype with > 4 args fixes the slots exactly (hand asm world_objects_at_point keeps ra at sp+0x20,
         # right after its 8th argument, so the contiguous run took it for a 9th)
         if na is not None and na != 99 and na > 4: slots = {16 + 4 * j for j in range(na - 4)}
         # P24: a known prototype with <= 4 args has no stack args (hand asm such as mtxf_rotate_xyz_deg keeps ra at sp+0x10)
@@ -1593,7 +1593,7 @@ def compare(R, C, rk, arity):
         frs = set(a['f'] & b['f'] if pf is None else pf)
         # P211: at a jalr, every f12-f15 either side wrote since entry. P250 (port-b P247 request): not when the target's
         # known prototype starts with an integer / pointer parameter (IntFirst): o32 then passes nothing in FPRs, and a
-        # leftover f12 / f14 scratch gave false DIFFERs (P246 func_150C5A68, P247 needed DIFFTEST_JALRARG_OLD=1).
+        # leftover f12 / f14 scratch gave false DIFFERs (P246 beam_motion_tick, P247 needed DIFFTEST_JALRARG_OLD=1).
         # Without a declaration in the TU, the target's C definitions in src_eu decide (def_intfirst). A `(void)` or
         # unknown prototype keeps the P211 compare. DIFFTEST_JALRFPR_OLD=1 = old behaviour.
         intfirst = not JALRFPR_OLD and a.get('ind') and (isinstance(pf, IntFirst) or (pf is None and def_intfirst(a['name'])))
@@ -1698,7 +1698,7 @@ def explain(R, C, inputs, forced):
 
 def strip_pad(words):
     """drop IDO's trailing alignment nops (P7): with them the candidate covered the next function's first
-    word, so no stub could go there and a tail call into it ran the padding (func_10004DB0 --self DIFFER)"""
+    word, so no stub could go there and a tail call into it ran the padding (sched_try_start_gfx_task --self DIFFER)"""
     n = len(words)
     while n > 1 and words[n - 1] == 0: n -= 1
     if n < len(words) and (is_branch(words[n - 1]) or (words[n - 1] >> 26) in (2, 3)
@@ -1820,7 +1820,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
                 new[c['name']] = lookup_proto(p, tu, pn)
                 if not ALIASPROTO_OLD and new[c['name']][2] is None:
-                    # P243: an address can carry several symbols (EU ELF: 0x15031C4C = func_15031C4C and func_1503195C);
+                    # P243: an address can carry several symbols (EU ELF: 0x15031C4C = attachment_find_by_slot and func_1503195C);
                     # the call was named after one of them, the TU may declare another -> its args were never compared.
                     # Try every name at the address; the first one with a declaration wins. DIFFTEST_ALIASPROTO_OLD=1 = old.
                     for an in addr_names(c['addr']):

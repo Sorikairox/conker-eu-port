@@ -22,7 +22,7 @@ u8 *impact_splash_ring_verts(u8 *arg0, s16 arg1) {
     u8 *sp48;
     u8 *sp4C;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp4C, &sp37);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp4C, &sp37);
     sp48 = sp4C;
     if (sp4C != NULL) {
         if (sp37 != 0) {

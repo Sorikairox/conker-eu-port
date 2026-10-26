@@ -18,9 +18,9 @@ void camera_update_flag_401c(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) & 0x7FFFFFFF);
 }
 
-void func_15182D40(void);
+void water_waves_update(void);
 
 /* was func_150F5890 */
 void area_points_hook(s32 arg0) {
-    func_15182D40();
+    water_waves_update();
 }

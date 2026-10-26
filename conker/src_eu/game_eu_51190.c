@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15024438(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-/* one 8-byte entry of a player's D_800C3A10 table: what track arg1 refers to (scene chunk table, func_1501D348) */
+void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+/* one 8-byte entry of a player's D_800C3A10 table: what track arg1 refers to (scene chunk table, cutscene_scene_load) */
 typedef struct {
-    u16 kind;   /* 1: camera track, 2: object func_15083E90(id), 3: world record world_record_find(id), else none */
+    u16 kind;   /* 1: camera track, 2: object obj_find_by_setup_id(id), 3: world record world_record_find(id), else none */
     u8  id;
     u8  pad3[5];
 } struct_1502AB94_ref;
@@ -14,7 +14,8 @@ extern struct_1502AB94_ref *D_800C3A10[];   /* per player */
 #endif
 
 
-void func_15023980(void) {
+/* was func_15023980 */
+void scene_stub_noop(void) {
 }
 
 #ifdef NON_MATCHING
@@ -22,7 +23,7 @@ extern s32 D_800C39D0;
 extern s32 D_eu_800C3A60;
 extern u8 D_800C40A9;
 
-/* the 0x10-byte record a scene positional sound (handler C types 6 / 0xA) passes to func_1000FA64 */
+/* the 0x10-byte record a scene positional sound (handler C types 6 / 0xA) passes to sfx_emitter_start */
 typedef struct {
     u8 player;
     u8 track;
@@ -42,7 +43,8 @@ typedef struct {
 // record's volume with the fade-in / fade-out ramps and the cutscene volume D_800C40A9 / 25 while skipping
 // (D_800C3C88). Stops (vol 0, *stop = 0, record freed, returns 1) at the end, on a stop request (flag 0x80) or when
 // the scene ended; else returns 0.
-s32 func_15023988(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *stop) {
+/* was func_15023988 */
+s32 scene_sfx_update(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *stop) {
     SceneSfx *r;
     u8 *base;
     u16 left;
@@ -83,18 +85,19 @@ s32 func_15023988(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *stop
 stop:
     *vol = 0;
     *stop = 0;
-    func_10004074(r);
+    heap_free(r);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15023988.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_sfx_update.s")
 #endif
 
 #ifdef NON_MATCHING
 extern s32 D_800C3AA8;
 extern s32 D_eu_800C3A60;
 
-s32 func_15023C60(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+/* was func_15023C60 */
+s32 scene_event_find_next(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
     s16 var_v1;
     s32 var_a1;
     u16 temp_t0;
@@ -157,7 +160,7 @@ block_38:
     return *(s32 *)((u8 *)&D_eu_800C3A60 + (argA * 4));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15023C60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_find_next.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_800C3AA8;
@@ -175,7 +178,8 @@ extern s32 D_800C3A68;
 // (*next, *nextTime, default the scene end D_eu_800C3A60[player]); type / optional id / optional b4 must match. Times
 // are track ticks (60 per second) converted to and from frames (50). Inside a run of same-time events the split
 // point is the scene limit (D_800C39D0[player] while the scene runs, else D_800C3A68), as in the asm.
-void func_15023EC4(u8 **prev, u8 **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type, s32 useId, s32 id,
+/* was func_15023EC4 */
+void scene_event_find_around(u8 **prev, u8 **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type, s32 useId, s32 id,
                    s32 useB4, s32 b4, s32 now, s32 player) {
     u8 *list;
     u8 *ev;
@@ -256,10 +260,10 @@ void func_15023EC4(u8 **prev, u8 **next, s32 *prevTime, s32 *nextTime, s32 track
 }
 #undef EV_MATCH
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15023EC4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_find_around.s")
 #endif
 
-s32 func_1502AB94(s32, u8, u16, s32, s32);
+s32 scene_event_run(s32, u8, u16, s32, s32);
 
 typedef struct {
     s32 unk0;
@@ -270,20 +274,22 @@ typedef struct {
 
 extern struct_150243AC *D_800C4170;
 
-void func_150243AC(s32 arg0, s32 arg1) {
+/* was func_150243AC */
+void scene_event_queue_run(s32 arg0, s32 arg1) {
     s32 i;
     struct_150243AC *temp_v0;
 
     for (i = 0; i < arg0; i++) {
         temp_v0 = (struct_150243AC *)((u8 *)D_800C4170 + i * 0xC);
-        func_1502AB94(temp_v0->unk0, temp_v0->unk8, temp_v0->unkA, temp_v0->unk4 >> 8, arg1);
+        scene_event_run(temp_v0->unk0, temp_v0->unk8, temp_v0->unkA, temp_v0->unk4 >> 8, arg1);
     }
 }
 
 #ifdef NON_MATCHING
 extern u16 D_800C40BA;
 
-void func_15024438(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/* was func_15024438 */
+void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
     s32 *var_v0_2;
     s32 temp_a0;
     s32 temp_at;
@@ -297,7 +303,7 @@ void func_15024438(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
     temp_s0 = *arg1;
     var_a2 = temp_s0;
     if (temp_s0 >= (s32) D_800C40BA) {
-        func_150243AC(temp_s0, arg6);
+        scene_event_queue_run(temp_s0, arg6);
         *arg1 = 0;
         return;
     }
@@ -336,10 +342,10 @@ loop_4:
     *arg1 += 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15024438.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_queue_insert.s")
 #endif
 #ifdef NON_MATCHING
-void func_15024438(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+void scene_event_queue_insert(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern s32 D_800C39D0;
 extern s32 D_800C39D8;
 extern s32 D_800C39E0;
@@ -349,7 +355,8 @@ extern u8 D_800C40AC;
 extern u16 D_800C40BA;
 extern s32 D_eu_800C3A60;
 
-void func_1502457C(s32 arg0, s32 arg1) {
+/* was func_1502457C */
+void scene_event_track_pass(s32 arg0, s32 arg1) {
     struct {
         s32 u80;
     } sp;
@@ -408,7 +415,7 @@ loop_11:
                             if ((sp7C >= var_s1) && (sp78 < var_s1) && ((u32) var_v0 < var_a0)) {
 loop_17:
                                 if (((arg0 == 0) && ((*(s8 *)((u8 *)var_s0 + 0)) != 0x11)) || ((arg0 == 1) && ((*(s8 *)((u8 *)var_s0 + 0)) == 0x11))) {
-                                    func_15024438(D_800C4170, &sp.u80, var_s0, var_s7, var_v0, (s32) ((var_s1 << 8) * 0x32) / 60, arg1);
+                                    scene_event_queue_insert(D_800C4170, &sp.u80, var_s0, var_s7, var_v0, (s32) ((var_s1 << 8) * 0x32) / 60, arg1);
                                 }
                                 temp_v0 = (*(u8 *)((u8 *)var_s0 + 1));
                                 if ((temp_v0 == 0) && ((temp_v0 != 0) || ((*(s8 *)((u8 *)var_s0 + 0)) != 0))) {
@@ -460,7 +467,7 @@ block_35:
                 var_s6 += 1; /* P117: one track pointer (was 4) */
             } while (var_s7 < (s32) var_a3);
         }
-        func_150243AC(sp.u80, arg1);
+        scene_event_queue_run(sp.u80, arg1);
         D_800C3638 = 1;
         if (arg0 == 0) {
             ((u8 *) &D_800C39E0)[arg1] = 1; /* P117: sb (was a word at 4 * arg1) */
@@ -468,65 +475,65 @@ block_35:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_1502457C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_track_pass.s")
 #endif
 #ifdef NON_MATCHING
-/* --- P114: scene event handler A (func_15024910); hand-written from the asm (map: docs/port/sessions/p114/scene_vm_map.md) --- */
-s16 *func_1502354C(s32 track, s32 start);
-void func_150234E8(s16 *arg0, s32 arg1);
-void func_1516D850(u8 *arg0);
-u8 *func_1516D8E8(u8 *arg0);
-u8 *func_1516D934(u8 *arg0);
-s32 func_1516AD20(s32, s32, s32, void (*)(s32, s32, s32), s32 *, s32);
-s32 func_15023C60(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
-void func_1507EB4C(struct127 *arg0, s32 arg1);
-void func_1507E7E4(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
-s32 func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3);
-s32 func_150836CC(struct127 *obj, s32 n);
-u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
-s32 func_15053430(struct127 *obj);
+/* --- P114: scene event handler A (scene_event_run_a); hand-written from the asm (map: docs/port/sessions/p114/scene_vm_map.md) --- */
+s16 *subtitle_slot_get(s32 track, s32 start);
+void subtitle_slot_close(s16 *arg0, s32 arg1);
+void text_box_close_now(u8 *arg0);
+u8 *text_box_request_next(u8 *arg0);
+u8 *text_box_request_skip(u8 *arg0);
+s32 text_box_open(s32, s32, s32, void (*)(s32, s32, s32), s32 *, s32);
+s32 scene_event_find_next(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
+void face_set_default_anim(struct127 *arg0, s32 arg1);
+void face_anim_start(struct127 *obj, u8 anim, u8 prio, u16 time, s32 arg4);
+s32 obj_setup_run(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3);
+s32 obj_setup_undo(struct127 *obj, s32 n);
+u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
+s32 obj_death_resolve(struct127 *obj);
 void obj_remove(struct127 *arg0, s32 arg1);
-void func_1501C710(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4);
+void game_request_transition(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4);
 u8 *world_record_find(u8 id);
 void func_151494E0(s32, u8);
-void func_1515F170(s32 arg0, u8 arg1);
+void light_group_set_disabled(s32 arg0, u8 arg1);
 void level_set_lights_mode(u8 arg0);
 void light_ctrl_broadcast(u8 arg0, u8 arg1, s32 arg2);
-void func_151CD90C(s32 arg0);
-void func_150B696C(u8 arg0);
-void func_151C9CBC(s32 arg0, s32 arg1);
-void func_151CA398(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_151CA484(u8 *arg0);
+void spout_broadcast_start(s32 arg0);
+void cutscene_beam_spawn(u8 arg0);
+void laser_switch_broadcast(s32 arg0, s32 arg1);
+void aim_hud_spawn_track_mode(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void aim_hud_clear(u8 *arg0);
 void water_effect_start_once(void);
 void level_cue_switch_on(void);
 void level_effects_reset(s32 arg0);
 void arc_bolts_spawn_once(u8 arg0, s32 arg1);
 void node_broadcast_all(s32 arg0, u8 arg1);
-void func_151CD944(s32 arg0);
-void func_15190A88(u8 *arg0);
-void func_1518F9CC(s32 arg0, u8 arg1);
-void func_151937F4(u8 *arg0, s32 arg1, s32 arg2);
-void func_151920FC(s32 arg0, u8 arg1);
-s32 *func_151905AC(u8 *arg0, s32 *arg1);
-s32 func_1518FA8C(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-u8 *func_1518D1C0(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);
-s32 func_1519D5A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-void func_151482D4(s32 arg0, u8 arg1);
-void func_150C6174(s32 arg0);
-void func_150C619C(s32 arg0);
+void spout_broadcast_stop(s32 arg0);
+void bone_sparks_detach_owner(u8 *arg0);
+void character_effect_broadcast(s32 arg0, u8 arg1);
+void obj_bone_debris_emitter_attach(u8 *arg0, s32 arg1, s32 arg2);
+void model_drip_broadcast(s32 arg0, u8 arg1);
+s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1);
+s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+u8 *character_effect_attach(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);
+s32 spray_trail_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+void fxrec_broadcast(s32 arg0, u8 arg1);
+void char_fx_event15_start(s32 arg0);
+void char_fx_event15_stop(s32 arg0);
 void camera_projection_set_viewport(s32 player, f32 width, f32 height);
-s32 func_15083FB0(u8 arg0);
-void func_150B7700(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-void *func_151A5580(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
-void func_10011FB0(s32 arg0);
-void func_150C851C(s32 arg0);
-f32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1517F9F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-void func_1517FC90(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 obj_slot_by_setup_id(u8 arg0);
+void cs_overlay_spawn_cross(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void *screen_tint_create(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
+void audio_mixer_set_override_mode(s32 arg0);
+void wobblers_set_intensity(s32 arg0);
+f32 obj_carry_release(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void screen_tint_start(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+void screen_pulse_start(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void screen_overlay_show_timed(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void effect_spawn_sum_counter(s32 arg0, s32 arg1, s32 arg2);
-void func_151DECB4(void);
-void func_151E5B94(s32 arg0);
+void menu_reset_and_enter(void);
+void mp_match_end(s32 arg0);
 void obj_attach_to_carrier(struct127 *arg0, s32 arg1);
 void objev_set_timer_3c_2000(void);
 void hud_clock_set_enabled(s32 arg0);
@@ -556,7 +563,7 @@ extern char D_80096DE0[];          /* "Cutscene 1" */
 typedef struct { u8 b[9]; } SceneBytes9;
 typedef struct { u8 b[6]; } SceneBytes6;
 typedef struct { s16 h[8]; } SceneHalves8;
-/* one 8-byte scene event (as in func_150268BC) */
+/* one 8-byte scene event (as in scene_event_run_b) */
 typedef struct {
     s8  type;
     u8  delta;
@@ -575,12 +582,13 @@ typedef struct {
 #define SA_PTR(p, o) (*(u8 **) ((u8 *) (p) + (o)))
 #define SA_OBJ_INDEX(o) (((u8 *) (o) - (u8 *) D_800CC2D0) / 0x32C)
 
-// scene_event_run_a: first handler of a scene event (func_1502AB94 tries this one, then func_150268BC, then
-// func_15029EA8). ev is the 8-byte event, track / player its track, now the track time, obj / wrec the track's object
+// scene_event_run_a: first handler of a scene event (scene_event_run tries this one, then scene_event_run_b, then
+// scene_event_run_c). ev is the 8-byte event, track / player its track, now the track time, obj / wrec the track's object
 // or world record (ref kind 2 / 3), flag the player's D_800C3A08 byte. Handles the cutscene light types (7, 0xE, 0xF,
 // 0x10, 0x12 while D_800E1024), object types 0xC (animation), 0xD (setup lists), 4, 9, 1, track switch 3, and the
-// type 5 sub-types below (0x67: leave the logo scene for the title menu via func_151DECB4). Returns 1 when handled.
-s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *wrec, u8 *data, s32 flag) {
+// type 5 sub-types below (0x67: leave the logo scene for the title menu via menu_reset_and_enter). Returns 1 when handled.
+/* was func_15024910 */
+s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *wrec, u8 *data, s32 flag) {
     SceneEventA *ev = (SceneEventA *) arg0;
     u8 *o = (u8 *) obj;
     u8 *rec;
@@ -599,13 +607,13 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             (type == 0x10 && D_800BEECB != 3) || (type == 0x12 && D_800BEECB != 1)) {
             return 1;
         }
-        light = func_1502354C(track, ev->b4 == 0);
+        light = subtitle_slot_get(track, ev->b4 == 0);
         if (light == NULL) {
             return 1;
         }
         if (ev->b4 == 0) {
             if (SA_U8(light, 0xC) != 0) {
-                func_1516D850(SA_PTR(light, 0x34));
+                text_box_close_now(SA_PTR(light, 0x34));
             }
             text = (u8 *) D_800C3A00[player][ev->id];
             if (*text == 0xBE) {
@@ -632,14 +640,14 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             if (ev->b5 == 2) {
                 SA_S32(light, 4) |= 0x40000;
             }
-            SA_S32(light, 0x34) = func_1516AD20(0, 0, 0, NULL, (s32 *) ((u8 *) light + 4), flag);
+            SA_S32(light, 0x34) = text_box_open(0, 0, 0, NULL, (s32 *) ((u8 *) light + 4), flag);
         } else if (ev->b4 == 1) {
-            func_150234E8(light, ev->b5);
+            subtitle_slot_close(light, ev->b5);
         } else {
             if (ev->b5 == 0) {
-                SA_PTR(light, 0x34) = func_1516D8E8(SA_PTR(light, 0x34));
+                SA_PTR(light, 0x34) = text_box_request_next(SA_PTR(light, 0x34));
             } else {
-                SA_PTR(light, 0x34) = func_1516D934(SA_PTR(light, 0x34));
+                SA_PTR(light, 0x34) = text_box_request_skip(SA_PTR(light, 0x34));
             }
             if (ev->w6 != 0) {
                 k = ev->w6 - 1;
@@ -660,25 +668,25 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0xC: /* object animation */
         if (ev->id != 0) {
             if (ev->w6 != 0) {
-                func_1507EB4C(obj, ev->id);
+                face_set_default_anim(obj, ev->id);
             } else {
                 if (ev->b5 != 0) {
                     span = 0xFFFF;
                 } else {
-                    span = func_15023C60(arg0, type, track, &next, 0, 0, 0, 0, 0, 0, player) - now;
+                    span = scene_event_find_next(arg0, type, track, &next, 0, 0, 0, 0, 0, 0, player) - now;
                 }
-                func_1507E7E4(obj, ev->id, 3, span, ev->b4);
+                face_anim_start(obj, ev->id, 3, span, ev->b4);
             }
         }
         return 1;
     case 0xD: /* object setup list id + 1: run / undo / set a parameter */
         if (obj != NULL) {
             if (ev->b4 == 0) {
-                func_15083568(obj, ev->id + 1, 1.0f, 0);
+                obj_setup_run(obj, ev->id + 1, 1.0f, 0);
             } else if (ev->b4 == 1) {
-                func_150836CC(obj, ev->id + 1);
+                obj_setup_undo(obj, ev->id + 1);
             } else {
-                u8 *att = func_15031C4C(o, ev->id + 1, 0);
+                u8 *att = attachment_find_by_slot(o, ev->id + 1, 0);
 
                 if (att != NULL) {
                     if (ev->b4 == 2) {
@@ -692,7 +700,7 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         return 1;
     case 4: /* object +0x134 / +0x135: id and half the span (1 .. 255) */
         if (obj != NULL) {
-            span = (func_15023C60(arg0, type, track, &next, 0, 0, 0, 0, 0, 0, player) - now) / 2;
+            span = (scene_event_find_next(arg0, type, track, &next, 0, 0, 0, 0, 0, 0, player) - now) / 2;
             if (span >= 0x100) {
                 span = 0xFF;
             } else if (span == 0) {
@@ -752,7 +760,7 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x14:
         if (obj != NULL) {
             if (ev->b4 == 0) {
-                func_15053430(obj);
+                obj_death_resolve(obj);
             } else {
                 obj_remove(obj, 0);
             }
@@ -778,9 +786,9 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     }
     case 0x44: /* level change */
         if (ev->b5 != 0) {
-            func_1501C710(2, (u16 *) (s32) ev->b4, ev->w6, 0, 0);
+            game_request_transition(2, (u16 *) (s32) ev->b4, ev->w6, 0, 0);
         } else {
-            func_1501C710(1, (u16 *) (s32) ev->b4, 0, 0, 0);
+            game_request_transition(1, (u16 *) (s32) ev->b4, 0, 0, 0);
         }
         break;
     case 0x17:
@@ -840,7 +848,7 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             pos[0] = SA_F32(rec, 0);
             pos[1] = SA_F32(rec, 4);
             pos[2] = SA_F32(rec, 8);
-            func_151BEE00(pos, SA_F32(rec, 0x10), 1, 0, 2, 0xFF, 1);
+            life_pickup_spawn(pos, SA_F32(rec, 0x10), 1, 0, 2, 0xFF, 1);
             break;
         }
         case 1: {
@@ -850,7 +858,7 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             pos[0] = SA_F32(rec, 0);
             pos[1] = SA_F32(rec, 4);
             pos[2] = SA_F32(rec, 8);
-            func_151A9940(5, 1, NULL, (s32) pos, -10000.0f, 100.0f, -1, flag, 1);
+            kind_effect_spawn(5, 1, NULL, (s32) pos, -10000.0f, 100.0f, -1, flag, 1);
             break;
         }
         case 2:
@@ -858,11 +866,11 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             break;
         case 3:
             if (ev->b5 != 0) {
-                func_1515F170(1, 0);
-                func_1515F170(2, 1);
+                light_group_set_disabled(1, 0);
+                light_group_set_disabled(2, 1);
             } else {
-                func_1515F170(1, 1);
-                func_1515F170(2, 0);
+                light_group_set_disabled(1, 1);
+                light_group_set_disabled(2, 0);
             }
             break;
         case 4:
@@ -872,28 +880,28 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             light_ctrl_broadcast(0x28, 0x17, 0);
             break;
         case 6:
-            func_151CD90C(ev->b5);
+            spout_broadcast_start(ev->b5);
             break;
         case 7:
-            func_1515F170(3, ev->b5 != 0 ? 0 : 1);
+            light_group_set_disabled(3, ev->b5 != 0 ? 0 : 1);
             break;
         case 8:
-            func_150B696C(ev->b5);
+            cutscene_beam_spawn(ev->b5);
             break;
         case 9: {
             static const s32 sLights[4] = { 0x12, 0x13, 0x14, 0x15 };   /* D_80096DD0 */
             u8 i;
 
             for (i = 0; i < 4; i++) {
-                func_151C9CBC(2, (s32) (D_800D34B8 + sLights[i] * 0x34));
+                laser_switch_broadcast(2, (s32) (D_800D34B8 + sLights[i] * 0x34));
             }
             break;
         }
         case 10:
-            func_151CA398((u8 *) D_800DBFF0, 0, (s8) track, (u8) flag, 1);
+            aim_hud_spawn_track_mode((u8 *) D_800DBFF0, 0, (s8) track, (u8) flag, 1);
             break;
         case 11:
-            func_151CA484((u8 *) D_800DBFF0);
+            aim_hud_clear((u8 *) D_800DBFF0);
             break;
         case 12:
             water_effect_start_once();
@@ -914,15 +922,15 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             node_broadcast_all(0, 0x4F);
             break;
         case 18:
-            func_151CD944(ev->b5);
+            spout_broadcast_stop(ev->b5);
             break;
         case 19:
-            func_1515F170(0xB, 0);
+            light_group_set_disabled(0xB, 0);
             break;
         case 20:
             if (obj != NULL) {
-                func_15190A88(o);
-                func_1518F9CC(0, 0x49);
+                bone_sparks_detach_owner(o);
+                character_effect_broadcast(0, 0x49);
             }
             break;
         case 21:
@@ -930,7 +938,7 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             break;
         case 22:
             if (obj != NULL) {
-                func_151937F4(o, 0xFF, 1);
+                obj_bone_debris_emitter_attach(o, 0xFF, 1);
             }
             break;
         case 23:
@@ -939,17 +947,17 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
 
                 ref.obj = o;
                 ref.kind = SA_U8(o, 0x3B);
-                func_151920FC((s32) &ref, 0x50);
+                model_drip_broadcast((s32) &ref, 0x50);
             }
             break;
         }
         break;
     case 0x6E: {
         s32 n;
-        u8 *list = (u8 *) func_151905AC(o, &n);
+        u8 *list = (u8 *) bone_sparks_presets_for_kind(o, &n);
 
         if (list != NULL && ev->w6 < n) {
-            func_1518FA8C((s32) obj, list[ev->w6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
+            bone_sparks_attach_preset((s32) obj, list[ev->w6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
         }
         break;
     }
@@ -961,26 +969,26 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         *(SceneHalves8 *) kinds = *(SceneHalves8 *) D_800844BC;
         if (ev->b4 == 0) {
             k = ev->b5 >= 4 ? 3 : ev->b5;
-            span = func_15023C60(arg0, ev->type, track, &next, 1, ev->id, 0, 0, 1, ev->b5, player) - now;
+            span = scene_event_find_next(arg0, ev->type, track, &next, 1, ev->id, 0, 0, 1, ev->b5, player) - now;
             if (ev->w6 != 0) {
                 span = 999;
                 f = 0xFF;
             } else {
                 f = (u8) flag;
             }
-            func_1518D1C0(o, kinds[k][1], span, 0, f, 0, D_80096DE0);
+            character_effect_attach(o, kinds[k][1], span, 0, f, 0, D_80096DE0);
         }
         break;
     }
     case 0x36:
         if (ev->b4 == 0) {
-            func_1519D5A0((s32) obj, 0, 300, 0, flag, 0);
+            spray_trail_spawn((s32) obj, 0, 300, 0, flag, 0);
         } else if (ev->b4 == 1) {
             struct { u8 *obj; u8 kind; } ref;
 
             ref.obj = o;
             ref.kind = SA_U8(o, 0x3B);
-            func_151482D4((s32) &ref, 7);
+            fxrec_broadcast((s32) &ref, 7);
         }
         break;
     case 0x30:
@@ -1001,14 +1009,14 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 anim = 12;
                 break;
             }
-            func_1514D3B0((s32) obj, 0xD, anim, 0);
+            char_fx_send_event((s32) obj, 0xD, anim, 0);
         }
         break;
     case 0x46:
         if (ev->b4 != 0) {
-            func_150C6174((s32) obj);
+            char_fx_event15_start((s32) obj);
         } else {
-            func_150C619C((s32) obj);
+            char_fx_event15_stop((s32) obj);
         }
         break;
     case 0x25:
@@ -1035,7 +1043,7 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x3D: /* target: the object with setup id w6 & 0xFF */
         if (obj != NULL) {
             if (ev->b4 == 0) {
-                s32 target = func_15083FB0(ev->w6);
+                s32 target = obj_slot_by_setup_id(ev->w6);
 
                 if (target != -1) {
                     SA_U8(o, 0x65) = target + 1;
@@ -1081,13 +1089,13 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x43:
         if (ev->b4 == 0) {
             rec = SA_REC(player, track);
-            func_150B7700((s32) SA_F32(rec, 0x24), (s32) SA_F32(rec, 0x28),
-                          func_15023C60(arg0, type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now, flag);
+            cs_overlay_spawn_cross((s32) SA_F32(rec, 0x24), (s32) SA_F32(rec, 0x28),
+                          scene_event_find_next(arg0, type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now, flag);
         }
         break;
     case 0x45:
         if (ev->b4 == 0) {
-            func_151A5580(0, func_15023C60(arg0, type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now, 0xFF, 0, 0,
+            screen_tint_create(0, scene_event_find_next(arg0, type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now, 0xFF, 0, 0,
                           D_800BEE08, 0, 0);
         }
         break;
@@ -1102,13 +1110,13 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         }
         break;
     case 0x4A:
-        func_10011FB0(ev->b4 == 0 ? ev->b5 : 0);
+        audio_mixer_set_override_mode(ev->b4 == 0 ? ev->b5 : 0);
         break;
     case 0x54:
         D_800C3A84[player] = ~ev->b4;
         break;
     case 0x55:
-        func_150C851C(ev->b4);
+        wobblers_set_intensity(ev->b4);
         break;
     case 0x59:
         D_800C40AB = 1;
@@ -1118,15 +1126,15 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         switch (SA_U8(o, 4)) {
         case 0x53:
             SA_U8(o, 0x124) = 0;
-            func_15052F9C(obj, 156.0f, 1, 4, 0, 10, 0xFF, 0, 1, 0);
+            obj_carry_release(obj, 156.0f, 1, 4, 0, 10, 0xFF, 0, 1, 0);
             break;
         case 0x28:
             SA_U8(o, 0x124) = 0;
-            func_15052F9C(obj, 180.0f, 5, 0x44, 1, 1, 0xFF, 0, 1, 0);
+            obj_carry_release(obj, 180.0f, 5, 0x44, 1, 1, 0xFF, 0, 1, 0);
             break;
         case 0x21:
             SA_U8(o, 0x124) = 0;
-            func_15052F9C(obj, 156.0f, 0x19, 4, 0, 15, 0xFF, 0, 1, 0);
+            obj_carry_release(obj, 156.0f, 0x19, 4, 0, 15, 0xFF, 0, 1, 0);
             break;
         }
         break;
@@ -1145,33 +1153,33 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s32 v;
 
         *(SceneBytes9 *) colours = *(SceneBytes9 *) D_800844CC;
-        span = func_15023C60(arg0, ev->type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now;
+        span = scene_event_find_next(arg0, ev->type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now;
         if (ev->b4 == 0) {
             v = ev->w6 != 0 ? ev->w6 : 0x7F;
-            func_1517F9F8(colours[ev->b5][0], colours[ev->b5][1], colours[ev->b5][2], (s16) v, span, 0);
+            screen_tint_start(colours[ev->b5][0], colours[ev->b5][1], colours[ev->b5][2], (s16) v, span, 0);
         } else {
             D_800DE240[0] = 0;
         }
         break;
     }
     case 0x38:
-        span = func_15023C60(arg0, type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now;
+        span = scene_event_find_next(arg0, type, track, &next, 1, ev->id, 0, 0, 0, 0, player) - now;
         if (ev->b4 == 0) {
-            func_1517FC90(ev->b5, span, ev->w6 != 0 ? ev->w6 : 4, 0x7F, 1);
+            screen_pulse_start(ev->b5, span, ev->w6 != 0 ? ev->w6 : 4, 0x7F, 1);
         } else {
             D_800DDE08 = 0;
         }
         break;
     case 0x5C: /* camera fade in / hold / out: span to the event's b4 = 1 / 2 / 3 companions */
         if (ev->b4 == 0) {
-            s32 end = func_15023C60(arg0, type, track, &next, 1, ev->id, 1, 1, 1, ev->b5, player);
-            s32 in = func_15023C60(arg0, ev->type, track, &next, 1, ev->id, 1, 2, 1, ev->b5, player) - now;
+            s32 end = scene_event_find_next(arg0, type, track, &next, 1, ev->id, 1, 1, 1, ev->b5, player);
+            s32 in = scene_event_find_next(arg0, ev->type, track, &next, 1, ev->id, 1, 2, 1, ev->b5, player) - now;
             s32 out;
 
             if (next == NULL) {
                 in = 0;
             }
-            out = end - func_15023C60(arg0, ev->type, track, &next, 1, ev->id, 1, 3, 1, ev->b5, player);
+            out = end - scene_event_find_next(arg0, ev->type, track, &next, 1, ev->id, 1, 3, 1, ev->b5, player);
             if (next == NULL) {
                 out = 0;
             }
@@ -1209,10 +1217,10 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         }
         break;
     case 0x67: /* end of the logo scene: go to the title menu */
-        func_151DECB4();
+        menu_reset_and_enter();
         break;
     case 0x73:
-        func_151E5B94(0);
+        mp_match_end(0);
         break;
     case 0x69:
         if (obj != NULL) {
@@ -1226,7 +1234,7 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 SA_F32(o, 0x20) = 0.0f;
                 break;
             case 2:
-                func_150836CC(obj, 0x11);
+                obj_setup_undo(obj, 0x11);
                 SA_U8(o, 0xA9) = 0;
                 break;
             case 3:
@@ -1333,144 +1341,144 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
 #undef SA_PTR
 #undef SA_OBJ_INDEX
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15024910.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run_a.s")
 #endif
 #ifdef NON_MATCHING
 /* P90: hand-written from the asm (map: docs/port/sessions/p89/func_150268BC_map.md, tests: docs/port/sessions/p90) */
 /* --- callees: C definitions elsewhere (signatures copied) --- */
-void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
+void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2);
 void func_151F2D6C(s32, s32);
 void func_151F2BA8(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
-void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
+void particle_emitter_node_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
                    u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15,
                    u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F,
                    u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29,
                    u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30);
-void func_151BA1A0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
+void spark_sprite_burst_spawn(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
                    s16 argA, s16 argB, s16 argC, s32 argD, u8 argE, s32 argF);
 void node_spawn_sprite_quad(void *arg0, u8 arg1, s32 arg2);
 void beam_effect_spawn_attached(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                    s16 argA, s16 argB, u16 argC, u8 argD);
-void func_1516ECE8(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_150BF47C(s32 arg0);
+void particle_emitter_preset_packed_pos(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
+void twin_particle_emitters_spawn(s32 arg0);
 f32 math_sin_u8(u8 arg0);
-void func_151DCE6C(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
-void func_150BA4C0(u8 *arg0, u8 arg1, s32 arg2);
-void func_151A3940(u8 *arg0, u8 arg1);
-void func_151664F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8);
-void func_150B2974(u8 *arg0, s32 arg1, s32 arg2);
+void flash_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
+void crumble_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void obj_burning_fx_start(u8 *arg0, u8 arg1);
+void water_ring_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8);
+void obj_blast_fx_spawn(u8 *arg0, s32 arg1, s32 arg2);
 void point_emitter_spawn_preset(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
-s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
-void func_150D0148(f32 arg0);
+s32 fb_zoom_fx_spawn(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
+void bouncing_sprites_broadcast_drop(f32 arg0);
 void func_151494E0(s32, u8);
 struct260 *segment_effect_spawn(u8 *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7);
 struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
 struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
 void swing_lamp_post_target(s32 arg0, s32 arg1, u8 arg2);
-void func_151A9940(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
-u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_150AFC18(s16 arg0, u8 arg1, s32 arg2);
+void kind_effect_spawn(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
+u8 *model_drip_create(u8 **arg0, s32 arg1, u8 arg2, s32 arg3);
+void fb_fx_spawn_simple(s16 arg0, u8 arg1, s32 arg2);
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
-void func_1519F0FC(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4);
+void seqfx_track_effect_spawn(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4);
 void obj_bone_spark_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
-void func_150D0644(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_150D07C4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_150D09D4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_1519F2F4(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-s32 func_15046F70(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
+void text_pager_spawn_caption(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void text_pager_spawn_console(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void text_pager_spawn_title(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void seqfx_track_sprite_spawn(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+s32 collision_floor_probe(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
 f32 random_float(void);
 s32 random_int(void);
 s32 fx_splash_spawn(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9,
                   s32 argA);
 void zap_bolt_spawn_path(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3);
-s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
-struct260 *func_151B57F0(s16 arg0, u8 arg1, s32 arg2);
-struct260 *func_151932B8(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
-s32 *func_151905AC(u8 *arg0, s32 *arg1);
-s32 func_1518FA8C(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
+struct260 *electric_bolt_spawn(s16 arg0, u8 arg1, s32 arg2);
+struct260 *body_dust_effect_start(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
+s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1);
+s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32 point_emitter_spawn(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3);
 s32 anim_fx_bone_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
 void anim_fx_trail_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
-void func_150C7520(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
-u8 *func_1519EEE0(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-void func_1516F868(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_1516F730(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
+void obj_bone_emitters_restart(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
+u8 *seqfx_timer_create(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+void particle_emitter_preset_obj_pair(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void particle_emitter_preset_obj_burst(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void fx_ground_splats_around(struct127 *arg0, f32 arg1, u8 arg2, s32 arg3);
-void func_1504715C(void *out, u8 *obj);
-void func_150CAE30(u8 *arg0);
+void hitinfo_from_obj_floor(void *out, u8 *obj);
+void landing_dust_spray(u8 *arg0);
 void swing_lamp_post_toggle(void);
-u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
-void func_151C5B38(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2);
+u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
+void gun_muzzle_sparks_spawn(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void gun_muzzle_flash_light(u8 *arg0, u8 arg1, s32 arg2);
 void obj_bone14_spark_burst(u8 *arg0, u8 arg1, s32 arg2);
 void obj_joint_spark_spray(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
 void obj_bone_spark_spray(u8 *arg0, u8 arg1, s32 arg2);
 void obj_muzzle_blast(u8 *arg0, u8 arg1, s32 arg2);
-s32 func_151BEE00(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98: asm reloads a1 with lwc1 */
-void func_150BAEF4(u8 *arg0, u8 arg1, s32 arg2);
-void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2);
-void func_15143134(void *arg0, void *arg1, void *arg2);
-void func_151C384C(void *arg0, u8 arg1, s32 arg2);
-void func_151C9CBC(s32 arg0, s32 arg1);
+s32 life_pickup_spawn(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98: asm reloads a1 with lwc1 */
+void obj_heavy_impact_fx(u8 *arg0, u8 arg1, s32 arg2);
+void explosion_smoke_flash_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
+void fire_embers_spawn(void *arg0, u8 arg1, s32 arg2);
+void laser_switch_broadcast(s32 arg0, s32 arg1);
 void obj_angle_point_effect(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_151CC840(s32 arg0);
-void func_1519EFE8(f32 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4);
+void aim_hud_send_flash(s32 arg0);
+void seqfx_burst_spawn(f32 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4);
 s32 object_arc_to_surface_spawn(u8 *, s16, s16, s16, s32, f32, f32, s32, s32, s8 *, s32, s32);
-s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3);
+s32 particle_spawn_smoke_puff(u8 *arg0, f32 arg1, u8 arg2, s32 arg3);
 void obj_set_dying_flags(struct127 *arg0);
 void object_hit_effect(struct127 *arg0, s32 arg1, s32 arg2);
-void func_15193660(u8 *arg0, u8 arg1, s32 arg2);
-void func_151A0A10(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
-void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
+void obj_head_particle_burst(u8 *arg0, u8 arg1, s32 arg2);
+void ground_dust_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
+void emit_sparks_in_angle_range(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
 void impact_spawn_debris_burst(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
+void obj_bone_beam_impact(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
 void smoke_column_spawn_far(s32 arg0);
 void fx_twin_beams_spawn(u8 arg0);
-void func_1518B7D4(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4);
-void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6);
-void func_15171B70(u8 *arg0, u8 arg1, s32 arg2);
-void func_15172164(struct127 *arg0, u8 arg1);
-void func_15171434(s32 arg0, u8 arg1, s32 arg2);
-void func_15171734(u8 *arg0);
-void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_1516F2D8(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
+void rubble_scatter_spawn(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4);
+void rubble_scatter_spawn_ex(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6);
+void debris_sparks_rect_by_type(u8 *arg0, u8 arg1, s32 arg2);
+void debris_obj_destroy_by_id(struct127 *arg0, u8 arg1);
+void debris_crate_break_by_level(s32 arg0, u8 arg1, s32 arg2);
+void debris_obj_remove_explode(u8 *arg0);
+void rubble_burst_with_dust(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void particle_emitter_preset_obj3a(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void fx_point_emitter_spawn(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
 void *memcpy(void *s1, const void *s2, size_t n);
 /* --- callees still in asm: declared from this function's call sites (arity and widths from the asm) --- */
-void func_15177F90(u8 kind, u8 *pos, s32, s32 x, s32 y, s32 z, s32, s32 span, s32 flag, s32, s32 w6);
-void func_150B0574(f32 *from, f32 *to, u8 flag, s32);
+void swarm_spawn(u8 kind, u8 *pos, s32, s32 x, s32 y, s32 z, s32, s32 span, s32 flag, s32, s32 w6);
+void beam_trail_spawn(f32 *from, f32 *to, u8 flag, s32);
 f32 math_cos_u8(u8 angle);
-void func_1516FAB8(s32 x, s32 y, s32 z, s32 span, s32 dx, s32, s32 dz, s32, s32, s32, s32, s32, s32, s32, s32, s32 flag, s32);
+void particle_spray_pair_spawn(s32 x, s32 y, s32 z, s32 span, s32 dx, s32, s32 dz, s32, s32, s32, s32, s32, s32, s32, s32, s32 flag, s32);
 s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, struct127 *, s32, s32,
                   s32, s32, s32, f32, f32, f32, f32, f32, f32);
 struct260 *event_object_effect_spawn(u8 *obj, s16 span, s8, s8, f32, s32, u8 flag, s32);
 void trail_follower_spawn(u8 *rec, s16 span, u8 flag, s32);
-void func_150C4620(u8 *obj, s16 span, u8 flag, s32);
-void func_150CFB90(s16 span, u8 flag, s32);
-struct260 *func_151925C4(u8 *obj, s16 span, u8 flag, s32);
+void damage_smoke_spawn(u8 *obj, s16 span, u8 flag, s32);
+void screen_bar_spawn(s16 span, u8 flag, s32);
+struct260 *obj_dust_effect(u8 *obj, s16 span, u8 flag, s32);
 void score_banner_spawn(s16 span, u8 flag, s32);
-s32 func_151B09BC(u8 *obj, s32, s16 span, u8 flag, s32);
-u8 *func_1518D1C0(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);
+s32 object_link_effect_spawn(u8 *obj, s32, s16 span, u8 flag, s32);
+u8 *character_effect_attach(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);
 void blood_splash_spawn(f32 *offset, f32, f32, f32, s32, s32, s32, s32 span, s32, s32, s32 flag, s32);
 void beam_spawn_points(u8 *pos, u8 *, u8 *, u8 *, u8 *, s32 span, s32 flag, s32);
-s32 func_1514DA28(s16, s16);
-s32 func_1514654C(u8 *obj, u8 *att, s32, f32 **, u8 **, s32);
-void func_151CFFFC(u8 *obj, u8 flag, s32);
-void func_151C62D0(u8 *obj, u8 b5, s32, u8 *att, s32 kind, s32 flag, s32);
+s32 char_fx_slot_derives(s16, s16);
+s32 model_node_points_to_world(u8 *obj, u8 *att, s32, f32 **, u8 **, s32);
+void object_shatter_effects(u8 *obj, u8 flag, s32);
+void object_gun_fire(u8 *obj, u8 b5, s32, u8 *att, s32 kind, s32 flag, s32);
 void object_explode(u8 *obj, u8 flag, s32);
 s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void obj_limb_muzzle_burst(u8 *obj, u8, u8, u8 flag, s32);
-void func_15171100(void *pos, s32, s32, s32, s32 flag, s32);
-s32 func_151A74B0(void *spray, s32, u8 flag, s32);
+void debris_crate_break_pieces(void *pos, s32, s32, s32, s32 flag, s32);
+s32 debris_spray_spawn(void *spray, s32, u8 flag, s32);
 void smoke_columns_spawn(u8 flag);
 void joint_beam_spawn(u8 *obj, s32, u8 flag, s32);
-void func_1514948C(u8 n, f32 x, f32 y, f32 z, s32, s32, s32, f32, s32, f32, f32, s32 flag);
+void trail_spawn_directed(u8 n, f32 x, f32 y, f32 z, s32, s32, s32, f32, s32, f32, f32, s32 flag);
 void spark_effect_on_event(u8 *obj, s32, u8 flag);
 
-/* one 8-byte script event (func_1502AB94's table entry) */
+/* one 8-byte script event (scene_event_run's table entry) */
 typedef struct {
     s8  type;    /* 0x0B sound, 0x11 table byte, 0x05 effect */
     u8  delta;
@@ -1480,7 +1488,7 @@ typedef struct {
     s16 w6;
 } ScriptEvent;
 
-/* particle spray of sub-types 0x4D / 0x4E (func_151A74B0); 0x28 / 0x2C are left unset */
+/* particle spray of sub-types 0x4D / 0x4E (debris_spray_spawn); 0x28 / 0x2C are left unset */
 typedef struct {
     s16 count;
     f32 pos[3];
@@ -1498,7 +1506,7 @@ extern s16 *D_eu_800C3C88[4][30];   /* per player and track: s16 x, y, z */
 extern s32 *D_800C3A00[4];          /* per player: word table indexed by w6 */
 extern s32 D_8008CDF0;
 extern u8 *D_8008AF88[];
-/* func_151C5280's .s rodata (game_eu_1F3040) is dropped in the NM link: local copy of its first muzzle point */
+/* gun_muzzle_smoke_spawn's .s rodata (game_eu_1F3040) is dropped in the NM link: local copy of its first muzzle point */
 static const f32 D_800AAE70[3] = { -113.828796f, -14.0823936f, 14.5422001f };
 extern char D_80096DEC[];          /* "Cutscene 2" */
 
@@ -1528,29 +1536,30 @@ static const u8 sBones5F19[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };                
 #define O_PTR(o, off) (*(u8 **) ((u8 *) (o) + (off)))
 
 /* frames until the next event of this type and id on the track: the effect's duration */
-#define SPAN(ev, out) (func_15023C60((u32) (ev), (ev)->type, track, (out), 1, (ev)->id, 0, 0, 0, 0, player) - now)
+#define SPAN(ev, out) (scene_event_find_next((u32) (ev), (ev)->type, track, (out), 1, (ev)->id, 0, 0, 0, 0, player) - now)
 #define REC(player, track) ((u8 *) &(&D_800C3958)[player][track])
 #define OBJ_INDEX(obj) ((s32) ((u8 *) (obj) - (u8 *) D_800CC2D0) / 812)
 
-/* Script event interpreter (middle handler of func_1502AB94). `arg0` is one 8-byte ScriptEvent of track `track` of
+/* Script event interpreter (middle handler of scene_event_run). `arg0` is one 8-byte ScriptEvent of track `track` of
  * player `player`; `now` = the current frame, `value` = the byte type 0x11 stores, `obj` / `rec` = the object or the
  * player's D_800C3958 record the track drives, `data` = its position (f32 x, y, z), `flag` = passed on to the effects.
  * Type 0x0B plays / fades / stops a sound, type 0x11 sets a per-track byte, type 0x05 starts effect `id` (most only
  * when b4 == 0; "span" = frames until the next event with the same type and id). Returns 1 when handled, else 0. */
-s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *rec, u8 *data, s32 flag) {
+/* was func_150268BC */
+s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *rec, u8 *data, s32 flag) {
     ScriptEvent *ev = (ScriptEvent *) arg0;
     f32 *pos = (f32 *) data;
     u8 *r;
-    u8 *next;   /* out slot of func_15023C60 (never read) */
+    u8 *next;   /* out slot of scene_event_find_next (never read) */
     s32 span;
     s32 vol;
     s32 i;
 
     if (ev->type == 0x0B) {   /* sound */
         if (ev->b4 == 0) {
-            func_1001263C(ev->id, ev->w6 == 0 ? 0x10000 : (ev->w6 << 16) / 255, 0x40);
+            mp3_voice_play(ev->id, ev->w6 == 0 ? 0x10000 : (ev->w6 << 16) / 255, 0x40);
         } else if (ev->b4 == 1) {
-            span = func_15023C60((u32) ev, ev->type, track, &next, 1, ev->id, 1, 2, 0, 0, player) - now;
+            span = scene_event_find_next((u32) ev, ev->type, track, &next, 1, ev->id, 1, 2, 0, 0, player) - now;
             vol = ev->w6 == 0 ? 0x10000 : (ev->w6 << 16) / 255;
             func_151F2D6C(vol, (span * 0x5604) / 50);
         } else if (ev->b4 == 3) {
@@ -1592,7 +1601,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         c = D_800844D8[k];   /* N64: from a stack copy of the table taken before the span call */
         grow = (size * 40) / 4096;
         /* a0 / a1: the two halves of the `data` pointer, as the N64 code passes them */
-        func_1516DF0C((s16) ((s32) data >> 16), (s16) (s32) data, 0, 0x1B, 0, c[0], c[1], c[2], c[3], c[4], c[5], 0, 1,
+        particle_emitter_node_spawn((s16) ((s32) data >> 16), (s16) (s32) data, 0, 0x1B, 0, c[0], c[1], c[2], c[3], c[4], c[5], 0, 1,
                       6, 0, 0, 0, 0, 0, (size >> 3) >> 8, (size >> 3) & 0xFF, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, span, grow,
                       grow, 0xFF, 14, 8, 8, 0x25, 0, 0xFF, 8, 0, 0, player, 0, 0, flag, 0);
         break;
@@ -1600,13 +1609,13 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x0A:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_151BA1A0(3, 3, 0, 0, 0, 800, 1200, 400, 200, 0x66, 0x1C7, 2, span, (s32) data, flag, 0);
+            spark_sprite_burst_spawn(3, 3, 0, 0, 0, 800, 1200, 400, 200, 0x66, 0x1C7, 2, span, (s32) data, flag, 0);
         }
         break;
     case 0x0B:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_151BA1A0(0x2F, 1, 0, 0, 0, 2000, 1000, 400, 200, 0x400, 0x400, 6, span, (s32) data, flag, 0);
+            spark_sprite_burst_spawn(0x2F, 1, 0, 0, 0, 2000, 1000, 400, 200, 0x400, 0x400, 6, span, (s32) data, flag, 0);
         }
         break;
     case 0x0C: {
@@ -1633,7 +1642,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x19:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_15177F90(ev->b5 != 0 ? ev->b5 : 12, data, 0xFF, pos[0], pos[1], pos[2], 0, span, flag, 0, ev->w6);
+            swarm_spawn(ev->b5 != 0 ? ev->b5 : 12, data, 0xFF, pos[0], pos[1], pos[2], 0, span, flag, 0, ev->w6);
         }
         break;
     case 0x1A: {
@@ -1647,7 +1656,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             to[0] = O_F32(r, 0);
             to[1] = O_F32(r, 0x38) + O_F32(r, 4);
             to[2] = O_F32(r, 8);
-            func_150B0574(from, to, (u8) flag, 1);
+            beam_trail_spawn(from, to, (u8) flag, 1);
         } else {
             r = REC(player, track);
             beam_effect_spawn(0, p[0], p[1], p[2], O_F32(r, 0), O_F32(r, 0x38) + O_F32(r, 4), O_F32(r, 8), 40.0f, 0.0f, 8.0f,
@@ -1666,10 +1675,10 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (ev->b4 == 0) {
             switch ((u16) ev->w6) {
             case 0:
-                func_1516ECE8((u32) data, span, ev->b5, (u8) flag, 0);
+                particle_emitter_preset_packed_pos((u32) data, span, ev->b5, (u8) flag, 0);
                 break;
             case 1:
-                func_150BF47C(span);
+                twin_particle_emitters_spawn(span);
                 break;
             case 2: {   /* two sprays either side of the object, along its yaw */
                 f32 x = O_F32(obj, 0x14);
@@ -1678,33 +1687,33 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 u8 angle = O_U16(obj, 0x7A) >> 8;
                 f32 sn = math_sin_u8(angle);
                 f32 cs = math_cos_u8(angle);
-                func_1516FAB8(x + 20.0f, y + 475.0f, z, span, 14.0f * sn, 0xB00, 14.0f * cs, 200, 50, 10, 6, 7, 0xBE,
+                particle_spray_pair_spawn(x + 20.0f, y + 475.0f, z, span, 14.0f * sn, 0xB00, 14.0f * cs, 200, 50, 10, 6, 7, 0xBE,
                               0xBE, 0xBE, (u8) flag, 0);
-                func_1516FAB8(x - 24.0f, y + 476.0f, z, span, -23.0f * sn, 0x800, -23.0f * cs, 200, 50, 10, 6, 7, 0xBE,
+                particle_spray_pair_spawn(x - 24.0f, y + 476.0f, z, span, -23.0f * sn, 0x800, -23.0f * cs, 200, 50, 10, 6, 7, 0xBE,
                               0xBE, 0xBE, (u8) flag, 0);
                 break;
             }
             case 3:
-                func_151DCE6C(data, span, 1, 1, flag, 0);
+                flash_smoke_emitter_spawn(data, span, 1, 1, flag, 0);
                 break;
             case 4:
-                func_151DCE6C(data, span, 0, 0, flag, 0);
+                flash_smoke_emitter_spawn(data, span, 0, 0, flag, 0);
                 break;
             }
         }
         break;
     case 0x1F:
         if (obj != NULL) {
-            func_150BA4C0((u8 *) obj, (u8) flag, 1);
+            crumble_emitter_spawn((u8 *) obj, (u8) flag, 1);
         }
         break;
     case 0x00:
         if (obj != NULL) {
-            func_151A3940((u8 *) obj, (u8) flag);
+            obj_burning_fx_start((u8 *) obj, (u8) flag);
         }
         break;
     case 0x20:
-        func_151664F0(-1, pos[0], pos[1], pos[2], 20, 20, 1, flag, 1);
+        water_ring_spawn(-1, pos[0], pos[1], pos[2], 20, 20, 1, flag, 1);
         break;
     case 0x06:
     case 0x3E:
@@ -1712,7 +1721,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x2A:
         break;
     case 0x07:
-        func_150B2974((u8 *) obj, 9, -1);
+        obj_blast_fx_spawn((u8 *) obj, 9, -1);
         break;
     case 0x21:
         if (ev->b4 == 0) {
@@ -1721,7 +1730,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         break;
     case 0x60:
         if (ev->b4 == 0) {
-            func_150CE660((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);   /* 4th argument 0 (P80) */
+            fb_zoom_fx_spawn((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);   /* 4th argument 0 (P80) */
         }
         break;
     case 0x65:
@@ -1730,13 +1739,13 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 s8 level = ev->w6;
                 func_151494E0((s32) &level, 0x51);
             } else if (ev->b5 == 0x13) {
-                func_150D0148(ev->w6 * 0.01f * 300.0f - 150.0f);
+                bouncing_sprites_broadcast_drop(ev->w6 * 0.01f * 300.0f - 150.0f);
             }
         }
         if (ev->b4 != 0) {
             break;
         }
-        span = func_15023C60((u32) ev, ev->type, track, &next, 1, ev->id, 1, 1, 1, ev->b5, player) - now;
+        span = scene_event_find_next((u32) ev, ev->type, track, &next, 1, ev->id, 1, 1, 1, ev->b5, player) - now;
         switch (ev->b5) {
         case 1:
             event_object_effect_spawn((u8 *) obj, span, -1, 0, 0.00071f, 0, flag, 1);
@@ -1765,7 +1774,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             p[0] = O_F32(r, 0);
             p[1] = O_F32(r, 4);
             p[2] = O_F32(r, 8);
-            func_151A9940(5, 1, NULL, (s32) p, -10000.0f, 100.0f, span, (u8) flag, 1);
+            kind_effect_spawn(5, 1, NULL, (s32) p, -10000.0f, 100.0f, span, (u8) flag, 1);
             break;
         }
         case 9: {
@@ -1792,7 +1801,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 s.kind = 0;
                 break;
             }
-            func_15190770((u8 **) &s, 0, (u8) flag, 1);
+            model_drip_create((u8 **) &s, 0, (u8) flag, 1);
             break;
         }
         case 10:
@@ -1801,7 +1810,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         case 11: {
             struct260 *e;
             s16 zero[2];
-            func_150AFC18(span, (u8) flag, 1);
+            fb_fx_spawn_simple(span, (u8) flag, 1);
             zero[0] = 0;
             zero[1] = 0;
             e = func_15149130(span, -1, 0x4B, -1, 1, 0, (struct37 *) 4, (u8) flag, 1);
@@ -1814,14 +1823,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             obj_bone_glow_emitter_spawn((u8 *) obj, span, (u8) flag, 1);
             break;
         case 13:
-            func_1519F0FC(REC(player, track), (u16) ev->w6 < 0xE9 ? ev->w6 : 0, span, (u8) flag, 1);
+            seqfx_track_effect_spawn(REC(player, track), (u16) ev->w6 < 0xE9 ? ev->w6 : 0, span, (u8) flag, 1);
             break;
         case 15:
             if (obj != NULL && span > 0) {
                 O_S32(obj, 0x2EC) = 1;
                 O_F32(obj, 0x2D8) = span * 0.5f;
                 O_F32(obj, 0x2DC) = 1.0f / O_F32(obj, 0x2D8);
-                func_150C4620((u8 *) obj, span, (u8) flag, 1);
+                damage_smoke_spawn((u8 *) obj, span, (u8) flag, 1);
             }
             break;
         case 16:
@@ -1830,22 +1839,22 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             }
             break;
         case 17:
-            func_150D0644(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_caption(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
             break;
         case 18:
-            func_150D07C4(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_console(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
             break;
         case 19:
-            func_150CFB90(span, (u8) flag, 1);
+            screen_bar_spawn(span, (u8) flag, 1);
             break;
         case 20:
-            func_151925C4((u8 *) obj, span, (u8) flag, 1);
+            obj_dust_effect((u8 *) obj, span, (u8) flag, 1);
             break;
         case 21:
-            func_150D09D4(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_title(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
             break;
         case 22:
-            func_1519F2F4(REC(player, track), (u16) ev->w6 < 0xCF ? (u16) ev->w6 : 0, span, (u8) flag, 1);
+            seqfx_track_sprite_spawn(REC(player, track), (u16) ev->w6 < 0xCF ? (u16) ev->w6 : 0, span, (u8) flag, 1);
             break;
         case 23:
             score_banner_spawn(span, (u8) flag, 1);
@@ -1870,7 +1879,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             probe[0] = p[0];
             probe[1] = p[1] + 100.0f;
             probe[2] = p[2];
-            if (func_15046F70((u8 *) probe, 0, p[1] - 1000.0f, (u8 *) &hit) != 0 && hit.surface != 3) {
+            if (collision_floor_probe((u8 *) probe, 0, p[1] - 1000.0f, (u8 *) &hit) != 0 && hit.surface != 3) {
                 found = 1;
                 p[1] = hit.y;
             } else {
@@ -1906,26 +1915,26 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             s.unk5 = 1;
             s.unk6 = -1;
             s.unk2 = span;
-            func_151D8E18(&s, 0, (u8) flag, 1);
+            rumble_request(&s, 0, (u8) flag, 1);
             break;
         }
         }
         break;
     case 0x5B:
         if (ev->b4 == 0) {
-            func_151B57F0(SPAN(ev, &next), (u8) flag, 0);
+            electric_bolt_spawn(SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x5D:
         if (ev->b4 == 0) {
-            func_151932B8((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);
+            body_dust_effect_start((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x5E:
         if (ev->b5 == 1) {
-            func_151B09BC((u8 *) obj, 0, 1000, (u8) flag, 0);
+            object_link_effect_spawn((u8 *) obj, 0, 1000, (u8) flag, 0);
         } else if (ev->b4 == 0) {
-            func_151B09BC((u8 *) obj, 0, SPAN(ev, &next), (u8) flag, 0);
+            object_link_effect_spawn((u8 *) obj, 0, SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x4C:
@@ -1934,12 +1943,12 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             span = SPAN(ev, &next);
             if (kind == 0x49 || kind == 0x58) {
                 s32 n;
-                u8 *list = (u8 *) func_151905AC((u8 *) obj, &n);
+                u8 *list = (u8 *) bone_sparks_presets_for_kind((u8 *) obj, &n);
                 if (list != NULL && ev->w6 < n) {
-                    func_1518FA8C((s32) obj, list[ev->w6], span, -1, -1, -1, 0, 0, flag, 1);
+                    bone_sparks_attach_preset((s32) obj, list[ev->w6], span, -1, -1, -1, 0, 0, flag, 1);
                 }
             } else {
-                func_1518D1C0((u8 *) obj, ev->b5, span, 0, flag, 1, D_80096DEC);
+                character_effect_attach((u8 *) obj, ev->b5, span, 0, flag, 1, D_80096DEC);
             }
         }
         break;
@@ -1973,7 +1982,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             f32 offset[2];
             f32 ra, rb, rc;
             u32 rd;
-            span = func_15023C60((u32) ev, ev->type, track, &next, 1, ev->id, 0, 0, 1, ev->b5, player) - now;
+            span = scene_event_find_next((u32) ev, ev->type, track, &next, 1, ev->id, 0, 0, 1, ev->b5, player) - now;
             offset[0] = random_float() * 200.0f + -100.0f;
             offset[1] = random_float() * 300.0f + -150.0f;
             ra = random_float();
@@ -1987,7 +1996,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x0F:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_150C7520((u8 *) obj, span, (u8) flag, 1);
+            obj_bone_emitters_restart((u8 *) obj, span, (u8) flag, 1);
         }
         break;
     case 0x32:
@@ -2006,10 +2015,10 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 idx = 13;
             }
             for (node = O_PTR(obj, 0x2F4); node != NULL; node = O_PTR(node, 0x14)) {
-                if (idx == O_S16(node, 0x1C) || func_1514DA28(O_S16(D_8008AF88[idx], 4), O_S16(node, 0x1C)) != 0) {
+                if (idx == O_S16(node, 0x1C) || char_fx_slot_derives(O_S16(D_8008AF88[idx], 4), O_S16(node, 0x1C)) != 0) {
                     r = REC(player, track);
                     O_S32(O_PTR(node, 0x10), 0x30) =
-                        (s32) func_1519EEE0(span, (s32) O_PTR(node, 0x10), 0, (s32) (r + 0x30), (s32) (r + 0x20), flag, 0);
+                        (s32) seqfx_timer_create(span, (s32) O_PTR(node, 0x10), 0, (s32) (r + 0x30), (s32) (r + 0x20), flag, 0);
                 }
             }
         }
@@ -2018,7 +2027,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (obj != NULL) {
             span = SPAN(ev, &next);
             if (ev->b4 == 0) {
-                func_1516F868(OBJ_INDEX(obj), span, span, 0, flag, 0);
+                particle_emitter_preset_obj_pair(OBJ_INDEX(obj), span, span, 0, flag, 0);
             }
         }
         break;
@@ -2026,7 +2035,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (obj != NULL) {
             span = SPAN(ev, &next);
             if (ev->b4 == 0) {
-                func_1516F730(OBJ_INDEX(obj), span, (u8) flag, 0);
+                particle_emitter_preset_obj_burst(OBJ_INDEX(obj), span, (u8) flag, 0);
             }
         }
         break;
@@ -2045,15 +2054,15 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 } hit;
                 f32 probe[3];
                 f32 p[3];
-                func_1504715C(&hit, (u8 *) obj);
+                hitinfo_from_obj_floor(&hit, (u8 *) obj);
                 probe[0] = O_F32(obj, 0x14);
                 probe[1] = O_F32(obj, 0x18) + 100.0f;
                 probe[2] = O_F32(obj, 0x1C);
-                if (func_15046F70((u8 *) probe, 0, O_F32(obj, 0x18) - 300.0f, (u8 *) &hit) != 0) {
+                if (collision_floor_probe((u8 *) probe, 0, O_F32(obj, 0x18) - 300.0f, (u8 *) &hit) != 0) {
                     p[0] = probe[0];
                     p[1] = hit.y;
                     p[2] = probe[2];
-                    func_150CAE30((u8 *) p);
+                    landing_dust_spray((u8 *) p);
                 }
             }
             break;
@@ -2070,14 +2079,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 case 0x74:
                 case 0x75:
                 case 0x7A: {
-                    u8 *att = func_15031C4C((u8 *) obj, 0x46, 0);
+                    u8 *att = attachment_find_by_slot((u8 *) obj, 0x46, 0);
                     if (att != NULL) {
                         u8 buf[16];
                         f32 *src = D_800AAE70;
                         u8 *dst = buf;
-                        if (func_1514654C((u8 *) obj, att, 0, &src, &dst, 1) != 0) {
-                            func_151C5B38((s32) obj, (s32) buf, 0x46, (u8) flag, 1);
-                            func_151C5C54(buf, (u8) flag, 1);
+                        if (model_node_points_to_world((u8 *) obj, att, 0, &src, &dst, 1) != 0) {
+                            gun_muzzle_sparks_spawn((s32) obj, (s32) buf, 0x46, (u8) flag, 1);
+                            gun_muzzle_flash_light(buf, (u8) flag, 1);
                         }
                     }
                     break;
@@ -2100,23 +2109,23 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             p[0] = O_F32(r, 0);
             p[1] = O_F32(r, 4);
             p[2] = O_F32(r, 8);
-            func_151BEE00(p, O_F32(r, 0x10), 1, 0, 2, flag, 1);
+            life_pickup_spawn(p, O_F32(r, 0x10), 1, 0, 2, flag, 1);
             break;
         }
         case 4:
-            func_151CFFFC((u8 *) obj, (u8) flag, 1);
+            object_shatter_effects((u8 *) obj, (u8) flag, 1);
             break;
         case 5:
             if (obj != NULL) {
                 u8 *att = NULL;
                 if (ev->w6 != 0) {
-                    att = func_15031C4C((u8 *) obj, ev->b5 != 0 ? 0xA4 : 0xA5, 0);
+                    att = attachment_find_by_slot((u8 *) obj, ev->b5 != 0 ? 0xA4 : 0xA5, 0);
                 }
-                func_151C62D0((u8 *) obj, ev->b5, 1, att, ev->b5 != 0 ? 0xA4 : 0xA5, flag, 1);
+                object_gun_fire((u8 *) obj, ev->b5, 1, att, ev->b5 != 0 ? 0xA4 : 0xA5, flag, 1);
             }
             break;
         case 6:
-            func_150BAEF4((u8 *) obj, 9, -1);
+            obj_heavy_impact_fx((u8 *) obj, 9, -1);
             break;
         case 7:
             object_explode((u8 *) obj, (u8) flag, 1);
@@ -2126,7 +2135,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             p[0] = pos[0];
             p[1] = pos[1];
             p[2] = pos[2];
-            func_151D5BF8((u8 *) p, (u8) flag, 1);
+            explosion_smoke_flash_spawn((u8 *) p, (u8) flag, 1);
             break;
         }
         case 9:
@@ -2150,14 +2159,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                     entry = c.v[(u32) random_int() % 6];
                     break;
                 }
-                func_15143134(entry, out, O_PTR(obj, 0x1D4) + (sBones5F10[ev->b5] << 6));
-                func_151C384C(out, (u8) flag, 1);
+                mtx_transform_point_or_origin(entry, out, O_PTR(obj, 0x1D4) + (sBones5F10[ev->b5] << 6));
+                fire_embers_spawn(out, (u8) flag, 1);
             }
             break;
         case 11: {
             u8 k = 0;
             do {
-                func_151C9CBC(1, (s32) (D_800D34B8 + sLights5F11[k] * 0x34));
+                laser_switch_broadcast(1, (s32) (D_800D34B8 + sLights5F11[k] * 0x34));
                 k++;
             } while (k < 4);
             break;
@@ -2168,14 +2177,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             break;
         }
         case 13:
-            func_151CC840((s32) D_800DBFF0);
+            aim_hud_send_flash((s32) D_800DBFF0);
             break;
         case 14: {
             f32 p[3];
             p[0] = pos[0];
             p[1] = pos[1];
             p[2] = pos[2];
-            func_1519EFE8(p, (u16) ev->b5 < 0xE9 ? (u16) ev->b5 : 0, ev->w6 != 0 ? ev->w6 * 0.01f : 1.0f, (u8) flag, 1);
+            seqfx_burst_spawn(p, (u16) ev->b5 < 0xE9 ? (u16) ev->b5 : 0, ev->w6 != 0 ? ev->w6 * 0.01f : 1.0f, (u8) flag, 1);
             break;
         }
         case 15: {   /* blue-white sparks */
@@ -2207,23 +2216,23 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             s.unk4 = 8;
             s.unk5 = 1;
             s.unk6 = -1;
-            func_151D8E18(&s, 0, (u8) flag, 1);
+            rumble_request(&s, 0, (u8) flag, 1);
             break;
         }
         case 18:
             if (O_PTR(obj, 0x1D4) != NULL) {
                 ScriptOffsets2 t = sOffsets5F18;
                 f32 out[3];
-                func_15143134(t.v[ev->b5], out, O_PTR(obj, 0x1D4));
-                func_15132454((u8 *) out, 0.646f, (u8) flag, 0);
+                mtx_transform_point_or_origin(t.v[ev->b5], out, O_PTR(obj, 0x1D4));
+                particle_spawn_smoke_puff((u8 *) out, 0.646f, (u8) flag, 0);
             }
             break;
         case 19:
             if (O_PTR(obj, 0x1D4) != NULL) {
                 ScriptOffsets8 t = sOffsets5F19;
                 f32 out[3];
-                func_15143134(t.v[ev->b5], out, O_PTR(obj, 0x1D4) + (sBones5F19[ev->b5] << 6));
-                func_15132454((u8 *) out, 6.9900002f, (u8) flag, 0);
+                mtx_transform_point_or_origin(t.v[ev->b5], out, O_PTR(obj, 0x1D4) + (sBones5F19[ev->b5] << 6));
+                particle_spawn_smoke_puff((u8 *) out, 6.9900002f, (u8) flag, 0);
             }
             break;
         case 20: {
@@ -2235,7 +2244,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             s.x = O_F32(r, 0);
             s.y = O_F32(r, 4) + 50.0f;
             s.z = O_F32(r, 8);
-            func_15171100(&s, 1, 1, 2, flag, 0);
+            debris_crate_break_pieces(&s, 1, 1, 2, flag, 0);
             break;
         }
         case 21:
@@ -2246,13 +2255,13 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             break;
         case 22:
             if (obj != NULL) {
-                func_15193660((u8 *) obj, (u8) flag, 0);
+                obj_head_particle_burst((u8 *) obj, (u8) flag, 0);
             }
             break;
         }
         break;
     case 0x40:
-        func_151A0A10((u8 *) obj, 0x28, (u8) flag, 1);
+        ground_dust_spawn((u8 *) obj, 0x28, (u8) flag, 1);
         break;
     case 0x4D: {
         ScriptSpray s;
@@ -2281,7 +2290,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s.unk4C = -3.0f;
         s.unk48 = 0.0f;
         s.unk50 = 6.0f;
-        func_151A74B0(&s, 1, (u8) flag, 1);
+        debris_spray_spawn(&s, 1, (u8) flag, 1);
         break;
     }
     case 0x4E: {
@@ -2311,7 +2320,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s.unk4C = -4.0f;
         s.unk48 = 0.0f;
         s.unk50 = 8.0f;
-        func_151A74B0(&s, 1, (u8) flag, 1);
+        debris_spray_spawn(&s, 1, (u8) flag, 1);
         break;
     }
     case 0x4F: {
@@ -2342,7 +2351,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s.unk24 = 25.0f;
         s.unk28 = 20.2f;
         s.unk40 = 0.5f;
-        func_15154488(&s, &s.unk8, 0, (u8) flag, 1);
+        emit_sparks_in_angle_range(&s, &s.unk8, 0, (u8) flag, 1);
         break;
     }
     case 0x24: {
@@ -2363,11 +2372,11 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (kind >= 27) {
             kind = 0;
         }
-        func_151AFA80((u8 *) obj, kind, (u8) flag, 0);
+        obj_bone_beam_impact((u8 *) obj, kind, (u8) flag, 0);
         break;
     }
     case 0x47:
-        func_151925C4((u8 *) obj, 50, (u8) flag, 0);
+        obj_dust_effect((u8 *) obj, 50, (u8) flag, 0);
         break;
     case 0x2E:
         smoke_columns_spawn((u8) flag);
@@ -2387,7 +2396,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (ev->b5 != 0) {
             b5 = ev->b5;
         }
-        func_1514948C(n, pos[0], pos[1], pos[2], O_F32(r, 0x20) * 0.05f, (O_F32(r, 0x10) + 180.0f) * 0.7111111f,
+        trail_spawn_directed(n, pos[0], pos[1], pos[2], O_F32(r, 0x20) * 0.05f, (O_F32(r, 0x10) + 180.0f) * 0.7111111f,
                       O_F32(r, 0xC) * 0.7111111f, O_F32(r, 0x38) * 0.1f + 0.5f, b5, O_F32(r, 0x18) * 0.1f + 1.0f, scale,
                       flag);
         break;
@@ -2419,35 +2428,35 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             len = ev->w6;
         }
         if (ev->id == 0x27) {
-            func_1518B7D4((s32) data, len, speed, n, flag);
+            rubble_scatter_spawn((s32) data, len, speed, n, flag);
         } else {
-            func_1518B818((s32) data, len, speed, n, 30, 100, (u8) flag);
+            rubble_scatter_spawn_ex((s32) data, len, speed, n, 30, 100, (u8) flag);
         }
         break;
     }
     case 0x28:
         if (rec != NULL) {
-            func_15171B70(rec, (u8) flag, 0);
+            debris_sparks_rect_by_type(rec, (u8) flag, 0);
         } else if (obj != NULL) {
-            func_15172164(obj, (u8) flag);
+            debris_obj_destroy_by_id(obj, (u8) flag);
         }
         break;
     case 0x29:
         if (rec != NULL) {
-            func_15171434((s32) rec, (u8) flag, 0);
+            debris_crate_break_by_level((s32) rec, (u8) flag, 0);
         } else if (obj != NULL) {
-            func_15171734((u8 *) obj);
+            debris_obj_remove_explode((u8 *) obj);
         }
         break;
     case 0x2B:
-        func_1518BC20(pos[0], pos[1], pos[2], (u8) flag, 0);
+        rubble_burst_with_dust(pos[0], pos[1], pos[2], (u8) flag, 0);
         break;
     case 0x2C:
         SPAN(ev, &next);
         break;
     case 0x2F:
         if (obj != NULL && ev->b4 == 0) {
-            func_1516F2D8(OBJ_INDEX(obj), SPAN(ev, &next), (u8) flag, 0);
+            particle_emitter_preset_obj3a(OBJ_INDEX(obj), SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x39:
@@ -2469,7 +2478,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_150268BC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run_b.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2477,39 +2486,40 @@ extern s32 D_800C39D0;
 extern u8 D_800844A0[];  /* screen fade colours, 3 bytes (r, g, b) per entry */
 extern s8 D_800C40AA;
 extern u16 D_800C40AE;
-s32 func_15023C60(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
-void func_15023EC4(u8 **, u8 **, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_15023988(u8 *, s32 *, u32 *, s32 *, s32 *, s32 *, u16 *);
-s32 func_1000E134(s32);
-void func_1000D96C(s32, s32, s32);
-void func_1000DE1C(s32, s32);
-void func_1517946C(s32);
-void func_151D6CA0(s32, s32);
-void func_15188EBC(s32, s32, s32);
-void func_15188D80(struct127 *, s32, s32);
-void func_15189040(s32);
-void func_15155D6C(s32, s32, f32);
-void func_15156500(void);
-void func_1503DE70(struct127 *, s32, s32);
+s32 scene_event_find_next(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
+void scene_event_find_around(u8 **, u8 **, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 scene_sfx_update(u8 *, s32 *, u32 *, s32 *, s32 *, s32 *, u16 *);
+s32 music_song_type_is_1_or_3(s32);
+void music_play_song(s32, s32, s32);
+void music_stop_song(s32, s32);
+void rain_request(s32);
+void fb_ghost_set_mode(s32, s32);
+void afterimage_start_world(s32, s32, s32);
+void afterimage_start(struct127 *, s32, s32);
+void afterimage_remove_object(s32);
+void head_icon_show_timed(s32, s32, f32);
+void head_icon_set_bobbing(void);
+void breakable_request_flag_entry(struct127 *, s32, s32);
 void screen_overlay_show_timed(s32, s32, s32, s32);
-void func_1517F3B0(s32, s32, s32, s32, s8, s32);
+void screen_fade_start(s32, s32, s32, s32, s8, s32);
 void *allocate_memory(s32, s32, s32, s32);
 
 /* the span (frames from now) to the next event of this track matching the type / id (and b4 / b5 when given) */
 #define NEXT(out, useB4, b4v, useB5, b5v) \
-    (func_15023C60((u32) ev, (s8) ev[0], track, (out), 1, *(s16 *) (ev + 2), (useB4), (b4v), (useB5), (b5v), player) - now)
+    (scene_event_find_next((u32) ev, (s8) ev[0], track, (out), 1, *(s16 *) (ev + 2), (useB4), (b4v), (useB5), (b5v), player) - now)
 
-// scene_event_run_c: third scene event handler (after func_15024910 / func_150268BC): sounds and music, object
+// scene_event_run_c: third scene event handler (after scene_event_run_a / scene_event_run_b): sounds and music, object
 // animations and the screen fade. ev = the 8-byte event (s8 type, u8 delta, s16 id, s8 b4, s8 b5, s16 w6), now the
 // track time, obj / wrec the track's object / world record, data its position (f32 x, y, z); replay = 1 while the
 // scene is fast-forwarded (then most cases only restore end states). Returns 1 when the event was handled.
-//   6 / 0xA: positional sound id (volume w6, 0 = 0xFF) on func_1000FA64 with the update callback func_15023988;
+//   6 / 0xA: positional sound id (volume w6, 0 = 0xFF) on sfx_emitter_start with the update callback scene_sfx_update;
 //            0xA stops at its b4 1 event and fades in / out to its b4 2 / 3 events, 6 plays to the end (flags
 //            0x400, 0x800 for b4 2). 8: music id (b4 0 start, 1 / 4 volume, 2 / 6 fade, 8 / 9 other controls).
 //   2: object animation id with blend w6 - 1 frames, speed so that it lasts to the next type-2 event.
 //   5 / 1: screen fade to colour D_800844A0[b5] over the span to the b4 1 event (w6 0 = fade in); in replay the
 //          b4 != 0 event re-applies the last one. 5 / 4, 0x5C, 0x56, 0x76, 0x2D, 0x57: see the cases.
-s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *wrec, u8 *data, s32 flag,
+/* was func_15029EA8 */
+s32 scene_event_run_c(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *wrec, u8 *data, s32 flag,
                   s32 replay) {
     u8 *ev = (u8 *) arg0;
     s32 type = (s8) ev[0];
@@ -2570,8 +2580,8 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             *(u16 *) (r + 0xC) = (vol * 0x7FFF) >> 8;
             *(u16 *) (r + 0xA) = fadeOut;
             r[2] = (s8) ev[0] == 0xA;
-            func_1000FA64(*(u16 *) (ev + 2), *(f32 *) (data + 0), *(f32 *) (data + 4), *(f32 *) (data + 8),
-                          *(u16 *) (r + 0xC), 0x7D00, 0x7918, (s32) func_15023988, r, 0, flags, (s8) ev[5] * 50);
+            sfx_emitter_start(*(u16 *) (ev + 2), *(f32 *) (data + 0), *(f32 *) (data + 4), *(f32 *) (data + 8),
+                          *(u16 *) (r + 0xC), 0x7D00, 0x7918, (s32) scene_sfx_update, r, 0, flags, (s8) ev[5] * 50);
         }
         return 1;
     }
@@ -2582,39 +2592,39 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
 
         switch ((s8) ev[4]) {
             case 0:
-                if (replay != 0 && func_1000E134(id) != 0) {
+                if (replay != 0 && music_song_type_is_1_or_3(id) != 0) {
                     return 1;
                 }
-                func_1000D96C(id, 0, 0);
+                music_play_song(id, 0, 0);
                 return 1;
             case 1:
-                func_1000E588(id, w6 * 100, bit);
+                music_song_set_chans_volume(id, w6 * 100, bit);
                 return 1;
             case 2:
-                func_1000DF68(id, w6 * 328, 1);
+                music_song_set_fade(id, w6 * 328, 1);
                 return 1;
             case 3:
                 return 1;
             case 4:
-                t = func_15023C60((u32) ev, type, track, &next, 1, id, 1, 5, 1, (s8) ev[5], player) - now;
+                t = scene_event_find_next((u32) ev, type, track, &next, 1, id, 1, 5, 1, (s8) ev[5], player) - now;
                 if (replay != 0) {
-                    func_1000E588(id, w6, bit);
+                    music_song_set_chans_volume(id, w6, bit);
                 } else {
-                    func_1000E46C(id, w6, bit, t);
+                    music_song_set_chans_level(id, w6, bit, t);
                 }
                 return 1;
             case 6:
-                t = func_15023C60((u32) ev, type, track, &next, 1, id, 1, 7, 0, 0, player) - now;
+                t = scene_event_find_next((u32) ev, type, track, &next, 1, id, 1, 7, 0, 0, player) - now;
                 if (t < 2) {
                     t = 1;
                 }
-                func_1000DF68(id, w6 * 328, t);
+                music_song_set_fade(id, w6 * 328, t);
                 return 1;
             case 8:
-                func_1000E654(id, w6 + 1, 0, -1);
+                music_song_set_marker(id, w6 + 1, 0, -1);
                 return 1;
             case 9:
-                func_1000DE1C(id, 0);
+                music_stop_song(id, 0);
                 return 1;
         }
         return 1;
@@ -2629,7 +2639,7 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (obj == NULL) {
             return 1;
         }
-        frames = func_15023C60((u32) ev, type, track, &next, 0, 0, 0, 0, 0, 0, player) - now;
+        frames = scene_event_find_next((u32) ev, type, track, &next, 0, 0, 0, 0, 0, 0, player) - now;
         if ((s8) ev[4] != 0) {
             return 1;
         }
@@ -2676,18 +2686,18 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             u8 *c;
 
             if ((s8) ev[4] == 0) {
-                t = func_15023C60((u32) ev, type, track, &next, 1, 1, 0, 0, 0, 0, player) - now;
+                t = scene_event_find_next((u32) ev, type, track, &next, 1, 1, 0, 0, 0, 0, player) - now;
                 if (replay != 0) {
                     t = 0;
                 }
                 c = &D_800844A0[(s8) ev[5] * 3];
-                func_1517F3B0(c[0], c[1], c[2], t, *(s16 *) (ev + 6) == 0, 0);
+                screen_fade_start(c[0], c[1], c[2], t, *(s16 *) (ev + 6) == 0, 0);
                 D_800C40AA = *(s16 *) (ev + 6) == 0;
             } else if (replay != 0) {
-                func_15023EC4(&prev, &next, NULL, &prevTime, track, type, 1, 1, 1, 0, (&D_800C39D0)[player], player);
+                scene_event_find_around(&prev, &next, NULL, &prevTime, track, type, 1, 1, 1, 0, (&D_800C39D0)[player], player);
                 if (prev != NULL) {
                     c = &D_800844A0[(s8) prev[5] * 3];
-                    func_1517F3B0(c[0], c[1], c[2], 0, *(s16 *) (prev + 6) == 0, 0);
+                    screen_fade_start(c[0], c[1], c[2], 0, *(s16 *) (prev + 6) == 0, 0);
                     D_800C40AA = *(s16 *) (prev + 6) == 0;
                 }
             }
@@ -2707,7 +2717,7 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 if (set == -1) {
                     return 1;
                 }
-                func_1503DE70(obj, set, (s8) ev[4] != 0 ? (s8) ev[4] - 1 : -1);
+                breakable_request_flag_entry(obj, set, (s8) ev[4] != 0 ? (s8) ev[4] - 1 : -1);
             } else {
                 obj_remove(obj, 1);
             }
@@ -2721,7 +2731,7 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             if ((s8) ev[4] != 0 || replay != 0) {
                 return 1;
             }
-            end = func_15023C60((u32) ev, type, track, &next, 1, 0x5C, 1, 1, 1, (s8) ev[5], player);
+            end = scene_event_find_next((u32) ev, type, track, &next, 1, 0x5C, 1, 1, 1, (s8) ev[5], player);
             in = NEXT(&next, 1, 2, 1, (s8) ev[5]);
             if (next == NULL) {
                 in = 0;
@@ -2736,39 +2746,39 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         case 0x56:
             if ((s8) ev[4] == 0) {
                 if (replay == 0) {
-                    func_1517946C(3);
+                    rain_request(3);
                 }
             } else if (replay != 0) {
-                func_1517946C(2);
+                rain_request(2);
             } else if ((s8) ev[5] == 0) {
-                func_1517946C(0);
+                rain_request(0);
             } else {
-                func_1517946C(1);
+                rain_request(1);
             }
             return 1;
         case 0x76:
-            func_151D6CA0(*(s16 *) (ev + 6), (s8) ev[4] == 1 ? 0 : ((s8) ev[5] == 1 ? 2 : 1));
+            fb_ghost_set_mode(*(s16 *) (ev + 6), (s8) ev[4] == 1 ? 0 : ((s8) ev[5] == 1 ? 2 : 1));
             return 1;
         case 0x2D:
-            t = func_15023C60((u32) ev, type, track, &next, 1, 0x2D, 0, 0, 0, 0, player) - now;
+            t = scene_event_find_next((u32) ev, type, track, &next, 1, 0x2D, 0, 0, 0, 0, player) - now;
             if (wrec != NULL) {
                 if ((s8) ev[4] == 0) {
-                    func_15188EBC((s32) wrec, t, (s8) ev[5]);
+                    afterimage_start_world((s32) wrec, t, (s8) ev[5]);
                 }
             } else if (obj != NULL) {
                 if ((s8) ev[4] == 0) {
-                    func_15188D80(obj, t, (s8) ev[5]);
+                    afterimage_start(obj, t, (s8) ev[5]);
                 } else if (replay != 0) {
-                    func_15189040((s32) obj);
+                    afterimage_remove_object((s32) obj);
                 }
             }
             return 1;
         case 0x57:
             if ((s8) ev[4] == 0) {
-                func_15155D6C(0, func_15023C60((u32) ev, type, track, &next, 1, 0x57, 0, 0, 0, 0, player) - now, 0.0f);
+                head_icon_show_timed(0, scene_event_find_next((u32) ev, type, track, &next, 1, 0x57, 0, 0, 0, 0, player) - now, 0.0f);
             } else if (replay != 0) {
                 D_800C3E78 = 0;
-                func_15156500();
+                head_icon_set_bobbing();
             }
             return 1;
     }
@@ -2776,20 +2786,21 @@ s32 func_15029EA8(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
 }
 #undef NEXT
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15029EA8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run_c.s")
 #endif
 
 #ifdef NON_MATCHING
 u8 *world_record_find(u8);
-s32 func_15024910(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
-s32 func_150268BC(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
-s32 func_15029EA8(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32, s32);
+s32 scene_event_run_a(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
+s32 scene_event_run_b(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
+s32 scene_event_run_c(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32, s32);
 
 /* Runs entry arg1 of player `player` through the three handlers in turn; the first non-zero result is returned.
  * The entry may refer to an object (kind 2: its data at +0x14 replaces the player's D_800C3958 record) or to a
  * world_record_find record (kind 3); a missing reference returns 0. When D_800C3C88 == 2 the middle handler is skipped
  * and the last one gets 1 instead of 0. */
-s32 func_1502AB94(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
+/* was func_1502AB94 */
+s32 scene_event_run(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
     struct127 *obj;
     u8 *rec;
     u8 *data;
@@ -2803,7 +2814,7 @@ s32 func_1502AB94(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
     flag = (&D_800C3A08)[player];
     ref = &D_800C3A10[player][arg1];
     if (ref->kind == 2) {
-        obj = func_15083E90(ref->id);
+        obj = obj_find_by_setup_id(ref->id);
         if (obj == NULL) {
             return 0;
         }
@@ -2818,22 +2829,22 @@ s32 func_1502AB94(s32 arg0, u8 arg1, u16 arg2, s32 arg3, s32 player) {
         data = (u8 *) ((&D_800C3958)[player] + arg1);
     }
     if (D_800C3C88 != 2) {
-        ret = func_15024910(arg0, arg1, arg2, arg3, player, obj, rec, data, flag);
+        ret = scene_event_run_a(arg0, arg1, arg2, arg3, player, obj, rec, data, flag);
         if (ret != 0) {
             return ret;
         }
-        ret = func_150268BC(arg0, arg1, arg2, arg3, player, obj, rec, data, flag);
+        ret = scene_event_run_b(arg0, arg1, arg2, arg3, player, obj, rec, data, flag);
         if (ret != 0) {
             return ret;
         }
-        return func_15029EA8(arg0, arg1, arg2, arg3, player, obj, rec, data, flag, 0);
+        return scene_event_run_c(arg0, arg1, arg2, arg3, player, obj, rec, data, flag, 0);
     }
-    ret = func_15024910(arg0, arg1, arg2, arg3, player, obj, rec, data, flag);
+    ret = scene_event_run_a(arg0, arg1, arg2, arg3, player, obj, rec, data, flag);
     if (ret != 0) {
         return ret;
     }
-    return func_15029EA8(arg0, arg1, arg2, arg3, player, obj, rec, data, flag, 1);
+    return scene_event_run_c(arg0, arg1, arg2, arg3, player, obj, rec, data, flag, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_1502AB94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/scene_event_run.s")
 #endif

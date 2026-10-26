@@ -18,11 +18,11 @@
 \#^        && func_150ACEA0(((f32 \*) from)\[0\]#s/&r\.u10, &r\.u14/\&r.u14, \&r.u10/
 \#^                         &r\.pos\[0\], &r\.pos\[1\], &r\.pos\[2\], 0, &hitObj, 0, 0\.0f) != 0$#s/0, 0\.0f/0, 1.0f/
 \#^                         &r\.pos\[0\], &r\.pos\[1\], &r\.pos\[2\], 0, &hitObj, 0, 0\.0f) != 0$#s/!= 0/== 0/
-\#^        && func_15145C90(hitObj) != 0) {$#s/!= 0/== 0/
+\#^        && prop_is_flagged(hitObj) != 0) {$#s/!= 0/== 0/
 \#^        d\[1\] = r\.pos\[1\] - q\.from\[1\];$#s/q\.from\[1\]/q.to[1]/
 \#^        r\.hit |= 1;$#s/1;/2;/
-\#^        if (func_15144A74(d, r\.pos) < 0\.0f) {$#s/< 0\.0f/<= 0.0f/
-\#^        if (func_15144A74(d, r\.pos) < 0\.0f) {$#s/(d, r\.pos)/(r.pos, d)/
+\#^        if (vec3_dot(d, r\.pos) < 0\.0f) {$#s/< 0\.0f/<= 0.0f/
+\#^        if (vec3_dot(d, r\.pos) < 0\.0f) {$#s/(d, r\.pos)/(r.pos, d)/
 \#^            r\.side = -1\.0f;$#s/-1/-2/
 \#^    bit2 = (random_int() & 1) ? 2 : 0;$#s/? 2/? 4/
 \#^    bit1 = (random_int() & 1) ? 1 : 0;$#s/: 0/: 2/

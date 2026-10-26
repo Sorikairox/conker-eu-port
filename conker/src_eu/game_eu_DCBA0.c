@@ -4,9 +4,10 @@
 
 
 #ifdef NON_MATCHING
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
-void func_150AEEB0(struct127 *arg0, u8 arg1) {
+/* was func_150AEEB0 */
+void obj_trail_burst_spawn(struct127 *arg0, u8 arg1) {
     struct {
         s32 uBC;
         s32 uC0;
@@ -87,7 +88,7 @@ loop_2:
         sp.uEC = -temp_f24 * temp_f26;
         sp.uF0 = temp_f2 * temp_f20;
         var_s3 -= 1;
-        if (func_15148310(&sp.u104, &sp.uE4, 0, 1, 3, 0, 0, 0, 0, 0, 0, &sp.uBC, 0, (s32) arg1, 0) == 0) {
+        if (trail_spawn(&sp.u104, &sp.uE4, 0, 1, 3, 0, 0, 0, 0, 0, 0, &sp.uBC, 0, (s32) arg1, 0) == 0) {
             var_s4 = 0;
         }
         if ((var_s4 != 0) && (var_s3 != 0)) {
@@ -96,9 +97,10 @@ loop_2:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCBA0/func_150AEEB0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCBA0/obj_trail_burst_spawn.s")
 #endif
-s32 func_150AF6A0(struct_eu_sprite *arg0) {
+/* was func_150AF6A0 */
+s32 trail_alpha_from_life(struct_eu_sprite *arg0) {
     struct_eu_sprite_sub *sub = arg0->unk98;
     s32 v = arg0->unk1C * 32;
 

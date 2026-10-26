@@ -2,21 +2,21 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_150A28C4(u8 *arg0);
-s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2);
+void trigger_sound_start(u8 *arg0);
+s32 trigger_test_object(struct127 *arg0, u8 *arg1, s32 arg2);
 s32 approx_dist3_int(s32, s32, s32);
-s32 func_151733EC(struct127 *, u8, s32);
-void func_150A2AB4(u8 *, struct127 *, s32, u64);
-void func_150A29A0();
-void func_15080AA8(s32, s32);
-void func_15082DD8(struct127 *);
-void func_15055C88(struct127 *);
-void func_1000D96C(s32, s32, s32);
-void func_15080900(struct127 *, u8 *, s32, s32, s32);
-void func_151AE61C(struct127 *, u8 *);
-void func_1501D348(s32, s32, s32, s32, s32);
-void func_10023BC0(void);
-void func_10023C04(void);
+s32 warp_request_start(struct127 *, u8, s32);
+void trigger_zone_event_fire(u8 *, struct127 *, s32, u64);
+void trigger_ambfx_start();
+void context_action_clear(s32, s32);
+void obj_set_spawn_flags(struct127 *);
+void player_start_shrink_death(struct127 *);
+void music_play_song(s32, s32, s32);
+void context_action_set(struct127 *, u8 *, s32, s32, s32);
+void rope_try_grab(struct127 *, u8 *);
+void cutscene_scene_load(s32, s32, s32, s32, s32);
+void os_pi_get_access(void);
+void os_pi_rel_access(void);
 s32 osPiRawReadIo(u32, u32 *);
 extern u8 *D_800D34BC;
 extern u64 D_800D34C0[3];
@@ -33,9 +33,10 @@ extern u64 D_800D3510[][3];
 
 
 #ifdef NON_MATCHING
-void func_1000FC18(u16, s16, s16, s16, u16);
+void sfx_emitter_stop_at(u16, s16, s16, s16, u16);
 
-void func_150A09D0(s32 arg0) {
+/* was func_150A09D0 */
+void triggers_update(s32 arg0) {
     s32 temp_v1;
     s32 temp_v1_2;
     s32 temp_v1_3;
@@ -67,11 +68,11 @@ void func_150A09D0(s32 arg0) {
                 if (temp_v1_2 == 1) {
                     (*(s32 *)((u8 *)var_v0 + 0x20)) = (s32) (temp_v1_2 ^ 3);
                 } else if (temp_v1_2 == 2) {
-                    func_1000FC18(((u32) (*(u32 *)((u8 *)var_v0 + 0x1C)) >> 0x10) & 0xFFFF, (*(s16 *)((u8 *)var_v0 + 0)), (*(s16 *)((u8 *)var_v0 + 2)), (*(s16 *)((u8 *)var_v0 + 4)), (*(s32 *)((u8 *)var_v0 + 0x18)));
+                    sfx_emitter_stop_at(((u32) (*(u32 *)((u8 *)var_v0 + 0x1C)) >> 0x10) & 0xFFFF, (*(s16 *)((u8 *)var_v0 + 0)), (*(s16 *)((u8 *)var_v0 + 2)), (*(s16 *)((u8 *)var_v0 + 4)), (*(s32 *)((u8 *)var_v0 + 0x18)));
                     (*(s32 *)((u8 *)(&D_800D34B8[var_s0]) + 0x20)) = 0;
                 }
-                if ((D_800C35EA == 1) && (func_150A2280(D_800CC2D0, &D_800D34B8[var_s0], 0) == 0)) {
-                    func_150A28C4(&D_800D34B8[var_s0]);
+                if ((D_800C35EA == 1) && (trigger_test_object(D_800CC2D0, &D_800D34B8[var_s0], 0) == 0)) {
+                    trigger_sound_start(&D_800D34B8[var_s0]);
                 }
 block_36:
                 var_a1 = D_800D3094;
@@ -83,9 +84,9 @@ block_36:
                     temp_v1_3 = (*(s32 *)((u8 *)var_v0 + 0x20));
                     if (temp_v1_3 == 1) {
                         (*(s32 *)((u8 *)var_v0 + 0x20)) = 2;
-                    } else if ((temp_v1_3 == 2) && (func_1000E46C((s32) (*(u8 *)((u8 *)var_v0 + 0x17)), 0, (*(s32 *)((u8 *)var_v0 + 0x18)), 0) != 0)) {
+                    } else if ((temp_v1_3 == 2) && (music_song_set_chans_level((s32) (*(u8 *)((u8 *)var_v0 + 0x17)), 0, (*(s32 *)((u8 *)var_v0 + 0x18)), 0) != 0)) {
                         temp_v0 = &D_800D34B8[var_s0];
-                        if (func_1000E46C((s32) (*(u8 *)((u8 *)temp_v0 + 0x17)), 0x64, (*(s32 *)((u8 *)temp_v0 + 0x1C)), 0) != 0) {
+                        if (music_song_set_chans_level((s32) (*(u8 *)((u8 *)temp_v0 + 0x17)), 0x64, (*(s32 *)((u8 *)temp_v0 + 0x1C)), 0) != 0) {
                             (*(s32 *)((u8 *)(&D_800D34B8[var_s0]) + 0x20)) = 0;
                         }
                     }
@@ -137,11 +138,12 @@ block_36:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A09D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/triggers_update.s")
 #endif
 extern f32 D_8009F970;
 extern f32 D_8009F974;
-void func_150A11F4(u8 *arg0)
+/* was func_150A11F4 */
+void trigger_cache_angles(u8 *arg0)
 {
   f32 temp_f20;
   temp_f20 = (*((f32 *) (((u8 *) arg0) + 0xC))) * D_8009F970;
@@ -154,9 +156,10 @@ void func_150A11F4(u8 *arg0)
 
 #ifdef NON_MATCHING
 extern f32 D_8009F978;
-void func_15035AF8(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+void reflect_queue_object(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-void func_150A126C(void) {
+/* was func_150A126C */
+void trigger_reflect_queue_objects(void) {
     f32 temp_f2;
     f32 var_f0;
     s16 temp_v1;
@@ -179,7 +182,7 @@ void func_150A126C(void) {
                 var_s2 = 0;
                 if (((s32) (*(u8 *)((u8 *)temp_s0 + 0x15)) >> 2) == 6) {
                     do {
-                        if ((var_s1->interaction_state != 0) && ((temp_v0 = var_s1->unk5, (temp_v0 == 0)) || (temp_v0 == 1)) && (func_150A2280(var_s1, &D_800D34B8[var_s4], 1) == 0)) {
+                        if ((var_s1->interaction_state != 0) && ((temp_v0 = var_s1->unk5, (temp_v0 == 0)) || (temp_v0 == 1)) && (trigger_test_object(var_s1, &D_800D34B8[var_s4], 1) == 0)) {
                             temp_s0_2 = &D_800D34B8[var_s4];
                             if ((*(u8 *)((u8 *)temp_s0_2 + 0x17)) == 0) {
                                 temp_s0_3 = &D_800D34B8[var_s4];
@@ -190,10 +193,10 @@ void func_150A126C(void) {
                                     if (var_f0 > 100.0f) {
                                         var_f0 = 100.0f;
                                     }
-                                    func_15035AF8(2, var_s2, (f32) (*(s16 *)((u8 *)temp_s0_3 + 0)), (f32) (*(s16 *)((u8 *)temp_s0_3 + 2)), (f32) (*(s16 *)((u8 *)temp_s0_3 + 4)), 0.0f, (*(f32 *)((u8 *)temp_s0_3 + 0x10)), temp_f2 - var_f0, temp_f2, 255.0f);
+                                    reflect_queue_object(2, var_s2, (f32) (*(s16 *)((u8 *)temp_s0_3 + 0)), (f32) (*(s16 *)((u8 *)temp_s0_3 + 2)), (f32) (*(s16 *)((u8 *)temp_s0_3 + 4)), 0.0f, (*(f32 *)((u8 *)temp_s0_3 + 0x10)), temp_f2 - var_f0, temp_f2, 255.0f);
                                 }
                             } else {
-                                func_15035AF8(1, var_s2, var_s1->x_position, var_s1->unk180, var_s1->z_position, 0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
+                                reflect_queue_object(1, var_s2, var_s1->x_position, var_s1->unk180, var_s1->z_position, 0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
                             }
                         }
                         var_s2 += 1;
@@ -207,16 +210,18 @@ void func_150A126C(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A126C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_reflect_queue_objects.s")
 #endif
-u8 *func_150A1520(u8 *arg0) {
+/* was func_150A1520 */
+u8 *ptr_offset_0x400(u8 *arg0) {
     return arg0 + 0x400;
 }
 
-s32 func_150A2280(struct127 *, u8 *, s32);
+s32 trigger_test_object(struct127 *, u8 *, s32);
 extern f32 D_8009F97C;
 
-void func_150A152C(struct108 *arg0, u8 **arg1, s32 arg2) {
+/* was func_150A152C */
+void trigger_camera_zones_apply(struct108 *arg0, u8 **arg1, s32 arg2) {
     struct127 sp;
 
     sp.x_position = arg0->unk2F8;
@@ -232,7 +237,7 @@ void func_150A152C(struct108 *arg0, u8 **arg1, s32 arg2) {
         if (*arg1 == NULL) {
             continue;
         }
-        if (func_150A2280(&sp, *arg1, 0) != 0) {
+        if (trigger_test_object(&sp, *arg1, 0) != 0) {
             continue;
         }
         if (((*arg1)[0x15] >> 2) != 1) {
@@ -255,14 +260,15 @@ void func_150A152C(struct108 *arg0, u8 **arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-// P45: trigger zones of a record, per frame, before its state handler (func_1504A730).
+// P45: trigger zones of a record, per frame, before its state handler (objects_run_state_handlers).
 // Zones: D_800D34BC, 0x28 bytes each: u64 mask[3] (which triggers the zone allows), u8 +0x18 priority, s16 box
 // +0x1A..+0x24 (x min/max, y min/max, z min/max, exclusive). w = the record's cached zone (D_800D34F0[player] - 1)
 // if it still contains the position, else D_800D34D8; then every zone set in w that contains the position ANDs its
 // mask in (the lowest priority one is cached for players), a zone that does not is cleared. w |= D_800D34C0 (always
-// on). Then each trigger set in w (D_800D34B8, 0x34 bytes) that func_150A2280 says the record touches fires by
+// on). Then each trigger set in w (D_800D34B8, 0x34 bytes) that trigger_test_object says the record touches fires by
 // kind (+0x15 >> 2) and is recorded in D_800D3510[player] (the bits of the previous frame are `prev`).
-void func_150A16A4(struct127 *arg0) {
+/* was func_150A16A4 */
+void trigger_zones_update_object(struct127 *arg0) {
     u32 spCC;
     s32 spC8;
     struct108 *spB8;
@@ -293,15 +299,15 @@ void func_150A16A4(struct127 *arg0) {
     if (spB8 == NULL) {
         spC8 = 0xFF;
     } else if (D_800D3694 != 0) {
-        func_150A152C(spB8, D_800D3690, D_800D3694);
+        trigger_camera_zones_apply(spB8, D_800D3690, D_800D3694);
     }
     x = (s32)arg0->x_position;
     y = (s32)arg0->y_position;
     z = (s32)arg0->z_position;
     if (arg0->unk127 != 0xFF) {
-        func_15080AA8(arg0->unk127, arg0->unk127);
+        context_action_clear(arg0->unk127, arg0->unk127);
     }
-    func_15082DD8(arg0);
+    obj_set_spawn_flags(arg0);
     *(s16 *)((u8 *)arg0 + 0x120) = -10000;
     D_800D3698 = 0;
     player = arg0 - D_800CC2D0;
@@ -393,7 +399,7 @@ void func_150A16A4(struct127 *arg0) {
                     *ps = 0;
                 }
             }
-            if (((u32)mask & 1) && (off = i * 0x34, func_150A2280(arg0, D_800D34B8 + off, 0) == 0)) {
+            if (((u32)mask & 1) && (off = i * 0x34, trigger_test_object(arg0, D_800D34B8 + off, 0) == 0)) {
                 e = D_800D34B8 + off;
                 v = e[0x15] >> 2;
                 if (v < 26) {
@@ -420,7 +426,7 @@ void func_150A16A4(struct127 *arg0) {
                                 arg0->unkF8 |= 2;
                                 break;
                             case 4:
-                                func_15055C88(arg0);
+                                player_start_shrink_death(arg0);
                                 break;
                             case 5:
                                 o = (u8 *)arg0->unk31C;
@@ -466,21 +472,21 @@ void func_150A16A4(struct127 *arg0) {
                         }
                         break;
                     case 2:
-                        func_150A28C4(D_800D34B8 + off);
+                        trigger_sound_start(D_800D34B8 + off);
                         break;
                     case 3:
                         if (e[0x17] == 5) {
-                            func_151AE61C(arg0, D_800D34B8 + off);
+                            rope_try_grab(arg0, D_800D34B8 + off);
                         }
                         break;
                     case 4:
-                        func_150A29A0(D_800D34B8 + off, spC8);
+                        trigger_ambfx_start(D_800D34B8 + off, spC8);
                         break;
                     case 7:
                         if (*(s32 *)(e + 0x20) == 0) {
-                            if (func_1000E46C(e[0x17], 100, *(s32 *)(e + 0x18), 0) != 0) {
+                            if (music_song_set_chans_level(e[0x17], 100, *(s32 *)(e + 0x18), 0) != 0) {
                                 e = D_800D34B8 + off;
-                                if (func_1000E46C(e[0x17], 0, *(s32 *)(e + 0x1C), 0) != 0) {
+                                if (music_song_set_chans_level(e[0x17], 0, *(s32 *)(e + 0x1C), 0) != 0) {
                                     *(s32 *)(D_800D34B8 + off + 0x20) = 1;
                                 }
                             }
@@ -489,13 +495,13 @@ void func_150A16A4(struct127 *arg0) {
                         }
                         break;
                     case 8:
-                        func_10023BC0();
-                        osPiRawReadIo((u32)func_150A1520((u8 *)0xB0000054), &sp68);
-                        func_10023C04();
-                        if (func_150A1520((u8 *)sp68) == (u8 *)0x01090C2B && D_800C35EA == 0 &&
+                        os_pi_get_access();
+                        osPiRawReadIo((u32)ptr_offset_0x400((u8 *)0xB0000054), &sp68);
+                        os_pi_rel_access();
+                        if (ptr_offset_0x400((u8 *)sp68) == (u8 *)0x01090C2B && D_800C35EA == 0 &&
                             *((u8 *)arg0 + 0x1CA) != 0) {
                             e = D_800D34B8 + off;
-                            func_151733EC(arg0, e[0x17], *(s32 *)(e + 0x18));
+                            warp_request_start(arg0, e[0x17], *(s32 *)(e + 0x18));
                             if (D_800BE9F0 != (D_800D34B8 + off)[0x17]) {
                                 *((u8 *)arg0 + 0x125) = 0xFF;
                                 *(f32 *)((u8 *)arg0 + 0x1CC) = arg0->y_position;
@@ -503,10 +509,10 @@ void func_150A16A4(struct127 *arg0) {
                         }
                         break;
                     case 11:
-                        func_15080900(arg0, D_800D34B8 + off, 1, e[0x17], *(s32 *)(e + 0x18));
+                        context_action_set(arg0, D_800D34B8 + off, 1, e[0x17], *(s32 *)(e + 0x18));
                         break;
                     case 12:
-                        func_150A2AB4(D_800D34B8 + off, arg0, spC8, prev);
+                        trigger_zone_event_fire(D_800D34B8 + off, arg0, spC8, prev);
                         break;
                     case 13:
                         if (spC8 != 0xFF && !((u32)prev & 1) && D_800E0B94 == 0 && *((u8 *)arg0 + 0x1CA) != 0 &&
@@ -515,17 +521,17 @@ void func_150A16A4(struct127 *arg0) {
                                 e[0x14] = 1;
                                 e = D_800D34B8 + off;
                             }
-                            func_1501D348(D_800BE9F0, *(s32 *)(e + 0x18), 0, 0, 0);
+                            cutscene_scene_load(D_800BE9F0, *(s32 *)(e + 0x18), 0, 0, 0);
                             e = D_800D34B8 + off;
                             *(s32 *)(e + 0x1C) += 1;
                         }
                         break;
                     case 14:
                         if (spC8 != 0xFF && !((u32)prev & 1)) {
-                            func_1000D96C(e[0x17], *(s32 *)(e + 0x18), *(s32 *)(e + 0x1C) & 0xFF);
+                            music_play_song(e[0x17], *(s32 *)(e + 0x18), *(s32 *)(e + 0x1C) & 0xFF);
                             e = D_800D34B8 + off;
                             if (e[0x17] != 0) {
-                                func_1000E46C(e[0x17], 0, *(s32 *)(e + 0x20) & 0xFFFF, 0);
+                                music_song_set_chans_level(e[0x17], 0, *(s32 *)(e + 0x20) & 0xFFFF, 0);
                             }
                         }
                         break;
@@ -549,13 +555,14 @@ void func_150A16A4(struct127 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A16A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_zones_update_object.s")
 #endif
 #ifdef NON_MATCHING
 s32 approx_dist3_int(s32, s32, s32);
-s32 func_150ADE40(s16, s16, s32, s32);
+s32 approx_dist2_int(s16, s16, s32, s32);
 
-s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2) {
+/* was func_150A2280 */
+s32 trigger_test_object(struct127 *arg0, u8 *arg1, s32 arg2) {
     s16 sp5E;
     s16 sp5C;
     s16 sp5A;
@@ -644,7 +651,7 @@ s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2) {
                 sp5C = (s16) (s32) ((temp_f16 * temp_f12_2) + (temp_f18 * temp_f2_2));
             }
             sp58 = var_t0;
-            if ((func_150ADE40(sp5E, sp5A, 0, 0) < ((*(s16 *)((u8 *)arg1 + 6)) + var_t0)) && (sp5C > 0) && (sp5C < (*(s16 *)((u8 *)arg1 + 8)))) {
+            if ((approx_dist2_int(sp5E, sp5A, 0, 0) < ((*(s16 *)((u8 *)arg1 + 6)) + var_t0)) && (sp5C > 0) && (sp5C < (*(s16 *)((u8 *)arg1 + 8)))) {
                 return 0;
             }
             goto block_35;
@@ -721,9 +728,10 @@ block_35:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2280.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_test_object.s")
 #endif
-void func_150A28C4(u8 *arg0)
+/* was func_150A28C4 */
+void trigger_sound_start(u8 *arg0)
 {
   int new_var;
   s32 var_t0;
@@ -744,7 +752,7 @@ void func_150A28C4(u8 *arg0)
       var_t0 = 0x108;
     }
     temp_v0 = *((u32 *) (((u8 *) arg0) + 0x1C));
-    func_1000FA64((temp_v0 >> 0x10) & ((short) 0xFFFF), *((s16 *) (((u8 *) arg0) + 0)), *((s16 *) (((u8 *) arg0) + 2)), *((s16 *) (((u8 *) arg0) + 4)), (temp_t1 & 0x7F) * 0x147, (u16) ((*((s32 *) (((u8 *) arg0) + 0x18))) | var_v1), (s16) (temp_v0 & 0xFFFF), 0, 0, 0, var_t0, 0);
+    sfx_emitter_start((temp_v0 >> 0x10) & ((short) 0xFFFF), *((s16 *) (((u8 *) arg0) + 0)), *((s16 *) (((u8 *) arg0) + 2)), *((s16 *) (((u8 *) arg0) + 4)), (temp_t1 & 0x7F) * 0x147, (u16) ((*((s32 *) (((u8 *) arg0) + 0x18))) | var_v1), (s16) (temp_v0 & 0xFFFF), 0, 0, 0, var_t0, 0);
     *((s32 *) (((u8 *) arg0) + 0x20)) = 1;
  dummy_label_636436: ;
     return;
@@ -752,8 +760,9 @@ void func_150A28C4(u8 *arg0)
   *((s32 *) (((u8 *) arg0) + 0x20)) = 1;
 }
 
-s32 func_15183800(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_150A29A0(Unk34B8 *arg0, s32 arg1) {
+s32 ambfx_effect_start(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+/* was func_150A29A0 */
+void trigger_ambfx_start(Unk34B8 *arg0, s32 arg1) {
     s32 v;
     s32 r;
     s32 a;
@@ -776,7 +785,7 @@ void func_150A29A0(Unk34B8 *arg0, s32 arg1) {
             d = ((u8 *)&arg0->unk1C)[0];
             e = ((u8 *)&arg0->unk1C)[1];
             f = arg0->unk20;
-            r = func_15183800(arg0->x, arg0->y + (e << 4), arg0->z, a, g, arg0->unk6, arg1, b, c, d, f);
+            r = ambfx_effect_start(arg0->x, arg0->y + (e << 4), arg0->z, a, g, arg0->unk6, arg1, b, c, d, f);
             if (r != -1 && arg0->unk17 != 9) {
                 arg0->unk1C = ((r << 8) | 0xF0) | (arg0->unk1C & 0xFFFF0000);
             }
@@ -793,11 +802,12 @@ void func_150A29A0(Unk34B8 *arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 void arc_spark_spawn(struct127 *, s32, u8 *, u8);
-void func_151CEACC(struct127 *, u8 *);
+void spout_check_obj_hit(struct127 *, u8 *);
 extern u8 D_800D34B0;
 extern s32 D_800DA2D8;
 
-void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was `s32 arg5` (read a3); the asm reads the low word of a u64 at sp+0x14
+/* was func_150A2AB4 */
+void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was `s32 arg5` (read a3); the asm reads the low word of a u64 at sp+0x14
     u16 temp_v0_2;
     u8 temp_t1;
     u8 temp_t6;
@@ -830,7 +840,7 @@ void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was 
     case 6:
         if (!(arg4 & 1)) {
             D_800D34B0 = 0x19;
-            func_10010344(0x66FU, arg1, 0x5DC0, 0x190, 0x1F4U);
+            actor_sound_play2(0x66FU, arg1, 0x5DC0, 0x190, 0x1F4U);
         }
         temp_t1 = (D_800D34B0 + D_800BE9E4) & 0xFF;
         D_800D34B0 = temp_t1;
@@ -848,23 +858,24 @@ void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was 
         }
         break;
     case 8:
-        func_151C8C24(arg1, arg0);
+        laser_test_obj_broadcast(arg1, arg0);
         return;
     case 9:
-        func_1515F7E0(arg1, arg0);
+        obj_kind9_dispatch(arg1, arg0);
         return;
     case 10:
-        func_151CEACC(arg1, arg0);
+        spout_check_obj_hit(arg1, arg0);
         break;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2AB4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_zone_event_fire.s")
 #endif
-s32 func_150A2280(struct127 *, u8 *, s32);
-s32 func_151733EC(struct127 *, u8, s32);
+s32 trigger_test_object(struct127 *, u8 *, s32);
+s32 warp_request_start(struct127 *, u8, s32);
 
-void func_150A2C6C(u8 *arg0)
+/* was func_150A2C6C */
+void trigger_warp_check(u8 *arg0)
 {
   int new_var;
   s32 var_s0;
@@ -879,10 +890,10 @@ void func_150A2C6C(u8 *arg0)
       do
       {
         new_var = var_s0 ^ 0;
-        if (((((s32) (*((u8 *) (((u8 *) (&D_800D34B8[new_var])) + 0x15)))) >> 2) == 8) && (func_150A2280(arg0, &D_800D34B8[var_s0 & 0xFFFFFFFF], 0) == 0))
+        if (((((s32) (*((u8 *) (((u8 *) (&D_800D34B8[new_var])) + 0x15)))) >> 2) == 8) && (trigger_test_object(arg0, &D_800D34B8[var_s0 & 0xFFFFFFFF], 0) == 0))
         {
           temp_v0 = &D_800D34B8[var_s0];
-          func_151733EC(arg0, *((u8 *) (((u8 *) temp_v0) + 0x17)), *((s32 *) (((u8 *) temp_v0) + 0x18)));
+          warp_request_start(arg0, *((u8 *) (((u8 *) temp_v0) + 0x17)), *((s32 *) (((u8 *) temp_v0) + 0x18)));
         }
         var_s1 += 1;
         var_s0 += 0x34;
@@ -892,7 +903,8 @@ void func_150A2C6C(u8 *arg0)
   }
 }
 
-void func_150A2D44(s32 arg0, s32 arg1) {
+/* was func_150A2D44 */
+void trigger_set_disabled(s32 arg0, s32 arg1) {
     s32 i;
 
     arg0 &= 0xFFF;
@@ -906,7 +918,8 @@ void func_150A2D44(s32 arg0, s32 arg1) {
     }
 }
 
-void func_150A2E20(s32 arg0, s32 arg1, int arg2)
+/* was func_150A2E20 */
+void trigger_set_kind_args(s32 arg0, s32 arg1, int arg2)
 {
   s32 temp_v0;
   int new_var;
@@ -931,7 +944,8 @@ void func_150A2E20(s32 arg0, s32 arg1, int arg2)
 
 extern u64 D_800D3510[][3];
 
-s32 func_150A29C8(s32 arg0, s32 arg1) {
+/* was func_150A29C8 */
+s32 trigger_test_player(s32 arg0, s32 arg1) {
     arg1 &= 0xFFF;
     if ((u32)D_800D3094 < (u32)arg1) {
         return 1;
@@ -942,10 +956,11 @@ s32 func_150A29C8(s32 arg0, s32 arg1) {
         }
         return 1;
     }
-    return func_150A2280(&D_800CC2D0[arg0], D_800D34B8 + arg1 * 0x34, 1);
+    return trigger_test_object(&D_800CC2D0[arg0], D_800D34B8 + arg1 * 0x34, 1);
 }
 
-s32 func_150A2FCC(u32 arg0, s32 arg1, s32 *arg2) {
+/* was func_150A2FCC */
+s32 trigger_first_touched(u32 arg0, s32 arg1, s32 *arg2) {
     s32 i;
     u32 v;
 
@@ -962,7 +977,7 @@ s32 func_150A2FCC(u32 arg0, s32 arg1, s32 *arg2) {
     for (i = 0; i < arg1; i++) {
         v = arg2[i] & 0xFFF;
         if (v < (u32)D_800D3094) {
-            if (func_150A2280(&D_800CC2D0[arg0], D_800D34B8 + v * 0x34, 1) == 0) {
+            if (trigger_test_object(&D_800CC2D0[arg0], D_800D34B8 + v * 0x34, 1) == 0) {
                 return v;
             }
         }
@@ -971,7 +986,8 @@ s32 func_150A2FCC(u32 arg0, s32 arg1, s32 *arg2) {
     return -1;
 }
 
-s32 func_150A3184(s32 arg0) {
+/* was func_150A3184 */
+s32 trigger_find_touching_player(s32 arg0) {
     s32 i;
 
     arg0 &= 0xFFF;
@@ -988,9 +1004,10 @@ s32 func_150A3184(s32 arg0) {
     return -1;
 }
 
-s32 func_150A2280(struct127 *, u8 *, s32);
+s32 trigger_test_object(struct127 *, u8 *, s32);
 
-s32 func_150A3264(s32 arg0, u32 arg1) {
+/* was func_150A3264 */
+s32 trigger_test_camera(s32 arg0, u32 arg1) {
     struct108 *e;
     struct127 sp;
 
@@ -1006,11 +1023,12 @@ s32 func_150A3264(s32 arg0, u32 arg1) {
     sp.old_x_position = e->unk304;
     sp.old_y_position = e->unk308;
     sp.old_z_position = e->unk30C;
-    return func_150A2280(&sp, D_800D34B8 + arg1 * 0x34, 0);
+    return trigger_test_object(&sp, D_800D34B8 + arg1 * 0x34, 0);
 }
 
 #ifdef NON_MATCHING
-s32 func_150A332C(Unk34B8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
+/* was func_150A332C */
+s32 trigger_plane_side(Unk34B8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     f32 temp_f14;
 
     temp_f14 = arg2 - (f32) arg0->y;
@@ -1021,22 +1039,24 @@ s32 func_150A332C(Unk34B8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A332C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_plane_side.s")
 #endif
-s32 func_150A332C(Unk34B8 *, f32, f32, f32);
-s32 func_150A33C4(s32 arg0, s32 arg1) {
+s32 trigger_plane_side(Unk34B8 *, f32, f32, f32);
+/* was func_150A33C4 */
+s32 trigger_plane_side_object(s32 arg0, s32 arg1) {
     arg1 &= 0xFFF;
     if ((u32) D_800D3094 < arg1) {
         return 1;
     }
     if ((((Unk34B8 *) D_800D34B8)[arg1].unk15 & 3) == 3) {
-        return func_150A332C(arg1 + (Unk34B8 *) D_800D34B8, D_800CC2D0[arg0].x_position, D_800CC2D0[arg0].y_position, D_800CC2D0[arg0].z_position);
+        return trigger_plane_side(arg1 + (Unk34B8 *) D_800D34B8, D_800CC2D0[arg0].x_position, D_800CC2D0[arg0].y_position, D_800CC2D0[arg0].z_position);
     }
     return 0;
 }
 
-s32 func_150A332C(Unk34B8 *, f32, f32, f32);
-s32 func_150A3484(s32 arg0, s32 arg1) {
+s32 trigger_plane_side(Unk34B8 *, f32, f32, f32);
+/* was func_150A3484 */
+s32 trigger_plane_side_camera(s32 arg0, s32 arg1) {
     struct108 *v = &D_800DBFF0[arg0];
 
     arg1 &= 0xFFF;
@@ -1044,13 +1064,14 @@ s32 func_150A3484(s32 arg0, s32 arg1) {
         return 1;
     }
     if ((((Unk34B8 *) D_800D34B8)[arg1].unk15 & 3) == 3) {
-        return func_150A332C(arg1 + (Unk34B8 *) D_800D34B8, v->unk2F8, v->unk2FC, v->unk300);
+        return trigger_plane_side(arg1 + (Unk34B8 *) D_800D34B8, v->unk2F8, v->unk2FC, v->unk300);
     }
     return 0;
 }
 
 
-s32 func_150A3538(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
+/* was func_150A3538 */
+s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     u32 i;
     struct127 sp;
 
@@ -1059,16 +1080,17 @@ s32 func_150A3538(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     sp.z_position = sp.old_z_position = (f32)arg3;
     sp.unk180 = sp.y_position;
     for (i = 0; i < (u32)D_800D3094; i++) {
-        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == 3 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg0 && func_150A2280(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
+        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == 3 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg0 && trigger_test_object(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_150A2280(struct127 *, u8 *, s32);
+s32 trigger_test_object(struct127 *, u8 *, s32);
 
-u8 *func_150A3674(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_150A3674 */
+u8 *trigger_find_at_point(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u32 i;
     struct127 sp;
 
@@ -1077,14 +1099,15 @@ u8 *func_150A3674(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     sp.z_position = sp.old_z_position = (f32)arg4;
     sp.unk180 = sp.y_position;
     for (i = 0; i < (u32)D_800D3094; i++) {
-        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == arg0 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg1 && func_150A2280(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
+        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == arg0 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg1 && trigger_test_object(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
             return D_800D34B8 + i * 0x34;
         }
     }
     return NULL;
 }
 
-s32 func_150A3794(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_150A3794 */
+s32 trigger_contains_point(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct127 sp24;
     u8 *new_var; // fakematch: pointer to the local struct for the 0x180 store
     s32 pad[2];
@@ -1093,13 +1116,14 @@ s32 func_150A3794(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     sp24.z_position = (sp24.old_z_position = (f32)arg3);
     new_var = (u8 *)&sp24;
     *(f32 *)(new_var + 0x180) = sp24.y_position;
-    if (0 == func_150A2280((u8 *)&sp24, arg0, 0)) {
+    if (0 == trigger_test_object((u8 *)&sp24, arg0, 0)) {
         return (unsigned int)1; // fakematch: permuter artifact (cast)
     }
     return 0;
 }
 
-void func_150A3810(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
+/* was func_150A3810 */
+void trigger_get_fields(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
     s32 temp_v0;
 
     temp_v0 = arg0 * 0x34;
@@ -1109,7 +1133,8 @@ void func_150A3810(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
     *arg4 = (*(s32 *)((u8 *)((D_800D34B8 + temp_v0)) + 0x20));
 }
 
-void func_150A3878(s32 arg0, u16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+/* was func_150A3878 */
+void trigger_set_fields_masked(s32 arg0, u16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     if (arg1 & 1) {
         *(s8 *)((u8 *)(D_800D34B8 + (arg0 * 0x34)) + 0x17) = arg2;
     }
@@ -1124,7 +1149,8 @@ void func_150A3878(s32 arg0, u16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     }
 }
 
-void func_150A3924(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
+/* was func_150A3924 */
+void trigger_set_position(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     s32 temp_v0;
 
     temp_v0 = arg0 * 0x34;
@@ -1133,20 +1159,21 @@ void func_150A3924(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     (*(s16 *)((u8 *)((D_800D34B8 + temp_v0)) + 4)) = arg3;
 }
 
-s32 func_150A39E4(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+s32 trigger_cylinder_segment_hit(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
-s32 func_150A3990(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* was func_150A3990 */
+s32 trigger_segment_hit(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     if (arg0[0x14] == 1) {
         return 0;
     }
     if (!(arg0[0x15] & 3)) {
-        return func_150A39E4(arg0, arg1, arg2, arg3);
+        return trigger_cylinder_segment_hit(arg0, arg1, arg2, arg3);
     }
     return 0;
 }
 
 #ifdef NON_MATCHING
-/* collision cylinder (0x34-byte entries of D_800D34B8, see func_150A3924 / func_150A11F4) */
+/* collision cylinder (0x34-byte entries of D_800D34B8, see trigger_set_position / trigger_cache_angles) */
 typedef struct {
     s16 x, y, z;    /* base centre */
     s16 radius;
@@ -1166,7 +1193,8 @@ static const f32 D_8009FA48_nm[1] = { 0.017453292f }; /* 0x3C8EFA35 */
 
 // cylinder_segment_hit: intersects the segment p0 -> p1 with the rotated cylinder cyl; on a hit writes the entry
 // point (world coordinates) to out and returns 1, else returns 0 (out untouched).
-s32 func_150A39E4(u8 *arg0, f32 *p0, f32 *p1, f32 *out) {
+/* was func_150A39E4 */
+s32 trigger_cylinder_segment_hit(u8 *arg0, f32 *p0, f32 *p1, f32 *out) {
     CollCylinder *cyl = (CollCylinder *) arg0;
     f32 local[2][3]; /* p0, p1 in cylinder space */
     f32 *src;
@@ -1279,5 +1307,5 @@ s32 func_150A39E4(u8 *arg0, f32 *p0, f32 *p1, f32 *out) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A39E4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/trigger_cylinder_segment_hit.s")
 #endif

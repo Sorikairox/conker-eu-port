@@ -1,5 +1,5 @@
 # camera_update_map_tint setups: obj 80480000; EU keys: event_dispatch=1509C250 (RET sequence per call), event_dispatch_alt=1509C3C0,
-# func_150498A0=150498A0 (OUTA 0: current tint value). Call order: 403B, [4038, 4039, 403A], 2007, 4010, 9C, 9A.
+# math_spring_approach=150498A0 (OUTA 0: current tint value). Call order: 403B, [4038, 4039, 403A], 2007, 4010, 9C, 9A.
 off ! 0=80480000 ! 80480084=FFFFFFFF ! 1509C250=0 !  ! 150498A0=0:437F0000 !  !
 offnan ! 0=80480000 ! 80480084=00000000 ! 1509C250=0 !  ! 150498A0=0:7FC00000 !  !
 r128 ! 0=80480000 ! 80480084=00000000 ! 1509C250=1;1;0;1;55;3A0 !  ! 150498A0=0:43968000 !  !

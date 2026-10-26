@@ -5,20 +5,20 @@
 
 #ifdef NON_MATCHING
 /*
- * P54: func_150A3F50 / func_150A48C0 / func_150A5480 are hand-written asm (one shared register convention): each
- * walks a set of triangles and runs the per-triangle floor test func_150A408C (a label inside func_150A3F50.s,
+ * P54: floor_collect_level_tris / floor_collect_world_obj_tris / floor_collect_record_tris are hand-written asm (one shared register convention): each
+ * walks a set of triangles and runs the per-triangle floor test func_150A408C (a label inside floor_collect_level_tris.s,
  * here floor_tri) on the integer point (x, z). A triangle passes when (x, z) is inside its x / z bounds (+-2) and
  * between the two edges at z; its floor height (24.8, clamped to the triangle's y range) goes to the next 16-byte
  * entry of D_800D3720: +0 height, +4 pointer to the 3 vertex offsets, +8 vertex base, +0xC tag. The count stops at
  * 0x27 (later hits overwrite entry 0x27). Returns the count.
- * - func_150A3F50: area 0 / 1 (level). D_800DBE62 == 0: every triangle 0 .. D_800DBE4C - 1 (the asm leaves the tag
+ * - floor_collect_level_tris: area 0 / 1 (level). D_800DBE62 == 0: every triangle 0 .. D_800DBE4C - 1 (the asm leaves the tag
  *   = the caller's $gp; 0 here). Else D_800D39A4 = 0 and the BSP tree D_800DC278 (+4 sibling offset, +6 radius,
  *   +8 / +0xA centre x / z, +0xC child offset, leaf byte list at +0xE: b < 0x80 = previous index + b, else 15-bit
  *   index ((b & 0x7F) << 8 | next byte), 0 = end): only the first leaf reached is tested, tag 0. The first delta
  *   adds to the caller's $v1 (0 here; level data starts each leaf with an absolute index).
- * - func_150A48C0: area 2, the world objects in the u16 list ids[0 .. count - 1] (D_800DBEF4 + id * 0xA0: +0x56
+ * - floor_collect_world_obj_tris: area 2, the world objects in the u16 list ids[0 .. count - 1] (D_800DBEF4 + id * 0xA0: +0x56
  *   triangle count, +0x58 first triangle; vertex base D_800DC328[id], skipped when 0), tag = id.
- * - func_150A5480: area 3, the 25 records D_800CC2D0 except D_800D39FC - 1, with +0 != 0, +0xF8 & 0x4000,
+ * - floor_collect_record_tris: area 3, the 25 records D_800CC2D0 except D_800D39FC - 1, with +0 != 0, +0xF8 & 0x4000,
  *   +0x264 (vertex base) and +0x268 (bounds) set; byte +4 = model: D_800C5D38[m] triangles, offsets D_800C6070[m].
  */
 extern u8 D_800DBE62;
@@ -120,7 +120,8 @@ static s32 floor_tri(s32 x, s32 z, s32 i, u8 *vofs, u8 *bnd, s32 base, s32 tag, 
     return n;
 }
 
-s32 func_150A3F50(s32 x, s32 z) {
+/* was func_150A3F50 */
+s32 floor_collect_level_tris(s32 x, s32 z) {
     u8 *vofs = (u8 *)D_800DC26C;
     u8 *bnd = (u8 *)D_800DC270;
     u8 *node;
@@ -168,7 +169,8 @@ s32 func_150A3F50(s32 x, s32 z) {
     return n;
 }
 
-s32 func_150A48C0(s32 x, s32 z, s32 count, s32 *idList) {
+/* was func_150A48C0 */
+s32 floor_collect_world_obj_tris(s32 x, s32 z, s32 count, s32 *idList) {
     u16 *ids = (u16 *)idList;
     u16 *end;
     u8 *obj;
@@ -193,7 +195,8 @@ s32 func_150A48C0(s32 x, s32 z, s32 count, s32 *idList) {
     return n;
 }
 
-s32 func_150A5480(s32 x, s32 z) {
+/* was func_150A5480 */
+s32 floor_collect_record_tris(s32 x, s32 z) {
     u8 *rec = (u8 *)D_800CC2D0;
     u8 *end = rec + 0x4F4C;
     s32 skip = D_800D39FC - 1;
@@ -222,12 +225,12 @@ s32 func_150A5480(s32 x, s32 z) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A3F50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_collect_level_tris.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * P53: func_150A44A4.s is hand-written: the height of a floor triangle under the point (x, z), in 24.8 fixed point.
+ * P53: floor_tri_height.s is hand-written: the height of a floor triangle under the point (x, z), in 24.8 fixed point.
  * The triangle is either 3 vertex pointers (tri, when packed == NULL) or 9 inline s16 (packed: x, y, z per vertex;
  * all-zero first or second 8 bytes = no triangle). The vertices are sorted by z, the two edges crossing z = pz give
  * the x / y span, and the result is clamped to the triangle's y range. Returns `out` (as an s32) on a hit, else 0.
@@ -247,7 +250,8 @@ static s32 a44a4_div(s32 a, s32 b) {
     return a / b;
 }
 
-s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out) {
+/* was func_150A44A4 */
+s32 floor_tri_height(f32 x, f32 z, s32 tri, u8 *packed, f32 *out) {
     s32 px, pz;
     s32 ax, ay, az, bx, by, bz, cx, cy, cz, t;
     s32 dz1, rz1, dz2, rz2, rzb, k, x1, x2, sx, ex, sy, ey, d1, d2, s, ymax, ymin, y1, y2, v;
@@ -344,22 +348,22 @@ s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out) {
     return (s32)out;
 }
 
-/* P54: func_150A44A4_tail.s no longer needed (func_150A3F50 / func_150A48C0 are C) */
+/* P54: func_150A44A4_tail.s no longer needed (floor_collect_level_tris / floor_collect_world_obj_tris are C) */
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A44A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_tri_height.s")
 #endif
 
 #ifndef NON_MATCHING /* P54: C above */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A48C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_collect_world_obj_tris.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * func_150A49D0.s is hand-written asm with two entry points: func_150A49D0 (transform the vertices of a
+ * world_objects_transform_mesh.s is hand-written asm with two entry points: world_objects_transform_mesh (transform the vertices of a
  * list of world objects into world space and refresh their per-triangle bounding boxes) and func_150A4ED4
  * (select the collision tables of one area). The other glabels in the file (func_150A4B50, func_150A4CC8,
- * func_150A4CDC, func_150A4D78) are labels inside func_150A49D0's loop, not functions. The fragment after
- * func_150A4ED4 (.L150A4F74 / D_150A4FD4) is reached from func_150A3F50 and stays asm (func_150A49D0_tail.s).
+ * func_150A4CDC, func_150A4D78) are labels inside world_objects_transform_mesh's loop, not functions. The fragment after
+ * func_150A4ED4 (.L150A4F74 / D_150A4FD4) is reached from floor_collect_level_tris and stays asm (func_150A49D0_tail.s).
  */
 typedef struct {
     /* 0x00 */ f32 rot[3];      /* degrees */
@@ -383,7 +387,7 @@ typedef struct {
 } WorldObj; /* size 0xA0 */
 
 s32 allocate_memory(s32, s32, s32, s32);
-void func_10004074(s32);
+void heap_free(s32);
 extern s32 D_800DC26C;          /* triangle vertex offsets (3 words per triangle) */
 extern s32 D_800DC270;          /* triangle x/z bounds (4 halfwords per triangle) */
 extern s32 D_800DC274;          /* triangle y bounds (2 halfwords per triangle) */
@@ -397,7 +401,8 @@ extern f32 D_8009FA50;          /* degrees to radians */
      : ((f) >= 0.0f) ? (s32)(((f) + 8388608.0f) - 8388608.0f)                                       \
                      : -(s32)((-(f) + 8388608.0f) - 8388608.0f))
 
-s32 func_150A49D0(s32 count, s32 *idList, s32 force) {
+/* was func_150A49D0 */
+s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force) {
     u16 *ids = (u16 *)idList;
     u16 *last;
     s32 buf;
@@ -551,7 +556,7 @@ s32 func_150A49D0(s32 count, s32 *idList, s32 force) {
 
     next:
         if (tmp != 0) {
-            func_10004074(tmp);
+            heap_free(tmp);
         }
         if (ids == last) {
             break;
@@ -570,16 +575,16 @@ void func_150A4ED4(s32 area) {
     D_800DC280 = area;
 }
 
-/* P54: func_150A49D0_tail.s no longer needed (func_150A3F50 / func_150A48C0 are C) */
+/* P54: func_150A49D0_tail.s no longer needed (floor_collect_level_tris / floor_collect_world_obj_tris are C) */
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A49D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/world_objects_transform_mesh.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * obj_floor_mesh_update: P190 readable C for the hand-written func_150A4FE4.s (saves $gp and every FPR, keeps
+ * obj_floor_mesh_update: P190 readable C for the hand-written obj_floor_mesh_update.s (saves $gp and every FPR, keeps
  * values in odd FPRs; inner labels func_150A53D4 / func_150A543C are its exit and release paths). Builds the
- * world-space floor mesh of an object record (D_800CC2D0, 0x32C bytes each) that func_150A5480 tests (area 3):
+ * world-space floor mesh of an object record (D_800CC2D0, 0x32C bytes each) that floor_collect_record_tris tests (area 3):
  * - only while the record is live (+0, +0x1D4 matrices, +0xF8 & 0x4000), its model m = byte +4 has a group list
  *   D_800C5C08[m] and another live record is within the radius +0x270 on x / z; otherwise the three buffers
  *   +0x264 / +0x268 / +0x26C are freed and cleared.
@@ -609,7 +614,8 @@ static s32 objmesh_rint(f32 f) {
     return BLOB49D0_RINT(f);
 }
 
-void func_150A4FE4(struct127 *arg0) {
+/* was func_150A4FE4 */
+void obj_floor_mesh_update(struct127 *arg0) {
     u8 *obj = (u8 *)arg0;
     u8 *rec;
     u8 *recEnd = (u8 *)D_800CC2D0 + 25 * 0x32C;
@@ -724,23 +730,23 @@ release:
     p = OBJMESH_W(obj, 0x264);
     OBJMESH_W(obj, 0x264) = 0;
     if (p != 0) {
-        func_10004074(p);
+        heap_free(p);
     }
     p = OBJMESH_W(obj, 0x268);
     OBJMESH_W(obj, 0x268) = 0;
     if (p != 0) {
-        func_10004074(p);
+        heap_free(p);
     }
     p = OBJMESH_W(obj, 0x26C);
     OBJMESH_W(obj, 0x26C) = 0;
     if (p != 0) {
-        func_10004074(p);
+        heap_free(p);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A4FE4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/obj_floor_mesh_update.s")
 #endif
 
 #ifndef NON_MATCHING /* P54: C above */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A5480.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/floor_collect_record_tris.s")
 #endif

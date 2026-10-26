@@ -18,7 +18,7 @@ void func_15011B00(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 void func_15011B94(void) {
     func_15011B00(1257, 338, -2988, -367);
     func_15011B00(1901, 338, -2753, -367);
-    func_1515F170(1, 0);
-    func_1515F170(2, 1);
-    func_1000FA64(77, 765, 55, -89, 12000, 600, 300, func_1000EF40, 0, 0, 8, 0);
+    light_group_set_disabled(1, 0);
+    light_group_set_disabled(2, 1);
+    sfx_emitter_start(77, 765, 55, -89, 12000, 600, 300, sfx_cb_keep_until_silent, 0, 0, 8, 0);
 }

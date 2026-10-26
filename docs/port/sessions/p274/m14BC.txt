@@ -11,7 +11,7 @@
 \#^    t\.u54\[4\] = 0;$#s/= 0/= 1/
 \#^    t\.u48\[1\] = -0\.7f;#s/-0\.7f/-0.6f/
 \#^    for (i = 0; i < 6; i++, pc++) {$#s/< 6/< 5/
-\#^        t\.model = func_1518C900(pc->model);$#s/pc->model/i/
+\#^        t\.model = shared_dl_acquire(pc->model);$#s/pc->model/i/
 \#^        t\.id = pc->model;$#s/pc->model/i/
 \#^        t\.pos\[1\] = pc->offset\[1\] + y;$#s/+ y/+ z/
 \#^        t\.spin\[0\] = pc->offset\[0\] \* 0\.09f;#s/0\.09f/0.08f/

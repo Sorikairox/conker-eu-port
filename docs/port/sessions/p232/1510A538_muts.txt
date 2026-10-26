@@ -8,14 +8,14 @@ s/            if (D_800A28D4\[0\] < sel) {/            if (D_800A28D4[0] <= sel)
 s/                    sel -= wt;/                    sel += wt;/ % pick2
 s/                } while (wt < sel);/                } while (wt <= sel);/ % pick_tie pick2 pick5 pick1
 s/            seg = \&D_800A2938\[i \* 3\];/            seg = \&D_800A2938[i * 4];/ % pick2
-s/            func_150A7E40(mtx, (seg\[3\] - seg\[0\]) \* r + seg\[0\], (seg\[4\] - seg\[1\]) \* r + seg\[1\],/            func_150A7E40(mtx, (seg[3] - seg[0]) * r + seg[1], (seg[4] - seg[1]) * r + seg[1],/ % one_h0
-s/            func_150A7E40(mtx, seg\[0\], seg\[1\], seg\[2\], \&start\[0\], \&start\[1\], \&start\[2\]);/            func_150A7E40(mtx, seg[0], seg[1], seg[3], \&start[0], \&start[1], \&start[2]);/ % one_h0
-s/            func_150A7E40(mtx, seg\[3\], seg\[4\], seg\[5\], \&end\[0\], \&end\[1\], \&end\[2\]);/            func_150A7E40(mtx, seg[3], seg[4], seg[5], \&end[0], \&end[2], \&end[1]);/ % one_h0
-s/            func_150A7E40(mtx, D_800A298C\[i \* 3\], D_800A298C\[i \* 3 + 1\], D_800A298C\[i \* 3 + 2\], \&target\[0\],/            func_150A7E40(mtx, D_800A298C[i * 3], D_800A298C[i * 3], D_800A298C[i * 3 + 2], \&target[0],/ % one_h0
+s/            mtxf_transform_point(mtx, (seg\[3\] - seg\[0\]) \* r + seg\[0\], (seg\[4\] - seg\[1\]) \* r + seg\[1\],/            mtxf_transform_point(mtx, (seg[3] - seg[0]) * r + seg[1], (seg[4] - seg[1]) * r + seg[1],/ % one_h0
+s/            mtxf_transform_point(mtx, seg\[0\], seg\[1\], seg\[2\], \&start\[0\], \&start\[1\], \&start\[2\]);/            mtxf_transform_point(mtx, seg[0], seg[1], seg[3], \&start[0], \&start[1], \&start[2]);/ % one_h0
+s/            mtxf_transform_point(mtx, seg\[3\], seg\[4\], seg\[5\], \&end\[0\], \&end\[1\], \&end\[2\]);/            mtxf_transform_point(mtx, seg[3], seg[4], seg[5], \&end[0], \&end[2], \&end[1]);/ % one_h0
+s/            mtxf_transform_point(mtx, D_800A298C\[i \* 3\], D_800A298C\[i \* 3 + 1\], D_800A298C\[i \* 3 + 2\], \&target\[0\],/            mtxf_transform_point(mtx, D_800A298C[i * 3], D_800A298C[i * 3], D_800A298C[i * 3 + 2], \&target[0],/ % one_h0
 s/            dir\[0\] = ((target\[0\] - end\[0\]) \* r + end\[0\]) - start\[0\];/            dir[0] = ((target[0] - end[0]) * r + end[0]) + start[0];/ % one_h0
 s/            dir\[1\] = ((target\[1\] - end\[1\]) \* r + end\[1\]) - start\[1\];/            dir[1] = ((target[1] - end[1]) * r + start[1]) - start[1];/ % one_h0
 s/            dir\[2\] = ((target\[2\] - end\[2\]) \* r + end\[2\]) - start\[2\];/            dir[2] = ((target[2] - end[2]) + end[2]) - start[2];/ % one_h0
-s/            func_15145128(dir, dir, NULL, NULL);/            func_15145128(dir, pt, NULL, NULL);/ % one_h0
+s/            vec3_normalize_len(dir, dir, NULL, NULL);/            vec3_normalize_len(dir, pt, NULL, NULL);/ % one_h0
 1,/rec + 4) -= 1.0f/s/            \*(f32 \*) (rec + 4) -= 1.0f;/            *(f32 *) (rec + 4) -= 2.0f;/ % three_h0
 /    } else {/,$s/            \*(f32 \*) (rec + 4) -= 1.0f;/            *(f32 *) (rec + 4) -= 0.5f;/ % noh_drop
 s/    if ((s8) rec\[0xC\] != -1) {/    if ((s8) rec[0xC] == -1) {/ % none

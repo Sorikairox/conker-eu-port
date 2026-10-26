@@ -1,4 +1,4 @@
-# P262 func_150B0344 (player_joint_beam_spawn) mutants: sed % setup names
+# P262 player_joint_beam_spawn (player_joint_beam_spawn) mutants: sed % setup names
 s/if (mtx == NULL) {/if (mtx != NULL) {/ % s0 null
 s/joint = 3;/joint = 2;/ % s0
 s/joint = 2;$/joint = 3;/ % s1
@@ -6,7 +6,7 @@ s/if (side == 0) {/if (side > 0) {/ % sneg
 s/(joint << 6)/(joint << 5)/ % s0
 s/z0 = -20.0f;/z0 = 20.0f;/ % s0
 s/z1 = -150.0f;/z1 = -15.0f;/ % s0
-s/func_150A7E40(m, x1, y1, z1, \&x1, \&y1, \&z1);/func_150A7E40(m, x1, y1, z1, \&x1, \&z1, \&y1);/ % s0
+s/mtxf_transform_point(m, x1, y1, z1, \&x1, \&y1, \&z1);/mtxf_transform_point(m, x1, y1, z1, \&x1, \&z1, \&y1);/ % s0
 s/beam_effect_spawn(0, x0, y0, z0, x1, y1, z1,/beam_effect_spawn(0, x0, y0, z0, y1, x1, z1,/ % s0
 s/40.0f, 0.0f, 2.0f, 120.0f, 0x3C, 0x23/40.0f, 0.0f, 2.0f, 12.0f, 0x3C, 0x23/ % s0
 s/120.0f, 0x3C, 0x23, 0, 0,/120.0f, 0x3C, 0x22, 0, 0,/ % s0

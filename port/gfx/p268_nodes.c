@@ -113,7 +113,7 @@ void *__wrap_node_render_layers_draw(void *gdl, int group, short a2, int list) {
     return __real_node_render_layers_draw(gdl, group, a2, list);
 }
 
-/* P269 DIAGNOSTIC (?p268nodes=2): the three behaviours of the type-77 trail nodes of func_151D7DE0 (game_eu_204F70),
+/* P269 DIAGNOSTIC (?p268nodes=2): the three behaviours of the type-77 trail nodes of fx_carrier_attach_trail (game_eu_204F70),
  * each checked for writes past the node's heap block (8 words from the block end), with the ring state before. */
 static void p269_beh(const char *name, int (*real)(void *), int *ret, unsigned char *q) {
     unsigned sz = W(q - 0xC, 8) & 0xFFFFFF, k, before[8];
@@ -130,7 +130,7 @@ static void p269_beh(const char *name, int (*real)(void *), int *ret, unsigned c
         port_js_stack(1, 6);
     }
 }
-int __real_func_151D7EDC(void *); int __real_func_151D7FE8(void *); int __real_func_151D8280(void *);
-int __wrap_func_151D7EDC(void *o) { int r; p269_beh("func_151D7EDC", __real_func_151D7EDC, &r, o); return r; }
-int __wrap_func_151D7FE8(void *o) { int r; p269_beh("func_151D7FE8", __real_func_151D7FE8, &r, o); return r; }
-int __wrap_func_151D8280(void *o) { int r; p269_beh("func_151D8280", __real_func_151D8280, &r, o); return r; }
+int __real_glow_trail_points_update(void *); int __real_glow_trail_emit_points(void *); int __real_glow_trail_limit_length(void *);
+int __wrap_glow_trail_points_update(void *o) { int r; p269_beh("glow_trail_points_update", __real_glow_trail_points_update, &r, o); return r; }
+int __wrap_glow_trail_emit_points(void *o) { int r; p269_beh("glow_trail_emit_points", __real_glow_trail_emit_points, &r, o); return r; }
+int __wrap_glow_trail_limit_length(void *o) { int r; p269_beh("glow_trail_limit_length", __real_glow_trail_limit_length, &r, o); return r; }

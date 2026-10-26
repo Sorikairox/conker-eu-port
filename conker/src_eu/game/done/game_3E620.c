@@ -7,9 +7,9 @@
 void func_15011170(void) {
     D_80088B40 = 0;
     lightning_emitter_spawn(D_800DBFF0, 0, 0, 0xFF, 1);
-    func_1000FA64(108, -3580,  -546, -6129, 18000, 1111, 1100, func_1000EB00, 0, 0, 8, 0);
-    func_1000FA64(108, -2929, -1121, -2158, 18000, 1590, 1580, func_1000EB00, 0, 0, 8, 0);
-    func_1000FA64(108,   497, -1071, -2105, 18000, 2040, 2030, func_1000EB00, 0, 0, 8, 0);
-    func_1000FA64(1567,   26,     0,     0, 12000, 2500, 1800, func_1000EF40, 0, 0, 72, 0);
-    func_1000FA64(1567,   27,     0,     0,  8000, 2000, 1000, func_1000EF40, 0, 0, 72, 0);
+    sfx_emitter_start(108, -3580,  -546, -6129, 18000, 1111, 1100, sfx_cb_ambient_random_chirp, 0, 0, 8, 0);
+    sfx_emitter_start(108, -2929, -1121, -2158, 18000, 1590, 1580, sfx_cb_ambient_random_chirp, 0, 0, 8, 0);
+    sfx_emitter_start(108,   497, -1071, -2105, 18000, 2040, 2030, sfx_cb_ambient_random_chirp, 0, 0, 8, 0);
+    sfx_emitter_start(1567,   26,     0,     0, 12000, 2500, 1800, sfx_cb_keep_until_silent, 0, 0, 72, 0);
+    sfx_emitter_start(1567,   27,     0,     0,  8000, 2000, 1000, sfx_cb_keep_until_silent, 0, 0, 72, 0);
 }

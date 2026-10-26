@@ -21,9 +21,9 @@ void __osSetSR(u32);
 void __osSetFpcCsr(u32);
 s32 __osSpRawReadIo(u32, u32 *);
 s32 __osSpRawWriteIo(u32, u32);
-void func_10024190(void *, s32); /* osWritebackDCache */
+void os_writeback_dcache(void *, s32); /* osWritebackDCache */
 void osInvalICache(void *, s32);
-void func_10008410(void); /* osMapTLBRdb */
+void os_map_tlb_rdb(void); /* osMapTLBRdb */
 s32 osPiRawReadIo(u32, u32 *);
 void bzero(void *, int);
 void __osSetHWIntrRoutine(s32, s32 (*)(void));
@@ -48,9 +48,9 @@ void __osInitialize_common(void) {
     *(__osExceptionVector *)XUT_VEC = *__osExceptionPreamble;
     *(__osExceptionVector *)ECC_VEC = *__osExceptionPreamble;
     *(__osExceptionVector *)E_VEC = *__osExceptionPreamble;
-    func_10024190((void *)UT_VEC, E_VEC - UT_VEC + sizeof(__osExceptionVector));
+    os_writeback_dcache((void *)UT_VEC, E_VEC - UT_VEC + sizeof(__osExceptionVector));
     osInvalICache((void *)UT_VEC, E_VEC - UT_VEC + sizeof(__osExceptionVector));
-    func_10008410();
+    os_map_tlb_rdb();
     osPiRawReadIo(4, &clock);
     clock &= ~0xf;
     if (clock != 0) {

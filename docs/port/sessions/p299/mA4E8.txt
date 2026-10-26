@@ -28,16 +28,16 @@
 \#^    blk.layoutScale = sBarLayoutScale\[k\]\[alt\];#s/\[alt\]/[1]/
 \#^    s32 alt = (D_80082FA0 == 1);#s/== 1/!= 0/
 \#^        spec.rgba\[i\] = BAR_F2U(sBarColour\[k\]\[i\]);#s/\[k\]\[i\]/[k][0]/
-\#func_151559FC(&spec, 8, 0#s/8, 0, 0/5, 0, 0/
-\#func_151559FC(&spec, 8, 0#s/group, 1)/group, 0)/
-\#func_151559FC(&spec, 0, 0#s/group, 0)/group, 1)/
+\#sprite2d_spawn(&spec, 8, 0#s/8, 0, 0/5, 0, 0/
+\#sprite2d_spawn(&spec, 8, 0#s/group, 1)/group, 0)/
+\#sprite2d_spawn(&spec, 0, 0#s/group, 0)/group, 1)/
 1,\#if (spr != NULL)#s/!= NULL/== NULL/
 1,\#memcpy(spr + 0x70#s/0x58)/0x50)/
-\#func_151559FC(&spec, 8, 0#,\#blk.part = 0#s/blk.part = 0/blk.part = 1/
+\#sprite2d_spawn(&spec, 8, 0#,\#blk.part = 0#s/blk.part = 0/blk.part = 1/
 \#^    spec.h = sBarHeight\[k\] + 2.0f;#s/2.0f/1.0f/
 \#^    spec.w = sBarWidth\[k\] + 2.0f;#s/2.0f/1.0f/
 \#BAR_F2U(sBarBackColour#s/sBarBackColour/sBarColour/
-\#func_151559FC(&spec, 0, 0#,\#memcpy(spr + 0x70#s/0x70/0x74/
+\#sprite2d_spawn(&spec, 0, 0#,\#memcpy(spr + 0x70#s/0x70/0x74/
 \#0.02631579f, 0.021505376f#s/0.021505376f/0.0215f/
 \#^    { -50.0f, -62.0f }, { -38.0f, -46.5f }#s/-46.5f/-46.0f/
 \#^    { 255.0f, 255.0f, 0.0f, 90.0f }, { 0.0f, 0.0f, 180.0f, 90.0f },#s/90.0f }, {/91.0f }, {/

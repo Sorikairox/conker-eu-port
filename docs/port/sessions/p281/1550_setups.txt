@@ -1,5 +1,5 @@
-# P281 func_10001550 (_Ldtob). arg0 = _Pft at 80480000 (v.ld 0x0, s 0x8 -> 80490000, prec 0x24), arg1 = code.
-# RET 10001A80 = func_100019F0 (_Ldunscale: -1 finite, 0 zero, 1 inf, 2 nan); OUTB writes its s16 exponent (a0);
+# P281 init_printf_ldtob (_Ldtob). arg0 = _Pft at 80480000 (v.ld 0x0, s 0x8 -> 80490000, prec 0x24), arg1 = code.
+# RET 10001A80 = init_printf_ldunscale (_Ldunscale: -1 finite, 0 zero, 1 inf, 2 nan); OUTB writes its s16 exponent (a0);
 # ldiv (10023500) is computed by difftest (P281 ldiv helper): real digits.
 e6 ! 0=80480000,1=65 ! 80480000=40934A45,80480004=6D5CFAAD,80480008=80490000,80480024=6 ! 10001A80=FFFFFFFF ! ! ! ! 10001A80=0:00;0B
 edef ! 0=80480000,1=65 ! 80480000=40934A45,80480004=6D5CFAAD,80480008=80490000,80480024=FFFFFFFF ! 10001A80=FFFFFFFF ! ! ! ! 10001A80=0:00;0B

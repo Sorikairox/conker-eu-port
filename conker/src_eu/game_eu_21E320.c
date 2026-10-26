@@ -6,13 +6,15 @@
 extern s32 D_8002C170;
 extern u8 *D_800E1150;
 
-void func_151F0B10(void) {
+/* was func_151F0B10 */
+void game_os_si_create_access_queue(void) {
     D_8002C170 = 1;
     osCreateMesgQueue(&D_80042E38, &D_800E1150, 1);
     osSendMesg(&D_80042E38, NULL, 0);
 }
 
-void func_151F0B60(void) {
+/* was func_151F0B60 */
+void game_os_si_get_access(void) {
     OSMesg dummyMesg;
 
     if (!D_8002C170) {
@@ -21,19 +23,21 @@ void func_151F0B60(void) {
     osRecvMesg(&D_80042E38, &dummyMesg, OS_MESG_BLOCK);
 }
 
-void func_151F0BA4(void) {
+/* was func_151F0BA4 */
+void game_os_si_rel_access(void) {
     osSendMesg(&D_80042E38, NULL, OS_MESG_NOBLOCK);
 }
 
-void func_10024190(void *, s32); // osWritebackDCache
+void os_writeback_dcache(void *, s32); // osWritebackDCache
 
 // __osSiRawStartDma
-s32 func_151F0BD0(s32 direction, void *dramAddr) {
+/* was func_151F0BD0 */
+s32 game_os_si_raw_start_dma(s32 direction, void *dramAddr) {
     if (__osSiDeviceBusy()) {
         return -1;
     }
     if (direction == OS_WRITE) {
-        func_10024190(dramAddr, 64);
+        os_writeback_dcache(dramAddr, 64);
     }
     IO_WRITE(SI_DRAM_ADDR_REG, osVirtualToPhysical(dramAddr));
     if (direction == OS_READ) {

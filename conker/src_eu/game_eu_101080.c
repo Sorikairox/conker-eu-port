@@ -8,7 +8,7 @@ extern u8 D_800A4EA8[];
 
 
 #ifdef NON_MATCHING
-/* func_15147FF0 spawn request (0x18 bytes) */
+/* fxrec_spawn spawn request (0x18 bytes) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ s16 u0C;
@@ -81,7 +81,7 @@ typedef struct {
     /* 0x04 */ f32 u04;
 } EmitExtra3870;
 
-u8 *func_15031C4C(struct127 *, s32, s32);
+u8 *attachment_find_by_slot(struct127 *, s32, s32);
 s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 memcpy(u8 *, u8 *, s32);
@@ -95,14 +95,14 @@ extern f32 D_800A0DC8;
 extern f32 D_800A0DCC;
 extern f32 D_800A0DD0;
 
-// object_fire_spawn: creates the burning-effect object for `obj` (func_15031D40): takes effect handle 0x79 (0x7A when
-// obj->id is 0x48) with func_15031C4C (none: return); the effect position and direction come from object_get_beam_ends (flag 4
-// set when it found them; else (0, 0, 0) and (0, 500, 0)); func_15147FF0 (0x20, 0x14) creates the object, whose data
+// object_fire_spawn: creates the burning-effect object for `obj` (attachment_apply_kind_effects): takes effect handle 0x79 (0x7A when
+// obj->id is 0x48) with attachment_find_by_slot (none: return); the effect position and direction come from object_get_beam_ends (flag 4
+// set when it found them; else (0, 0, 0) and (0, 500, 0)); fxrec_spawn (0x20, 0x14) creates the object, whose data
 // (+0x98) gets {obj, room, 1, handle, emitters, 20, 20}. Starts the looping sounds 0x5B3 (sound level < 5), 0x5B4 and
 // 0x5BC (level < 7 or obj +0x318 set) at the object's position with callback rocket_sound_update, and two emitters
 // (particle_emitter_spawn: texture 0x15 set 0x5503, and a random texture of D_800A0D90 set 0x2203 with +0x170 = {0, 1.0}),
 // stored in the data. kind (u8) and owner go to every spawn. Returns 0 (the asm leaves a leftover v0; the callers,
-// func_15031D40 (asm) and game_eu_5D910's C, do not read it).
+// attachment_apply_kind_effects (asm) and game_eu_5D910's C, do not read it).
 /* was func_150D3870 */
 s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     EmitExtra3870 extra;
@@ -131,7 +131,7 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     blk.obj = obj;
     blk.room = obj->unique_id;
     snd = (obj->id == 0x48) ? 0x7A : 0x79;
-    handle = func_15031C4C(obj, snd, 0);
+    handle = attachment_find_by_slot(obj, snd, 0);
     if (handle == NULL) {
         return 0;
     }
@@ -146,20 +146,20 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
         dir[2] = 0.0f;
         dir[1] = 500.0f;
     }
-    newobj = func_15147FF0(&spawn, 0x20, 0x14, 0, 13, 13, 0, 0, 0, kind, owner);
+    newobj = fxrec_spawn(&spawn, 0x20, 0x14, 0, 13, 13, 0, 0, 0, kind, owner);
     if (newobj == NULL) {
         return 0;
     }
     data = *(Data3870 **) (newobj + 0x98);
     memcpy((u8 *) data, (u8 *) &blk, sizeof(Data3870));
     if (D_8008FD8C < 5) {
-        func_1000FA64(0x5B3, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
+        sfx_emitter_start(0x5B3, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                       (s32) &rocket_sound_update, data, 0x5B3, 12, 0);
     }
-    func_1000FA64(0x5B4, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
+    sfx_emitter_start(0x5B4, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                   (s32) &rocket_sound_update, data, 0x5B4, 12, 0);
     if (D_8008FD8C < 7 || *(s32 *) ((u8 *) obj + 0x318) != 0) {
-        func_1000FA64(0x5BC, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
+        sfx_emitter_start(0x5BC, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
                       (s32) &rocket_sound_update, data, 0x5BC, 12, 0);
     }
 
@@ -292,8 +292,8 @@ s32 object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
 #endif
 
 #ifdef NON_MATCHING
-f32 func_15143E64(s32);
-s32 func_1515C668(s32, s32 *, u8 *);
+f32 vec3_length(s32);
+s32 motion_track_get_delta(s32, s32 *, u8 *);
 void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner);
 
 /* rodata copies (NM link drops the asm rodata) */
@@ -317,7 +317,7 @@ typedef struct {
 // (write index +0x2E, count +0x2C, read index +0x2D, size +0x25), then picks the speed class from the target's
 // +0x31C (record byte 0x84: target speed +0x44 > 6 / > 3; else the player slot's lean (*D_800BE728)[i] byte 3 > 20 /
 // < -20) and sets the goal +0x18 (50 / 10 / 20) and link +0x10's +0x174 (2.1 / 0.2 / 1); class 0 newly reached
-// spawns smoke_puff_burst dust (surface from func_1515C668 or D_800A5860). Always eases +0x14 by 0.35.
+// spawns smoke_puff_burst dust (surface from motion_track_get_delta or D_800A5860). Always eases +0x14 by 0.35.
 /* was func_150D3F78 */
 s32 track_follow_record(u8 *obj) {
     Point3F78 *ring = *(Point3F78 **) (obj + 0x94);
@@ -399,7 +399,7 @@ s32 track_follow_record(u8 *obj) {
         step[0] = pos[0] - old[0];
         step[1] = pos[1] - old[1];
         step[2] = pos[2] - old[2];
-        spd = func_15143E64((s32) step);
+        spd = vec3_length((s32) step);
         ring[(s8) obj[0x2E]].pos[0] = pos[0];
         ring[(s8) obj[0x2E]].pos[1] = pos[1];
         ring[(s8) obj[0x2E]].pos[2] = pos[2];
@@ -453,7 +453,7 @@ s32 track_follow_record(u8 *obj) {
                 }
                 *(f32 *) (st + 0x18) = 50.0f;
                 if (st[5] != prev) {
-                    if (func_1515C668((s32) tgt, (s32 *) &surface, tgt) == 0) {
+                    if (motion_track_get_delta((s32) tgt, (s32 *) &surface, tgt) == 0) {
                         surface = (f32 *) D_800A5860;
                     }
                     smoke_puff_burst(pos, surface, *(f32 *) (tgt + 0x40), obj[0xC], obj[1]);
@@ -479,8 +479,8 @@ s32 track_follow_record(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-f32 func_15143E64(s32);
-s32 func_1515C668(s32, s32 *, u8 *);
+f32 vec3_length(s32);
+s32 motion_track_get_delta(s32, s32 *, u8 *);
 
 /* was func_150D44E4 */
 s32 track_trail_update(u8 *arg0) {
@@ -516,8 +516,8 @@ s32 track_trail_update(u8 *arg0) {
     if (D_800C35EA != 1) {
         sp.u88 = var_t0;
         var_t0 = sp.u88;
-        if (func_1515C668(*temp_t6, &sp.u7C, arg0) != 0) {
-            var_f2 = func_15143E64(sp.u7C);
+        if (motion_track_get_delta(*temp_t6, &sp.u7C, arg0) != 0) {
+            var_f2 = vec3_length(sp.u7C);
         } else {
             var_f2 = 0.0f;
         }
@@ -602,11 +602,11 @@ s32 track_trail_update(u8 *arg0) {
 #endif
 #ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
-s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
+s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 D_800914B0;
 extern s32 D_800D30BC;
 
@@ -702,7 +702,7 @@ u8 *track_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
         if (((*(s32 *)((u8 *)temp_v1 + 0x1D4)) == 0) || (((*(u8 *)((u8 *)temp_v1 + 0x74)) & 0xF) == 0xF)) {
 
         } else {
-            func_151D6310(arg0 + 0x84, arg2, ((*(u8 *)((u8 *)arg0 + 0x25)) * 0x30) + 0xF0, &sp.uD8, &sp.uD7);
+            vtx_slot_buffer_get(arg0 + 0x84, arg2, ((*(u8 *)((u8 *)arg0 + 0x25)) * 0x30) + 0xF0, &sp.uD8, &sp.uD7);
             if (sp.uD7 != 0) {
                 var_v0 = (*(u8 **)((u8 *)((arg0 + (arg2 * 4))) + 0x84));
                 var_v1 = 0;
@@ -722,11 +722,11 @@ u8 *track_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                     } while (var_v1 < (((*(u8 *)((u8 *)arg0 + 0x25)) * 2) + 0xA));
                 }
             }
-            temp_v0 = func_15144B34((s32) arg2);
+            temp_v0 = camera_get_pos((s32) arg2);
             sp.uEB = 1;
             sp.u118 = temp_v0;
             temp_v1_2 = ((u8 *)&D_800A4EA8);
-            var_s0 = func_15142FBC(gfx_set_combine_mode(func_15142B7C(func_15142C10(func_15142E24(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.uEB, 0x3E), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uEB), 0x200005, 0x1F0600), 0x55, &sp.uEB), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 0x1C)) | (*(s32 *)((u8 *)temp_v1_2 + 0x18)), &sp.uEB);
+            var_s0 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_geometry_mode_cached(gfx_env_color_cached(gfx_load_texture_cached(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.uEB, 0x3E), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uEB), 0x200005, 0x1F0600), 0x55, &sp.uEB), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 0x1C)) | (*(s32 *)((u8 *)temp_v1_2 + 0x18)), &sp.uEB);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
             if (var_a0 < 0) {
                 var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
@@ -864,14 +864,14 @@ u8 *track_trail_draw(u8 *arg0, u8 *arg1, s16 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/track_trail_draw.s")
 #endif
 #ifdef NON_MATCHING
-u8 *func_15031C4C(struct127 *, s32, s32);
+u8 *attachment_find_by_slot(struct127 *, s32, s32);
 
 // object_fire_message: message handler of the object_fire_spawn effect object (D_8008A760 handler table). data = +0x98
 // ({owner object, its room byte, effect handle, ...}). Messages 0, 0x2E and 3: when the message names the owner
 // (msg +0 == owner, or msg +4 byte == room) the effect object removes itself (node_destroy). Message 0x2D (object
 // replaced, msg = {old, new, ..., room of old (+8), room of new (+9)}): when the owner is msg +0, it moves to msg +4
 // (room +9), when it is msg +4 it moves to msg +0 (room +8); either way it takes a new effect handle for the new
-// owner (func_15031C4C 0x79, 0x7A when the owner's id is 0x48).
+// owner (attachment_find_by_slot 0x79, 0x7A when the owner's id is 0x48).
 /* was func_150D4ED0 */
 void object_fire_message(u8 *obj, u8 *msg, u8 event) {
     u8 *data = *(u8 **) (obj + 0x98);
@@ -893,7 +893,7 @@ void object_fire_message(u8 *obj, u8 *msg, u8 event) {
         } else {
             return;
         }
-        *(u8 **) (data + 8) = func_15031C4C(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
+        *(u8 **) (data + 8) = attachment_find_by_slot(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
     }
 }
 #else
@@ -901,12 +901,12 @@ void object_fire_message(u8 *obj, u8 *msg, u8 event) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1514654C(struct127 *, s32, s32, void **, void **, s32);
+s32 model_node_points_to_world(struct127 *, s32, s32, void **, void **, s32);
 extern s32 D_800A0DA0;
 extern s32 D_800A0DAC;
 
 // object_get_beam_ends: the two end points of the object's beam: with a model (arg2->unk1D4) the positions of the
-// two named joints D_800A0DA0 / D_800A0DAC (func_1514654C, 2 lookups, result 1 on success, else 0); without one,
+// two named joints D_800A0DA0 / D_800A0DAC (model_node_points_to_world, 2 lookups, result 1 on success, else 0); without one,
 // the object position + 100 and + 600 in y (result 2). P124: the joint name / output lists are 2-element arrays
 // (m2c had 4 separate locals and passed the address of the first of each pair).
 /* was func_150D4FF0 */
@@ -919,7 +919,7 @@ s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3) {
         names[1] = &D_800A0DAC;
         outs[0] = arg0;
         outs[1] = arg1;
-        if (func_1514654C(arg2, arg3, 0, names, outs, 2) != 0) {
+        if (model_node_points_to_world(arg2, arg3, 0, names, outs, 2) != 0) {
             return 1;
         }
         return 0;
@@ -938,17 +938,17 @@ s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3) {
 /* was func_150D50E4 */
 void object_fire_free(s32 arg0) {
     object_fire_cleanup(arg0);
-    func_15147E64(arg0);
+    fxrec_die_retire(arg0);
 }
 
 /* was func_150D5110 */
 void object_fire_free_alt(s32 arg0) {
     object_fire_cleanup(arg0);
-    func_15147E98(arg0);
+    fxrec_die_free(arg0);
 }
 
 #ifdef NON_MATCHING
-void func_1000FD38(s32, s32, s32);
+void sfx_emitter_stop_by_callback(s32, s32, s32);
 s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound);
 
 /* was func_150D513C */
@@ -960,11 +960,11 @@ void object_fire_cleanup(u8 *arg0) {
 
     temp_s0 = (*(u8 **)((u8 *)arg0 + 0x98));
     if (D_8008FD8C < 5) {
-        func_1000FD38((s32) &rocket_sound_update, (s32) temp_s0, 0x5B3);
+        sfx_emitter_stop_by_callback((s32) &rocket_sound_update, (s32) temp_s0, 0x5B3);
     }
     sp20 = (s32 *) &rocket_sound_update;
-    func_1000FD38((s32) &rocket_sound_update, (s32) temp_s0, 0x5B4);
-    func_1000FD38((s32) &rocket_sound_update, (s32) temp_s0, 0x5BC);
+    sfx_emitter_stop_by_callback((s32) &rocket_sound_update, (s32) temp_s0, 0x5B4);
+    sfx_emitter_stop_by_callback((s32) &rocket_sound_update, (s32) temp_s0, 0x5BC);
     temp_a0 = (*(struct102 **)((u8 *)temp_s0 + 0xC));
     if (temp_a0 != NULL) {
         node_destroy(temp_a0);
@@ -994,15 +994,15 @@ s32 fire_emitter_flicker(u8 *arg0)
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_15143794(s16, s16, f32, void *);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 extern f32 D_800A0DE8;
 extern f32 D_800A0DEC;
 extern f32 D_800A0DF0;
 extern f32 D_800A0DF4;
 extern f32 D_800A0DF8;
 
-/* func_151307F0's sprite particle template (the func_15153BA4 layout; +0x68.. is not filled here) */
+/* particle_spawn_ex's sprite particle template (the emit_particle_burst_req layout; +0x68.. is not filled here) */
 typedef struct {
     /* 0x00 */ s32 u0;
     /* 0x04 */ s32 u4;
@@ -1031,8 +1031,8 @@ typedef struct {
     /* 0x6C */ f32 u6C;
 } SprTmpl5268;
 
-// smoke_puff_burst: spawns 10..20 smoke sprites (func_151307F0, room / owner from arg3 / arg4) at pos. Each gets a
-// random sprite of D_800A0D90, life 27..44, alpha 100..255, size 199..432 and a velocity from func_15143794 (yaw
+// smoke_puff_burst: spawns 10..20 smoke sprites (particle_spawn_ex, room / owner from arg3 / arg4) at pos. Each gets a
+// random sprite of D_800A0D90, life 27..44, alpha 100..255, size 199..432 and a velocity from vec3_from_angles_byte (yaw
 // around the scaled heading byte (s16) (scale * D_800A0DE8) >> 8 + 0x40 plus 0..129, pitch -64..16, speed 5..15)
 // minus the source's horizontal velocity (vel x / z) times a random drag; random flip flags 0x40 / 0x80.
 /* was func_150D5268 */
@@ -1088,7 +1088,7 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
         t.size[0] = t.size[1] = random_float() * 233.0f + 199.0f;
         r1 = random_int();
         r2 = random_int();
-        func_15143794(r1 % 130 + yaw, r2 % 81 - 0x40, random_float() * 10.0f + 5.0f, t.vel);
+        vec3_from_angles_byte(r1 % 130 + yaw, r2 % 81 - 0x40, random_float() * 10.0f + 5.0f, t.vel);
         t.vel[0] -= vel[0] * drag;
         t.vel[2] -= vel[2] * drag;
         t.u54 = random_float() * D_800A0DF4 + D_800A0DF8;
@@ -1096,7 +1096,7 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
         bit80 = (random_int() & 1) ? 0x80 : 0;
         bit40 = (random_int() & 1) ? 0x40 : 0;
         t.mode |= bit40 | bit80;
-        func_151307F0((s32) &t, 1, 0, 0, room, owner);
+        particle_spawn_ex((s32) &t, 1, 0, 0, room, owner);
         n--;
     } while (n > 0);
 }
@@ -1104,7 +1104,7 @@ void smoke_puff_burst(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/smoke_puff_burst.s")
 #endif
 #ifdef NON_MATCHING
-// rocket_sound_update: per-frame callback (func_1000FA64, same type as object_sound_follow_cam) of the three sounds
+// rocket_sound_update: per-frame callback (sfx_emitter_start, same type as object_sound_follow_cam) of the three sounds
 // object_fire_spawn starts for its object (voice +0x18 = the object's Data3870, voice +0x1C = sound id). Target volume
 // and pitch per id: 0x5B3 follows the speed of data->obj (f32 +0x28): volume speed*25 (0 below 500, capped at 5000),
 // pitch speed*5 (capped at 1000); state (data +5) 1 or 2 adds 7000 to the volume (1 also sets pitch 400); another
@@ -1216,7 +1216,7 @@ s32 rocket_sound_update(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *sl
     *pitch = (s16) curPitch;
     if (*vol == 0) {
         if (*(u16 *) (e + 0x24) != 0) {
-            func_100111C8(*(u16 *) (e + 0x24));
+            sound_voice_stop(*(u16 *) (e + 0x24));
             *(u16 *) (e + 0x24) = 0;
         }
         *sound = 0;

@@ -1,16 +1,16 @@
-\#^    func_151D6310((s32 \*) (obj + 0x74), id#s/0x74/0x70/
-\#^    func_151D6310((s32 \*) (obj + 0x74), id#s/0x84/0x80/
+\#^    vtx_slot_buffer_get((s32 \*) (obj + 0x74), id#s/0x74/0x70/
+\#^    vtx_slot_buffer_get((s32 \*) (obj + 0x74), id#s/0x84/0x80/
 \#^    if (vtx == NULL) {#s/==/!=/
-\#^    cam = func_15144B34(id);#s/(id)/(0)/
+\#^    cam = camera_get_pos(id);#s/(id)/(0)/
 \#^    flag = 1;#s/1;/0;/
-\#^    gfx = func_15142E24(gfx, D_80091120#s/0x2C/0x2D/
-\#^    gfx = func_15142E24(gfx, D_80091120#s/&flag, 3/\&flag, 2/
-\#^    gfx = func_15142C10(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x59\]/obj[0x58]/
-\#^    gfx = func_15142C10(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x5B\]/obj[0x5A]/
-\#^    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);#s/0x1F0600/0x1F0601/
+\#^    gfx = gfx_load_texture_cached(gfx, D_80091120#s/0x2C/0x2D/
+\#^    gfx = gfx_load_texture_cached(gfx, D_80091120#s/&flag, 3/\&flag, 2/
+\#^    gfx = gfx_env_color_cached(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x59\]/obj[0x58]/
+\#^    gfx = gfx_env_color_cached(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x5B\]/obj[0x5A]/
+\#^    gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x1F0600);#s/0x1F0600/0x1F0601/
 \#^    gfx = gfx_set_combine_mode(gfx, 0x44, &flag);#s/0x44/0x45/
-\#^    gfx = func_15142FBC(gfx#s/0x2CA0/0x2CA1/
-\#^    gfx = func_15142FBC(gfx#s/D_800A4EA8\[3\]/D_800A4EA8[1]/
+\#^    gfx = gfx_other_mode_cached(gfx#s/0x2CA0/0x2CA1/
+\#^    gfx = gfx_other_mode_cached(gfx#s/D_800A4EA8\[3\]/D_800A4EA8[1]/
 \#^    dx = pts\[3\] - pts\[0\];#s/pts\[3\]/pts[4]/
 \#^    dz = pts\[5\] - pts\[2\];#s/pts\[2\]/pts[1]/
 \#^    ey = pts\[1\] - cam\[1\];#s/cam\[1\]/cam[0]/

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_15036F60(u8 *arg0) {
+/* was func_15036F60 */
+void look_record_alloc(u8 *arg0) {
     s32 i;
 
     *(f32 **)(arg0 + 0x324) = allocate_memory(0x48, 1, 0, 0);
@@ -15,8 +16,8 @@ void func_15036F60(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15037CCC(f32 *, s32, s32, s32, f32, s32, s32);
-void func_15038910(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void look_find_target(f32 *, s32, s32, s32, f32, s32, s32);
+void look_turn_joint(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern u8 D_800C441A;
 extern f32 D_800C4408[3];
 
@@ -24,10 +25,11 @@ extern f32 D_800C4408[3];
  * P65: per-frame callback of the current object D_800CC2D0[D_800C3E78] (called twice per frame for Conker).
  * D_800C441A counts the calls of this frame: the first call of a frame is skipped (only sets the counter to 1) for
  * object ids 0x3B / 0x75 / 0x80 / ... (jump table jtbl_80098604, a .late_rodata table: not code), when D_800C35EA == 1,
- * or when the record +0x324 still holds the -99999 "unset" x. Otherwise point D_800C4408 is filled by func_15037CCC
- * (or set to -99999 on a first call without D_800D154C->unk2F8 & 0x100) and passed to func_15038910.
+ * or when the record +0x324 still holds the -99999 "unset" x. Otherwise point D_800C4408 is filled by look_find_target
+ * (or set to -99999 on a first call without D_800D154C->unk2F8 & 0x100) and passed to look_turn_joint.
  */
-void func_15036FD8(void) {
+/* was func_15036FD8 */
+void look_frame_cb_current(void) {
     struct127 *obj = &D_800CC2D0[D_800C3E78];
     u8 *rec = obj->unk324;
     s32 kind;
@@ -74,31 +76,32 @@ void func_15036FD8(void) {
         D_800C4408[1] = -99999.0f;
         D_800C4408[2] = -99999.0f;
     } else {
-        func_15037CCC(D_800C4408, kind, 0, D_800C3E78, 90.0f, 0xFF, 0);
+        look_find_target(D_800C4408, kind, 0, D_800C3E78, 90.0f, 0xFF, 0);
     }
-    func_15038910(kind, 0, D_800C4408, D_800C3E78, first, 0, D_800C441A, 3, 0, 0, 0, later, 0);
+    look_turn_joint(kind, 0, D_800C4408, D_800C3E78, first, 0, D_800C441A, 3, 0, 0, 0, later, 0);
     D_800C441A++;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15036FD8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_frame_cb_current.s")
 #endif
 
 #ifdef NON_MATCHING
 extern u8 D_800C441A;
 extern f32 D_800C4408[3];
-void func_1503B9F8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
-void func_15038910(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void look_find_target_simple(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
+void look_turn_joint(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * P76: head / body look of the current object D_800CC2D0[D_800C3E78] by object kind (+4; jump table jtbl_80098714,
  * .late_rodata data: now a C switch; kinds without a case do nothing). Each kind picks the joint / parent joint pair
  * (slot D_800C441A = 0 / 1 / 2 may differ), the look limit row lookArg, follow factors limits, keepMask, wrap
  * (passed as the force flag of the joint range test), postMul, the target search options (needVisible, anyRange, mode, prefer) and a
- * y offset. The target D_800C4408 comes from func_1503B9F8 on the first slot or when `always` is set (range: the sum
- * of floats 0 and 4 of row lookArg - 1 of D_80098418), or is cleared (-99999) for `noTarget`; then func_15038910
+ * y offset. The target D_800C4408 comes from look_find_target_simple on the first slot or when `always` is set (range: the sum
+ * of floats 0 and 4 of row lookArg - 1 of D_80098418), or is cleared (-99999) for `noTarget`; then look_turn_joint
  * turns the joint and D_800C441A counts up.
  */
-void func_15037224(void) {
+/* was func_15037224 */
+void look_head_body_by_kind(void) {
     u8 *self = (u8 *) &D_800CC2D0[D_800C3E78];
     s32 prefer = 0x100;
     s32 joint, parent;
@@ -312,30 +315,31 @@ void func_15037224(void) {
     if (noTarget) {
         D_800C4408[0] = D_800C4408[1] = D_800C4408[2] = -99999.0f;
     } else if (D_800C441A == 0 || always) {
-        func_1503B9F8((u8 *) D_800C4408, joint, parent, D_800C3E78,
+        look_find_target_simple((u8 *) D_800C4408, joint, parent, D_800C3E78,
                       ((f32 *) D_80098418[lookArg - 1])[4] + ((f32 *) D_80098418[lookArg - 1])[0], prefer,
                       (s32) &best, wrap, needVisible, anyRange, mode);
         D_800C4408[1] += yOfs;
     }
-    func_15038910(joint, parent, D_800C4408, D_800C3E78, lookArg, limits, D_800C441A, keepMask, wrap, postMul, 0,
+    look_turn_joint(joint, parent, D_800C4408, D_800C3E78, lookArg, limits, D_800C441A, keepMask, wrap, postMul, 0,
                   later, mode);
     D_800C441A++;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037224.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_head_body_by_kind.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
+void look_angles_to_point(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
 
 /*
  * P71: is point (x, y, z) inside the range of joint j2 of object id? The joint matrices are
  * D_800CC2D0[id].unk1D4 (64 bytes each). The translation column of joints j1 and j2 is cleared (w = 1), the point
- * relative to j1's origin is rotated by j2's rows and func_15038758 measures it (with mode); when the measure is
+ * relative to j1's origin is rotated by j2's rows and look_angles_to_point measures it (with mode); when the measure is
  * within (-lim, lim) the point is copied to out and 1 returned. force skips the test (copies, returns 1); no
  * matrices: 0. (The asm also saves j1's second row to an unused local.)
  */
-s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode) {
+/* was func_15037988 */
+s32 look_point_in_joint_range(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode) {
     f32 *mtx;
     f32 *a;
     f32 *b;
@@ -362,7 +366,7 @@ s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim
     dx = x - a[12];
     dy = y - a[13];
     dz = z - a[14];
-    func_15038758(&dist, &unused, dx * b[0] + dy * b[1] + b[2] * dz, dx * b[4] + dy * b[5] + b[6] * dz,
+    look_angles_to_point(&dist, &unused, dx * b[0] + dy * b[1] + b[2] * dz, dx * b[4] + dy * b[5] + b[6] * dz,
                   dx * b[8] + dy * b[9] + b[10] * dz, mode);
     if (dist < lim && -lim < dist) {
         out[0] = x;
@@ -373,11 +377,12 @@ s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037988.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_point_in_joint_range.s")
 #endif
 extern s32 D_800C4414;
 
-s32 func_15037B70(s32 arg0, u8 *arg1) {
+/* was func_15037B70 */
+s32 look_get_fixed_target(s32 arg0, u8 *arg1) {
     f32 temp_f0;
     f32 temp_f2;
     s32 temp_t8;
@@ -411,7 +416,7 @@ s32 func_15037B70(s32 arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-/* P76: look point table (D_800C6A70[D_800C6A74], 0x14-byte records; func_1503E0C0 marks removed ones with unk6 = 2) */
+/* P76: look point table (D_800C6A70[D_800C6A74], 0x14-byte records; look_point_remove marks removed ones with unk6 = 2) */
 typedef struct {
     s16 x, y, z;    /* 0x00: the point (+50 is added to y for the joint range test) */
     u16 unk6;       /* 0x06: nonzero = not usable */
@@ -426,24 +431,25 @@ extern u32 D_800C6A74;
 extern u32 D_80084790;      /* round-robin start into D_800C6A70 (the last chosen point) */
 extern s32 D_80084770[8];   /* the node list indices searched in D_800DD280[0..1] */
 extern s32 D_800C43F0;      /* f32 x, y, z: default aim point */
-u8 *func_15031CBC(s32, u8 *);
-void func_1507EDC8(u8 *, s32);
-s32 func_15037B70(s32, u8 *);
-s32 func_150383B0(u8 *, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32);
-s32 func_15037988(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
+u8 *attachment_find_by_slot_any(s32, u8 *);
+void face_anim_stub(u8 *, s32);
+s32 look_get_fixed_target(s32, u8 *);
+s32 look_search_nearest_object(u8 *, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32);
+s32 look_point_in_joint_range(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
 
 /*
  * P76: look target of object id (out = point, -99999 when there is none; D_800C43F0 is reset to -99999 too).
  * Nothing during cutscenes (D_800C35EA / D_800C35EB). Fixed targets first: a sub-object +0x318 with +0x2C == 0x100
- * and a +0x73C flag gives its point +0x740; func_15037B70 (look modes 1..3). Object 0 in state 0x81 (+0x84) aims at
+ * and a +0x73C flag gives its point +0x740; look_get_fixed_target (look modes 1..3). Object 0 in state 0x81 (+0x84) aims at
  * the object of its attachment 0x1F (+0x48 matrices +0x3E8[D_800BE9C0], enabled by +0x3F6): its position for kind
- * 5, else that matrix's point. Otherwise the nearest candidate that passes the joint range test func_15037988 wins
- * (squared distance from the object, with x truncated to s16): the object search func_150383B0 (from 1.6e9), the
+ * 5, else that matrix's point. Otherwise the nearest candidate that passes the joint range test look_point_in_joint_range wins
+ * (squared distance from the object, with x truncated to s16): the object search look_search_nearest_object (from 1.6e9), the
  * look points of D_800C6A70 (round robin from D_80084790, within each point's x window and reach) and the nodes of
  * the D_80084770 lists in both D_800DD280 groups (within 500; lists 25 and 72 use +0x38 when +0x66 is 0, the
- * others +0x98). An object or a look point with an animation then starts it on id (func_1507EDC8).
+ * others +0x98). An object or a look point with an animation then starts it on id (face_anim_stub).
  */
-void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mode) {
+/* was func_15037CCC */
+void look_find_target(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mode) {
     u8 *self;
     u8 *ext;
     u8 *sub;
@@ -476,14 +482,14 @@ void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mo
         out[2] = *(f32 *) (ext + 0x748);
         return;
     }
-    if (func_15037B70(id, (u8 *) out) != 0) {
+    if (look_get_fixed_target(id, (u8 *) out) != 0) {
         return;
     }
     if (id == 0 && *(u16 *) (self + 0x84) == 0x81) {
-        sub = func_15031CBC(0x1F, self);
+        sub = attachment_find_by_slot_any(0x1F, self);
         if (sub != NULL && (mtxs = *(u8 **) (sub + 0x48)) != NULL && mtxs[0x3F6] != 0
             && (mtx = ((s32 *) (mtxs + 0x3E8))[D_800BE9C0]) != 0) {
-            other = (u8 *) func_15083E90(sub[0]);
+            other = (u8 *) obj_find_by_setup_id(sub[0]);
             if (other != NULL) {
                 if (other[5] == 5) {
                     pt[0] = *(f32 *) (other + 0x14);
@@ -492,7 +498,7 @@ void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mo
                 } else {
                     vec_from_fixed_pos((vertex *) pt, (struct113 *) mtx);
                 }
-                if (func_15037988(id, j1, j2, pt[0], pt[1], pt[2], out, lim, 0, mode) != 0) {
+                if (look_point_in_joint_range(id, j1, j2, pt[0], pt[1], pt[2], out, lim, 0, mode) != 0) {
                     return;
                 }
             }
@@ -502,7 +508,7 @@ void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mo
     sx = (s16) *(f32 *) (self + 0x14);
     best = 1.6e9f;
     found = 0;
-    objRet = func_150383B0((u8 *) out, j1, j2, id, lim, prefer, (s32) &best, 0, 0, 0, mode);
+    objRet = look_search_nearest_object((u8 *) out, j1, j2, id, lim, prefer, (s32) &best, 0, 0, 0, mode);
     if (objRet != 0 && best != 1.6e9f) {
         found = 1;
     }
@@ -521,7 +527,7 @@ void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mo
                 dy = *(f32 *) (self + 0x18) - lp->y;
                 d2 = dx * dx + dz * dz + dy * dy;
                 if (d2 < (f32) lp->range2 && d2 < best
-                    && func_15037988(id, j1, j2, lp->x, lp->y + 50.0f, lp->z, out, lim, 0, mode) != 0) {
+                    && look_point_in_joint_range(id, j1, j2, lp->x, lp->y + 50.0f, lp->z, out, lim, 0, mode) != 0) {
                     bestPoint = i;
                     best = d2;
                 }
@@ -558,7 +564,7 @@ void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mo
                 dx = (f32) sx - pt[0];
                 d2 = dx * dx + dz * dz + dy * dy;
                 if (d2 < 250000.0f && d2 < best
-                    && func_15037988(id, j1, j2, pt[0], pt[1], pt[2], out, lim, 0, mode) != 0) {
+                    && look_point_in_joint_range(id, j1, j2, pt[0], pt[1], pt[2], out, lim, 0, mode) != 0) {
                     found = 3;
                     best = d2;
                 }
@@ -567,21 +573,21 @@ void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mo
     }
 
     if (found == 1) {
-        func_1507EDC8(self, objRet - 1);
+        face_anim_stub(self, objRet - 1);
     } else if (found == 2 && D_800C6A70[bestPoint].anim != 0) {
-        func_1507EDC8(self, D_800C6A70[bestPoint].anim - 1);
+        face_anim_stub(self, D_800C6A70[bestPoint].anim - 1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037CCC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_find_target.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode);
+s32 look_point_in_joint_range(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode);
 
 /*
  * P71: look target search of object id: the nearest other active object (of the first 25; not 0xFF kinds) whose
- * look point (+0x1A4 / +0x1AA / +0x1A8, s16) lies within the joint range test func_15037988 (j1, j2, lim, force,
+ * look point (+0x1A4 / +0x1AA / +0x1A8, s16) lies within the joint range test look_point_in_joint_range (j1, j2, lim, force,
  * mode). Candidates: closer than the sight range (squared: (+0x23D * 8)^2, or 1.6e9 with anyRange) and than *best,
  * or of kind prefer (+4) at any distance; a found object of kind prefer ends the search. Skipped: objects linked to
  * each other by +0x65 (index + 1), the same kind (except for kinds 5 / 0xAD..0xAF), kind 0x2C for 0x2D, and by
@@ -589,9 +595,10 @@ s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim
  * target (+0x222 with +0x223 1 / 0xC) counts as distance 0. Returns the found object's +0x13B + 1 (out = the look
  * point), else 0 with out = -99999 (also during cutscenes, D_800C35EA / D_800C35EB).
  */
-s32 func_150383B0(u8 *outp, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 bestp, s32 force, s32 needVisible,
+/* was func_150383B0 */
+s32 look_search_nearest_object(u8 *outp, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 bestp, s32 force, s32 needVisible,
                   s32 anyRange, s32 mode) {
-    f32 *out = (f32 *) outp;     /* the parameter types of the declaration used by func_1503B9F8 */
+    f32 *out = (f32 *) outp;     /* the parameter types of the declaration used by look_find_target_simple */
     f32 *best = (f32 *) bestp;
     u8 *self;
     u8 *o;
@@ -647,7 +654,7 @@ s32 func_150383B0(u8 *outp, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 bes
         if (!(d2 < range2 && d2 < *best) && prefer != o[4]) {
             continue;
         }
-        if (func_15037988(id, j1, j2, *(s16 *) (o + 0x1A4), *(s16 *) (o + 0x1AA), *(s16 *) (o + 0x1A8), out, lim,
+        if (look_point_in_joint_range(id, j1, j2, *(s16 *) (o + 0x1A4), *(s16 *) (o + 0x1AA), *(s16 *) (o + 0x1A8), out, lim,
                           force, mode) != 0) {
             *best = d2;
             found = i;
@@ -663,12 +670,13 @@ s32 func_150383B0(u8 *outp, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 bes
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_150383B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_search_nearest_object.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_800989F8;
-void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
+/* was func_15038758 */
+void look_angles_to_point(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     f32 temp_f0;
     f32 temp_f0_2;
     f32 var_f0;
@@ -706,10 +714,10 @@ block_9:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038758.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_angles_to_point.s")
 #endif
 #ifdef NON_MATCHING
-/* P76: per-object look state (object +0x324, func_15036F60: 0x48 bytes), three slots (D_800C441A) */
+/* P76: per-object look state (object +0x324, look_record_alloc: 0x48 bytes), three slots (D_800C441A) */
 typedef struct {
     f32 yaw[3];       /* 0x00: current angles (degrees), -99999 = unset */
     f32 pitch[3];     /* 0x0C */
@@ -732,11 +740,11 @@ extern u8 D_800C43FC;
 extern f32 D_800C4400;
 extern f32 D_800C4404;
 extern f32 D_80098550[][4];  /* per limit set: yaw / pitch follow factors, yaw / pitch max steps */
-s32 func_15021E60(f32 *, f32 *, f32 *, f32 *, s32, s32);
-void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
-void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7);
+s32 cutscene_player_look_target(f32 *, f32 *, f32 *, f32 *, s32, s32);
+void look_angles_to_point(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
+void look_clamp_angles(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7);
 void mtxf_rotate_xyz_deg(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void func_15049F30(f32 q1[4], f32 q2[4]);
 void func_15049FA8(f32 mtx[4][4], f32 arg1[4]);
 void func_1504A1CC(f32 q1[4], f32 q2[4], f32 t, f32 result[4]);
@@ -744,19 +752,20 @@ void func_1504A430(f32 quat[4], f32 mtx[4][4]);
 
 /*
  * P76: turn joint `joint` of object id toward target (x, y, z; all -99999 = no target). The angles (yaw, pitch,
- * degrees) of the target relative to the joint come from func_15038758 in the frame of joint `parent` (axis picks
- * the joint axis that should point at it, 0..3), unless func_15021E60 supplies fixed angles. Look state slot
+ * degrees) of the target relative to the joint come from look_angles_to_point in the frame of joint `parent` (axis picks
+ * the joint axis that should point at it, 0..3), unless cutscene_player_look_target supplies fixed angles. Look state slot
  * `slot` of the object's LookTrack (+0x324) follows them: with a blend running (fade / hold) by the factors of
  * D_80098550[limits] scaled toward 1, else by per-frame velocity steps limited by its max steps. keepMask bit 0 / 1
- * keeps the new yaw / pitch (else the raw ones), wrap keeps yaw continuous across +-180 and skips func_1503A1C0
+ * keeps the new yaw / pitch (else the raw ones), wrap keeps yaw continuous across +-180 and skips look_clamp_angles
  * (look limits), postMul multiplies the rotation onto the joint matrix instead of replacing it, yawBias is taken off
  * the yaw. The rotation (yawOfs / pitchOfs added) is rotation matrix * parent's matrix; during a blend it is slerped
  * (quaternions) from the joint's current orientation by the fade factor and the column scales are kept. Also
  * sets the aim point D_800C43F0 (target pushed 100x out from the joint), the object +0x2CA byte angle (slot 0) and,
- * for fixed angles, D_800C43FC / D_800C4400 / D_800C4404. The 9th argument of the asm's func_1503A1C0 calls (slot)
- * is not read by func_1503A1C0 and is left out.
+ * for fixed angles, D_800C43FC / D_800C4400 / D_800C4404. The 9th argument of the asm's look_clamp_angles calls (slot)
+ * is not read by look_clamp_angles and is left out.
  */
-void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 limits, s32 slot, s32 keepMask,
+/* was func_15038910 */
+void look_turn_joint(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 limits, s32 slot, s32 keepMask,
                    s32 wrap, s32 postMul, s32 yawBias, s32 unused, s32 axis) {
     u8 *self;
     LookTrack *lt;
@@ -766,7 +775,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
     f32 yaw, pitch, roll;
     f32 fixedYaw, fixedPitch;
     f32 rawYaw, rawPitch;
-    f32 lim0, lim1;     /* func_1503A1C0 outputs */
+    f32 lim0, lim1;     /* look_clamp_angles outputs */
     f32 ax, ay, az;
     f32 d[3];
     f32 wx, wy, wz;
@@ -800,7 +809,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
     if (D_800C441A == 0) {
         self[0x2CA] = 0;
     }
-    fixed = func_15021E60(&yaw, &pitch, &roll, target, id, 0);
+    fixed = cutscene_player_look_target(&yaw, &pitch, &roll, target, id, 0);
     if (fixed) {
         fixedYaw = yaw;
         fixedPitch = pitch;
@@ -886,7 +895,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
         wx = ax * J[0][0] + ay * J[1][0] + J[2][0] * az;
         wy = ax * J[0][1] + ay * J[1][1] + J[2][1] * az;
         wz = ax * J[0][2] + ay * J[1][2] + J[2][2] * az;
-        func_15038758(&yaw, &pitch, wx * P[0][0] + wy * P[0][1] + P[0][2] * wz,
+        look_angles_to_point(&yaw, &pitch, wx * P[0][0] + wy * P[0][1] + P[0][2] * wz,
                       wx * P[1][0] + wy * P[1][1] + P[1][2] * wz, wx * P[2][0] + wy * P[2][1] + P[2][2] * wz, axis);
     }
     if (yaw > 180.0f) {
@@ -907,7 +916,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
     rawYaw = yaw;
     rawPitch = pitch;
     if ((expired && !fixed) || D_800BE9B4 != 0) {
-        func_1503A1C0(lookArg, &yaw, &pitch, &lim1, &lim0, rawYaw, rawPitch, id);
+        look_clamp_angles(lookArg, &yaw, &pitch, &lim1, &lim0, rawYaw, rawPitch, id);
         lt->yawVel[slot] = 0.0f;
         lt->pitchVel[slot] = 0.0f;
         lt->yaw[slot] = yaw;
@@ -925,7 +934,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
         pitch = rawPitch;
     } else {
         if (!fixed) {
-            func_15038758(&yaw, &pitch, d[0] * P[0][0] + d[1] * P[0][1] + P[0][2] * d[2],
+            look_angles_to_point(&yaw, &pitch, d[0] * P[0][0] + d[1] * P[0][1] + P[0][2] * d[2],
                           d[0] * P[1][0] + d[1] * P[1][1] + P[1][2] * d[2],
                           d[0] * P[2][0] + d[1] * P[2][1] + P[2][2] * d[2], axis);
             if (yaw > 0.0f) {
@@ -946,7 +955,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
                 d[0] = -d[0];
                 d[1] = 20.0f - d[1];
                 d[2] = -d[2];
-                func_15038758(&yaw, &pitch, d[0] * P[0][0] + d[1] * P[0][1] + P[0][2] * d[2],
+                look_angles_to_point(&yaw, &pitch, d[0] * P[0][0] + d[1] * P[0][1] + P[0][2] * d[2],
                               d[0] * P[1][0] + d[1] * P[1][1] + P[1][2] * d[2],
                               d[0] * P[2][0] + d[1] * P[2][1] + P[2][2] * d[2], axis);
             }
@@ -955,7 +964,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
         ((f32 *) &D_800C43F0)[1] = d[1] * 100.0f + J[3][1];
         ((f32 *) &D_800C43F0)[2] = d[2] * 100.0f + J[3][2];
         if (!wrap) {
-            func_1503A1C0(lookArg, &yaw, &pitch, &lim1, &lim0, rawYaw, rawPitch, id);
+            look_clamp_angles(lookArg, &yaw, &pitch, &lim1, &lim0, rawYaw, rawPitch, id);
         }
     }
 
@@ -1017,7 +1026,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
             pitch = lt->pitchVel[slot] + lt->pitch[slot];
         }
         if (!wrap) {
-            func_1503A1C0(lookArg, &yaw, &pitch, NULL, NULL, rawYaw, rawPitch, id);
+            look_clamp_angles(lookArg, &yaw, &pitch, NULL, NULL, rawYaw, rawPitch, id);
         }
     } else {
         yaw = lt->yaw[slot];
@@ -1058,8 +1067,8 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
             mtxf_rotate_xyz_deg(rot2, -a, roll, 0.0f);
             break;
     }
-    func_150A7A48(rot1, rot2, rot);
-    func_150A7A48(rot, P, res);
+    mtxf_mul(rot1, rot2, rot);
+    mtxf_mul(rot, P, res);
     res[3][0] = J[3][0];    /* keep the joint's position */
     res[3][1] = J[3][1];
     res[3][2] = J[3][2];
@@ -1089,7 +1098,7 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
         scale[0] = scale[1] = scale[2] = 1.0f;
     }
     if (postMul) {
-        func_150A7A48(rot, J, rot1);
+        mtxf_mul(rot, J, rot1);
         bcopy(rot1, J, sizeof(rot1));
     } else {
         bcopy(res, J, sizeof(res));
@@ -1126,24 +1135,26 @@ void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038910.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_turn_joint.s")
 #endif
 
-void *func_15039D44(s32 arg0, s32 arg1) {
+/* was func_15039D44 */
+void *look_get_limits(s32 arg0, s32 arg1) {
     return &D_80098418[arg1];
 }
 
 #ifdef NON_MATCHING
 /*
- * P71: limits of the look angles (*yaw, *pitch) of object id, set 0 of func_15039D44: f[0] / f[1] yaw max / min,
+ * P71: limits of the look angles (*yaw, *pitch) of object id, set 0 of look_get_limits: f[0] / f[1] yaw max / min,
  * f[2] / f[3] pitch max / min, f[4] / f[5] yaw / pitch margins. Without a camera record (+0x318) or in camera
  * mode 0x100 both are clamped. Else an angle beyond its range by more than the margin resets to rest (restYaw /
  * restPitch; a reset yaw also resets the pitch and copies both to *outYaw / *outPitch); otherwise the incoming
  * angles go to *outYaw / *outPitch (when given) and are clamped.
  */
-void func_15039D68(f32 *yaw, f32 *pitch, f32 *outYaw, f32 *outPitch, f32 restYaw, f32 restPitch, s32 id) {
+/* was func_15039D68 */
+void look_clamp_default(f32 *yaw, f32 *pitch, f32 *outYaw, f32 *outPitch, f32 restYaw, f32 restPitch, s32 id) {
     u8 *cam = *(u8 **) ((u8 *) &D_800CC2D0[id] + 0x318);
-    f32 *lim = func_15039D44(id, 0);
+    f32 *lim = look_get_limits(id, 0);
 
     if (cam != NULL && *(s32 *) (cam + 0x2C) != 0x100) {
         if (lim[0] + lim[4] < *yaw || *yaw < lim[1] - lim[4]) {
@@ -1185,7 +1196,7 @@ void func_15039D68(f32 *yaw, f32 *pitch, f32 *outYaw, f32 *outPitch, f32 restYaw
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15039D68.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_clamp_default.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -1195,14 +1206,15 @@ extern u8 D_80098400[];
 extern u16 *D_80084710[];
 
 /*
- * P70: look-at record setup and the "no look" flag (bit 2 of +0x2FB), after func_1503B840.
+ * P70: look-at record setup and the "no look" flag (bit 2 of +0x2FB), after obj_set_kind_look_flags.
  * With a look record (+0x324): object 0x53 in animation 0x15, or D_800BE9B4 set, resets the three look slots
  * (+0x30.. = 40, +0x33.. = 0, +0x36.. = 4). Then, for object ids with a list (D_8009822C[id] = list number + 1;
  * D_80098400 = list lengths, D_80084710 = u16 lists of +0x84 values), a listed +0x84 sets the flag.
  * Otherwise the flag is set in state 1 when the health is 0, or (in water and xz speed < 5) or +0x31C[0x197] != 0
  * or xz speed > 20; in the other states when the health is 0.
  */
-void func_15039CC8(struct127 *obj) {
+/* was func_15039CC8 */
+void look_record_setup(struct127 *obj) {
     u8 *rec = obj->unk324;
     s32 list;
     s32 n;
@@ -1244,13 +1256,14 @@ void func_15039CC8(struct127 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15039CC8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_record_setup.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15039D68(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
+void look_clamp_default(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
 
-void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7) {
+/* was func_1503A1C0 */
+void look_clamp_angles(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7) {
     f32 temp_f0;
     f32 temp_f0_2;
     f32 temp_f12;
@@ -1262,10 +1275,10 @@ void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg
     u8 *temp_v0;
 
     if (arg0 == 0) {
-        func_15039D68(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+        look_clamp_default(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         return;
     }
-    temp_v0 = func_15039D44(arg7, arg0);
+    temp_v0 = look_get_limits(arg7, arg0);
     temp_f12 = (*(f32 *)((u8 *)temp_v0 + 0x10));
     temp_f0 = *arg1;
     if ((((*(f32 *)((u8 *)temp_v0 + 0)) + temp_f12) < temp_f0) || (var_f2 = (*(f32 *)((u8 *)temp_v0 + 4)), (temp_f0 < (var_f2 - temp_f12)))) {
@@ -1310,16 +1323,17 @@ void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A1C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_clamp_angles.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1503DA64(s32 arg0, s32 arg1);
-s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *); /* s32: P59 definition returns 0 */
-/* func_1503A37C (P57, from the m2c draft): object bounds from the skeleton. With a skeleton (+0x1D4) and a model
- * header D_800D1C90[type] (func_1503DA64(type, 0) == 0): joint header+0x26's matrix rows scaled to the header
+s32 model_header_load(s32 arg0, s32 arg1);
+s32 obj_collision_cylinder(struct127 *, s16 *, s16 *, s16 *); /* s32: P59 definition returns 0 */
+/* obj_bounds_from_skeleton (P57, from the m2c draft): object bounds from the skeleton. With a skeleton (+0x1D4) and a model
+ * header D_800D1C90[type] (model_header_load(type, 0) == 0): joint header+0x26's matrix rows scaled to the header
  * radii (+0x3A u8, +0 s16, +0x30 s8) * y scale +0x150 give the box +0x1A4..+0x1B6 (s16) and the direction bytes
- * +0x1B8..+0x1BA; without: from the position, func_1507C7C0's height and header +0 * y scale. */
-void func_1503A37C(struct127 *arg0) {
+ * +0x1B8..+0x1BA; without: from the position, obj_collision_cylinder's height and header +0 * y scale. */
+/* was func_1503A37C */
+void obj_bounds_from_skeleton(struct127 *arg0) {
     u8 *temp_v0_2;
     u8 temp_v0;
     u8 temp_t4;
@@ -1373,7 +1387,7 @@ void func_1503A37C(struct127 *arg0) {
     temp_v0 = ((u8 *)arg0)[4];
     if (temp_v0 != 0xFF) {
         if (((*(u8 **)((u8 *)arg0 + 0x1D4)) != NULL) && (D_800D1C90[temp_v0] != NULL)) {
-            if (func_1503DA64(temp_v0, 0) == 0) {
+            if (model_header_load(temp_v0, 0) == 0) {
                 temp_v1 = D_800D1C90[((u8 *)arg0)[4]];
                 sp28 = (*(f32 *)((u8 *)arg0 + 0x150));
                 temp_t4 = (*(u8 *)((u8 *)temp_v1 + 0x3A));
@@ -1474,7 +1488,7 @@ void func_1503A37C(struct127 *arg0) {
                 var_t0 = 0;
             }
             sp2C = (s32) var_t0;
-            func_1507C7C0(arg0, &sp36, &sp34, &sp32);
+            obj_collision_cylinder(arg0, &sp36, &sp34, &sp32);
             (*(s16 *)((u8 *)arg0 + 0x1A4)) = (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14));
             temp_v0_3 = (*(s16 *)((u8 *)arg0 + 0x1A4));
             ((u8 *)arg0)[0x2CA] = 0;
@@ -1493,10 +1507,11 @@ void func_1503A37C(struct127 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A37C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/obj_bounds_from_skeleton.s")
 #endif
 
-void func_1503A8FC(void) {
+/* was func_1503A8FC */
+void obj_cb_pin_joint1_position(void) {
     u8 *p;
     p = (u8 *)D_800CC2D0[D_800C3E78].unk1D4 + 0x40;
     *(f32 *)(p + 0x30) = *(f32 *)((u8 *)&D_800CC2D0[D_800C3E78] + 0x174);
@@ -1508,14 +1523,15 @@ void func_1503A8FC(void) {
 #define OBJ_U8(obj, off) (*(u8 *) ((u8 *) (obj) + (off)))
 extern u8 D_800C441A;
 extern u8 D_80084794[];
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
 /*
  * P70: per-frame joint callback of object 0x22 (D_800CC2D0[D_800C3E78]): scales joint D_80084794[n] (n = the
  * call counter D_800C441A of this frame) by f = 1 + +0x20A / 64 in x and z on the first call, by 1 / f on the
  * later ones, keeping the joint's translation, then counts the call.
  */
-void func_1503A968(void) {
+/* was func_1503A968 */
+void obj22_cb_scale_joint(void) {
     struct127 *obj = &D_800CC2D0[D_800C3E78];
     f32 (*m)[4];
     f32 tmp[4][4];
@@ -1550,7 +1566,7 @@ void func_1503A968(void) {
     pos[2] = m[3][2];
     guMtxIdentF(tmp);
     mtxf_scale(tmp, sx.bits, sy.bits, sz.bits);
-    func_150A7A48(m, tmp, out);
+    mtxf_mul(m, tmp, out);
     bcopy(out, m, 0x40);
     m[3][0] = pos[0];
     m[3][1] = pos[1];
@@ -1558,21 +1574,22 @@ void func_1503A968(void) {
     D_800C441A++;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A968.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/obj22_cb_scale_joint.s")
 #endif
 
-void func_15037224(void);
-void func_1503A968(void);
+void look_head_body_by_kind(void);
+void obj22_cb_scale_joint(void);
 extern u8 D_800C441A;
 
-void func_1503AAE0(void) {
+/* was func_1503AAE0 */
+void look_joint_cb_combined(void) {
     s32 sp1C;
 
     sp1C = D_800C441A;
     D_800C441A = 0;
-    func_15037224();
+    look_head_body_by_kind();
     D_800C441A = sp1C;
-    func_1503A968();
+    obj22_cb_scale_joint();
 }
 
 #ifdef NON_MATCHING
@@ -1587,9 +1604,9 @@ extern s32 D_800C43F0;      /* f32 x, y, z: default aim point */
 extern u8 D_800C43FC;       /* one-shot: use D_800C4400 / D_800C4404 as the angles */
 extern f32 D_800C4400;
 extern f32 D_800C4404;
-s32 func_150220CC(f32 *, f32 *, s32, s32);
+s32 cutscene_player_look_limits(f32 *, f32 *, s32, s32);
 f32 math_cos_u8(u8);
-u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
+u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
 
 /* move *cur toward target by at most step */
 #define LOOK_STEP(cur, target, step)                         \
@@ -1604,14 +1621,15 @@ u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
 
 /*
  * P65: head / eye aiming for the objects with a look joint (by id: Conker 0..4, 0x82, 0x96 use joint 12 and keep
- * D_800C43F0; others ask func_15037CCC for the target in D_800C4408). The joint matrix is made affine; while the
+ * D_800C43F0; others ask look_find_target for the target in D_800C4408). The joint matrix is made affine; while the
  * timer +0x282 runs, mode +0x276 animates the angles (0: circling offsets, 1: growing offsets, 2: aim at sub-model
  * 0x2B's point, 3: aim at joint +0x278, 4: nodding for model 0x26, 5: scaled offsets, 6: fixed pose); otherwise
- * the angles come from the target in joint space (atan2, in degrees), func_150220CC may override them, they are
+ * the angles come from the target in joint space (atan2, in degrees), cutscene_player_look_limits may override them, they are
  * clamped (yaw +-45, pitch -15..30), scaled by the per-id limits D_800D1C90[id] +0x2C..+0x2F and approached by
  * 8 (or 4 without target) per call in +0x27A..+0x280. UNVERIFIED parts: see P65.md.
  */
-void func_1503AB20(struct127 *obj) {
+/* was func_1503AB20 */
+void look_aim_head_eyes(struct127 *obj) {
     f32 *joint;
     u8 *sub;
     u8 *mtxs;
@@ -1688,7 +1706,7 @@ void func_1503AB20(struct127 *obj) {
             return;
     }
     if (callTarget) {
-        func_15037CCC(D_800C4408, jointNo, jointNo, obj - D_800CC2D0, 90.0f, lookFlags, 0);
+        look_find_target(D_800C4408, jointNo, jointNo, obj - D_800CC2D0, 90.0f, lookFlags, 0);
     }
 
     index = obj - D_800CC2D0;
@@ -1750,7 +1768,7 @@ void func_1503AB20(struct127 *obj) {
                 break;
             case 2:
                 aim = TRUE;
-                sub = func_15031C4C((u8 *) obj, 0x2B, 0);
+                sub = attachment_find_by_slot((u8 *) obj, 0x2B, 0);
                 if (sub != NULL) {
                     mtxs = *(u8 **) (sub + 0x48);
                     if (mtxs != NULL && ((s32 *) (mtxs + 0x3E8))[D_800BE9C0] != 0) {
@@ -1858,7 +1876,7 @@ void func_1503AB20(struct127 *obj) {
         }
     }
 
-    if (LOOK_TIMER(obj) == 0 && func_150220CC(&yaw0, &pitch0, index, 0) != 0) {
+    if (LOOK_TIMER(obj) == 0 && cutscene_player_look_limits(&yaw0, &pitch0, index, 0) != 0) {
         clamp = TRUE;
         mirror = FALSE;
         useOffsets = FALSE;
@@ -1922,20 +1940,21 @@ void func_1503AB20(struct127 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503AB20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/look_aim_head_eyes.s")
 #endif
 
-s32 func_150383B0(u8 *, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32);
+s32 look_search_nearest_object(u8 *, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800C43F0;
 
-void func_1503B9F8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+/* was func_1503B9F8 */
+void look_find_target_simple(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
     (*(f32 *)((u8 *)arg0 + 0)) = -99999.0f;
     (*(f32 *)((u8 *)arg0 + 4)) = -99999.0f;
     (*(f32 *)((u8 *)arg0 + 8)) = -99999.0f;
     (*(f32 *)((u8 *)(&D_800C43F0) + 0)) = -99999.0f;
     (*(f32 *)((u8 *)(&D_800C43F0) + 4)) = -99999.0f;
     (*(f32 *)((u8 *)(&D_800C43F0) + 8)) = -99999.0f;
-    if (func_15037B70(arg3, arg0) == 0) {
-        func_150383B0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA);
+    if (look_get_fixed_target(arg3, arg0) == 0) {
+        look_search_nearest_object(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA);
     }
 }

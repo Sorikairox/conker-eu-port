@@ -1,4 +1,4 @@
-# P237 func_151EA4C8 (mp_team_score_draw) mutants: sed % setup names
+# P237 mp_team_score_draw (mp_team_score_draw) mutants: sed % setup names
 s/    top = y - 0x10;/    top = y - 0x20;/ % big_rows
 s/    if (!(D_80090160 \& 0x4000) \&\& \*(s8 \*) (D_80090174 + 0x42) != 8) {/    if (!(D_80090160 \& 0x4000)) {/ % mode8
 s/        tex = 0xD12;/        tex = 0xD13;/ % big_rows
@@ -17,17 +17,17 @@ s/    TW_W(gdl, 0xF5180000 | ((((size \* 2 + 7) >> 3) \& 0x1FF) << 9), 0x0009425
 s/    TW_W(gdl, 0xF2000000, ((((size - 1) \* 4) \& 0xFFF) << 12) | 0x7C);  \/\* SetTileSize \*\//    TW_W(gdl, 0xF2000000, ((((size - 1) * 4) \& 0xFFF) << 12) | 0x3C);/ % big_rows
 s/    TW_W(gdl, 0xFB000000, 0xFFFFFFFF);                              \/\* SetEnvColor white \*\//    TW_W(gdl, 0xFB000000, 0xFFFFFF00);/ % big_rows
 s/        if (D_80090160 \& 0x6040) {/        if (D_80090160 \& 0x6000) {/ % team6040
-s/            score1 = func_150859AC(1, 6);/            score1 = func_150859AC(1, 3);/ % team2000
+s/            score1 = player_stat_get(1, 6);/            score1 = player_stat_get(1, 3);/ % team2000
 s/        } else if (D_80090160 \& 0x100) {/        } else if (D_80090160 \& 0x80) {/ % pl100
-s/                v = func_150859AC((s16) i, 3);/                v = func_150859AC((s16) i, 6);/ % pl100
+s/                v = player_stat_get((s16) i, 3);/                v = player_stat_get((s16) i, 6);/ % pl100
 s/                if (D_800CC2D0\[i\].unk128 != 0) {/                if (D_800CC2D0[i].unk128 == 1) {/ % pl100_t2
 s/            row = 0x200;/            row = 0x100;/ % big_rows
 s/                v = \*(s16 \*) (D_80090174 + 0x46 + i \* 2);/                v = *(u16 *) (D_80090174 + 0x46 + i * 2);/ % big_rows
 s/                if (D_800E1030\[i\] != 0) {/                if (D_800E1030[i] == 0) {/ % big_rows
 s/        D_800E0ED0\[1\] = score1;/        D_800E0ED0[1] = score0;/ % big_rows
 s/        score0 = D_800E0ED0\[0\];/        score0 = D_800E0ED0[1];/ % stored
-s/    gdl = (Gfx \*) func_151E8E94((u8 \*) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, row, 0x400, 0x400);/    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, 0, 0x400, 0x400);/ % big_rows
-s/    gdl = (Gfx \*) func_151E8E94((u8 \*) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row + lt, 0x400, 0x400);/    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row, 0x400, 0x400);/ % small_4000
+s/    gdl = (Gfx \*) hud_tex_rect_scaled((u8 \*) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, row, 0x400, 0x400);/    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, 0, 0x400, 0x400);/ % big_rows
+s/    gdl = (Gfx \*) hud_tex_rect_scaled((u8 \*) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row + lt, 0x400, 0x400);/    gdl = (Gfx *) hud_tex_rect_scaled((u8 *) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row, 0x400, 0x400);/ % small_4000
 s/    text_set_color(0xC0, 0xC0, 0xC0, 0xFF);/    text_set_color(0xC0, 0xC0, 0xC0, 0x80);/ % big_rows
 s/    text_printf_at(0x4F, (top >> 2) + 1, 0x80, D_800ABEB0, score1);/    text_printf_at(0x4F, (top >> 2), 0x80, D_800ABEB0, score1);/ % big_rows
 s/    text_printf_at(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score0);/    text_printf_at(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score1);/ % big_rows

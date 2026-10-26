@@ -1,4 +1,4 @@
-# P237 func_150C7E68 (obj_shade_from_level) mutants: sed % setup names
+# P237 obj_shade_from_level (obj_shade_from_level) mutants: sed % setup names
 # dropped (equivalent): s16 -> u16 load (only bits 4..11 reach the byte)
 s/    scenery_start_pending_anim(obj);/    scenery_start_pending_anim(0);/ % rec
 s/    if (!(obj\[0x73\] \& 4)) {/    if (!(obj[0x73] \& 2)) {/ % flag4 rec_neg

@@ -14,7 +14,7 @@ s/        d.anim2 = D_80090778;/        d.anim2 = D_800907C4;/
 s/        d.uFC = -1;/        d.uFC = 1;/
 s/        d.u00 = 6.0f;/        d.u00 = 7.0f;/
 s/        d.u10C = 100.0f;/        d.u10C = 101.0f;/
-s/        obj = func_15083E90(6);/        obj = func_15083E90(5);/
+s/        obj = obj_find_by_setup_id(6);/        obj = obj_find_by_setup_id(5);/
 s/== 6) ? 498.0f : -37.0f;/== 7) ? 498.0f : -37.0f;/
 s/        spec.y = 736.0f;/        spec.y = 737.0f;/
 s/            spec.z = D_800A1070;/            spec.z = D_800A106C;/

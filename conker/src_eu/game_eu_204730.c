@@ -6,7 +6,8 @@ extern u8 D_800A5860[];
 #endif
 
 
-void func_151D6F20(s32 arg0, s32 arg1) {
+/* was func_151D6F20 */
+void pickup_burst_in_mp_level(s32 arg0, s32 arg1) {
     if ((D_800BE9F0 == 50) || (D_800BE9F0 == 51)) {
         obj_sprite_burst_spawn(arg0, 0xFF, 1);
     }
@@ -35,14 +36,15 @@ typedef struct {
     f32 u44;
 } S06E8;
 
-s32 func_151506E8(S06E8 *, struct17 *, f32 *, u8, s32);
-void func_1504715C(f32 *, struct127 *);
+s32 emit_dust_by_angles(S06E8 *, struct17 *, f32 *, u8, s32);
+void hitinfo_from_obj_floor(f32 *, struct127 *);
 
-void func_151D6F64(s16 *arg0, struct127 *arg1) {
+/* was func_151D6F64 */
+void pickup_spin_sparkle_spawn(s16 *arg0, struct127 *arg1) {
     f32 v[9];
     struct_eu_15154488 s;
 
-    func_1504715C(v, arg1);
+    hitinfo_from_obj_floor(v, arg1);
     s.unk8.unk0 = arg0[8];
     s.unk8.unk4 = arg0[9];
     s.unk8.unk8 = arg0[10];
@@ -69,7 +71,7 @@ void func_151D6F64(s16 *arg0, struct127 *arg1) {
     s.unk40 = 0.4f;
     s.unk48 = 0;
     s.unk3C = 9;
-    func_15154488(&s, &s.unk8, (s32)v, 0xFF, 1);
+    emit_sparks_in_angle_range(&s, &s.unk8, (s32)v, 0xFF, 1);
     {
     S06E8 t;
     t.pos.unk0 = arg0[8];
@@ -96,18 +98,19 @@ void func_151D6F64(s16 *arg0, struct127 *arg1) {
     t.u3C = 1.0f;
     t.u40 = 0;
     t.u44 = 1.0f;
-    func_151506E8(&t, &t.pos, v, 0xFF, 1);
+    emit_dust_by_angles(&t, &t.pos, v, 0xFF, 1);
     }
 }
 
 #ifdef NON_MATCHING
 u8 *event_get_vars(s32);
-u8 *func_150D0420(s32, s32 *, s32, s32, s32, s32, s32, s32);
-s32 func_15157580(s8 *, s32, f32, s32, s32, s32, s32, s32); /* P95: f32 (float bits were passed as an int) */
+u8 *text_pager_spawn(s32, s32 *, s32, s32, s32, s32, s32, s32);
+s32 anim_model_fx_spawn(s8 *, s32, f32, s32, s32, s32, s32, s32); /* P95: f32 (float bits were passed as an int) */
 s32 memcpy(s32, u8 **, s32);
 extern s32 D_800AB630;
 
-void func_151D71AC(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151D71AC */
+void money_collect_popup_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u38;
         u8 * u3C;
@@ -195,13 +198,13 @@ void func_151D71AC(u8 *arg0, u8 arg1, s32 arg2) {
     (*(s32 *)((u8 *)(&sp.u94) + 8)) = (s32) (*(s32 *)((u8 *)temp_t4 + 8));
     sp.uA4 = 8;
     sp.uA6 = 0x1F;
-    func_15157580(&sp.u50, 0, 1.0f, 0, 0, 0, (s32) arg1, arg2); /* P95: f32 (float bits were passed as an int) */
+    anim_model_fx_spawn(&sp.u50, 0, 1.0f, 0, 0, 0, (s32) arg1, arg2); /* P95: f32 (float bits were passed as an int) */
     sp.u3C = arg0;
     sp.u38 = D_800AB630;
     sp.u48 = 8;
     sp.u4A = 0x1F;
     sp.u40 = (*(u8 *)((u8 *)arg0 + 0x3B));
-    sp.u44 = func_150859AC(0, 6);
+    sp.u44 = player_stat_get(0, 6);
     temp_v0 = event_get_vars(0x83);
     if (temp_v0 != NULL) {
         temp_v1 = (*(s32 *)((u8 *)temp_v0 + 0x64)) + 1;
@@ -219,18 +222,19 @@ void func_151D71AC(u8 *arg0, u8 arg1, s32 arg2) {
 block_7:
         sp.u44 = 0;
     }
-    temp_v0_2 = func_150D0420(0x63, &sp.u38, 0x96, 0x10, 3, 1, (s32) arg1, arg2);
+    temp_v0_2 = text_pager_spawn(0x63, &sp.u38, 0x96, 0x10, 3, 1, (s32) arg1, arg2);
     if (temp_v0_2 != NULL) {
         memcpy((*(s32 *)((u8 *)temp_v0_2 + 0x48)), &sp.u3C, 0x10);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/func_151D71AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/money_collect_popup_spawn.s")
 #endif
-f32 func_15144AA8(s32);
+f32 camera_get_yaw_deg(s32);
 #define MTX_7410(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
-s32 func_151D7410(u8 *arg0) {
-    mtxf_rotate_xyz_deg(&MTX_7410(arg0), 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
+/* was func_151D7410 */
+s32 money_popup_mtx_update(u8 *arg0) {
+    mtxf_rotate_xyz_deg(&MTX_7410(arg0), 0.0f, camera_get_yaw_deg(0) + 25.0f, 0.0f);
     MTX_7410(arg0)[12] = (*(f32 **)(arg0 + 0x4C))[5];
     MTX_7410(arg0)[13] = (*(f32 **)(arg0 + 0x4C))[6] + 120.0f;
     MTX_7410(arg0)[14] = (*(f32 **)(arg0 + 0x4C))[7];
@@ -248,8 +252,8 @@ s32 func_151D7410(u8 *arg0) {
 #undef MTX_7410
 
 #ifdef NON_MATCHING
-/* P241: readable C for func_151D75B0 (game_eu_204730, 51 insns). */
-// money_popup_draw: entry 3 of the record table D_80088C40 (dispatcher func_150D0544 ends the record, timer +0xE = -1,
+/* P241: readable C for money_popup_draw (game_eu_204730, 51 insns). */
+// money_popup_draw: entry 3 of the record table D_80088C40 (dispatcher text_pager_update ends the record, timer +0xE = -1,
 // when the result is 0). Returns 0 once the owner object (data +0) is gone or its id byte +0x3B no longer matches
 // data +4; otherwise prints "$ %d" (D_800AB634, the amount at data +8) above the owner in colour (0x32, 0x7D, 0x1C)
 // with alpha fading in over the first data +0xC frames (timer * step data +0xE, clamped at 0; 0xFF after) and keeps
@@ -257,7 +261,8 @@ s32 func_151D7410(u8 *arg0) {
 // is full), like its siblings' explicit 1.
 extern u8 D_800AB634[];
 void text_printf(s32, ...); /* varargs, as its definition (game_70200) */
-s32 func_151D75B0(u8 *rec) {
+/* was func_151D75B0 */
+s32 money_popup_draw(u8 *rec) {
     u8 *data = *(u8 **) (rec + 0x48);
     u8 *owner = *(u8 **) data;
     s16 timer;
@@ -281,25 +286,27 @@ s32 func_151D75B0(u8 *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/func_151D75B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/money_popup_draw.s")
 #endif
 
-void func_151D767C(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_151D767C */
+void money_popup_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *temp = *(u8 **)(arg0 + 0x48);
     node_handle_link_message(arg1, arg2, temp, temp + 4, arg0);
 }
 
 extern s32 D_80083AD0;
 extern s32 D_80083C50;
-u8 *func_1513445C(u8 *, s32, s32, s32);
-Gfx *func_151D76BC(Gfx *gdl, u8 *arg1, s32 arg2, s32 arg3, s8 *arg4) {
+u8 *gfx_emit_sprite_tex_segment(u8 *, s32, s32, s32);
+/* was func_151D76BC */
+Gfx *banner_sprite_set_segment(Gfx *gdl, u8 *arg1, s32 arg2, s32 arg3, s8 *arg4) {
     if (arg1[0x43] < 0xFF) {
         gSPSegment(gdl++, 8, &D_80083AD0);
     } else {
         gSPSegment(gdl++, 8, &D_80083C50);
     }
-    gdl = (Gfx *)func_1513445C((u8 *)gdl, 0xC3, 6, 3);
-    gdl = (Gfx *)func_1513445C((u8 *)gdl, 0xC3, 7, 3);
+    gdl = (Gfx *)gfx_emit_sprite_tex_segment((u8 *)gdl, 0xC3, 6, 3);
+    gdl = (Gfx *)gfx_emit_sprite_tex_segment((u8 *)gdl, 0xC3, 7, 3);
     *arg4 = 1;
     return gdl;
 }

@@ -7,11 +7,12 @@ s32 memcpy(s32, void *, s32);
 
 
 #ifdef NON_MATCHING
-void func_1504715C(void *, u8 *);
-void func_15143794(s16, s16, f32, void *);
-void func_1515C7B4(u8 *, f32 *, f32 *, f32 *);
+void hitinfo_from_obj_floor(void *, u8 *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+void obj_get_fx_point_b(u8 *, f32 *, f32 *, f32 *);
 
-void func_150CF650(u8 *arg0) {
+/* was func_150CF650 */
+void obj_dust_emitter_update(u8 *arg0) {
     struct {
         f32 uBC;
         u8 padC0[0x8];
@@ -43,18 +44,18 @@ void func_150CF650(u8 *arg0) {
     }
     if ((*(s32 *)((u8 *)temp_s0 + 0x1D4)) != 0) {
         (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.06f + (random_float() * 0.0704f)) * D_800BE9A4));
-        func_1515C7B4(temp_s0, &sp.u104, &sp.uD8, &sp.uD4);
+        obj_get_fx_point_b(temp_s0, &sp.u104, &sp.uD8, &sp.uD4);
         sp.u100 = (sp.uD8 + sp.uD4) * 0.5f;
-        func_1504715C(&sp.uDC, temp_s0);
+        hitinfo_from_obj_floor(&sp.uDC, temp_s0);
         if ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f) {
             do {
                 temp_s0_2 = random_int() & 0xFF;
-                func_15143794(temp_s0_2, (s16) ((random_int() % 76U) - 0x40), sp.u100, &sp.uC8);
+                vec3_from_angles_byte(temp_s0_2, (s16) ((random_int() % 76U) - 0x40), sp.u100, &sp.uC8);
                 sp.uC8 += sp.u104;
                 sp.uCC += sp.u108;
                 sp.uD0 += sp.u10C;
                 temp_s0_3 = random_int();
-                func_15143794(temp_s0_2, (s16) (((u32) temp_s0_3 % 54U) - 0x38), (random_float() * 1.4430001f) + 2.2680001f, &sp.uBC);
+                vec3_from_angles_byte(temp_s0_2, (s16) (((u32) temp_s0_3 % 54U) - 0x38), (random_float() * 1.4430001f) + 2.2680001f, &sp.uBC);
                 temp_f20 = random_float();
                 temp_s1 = random_int();
                 temp_s0_4 = random_int();
@@ -65,9 +66,10 @@ void func_150CF650(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CF650.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/obj_dust_emitter_update.s")
 #endif
-void func_150CF994(struct102 *arg0, u8 *arg1, u8 arg2) {
+/* was func_150CF994 */
+void obj_dust_emitter_handle_event(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x28;
     if (arg2 == 0) {
         s32 t = *(s32 *)arg1;
@@ -86,23 +88,25 @@ void func_150CF994(struct102 *arg0, u8 *arg1, u8 arg2) {
 }
 
 #ifdef NON_MATCHING
-void func_151CFE48(struct127 *, f32, f32); /* P95: f32 parameter */
+void ground_fx_spawn_random(struct127 *, f32, f32); /* P95: f32 parameter */
 #else
-void func_151CFE48(struct127 *, f32, s32);
+void ground_fx_spawn_random(struct127 *, f32, s32);
 #endif
 
-void func_150CFA40(s32 arg0) {
+/* was func_150CFA40 */
+void ground_fx_spawn_above_player(s32 arg0) {
 #ifdef NON_MATCHING
-    func_151CFE48(D_800CC2D0, D_800CC2D0->y_position + 300.0f, -10000.0f); /* P95: float literal (asm passes the bits 0xC61C4000) */
+    ground_fx_spawn_random(D_800CC2D0, D_800CC2D0->y_position + 300.0f, -10000.0f); /* P95: float literal (asm passes the bits 0xC61C4000) */
 #else
-    func_151CFE48(D_800CC2D0, D_800CC2D0->y_position + 300.0f, 0xC61C4000);
+    ground_fx_spawn_random(D_800CC2D0, D_800CC2D0->y_position + 300.0f, 0xC61C4000);
 #endif
 }
 
 extern s32 D_80088C30;
 extern s32 D_80088C34;
 extern s32 D_80088C38;
-void func_150CFA88(s32 arg0) {
+/* was func_150CFA88 */
+void tex_scroll_step_offsets(s32 arg0) {
     s32 temp_v1;
     D_80088C30 += D_800BE9E4 * 0x1A;
     temp_v1 = D_800BE9E4 * 0x1C;
@@ -115,14 +119,15 @@ extern s32 D_80088C34;
 extern s32 D_80088C38;
 extern s32 D_80088C3C;
 
-Gfx *func_150CFAF8(Gfx *gdl) {
+/* was func_150CFAF8 */
+Gfx *tex_scroll_set_tile_sizes(Gfx *gdl) {
     gDPSetTileSize(gdl++, 0, D_80088C30 >> 7, D_80088C34 >> 7, 0x47E, 0x47E);
     gDPSetTileSize(gdl++, 1, D_80088C38 >> 7, D_80088C3C >> 7, 0x47E, 0x47E);
     return gdl;
 }
 
 #ifdef NON_MATCHING
-s32 func_151559FC(s32 *, s32, s32, s32, s32, s32, s32);
+s32 sprite2d_spawn(s32 *, s32, s32, s32, s32, s32, s32);
 
 typedef struct {
     /* 0x00 */ f32 x;
@@ -164,9 +169,10 @@ typedef struct {
 } SpawnExtraCFB90; // copied to the record's +0x70
 
 // screen_bar_spawn: spawns effect kind 0xC1 at (-300, 72), scale 7.5, with `span` at +0x12 (+0x14 = 0x31, white
-// colour bytes, flags 0x200004 / 0x9F0601 and fixed defaults, current player D_80082FA0) through func_151559FC (list
+// colour bytes, flags 0x200004 / 0x9F0601 and fixed defaults, current player D_80082FA0) through sprite2d_spawn (list
 // 0xC, `flag`, `arg2`) and copies the extra block (0, 0, -300, 0) to the new record's +0x70.
-void func_150CFB90(s16 span, u8 flag, s32 arg2) {
+/* was func_150CFB90 */
+void screen_bar_spawn(s16 span, u8 flag, s32 arg2) {
     SpawnExtraCFB90 extra;
     SpawnSpecCFB90 spec;
     s32 rec;
@@ -203,21 +209,22 @@ void func_150CFB90(s16 span, u8 flag, s32 arg2) {
     spec.u4C = 1.0f;
     spec.u50 = 0.0f;
     spec.u54 = 0.0f;
-    rec = func_151559FC((s32 *) &spec, 0xC, 0, 0, 0x10, flag, arg2);
+    rec = sprite2d_spawn((s32 *) &spec, 0xC, 0, 0, 0x10, flag, arg2);
     if (rec != 0) {
         memcpy(rec + 0x70, &extra, 0x10);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFB90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/screen_bar_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_151559FC(s32 *, s32, s32, s32, s32, s32, s32);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+s32 sprite2d_spawn(s32 *, s32, s32, s32, s32, s32, s32);
 extern s32 D_80090070;
 
-s32 func_150CFD10(u8 *arg0) {
+/* was func_150CFD10 */
+s32 screen_bar_update_burst(u8 *arg0) {
     struct {
         s32 u9C;
         s32 uA0;
@@ -316,7 +323,7 @@ s32 func_150CFD10(u8 *arg0) {
                     sp.uCA = (random_int() % 101U) + 0x9B;
                     sp.uBC = (*(s8 (**)())((u8 *)(&D_80090070) + 8))();
                     temp_s0 = random_int();
-                    func_15143874((s16) (((u32) temp_s0 % 65U) - 0xA0), (random_float() * 2.0f) + 2.5f, &sp.u9C, &sp.uA0);
+                    vec2_from_angle_byte((s16) (((u32) temp_s0 % 65U) - 0xA0), (random_float() * 2.0f) + 2.5f, &sp.u9C, &sp.uA0);
                     sp.uA4 = (random_float() * 0.333f) + 0.404f;
                     temp_f2 = (random_float() * 1.79f) + 1.6999999f;
                     sp.uB4 = temp_f2;
@@ -332,7 +339,7 @@ s32 func_150CFD10(u8 *arg0) {
                         var_s0 = 0;
                     }
                     sp.uC0 = var_s0 | 1 | var_s1 | 0x38;
-                    temp_v0 = func_151559FC(&sp.uAC, 0xD, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                    temp_v0 = sprite2d_spawn(&sp.uAC, 0xD, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                     if (temp_v0 != 0) {
                         memcpy(temp_v0 + 0x70, &sp.u9C, 0x10);
                     }
@@ -348,9 +355,10 @@ s32 func_150CFD10(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFD10.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/screen_bar_update_burst.s")
 #endif
-void func_150D00FC(u8 *arg0, f32 *arg1, u8 arg2) {
+/* was func_150D00FC */
+void bouncing_sprite_handle_drop(u8 *arg0, f32 *arg1, u8 arg2) {
     u8 *temp_v0 = arg0 + 0x70;
     if (arg2 == 0x52) {
         temp_v0[0] |= 1;
@@ -360,12 +368,14 @@ void func_150D00FC(u8 *arg0, f32 *arg1, u8 arg2) {
     }
 }
 
-void func_150D0148(f32 arg0) {
+/* was func_150D0148 */
+void bouncing_sprites_broadcast_drop(f32 arg0) {
     f32 sp1C = arg0;
-    func_15155C9C(&sp1C, 0x52);
+    sprite2d_broadcast(&sp1C, 0x52);
 }
 
-s32 func_150D0170(u8 *arg0) {
+/* was func_150D0170 */
+s32 bouncing_sprite_update(u8 *arg0) {
     f32 *v = (f32 *)(arg0 + 0x70);
 
     *(f32 *)(arg0 + 0x10) += v[0] * D_800BE9A4;
@@ -379,35 +389,39 @@ s32 func_150D0170(u8 *arg0) {
     return 1;
 }
 
-u8 *func_150D0230(u8 *arg0) {
+/* was func_150D0230 */
+u8 *text_find_line_end(u8 *arg0) {
     while ((*arg0 != 0xBD) && (*arg0 != 0)) {
         arg0++;
     }
     return arg0;
 }
 
-u8 *func_150D026C(u8 *arg0) {
+/* was func_150D026C */
+u8 *text_find_string_end(u8 *arg0) {
     while (*arg0 != 0) {
         arg0++;
     }
     return arg0;
 }
 
-s32 func_150D0294(u8 *arg0, u8 **arg1) {
-    u8 *temp_v0 = func_150D0230(arg0);
+/* was func_150D0294 */
+s32 text_line_length(u8 *arg0, u8 **arg1) {
+    u8 *temp_v0 = text_find_line_end(arg0);
     *arg1 = temp_v0;
     return temp_v0 - arg0;
 }
 
-s32 func_150D02C8(u8 *arg0)
+/* was func_150D02C8 */
+s32 text_max_line_length(u8 *arg0)
 {
   u8 *end;
   s32 best = 0;
   u8 *next;
-  end = func_150D026C(arg0);
+  end = text_find_string_end(arg0);
   while (arg0 < end) {
     s32 v;
-    v = func_150D0294(arg0, &next);
+    v = text_line_length(arg0, &next);
     if (best < v) {
       best = v;
     }
@@ -417,7 +431,8 @@ s32 func_150D02C8(u8 *arg0)
 }
 
 s32 memcpy(s32, void *, s32);
-void func_150D034C(u8 *arg0)
+/* was func_150D034C */
+void text_pager_copy_line(u8 *arg0)
 {
   u8 *p = arg0;
   u8 *q;
@@ -427,21 +442,22 @@ void func_150D034C(u8 *arg0)
   *((*((u8 **) ((p + ((*((u8 *) (p + 0x15))) << 2)) + 0x18))) + (*((u8 *) (p + 0x14)))) = 0;
 }
 
-void func_150D03A8(u8 *arg0) {
+/* was func_150D03A8 */
+void text_pager_next_line(u8 *arg0) {
     u8 *v = arg0 + 0x28;
 
     if (**(u8 **)(arg0 + 0x38) != 0) {
         *(u8 **)(v + 0xC) = *(u8 **)(v + 0x10) + 1;
-        *(u8 *)(v + 0x14) = func_150D0294(*(u8 **)(v + 0xC), (u8 **)(v + 0x10));
+        *(u8 *)(v + 0x14) = text_line_length(*(u8 **)(v + 0xC), (u8 **)(v + 0x10));
         *(u8 *)(v + 0x15) = *(u8 *)(v + 0x15) ^ 1;
-        func_150D034C(arg0);
+        text_pager_copy_line(arg0);
         *(u8 *)(v + 8) = *(u8 *)(v + 8) | 1;
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_150D02C8(u8 *);
-void func_150D034C(u8 *);
+s32 text_max_line_length(u8 *);
+void text_pager_copy_line(u8 *);
 typedef struct {
     /* 0x00 */ u8 unk0;
     /* 0x04 */ u8 *unk4;
@@ -457,7 +473,8 @@ typedef struct {
     /* 0x25 */ u8 unk25;
 } struct150D0420; /* size 0x28 */
 
-u8 *func_150D0420(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
+/* was func_150D0420 */
+u8 *text_pager_spawn(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
     struct150D0420 sp40;
     u8 *sp3C;
     s32 sp38;
@@ -471,11 +488,11 @@ u8 *func_150D0420(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5, u8 
     sp40.unk25 = (u8)arg5;
     sp40.unk24 = (s8)arg4;
     sp40.unk0 = arg0;
-    sp40.unk14 = func_150D0294((u8 *)arg1, &sp40.unk10);
+    sp40.unk14 = text_line_length((u8 *)arg1, &sp40.unk10);
     sp40.unk18 = NULL;
     sp40.unk1C = NULL;
     sp40.unk20 = NULL;
-    n = func_150D02C8((u8 *)arg1);
+    n = text_max_line_length((u8 *)arg1);
     sp38 = n + 1;
     sp3C = (u8 *)func_15149130(arg2, -1, -1, 5, 3, 0x47, (struct37 *)(arg3 + n * 2 + 0x2A), arg6, arg7);
     if (sp3C != NULL) {
@@ -486,16 +503,17 @@ u8 *func_150D0420(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5, u8 
         dst->unk1C = dst->unk18 + sp38;
         *dst->unk18 = 0;
         *dst->unk1C = 0;
-        func_150D034C(sp3C);
+        text_pager_copy_line(sp3C);
     }
     return sp3C;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0420.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/text_pager_spawn.s")
 #endif
 extern s32 D_80088C40[];
 
-s32 func_150D0544(s32 arg0, u8 *arg1, s32 arg2) {
+/* was func_150D0544 */
+s32 text_pager_update(s32 arg0, u8 *arg1, s32 arg2) {
     u8 *v = arg1 + 0x28;
 
     if ((*(s8 *)(arg1 + 0x4C) != -1) && (((s32 (**)(u8 *))D_80088C40)[*(volatile s8 *)(arg1 + 0x4C)](arg1) == 0)) { // fakematch: volatile forces the second lb of the index, v defined first so addiu is rematerialised
@@ -507,12 +525,13 @@ s32 func_150D0544(s32 arg0, u8 *arg1, s32 arg2) {
 }
 
 extern void (*D_80088C50[])(u8 *, u8 *, u8);
-void func_150D03A8(u8 *);
-void func_150D05D0(u8 *arg0, u8 *arg1, u8 arg2) {
+void text_pager_next_line(u8 *);
+/* was func_150D05D0 */
+void text_pager_handle_event(u8 *arg0, u8 *arg1, u8 arg2) {
     void (*f)(u8 *, u8 *, u8);
     if (arg2 == 0x51) {
         if (arg0[0x28] == arg1[0]) {
-            func_150D03A8(arg0);
+            text_pager_next_line(arg0);
         }
     } else {
         f = D_80088C50[arg0[0x4D]];
@@ -522,14 +541,15 @@ void func_150D05D0(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-u8 *func_150D0420(u8, s32, s16, s32, s32, s32, u8, s32);
+u8 *text_pager_spawn(u8, s32, s16, s32, s32, s32, u8, s32);
 s32 memcpy(s32, void *, s32);
-void func_150D0644(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
+/* was func_150D0644 */
+void text_pager_spawn_caption(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     s32 sfpad;
     s8 sp30[4];
     u8 *temp_v0;
     sp30[0] = 0;
-    temp_v0 = func_150D0420(arg0, arg1, arg2, 8, 0, 0, arg3, arg4);
+    temp_v0 = text_pager_spawn(arg0, arg1, arg2, 8, 0, 0, arg3, arg4);
     if (temp_v0 != NULL) {
         memcpy((*(s32 *)((u8 *)temp_v0 + 0x48)), sp30, 1);
     }

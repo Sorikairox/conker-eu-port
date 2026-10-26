@@ -19,9 +19,9 @@ GPR = ['zero', 'at', 'v0', 'v1', 'a0', 'a1', 'a2', 'a3', 't0', 't1', 't2', 't3',
 
 # C call for each external callee: registers in, registers out (o32: ints a0-a3, floats f12 / f14, v0 / f0 out)
 EXTERN = {
-    'func_1507C7C0': 'v0 = func_1507C7C0((struct127 *) a0, (s16 *) a1, (s16 *) a2, (s16 *) a3);',
+    'obj_collision_cylinder': 'v0 = obj_collision_cylinder((struct127 *) a0, (s16 *) a1, (s16 *) a2, (s16 *) a3);',
     'func_150A69A8': 'v0 = func_150A69A8((s32) a0, (s32) a1, (s32 *) a2, (s32) a3);',
-    'func_150A49D0': 'v0 = func_150A49D0((s32) a0, (s32 *) a1, (s32) a2);',
+    'world_objects_transform_mesh': 'v0 = world_objects_transform_mesh((s32) a0, (s32 *) a1, (s32) a2);',
     'quadtree_set_test_box': 'quadtree_set_test_box(F[12].f, F[14].f, U2F(a2));',
     'func_150484A0': 'F[0].f = func_150484A0(F[12].f, F[14].f);',
     'collision_select_area': 'collision_select_area((s32) a0);',

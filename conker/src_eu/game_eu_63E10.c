@@ -15,7 +15,8 @@ static const f32 sAxisY[3] = { 0.0f, 1.0f, 0.0f };
 /* Turns joint `joint` of object `index` towards the D_800DBFF0 position (+0x2F8, a look-at from the joint's own
  * translation, up = d x (d x Y)), then applies the object's scale: x / z columns by +0x14C, y column by +0x150.
  * `turn` swaps the look direction a quarter turn about Y: (dx, dy, dz) -> (dz, dy, -dx). arg0 is unused. */
-void func_15036600(s32 arg0, s32 index, s32 joint, s32 turn) {
+/* was func_15036600 */
+void obj_joint_look_at_camera(s32 arg0, s32 index, s32 joint, s32 turn) {
     struct127 *obj = &D_800CC2D0[index];
     f32 (*mtx)[4];
     f32 pos[3];
@@ -62,5 +63,5 @@ void func_15036600(s32 arg0, s32 index, s32 joint, s32 turn) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_63E10/func_15036600.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_63E10/obj_joint_look_at_camera.s")
 #endif

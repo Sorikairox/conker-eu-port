@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-s32 func_1516ACE0(u8 *arg0) {
+/* was func_1516ACE0 */
+s32 text_split_lines(u8 *arg0) {
     s32 n = 1;
 
     while (*arg0 != 0) {
@@ -22,15 +23,15 @@ extern StrEnt_1516CDE8 *D_800DD688;
 
 #ifdef NON_MATCHING
 /* P155 */
-u8 *func_1516CDE8(s32 *arg0, s32 arg1, s16 arg2);
-void func_15042BC4(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3);
+u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2);
+void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3);
 extern f32 D_800A70B0; /* text box width scale */
 extern f32 D_800A70B4; /* text box height scale */
 extern u8 D_800CC8D3[]; /* per-player records, 0x32C bytes each */
 typedef struct {
     s32 flags;  /* low 4 bits: box style; 2: large font; 0x7000 cleared on open */
     s32 str;    /* string table index, or the text itself for a caller-owned descriptor */
-    u8 lines;   /* line count (counted by func_1516ACE0 for a caller-owned descriptor) */
+    u8 lines;   /* line count (counted by text_split_lines for a caller-owned descriptor) */
     u8 player;
     s8 bA;
     u8 padB[0x1B];
@@ -41,10 +42,11 @@ typedef struct {
 // text_box_open: opens a text box (node_alloc kind 0x51, 0x74 bytes) for descriptor `text`, or, without it, for
 // string id `id` (< 0x100: table D_800DD684, else D_800DD688[id - 0x100]); +0xD = source 0 / 1 / 2 (2 = caller
 // descriptor, whose lines are then counted). Stores player / arg2 / callback in the descriptor, measures every line
-// (func_15042BC4) for the box size +0x38 / +0x3C (plus half / one line height of 18, 25 for the large font, scaled by
+// (text_measure_string) for the box size +0x38 / +0x3C (plus half / one line height of 18, 25 for the large font, scaled by
 // D_800A70B0 / D_800A70B4), points +0x24 at the first line, clears the descriptor's 0x7000 bits and flags the
 // player's record (+0xD3 of the 0x32C-byte entry). Returns the box record or NULL.
-s32 func_1516AD20(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32), s32 *text, s32 arg5) {
+/* was func_1516AD20 */
+s32 text_box_open(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32), s32 *text, s32 arg5) {
     u8 *box;
     TextAD20 *t;
     s32 i;
@@ -92,10 +94,10 @@ s32 func_1516AD20(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
     *(f32 *)(box + 0x38) = 0.0f;
     *(f32 *)(box + 0x3C) = 0.0f;
     if (box[0xD] == 2) {
-        t->lines = func_1516ACE0((u8 *)t->str);
+        t->lines = text_split_lines((u8 *)t->str);
     }
     for (i = 0; i < t->lines; i++) {
-        func_15042BC4(func_1516CDE8((s32 *)t, i, box[0xD]), &w, &h, &unused);
+        text_measure_string(text_box_get_line((s32 *)t, i, box[0xD]), &w, &h, &unused);
         if (*(f32 *)(box + 0x38) < (f32)w) {
             *(f32 *)(box + 0x38) = w;
         }
@@ -106,7 +108,7 @@ s32 func_1516AD20(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
     line = (t->flags & 2) ? 25.0f : 18.0f;
     *(f32 *)(box + 0x38) = (*(f32 *)(box + 0x38) + line * 0.5f) * D_800A70B0;
     *(f32 *)(box + 0x3C) = (*(f32 *)(box + 0x3C) + line) * D_800A70B4;
-    *(u8 **)(box + 0x24) = func_1516CDE8((s32 *)t, 0, box[0xD]);
+    *(u8 **)(box + 0x24) = text_box_get_line((s32 *)t, 0, box[0xD]);
     box[0x20] = 0;
     t->flags &= ~0x7000;
     D_800CC8D3[t->player * 0x32C] = 1;
@@ -114,12 +116,12 @@ s32 func_1516AD20(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
     return (s32)box;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/func_1516AD20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_open.s")
 #endif
 
 #ifdef NON_MATCHING
 s32 func_151F2CDC(void);
-void func_1516D1C8(u8 *box);
+void text_box_place(u8 *box);
 extern u16 D_800BEB30[]; /* buttons pressed this frame, per player (0x8000 A, 0x4000 B) */
 extern f32 D_800A7138;   /* 1 / 3: open speed */
 
@@ -127,15 +129,16 @@ extern f32 D_800A7138;   /* 1 / 3: open speed */
 #define TB_S16(box, o) (*(s16 *)((box) + (o)))
 #define TB_F32(box, o) (*(f32 *)((box) + (o)))
 
-// text_box_update: per-frame update of a text box (D_8008B848 kind 0x51, record of func_1516AD20). Closes the box at
+// text_box_update: per-frame update of a text box (D_8008B848 kind 0x51, record of text_box_open). Closes the box at
 // once when the descriptor's +0x2B is set and D_800C35EA is not 1. +0x15 is the state: 1 open (style 2: the 3-dot
 // "more" variant, starts at 8), 2 grow (+0x28 scale up by +0x2C per frame, line fades in after 0.75), 4 wait
 // (45 per frame from 180), 8 the dots fade in one by one, 0x10 line fade-in, 0x20 shown (waits for A / B, the
 // "no B" / "last line" / timed flags of the descriptor, or a +0x100 request), 0x40 line fade-out then the next line
 // or 0x80, 0x80 shrink and close (callback with 0x1000, player's record flag cleared, box freed). Descriptor flag
 // 0x400 skips the timed steps. The callback gets (descriptor, line, state) with 0x2000 (next line) / 0x4000 (shown)
-// / 0x1000 (closed) set in the flags meanwhile. Always ends with func_1516D1C8 (screen position).
-void func_1516AFE0(u8 *box) {
+// / 0x1000 (closed) set in the flags meanwhile. Always ends with text_box_place (screen position).
+/* was func_1516AFE0 */
+void text_box_update(u8 *box) {
     TextAD20 *t;
     u8 *pl;
     s32 skip;
@@ -169,7 +172,7 @@ void func_1516AFE0(u8 *box) {
             TB_S16(box, 0x18) = 10;
             box[0x15] = 8;
             TB_F32(box, 0x28) = 1.0f;
-            func_1516D1C8(box);
+            text_box_place(box);
             box[0xE] = 1;
             TB_F32(box, 0x70) = TB_F32(box, 0x5C);
         } else {
@@ -180,7 +183,7 @@ void func_1516AFE0(u8 *box) {
         box[0x1A] = 0;
         break;
     case 2:
-        func_15042BC4(*(u8 **) (box + 0x24), &w, &h, &unused);
+        text_measure_string(*(u8 **) (box + 0x24), &w, &h, &unused);
         TB_F32(box, 0x30) = w >> 1;
         TB_F32(box, 0x34) = h >> 1;
         TB_F32(box, 0x28) = TB_F32(box, 0x28) + TB_F32(box, 0x2C) * D_800BE9A4;
@@ -249,7 +252,7 @@ void func_1516AFE0(u8 *box) {
         if (TB_S16(box, 0x16) == 0) {
             ((s8 *) box)[0x20]++;
             if (((s8 *) box)[0x20] < TB_T(box)->lines) {
-                *(u8 **) (box + 0x24) = func_1516CDE8((s32 *) TB_T(box), ((s8 *) box)[0x20], box[0xD]);
+                *(u8 **) (box + 0x24) = text_box_get_line((s32 *) TB_T(box), ((s8 *) box)[0x20], box[0xD]);
                 TB_S16(box, 0x18) = 10;
                 box[0x15] = 0x10;
                 TB_T(box)->flags |= 0x2000;
@@ -269,7 +272,7 @@ void func_1516AFE0(u8 *box) {
         }
         /* fallthrough: skipping goes on with the line fade-in */
     case 0x10:
-        func_15042BC4(*(u8 **) (box + 0x24), &w, &h, &unused);
+        text_measure_string(*(u8 **) (box + 0x24), &w, &h, &unused);
         TB_F32(box, 0x30) = w >> 1;
         TB_F32(box, 0x34) = h >> 1;
         TB_S16(box, 0x18) -= D_800BE9A0;
@@ -362,21 +365,21 @@ void func_1516AFE0(u8 *box) {
             D_800CC8D3[TB_T(box)->player * 0x32C] = 0;
             *(s16 *) (pl + 0x6CC) = 0;
             ((u8 *) TB_T(box))[8] = 0;
-            node_destroy((struct102 *) box); /* the box is freed; func_1516D1C8 below still runs on it, as on N64 */
+            node_destroy((struct102 *) box); /* the box is freed; text_box_place below still runs on it, as on N64 */
         }
         break;
     }
-    func_1516D1C8(box);
+    text_box_place(box);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/func_1516AFE0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_update.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P170 */
-Gfx *func_15095380(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
-Gfx *func_15095E58(Gfx *gfx, void *spr, f32 x, f32 y);
-Gfx *func_1516CEA4(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a);
+Gfx *sprite_load_texture(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
+Gfx *sprite_draw_at_screen(Gfx *gfx, void *spr, f32 x, f32 y);
+Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a);
 extern u8 D_800E100C;     /* text box fade, 0 = hidden */
 extern u8 D_800D31C8;     /* sprite primitive colour r, g, b */
 extern u8 D_800D31C9;
@@ -389,7 +392,7 @@ extern u8 D_8009092C[];   /* pointer sprite header */
 extern u8 D_8009093C[];   /* thought dot sprite */
 extern u8 D_8009094C[];   /* pointer sprite, descriptor flag 8 */
 
-/* sprite parameters for func_15095380 / func_15095E58 */
+/* sprite parameters for sprite_load_texture / sprite_draw_at_screen */
 typedef struct {
     u8 unk0[6];
     s16 w;      /* +6: x scale (1024 = 1) */
@@ -404,16 +407,17 @@ typedef struct {
 #define TB_FLAGS (**(s32 **) (box + 0x10))
 #define TB_DL_FULL(g) ((g) - D_800BEDE8[D_800BE9C0] > D_800BEFC4)
 
-// text_box_draw: draws a text box (record of func_1516AD20; +0x28 scale, +0x38 / +0x3C size, +0x40 / +0x44 pointer
-// tip, +0x58 pointer angle from func_1516D1C8). First the shadow pass in black at a quarter alpha: the box sprite
+// text_box_draw: draws a text box (record of text_box_open; +0x28 scale, +0x38 / +0x3C size, +0x40 / +0x44 pointer
+// tip, +0x58 pointer angle from text_box_place). First the shadow pass in black at a quarter alpha: the box sprite
 // (D_8009090C, or D_8009091C with descriptor flag 2) 5 pixels right / up unless descriptor flag 4, then the pointer
 // or, with flag 2, the two "thought" dots (D_8009093C; the first eases towards the tip in +0x70) - this pass also
 // sets the box corner +0x48 / +0x4C. Then the colour pass in the descriptor's colour (+0x28..+0x2A into
 // D_800D31C8..CA; black at alpha 0x55 with flag 4): pointer / dots (flag 8: the D_8009094C pointer), the box, and
-// the text (func_1516CEA4). Alphas scale with the global fade D_800E100C (+1, / 256); the box's fade bytes are +0x1A
+// the text (text_box_draw_text). Alphas scale with the global fade D_800E100C (+1, / 256); the box's fade bytes are +0x1A
 // (text), +0x1B (box), +0x1C / +0x1D (dots). Returns gfx unchanged when the box is hidden (+0xE == 0) or the fade is 0,
 // and the original gfx (drops the box) when the frame display list fills up.
-Gfx *func_1516BC2C(Gfx *gfx, u8 *box, s16 arg2) {
+/* was func_1516BC2C */
+Gfx *text_box_draw(Gfx *gfx, u8 *box, s16 arg2) {
     Gfx *start = gfx;
     TextBoxSprite spr;
     s32 plain;
@@ -461,12 +465,12 @@ Gfx *func_1516BC2C(Gfx *gfx, u8 *box, s16 arg2) {
     if (TB_FLAGS & 2) {
         spr.alpha = (u32) ((f32) box[0x1B] * 64.0f / 255.0f);
         spr.alpha = (spr.alpha * fade) >> 8;
-        gfx = func_15095380(gfx, D_8009091C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009091C, 0, &spr, 0, 0, 0, 2, 3);
     } else {
-        gfx = func_15095380(gfx, D_8009090C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009090C, 0, &spr, 0, 0, 0, 2, 3);
     }
     if (!plain) {
-        gfx = func_15095E58(gfx, &spr, TB_F(0x48) + 5.0f, TB_F(0x4C) + -5.0f);
+        gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x48) + 5.0f, TB_F(0x4C) + -5.0f);
     }
     if (0.0f < TB_F(0x58) && TB_F(0x58) < 3.14159274f) {
         spr.flip &= ~2;
@@ -487,33 +491,33 @@ Gfx *func_1516BC2C(Gfx *gfx, u8 *box, s16 arg2) {
         if (box[0x15] == 1) {
             TB_F(0x70) = TB_F(0x5C);
         }
-        gfx = func_15095380(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
         spr.alpha = (u32) ((f32) box[0x1C] * 64.0f / 255.0f);
         spr.alpha = (spr.alpha * fade) >> 8;
         if (1.57079637f < TB_F(0x58)) {
             TB_F(0x70) = TB_F(0x70) + (TB_F(0x40) + px - TB_F(0x70)) * 0.3f;
-            gfx = func_15095E58(gfx, &spr, TB_F(0x70), TB_F(0x44) - py);
+            gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x70), TB_F(0x44) - py);
         } else {
             TB_F(0x70) = TB_F(0x70) + (TB_F(0x40) - px - TB_F(0x70)) * 0.3f;
-            gfx = func_15095E58(gfx, &spr, TB_F(0x70), TB_F(0x44) - py);
+            gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x70), TB_F(0x44) - py);
         }
         spr.w /= 2;
         spr.h /= 2;
         spr.alpha = (u32) ((f32) box[0x1D] * 64.0f / 255.0f);
         spr.alpha = (spr.alpha * fade) >> 8;
-        gfx = func_15095380(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
         if (1.57079637f < TB_F(0x58)) {
-            gfx = func_15095E58(gfx, &spr, TB_F(0x40) - 2.5f, TB_F(0x44) + -2.5f);
+            gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) - 2.5f, TB_F(0x44) + -2.5f);
         } else {
-            gfx = func_15095E58(gfx, &spr, TB_F(0x40) + 2.5f, TB_F(0x44) + -2.5f);
+            gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) + 2.5f, TB_F(0x44) + -2.5f);
         }
     } else {
-        gfx = func_15095380(gfx, D_8009092C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009092C, 0, &spr, 0, 0, 0, 2, 3);
         if (!plain) {
             if (1.57079637f < TB_F(0x58)) {
-                gfx = func_15095E58(gfx, &spr, TB_F(0x40) + px - 2.5f, TB_F(0x44) - py + -2.5f);
+                gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) + px - 2.5f, TB_F(0x44) - py + -2.5f);
             } else {
-                gfx = func_15095E58(gfx, &spr, TB_F(0x40) - px + 2.5f, TB_F(0x44) - py + -2.5f);
+                gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) - px + 2.5f, TB_F(0x44) - py + -2.5f);
             }
         }
     }
@@ -559,25 +563,25 @@ Gfx *func_1516BC2C(Gfx *gfx, u8 *box, s16 arg2) {
     spr.w = (s32) (TB_F(0x38) / (f32) *(u16 *) (D_8009090C + 6) * 2355.2f * TB_F(0x28));
     spr.h = (s32) (TB_F(0x3C) / (f32) *(u16 *) (D_8009090C + 8) * 4259.84f * TB_F(0x28));
     if (TB_FLAGS & 2) {
-        gfx = func_15095380(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
         spr.alpha = (box[0x1C] * fade) >> 8;
-        gfx = func_15095E58(gfx, &spr, TB_F(0x70), TB_F(0x44) - py);
+        gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x70), TB_F(0x44) - py);
         spr.w /= 2;
         spr.h /= 2;
-        gfx = func_15095380(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009093C, 0, &spr, 0, 0, 0, 2, 3);
         spr.alpha = (box[0x1D] * fade) >> 8;
         /* both sides draw the small dot at the tip */
-        gfx = func_15095E58(gfx, &spr, TB_F(0x40), TB_F(0x44));
+        gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40), TB_F(0x44));
     } else {
         if (TB_FLAGS & 8) {
-            gfx = func_15095380(gfx, D_8009094C, 0, &spr, 0, 0, 0, 2, 3);
+            gfx = sprite_load_texture(gfx, D_8009094C, 0, &spr, 0, 0, 0, 2, 3);
         } else {
-            gfx = func_15095380(gfx, D_8009092C, 0, &spr, 0, 0, 0, 2, 3);
+            gfx = sprite_load_texture(gfx, D_8009092C, 0, &spr, 0, 0, 0, 2, 3);
         }
         if (1.57079637f < TB_F(0x58)) {
-            gfx = func_15095E58(gfx, &spr, TB_F(0x40) + px, TB_F(0x44) - py);
+            gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) + px, TB_F(0x44) - py);
         } else {
-            gfx = func_15095E58(gfx, &spr, TB_F(0x40) - px, TB_F(0x44) - py);
+            gfx = sprite_draw_at_screen(gfx, &spr, TB_F(0x40) - px, TB_F(0x44) - py);
         }
     }
 
@@ -586,21 +590,22 @@ Gfx *func_1516BC2C(Gfx *gfx, u8 *box, s16 arg2) {
     spr.h = (s32) (TB_F(0x3C) / (f32) *(u16 *) (D_8009090C + 8) * 4259.84f * TB_F(0x28));
     if (TB_FLAGS & 2) {
         spr.alpha = (box[0x1B] * fade) >> 8;
-        gfx = func_15095380(gfx, D_8009091C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009091C, 0, &spr, 0, 0, 0, 2, 3);
     } else {
-        gfx = func_15095380(gfx, D_8009090C, 0, &spr, 0, 0, 0, 2, 3);
+        gfx = sprite_load_texture(gfx, D_8009090C, 0, &spr, 0, 0, 0, 2, 3);
     }
-    gfx = func_15095E58(gfx, &spr, (s32) TB_F(0x48), (s32) TB_F(0x4C));
+    gfx = sprite_draw_at_screen(gfx, &spr, (s32) TB_F(0x48), (s32) TB_F(0x4C));
     if (TB_DL_FULL(gfx)) {
         return start;
     }
-    return func_1516CEA4(gfx, box, 0, 0, 0, (box[0x1A] * fade) >> 8);
+    return text_box_draw_text(gfx, box, 0, 0, 0, (box[0x1A] * fade) >> 8);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/func_1516BC2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_draw.s")
 #endif
 
-u8 *func_1516CDE8(s32 *arg0, s32 arg1, s16 arg2) {
+/* was func_1516CDE8 */
+u8 *text_box_get_line(s32 *arg0, s32 arg1, s16 arg2) {
     s32 i;
     u8 *p;
 
@@ -628,15 +633,16 @@ u8 *func_1516CDE8(s32 *arg0, s32 arg1, s16 arg2) {
 
 #ifdef NON_MATCHING
 /* P170 */
-Gfx *func_15041A9C(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA);
+Gfx *text_draw_string(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA);
 extern Gfx D_80085D30[]; /* text render state display list */
 
 // text_box_draw_text: draws a text box's string (+0x24, lines split at '\n', leading newlines skipped) from the
-// box's corner (+0x50 / +0x54 minus +0x30 / +0x34). Each line is measured (func_15042BC4: width, height, advance)
-// and printed by func_15041A9C at 4096 x 4096 scale with its length: descriptor flag 0x20000 centres it on +0x30,
+// box's corner (+0x50 / +0x54 minus +0x30 / +0x34). Each line is measured (text_measure_string: width, height, advance)
+// and printed by text_draw_string at 4096 x 4096 scale with its length: descriptor flag 0x20000 centres it on +0x30,
 // flag 0x40000 prints it white one pixel right, flag 4 in colour r / g / b, otherwise black one pixel right.
 // Returns the original gfx (drops the text) once the frame display list is full.
-Gfx *func_1516CEA4(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
+/* was func_1516CEA4 */
+Gfx *text_box_draw_text(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
     Gfx *start = gfx;
     u8 line[84];
     s32 width;
@@ -673,7 +679,7 @@ Gfx *func_1516CEA4(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
         if (c != 0) {
             n++;
         } else {
-            func_15042BC4(line, &width, &height, &advance);
+            text_measure_string(line, &width, &height, &advance);
             if (!first) {
                 y += (f32) height;
             } else {
@@ -686,11 +692,11 @@ Gfx *func_1516CEA4(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
                 dx = 0.0f;
             }
             if (flags & 0x40000) {
-                gfx = func_15041A9C(gfx, x + dx + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
+                gfx = text_draw_string(gfx, x + dx + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
             } else if (!(flags & 4)) {
-                gfx = func_15041A9C(gfx, x + dx + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
+                gfx = text_draw_string(gfx, x + dx + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
             } else {
-                gfx = func_15041A9C(gfx, x + dx, y, line, r, g, b, a, 4096.0f, 4096.0f, n);
+                gfx = text_draw_string(gfx, x + dx, y, line, r, g, b, a, 4096.0f, 4096.0f, n);
             }
             n = 0;
             y += (f32) advance;
@@ -699,12 +705,12 @@ Gfx *func_1516CEA4(Gfx *gfx, u8 *box, u8 r, u8 g, u8 b, u8 a) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/func_1516CEA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_draw_text.s")
 #endif
 
 #ifdef NON_MATCHING
 void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
-void func_1516D63C(u8 *, f32 *, f32 *, s32);
+void text_box_clamp_to_screen(u8 *, f32 *, f32 *, s32);
 extern u8 D_8009090C[]; /* box sprite header: u16 width +6, height +8 */
 extern u8 D_8009092C[]; /* pointer sprite header: u16 width +6, height +8 */
 extern u8 D_800CC730[]; /* per-player records (0x32C bytes): f32 heading at +0 */
@@ -712,10 +718,11 @@ extern u8 D_800CC730[]; /* per-player records (0x32C bytes): f32 heading at +0 *
 // text_box_place: screen position of a text box (+0x5C / +0x60, copied to +0x40 / +0x44) and the angle +0x58 of
 // its pointer (towards the speaker). Descriptor flag 0x8000: position from the descriptor's percentages (+0x18 /
 // +0x1C words point at f32 x / y in %, +0x20 at the pointer angle in %, 55..125 degrees) scaled to the viewport
-// (D_800BE628 +4 / +8), kept on screen by func_1516D63C when flag 0x10000 is set. Otherwise the speaker's world
+// (D_800BE628 +4 / +8), kept on screen by text_box_clamp_to_screen when flag 0x10000 is set. Otherwise the speaker's world
 // point (descriptor +0xC..+0x14) projected once (camera_world_to_screen) and the angle from the player's heading relative to
 // the camera (D_800DBFF0 +0x37C), always kept on screen. +0x50 / +0x54: the pointer's corner.
-void func_1516D1C8(u8 *box) {
+/* was func_1516D1C8 */
+void text_box_place(u8 *box) {
     u8 *t;
     u8 *vp;
     f32 a;
@@ -739,7 +746,7 @@ void func_1516D1C8(u8 *box) {
         }
         *(f32 *) (box + 0x58) = (70.0f * a + 55.0f) * 0.0174532924f;
         if (*(s32 *) t & 0x10000) {
-            func_1516D63C(box, (f32 *) (box + 0x5C), (f32 *) (box + 0x60), (s32) (box + 0x58));
+            text_box_clamp_to_screen(box, (f32 *) (box + 0x5C), (f32 *) (box + 0x60), (s32) (box + 0x58));
         }
     } else {
         camera_world_to_screen(0, *(f32 *) (t + 0xC), *(f32 *) (t + 0x10), *(f32 *) (t + 0x14), &sx, &sy, &sz);
@@ -765,7 +772,7 @@ void func_1516D1C8(u8 *box) {
             a = -180.0f - a;
         }
         *(f32 *) (box + 0x58) = (70.0f * (a / -180.0f + 0.5f) + 55.0f) * 0.0174532924f;
-        func_1516D63C(box, (f32 *) (box + 0x5C), (f32 *) (box + 0x60), (s32) (box + 0x58));
+        text_box_clamp_to_screen(box, (f32 *) (box + 0x5C), (f32 *) (box + 0x60), (s32) (box + 0x58));
     }
     *(f32 *) (box + 0x40) = *(f32 *) (box + 0x5C);
     *(f32 *) (box + 0x44) = *(f32 *) (box + 0x60);
@@ -779,14 +786,15 @@ void func_1516D1C8(u8 *box) {
         - (f32) oy;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/func_1516D1C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_place.s")
 #endif
 
 #ifdef NON_MATCHING
 extern u16 D_80090912;
 extern u16 D_80090932;
 
-void func_1516D63C(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
+/* was func_1516D63C */
+void text_box_clamp_to_screen(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
     f32 sp2C;
     f32 sp28;
     f32 sp24;
@@ -846,9 +854,10 @@ void func_1516D63C(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/func_1516D63C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1984F0/text_box_clamp_to_screen.s")
 #endif
-void func_1516D850(u8 *arg0) {
+/* was func_1516D850 */
+void text_box_close_now(u8 *arg0) {
     if ((arg0 != NULL) && (arg0[0] == 0x51)) {
         (*(u8 **)(arg0 + 0x10))[8] = 0;
         node_destroy((struct102 *)arg0);
@@ -856,7 +865,8 @@ void func_1516D850(u8 *arg0) {
     }
 }
 
-void func_1516D898(u8 *arg0) {
+/* was func_1516D898 */
+void text_box_request_finish(u8 *arg0) {
     if ((arg0 != NULL) && (arg0[0] == 0x51)) {
         **(s32 **)(arg0 + 0x10) |= 0x100;
         **(s32 **)(arg0 + 0x10) &= ~0x400;
@@ -864,7 +874,8 @@ void func_1516D898(u8 *arg0) {
     }
 }
 
-u8 *func_1516D8E8(u8 *arg0) {
+/* was func_1516D8E8 */
+u8 *text_box_request_next(u8 *arg0) {
     if ((arg0 != NULL) && (arg0[0] == 0x51)) {
         **(s32 **)(arg0 + 0x10) |= 0x100;
         **(s32 **)(arg0 + 0x10) &= ~0x400;
@@ -873,7 +884,8 @@ u8 *func_1516D8E8(u8 *arg0) {
     return NULL;
 }
 
-u8 *func_1516D934(u8 *arg0) {
+/* was func_1516D934 */
+u8 *text_box_request_skip(u8 *arg0) {
     if ((arg0 != NULL) && (arg0[0] == 0x51)) {
         **(s32 **)(arg0 + 0x10) |= 0x500;
         return arg0;

@@ -9,7 +9,8 @@ extern u8 D_800AB930[];
 #ifdef NON_MATCHING
 extern s32 D_800AB934;
 
-void func_151DD390(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151DD390 */
+void bounce_dust_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u2C;
         s32 u30;
@@ -48,8 +49,8 @@ void func_151DD390(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u50 = -0.693f;
     sp.u54 = 0.30400002f;
     sp.u64 = 25.714f;
-    func_15152700(&sp.u2C, ((u8 *)&D_800AB930), &D_800AB934, 1, 26.0f, 0U, (u8) (s32) arg1, arg2);
+    emit_textured_burst(&sp.u2C, ((u8 *)&D_800AB930), &D_800AB934, 1, 26.0f, 0U, (u8) (s32) arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20ABA0/func_151DD390.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20ABA0/bounce_dust_spawn.s")
 #endif

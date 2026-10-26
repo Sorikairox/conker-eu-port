@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1518FE50(s32);
+void bone_sparks_emit(s32);
 #endif
 
 typedef struct {
@@ -54,15 +54,16 @@ typedef struct {
 
 #ifdef NON_MATCHING
 /* P177 */
-u8 *func_1518E934(u8 **arg0, u8 arg1);
+u8 *character_effect_create(u8 **arg0, u8 arg1);
 // character_effect_attach: attaches effect `type` (1..18: fire, smoke, impacts, ...) to obj: a kind-0x21 effect record
-/* (func_1518E934, for view `view`) holding obj, obj's id byte +0x3B, a duration, a flag byte, a direction byte and the
+/* (character_effect_create, for view `view`) holding obj, obj's id byte +0x3B, a duration, a flag byte, a direction byte and the
  * effect number. With `clear`, first frees (node_destroy) every kind-0x21 record of both groups that belongs to obj
  * or to obj's id (the list walk keeps the next pointer in D_800DD5C8[depth] like the other list walks).
  * Types 13, 14, 15, 16 and 18 take `time` as the duration (13, 15, 16: flag 0 for time 999 = endless); types 10..12
  * set the flag from obj +0x1CA. Returns the record, NULL for no obj, an unknown type or no record.
  * `arg5` and `name` (the effect's debug name) are not used. */
-u8 *func_1518D1C0(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char *name) {
+/* was func_1518D1C0 */
+u8 *character_effect_attach(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char *name) {
     struct {
         u8 *owner;  /* 0x0 */
         u8 id;      /* 0x4 obj +0x3B */
@@ -116,19 +117,19 @@ u8 *func_1518D1C0(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char
     case 18: e.time = time; e.flag = 1; e.dir = -1; e.effect = 15; break;
     default: return NULL;
     }
-    return func_1518E934((u8 **)&e, view);
+    return character_effect_create((u8 **)&e, view);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518D1C0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/character_effect_attach.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P197 */
-/* character_effect_update: P197: update handler of the kind-0x21 character effect records that func_1518D1C0
- * (character_effect_attach) creates through func_1518E934 (fire, smoke, impacts ... on a model). See below. */
-void func_15143134(void *arg0, void *arg1, void *arg2);
+/* character_effect_update: P197: update handler of the kind-0x21 character effect records that character_effect_attach
+ * (character_effect_attach) creates through character_effect_create (fire, smoke, impacts ... on a model). See below. */
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
 void effect3d_set_handlers(u8 *, u8, u8, u8, u8);
-void func_1518E878(u8 *);
+void character_effect_free_particles(u8 *);
 s32 memcpy(u8 *, u8 **, s32);
 
 typedef struct CharFxSlot {
@@ -240,20 +241,21 @@ extern void (*D_8008D9C0[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
 extern s32 (*D_8008D9C8[])(u8 *);
 
 /* character_effect_update: per-frame handler (object type entry at D_8008BEFC) of a kind-0x21 character effect e
- * (func_1518D1C0 / func_1518E934), a particle emitter tied to the owner model e->owner. When e is not running it only
- * frees its particles (func_1518E878, mode 1). It removes itself (node_destroy) when the owner is gone or has
+ * (character_effect_attach / character_effect_create), a particle emitter tied to the owner model e->owner. When e is not running it only
+ * frees its particles (character_effect_free_particles, mode 1). It removes itself (node_destroy) when the owner is gone or has
  * another id, or when its time (e +0x1E, bit 0 of e +0x20) runs out (then the D_8008D9C8[onEnd] handler decides).
  * When the owner is hidden for this view (owner +0x74 bit D_80082FA4) the particles are freed. Otherwise the row of
  * D_8008D980[effect] for the owner's variant (+0x1C8) is picked: with matrices (+0x1D4) and a visible model
  * (+0x74 & 0xF != 0xF) the row whose id list holds owner +0x84 (else the default row), mode 4; without, the hidden
  * row (mode 2) at the owner position + yoff. A row / mode change restarts the effect (accumulator = max).
- * Live particles follow their model point (func_15143134) or the effect position + their offset; when their hold
+ * Live particles follow their model point (mtx_transform_point_or_origin) or the effect position + their offset; when their hold
  * time is over they are let go: velocity from the last move * D_800BEDC8 (x / z clamped to +-10), effect3d_set_handlers
  * with the template's end arguments, a life time. The accumulator gains rate per frame; for every whole unit a free
  * slot is picked at random and a particle record is spawned (D_8008D9C0[tpl->init] fills the spawn block,
  * effect3d_spawn_default, the 0x58-byte motion block to +0x110) at a model point or at the effect position + a random
  * sphere (shape 1) / ring (shape 2) offset. */
-void func_1518DC50(u8 *arg0) {
+/* was func_1518DC50 */
+void character_effect_update(u8 *arg0) {
     CharFx *e = (CharFx *) arg0;
     CharFxMotion blk;
     CharFxSpawn spawn;
@@ -271,7 +273,7 @@ void func_1518DC50(u8 *arg0) {
 
     if (!(e->flags & 1)) {
         if (e->live != 0) {
-            func_1518E878(arg0);
+            character_effect_free_particles(arg0);
             e->mode = 1;
         }
         return;
@@ -298,7 +300,7 @@ void func_1518DC50(u8 *arg0) {
         if (vis & (1 << D_80082FA4)) {
             /* hidden in this view */
             if (!(e->mode & 1)) {
-                func_1518E878(arg0);
+                character_effect_free_particles(arg0);
                 e->mode |= 1;
             }
         } else {
@@ -328,7 +330,7 @@ void func_1518DC50(u8 *arg0) {
             }
             if (!(e->mode & 8) && (mode != e->mode || e->attach != cfg->attach)) {
                 /* other row: restart */
-                func_1518E878(arg0);
+                character_effect_free_particles(arg0);
                 fresh = 1;
                 e->accum = (f32) cfg->max;
             }
@@ -338,7 +340,7 @@ void func_1518DC50(u8 *arg0) {
                 e->pos[1] = *(f32 *) (owner + 0x18) + cfg->yoff;
                 e->pos[2] = *(f32 *) (owner + 0x1C);
             } else if (cfg->attach == 2) {
-                func_150A7E40((f32(*)[4]) (*(u8 **) (e->owner + 0x1D4) + cfg->matrix * 0x40), cfg->local[0],
+                mtxf_transform_point((f32(*)[4]) (*(u8 **) (e->owner + 0x1D4) + cfg->matrix * 0x40), cfg->local[0],
                               cfg->local[1], cfg->local[2], &e->pos[0], &e->pos[1], &e->pos[2]);
             }
 
@@ -356,7 +358,7 @@ void func_1518DC50(u8 *arg0) {
                         *(f32 *) (slot->obj + 0x3C) = e->pos[2] + slot->off[2];
                     } else {
                         pt = cfg->points + i * 0x10;
-                        func_15143134(pt, slot->obj + 0x34,
+                        mtx_transform_point_or_origin(pt, slot->obj + 0x34,
                                       *(u8 **) (e->owner + 0x1D4) + *(s16 *) (pt + 0xC) * 0x40);
                     }
                     slot->timer -= D_800BE9E4;
@@ -486,7 +488,7 @@ void func_1518DC50(u8 *arg0) {
                                 } else {
                                     idx = head - e->slots;
                                     pt = cfg->points + idx * 0x10;
-                                    func_15143134(pt, head->obj + 0x34,
+                                    mtx_transform_point_or_origin(pt, head->obj + 0x34,
                                                   *(u8 **) (e->owner + 0x1D4) + *(s16 *) (pt + 0xC) * 0x40);
                                 }
                                 obj = head->obj;
@@ -518,10 +520,11 @@ void func_1518DC50(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518DC50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/character_effect_update.s")
 #endif
 
-s32 func_1518E808(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1518E808 */
+s32 effect_sound_follow_owner(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *temp_v1;
 
     temp_v1 = (*(u8 **)((u8 *)arg0 + 0x1C));
@@ -534,7 +537,8 @@ s32 func_1518E808(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 1;
 }
 
-void func_1518E878(u8 *arg0) {
+/* was func_1518E878 */
+void character_effect_free_particles(u8 *arg0) {
     s32 i;
     struct102 **var_s0;
 
@@ -550,16 +554,18 @@ void func_1518E878(u8 *arg0) {
     bzero(arg0 + 0x48, 0x960);
 }
 
-void func_1518E8EC(u8 *arg0, u8 arg1) {
+/* was func_1518E8EC */
+void character_effect_set_type(u8 *arg0, u8 arg1) {
     if (arg1 != arg0[0x22]) {
-        func_1518E878(arg0);
+        character_effect_free_particles(arg0);
         arg0[0x22] = arg1;
     }
 }
 
 s32 memcpy(u8 *, u8 **, s32);
 
-u8 *func_1518E934(u8 **arg0, u8 arg1) {
+/* was func_1518E934 */
+u8 *character_effect_create(u8 **arg0, u8 arg1) {
     u8 *temp_v0;
     u8 *sp24;
 
@@ -587,22 +593,26 @@ u8 *func_1518E934(u8 **arg0, u8 arg1) {
     return sp24;
 }
 
-void func_1518EA10(struct_eu_1BAAA0 *arg0) {
-    func_1518E878(arg0);
-    func_1514EDF0(arg0, arg0->unk18);
+/* was func_1518EA10 */
+void character_effect_cleanup(struct_eu_1BAAA0 *arg0) {
+    character_effect_free_particles(arg0);
+    char_fx_detach_effect(arg0, arg0->unk18);
 }
 
-void func_1518EA3C(void *arg0) {
-    func_1518EA10(arg0);
+/* was func_1518EA3C */
+void character_effect_retire(void *arg0) {
+    character_effect_cleanup(arg0);
     node_retire(arg0);
 }
 
-void func_1518EA68(void *arg0) {
-    func_1518EA10(arg0);
+/* was func_1518EA68 */
+void character_effect_unlink_free(void *arg0) {
+    character_effect_cleanup(arg0);
     node_unlink_free(arg0);
 }
 
-void func_1518EA94(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, s16 *arg6) {
+/* was func_1518EA94 */
+void character_effect_init_spark(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, s16 *arg6) {
     s32 temp_v1;
 
     *arg1 = 2;
@@ -625,9 +635,10 @@ void func_1518EA94(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, s
     *arg6 = 0x301;
 }
 
-void func_151429E0(s32, s32, s32, s32);
+void fx_pick_random_color(s32, s32, s32, s32);
 
-void func_1518EB48(s8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s16 *arg6) {
+/* was func_1518EB48 */
+void character_effect_init_smoke(s8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s16 *arg6) {
     s32 var_v0;
 
     if (random_int() & 1) {
@@ -639,16 +650,17 @@ void func_1518EB48(s8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s
     } else {
         var_v0 = 4;
     }
-    func_151429E0(var_v0 & 0xFF, arg2, arg3, arg4);
+    fx_pick_random_color(var_v0 & 0xFF, arg2, arg3, arg4);
     *arg5 = 0xC8;
     *arg6 = 0x401;
 }
 
-u8 *func_1518D1C0(u8 *, s16, s16, u8, u8, s32, char *);
+u8 *character_effect_attach(u8 *, s16, s16, u8, u8, s32, char *);
 extern s32 D_800A7840;
 
-s32 func_1518EBDC(u8 *arg0) {
-    func_1518D1C0(*(u8 **)(arg0 + 0x18), 3, 0, 0, arg0[0xC], arg0[1], (char *)&D_800A7840);
+/* was func_1518EBDC */
+s32 character_effect_end_chain3(u8 *arg0) {
+    character_effect_attach(*(u8 **)(arg0 + 0x18), 3, 0, 0, arg0[0xC], arg0[1], (char *)&D_800A7840);
     (*(s16 *)((u8 *)arg0 + 0x1E)) = 0x80;
     (*(s8 *)((u8 *)arg0 + 0x21)) = -1;
     return 0;
@@ -656,8 +668,9 @@ s32 func_1518EBDC(u8 *arg0) {
 
 extern s32 D_800A787C;
 
-s32 func_1518EC44(u8 *arg0) {
-    func_1518D1C0(*(u8 **)(arg0 + 0x18), 4, 0, 0, arg0[0xC], arg0[1], (char *)&D_800A787C);
+/* was func_1518EC44 */
+s32 character_effect_end_chain4(u8 *arg0) {
+    character_effect_attach(*(u8 **)(arg0 + 0x18), 4, 0, 0, arg0[0xC], arg0[1], (char *)&D_800A787C);
     (*(s16 *)((u8 *)arg0 + 0x1E)) = 0x80;
     (*(s8 *)((u8 *)arg0 + 0x21)) = -1;
     return 0;
@@ -665,7 +678,7 @@ s32 func_1518EC44(u8 *arg0) {
 
 #ifdef NON_MATCHING
 /* P203 */
-void func_151D6310(s32, s16, s32, u8 **, u8 *);
+void vtx_slot_buffer_get(s32, s16, s32, u8 **, u8 *);
 f32 math_sin_u8(u8);
 f32 math_cos_u8(u8);
 extern f32 D_800DD608[]; /* per view: sin of the camera yaw */
@@ -673,7 +686,7 @@ extern f32 D_800DD618[]; /* per view: cos of the camera yaw */
 
 // particle_quad_velocity_build: P203: entry 5 of the particle draw table D_8008A1BC (game_169510): builds the 4
 // vertices of the particle `p` for view `view` (a quad stretched along its screen-space motion, e.g. the
-// character-effect flames). func_151D6310 gives the view's vertex block (p +0x100[view], 0x40 bytes); when it is
+// character-effect flames). vtx_slot_buffer_get gives the view's vertex block (p +0x100[view], 0x40 bytes); when it is
 // new, both of its halves get the template vertices p +0xC0. Lean: the motion since the last frame (+0x40 - +0x34,
 // +0x48 - +0x3C) across the view (cos / sin of the view, D_800DD618 / D_800DD608) times D_800BEDC8, then
 // sqrt(|t|) * p +0x160, at most pi / 2, negative for a forward motion; byte angle = lean * 256 / (2 pi) (Rare's
@@ -681,7 +694,8 @@ extern f32 D_800DD618[]; /* per view: cos of the camera yaw */
 // angle (math_sin_u8 sin, math_cos_u8 cos) around the position p +0x34; the s16 corners go to +0x00, +0x10,
 // +0x20, +0x30 of the block (the view's horizontal axis is (cos, -sin) in x / z). Returns the block, NULL when
 // none is available.
-u8 *func_1518ECAC(u8 *p, s16 view) {
+/* was func_1518ECAC */
+u8 *particle_quad_velocity_build(u8 *p, s16 view) {
     u8 *blk;
     u8 fresh;
     s16 *v;
@@ -689,7 +703,7 @@ u8 *func_1518ECAC(u8 *p, s16 view) {
     s32 n, neg;
     u8 ang;
 
-    func_151D6310((s32) (p + 0x100), view, 0x40, &blk, &fresh);
+    vtx_slot_buffer_get((s32) (p + 0x100), view, 0x40, &blk, &fresh);
     if (blk == NULL) {
         return NULL;
     }
@@ -740,20 +754,21 @@ u8 *func_1518ECAC(u8 *p, s16 view) {
     return blk;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518ECAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/particle_quad_velocity_build.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P222: readable C for func_1518F080 (game_eu_1BAF40, 273 words). */
-/* func_151D6310 is declared above in game_eu_1BAF40.c: (s32, s16, s32, u8 **, u8 *) */
+/* P222: readable C for line_quad_build (game_eu_1BAF40, 273 words). */
+/* vtx_slot_buffer_get is declared above in game_eu_1BAF40.c: (s32, s16, s32, u8 **, u8 *) */
 
 // line_quad_build: builds the camera-facing quad of a line effect for display list slot `slot`: the line runs from
 // A = +0x34/+0x38/+0x3C towards B = +0x40/+0x44/+0x48, cut at P = A + (B - A) * +0x30. Each end gets two vertices,
 // offset by +-(half width +0x2C) along the normal of the plane through the end, the line and the slot's camera
-// (D_800DBFF0[slot] +0x2F8): A + n, A - n, P + n, P - n (a zero normal gives offset 0). func_151D6310 hands out the
+// (D_800DBFF0[slot] +0x2F8): A + n, A - n, P + n, P - n (a zero normal gives offset 0). vtx_slot_buffer_get hands out the
 // slot's vertex buffer (pointer table at +0x100); when it is new, both halves (0x40 bytes each) are first filled from
 // the template at +0xC0. Returns the written vertices, or NULL when no buffer is available. (Draw-table entry.)
-u8 *func_1518F080(u8 *fx, s16 slot) {
+/* was func_1518F080 */
+u8 *line_quad_build(u8 *fx, s16 slot) {
     u8 *vtx;
     u8 *start;
     u8 fresh;
@@ -764,7 +779,7 @@ u8 *func_1518F080(u8 *fx, s16 slot) {
     f32 nx, ny, nz;
     f32 len2, k;
 
-    func_151D6310((s32) (fx + 0x100), slot, 0x40, &vtx, &fresh);
+    vtx_slot_buffer_get((s32) (fx + 0x100), slot, 0x40, &vtx, &fresh);
     start = vtx;
     if (vtx == NULL) {
         return NULL;
@@ -839,10 +854,11 @@ u8 *func_1518F080(u8 *fx, s16 slot) {
     return start;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F080.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/line_quad_build.s")
 #endif
 
-s32 func_1518F4C4(u8 *arg0)
+/* was func_1518F4C4 */
+s32 line_particle_move_damped(u8 *arg0)
 {
   u8 *p = arg0 + 0x110;
   f32 x;
@@ -870,7 +886,8 @@ s32 func_1518F4C4(u8 *arg0)
   return 1;
 }
 
-s32 func_1518F5C8(u8 *arg0) {
+/* was func_1518F5C8 */
+s32 line_particle_move(u8 *arg0) {
     f32 x;
     f32 y;
     f32 z;
@@ -894,7 +911,8 @@ s32 func_1518F5C8(u8 *arg0) {
     return 1;
 }
 
-s32 func_1518F678(struct_eu_1BAAA0_e *arg0) {
+/* was func_1518F678 */
+s32 particle_shrink_fade(struct_eu_1BAAA0_e *arg0) {
     arg0->unk30 = arg0->unk30 - (arg0->unk30 * arg0->unk154);
     arg0->unk2C = arg0->unk2C - (arg0->unk2C * arg0->unk154);
     if (arg0->unk1C < arg0->unk158) {
@@ -903,7 +921,8 @@ s32 func_1518F678(struct_eu_1BAAA0_e *arg0) {
     return 1;
 }
 
-s32 func_1518F6CC(struct_eu_1BAAA0_e *arg0) {
+/* was func_1518F6CC */
+s32 particle_shrink_height_fade(struct_eu_1BAAA0_e *arg0) {
     arg0->unk30 = arg0->unk30 - (arg0->unk30 * arg0->unk154);
     if (arg0->unk1C < arg0->unk158) {
         arg0->unk5C = arg0->unk1C * arg0->unk15A;
@@ -911,7 +930,8 @@ s32 func_1518F6CC(struct_eu_1BAAA0_e *arg0) {
     return 1;
 }
 
-s32 func_1518F710(u8 *arg0) {
+/* was func_1518F710 */
+s32 flame_particle_flicker(u8 *arg0) {
     u8 *p = arg0 + 0x110;
     s32 v;
 
@@ -940,7 +960,8 @@ s32 func_1518F710(u8 *arg0) {
     return 1;
 }
 
-s32 func_1518F8F4(u8 *arg0) {
+/* was func_1518F8F4 */
+s32 flame_particle_settle(u8 *arg0) {
     u8 *p;
 
     if (*(s16 *)(arg0 + 0x12C) == 0) {
@@ -960,13 +981,15 @@ s32 func_1518F8F4(u8 *arg0) {
 }
 
 // rodata_inject: size 0x24CB34 4
-void func_1518F9CC(s32 arg0, u8 arg1) {
+/* was func_1518F9CC */
+void character_effect_broadcast(s32 arg0, u8 arg1) {
     const s32 sp1C[1] = {0x21};
 
     node_broadcast_types(sp1C, 1, arg0, arg1);
 }
 
-void func_1518FA0C(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_1518FA0C */
+void character_effect_on_message(u8 *arg0, u8 *arg1, u8 arg2) {
     s32 v0;
     s32 v1;
     u8 a0;
@@ -983,26 +1006,27 @@ void func_1518FA0C(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-s32 func_1518FB40(s32, u8 *, s16, s8, s8, s8, u8, s32, u8, s32);
-s32 func_15190334(s32, u8 *, u8);
+s32 bone_sparks_attach(s32, u8 *, s16, s8, s8, s8, u8, s32, u8, s32);
+s32 bone_sparks_table_for_kind(s32, u8 *, u8);
 extern u8 *D_8008D9D0[];
-s32 func_1518FA8C(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+/* was func_1518FA8C */
+s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     s32 sfpad; // fakematch: unused local shifts sp33 to the ref slot
     u8 sp33;
 
     if (arg0 == 0) {
         return 0;
     }
-    if (func_15190334(arg0, &sp33, arg1) == 0) {
+    if (bone_sparks_table_for_kind(arg0, &sp33, arg1) == 0) {
         return 0;
     }
-    return func_1518FB40(arg0, D_8008D9D0[sp33] + arg1 * 0x50, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+    return bone_sparks_attach(arg0, D_8008D9D0[sp33] + arg1 * 0x50, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
 void *attach_ctrl_spawn(void *arg0, s32 arg1, u8 arg2, s32 arg3);
 void attach_fx_asset_acquire(s32);
-struct225 *func_1519078C(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5);
-s32 func_1518E808(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+struct225 *bone_sparks_light_create(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5);
+s32 effect_sound_follow_owner(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 typedef struct {
     s32 w[0x14];
@@ -1030,7 +1054,8 @@ typedef struct {
     u8 unkD;
 } HeadFB40;
 
-s32 func_1518FB40(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+/* was func_1518FB40 */
+s32 bone_sparks_attach(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     HeadFB40 head;
     DataFB40 data;
     u8 *temp_v0;
@@ -1065,34 +1090,35 @@ s32 func_1518FB40(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 ar
         d = (DataFB40 *)(temp_v0 + 0x30);
         memcpy(d, &data, 0x5C);
         if (arg5 != -1) {
-            *(struct225 **)((u8 *)d + 0x54) = func_1519078C((s32)temp_v0, (u8 *)arg0, arg5, arg2, arg8, arg9);
+            *(struct225 **)((u8 *)d + 0x54) = bone_sparks_light_create((s32)temp_v0, (u8 *)arg0, arg5, arg2, arg8, arg9);
         } else {
             *(struct225 **)((u8 *)d + 0x54) = NULL;
         }
         attach_fx_asset_acquire(*(s32 *)((u8 *)d + 0x48));
-        func_1000FA64(0x4D, *(f32 *)((u8 *)arg0 + 0x14), *(f32 *)((u8 *)arg0 + 0x18), *(f32 *)((u8 *)arg0 + 0x1C), 15000, 2000, 800, (s32)func_1518E808, temp_v0, arg0, 0, 0);
+        sfx_emitter_start(0x4D, *(f32 *)((u8 *)arg0 + 0x14), *(f32 *)((u8 *)arg0 + 0x18), *(f32 *)((u8 *)arg0 + 0x1C), 15000, 2000, 800, (s32)effect_sound_follow_owner, temp_v0, arg0, 0, 0);
     }
     return (s32)temp_v0;
 }
 
 #ifdef NON_MATCHING
-void func_1518FE50(s32);
-// D_8008DA1C: the bone-spark emitter's tick handler table (0x8008DA1C: func_15190B2C, func_15190C34). func_1518FD34
-// indexes it with self +0x88 and returns the handler's result; func_1518FDC8 indexes D_8008DA20 (= D_8008DA1C + 1)
+void bone_sparks_emit(s32);
+// D_8008DA1C: the bone-spark emitter's tick handler table (0x8008DA1C: bone_sparks_tick_hurt, bone_sparks_owner_release). bone_sparks_tick
+// indexes it with self +0x88 and returns the handler's result; bone_sparks_release indexes D_8008DA20 (= D_8008DA1C + 1)
 // with self +0x89. One signature for both views (wasm call_indirect): s32 (u8 *).
 extern s32 (*D_8008DA1C[])(u8 *);
 
 // bone_sparks_tick: effect-child handler (D_8008FFE0 [3] / D_8008FFE8 [1]). Advances the emitter's spark counter
 // (self +0x30) by (rate +0x34 + random f32 * spread +0x38) * D_800BE9A4 (frame time), emits the sparks
-// (func_1518FE50), then runs the tick handler D_8008DA1C[self +0x88] (none: -1) and returns its result (1 without).
+// (bone_sparks_emit), then runs the tick handler D_8008DA1C[self +0x88] (none: -1) and returns its result (1 without).
 // The second argument (the position the effect-node dispatchers pass) is not used; it is there for the table's
 // common signature s32 (node, pos).
-s32 func_1518FD34(u8 *self, void *pos) {
+/* was func_1518FD34 */
+s32 bone_sparks_tick(u8 *self, void *pos) {
     f32 *count = (f32 *)(self + 0x30);
     s8 tick;
 
     count[0] += (count[1] + random_float() * count[2]) * D_800BE9A4;
-    func_1518FE50((s32)self);
+    bone_sparks_emit((s32)self);
     tick = (s8)self[0x88];
     if (tick != -1) {
         return D_8008DA1C[tick](self);
@@ -1100,14 +1126,15 @@ s32 func_1518FD34(u8 *self, void *pos) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FD34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_sparks_tick.s")
 #endif
 
 #ifdef NON_MATCHING
 // bone_sparks_release: effect-child handler (D_8008FFE0 [6] / D_8008FFE8 [4]): runs the release handler
 // D_8008DA20[self +0x89] (= D_8008DA1C[self +0x89 + 1]; none: -1). The second argument is unused (table signature
 // s32 (node, pos)); returns the handler's result (0 without; the dispatchers that reach it ignore v0).
-s32 func_1518FDC8(u8 *self, void *pos) {
+/* was func_1518FDC8 */
+s32 bone_sparks_release(u8 *self, void *pos) {
     s8 release = (s8)self[0x89];
 
     if (release != -1) {
@@ -1116,7 +1143,7 @@ s32 func_1518FDC8(u8 *self, void *pos) {
     return 0;
 }
 #else
-void func_1518FDC8(u8 *arg0)
+void bone_sparks_release(u8 *arg0)
 {
   u8 *new_var;
   new_var = ((u8 *) arg0) + 0x89;
@@ -1128,22 +1155,23 @@ void func_1518FDC8(u8 *arg0)
 #endif
 
 #ifndef NON_MATCHING
-s32 func_1518FE50(s32);
+s32 bone_sparks_emit(s32);
 #endif
 
 #ifdef NON_MATCHING
 // bone_sparks_burst: effect-child handler (D_8008FFE0 [4] / D_8008FFE8 [2]): sets the spark counter (self +0x30) to
-// base +0x3C + random f32 * spread +0x40 and emits them at once (func_1518FE50). The second argument is unused (table
-// signature s32 (node, pos)); returns 0 (the asm leaves func_1518FE50's v0; the dispatchers that reach it ignore it).
-s32 func_1518FE0C(u8 *self, void *pos) {
+// base +0x3C + random f32 * spread +0x40 and emits them at once (bone_sparks_emit). The second argument is unused (table
+// signature s32 (node, pos)); returns 0 (the asm leaves bone_sparks_emit's v0; the dispatchers that reach it ignore it).
+/* was func_1518FE0C */
+s32 bone_sparks_burst(u8 *self, void *pos) {
     f32 *count = (f32 *)(self + 0x30);
 
     count[0] = count[3] + count[4] * random_float();
-    func_1518FE50((s32)self);
+    bone_sparks_emit((s32)self);
     return 0;
 }
 #else
-void func_1518FE0C(s32 arg0)
+void bone_sparks_burst(s32 arg0)
 {
   u8 *new_var;
   u8 *temp_v0;
@@ -1152,12 +1180,12 @@ void func_1518FE0C(s32 arg0)
   new_var2 = (f32 *) (((u8 *) temp_v0) + 0);
   new_var = temp_v0;
   *new_var2 = (f32) ((*((f32 *) (((u8 *) new_var) + 0xC))) + ((*((f32 *) (((u8 *) temp_v0) + 0x10))) * random_float()));
-  func_1518FE50(arg0);
+  bone_sparks_emit(arg0);
 }
 #endif
 
 #ifdef NON_MATCHING
-u8 *func_1514BE54(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9,
+u8 *flame_spawn(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9,
                   u8 argA, s32 argB, u8 argC, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11);
 void *attach_fx_spawn(void *arg0, void *arg1, s32 arg2, u8 arg3, s32 arg4);
 
@@ -1166,7 +1194,8 @@ void *attach_fx_spawn(void *arg0, void *arg1, s32 arg2, u8 arg3, s32 arg4);
 // entries, bone index + offset) is transformed by the owner's (+0x10) bone matrix, a particle (kind 0x13 / 0x14) is
 // spawned there and a follower (attach_fx_spawn) ties it to the bone. Owners without matrices or hidden (nibble 0xF)
 // only drain the counter.
-void func_1518FE50(s32 arg0) {
+/* was func_1518FE50 */
+void bone_sparks_emit(s32 arg0) {
     u8 *self = (u8 *)arg0;
     u8 *owner = *(u8 **)(self + 0x10);
     f32 *count = (f32 *)(self + 0x30);
@@ -1205,10 +1234,10 @@ void func_1518FE50(s32 arg0) {
             point = (u8 *)D_800E0990[set] + ((u32)random_int() % (u16)D_800E0968[set]) * 16;
             speed[0] = random_float() * *(f32 *)(self + 0x4C) + *(f32 *)(self + 0x44);
             speed[1] = random_float() * *(f32 *)(self + 0x50) + *(f32 *)(self + 0x48);
-            func_15143134(point + 4, at, *(u8 **)(owner + 0x1D4) + (point[0] << 6));
+            mtx_transform_point_or_origin(point + 4, at, *(u8 **)(owner + 0x1D4) + (point[0] << 6));
             size = random_int();
             kind = (random_int() & 1) ? 0x13 : 0x14;
-            part = func_1514BE54((u8 *)at, (u8 *)speed, -1, (u32)size % (self[0x55] + 1) + self[0x54], D_800A5860,
+            part = flame_spawn((u8 *)at, (u8 *)speed, -1, (u32)size % (self[0x55] + 1) + self[0x54], D_800A5860,
                                  0.0f, 1.0f, *(f32 *)(self + 0x80), 0, 0x23, 0, kind, 1, 1, 0xFF, 0, self[0xC],
                                  self[1]);
             if (part != NULL) {
@@ -1231,22 +1260,24 @@ void func_1518FE50(s32 arg0) {
     } while (1.0f < *count);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FE50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_sparks_emit.s")
 #endif
 
-s32 func_15190174(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
+/* was func_15190174 */
+s32 bone_spark_follow_look(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
     struct_eu_1BAAA0_c *temp_a0 = arg0->unk2C;
 
     temp_a0->unk34 = *arg1;
-    func_1514C390(temp_a0, arg1, arg0);
+    effect3d_look_follow(temp_a0, arg1, arg0);
     return 1;
 }
 
-s32 func_151901B4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
+/* was func_151901B4 */
+s32 bone_spark_follow_look_up(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
     struct_eu_1BAAA0_c *temp_a0 = arg0->unk2C;
 
     temp_a0->unk34 = *arg1;
-    func_1514C4C0(temp_a0, arg1, arg0);
+    effect3d_look_set_up(temp_a0, arg1, arg0);
     return 1;
 }
 
@@ -1257,12 +1288,13 @@ s32 func_151901B4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
 // +0x154 = random f32 * cfg +0x68 + cfg +0x64, +0x158 = cfg +0x6C, +0x6C / +0x6E = cfg s16 +0x70 / +0x72,
 // +0x1C = random % (cfg s16 +0x76 + 1) + cfg s16 +0x74, +0x70 = 0x21 when cfg +0x7C bit 0 else 0x20, +0x71 = 0x24,
 // +0x58 |= 0x08000001.
-// target (a1): P231: a real vec3. P215 / P219 took the table for D_8008FC48 (func_1519AF14's, whose three entries
-// func_1519CEB8 / CEE0 / CF08 take one argument) and added a PORT-only "aim at the node itself" fallback; the real
+// target (a1): P231: a real vec3. P215 / P219 took the table for D_8008FC48 (emitter2_trail_update's, whose three entries
+// emitter2_path_fx_quarter / CEE0 / CF08 take one argument) and added a PORT-only "aim at the node itself" fallback; the real
 // callers pass the position, so the fallback is gone and both builds use the target.
-// Returns s32 only for the table signature (the siblings func_15190174 / func_151901B4 return s32); the dispatcher
+// Returns s32 only for the table signature (the siblings bone_spark_follow_look / bone_spark_follow_look_up return s32); the dispatcher
 // never reads v0. Path 2 returns the random int (the asm leaves it in v0), path 1 returns 0.
-s32 func_151901F4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) {
+/* was func_151901F4 */
+s32 bone_spark_release_toward(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) {
     u8 *node = (u8 *)arg0;
     u8 *p = *(u8 **)(node + 0x2C);
     u8 *cfg = *(u8 **)(node + 0x30);
@@ -1287,10 +1319,11 @@ s32 func_151901F4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) {
     return r;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_151901F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_spark_release_toward.s")
 #endif
 
-s32 func_15190334(s32 arg0, u8 *arg1, u8 arg2) {
+/* was func_15190334 */
+s32 bone_sparks_table_for_kind(s32 arg0, u8 *arg1, u8 arg2) {
     switch (((u8 *)arg0)[4]) {
     case 0x87:
     case 0xB0:
@@ -1445,7 +1478,8 @@ extern s32 D_800A7ED0;
 extern s32 D_800A7ED4;
 extern s32 D_800A7ED8;
 
-s32 *func_151905AC(u8 *arg0, s32 *arg1) {
+/* was func_151905AC */
+s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1) {
     s32 *p;
 
     switch (arg0[4]) {
@@ -1544,7 +1578,8 @@ s32 *func_151905AC(u8 *arg0, s32 *arg1) {
     return p;
 }
 
-struct225 *func_1519078C(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5) {
+/* was func_1519078C */
+struct225 *bone_sparks_light_create(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5) {
     s32 pad; // fakematch: frame slot above the header
     Header header;
     struct {
@@ -1596,18 +1631,20 @@ s32 light_follow_obj_pos(u8 *arg0, u8 *arg1);
 
 // light_effect_update_18: handler 18 of D_8008B490 (P251): the dispatcher light_ctrl_update tests the result, which is
 // light_follow_obj_pos's v0 left in place by the matched void C; s32 here (as light_beh_follow_obj), one signature for wasm
-s32 func_15190940(u8 *arg0) {
+/* was func_15190940 */
+s32 bone_sparks_light_update(u8 *arg0) {
     light_flicker_intensity_step(arg0, arg0 + 0x20);
     return light_follow_obj_pos(arg0, arg0 + 0x18);
 }
 #else
-void func_15190940(u8 *arg0) {
+void bone_sparks_light_update(u8 *arg0) {
     light_flicker_intensity_step(arg0, arg0 + 0x20);
     light_follow_obj_pos(arg0, arg0 + 0x18);
 }
 #endif
 
-void func_15190970(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_15190970 */
+void bone_sparks_light_on_event(u8 *arg0, u8 *arg1, u8 arg2) {
     s32 temp_v0;
     s32 temp_v1;
     u8 temp_a2;
@@ -1624,39 +1661,44 @@ void func_15190970(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-void func_151909C4(struct_eu_1BAAA0 *arg0) {
+/* was func_151909C4 */
+void bone_sparks_light_unlink(struct_eu_1BAAA0 *arg0) {
     struct_eu_1BAAA0_b *temp_v0 = arg0->unk40;
 
     temp_v0->unk84 = 0;
 }
 
-void func_151909D4(void *arg0) {
-    func_151909C4(arg0);
+/* was func_151909D4 */
+void bone_sparks_light_retire(void *arg0) {
+    bone_sparks_light_unlink(arg0);
     light_ctrl_retire(arg0);
 }
 
-void func_15190A00(void *arg0) {
-    func_151909C4(arg0);
+/* was func_15190A00 */
+void bone_sparks_light_free(void *arg0) {
+    bone_sparks_light_unlink(arg0);
     light_ctrl_free(arg0);
 }
 
 #ifdef NON_MATCHING
 // effect_node_release: P213: release handler of an effect node (entry of the D_8008FC60 handler table, void (u8 *),
-/* dispatched by func_15199EF0): frees the attached record +0x84 (node_destroy), then func_1000FD38(func_1518E808,
- * node, word +0x10) (func_1518E808 is the node's func_1000FA64 callback) and attach_fx_asset_release(word +0x78). */
-void func_1000FD38(s32, s32, s32);
-void func_15190A2C(u8 *node) {
+/* dispatched by spec_emitter_cleanup): frees the attached record +0x84 (node_destroy), then sfx_emitter_stop_by_callback(effect_sound_follow_owner,
+ * node, word +0x10) (effect_sound_follow_owner is the node's sfx_emitter_start callback) and attach_fx_asset_release(word +0x78). */
+void sfx_emitter_stop_by_callback(s32, s32, s32);
+/* was func_15190A2C */
+void bone_sparks_node_release(u8 *node) {
     if (*(u8 **)(node + 0x84) != NULL) {
         node_destroy(*(struct102 **)(node + 0x84));
     }
-    func_1000FD38((s32)func_1518E808, (s32)node, *(s32 *)(node + 0x10));
+    sfx_emitter_stop_by_callback((s32)effect_sound_follow_owner, (s32)node, *(s32 *)(node + 0x10));
     attach_fx_asset_release(*(s32 *)(node + 0x30 + 0x48));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_15190A2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/bone_sparks_node_release.s")
 #endif
 
-void func_15190A88(u8 *arg0) {
+/* was func_15190A88 */
+void bone_sparks_detach_owner(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -1669,7 +1711,8 @@ void func_15190A88(u8 *arg0) {
 
 void attach_ctrl_free_if_owner(u8 *, s32, u8);
 extern void (*D_8008DA24[])(u8 *, s32, u8);
-void func_15190AC0(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_15190AC0 */
+void bone_sparks_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     void (*f)(u8 *, s32, u8);
     if (arg2 == 0x2A) {
         attach_ctrl_free_if_owner(arg0, arg1, arg2);
@@ -1695,7 +1738,8 @@ typedef struct {
     Tick0B2C t;
 } Obj0B2C;
 
-s32 func_15190B2C(Obj0B2C *arg0) {
+/* was func_15190B2C */
+s32 bone_sparks_tick_hurt(Obj0B2C *arg0) {
     Tick0B2C *t = &arg0->t;
     u8 *v;
 
@@ -1712,10 +1756,11 @@ s32 func_15190B2C(Obj0B2C *arg0) {
 }
 
 #ifdef NON_MATCHING
-// bone_sparks_owner_release: D_8008DA1C [1] (func_1518FDC8's release handler, also reachable as a tick handler from
-// func_1518FD34): clears byte +0x1AC of the owner's (+0x10) attachment +0x31C, if any. Returns that pointer (the asm
-// leaves it in v0, and func_1518FD34 returns a tick handler's v0), so the table has one signature s32 (u8 *).
-s32 func_15190C34(u8 *self) {
+// bone_sparks_owner_release: D_8008DA1C [1] (bone_sparks_release's release handler, also reachable as a tick handler from
+// bone_sparks_tick): clears byte +0x1AC of the owner's (+0x10) attachment +0x31C, if any. Returns that pointer (the asm
+// leaves it in v0, and bone_sparks_tick returns a tick handler's v0), so the table has one signature s32 (u8 *).
+/* was func_15190C34 */
+s32 bone_sparks_owner_release(u8 *self) {
     u8 *att = *(u8 **)(*(u8 **)(self + 0x10) + 0x31C);
 
     if (att != NULL) {
@@ -1724,7 +1769,7 @@ s32 func_15190C34(u8 *self) {
     return (s32)att;
 }
 #else
-void func_15190C34(u8 *arg0) {
+void bone_sparks_owner_release(u8 *arg0) {
     u8 *temp_v0;
 
     temp_v0 = (*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x10))) + 0x31C));
@@ -1734,7 +1779,8 @@ void func_15190C34(u8 *arg0) {
 }
 #endif
 
-void func_15190C50(u8 *arg0, s32 *arg1, u8 arg2) {
+/* was func_15190C50 */
+void bone_sparks_on_model_swap(u8 *arg0, s32 *arg1, u8 arg2) {
     s32 *p = (s32 *)(arg0 + 0x90);
     if (arg2 == 0x2D) {
         if (arg1[0] == p[2]) {
@@ -1747,7 +1793,8 @@ void func_15190C50(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-void func_1519072C(u8 *arg0)
+/* was func_1519072C */
+void object_effects_detach_all(u8 *arg0)
 {
   u8 *sp20[2];
   s32 sp1C;
@@ -1760,21 +1807,22 @@ void func_1519072C(u8 *arg0)
     ((u8 *) sp20)[4] = arg0[0x3B];
     attach_ctrl_broadcast(sp1C, 0x2A);
   }
-  func_1518F9CC(0xFFFFFFFFFFFFFFFF & sp1C, 0x49);
+  character_effect_broadcast(0xFFFFFFFFFFFFFFFF & sp1C, 0x49);
 }
 
 typedef struct { u8 *p; u8 b; } S190770;
-s32 func_151920FC(void *, s32);
+s32 model_drip_broadcast(void *, s32);
 u8 impact_current_kind();
 
-u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_15190770 */
+u8 *model_drip_create(u8 **arg0, s32 arg1, u8 arg2, s32 arg3) {
     u8 *obj;
     S190770 s;
     u8 *q;
 
     s.p = *arg0;
     s.b = (*arg0)[0x3B];
-    func_151920FC(&s, 0xE);
+    model_drip_broadcast(&s, 0xE);
     obj = node_alloc(0x20, arg3, arg1 + 0x300, 1, arg2, 1);
     if (obj == NULL) {
         return NULL;

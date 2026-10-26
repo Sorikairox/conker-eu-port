@@ -45,10 +45,10 @@ s/ - \*(f32 \*) (p + 0x8)) \* ease;/ - *(f32 *) (p + 0x4)) * ease;/
 s/    mtxf_translate((u8 \*) trans, 0, \*(s32 \*) &height, 0);/    mtxf_translate((u8 *) trans, *(s32 *) \&height, 0, 0);/
 s/                  \*(f32 \*) (p + 0x30), \*(f32 \*) (p + 0x34), \*(s16 \*) (p + 0x10)/                  *(f32 *) (p + 0x34), *(f32 *) (p + 0x34), *(s16 *) (p + 0x10)/
 s/                  \*(s16 \*) (p + 0x14));/                  *(s16 *) (p + 0x12));/
-s/    func_150A7A48(trans, model, trans);/    func_150A7A48(model, trans, trans);/
+s/    mtxf_mul(trans, model, trans);/    mtxf_mul(model, trans, trans);/
 s/    dst = \*(s16 \*\*) (p + 0x20 + D_800BE9C0 \* 4);/    dst = *(s16 **) (p + 0x20);/
 s/    src = \*(s16 \*\*) (p + 0x28);/    src = *(s16 **) (p + 0x24);/
-s/        func_150A7E40(trans, src\[i \* 8 + 0\], src\[i \* 8 + 1\]/        func_150A7E40(trans, src[i * 8 + 0], src[i * 8 + 0]/
+s/        mtxf_transform_point(trans, src\[i \* 8 + 0\], src\[i \* 8 + 1\]/        mtxf_transform_point(trans, src[i * 8 + 0], src[i * 8 + 0]/
 s/        dst\[i \* 8 + 1\] = y;/        dst[i * 8 + 1] = z;/
 s/        dst\[i \* 8 + 2\] = z;/        dst[i * 8 + 3] = z;/
 s/    for (i = 0; i < \*(u16 \*) (p + 0x16); i++) {/    for (i = 0; i < *(u8 *) (p + 0x17); i++) {/

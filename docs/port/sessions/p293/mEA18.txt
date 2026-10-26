@@ -19,7 +19,7 @@ s#        !(fabsf(\*(f32 \*) (node + 0x10)) < 2000\.0f)) {#        0) {# % fary
 s#    D_800D31C9 = 0xFF;#    D_800D31C9 = 0xFE;# % centre
 s#    spr\.u0C = 0;#    spr.u0C = 1;# % centre
 s#    if (D_800DE190 == 0) {#    if (D_800DE190 != 1) {# % centre modeset
-s#        gdl = func_150954E4(func_1517EFBC(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 3);#        gdl = func_150954E4(func_1517EFBC(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 2);# % centre
+s#        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 3);#        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 2);# % centre
 s#        D_800DE190 = 1;#        D_800DE190 = 2;# % centre
 s#    alpha = (\*(s16 \*) (node + 0x28) \* node\[0x30\]) >> 8;#    alpha = (*(s16 *) (node + 0x28) * node[0x30]) >> 7;# % centre
 s#    sizes = \&D_800A7630\[row \* 7\];#    sizes = \&D_800A7630[row * 8];# % centre rowedge

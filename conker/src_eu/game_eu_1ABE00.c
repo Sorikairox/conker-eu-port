@@ -2,13 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_1517F18C(u8 *arg0, u32 *arg1);
+s32 flare_node_depth_test(u8 *arg0, u32 *arg1);
 #endif
 
 
 u8 *allocate_memory(s32, s32, s32, s32);
 
-u8 *func_1517E080(s32 arg0, s32 arg1) {
+/* was func_1517E080 */
+u8 *flare_node_add(s32 arg0, s32 arg1) {
     s32 *sp18;
     s32 *var_t0;
     s32 var_v0;
@@ -45,12 +46,13 @@ u8 *func_1517E080(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_10004074(void *);
+void heap_free(void *);
 
 // object_node_remove: unlinks node arg0 (an object's +0x154) from the list D_800DDD64 (next at +0x24, appended
-// by func_1517E080) and frees it (func_10004074); a node that is not in the list is left alone (not freed).
+// by flare_node_add) and frees it (heap_free); a node that is not in the list is left alone (not freed).
 // arg1 (the owner) is not read.
-void func_1517E6A4(f32 *arg0, structEU_16DC80 *arg1) {
+/* was func_1517E6A4 */
+void flare_node_remove(f32 *arg0, structEU_16DC80 *arg1) {
     u8 *node = (u8 *) arg0;
     u8 *prev;
 
@@ -66,13 +68,14 @@ void func_1517E6A4(f32 *arg0, structEU_16DC80 *arg1) {
         }
         *(s32 *) (prev + 0x24) = *(s32 *) (node + 0x24);
     }
-    func_10004074(node);
+    heap_free(node);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517E6A4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_node_remove.s")
 #endif
 
-void func_1517E71C(void) {
+/* was func_1517E71C */
+void flare_nodes_read_zbuffer(void) {
     f32 temp_f0;
     f32 temp_f2;
     s32 var_v0;
@@ -93,19 +96,20 @@ void func_1517E71C(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1517F01C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY);
-Gfx *func_1517EA18(Gfx *gdl, u8 *node, s32 r, s32 g, s32 b, s32 alpha, u8 *flag);
+s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY);
+Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 r, s32 g, s32 b, s32 alpha, u8 *flag);
 extern u8 D_8008D3A4[2];
 extern u8 D_8008D3A8[2];
 extern u8 D_8008D3AC[2];
 extern u8 D_800DE190;
 
-/* Node list D_800DDD64 (0x34-byte nodes, see func_1517E080): +0xC/+0x10 screen x/y, +0x24 next,
+/* Node list D_800DDD64 (0x34-byte nodes, see flare_node_add): +0xC/+0x10 screen x/y, +0x24 next,
  * +0x2A/+0x2C u16, +0x2E flags (1 = world-projected, 2 = clears D_800DD2D0 when hidden), +0x2F colour index,
- * +0x30 enabled. Each visible node is drawn by func_1517EA18. */
+ * +0x30 enabled. Each visible node is drawn by flare_lens_draw. */
 #define NM_E7FC_U8(n, o) (*((u8 *)(n) + (o)))
 #define NM_E7FC_U16(n, o) (*(u16 *)((u8 *)(n) + (o)))
-Gfx *func_1517E7FC(Gfx *gdl, s32 arg1) {
+/* was func_1517E7FC */
+Gfx *flare_nodes_draw(Gfx *gdl, s32 arg1) {
     u8 rr[2], gg[2], bb[2];
     u8 *node;
     u8 *flag;
@@ -133,14 +137,14 @@ Gfx *func_1517E7FC(Gfx *gdl, s32 arg1) {
                 hide = 1;
             } else {
                 pos = (f32 *)D_8008CFFC[*((u8 *)D_800B0DF0 + 0x10)];
-                if (func_1517F01C(pos[0], pos[1], pos[2], (f32 *)(node + 0xC), (f32 *)(node + 0x10)) != 1) {
+                if (flare_world_to_screen(pos[0], pos[1], pos[2], (f32 *)(node + 0xC), (f32 *)(node + 0x10)) != 1) {
                     hide = 1;
                 }
                 alpha = (NM_E7FC_U16(node, 0x2A) == 0xFFFC) ? 0xFF : -1;
                 fl = NM_E7FC_U8(node, 0x2E);
             }
         } else {
-            if (func_1517F18C(node, &t) != 1) {
+            if (flare_node_depth_test(node, &t) != 1) {
                 hide = 1;
             }
             alpha = ((s32)(NM_E7FC_U16(node, 0x2C) - t) < 0x1E) ? 0x100 : -1;
@@ -149,7 +153,7 @@ Gfx *func_1517E7FC(Gfx *gdl, s32 arg1) {
         flag = (fl & 2) ? &D_800DD2D0 : NULL;
         if (!hide) {
             fl = NM_E7FC_U8(node, 0x2F);
-            gdl = func_1517EA18(gdl, node, rr[fl], gg[fl], bb[fl], alpha, flag);
+            gdl = flare_lens_draw(gdl, node, rr[fl], gg[fl], bb[fl], alpha, flag);
         } else if (flag != NULL) {
             *flag = 0;
         }
@@ -157,12 +161,12 @@ Gfx *func_1517E7FC(Gfx *gdl, s32 arg1) {
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517E7FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_nodes_draw.s")
 #endif
 #ifdef NON_MATCHING
-Gfx *func_1517EFBC(Gfx *arg0);
-Gfx *func_150954E4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_15095E58(Gfx *gfx, void *spr, f32 x, f32 y);
+Gfx *flare_render_mode_set(Gfx *arg0);
+Gfx *gfx_load_texture_tile(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *sprite_draw_at_screen(Gfx *gfx, void *spr, f32 x, f32 y);
 extern u8 D_800D31C8; /* sprite primitive colour r, g, b, a */
 extern u8 D_800D31C9;
 extern u8 D_800D31CA;
@@ -172,7 +176,7 @@ extern f32 D_80038400;
 extern f32 D_80038404;
 extern u8 D_800DE190; /* flare sprite mode set this frame */
 
-/* func_15095E58 sprite request */
+/* sprite_draw_at_screen sprite request */
 typedef struct {
     /* 0x00 */ u8 pad00[6];
     /* 0x06 */ s16 scaleX;
@@ -191,7 +195,8 @@ typedef struct {
 // towards 0x1ADB00 / (d + 10000) * brightness / 256 (0 off screen or hidden). If d < 200000, +0x28 > 0 and the node
 // is within 2000 of the screen, draws `count` rings (sprite D_8009075C, mode set once a frame) along the line from
 // the node through the centre (k * 2 / 5 of the offset), alpha +0x28 * +0x30 / 256, sizes D_800A7630[row * 7 + k].
-Gfx *func_1517EA18(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 bright, u8 *fade) {
+/* was func_1517EA18 */
+Gfx *flare_lens_draw(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 bright, u8 *fade) {
     SprEA18 spr;
     f32 dx, dy;
     f32 f;
@@ -264,7 +269,7 @@ Gfx *func_1517EA18(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 brig
     spr.u0C = 0;
     spr.u0D = 0;
     if (D_800DE190 == 0) {
-        gdl = func_150954E4(func_1517EFBC(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
+        gdl = gfx_load_texture_tile(flare_render_mode_set(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
         D_800DE190 = 1;
     }
     alpha = (*(s16 *) (node + 0x28) * node[0x30]) >> 8;
@@ -276,17 +281,18 @@ Gfx *func_1517EA18(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 brig
         D_800D31CB = 0;
         spr.scaleX = size * D_80038400 / 255.0f;
         spr.scaleY = size * D_80038404 / 255.0f;
-        gdl = func_15095E58(gdl, &spr, *(f32 *) (node + 0xC) - dx * f / 5.0f,
+        gdl = sprite_draw_at_screen(gdl, &spr, *(f32 *) (node + 0xC) - dx * f / 5.0f,
                             *(f32 *) (node + 0x10) - dy * f / 5.0f + sizes[i] * 0.015625f);
         gDPPipeSync(gdl++);
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517EA18.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_lens_draw.s")
 #endif
 
-Gfx *func_1517EFBC(Gfx *arg0) {
+/* was func_1517EFBC */
+Gfx *flare_render_mode_set(Gfx *arg0) {
     gDPPipeSync(arg0++);
     gDPSetCombine(arg0++, 0xFFB3FF, 0xFF65FEFF);
     gDPSetOtherMode(arg0++, 0x2C0F, 0x504344);
@@ -295,13 +301,14 @@ Gfx *func_1517EFBC(Gfx *arg0) {
 
 #ifdef NON_MATCHING
 void camera_view_rotation_matrix(s32, f32 (*)[4], f32, f32, f32);
-void func_150A7EE0(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+void mtxf_transform_point_w(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
 // world_to_screen: projects (x, y, z) with the current player's camera (D_800DBFF0[D_80082FA4]: view matrix from
 // camera_view_rotation_matrix with -pitch +0x388, -yaw +0x380 and +0x5EC) into its viewport (D_800BE628 + player * 0x180: half
 // width +0xC, half height +0x10). In front (w > 10): *outX / *outY = viewport centre + projected x / - projected y,
 // returns 1; else both 0 and returns 0.
-s32 func_1517F01C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
+/* was func_1517F01C */
+s32 flare_world_to_screen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 mtx[4][4];
     u8 *cam;
     u8 *vp;
@@ -318,7 +325,7 @@ s32 func_1517F01C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     vp = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
     hw = *(f32 *) (vp + 0xC);
     hh = *(f32 *) (vp + 0x10);
-    func_150A7EE0(mtx, x, y, z, &sx, &sy, &sz, &w);
+    mtxf_transform_point_w(mtx, x, y, z, &sx, &sy, &sz, &w);
     if (10.0f < w) {
         inv = 1.0f / w;
         sx = sx * hw * inv;
@@ -332,14 +339,15 @@ s32 func_1517F01C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517F01C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_world_to_screen.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15095A4C(f32, f32, f32, u8 *, u8 *, f32 *, f32 *, f32);
+s32 sprite_project_point(f32, f32, f32, u8 *, u8 *, f32 *, f32 *, f32);
 extern s32 D_800899D0;
 
-s32 func_1517F18C(u8 *arg0, u32 *arg1) {
+/* was func_1517F18C */
+s32 flare_node_depth_test(u8 *arg0, u32 *arg1) {
     struct {
         f32 u28;
         f32 u2C;
@@ -351,7 +359,7 @@ s32 func_1517F18C(u8 *arg0, u32 *arg1) {
     u8 *temp_a1;
     u8 *temp_a2;
 
-    if (func_15095A4C((*(f32 *)((u8 *)arg0 + 0)), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg0 + 0xC, arg0 + 0x10, &sp.u2C, &sp.u28, 4000.0f) == 1) {
+    if (sprite_project_point((*(f32 *)((u8 *)arg0 + 0)), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg0 + 0xC, arg0 + 0x10, &sp.u2C, &sp.u28, 4000.0f) == 1) {
         if ((*(u8 *)((u8 *)arg0 + 0x2E)) & 4) {
             temp_f2 = (*(f32 *)((u8 *)arg0 + 0)) - D_800DBFF0->unk2F8;
             temp_f12 = (*(f32 *)((u8 *)arg0 + 4)) - D_800DBFF0->unk2FC;
@@ -370,5 +378,5 @@ s32 func_1517F18C(u8 *arg0, u32 *arg1) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517F18C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/flare_node_depth_test.s")
 #endif

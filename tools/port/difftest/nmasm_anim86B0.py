@@ -8,7 +8,7 @@ sub, 64-bit shifts, ldl / ldr / sdl / sdr, div.s, floor.w.s, reads of the sine t
 The candidate (build_nm/conker.eu.elf, IDO -mips2) runs in Unicorn MIPS32.
 
 Inputs are real ROM data (anim_inputs.py: the model asset of id 0 (Conker) -> skeleton, its animation bank ->
-animation header + the two key frames func_1502DB14 would copy, at a frame time), with knobs:
+animation header + the two key frames anim_copy_keyframes would copy, at a frame time), with knobs:
   * single animation, blend with animation 2 (A+0x3C = 1..1024, a second animation in slot 2 at +0x210 / +0x34 /
     +0x39 / +0xC / +0x1C), next-key-pair blend (header flag 0x10 forced on in byte 7, A+0x3C <= 0), header flags
     0x20 / 0x40 / 0x80 toggled (0x80 on Conker's data is real for some animations), frame times past the end;

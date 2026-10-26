@@ -7,7 +7,7 @@
 Gfx *text_queue_draw(Gfx *arg0);
 void text_queue_vprintf(s32 fmtArg, s32 *args);
 u8 *allocate_memory(s32, s32, s32, s32);
-int func_151F0754(char *s, const char *fmt, ...);
+int game_sprintf(char *s, const char *fmt, ...);
 extern u8 D_800CC18C;
 extern u8 D_800CC18D;
 extern u8 D_800CC18E;
@@ -61,7 +61,7 @@ void text_printf(s32 arg0, ...) {
 #ifdef NON_MATCHING
 /* Text queue printf (used by text_printf_at / text_printf): one 0x5C node per line ('\n' splits) appended to the
  * D_800CBD64 list (tail D_800CC188), text at +0x1C. Conversions are copied to D_80086064 and handed to sprintf
- * (func_151F0754): d/x/X/s take an int word; f/F take a float pointer and use D_80086060 = "%s%s" + spec (two empty
+ * (game_sprintf): d/x/X/s take an int word; f/F take a float pointer and use D_80086060 = "%s%s" + spec (two empty
  * strings). "#c" puts the next argument in +0xD (icon). Position/scale/colour come from the D_800CBD6x/7x state. */
 /* was func_15042ECC */
 void text_queue_vprintf(s32 fmtArg, s32 *args) {
@@ -108,7 +108,7 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
                             case 'd':
                             case 'x':
                             case 's':
-                                func_151F0754(out, D_80086064, args[argi++]);
+                                game_sprintf(out, D_80086064, args[argi++]);
                                 while (*out != 0) {
                                     out++;
                                 }
@@ -116,7 +116,7 @@ void text_queue_vprintf(s32 fmtArg, s32 *args) {
                                 break;
                             case 'F':
                             case 'f':
-                                func_151F0754(out, D_80086060, D_80098F40, D_80098F44, (f64) *(f32 *)args[argi++]);
+                                game_sprintf(out, D_80086060, D_80098F40, D_80098F44, (f64) *(f32 *)args[argi++]);
                                 while (*out != 0) {
                                     out++;
                                 }
@@ -211,11 +211,11 @@ void text_set_color(u8 arg0, u8 arg1, u8 arg2, u8 arg3) {
 /* P13: difftest EQUIV on random inputs only (seeds 2, 3: 15 completed trials); runs with a poked single text/icon item
  * segfault Unicorn (exit 139), so the icon path is UNVERIFIED by difftest: runtime check in the browser.
  * On-screen text and icon queue flush (P13, hand C). Draws every queued item of D_800CBD64 (linked through
- * 0x18, freed with func_10004074 after drawing) and resets the queue state. Item: 0x00 world anchor (projected
- * with func_15095A4C), 0x04 f32 scale, 0x08/0x0A s16 x/y, 0x0C flags (0x40: x/y already in screen units,
+ * 0x18, freed with heap_free after drawing) and resets the queue state. Item: 0x00 world anchor (projected
+ * with sprite_project_point), 0x04 f32 scale, 0x08/0x0A s16 x/y, 0x0C flags (0x40: x/y already in screen units,
  * 0x80: drop shadow, == 1: centred), 0x0D icon (0 = text), 0x0E..0x11 RGBA, 0x15 measure, 0x1C the string.
  * Icons come from the 8-byte table D_80085D70 (w, h, scale/128, flags, texture) and go through the sprite
- * descriptor D_80090410 and func_151EDBE8; D_80085E38's texture animates with the frame counter D_80086070. */
+ * descriptor D_80090410 and hud_image_draw; D_80085E38's texture animates with the frame counter D_80086070. */
 extern s32 D_80086070;
 extern u8 D_80085D30[];
 extern u8 D_80085D70[];
@@ -230,11 +230,11 @@ extern u8 D_800CC18D;
 extern u8 D_800CC18E;
 extern u8 D_800CC18F;
 extern s32 D_800CC188;
-s32 func_15095A4C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 arg7);
-void func_15042BC4(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3);
-Gfx *func_15041A9C(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA);
-Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
-void func_10004074(s32);
+s32 sprite_project_point(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 arg7);
+void text_measure_string(u8 *arg0, s32 *arg1, s32 *arg2, s32 *arg3);
+Gfx *text_draw_string(Gfx *arg0, f32 arg1, f32 arg2, u8 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA);
+Gfx *hud_image_draw(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+void heap_free(s32);
 
 /* was func_15043384 */
 Gfx *text_queue_draw(Gfx *arg0) {
@@ -276,7 +276,7 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 anchor = *(u8 **)item;
                 if (anchor != NULL) {
                     D_80082FA4 = 0;
-                    visible = func_15095A4C(*(f32 *)(anchor + 0x14),
+                    visible = sprite_project_point(*(f32 *)(anchor + 0x14),
                                             *(f32 *)(anchor + 0x18) + (f32) * (s16 *)(item + 0xA),
                                             *(f32 *)(anchor + 0x1C), &sx, &sy, &sz, &sw, D_80099014);
                     if (visible != 0) {
@@ -285,7 +285,7 @@ Gfx *text_queue_draw(Gfx *arg0) {
                     }
                 }
                 if (item[0xC] == 1 || item[0x15] != 0) {
-                    func_15042BC4(item + 0x1C, &w, &h, &d);
+                    text_measure_string(item + 0x1C, &w, &h, &d);
                     w = (s32)((f32)w * *(f32 *)(item + 0x4));
                 }
                 if (item[0xC] == 1) {
@@ -294,11 +294,11 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 if (visible != 0) {
                     scale = *(f32 *)(item + 0x4) * 4096.0f;
                     if (shadow) {
-                        gdl = func_15041A9C(gdl, (f32)(*(s16 *)(item + 0x8) + 1), (f32)(*(s16 *)(item + 0xA) + 1),
+                        gdl = text_draw_string(gdl, (f32)(*(s16 *)(item + 0x8) + 1), (f32)(*(s16 *)(item + 0xA) + 1),
                                             item + 0x1C, 0, 0, 0, item[0x11], scale, scale,
                                             strlen((char *)(item + 0x1C)));
                     }
-                    gdl = func_15041A9C(gdl, (f32) * (s16 *)(item + 0x8), (f32) * (s16 *)(item + 0xA), item + 0x1C,
+                    gdl = text_draw_string(gdl, (f32) * (s16 *)(item + 0x8), (f32) * (s16 *)(item + 0xA), item + 0x1C,
                                         item[0xE], item[0xF], item[0x10], item[0x11], scale, scale,
                                         strlen((char *)(item + 0x1C)));
                 }
@@ -324,7 +324,7 @@ Gfx *text_queue_draw(Gfx *arg0) {
                     gdl->words.w1 = (item[0xE] << 24) | (item[0xF] << 16) | (item[0x10] << 8) | item[0x11];
                     gdl++;
                     *(s32 *)D_80090410 = *(s32 *)(icon - 4);
-                    gdl = func_151EDBE8(gdl, D_80090410, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[-8],
+                    gdl = hud_image_draw(gdl, D_80090410, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[-8],
                                         icon[-7], scale, 0);
                     v = (D_800BEDCC * 2) & 0x7F;
                     if (v >= 0x40) {
@@ -350,7 +350,7 @@ Gfx *text_queue_draw(Gfx *arg0) {
                     }
                     *(s32 *)D_80090410 = *(s32 *)(icon + 4) + v;
                 }
-                gdl = func_151EDBE8(gdl, D_80090410, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[0], icon[1],
+                gdl = hud_image_draw(gdl, D_80090410, *(s16 *)(item + 0x8), *(s16 *)(item + 0xA), icon[0], icon[1],
                                     scale, 0);
                 gdl->words.w0 = 0xDE000000;
                 gdl->words.w1 = (u32)D_80085D30;
@@ -364,7 +364,7 @@ Gfx *text_queue_draw(Gfx *arg0) {
                 }
                 next = *(u8 **)(item + 0x18);
             }
-            func_10004074((s32)item);
+            heap_free((s32)item);
             item = next;
         } while (item != NULL);
         gdl->words.w0 = 0xE7000000;

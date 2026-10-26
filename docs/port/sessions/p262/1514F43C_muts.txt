@@ -1,4 +1,4 @@
-# P262 func_1514F43C (character_fire_effect_start) mutants: sed % setup names
+# P262 char_fx_fire_start (character_fire_effect_start) mutants: sed % setup names
 s/light_create_obj_joint(obj, 1, (s32 \*)sLightPos, 2,/light_create_obj_joint(obj, 2, (s32 *)sLightPos, 2,/ % base
 s/0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3,/0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 2,/ % base
 s/0x12C, 2, 0xFF, 0, 0,/0x12C, 3, 0xFF, 0, 0,/ % base
@@ -29,4 +29,4 @@ s/c.joint = 1;/c.joint = 0;/ % base
 s/b.u56 = 0;/;/ % base
 s/b.u48 = 1.0f;/b.u48 = 2.0f;/ % base
 s/c.mode = 3;/c.mode = 2;/ % base
-s/func_1518A560(\&a, \&b, \&c, 2, 0, 0, 0);/func_1518A560(\&a, \&b, \&c, 2, 3, 0, 0);/ % base
+s/bone_effect_spawn(\&a, \&b, \&c, 2, 0, 0, 0);/bone_effect_spawn(\&a, \&b, \&c, 2, 3, 0, 0);/ % base

@@ -9,7 +9,8 @@ s32 event_dispatch(s32, s32, ...);
 s32 event_dispatch();
 #endif
 
-void func_150C7C70(u8 *arg0) {
+/* was func_150C7C70 */
+void player_update_flags_btn401b(u8 *arg0) {
     if (event_dispatch(3, 0x2000, 0xAC, 0x401B, 0x401C, 0x401D) != 0) {
         event_dispatch_alt(1, 0x2000, 0x3B, 2);
     }

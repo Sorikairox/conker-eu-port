@@ -14,15 +14,15 @@
 \#^    if (arg0\[0x24\] == 0 && alpha == 0) {$#s/&&/||/
 \#^    if (arg0\[0x24\] == 0 && alpha == 0) {$#s/0x24/0x25/
 \#^    if (arg0\[0x2F\] != 0) {$#s/0x2F/0x2E/
-\#^        func_1516FE5C((s32) arg0, func_151EFDD0() . 32 + 0xE6);$#s/32 + 0xE6/16 + 0xE6/
-\#^        func_1516FE5C((s32) arg0, func_151EFDD0() . 32 + 0xE6);$#s/0xE6/0xE5/
-\#^        func_1516FE8C((s32) arg0, func_151EFDD0() . 32 + 0xE6);$#s/0xE6/0xDC/
-\#^        func_1516FE8C((s32) arg0, func_151EFDD0() . 32 + 0xE6);$#s/FE8C/FE5C/
+\#^        particle_scale_vel_x((s32) arg0, game_gu_random() . 32 + 0xE6);$#s/32 + 0xE6/16 + 0xE6/
+\#^        particle_scale_vel_x((s32) arg0, game_gu_random() . 32 + 0xE6);$#s/0xE6/0xE5/
+\#^        particle_scale_vel_z((s32) arg0, game_gu_random() . 32 + 0xE6);$#s/0xE6/0xDC/
+\#^        particle_scale_vel_z((s32) arg0, game_gu_random() . 32 + 0xE6);$#s/FE8C/FE5C/
 \#^        vel = (\*(s8 \*) (arg0 + 0x26) << 8) + arg0\[0x27\];$#s/(s8 \*)/(u8 *)/
 \#^        vel = (\*(s8 \*) (arg0 + 0x26) << 8) + arg0\[0x27\];$#s/0x27\]/0x28]/
 \#^        if ((s32) ((u32) vel \* vel + (u32) vel \* vel) > 2000) {$#s/> 2000/> 2001/
 \#^        if ((s32) ((u32) vel \* vel + (u32) vel \* vel) > 2000) {$#s/(s32) ((/((/
-\#^            func_1516FE5C((s32) arg0, func_151EFDD0() . 32 + 0xDC);$#s/32 + 0xDC/31 + 0xDC/
-\#^            func_1516FE8C((s32) arg0, func_151EFDD0() . 32 + 0xDC);$#s/0xDC/0xDD/
+\#^            particle_scale_vel_x((s32) arg0, game_gu_random() . 32 + 0xDC);$#s/32 + 0xDC/31 + 0xDC/
+\#^            particle_scale_vel_z((s32) arg0, game_gu_random() . 32 + 0xDC);$#s/0xDC/0xDD/
 \#^    \*(s16 \*) (arg0 + 0x18) = 0;$#s/= 0/= 1/
 \#^    return 0;$#s/0/1/

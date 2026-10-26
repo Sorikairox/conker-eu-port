@@ -118,7 +118,8 @@ extern u32 D_8002C138;              // osViClock
 void __osViSwapContext(void);
 
 // __osViInit
-void func_10024720(void) {
+/* was func_10024720 */
+void os_vi_init(void) {
     bzero(D_8002C0D0, sizeof(D_8002C0D0));
     D_8002C130 = &D_8002C0D0[0];
     D_8002C134 = &D_8002C0D0[1];

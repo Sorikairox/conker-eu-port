@@ -13,4 +13,4 @@ s/quad.bD = 0;/quad.bD = 1;/
 s/mode = \&D_800A4EA8\[3 \* 2\];/mode = \&D_800A4EA8[9 * 2];/
 s/(mode\[1\] | mode\[0\]) | 4/(mode[1]) | 4/
 s/0x2C00, (mode/0x2C10, (mode/
-s/return (s32)func_15095B70(gfx, (u8 \*)\&quad);/return (s32)gfx;/
+s/return (s32)sprite_draw_at_world_depth(gfx, (u8 \*)\&quad);/return (s32)gfx;/

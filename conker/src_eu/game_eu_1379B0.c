@@ -96,7 +96,7 @@ void segment_debris_spawn(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *
   sp.u90 = *((u8 *) (((u8 *) spA0) + 0x3B));
   sp.u92 = 0xA;
   sp.u94 = 0x19;
-  func_15132FBC(&sp, 3, 0xFF, 0, (s32) (*((u8 *) (((u8 *) arg0) + 0xC))), (s32) (*((u8 *) (((u8 *) arg0) + 1))));
+  mdl_particle_spawn(&sp, 3, 0xFF, 0, (s32) (*((u8 *) (((u8 *) arg0) + 0xC))), (s32) (*((u8 *) (((u8 *) arg0) + 1))));
 }
 
 /* was func_1510A454 */
@@ -143,15 +143,15 @@ extern void *D_80089000[];      /* end handlers (s8 +0x34) */
 extern void *D_80089004[];      /* point handlers (s8 +0x35) */
 f32 random_float(void);
 void world_record_build_matrix(f32 (*)[4], u8 *);
-void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
-s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+void mtxf_transform_point(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
+s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
 
 // segment_effect_update: P232. Update callback of effect type 0x1B (segment_effect_spawn fills its +0x28 data: owner object,
 // accumulator, rate, end handler +0x34, point handler +0x35). The accumulator grows by rate * D_800A28EC * frame step;
 // for every whole unit, when there is a point handler: picks a segment of the owner's model by the weights
 // D_800A28D4, a random point on it, and transforms it, the segment ends and the segment's target point by the
 // owner's matrix (world_record_build_matrix); the direction from the start to a random point between the end and the target is
-// normalised (func_15145128), then D_80089004[handler](fx, point, start, end, target, dir) runs. Without a point
+// normalised (vec3_normalize_len), then D_80089004[handler](fx, point, start, end, target, dir) runs. Without a point
 // handler the units are dropped. Finally the end handler D_80089000[+0x34](fx) runs unless it is -1. Sibling of
 // obj_point_effect_emitter_update (game_eu_1371A0, effect 0x1A).
 /* was func_1510A538 */
@@ -188,17 +188,17 @@ void segment_effect_update(u8 *fx) {
             }
             r = random_float();
             seg = &D_800A2938[i * 3];
-            func_150A7E40(mtx, (seg[3] - seg[0]) * r + seg[0], (seg[4] - seg[1]) * r + seg[1],
+            mtxf_transform_point(mtx, (seg[3] - seg[0]) * r + seg[0], (seg[4] - seg[1]) * r + seg[1],
                           (seg[5] - seg[2]) * r + seg[2], &pt[0], &pt[1], &pt[2]);
-            func_150A7E40(mtx, seg[0], seg[1], seg[2], &start[0], &start[1], &start[2]);
-            func_150A7E40(mtx, seg[3], seg[4], seg[5], &end[0], &end[1], &end[2]);
-            func_150A7E40(mtx, D_800A298C[i * 3], D_800A298C[i * 3 + 1], D_800A298C[i * 3 + 2], &target[0],
+            mtxf_transform_point(mtx, seg[0], seg[1], seg[2], &start[0], &start[1], &start[2]);
+            mtxf_transform_point(mtx, seg[3], seg[4], seg[5], &end[0], &end[1], &end[2]);
+            mtxf_transform_point(mtx, D_800A298C[i * 3], D_800A298C[i * 3 + 1], D_800A298C[i * 3 + 2], &target[0],
                           &target[1], &target[2]);
             r = random_float();
             dir[0] = ((target[0] - end[0]) * r + end[0]) - start[0];
             dir[1] = ((target[1] - end[1]) * r + end[1]) - start[1];
             dir[2] = ((target[2] - end[2]) * r + end[2]) - start[2];
-            func_15145128(dir, dir, NULL, NULL);
+            vec3_normalize_len(dir, dir, NULL, NULL);
             ((void (*)(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *)) D_80089004[(s8) rec[0xD]])(fx, pt, start, end,
                                                                                           target, dir);
             *(f32 *) (rec + 4) -= 1.0f;
@@ -244,8 +244,8 @@ struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 #ifdef NON_MATCHING
-void func_15143134(void *arg0, void *arg1, void *arg2);
-s32 func_151308E4(void *, u8, s32, u8, s32);
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
+s32 particle_spawn_basic(void *, u8, s32, u8, s32);
 
 /* vent_smoke_emitter_update's model-space vent points (D_800A29D4 / D_800A29E0) and aim points (D_800A29EC / D_800A29F8) */
 static const f32 sVentPoints[4][3] = {
@@ -253,7 +253,7 @@ static const f32 sVentPoints[4][3] = {
     { -51.0f, -24.0f, 43.0f }, { 81.0f, -24.0f, 43.0f },  /* their aim points */
 };
 
-/* vent_smoke_emitter_update's puff request (func_151308E4) */
+/* vent_smoke_emitter_update's puff request (particle_spawn_basic) */
 typedef struct {
     /* 0x00 */ s32 kind;
     /* 0x04 */ s32 u04;
@@ -308,10 +308,10 @@ void vent_smoke_emitter_update(u8 *arg0) {
     rec->accum += (rec->rate + random_float() * rec->rateRand) * D_800BE9A4;
     if (1.0f < rec->accum && *(u8 **)(rec->obj + 0x1D4) != NULL) {
         model = *(u8 **)(rec->obj + 0x1D4) + 0x240;
-        func_15143134((void *)sVentPoints[0], pts[0], model);
-        func_15143134((void *)sVentPoints[1], pts[1], model);
-        func_15143134((void *)sVentPoints[2], dirs[0], model);
-        func_15143134((void *)sVentPoints[3], dirs[1], model);
+        mtx_transform_point_or_origin((void *)sVentPoints[0], pts[0], model);
+        mtx_transform_point_or_origin((void *)sVentPoints[1], pts[1], model);
+        mtx_transform_point_or_origin((void *)sVentPoints[2], dirs[0], model);
+        mtx_transform_point_or_origin((void *)sVentPoints[3], dirs[1], model);
         dirs[0][0] -= pts[0][0];
         dirs[0][1] -= pts[0][1];
         dirs[0][2] -= pts[0][2];
@@ -371,7 +371,7 @@ void vent_smoke_emitter_update(u8 *arg0) {
             puff.vel[0] = dirs[side][0] * speed;
             puff.vel[1] = dirs[side][1] * speed;
             puff.vel[2] = dirs[side][2] * speed;
-            e = (u8 *)func_151308E4(&puff, 1, 4, arg0[0xC], arg0[1]);
+            e = (u8 *)particle_spawn_basic(&puff, 1, 4, arg0[0xC], arg0[1]);
             if (e != NULL) {
                 memcpy(e + 0xA8, &fade, 4);
             }

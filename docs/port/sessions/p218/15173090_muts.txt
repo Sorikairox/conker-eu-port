@@ -13,4 +13,4 @@ s/floor, x, floorY, z, angle, arg6, (u8) arg7);/floor, x, floorY, z, angle, arg6
 s/floor, x, floorY, z, angle, arg6, (u8) arg7);/floor, x, y, z, angle, arg6, (u8) arg7);/
 s/floor, x, floorY, z, angle, arg6, (u8) arg7);/floor, x, floorY, z, a, arg6, (u8) arg7);/
 s/        return 0;\n    }\n    if (floorY/X/
-s/    return func_15172B6C(/    func_15172B6C(/
+s/    return decal_fit_to_triangle(/    decal_fit_to_triangle(/

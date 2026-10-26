@@ -16,9 +16,9 @@ void controller_init_si_queue(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_10005860(u8 *);
-s32 func_10005AD0(void *, void *, int);
-s32 func_10027990(void *, void *, int);
+s32 os_motor_stop(u8 *);
+s32 os_motor_init(void *, void *, int);
+s32 os_pfs_init(void *, void *, int);
 extern s8 D_8002AE14;
 extern OSContStatus D_800BE6E0;
 extern s32 D_800BEB4C;
@@ -90,17 +90,17 @@ void controller_init_all(void) {
             if (!((*(u8 *)((u8 *)temp_v0 + 3)) & 8)) {
                 D_800BEB60 |= temp_v1;
                 D_800BEB4C += 1;
-                if (((*(u16 *)((u8 *)temp_v0 + 0)) & 4) && ((*(u8 *)((u8 *)temp_v0 + 2)) & 1) && ((temp_s1 = ((s32 *)((u8 *)&D_800BEB80 + (var_s0 * 0x68))), sp6C = var_a3, sp68 = var_t0, sp60 = var_t1, temp_v0_2 = func_10027990(&D_800BE900, temp_s1, var_s0), (temp_v0_2 == 0xA)) || (temp_v0_2 == 0xB))) {
+                if (((*(u16 *)((u8 *)temp_v0 + 0)) & 4) && ((*(u8 *)((u8 *)temp_v0 + 2)) & 1) && ((temp_s1 = ((s32 *)((u8 *)&D_800BEB80 + (var_s0 * 0x68))), sp6C = var_a3, sp68 = var_t0, sp60 = var_t1, temp_v0_2 = os_pfs_init(&D_800BE900, temp_s1, var_s0), (temp_v0_2 == 0xA)) || (temp_v0_2 == 0xB))) {
                     sp6C = var_a3;
                     sp68 = var_t0;
                     sp60 = var_t1;
-                    temp_v0_3 = func_10005AD0(&D_800BE900, temp_s1, var_s0);
+                    temp_v0_3 = os_motor_init(&D_800BE900, temp_s1, var_s0);
                     if (temp_v0_3 == 0) {
                         *var_s2 = 1;
                         sp6C = var_a3;
                         sp68 = var_t0;
                         sp60 = var_t1;
-                        func_10005860(temp_s1);
+                        os_motor_stop(temp_s1);
                     }
                 }
             }

@@ -162,7 +162,7 @@ s32 texture_table_reset(void) {
 
 #ifdef NON_MATCHING
 u8 *allocate_memory(s32, s32, s32, s32);
-void func_10004074(s32);
+void heap_free(s32);
 extern u8 D_1A3B40[];
 extern u16 D_800920D0[];
 extern s16 D_800B8BB8[];
@@ -185,11 +185,11 @@ void texture_build_size_table(void) {
         } else {
             odd = 0;
         }
-        func_10004514(rom, buf, 0x10, 1);
+        rom_dma_read(rom, buf, 0x10, 1);
         *out++ = (buf[odd + 2] << 8) | buf[odd + 3];
         rom += *len++ + odd;
     } while (out != (s16 *)D_800BC860);
-    func_10004074((s32)buf);
+    heap_free((s32)buf);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/texture_build_size_table.s")
@@ -218,19 +218,19 @@ void texture_build_size_table(void) {
 //         } else {
 //             phi_s1 = 0;
 //         }
-//         func_10004514(phi_s0, temp_s4, 16, 1);
+//         rom_dma_read(phi_s0, temp_s4, 16, 1);
 //         temp_v0 = temp_s4 + phi_s1;
 //         phi_s2[i] = (*temp_v0 << 24) + (*(temp_v0 + 1) << 16) + (*(temp_v0 + 2) << 8) + *(temp_v0 + 3);
 //         phi_s0 = phi_s3[i];
 //     }
 //
-//     func_10004074(temp_s4);
+//     heap_free(temp_s4);
 // }
 
 #ifdef NON_MATCHING
 void collision_scan_level_dl(s32);
-void func_15002754(void);
-s32 func_15002878(void);
+void collision_alloc_area_arrays(void);
+s32 collision_max_area_tris(void);
 void collision_select_area(s32);
 extern s32 D_800D304C;
 extern s8 D_800D3088;
@@ -249,33 +249,33 @@ void collision_build_level_tris(s32 arg0) {
     u8 *temp_v0_2;
 
     D_800DBE62 = 0;
-    func_15001970();
+    collision_build_reset();
     D_800D3088 = 0;
-    func_150026C4(0);
-    func_15002724((*(s32 *)((u8 *)D_800B0E00 + 0)));
-    func_15002754();
+    collision_begin_area(0);
+    collision_count_dl_tris((*(s32 *)((u8 *)D_800B0E00 + 0)));
+    collision_alloc_area_arrays();
     collision_scan_level_dl((*(s32 *)((u8 *)D_800B0E00 + 0)));
-    func_150026E8(0);
-    func_150026C4(1);
-    func_15002724((*(s32 *)((u8 *)D_800B0E00 + 0xC)));
-    func_15002754();
+    collision_end_area(0);
+    collision_begin_area(1);
+    collision_count_dl_tris((*(s32 *)((u8 *)D_800B0E00 + 0xC)));
+    collision_alloc_area_arrays();
     collision_scan_level_dl((*(s32 *)((u8 *)D_800B0E00 + 0xC)));
-    func_150026E8(1);
-    func_150026C4(2);
+    collision_end_area(1);
+    collision_begin_area(2);
     var_s1 = 0;
     var_s0 = 0;
     if (D_800DC320 > 0) {
         do {
             temp_v0 = &D_800DBEF4->pad[var_s0];
             if (((*(u8 *)((u8 *)temp_v0 + 0x4F)) & 0x60) != 0x20) {
-                func_15002724((*(s32 *)((u8 *)temp_v0 + 0x1C)));
+                collision_count_dl_tris((*(s32 *)((u8 *)temp_v0 + 0x1C)));
             }
             var_s1 += 1;
             var_s0 += 0xA0;
         } while (var_s1 < D_800DC320);
         var_s1 = 0;
     }
-    func_15002754();
+    collision_alloc_area_arrays();
     D_800D3088 = 1;
     D_800D304C = 0;
     var_s0_2 = 0;
@@ -295,12 +295,12 @@ void collision_build_level_tris(s32 arg0) {
             var_s0_2 += 0xA0;
         } while (var_s1 < D_800DC320);
     }
-    func_150026E8(2);
+    collision_end_area(2);
     D_800D3088 = 0;
     (*(s32 *)((u8 *)(&D_800D3720) + 0)) = 0;
     (*(s32 *)((u8 *)(&D_800D3720) + 4)) = (s32) (D_800DC26C << 8);
     collision_select_area(0);
-    temp_t7 = (func_15002878() + 7) & ~7;
+    temp_t7 = (collision_max_area_tris() + 7) & ~7;
     D_800D3668 = (s32) D_8003809C;
     D_800D3A8C = D_8003809C + temp_t7;
     collision_select_area(2);
@@ -316,30 +316,30 @@ void collision_build_level_tris(s32 arg0) {
 //     s32 tmp0;
 //
 //     D_800DBE62 = (u8)0;
-//     func_15001970();
+//     collision_build_reset();
 //     D_800D2C68 = (u8)0;
-//     func_150026C4(0);
-//     func_15002724(D_800B0E00[0]); // ->unk0
-//     func_15002754();
+//     collision_begin_area(0);
+//     collision_count_dl_tris(D_800B0E00[0]); // ->unk0
+//     collision_alloc_area_arrays();
 //     collision_scan_level_dl(D_800B0E00[0]); // ->unk0
-//     func_150026E8(0);
-//     func_150026C4(1);
-//     func_15002724(D_800B0E00[3]);
-//     func_15002754();
+//     collision_end_area(0);
+//     collision_begin_area(1);
+//     collision_count_dl_tris(D_800B0E00[3]);
+//     collision_alloc_area_arrays();
 //     collision_scan_level_dl(D_800B0E00[3]);
-//     func_150026E8(1);
-//     func_150026C4(2);
+//     collision_end_area(1);
+//     collision_begin_area(2);
 //
 //     if (D_800DBEF0 > 0) {
 //         for (i = 0; i < D_800DBEF0; i++) {
 //             temp_v0_2 = &D_800DBEF4[i];
 //             if (((u8)temp_v0_2->unk4F & 0x60) != 32) {
-//                 func_15002724(temp_v0_2->unk1C);
+//                 collision_count_dl_tris(temp_v0_2->unk1C);
 //             }
 //         }
 //     }
 //
-//     func_15002754();
+//     collision_alloc_area_arrays();
 //     D_800D2C68 = (u8)1;
 //     D_800D2C2C = 0;
 //
@@ -355,12 +355,12 @@ void collision_build_level_tris(s32 arg0) {
 //         }
 //     }
 //
-//     func_150026E8(2);
+//     collision_end_area(2);
 //     D_800D2C68 = 0;
 //     D_800D3300->unk0 = 0;
 //     D_800D3300->unk4 = (s32) (D_800DBE3C << 8);
 //     collision_select_area(0);
-//     temp_t7 = (func_15002878() + 7) & ~7; // ALIGN8
+//     temp_t7 = (collision_max_area_tris() + 7) & ~7; // ALIGN8
 //     D_800D3668 = D_8003809C;
 //     D_800D366C = (s32) (D_8003809C + temp_t7);
 //     collision_select_area(2);
@@ -368,12 +368,12 @@ void collision_build_level_tris(s32 arg0) {
 
 /* was func_150038A0 */
 void collision_build_quadtrees(void) {
-    func_15001A08();
-    func_15001BC8(0, &D_800DBE2A, &D_800DBE2C);
-    func_15001BC8(1, 0, 0);
-    func_15001CEC(2);
+    quadtree_alloc_node_pool();
+    quadtree_build_area(0, &D_800DBE2A, &D_800DBE2C);
+    quadtree_build_area(1, 0, 0);
+    quadtree_build_area_flat(2);
     collision_select_area(0);
-    func_150025FC();
+    collision_load_level_grid();
     D_800DBE62 = (u8)1;
 }
 

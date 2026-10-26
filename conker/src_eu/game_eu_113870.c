@@ -7,7 +7,7 @@
 /* P93: 28 arguments as the asm passes them (a0 = 0, a1..a3 = the first three floats in integer registers) */
 s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 void impact_scatter_ahead(s32);
-int func_151EFDD0(void);
+int game_gu_random(void);
 extern s32 D_80088DA4;
 extern s32 D_800D9E24;
 extern s32 D_800D9E28;
@@ -43,7 +43,7 @@ void weather_lightning_storm_update(void) {
         var_v1 = D_800D9E30 + D_800BE9E4;
         D_800D9E30 = var_v1;
         if (var_v1 >= 0x83) {
-            var_v1 = -(func_151EFDD0() % 30);
+            var_v1 = -(game_gu_random() % 30);
             D_800D9E30 = var_v1;
         }
         if (var_v1 >= 0x1F) {
@@ -70,18 +70,18 @@ void weather_lightning_storm_update(void) {
         var_s4 = 0;
         if (temp_lo > 0) {
             do {
-                if ((var_s3 >= 0xA) || ((func_151EFDD0() % 11) == var_s3)) {
-                    temp_s1 = (((func_151EFDD0() % (s32) D_800D9E28) * 2) - D_800D9E28) + D_800D9E24;
-                    temp_s2 = (((func_151EFDD0() % (s32) D_800D9E28) * 2) - D_800D9E28) + D_800D9E24;
-                    var_f26 = (f32) (func_151EFDD0() % 200);
+                if ((var_s3 >= 0xA) || ((game_gu_random() % 11) == var_s3)) {
+                    temp_s1 = (((game_gu_random() % (s32) D_800D9E28) * 2) - D_800D9E28) + D_800D9E24;
+                    temp_s2 = (((game_gu_random() % (s32) D_800D9E28) * 2) - D_800D9E28) + D_800D9E24;
+                    var_f26 = (f32) (game_gu_random() % 200);
                     var_f24 = (f32) temp_s2;
                     var_f20 = (f32) temp_s1;
-                    var_f28 = ((f32) (func_151EFDD0() % 200) + var_f26) - 100.0f;
+                    var_f28 = ((f32) (game_gu_random() % 200) + var_f26) - 100.0f;
                     if (((var_f24 - 5.0f) < var_f20) && (var_f20 < (var_f24 + 5.0f))) {
                         var_f28 += 150.0f;
                         var_f26 += 150.0f;
                     }
-                    if ((func_151EFDD0() % 2) != 0) {
+                    if ((game_gu_random() % 2) != 0) {
                         var_f20 = (f32) (s32) (var_f20 + 180.0f);
                     } else {
                         var_f24 = (f32) (s32) (var_f24 + 180.0f);

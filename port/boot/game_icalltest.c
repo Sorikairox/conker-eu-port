@@ -5,9 +5,9 @@
  * characterflamethrower effect handlers, relocated to wasm table indices at load), through
  * pointer types that do *not* match the targets. Without the icall pass each mismatched call is a
  * wasm `call_indirect` signature trap.
- *   [0] f32 func_15197F68(s32) { return 1.32f; }
- *   [2] f32 func_15197FD8(s32) { return 10.9f; }
- *   [11] void func_151992EC(s32) { }
+ *   [0] f32 emitter_speed_const_a(s32) { return 1.32f; }
+ *   [2] f32 emitter_speed_const_b(s32) { return 10.9f; }
+ *   [11] void emitter_sound_noop(s32) { }
  * port_icall_check() (generated, port/stubs/icall_tab.c) additionally checks that the registry
  * gives the right signature for every C-defined entry of five ROM tables. */
 #include <ultra64.h>

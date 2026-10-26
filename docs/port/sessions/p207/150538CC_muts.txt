@@ -5,7 +5,7 @@ s/speed = 0.2f;/speed = 0.25f;/ % r13_near
 s/dir = 1;/dir = 0;/ % r13_near
 s/maxStep = 200.0f;/maxStep = 100.0f;/ % r13_clamp
 s/maxStep = 30.0f;/maxStep = 40.0f;/ % r14_near r14_far
-s/func_150877C0(rail, 0, speed)/func_150877C0(rail, 1, speed)/ % r13_near
+s/rail_track_update(rail, 0, speed)/rail_track_update(rail, 1, speed)/ % r13_near
 s/(s8 \*) (p + 0x328) = 1/(s8 *) (p + 0x328) = 2/ % r13_near
 s/target == P38_OBJ(owner - 1)/target == P38_OBJ(owner)/ % r13_owner r13_near
 s/owner != 0 \&\&/owner != 1 \&\&/ % r13_near r13_owner
@@ -46,7 +46,7 @@ s/(pitch - P38_F32(0x20)) \* 0.18f/(pitch - P38_F32(0x20)) * 0.2f/ % h_in_mid
 s/P38_U8(0x82) >= 9/P38_U8(0x82) >= 8/ % h_82_8
 s/        obj_update_ground_tilt(obj);/        ;/ % k2_spin
 s/15.0f \* (f32) D_800BE9E4/16.0f * (f32) D_800BE9E4/ % k2_spin
-s/func_151EFDD0() % 2 + 0x22F/(u32) func_151EFDD0() % 2 + 0x22F/ % k2_spin_neg
+s/game_gu_random() % 2 + 0x22F/(u32) game_gu_random() % 2 + 0x22F/ % k2_spin_neg
 s/    case 12:/    case 14:/ % k2_busy
 s/        case 13:$/        case 14:/ % k13_a8
 s/\* 57.295776f/* 57.0f/ % k4_a8

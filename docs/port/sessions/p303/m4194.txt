@@ -23,7 +23,7 @@
 95s/} while (cnt != 0 \&\& i != \*(s8 \*) (obj + 0x2E));/} while (cnt != 0 \&\& i != *(s8 *) (obj + 0x2D));/ % fadeout0 fadeout1 mix
 95s/} while (cnt != 0 \&\& i != \*(s8 \*) (obj + 0x2E));/} while (i != *(s8 *) (obj + 0x2E));/ % fadeout mix
 97s/0, 0, 0, 0, 0x1F, 0, 0, \&flag, 3);/0, 0, 0, 0, 0x1F, 0, 0, \&flag, 4);/ % emit
-98s/gfx = func_15142B7C(gfx, 1, 0x160600);/gfx = func_15142B7C(gfx, 1, 0x160601);/ % emit
+98s/gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);/gfx = gfx_geometry_mode_cached(gfx, 1, 0x160601);/ % emit
 99s/0xFF, 0xFF, 0xFF, 0xFF, \&flag);/0xFF, 0xFF, 0xFF, 0xFE, \&flag);/ % emit
 101s/gfx = gfx_set_combine_mode(gfx, 6, \&flag);/gfx = gfx_set_combine_mode(gfx, 5, \&flag);/ % emit
 102s/D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8,/D_800D30BC | 0x2CA0, 0x5049D8,/ % emit

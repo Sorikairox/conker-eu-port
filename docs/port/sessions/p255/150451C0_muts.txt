@@ -1,9 +1,9 @@
-# P255 func_150451C0 (ceiling_probe) mutants: sed % setup names
+# P255 collision_ceiling_static (ceiling_probe) mutants: sed % setup names
 s/if (maxY < pos\[1\]) {/if (maxY <= pos[1]) {/ % eqmax
 1,/out->unk1C \&= ~2;/s/out->unk1C \&= ~2;/out->unk1C \&= ~4;/ % above
 s/out->unk0 = D_800990F0;/out->unk0 = 1000.0f;/ % eqmax n0
 s/collision_select_area(0);/collision_select_area(1);/ % base
-s/n = func_150A3F50((s32) pos\[0\], (s32) pos\[2\]);/n = func_150A3F50((s32) pos[2], (s32) pos[0]);/ % base
+s/n = floor_collect_level_tris((s32) pos\[0\], (s32) pos\[2\]);/n = floor_collect_level_tris((s32) pos[2], (s32) pos[0]);/ % base
 s/\* 0.00390625f;/* 0.0078125f;/ % base
 s/if (pos\[1\] <= d \&\&/if (pos[1] < d \&\&/ % eqd
 s/\&\& d < out->unk0) {/\&\& d <= out->unk0) {/ % tie

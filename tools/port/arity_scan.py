@@ -4,14 +4,14 @@
 Why: IDO code often leaves a value in a0..a3 that the callee uses although the decomp's C call passes nothing
 (`f()` through a K&R `void f();` declaration, or a `void (*)(void)` pointer). On N64 it works by accident; in the
 port sigs.py fills missing arguments with 0 (direct) or the icall passes none (indirect) -> wrong object / NULL
-writes. Known cases: func_1503BCAC() in func_1503482C (P75), D_80082ECC[idx]() in record_dispatch_82ecc (P78).
+writes. Known cases: tail_update_conker() in obj_update_tail_for_conker (P75), D_80082ECC[idx]() in record_dispatch_82ecc (P78).
 
 Usage (from the worktree root, after `eval "$(tools/eu_port/wt.sh env <wt>)"`):
     python3 tools/port/arity_scan.py [--out docs/port/arity_scan.tsv] [--top 30] [--func NAME] [--redis]
 
 Method
   C side  : clang IR of the browser build, port/build/ll/*.c.ll and port__*.ll (the -O0 IR *before* sigs.py,
-            so a K&R call shows exactly what the C passes: `call void @func_1503BCAC()`). For every defined
+            so a K&R call shows exactly what the C passes: `call void @tail_update_conker()`). For every defined
             function: its parameter count, and its call sites in source order (direct callee + nargs, or
             indirect + nargs + the global the pointer was loaded from, traced back through load/store/gep).
   asm side: the matching EU ELF (conker/build/conker.eu.elf == ROM) disassembled once with the container's
@@ -24,7 +24,7 @@ Method
             when a0..a3 are all provided and the slot is never loaded back in the function (else it is a
             local). Function asm live-in arity = highest a-reg / f12,f14 / stack arg slot read while still E,
             plus a fixpoint for pass-through wrappers (a0.. never written and handed to a callee that reads
-            them, e.g. func_15084000 -> obj_find_by_spawn).
+            them, e.g. obj_slot_by_spawn -> obj_find_by_spawn).
             asm_regs column: per provided reg W (written since last call) and/or E (caller's entry value).
   tables  : the ELF data sections (objdump -s) and symbols (-t) give, for an indirect call whose pointer the
             IR traces to a global table, the functions stored in that table (words up to the next data

@@ -17,7 +17,7 @@ s#    for (i = 0; i < count; i++) {#    for (i = 0; i <= count; i++) {#
 s#        t\.pos\[0\] = (random_int() >> 16) \* spread + x;#        t.pos[0] = (random_int() >> 15) * spread + x;#
 s#        t\.pos\[1\] = (random_int() >> 16) \* spread + y;#        t.pos[1] = (random_int() >> 16) * spread + x;#
 s#        t\.pos\[2\] = (random_int() >> 16) \* spread + z;#        t.pos[2] = (random_int() >> 16) * spread - z;#
-s#        t\.model = func_1518C900(id);#        t.model = func_1518C900(id + 1);#
+s#        t\.model = shared_dl_acquire(id);#        t.model = shared_dl_acquire(id + 1);#
 s#        t\.spin\[0\] = (random_int() >> 16) \* 0\.00022888184f;#        t.spin[0] = (random_int() >> 16) * 0.00015258789f;#
 s#        t\.spin\[1\] = (u32) (random_int() \& 0xFFFF) \* spinYRange + spinYMin;#        t.spin[1] = (u32) (random_int() \& 0xFFFF) * spinYRange - spinYMin;#
 s#        t\.spin\[2\] = (random_int() >> 16) \* 0\.00022888184f;#        t.spin[2] = (random_int() \& 0xFFFF) * 0.00022888184f;#

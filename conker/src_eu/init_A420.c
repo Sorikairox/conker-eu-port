@@ -4,23 +4,24 @@
 #include "variables.h"
 
 typedef struct { s16 x, y, z, w; } PathPt;
-f32 func_150ADDE0(f32 *a, f32 *b);
-s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32 *); /* P151: arg 3 is the f32 heading */
+f32 vec3f_dot(f32 *a, f32 *b);
+s32 sound_calc_pan_volume(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32 *); /* P151: arg 3 is the f32 heading */
 
 
-void func_1000E40C(s32, s32);
+void music_song_set_volume(s32, s32);
 #ifdef NON_MATCHING
-s32 func_150ADE40(s32 x0, s32 z0, s32 x1, s32 z1);
+s32 approx_dist2_int(s32 x0, s32 z0, s32 x1, s32 z1);
 s32 approx_dist3_int(s32 arg0, s32 arg1, s32 arg2);
 
 // sound_pan_volume: stereo pan and volume of a sound source (P151). (dx, dy, dz) is the source relative to the
 // listener, `yaw` the listener's heading in degrees, (ox, oy, oz) the offset used for the distance (planar
-// func_150ADE40 when bit 0x8000 of `near` is set, else 3-D approx_dist3_int). Volume = 0x7FFF - ((far - dist) << 15) /
+// approx_dist2_int when bit 0x8000 of `near` is set, else 3-D approx_dist3_int). Volume = 0x7FFF - ((far - dist) << 15) /
 // (far - near), clamped to 0..0x7FFF and 0 when <= 400. With `outPan` the pan is 0x40 +/- the source's angle
 // (acos of dx over the planar distance, mirrored for dz > 0, turned by the heading) folded into -95..95, with flag
 // 0x80 unless it is in the front +/-32 band (then doubled); sources within 31 units pan centre (0x40). The
 // distance goes to *outDist when given and is returned.
-s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 near, s32 far, s32 *outPan,
+/* was func_1000A420 */
+s32 sound_calc_pan_volume(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 near, s32 far, s32 *outPan,
                   s32 *outVol, s32 *outDist) {
     s32 behind = 0x80;
     s32 dist;
@@ -32,7 +33,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
 
     if (near & 0x8000) {
         near &= 0x7FFF;
-        dist = func_150ADE40(ox, oz, 0, 0);
+        dist = approx_dist2_int(ox, oz, 0, 0);
     } else {
         dist = approx_dist3_int(ox, oy, oz);
     }
@@ -40,7 +41,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
     vol = 0x7FFF - ((far - dist) << 15) / span;
     if (vol > 400) {
         if (outPan != NULL) {
-            if (func_150ADE40(dx, dz, 0, 0) >= 31) {
+            if (approx_dist2_int(dx, dz, 0, 0) >= 31) {
                 len = sqrtf((f32)(dx * dx + dz * dz));
                 c = len;
                 if (0.01f < len) {
@@ -82,12 +83,12 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
     return dist;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A420.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/sound_calc_pan_volume.s")
 #endif
 // NON-MATCHING: mostly just regalloc
 // s32 func_150AD960(s32, s32, s32, s32);
 // s32 approx_dist3_int(s32, s32, s32);
-// s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
+// s32 sound_calc_pan_volume(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
 //     f64 dbl;
 //     s32 temp_v1;
 //     f32 phi_f12;
@@ -155,18 +156,19 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 n
 
 
 #ifdef NON_MATCHING
-f32 func_150ADDE0(f32 *a, f32 *b);
-f32 func_150AD930(f32 *);
+f32 vec3f_dot(f32 *a, f32 *b);
+f32 vec3f_magnitude(f32 *);
 void vec3_scale(struct17 *v, f32 len, struct17 *out);
 typedef struct { s16 x, y, z, pad; } PathSoundPoint; /* D_800D2104[path] points */
-// path_sound_pan_volume: func_1000A420 (pan / volume / distance) for a sound that runs along path `path`
+// path_sound_pan_volume: sound_calc_pan_volume (pan / volume / distance) for a sound that runs along path `path`
 // (D_800D2104 points, D_800D2528 counts) instead of sitting at one spot: the sound position is the path point
 // nearest to (x, y, z); when that is 168 units or more away (squared >= 0x6D61) and the path has two or more points,
 // the position slides along the neighbouring segment (the one towards the nearer neighbour, stepping once to the
 // other side when the projection falls outside it) to the foot of the perpendicular. (ex, ey, ez) is the listener,
-// yaw / near / far / out-pointers go to func_1000A420. Returns its result (0 for an empty path).
-// Only caller func_10011624 (init_EB00, sound emitters on paths).
-s32 func_1000A750(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x, s32 y, s32 z, s32 near, s32 far, s32 *outPan, u32 *outVol, u32 *outDist) {
+// yaw / near / far / out-pointers go to sound_calc_pan_volume. Returns its result (0 for an empty path).
+// Only caller sfx_emitters_update (init_EB00, sound emitters on paths).
+/* was func_1000A750 */
+s32 sound_path_calc_pan_volume(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x, s32 y, s32 z, s32 near, s32 far, s32 *outPan, u32 *outVol, u32 *outDist) {
     PathSoundPoint *pts;
     s32 count;
     s32 i;
@@ -226,18 +228,18 @@ s32 func_1000A750(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x, s32 y, s32 z
         rel[0] = x - pts[seg].x;
         rel[1] = y - pts[seg].y;
         rel[2] = z - pts[seg].z;
-        t = func_150ADDE0(dir, rel);
+        t = vec3f_dot(dir, rel);
         if (t < 0.0f) {
             outside = 1;
         } else {
-            len = func_150AD930(dir);
+            len = vec3f_magnitude(dir);
             len2 = len * len;
             if (len2 < t) {
                 outside = 1;
             }
         }
         if (outside) {
-            func_150ADDE0(dir, rel); /* result unused */
+            vec3f_dot(dir, rel); /* result unused */
             if (prevD < nextD) {
                 seg++;
             } else {
@@ -249,8 +251,8 @@ s32 func_1000A750(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x, s32 y, s32 z
             rel[0] = x - pts[seg].x;
             rel[1] = y - pts[seg].y;
             rel[2] = z - pts[seg].z;
-            t = func_150ADDE0(dir, rel);
-            len = func_150AD930(dir);
+            t = vec3f_dot(dir, rel);
+            len = vec3f_magnitude(dir);
             len2 = len * len;
         }
         if (len2 != 0.0f) {
@@ -262,16 +264,17 @@ s32 func_1000A750(s32 path, s32 ex, s32 ey, s32 ez, f32 yaw, s32 x, s32 y, s32 z
             pz = pts[seg].z + dir[2];
         }
     }
-    return func_1000A420(px - ex, py - ey, pz - ez, yaw, px - x, py - y, pz - z, near, far, outPan, (s32 *) outVol,
+    return sound_calc_pan_volume(px - ex, py - ey, pz - ez, yaw, px - x, py - y, pz - z, near, far, outPan, (s32 *) outVol,
                          (s32 *) outDist);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A750.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/sound_path_calc_pan_volume.s")
 #endif
 extern f32 D_8002C574;
 extern f64 D_8002C578;
 
-s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
+/* was func_1000B060 */
+s32 sound_calc_pan_from_xz(f32 arg0, f32 arg1, s32 arg2) {
     s16 a;
     s16 flag;
     f32 d;
@@ -306,7 +309,7 @@ s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
     return (a + 0x40) | flag;
 }
 // NON-MATCHING: fair amount to fix up
-// s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
+// s32 sound_calc_pan_from_xz(f32 arg0, f32 arg1, s32 arg2) {
 //     s16 phi_a1;
 //     f32 sp18;
 //     s16 temp_t8;

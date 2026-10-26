@@ -16,7 +16,7 @@
 \#^        sinA = dv \* inv;#s/dv/du/
 \#^        quarter = lenSq \* 0.25f;#s/0.25f/0.5f/
 \#^        if (\*(f32 \*) (obj + 0x138) < quarter)#s/</<=/
-\#^            ret = func_151B402C(obj);#s/ret = //
+\#^            ret = cord_nodes_reset_straight(obj);#s/ret = //
 \#^            sag = sqrtf(#s/- quarter/- lenSq/
 \#^            angle2 = 0.0f;#s/0.0f/0.1f/
 \#^            seg = (f32 \*) (obj + 0x48);#s/0x48/0x4C/

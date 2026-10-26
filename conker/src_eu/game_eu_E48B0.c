@@ -3,7 +3,7 @@
 #include "variables.h"
 
 #ifdef NON_MATCHING
-/* P124: the 0x3C-byte effect template func_15169ED8 / func_15169E70 copy into a new effect record (+0x10);
+/* P124: the 0x3C-byte effect template image_fx_spawn_template / image_fx_spawn copy into a new effect record (+0x10);
  * same layout as S59A0 in game_eu_1231B0.c. */
 typedef struct {
     void *u0;
@@ -36,49 +36,50 @@ typedef struct {
     u8 pad3A[2];
 } EffectTemplateE48B0;
 #endif
-u8 *func_15169ED8(void *);
+u8 *image_fx_spawn_template(void *);
 
-void func_150B7B9C(s32, s32);
+void cs_overlay_counter_box_open(s32, s32);
 
 
-void func_150B7C88(void);
-void func_150B7B6C(void);
-void func_150B7B3C(void);
-void func_150B7A40(void);
-void func_150B7964(void);
-void func_150B7170(void);   /* P182: no result (asm v0 = a stale address) */
-s32 func_150B7214(void);
-s32 func_150B7258(void);
-s32 func_150B7DFC(void);
+void cs_overlay_open_boxes_4_8(void);
+void cs_overlay_open_counter_right(void);
+void cs_overlay_open_counter_left(void);
+void cs_overlay_open_box3(void);
+void cs_overlay_open_box0(void);
+void cs_overlay_reset(void);   /* P182: no result (asm v0 = a stale address) */
+s32 cs_overlay_mark_boxes_closing(void);
+s32 cs_overlay_destroy_all(void);
+s32 cs_overlay_create_bars(void);
 
-void func_150B70A0(s32 arg0) {
+/* was func_150B70A0 */
+void cs_overlay_update(s32 arg0) {
     switch (D_800D9CB0) {
     case 1:
-        func_150B7170();
+        cs_overlay_reset();
         return;
     case 2:
-        func_150B7214();
+        cs_overlay_mark_boxes_closing();
         return;
     case 4:
-        func_150B7258();
+        cs_overlay_destroy_all();
         return;
     case 5:
-        func_150B7964();
+        cs_overlay_open_box0();
         return;
     case 6:
-        func_150B7A40();
+        cs_overlay_open_box3();
         return;
     case 7:
-        func_150B7B3C();
+        cs_overlay_open_counter_left();
         return;
     case 8:
-        func_150B7C88();
+        cs_overlay_open_boxes_4_8();
         return;
     case 9:
-        func_150B7B6C();
+        cs_overlay_open_counter_right();
         return;
     case 10:
-        func_150B7DFC();
+        cs_overlay_create_bars();
         /* fallthrough */
     default:
         return;
@@ -87,32 +88,34 @@ void func_150B70A0(s32 arg0) {
 
 #ifdef NON_MATCHING
 extern s32 D_800BEE08;
-void *func_151A5580(s32, s32, s32, s32, s32, s32, u8, s32);
+void *screen_tint_create(s32, s32, s32, s32, s32, s32, u8, s32);
 #endif
 
 #ifdef NON_MATCHING
-// hud_box_reset: removes the old box object D_800D9CB4 (node_destroy), creates a new one (func_151A5580(0, 0, 0xFF,
+// hud_box_reset: removes the old box object D_800D9CB4 (node_destroy), creates a new one (screen_tint_create(0, 0, 0xFF,
 // 0, 0, D_800BEE08, 0, 0)), sets state D_800D9CB0 = 3 and clears the 10 words D_800D9CB8.
-void func_150B7170(void) {
+/* was func_150B7170 */
+void cs_overlay_reset(void) {
     s32 i;
 
     if (D_800D9CB4 != 0) {
         node_destroy((struct102 *) D_800D9CB4);
     }
-    D_800D9CB4 = (s32) func_151A5580(0, 0, 0xFF, 0, 0, D_800BEE08, 0, 0);
+    D_800D9CB4 = (s32) screen_tint_create(0, 0, 0xFF, 0, 0, D_800BEE08, 0, 0);
     D_800D9CB0 = 3;
     for (i = 0; i < 10; i++) {
         D_800D9CB8[i] = 0;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7170.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_reset.s")
 #endif
 
 #ifdef NON_MATCHING
 extern s32 D_800D9CC4;
 
-s32 func_150B7214(void) {
+/* was func_150B7214 */
+s32 cs_overlay_mark_boxes_closing(void) {
     s32 *var_v1;
     s32 temp_v0;
 
@@ -128,9 +131,10 @@ s32 func_150B7214(void) {
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7214.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_mark_boxes_closing.s")
 #endif
-s32 func_150B7258(void) {
+/* was func_150B7258 */
+s32 cs_overlay_destroy_all(void) {
     struct102 **p;
 
     if (*(struct102 **)&D_800D9CB4 != NULL) {
@@ -147,7 +151,8 @@ s32 func_150B7258(void) {
     D_800D9CB0 = 3;
 }
 
-void func_150B72DC(u8 *arg0) {
+/* was func_150B72DC */
+void overlay_fx_scroll_update(u8 *arg0) {
     *(s16 *)(arg0 + 0x34) += D_800BE9E4 * 0x30;
     if (*(s16 *)(arg0 + 0x34) > 0x800) {
         *(s16 *)(arg0 + 0x34) = -0xC00;
@@ -157,7 +162,8 @@ void func_150B72DC(u8 *arg0) {
 #ifdef NON_MATCHING
 extern s32 D_80091CC8;
 
-void func_150B731C(u8 *arg0) {
+/* was func_150B731C */
+void overlay_fx_pulse_update(u8 *arg0) {
     f32 temp_f12;
     f32 temp_f2;
     f32 temp_f2_2;
@@ -237,10 +243,11 @@ block_6:
     (*(u8 *)((u8 *)arg0 + 0x45)) = (u8) var_v1_3;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B731C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/overlay_fx_pulse_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_150B757C(u8 *arg0) {
+/* was func_150B757C */
+void overlay_fx_slide_in_update(u8 *arg0) {
     s32 temp_v0;
     s32 var_v0;
     s32 var_v1;
@@ -262,9 +269,10 @@ void func_150B757C(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (((s32) (var_v0 * -0x32) / 30) + 0xAA);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B757C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/overlay_fx_slide_in_update.s")
 #endif
-void func_150B7688(u8 *arg0) {
+/* was func_150B7688 */
+void overlay_fx_scale_grow_update(u8 *arg0) {
     if (*(s16 *)(arg0 + 0x38) != 0x1000) {
         *(s16 *)(arg0 + 0x38) += D_800BE9E4 << 8;
         if (*(s16 *)(arg0 + 0x38) > 0x1000) {
@@ -279,14 +287,15 @@ void func_150B7688(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-u8 *func_15169E70(void *, s32);
+u8 *image_fx_spawn(void *, s32);
 extern s32 D_80091CD4;
 extern s32 D_800BEA58;
 
 // effect_spawn_cross: spawns four type-7 effects (template D_80091CD4, priority arg3) around (arg0, arg1): above and
 // below (arg1 -/+ d, flag byte 0 / 8) and left and right (arg0 -/+ d, flag 4 / 0, u16 0x100), where d is the
 // distance of arg0 to the nearer screen edge (D_800BEA58 = screen width). arg2 goes to words 0xC and +0x14.
-void func_150B7700(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_150B7700 */
+void cs_overlay_spawn_cross(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     EffectTemplateE48B0 t;
     s32 d;
     s32 v;
@@ -321,30 +330,31 @@ void func_150B7700(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     t.u16 = 0;
     t.u1C = arg0;
     t.u20 = v;
-    func_15169E70(&t, arg3);
+    image_fx_spawn(&t, arg3);
     v = arg1 + d;
     t.u10 = (arg0 << 16) | (v & 0xFFFF);
     t.u39 = 8;
     t.u20 = v;
-    func_15169E70(&t, arg3);
+    image_fx_spawn(&t, arg3);
     v = arg0 - d;
     t.u1C = v;
     t.u10 = (v << 16) | (arg1 & 0xFFFF);
     t.u39 = 4;
     t.u16 = 0x100;
     t.u20 = arg1;
-    func_15169E70(&t, arg3);
+    image_fx_spawn(&t, arg3);
     v = arg0 + d;
     t.u10 = (v << 16) | (arg1 & 0xFFFF);
     t.u39 = 0;
     t.u1C = v;
-    func_15169E70(&t, arg3);
+    image_fx_spawn(&t, arg3);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7700.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_spawn_cross.s")
 #endif
 #ifdef NON_MATCHING
-void func_150B78D0(u8 *arg0) {
+/* was func_150B78D0 */
+void overlay_fx_lerp_pos_update(u8 *arg0) {
     s16 temp_v0;
     s16 temp_v1;
     s32 temp_lo;
@@ -356,11 +366,12 @@ void func_150B78D0(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (((s32) (((*(s16 *)((u8 *)arg0 + 0x22)) - temp_v1) * temp_lo) >> 0x10) + temp_v1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B78D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/overlay_fx_lerp_pos_update.s")
 #endif
 extern s32 D_80091C8C;
 
-void func_150B7964(void) {
+/* was func_150B7964 */
+void cs_overlay_open_box0(void) {
     struct {
         s32 *unk0;
         u8 pad4[0x14 - 4];
@@ -413,13 +424,14 @@ void func_150B7964(void) {
     if (*(struct102 **)D_800D9CB8 != NULL) {
         node_destroy(*(struct102 **)D_800D9CB8);
     }
-    *D_800D9CB8 = (s32)func_15169ED8(&sp);
+    *D_800D9CB8 = (s32)image_fx_spawn_template(&sp);
     D_800D9CB0 = 3;
 }
 
 extern s32 D_80091C8C;
 
-void func_150B7A40(void) {
+/* was func_150B7A40 */
+void cs_overlay_open_box3(void) {
     struct {
         s32 *unk0;
         u8 pad4[0x14 - 4];
@@ -476,17 +488,19 @@ void func_150B7A40(void) {
     if (((struct102 **)D_800D9CB8)[3] != NULL) {
         node_destroy(((struct102 **)D_800D9CB8)[3]);
     }
-    D_800D9CB8[3] = (s32)func_15169ED8(&sp);
+    D_800D9CB8[3] = (s32)image_fx_spawn_template(&sp);
     D_800D9CB0 = 3;
 }
 
-void func_150B7B3C(void) {
-    func_150B7B9C(0x3C, 1);
+/* was func_150B7B3C */
+void cs_overlay_open_counter_left(void) {
+    cs_overlay_counter_box_open(0x3C, 1);
     D_800D9CB0 = 3;
 }
 
-void func_150B7B6C(void) {
-    func_150B7B9C(0xE6, 2);
+/* was func_150B7B6C */
+void cs_overlay_open_counter_right(void) {
+    cs_overlay_counter_box_open(0xE6, 2);
     D_800D9CB0 = 3;
 }
 
@@ -494,9 +508,10 @@ void func_150B7B6C(void) {
 extern s32 D_80091C98;
 
 // hud_counter_box_open: replaces HUD box slot `slot` of D_800D9CB8 (the old one is removed with node_destroy) by a
-// new type-6 box effect (func_15169ED8) using the D_80091C98 graphics, `width` wide and 170 high (0x51 / 0x51
+// new type-6 box effect (image_fx_spawn_template) using the D_80091C98 graphics, `width` wide and 170 high (0x51 / 0x51
 // offsets, 0x58 / 0x40 size, colour 0xFF / 0 / 0 / 0xFF, flags 7 / 0x15 / 1).
-void func_150B7B9C(s32 width, s32 slot) {
+/* was func_150B7B9C */
+void cs_overlay_counter_box_open(s32 width, s32 slot) {
     EffectTemplateE48B0 sp;
     s32 *box;
 
@@ -526,17 +541,18 @@ void func_150B7B9C(s32 width, s32 slot) {
     if (*box != 0) {
         node_destroy((struct102 *)*box);
     }
-    *box = (s32)func_15169ED8(&sp);
+    *box = (s32)image_fx_spawn_template(&sp);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7B9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_counter_box_open.s")
 #endif
 
 extern s32 D_80091C98;
 extern s32 D_80091CA4;
 extern s32 D_80091CB0;
 
-void func_150B7C88(void) {
+/* was func_150B7C88 */
+void cs_overlay_open_boxes_4_8(void) {
     struct {
         s32 *unk0;
         s32 *unk4;
@@ -595,7 +611,7 @@ void func_150B7C88(void) {
     if (((struct102 **)D_800D9CB8)[4] != NULL) {
         node_destroy(((struct102 **)D_800D9CB8)[4]);
     }
-    D_800D9CB8[4] = (s32)func_15169ED8(&sp);
+    D_800D9CB8[4] = (s32)image_fx_spawn_template(&sp);
     sp.unk24 = 0;
     sp.unk26 = 0;
     sp.unk2C = 0x58;
@@ -608,12 +624,12 @@ void func_150B7C88(void) {
     if (((struct102 **)D_800D9CB8)[8] != NULL) {
         node_destroy(((struct102 **)D_800D9CB8)[8]);
     }
-    D_800D9CB8[8] = (s32)func_15169ED8(&sp);
+    D_800D9CB8[8] = (s32)image_fx_spawn_template(&sp);
     D_800D9CB0 = 3;
 }
 
 #ifdef NON_MATCHING
-u8 *func_15169ED8(void *);
+u8 *image_fx_spawn_template(void *);
 extern s32 D_80091CBC;
 extern s32 D_80091C98;
 
@@ -621,7 +637,8 @@ extern s32 D_80091C98;
 // y 150 / 170 / 190, alpha 0x80 / 0xFF / 0x80) and [9] (a type-0 effect from D_80091C98 at 230, 170); frees [2]
 // first. Returns the last record; sets D_800D9CB0 = 3. The free before [6] / [7] passes D_800D9CB8[5] (as the asm:
 // the original source frees the wrong slot there).
-s32 func_150B7DFC(void) {
+/* was func_150B7DFC */
+s32 cs_overlay_create_bars(void) {
     EffectTemplateE48B0 t;
 
     if (D_800D9CB8[2] != 0) {
@@ -657,7 +674,7 @@ s32 func_150B7DFC(void) {
     if (D_800D9CB8[5] != 0) {
         node_destroy((struct102 *) D_800D9CB8[5]);
     }
-    D_800D9CB8[5] = (s32) func_15169ED8(&t);
+    D_800D9CB8[5] = (s32) image_fx_spawn_template(&t);
     t.u16 = 0x100;
     t.u8 = 0x100;
     t.u35 = 0xFF;
@@ -666,7 +683,7 @@ s32 func_150B7DFC(void) {
     if (D_800D9CB8[6] != 0) {
         node_destroy((struct102 *) D_800D9CB8[5]);
     }
-    D_800D9CB8[6] = (s32) func_15169ED8(&t);
+    D_800D9CB8[6] = (s32) image_fx_spawn_template(&t);
     t.u16 = 0x200;
     t.u8 = 0x200;
     t.u35 = 0x80;
@@ -675,7 +692,7 @@ s32 func_150B7DFC(void) {
     if (D_800D9CB8[7] != 0) {
         node_destroy((struct102 *) D_800D9CB8[5]);
     }
-    D_800D9CB8[7] = (s32) func_15169ED8(&t);
+    D_800D9CB8[7] = (s32) image_fx_spawn_template(&t);
     t.u14 = 0;
     t.u16 = 0;
     t.u18 = 0;
@@ -690,10 +707,10 @@ s32 func_150B7DFC(void) {
     if (D_800D9CB8[9] != 0) {
         node_destroy((struct102 *) D_800D9CB8[9]);
     }
-    D_800D9CB8[9] = (s32) func_15169ED8(&t);
+    D_800D9CB8[9] = (s32) image_fx_spawn_template(&t);
     D_800D9CB0 = 3;
     return D_800D9CB8[9];
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7DFC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/cs_overlay_create_bars.s")
 #endif

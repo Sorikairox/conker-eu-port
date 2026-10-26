@@ -1,21 +1,21 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-// hoisted forward declaration(s) for func_1514F878
+// hoisted forward declaration(s) for char_fx_beam_light_j5
 typedef struct { s32 w[3]; } V3_1514F878;
 extern V3_1514F878 D_800A5D50;
 extern V3_1514F878 D_800A5D5C;
 extern f32 D_800A6238;
 
-s32 func_1514F2FC(u8 *, u8 *);
+s32 char_fx_detach(u8 *, u8 *);
 
 void obj_glow_smoke_attach(u8 *, u8, s32);
 
-s32 func_1514F2AC(u8 *, s32, u8 **);
+s32 char_fx_find_effect(u8 *, s32, u8 **);
 
 u8 *light_create_obj_joint(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void *func_1518A560(void *, void *, void *, s32, s32, s32, s32);
+void *bone_effect_spawn(void *, void *, void *, s32, s32, s32, s32);
 
 
 #ifdef NON_MATCHING
@@ -23,7 +23,8 @@ void *func_1518A560(void *, void *, void *, s32, s32, s32, s32);
 // (+0x4) it sets *outType (index into D_800A62B8, flag 4); by the game mode D_800BE9F0 it sets *outMode (index
 // into D_800A62A0, flag 2) and, when the character's sub-type (+0x3B) matches the mode, *outSub (column of
 // D_8008AF30[*outMode], flag 1). Returns the flags; outputs whose flag is clear are left unwritten.
-s32 func_1514CFF0(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *outType) {
+/* was func_1514CFF0 */
+s32 char_fx_handler_indices(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *outType) {
     u8 *obj = (u8 *)arg0;
     u8 flags = 0;
     u8 sub;
@@ -117,19 +118,20 @@ s32 func_1514CFF0(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *outType) {
     return flags;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514CFF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_handler_indices.s")
 #endif
 
-s32 func_1514CFF0(struct127 *, s32 *, s32 *, s32 *);
-void func_15155CF0(s32, s32);
-struct102 *func_15156544(s32);
+s32 char_fx_handler_indices(struct127 *, s32 *, s32 *, s32 *);
+void head_icon_create(s32, s32);
+struct102 *head_icon_find(s32);
 extern void (*D_8008AE10[])(struct127 *);
 extern void (*D_8008AE6C)(struct127 *);
 extern u8 *D_8008AF30[];
 extern u8 D_800A62A0[];
 extern u8 D_800A62B8[];
 
-s32 func_1514D6CC(struct127 *arg0) {
+/* was func_1514D6CC */
+s32 char_fx_init(struct127 *arg0) {
     s32 sp44 = -1;
     s32 sp40 = -1;
     s32 sp3C = -1;
@@ -144,16 +146,16 @@ s32 func_1514D6CC(struct127 *arg0) {
     }
     idx = arg0 - D_800CC2D0;
     do {
-        e = func_15156544(idx);
+        e = head_icon_find(idx);
         if (e != NULL) {
             node_destroy(e);
         }
     } while (e != NULL);
     if (idx == 0 && D_800BE616 == 0) {
-        func_15155CF0(idx, 0xFF);
+        head_icon_create(idx, 0xFF);
     }
     D_8008AE6C(arg0);
-    ret = func_1514CFF0(arg0, &sp44, &sp40, &sp3C);
+    ret = char_fx_handler_indices(arg0, &sp44, &sp40, &sp3C);
     r = ret;
     if (ret == 0) {
         return 0;
@@ -181,7 +183,8 @@ s32 func_1514D6CC(struct127 *arg0) {
 extern u8 *D_8008AF88[];
 extern void (*D_8008AEF8[])(s32);
 
-s32 func_1514D880(u8 *arg0) {
+/* was func_1514D880 */
+s32 char_fx_clear_all(u8 *arg0) {
     struct102 *p;
     struct102 *next;
 
@@ -201,15 +204,16 @@ s32 func_1514D880(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1514DA28();   /* K&R definition below (s16 state, s16 base) */
-extern s32 (*D_8008AF04[])(u8 *, s32, s32);   /* state event handlers: func_1514EE0C .. func_1514F0FC (8) */
+s32 char_fx_slot_derives();   /* K&R definition below (s16 state, s16 base) */
+extern s32 (*D_8008AF04[])(u8 *, s32, s32);   /* state event handlers: char_fx_evt_visibility .. char_fx_evt_accept (8) */
 // obj_state_event_dispatch: sends an event (arg2, arg3) to every state node of obj (list at +0x2F4, linked through
-// +0x14) whose state (+0x1C) is `state` or derives from it (func_1514DA28 on the state table D_8008AF88); each
+// +0x14) whose state (+0x1C) is `state` or derives from it (char_fx_slot_derives on the state table D_8008AF88); each
 // matching node's state record names its handler (s16 at +0, -1 = none) in D_8008AF04, called with the node's data
 // (+0x10). Returns whether the last handler called accepted the event (0 when none was called).
 // The event values are full words (P218: the asm passes a2 / a3 to the handler unmasked).
-// Callers: aiscript_send_event (game_A28B0), func_15024910 (game_eu_51190, state 0xD with an animation), tank_update.
-s32 func_1514D3B0(s32 obj, s16 state, s32 arg2, s32 arg3) {
+// Callers: aiscript_send_event (game_A28B0), scene_event_run_a (game_eu_51190, state 0xD with an animation), tank_update.
+/* was func_1514D3B0 */
+s32 char_fx_send_event(s32 obj, s16 state, s32 arg2, s32 arg3) {
     u8 *node;
     s16 idx;
     s32 handled;
@@ -217,7 +221,7 @@ s32 func_1514D3B0(s32 obj, s16 state, s32 arg2, s32 arg3) {
     handled = 0;
     for (node = *(u8 **) ((u8 *) obj + 0x2F4); node != NULL; node = *(u8 **) (node + 0x14)) {
         if (state != *(s16 *) (node + 0x1C)
-            && func_1514DA28(*(s16 *) (D_8008AF88[state] + 4), *(s16 *) (node + 0x1C)) == 0) {
+            && char_fx_slot_derives(*(s16 *) (D_8008AF88[state] + 4), *(s16 *) (node + 0x1C)) == 0) {
             continue;
         }
         idx = *(s16 *) D_8008AF88[*(s16 *) (node + 0x1C)];
@@ -228,10 +232,10 @@ s32 func_1514D3B0(s32 obj, s16 state, s32 arg2, s32 arg3) {
     return handled;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514D3B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_send_event.s")
 #endif
 
-s32 func_1514DA28(arg0, arg1)
+s32 char_fx_slot_derives(arg0, arg1)
 s16 arg0;
 s16 arg1;
 {
@@ -241,20 +245,20 @@ s16 arg1;
     if (arg0 == arg1) {
         return 1;
     }
-    if (func_1514DA28(*(s16 *)(D_8008AF88[arg0] + 6), arg1, arg0) != 0) {
+    if (char_fx_slot_derives(*(s16 *)(D_8008AF88[arg0] + 6), arg1, arg0) != 0) {
         return 1;
     }
-    if (func_1514DA28(*(s16 *)(D_8008AF88[arg0] + 4), arg1) != 0) {
+    if (char_fx_slot_derives(*(s16 *)(D_8008AF88[arg0] + 4), arg1) != 0) {
         return 1;
     }
     return 0;
 }
 
 #ifdef NON_MATCHING
-/* P241: readable C for func_1514DAD4 (game_eu_17A800, 58 insns). */
-// object_fixed_beam_spawn: entry 16 of D_8008AE10 (`void (struct127 *)`): spawns a beam effect (func_150C5870,
+/* P241: readable C for char_fx_fixed_beam (game_eu_17A800, 58 insns). */
+// object_fixed_beam_spawn: entry 16 of D_8008AE10 (`void (struct127 *)`): spawns a beam effect (beam_spawn,
 // kind 0x46) from the fixed point (-477, -2015, 2244) to the object's position +0x14, width 0.32, gives it the
-// record {object, its id byte +0x3B, 6, 0, -180, 77} at +0xC8 and attaches it to the object (func_1514F18C, slot
+// record {object, its id byte +0x3B, 6, 0, -180, 77} at +0xC8 and attaches it to the object (char_fx_attach, slot
 // 0x15). Constants: the ELF's D_800A61C4..D_800A61D0 (0xC3EE8000, 0xC4FBE000, 0x450C4000, 0x3EA3D70A).
 typedef struct {
     f32 start[3];
@@ -262,7 +266,7 @@ typedef struct {
     u8 flag18;
     f32 width;
     u8 flag20;
-} BeamSpawn_1514DAD4; /* func_150C5870 copies 0x24 bytes */
+} BeamSpawn_1514DAD4; /* beam_spawn copies 0x24 bytes */
 typedef struct {
     struct127 *owner;
     u8 ownerId;
@@ -271,8 +275,9 @@ typedef struct {
     f32 fC;
     f32 f10;
 } BeamRec_1514DAD4; /* 0x14 bytes at effect +0xC8 */
-u8 *func_150C5870(s32, s32);
-void func_1514DAD4(struct127 *obj) {
+u8 *beam_spawn(s32, s32);
+/* was func_1514DAD4 */
+void char_fx_fixed_beam(struct127 *obj) {
     BeamRec_1514DAD4 rec;
     BeamSpawn_1514DAD4 blk;
     u8 *fx;
@@ -292,17 +297,18 @@ void func_1514DAD4(struct127 *obj) {
     blk.flag18 = 1;
     blk.width = 0.32f;
     blk.flag20 = 1;
-    fx = func_150C5870((s32) &blk, 0x14);
+    fx = beam_spawn((s32) &blk, 0x14);
     if (fx != NULL) {
         memcpy(fx + 0xC8, &rec, sizeof(rec));
-        func_1514F18C(fx, obj, 0x15);
+        char_fx_attach(fx, obj, 0x15);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514DAD4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_fixed_beam.s")
 #endif
 
-void func_1514DBBC(struct127 *arg0) {
+/* was func_1514DBBC */
+void char_fx_glow_light_j5(struct127 *arg0) {
     s32 pad; // fakematch: unused slot at the top of the frame
     struct {
         f32 uA4;
@@ -402,7 +408,7 @@ void func_1514DBBC(struct127 *arg0) {
     c.u34 = 25.0f;
     c.u40 = 75.0f;
     b.uEC = 1.0f;
-    func_1514F18C(func_1518A560(&a, &b, &c, 2, 0, 0, 0), arg0, 9);
+    char_fx_attach(bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0), arg0, 9);
     a.u4C = 3;
     a.u54 = 0;
     a.u58 = 0;
@@ -444,14 +450,16 @@ void func_1514DBBC(struct127 *arg0) {
     c.u3C = 20.0f;
     c.u40 = -140.0f;
     b.uEC = 1.0f;
-    func_1514F18C(func_1518A560(&a, &b, &c, 2, 0, 0, 0), arg0, 0xA);
+    char_fx_attach(bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0), arg0, 0xA);
     light_create_obj_joint(arg0, 5, (s32 *)&c, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514DEDC(s32 arg0) {
+/* was func_1514DEDC */
+void char_fx_nop_a(s32 arg0) {
 }
 
-void func_1514DEE8(struct127 *arg0) {
+/* was func_1514DEE8 */
+void char_fx_rec32_attach(struct127 *arg0) {
     f32 buf[8];
     u8 *r;
     *(s32 *)&buf[0] = 0;
@@ -462,26 +470,28 @@ void func_1514DEE8(struct127 *arg0) {
     *(s32 *)&buf[6] = 0;
     *(s32 *)&buf[7] = 0;
     buf[4] = 12.0f;
-    r = func_15159140(arg0, 1, 0x20);
+    r = move_watch_spawn(arg0, 1, 0x20);
     if (r != NULL) {
         memcpy(r + 0x58, buf, 0x20);
-        func_1514F18C(r, arg0, 0x13);
+        char_fx_attach(r, arg0, 0x13);
     }
 }
 
 #ifdef NON_MATCHING
-u8 *func_151AD010(u8 *, f32, s32); /* P95 */
+u8 *rope_rider_create(u8 *, f32, s32); /* P95 */
 #endif
-void func_1514DF64(struct127 *arg0) {
-    func_1514DEE8(arg0);
+/* was func_1514DF64 */
+void char_fx_rec32_ad010_attach(struct127 *arg0) {
+    char_fx_rec32_attach(arg0);
 #ifdef NON_MATCHING
-    func_1514F18C(func_151AD010(arg0, 20.0f, 0), arg0, 0x14); /* P95: float literal (asm passes the bits 0x41A00000) */
+    char_fx_attach(rope_rider_create(arg0, 20.0f, 0), arg0, 0x14); /* P95: float literal (asm passes the bits 0x41A00000) */
 #else
-    func_1514F18C(func_151AD010(arg0, 0x41A00000, 0), arg0, 0x14);
+    char_fx_attach(rope_rider_create(arg0, 0x41A00000, 0), arg0, 0x14);
 #endif
 }
 
-void func_1514DFA8(struct127 *arg0) {
+/* was func_1514DFA8 */
+void char_fx_rec28_attach(struct127 *arg0) {
     u8 *r;
     s32 buf[7];
     buf[5] = 0;
@@ -490,14 +500,15 @@ void func_1514DFA8(struct127 *arg0) {
     buf[1] = 0;
     buf[2] = 0;
     buf[3] = 0;
-    r = func_15159140(arg0, 1, 0x1C);
+    r = move_watch_spawn(arg0, 1, 0x1C);
     if (r != NULL) {
         memcpy(r + 0x58, buf, 0x1C);
-        func_1514F18C(r, arg0, 0x13);
+        char_fx_attach(r, arg0, 0x13);
     }
 }
 
-void func_1514E014(struct127 *arg0) {
+/* was func_1514E014 */
+void char_fx_rec8_attach(struct127 *arg0) {
     u8 *p;
     s32 buf[2];
 
@@ -506,115 +517,139 @@ void func_1514E014(struct127 *arg0) {
     buf[1] = 0;
     if ((arg0 && arg0) && arg0) { // fakematch: permuter, moves the a2 = 8 setup before the memcpy call
     }
-    p = func_15159140(arg0, 1, 8);
+    p = move_watch_spawn(arg0, 1, 8);
     if (p != NULL) {
         memcpy(p + 0x58, buf, 8);
-        func_1514F18C(p, arg0, 0x13);
+        char_fx_attach(p, arg0, 0x13);
     }
 }
 
-void func_1514E088(struct127 *arg0) {
-    s32 temp_v0 = func_15159140(arg0, 1, 0);
+/* was func_1514E088 */
+void char_fx_rec0_attach(struct127 *arg0) {
+    s32 temp_v0 = move_watch_spawn(arg0, 1, 0);
     if (temp_v0 != 0) {
-        func_1514F18C(temp_v0, arg0, 0x13);
+        char_fx_attach(temp_v0, arg0, 0x13);
     }
 }
 
-void func_1514E0C8(s32 arg0) {
+/* was func_1514E0C8 */
+void char_fx_nop_b(s32 arg0) {
 }
 
-void func_1514E0D4(u8 *arg0) {   /* P76: callback; a0 passes through */
+/* was func_1514E0D4 */
+void char_fx_level14_attach(u8 *arg0) {   /* P76: callback; a0 passes through */
     if (D_800BE9F0 == 0x14) {
-        func_151B2610(arg0);
+        cord_rig_spawn(arg0);
     }
 }
 
-void func_1514E108(struct127 *arg0) {   /* P76: callback; a0 passes through */
-    func_1514F704(arg0);
+/* was func_1514E108 */
+void char_fx_bundle_attach_a(struct127 *arg0) {   /* P76: callback; a0 passes through */
+    char_fx_bundle_attach(arg0);
 }
 
-void func_1514E128(struct127 *arg0) {
+/* was func_1514E128 */
+void char_fx_light_j2(struct127 *arg0) {
     light_create_obj_joint(arg0, 2, (s32 *)D_800A5C80, 2, 0x12C, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-void func_1514E1A8(struct127 *arg0) {
+/* was func_1514E1A8 */
+void char_fx_1500ee18_attach(struct127 *arg0) {
     func_1500EE18(arg0, 0xFF, 1);
 }
 
-void func_1514E1CC(s32 arg0) {
-    func_151D1510(arg0, 0, 0xFF, 1);
+/* was func_1514E1CC */
+void char_fx_1d1510_attach(s32 arg0) {
+    obj_point_trail_spawn(arg0, 0, 0xFF, 1);
 }
 
-void func_1514E1F4(u8 *arg0) {
+/* was func_1514E1F4 */
+void char_fx_set_flag2(u8 *arg0) {
     *(s32 *)(arg0 + 0x94) |= 2;
 }
 
-void func_1514E208(u8 *arg0) {
+/* was func_1514E208 */
+void char_fx_set_flags710(u8 *arg0) {
     *(s32 *)(arg0 + 0x94) |= 0x710;
 }
 
-void func_1514E21C(struct127 *arg0) {
+/* was func_1514E21C */
+void char_fx_setup_attachments(struct127 *arg0) {
     *(s32 *)((u8 *)arg0 + 0x9C) = 0x6000;
-    func_15083568(arg0, 0x23, 1.0f, 0);
-    func_15083568(arg0, 0x44, 1.0f, 0);
+    obj_setup_run(arg0, 0x23, 1.0f, 0);
+    obj_setup_run(arg0, 0x44, 1.0f, 0);
 }
 
-void func_1514E264(struct127 *arg0) {
+/* was func_1514E264 */
+void char_fx_setup_vehicle(struct127 *arg0) {
     u8 *v = *(u8 **)((u8 *)arg0 + 0x31C);
     if (v != NULL) {
         v[0x94] = 1;
     }
-    func_15083568(arg0, 0x17, 1.0f, 0);
+    obj_setup_run(arg0, 0x17, 1.0f, 0);
 }
 
-void func_1514E29C(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E29C */
+void char_fx_setup_attachments_1(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E2BC(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E2BC */
+void char_fx_setup_attachments_2(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E2DC(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E2DC */
+void char_fx_setup_attachments_3(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E2FC(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E2FC */
+void char_fx_setup_attachments_4(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E31C(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E31C */
+void char_fx_setup_attachments_5(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E33C(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E33C */
+void char_fx_setup_attachments_6(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E35C(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E35C */
+void char_fx_setup_attachments_7(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E37C(struct127 *arg0) {
-    func_1514E21C(arg0);
+/* was func_1514E37C */
+void char_fx_setup_attachments_8(struct127 *arg0) {
+    char_fx_setup_attachments(arg0);
 }
 
-void func_1514E39C(s32 arg0) {
+/* was func_1514E39C */
+void char_fx_nop_c(s32 arg0) {
 }
 
-void func_1514E3A8(s32 arg0) {
+/* was func_1514E3A8 */
+void char_fx_nop_d(s32 arg0) {
 }
 
-void func_1514E3B4(s32 arg0) {
+/* was func_1514E3B4 */
+void char_fx_nop_e(s32 arg0) {
 }
 
-void func_1514E3C0(struct127 *arg0) {
+/* was func_1514E3C0 */
+void char_fx_setup_attachments_if(struct127 *arg0) {
     if (((u8 *)D_800D2E4C)[0x11] & 8) {
-        func_1514E21C(arg0);
+        char_fx_setup_attachments(arg0);
     }
 }
 
-void func_1514E3F8(s32 arg0) {
+/* was func_1514E3F8 */
+void char_fx_nop_f(s32 arg0) {
 }
 
 extern u8 D_800A5C8C[];
@@ -623,25 +658,28 @@ extern u8 D_800A5CA4[];
 extern f32 D_800A61E4;
 s32 light_create_obj_beam(struct127 *, s32, s32 *, s32 *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_1514E404(struct127 *arg0) {
+/* was func_1514E404 */
+void char_fx_beam_light_setup(struct127 *arg0) {
     s32 temp_v0;
 
     light_create_obj_beam(arg0, 0xC, D_800A5C8C, D_800A5C98, D_800A61E4, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
-    temp_v0 = func_15083568(arg0, 0x3C, 1.0f, 0);
+    temp_v0 = obj_setup_run(arg0, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
         (*(s32 *)((u8 *)temp_v0 + 0x38)) = 0x7D0;
     }
-    func_1514F18C(light_create_obj_joint(arg0, 0, D_800A5CA4, 2, 0x12C, 0xB, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), arg0, 0x19);
+    char_fx_attach(light_create_obj_joint(arg0, 0, D_800A5CA4, 2, 0x12C, 0xB, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), arg0, 0x19);
 }
 
-void func_1514E540(u8 *arg0) {
-    arg0[0x65] = func_15083FB0(9, arg0) + 1;
+/* was func_1514E540 */
+void char_fx_set_variant(u8 *arg0) {
+    arg0[0x65] = obj_slot_by_setup_id(9, arg0) + 1;
     arg0[0x101] |= 0x34;
 }
 
 extern f32 D_800A61E8;
 extern f32 D_800A61EC;
-void func_1514E57C(struct127 *arg0) {
+/* was func_1514E57C */
+void char_fx_glow_attach_a(struct127 *arg0) {
     s32 pad; // fakematch: unused slot at the top of the frame
     struct {
         f32 uA4;
@@ -741,13 +779,14 @@ void func_1514E57C(struct127 *arg0) {
     c.u34 = 59.0f;
     c.u40 = D_800A61EC;
     b.uEC = 1.0f;
-    func_1514F18C(func_1518A560(&a, &b, &c, 2, 0, 0, 0), arg0, 6);
-    func_151D7A60(arg0, 5, -1, 0xFF, 1);
+    char_fx_attach(bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0), arg0, 6);
+    char_glow_trail_spawn(arg0, 5, -1, 0xFF, 1);
 }
 
 extern f32 D_800A61F0;
 extern f32 D_800A61F4;
-void func_1514E704(struct127 *arg0) {
+/* was func_1514E704 */
+void char_fx_glow_attach_b(struct127 *arg0) {
     s32 pad; // fakematch: unused slot at the top of the frame
     struct {
         f32 uA4;
@@ -847,16 +886,17 @@ void func_1514E704(struct127 *arg0) {
     c.u34 = 59.0f;
     c.u40 = D_800A61F4;
     b.uEC = 1.0f;
-    func_1514F18C(func_1518A560(&a, &b, &c, 2, 0, 0, 0), arg0, 6);
-    func_151D7A60(arg0, 5, -1, 0xFF, 1);
+    char_fx_attach(bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0), arg0, 6);
+    char_glow_trail_spawn(arg0, 5, -1, 0xFF, 1);
 }
 
 #ifdef NON_MATCHING
-// object_glow_attach: handler (table EU 8008AE1C) that builds a sprite effect (func_1518A560 with the same
-// three records as func_1514DBBC: render block a, size / fade block b, attachment c = {obj, its id, joint 0xC, mode
-// 2, offset (0, 100, 0) .. (0, 600, 0)}), attaches it to the object in slot 7 (func_1514F18C), then adds a light
+// object_glow_attach: handler (table EU 8008AE1C) that builds a sprite effect (bone_effect_spawn with the same
+// three records as char_fx_glow_light_j5: render block a, size / fade block b, attachment c = {obj, its id, joint 0xC, mode
+// 2, offset (0, 100, 0) .. (0, 600, 0)}), attaches it to the object in slot 7 (char_fx_attach), then adds a light
 // (light_create_obj_joint: joint 0xC, offset (0, 0, 150), then 300, 40, 255, 181, 0, 255, 0, 2, 0, 0, 255, 1).
-void func_1514E88C(struct127 *obj) {
+/* was func_1514E88C */
+void char_fx_object_glow(struct127 *obj) {
     struct {
         f32 u2C;
         f32 u30;
@@ -956,75 +996,85 @@ void func_1514E88C(struct127 *obj) {
     c.u40 = 600.0f;
     c.u44 = obj;
     b.uEC = 1.0f;
-    func_1514F18C(func_1518A560(&a, &b, &c, 2, 3, 0, 0), obj, 7);
+    char_fx_attach(bone_effect_spawn(&a, &b, &c, 2, 3, 0, 0), obj, 7);
     light[0] = 0.0f;
     light[1] = 0.0f;
     light[2] = 150.0f;
     light_create_obj_joint(obj, 0xC, (s32 *)light, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E88C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_object_glow.s")
 #endif
 
-u8 * func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
-u8 * func_1518D1C0(struct127 *, s16, s32, u8, u8, s32, u8 *);
+u8 * light_add_point(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
+u8 * character_effect_attach(struct127 *, s16, s32, u8, u8, s32, u8 *);
 
-void func_1514EA78(struct127 *arg0) {
+/* was func_1514EA78 */
+void char_fx_effect_a5cb0(struct127 *arg0) {
     f32 *temp_v1;
 
-    func_1514F18C(func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, D_800A5CB0), arg0, 0xD);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CB0), arg0, 0xD);
     temp_v1 = &arg0->x_position;
-    func_1514F18C(func_1515D5F8(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
+    char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
 
 
-void func_1514EB28(struct127 *arg0) {
+/* was func_1514EB28 */
+void char_fx_effect_a5cc4(struct127 *arg0) {
     f32 *temp_v1;
 
-    func_1514F18C(func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, D_800A5CC4), arg0, 0xD);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CC4), arg0, 0xD);
     temp_v1 = &arg0->x_position;
-    func_1514F18C(func_1515D5F8(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
+    char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
 
 
-void func_1514EBD8(struct127 *arg0) {
+/* was func_1514EBD8 */
+void char_fx_effect_a5cd8(struct127 *arg0) {
     f32 *temp_v1;
 
-    func_1514F18C(func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, D_800A5CD8), arg0, 0xD);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CD8), arg0, 0xD);
     temp_v1 = &arg0->x_position;
-    func_1514F18C(func_1515D5F8(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
+    char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
 
 
-void func_1514EC88(struct127 *arg0) {
+/* was func_1514EC88 */
+void char_fx_effect_a5cec(struct127 *arg0) {
     f32 *temp_v1;
 
-    func_1514F18C(func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, D_800A5CEC), arg0, 0xE);
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5CEC), arg0, 0xE);
     temp_v1 = &arg0->x_position;
-    func_1514F18C(func_1515D5F8(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
+    char_fx_attach(light_add_point(-0x8000, (s32) temp_v1 >> 0x10, (s32) temp_v1 & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0), arg0, 0x18);
 }
 
-void func_1514ED38(struct127 *arg0) {
-    func_1514F18C(func_1518D1C0(arg0, 7, 0, 1, 0xFF, 1, D_800A5D00), arg0, 0xF);
+/* was func_1514ED38 */
+void char_fx_effect_a5d00(struct127 *arg0) {
+    char_fx_attach(character_effect_attach(arg0, 7, 0, 1, 0xFF, 1, D_800A5D00), arg0, 0xF);
 }
 
-void func_1514ED94(s32 arg0) {
+/* was func_1514ED94 */
+void char_fx_end_nop(s32 arg0) {
 }
 
-void func_1514EDA0(struct102 *arg0) {
+/* was func_1514EDA0 */
+void char_fx_end_destroy(struct102 *arg0) {
     node_destroy(arg0);
 }
 
-void func_1514EDC0(struct102 *arg0) {
-    func_1518E878(arg0);
+/* was func_1514EDC0 */
+void char_fx_end_char_effect(struct102 *arg0) {
+    character_effect_free_particles(arg0);
     node_destroy(arg0);
 }
 
-void func_1514EDEC(s32 arg0) {   /* P76: callback; a0 passes through */
-    func_1515F10C(arg0);
+/* was func_1514EDEC */
+void char_fx_end_15f10c(s32 arg0) {   /* P76: callback; a0 passes through */
+    light_remove(arg0);
 }
 
-s32 func_1514EE0C(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_1514EE0C */
+s32 char_fx_evt_visibility(u8 *arg0, s32 arg1, s32 arg2) {
     switch (arg1) {
     case 0:
         if (*(s32 *)(arg0 + 0x10) & 1) {
@@ -1045,7 +1095,8 @@ s32 func_1514EE0C(u8 *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-s32 func_1514EE90(u8 *arg0, s32 arg1, s32 arg2)
+/* was func_1514EE90 */
+s32 char_fx_evt_visibility_linked(u8 *arg0, s32 arg1, s32 arg2)
 {
   u8 *v = arg0 + 0x110;
   s32 f;
@@ -1082,80 +1133,86 @@ s32 func_1514EE90(u8 *arg0, s32 arg1, s32 arg2)
       break;
 
     default:
-      return func_1514EE0C(arg0, arg1, arg2);
+      return char_fx_evt_visibility(arg0, arg1, arg2);
 
   }
 
   return 1;
 }
 
-s32 func_1514EF4C(u8 *arg0, s32 arg1, s32 arg2) {
-    return func_1514EE90(arg0, arg1, arg2);
+/* was func_1514EF4C */
+s32 char_fx_evt_visibility_linked_b(u8 *arg0, s32 arg1, s32 arg2) {
+    return char_fx_evt_visibility_linked(arg0, arg1, arg2);
 }
 
-s32 func_1514EF6C(u8 *arg0, s32 arg1, s32 arg2) {
-    return func_1514EE0C(arg0, arg1, arg2);
+/* was func_1514EF6C */
+s32 char_fx_evt_visibility_b(u8 *arg0, s32 arg1, s32 arg2) {
+    return char_fx_evt_visibility(arg0, arg1, arg2);
 }
 
-s32 func_1514EF8C(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_1514EF8C */
+s32 char_fx_evt_set_mode(u8 *arg0, s32 arg1, s32 arg2) {
     switch (arg1) {
     case 3:
         if (arg0[0x22] == 2) {
-            func_1518E8EC(arg0, 3);
+            character_effect_set_type(arg0, 3);
         } else {
-            func_1518E8EC(arg0, 2);
+            character_effect_set_type(arg0, 2);
         }
         break;
     case 4:
-        func_1518E8EC(arg0, 3);
+        character_effect_set_type(arg0, 3);
         break;
     case 5:
-        func_1518E8EC(arg0, 2);
+        character_effect_set_type(arg0, 2);
         break;
     case 6:
         if (arg0[0x22] == 2) {
-            func_1518E8EC(arg0, 5);
+            character_effect_set_type(arg0, 5);
         } else {
-            func_1518E8EC(arg0, 2);
+            character_effect_set_type(arg0, 2);
         }
         break;
     case 7:
-        func_1518E8EC(arg0, 5);
+        character_effect_set_type(arg0, 5);
         break;
     case 8:
-        func_1518E8EC(arg0, 2);
+        character_effect_set_type(arg0, 2);
         break;
     case 9:
         if (arg0[0x22] == 2) {
-            func_1518E8EC(arg0, 6);
+            character_effect_set_type(arg0, 6);
         } else {
-            func_1518E8EC(arg0, 2);
+            character_effect_set_type(arg0, 2);
         }
         break;
     case 10:
-        func_1518E8EC(arg0, 6);
+        character_effect_set_type(arg0, 6);
         break;
     case 11:
-        func_1518E8EC(arg0, 2);
+        character_effect_set_type(arg0, 2);
         break;
     case 12:
-        func_1518E8EC(arg0, 2);
+        character_effect_set_type(arg0, 2);
         break;
     default:
-        return func_1514EE0C(arg0, arg1, arg2);
+        return char_fx_evt_visibility(arg0, arg1, arg2);
     }
     return 1;
 }
 
-s32 func_1514F0DC(u8 *arg0, s32 arg1, s32 arg2) {
-    return func_1514EE0C(arg0, arg1, arg2);
+/* was func_1514F0DC */
+s32 char_fx_evt_visibility_c(u8 *arg0, s32 arg1, s32 arg2) {
+    return char_fx_evt_visibility(arg0, arg1, arg2);
 }
 
-s32 func_1514F0FC(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1514F0FC */
+s32 char_fx_evt_accept(s32 arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-u8 *func_1514F114(s32 arg0, s16 arg1, s32 arg2)
+/* was func_1514F114 */
+u8 *char_fx_node_alloc(s32 arg0, s16 arg1, s32 arg2)
 {
   int new_var2;
   u8 *new_var;
@@ -1173,7 +1230,8 @@ u8 *func_1514F114(s32 arg0, s16 arg1, s32 arg2)
   return temp_v0;
 }
 
-s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2) {
+/* was func_1514F18C */
+s32 char_fx_attach(void *arg0, struct127 *arg1, s16 arg2) {
     u8 *ret;
     u8 *node;
     struct_eu_link *next;
@@ -1181,7 +1239,7 @@ s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2) {
 
     ret = NULL;
     if (arg0 != NULL) {
-        node = (u8 *)func_1514F114(arg0, arg2, 0);
+        node = (u8 *)char_fx_node_alloc(arg0, arg2, 0);
         ret = node;
         if (node != NULL) {
             *(struct_eu_link **)(node + 0x14) = arg1->unk2F4;
@@ -1203,7 +1261,8 @@ s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2) {
     return (s32)ret;
 }
 
-s32 func_1514F250(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2) {
+/* was func_1514F250 */
+s32 char_fx_find_slot(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2) {
     s32 found = 0;
     struct_eu_link *n = arg0;
     struct_eu_link *next;
@@ -1222,7 +1281,8 @@ s32 func_1514F250(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2) {
     return found;
 }
 
-s32 func_1514F2AC(u8 *arg0, s32 arg1, u8 **arg2) {
+/* was func_1514F2AC */
+s32 char_fx_find_effect(u8 *arg0, s32 arg1, u8 **arg2) {
     s32 found = 0;
     u8 *node = arg0;
     u8 *next;
@@ -1241,7 +1301,8 @@ s32 func_1514F2AC(u8 *arg0, s32 arg1, u8 **arg2) {
     return found;
 }
 
-s32 func_1514F2FC(u8 *arg0, u8 *arg1) {
+/* was func_1514F2FC */
+s32 char_fx_detach(u8 *arg0, u8 *arg1) {
     s32 sp1C;
     if (arg0 == *(u8 **)(arg1 + 0x2F4)) {
         *(u8 **)(arg1 + 0x2F4) = *(u8 **)(arg0 + 0x14);
@@ -1257,7 +1318,8 @@ s32 func_1514F2FC(u8 *arg0, u8 *arg1) {
     return sp1C;
 }
 
-void func_1514EDF0(s32 arg0, u8 *arg1) {
+/* was func_1514EDF0 */
+void char_fx_detach_effect(s32 arg0, u8 *arg1) {
     s32 temp_v0;
     u8 *var_s1;
     u8 *sp34;
@@ -1265,16 +1327,17 @@ void func_1514EDF0(s32 arg0, u8 *arg1) {
     var_s1 = (*(u8 **)((u8 *)arg1 + 0x2F4));
     sp34 = NULL;
     do {
-        temp_v0 = func_1514F2AC(var_s1, arg0, &sp34);
+        temp_v0 = char_fx_find_effect(var_s1, arg0, &sp34);
         temp_s0 = temp_v0;
         if (temp_v0 != 0) {
             var_s1 = (*(u8 **)((u8 *)sp34 + 0x14));
-            func_1514F2FC(sp34, arg1);
+            char_fx_detach(sp34, arg1);
         }
     } while (temp_s0 != 0);
 }
 
-void func_1514F3E0(u8 *arg0) {
+/* was func_1514F3E0 */
+void char_fx_15c3c0_attach(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -1286,15 +1349,16 @@ void func_1514F3E0(u8 *arg0) {
     sp20.unk4 = arg0[0x3B];
     sp20.unk5 = 0;
     sp20.unk6 = 300;
-    func_1514F18C(func_1515C3C0(&sp20, 0, 255, 1), arg0, 0x16);
+    char_fx_attach(motion_track_spawn(&sp20, 0, 255, 1), arg0, 0x16);
 }
 
 #ifdef NON_MATCHING
 // character_fire_effect_start: handler (table EU 8008AE80): adds a light at (0, 90, 0) on joint 1 of the object
-// (light_create_obj_joint: 300, 2, 255, 0, 0, 255, 0, 3, 0, 0, 255, 1) attached in slot 0x19 (func_1514F18C), then a sprite
-// effect (func_1518A560) with render block kind 0x69 / 3 / 0x4403, size 95 / 65, fade 0.15 / 0.7 / 0.4, attached to
+// (light_create_obj_joint: 300, 2, 255, 0, 0, 255, 0, 3, 0, 0, 255, 1) attached in slot 0x19 (char_fx_attach), then a sprite
+// effect (bone_effect_spawn) with render block kind 0x69 / 3 / 0x4403, size 95 / 65, fade 0.15 / 0.7 / 0.4, attached to
 // joint 1 from (0, 70, 0) to (0, 120, 0) (mode 3).
-void func_1514F43C(struct127 *obj) {
+/* was func_1514F43C */
+void char_fx_fire_start(struct127 *obj) {
     static const f32 sLightPos[3] = { 0.0f, 90.0f, 0.0f };
     static const f32 sFrom[3] = { 0.0f, 70.0f, 0.0f };
     static const f32 sTo[3] = { 0.0f, 120.0f, 0.0f };
@@ -1361,7 +1425,7 @@ void func_1514F43C(struct127 *obj) {
         s16 u56;
     } a;
 
-    func_1514F18C(light_create_obj_joint(obj, 1, (s32 *)sLightPos, 2, 0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1), obj,
+    char_fx_attach(light_create_obj_joint(obj, 1, (s32 *)sLightPos, 2, 0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1), obj,
                   0x19);
     a.u00 = 0x69;
     a.u40 = 0x4ED200A;
@@ -1418,17 +1482,19 @@ void func_1514F43C(struct127 *obj) {
     b.u57 = 0;
     b.u48 = 1.0f;
     c.mode = 3;
-    func_1518A560(&a, &b, &c, 2, 0, 0, 0);
+    bone_effect_spawn(&a, &b, &c, 2, 0, 0, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F43C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/char_fx_fire_start.s")
 #endif
 
-void func_1514F680(struct127 *arg0) {   /* P76: callback; a0 passes through */
-    func_1514F704(arg0);
+/* was func_1514F680 */
+void char_fx_bundle_attach_b(struct127 *arg0) {   /* P76: callback; a0 passes through */
+    char_fx_bundle_attach(arg0);
 }
 
-s32 func_1514F6A0(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_1514F6A0 */
+s32 char_fx_evt_link_flag(u8 *arg0, s32 arg1, s32 arg2) {
     switch (arg1) {
     case 0xD:
         (*(u8 **)(arg0 + 0x14))[9] = 0;
@@ -1437,7 +1503,7 @@ s32 func_1514F6A0(u8 *arg0, s32 arg1, s32 arg2) {
         (*(u8 **)(arg0 + 0x14))[9] = 1;
         break;
     default:
-        return func_1514EE0C(arg0, arg1, arg2);
+        return char_fx_evt_visibility(arg0, arg1, arg2);
     }
     return 1;
 }
@@ -1445,25 +1511,27 @@ s32 func_1514F6A0(u8 *arg0, s32 arg1, s32 arg2) {
 extern u8 D_800A5D38[];
 extern u8 D_800A5D44[];
 
-int func_1514F704(struct127 *arg0) { // int: callers use the implicit declaration
+/* was func_1514F704 */
+int char_fx_bundle_attach(struct127 *arg0) { // int: callers use the implicit declaration
     u8 *r;
 
-    func_151D1510(arg0, 1, 0xFF, 1);
-    func_151D1510(arg0, 2, 0xFF, 1);
-    func_151BB5F4(arg0);
+    obj_point_trail_spawn(arg0, 1, 0xFF, 1);
+    obj_point_trail_spawn(arg0, 2, 0xFF, 1);
+    tank_engine_sound_start(arg0);
     if (D_800BE616 == 0) {
-        func_151BC624(arg0);
+        obj_beam_light_attach(arg0);
     }
-    func_151BD8A8(arg0, 0xFF, 1);
-    func_151BA4B0(arg0, 0xFF, 1);
+    obj_twin_bone_emitters_spawn(arg0, 0xFF, 1);
+    player_screen_uv_mesh_spawn(arg0, 0xFF, 1);
     light_create_obj_joint(arg0, 1, (s32 *)D_800A5D38, 2, 0x12C, 0xC, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
     r = light_create_obj_joint(arg0, 1, (s32 *)D_800A5D44, 2, 0x12C, 0xF, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
     if (r != NULL) {
-        func_1514F18C(r, arg0, 0x19);
+        char_fx_attach(r, arg0, 0x19);
     }
 }
 
-void func_1514F878(struct127 *arg0) {
+/* was func_1514F878 */
+void char_fx_beam_light_j5(struct127 *arg0) {
     V3_1514F878 sp54;
     V3_1514F878 sp48;
     sp54 = D_800A5D50;
@@ -1471,7 +1539,8 @@ void func_1514F878(struct127 *arg0) {
     light_create_obj_beam(arg0, 5, &sp54, &sp48, D_800A6238, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514F93C(u8 *arg0) {
+/* was func_1514F93C */
+void char_fx_spawn_linked_3a(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -1488,31 +1557,38 @@ void func_1514F93C(u8 *arg0) {
     }
 }
 
-void func_1514F9BC(struct127 *arg0) {
-    func_1514F18C(func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, D_800A5D68), arg0, 0xD);
+/* was func_1514F9BC */
+void char_fx_effect_a5d68(struct127 *arg0) {
+    char_fx_attach(character_effect_attach(arg0, 5, 0, 1, 0xFF, 1, D_800A5D68), arg0, 0xD);
 }
 
-void func_1514FA18(s32 arg0) {
-    func_151D7A60(arg0, 1, -1, 0xFF, 1);
+/* was func_1514FA18 */
+void char_fx_d7a60_kind1(s32 arg0) {
+    char_glow_trail_spawn(arg0, 1, -1, 0xFF, 1);
 }
 
-void func_1514FA48(s32 arg0) {
-    func_151D7A60(arg0, 2, 1, 0xFF, 1);
+/* was func_1514FA48 */
+void char_fx_d7a60_kind2(s32 arg0) {
+    char_glow_trail_spawn(arg0, 2, 1, 0xFF, 1);
 }
 
-void func_1514FA78(s32 arg0) {
-    func_151D7A60(arg0, 3, 0, 0xFF, 1);
+/* was func_1514FA78 */
+void char_fx_d7a60_kind3(s32 arg0) {
+    char_glow_trail_spawn(arg0, 3, 0, 0xFF, 1);
 }
 
-void func_1514FAA8(s32 arg0) {
-    func_151D7A60(arg0, 4, -1, 0xFF, 1);
+/* was func_1514FAA8 */
+void char_fx_d7a60_kind4(s32 arg0) {
+    char_glow_trail_spawn(arg0, 4, -1, 0xFF, 1);
 }
 
-void func_1514FAD8(s32 arg0) {
-    func_150C4620(arg0, -1, 0xFF, 1);
+/* was func_1514FAD8 */
+void char_fx_glow_spawn(s32 arg0) {
+    damage_smoke_spawn(arg0, -1, 0xFF, 1);
 }
 
-void func_1514FB00(struct127 *arg0) {
+/* was func_1514FB00 */
+void char_fx_glow_smoke(struct127 *arg0) {
     obj_glow_smoke_attach(arg0, 0xFF, 1);
     obj_spawn_effect_85(arg0, 0xFF, 1);
 }
@@ -1529,12 +1605,13 @@ typedef struct {
 } BlkFB3C;
 
 #ifdef NON_MATCHING
-u8 *func_150C0FC0(BlkFB3C *arg0, s32 arg1, s32 arg2);
+u8 *smoke_trail_spawn(BlkFB3C *arg0, s32 arg1, s32 arg2);
 #else
-void func_150C0FC0(BlkFB3C *arg0, s32 arg1, s32 arg2);
+void smoke_trail_spawn(BlkFB3C *arg0, s32 arg1, s32 arg2);
 #endif
 
-void func_1514FB3C(u8 *arg0) {
+/* was func_1514FB3C */
+void char_fx_0c0fc0_attach(u8 *arg0) {
     BlkFB3C b;
 
     b.u0 = 0;
@@ -1545,5 +1622,5 @@ void func_1514FB3C(u8 *arg0) {
     b.u14 = 20;
     b.u16 = 300;
     b.u18 = 4;
-    func_150C0FC0(&b, 0xFF, 1);
+    smoke_trail_spawn(&b, 0xFF, 1);
 }

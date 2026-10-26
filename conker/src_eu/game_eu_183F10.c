@@ -5,11 +5,12 @@
 extern u8 D_800A4EA8[];
 #endif
 
-void func_15157734(u8 *arg0);
+void anim_model_fx_free_lights(u8 *arg0);
 
 
 #ifdef NON_MATCHING
-s32 func_15156700(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_15156700 */
+s32 line_fx_spawn(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     struct {
         s32 u30;
         u8 pad34[0x10];
@@ -76,14 +77,16 @@ s32 func_15156700(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     return (s32) sp.u44;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15156700.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/line_fx_spawn.s")
 #endif
-s32 func_15156700(s32, u8, s32, u8, s32);
-void func_151568F8(s32 arg0, u8 arg1, s32 arg2) {
-    func_15156700(arg0, arg1, arg2, 0xFF, 0);
+s32 line_fx_spawn(s32, u8, s32, u8, s32);
+/* was func_151568F8 */
+void line_fx_spawn_default(s32 arg0, u8 arg1, s32 arg2) {
+    line_fx_spawn(arg0, arg1, arg2, 0xFF, 0);
 }
 
-void func_15156928(struct102 *arg0p) {
+/* was func_15156928 */
+void line_fx_update(struct102 *arg0p) {
     u8 *arg0 = (u8 *)arg0p;
     s32 done;
     s16 t;
@@ -118,14 +121,15 @@ void func_15156928(struct102 *arg0p) {
 
 #ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, u8, s8 *);
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+s32 gfx_prim_color_cached(s32, s32, s32, s32, s32, s32, s32, s8 *);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
-u8 *func_15156A68(s32 arg0, u8 *arg1, s16 arg2) {
+/* was func_15156A68 */
+u8 *line_fx_draw(s32 arg0, u8 *arg1, s16 arg2) {
     struct {
         u8 u59;
         u8 u5A;
@@ -174,7 +178,7 @@ u8 *func_15156A68(s32 arg0, u8 *arg1, s16 arg2) {
     u8 *temp_v1;
     u8 *temp_v1_2;
 
-    func_151D6310(arg1 + 0x88, arg2, 0x30, &sp.u5C, &sp.u59);
+    vtx_slot_buffer_get(arg1 + 0x88, arg2, 0x30, &sp.u5C, &sp.u59);
     if (sp.u59 != 0) {
         temp_a1 = arg1 + 0x58;
         temp_v1 = arg1 + (arg2 * 4);
@@ -200,7 +204,7 @@ u8 *func_15156A68(s32 arg0, u8 *arg1, s16 arg2) {
     temp_f12 = (*(f32 *)((u8 *)arg1 + 0x14));
     temp_f2 = (*(f32 *)((u8 *)arg1 + 0x10));
     temp_f14 = (*(f32 *)((u8 *)arg1 + 0x28));
-    temp_s1_2 = func_15142FBC(gfx_set_combine_mode(func_15142CF0(func_15142C10(func_15142B7C(arg0, var_v1 | 5 | 0x200000, 0x1F0600), 0, 0, 0, (s32) (*(u8 *)((u8 *)arg1 + 0x4C)), &sp.u67), 0, 0, 0, 0, 0, 0, &sp.u67), sp.u5A, &sp.u67), 0x82CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u67);
+    temp_s1_2 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(gfx_geometry_mode_cached(arg0, var_v1 | 5 | 0x200000, 0x1F0600), 0, 0, 0, (s32) (*(u8 *)((u8 *)arg1 + 0x4C)), &sp.u67), 0, 0, 0, 0, 0, 0, &sp.u67), sp.u5A, &sp.u67), 0x82CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u67);
     temp_f16 = temp_f2 - temp_f14;
     sp.u8C = temp_f12 - (*(f32 *)((u8 *)arg1 + 0x2C));
     temp_f0 = (*(f32 *)((u8 *)arg1 + 0x18));
@@ -247,12 +251,13 @@ u8 *func_15156A68(s32 arg0, u8 *arg1, s16 arg2) {
     return temp_s1 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15156A68.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/line_fx_draw.s")
 #endif
-s32 func_151308E4(void *, s32, s32, u8, s32);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
 typedef struct { f32 x, y, z; } V3_6E68;
 typedef struct { s32 a, b; } V2_6E68;
-void func_15156E68(u8 *arg0, u8 arg1) {
+/* was func_15156E68 */
+void line_spark_burst_at(u8 *arg0, u8 arg1) {
     struct {
         s16 u98;
         s16 u9A;
@@ -354,7 +359,7 @@ void func_15156E68(u8 *arg0, u8 arg1) {
     B.uDA = *(s16 *)(arg0 + 0x42);
     B.uDC = *(s16 *)(arg0 + 0x44);
     B.uDE = *(u8 *)(arg0 + 0x46);
-    func_15153F24(&B, arg1);
+    emit_line_sparks_by_angles(&B, arg1);
     sp.u45 = *(u8 *)(arg0 + 0x47);
     sp.u30 = *(u16 *)(arg0 + 0x48);
     sp.u2C = *(s32 *)(arg0 + 0x50);
@@ -386,18 +391,19 @@ void func_15156E68(u8 *arg0, u8 arg1) {
     sp.u74 = 0.0f;
     sp.u78 = 0.0f;
     sp.u7C = 0.0f;
-    func_151308E4(&sp, arg0[0x88], 0, arg1, 0);
+    particle_spawn_basic(&sp, arg0[0x88], 0, arg1, 0);
 }
 
 #ifdef NON_MATCHING
 // spark_point_flash_update: P256: counts the emitter `obj`'s timer (s16 +0x2C) down by the frame step D_800BE9E4;
 // when it runs out, picks a random point of the table D_800DCE60 (3 groups x 10 points of x, y, z, w); a point with
-// a zero coordinate spawns nothing, else func_15157294(point, room obj[0xC]) and a light flash (light_create_with_ctrl:
+// a zero coordinate spawns nothing, else line_spark_burst_random_flip(point, room obj[0xC]) and a light flash (light_create_with_ctrl:
 // type 3, 5..15 frames, at the truncated point, radius 100..255, white, room obj[0xC], owner obj[1]). The timer then
 // restarts at min +0x28 + rand % (range +0x2A + 1) (unsigned).
 extern f32 D_800DCE60[][10][4];
-void func_15157294(u8 *, u8);
-void func_151570C4(u8 *obj) {
+void line_spark_burst_random_flip(u8 *, u8);
+/* was func_151570C4 */
+void spark_point_flash_update(u8 *obj) {
     Header flash;
     Header2 at;
     s16 *timer;
@@ -411,7 +417,7 @@ void func_151570C4(u8 *obj) {
     group = random_int() % 3U;
     pt = D_800DCE60[group][random_int() % 10U];
     if (pt[0] != 0.0f && pt[1] != 0.0f && pt[2] != 0.0f) {
-        func_15157294((u8 *) pt, obj[0xC]);
+        line_spark_burst_random_flip((u8 *) pt, obj[0xC]);
         flash.unk0 = 3;
         flash.unk1 = -1;
         flash.unk2 = random_int() % 11U + 5;
@@ -425,10 +431,11 @@ void func_151570C4(u8 *obj) {
     timer[2] = random_int() % (u32) (timer[1] + 1) + timer[0];
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_151570C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/spark_point_flash_update.s")
 #endif
 
-void func_15157294(u8 *arg0, u8 arg1)
+/* was func_15157294 */
+void line_spark_burst_random_flip(u8 *arg0, u8 arg1)
 {
   struct 
   {
@@ -555,35 +562,39 @@ void func_15157294(u8 *arg0, u8 arg1)
     sp.u9F = -1;
     sp.uA0 = 1;
     sp.uA1 = 1;
-    func_15156E68((u8 *)&sp, arg1);
+    line_spark_burst_at((u8 *)&sp, arg1);
 }
 
-void func_15157504(s32 arg0) {
-    func_151D5E30(arg0 + 0x88, arg0);
+/* was func_15157504 */
+void line_fx_free_buffers(s32 arg0) {
+    vtx_slot_buffers_free(arg0 + 0x88, arg0);
 }
 
-void func_15157528(struct102 *arg0) {
-    func_15157504(arg0);
+/* was func_15157528 */
+void line_fx_retire(struct102 *arg0) {
+    line_fx_free_buffers(arg0);
     node_retire(arg0);
 }
 
-void func_15157554(struct102 *arg0) {
-    func_15157504(arg0);
+/* was func_15157554 */
+void line_fx_free(struct102 *arg0) {
+    line_fx_free_buffers(arg0);
     node_unlink_free(arg0);
 }
 
 #ifdef NON_MATCHING
-s32 func_1503F8A8(u8 *, s32, s32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
+s32 animmodel_start_anim(u8 *, s32, s32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
 #else
-s32 func_1503F8A8(u8 *, s32, s32, s32, f32, s32);
+s32 animmodel_start_anim(u8 *, s32, s32, s32, f32, s32);
 #endif
-s32 func_1503F91C(s32, s32, u8 *, u8 *, u8 *, u8 *, u8 *);
-s32 func_1515D9B0();
-s32 func_1515D9F0(s32);
+s32 animmodel_create(s32, s32, u8 *, u8 *, u8 *, u8 *, u8 *);
+s32 light_alloc_lookat_buf();
+s32 light_alloc_light_buf(s32);
 #ifdef NON_MATCHING
-u8 *func_15157580(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) { /* P95: f32 (float bits were passed as an int) */
+/* was func_15157580 */
+u8 *anim_model_fx_spawn(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) { /* P95: f32 (float bits were passed as an int) */
 #else
-u8 *func_15157580(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
+u8 *anim_model_fx_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
 #endif
     u8 *obj;
     s32 type;
@@ -600,12 +611,12 @@ u8 *func_15157580(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8
         return NULL;
     }
     memcpy(obj + 0x10, arg0, 0x58);
-    func_1503F91C(*(s32 *)(obj + 0x18), *(s32 *)(obj + 0x1C), obj + 0x6C, obj + 0x70, obj + 0x74, obj + 0x78, obj + 0x68);
+    animmodel_create(*(s32 *)(obj + 0x18), *(s32 *)(obj + 0x1C), obj + 0x6C, obj + 0x70, obj + 0x74, obj + 0x78, obj + 0x68);
     guMtxIdentF(obj + 0x7C);
     guMtxIdentF(obj + 0xBC);
     *(u8 **)(*(u8 **)(obj + 0x68) + 0x3E0) = obj + 0x7C;
     *(u8 **)(*(u8 **)(obj + 0x68) + 0x3E4) = obj + 0xBC;
-    func_1503F8A8(*(u8 **)(obj + 0x68), 1, arg1, arg2, 0.0f, 0);
+    animmodel_start_anim(*(u8 **)(obj + 0x68), 1, arg1, arg2, 0.0f, 0);
     *(s32 *)(obj + 0xFC) = arg3;
     *(s32 *)(obj + 0x118) = arg4;
     obj[0x100] = 0;
@@ -615,36 +626,39 @@ u8 *func_15157580(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8
     *(s32 *)(obj + 0x114) = 0;
     if (arg3 != 0) {
         for (i = 0; i <= D_80082FA0; i++) {
-            ((s32 *)(obj + 0x104))[i] = func_1515D9F0(arg3);
+            ((s32 *)(obj + 0x104))[i] = light_alloc_light_buf(arg3);
         }
-        *(s32 *)(obj + 0x114) = func_1515D9B0();
+        *(s32 *)(obj + 0x114) = light_alloc_lookat_buf();
     }
     return obj;
 }
 
-void func_15157734(u8 *arg0) {
+/* was func_15157734 */
+void anim_model_fx_free_lights(u8 *arg0) {
     s32 i;
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (((s32 *)(arg0 + 0x104))[i]) {
-            func_100043B4(((s32 *)(arg0 + 0x104))[i], 4);
+            heap_set_block_tag(((s32 *)(arg0 + 0x104))[i], 4);
         }
     }
     if (*(s32 *)(arg0 + 0x114) != 0) {
-        func_100043B4(*(s32 *)(arg0 + 0x114), 4);
+        heap_set_block_tag(*(s32 *)(arg0 + 0x114), 4);
     }
 }
 
-void func_151577B8(struct102 *arg0) {
-    func_15157734(arg0);
-    func_1518CF74(*(s32 *)((u8 *)arg0 + 0x18));
-    func_1503FAA8(*(s32 *)((u8 *)arg0 + 0x68));
+/* was func_151577B8 */
+void anim_model_fx_retire(struct102 *arg0) {
+    anim_model_fx_free_lights(arg0);
+    shared_dl_release(*(s32 *)((u8 *)arg0 + 0x18));
+    animmodel_free(*(s32 *)((u8 *)arg0 + 0x68));
     node_retire(arg0);
 }
 
-void func_151577FC(struct102 *arg0) {
-    func_15157734(arg0);
-    func_1518CF74(*(s32 *)((u8 *)arg0 + 0x18));
-    func_1503FAA8(*(s32 *)((u8 *)arg0 + 0x68));
+/* was func_151577FC */
+void anim_model_fx_free(struct102 *arg0) {
+    anim_model_fx_free_lights(arg0);
+    shared_dl_release(*(s32 *)((u8 *)arg0 + 0x18));
+    animmodel_free(*(s32 *)((u8 *)arg0 + 0x68));
     node_unlink_free(arg0);
 }

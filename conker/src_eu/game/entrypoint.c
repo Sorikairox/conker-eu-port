@@ -21,13 +21,13 @@ extern s32 D_800BEE24;
 extern s32 D_800BEE20;
 extern s32 D_800BEE08;
 void texture_build_size_table(void);
-void func_10008180(void);
+void audio_system_init(void);
 void level_build_flag_bitmask(void);
-void func_151EF7B0(void);
+void game_clear_e9d00_flag(void);
 void controller_init_all(void);
-void func_151DDF20(void);
-void func_150158D0(s16 idx);
-void func_151E582C(void);
+void settings_reset_defaults(void);
+void glyph_set_load_rom(s16 idx);
+void menu_init(void);
 void level_lights_clear(void);
 void random_seed(s32 arg0);
 void level_load(void);
@@ -35,9 +35,9 @@ void game_main_loop(void);
 void func_15008A60(void);
 void save_block_realloc_random(void);
 // game_main: the game thread's entry. Initialises the subsystems and the message queue, then loops forever: frame
-// states 1 / 5 run func_151E582C, then (from 2) the frame update, the 0x81280783 hook in mode 2 and level_start_game
+// states 1 / 5 run menu_init, then (from 2) the frame update, the 0x81280783 hook in mode 2 and level_start_game
 // with the low halves of D_800BEE24 / D_800BEE20 / D_800BE9F4, then (from 3) level_load and the state goes back
-// to 0; every pass ends with func_100051E8, D_800BEE08 = 0 and game_main_loop.
+// to 0; every pass ends with sched_send_retrace_msg, D_800BEE08 = 0 and game_main_loop.
 void func_15007830(void) {
     func_15007A20();
     D_800D3048 = 0;
@@ -45,18 +45,18 @@ void func_15007830(void) {
     D_800BEE88[0] = 2;
     D_800BEE88[0x10] = 2;
     D_800BEA37 = 0;
-    func_100050A0(&D_800BEE30);
+    sched_init(&D_800BEE30);
     texture_build_size_table();
     D_800BEECB = 0;
-    func_10008180();
+    audio_system_init();
     game_init_message_queues();
     level_build_flag_bitmask();
-    func_151EF7B0();
+    game_clear_e9d00_flag();
     D_800BEEC8 = 0;
     controller_init_si_queue();
     controller_init_all();
-    func_151DDF20();
-    func_150158D0(0);
+    settings_reset_defaults();
+    glyph_set_load_rom(0);
     func_15008A60();
     text_queue_reset();
     D_800BEA35 = 5;
@@ -68,7 +68,7 @@ void func_15007830(void) {
         switch (D_800BEA35) {
             case 1:
             case 5:
-                func_151E582C();
+                menu_init();
                 /* fallthrough */
             case 2:
                 level_lights_clear();
@@ -83,7 +83,7 @@ void func_15007830(void) {
                 D_800BEA35 = 0;
                 break;
         }
-        func_100051E8();
+        sched_send_retrace_msg();
         D_800BEE08 = 0;
         game_main_loop();
     }
@@ -99,10 +99,10 @@ void func_15007830(void) {
 //     D_800BEA68->unk0 = 2;
 //     D_800BEA68->unk20 = 2;
 //     D_800BE617 = 0;
-//     func_100050A0(&D_800BEA10);
+//     sched_init(&D_800BEA10);
 //     texture_build_size_table();
 //     D_800BEAAB = 0;
-//     func_10008180();
+//     audio_system_init();
 //     game_init_message_queues();
 //     level_build_flag_bitmask();
 //     func_151EEFF0();
@@ -133,7 +133,7 @@ void func_15007830(void) {
 //                 level_load();
 //                 D_800BE615 = 0U;
 //             case 3:
-//                 func_100051E8();
+//                 sched_send_retrace_msg();
 //                 D_800BE9E8 = 0;
 //                 game_main_loop();
 //         }

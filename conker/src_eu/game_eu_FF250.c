@@ -6,7 +6,8 @@
 #ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
 
-void func_150D1A40(struct108 *arg0) {
+/* was func_150D1A40 */
+void camera_update_ride_chase(struct108 *arg0) {
     f32 sp34;
     f32 temp_f0;
     f32 temp_f0_2;
@@ -79,5 +80,5 @@ void func_150D1A40(struct108 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF250/func_150D1A40.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF250/camera_update_ride_chase.s")
 #endif

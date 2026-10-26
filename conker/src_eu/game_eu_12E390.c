@@ -2,17 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING
-void func_15145548(void *, void *, void *, void *, f32 *); /* P270 */
+void segment_closest_point(void *, void *, void *, void *, f32 *); /* P270 */
 #endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, s32, s32);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 #endif
 
 
 #ifdef NON_MATCHING
 /* P153 */
-s32 func_151308E4(s32 tmpl, u8 arg1, s32 size, u8 arg3, s32 arg4);
+s32 particle_spawn_basic(s32 tmpl, u8 arg1, s32 size, u8 arg3, s32 arg4);
 u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 
@@ -34,7 +34,7 @@ typedef struct {
     u8 u44[4];        /* 0x44 */
 } SpawnBlock0B80;
 
-/* particle template of func_151308E4 (0x70 bytes, the func_15153BA4 layout) */
+/* particle template of particle_spawn_basic (0x70 bytes, the emit_particle_burst_req layout) */
 typedef struct {
     s32 u0;           /* 0x00 */
     s32 u4;           /* 0x04 */
@@ -130,7 +130,7 @@ typedef struct {
 
 // object_burst_effect_spawn: builds the compound effect of object_effect_start on obj: a main record (kind 0x59,
 // effect3d_spawn with the 0x94-byte state: obj, pos, dir, kind, the obj slot, sizes arg8..argB, a sound handle from
-// func_10010F30 when obj +0x318 is set), and under it (stored in the state at +0x28 .. +0x34) a second record
+// sound_play_2d when obj +0x318 is set), and under it (stored in the state at +0x28 .. +0x34) a second record
 // (kind 3), a light (light_create_with_ctrl), a spark particle (kind 0x2B, random angles / spin), a particle emitter
 // (particle_emitter_spawn) and a glow particle (kind 0x15). life -1 means 300 ticks and clears the "timed" flag bit 1 of
 // every block. rgb = colour of every part. Returns the main record (0 when it could not be created).
@@ -189,7 +189,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
     f.main.param[20] = 20.0f;
     f.main.param[21] = 0.4f;
     if (*(u8 **) (obj + 0x318) != NULL) {
-        f.main.sound = func_10010F30(0x4D0, 0x7D0, 0x40, 0, 0);
+        f.main.sound = sound_play_2d(0x4D0, 0x7D0, 0x40, 0, 0);
     } else {
         f.main.sound = 0;
     }
@@ -330,7 +330,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
     f.spark.u60[3] = 0xFF;
     f.spark.u60[4] = 0;
     f.spark.u60[5] = 1;
-    *(s32 *) (state + 0x24) = func_151308E4((s32) &f.spark, 1, 0x30, argD, argE);
+    *(s32 *) (state + 0x24) = particle_spawn_basic((s32) &f.spark, 1, 0x30, argD, argE);
     if (*(s32 *) (state + 0x24) != 0) {
         memcpy(*(s32 *) (state + 0x24) + 0xA8, (s32) &f.sparkPay, 0x30);
     }
@@ -428,7 +428,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
     f.glow.u60[3] = 0xFF;
     f.glow.u60[4] = 1;
     f.glow.u60[5] = 5;
-    *(s32 *) (state + 0x34) = func_151308E4((s32) &f.glow, 1, 8, argD, argE);
+    *(s32 *) (state + 0x34) = particle_spawn_basic((s32) &f.glow, 1, 8, argD, argE);
     if (*(s32 *) (state + 0x34) != 0) {
         memcpy(*(s32 *) (state + 0x34) + 0xA8, (s32) &f.glowPay, 8);
     }
@@ -440,7 +440,7 @@ s32 obj_glow_effect_spawn(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, 
 
 #ifdef NON_MATCHING
 /* obj_fx_kill_all: P238: handler in the kind table at D_8008A29C (default effect3d_retire): stops the object's sound
- * (u16 +0x1A0, func_100111C8) when set, ends each of its effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that
+ * (u16 +0x1A0, sound_voice_stop) when set, ends each of its effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that
  * order; node_destroy) that is set, then runs the default effect3d_retire. The pointers are not cleared. */
 /* was func_15101610 */
 void laser_sight_retire(struct210 *arg0) {
@@ -448,7 +448,7 @@ void laser_sight_retire(struct210 *arg0) {
     u8 *fx = obj + 0x110;
 
     if (*(u16 *) (obj + 0x1A0) != 0) {
-        func_100111C8(*(u16 *) (obj + 0x1A0));
+        sound_voice_stop(*(u16 *) (obj + 0x1A0));
     }
     if (*(struct102 **) (obj + 0x138) != NULL) {
         node_destroy(*(struct102 **) (obj + 0x138));
@@ -533,14 +533,14 @@ void obj_glow_light_free(struct210 *arg0) {
 void obj_glow_spark_retire(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0xD0) + 0x110;
     *(s32 *)(p + 0x24) = 0;
-    func_15131CAC(arg0);
+    particle_die_retire(arg0);
 }
 
 /* was func_15101830 */
 void obj_glow_spark_free(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0xD0) + 0x110;
     *(s32 *)(p + 0x24) = 0;
-    func_15131CCC(arg0);
+    particle_die_free(arg0);
 }
 
 /* was func_15101858 */
@@ -561,20 +561,20 @@ void obj_glow_emitter_free(struct210 *arg0) {
 void obj_glow_halo_retire(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0xA8) + 0x110;
     *(s32 *)(p + 0x34) = 0;
-    func_15131CAC(arg0);
+    particle_die_retire(arg0);
 }
 
 /* was func_151018D0 */
 void obj_glow_halo_free(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0xA8) + 0x110;
     *(s32 *)(p + 0x34) = 0;
-    func_15131CCC(arg0);
+    particle_die_free(arg0);
 }
 
 #ifdef NON_MATCHING
 /* P146 */
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-f32 func_15143E64(f32 *);
+f32 vec3_length(f32 *);
 // laser_sight_update: update handler (D_8008A058 slot 21) of an aim beam carried by an object (+0x110, valid while
 // its +0 is set and its id +0x3B equals +0x114). The beam starts at a bone point (+0x118 in bone +0x130 space) of
 // the object's skeleton (+0x1D4; skipped in mode D_800C35EA 1 when the object's +0x74 low nibble is 0xF). With flag
@@ -609,7 +609,7 @@ s32 laser_sight_update(u8 *fx) {
     bones = *(u8 **)(obj + 0x1D4);
     if (bones != NULL && (D_800C35EA != 1 || (obj[0x74] & 0xF) != 0xF)) {
         mtx = bones + (st[0x20] << 6);
-        func_15143134(st + 0x8, fx + 0x34, mtx);
+        mtx_transform_point_or_origin(st + 0x8, fx + 0x34, mtx);
         if (st[0x23] & 2) {
             aim = *(u8 **)(obj + 0x31C);
             hit = aim[0x109];
@@ -637,7 +637,7 @@ s32 laser_sight_update(u8 *fx) {
                 *(f32 *)(fx + 0x48) = *(f32 *)(fx + 0x3C) + dir[2];
             }
         } else {
-            func_15143134(st + 0x14, end, mtx);
+            mtx_transform_point_or_origin(st + 0x14, end, mtx);
             end[0] -= *(f32 *)(fx + 0x34);
             end[1] -= *(f32 *)(fx + 0x38);
             end[2] -= *(f32 *)(fx + 0x3C);
@@ -647,7 +647,7 @@ s32 laser_sight_update(u8 *fx) {
                 dir[0] = *(f32 *)(fx + 0x40) - *(f32 *)(fx + 0x34);
                 dir[1] = *(f32 *)(fx + 0x44) - *(f32 *)(fx + 0x38);
                 dir[2] = *(f32 *)(fx + 0x48) - *(f32 *)(fx + 0x3C);
-                *(f32 *)(st + 0x44) = func_15143E64(dir);
+                *(f32 *)(st + 0x44) = vec3_length(dir);
                 hit = 1;
             } else {
                 hit = 0;
@@ -819,7 +819,7 @@ u8 *laser_beam_draw(u8 *arg0, s16 arg1) {
     if ((*(u8 *)((u8 *)temp_t0 + 0x23)) & 1) {
         arg1 = temp_a1;
         sp48 = temp_t0;
-        func_151D6310(arg0 + 0x100, temp_a1, 0x40, &sp.uC8, &sp.u67);
+        vtx_slot_buffer_get(arg0 + 0x100, temp_a1, 0x40, &sp.uC8, &sp.u67);
         sp.uC4 = sp.uC8;
         if (sp.uC8 != NULL) {
             if (sp.u67 != 0) {
@@ -830,7 +830,7 @@ u8 *laser_beam_draw(u8 *arg0, s16 arg1) {
                 memcpy((*(s32 *)((u8 *)temp_v1 + 0x100)), temp_a1_2, 0x40);
                 memcpy((*(s32 *)((u8 *)temp_v1 + 0x100)) + 0x40, temp_a1_2, 0x40);
             }
-            temp_v0_2 = func_15144B34((s32) arg1);
+            temp_v0_2 = camera_get_pos((s32) arg1);
             (*(f32 *)((u8 *)(&sp.u78) + 0)) = (*(f32 *)((u8 *)arg0 + 0x34));
             (*(s32 *)((u8 *)(&sp.u78) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 0x38));
             (*(s32 *)((u8 *)(&sp.u78) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 0x3C));
@@ -862,7 +862,7 @@ u8 *laser_beam_draw(u8 *arg0, s16 arg1) {
                 sp.u68 = (*(f32 *)((u8 *)sp48 + 0x44));
             }
             sp.uC0 = temp_v0_2;
-            func_15145548(&sp.u78, &sp.uB4, temp_v0_2, &sp.uA8, 0);  /* P270: m2c passed a live f12 (3508.0f) as an extra leading arg (asm: a0 = sp + 0x78) */
+            segment_closest_point(&sp.u78, &sp.uB4, temp_v0_2, &sp.uA8, 0);  /* P270: m2c passed a live f12 (3508.0f) as an extra leading arg (asm: a0 = sp + 0x78) */
             temp_f0_2 = sp.uA8 - (*(f32 *)((u8 *)sp.uC0 + 0));
             temp_f2_2 = sp.uAC - (*(f32 *)((u8 *)sp.uC0 + 4));
             temp_f12 = sp.uB0 - (*(f32 *)((u8 *)sp.uC0 + 8));
@@ -944,9 +944,9 @@ block_23:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/laser_beam_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15144E80(u8 *, f32 *, f32 *, s32);
-s32 func_15145128(f32 *, f32 *, s32, s32);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+s32 tri_calc_normal(u8 *, f32 *, f32 *, s32);
+s32 vec3_normalize_len(f32 *, f32 *, s32, s32);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
 /* was func_151024D0 */
@@ -969,7 +969,7 @@ u8 *laser_marker_draw(u8 *arg0, s16 arg1) {
     s32 temp_a1;
     u8 *temp_v1;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u50, &sp.u33);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u50, &sp.u33);
     sp.u4C = sp.u50;
     if (sp.u50 != NULL) {
         if (sp.u33 != 0) {
@@ -983,11 +983,11 @@ u8 *laser_marker_draw(u8 *arg0, s16 arg1) {
         if (!((*(u8 *)((u8 *)arg0 + 0x110)) & 1)) {
             return NULL;
         }
-        if (func_15144E80(arg0 + 0x112, &sp.u40, &sp.u34, 0) == 0) {
+        if (tri_calc_normal(arg0 + 0x112, &sp.u40, &sp.u34, 0) == 0) {
             return NULL;
         }
-        func_15145128(&sp.u40, &sp.u40, 0, 0);
-        func_15145128(&sp.u34, &sp.u34, 0, 0);
+        vec3_normalize_len(&sp.u40, &sp.u40, 0, 0);
+        vec3_normalize_len(&sp.u34, &sp.u34, 0, 0);
         temp_f8 = sp.u40 * (*(f32 *)((u8 *)arg0 + 0x2C));
         sp.u40 = temp_f8;
         sp.u44 *= (*(f32 *)((u8 *)arg0 + 0x2C));
@@ -1040,7 +1040,7 @@ s32 obj_glow_spin_flicker(u8 *arg0) {
 
     (*(f32 *)((u8 *)arg0 + 0x160)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x160)) + ((*(f32 *)((u8 *)arg0 + 0x164)) * D_800BE9A4));
     temp_s0 = arg0 + 0x110;
-    (*(f32 *)((u8 *)temp_s0 + 0x50)) = func_15144B68((*(f32 *)((u8 *)arg0 + 0x160)));
+    (*(f32 *)((u8 *)temp_s0 + 0x50)) = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x160)));
     (*(f32 *)((u8 *)temp_s0 + 0x58)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x58)) + ((*(f32 *)((u8 *)temp_s0 + 0x5C)) * D_800BE9A4));
     if ((*(f32 *)((u8 *)temp_s0 + 0x58)) > 32767.0f) {
         do {
@@ -1116,8 +1116,8 @@ s32 obj_glow_halo_update(u8 *arg0, s32 arg1) {
     (*(f32 *)((u8 *)temp_s0 + 4)) = temp_f10;
     (*(f32 *)((u8 *)temp_s0 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x18)) + ((*(f32 *)((u8 *)temp_s0 + 0x20)) * D_800BE9A4));
     (*(f32 *)((u8 *)temp_s0 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0 + 0x24)) * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_s0 + 0x18)) = func_15144B68((*(f32 *)((u8 *)temp_s0 + 0x18)));
-    (*(f32 *)((u8 *)temp_s0 + 0x1C)) = func_15144B68((*(f32 *)((u8 *)temp_s0 + 0x1C)));
+    (*(f32 *)((u8 *)temp_s0 + 0x18)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x18)));
+    (*(f32 *)((u8 *)temp_s0 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x1C)));
     return 1;
 }
 #else

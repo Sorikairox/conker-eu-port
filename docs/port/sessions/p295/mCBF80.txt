@@ -1,6 +1,6 @@
-# P295 mutants for func_150CBF80 (ground_puff_spawn)
+# P295 mutants for ground_puff_spawn (ground_puff_spawn)
 /if (obj == NULL || obj->unk1D4 == NULL) {/s/ || obj->unk1D4 == NULL//
-/func_15143134((void \*) src->point, pos/s/src->bone \* 64/src->bone * 32/
+/mtx_transform_point_or_origin((void \*) src->point, pos/s/src->bone \* 64/src->bone * 32/
 /probe\[1\] = pos\[1\] + 200.0f;/s/200.0f/100.0f/
 /pos\[1\] - 2000.0f, (u8 \*) hit) == 0/s/== 0/!= 0/
 /pos\[1\] - 2000.0f, (u8 \*) hit) == 0/s/2000.0f/1000.0f/
@@ -35,7 +35,7 @@
 /^    n = (u32) random_int()/s/ 14 / 15 /
 /^    rgb\[1\] = cg;/s/cg/cb/
 /0xFF, n, 0x12, 0, 0.0f, (s32) rgb, arg3);/s/70.0f + 70.0f/70.0f + 71.0f/
-/func_151D5404((struct17 \*) pos, 500.0f, 5000.0f/s/0xC, 0xF/0xC, 0xE/
+/rumble_all_players_at((struct17 \*) pos, 500.0f, 5000.0f/s/0xC, 0xF/0xC, 0xE/
 /{ -68.0f, 0.0f, -3.0f }, 0xBE, 0x41, 0x11, 6/s/0.09f/0.1f/
 /{ 0.0f, 0.0f, 40.0f }, 0x96/s/40.0f/41.0f/
 /0.060000002f, -0x72/s/-0x72/-0x71/

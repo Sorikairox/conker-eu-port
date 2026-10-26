@@ -1,4 +1,4 @@
-# P246 func_150C5A68 (object_motion_step) mutants: sed % setup names
+# P246 beam_motion_tick (object_motion_step) mutants: sed % setup names
 s/(o + 0x10) \& 1)/(o + 0x10) \& 2)/ % keep0 off
 s/(o + 0x30) != -1/(o + 0x30) != 0/ % keep0
 s/(o + 0x30)\](o) == 0/(o + 0x30)](o) != 0/ % keep0 kill1
@@ -6,6 +6,6 @@ s/remove = 1;/remove = 0;/ % kill1
 s/node_destroy(obj);/node_destroy(0);/ % kill1
 s/if (!remove) {/if (remove) {/ % keep0
 s/d\[1\] = \*(f32 \*) (o + 0x1C) - \*(f32 \*) (o + 0x28)/d[1] = *(f32 *) (o + 0x1C) - *(f32 *) (o + 0x24)/ % keep0 keepz
-s/(o + 0xC0) = func_15143E64(d)/(o + 0xC4) = func_15143E64(d)/ % keep0 keepz
+s/(o + 0xC0) = vec3_length(d)/(o + 0xC4) = vec3_length(d)/ % keep0 keepz
 s/d\[0\] != dx || d\[1\] != dy || d\[2\] != dz/d[0] == dx || d[1] != dy || d[2] != dz/ % keep0 keepz
 s/(o + 0x30)\](o) == 0/(o + 0x30)](o + 4) == 0/ % keep0 kill1

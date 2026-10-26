@@ -25,32 +25,32 @@ s32 fxevt_nop_d(s32 arg0) {
 
 /* was func_1509DD50 */
 s32 fxevt_debris_burst(s32 arg0, struct214 *arg1) {
-    func_15177F90(arg1->unk7, 0, arg1->unkB, arg1->unkC, arg1->unk10, arg1->unk14, arg1->unk18, 0x7FFF, 0xFF, arg1->unk1C, 0);
+    swarm_spawn(arg1->unk7, 0, arg1->unkB, arg1->unkC, arg1->unk10, arg1->unk14, arg1->unk18, 0x7FFF, 0xFF, arg1->unk1C, 0);
     return 1;
 }
 
 /* was func_1509DDC4 */
 s32 fxevt_emitter_kill(s32 arg0, u8 arg1) {
-    func_15178E14(arg0 & 0xff);
+    swarm_destroy_by_id(arg0 & 0xff);
     return 0;
 }
 
-s32 func_15084000(s32);
+s32 obj_slot_by_spawn(s32);
 void func_15178C34(u8, s32, s32, s32, s32);
 void func_15178BE4(u8, f32*, s32);
-s32 func_15178C9C(u8 arg0, s32 arg1);
+s32 swarm_distance_to_obj(u8 arg0, s32 arg1);
 #ifdef NON_MATCHING
-void func_15179154(u8, s32, s16);
-void func_151791A4(u8, s32, s32, s32, s16);
+void swarm_set_target_ptr(u8, s32, s16);
+void swarm_set_target_pos(u8, s32, s32, s32, s16);
 
 /* was func_1509DDFC */
 s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
     switch (arg1) {                                 /* irregular */
     case 0:
-        func_15179154(arg0 & 0xFF, &D_800CC2D0[func_15084000((*(s32 *)((u8 *)arg2 + 8)) & ~0x2000)].x_position, (*(s16 *)((u8 *)arg2 + 0xE)));
+        swarm_set_target_ptr(arg0 & 0xFF, &D_800CC2D0[obj_slot_by_spawn((*(s32 *)((u8 *)arg2 + 8)) & ~0x2000)].x_position, (*(s16 *)((u8 *)arg2 + 0xE)));
         return 1;
     case 1:
-        func_151791A4(arg0 & 0xFF, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), (*(s32 *)((u8 *)arg2 + 0x10)), (*(s32 *)((u8 *)arg2 + 0x14)));
+        swarm_set_target_pos(arg0 & 0xFF, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), (*(s32 *)((u8 *)arg2 + 0x10)), (*(s32 *)((u8 *)arg2 + 0x14)));
         return 1;
     default:
         return 0;
@@ -65,7 +65,7 @@ s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
 //     //     return 0;
 //     // }
 //     // if (arg1 == 0) {
-//     //     func_15178BE4(arg0 & 0xFF, &D_800CC2D0[func_15084000(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
+//     //     func_15178BE4(arg0 & 0xFF, &D_800CC2D0[obj_slot_by_spawn(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
 //     //     return 1;
 //     // }
 //     // if (arg1 != 1) {
@@ -77,7 +77,7 @@ s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
 //         case 1:
 //             return 0;
 //         case 0:
-//             func_15178BE4(arg0 & 0xFF, &D_800CC2D0[func_15084000(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
+//             func_15178BE4(arg0 & 0xFF, &D_800CC2D0[obj_slot_by_spawn(arg2->unk8 & ~0x2000)].unk14, arg2->unkC.s.unk2);
 //             return 1;
 //         default:
 //             func_15178C34(arg0 & 0xFF, arg2->unk8, arg2->unkC.i.unk0, arg2->unk10, arg2->unk14);
@@ -89,7 +89,7 @@ s32 fxevt_emitter_set_target(s32 arg0, s32 arg1, u8 *arg2) {
 s32 fxevt_emitter_dist_to_obj(s32 arg0, s32 arg1, struct215 *arg2) {
     if (arg1 == 0) {
         s32 mask = ~0x2000;
-        return func_15178C9C(arg0 & 0xff, func_15084000(arg2->unk8 & mask));
+        return swarm_distance_to_obj(arg0 & 0xff, obj_slot_by_spawn(arg2->unk8 & mask));
     }
     return 0;
 }

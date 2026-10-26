@@ -15,7 +15,7 @@ s/\* 0.017453292f, 1.0f/* 0.017453292f, 2.0f/ % one
 s/(obj + 0x40) \* 0.017453292f/(obj + 0x3C) * 0.017453292f/ % one
 s/fwd\[1\] = -side\[0\];/fwd[1] = side[0];/ % one
 s/fwd\[0\] = side\[1\];/fwd[0] = side[0];/ % one
-s/func_150B0F40(obj, owner,/func_150B0F40(owner, obj,/ % one
+s/wake_spray_point_pick(obj, owner,/wake_spray_point_pick(owner, obj,/ % one
 s/n1 % 26 - 0x29/n1 % 26 - 0x28/ % one multi
 s/r + 4.06f/r + 4.0f/ % one
 s/random_float() \* 3.77f/random_float() * 3.7f/ % one

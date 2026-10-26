@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_1516D970(void) {
+/* was func_1516D970 */
+void particle_cooldowns_tick(void) {
     s32 i;
     s32 v;
 
@@ -18,9 +19,10 @@ void func_1516D970(void) {
     }
 }
 
-s32 func_15044BC0(s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *);
+s32 timedfx_create_box(s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *);
 
-void func_1516DA58(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, s16 arg17, s16 arg18, u8 arg19, s16 arg1A, s32 arg1B, s32 arg1C, u8 arg1D, s32 arg1E) {
+/* was func_1516DA58 */
+void particle_sprite_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, s16 arg17, s16 arg18, u8 arg19, s16 arg1A, s32 arg1B, s32 arg1C, u8 arg1D, s32 arg1E) {
     u8 *temp_v0;
     s32 var_a0;
     u8 *sp34;
@@ -62,7 +64,7 @@ void func_1516DA58(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
         (*(u8 *)((u8 *)temp_v0 + 0x2F)) = arg16;
         if (arg1C != 0) {
             sp34 = temp_v0;
-            (*(s32 *)((u8 *)temp_v0 + 0x30)) = func_15044BC0(-1, 0, arg1C, 0x14, 0x14, 0x14, 0, temp_v0 + 0xE, temp_v0 + 0x14);
+            (*(s32 *)((u8 *)temp_v0 + 0x30)) = timedfx_create_box(-1, 0, arg1C, 0x14, 0x14, 0x14, 0, temp_v0 + 0xE, temp_v0 + 0x14);
             return;
         }
         (*(s32 *)((u8 *)temp_v0 + 0x30)) = 0;
@@ -71,7 +73,8 @@ void func_1516DA58(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
 
 extern s32 (*D_8008CF40[])(u8 *);
 
-void func_1516DBE8(u8 *arg0) {
+/* was func_1516DBE8 */
+void particle_sprite_tick(u8 *arg0) {
     s32 v;
 
     v = arg0[0x24];
@@ -99,24 +102,25 @@ void func_1516DBE8(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-u8 *func_15095B70(u8 *, u8 *);
+s32 gfx_load_texture_cached(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
+u8 *sprite_draw_at_world_depth(u8 *, u8 *);
 extern u8 *D_8008CDEC[];
-extern s16 D_800DD5EC; /* last sprite other-mode (1 / 2 / 3), shared with func_150A6D40 */
+extern s16 D_800DD5EC; /* last sprite other-mode (1 / 2 / 3), shared with sprite_billboard_draw */
 extern s32 D_800D30BC; /* TLUT bit of the last loaded texture */
 extern u8 D_800D31C8;
 extern u8 D_800D31C9;
 extern u8 D_800D31CA;
-// tinted_sprite_draw: draw handler of the particle type whose tick is func_1516DBE8 (D_8008BBF8 / D_8008CD3C, same
-// slot as func_150A6D40). Loads the texture D_8008CDEC[+0x1A] frame +0x1B (func_15142E24), picks the combine mode
+// tinted_sprite_draw: draw handler of the particle type whose tick is particle_sprite_tick (D_8008BBF8 / D_8008CD3C, same
+// slot as sprite_billboard_draw). Loads the texture D_8008CDEC[+0x1A] frame +0x1B (gfx_load_texture_cached), picks the combine mode
 // (2 for a texture of format 5 at +0xA, else 1; set only when it differs from D_800DD5EC, after a pipe sync), sets the
 // other mode 0x2C00 | TLUT | (0x100000 for mode 2), the colour D_800D31C8..CA from +0x1C..+0x1E and the env colour
 // +0x20..+0x22 (only when it differs from D_800DD5F8..FC; alpha 0), and draws the quad (+0xE..+0x16, alpha +0x1F)
-// with func_15095B70. Returns the advanced display list.
+// with sprite_draw_at_world_depth. Returns the advanced display list.
 // The asm leaves its other-mode word (sp+0x5C) uninitialised when the combine mode is unchanged (a stale stack
 // word); the C uses the word that belongs to the mode, i.e. what the previous draw of this mode set.
-u8 *func_1516DCA8(u8 *gfx, u8 *obj, s32 arg2) {
+/* was func_1516DCA8 */
+u8 *particle_tinted_sprite_draw(u8 *gfx, u8 *obj, s32 arg2) {
     struct {
         s16 x, y, z;
         s16 sizeX, sizeZ;
@@ -125,7 +129,7 @@ u8 *func_1516DCA8(u8 *gfx, u8 *obj, s32 arg2) {
         u8 flag;
     } quad; /* sp84 */
     s32 *tex;
-    s32 synced; /* the s32 at sp78; func_15142E24 / func_15142FBC see it as a byte */
+    s32 synced; /* the s32 at sp78; gfx_load_texture_cached / gfx_other_mode_cached see it as a byte */
     s32 mode;
     s32 other;
     s32 r;
@@ -135,7 +139,7 @@ u8 *func_1516DCA8(u8 *gfx, u8 *obj, s32 arg2) {
     synced = 0;
     D_800D31CB = 0;
     tex = (s32 *) D_8008CDEC[obj[0x1A]];
-    gfx = (u8 *) func_15142E24((s32) gfx, (s32) tex, obj[0x1B] << 8, 2, 0x100, 0x100, 0, 6, (s32) &quad,
+    gfx = (u8 *) gfx_load_texture_cached((s32) gfx, (s32) tex, obj[0x1B] << 8, 2, 0x100, 0x100, 0, 6, (s32) &quad,
                                (u8 *) &synced, 3);
     if (((u8 *) tex)[0xA] == 5) {
         mode = 2;
@@ -160,7 +164,7 @@ u8 *func_1516DCA8(u8 *gfx, u8 *obj, s32 arg2) {
         }
         gfx += 8;
     }
-    gfx = (u8 *) func_15142FBC((Gfx *) gfx, other | D_800D30BC | 0x2C00, 0x5049DC, (u8 *) &synced);
+    gfx = (u8 *) gfx_other_mode_cached((Gfx *) gfx, other | D_800D30BC | 0x2C00, 0x5049DC, (u8 *) &synced);
 
     quad.x = *(s16 *) (obj + 0xE);
     quad.y = *(s16 *) (obj + 0x10);
@@ -188,13 +192,14 @@ u8 *func_1516DCA8(u8 *gfx, u8 *obj, s32 arg2) {
         ((s32 *) gfx)[1] = (r << 24) | (g << 16) | (b << 8);
         gfx += 8;
     }
-    return func_15095B70(gfx, (u8 *) &quad);
+    return sprite_draw_at_world_depth(gfx, (u8 *) &quad);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516DCA8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_tinted_sprite_draw.s")
 #endif
 
-void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F, u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29, u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30) {
+/* was func_1516DF0C */
+void particle_emitter_node_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F, u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29, u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30) {
     s32 var_a0;
     u8 *temp_v0;
 
@@ -299,16 +304,17 @@ typedef struct {
 
 extern s16 D_800A7210[][7]; /* object-attached emitter points: a xyz, b xyz, random z mask */
 f32 math_cos_u8(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
-s32 func_151705A4(s32 flags, f32 *vx, f32 *vy, f32 *vz);
+s32 particle_random_direction(s32 flags, f32 *vx, f32 *vy, f32 *vz);
 
 // particle_emitter_update: emitter tick. The countdown +0x42 runs down by D_800BE9E4 frames; each time it passes 0
 // it is re-armed with +0x41 (0 = once) and a burst of +0x44 particles is rolled (+0x43 = chance out of 256, scaled
 // by timer / +0x3C with flag 4). A particle starts at the emitter's xyz, at a s16 / f32 position behind a pointer
 // (flags 0x10 / 0x20), or (object +0x3F) at two points of D_800A7210 moved by the object's matrix +0x1D4[+0x47],
 // whose difference (minus the object's movement) is its velocity. Flag 8 gives a random direction
-// (func_151705A4), +0x3D / +0x3E scatter the start, then func_1516DA58 spawns it. Velocities are passed as
+// (particle_random_direction), +0x3D / +0x3E scatter the start, then particle_sprite_spawn spawns it. Velocities are passed as
 // hi / lo bytes in the colour args. Finally the timer +0x20 runs down and the emitter is freed (node_destroy).
-void func_1516E100(u8 *arg0) {
+/* was func_1516E100 */
+void particle_emitter_update(u8 *arg0) {
     ParticleEmitter *e = (ParticleEmitter *) arg0;
     s32 notKind11;
     s32 n;
@@ -380,9 +386,9 @@ void func_1516E100(u8 *arg0) {
                     bz += (f32) (u32) (random_int() & D_800A7210[e->posX][6]);
                 }
                 obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
-                func_150A7E40((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), ax, ay, az, &ax, &ay, &az);
+                mtxf_transform_point((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), ax, ay, az, &ax, &ay, &az);
                 obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
-                func_150A7E40((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), bx, by, bz, &bx, &by, &bz);
+                mtxf_transform_point((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), bx, by, bz, &bx, &by, &bz);
                 vx = (bx - ax) * 8.0f;
                 vy = (by - ay) * 8.0f;
                 rise = (s32) vy;
@@ -403,7 +409,7 @@ void func_1516E100(u8 *arg0) {
                 z = (s32) az;
             }
             if (e->flags & 8) {
-                func_151705A4(e->flags, &vx, &vy, &vz);
+                particle_random_direction(e->flags, &vx, &vy, &vz);
                 speed = (s32) (e->speedScale * 16);
                 offset = e->offsetScale;
                 y = (s32) ((f32) y + offset * vy);
@@ -484,7 +490,7 @@ void func_1516E100(u8 *arg0) {
                     }
                 }
             }
-            func_1516DA58(x, y, z, e->parm[0], e->parm[1], e->parm[2], e->parm[3], e->parm[4], e->parm[5],
+            particle_sprite_spawn(x, y, z, e->parm[0], e->parm[1], e->parm[2], e->parm[3], e->parm[4], e->parm[5],
                           e->parm[6], e->parm[7], e->parm[8], e->parm[9], a0D, a0E, a0F, a10, e->parm2[0],
                           e->parm2[1], e->parm2[2], e->parm2[3], e->parm2[4], e->parm2[5], parmA, parmB, e->parm40,
                           rise, notKind11, e->parm48, e->unk0C, e->owner);
@@ -501,13 +507,14 @@ void func_1516E100(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516E100.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_emitter_update.s")
 #endif
 
-void func_1516ECE8(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+/* was func_1516ECE8 */
+void particle_emitter_preset_packed_pos(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     if (arg1) { // fakematch: permuter, forces arg1 home/reload order
     }
-    func_1516DF0C(arg0 >> 0x10, arg0 & 0xFFFF, 0, arg2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1, 0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1, 0, 0, 0, 0, 0, arg3, arg4);
+    particle_emitter_node_spawn(arg0 >> 0x10, arg0 & 0xFFFF, 0, arg2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1, 0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1, 0, 0, 0, 0, 0, arg3, arg4);
 }
 
 #ifdef NON_MATCHING
@@ -519,7 +526,8 @@ extern u8 D_800A71EC[]; /* rgb per threshold */
 // out) picks, from index +0x26 for 8 entries, the first threshold of D_800A71E0 at or below it, and the colour
 // +0x1C..+0x1E is that entry's rgb (D_800A71EC) blended with the previous entry's by the level's position between
 // the two thresholds. Returns 0.
-s32 func_1516EE3C(u8 *arg0) {
+/* was func_1516EE3C */
+s32 particle_glow_colour_tick(u8 *arg0) {
     u8 on = arg0[0x24];
     s32 fade = arg0[0x1F];
     s32 level;
@@ -569,10 +577,11 @@ s32 func_1516EE3C(u8 *arg0) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516EE3C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_glow_colour_tick.s")
 #endif
 
-s32 func_1516F21C(u8 *arg0) {
+/* was func_1516F21C */
+s32 particle_fade_scale_tick(u8 *arg0) {
     s32 v;
     s32 t;
     s32 hl;
@@ -605,33 +614,36 @@ s32 func_1516F21C(u8 *arg0) {
     return 0;
 }
 
-void func_1516F2D8(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_1516F2D8 */
+void particle_emitter_preset_obj3a(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     u8 t;
 
     t = D_800CC2D4[arg0 * 0x32C];
     if (t == 0x3A) {
-        func_1516DF0C(5, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0x124, 0x124, 0, 0, arg1, 0, 0, arg0, 0xC, 0, 0, 0x81, 2, 0, 1, 0, 0, 0, 5, 0, arg2, arg3);
+        particle_emitter_node_spawn(5, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0x124, 0x124, 0, 0, arg1, 0, 0, arg0, 0xC, 0, 0, 0x81, 2, 0, 1, 0, 0, 0, 5, 0, arg2, arg3);
     }
 }
 
-void func_1516EED4(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_1516EED4 */
+void particle_emitter_preset_cooldown(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     if ((arg0 < 4) && ((&D_800DD2A0)[arg0 ^ 0] >= arg1)) { // fakematch: ^ 0 (permuter), keeps one arg0 reload
         (&D_800DD2A0)[arg0 ^ 0] = 0;
-        func_1516DF0C(0, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0, 0, 0x1E, 0, 0, arg0, 0x14, 0, 0, 0x81, 8, 0, 1, 0, 0, 0, 0xC, 0, arg2, arg3);
+        particle_emitter_node_spawn(0, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0, 0, 0x1E, 0, 0, arg0, 0x14, 0, 0, 0x81, 8, 0, 1, 0, 0, 0, 0xC, 0, arg2, arg3);
     }
 }
 
 #ifdef NON_MATCHING
-void func_1516FDD4(u8 *arg0);
-void func_1516FEBC(s32 arg0, s32 arg1);
+void particle_move_xz(u8 *arg0);
+void particle_scale_vel_xz(s32 arg0, s32 arg1);
 
-// sprite_fade_grow_kind_tick: particle tick (handler at 0x8008CF48, sibling of func_1516FF34) with per-kind
+// sprite_fade_grow_kind_tick: particle tick (handler at 0x8008CF48, sibling of particle_fade_shrink_tick) with per-kind
 // parameters (+0x2C = kind 0..10, tables copied from D_8008CF64 / CF70 / CF7C / CF88). While +0x24 (fading in) is
 // set, alpha +0x1F rises by 16 per frame (D_800BE9E4) up to the kind's maximum; otherwise it falls by the kind's
 // rate per frame down to 0. Returns 1 (done) once fading out reached 0. Else moves the particle
-// (func_1516FDD4), grows the size +0x14 / +0x16 by the kind's step per frame (kind 3 also sets +0x18 = 100),
-// scales its velocity by the kind's factor / 256 (func_1516FEBC) and returns 0.
-s32 func_1516F594(u8 *arg0) {
+// (particle_move_xz), grows the size +0x14 / +0x16 by the kind's step per frame (kind 3 also sets +0x18 = 100),
+// scales its velocity by the kind's factor / 256 (particle_scale_vel_xz) and returns 0.
+/* was func_1516F594 */
+s32 particle_fade_grow_kind_tick(u8 *arg0) {
     static const u8 scale[11] = { 0xFA, 0xFA, 0xEB, 0xEB, 0xFA, 0xFA, 0xDC, 0xD2, 0xD2, 0xDC, 0xD2 };
     static const u8 grow[11] = { 0x10, 0x07, 0x07, 0x07, 0x14, 0x08, 0x28, 0x28, 0x28, 0x14, 0x14 };
     static const u8 maxAlpha[11] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xBE, 0xAA, 0x78, 0xC8, 0x3C, 0x78, 0xC8 };
@@ -658,53 +670,57 @@ s32 func_1516F594(u8 *arg0) {
     if (arg0[0x24] == 0 && v == 0) {
         return 1;
     }
-    func_1516FDD4(arg0);
+    particle_move_xz(arg0);
     size = *(s16 *) (arg0 + 0x14) + D_800BE9E4 * grow[kind];
     *(s16 *) (arg0 + 0x16) = size;
     *(s16 *) (arg0 + 0x14) = size;
     if (kind == 3) {
         *(s16 *) (arg0 + 0x18) = 100;
     }
-    func_1516FEBC((s32) arg0, scale[kind]);
+    particle_scale_vel_xz((s32) arg0, scale[kind]);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F594.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_fade_grow_kind_tick.s")
 #endif
 
-void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F, u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29, u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30);
+void particle_emitter_node_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F, u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29, u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30);
 
-void func_1516F730(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
-    func_1516DF0C(2, 0, 0, 0x2D, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, arg1, 0xA, 0xA, arg0, 0x3C, 0, 0, 0x81, 4, 0, 1, 0, 0, 0, 4, 2, (s32) arg2, arg3);
+/* was func_1516F730 */
+void particle_emitter_preset_obj_burst(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    particle_emitter_node_spawn(2, 0, 0, 0x2D, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, arg1, 0xA, 0xA, arg0, 0x3C, 0, 0, 0x81, 4, 0, 1, 0, 0, 0, 4, 2, (s32) arg2, arg3);
 }
 
-void func_1516F868(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    func_1516DF0C(3, 0, 0, 0x2B, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, arg1, 4, 4, arg0, 0x10, 0, 0, 0x81, 4, 0, 1, 0, 0, 0, 1, 0, arg4, arg5);
-    func_1516DF0C(3, 0, 0, 0x2B, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, 7, 4, 4, arg0, arg2, 0, 0, 0x81, 5, 0, 1, 0, 0, 0, 1, arg3, arg4, arg5);
+/* was func_1516F868 */
+void particle_emitter_preset_obj_pair(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+    particle_emitter_node_spawn(3, 0, 0, 0x2B, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, arg1, 4, 4, arg0, 0x10, 0, 0, 0x81, 4, 0, 1, 0, 0, 0, 1, 0, arg4, arg5);
+    particle_emitter_node_spawn(3, 0, 0, 0x2B, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, 7, 4, 4, arg0, arg2, 0, 0, 0x81, 5, 0, 1, 0, 0, 0, 1, arg3, arg4, arg5);
 }
 
 #ifdef NON_MATCHING
 
-// spray_pair_spawn: spawns two particle sprays at (x, y, z) through func_1516DF0C (same parameters except the second
+// spray_pair_spawn: spawns two particle sprays at (x, y, z) through particle_emitter_node_spawn (same parameters except the second
 // one's +0x13 byte (rate11 instead of rate10) and +0x27 = 6), then plays sound 7 there with `span` as the sound's user
 // value. Speeds speedA / speedB go through a 20.12 fixed-point round trip ((v << 12) / 4096) as in the asm.
-void func_1516FAB8(s32 x, s32 y, s32 z, s32 span, s32 dx, s32 spread, s32 dz, s32 speedA, s32 speedB, s32 size,
+/* was func_1516FAB8 */
+void particle_spray_pair_spawn(s32 x, s32 y, s32 z, s32 span, s32 dx, s32 spread, s32 dz, s32 speedA, s32 speedB, s32 size,
                    s32 rate10, s32 rate11, s32 unused12, s32 unused13, s32 unused14, s32 flag, s32 owner) {
     s16 a = (s16)((speedA << 12) / 4096);
     s16 b = (s16)((speedB << 12) / 4096);
 
-    func_1516DF0C(x, y, z, 0xD, 0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0, 2, dx, 0, dz, 0, 0, 0, rate10, 0, 0, 0, 0, 0, 0, 0,
+    particle_emitter_node_spawn(x, y, z, 0xD, 0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0, 2, dx, 0, dz, 0, 0, 0, rate10, 0, 0, 0, 0, 0, 0, 0,
                   a, a, b, b, span, size, 0x14, 0xFF, 0x10, spread, 0xC8, 1, 0, 0, 1, 0, 0, 0, 0, 0, flag, owner);
-    func_1516DF0C(x, y, z, 0xD, 0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0, 2, dx, 0, dz, 0, 0, 0, rate11, 0, 0, 0, 0, 0, 0, 0,
+    particle_emitter_node_spawn(x, y, z, 0xD, 0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0, 2, dx, 0, dz, 0, 0, 0, rate11, 0, 0, 0, 0, 0, 0, 0,
                   a, a, b, b, span, size, 0x14, 0xFF, 0x10, spread, 0xC8, 1, 6, 0, 1, 0, 0, 0, 0, 0, flag, owner);
-    func_1000FA64(7, x, y, z, 0x36B0, 0x3E8, 0x64, (s32)&func_1000EBC4, (void *)span, 0, 0, 0);
+    sfx_emitter_start(7, x, y, z, 0x36B0, 0x3E8, 0x64, (s32)&sfx_cb_fade_out, (void *)span, 0, 0, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FAB8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_spray_pair_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_1516FDD4(u8 *arg0) {
+/* was func_1516FDD4 */
+void particle_move_xz(u8 *arg0) {
     s32 temp_t1;
     s32 temp_t3;
 
@@ -716,9 +732,10 @@ void func_1516FDD4(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x2B)) = (u8) temp_t1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FDD4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_move_xz.s")
 #endif
-void func_1516FE5C(s32 arg0, s32 arg1) {
+/* was func_1516FE5C */
+void particle_scale_vel_x(s32 arg0, s32 arg1) {
     s32 v;
 
     v = ((s8 *)arg0)[0x26];
@@ -730,7 +747,8 @@ void func_1516FE5C(s32 arg0, s32 arg1) {
     ((u8 *)arg0)[0x27] = v & 0xFFFFu; // fakematch: the mask moves the low byte temp from t8 to t0
 }
 
-void func_1516FE8C(s32 arg0, s32 arg1) {
+/* was func_1516FE8C */
+void particle_scale_vel_z(s32 arg0, s32 arg1) {
     s32 v;
 
     v = ((s8 *)arg0)[0x28];
@@ -742,28 +760,31 @@ void func_1516FE8C(s32 arg0, s32 arg1) {
     ((u8 *)arg0)[0x29] = v & 0xFFFFu; // fakematch: the mask moves the low byte temp from t8 to t0
 }
 
-void func_1516FE5C(s32, s32);
-void func_1516FE8C(s32, s32);
+void particle_scale_vel_x(s32, s32);
+void particle_scale_vel_z(s32, s32);
 
-void func_1516FEBC(s32 arg0, s32 arg1) {
-    func_1516FE5C(arg0, arg1);
-    func_1516FE8C(arg0, arg1);
+/* was func_1516FEBC */
+void particle_scale_vel_xz(s32 arg0, s32 arg1) {
+    particle_scale_vel_x(arg0, arg1);
+    particle_scale_vel_z(arg0, arg1);
 }
 
-void func_1516FEF4(s32 arg0, s32 arg1) {
+/* was func_1516FEF4 */
+void particle_scale_vel_xyz(s32 arg0, s32 arg1) {
     s32 v;
-    func_1516FEBC(arg0, arg1);
+    particle_scale_vel_xz(arg0, arg1);
     v = *(s16 *)((u8 *)arg0 + 0x18);
     v = v * arg1;
     *(s16 *)((u8 *)arg0 + 0x18) = v >> 8;
 }
 
 #ifdef NON_MATCHING
-// sprite_fade_scale_tick: particle tick (same scheme as func_151702C0): while +0x24 (fading in) is set, alpha +0x1F
+// sprite_fade_scale_tick: particle tick (same scheme as particle_fade_rise_tick): while +0x24 (fading in) is set, alpha +0x1F
 // rises by 16 per frame (D_800BE9E4) up to 255; otherwise it falls by 8 per frame down to 0 and the size
 // (+0x14 / +0x16) follows it (2 * alpha). Returns 1 (done) once fading out reached 0; else moves the particle
-// (func_1516FDD4), scales its velocity by 0xF0 / 256 (func_1516FEF4) and returns 0.
-s32 func_1516FF34(u8 *arg0) {
+// (particle_move_xz), scales its velocity by 0xF0 / 256 (particle_scale_vel_xyz) and returns 0.
+/* was func_1516FF34 */
+s32 particle_fade_shrink_tick(u8 *arg0) {
     s32 v;
     s32 t;
 
@@ -791,26 +812,28 @@ s32 func_1516FF34(u8 *arg0) {
     if ((arg0[0x24] == 0) && (v == 0)) {
         return 1;
     }
-    func_1516FDD4(arg0);
-    func_1516FEF4((s32) arg0, 0xF0);
+    particle_move_xz(arg0);
+    particle_scale_vel_xyz((s32) arg0, 0xF0);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FF34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_fade_shrink_tick.s")
 #endif
 
-void func_1516FFF8(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    func_1516DF0C(arg0, arg1, arg2, 0x1B, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0xFF, 0xFF, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x400, 0x400, 0, 0, 2, 0, 0, 0xFF, 0xF, 0, 0, 9, 0, 0xFF, 0xA, 0x5A, 5, arg3, 0, 0, (s32) arg4, arg5);
+/* was func_1516FFF8 */
+void particle_emitter_preset_at_pos(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 arg4, s32 arg5) {
+    particle_emitter_node_spawn(arg0, arg1, arg2, 0x1B, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0xFF, 0xFF, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x400, 0x400, 0, 0, 2, 0, 0, 0xFF, 0xF, 0, 0, 9, 0, 0xFF, 0xA, 0x5A, 5, arg3, 0, 0, (s32) arg4, arg5);
 }
 
 #ifdef NON_MATCHING
-// sprite_fade_drift_tint_tick: particle tick (handler at 0x8008CF50, same scheme as func_1516FF34): while +0x24
+// sprite_fade_drift_tint_tick: particle tick (handler at 0x8008CF50, same scheme as particle_fade_shrink_tick): while +0x24
 // (fading in) is set, alpha +0x1F rises by 16 per frame (D_800BE9E4) up to 255; otherwise it falls by
 // D_800BE9E4 << +0x2F down to 0. Returns 1 (done) once fading out reached 0. Else the size +0x14 / +0x16 grows by
 // the signed rates +0x2D / +0x2E per frame; when the width reaches 0 or below both are cleared and it returns 1.
 // Else the tint step +0x2C advances by D_800BE9E4 (up to 0x7F) and the colour +0x1C..+0x1E blends from
 // +0x26..+0x28 towards +0x29..+0x2B by 2 * step / 256; returns 0.
-s32 func_1517013C(u8 *arg0) {
+/* was func_1517013C */
+s32 particle_fade_drift_tint_tick(u8 *arg0) {
     s32 v = arg0[0x1F];
     s32 t;
 
@@ -851,12 +874,13 @@ s32 func_1517013C(u8 *arg0) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1517013C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_fade_drift_tint_tick.s")
 #endif
 
-void func_1516FDD4(u8 *arg0);
+void particle_move_xz(u8 *arg0);
 
-s32 func_151702C0(u8 *arg0) {
+/* was func_151702C0 */
+s32 particle_fade_rise_tick(u8 *arg0) {
     s32 v;
     s32 t;
 
@@ -884,13 +908,14 @@ s32 func_151702C0(u8 *arg0) {
     if ((arg0[0x24] == 0) && (v == 0)) {
         return 1;
     }
-    func_1516FDD4(arg0);
+    particle_move_xz(arg0);
     *(s16 *)(arg0 + 0x18) += ((s8 *)arg0)[0x2C];
     return 0;
 }
 
 #ifdef NON_MATCHING
-void func_1516FE1C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_1516FE1C */
+void particle_emitter_preset_obj_twin(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     struct {
         s32 uFC;
     } sp;
@@ -926,15 +951,16 @@ void func_1516FE1C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
             var_s2 = 0x1B;
             var_s1 = 8;
         }
-        func_1516DF0C(var_s7, var_fp, 0, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, (u8) var_s1, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0xAA, 0xAA, 0xAA, 0xAA, (u16) (arg1 & 0xFFFF), 0x1EU, 0U, (u8) (var_a0 & 0xFF), 0x1EU, 0x168, 0x18U, (u16) (var_a1 & 0xFFFF), 4U, 0U, 1U, 0U, 0U, 0, (u8) var_s2, 0U, (u8) (s32) arg2, arg3);
+        particle_emitter_node_spawn(var_s7, var_fp, 0, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, (u8) var_s1, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0xAA, 0xAA, 0xAA, 0xAA, (u16) (arg1 & 0xFFFF), 0x1EU, 0U, (u8) (var_a0 & 0xFF), 0x1EU, 0x168, 0x18U, (u16) (var_a1 & 0xFFFF), 4U, 0U, 1U, 0U, 0U, 0, (u8) var_s2, 0U, (u8) (s32) arg2, arg3);
         var_s0 += 1;
     } while (var_s0 != 2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FE1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_emitter_preset_obj_twin.s")
 #endif
 f32 math_cos_u8();
-s32 func_151705A4(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* was func_151705A4 */
+s32 particle_random_direction(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     s32 mask;
     s32 pad; // fakematch: frame slot 0x28
     f32 s;
@@ -959,10 +985,11 @@ extern f32 D_8008CFA0[3]; /* spread per variant: 571, 130, 130 */
 extern u8 D_8008CFAC[9];  /* colour per variant (3 bytes) */
 
 // quad_edge_sparks_spawn: walks the 4 edges of `quad` (4 points of 3 floats) and spawns `countA` (edges 0 / 2) or
-// `countB` (edges 1 / 3) sparks evenly along each edge (func_1516DA58 type 0xD, variant `variant`'s colour): the
+// `countB` (edges 1 / 3) sparks evenly along each edge (particle_sprite_spawn type 0xD, variant `variant`'s colour): the
 // spark's push is the edge midpoint relative to (x, z) (doubled, as hi / lo bytes), its speed 731 * size + rand
 // modulo 836 * size, life 15..46, spread 143 * size + rand modulo D_8008CFA0[variant] * size. The caller's D_8008CF94 copy is unused.
-void func_15170648(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 variant, s32 countA, s32 countB, s32 alpha,
+/* was func_15170648 */
+void particle_quad_edge_sparks(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 variant, s32 countA, s32 countB, s32 alpha,
                    s32 owner) {
     f32 *p;
     f32 *q;
@@ -1006,25 +1033,26 @@ void func_15170648(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 variant, s32
             pz = (q[2] - p[2]) * t + p[2];
             life = (random_int() & 0x1F) + 15;
             speed = (u32)random_int() % (u32)speedRange + speedBase;
-            func_1516DA58((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0, col[0], col[1], col[2], 0, 0, 0, 0, 2,
+            particle_sprite_spawn((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0, col[0], col[1], col[2], 0, 0, 0, 0, 2,
                           (vx >> 8) & 0xFF, vx & 0xFF, (vz >> 8) & 0xFF, vz & 0xFF, 0, 0, kind, 0, 0, 0, speed, speed,
                           life, (u32)random_int() % (u32)range + spreadBase, 0, 0, alpha, owner);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_15170648.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_quad_edge_sparks.s")
 #endif
 
 #ifdef NON_MATCHING
 extern u16 D_800CC76A;
-s32 func_151EFDD0(void);
+s32 game_gu_random(void);
 f32 math_cos_u8(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
 // spark_particle_spawn: one spark at (x, y, z) thrown in direction `angle` (the camera angle D_800CC76A when `flare`
 // is 0) with a random pitch (rand % 50, both signs), horizontal speed from sin / cos of the angle, fixed fall -0x32;
-// flare != 0: long-lived flare particle (func_1516DA58), else short spark (func_1516DF0C). alpha and arg6 pass through.
-// Called by ambient_emitters_update (func_1517C11C) for torch / fire sparks and flare-ups.
-void func_15170A70(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, s32 arg6) {
+// flare != 0: long-lived flare particle (particle_sprite_spawn), else short spark (particle_emitter_node_spawn). alpha and arg6 pass through.
+// Called by ambient_emitters_update (ambient_emitters_update) for torch / fire sparks and flare-ups.
+/* was func_15170A70 */
+void particle_spark_spawn(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, s32 arg6) {
     s32 pitch;
     f32 dirX;
     f32 dirZ;
@@ -1039,7 +1067,7 @@ void func_15170A70(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, s32 arg
     if (flare == 0) {
         angle = D_800CC76A;
     }
-    pitch = func_151EFDD0() % 50;
+    pitch = game_gu_random() % 50;
     dirX = math_cos_u8(angle & 0xFF);
     dirZ = -math_sin_u8(angle & 0xFF);
     tilt = math_cos_u8(pitch & 0xFF);
@@ -1053,27 +1081,28 @@ void func_15170A70(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, s32 arg
     vz = dz * 256.0f;
     vy = dy * 256.0f;
     if (flare != 0) {
-        func_1516DA58(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6, vx >> 8, vx & 0xFF, vz >> 8, vz & 0xFF,
+        particle_sprite_spawn(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6, vx >> 8, vx & 0xFF, vz >> 8, vz & 0xFF,
                       0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF, vy - 0x32, 0, 0, alpha & 0xFF, arg6);
     } else {
-        func_1516DF0C(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6, vx >> 8, vx & 0xFF, vz >> 8, vz & 0xFF,
+        particle_emitter_node_spawn(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6, vx >> 8, vx & 0xFF, vz >> 8, vz & 0xFF,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166, 0, 0, 0x14, 0, 0, 0xFF, 0xFF, vy - 0x32, 0xC8, 9,
                       1, 0, 1, 0x32, 0x14, 0, 0, 0, alpha & 0xFF, arg6);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_15170A70.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_spark_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_151EFDD0(void);
-// sprite_flicker_drift_tick: particle tick (handler at 0x8008CF58 of D_8008CF40, same scheme as func_1516FF34).
+s32 game_gu_random(void);
+// sprite_flicker_drift_tick: particle tick (handler at 0x8008CF58 of D_8008CF40, same scheme as particle_fade_shrink_tick).
 // While +0x24 (life) is set, the alpha +0x1F rises by 64 per frame (D_800BE9E4) up to 254; a particle whose alpha is
 // still 0 first gets a life of 200..224 (random_int). Otherwise the alpha falls by 16 per frame down to 0, and
-// the particle is done (returns 1) once it reached 0. Else it moves (func_1516FDD4) and its velocity +0x26 / +0x28
+// the particle is done (returns 1) once it reached 0. Else it moves (particle_move_xz) and its velocity +0x26 / +0x28
 // is scaled by a random (230 + -31..31) / 256 when +0x2F is set, or by (220 + -31..31) / 256 when the 8.8
 // velocity +0x26 is above sqrt(1000); +0x18 is cleared and it returns 0.
-s32 func_15170D50(u8 *arg0) {
+/* was func_15170D50 */
+s32 particle_flicker_drift_tick(u8 *arg0) {
     s32 alpha = arg0[0x1F];
     s32 vel;
 
@@ -1098,27 +1127,28 @@ s32 func_15170D50(u8 *arg0) {
     if (arg0[0x24] == 0 && alpha == 0) {
         return 1;
     }
-    func_1516FDD4(arg0);
+    particle_move_xz(arg0);
     if (arg0[0x2F] != 0) {
-        func_1516FE5C((s32) arg0, func_151EFDD0() % 32 + 0xE6);
-        func_1516FE8C((s32) arg0, func_151EFDD0() % 32 + 0xE6);
+        particle_scale_vel_x((s32) arg0, game_gu_random() % 32 + 0xE6);
+        particle_scale_vel_z((s32) arg0, game_gu_random() % 32 + 0xE6);
     } else {
         vel = (*(s8 *) (arg0 + 0x26) << 8) + arg0[0x27];
         // the asm squares the +0x26 velocity twice (not +0x28); u32 keeps its wrap-around at vel = -0x8000
         if ((s32) ((u32) vel * vel + (u32) vel * vel) > 2000) {
-            func_1516FE5C((s32) arg0, func_151EFDD0() % 32 + 0xDC);
-            func_1516FE8C((s32) arg0, func_151EFDD0() % 32 + 0xDC);
+            particle_scale_vel_x((s32) arg0, game_gu_random() % 32 + 0xDC);
+            particle_scale_vel_z((s32) arg0, game_gu_random() % 32 + 0xDC);
         }
     }
     *(s16 *) (arg0 + 0x18) = 0;
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_15170D50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/particle_flicker_drift_tick.s")
 #endif
 
-s32 func_151705A4(s32, f32 *, f32 *, f32 *);
-void func_15170F24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s32 arg6) {
+s32 particle_random_direction(s32, f32 *, f32 *, f32 *);
+/* was func_15170F24 */
+void particle_burst_random_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s32 arg6) {
     s32 q0; // fakematch: unused locals pad the frame to 0xF8
     f32 x;
     f32 y;
@@ -1129,12 +1159,12 @@ void func_15170F24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s3
     s32 p0, p1; // fakematch: unused locals pad the frame
 
     for (i = 0; i < arg3; i++) {
-        func_151705A4(0x40, &x, &y, &z);
+        particle_random_direction(0x40, &x, &y, &z);
         x *= arg4;
         y *= 2.0f * arg4;
         z *= arg4;
         a = x;
         b = z;
-        func_1516DA58(arg0, arg1, arg2, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7, a >> 8, a & 0xFF, b >> 8, b & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28, y, 0, 0, arg5, arg6);
+        particle_sprite_spawn(arg0, arg1, arg2, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7, a >> 8, a & 0xFF, b >> 8, b & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28, y, 0, 0, arg5, arg6);
     }
 }

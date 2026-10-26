@@ -3,17 +3,18 @@
 #include "variables.h"
 #include "controller.h"
 
-void func_151F2A84(int channel, u16 address);
+void game_os_pack_ram_read_data(int channel, u16 address);
 
 
 extern OSPifRam __osPfsPifRam;
 extern u8 _osLastSentSiCmd;
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_10025B60(s32, void *); // __osSiRawStartDma
+s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 u8 __osContDataCrc(u8 *data);
 s32 __osPfsGetStatus(OSMesgQueue *queue, int channel);
-s32 func_151F2840(OSMesgQueue *mq, int channel, u16 address, u8 *buffer) {
+/* was func_151F2840 */
+s32 game_os_cont_ram_read(OSMesgQueue *mq, int channel, u16 address, u8 *buffer) {
     s32 ret;
     int i;
     u8 *ptr;
@@ -25,15 +26,15 @@ s32 func_151F2840(OSMesgQueue *mq, int channel, u16 address, u8 *buffer) {
     retry = 2;
     __osSiGetAccess();
     _osLastSentSiCmd = CONT_CMD_READ_MEMPACK;
-    func_151F2A84(channel, address);
-    ret = func_10025B60(OS_WRITE, &__osPfsPifRam);
+    game_os_pack_ram_read_data(channel, address);
+    ret = os_si_raw_start_dma(OS_WRITE, &__osPfsPifRam);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     do {
         for (i = 0; i < 16; i++) {
             __osPfsPifRam.ramarray[i] = 0xFF;
         }
         __osPfsPifRam.pifstatus = 0;
-        ret = func_10025B60(OS_READ, &__osPfsPifRam);
+        ret = os_si_raw_start_dma(OS_READ, &__osPfsPifRam);
         osRecvMesg(mq, NULL, OS_MESG_BLOCK);
         ptr = (u8 *)&__osPfsPifRam;
         if (channel != 0) {
@@ -67,7 +68,8 @@ s32 func_151F2840(OSMesgQueue *mq, int channel, u16 address, u8 *buffer) {
 
 extern OSPifRam __osPfsPifRam;
 u8 __osContAddressCrc(u16 addr);
-void func_151F2A84(int channel, u16 address) {
+/* was func_151F2A84 */
+void game_os_pack_ram_read_data(int channel, u16 address) {
     u8 *ptr;
     __OSContRamReadFormat ramreadformat;
     int i;

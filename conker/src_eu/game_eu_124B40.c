@@ -16,10 +16,10 @@ void glow_pair_post_remove_event(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void *memcpy(void *, const void *, s32);
 
-/* func_151307F0's particle template (the GlowTmplC034 layout of game_2062D0) */
+/* particle_spawn_ex's particle template (the GlowTmplC034 layout of game_2062D0) */
 typedef struct {
     s32 u0;           /* 0x00 */
     s32 u4;           /* 0x04 */
@@ -61,7 +61,7 @@ typedef struct {
 
 #ifdef NON_MATCHING
 // object_twin_glow_spawn: creates a type-0x43 object (func_15149130) for obj and copies a record {obj, obj +0x3B,
-// 0, 0, ..., +0x74 = 0} to its +0x28, then spawns two func_151307F0 glow particles (flags 0x4417, life 300, size
+// 0, 0, ..., +0x74 = 0} to its +0x28, then spawns two particle_spawn_ex glow particles (flags 0x4417, life 300, size
 // 1511, sprite 100, mode 0x64C000, the second one red instead of blue in colour[4..7]) and stores them at the
 // record's fx[0] / fx[1]. Returns the new object (NULL when the alloc fails).
 /* was func_150F7364 */
@@ -128,12 +128,12 @@ void *glow_pair_spawn(struct127 *obj) {
     t.u54 = 0.0f;
     t.u24 = 1.0f;
     t.u6C = 20.0f;
-    r->fx[0] = func_151307F0((s32) &t, 1, 0, 0, ((u8 *) o)[0xC], ((u8 *) o)[1]);
+    r->fx[0] = particle_spawn_ex((s32) &t, 1, 0, 0, ((u8 *) o)[0xC], ((u8 *) o)[1]);
     t.colour[4] = 0xFF;
     t.colour[5] = 0;
     t.colour[6] = 0;
     t.colour[7] = 0xFF;
-    r->fx[1] = func_151307F0((s32) &t, 1, 0, 0, ((u8 *) o)[0xC], ((u8 *) o)[1]);
+    r->fx[1] = particle_spawn_ex((s32) &t, 1, 0, 0, ((u8 *) o)[0xC], ((u8 *) o)[1]);
     return o;
 }
 #else
@@ -143,9 +143,9 @@ void *glow_pair_spawn(struct127 *obj) {
 #ifdef NON_MATCHING
 extern f32 D_800A1F84;
 extern f32 D_800A1F88;
-void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
+void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 s32 obj_get_player_alpha(s32, s32);
-s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800D9E70;
 
 /* was func_150F75EC */
@@ -182,11 +182,11 @@ void glow_pair_update(u8 *arg0) {
         sp.u6C = temp_s2->x_position;
         sp.u70 = temp_s2->y_position + 46.0f;
         sp.u74 = temp_s2->z_position;
-        func_15145740(temp_s2, (s32) &D_800D9E70, 0, 0, 0.0f);
+        obj_get_aim_vectors(temp_s2, (s32) &D_800D9E70, 0, 0, 0.0f);
         (*(f32 *)((u8 *)(&D_800D9E70) + 0)) = (f32) ((*(f32 *)((u8 *)(&D_800D9E70) + 0)) * D_800A1F84);
         (*(f32 *)((u8 *)(&D_800D9E70) + 4)) = (f32) ((*(f32 *)((u8 *)(&D_800D9E70) + 4)) * D_800A1F84);
         (*(f32 *)((u8 *)(&D_800D9E70) + 8)) = (f32) ((*(f32 *)((u8 *)(&D_800D9E70) + 8)) * D_800A1F84);
-        func_15081A90(temp_s2, sp.u6C, sp.u70, sp.u74, (*(f32 *)((u8 *)(&D_800D9E70) + 0)), (*(f32 *)((u8 *)(&D_800D9E70) + 4)), (*(f32 *)((u8 *)(&D_800D9E70) + 8)), temp_s1 + 0x10, D_800A1F88, 0, 0, 1, -1, 0, 0);
+        ray_cast_world(temp_s2, sp.u6C, sp.u70, sp.u74, (*(f32 *)((u8 *)(&D_800D9E70) + 0)), (*(f32 *)((u8 *)(&D_800D9E70) + 4)), (*(f32 *)((u8 *)(&D_800D9E70) + 8)), temp_s1 + 0x10, D_800A1F88, 0, 0, 1, -1, 0, 0);
         (*(u8 *)((u8 *)temp_s1 + 0x74)) = (u8) ((*(u8 *)((u8 *)temp_s1 + 0x74)) | 1);
         if (((*(u8 **)((u8 *)temp_s1 + 8)) != NULL) && (temp_v0_2 = (*(u8 **)((u8 *)temp_s1 + 0xC)), (temp_v0_2 != NULL))) {
             if ((*(u8 *)((u8 *)temp_s1 + 0x69)) == 0) {
@@ -216,7 +216,7 @@ void glow_pair_update(u8 *arg0) {
                 (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0xC))) + 0x74)) = 3;
                 return;
             }
-            func_1502ED88((*(s32 *)((u8 *)temp_s1 + 0x10)), 0xFF, 0, 0, 0x7F, 0, 0x10);
+            obj_tint_set_flash((*(s32 *)((u8 *)temp_s1 + 0x10)), 0xFF, 0, 0, 0x7F, 0, 0x10);
             var_t1 = -1;
             (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 8))) + 0x74)) = 3;
             var_t2 = (*(u8 **)((u8 *)temp_s1 + 0xC));
@@ -248,7 +248,7 @@ void glow_pair_handle_event(struct102 *obj, u8 *ev, u8 type) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/glow_pair_handle_event.s")
 #endif
 
-s32 func_1514EDF0(s32, s32);
+s32 char_fx_detach_effect(s32, s32);
 /* was func_150F791C */
 void glow_pair_free_particles(s32 arg0) {
     s32 *p;
@@ -264,7 +264,7 @@ void glow_pair_free_particles(s32 arg0) {
         i += 1;
         i = i & 0xFF;
     } while (i < 2);
-    func_1514EDF0(arg0, *p);
+    char_fx_detach_effect(arg0, *p);
 }
 
 /* was func_150F798C */

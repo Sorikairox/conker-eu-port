@@ -22,7 +22,7 @@ s/(obj->unk10B \& 0xFE) |/(obj->unk10B \& 0xFC) |/
 s/player != 0xFF \&\& phase == 0 \&\&/player != 0xFF \&\&/
 s/obj->unk31C != NULL \&\& obj->camera != NULL/obj->unk31C != NULL/
 s/((u8 \*)obj->unk31C)\[0x197\] != 0/((u8 *)obj->unk31C)[0x196] != 0/
-s/func_1517F9F8(0xFF, 0, 0, 0xB4, 0x14, /func_1517F9F8(0xFF, 0, 0, 0xB4, 0x15, /
+s/screen_tint_start(0xFF, 0, 0, 0xB4, 0x14, /screen_tint_start(0xFF, 0, 0, 0xB4, 0x15, /
 s/((u8 \*)obj->camera)\[0x23D\]);/((u8 *)obj->camera)[0x23C]);/
 s/            player = obj->unk127;/            ;/
 s/player != 0xFF \&\& obj->health == 0/obj->health == 0/

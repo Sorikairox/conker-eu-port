@@ -15,12 +15,12 @@ void level_lights_init(s16 arg0, s16 arg1) {
 
     for (i = 0; i < 16; i++) {
         if ((1 << i) & arg1) {
-            func_15085710(i, 0, D_80087270[i]);
+            player_stat_modify(i, 0, D_80087270[i]);
             D_800D2457 = D_800D2456 = 6;
-            func_15085710(i, 5, D_8008726C);
-            func_15085710(i, 2, D_80087260);
+            player_stat_modify(i, 5, D_8008726C);
+            player_stat_modify(i, 2, D_80087260);
             if (D_800BE616 != 0) {
-                func_15085710(i, 9, D_80087264);
+                player_stat_modify(i, 9, D_80087264);
             }
         }
         level_lights_stub(arg1);

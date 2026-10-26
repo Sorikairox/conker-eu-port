@@ -7,7 +7,8 @@
 extern f32 D_800A8590;
 s32 sprite_vtx_quads_init(s32 *, s32, s32, s32, s32);
 
-void func_15193900(u8 *arg0) {
+/* was func_15193900 */
+void ceiling_drip_spawn(u8 *arg0) {
     struct {
         s32 u28;
         u8 pad2C[0x82];
@@ -56,9 +57,10 @@ void func_15193900(u8 *arg0) {
     (*(s16 *)((u8 *)arg0 + 0xE)) = (s16) ((random_int() & 0x7F) + 0x64);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1110/func_15193900.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1110/ceiling_drip_spawn.s")
 #endif
-void func_15193A24(u8 *arg0) {
+/* was func_15193A24 */
+void ceiling_drip_fall_update(u8 *arg0) {
     s16 temp_v0;
     f32 sp38[3];
 

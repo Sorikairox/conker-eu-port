@@ -335,7 +335,7 @@ extern u8 D_16004870[];          /* "NaN" */
 extern u8 D_16004874[];          /* "Inf" */
 s16 debug_printf_ldunscale(s16 *pex, f64 *px);
 void debug_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
-// debug_format_double_digits (the debugger's copy of libc _Ldtob, same code as func_10001550): converts the double in px->v for printf conversion `code` (e f g E G): default
+// debug_format_double_digits (the debugger's copy of libc _Ldtob, same code as init_printf_ldtob): converts the double in px->v for printf conversion `code` (e f g E G): default
 // precision 6 (1 for %g with precision 0), "NaN" / "Inf" copied as is, otherwise scales the value by powers of ten
 // to 8-digit groups, generates up to 19 digits, drops leading zeros, rounds to the significant digit count and hands
 // the digits to debug_printf_genld (_Genld).

@@ -6,7 +6,7 @@
 /* Impact effect kinds read by impact_effect_spawn (its .s owns this rodata; the NM link drops it). */
 typedef struct {
     u16 sparkKind; /* +0 spark record kind for sprite_vtx_quads_init, 0 = none */
-    u16 debris;    /* +2 debris effect id (func_151722BC / func_15172474), 0 = none, 0x13 = special burst */
+    u16 debris;    /* +2 debris effect id (decal_spawn_at / decal_spawn_on_triangle), 0 = none, 0x13 = special burst */
     u8 smokePct;   /* +4 chance (percent) of a smoke puff when size != 0 */
     u8 subEffect;  /* +5 impact_dust_spawn effect, 0 = none */
     u8 countBase;  /* +6 debris count = base + rand % range + 1 */
@@ -46,9 +46,9 @@ typedef struct {
     u8 uA4;
     u8 padA5[3];
 } ImpactSpark;
-s32 func_151EFDD0(void);
-s32 func_151722BC(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
-void func_15172474(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC);
+s32 game_gu_random(void);
+s32 decal_spawn_at(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
+void decal_spawn_on_triangle(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC);
 void impact_dust_spawn(f32, f32, f32, s32, s32, s32 *, s32);
 s32 sprite_vtx_quads_init(void *, s32, s32, s32, s32);
 void *node_spawn_vtx_sprite(void *, u8, s32);
@@ -75,27 +75,27 @@ s32 impact_effect_spawn(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 s
     }
     k = &D_800A1440[kind];
     if (k->debris != 0) {
-        count = (func_151EFDD0() % k->countRange) + k->countBase + 1;
+        count = (game_gu_random() % k->countRange) + k->countBase + 1;
         if (size != 1) {
             spread = 0x1E;
         }
         count = D_800A14EC[size] * count;
         if (k->debris == 0x13) {
-            func_151722BC(x, y, z, 0x1E, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
+            decal_spawn_at(x, y, z, 0x1E, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
         } else if (tri != NULL) {
-            func_15172474(x, y, z, (s32) tri, spread, 0xB5AD, k->debris, count, 0, 0, 0, 0xFF, 0);
+            decal_spawn_on_triangle(x, y, z, (s32) tri, spread, 0xB5AD, k->debris, count, 0, 0, 0, 0xFF, 0);
         } else {
-            func_151722BC(x, y, z, (s16) spread, 0xB5AD, k->debris, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
+            decal_spawn_at(x, y, z, (s16) spread, 0xB5AD, k->debris, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }
     }
     if (k->subEffect != 0) {
         impact_dust_spawn(x, y, z, k->subEffect | flag, size, tri, slot);
     }
-    if (size != 0 && (func_151EFDD0() % 100) < k->smokePct) {
+    if (size != 0 && (game_gu_random() % 100) < k->smokePct) {
         pos[0] = x;
         pos[1] = y + 20.0f;
         pos[2] = z;
-        func_151C384C(pos, 0xFF, 1);
+        fire_embers_spawn(pos, 0xFF, 1);
         if (slot != 0xFF) {
             D_800D9D83[slot * 28] = 100;
         }
@@ -126,18 +126,18 @@ s32 impact_effect_spawn(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 s
 
 #ifdef NON_MATCHING
 void collision_select_area(s32);
-s32 func_150A49D0(s32 count, s32 *idList, s32 force);
-s32 func_150A48C0(s32, s32, s32, s32 *);
+s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
+s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
 s32 floor_flags_surface_type(s32);
 extern struct {
     s32 height;  /* floor height * 256 */
     s32 *tri;    /* collision triangle (12-byte records at D_800DC26C) */
     u8 pad8[8];
-} D_800D3720[]; /* hits of the last func_150A48C0 probe */
+} D_800D3720[]; /* hits of the last floor_collect_world_obj_tris probe */
 extern s32 D_800DC26C;
 
 // object_impact_effect: impact effect for the world object `obj` (0xA0-byte records at D_800DBEF4, count
-// D_800DC320). Probes the object's floor (func_150A48C0, only this object's id in the list) at its x / z (+0x10 /
+// D_800DC320). Probes the object's floor (floor_collect_world_obj_tris, only this object's id in the list) at its x / z (+0x10 /
 // +0x14) jittered by up to +-(+0x50) units, at most 5 tries. Takes the highest hit: its height (/ 256) becomes the
 // effect y, and its triangle, moved into world space with the object's matrix (world_record_build_matrix; vertex offsets +
 // the object's vertex base for the current frame buffer D_800BE9C0), carries the debris. The effect kind comes from
@@ -164,17 +164,17 @@ s32 impact_effect_at_world_object(u8 *obj) {
     }
     id = idx;
     collision_select_area(2);
-    func_150A49D0(1, (s32 *) &id, 0);
+    world_objects_transform_mesh(1, (s32 *) &id, 0);
     do {
         x = *(s16 *) (obj + 0x10);
         z = *(s16 *) (obj + 0x14);
         if (*(u16 *) (obj + 0x50) != 0) {
             n = *(u16 *) (obj + 0x50);
-            x = x + (func_151EFDD0() % n) * 2 - n;
+            x = x + (game_gu_random() % n) * 2 - n;
             n = *(u16 *) (obj + 0x50);
-            z = z + (func_151EFDD0() % n) * 2 - n;
+            z = z + (game_gu_random() % n) * 2 - n;
         }
-        found = func_150A48C0(x, z, 1, (s32 *) &id);
+        found = floor_collect_world_obj_tris(x, z, 1, (s32 *) &id);
         if (found != 0) {
             best = -0x800000;
             for (i = found - 1; i >= 0; i--) {
@@ -206,7 +206,7 @@ s32 impact_effect_at_world_object(u8 *obj) {
         for (i = 0; i < 3; i++) {
             s16 *v = (s16 *) world[i];
 
-            func_150A7E40(mtx, v[0], v[1], v[2], &ox, &oy, &oz);
+            mtxf_transform_point(mtx, v[0], v[1], v[2], &ox, &oy, &oz);
             verts[i][0] = ox;
             verts[i][1] = oy;
             verts[i][2] = oz;
@@ -336,7 +336,7 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
         dz = nz / len;
         if (slot != 0xFF && fabsf(dy) < 0.9f) {
             mtxf_look_at(mtx, 0.0f, 0.0f, 0.0f, dx, dy, dz, 0.0f, 1.0f, 0.0f);
-            func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),
+            mtxf_transform_point(mtx, 0.0f, 0.0f, 1.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),
                           (f32 *) (D_800D9D80 + slot * 28 + 0x14), (f32 *) (D_800D9D80 + slot * 28 + 0x18));
         } else {
             flat = 1;
@@ -381,7 +381,7 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
         fast = 1;
         rec.gravity = -0x175;
         count = 12;
-        base = base * (0.5f * (func_151EFDD0() % 3 + 1));
+        base = base * (0.5f * (game_gu_random() % 3 + 1));
     } else if (size == 0) {
         rec.gravity = -0xDA;
         base = base * 0.5f;
@@ -391,7 +391,7 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
     }
     while (count-- != 0 && more) {
         speed = random_float() * 957.0f + base;
-        angle = func_151EFDD0() % 256;
+        angle = game_gu_random() % 256;
         if (fast) {
             speed += speed;
         }
@@ -402,15 +402,15 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
         } else {
             s = math_sin_u8(angle);
             c = math_cos_u8(angle);
-            func_150A7E40(mtx, s * 0.5f, c * 0.5f, 1.0f, &dx, &dy, &dz);
+            mtxf_transform_point(mtx, s * 0.5f, c * 0.5f, 1.0f, &dx, &dy, &dz);
         }
         kx = 0.315f * dx;
         kz = 0.315f * dz;
-        rec.u28 = func_151EFDD0() % 2 + 0x182;
+        rec.u28 = game_gu_random() % 2 + 0x182;
         rec.vx = (s32) (speed * kx);
         rec.vy = (s32) (speed * dy);
         rec.vz = (s32) (speed * kz);
-        func_151EFDD0();
+        game_gu_random();
         rec.u2A = 10;
         rec.size0 = (s32) (random_float() * sizeRange + sizeBase);
         rec.size1 = (s32) (random_float() * sizeRange + sizeBase);
@@ -419,7 +419,7 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
         }
     }
     if (kind == 4 || kind == 9 || kind == 5) {
-        if (func_151EFDD0() % 5 == 0) {
+        if (game_gu_random() % 5 == 0) {
             impact_dust_smoke_puff(x, y, z, dx, dy, dz, kind);
         }
     }
@@ -428,8 +428,8 @@ void impact_dust_spawn(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 sl
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/impact_dust_spawn.s")
 #endif
 
-s32 func_15132FBC(void *, s32, s32, s32, u8, s32);
-s32 func_151EFDD0(void);
+s32 mdl_particle_spawn(void *, s32, s32, s32, u8, s32);
+s32 game_gu_random(void);
 
 /* was func_150E5AD8 */
 void impact_dust_smoke_puff(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
@@ -504,7 +504,7 @@ void impact_dust_smoke_puff(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f3
         sp.u28[1] = 0.3f;
         sp.u7E = 7;
     }
-    sp.u7C = (func_151EFDD0() % 60) + 60;
+    sp.u7C = (game_gu_random() % 60) + 60;
     sp.u78 = 0x29E9;
     t = (random_float() * 4.6f) + 1.5f;
     sp.u74 = -0.78f;
@@ -530,15 +530,15 @@ void impact_dust_smoke_puff(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f3
     sp.u98 = 0;
     sp.u9A = 0x20;
     sp.u9C = 7;
-    func_15132FBC(&sp, 3, 0xFF, 0, 0xFF, 0);
+    mdl_particle_spawn(&sp, 3, 0xFF, 0, 0xFF, 0);
 }
 
 #ifdef NON_MATCHING
 void tri_compute_plane(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
-f32 func_150ADDE0(f32 *a, f32 *b);
+f32 vec3f_dot(f32 *a, f32 *b);
 extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last tri_compute_plane triangle */
 
-// debris_ground_bounce: ground handler 4 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, func_15132BBC's
+// debris_ground_bounce: ground handler 4 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, mdl_particle_spawn_ex's
 // dispatcher; x / y / z unused). Puts the object on the ground (+0x3C = +0x10 * 1.1 + ground). Slower than 2 downwards
 // it stops: velocities +0x44..+0x4C cleared, flags 0x6F of +0x60 dropped. Otherwise it bounces: with the ground
 // triangle `tri` (nine s16) the velocity is reflected about the triangle's normal (v - 2 (v.n) n, from the
@@ -574,13 +574,13 @@ s32 debris_ground_bounce(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
         n[0] = -D_800CC630;
         n[1] = -D_800CC634;
         n[2] = -D_800CC638;
-        len = func_150AD930(n);
+        len = vec3f_magnitude(n);
         if (1e-05f < len) {
             vec3_scale((struct17 *) n, 1.0f / len, (struct17 *) unit);
             vel[0] = *(f32 *) (p + 0x44);
             vel[1] = *(f32 *) (p + 0x48);
             vel[2] = *(f32 *) (p + 0x4C);
-            len = func_150ADDE0(unit, vel);
+            len = vec3f_dot(unit, vel);
             vec3_scale((struct17 *) unit, len + len, (struct17 *) n);
             vec3_sub((struct17 *) vel, (struct17 *) n, (struct17 *) n);
             fac = *(f32 *) (p + 0x14);

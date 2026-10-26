@@ -3,26 +3,26 @@ s#        \*(s16 \*) (self + 0xE) = -1;#        *(s16 *) (self + 0xE) = 1;# % go
 s#    if (\*(s32 \*) (obj + 0x1D4) == 0 || (rec->mode \& 2)) {#    if (*(s32 *) (obj + 0x1D4) == 0 || (rec->mode \& 3)) {# % m1q2 m0t1
 s#            rec->glow\[0x74\] = 3;#            rec->glow[0x74] = 2;# % offg m2
 s#    if (rec->sound == 0) {#    if (rec->sound != 0) {# % m0t1 snd
-s#        rec->sound = func_10010154(0x96, (struct127 \*) obj, 0x36B0, 0x190, 0x4268);#        rec->sound = func_10010154(0x96, (struct127 *) obj, 0x36B0, 0x190, 0x4269);# % m0t1
-s#        u8 \*pt = func_15031C4C(obj, rec->point, 0);#        u8 *pt = func_15031C4C(obj, rec->point + 1, 0);# % m1q2
+s#        rec->sound = actor_sound_play(0x96, (struct127 \*) obj, 0x36B0, 0x190, 0x4268);#        rec->sound = actor_sound_play(0x96, (struct127 *) obj, 0x36B0, 0x190, 0x4269);# % m0t1
+s#        u8 \*pt = attachment_find_by_slot(obj, rec->point, 0);#        u8 *pt = attachment_find_by_slot(obj, rec->point + 1, 0);# % m1q2
 s#        t = (\*(s32 \*) (obj + 0x2EC) != 0) ? \*(f32 \*) (obj + 0x2DC) \* \*(f32 \*) (obj + 0x2D8) : 0\.0f;#        t = (*(s32 *) (obj + 0x2EC) != 0) ? *(f32 *) (obj + 0x2DC) * *(f32 *) (obj + 0x2DC) : 0.0f;# % m1q2
 s#        if (i >= 4) {#        if (i > 4) {# % m1q4
 s#        f = (t - (f32) i \* 0\.25f) \* 4\.0f;#        f = (t - (f32) i * 0.25f) * 3.0f;# % m1q2 m1q1
 s#        off\[1\] = D_800A0748\[i\]\[1\] \* f;#        off[1] = D_800A0748[i][2] * f;# % m1q2
-s#        if (func_1514654C(obj, pt, D_800A0778\[i\], \&offp, \&posp, 1) == 0) {#        if (func_1514654C(obj, pt, D_800A0778[i + 1], \&offp, \&posp, 1) == 0) {# % m1q2 m1fb
+s#        if (model_node_points_to_world(obj, pt, D_800A0778\[i\], \&offp, \&posp, 1) == 0) {#        if (model_node_points_to_world(obj, pt, D_800A0778[i + 1], \&offp, \&posp, 1) == 0) {# % m1q2 m1fb
 s#            pos\[1\] = \*(f32 \*) (obj + 0x18) + 800\.0f;#            pos[1] = *(f32 *) (obj + 0x18) + 80.0f;# % m1fb
 s#        t = (\*(s32 \*) (obj + 0x2E8) != 0) ? (f32) \*(s32 \*) (obj + 0x2E4) \/ (f32) \*(s32 \*) (obj + 0x2E8) : 1\.0f;#        t = (*(s32 *) (obj + 0x2E8) != 0) ? (f32) *(s32 *) (obj + 0x2E4) \/ (f32) *(s32 *) (obj + 0x2E8) : 0.5f;# % m0z
 s#        if (i >= 3) {#        if (i > 3) {# % m0full
 s#        f = (t - (f32) i \* D_800A0788_c\[0\]) \* 3\.0f;#        f = (t - (f32) i * D_800A0788_c[0]) * 4.0f;# % m0t1 m0t2
 s#        off\[2\] = D_800A0720\[i\]\[2\] \* f;#        off[2] = D_800A0720[i][1] * f;# % m0t1 m0t2 m0t0
-s#        func_15143134(off, pos, \*(u8 \*\*) (obj + 0x1D4) + (D_800A0744\[i\] << 6));#        func_15143134(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 5));# % m0t1 m0t2
+s#        mtx_transform_point_or_origin(off, pos, \*(u8 \*\*) (obj + 0x1D4) + (D_800A0744\[i\] << 6));#        mtx_transform_point_or_origin(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 5));# % m0t1 m0t2
 s#        glow\[0x74\] = 0xFF;#        glow[0x74] = 0xFE;# % m0t1
 s#        \*(Vec49A4 \*) (rec->glow + 0x40) = \*(Vec49A4 \*) pos;#        *(Vec49A4 *) (rec->glow + 0x44) = *(Vec49A4 *) pos;# % m0t1
-s#    if (D_800BE9F0 == 2 \&\& func_150A29C8(((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C, 0x4065) == 0) {#    if (D_800BE9F0 == 2 \&\& func_150A29C8(((u8 *) obj - (u8 *) D_800CC2D0) \/ 0x32C, 0x4066) == 0) {# % gm2no gm2yes
+s#    if (D_800BE9F0 == 2 \&\& trigger_test_player(((u8 \*) obj - (u8 \*) D_800CC2D0) \/ 0x32C, 0x4065) == 0) {#    if (D_800BE9F0 == 2 \&\& trigger_test_player(((u8 *) obj - (u8 *) D_800CC2D0) \/ 0x32C, 0x4066) == 0) {# % gm2no gm2yes
 s#        enabled = FALSE;#        enabled = TRUE;# % gm2no
 s#        rec->smoke += (D_800A078C_c\[0\] + random_float() \* D_800A0790_c\[0\]) \* D_800BE9A4;#        rec->smoke += (D_800A078C_c[0] + random_float() * D_800A0794_c[0]) * D_800BE9A4;# % one many
 s#        while (1\.0f < rec->smoke) {#        while (1.0f <= rec->smoke) {# % exact
-s#            func_151C3C88((u8 \*) pos, self\[0xC\], self\[1\]);#            func_151C3C88((u8 *) pos, self[0xC], self[2]);# % one many
+s#            fire_embers_spawn_b((u8 \*) pos, self\[0xC\], self\[1\]);#            fire_embers_spawn_b((u8 *) pos, self[0xC], self[2]);# % one many
 s#            rec->smoke -= 1\.0f;#            rec->smoke -= 0.5f;# % one many
 s#    rec->sparks += (D_800A0794_c\[0\] + random_float() \* D_800A0798_c\[0\]) \* D_800BE9A4;#    rec->sparks += (D_800A0794_c[0] + random_float() * D_800A0798_c[0]) * 2.0f;# % m0t1 one many
 s#    if (!(1\.0f < rec->sparks)) {#    if (!(1.0f <= rec->sparks)) {# % exact

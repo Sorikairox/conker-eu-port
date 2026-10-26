@@ -11,11 +11,11 @@ void obj_bone_point_transform(u8 *arg0, u8 arg1, void *arg2, void *arg3);
 #ifdef NON_MATCHING
 void bolt_arc_sample_curve(struct102 *);
 void bolt_arc_jitter_points(struct102 *);
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 random_int(void);
 void *memcpy(void *, const void *, unsigned int);
 
-/* The 0x70-byte particle spec func_151307F0 gets for each arc end. */
+/* The 0x70-byte particle spec particle_spawn_ex gets for each arc end. */
 typedef struct {
     s32 w00;            /* 0x00 0x200005 */
     s32 w04;            /* 0x04 0 */
@@ -46,7 +46,7 @@ typedef struct {
 // +0x48 colour). The object's data area (+0x60) follows its 0x88-byte header, n * 0x34 + (n + 2) * 0xC bytes in and
 // `extra` more bytes are reserved for the caller. Sets the step 1 / (n + 1) (+0x64) and the life (+0x68), builds the
 // points (bolt_arc_sample_curve, bolt_arc_jitter_points), clears +0x6C..+0x83, sets +0x84 = n * 0x30 + 0x60 and spawns one glow
-// particle at each arc end (func_151307F0, handles at +0x6C / +0x70). Returns the object (NULL when none is free).
+// particle at each arc end (particle_spawn_ex, handles at +0x6C / +0x70). Returns the object (NULL when none is free).
 /* was func_15106260 */
 u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3) {
     ArcEndSpec ps;
@@ -119,7 +119,7 @@ u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3) {
         ps.pos[2] = end[2];
         flags = random_int() ? 0x40 : 0;
         ps.flags = (random_int() ? 0x80 : 0) | flags;
-        *(s32 *)(obj + 0x6C + i * 4) = func_151307F0((s32)&ps, 0, 0, 0, layer, arg3);
+        *(s32 *)(obj + 0x6C + i * 4) = particle_spawn_ex((s32)&ps, 0, 0, 0, layer, arg3);
     }
     return obj;
 }
@@ -195,7 +195,7 @@ struct_eu_133A70_elem *bolt_arc_points_get(struct_eu_133A70 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15146078(f32 *, f32 *, f32 *);
+s32 vec3_make_basis(f32 *, f32 *, f32 *);
 f32 bezier_basis0(f32);
 f32 bezier_basis1(f32);
 f32 bezier_basis2(f32);
@@ -207,7 +207,7 @@ f32 bezier_basis3_deriv(f32);
 // bolt_arc_sample_curve: samples the arc's cubic Bezier curve (control points +0x14, +0x20, +0x2C, +0x38) at the
 // +0x48 points t = step, 2 * step, ... (step +0x64 = 1 / (n + 1)) into the 0x34-byte records at +0x88: t, the
 // position (Bernstein weights bezier_basis0 / A5C / A90 / AC0), the tangent (derivatives bezier_basis0_deriv / B04 / B3C /
-// B6C) and two side vectors at +0x1C / +0x28 from func_15146078 (zero when it fails, e.g. a zero tangent).
+// B6C) and two side vectors at +0x1C / +0x28 from vec3_make_basis (zero when it fails, e.g. a zero tangent).
 // The asm leaves a stale v0; the only caller (bolt_arc_spawn) ignores it, so the C is void.
 /* was func_15106794 */
 void bolt_arc_sample_curve(struct102 *arg0) {
@@ -243,7 +243,7 @@ void bolt_arc_sample_curve(struct102 *arg0) {
         for (k = 0; k < 3; k++) {
             rec[4 + k] = p0[k] * d0 + p1[k] * d1 + p2[k] * d2 + p3[k] * d3;
         }
-        if (func_15146078(rec + 4, rec + 7, rec + 10) == 0) {
+        if (vec3_make_basis(rec + 4, rec + 7, rec + 10) == 0) {
             rec[7] = 0.0f;
             rec[8] = 0.0f;
             rec[9] = 0.0f;
@@ -303,7 +303,7 @@ f32 bezier_basis3_deriv(f32 arg0) {
 }
 
 // PERMUTER CHANGED DECL: voidfunc_15106B90(struct102*) (base: voidfunc_15106B90(struct102*arg0))
-void func_15143874(s16, f32, f32 *, f32 *);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 
 /* was func_15106B90 */
 void bolt_arc_jitter_points(struct102 *arg0)
@@ -326,7 +326,7 @@ void bolt_arc_jitter_points(struct102 *arg0)
     q = src + ((i - 1) * 0x34);
     if (!arg0) { // fakematch: permuter (s-register order of i / dst / src)
     }
-    func_15143874(random_int() & 0xFF, (*((f32 *) (((u8 *) arg0) + 0x4C))) * random_float(), &c, &s);
+    vec2_from_angle_byte(random_int() & 0xFF, (*((f32 *) (((u8 *) arg0) + 0x4C))) * random_float(), &c, &s);
     dst->x = (*((f32 *) (q + 4))) + (((*((f32 *) (q + 0x28))) * s) + ((*((f32 *) (q + 0x1C))) * c));
     dst->y = (*((f32 *) (q + 8))) + (((*((f32 *) (q + 0x2C))) * s) + ((*((f32 *) (q + 0x20))) * c));
     dst->z = (*((f32 *) (q + 0xC))) + (((*((f32 *) (q + 0x30))) * s) + ((*((f32 *) (q + 0x24))) * c));
@@ -335,12 +335,12 @@ void bolt_arc_jitter_points(struct102 *arg0)
 }
 
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
-s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+void vtx_slot_buffer_get(s32 *, s16, s32, Vtx **, u8 *);
+s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 s32 gfx_set_combine_mode(s32, u8, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
-s32 func_15142FBC(s32, s32, s32, s8 *);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
+s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
 extern s32 D_80091120[];  /* ribbon texture descriptor */
 extern s32 D_800D30BC;
 extern s32 D_800A4EA8[];  /* render mode pairs (2 words each) */
@@ -361,8 +361,8 @@ static const f32 sRibbonMinLen2B[1] = { 0.0001f };  /* 0x38D1B717 */
 
 // ribbon_draw: draws the object's point chain (bolt_arc_points_get: obj +0x48 + 2 points) as a camera-facing ribbon of
 // half width obj +0x50: each point gets 3 vertices (p + n, p, p - n with s = 0 / 0x200 / 0x400, n = the side normal of
-// the segment and the camera of view id, func_15144B34), each segment one 6-vertex load and 4 triangles. Vertices
-// from func_151D6310 (obj +0x74 pool, obj +0x84 count; nothing drawn without). Texture D_80091120 (combine 3), prim
+// the segment and the camera of view id, camera_get_pos), each segment one 6-vertex load and 4 triangles. Vertices
+// from vtx_slot_buffer_get (obj +0x74 pool, obj +0x84 count; nothing drawn without). Texture D_80091120 (combine 3), prim
 // colour obj +0x58..+0x5B, geometry 0x200005 / 0x1F0600, combine 0x44, render mode 0x80000 | 0x2CA0 | D_800D30BC
 // with the second D_800A4EA8 pair. Returns the display list end.
 /* was func_15106D38 */
@@ -381,18 +381,18 @@ s32 bolt_arc_ribbon_draw(s32 gfx, u8 *obj, s16 id) {
     f32 k;
     s32 i;
 
-    func_151D6310((s32 *) (obj + 0x74), id, *(s32 *) (obj + 0x84), &vtx, NULL);
+    vtx_slot_buffer_get((s32 *) (obj + 0x74), id, *(s32 *) (obj + 0x84), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
-    cam = func_15144B34(id);
+    cam = camera_get_pos(id);
     flag = 1;
     pts = (f32 *) bolt_arc_points_get((struct_eu_133A70 *) obj);
-    gfx = func_15142E24(gfx, D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
-    gfx = func_15142C10(gfx, obj[0x58], obj[0x59], obj[0x5A], obj[0x5B], &flag);
-    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = gfx_load_texture_cached(gfx, D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    gfx = gfx_env_color_cached(gfx, obj[0x58], obj[0x59], obj[0x5A], obj[0x5B], &flag);
+    gfx = gfx_geometry_mode_cached(gfx, 0x200005, 0x1F0600);
     gfx = gfx_set_combine_mode(gfx, 0x44, &flag);
-    gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[3] | D_800A4EA8[2], &flag);
+    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[3] | D_800A4EA8[2], &flag);
 
     /* first point: side normal of the first segment */
     dx = pts[3] - pts[0];
@@ -487,7 +487,7 @@ void bolt_arc_free(u8 *arg0)
   if (b != NULL) {
     node_destroy(b);
   }
-  func_151D5E30(arg0 + 0x74);
+  vtx_slot_buffers_free(arg0 + 0x74);
 }
 
 /* was func_15107478 */
@@ -622,12 +622,12 @@ typedef struct {
 u8 *bolt_arc_spawn(s16 *spec, s32 extra, u8 layer, s32 arg3);
 s32 random_int(void);
 f32 random_float(void);
-void func_15143794(s16, s16, f32, u8 *);
+void vec3_from_angles_byte(s16, s16, f32, u8 *);
 void *memcpy(void *, const void *, unsigned int);
 
 // bolt_record_update: record handler of the bolt spawned by bolt_spawn (type 0x3E). While no arc is alive
 // (+0x30 == 0) it spawns the next segment arc (bolt_arc_spawn kind 4) between points +0x2C and +0x2D of the point list,
-// with two control points pushed sideways by func_15143794 (random angle, random pitch around -0x40) and life,
+// with two control points pushed sideways by vec3_from_angles_byte (random angle, random pitch around -0x40) and life,
 // colour, width and the other values from the bolt parameters (+0x38..); the arc gets the record pointer. When the
 // last segment is done it marks the record finished (+0xE = -1, +0xD bit 0).
 /* was func_1510783C */
@@ -669,7 +669,7 @@ void bolt_record_update(u8 *rec) {
     r1 = random_int();
     r2 = random_int();
     spread = *(s16 *) (p + 0x14);
-    func_15143794((u8) r1, r2 % (u32) (spread + 1) - (spread >> 1) - 0x40,
+    vec3_from_angles_byte((u8) r1, r2 % (u32) (spread + 1) - (spread >> 1) - 0x40,
                   random_float() * *(f32 *) (p + 0x10) + *(f32 *) (p + 0xC), (u8 *) off);
     s.c1[0] = s.a[0] + off[0];
     s.c1[1] = s.a[1] + off[1];
@@ -678,7 +678,7 @@ void bolt_record_update(u8 *rec) {
     r1 = random_int();
     r2 = random_int();
     spread = *(s16 *) (p + 0x14);
-    func_15143794((u8) r1, r2 % (u32) (spread + 1) - (spread >> 1) - 0x40,
+    vec3_from_angles_byte((u8) r1, r2 % (u32) (spread + 1) - (spread >> 1) - 0x40,
                   random_float() * *(f32 *) (p + 0x10) + *(f32 *) (p + 0xC), (u8 *) off);
     s.c2[0] = s.b[0] + off[0];
     s.c2[1] = s.b[1] + off[1];
@@ -740,7 +740,7 @@ void bolt_record_handle_event(u8 *arg0, s32 arg1, u8 arg2)
 }
 
 #ifdef NON_MATCHING
-s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 
 /* The 0x50-byte arc spec bolt_arc_spawn copies into the arc object (+0x10). */
 typedef struct {
@@ -768,7 +768,7 @@ typedef struct {
     s16 angle1;
 } ArcLink;
 
-// object_arc_to_surface_spawn: casts a ray (func_15081A90) from the object's attachment point at angles
+// object_arc_to_surface_spawn: casts a ray (ray_cast_world) from the object's attachment point at angles
 // (angle0, angle1) (obj_attach_point_at_angles) outwards from the object's centre and, when it hits something, spawns a lightning arc
 // (bolt_arc_spawn, 0xC extra bytes for an ArcLink back to the object) from the point to the hit, with control points at
 // 1/3 and 2/3 (arc_control_points_thirds). life -1 = 300 and spec +0x02 = 0. Returns the arc, 0 when the object has no +0x1D4, the
@@ -803,7 +803,7 @@ s32 object_arc_to_surface_spawn(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 s
     spec.rgba[3] = rgba[3];
     spec.u4C = 2;
     obj_attach_point_at_angles(obj, angle0, angle1, (u8 *)spec.start, (u8 *)origin);
-    func_15081A90((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], spec.start[0] - origin[0],
+    ray_cast_world((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], spec.start[0] - origin[0],
                   spec.start[1] - origin[1], spec.start[2] - origin[2], hit, 0.0f, 0, 1, 1, -1, 0, 0);
     if (hit[0x59] == 0) {
         return 0;
@@ -865,11 +865,11 @@ s32 obj_arc_follow_update(u8 *arg0, s8 *arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/obj_arc_follow_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_15143794(s16, s16, f32, u8 *); /* P95: f32 (float bits were passed as an int) */
+void vec3_from_angles_byte(s16, s16, f32, u8 *); /* P95: f32 (float bits were passed as an int) */
 #else
-s32 func_15143794(s16, s16, s32, u8 *);
+s32 vec3_from_angles_byte(s16, s16, s32, u8 *);
 #endif
-s32 func_1515C7B4(u8 *, f32 *, s32 *, s32 *);
+s32 obj_get_fx_point_b(u8 *, f32 *, s32 *, s32 *);
 
 /* was func_15107FA0 */
 void obj_attach_point_at_angles(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4) {
@@ -877,11 +877,11 @@ void obj_attach_point_at_angles(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4
     s32 sp28;
     s32 sp24;
 
-    func_1515C7B4(arg0, sp2C, &sp28, &sp24);
+    obj_get_fx_point_b(arg0, sp2C, &sp28, &sp24);
 #ifdef NON_MATCHING
-    func_15143794(arg1, arg2, *(f32 *)&sp28, arg3); /* P95: f32 (float bits were passed as an int) */
+    vec3_from_angles_byte(arg1, arg2, *(f32 *)&sp28, arg3); /* P95: f32 (float bits were passed as an int) */
 #else
-    func_15143794(arg1, arg2, sp28, arg3);
+    vec3_from_angles_byte(arg1, arg2, sp28, arg3);
 #endif
     *(f32 *)(arg3 + 4) *= *(f32 *)(arg0 + 0xF0);
     *(f32 *)(arg3 + 0) += sp2C[0];
@@ -914,17 +914,17 @@ void obj_angle_point_effect(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
     s32 sp18;
 
     if (*(s32 *)(arg0 + 0x1D4) != 0) {
-        func_1515C7B4(arg0, sp20, &sp1C, &sp18);
+        obj_get_fx_point_b(arg0, sp20, &sp1C, &sp18);
 #ifdef NON_MATCHING
-        func_15143794(arg1, arg2, *(f32 *)&sp1C, sp2C); /* P95: f32 (float bits were passed as an int) */
+        vec3_from_angles_byte(arg1, arg2, *(f32 *)&sp1C, sp2C); /* P95: f32 (float bits were passed as an int) */
 #else
-        func_15143794(arg1, arg2, sp1C, sp2C);
+        vec3_from_angles_byte(arg1, arg2, sp1C, sp2C);
 #endif
         sp2C[1] *= *(f32 *)(arg0 + 0xF0);
         sp2C[0] += sp20[0];
         sp2C[1] += sp20[1];
         sp2C[2] += sp20[2];
-        func_151C384C(sp2C, arg3, arg4);
+        fire_embers_spawn(sp2C, arg3, arg4);
     }
 }
 
@@ -938,7 +938,7 @@ typedef struct {
 } ArcPointLink;
 
 // object_arc_from_point_spawn: like object_arc_to_surface_spawn but from the object's point `pos` / `kind` (obj_bone_point_transform) in the
-// direction of angles (angle0, angle1) (func_15143794, unit length): the ray (func_15081A90, length 300) ends the
+// direction of angles (angle0, angle1) (vec3_from_angles_byte, unit length): the ray (ray_cast_world, length 300) ends the
 // arc at the hit, or 300 units out when it hits nothing. Spec +0x34 = 1, +0x4C = 3, 0x18 extra bytes for an
 // ArcPointLink. Returns the arc, 0 when the object has no +0x1D4 or no arc could be spawned.
 /* was func_1510819C */
@@ -973,8 +973,8 @@ s32 object_arc_from_point_spawn(u8 *obj, u8 kind, f32 *pos, s16 angle0, s16 angl
     spec.rgba[3] = rgba[3];
     spec.u4C = 3;
     obj_bone_point_transform(obj, kind, pos, spec.start);
-    func_15143794(angle0, angle1, 1.0f, (u8 *)dir);
-    func_15081A90((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], dir[0], dir[1], dir[2], hit,
+    vec3_from_angles_byte(angle0, angle1, 1.0f, (u8 *)dir);
+    ray_cast_world((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], dir[0], dir[1], dir[2], hit,
                   300.0f, 0, 1, 1, -1, 0, 0);
     if (hit[0x59] == 0) {
         spec.end[0] = spec.start[0] + dir[0] * 300.0f;
@@ -1035,7 +1035,7 @@ s32 obj_point_arc_follow_update(u8 *arg0, s8 *arg1) {
 #endif
 /* was func_151084D4 */
 void obj_bone_point_transform(u8 *arg0, u8 arg1, void *arg2, void *arg3) {
-    func_15143134(arg2, arg3, *(u8 **)(arg0 + 0x1D4) + (arg1 << 6));
+    mtx_transform_point_or_origin(arg2, arg3, *(u8 **)(arg0 + 0x1D4) + (arg1 << 6));
 }
 
 /* was func_15108518 */

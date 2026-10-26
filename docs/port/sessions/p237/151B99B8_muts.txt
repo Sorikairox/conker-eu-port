@@ -1,10 +1,10 @@
-# P237 func_151B99B8 (searchlight_light_update) mutants: sed % setup names
+# P237 swinging_lamp_light_update (searchlight_light_update) mutants: sed % setup names
 s/    mtxf_rotate_xyz_deg(mf, 0.0f, 0.0f, \*(f32 \*) (obj + 0x170));/    mtxf_rotate_xyz_deg(mf, 0.0f, 0.0f, *(f32 *) (obj + 0x174));/ % beam
 s/    mf\[3\]\[1\] = \*(f32 \*) (obj + 0x3C);/    mf[3][1] = *(f32 *) (obj + 0x38);/ % beam
 s/    mf\[0\]\[2\] \*= \*(f32 \*) (obj + 0x18);/    mf[0][2] *= *(f32 *) (obj + 0x1C);/ % beam
 s/    mf\[1\]\[1\] \*= \*(f32 \*) (obj + 0x1C);/    mf[1][1] *= *(f32 *) (obj + 0x18);/ % beam
 s/    mf\[2\]\[2\] \*= \*(f32 \*) (obj + 0x18);/    mf[2][2] *= 1.0f;/ % beam
-s/    func_150A7E40(mf, 0.0f, -150.0f, 0.0f, \&x, \&y, \&z);/    func_150A7E40(mf, 0.0f, 150.0f, 0.0f, \&x, \&y, \&z);/ % beam
+s/    mtxf_transform_point(mf, 0.0f, -150.0f, 0.0f, \&x, \&y, \&z);/    mtxf_transform_point(mf, 0.0f, 150.0f, 0.0f, \&x, \&y, \&z);/ % beam
 s/    arg0->unk14->unk10 = y;/    arg0->unk14->unk10 = z;/ % beam
 s/    if (B9B8_BEAM == NULL) {/    if (B9B8_BEAM != NULL) {/ % beam
 s/        return 1;/        return 0;/ % nobeam

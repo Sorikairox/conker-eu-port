@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_150BE390(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_150BE390 */
+void sprite2d_emitter_spawn(s32 arg0, u8 arg1, s32 arg2) {
     struct {
         s32 unk0;
         s16 unk4;
@@ -19,9 +20,10 @@ void func_150BE390(s32 arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151559FC(f32 *, s32, s32, s32, s32, s32, s32);
+s32 sprite2d_spawn(f32 *, s32, s32, s32, s32, s32, s32);
 
-void func_150BE40C(u8 *arg0) {
+/* was func_150BE40C */
+void sprite2d_emitter_update(u8 *arg0) {
     struct {
         u8 * u38;
         u8 pad3C[0x8];
@@ -114,7 +116,7 @@ void func_150BE40C(u8 *arg0) {
         sp34 = temp_v1;
         sp.u38 = *temp_v1;
         sp.u48 = (random_float() * 4.064f) + 2.513f;
-        temp_v0 = func_151559FC(&sp.u94, 0xA, 0, 0, 0x58, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), 0);
+        temp_v0 = sprite2d_spawn(&sp.u94, 0xA, 0, 0, 0x58, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), 0);
         if (temp_v0 != 0) {
             memcpy(temp_v0 + 0x70, &sp.u38, 0x58);
         }
@@ -122,9 +124,10 @@ void func_150BE40C(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBBA0/func_150BE40C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBBA0/sprite2d_emitter_update.s")
 #endif
-void func_150BE650(struct102 *arg0, u8 **arg1, u8 arg2) {
+/* was func_150BE650 */
+void sprite2d_emitter_on_message(struct102 *arg0, u8 **arg1, u8 arg2) {
     if (arg2 == 0x21) {
         if (*(u8 **)((u8 *)arg0 + 0x28) == *arg1) {
             node_destroy(arg0);
@@ -137,7 +140,8 @@ void func_150BE650(struct102 *arg0, u8 **arg1, u8 arg2) {
     }
 }
 
-s32 func_150BE6C4(f32 *arg0) {
+/* was func_150BE6C4 */
+s32 sprite_rise_update(f32 *arg0) {
     arg0[5] += arg0[0x20] * D_800BE9A4;
     if (arg0[5] > 120.0f) {
         return 0;

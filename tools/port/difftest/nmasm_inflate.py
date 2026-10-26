@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P36: compare Rare's inflater (init_eu_5DA0 hand asm: func_1000654C .. func_100070F0 + func_1000738C, the fixed
+"""P36: compare Rare's inflater (init_eu_5DA0 hand asm: rzip_inflate_impl .. rzip_inflate_codes + rzip_build_fixed_tables, the fixed
 table builder) with its NON_MATCHING C, whole, on real packed assets from the ROM.
 
 Both run in Unicorn MIPS32: the reference on build/conker.eu.elf's .init words, the candidate on build_nm's. The
@@ -7,8 +7,8 @@ only 64-bit instructions in the asm are the 8 `sd $zero` that clear huft_build's
 they are patched into a jump to a trampoline of 32-bit stores. Both use the reference .init_data (mask / base / extra tables).
 
 Per trial: RAM is filled with a random pattern (so stale table memory is the same on both sides), the packed
-record (BE u32 size + deflate, or the BE halfword 0x1172 + deflate) is placed at src, func_1000738C builds the
-fixed tables at D_8003C230, then func_1000654C(src, dst, work) runs. Compared: v0 and all of RDRAM except the stack.
+record (BE u32 size + deflate, or the BE halfword 0x1172 + deflate) is placed at src, rzip_build_fixed_tables builds the
+fixed tables at D_8003C230, then rzip_inflate_impl(src, dst, work) runs. Compared: v0 and all of RDRAM except the stack.
 The reference output is also checked against Python's zlib (raw deflate) and the header size.
 Modes per trial (random): normal (work just past the output or far away), 0x1172 header, output limit too small
 (error path: v0 = 0, partial output), src above dst (limit = src - dst), corrupted stream (both must agree;
@@ -82,8 +82,8 @@ class Emu:
         mu.mem_write(LOW, bytes(mem[LOW:RAM]))
         v, b = self.init_data; mu.mem_write(phys(v), b)
         try:
-            self.call('func_1000738C', [], 2000000)
-            r = self.call('func_1000654C', [src, dst, work], maxi)
+            self.call('rzip_build_fixed_tables', [], 2000000)
+            r = self.call('rzip_inflate_impl', [src, dst, work], maxi)
         except (UcError, RuntimeError) as e:
             pc = mu.reg_read(UC_MIPS_REG_PC)
             if self.last: print(' '.join('%08X/%08X/%08X' % x for x in self.last[-8:]))

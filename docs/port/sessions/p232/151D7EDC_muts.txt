@@ -8,8 +8,8 @@ s/    while (i != (s8) arg0\[0x2D\]) {/    while (i > (s8) arg0[0x2D]) {/ % wrap
 s/        if (i < 0) {/        if (i <= 0) {/ % wrap
 s/            i = arg0\[0x25\] - 1;/            i = arg0[0x25];/ % wrap
 s/        e = ring + i \* 0x1C;/        e = ring + i * 0x18;/ % one
-s/        func_151D8CC8((f32 \*) e, (f32 \*) (e + 0xC), D_800BE9A4);/        func_151D8CC8((f32 *) e, (f32 *) (e + 0x10), D_800BE9A4);/ % one
-s/        func_151D8CC8((f32 \*) e, (f32 \*) (e + 0xC), D_800BE9A4);/        func_151D8CC8((f32 *) e, (f32 *) (e + 0xC), 1.0f);/ % one
+s/        trail_point_apply_gravity((f32 \*) e, (f32 \*) (e + 0xC), D_800BE9A4);/        trail_point_apply_gravity((f32 *) e, (f32 *) (e + 0x10), D_800BE9A4);/ % one
+s/        trail_point_apply_gravity((f32 \*) e, (f32 \*) (e + 0xC), D_800BE9A4);/        trail_point_apply_gravity((f32 *) e, (f32 *) (e + 0xC), 1.0f);/ % one
 s/    if ((s8) arg0\[0x2C\] > 0) {/    if ((s8) arg0[0x2C] > 1) {/ % one
 s/    if ((s8) arg0\[0x2C\] > 0) {/    if ((s8) arg0[0x2C] >= 0) {/ % empty
 s/        e = ring + (s8) arg0\[0x2D\] \* 0x1C;/        e = ring + (s8) arg0[0x2E] * 0x1C;/ % one

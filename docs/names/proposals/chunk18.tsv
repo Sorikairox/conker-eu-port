@@ -1,0 +1,242 @@
+old	new	confidence	description
+func_151EF7B0	game_clear_e9d00_flag	low	Clears the global word D_800E9D00 to 0
+func_151EF800	game_os_pi_read_io	high	Game-segment copy of libultra osPiReadIo: takes PI access, raw-reads a PI device word, releases access
+func_151EF840	game_sqrtf	high	Game-segment sqrtf wrapper (built -O2 so the sqrt instruction fills the jr ra delay slot)
+func_151EF850	game_os_cont_init	high	Game-segment copy of libultra osContInit: waits for PIF boot, probes controllers, sets up SI/EEPROM queues
+func_151EFA48	game_os_cont_get_init_data	high	Game-segment copy of __osContGetInitData: unpacks controller status replies into OSContStatus and a bit pattern
+func_151EFB18	game_os_pack_request_data	high	Game-segment copy of __osPackRequestData: fills the PIF RAM with a status-request command for each controller
+func_151EFC10	game_os_pfs_init_pak	high	Game-segment copy of osPfsInitPak: checks Controller Pak status, reads its ID and runs osPfsChecker
+func_151EFCC4	game_os_pfs_get_status	high	Game-segment copy of __osPfsGetStatus: queries a controller and maps the pak status to PFS error codes
+func_151EFDD0	game_gu_random	high	Game-segment copy of libultra guRandom: steps the xseed pseudo-random generator and returns it
+func_151EFE00	game_os_pi_set_control	med	Sets/clears bits of the PI/device control register (D_8002C134->control) per flag pairs with interrupts disabled
+func_151F0180	game_os_set_timer	high	Game-segment copy of osSetTimer: initialises an OSTimer, inserts it and re-arms the timer interrupt if first
+func_151F0260	game_os_cont_start_read_data	high	Game-segment copy of osContStartReadData: packs read-button commands and starts the SI DMA write
+func_151F0324	game_os_cont_get_read_data	high	Game-segment copy of osContGetReadData: unpacks button/stick replies into OSContPad entries
+func_151F03CC	game_os_pack_read_data	high	Game-segment copy of __osPackReadData: fills the PIF RAM with read-button commands for each controller
+func_151F05C0	game_gu_mtx_ident_f	high	Game-segment copy of guMtxIdentF: sets a 4x4 float matrix to identity
+func_151F0648	game_gu_mtx_ident	high	Game-segment copy of guMtxIdent: builds an identity float matrix and converts it to a fixed-point Mtx
+func_151F0730	game_prout_sprintf	high	Game-segment copy of proutSprintf: memcpy callback for _Printf, returns the advanced destination pointer
+func_151F0754	game_sprintf	high	Game-segment copy of sprintf: formats into s via _Printf and NUL-terminates
+func_151F0B10	game_os_si_create_access_queue	high	Game-segment copy of __osSiCreateAccessQueue: creates the SI access message queue and posts one token
+func_151F0B60	game_os_si_get_access	high	Game-segment copy of __osSiGetAccess: creates the queue if needed and blocks for the SI access token
+func_151F0BA4	game_os_si_rel_access	high	Game-segment copy of __osSiRelAccess: returns the SI access token to the queue
+func_151F0BD0	game_os_si_raw_start_dma	high	Game-segment copy of __osSiRawStartDma: starts a 64-byte PIF RAM DMA read or write over SI
+func_151F0C80	game_os_get_time	high	Game-segment copy of osGetTime: returns the 64-bit time from the base count plus elapsed CP0 count
+func_151F0D10	game_os_sumcalc	high	Game-segment copy of __osSumcalc: 16-bit byte sum of a buffer
+func_151F0D6C	game_os_id_check_sum	high	Game-segment copy of __osIdCheckSum: computes checksum and inverted checksum over a pak ID block
+func_151F0DD4	game_os_repair_pack_id	high	Game-segment copy of __osRepairPackId: rebuilds a corrupt Controller Pak ID and writes it to all ID slots
+func_151F11EC	game_os_check_pack_id	high	Game-segment copy of __osCheckPackId: looks for a valid backup ID block and restores the others from it
+func_151F1384	game_os_get_id	high	Game-segment copy of __osGetId: reads/validates the pak ID (repairing it) and fills the OSPfs geometry fields
+func_151F15E0	game_os_check_id	high	Game-segment copy of __osCheckId: re-reads the pak ID block and compares it with the cached OSPfs id
+func_151F16DC	game_os_pfs_rw_inode	high	Game-segment copy of __osPfsRWInode: reads or writes an inode table page (with checksum and backup copy)
+func_151F19FC	game_os_pfs_select_bank	high	Game-segment copy of __osPfsSelectBank: writes the active bank number to the pak bank-select address
+func_151F2840	game_os_cont_ram_read	high	Game-segment copy of __osContRamRead: reads a 32-byte Controller Pak block with CRC check and retry
+func_151F2A84	game_os_pack_ram_read_data	high	Game-segment copy of __osPackRamReadData: fills the PIF RAM with a mempak read command for one channel
+func_151F2BF0	game_os_cont_ram_write	high	Game-segment copy of __osContRamWrite: writes a 32-byte Controller Pak block with CRC check and retry
+func_151F2E20	game_os_pack_ram_write_data	high	Game-segment copy of __osPackRamWriteData: fills the PIF RAM with a mempak write command and data
+func_151F9060	mp3_huff_decode_pair	high	Hand asm: decodes one MP3 Huffman code of a table into (x, y) via the 8-bit lookup or the tree walk
+func_151F911C	mp3_huff_read_bits	high	Hand asm leaf (private ABI): returns the next n bits MSB-first at the bit position and advances it
+func_151F9150	mp3_get_bits	high	Returns the next numbits bits of a buffer at bit *offset (MSB first) and advances *offset
+func_151F9184	mp3_huff_decode_big_values	high	Decodes MP3 big-value (x, y) pairs with linbits extension and sign bits into the output lines
+func_151F933C	mp3_huff_decode_count1	high	Decodes MP3 count1 quadruples (four 1-bit values plus signs) until line 576 or the end bit
+func_151F94E0	mp3_imdct36_hybrid	high	MP3 long-block 36-point IMDCT of one subband, windowing and overlap-add with the previous block
+func_151FA3E0	mp3_imdct12_short	high	MP3 short-block IMDCT (three 12-point transforms) of one subband with windowing and overlap-add
+func_15001970	collision_build_reset	med	Resets the collision build counters and allocates the per-level scratch buffer D_800B0DC0 (size from D_80091C04)
+func_15001A08	quadtree_alloc_node_pool	high	Allocates the level quadtree node pool (doubled unless the cart word at ROM 0xD24 matches) and resets its counters
+func_15001B10	quadtree_alloc_node	high	Hands out a new 14-byte quadtree node from the node pool (4-byte aligned, child links cleared)
+func_15001B5C	quadtree_pool_put_byte	high	Appends one byte to the quadtree node pool
+func_15001B8C	quadtree_pool_put_u16_be	high	Appends a big-endian halfword to the quadtree node pool
+func_15001BC8	quadtree_build_area	med	Builds the collision quadtree of area arg0 from all its triangles, links the node offsets and stores the root
+func_15001CEC	quadtree_build_area_flat	med	Builds a single-node (whole-world) quadtree for area arg0 holding every triangle in one leaf list
+func_15001DE0	quadtree_build_node	med	Recursively builds a quadtree node for a box: a leaf when few triangles or small enough, else splits in four
+func_15002008	quadtree_write_leaf_list	high	Appends a node's leaf list (triangles passing the box test, delta-encoded indices) to the node pool
+func_15002248	quadtree_filter_box_tris	high	Keeps the triangles of an index list that pass the box test into a new list; returns the count and snapped extents
+func_15002560	quadtree_link_siblings	med	Recursively fills the sibling offset links of quadtree nodes (node->unk4) for a node chain
+func_150025FC	collision_load_level_grid	med	Loads the level's two collision grid assets (2/5/level*2, +1) and builds the grid via func_150183D0
+func_150026C4	collision_begin_area	med	Starts counting triangles for collision area arg0 (resets the count, selects the area)
+func_150026E8	collision_end_area	med	Stores the counted triangle total of area arg0 and adds it to the level total
+func_15002724	collision_count_dl_tris	med	Adds the triangle count of display list arg0 to the current area's running count
+func_15002754	collision_alloc_area_arrays	med	Carves the current area's triangle/vertex/flag arrays out of the scratch buffer from its triangle count
+func_150027F8	dl_count_triangles	med	Counts the triangles in a display list (TRI1/TRI2/quad commands) up to the end-DL command
+func_15002878	collision_max_area_tris	med	Returns the largest triangle count among the collision areas
+func_150028BC	model_build_collision_tables	high	Builds a model's sorted vertex-range and triangle tables from its display list for collision/skinning
+func_15002F40	collision_set_step_size	med	Sets the collision probe step D_800DBE64 per level (150 for levels 50/51, 85 when D_800BE616, else 50)
+func_15002FA0	xor_f0f0f0f0	high	Obfuscation helper: returns arg0 XOR 0xF0F0F0F0
+func_15002FB4	level_load_header	med	Loads the level header asset (2/21/level), errors if missing, halves a field on a failed cart check, sets globals
+func_1500310C	level_stub_noop	low	Empty function called from game_eu_1E39B0
+func_1500ABA0	ambient_sounds_reset	med	Loads the level's 60-byte ambient sound id table (asset 3/12) and clears the ambient voice and emitter state
+func_1500AC14	ambient_sounds_load	high	For each of the 15 ambient slots clears its voice record and loads the sample when the slot is in use
+func_1500AD84	ambient_slot_setup	high	Sets up ambient slot slot for sound id from its sound info: phase range, parameters, placement row and flags
+func_1500AF08	ambient_emitter_add	high	Writes ambient emitter index of a slot at (x, y, z) with phase and spread; returns the next index (capped)
+func_1500B1F4	ambient_place_points	high	Placer type 0: puts count emitters at fixed (u, v) points on a triangle with spread 0x80
+func_1500B3B0	ambient_place_shape	high	Placer type 4: emitters at a shape's (x, z) offsets around the triangle centroid, y on the triangle plane
+func_1500B714	ambient_place_centre_sfx	high	Placer type 1: one emitter at the triangle centroid plus a positional sound 0x4D with the given volume
+func_1500B8F4	ambient_place_points_range57	high	Placer type 2: like type 0 with spread 0, then sets the slot's phase range to 0x57
+func_1500BAB8	ambient_place_points_range8	high	Placer type 3: like type 0 with spread 0, then sets the slot's phase range to 8
+func_1500BC7C	ambient_place_points_range21	high	Placer type 5: like type 0 with spread 0, then sets the slot's phase range to 0x21
+func_1500BE40	ambient_timer_reset	low	Clears D_800DDD10[0..1] and sets D_800DDD0C to 110
+func_1500BE68	ambient_state_reset	med	Clears the ambient slot masks and counters (D_800DDC00/04/08, D_800DDD1C/20) and resets the ambient timer
+func_1500BEC0	ambient_emitters_build	high	Level start: sets up the 15 ambient slots, allocates emitters and runs each flagged triangle's placer
+func_1500F240	mist_puff_spawn	low	Spawns a sprite quad effect (random rotation, yellow tint) at (arg0, arg1, arg2); returns its handle
+func_1500F328	level_fx_spawn_box_a	low	Spawns effect type 0xA (func_151491F4) with a random lifetime and the four shorts arg0..arg3, flag 1
+func_1500F3BC	level_mist_setup	med	Level-object init: two box effects, four puff sprites stored in D_800D9CF0 and nine drifting emitters on a path
+func_1500F980	level_fx_spawn_box_b	low	Spawns effect type 0xA (func_151491F4) with a random lifetime, the four shorts arg0..arg3 and flag arg4
+func_1500FA14	level_ropes_setup	low	Level-object init: creates several ropes from the D_800966D0.. specs and spawns box effects
+func_1500FDE0	level_slots10_init	low	Allocates and fills 10 random 10-byte records at D_eu_800BE900, then calls func_150C851C
+func_1500FF4C	level_tex_scroll_create	low	Creates a texture scroll on D_80091B68 (params 0, 0xAD, 0x75)
+func_1500FF7C	level_tex_scroll_fx_setup	low	Level-object init: adds texture scrolls to the level DLs, sets up records and spawns effects 0x12C
+func_15012760	level_vertex_colours_backup	high	Level load: allocates the colour store and copies vertex colours of level chunks, rooms and colour groups
+func_15012C34	vertex_colours_store	high	Appends the RGB of count 16-byte vertices to the level colour store
+func_15012E88	dl_env_colours_list	high	Walks a display list to G_ENDDL recording each G_SETENVCOLOR command's index and RGB
+func_15012F40	clear_dfc00_table	low	Clears the 0x1E3-byte table D_800DFC00
+func_150158C0	glyph_count_reset	low	Clears D_800CC16C (cleared before the ROM glyph sets are loaded in game_eu_430D0)
+func_150158D0	glyph_set_load_rom	high	Loads ROM range idx (D_80083310) into a temp buffer and converts each size-prefixed glyph record
+func_150159E8	glyph_rle_to_texture	high	Decodes one RLE glyph into an 8-bit texture (rows padded to 8, odd rows TMEM-swapped)
+func_15015E30	gfx_alloc_dl_buffers	high	Allocates the two display-list buffers (level header count, default 8000, plus 400 Gfx) and their limit
+func_15016380	level_load_ptr_table_3c	low	Loads asset 3/0xC/level sub 9 (8-byte entries, 0-terminated) into D_800D1CD0 and relocates its offsets
+func_15016800	setup_load_type_assets	med	For each setup entry type below 0xBB loads its 2/0x12 asset once, caching type and pointer in D_800BE9B8/C8
+func_15016950	level_setup_load	high	Loads the level's setup table (player slots plus level entries), entry data and flags, then spawns players
+func_150170C4	level_entry_data_load	high	Allocates per-setup-entry block pointers and kind bytes; player slots get kind 2, others from asset 2/0x10
+func_150183D0	pvs_setup	high	PVS setup: builds the Huffman tree, keeps the bit stream and records each row's start {byte, bit}
+func_150184B0	pvs_build_huffman_tree	high	Builds the 256-symbol Huffman tree from the code/length table (hand asm, MSB-first insertion)
+func_1501B300	camera_update_dir_vector	med	Smooths the camera pitch/heading for player and writes its s8 direction vector to D_800DCD30
+func_1501B640	camera_update_dir_vector_thunk	high	Forwards to func_1501B300 for player
+func_1501BB20	cont_arm_read_timer	med	If the pending flag D_8002AE18 is set, arms a 25 us timer posting message 6 to D_8003B578 and clears the flag
+func_1501BBB8	cont_read_frame	high	Per-frame controller read: fetches the 4 pads, maps them to players, computes edge masks and stick dead zone
+func_1501BFF0	rumble_start_strength	med	Starts rumble on controller arg0 with strength level arg1 (0..8) mapped to on/off timing parameters
+func_1501C0D0	rumble_start	med	Starts rumble on the pak of controller arg0 (if present) with on time arg1 and off time arg2
+func_1501C15C	rumble_stop	med	Stops rumble on the pak of controller arg0
+func_1501C1B0	rumble_update	med	Per frame: detects/initialises Rumble Paks on the 4 ports and drives each motor's on/off cycle
+func_1501C51C	rumble_stop_all	high	Stops rumble on all four controllers
+func_1501C55C	save_process_request	med	Runs the pending EEPROM save request D_80082BB4 (slot/config/options load, write, erase) once the device is ready
+func_1501C710	game_request_transition	med	Stops rumble and requests a game state change by type (level warp, checkpoint restart, game over, menu)
+func_15023920	setup_link_spawned_obj	low	Event 0xB/2 handler: stores the unique id of the object spawned from setup entry arg3 into D_800C3A10[arg2]+0x2A
+func_151E8C60	hud_overlay_draw_post	med	Draws the fade rectangle and the D_800903A4 screen slot, then the paused/controller-removed message when needed
+func_151E8620	hud_overlay_draw_screen	med	Runs the D_80090370 screen slot draw for D_800E0B94; discards its output if the DL buffer would overflow
+func_151E8E94	hud_tex_rect_scaled	med	Emits a clipped texture rectangle (TexRect + RDPHalf) with HUD scale D_800901BC/C0 and adjusted s/t
+func_151E9150	mp_hud_markers_draw	high	Draws the multiplayer HUD overlay (player markers, carrier, team panels and scores); returns the DL end
+func_151E9E1C	mp_team_marks_draw	high	Draws the team panel of the multiplayer HUD at row y, marking teams that are out of the game
+func_151EA4C8	mp_team_score_draw	high	Draws the two-team score panel (Total War and other team modes) at row y
+func_151EA90C	mp_scoreboard_draw	high	Draws the multiplayer score table (barrel menu bar or in-match HUD), one row per queued player
+func_151EB5AC	hud_counter_digits_draw	med	Draws a numeric counter (money/lives screen) as digit textures at (arg1, arg2) for value arg3
+func_151EB81C	hud_ingame_draw	med	Screen slot 0 (in-game HUD): pause/fade overlay, health, MP HUD and the money/lives counter screen
+func_151EC0E0	mp_scoreboard_draw_fading	med	Draws the multiplayer scoreboard at row 0x6A with alpha D_8009016C when that alpha is non-zero
+func_151EC11C	screen_centred_text_draw	high	Screen slot 21: centred text lines up to a "*" line, first line red, with fade in and out on D_800E0EC0
+func_151EC300	screen_intro_credits_draw	high	Screen slot 11: three-phase intro/credits screen on black (zooming line, sprites and text, final image)
+func_151EC928	screen_late_caption_draw	low	Draws string D_800E1008+0x1D0 at (0xDC, 0x130) fading in once the screen timer passes 0x5DC
+func_151EC9A0	screen_sprite_fade_draw	low	Screen slot drawing fading sprites (except in level 0x21) and passing the DL through func_15096D44
+func_151ECB98	frontend_menu_draw	med	Draws the barrel menu / cheat entry / save screen overlay by D_80090174 mode with a fade alpha
+func_151ECE00	barrel_menu_draw	high	Draws the multiplayer barrel menu: page banner, title, item barrel ring, scores and selection pulse
+func_151ED854	screen_logo_glow_draw	med	Screen slot 17: draws an 8x3 tiled image fading in and a glow copy tinted orange by D_800E0FC7
+func_151ED998	screen_fade_rect_draw	high	Fills the screen with black at alpha D_800E0FC6 (nothing when 0)
+func_151EDA54	hud_image_tile_setup	high	Emits the LoadBlock size and SetTile/SetTileSize commands for a HUD image tile descriptor
+func_151EDBE8	hud_image_draw	high	Draws a HUD image as cols x rows cached texture tiles with scissored texture rectangles at a scale
+func_151EE0C4	hud_anim_model_load	high	Allocates a HudModel, loads a model and animation, and makes HUD copies of its display lists
+func_151EE310	hud_anim_model_free	high	Frees a HudModel: its animation instance, the model block and each copied display list
+func_151EE394	hud_anim_model_draw	high	Draws a HudModel at screen (x, y) with a scale, advancing its animation and loading HUD render state
+func_151EE704	menu_sprites_load	high	Allocates the menu sprite block and loads/patches the menu sprite assets 0x1C5..0x1E2
+func_151EE93C	cheat_entry_draw	high	Cheat-code entry screen: moves the cursor over the letter wheel, edits the code and draws it
+func_151EF3A0	save_screen_frame_draw	high	Draws the save/load screen frame textures and the caption of the selected entry
+func_eu_1501C860	gfx_task_submit	high	Closes the frame display list (with overflow fallback), fills the RSP graphics OSTask and sends it to the scheduler
+func_1501CC1C	gfx_load_ucode	med	DMAs the graphics microcode text/data for the level's mode from ROM when the selection changed
+func_1501CDA0	cutscene_clear_actor_blocks	high	Fills the 16-byte block of every actor of cutscene slot slot with 0xFF
+func_1501CE34	cutscene_compute_length	high	Computes the length of cutscene slot slot from its camera tracks or actor keys (in 60 Hz frames too)
+func_1501D064	cutscene_sum_actor_counts	low	Returns the sum of the per-actor counts D_800C39F8[slot][i] over the slot's actors
+func_1501D044	cutscene_slot_reset	high	Resets cutscene slot slot and the shared cutscene state (script position, actors, camera actor, fades)
+func_1501D240	cutscene_load_scene_asset	high	Loads scene asset 3/6/(level, scene) and stores it (or 0) in D_800C3A88[slot]; returns it
+func_1501D2C4	cutscene_mark_seen	med	Sets bit scene in the 64-bit seen mask D_800C3A60[arg0] unless D_800C3670 is set
+func_1501D348	cutscene_scene_load	high	Scene loader for a slot: requests a level change if needed, else loads the scene and fills the slot tables
+func_1501DB18	cutscene_scan_start_events	high	Scans each actor's event track for start flags, the start position and the earliest screen colour event
+func_1501DE84	cutscene_start	high	Starts cutscene slot slot: sets the script position, runs camera/actor tracks once and poses taking-part objects
+func_1501DF70	cutscene_end_skip	high	Ends cutscene slot slot when skipped: removes attachments, fast-forwards the scene and restores the screen
+func_1501E364	cutscene_check_finished	med	When slot's script position reaches its length, ends the scene and runs a queued follow-up scene at once
+func_1501E46C	cutscene_advance_position	high	Steps the script position of slot by the frame delta (clamped to the length), remembering the previous one
+func_1501E5AC	cutscene_free_tables	high	Frees the per-slot tables of cutscene slot slot (actor paths, samples, cameras, blocks) on scene teardown
+func_1501E7A8	cutscene_actors_reset_anim	med	For each object actor of slot clears anim counters 0x6C/0x6D at or above 10 and refreshes it (func_1507EE9C)
+func_1501E888	cutscene_end	high	Ends cutscene slot slot: broadcasts the end event, marks the scene seen, tears down and resets the view
+func_1501EA84	cutscene_end_camera_objs	high	Scene end: sends the camera restore events to the game camera and releases the scene's objects
+func_1501ECA4	cutscene_camera_track_pass	high	Evaluates the 15-channel camera track keys of every actor of cutscene slot slot into its camera record
+func_1501F7D4	cutscene_path_point_at	high	Finds the path segment of an actor at a distance (binary search) and returns the point on it
+func_1501FD34	cutscene_actor_place_at	high	Places an actor of a cutscene slot at t percent of its path length (x, y, z out)
+func_1501FF10	cutscene_actor_heading_at	high	Returns an actor's heading in degrees at t percent of its path length
+func_15020090	cutscene_path_ctrl_points	med	Fetches the four control points (P0..P3) of a path segment from the actor's keys, clamping at the ends
+func_15020430	cutscene_path_compute_length	high	Computes the per-segment and total path length of an actor of a cutscene slot by sampling its curve
+func_15020920	cutscene_path_prepare_segment	high	Prepares the Catmull-Rom cubic coefficients and length samples of one path segment of an actor
+func_15020F6C	cutscene_apply_cameras	high	Applies the camera records of cutscene slot slot to the game camera and the actor objects
+func_15021834	cutscene_actor_apply_track	med	Applies the actor track of slot to object arg0 (or actor arg2): position on path, floor snap, scale and fade
+func_15021E60	cutscene_player_look_target	high	Returns the look target of the player's actor in a running cutscene (actor naming the player's room)
+func_150220CC	cutscene_player_look_limits	high	Returns the look limit pairs of the player's actor in a running cutscene
+func_15022238	cutscene_set_focus_point	low	Stores a point (s16 x, y, z) and value arg3 in D_800C39AC/B4 and sets flag D_800C3663
+func_15022290	cutscene_set_focus_point2	low	Stores a second point (s16 x, y, z) and value arg3 in D_800C39B8/C0
+func_150222DC	cutscene_obj_list_clear	high	Clears the count of object list arg0 (D_800C3930)
+func_150222F0	cutscene_record_list_clear	high	Clears the count of the world record id list of slot arg0 (D_800C396A)
+func_15022304	cutscene_obj_list_add	high	Adds id to object list list unless present; returns its 1-based position or the new entry index
+func_15022388	cutscene_actor_reset_obj	med	Resets the anim/turn state of the object behind actor arg0 of slot arg1 and restarts its idle animation
+func_15022440	cutscene_actor_spawn_obj	med	Ensures the object of actor arg0 in slot arg1 exists (spawning it from its setup entry) and lists it
+func_150225D0	cutscene_actor_pass	high	Applies the actor track (func_15021834) to every object actor of cutscene slot slot that has tracks
+func_150226E8	cutscene_record_list_add	high	Adds id to slot's world record id list unless present; returns i + 1 if found, else the old count
+func_15022764	cutscene_actor_claim_record	med	For a world-record actor (kind 3) that is enabled, records it in the slot list and disables it (+0x6E = 0)
+func_150227FC	cutscene_claim_records	med	Runs func_15022764 for every actor of slot arg0
+func_15022864	cutscene_restore_records	med	Re-enables (+0x6E = 1) every world record listed for slot arg0
+func_150228F0	cutscene_spawn_actors	med	For a running slot, spawns and resets the object of every actor (func_15022440, func_15022388)
+func_1502298C	cutscene_release_listed_objs	med	Ends the interaction (func_15060F28) of every listed object of slot arg0 that is interacting
+func_15022A40	cutscene_event_dispatch	low	Calls the D_800863B4 handler for event blocks of type 27 or 4
+func_15022A8C	cutscene_obj_takes_part	high	Returns whether object obj takes part in the loaded cutscene (2 owned, 1 own id, 0 no)
+func_15022BB0	cutscene_room_has_actor	med	Returns 1 when an actor of slot arg1 refers to room arg0's id, else 0
+func_15022C4C	cutscene_place_scene	high	Places the scene of slot in the level: moves/rotates every actor's path keys relative to the anchor actor
+func_1502330C	cutscene_find_camera_actor	high	Returns the actor whose event track has the nearest camera event to the script position
+func_15023464	subtitle_slots_clear	med	Clears the three cutscene subtitle text-box slots (D_800C3CA0)
+func_1502348C	subtitle_slots_close_all	med	Closes the text box of each used subtitle slot and frees the slot
+func_150234E8	subtitle_slot_close	med	Closes a subtitle slot's text box now (arg1) or asks it to finish
+func_1502354C	subtitle_slot_get	med	Returns the subtitle slot for id arg0, else claims a free one (recycling the first if none is free)
+func_15023684	cutscene_teardown_player	high	Scene teardown for the player: clears flags and resets the player object's speeds, timers and water state
+func_1502378C	cutscene_update_objects	med	Per frame: applies the actor tracks to every object taking part in the cutscene and refreshes them
+func_15023980	scene_stub_noop	low	Empty function (called from the cutscene scene loader)
+func_15023988	scene_sfx_update	high	Positional sound callback: follows a scene track's position, counts down and sets the volume, stops at scene end
+func_15023C60	scene_event_find_next	med	Searches an actor's event track for the next event matching type/id filters; returns its frame distance and entry
+func_15023EC4	scene_event_find_around	high	On a track finds the last matching event at or before now and the first one after it, with their times
+func_150243AC	scene_event_queue_run	med	Runs the first arg0 queued scene events (D_800C4170, 12 bytes each) through func_1502AB94
+func_15024438	scene_event_queue_insert	med	Inserts an event into the time-sorted queue; when the queue is full runs and empties it instead
+func_1502457C	scene_event_track_pass	med	Collects the events due between the previous and current script position of every actor track and runs them in order
+func_15024910	scene_event_run_a	high	First scene event handler: colour/fade, camera, effect and object commands of an 8-byte scene event
+func_150268BC	scene_event_run_b	high	Script event interpreter (middle handler): sounds, effects, object moves and spawns of a scene event
+func_15029EA8	scene_event_run_c	high	Third scene event handler: sounds and music, object animations and the screen fade
+func_1502AB94	scene_event_run	high	Runs a track entry of a slot through the three scene event handlers; returns the first non-zero result
+func_1502BDC0	objects_draw_pass	med	Appends the DL of every live object for render pass arg1 (with shadows) to the frame display list
+func_1502C074	obj_update_one	high	Per-object update by type: matrices, visibility, attachments, tint, face selectors and model switches
+func_1502C1D4	objects_update_all	high	Per-frame object update loop: unparented objects first, then children sorted by depth, then attachments
+func_1502C494	objects_update_blob_shadows	med	Creates blob shadows for visible ground objects that lack one and destroys those no longer needed
+func_1502C380	obj_mtx_buffer_reset	med	Resets this frame buffer's object matrix pool pointers (D_800C42A8/AC) and the matrix count
+func_1502C6AC	obj_shadow_kind	low	Returns the shadow kind byte of object arg0, mapping values >= 0x46 to 0xB
+func_1502C6F8	obj_draw_ground_shadow	high	Draws the ground shadow quad of object idx (size, alpha and texture from its shadow kind)
+func_1502C8F8	obj_shadow_anim_step	med	Advances object arg0's shadow animation phase (+0x60 += +0x62) wrapping at its shadow kind's limit
+func_1502C9D8	obj_select_lod	high	Picks object i's model level of detail from its squared distance to the camera
+func_1502CC64	obj_draw_part	high	Draws one part of an object into the frame DL (culling, colour block, fog alpha, model DL)
+func_1502CF24	obj_unpack_light_colours	med	Unpacks the light colour block (ambient and directional RGB from D_800D9F88/98 tables) for an object
+func_1502CFEC	obj_draw_model_dl	high	Builds the model display list of an object part: segments, matrices, lights, fog, tint and render mode
+func_1502D83C	obj_ambient_colour	med	Returns object arg0's inverted average colour of its two colour triplets when flagged, else white
+func_1502D920	obj_fog_alpha	high	Computes the fog alpha of an object from its projected depth within the level fog range
+func_1502DB14	anim_copy_keyframes	high	Copies the current animation key frames of each active slot for the skeleton evaluator
+func_1502DE10	model_joint_mtx_count	high	Returns the joint matrix count of model id (minus 4 for a fixed set of ids)
+func_1502DE74	obj_build_model_instance	high	Loads the object's model if needed, ensures its animation state and evaluates its skeleton matrices
+func_1502E228	obj_build_model_matrix	high	Builds object arg0's model matrix (parent joint, scale, rotation) unless it is hidden for every player
+func_1502E764	obj_mtx_buffer_flush	med	Flushes the frame's object matrices (func_150A9E64 with the count) and marks the pool done
+func_1502E7B4	obj_update_visibility	high	Computes object arg0's per-player hidden mask +0x74 from culling, view groups and fade state
+func_1502ECEC	obj_visibility_stub	low	Empty function called from the object visibility update
+func_1502ECFC	obj_tint_set_pulse	med	Sets an object's tint to kind 4 (pulsing colour r, g, b, a at speed arg5)
+func_1502ED40	obj_tint_pulse_stop	med	Switches an object's pulsing tint to kind 5 (fading out the pulse)
+func_1502ED50	obj_tint_fade_in	low	Sets an object's tint to kind 2 (black, alpha counting down from 0xFF at speed arg1)
+func_1502ED6C	obj_tint_fade_out	low	Sets an object's tint to kind 3 (inverse black alpha counting down from 0xFF at speed arg1)
+func_1502ED88	obj_tint_set_flash	med	Sets an object's tint to kind 6 (colour flash r, g, b, a rising then falling at speed arg6)
+func_1502EDEC	obj_tint_update	high	Per-frame step of an object's tint block (+0xA4 kind): fades, pulses and flashes
+func_1502EF24	obj_tint_get_colour	high	Returns the colour and alpha of a model's tint block by its kind
+func_1502F17C	obj_face_selector_target	high	Returns object arg0's selector mode byte +0x6A + arg1 folded to 0..2
+func_1502F1E4	obj_face_selectors_step	med	Steps the two vertex-block selectors (+0x6C/+0x6D) of object arg0 toward their modes, then refreshes it
+func_1502F30C	obj_set_vertex_segments	high	Sets segment 6 vertex block offsets of an object's model from its two selector bytes
+func_1502F554	obj_follow_parent	high	Moves object arg0 attached to its parent to the parent's (joint) position and heading
+func_1502F6B8	objects_update_carried	high	Moves objects standing on another object along with their carrier triangle
+func_1502F780	obj_carry_point	high	Carries a point along with a triangle of the carrier object's animated model
+func_1502FC38	obj_save_prev_joint_mtx	med	Copies an object's joint matrices to its previous-frame buffer +0x1D8 (allocated on demand) when flagged
+func_1502FCEC	obj_model_special_dl	low	Emits per-object special segment/texture DL commands by object id (timer scroll, vertex blocks)
+func_1502FED8	obj_apply_model_switch	high	Applies an object's pending model switch from its model list and restarts its animation
+func_15030060	model_keep_resident	med	Refreshes the resident timer D_800D2040[type] of an object's model (from its spawn data, default 3)

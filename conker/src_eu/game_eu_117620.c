@@ -3,9 +3,9 @@
 #include "variables.h"
 
 
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_15132FBC(void *, s32, s32, s32, u8, s32);
-void func_15143794(s16, s16, f32, void *);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+s32 mdl_particle_spawn(void *, s32, s32, s32, u8, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 typedef struct { f32 x, y, z; } V3s96;
 /* was func_150E9E10 */
 s32 fx_spark_burst_with_light(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
@@ -120,7 +120,7 @@ s32 fx_spark_burst_with_light(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4)
     sp.u64 = *(V3s96 *)arg0;
     sp.u7C = *(V3s96 *)arg1;
     sp.u88 = 0.0f;
-    func_151308E4(&sp, 0, 0, arg3, arg4);
+    particle_spawn_basic(&sp, 0, 0, arg3, arg4);
     i = (random_int() & 7) + 5;
     sp2.u78 = 0x21E8;
     sp2.u7E = 0x1B;
@@ -152,12 +152,12 @@ s32 fx_spark_burst_with_light(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4)
         sp2.u34 = *(V3s96 *)arg0;
         sp2.u7C = (random_int() % 41U) + 0x1D;
         sp2.u88 = (random_int() % 76U) + 0xB4;
-        func_15143794(random_int() & 0xFF, -(random_int() % 65U), ((random_float() * 2031.0f) + 1641.0f) * 0.01f, &sp2.u5C);
+        vec3_from_angles_byte(random_int() & 0xFF, -(random_int() % 65U), ((random_float() * 2031.0f) + 1641.0f) * 0.01f, &sp2.u5C);
         sp2.u28[3] = sp2.u28[2] = ((random_float() * 3047.0f) + 1016.0f) * 0.0001f * arg2;
         sp2.u74 = ((random_float() * 99.0f) + -206.0f) * 0.01f;
         sp2.u68 = (random_float() * 101.0f) + -49.0f;
         sp2.u70 = (random_float() * 101.0f) + -49.0f;
-        func_15132FBC(&sp2, 3, 0xFF, 0, arg3, arg4);
+        mdl_particle_spawn(&sp2, 3, 0xFF, 0, arg3, arg4);
     }
     hdr.unk0 = 3;
     hdr.unk1 = -1;
@@ -169,12 +169,12 @@ s32 fx_spark_burst_with_light(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4)
     light_create_with_ctrl(&hdr, &h2, (random_int() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 fx_spark_burst_with_light(s32 *, s32 *, f32, u8, s32);
 #ifdef NON_MATCHING
-void func_1514470C(u8 *arg0, u8 *arg1);
+void spawn_region_random_point_3d(u8 *arg0, u8 *arg1);
 #else
-s32 func_1514470C(s32, s32 *);
+s32 spawn_region_random_point_3d(s32, s32 *);
 #endif
 
 /* was func_150EA3B4 */
@@ -192,8 +192,8 @@ void fx_marker_spark_emitter_update(u8 *arg0)
     do
     {
       temp_f20 = (*((f32 *) (((u8 *) temp_s0) + 0xC))) + ((*((f32 *) (((u8 *) temp_s0) + 0x10))) * random_float());
-      func_1514470C(*((s32 *) (((u8 *) temp_s0) + 0)), sp80);
-      func_15143794((s16) (random_int() & 0xFF), (s16) (0x40 - (((u32) random_int()) % 129U)), (random_float() * 600.0f) * 0.01f, sp74);
+      spawn_region_random_point_3d(*((s32 *) (((u8 *) temp_s0) + 0)), sp80);
+      vec3_from_angles_byte((s16) (random_int() & 0xFF), (s16) (0x40 - (((u32) random_int()) % 129U)), (random_float() * 600.0f) * 0.01f, sp74);
       fx_spark_burst_with_light(sp80, sp74, temp_f20, *((u8 *) (((u8 *) arg0) + 0xC)), (s32) (*((u8 *) (((u8 *) arg0) + 1))));
       *((f32 *) (((u8 *) temp_s0) + 0x14)) = (f32) ((*((f32 *) (((u8 *) temp_s0) + 0x14))) - 1.0f);
     }

@@ -1,0 +1,215 @@
+old	new	confidence	description
+func_1516D970	particle_cooldowns_tick	med	Advance the 4 per-player particle cooldown counters D_800DD2A0 by D_800BE9A0, saturating at 0xFF
+func_1516DA58	particle_sprite_spawn	high	Allocate a 0x34-byte sprite particle node (kind 0x12/0x67) and fill position, colours, size, velocity, life and optional sound
+func_1516DBE8	particle_sprite_tick	high	Sprite particle tick: count down life, run the D_8008CF40 kind handler, destroy when done else integrate vertical speed
+func_1516DCA8	particle_tinted_sprite_draw	high	Draw handler for sprite particles: load texture frame, set combine/env colour and draw the quad
+func_1516DF0C	particle_emitter_node_spawn	high	Allocate a 0x4C-byte particle emitter node (kind 0x11/0x66) and store all spawn parameters, timer, rates and burst count
+func_1516E100	particle_emitter_update	high	Emitter tick: count down the period, roll and spawn bursts of sprite particles from position/pointer/object points, free on timeout
+func_1516ECE8	particle_emitter_preset_packed_pos	low	Emitter preset spawning at a packed (hi/lo s16) position with fixed colour, size and rate parameters
+func_1516EE3C	particle_glow_colour_tick	high	Glow particle handler: fade in/out, advance phase and blend the colour from the D_800A71E0 threshold table
+func_1516F21C	particle_fade_scale_tick	med	Particle handler: fade alpha in fast or out by rate +0x26 and set size from alpha times the +0x2C size; 1 when faded out
+func_1516F2D8	particle_emitter_preset_obj3a	low	Emitter preset attached to object arg0, only when the object's type byte is 0x3A
+func_1516EED4	particle_emitter_preset_cooldown	med	If the player cooldown D_800DD2A0[arg0] reached arg1, reset it and spawn an object-attached emitter
+func_1516F594	particle_fade_grow_kind_tick	high	Particle handler with per-kind tables: fade alpha, move, grow size and damp velocity by the kind's factor
+func_1516F730	particle_emitter_preset_obj_burst	low	Emitter preset attached to object arg0 (sprite kind 0x2D, 4 per burst, period 10)
+func_1516F868	particle_emitter_preset_obj_pair	low	Spawn two emitters attached to object arg0 (sprite kind 0x2B, different rates and durations)
+func_1516FAB8	particle_spray_pair_spawn	high	Spawn two particle sprays at (x, y, z) via particle_emitter_node_spawn and play sound 7 there
+func_1516FDD4	particle_move_xz	high	Integrate a particle's x/z position with its 8.8 fixed-point velocity times the frame time
+func_1516FE5C	particle_scale_vel_x	high	Scale a particle's 8.8 x velocity (+0x26) by arg1/256
+func_1516FE8C	particle_scale_vel_z	high	Scale a particle's 8.8 z velocity (+0x28) by arg1/256
+func_1516FEBC	particle_scale_vel_xz	high	Scale a particle's x and z velocities by arg1/256
+func_1516FEF4	particle_scale_vel_xyz	high	Scale a particle's x, z and vertical (+0x18) velocities by arg1/256
+func_1516FF34	particle_fade_shrink_tick	high	Particle handler: fade in/out with size following alpha, move and damp velocity by 0xF0/256
+func_1516FFF8	particle_emitter_preset_at_pos	low	Emitter preset at an explicit (x, y, z) position (sprite kind 0x1B, white, burst of 10)
+func_1517013C	particle_fade_drift_tint_tick	high	Particle handler: fade alpha, grow by signed rates and blend colour between two tints over time
+func_151702C0	particle_fade_rise_tick	med	Particle handler: fade in/out with size following alpha, move and add +0x2C to the vertical speed
+func_1516FE1C	particle_emitter_preset_obj_twin	low	Spawn two emitters on object arg0 (at its position pointer, or fixed when interaction_state is 1)
+func_151705A4	particle_random_direction	high	Compute a random unit direction vector (narrower pitch range with flag 0x40) into x/y/z
+func_15170648	particle_quad_edge_sparks	high	Spawn sparks evenly along the 4 edges of a quad, pushed outward from the centre
+func_15170A70	particle_spark_spawn	high	Spawn one spark or flare thrown in a direction with random pitch (torch/fire sparks)
+func_15170D50	particle_flicker_drift_tick	high	Particle handler: flickering fade in/out, move and randomly damp velocity
+func_15170F24	particle_burst_random_spawn	med	Spawn arg3 sprite particles at a point with random directions scaled by arg4 (kind 0x2F)
+func_15171100	debris_crate_break_pieces	high	Break an object into 6 debris model pieces with random spin, then a ring of sparks below it and set +0x6E
+func_15171434	debris_crate_break_by_level	med	Crate break dispatch on the level D_800BE9F0: level 2 or 16 call debris_crate_break_pieces with level-specific ids
+func_151714BC	debris_barrel_break_pieces	high	Break an object into the 6 D_800A72B8 debris pieces with velocity and spin, scale 2, life 60, then set +0x6E
+func_15171734	debris_obj_remove_explode	med	Remove an object (obj_remove mode 1), exploding it first when it is a bomb (type 0x33)
+func_15171770	debris_cloud_spawn	high	Spawn count debris model pieces scattered around (x, y, z) with random spin and scale
+func_15171B70	debris_sparks_rect_by_type	med	Pick a spark rectangle size/offset by the object's +0x72 type and spawn sparks around it
+func_15171D6C	debris_sparks_rect_spawn	high	Build a rectangle of half-size (w, d) around the object position plus offset and spawn edge sparks along it
+func_15171E60	particle_spark_ring_spawn	high	Spawn count sparks evenly around a circle of radius r at (x, y, z), moving outward
+func_15172164	debris_obj_destroy_by_id	med	Per-object-id destroy effect: ids 0x13/0x23 burst plus sound 0x69, 0x1E and 0x54 their own handlers
+func_15172210	decal_alloc	med	Allocate a 0x60-byte decal node (kind 0xF/0x43) with 4 vertices, set life, animation speed, texture and flags
+func_151722BC	decal_spawn_at	high	Allocate a decal and place it at (x, y, z): on the floor via decal_place_on_floor, or as a flat quad with flag bit 1
+func_15172474	decal_spawn_on_triangle	med	Allocate a decal and fit it to the given floor triangle at (x, y, z); destroy it when fitting fails
+func_15172530	decal_tick	med	Decal tick: count down life, advance the texture frame (loop or end with flag 4) and destroy after a short fade
+func_15172634	decal_draw	med	Decal draw handler: set texture, render mode and colour state, then emit the 4-vertex quad
+func_15172B6C	decal_fit_to_triangle	med	Compute the decal's 4 vertices on a floor triangle from its slope, angle and size; 0 when it does not fit
+func_15173090	decal_place_on_floor	high	Offset (x, z) by dist along angle-90, find the floor below and fit the decal there; 0 when there is no floor
+func_15172C50	warp_requests_reset	med	Clear the per-player pending warp level table D_800DD6E0 (-1) and entry table D_800DD2C0, keep arg0 for player 0
+func_15173218	warp_request_cancel	med	Cancel player arg0's pending warp and start a fade back in
+func_15173298	warp_player_to_entry	med	Place a player object at entry point arg1 (func_150858A0), clear flag 0x10 and reset its attachment state
+func_15172D80	warp_request_update	med	Per-player warp tick: cancel on death; when the fade-out ends, load the target level or warp within this one
+func_151733EC	warp_request_start	med	Request a player warp to level arg1 / entry arg2: fade out for camera players, or warp now if same level
+func_151734E0	screen_flash_overlay_draw	med	Draw a full-viewport fill rectangle with alpha D_800DD2D0 (white flash/glare overlay) when it is non-zero
+func_15173850	fog_init_from_level	high	Copy the level header's default fog/colour into preset slot 0 of D_8008D010 and apply the level's fog preset
+func_15173948	fog_identity_stub	low	Returns arg0 unchanged (stub)
+func_15173954	fog_blend_presets	high	Blend fog/colour preset from toward to by t/4096 into slot dest of D_8008D010 or the current fog state
+func_15173E34	fog_apply_level_default	med	When the level has no fog preset, apply preset 6 (flag 1) or 0 and copy the colour into D_800DC2D8
+func_15173F04	fog_level_preset_get	high	Return the level header's fog preset index (-1 = none)
+func_15173F20	vtx_colour_groups_blend	high	Blend a mesh's vertex colour groups (one or all) from base colours toward target colours by t/256
+func_151741D0	vtx_colour_world_blend	med	Blend the world mesh (mode 0) vertex colour group arg1 by t = arg0
+func_15174200	vtx_colour_record_blend	med	Blend the vertex colour groups of the mesh of world record arg2 (world_record_find) by t = arg0
+func_15174270	occlusion_probe_readback_emit	med	Emit display-list commands that copy the z-buffer and colour pixel at a screen point into the probe readback words
+func_1517485C	occlusion_probes_update	high	Occlusion probes (lens flares): decode read-back z/colour and call callbacks, then project and queue new probes
+func_15174B60	occlusion_probe_request	high	Queue an occlusion probe at (x, y, z) with callback info in a free slot of 3; 1 when all are busy
+func_15174690	fx_dust_puff_behind_obj	med	Spawn a sprite puff 10 units behind object arg0 (random offset, frame and size) when it is not in water
+func_15174E90	fx_puff_fade_grow_tick	med	Puff sprite tick: fade alpha +0x3F by rate +0x18 (capped at 200) and grow its size; ends when alpha runs out
+func_15174F10	level_anim_frame_counter_tick	med	Advance the shared animation counter D_800DD835 (mod arg1) every arg0 frames using the D_800DD836 timer
+func_15174F68	level_update_frame	med	Per-frame level update: lights, texture anims, scrollers, the level's handler D_8008D0A4, positional sound and ambience
+func_15174AA4	render_level_pre_layer	med	Draw the level's pre-scene layer (handler D_8008D114 by header byte +0xC) between identity matrix loads
+func_15174B48	render_level_post_layer	med	Draw the level's post-scene layer (handler D_8008D11C by header byte +0xD) between identity matrix loads
+func_15175160	flyer_leaf_burst_spawn	high	Spawn up to count falling leaves around (x, y, z) facing away from the player's camera, optional floor recording
+func_15175514	flyer_leaf_drop_spawn	high	Spawn up to count leaves in a square around (x, z) placed on or dropped from above the lowest floor below
+func_15175900	flyer_field_spawn	high	Spawn up to count ambient flyer/leaf particles in a ring around (x, z) with height, yaw and model options
+func_15175EC8	flyer_update	high	Per-frame ambient flyer (bird/bat) update: fade, sound, tether/wander, floor follow, bob, flight integration, removal
+func_15176DCC	flyer_perched_update	med	Perched flyer: idle pitch twitches until the player comes within 400, then takes off and flies with flyer_update
+func_151770F4	flyer_resting_update	med	Resting flyer: fade in/out with its slot, take off when the player comes within 200, then flyer_update
+func_15177360	flyer_model_draw	high	Draw a flyer/prop model with its yaw/pitch/roll/scale matrix, floor-tinted env colour and the type's display list
+func_15177638	flyer_draw	med	Flyer draw handler: cull against the view, then draw kind 0 with the shared model or other kinds via flyer_model_draw
+func_151777CC	flyer_wing_flap_animate	med	Animate a flyer type's wing vertices from its flap angle and advance the flap phase (wraps at 360)
+func_15177410	vtx_anim_light_create	med	Create a vertex light/wave record for model id with per-vertex distance factors and append it to D_800DD410
+func_15178004	vtx_anims_update	high	Per frame run the wave animators of visible models' vertex animations and move them to each model's place
+func_15177F90	swarm_spawn	med	Spawn a swarm leader record (type 0x3A, at a point or attached) and count follower sprites (type 0x3B) around it
+func_151787D8	swarm_follower_update	high	Steer a swarm follower sprite toward its leader: heading, velocity, climb and camera-relative sprite frame
+func_15178CC0	swarm_follower_draw	high	Draw a swarm follower billboard only when its leader is visible in this view
+func_eu_15178D14	swarm_empty_stub	low	Empty function (EU-only)
+func_15178D1C	swarm_leader_update	high	Per-frame swarm leader: move up to 16 units toward its target, set view visibility, keep the buzz sound playing
+func_15179108	swarm_find_by_id	high	Return the swarm leader record in the D_800DD368 list whose id byte +0x34 equals arg0, or NULL
+func_15179154	swarm_set_target_ptr	high	Point swarm arg0 at an f32 position pointer arg1 with height offset arg2
+func_151791A4	swarm_set_target_pos	high	Point swarm arg0 at the fixed s16 position (x, y, z) with height offset arg4
+func_15178C9C	swarm_distance_to_obj	high	Return the distance from swarm arg0's position to object arg1 (1 when the swarm is missing)
+func_15179314	swarm_destroy	high	Stop the swarm's sound, destroy all its follower sprites and free the leader record
+func_15178E14	swarm_destroy_by_id	high	Destroy the swarm with id arg0 and its followers
+func_15179420	rain_init	high	Reset the rain state: no request, idle state, 600-frame timer, gust timers, no drops or drop table
+func_1517946C	rain_request	high	Request a rain mode: 2 stops at once (destroy drops, free table, stop sound), 3 starts/resumes, else store request
+func_15179008	rain_update	high	Per-frame rain state machine: start, ramp up drops and sound, rain, stop, and spawn ground splashes
+func_15179A38	rain_centre_follow_camera	med	Move the rain centre D_800DD868 with the camera position, offset ahead along the camera angle
+func_15179B70	rain_drops_add	med	Spawn up to arg1 rain drop sprites into the drop table D_800DD870 around the camera
+func_15179D20	rain_drop_update	med	Rain drop tick: fall with the gust, respawn around the rain centre, destroy when retired and out of range
+func_1517A028	rain_drop_retire_one	high	Flag the last active rain drop in the table as retiring (+0x90 bit 2)
+func_1517A084	rain_spawn_splashes	high	Spawn count splash sprites on the ground at random points in the 500x500 square around the rain centre
+func_1517A220	rain_splash_fade_by_distance	med	Set a splash sprite's alpha from its x/z distance to the camera (255 fading by 160 per 1000 units)
+func_1517A320	flag_wave_update	high	Wave the two vertex buffers of animated mesh slot i by sin(angle) * amplitude and advance the wave angles
+func_1517A550	puff_drift_spawn	high	Create a drifting puff object of a given type with position, random velocity/spins/scale, colour and mode
+func_1517A75C	puff_drift_update	high	Drifting puff tick: move and spin, gravity for mode 5, damp velocity, count down life, fade and free
+func_1517A904	puff_identity_stub	low	Returns arg0 unchanged (stub used for puff types 0xC / 0x59)
+func_1517A910	puff_sprite_draw	high	Draw a puff object for a player: cull, mark seen, set texture, build its matrix and draw with its alpha
+func_1517ABB4	puff_ground_chip_spawn	med	Spawn a chip puff (type 9) that pops up from the floor at (x, z) with strength-based speed and spins
+func_1517ADBC	puff_ground_chip_update	med	Ground chip tick: fly, fall back to the floor, lie flat for 60 frames fading out, then destroy
+func_1517AEC8	puff_draw_begin	med	Start of a puff draw pass: invalidate the cached prim alpha D_800DD880 (types 0xC/0x59 pass through a stub)
+func_1517AF18	puff_texture_set	med	Load puff texture frame arg1 from D_800909C4 when it differs from the cached one
+func_1517AF90	puff_ground_chips_burst	med	Spawn arg4 ground chips scattered around (x, z) with random strengths from arg0 (nothing below 12)
+func_1517B0EC	puff_view_dl_begin	low	Wrapper calling view_dl_begin(arg0, arg2)
+func_1517ABB0	player_morph_cache_age	med	Age the cached player morph shape vertex sets in D_800DD460, freeing each one whose keep counter ran out
+func_1517B270	player_morph_blend	high	Blend player idx's morph target from the previous shape toward shape target over frames ticks into its vertices
+func_1517BA70	ambient_placer_flicker	med	Ambient emitter updater: speed the frame phase by 1.5 (wrapping at the frame count) and jitter the quad height
+func_1517BC58	ambient_placer_rise_fade	med	Ambient emitter updater: past phase 0x600 shift the quad up/sideways and lower its alpha, holding the phase
+func_1517BD18	ambient_placer_loop_mid	med	Ambient emitter updater: keep the frame phase looping in the 0x300..0x500 range
+func_1517BD68	ambient_placer_hop	med	Ambient emitter updater: move the quad along a parabolic hop, looping the phase; drop the emitter at 0xD00
+func_1517BE0C	ambient_emitters_sort	high	Quicksort the ambient emitter records D_800DE148[lo..hi] by x, or by z when D_8008D254 is set
+func_1517C11C	ambient_emitters_update	high	Per frame process the ambient emitters (fires, torches) in range: slot frames, flare-ups, sparks and camera-facing quads
+func_1517D534	ambient_slots_free_all	med	Release every ambient slot's loaded frame data (D_800DDA90 handles) and clear the handles
+func_1517D5E4	ambient_billboard_quad_draw	high	Append one upright textured RGBA16+I4-mask quad at (x, y, z) turned by angle to the display list
+func_1517DAE8	ambient_extra_flame_queue	med	Queue an extra flame billboard (position, angle, size, frame) in D_800DE158, at most 3 per frame
+func_1517DB6C	ambient_extra_flame_queue_cam	med	Queue an extra flame billboard facing player arg3's camera angle with the current flame frame
+func_1517DC00	ambient_extra_flames_draw	med	Advance the flame frame counter and draw every queued extra flame billboard, emptying the queue
+func_1517D7B0	ambient_flames_draw	med	Draw this frame's ambient emitter quads with each slot's texture frames, plus the queued extra flames
+func_1517E3CC	ambient_slots_refresh	high	Per frame mark ambient slots in range of player 0 and switch off unmarked slots with their loaded data
+func_1517E5CC	ambient_flare_point_set	high	Set the point D_800DD8A0 near which ambient emitters flare up
+func_1517E080	flare_node_add	high	Allocate a 0x34-byte lens flare node with colour index arg0 and enable arg1, appended to the list D_800DDD64
+func_1517E6A4	flare_node_remove	high	Unlink a lens flare node from the list D_800DDD64 and free it (left alone when not in the list)
+func_1517E71C	flare_nodes_read_zbuffer	med	For each flare node on screen, read the z-buffer word at its screen position into +0x2A
+func_1517E7FC	flare_nodes_draw	med	Project, occlusion-test and draw every enabled lens flare node, clearing the glare D_800DD2D0 when hidden
+func_1517EA18	flare_lens_draw	high	Draw a sun node's lens flare rings along the line through the screen centre and fade the screen glare
+func_1517EFBC	flare_render_mode_set	high	Emit pipe sync, combine and other-mode commands for the lens flare sprites
+func_1517F01C	flare_world_to_screen	high	Project (x, y, z) with the current player's camera into its viewport; 1 when in front, else 0
+func_1517F18C	flare_node_depth_test	med	Project a flare node and compute its depth vs the z-buffer value (optional facing cone test); 0 off screen
+func_1517F3B0	screen_fade_start	high	Start player arg5's screen fade to colour (r, g, b) over arg3 frames in direction arg4 unless already running
+func_1517F470	screen_fade_alpha	high	Return player arg0's current fade alpha 0..255 (forced value, or progress scaled, inverted for fade-in)
+func_1517F51C	screen_fade_is_opaque	high	Return 1 when player arg0's fade alpha is 255
+func_1517F54C	screen_fade_all_active	med	Return 1 when every player has a fade alpha above 0 or a non-zero zoom
+func_1517F5FC	screen_view_fill_colour	high	Emit a primitive-colour fill rectangle covering view i with colour (r, g, b) and alpha a
+func_1517F910	screen_fade_draw	high	Draw player arg1's fade colour over its view with the current fade alpha (nothing at 0)
+func_1517F40C	screen_fade_is_done	high	Return 1 when player arg0's fade timer reached its duration
+func_1517F448	screen_fade_tick	high	Advance player arg0's fade timer by the frame time until it reaches the duration
+func_1517F9F8	screen_tint_start	high	Set player arg5's tint colour (r, g, b), alpha arg3 and duration timer arg4
+func_1517FA48	screen_tint_draw	high	Draw player arg1's tint over its view while its timer and alpha are non-zero
+func_1517FAD4	screen_pulse_overlay_draw	high	Draw the pulsing overlay: alpha D_800DE1BB (optionally scaled by a wave), colour from D_8008D3B0
+func_1517FC90	screen_pulse_start	high	Start the pulsing overlay: duration, wave speed, colour index, alpha and wave flag
+func_1517FCCC	screen_tint_timers_tick	high	Count down every player's tint timer D_800DE240 by the frame time, clamped at 0
+func_1517FD24	screen_pulse_tick	high	Count down the pulsing overlay duration and advance its wave phase
+func_1517FD84	hud_lens_set_target	high	Set the player's lens centre offset from a projected world point or direct screen x/y, clamped
+func_1517FF64	hud_view_fill_rect	high	Append a fill rectangle (either corner order) clipped to the view's screen box; nothing when outside
+func_1518010C	hud_scope_lens_draw	high	Draw the four mirrored quadrants of a round lens texture around the view's lens centre
+func_15180AF0	hud_sniper_scope_draw	high	Draw the sniper scope overlay of a view: black surround, cross hair, brackets, lens, rim and range finder
+func_15181A6C	hud_lens_update	high	Per frame update every player's lens zoom: scripted zoom states, lens centre easing, zoom in/out
+func_15182238	hud_lens_is_off	high	Return 1 when player arg0's lens zoom is 0
+func_15182270	hud_lens_set_mode	med	Set player arg0's lens mode arg1 (0 = off, else full zoom centred) and its cross hair flag
+func_15181D70	hud_lens_start_scripted	med	Start player arg0's scripted zoom (death/cutscene camera): zoom rate set, zoom 0, centred
+func_15182338	hud_lens_reset	high	Reset player arg0's lens: zoom and rate 0, centred, scripted zoom off
+func_15182388	hud_lens_start_zoom_in	med	Turn player arg0's lens on and zoom in from 1 (or, with D_800BE616, set a 25-frame black fade)
+func_15182450	hud_letterbox_draw	med	Draw cinematic letterbox bars sized by the percentage at D_800DDE18, with textured edges
+func_15182BE0	screen_colour_fade_fx_start	high	Start a colour fade effect (type 0x39) with colour, alpha, mode and per-frame alpha step over frames
+func_15182CB8	screen_colour_fade_fx_tick	med	Colour fade effect tick: alpha = per-frame step times frames left
+func_15182CD8	screen_colour_fade_fx_draw	med	Colour fade effect draw: fill the view with its colour and alpha when the view matches its +0x2C byte
+func_15182D40	water_waves_update	med	Per frame update the wave profiles of every water object: player pushes, propagation, damping and splash sounds
+func_151831CC	water_mesh_wave_update	high	Rebuild a water object's frame vertices from its model vertices plus the wave profile height per z slot
+func_151834C8	water_wave_slot_of_z	high	Return the wave profile slot (0..39, fractional) of a z offset for water arg1's type
+func_1518354C	water_wave_push	high	Return how strongly wave slot slot of water water pushes player pl (type strength, 4/7 for neighbours, else 0)
+func_15183800	ambfx_effect_start	high	Start ambient/weather effect kind (0..11) in a free slot of D_800DDF5C: bursts, flyer fields, leaves, chips; -1 when busy
+func_15183E20	anim_mesh_load_with_next	med	Load anim mesh slot arg0 if needed and its follow-up asset (id arg0 + 0xAE) into the next slot
+func_15183EE4	anim_mesh_load_pair	med	Load anim mesh slots arg0 and arg0 + 1, the second sharing the first slot's display list word
+func_15183F60	anim_mesh_load_dependent	med	Load anim mesh slot arg0 if needed, then slot arg1's asset (id arg1 + 0xAD) when arg0 is present
+func_1518403C	anim_mesh_load	high	Load model idx once (asset 9, id idx + 0xAD) into anim mesh slot D_800DDE80[idx], relocating its display list
+func_15184114	anim_mesh_draw_by_id	med	Find the anim mesh slot whose id in D_800A76B0 equals arg1 and append its display list
+func_15184198	anim_mesh_release	high	Release anim mesh slot arg0: free its texture and block and clear its display list
+func_15184298	anim_meshes_update	high	Per frame update the 11 animated mesh slots: swing/wave/flap animations, release gone slots, age states
+func_15184688	ambfx_obj_record_flag57	low	Return 1 when the object's +0x31C record exists and its byte +0x57 is non-zero
+func_151846C0	shadow_obj_box_extents	high	Compute an object's shadow box half sizes from its joint positions, or from its model size and scale as fallback
+func_151848D8	shadow_light_projection	high	Pick the shadow light for an object slot and build its look-at and perspective projection; 0 when no shadow
+func_15185360	shadow_obj_light_distance	med	Distance from player to object for shadows with the object's box extents (scaled 1.3); 0 beyond 2000 or empty box
+func_15185514	shadow_render_caster	high	Render an object's model into the shadow texture with the light projection, blur it, then restore frame state
+func_151859C4	shadow_clip_isect_ymin	high	Clip helper: interpolate the vertex where edge a-b crosses the plane y = w (positions and s/t/u)
+func_15185AC4	shadow_clip_in_ymin	high	Clip helper: return whether the vertex is inside the y = w plane (w < y)
+func_15185AEC	shadow_clip_isect_xmax	high	Clip helper: interpolate the vertex where edge a-b crosses the plane x = -w
+func_15185BEC	shadow_clip_in_xmax	high	Clip helper: return whether the vertex is inside the x = -w plane (x < -w)
+func_15185C18	shadow_clip_isect_ymax	high	Clip helper: interpolate the vertex where edge a-b crosses the plane y = -w
+func_15185D20	shadow_clip_in_ymax	high	Clip helper: return whether the vertex is inside the y = -w plane (y < -w)
+func_15185D4C	shadow_clip_isect_xmin	high	Clip helper: interpolate the vertex where edge a-b crosses the plane x = w
+func_15185E44	shadow_clip_in_xmin	high	Clip helper: return whether the vertex is inside the x = w plane (w < x)
+func_15185E6C	shadow_clip_isect_far	high	Clip helper: interpolate the vertex where edge a-b crosses the far depth D_800D3AA8
+func_15185F6C	shadow_clip_in_far	high	Clip helper: return whether the vertex is nearer than the far depth D_800D3AA8
+func_15185F98	shadow_clip_isect_near	high	Clip helper: interpolate the vertex where edge a-b crosses the near depth D_800D3AAC
+func_15186098	shadow_clip_in_near	high	Clip helper: return whether the vertex is beyond the near depth D_800D3AAC
+func_151860C4	shadow_clip_isect_x0	high	Split helper: interpolate the vertex where edge a-b crosses x = 0
+func_151861B4	shadow_clip_in_x_neg	high	Split helper: return whether the vertex has x <= 0
+func_151861DC	shadow_clip_isect_y0	high	Split helper: interpolate the vertex where edge a-b crosses y = 0
+func_151862CC	shadow_clip_in_y_neg	high	Split helper: return whether the vertex has y <= 0
+func_151862F4	shadow_clip_in_x_pos	high	Split helper: return whether the vertex has x > 0
+func_1518631C	shadow_clip_in_y_pos	high	Split helper: return whether the vertex has y > 0
+func_15186344	shadow_clip_polygon_plane	high	Sutherland-Hodgman clip of an n-vertex polygon against one plane from the D_8008D838/D_8008D860 tables
+func_15186494	shadow_clip_triangle	high	Clip a projected shadow polygon against the frustum (optionally split in quadrants) and emit faded Vtx
+func_15186A9C	shadow_level_vertices	high	Collect the level triangles under a shadow box and project them with the light matrix into shadow vertices
+func_15186D04	shadow_draw_all	med	Build the shadow display list: per caster pick light, render its texture, gather and clip receiver triangles
+func_15187820	shadow_settings_for_level	med	Set the shadow distance/detail defaults, with overrides for levels 20, 33, 34 and 41
+func_15187954	shadow_object_vertices	high	Add the triangles of visible world objects under a shadow box to the shadow vertices after the level ones
+func_15187B50	shard_ring_spawn	med	Spawn a ring object of twelve randomly jittered quad shards at (x, y, z) with life and scale parameters
+func_15187EE8	shard_ring_tick	med	Shard ring tick: age and move the shards, free their buffer and destroy the ring when done
+func_15188008	shard_ring_draw	high	Draw the twelve-quad shard ring: object matrix, per-quad rotation/scale matrices and alpha by remaining life
+func_151882DC	shard_quad_rotation_matrix	low	Build a shard quad's rotation matrix from three angles with sin/cos (used when the record's +0x98 is set)
+func_15187EC0	light_fx_add	high	Add a light colour effect (mode, speed, from/to colours) in a free slot of 5; returns its index or -1
+func_15188500	light_fx_clear_all	high	Clear all light colour effects D_800DFB30 and reset their count
+func_15188530	light_fx_get_colour	high	Copy light effect arg0's current output colour into arg1[0..2] (ignored when the index is invalid)
+func_15188580	light_fx_get_blend	high	Read light effect arg0's blend factor t into *arg1
+func_151885BC	light_fx_set_blend	high	Set light effect arg0's blend factor t, clamped to 0..1
+func_15188630	light_fx_update	high	Advance every light effect (pulse, blink pattern, random flicker) and blend its colour between its two colours

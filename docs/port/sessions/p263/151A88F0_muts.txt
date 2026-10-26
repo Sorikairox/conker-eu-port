@@ -1,4 +1,4 @@
-# P263 func_151A88F0 (bolt_subdivide) mutants: sed % setup names
+# P263 bolt_subdivide (bolt_subdivide) mutants: sed % setup names
 s/while (hi - lo >= 2 \&\& depth > 0) {/while (hi - lo >= 1 \&\& depth > 0) {/ % tight
 s/while (hi - lo >= 2 \&\& depth > 0) {/while (hi - lo >= 2 \&\& depth >= 0) {/ % nodepth
 s/while (hi - lo >= 2 \&\& depth > 0) {/while (hi - lo >= 2) {/ % negdepth
@@ -12,8 +12,8 @@ s/(random_float() \* (amp + amp) + -amp) + (a\[1\] + dy \* 0.5f);/(random_float(
 s/BOLT_PT(obj, mid)\[2\] = a\[2\] + dz \* 0.5f;/BOLT_PT(obj, mid)[2] = a[2] + dz * 0.25f;/ % span4
 s/BOLT_PT(obj, mid)\[1\] = (random_float()/BOLT_PT(obj, mid)[2] = (random_float()/ % span4
 s/        depth--;/        ;/ % span4
-s/func_151A88F0(obj, lo, mid, amp, depth);/func_151A88F0(obj, mid, hi, amp, depth);/ % span4
-s/func_151A88F0(obj, lo, mid, amp, depth);/func_151A88F0(obj, lo, mid, amp * 0.5f, depth);/ % span4
+s/bolt_subdivide(obj, lo, mid, amp, depth);/bolt_subdivide(obj, mid, hi, amp, depth);/ % span4
+s/bolt_subdivide(obj, lo, mid, amp, depth);/bolt_subdivide(obj, lo, mid, amp * 0.5f, depth);/ % span4
 s/        lo = mid;/        hi = mid;/ % span4
 s/s16 hi, f32 amp, s16 depth) {/s16 hi, f32 amp, s32 depth) {/ % wide
 s/(u8 \*obj, s16 lo, s16 hi,/(u8 *obj, s16 lo, s32 hi,/ % wide

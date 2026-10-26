@@ -1,7 +1,7 @@
-# P256 func_15194210 (hit_impact_effect) mutants: sed % setup names
+# P256 hit_impact_effect (hit_impact_effect) mutants: sed % setup names
 s/ case 0x29:// % fire29
-s/func_151C384C(pos, view, group)/func_151C384C(pos, view, 1)/ % fire06alt
-s/func_151C384C(pos, view/func_151C384C(pos, 0xFF/ % fire06alt
+s/fire_embers_spawn(pos, view, group)/fire_embers_spawn(pos, view, 1)/ % fire06alt
+s/fire_embers_spawn(pos, view/fire_embers_spawn(pos, 0xFF/ % fire06alt
 s/style = 1;/style = 0;/ % s1_05 s1_B1
 s/style = 0;/style = 2;/ % s0_00 s0_B6
 s/style = 2;/style = 1;/ % s2_25 s2_95
@@ -21,4 +21,4 @@ s/case 0x3F:/case 0x40:/ % s6_3F none40
 s/    default:/    case 0xFF:/ % none24 noneBA
 s/case 0x25: case 0x92:/case 0x25:/ % s2_92
 s/switch (obj\[4\])/switch (obj[5])/ % s0_00 fire06
-s/func_1504715C(mtx, (struct127 \*) obj)/func_1504715C(mtx, (struct127 *) (obj + 4))/ % s0_00
+s/hitinfo_from_obj_floor(mtx, (struct127 \*) obj)/hitinfo_from_obj_floor(mtx, (struct127 *) (obj + 4))/ % s0_00

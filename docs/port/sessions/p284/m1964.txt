@@ -30,6 +30,6 @@
 \#^        obj_walk_update(obj);$#d
 \#^    obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) \* 0.0054931640625f;$#s/(s16) (obj->unk7A + 0x4000)/(u16) (obj->unk7A + 0x4000)/
 \#^    if (obj->id == 5 || obj->id == 0xAD || obj->id == 0xAE || obj->id == 0xAF || obj->id == 0x44) {$#s/ || obj->id == 0x44//
-\#^        func_15052760(obj, heading);$#s/heading/obj->unk76/
-\#^    if (func_150535F4(obj) == 0) {$#s/==/!=/
-\#^        func_15021834(obj, 0, -1);$#s/-1/1/
+\#^        obj_lean_into_turn(obj, heading);$#s/heading/obj->unk76/
+\#^    if (obj_check_death(obj) == 0) {$#s/==/!=/
+\#^        cutscene_actor_apply_track(obj, 0, -1);$#s/-1/1/

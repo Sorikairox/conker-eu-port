@@ -4,24 +4,26 @@
 
 
 extern f32 (*D_800D3040)[4];
-s32 func_15094DAC(s32, u8 **);
-void func_15094CD0(s32 arg0, u8 *arg1) {
+s32 skin_point_table_build(s32, u8 **);
+/* was func_15094CD0 */
+void skin_transform_points(s32 arg0, u8 *arg1) {
     u8 *sp50[16];
     u8 *v;
     u8 *p;
     s32 i;
-    func_15094DAC(arg0, sp50);
+    skin_point_table_build(arg0, sp50);
     for (i = 0; i < 16; i++) {
         p = sp50[i];
         if (p != NULL) {
             v = arg1 + i * 0xC;
-            func_150A7E40(D_800D3040, (f32) *(s16 *)(p + 0), (f32) *(s16 *)(p + 2), (f32) *(s16 *)(p + 4), (f32 *)v, (f32 *)(v + 4), (f32 *)(v + 8));
+            mtxf_transform_point(D_800D3040, (f32) *(s16 *)(p + 0), (f32) *(s16 *)(p + 2), (f32) *(s16 *)(p + 4), (f32 *)v, (f32 *)(v + 4), (f32 *)(v + 8));
         }
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_15094DAC(s32 arg0, u8 **arg1) {
+/* was func_15094DAC */
+s32 skin_point_table_build(s32 arg0, u8 **arg1) {
     s32 *temp_v0;
     s16 temp_a2;
     s16 temp_v1_2;
@@ -108,12 +110,13 @@ block_12:
     return (s32) var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_15094DAC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/skin_point_table_build.s")
 #endif
 #ifdef NON_MATCHING
 // uv_rotate: writes `count` texture coordinates (s16 u, v pairs of `uv`) rotated by `angle` degrees about the
 // centre ((w / 2) * 32, (h / 2) * 32) to the vertices of `vtx` (stride 0x10, s, t at +8 / +0xA).
-void func_15094EC8(u8 *vtx, s32 *uv, s32 count, f32 angle, s32 w, s32 h) {
+/* was func_15094EC8 */
+void uv_rotate(u8 *vtx, s32 *uv, s32 count, f32 angle, s32 w, s32 h) {
     f32 rad = angle * 0.0174532924f; /* D_8009E270 */
     f32 s = sinf(rad);
     f32 c = cosf(rad);
@@ -131,18 +134,19 @@ void func_15094EC8(u8 *vtx, s32 *uv, s32 count, f32 angle, s32 w, s32 h) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_15094EC8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/uv_rotate.s")
 #endif
 
 extern Mtx *D_800DC6D0[];
 extern f32 D_800D30C8[][4][4];
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 
-void func_150952B0(s32 arg0) {
+/* was func_150952B0 */
+void camera_build_view_proj(s32 arg0) {
     f32 a[4][4];
     f32 b[4][4];
 
     guMtxL2F(a, &D_800DC6D0[D_800BE9C0][arg0]);
     guMtxL2F(b, &((Mtx *)((u8 *)&((struct_eu_BE628 *)D_800BE628)[arg0] + 0x100))[D_800BE9C0]);
-    func_150A7A48(a, b, D_800D30C8[arg0]);
+    mtxf_mul(a, b, D_800D30C8[arg0]);
 }

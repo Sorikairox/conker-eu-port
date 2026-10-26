@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_1514373C(f32, f32, f32 *, f32 *);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 s32 memcpy(s32, f32 *, s32);
 
 /* was func_eu_15108850 */
@@ -113,7 +113,7 @@ void area_sparkle_emitter_update(u8 *arg0) {
                 temp_f2_2 = (random_float() * 500.0f) + 600.0f;
                 sp.uBC = temp_f2_2;
                 sp.uC0 = temp_f2_2 * 0.5f;
-                func_1514373C(2.0f * (random_float() * 3.1415927f), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 6)), &sp.uC4, &sp.uCC);
+                vec2_from_angle_rad(2.0f * (random_float() * 3.1415927f), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 6)), &sp.uC4, &sp.uCC);
                 sp.uC4 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 0));
                 sp.uCC += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 4))) + 4));
                 temp_v0 = (*(u8 **)((u8 *)temp_s0 + 4));
@@ -124,7 +124,7 @@ void area_sparkle_emitter_update(u8 *arg0) {
                 }
                 sp.uEC = var_v0 | 0xC000;
                 sp.uAF = (random_int() & 0x7F) + 0x80;
-                temp_v0_2 = func_151307F0(&sp.u94, 2, 0, 0x14, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_v0_2 = particle_spawn_ex(&sp.u94, 2, 0, 0x14, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0_2 != 0) {
                     memcpy(temp_v0_2 + 0xA8, &sp.u80, 0x14);
                 }

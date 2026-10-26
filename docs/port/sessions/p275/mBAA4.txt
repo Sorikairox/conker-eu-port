@@ -24,5 +24,5 @@
 \#^    if (slot == 0 || open == 0) {$#s/|| open == 0//
 \#^    frac = fabsf((angle - openAngle) / openAngle);$#s/fabsf//
 \#^    frac = fabsf((angle - openAngle) / openAngle);$#s/\/ openAngle/\/ target/
-\#^    func_151885BC(slot - 1, frac);$#s/slot - 1/slot/
-\#^    func_151741D0((s32) ((1\.0f - frac) \* 255\.0f), slot - 1);$#s/255/256/
+\#^    light_fx_set_blend(slot - 1, frac);$#s/slot - 1/slot/
+\#^    vtx_colour_world_blend((s32) ((1\.0f - frac) \* 255\.0f), slot - 1);$#s/255/256/

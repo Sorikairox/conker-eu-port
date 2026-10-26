@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_151436B4(f32, f32, f32, f32 *);
+void vec3_from_angles_rad(f32, f32, f32, f32 *);
 #endif
 
 s32 memcpy(s32, f32 *, s32);
@@ -124,7 +124,7 @@ void arc_spark_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
 #endif
 #ifdef NON_MATCHING
 s32 beam_ray_spawn(u8 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32); /* P98: asm mtc1 a2 */
-f32 func_15144528(f32, f32, f32);
+f32 wrap_float_range(f32, f32, f32);
 
 /* was func_150E7104 */
 void arc_spark_update(u8 *arg0) {
@@ -159,7 +159,7 @@ void arc_spark_update(u8 *arg0) {
         sp88 = (*(f32 *)((u8 *)temp_s0 + 0x1C)) * D_800BE9A4 * temp_f2;
         do {
             temp_f20 = sinf(var_f24);
-            func_151436B4((*(f32 *)((u8 *)temp_s0 + 0)) + (temp_f20 * (*(f32 *)((u8 *)temp_s0 + 8))), (*(f32 *)((u8 *)temp_s0 + 4)) + (sinf(var_f26) * (*(f32 *)((u8 *)temp_s0 + 0xC))), 5.0f, &sp.uB4);
+            vec3_from_angles_rad((*(f32 *)((u8 *)temp_s0 + 0)) + (temp_f20 * (*(f32 *)((u8 *)temp_s0 + 8))), (*(f32 *)((u8 *)temp_s0 + 4)) + (sinf(var_f26) * (*(f32 *)((u8 *)temp_s0 + 0xC))), 5.0f, &sp.uB4);
             temp_f20_2 = random_float();
             temp_f22 = random_float();
             temp_s1 = random_int();
@@ -169,8 +169,8 @@ void arc_spark_update(u8 *arg0) {
             sp.uDC -= sp.uD8;
             (*(f32 *)((u8 *)temp_s0 + 0x28)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x28)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s0 + 0x28)) > 1.0f);
-        (*(f32 *)((u8 *)temp_s0 + 0x10)) = func_15144528(var_f24, 6.2831855f, 0);
-        (*(f32 *)((u8 *)temp_s0 + 0x14)) = func_15144528(var_f26, 6.2831855f, 0);
+        (*(f32 *)((u8 *)temp_s0 + 0x10)) = wrap_float_range(var_f24, 6.2831855f, 0);
+        (*(f32 *)((u8 *)temp_s0 + 0x14)) = wrap_float_range(var_f26, 6.2831855f, 0);
         (*(f32 *)((u8 *)temp_s0 + 0x20)) = sp.uDC;
     }
 }
@@ -197,7 +197,7 @@ void arc_point_random_box2(f32 *arg0) {
 
 /* was func_150E7458 */
 void arc_point_random_marker(s32 arg0) {
-    func_1514470C((&D_800D9A20)[random_int() & 1], arg0);
+    spawn_region_random_point_3d((&D_800D9A20)[random_int() & 1], arg0);
 }
 
 extern s32 D_80088DE4;
@@ -225,7 +225,7 @@ void arc_point_near_object(f32 *out, u8 *obj)
   f32 c;
   f32 r;
   u16 ang;
-  if (func_1514F250(*((struct_eu_link **) (obj + 0x2F4)), 0x16, &m) != 0)
+  if (char_fx_find_slot(*((struct_eu_link **) (obj + 0x2F4)), 0x16, &m) != 0)
   {
     f32 s;
     u8 *p;
@@ -282,7 +282,7 @@ void arc_wobble_init_fixed(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
 
 void screen_sprite_spawn_edge(f32, s16, u8, u8, u8, s16, s16, s32, s32, u8, s32);
 s32 screen_sprite_spawn(f32 *, f32, s16, u8, u8, u8, s16, s16, s32, s32, u8, s32);
-s32 func_1516547C(s32, s32, s32, s32, s32);
+s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
 void storm_spawn_spark_emitter(void);
 void storm_spawn_debris_emitter(void);
 typedef struct { s32 w[2]; } E7810_V;
@@ -303,14 +303,14 @@ void screen_lightning_random_flash(u8 arg0, u8 arg1, s32 arg2) {
         } else {
             screen_sprite_spawn_edge(((random_float() * 100.0f) + 150.0f) * 0.1f, (random_int() % 201U) + 0x1F4, 9, (random_int() % 26U) + 0x64, 0xFF, 0x40, 3, (s32)&v, 2, arg1, arg2);
         }
-        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
-        func_1516547C(1, arg0, 0, arg1, arg2);
+        sound_play_2d(0x360, 0x7FFF, 0, 0, 0);
+        cam_wobble_start_preset(1, arg0, 0, arg1, arg2);
         s.unk0 = 1;
         s.unk2 = (random_int() % 26U) + 0x19;
         s.unk5 = 1;
         s.unk4 = (random_int() % 6U) + 3;
         s.unk6 = -1;
-        func_151D8E18(&s, 0, 0xFF, 0);
+        rumble_request(&s, 0, 0xFF, 0);
     }
 }
 
@@ -346,10 +346,10 @@ typedef struct {
     u8 u41;
 } SpawnSpecE7B20;
 extern u8 D_80088E04;
-s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
 
 // particle_spawn_simple: fills a particle spec (position x / y from `pos`, both scales `scale`, kind D_80088E04,
-// lifetime `life`, flags `flags` | 0x40, the colour / fade bytes and fixed defaults) and spawns it with func_151559FC
+// lifetime `life`, flags `flags` | 0x40, the colour / fade bytes and fixed defaults) and spawns it with sprite2d_spawn
 // (`arg8`, `arg9`, `arg10`, `arg11`). Returns the spawned record.
 /* was func_150E7B20 */
 s32 screen_sprite_spawn(f32 *pos, f32 scale, s16 life, u8 flags, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s32 arg8, s32 arg9,
@@ -384,7 +384,7 @@ s32 screen_sprite_spawn(f32 *pos, f32 scale, s16 life, u8 flags, u8 arg4, u8 arg
     spec.u3C = 0x20;
     spec.u40 = 0;
     spec.u41 = 0xA;
-    return func_151559FC(&spec, 0, arg8, arg9, 0, arg10, arg11);
+    return sprite2d_spawn(&spec, 0, arg8, arg9, 0, arg10, arg11);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/screen_sprite_spawn.s")
@@ -392,7 +392,7 @@ s32 screen_sprite_spawn(f32 *pos, f32 scale, s16 life, u8 flags, u8 arg4, u8 arg
 
 s32 random_int(void);
 f32 random_float(void);
-s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+s32 sprite2d_spawn(void *, s32, s32, s32, s32, s32, s32);
 typedef struct { s32 w[3]; } Vec3E7C50;
 extern Vec3E7C50 D_80088E08;
 extern Vec3E7C50 D_80088E14;
@@ -493,21 +493,21 @@ void screen_sprite_spawn_edge(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16
         }
         break;
     }
-    func_151559FC(&sp, 0, arg7, arg8, 0, arg9, argA);
+    sprite2d_spawn(&sp, 0, arg7, arg8, 0, arg9, argA);
 }
 
 #ifdef NON_MATCHING
-f32 func_15142A80(f32);
-f32 func_15142AC0(f32);
-f32 func_15142B04(f32);
-f32 func_15142B44(f32);
+f32 lagrange_cubic_w0(f32);
+f32 lagrange_cubic_w1(f32);
+f32 lagrange_cubic_w2(f32);
+f32 lagrange_cubic_w3(f32);
 extern s32 D_800BEE08;
 
 // spawn_random_curve_object: spawns a kind-0x12C object holding a random curve of `count` points (P151). Plays
-// sound +0x9A0 * D_800BEE08 of D_800DBFF0 and a 30..40 tick rumble/effect (func_151D8E18), then func_151491F4
+// sound +0x9A0 * D_800BEE08 of D_800DBFF0 and a 30..40 tick rumble/effect (rumble_request), then func_151491F4
 // (group 0xC, count * 8 + 0x10 bytes, arg2 / arg3 passed on). The object gets {scale, 0, count, 0} at +0x28 and,
 // from +0x38, `count` (x, y) points of the cubic spline through four control points x = -146 / -50 / 50 / 146 with
-// random y in -80..80, sampled at t = -1 .. 2 (basis func_15142A80 / AC0 / B04 / B44). Returns the object or
+// random y in -80..80, sampled at t = -1 .. 2 (basis lagrange_cubic_w0 / AC0 / B04 / B44). Returns the object or
 // NULL (also for count < 2).
 /* was func_150E7F14 */
 u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3) {
@@ -534,7 +534,7 @@ u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3) {
     fx.unk4 = 8;
     fx.unk6 = -1;
     fx.unk5 = 1;
-    func_151D8E18(&fx, 0, 0xFF, 0);
+    rumble_request(&fx, 0, 0xFF, 0);
     hdr.scale = scale;
     hdr.zero = 0.0f;
     hdr.count = count;
@@ -556,15 +556,15 @@ u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3) {
     dt = 3.0f / (f32)(count - 1);
     for (i = 0; i < count; i++) {
         pt = (f32 *)(obj + 0x38) + i * 2;
-        b0 = func_15142B04(t);
-        b1 = func_15142AC0(t);
-        b2 = func_15142A80(t);
-        b3 = func_15142B44(t);
+        b0 = lagrange_cubic_w2(t);
+        b1 = lagrange_cubic_w1(t);
+        b2 = lagrange_cubic_w0(t);
+        b3 = lagrange_cubic_w3(t);
         pt[0] = cp[3][0] * b3 + ((b2 * cp[0][0] + b1 * cp[1][0]) + b0 * cp[2][0]);
-        b0 = func_15142B04(t);
-        b1 = func_15142AC0(t);
-        b2 = func_15142A80(t);
-        b3 = func_15142B44(t);
+        b0 = lagrange_cubic_w2(t);
+        b1 = lagrange_cubic_w1(t);
+        b2 = lagrange_cubic_w0(t);
+        b3 = lagrange_cubic_w3(t);
         t += dt;
         pt[1] = cp[3][1] * b3 + ((b2 * cp[0][1] + b1 * cp[1][1]) + b0 * cp[2][1]);
     }
@@ -602,7 +602,7 @@ loop_3:
             var_s1 = 2;
         }
         screen_sprite_spawn(&sp.u98, (temp_f20 * 12.0f) + 30.0f, 0x12C, (var_s1 | var_s2) & 0xFF, (u8) (u32) ((random_float() * 25.0f) + 100.0f), 0xFFU, 1, 0xFF, 0, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
-        func_10010F30(0x360, 0x7FFFU, (u32) ((sp.u98 * 0.43150684f) + 64.0f) & 0xFF, 0, 0U);
+        sound_play_2d(0x360, 0x7FFFU, (u32) ((sp.u98 * 0.43150684f) + 64.0f) & 0xFF, 0, 0U);
         (*(s16 *)((u8 *)temp_s0 + 0xA)) = (s16) ((*(s16 *)((u8 *)temp_s0 + 0xA)) + 1);
         (*(f32 *)((u8 *)temp_s0 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 4)) - 1.0f);
         if (((*(f32 *)((u8 *)temp_s0 + 4)) > 1.0f) && ((*(s16 *)((u8 *)temp_s0 + 8)) != (*(s16 *)((u8 *)temp_s0 + 0xA)))) {
@@ -697,8 +697,8 @@ void fx_scorch_decal_spawn(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 a
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/fx_scorch_decal_spawn.s")
 #endif
 #ifdef NON_MATCHING
-void func_15150258(u8 *, u8, s32);
-void func_151D45A4(u8 *, u8, s32);
+void emit_random_sprites(u8 *, u8, s32);
+void explosion_light_spawn(u8 *, u8, s32);
 extern s32 D_800A1660;
 
 /* was func_150E8728 */
@@ -752,7 +752,7 @@ void fx_scripted_blast(s32 arg0, u8 arg1, s32 arg2) {
         (*(s32 *)((u8 *)(&sp.u84) + 4)) = (s32) (*(s32 *)((u8 *)temp_t8 + 4));
         (*(s32 *)((u8 *)(&sp.u84) + 8)) = (s32) (*(s32 *)((u8 *)temp_t8 + 8));
         sp.u88 += 200.0f;
-        func_151D45A4(&sp.u84, arg1, arg2);
+        explosion_light_spawn(&sp.u84, arg1, arg2);
         sp.u28 = 0;
         sp.u2A = 0xFF;
         sp.u2C = -0x40;
@@ -781,13 +781,13 @@ void fx_scripted_blast(s32 arg0, u8 arg1, s32 arg2) {
         sp.u68 = 0.78200006f;
         sp.u6C = -0.93000007f;
         sp.u70 = 0.73f;
-        func_15150258(&sp.u28, arg1, arg2);
+        emit_random_sprites(&sp.u28, arg1, arg2);
         sp.u20 = 1;
         sp.u22 = (random_int() % 11U) + 0x1E;
         sp.u24 = 8;
         sp.u26 = -1;
         sp.u25 = 1;
-        func_151D8E18((structEU_151D8E18 *) &sp.u20, 0, 0xFFU, 0);
+        rumble_request((structEU_151D8E18 *) &sp.u20, 0, 0xFFU, 0);
     }
 }
 #else
@@ -811,7 +811,7 @@ void fx_debris_emitter_spawn(Vec3_150E892C *arg0, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150E89F0 */
 void fx_debris_emitter_update(u8 *arg0) {
@@ -931,7 +931,7 @@ void fx_debris_emitter_update(u8 *arg0) {
             temp_f6 = (random_float() * 71.0f) + 80.0f;
             sp.uC8 = temp_f6;
             sp.uC4 = temp_f6;
-            temp_v0 = func_151307F0(&sp.u9C, 1, 0, 0xC, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = particle_spawn_ex(&sp.u9C, 1, 0, 0xC, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, (f32 *) &sp.u90, 0xC);
             }
@@ -944,7 +944,7 @@ void fx_debris_emitter_update(u8 *arg0) {
 #endif
 /* was func_150E8DA4 */
 s32 fx_particle_anim_step(u8 *arg0, s32 arg1) {
-    func_15131D98(arg0, arg0 + 0xAC, arg0 + 0xA8, arg0 + 0xAA);
+    particle_update_wobble_offset(arg0, arg0 + 0xAC, arg0 + 0xA8, arg0 + 0xAA);
     return 1;
 }
 
@@ -981,21 +981,21 @@ void storm_lightning_strike() {
 
     v = D_80088E20;
     node_broadcast_types(&v, 2, 0, 0x1B);
-    func_1516547C(0, D_800BEE0B, 0, 0xFF, 1);
+    cam_wobble_start_preset(0, D_800BEE0B, 0, 0xFF, 1);
     s.a = 1;
     s.b = random_int() % 21U + 20;
     s.d = 1;
     s.c = random_int() % 6U + 3;
     s.e = -1;
-    func_151D8E18((structEU_151D8E18 *)&s, 0, 0xFF, 1);
+    rumble_request((structEU_151D8E18 *)&s, 0, 0xFF, 1);
     if (D_800DCDC4 != 0) {
         storm_spawn_spark_emitter();
     }
     if (D_800DCDC4 != 0) {
         storm_spawn_debris_emitter();
     }
-    func_10010F30(0x4C8, 0x7FFF, 0x40, 0x200 - (random_int() & 0x400), 0);
-    func_10010F30(0x4CD, 0x5DC0, 0x40, 0x200 - (random_int() & 0x400), 0);
+    sound_play_2d(0x4C8, 0x7FFF, 0x40, 0x200 - (random_int() & 0x400), 0);
+    sound_play_2d(0x4CD, 0x5DC0, 0x40, 0x200 - (random_int() & 0x400), 0);
 }
 
 /* was func_150E9000 */
@@ -1028,7 +1028,7 @@ void storm_spark_emitter_update(u8 *arg0)
   f32 dy;
   f32 dz;
   u8 *o;
-  cam = func_15144B34(D_800BEE08);
+  cam = camera_get_pos(D_800BEE08);
   p = (f32 *) (arg0 + 0x28);
   p[2] += ((p[0] + (random_float() * p[1])) * D_800BE9A4) * D_800DCD90;
   while (p[2] > 1.0f)
@@ -1041,7 +1041,7 @@ void storm_spark_emitter_update(u8 *arg0)
       n = n->next;
     }
 
-    func_1514470C(n->id, s.pos);
+    spawn_region_random_point_3d(n->id, s.pos);
     dx = s.pos[0] - cam[0];
     dy = s.pos[1] - cam[1];
     dz = s.pos[2] - cam[2];
@@ -1066,8 +1066,8 @@ void storm_spark_emitter_update(u8 *arg0)
 }
 
 extern f32 D_800BE9A4;
-s32 func_151308E4(void *, s32, s32, u8, s32);
-void func_151436B4(f32, f32, f32, f32 *);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+void vec3_from_angles_rad(f32, f32, f32, f32 *);
 /* was func_150E92DC */
 void storm_spark_burst_update(u8 *arg0) {
     struct {
@@ -1170,12 +1170,12 @@ void storm_spark_burst_update(u8 *arg0) {
             sp.u4A = 5;
             r0 = random_float();
             r1 = random_float();
-            func_151436B4(r0 * 6.2831855f, r1 * 6.2831855f, random_float() * 20.0f, &sp.u64);
+            vec3_from_angles_rad(r0 * 6.2831855f, r1 * 6.2831855f, random_float() * 20.0f, &sp.u64);
             sp.u64 += *(f32 *)(p + 0);
             sp.u68 += *(f32 *)(p + 4);
             sp.u6C += *(f32 *)(p + 8);
             sp.u80 = ((random_float() * 471.0f) + -1242.0f) * 0.01f;
-            obj = func_151308E4(&sp, 0, 4, arg0[0xC], arg0[1]);
+            obj = particle_spawn_basic(&sp, 0, 4, arg0[0xC], arg0[1]);
             if (obj != 0) {
                 memcpy(obj + 0xA8, &scale, 4);
             }
@@ -1214,7 +1214,7 @@ void storm_debris_emitter_update(u8 *arg0)
   f32 dy;
   f32 dz;
   u8 *o;
-  cam = func_15144B34(D_800BEE08);
+  cam = camera_get_pos(D_800BEE08);
   p = (f32 *) (arg0 + 0x28);
   p[2] += ((p[0] + (random_float() * p[1])) * D_800BE9A4) * D_800DCD90;
   while (p[2] > 1.0f)
@@ -1227,7 +1227,7 @@ void storm_debris_emitter_update(u8 *arg0)
       n = n->next;
     }
 
-    func_1514470C(n->id, s.pos);
+    spawn_region_random_point_3d(n->id, s.pos);
     dx = s.pos[0] - cam[0];
     dy = s.pos[1] - cam[1];
     dz = s.pos[2] - cam[2];
@@ -1359,12 +1359,12 @@ void storm_debris_burst_update(u8 *arg0) {
             sp.uF0 = ((random_float() * 27374.0f) + -13687.0f) * 0.001f;
             temp_f20 = random_float();
             temp_f22 = random_float();
-            func_151436B4(temp_f20 * 6.2831855f, temp_f22 * 6.2831855f, random_float() * 50.0f, &sp.uD0);
+            vec3_from_angles_rad(temp_f20 * 6.2831855f, temp_f22 * 6.2831855f, random_float() * 50.0f, &sp.uD0);
             sp.uD0 += (*(f32 *)((u8 *)temp_s0 + 0));
             sp.uD4 += (*(f32 *)((u8 *)temp_s0 + 4));
             sp.u109 = 8;
             sp.uD8 += (*(f32 *)((u8 *)temp_s0 + 8));
-            temp_v0 = func_15132FBC(&sp.uA8, 3, 0xFF, 0x1C, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = mdl_particle_spawn(&sp.uA8, 3, 0xFF, 0x1C, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0x170, &sp.u88, 0x1C);
             }
@@ -1375,7 +1375,7 @@ void storm_debris_burst_update(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/storm_debris_burst_update.s")
 #endif
-s32 func_15133D30(u8 *);
+s32 mdl_particle_integrate(u8 *);
 
 typedef struct { s32 u0; s16 u4; u8 u6; u8 u7; s32 u8; s32 uC; u8 u10, u11, u12, u13, u14, u15, u16, u17; s32 u18; s32 u1C; s16 u20; s16 u22; s16 u24; s16 u26; } E9_S;
 /* was func_150E9C9C */
@@ -1384,7 +1384,7 @@ s32 storm_debris_ground_splash(u8 *arg0) {
     E9_S s;
     f32 f;
 
-    func_15133D30(arg0);
+    mdl_particle_integrate(arg0);
     p = arg0 + 0x170;
     if (*(f32 *)(arg0 + 0x3C) < *(f32 *)(arg0 + 0x170)) {
         if ((*(s32 *)(p + 4) & 0x1F) == 0xA) {

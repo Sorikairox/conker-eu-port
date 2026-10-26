@@ -21,14 +21,14 @@ void dl_validate(void *arg0, u32 arg1) {
 // contains jump relative
 #ifdef NON_MATCHING
 void func_150ADC50(void);
-void func_10008090(void);
+void debug_syscall_trap(void);
 void dl_dump_around(u8 *arg0);
 s32 dlcheck_vtx_invalid(struct148 *arg0);
 
 /* debug trap: error code 0x0C00005B in D_8003C8E0, then the break handler */
 #define DL_TRAP() (D_8003C8E0 = 0x0C00005B, func_150ADC50())
-/* trap, dump the command (dl_dump_around) and stop in func_10008090 with the frame index D_800BE9C0 flipped */
-#define DL_STOP(c) (dl_dump_around((u8 *) (c)), DL_TRAP(), D_800BE9C0 = 1 - D_800BE9C0, func_10008090(), \
+/* trap, dump the command (dl_dump_around) and stop in debug_syscall_trap with the frame index D_800BE9C0 flipped */
+#define DL_STOP(c) (dl_dump_around((u8 *) (c)), DL_TRAP(), D_800BE9C0 = 1 - D_800BE9C0, debug_syscall_trap(), \
                     D_800BE9C0 = 1 - D_800BE9C0)
 
 // dl_validate: debug walk over a display list of 8-byte commands until `end` (or, with end 0, until G_ENDDL 0xDF),
@@ -66,7 +66,7 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
                 } else {
                     DL_TRAP();
                     D_800BE9C0 = 1 - D_800BE9C0;
-                    func_10008090();
+                    debug_syscall_trap();
                     D_800BE9C0 = 1 - D_800BE9C0;
                 }
                 break;
@@ -130,7 +130,7 @@ void dl_validate_list(void *list, u32 end, s32 parent) {
             D_800C68A0 = 0;
             DL_TRAP();
             D_800BE9C0 = 1 - D_800BE9C0;
-            func_10008090();
+            debug_syscall_trap();
             D_800BE9C0 = 1 - D_800BE9C0;
         }
         if (bad) {

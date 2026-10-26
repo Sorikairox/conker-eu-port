@@ -1,5 +1,5 @@
-# P262 func_15195564 (character_hit_react) mutants: sed % setup names
-s/func_15190A88((u8 \*)target);/func_15190A88((u8 *)obj);/ % plain
+# P262 character_hit_react (character_hit_react) mutants: sed % setup names
+s/bone_sparks_detach_owner((u8 \*)target);/bone_sparks_detach_owner((u8 *)obj);/ % plain
 s/        case 0x00:/        case 0x05:/ % attach other
 s/        case 0x16:/        case 0x17:/ % noattach c17
 s/        case 0x3B:/        case 0x3A:/ % pl1 mid
@@ -7,7 +7,7 @@ s/        case 0xB4:/        case 0xB5:/ % player0 top
 s/        case 0x9D:/        case 0x9E:/ % player
 s/            return;$/            break;/ % other
 s/if (D_800BE616 == 0) {/if (D_800BE616 != 0) {/ % plain attach
-s/func_1518FA8C((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 1);/func_1518FA8C((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 0);/ % plain
+s/bone_sparks_attach_preset((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 1);/bone_sparks_attach_preset((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 0);/ % plain
 s/0x12C, -1, -1, 8, 0, 0,/0x12C, -1, 0, 8, 0, 0,/ % plain
 s/rec\[0\] = 0x7D;/rec[0] = 0x7C;/ % attach
 s/rec\[1\] = 5;/;/ % attach

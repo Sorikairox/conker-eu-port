@@ -2,7 +2,7 @@ s/handled = 0;/handled = 1;/
 s/(u8 \*) obj + 0x2F4)/(u8 *) obj + 0x2F0)/
 s/node = \*(u8 \*\*) (node + 0x14))/node = *(u8 **) (node + 0x10))/
 s/if (state != \*(s16/if (state == *(s16/
-s/\&\& func_1514DA28/|| func_1514DA28/
+s/\&\& char_fx_slot_derives/|| char_fx_slot_derives/
 s/(D_8008AF88\[state\] + 4)/(D_8008AF88[state] + 6)/
 s/+ 4), \*(s16 \*) (node + 0x1C)) == 0/+ 4), state) == 0/
 s/) == 0) {/) != 0) {/

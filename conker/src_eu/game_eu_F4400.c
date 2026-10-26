@@ -3,14 +3,15 @@
 #include "variables.h"
 
 
-s32 func_150C7290();
-void func_150C6BF0(u8 *arg0) {
+s32 ground_glow_b_spawn();
+/* was func_150C6BF0 */
+void ground_glow_b_keep_alive(u8 *arg0) {
     if (*(s32 *)(arg0 + 0x6C) != 0) {
         u8 *p = *(u8 **)(arg0 + 0x6C);
         p += 0xB0;
         p[4] = 1;
     } else {
-    *(s32 *)(arg0 + 0x6C) = func_150C7290(arg0);
+    *(s32 *)(arg0 + 0x6C) = ground_glow_b_spawn(arg0);
     }
 }
 
@@ -27,7 +28,8 @@ typedef struct {
     s16 pad1A;
     f32 unk1C;
 } struct_C630;
-s8 func_150C6C3C(u8 *arg0) {
+/* was func_150C6C3C */
+s8 ground_glow_b_flicker_update(u8 *arg0) {
     s8 ret;
     struct_C630 *p;
     ret = 1;
@@ -46,7 +48,8 @@ s8 func_150C6C3C(u8 *arg0) {
 }
 
 s32 sprite_fx_set_handlers(u8 *, s32, s32);
-s32 func_150C6D2C(u8 *arg0)
+/* was func_150C6D2C */
+s32 ground_glow_b_detach(u8 *arg0)
 {
   u8 *p;
   p = *((u8 **) (arg0 + 0xB0));
@@ -59,9 +62,10 @@ s32 func_150C6D2C(u8 *arg0)
   return 0;
 }
 
-s32 func_150C6DC4(s32, u8 *, s32);
+s32 ground_trail_b_spawn(s32, u8 *, s32);
 
-void func_150C6D70(u8 *arg0)
+/* was func_150C6D70 */
+void ground_trail_b_keep_alive(u8 *arg0)
 {
   u8 *new_var4;
   u8 *new_var;
@@ -91,15 +95,16 @@ void func_150C6D70(u8 *arg0)
     }
   }
   while (0);
-  *((s32 *) new_var) = func_150C6DC4(temp_a2, new_var2, *((s32 *) (((u8 *) new_var2) + 0x18)));
+  *((s32 *) new_var) = ground_trail_b_spawn(temp_a2, new_var2, *((s32 *) (((u8 *) new_var2) + 0x18)));
 }
 
 #ifdef NON_MATCHING
-s32 func_15045AF0(f32 *, s32, f32, u8 *);
+s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 s32 emitter_trail_spawn(s32 *, s32, s32, s32);
 s32 memcpy(s32, u8 **, s32);
 
-s32 func_150C6DC4(s32 arg0, u8 *arg1, s32 arg2) {
+/* was func_150C6DC4 */
+s32 ground_trail_b_spawn(s32 arg0, u8 *arg1, s32 arg2) {
     struct {
         f32 u24;
         f32 u28;
@@ -134,7 +139,7 @@ s32 func_150C6DC4(s32 arg0, u8 *arg1, s32 arg2) {
     sp.u24 = (*(f32 *)((u8 *)arg0 + 0x14));
     sp.u28 = (*(f32 *)((u8 *)arg0 + 0x18)) + 5000.0f;
     sp.u2C = (*(f32 *)((u8 *)arg0 + 0x1C));
-    if (func_15045AF0(&sp.u24, 0, (*(f32 *)((u8 *)arg0 + 0x18)) - 100.0f, arg1 + 0x34) != 0) {
+    if (collision_floor_dynamic_b_full(&sp.u24, 0, (*(f32 *)((u8 *)arg0 + 0x18)) - 100.0f, arg1 + 0x34) != 0) {
         sp.u3C = (*(f32 *)((u8 *)arg1 + 0x34));
     } else {
         sp.u3C = (*(f32 *)((u8 *)arg0 + 0x18)) + 5000.0f;
@@ -161,10 +166,11 @@ s32 func_150C6DC4(s32 arg0, u8 *arg1, s32 arg2) {
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6DC4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/ground_trail_b_spawn.s")
 #endif
-s32 func_1513092C(void *, s32, s32);
-void func_150C6F08(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+s32 particle_spawn_default(void *, s32, s32);
+/* was func_150C6F08 */
+void ground_trail_b_particle_spawn(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
         s32 u34;
         s32 u38;
@@ -283,13 +289,14 @@ void func_150C6F08(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     b.u38 = ((random_float() * 0.1f) + 0.08f) * b.scale;
     b.u3C = ((random_float() * 0.1f) + 0.08f) * b.scale;
     sp.u88 = ((random_float() * 60.0f) + 21.0f) * 0.001f;
-    obj = func_1513092C(&sp, 2, 0x28);
+    obj = particle_spawn_default(&sp, 2, 0x28);
     if (obj != 0) {
         memcpy(obj + 0xA8, &b, 0x28);
     }
 }
 
-s32 func_150C721C(u8 *arg0) {
+/* was func_150C721C */
+s32 ground_trail_b_alive_check(u8 *arg0) {
     s32 ret = 1;
     if (arg0[0x5C] == 0) {
         ret = 0;
@@ -304,25 +311,27 @@ s32 object_list_free(u8 *);
 
 /* D_80089E40 table entries 6 / 16 (s32 (*)(obj), see emitter_trail_update): clear the data's word +0x70, then return
  * object_list_move_1 / object_list_free's result (the asm tail value). */
-s32 func_150C7240(u8 *arg0) {
+/* was func_150C7240 */
+s32 ground_trail_b_retire(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
     return object_list_move_1(arg0);
 }
 
-s32 func_150C7268(u8 *arg0) {
+/* was func_150C7268 */
+s32 ground_trail_b_free(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
     return object_list_free(arg0);
 }
 #else
-void func_150C7240(u8 *arg0) {
+void ground_trail_b_retire(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
     object_list_move_1(arg0);
 }
 
-void func_150C7268(u8 *arg0) {
+void ground_trail_b_free(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
     object_list_free(arg0);
@@ -330,12 +339,13 @@ void func_150C7268(u8 *arg0) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15045AF0(f32 *, s32, f32, u8 *);
+s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 u8 impact_current_kind(void);
 extern s32 D_80088B80;
 extern s32 D_800AB7F4;
 
-s32 func_150C7290(u8 *arg0) {
+/* was func_150C7290 */
+s32 ground_glow_b_spawn(u8 *arg0) {
     struct {
         u8 * u64;
         s8 u68;
@@ -389,7 +399,7 @@ s32 func_150C7290(u8 *arg0) {
         (*(s32 *)((u8 *)(&sp.uB8) + 0)) = (s32) (*(s32 *)((u8 *)(&D_80088B80) + 0));
         (*(s32 *)((u8 *)(&sp.uB8) + 4)) = (s32) (*(s32 *)((u8 *)(&D_80088B80) + 4));
         (*(s32 *)((u8 *)(&sp.uB8) + 8)) = (s32) (*(s32 *)((u8 *)(&D_80088B80) + 8));
-        func_15143134(&sp.uB8, &sp.uC8, (*(u8 **)((u8 *)temp_v0 + 0x1D4)));
+        mtx_transform_point_or_origin(&sp.uB8, &sp.uC8, (*(u8 **)((u8 *)temp_v0 + 0x1D4)));
     } else {
         sp.uC8 = (*(f32 *)((u8 *)temp_v0 + 0x14));
         sp.uCC = (*(f32 *)((u8 *)temp_v0 + 0x18));
@@ -398,7 +408,7 @@ s32 func_150C7290(u8 *arg0) {
     sp.uB0 = sp.uCC + 200.0f;
     sp.uAC = sp.uC8;
     sp.uB4 = sp.uD0;
-    if (func_15045AF0(&sp.uAC, 0, sp.uCC - 200.0f, arg0 + 0x34) != 0) {
+    if (collision_floor_dynamic_b_full(&sp.uAC, 0, sp.uCC - 200.0f, arg0 + 0x34) != 0) {
         sp5F = impact_current_kind();
         sp.uB0 = (*(f32 *)((u8 *)arg0 + 0x34));
         temp_f10 = random_float() * 100.0f;
@@ -438,5 +448,5 @@ s32 func_150C7290(u8 *arg0) {
     return (s32) sp.uD4;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C7290.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/ground_glow_b_spawn.s")
 #endif

@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1518B290(u8 *arg0) {
+/* was func_1518B290 */
+s32 rubble_piece_hit_ground(u8 *arg0) {
     struct {
         f32 uA4;
         f32 uA8;
@@ -145,7 +146,7 @@ s32 func_1518B290(u8 *arg0) {
                 } else {
                     sp.u13A = 4;
                 }
-                temp_v0 = func_15132FBC(&sp.uD8, 3, 0xFF, 4, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_v0 = mdl_particle_spawn(&sp.uD8, 3, 0xFF, 4, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0 != NULL) {
                     (*(f32 *)((u8 *)temp_v0 + 0x170)) = (f32) *temp_s4;
                 }
@@ -177,8 +178,8 @@ s32 func_1518B290(u8 *arg0) {
         sp.uC6 = (random_int() % 201U) + 0x12C;
         sp.uC8 = 0;
         sp.uCA = 0x258;
-        func_151429E0(temp_s0_2 & 0xFF, &sp.uCC, &(*(s32 *)((u8 *)&sp + 0x29)), &(*(s32 *)((u8 *)&sp + 0x2A)));
-        func_151429E0(temp_s0_2 & 0xFF, &(*(s32 *)((u8 *)&sp + 0x2B)), &sp.uD0, &(*(s32 *)((u8 *)&sp + 0x2D)));
+        fx_pick_random_color(temp_s0_2 & 0xFF, &sp.uCC, &(*(s32 *)((u8 *)&sp + 0x29)), &(*(s32 *)((u8 *)&sp + 0x2A)));
+        fx_pick_random_color(temp_s0_2 & 0xFF, &(*(s32 *)((u8 *)&sp + 0x2B)), &sp.uD0, &(*(s32 *)((u8 *)&sp + 0x2D)));
         (*(s8 *)((u8 *)&sp + 0x2E)) = 0xFF;
         temp_f8 = (s32) ((*(f32 *)((u8 *)arg0 + 0x10)) * 511.0f);
         if ((f32) temp_f8 > 255.0f) {
@@ -188,22 +189,24 @@ s32 func_1518B290(u8 *arg0) {
         }
         sp.uD4 = 0xA;
         sp.uD5 = 0;
-        func_1518CFF0(&sp.uA4, 1);
+        puff_sprite_spawn(&sp.uA4, 1);
         return 0;
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8AA0/func_1518B290.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8AA0/rubble_piece_hit_ground.s")
 #endif
-s32 func_1518B71C(f32 *arg0) {
+/* was func_1518B71C */
+s32 rubble_piece_above_ground(f32 *arg0) {
     if (arg0[0x3C / 4] < arg0[0x170 / 4]) {
         return 0;
     }
     return 1;
 }
 
-s32 func_1518B748(u8 *arg0) {
+/* was func_1518B748 */
+s32 rubble_piece_fade(u8 *arg0) {
     f32 d;
     s32 a;
     s32 b;
@@ -229,13 +232,15 @@ s32 func_1518B748(u8 *arg0) {
     return 1;
 }
 
-void func_1518B7D4(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4) {
-    func_1518B818(arg0, arg1, arg2, arg3, 4, 0xFF, arg4);
+/* was func_1518B7D4 */
+void rubble_scatter_spawn(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4) {
+    rubble_scatter_spawn_ex(arg0, arg1, arg2, arg3, 4, 0xFF, arg4);
 }
 
 #ifdef NON_MATCHING
-s32 func_15046F70(void *, u16, f32, void *); /* P95 */
-void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6) {
+s32 collision_floor_probe(void *, u16, f32, void *); /* P95 */
+/* was func_1518B818 */
+void rubble_scatter_spawn_ex(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6) {
     struct {
         f32 u90;
         u8 pad94[0x14];
@@ -350,9 +355,9 @@ void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u
                 sp.uE4 = (*(f32 *)((u8 *)arg0 + 8)) - (angle_byte_cos((temp_s0 - 0x40) & 0xFF) * temp_f20);
                 sp.uF4 = 25.0f - (random_float() * 50.0f);
                 sp.uF8 = 25.0f - (random_float() * 50.0f);
-                if (func_15046F70(&sp.uDC, 0, -10000.0f, &sp.u90) != 0) { /* P95: was 0xC61C4000 as an int */
+                if (collision_floor_probe(&sp.uDC, 0, -10000.0f, &sp.u90) != 0) { /* P95: was 0xC61C4000 as an int */
                     sp.u116 = 2;
-                    temp_v0 = func_15132FBC(&sp.uB4, 3, 0xFF, 4, (s32) arg6, 0);
+                    temp_v0 = mdl_particle_spawn(&sp.uB4, 3, 0xFF, 4, (s32) arg6, 0);
                     if (temp_v0 != NULL) {
                         (*(f32 *)((u8 *)temp_v0 + 0x170)) = sp.u90;
                     }
@@ -375,7 +380,7 @@ void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u
                             temp_f0_2 = random_float();
                             sp.u116 = 3;
                             sp.uF8 = 25.0f - (temp_f0_2 * 50.0f);
-                            temp_v0_2 = func_15132FBC(&sp.uB4, 3, 0xFF, 4, (s32) arg6, 0);
+                            temp_v0_2 = mdl_particle_spawn(&sp.uB4, 3, 0xFF, 4, (s32) arg6, 0);
                             var_s1 -= 1;
                             if (temp_v0_2 != NULL) {
                                 (*(f32 *)((u8 *)temp_v0_2 + 0x170)) = sp.u90;
@@ -389,5 +394,5 @@ void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8AA0/func_1518B818.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8AA0/rubble_scatter_spawn_ex.s")
 #endif

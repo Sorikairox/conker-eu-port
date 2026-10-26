@@ -19,10 +19,10 @@ void event_start_level_events(s32 arg0, s32 arg1) {
 
     D_8003C8E0 = 0x5000000;
     save_block_realloc_random();
-    func_15096970();
+    camera_timed_records_clear();
 
     for (i = 0; i < D_800D2F3C; i++) {
-        if (func_1509CBD4(D_800D2F40[i])) {
+        if (event_prereqs_met(D_800D2F40[i])) {
             event_start(D_800D2F40[i], arg1);
         }
     }
@@ -48,7 +48,7 @@ u16 *event_get_vars(s32 arg0) {
 struct249 *event_find(s16 arg0);
 struct249 *event_load(s16 arg0);
 void event_link_sorted(struct249 *arg0);
-void func_150ADFD0(struct249 *, s32);
+void event_vm_run(struct249 *, s32);
 
 /* event_start: start event `id` (arg1 = 0: level start, skipped when the event's own save bit is set). An event not yet in the
  * list is loaded (event_load), linked (event_link_sorted) and run once from entry 0 unless the save bit of its flags
@@ -71,7 +71,7 @@ struct249 *event_start(s32 id, s32 arg1) {
         bit = flags & 0x3FF;
         if (!(save[bit >> 3] & (1 << (bit & 7)))) {
             D_8003C8E0 = 0x6000000;
-            func_150ADFD0(e, 0);
+            event_vm_run(e, 0);
             D_8003C8E0 = 0;
             flags = e->unk0;
         }
@@ -128,7 +128,7 @@ void event_unlink_free(struct249 *arg0) {
             arg0->next->prev = arg0->prev;
         }
     }
-    func_10004074(arg0);
+    heap_free(arg0);
     D_800D2F48.length--;
 }
 
@@ -224,7 +224,7 @@ struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *blk) {
     }
     bcopy((void *) blk, (void *) new, blk->unk4);
     bzero((u8 *) new + new->unkA, new->unk6);
-    func_10004074((s32) blk);
+    heap_free((s32) blk);
     return new;
 }
 #else
@@ -248,12 +248,12 @@ struct_eu_C8950_blk *event_block_relocate(struct_eu_C8950_blk *blk) {
 //     }
 //     bcopy(arg0, new, arg0->unk4);
 //     bzero((u8 *)new + new->unkA, new->unk6);
-//     func_10004074(arg0);
+//     heap_free(arg0);
 //     return new;
 // }
 
 #ifdef NON_MATCHING
-void func_150ADFD0(struct249 *, s32);
+void event_vm_run(struct249 *, s32);
 void event_unlink_free(struct249 *);
 void event_send_cmd36(void);
 
@@ -287,7 +287,7 @@ void event_list_unload(s32 arg0) {
         } else if (arg0 != 0 || (flags & 0x8000) ||
                    ((flags & 0x1000) && D_800BE9F0 != *(u16 *)((u8 *)e + 2))) {
             D_8003C8E0 = 0x06000001;
-            func_150ADFD0(e, 3);
+            event_vm_run(e, 3);
             D_8003C8E0 = 0;
             event_unlink_free(e);
             if (((u8 *)D_800D2E4C)[byte] & bit) {
@@ -304,7 +304,7 @@ void event_list_unload(s32 arg0) {
 #endif
 #ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-void func_150ADFD0(struct249 *, s32);
+void event_vm_run(struct249 *, s32);
 extern s16 D_800BEE12;
 extern s32 D_800D3268;
 extern s32 D_800D3378;
@@ -320,7 +320,7 @@ void event_list_run_phase(s32 arg0) {
     u16 var_v1;
 
     var_s0 = D_800D2F48.unk4;
-    func_15097118();
+    camera_timed_records_update();
     if ((D_800BE616 != 0) || (D_800BE9F0 == 0x32) || (event_dispatch(0, 0x2000, 0x93) != 0) || (arg0 != 2)) {
         event_send_cmd36();
         temp_a2 = D_800D2F48.length;
@@ -337,7 +337,7 @@ void event_list_run_phase(s32 arg0) {
                 if (arg0 == 4) {
                     if (((u8 *)D_800D2E4C)[temp_v0 >> 3] & (1 << (temp_v0 & 7))) {
                         D_8003C8E0 = 0x06000002;
-                        func_150ADFD0(var_s0, 4);
+                        event_vm_run(var_s0, 4);
                         D_8003C8E0 = 0;
                         ((u8 *)&D_800D2E70)[temp_v0] = 3;
                         var_s0->unk0 |= 0x8000;
@@ -348,7 +348,7 @@ void event_list_run_phase(s32 arg0) {
                 } else if (!(((u8 *)D_800D2E4C)[temp_v0 >> 3] & (1 << (temp_v0 & 7)))) {
                     if (var_v1 & 0x4000) {
                         D_8003C8E0 = 0x06000003;
-                        func_150ADFD0(var_s0, 1);
+                        event_vm_run(var_s0, 1);
                         D_8003C8E0 = 0;
                         temp_t1 = var_s0->unk0 & 0xBFFF;
                         var_v1 = temp_t1 & 0xFFFF;
@@ -361,7 +361,7 @@ void event_list_run_phase(s32 arg0) {
                         if (!(var_v1 & 0x2000) || (D_800BE9F0 == (*(u16 *)((u8 *)var_s0 + 2)))) {
                             if ((arg0 == 2) || ((arg0 == 1) && !(var_v1 & 0x400))) {
                                 D_8003C8E0 = 0x06000004;
-                                func_150ADFD0(var_s0, arg0);
+                                event_vm_run(var_s0, arg0);
                                 D_8003C8E0 = 0;
                             }
                             if (arg0 == 2) {
@@ -470,13 +470,13 @@ void save_block_realloc_random(void) {
         }
         for (i = 0; i <= n; i++) {
             if (i != n) {
-                func_10004074(sp38[i]);
+                heap_free(sp38[i]);
             }
         }
         D_800D2E4C = sp38[n];
         if (sp34 != NULL) {
             bcopy(sp34, D_800D2E4C, 0x1B);
-            func_10004074(sp34);
+            heap_free(sp34);
         }
     }
 }

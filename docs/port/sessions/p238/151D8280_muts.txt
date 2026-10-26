@@ -1,4 +1,4 @@
-# P238 func_151D8280 (trail_ring_constrain) mutants: sed % setup names
+# P238 glow_trail_limit_length (trail_ring_constrain) mutants: sed % setup names
 s/            if (80\.0f < total) {/            if (81.0f < total) {/ % edge
 s/k = (total - 80\.0f)/k = (total - 81.0f)/ % pull
 s/obj\[0x2C\] = (s8) obj\[0x2C\] - 1;/obj[0x2C] = (s8) obj[0x2C] - 2;/ % pull

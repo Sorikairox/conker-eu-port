@@ -16,13 +16,13 @@ s#        fr\.spin\[2\] = D_800A11E4\[i\] \* D_800A125C\[i\] \* D_800A12E4_c\[0\
 s#        fr\.u4C = random_float() \* D_800A12E0_c\[0\] + D_800A12DC_c\[0\];#        fr.u4C = random_float() * D_800A12E0_c[0] - D_800A12DC_c[0];# % base
 s# + 0x82;# + 0x83;# % base
 s#        fr\.tex = (random_int() \& 1) ? 0xC4 : 0xC5;#        fr.tex = (random_int() \& 2) ? 0xC4 : 0xC5;# % base rnd2
-s#        func_15132BBC(\&fr, 3, 0xFF, 0, 0, room, arg2);#        func_15132BBC(\&fr, 3, 0xFF, 0, 0, 0xFF, arg2);# % room
-s#    func_151664F0(-1, (s32) pos\[0\], (s32) pos\[1\], (s32) pos\[2\], 0x1E, 0x32, 0, room, arg2);#    func_151664F0(-1, (s32) pos[0], (s32) pos[2], (s32) pos[2], 0x1E, 0x32, 0, room, arg2);# % base
-s#    func_151D5404((struct17 \*) pos, 506\.0f, D_800A12E8_c\[0\], D_800A12EC_c\[0\], 0xF, 0x14, room, arg2);#    func_151D5404((struct17 *) pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 0xF, 0x15, room, arg2);# % base
-s#    func_151D58E4(pos, 506\.0f, D_800A12E8_c\[0\], D_800A12EC_c\[0\], 5, room, arg2);#    func_151D58E4(pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 5, room, 1);# % room
-s#    func_151D5AC4(pos, room, arg2);#    func_151D5AC4(pos, 0xFF, arg2);# % room
-s#    func_151D45A4(pos, room, arg2);#    func_151D45A4(pos, room, 1);# % room
-s#    func_15154728(pos, f \* 4\.0f + 12\.0f, 1\.6409999f,#    func_15154728(pos, f * 4.0f + 12.0f, 1.641f,# % base
+s#        mdl_particle_spawn_ex(\&fr, 3, 0xFF, 0, 0, room, arg2);#        mdl_particle_spawn_ex(\&fr, 3, 0xFF, 0, 0, 0xFF, arg2);# % room
+s#    water_ring_spawn(-1, (s32) pos\[0\], (s32) pos\[1\], (s32) pos\[2\], 0x1E, 0x32, 0, room, arg2);#    water_ring_spawn(-1, (s32) pos[0], (s32) pos[2], (s32) pos[2], 0x1E, 0x32, 0, room, arg2);# % base
+s#    rumble_all_players_at((struct17 \*) pos, 506\.0f, D_800A12E8_c\[0\], D_800A12EC_c\[0\], 0xF, 0x14, room, arg2);#    rumble_all_players_at((struct17 *) pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 0xF, 0x15, room, arg2);# % base
+s#    cam_shake_all_players(pos, 506\.0f, D_800A12E8_c\[0\], D_800A12EC_c\[0\], 5, room, arg2);#    cam_shake_all_players(pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 5, room, 1);# % room
+s#    smoke_cloud_spawn(pos, room, arg2);#    smoke_cloud_spawn(pos, 0xFF, arg2);# % room
+s#    explosion_light_spawn(pos, room, arg2);#    explosion_light_spawn(pos, room, 1);# % room
+s#    spark_shower_spawn(pos, f \* 4\.0f + 12\.0f, 1\.6409999f,#    spark_shower_spawn(pos, f * 4.0f + 12.0f, 1.641f,# % base
 s# + 0xC8), 0\.0f, room, arg2);# + 0xC9), 0.0f, room, arg2);# % base
 s#    ring\.count = (random_int() \& 3) + 3;#    ring.count = (random_int() \& 7) + 3;# % base rnd2
 s#    ring\.u18 = camv - 0x40;#    ring.u18 = camv - 0x41;# % base
@@ -34,6 +34,6 @@ s#    ring\.u55 = 1;#    ring.u55 = 0;# % base
 s#    ring\.u58 = 50;#    ring.u58 = 5;# % base
 s#    ring\.u20\[12\] = 10\.0f;#    ring.u20[12] = 1.0f;# % base
 s#    ring\.u20\[10\] = D_800A12F4_c\[0\];#    ring.u20[10] = D_800A12F0_c[0];# % base
-s#    func_151A74B0(\&ring, 0, room, arg2);#    func_151A74B0(\&ring, 1, room, arg2);# % base
+s#    debris_spray_spawn(\&ring, 0, room, arg2);#    debris_spray_spawn(\&ring, 1, room, arg2);# % base
 s#    e = (u8 \*) func_15149130(0xF, 8, -1, -1, 1, 0, (struct37 \*) 0xC, room, arg2);#    e = (u8 *) func_15149130(0xF, 8, -1, -1, 1, 1, (struct37 *) 0xC, room, arg2);# % base
 s#        memcpy(e + 0x28, \&at, 0xC);#        memcpy(e + 0x2C, \&at, 0xC);# % base

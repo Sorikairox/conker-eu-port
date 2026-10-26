@@ -13,7 +13,7 @@ s/    D_800BE748\[k \* 3\] \&= ~0x10;/    D_800BE748[k * 3] \&= ~0x20;/ % p0
 s/    slot\[0x2FC\] |= 1 << rider\[0x23D\];/    slot[0x2FC] = 1 << rider[0x23D];/ % p0
 s/    slot\[0x2FC\] |= 1 << rider\[0x23D\];/    slot[0x2FC] |= 2 << rider[0x23D];/ % p2
 s/    if (slot\[0x10A\] != 0) {/    if (slot[0x10A] == 0) {/ % p0
-s/        func_1517F9F8(0xFF, 0, 0, 180, 20, rider\[0x23D\]);/        func_1517F9F8(0xFF, 0, 0, 180, 20, k);/ % p2
-s/        func_1517F9F8(0xFF, 0, 0, 180, 20, rider\[0x23D\]);/        func_1517F9F8(0xFF, 0, 0, 181, 20, rider[0x23D]);/ % p0
+s/        screen_tint_start(0xFF, 0, 0, 180, 20, rider\[0x23D\]);/        screen_tint_start(0xFF, 0, 0, 180, 20, k);/ % p2
+s/        screen_tint_start(0xFF, 0, 0, 180, 20, rider\[0x23D\]);/        screen_tint_start(0xFF, 0, 0, 181, 20, rider[0x23D]);/ % p0
 s/        slot\[0x10A\] = 0;/        slot[0x10B] = 0;/ % p0
 s/    slot = (u8 \*) \&D_800CC2D0\[k\];/    slot = (u8 *) \&D_800CC2D0[0];/ % p3flag

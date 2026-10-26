@@ -1,7 +1,7 @@
 # P253 object_sound_follow_cam (object_sound_follow_cam) mutants: sed % setup names (the NM block holds only this function)
 s/e->y = (s32) \*(f32 \*) (obj + 0x18);/e->y = (s32) *(f32 *) (obj + 0x1C);/ % q
 s/(\*sound << 16) | (state & 0xFFFF);/(*sound << 16) | (state \& 0xFFF);/ % q
-s/func_10010344(0x5B0, (struct127 \*) obj, 25000, 100, 0x78);/func_10010344(0x5B0, (struct127 *) obj, 25000, 100, 0x77);/ % q
+s/actor_sound_play2(0x5B0, (struct127 \*) obj, 25000, 100, 0x78);/actor_sound_play2(0x5B0, (struct127 *) obj, 25000, 100, 0x77);/ % q
 s/^            \*sound = 0;$/            ;/ % q
 s/timer -= D_800BE9E4;/timer -= 1;/ % cnt
 s/if (timer <= 0) {/if (timer < 0) {/ % fire exact
@@ -15,4 +15,4 @@ s/return 1;/return 0;/ % novoice
 s/if (e->voice != \*(u16 \*) (obj + 0x8C))/if (e->voice == *(u16 *) (obj + 0x8C))/ % swap same
 s/e->flags &= ~0x80;/e->flags \&= ~0x81;/ % swap
 s/(state & 0xFFFF0000) | timer/(state \& 0xFFFF0000) | (timer + 1)/ % cnt swap
-s/func_10010344(0x5B1, (struct127 \*) obj, e->vol, e->unkA, e->unk8)/func_10010344(0x5B1, (struct127 *) obj, e->vol, e->unk8, e->unkA)/ % novoice
+s/actor_sound_play2(0x5B1, (struct127 \*) obj, e->vol, e->unkA, e->unk8)/actor_sound_play2(0x5B1, (struct127 *) obj, e->vol, e->unk8, e->unkA)/ % novoice

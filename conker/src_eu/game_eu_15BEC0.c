@@ -4,10 +4,10 @@
 
 
 #ifdef NON_MATCHING
-void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern f32 D_800DC434;
 
-/* P43: camera eye height. dy = eye.y (+0x2FC) - base (+0x354) eases (func_150498A0) towards the target height h:
+/* P43: camera eye height. dy = eye.y (+0x2FC) - base (+0x354) eases (math_spring_approach) towards the target height h:
  * +0x348 (95.0 with flag 0x10 of +0x5F0 and of *+0x36C), x1.5 with flag 0x400, cut below a ceiling of the followed
  * object (+0x3D0: +0x17C - 40, then the fast rate 5 / 9 is used), clamped to [+0x6F0, +0x6F4] when both are set,
  * D_800DC434 when +0x7F4; 0 with flag 0x40 outside mode 0x100 or with mode bit 0x01000000. +0x23C: dy = h at once
@@ -96,9 +96,9 @@ void camera_update_eye_height(u8 *arg0) {
         }
         fast = mode & 0x100;
         if (fast != 0 || ceiling != 0) {
-            func_150498A0(&dy, h, (f32 *)(arg0 + 0x25C), 5.0f, 9.0f, *(f32 *)(arg0 + 0x7B4));
+            math_spring_approach(&dy, h, (f32 *)(arg0 + 0x25C), 5.0f, 9.0f, *(f32 *)(arg0 + 0x7B4));
         } else {
-            func_150498A0(&dy, h, (f32 *)(arg0 + 0x25C), *(f32 *)(arg0 + 0x3B4), *(f32 *)(arg0 + 0x3B8),
+            math_spring_approach(&dy, h, (f32 *)(arg0 + 0x25C), *(f32 *)(arg0 + 0x3B4), *(f32 *)(arg0 + 0x3B8),
                           *(f32 *)(arg0 + 0x7B4));
         }
     }

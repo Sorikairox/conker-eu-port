@@ -2,8 +2,8 @@ s/    s32 arg = D_800D1580 \& 0xFFFF;/    s32 arg = D_800D1580 \& 0xFFF;/ % k7B_
 s/    if (rec == -1) {/    if (rec == -2) {/ % rec_none
 s/    state = 1;/    state = 2;/ % nobe nobe_noctl
 s/    D_800D252C\[rec\] = 0;/    D_800D252C[rec] = 1;/ % k75_tbl
-s/    n = func_15082E44((u8 \*) D_800D20FC + rec \* 0x30, rec, 0, 0, 0);/    n = func_15082E44((u8 *) D_800D20FC + rec * 0x2C, rec, 0, 0, 0);/ % k75_tbl
-s/    n = func_15082E44((u8 \*) D_800D20FC + rec \* 0x30, rec, 0, 0, 0);/    n = func_15082E44((u8 *) D_800D20FC + rec * 0x30, 0, 0, 0, 0);/ % k75_tbl
+s/    n = setup_entry_spawn((u8 \*) D_800D20FC + rec \* 0x30, rec, 0, 0, 0);/    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x2C, rec, 0, 0, 0);/ % k75_tbl
+s/    n = setup_entry_spawn((u8 \*) D_800D20FC + rec \* 0x30, rec, 0, 0, 0);/    n = setup_entry_spawn((u8 *) D_800D20FC + rec * 0x30, 0, 0, 0, 0);/ % k75_tbl
 s/    if (n == 0) {/    if (n == 1) {/ % obj_none k7B_10_n1
 s/    obj = \&D_800CC2D0\[n - 1\];/    obj = \&D_800CC2D0[n];/ % k75_tbl
 s/    obj->unk124 = D_800C3E78 + 1;/    obj->unk124 = D_800C3E78;/ % k75_tbl
@@ -15,7 +15,7 @@ s/        case 0x80:/        case 0x81:/ % k80_tbl
 s/                sel = (D_800D1580 >> 16) \& 0xFF;/                sel = (D_800D1580 >> 16) \& 0x7F;/ % k7B_10_tbl
 s/                sel = (D_800D1580 >> 16) \& 0xFF;/                sel = (D_800D1580 >> 8) \& 0xFF;/ % k7B_10_tbl
 s/                usePos = TRUE;/                usePos = FALSE;/ % k7B_A k7B_other
-s/            func_15143134(NULL, \&obj->x_position, (u8 \*) me->unk1D4 + sel \* 64);/            func_15143134(NULL, \&obj->y_position, (u8 *) me->unk1D4 + sel * 64);/ % k75_tbl
+s/            mtx_transform_point_or_origin(NULL, \&obj->x_position, (u8 \*) me->unk1D4 + sel \* 64);/            mtx_transform_point_or_origin(NULL, \&obj->y_position, (u8 *) me->unk1D4 + sel * 64);/ % k75_tbl
 s/        obj->y_position = me->y_position + 100.0f;/        obj->y_position = me->y_position + 10.0f;/ % notbl other_kind
 s/        obj->z_position = me->z_position;/        obj->z_position = me->x_position;/ % notbl other_kind
 s/    if (D_800BE616 != 0) {/    if (D_800BE616 == 0) {/ % k75_tbl nobe
@@ -33,10 +33,10 @@ s/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 1
 s/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 182.04445f), speed \* 4.0f, 0.0f, \&dx, \&dy, \&dz);/            vec_from_yaw_pitch((u16) (s32) ((40.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 4.0f, 0.0f, \&dx, \&dy, \&dz);/ % k75_tbl
 s/            obj->y_velocity = -dy;/            obj->y_velocity = -dx;/ % k75_tbl
 s/            obj->y_velocity = 50.0f;/            obj->y_velocity = 5.0f;/ % c198_0
-s/        snd = func_15031C4C((u8 \*) me, (me->id == 0x75) ? 0x64 : 0x2C, 0);/        snd = func_15031C4C((u8 *) me, (me->id == 0x75) ? 0x2C : 0x64, 0);/ % k75_tbl
+s/        snd = attachment_find_by_slot((u8 \*) me, (me->id == 0x75) ? 0x64 : 0x2C, 0);/        snd = attachment_find_by_slot((u8 *) me, (me->id == 0x75) ? 0x2C : 0x64, 0);/ % k75_tbl
 s/        if (snd != NULL) {/        if (snd == NULL) {/ % k75_tbl
 s/            obj->unk8E = \*(s32 \*) (snd + 0x3C);/            obj->unk8E = *(s32 *) (snd + 0x38);/ % k75_tbl
-s/            func_100100E0((s32) func_15033ECC, (s32) snd, (s32) D_800D154C, (s32) func_1000EE70, (s32) obj,/            func_100100E0((s32) func_15033ECC, (s32) snd, (s32) obj, (s32) func_1000EE70, (s32) obj,/ % k75_tbl
+s/            sfx_emitter_replace_callback((s32) attachment_sound_cb, (s32) snd, (s32) D_800D154C, (s32) sfx_cb_follow_object, (s32) obj,/            sfx_emitter_replace_callback((s32) attachment_sound_cb, (s32) snd, (s32) obj, (s32) sfx_cb_follow_object, (s32) obj,/ % k75_tbl
 s/                          obj->unique_id);/                          obj->unk124);/ % k75_tbl
 s/    angle = me->unk7A;/    angle = me->unk76;/ % k75_tbl
 s/    if (me->unk31C != NULL) {/    if (me->unk31C == NULL) {/ % k75_tbl
@@ -45,12 +45,12 @@ s/    obj->unk76 = angle;/    obj->unk76 = angle + 1;/ % k75_tbl
 s/    obj->xz_velocity = speed;/    obj->xz_velocity = speed + 1.0f;/ % k75_tbl
 s/    obj->unk1CC = obj->y_position;/    obj->unk1CC = obj->x_position;/ % k75_tbl
 s/    case 0x4A:/    case 0x4B:/ % k4A
-s/        func_151A3940((u8 \*) obj, 0xFF);/        func_151A3940((u8 *) obj, 0xFE);/ % k4A
+s/        obj_burning_fx_start((u8 \*) obj, 0xFF);/        obj_burning_fx_start((u8 *) obj, 0xFE);/ % k4A
 s/        OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) D_800CC70C;/        OBJ_MODEL_S16(obj, 0xE) = (s16) (s32) D_800CC70C;/ % k4A k7B_10_tbl
 s/            state = 7;/            state = 8;/ % k7B_10_tbl
 s/            OBJ_MODEL_S16(obj, 0xA) = 0x3D4;/            OBJ_MODEL_S16(obj, 0xA) = 0x3D5;/ % k7B_10_tbl
 s/            obj->unique_id = 0xFF - (n - 1);/            obj->unique_id = 0xFF - n;/ % k7B_10_tbl
-s/            func_1506B04C((u8 \*) obj, 0xC, NULL);/            func_1506B04C((u8 *) obj, 0xD, NULL);/ % k7B_10_tbl
+s/            obj_effect_run_handler((u8 \*) obj, 0xC, NULL);/            obj_effect_run_handler((u8 *) obj, 0xD, NULL);/ % k7B_10_tbl
 s/            obj_limb_muzzle_burst((u8 \*) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 1);/            obj_limb_muzzle_burst((u8 *) D_800D154C, r2 \& 1, r1 \& 3, 0xFF, 1);/ % k7B_10_tbl
 s/            obj_limb_muzzle_burst((u8 \*) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 1);/            obj_limb_muzzle_burst((u8 *) D_800D154C, r1 \& 1, r2 \& 3, 0xFF, 0);/ % k7B_10_tbl
 s/        } else if (arg == 0xA) {/        } else if (arg == 0xB) {/ % k7B_A

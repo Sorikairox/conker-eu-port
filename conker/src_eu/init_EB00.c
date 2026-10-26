@@ -26,15 +26,16 @@ typedef struct {
     f32 unk2C;
 } SfxEnt; // size 0x30
 extern u8 D_800BEA35;
-s32 func_1000A750(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 *argA, u32 *argB, u32 *argC);
+s32 sound_path_calc_pan_volume(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 *argA, u32 *argB, u32 *argC);
 
 extern s32 D_80042B00;
-void func_10011310(void);
-void func_10011624(struct15 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+void sound_stop_queue_process(void);
+void sfx_emitters_update(struct15 *arg0, s32 *arg1, s32 arg2, s32 arg3);
 typedef struct { s32 unk0; u8 pad4[0x10]; f32 unk14; f32 unk18; f32 unk1C; u8 pad20[0x64]; u16 unk84; u8 pad86[0xFE]; u32 unk184; } SfxObj;
 
 
-s32 func_1000EB00(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 arg7, u16 *arg8) {
+/* was func_1000EB00 */
+s32 sfx_cb_ambient_random_chirp(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 arg7, u16 *arg8) {
     if (arg0->unk24 != 0) {
         arg0->unk24 = 0;
     }
@@ -55,7 +56,8 @@ s32 func_1000EB00(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 
     return 0;
 }
 
-s32 func_1000EBC4(struct00 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1000EBC4 */
+s32 sfx_cb_fade_out(struct00 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 temp_v0 = arg0->unkC;
     s32 temp_v1 = arg0->unk18;
     temp_v1 -= D_800BE9E4;
@@ -71,7 +73,8 @@ s32 func_1000EBC4(struct00 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 0;
 }
 
-s32 func_1000EC24(struct251 *arg0, s32 arg1, s32 *arg2, struct11 *arg3, struct04 *arg4, s32 *arg5, u16 *arg6) {
+/* was func_1000EC24 */
+s32 sfx_cb_delayed_play_2d(struct251 *arg0, s32 arg1, s32 *arg2, struct11 *arg3, struct04 *arg4, s32 *arg5, u16 *arg6) {
     s16 temp_v1 = arg0->unk18.h[1];
 
     if (*arg6 != 0) {
@@ -84,7 +87,7 @@ s32 func_1000EC24(struct251 *arg0, s32 arg1, s32 *arg2, struct11 *arg3, struct04
 
     if (temp_v1 <= 0) {
         if (*arg2 != 0) {
-            func_10010F30(arg0->unk1C, *arg2, arg3->unk3, arg4->unk2, *arg5);
+            sound_play_2d(arg0->unk1C, *arg2, arg3->unk3, arg4->unk2, *arg5);
         }
         return 1;
     }
@@ -92,7 +95,8 @@ s32 func_1000EC24(struct251 *arg0, s32 arg1, s32 *arg2, struct11 *arg3, struct04
     return 0;
 }
 
-s32 func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
+/* was func_1000ECCC */
+s32 sfx_cb_delayed_object_sound2(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
     struct_eu_sfx *sfx = arg0;
     s16 timer = sfx->unk18;
 
@@ -105,15 +109,15 @@ s32 func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
     if (timer <= 0) {
         *arg6 = sfx->unk18 >> 16;
         sfx->unk0 = *arg6;
-        if (func_10010894((struct127 *)sfx->unk1C) == 0) {
-            func_10010344(*arg6, (struct127 *)sfx->unk1C, sfx->unkC, sfx->unkA, sfx->unk8);
+        if (actor_sound2_is_playing((struct127 *)sfx->unk1C) == 0) {
+            actor_sound_play2(*arg6, (struct127 *)sfx->unk1C, sfx->unkC, sfx->unkA, sfx->unk8);
         }
         return 1;
     }
     sfx->unk18 = (sfx->unk18 & 0xFFFF0000) | timer;
     return 0;
 }
-// ? func_1000ECCC(void *arg0, ? arg1, ? arg2, ? arg3, void *arg6) {
+// ? sfx_cb_delayed_object_sound2(void *arg0, ? arg1, ? arg2, ? arg3, void *arg6) {
 //     s16 temp_a1;
 //     s32 temp_t4;
 //     s32 temp_v1;
@@ -131,8 +135,8 @@ s32 func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 //         temp_t4 = arg0->unk18 >> 0x10;
 //         *arg6 = (u16) temp_t4;
 //         arg0->unk0 = (s16) temp_t4;
-//         if (func_10010894(arg0->unk1C, temp_a1, arg6) == 0) {
-//             func_10010344(*arg6, arg0->unk1C, arg0->unkC, arg0->unkA, (?32) arg0->unk8);
+//         if (actor_sound2_is_playing(arg0->unk1C, temp_a1, arg6) == 0) {
+//             actor_sound_play2(*arg6, arg0->unk1C, arg0->unkC, arg0->unkA, (?32) arg0->unk8);
 //         }
 //         return 1;
 //     }
@@ -140,7 +144,8 @@ s32 func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 //     return 0;
 // }
 
-s32 func_1000EDA0(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
+/* was func_1000EDA0 */
+s32 sfx_cb_delayed_object_sound(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
     struct_eu_sfx *sfx = arg0;
     s16 timer = sfx->unk18;
 
@@ -152,13 +157,14 @@ s32 func_1000EDA0(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
     timer -= D_800BE9E4;
     if (timer <= 0) {
         sfx->unk0 = *arg6 = sfx->unk18 >> 16;
-        func_10010630(*arg6, (struct127 *)sfx->unk1C, sfx->unkC, sfx->unkA, sfx->unk8);
+        actor_sound_play_untracked(*arg6, (struct127 *)sfx->unk1C, sfx->unkC, sfx->unkA, sfx->unk8);
         return 1;
     }
     sfx->unk18 = (sfx->unk18 & 0xFFFF0000) | timer;
     return 0;
 }
-s32 func_1000EE70(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *arg5)
+/* was func_1000EE70 */
+s32 sfx_cb_follow_object(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *arg5)
 {
   unsigned short new_var; // fakematch
   struct_eu_sfx *sfx = arg0;
@@ -175,7 +181,7 @@ s32 func_1000EE70(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *ar
       sfx->unk6 = obj->unk1C;
       return 0;
     }
-    if (func_1000F44C(sfx->unk24) == 0)
+    if (sound_voice_is_looping(sfx->unk24) == 0)
     {
       return 0;
     }
@@ -183,13 +189,14 @@ s32 func_1000EE70(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *ar
   return 1;
 }
 
-s32 func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
+/* was func_1000EF40 */
+s32 sfx_cb_keep_until_silent(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
     if (arg0->unk10 & 0x80) {
         arg0->unk10 = (s32) (arg0->unk10 & -0x81);
     }
     if (*arg2 == 0) {
         if (arg0->unk24 != 0) {
-            func_100111C8(arg0->unk24);
+            sound_voice_stop(arg0->unk24);
             arg0->unk24 = 0;
         }
         *arg6 = 0;
@@ -197,7 +204,8 @@ s32 func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4,
     return 0;
 }
 
-s32 func_1000EFB4(struct_eu_sfx *arg0, s32 arg1, s32 *arg2, struct11 *arg3, s32 arg4, s32 *arg5, u16 *arg6) {
+/* was func_1000EFB4 */
+s32 sfx_cb_follow_object_anim(struct_eu_sfx *arg0, s32 arg1, s32 *arg2, struct11 *arg3, s32 arg4, s32 *arg5, u16 *arg6) {
     SfxObj *obj = (SfxObj *)arg0->unk18;
     u16 *p;
     s32 id;
@@ -215,18 +223,19 @@ s32 func_1000EFB4(struct_eu_sfx *arg0, s32 arg1, s32 *arg2, struct11 *arg3, s32 
             }
         }
         if (*arg6 == 0xCA) {
-            func_10010F30(0xCB, id, arg3->unk3, 0, *arg5);
+            sound_play_2d(0xCB, id, arg3->unk3, 0, *arg5);
         } else if (*arg6 == 0x2CF) {
-            func_10010F30(0x2D7, id, arg3->unk3, 0, *arg5);
-            func_10010F30((random_int() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
+            sound_play_2d(0x2D7, id, arg3->unk3, 0, *arg5);
+            sound_play_2d((random_int() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
         } else if (*arg6 == 0x2D2) {
-            func_10010F30(0x2DA, id, arg3->unk3, 0, *arg5);
-            func_10010F30((random_int() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
+            sound_play_2d(0x2DA, id, arg3->unk3, 0, *arg5);
+            sound_play_2d((random_int() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
         }
     }
     return 1;
 }
-void func_1000F1A8(void) {
+/* was func_1000F1A8 */
+void sound_voices_reset(void) {
     s32 i;
 
     D_80042760 = 0;
@@ -243,10 +252,11 @@ void func_1000F1A8(void) {
 
 void func_10017780(u8 arg0, u16 arg1);
 s32* allocate_memory(s32, s32, s32, s32);
-void func_1000F248(s32 arg0) {
+/* was func_1000F248 */
+void sound_level_init(s32 arg0) {
     u16 tmp;
 
-    func_1000F1A8();
+    sound_voices_reset();
     if (arg0 == 4) {
         D_80041F54 = 0;
         D_80041F58 = 0.01f; // 0.009999999776482582
@@ -279,7 +289,7 @@ void func_1000F248(s32 arg0) {
     } else {
         D_80041FDC = 23000;
     }
-    func_10011E88(arg0);
+    sound_level_hook_nop(arg0);
     D_80041F60 = D_80041F61 = 0;
     func_10017780(0, D_80041F56);
     func_10017780(1, D_80041F56);
@@ -288,7 +298,8 @@ void func_1000F248(s32 arg0) {
     if (arg0) {}
 }
 
-s32 func_1000F3D0(u16 arg0) {
+/* was func_1000F3D0 */
+s32 sound_voice_is_playing(u16 arg0) {
     struct120 *temp_v1;
 
     temp_v1 = &D_800425E0[arg0 & 0xF];
@@ -302,7 +313,8 @@ s32 func_1000F3D0(u16 arg0) {
     return 0;
 }
 
-s32 func_1000F44C(u16 arg0) {
+/* was func_1000F44C */
+s32 sound_voice_is_looping(u16 arg0) {
     u32 mask;
     struct120 *temp_a1;
     struct31 *temp_a2;
@@ -318,7 +330,8 @@ s32 func_1000F44C(u16 arg0) {
     return 0;
 }
 
-s32 func_1000F4D8(u16 arg0) {
+/* was func_1000F4D8 */
+s32 sound_id_is_playing(u16 arg0) {
     s32 i;
 
     arg0 &= 0x7FFF;
@@ -337,7 +350,8 @@ s32 func_1000F4D8(u16 arg0) {
 // base >= 0x6E2 returns 1, n < 2 returns base.
 s32 random_int(void);
 
-u16 func_1000F568(s32 base, u16 n) {
+/* was func_1000F568 */
+u16 sound_pick_variant(s32 base, u16 n) {
     u8 *played;
     u32 pick;
     s32 mask;
@@ -374,11 +388,12 @@ u16 func_1000F568(s32 base, u16 n) {
     return base + pick;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F568.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sound_pick_variant.s")
 #endif
-s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32 *, s32);
+s32 sound_calc_pan_volume(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32 *, s32);
 
-s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5, s16 arg6) {
+/* was func_1000F6B8 */
+s32 sound_listener_volume_pan(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5, s16 arg6) {
     s32 vol;
     SfxListener *best;
     s32 i;
@@ -410,7 +425,7 @@ s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5, s16 arg6) {
         dy = y - best->ey;
         dz = z - best->ez;
     }
-    func_1000A420(dx, dy, dz, best->f, x - best->x, y - best->y, z - best->z, arg6, arg5, arg4, &vol, 0);
+    sound_calc_pan_volume(dx, dy, dz, best->f, x - best->x, y - best->y, z - best->z, arg6, arg5, arg4, &vol, 0);
     return vol;
 }
 typedef struct {
@@ -419,9 +434,10 @@ typedef struct {
     s32 unk8;
 } EU42988;
 extern EU42988 D_80042988[];
-void func_1000F85C(u16 arg0, s16 arg1, s32 arg2) {
+/* was func_1000F85C */
+void sound_voice_set_param(u16 arg0, s16 arg1, s32 arg2) {
     if (arg0 >= 0x10) {
-        if (func_1000F3D0(arg0) != 0) {
+        if (sound_voice_is_playing(arg0) != 0) {
             if (arg1 == 0x10) {
                 f32 sp1C;
                 sp1C = alCents2Ratio(arg2);
@@ -434,7 +450,7 @@ void func_1000F85C(u16 arg0, s16 arg1, s32 arg2) {
     }
 }
 // NON-MATCHING: not even close
-// void func_1000F85C(s32 arg0, s16 arg1, s32 arg2) {
+// void sound_voice_set_param(s32 arg0, s16 arg1, s32 arg2) {
 //     f32 sp1C;
 //     s32 sp18;
 //     s16 temp_a1;
@@ -448,7 +464,7 @@ void func_1000F85C(u16 arg0, s16 arg1, s32 arg2) {
 //         sp18 = temp_t6;
 //         arg1 = temp_a1;
 //         temp_a1_2 = arg1;
-//         if (func_1000F3D0(temp_t6) != 0) {
+//         if (sound_voice_is_playing(temp_t6) != 0) {
 //             if (temp_a1_2 == 16) {
 //                 sp18 = sp18;
 //                 arg1 = temp_a1_2;
@@ -466,32 +482,35 @@ void func_1000F85C(u16 arg0, s16 arg1, s32 arg2) {
 //     }
 // }
 
-void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4,
+/* was func_1000F91C */
+void sound_voice_update_3d(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4,
                    s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
     s32 sp2C;
-    s32 tmp = func_1000F6B8(arg4, arg5, arg6, arg7, &sp2C, (s32) arg8, (s32) arg9);
+    s32 tmp = sound_listener_volume_pan(arg4, arg5, arg6, arg7, &sp2C, (s32) arg8, (s32) arg9);
 
-    func_1000F85C(arg0, 8, (u32) (tmp * arg1) >> 0xF);
-    func_1000F85C(arg0, 4, sp2C & 0x7F);
-    func_1000F85C(arg0, 256, (sp2C & 0x80) | arg3);
-    func_1000F85C(arg0, 16, arg2);
+    sound_voice_set_param(arg0, 8, (u32) (tmp * arg1) >> 0xF);
+    sound_voice_set_param(arg0, 4, sp2C & 0x7F);
+    sound_voice_set_param(arg0, 256, (sp2C & 0x80) | arg3);
+    sound_voice_set_param(arg0, 16, arg2);
 }
 
-void func_1000F9D4(u16 arg0, s16 arg1, s16 arg2, s16 arg3) {
+/* was func_1000F9D4 */
+void sound_voice_update_pan(u16 arg0, s16 arg1, s16 arg2, s16 arg3) {
     u32 tmp;
 
-    func_1000F6B8(-1, arg1, arg2, arg3, &tmp, 32760, 32765);
-    func_1000F85C(arg0, 4, tmp & 0x7F);
-    func_1000F85C(arg0, 256, tmp & 0x80);
+    sound_listener_volume_pan(-1, arg1, arg2, arg3, &tmp, 32760, 32765);
+    sound_voice_set_param(arg0, 4, tmp & 0x7F);
+    sound_voice_set_param(arg0, 256, tmp & 0x80);
 }
 
 #ifdef NON_MATCHING
 // sfx_start_positional: claims the next of the 32 positional sound slots (D_80041FE0[D_80042B00++]) for sound id
 // arg0 at (arg1, arg2, arg3) with volume arg4, ranges arg5 / arg6, update callback arg7 (+ its data arg8, arg9) and
 // flags argA (with a callback: flags | 0x12, else (flags & 0x108) | 2; flag 0x40: arg2 is a joint index resolved by
-// func_15083E0C((u8) arg1), -1 = fail), pitch argB cents. func_10011624 starts it; returns the voice handle (+0x24)
+// setup_entry_find_by_id((u8) arg1), -1 = fail), pitch argB cents. sfx_emitters_update starts it; returns the voice handle (+0x24)
 // when the slot count did not change meanwhile (and marks the slot 0x1000), else 0. 0 when all slots are used.
-u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, s32 arg7, void *arg8,
+/* was func_1000FA64 */
+u16 sfx_emitter_start(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, s32 arg7, void *arg8,
                   s32 arg9, s32 argA, s32 argB) {
     SfxEnt *e;
     s32 idx;
@@ -510,7 +529,7 @@ u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s1
         e->unk10 = (argA & 0x108) | 2;
     }
     if (argA & 0x40) {
-        arg2 = func_15083E0C(arg1);
+        arg2 = setup_entry_find_by_id(arg1);
         if (arg2 == -1) {
             return 0;
         }
@@ -533,7 +552,7 @@ u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s1
     e->unk28 = 0;
     e->unk20 = argB;
     count = D_80042B00;
-    func_10011624(D_80041FE0, &D_80042B00, idx, idx + 1);
+    sfx_emitters_update(D_80041FE0, &D_80042B00, idx, idx + 1);
     if (count != D_80042B00) {
         return 0;
     }
@@ -541,48 +560,52 @@ u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s1
     return e->unk24;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FA64.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sfx_emitter_start.s")
 #endif
-void func_1000FC18(u16 arg0, s16 arg1, s16 arg2, s16 arg3, u16 arg4) {
+/* was func_1000FC18 */
+void sfx_emitter_stop_at(u16 arg0, s16 arg1, s16 arg2, s16 arg3, u16 arg4) {
     s32 i;
 
     for (i = 0; i < D_80042B00; i++) {
         if (arg0 == ((SfxEnt *)D_80041FE0)[i].unk0 && arg1 == ((SfxEnt *)D_80041FE0)[i].unk2 && arg2 == ((SfxEnt *)D_80041FE0)[i].unk4 && arg3 == ((SfxEnt *)D_80041FE0)[i].unk6 && arg4 == (((SfxEnt *)D_80041FE0)[i].unk8 & 0x7FFF)) {
             if (((SfxEnt *)D_80041FE0)[i].unk24 != 0) {
-                func_100111C8(((SfxEnt *)D_80041FE0)[i].unk24);
+                sound_voice_stop(((SfxEnt *)D_80041FE0)[i].unk24);
             }
             ((SfxEnt *)D_80041FE0)[i].unk10 |= 0x80;
         }
     }
 }
-void func_1000FD38(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1000FD38 */
+void sfx_emitter_stop_by_callback(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
 
     for (i = 0; i < D_80042760; i++) {
         if (arg0 == D_80041FE0[i].unk14 && arg1 == D_80041FE0[i].unk18 && arg2 == D_80041FE0[i].unk1C) {
             if (D_80041FE0[i].unk24) {
-                func_100111C8(D_80041FE0[i].unk24);
+                sound_voice_stop(D_80041FE0[i].unk24);
             }
             D_80041FE0[i].unk10 = D_80041FE0[i].unk10 | 0x80;
         }
     }
 }
-void func_1000FDF4(u16 arg0) {
+/* was func_1000FDF4 */
+void sfx_emitter_stop_by_voice(u16 arg0) {
     s32 i;
 
     for (i = 0; i < D_80042760; i++) {
         if (arg0 == D_80041FE0[i].unk24) {
             if (D_80041FE0[i].unk24) {
-                func_100111C8(D_80041FE0[i].unk24);
+                sound_voice_stop(D_80041FE0[i].unk24);
             }
             D_80041FE0[i].unk10 = D_80041FE0[i].unk10 | 0x80;
         }
     }
 }
-s32 func_1000FE88(struct15 *arg0, s32 arg1, s32 *arg2) {
+/* was func_1000FE88 */
+s32 sfx_emitter_free_index(struct15 *arg0, s32 arg1, s32 *arg2) {
     if (arg1 < *arg2) {
         if (arg0[arg1].unk24 != 0) {
-            func_100111C8(arg0[arg1].unk24);
+            sound_voice_stop(arg0[arg1].unk24);
         }
         arg0[arg1].unk10 |= 0x80;
         return 0;
@@ -591,7 +614,8 @@ s32 func_1000FE88(struct15 *arg0, s32 arg1, s32 *arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1000FEF0(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1000FEF0 */
+s32 sfx_emitter_find_by_voice(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_t6;
     s32 var_v1;
     struct15 *var_a2;
@@ -618,10 +642,10 @@ block_10:
     return -1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FEF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sfx_emitter_find_by_voice.s")
 #endif
 // NON-MATCHING: needs a re-work
-// s32 func_1000FEF0(u16 arg0, struct127 *arg1, s32 arg2) {
+// s32 sfx_emitter_find_by_voice(u16 arg0, struct127 *arg1, s32 arg2) {
 //     s32 i;
 //     struct15 *tmp;
 //
@@ -642,7 +666,8 @@ block_10:
 // }
 
 extern s32 D_80042B00;
-s32 func_1000FF90(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1000FF90 */
+s32 sfx_emitter_find_by_callback(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     u32 new_var; // fakematch: -1 kept in its own register
 
@@ -657,7 +682,8 @@ s32 func_1000FF90(s32 arg0, s32 arg1, s32 arg2) {
     }
     return -1;
 }
-void func_1001001C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_1001001C */
+void sfx_emitter_set_volume_pitch(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 i;
 
     for (i = 0; i < D_80042760; i++) {
@@ -667,7 +693,8 @@ void func_1001001C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         }
     }
 }
-void func_100100E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+/* was func_100100E0 */
+void sfx_emitter_replace_callback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     s32 i;
 
     for (i = 0; i < D_80042760; i++) {
@@ -680,9 +707,10 @@ void func_100100E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 }
 #ifdef NON_MATCHING
 // object_sound_play: plays sound sfx at object obj (volume vol, arg3 / arg4 = distance range) and keeps the handle in
-// obj+0x8E. Players (+0x318) play it as a 2D sound through func_10010BE8 with the player's pan; other objects
-// get a 3D emitter that follows them (func_1000EE70, key unique_id | 0x10000). Dead objects (state 0 or 5) play nothing.
-u16 func_10010154(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
+// obj+0x8E. Players (+0x318) play it as a 2D sound through sound_voice_play with the player's pan; other objects
+// get a 3D emitter that follows them (sfx_cb_follow_object, key unique_id | 0x10000). Dead objects (state 0 or 5) play nothing.
+/* was func_10010154 */
+u16 actor_sound_play(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
     u16 handle = 0;
     s32 flags = 0;
     s16 near = arg3;
@@ -692,7 +720,7 @@ u16 func_10010154(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
         return 0;
     }
     if (*(s32 *)(o + 0x318) != 0) {
-        handle = func_10010BE8(*(u16 *)(o + 0x8E), sfx, vol, 0x40, 0, ((*(u32 *)(o + 0x184) >> 3) & 0x30) << 1,
+        handle = sound_voice_play(*(u16 *)(o + 0x8E), sfx, vol, 0x40, 0, ((*(u32 *)(o + 0x184) >> 3) & 0x30) << 1,
                                D_80041FD9);
         *(u16 *)(o + 0x8E) = handle;
         return handle;
@@ -707,10 +735,10 @@ u16 func_10010154(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
     } else if (o[0x13C] != 0 && (o[4] == 0x8A || o[4] == 0x23)) {
         flags = 0x100;
     }
-    func_1000FD38((s32)func_1000EE70, (s32)obj, obj->unique_id | 0x10000);
+    sfx_emitter_stop_by_callback((s32)sfx_cb_follow_object, (s32)obj, obj->unique_id | 0x10000);
     if (*(s32 *)o != 0) {
-        handle = func_1000FA64(sfx, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position, vol, arg4, near,
-                               (s32)func_1000EE70, obj, obj->unique_id | 0x10000, flags, 0);
+        handle = sfx_emitter_start(sfx, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position, vol, arg4, near,
+                               (s32)sfx_cb_follow_object, obj, obj->unique_id | 0x10000, flags, 0);
     }
     *(u16 *)(o + 0x8E) = handle;
     return handle;
@@ -719,7 +747,8 @@ u16 func_10010154(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
 // object_sound_play2: as object_sound_play for the object's second sound slot (handle in obj+0x8C, emitter key
 // unique_id | 0x20000). A negative vol plays at -vol with flag 0x100; a player whose context has +0x94 == 1 plays at
 // full volume (0x7FFF) in mono.
-u16 func_10010344(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
+/* was func_10010344 */
+u16 actor_sound_play2(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
     u16 handle;
     s32 flags = 0;
     s16 near = arg3;
@@ -741,7 +770,7 @@ u16 func_10010344(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
             mono = 1;
             vol = 0x7FFF;
         }
-        handle = func_10010BE8(*(u16 *)(o + 0x8C), sfx, vol, 0x40, 0, ((*(u32 *)(o + 0x184) >> 3) & 0x30) << 1, mono);
+        handle = sound_voice_play(*(u16 *)(o + 0x8C), sfx, vol, 0x40, 0, ((*(u32 *)(o + 0x184) >> 3) & 0x30) << 1, mono);
         *(u16 *)(o + 0x8C) = handle;
         return handle;
     }
@@ -755,67 +784,71 @@ u16 func_10010344(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
     } else if (o[4] == 0x4F || o[4] == 0x83) {
         flags |= 4;
     }
-    func_1000FD38((s32)func_1000EE70, (s32)obj, obj->unique_id | 0x20000);
-    handle = func_1000FA64(sfx, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position, vol, arg4, near,
-                           (s32)func_1000EE70, obj, obj->unique_id | 0x20000, flags, 0);
+    sfx_emitter_stop_by_callback((s32)sfx_cb_follow_object, (s32)obj, obj->unique_id | 0x20000);
+    handle = sfx_emitter_start(sfx, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position, vol, arg4, near,
+                           (s32)sfx_cb_follow_object, obj, obj->unique_id | 0x20000, flags, 0);
     *(u16 *)(o + 0x8C) = handle;
     return handle;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010154.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010344.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/actor_sound_play.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/actor_sound_play2.s")
 #endif
-void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
+/* was func_10010558 */
+void actor_sound_play2_delayed(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
     if (arg5 <= 0) {
-        func_10010344(arg0, arg1, arg2, arg3, arg4);
+        actor_sound_play2(arg0, arg1, arg2, arg3, arg4);
     } else {
-        func_1000FA64(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, func_1000ECCC, arg5, arg1, 0, 0);
+        sfx_emitter_start(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, sfx_cb_delayed_object_sound2, arg5, arg1, 0, 0);
     }
 }
 
 #ifdef NON_MATCHING
-void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
+/* was func_10010630 */
+void actor_sound_play_untracked(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
     if (arg1->interaction_state != 0) {
         if (arg1->camera != NULL) {
-            func_10010F30((s32) arg0, arg2 & 0xFFFF, 0x40U, 0, (u8) ((((u32) arg1->unk184 >> 3) & 0x30) * 2));
+            sound_play_2d((s32) arg0, arg2 & 0xFFFF, 0x40U, 0, (u8) ((((u32) arg1->unk184 >> 3) & 0x30) * 2));
             return;
         }
-        func_1000FA64(arg0, (s16) (s32) arg1->x_position, (s16) (s32) arg1->y_position, (s16) (s32) arg1->z_position, arg2, (u16) (s32) arg4, (s16) (s32) arg3, (s32) func_1000EE70, arg1, (s32) arg1->unique_id, 0, 0);
+        sfx_emitter_start(arg0, (s16) (s32) arg1->x_position, (s16) (s32) arg1->y_position, (s16) (s32) arg1->z_position, arg2, (u16) (s32) arg4, (s16) (s32) arg3, (s32) sfx_cb_follow_object, arg1, (s32) arg1->unique_id, 0, 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010630.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/actor_sound_play_untracked.s")
 #endif
-// void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
+// void actor_sound_play_untracked(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
 //     if (arg1->interaction_state != 0) {
 //         if (arg1->camera != 0) {
-//             func_10010F30(arg0, arg2 & 0xFFFF, 64, 0, (((u32) arg1->unk184 >> 3) & 0x30) * 2); //
+//             sound_play_2d(arg0, arg2 & 0xFFFF, 64, 0, (((u32) arg1->unk184 >> 3) & 0x30) * 2); //
 //         } else {
-//             func_1000FA64(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, (void *)func_1000EE70, arg1, arg1->unique_id, 0, 0);
+//             sfx_emitter_start(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, (void *)sfx_cb_follow_object, arg1, arg1->unique_id, 0, 0);
 //         }
 //     }
 // }
 
-void func_10010720(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
+/* was func_10010720 */
+void actor_sound_play_untracked_delay(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
     if (arg5 <= 0) {
-        func_10010630(arg0, arg1, arg2, arg3, arg4);
+        actor_sound_play_untracked(arg0, arg1, arg2, arg3, arg4);
     } else {
-        func_1000FA64(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, func_1000EDA0, arg5, arg1, 0, 0);
+        sfx_emitter_start(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, sfx_cb_delayed_object_sound, arg5, arg1, 0, 0);
     }
 }
 
-s32 func_100107F8(struct127 *arg0) {
+/* was func_100107F8 */
+s32 actor_sound_is_playing(struct127 *arg0) {
     if (arg0->interaction_state == 0) {
         return 0;
     } else {
         if (arg0->camera != 0) {
             if (arg0->unk8E != 0) {
-                if (func_1000F3D0(arg0->unk8E) != 0) {
+                if (sound_voice_is_playing(arg0->unk8E) != 0) {
                     return 1;
                 }
             }
         } else {
-            if (func_1000FF90(func_1000EE70, arg0, arg0->unique_id | 0x10000) != -1) {
+            if (sfx_emitter_find_by_callback(sfx_cb_follow_object, arg0, arg0->unique_id | 0x10000) != -1) {
                 return 1;
             }
         }
@@ -824,15 +857,16 @@ s32 func_100107F8(struct127 *arg0) {
     return 0;
 }
 
-s32 func_10010894(struct127 *arg0) {
+/* was func_10010894 */
+s32 actor_sound2_is_playing(struct127 *arg0) {
     if (arg0->camera != 0) {
         if (arg0->unk8C != 0) {
-            if (func_1000F3D0(arg0->unk8C) != 0) {
+            if (sound_voice_is_playing(arg0->unk8C) != 0) {
                 return 1;
             }
         }
     } else {
-        if (func_1000FF90(func_1000EE70, arg0, arg0->unique_id | 0x20000) != -1) {
+        if (sfx_emitter_find_by_callback(sfx_cb_follow_object, arg0, arg0->unique_id | 0x20000) != -1) {
             return 1;
         }
     }
@@ -842,17 +876,18 @@ s32 func_10010894(struct127 *arg0) {
 
 extern s32 D_8004238C;
 
-void func_1001091C(u8 *arg0, s32 arg1) {
+/* was func_1001091C */
+void actor_sound_set_volume(u8 *arg0, s32 arg1) {
     s32 temp_v0;
 
     if (arg1 == 0) return;
     if (*(s32 *)arg0 == 0) return;
     if ((*(s32 *)((u8 *)arg0 + 0x318)) != 0) {
         if ((*(u16 *)((u8 *)arg0 + 0x8E)) != 0) {
-            func_1000F85C((*(u16 *)((u8 *)arg0 + 0x8E)), 8, arg1);
+            sound_voice_set_param((*(u16 *)((u8 *)arg0 + 0x8E)), 8, arg1);
         }
     } else {
-        temp_v0 = func_1000FF90((s32) func_1000EE70, (s32) arg0, (*(u8 *)((u8 *)arg0 + 0x3B)) | 0x10000);
+        temp_v0 = sfx_emitter_find_by_callback((s32) sfx_cb_follow_object, (s32) arg0, (*(u8 *)((u8 *)arg0 + 0x3B)) | 0x10000);
         if (temp_v0 != -1) {
             *(s32 *)((u8 *)&D_8004238C + (temp_v0 * 0x30)) = arg1;
             return;
@@ -861,16 +896,16 @@ void func_1001091C(u8 *arg0, s32 arg1) {
     }
 }
 // NON-MATCHING: something isnt right...
-// void func_1001091C(struct127 *arg0, struct15 *arg1) {
+// void actor_sound_set_volume(struct127 *arg0, struct15 *arg1) {
 //     s32 temp_v0;
 //
 //     if ((arg1 != NULL) && (arg0->unk0 != 0)) {
 //         if (arg0->camera != 0) {
 //             if (arg0->unk8E != 0) {
-//                 func_1000F85C(arg0->unk8E, 8, arg1->unk1C); // help
+//                 sound_voice_set_param(arg0->unk8E, 8, arg1->unk1C); // help
 //             }
 //         } else {
-//             temp_v0 = func_1000FF90(func_1000EE70, arg0, arg0->unique_id | 0x10000);
+//             temp_v0 = sfx_emitter_find_by_callback(sfx_cb_follow_object, arg0, arg0->unique_id | 0x10000);
 //             if (temp_v0 != -1) {
 //                 D_80041FEC[temp_v0][0] = arg1;
 //             } else {
@@ -880,52 +915,55 @@ void func_1001091C(u8 *arg0, s32 arg1) {
 //     }
 // }
 
-void func_100109D0(struct127 *arg0) {
+/* was func_100109D0 */
+void actor_sound_stop(struct127 *arg0) {
     if (arg0->camera) {
         if (arg0->unk8E) {
-            func_100111C8(arg0->unk8E);
+            sound_voice_stop(arg0->unk8E);
         }
     } else {
-        func_1000FD38(func_1000EE70, arg0, arg0->unique_id | 0x10000);
+        sfx_emitter_stop_by_callback(sfx_cb_follow_object, arg0, arg0->unique_id | 0x10000);
     }
     arg0->unk8E = 0;
 }
 
-void func_10010A3C(struct127 *arg0) {
+/* was func_10010A3C */
+void actor_sound2_stop(struct127 *arg0) {
     if (arg0->camera) {
         if (arg0->unk8C) {
-            func_100111C8(arg0->unk8C);
+            sound_voice_stop(arg0->unk8C);
         }
     } else {
-        func_1000FD38(func_1000EE70, arg0, arg0->unique_id | 0x20000);
+        sfx_emitter_stop_by_callback(sfx_cb_follow_object, arg0, arg0->unique_id | 0x20000);
     }
     arg0->unk8C = 0;
 }
 
-void func_10010AA8(struct127 *arg0) {
+/* was func_10010AA8 */
+void actor_sounds_stop_loops(struct127 *arg0) {
     s32 sp24;
     struct15 *tmp;
 
     if (arg0->camera != 0) {
-        if (arg0->unk8C && func_1000F44C(arg0->unk8C)) {
-            func_100111C8(arg0->unk8C);
+        if (arg0->unk8C && sound_voice_is_looping(arg0->unk8C)) {
+            sound_voice_stop(arg0->unk8C);
         }
-        if (arg0->unk8E && func_1000F44C(arg0->unk8E)) {
-            func_100111C8(arg0->unk8E);
+        if (arg0->unk8E && sound_voice_is_looping(arg0->unk8E)) {
+            sound_voice_stop(arg0->unk8E);
         }
     } else {
-        sp24 = func_1000FEF0(arg0->unk8C, arg0, arg0->unique_id);
+        sp24 = sfx_emitter_find_by_voice(arg0->unk8C, arg0, arg0->unique_id);
         if (sp24 != -1) {
-            if (func_1000F44C(arg0->unk8C)) {
-                func_100111C8(arg0->unk8C);
+            if (sound_voice_is_looping(arg0->unk8C)) {
+                sound_voice_stop(arg0->unk8C);
             }
             tmp = &D_80041FE0[sp24];
             tmp->unk10 |= 0x80;
         }
-        sp24 = func_1000FEF0(arg0->unk8E, arg0, arg0->unique_id);
+        sp24 = sfx_emitter_find_by_voice(arg0->unk8E, arg0, arg0->unique_id);
         if (sp24 != -1) {
-            if (func_1000F44C(arg0->unk8E)) {
-                func_100111C8(arg0->unk8E);
+            if (sound_voice_is_looping(arg0->unk8E)) {
+                sound_voice_stop(arg0->unk8E);
             }
             tmp = &D_80041FE0[sp24];
             tmp->unk10 |= 0x80;
@@ -940,7 +978,8 @@ s32 func_10017438(s32, s16, u16, u8, f32, s32, s32, struct31 **);
 extern s32 D_8003E708;
 extern u16 D_80042984;
 
-u16 func_10010BE8(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6) {
+/* was func_10010BE8 */
+u16 sound_voice_play(u16 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6) {
     u16 sp4E;
     struct31 **sp38;
     s32 sp34;
@@ -1021,37 +1060,41 @@ block_31:
     return var_t0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010BE8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sound_voice_play.s")
 #endif
-u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA)
+/* was func_10010E78 */
+u16 sound_voice_play_at(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA)
 {
   s32 sp2C;
   u32 temp_t1;
-  temp_t1 = (u32) func_1000F6B8(arg5, arg6, arg7, arg8, &sp2C, (s32) arg9, (s32) argA);
+  temp_t1 = (u32) sound_listener_volume_pan(arg5, arg6, arg7, arg8, &sp2C, (s32) arg9, (s32) argA);
   temp_t1 = (((u32) arg2) * temp_t1) >> 0xF;
   if (temp_t1 != 0)
   {
-    return func_10010BE8(arg0, arg1, temp_t1, sp2C & 0x7F, (s16) ((s32) arg3), (sp2C & 0x80) | arg4, (u8) ((s32) D_80041FD9));
+    return sound_voice_play(arg0, arg1, temp_t1, sp2C & 0x7F, (s16) ((s32) arg3), (sp2C & 0x80) | arg4, (u8) ((s32) D_80041FD9));
   }
   return 0;
 }
 
-u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
-    func_10010BE8(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);
+/* was func_10010F30 */
+u16 sound_play_2d(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
+    sound_voice_play(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);
 }
 
 #ifdef NON_MATCHING
-// sound_play_at: plays a sound with no owner (func_10010E78 with arg0 0). The asm passes func_10010E78's v0
+// sound_play_at: plays a sound with no owner (sound_voice_play_at with arg0 0). The asm passes sound_voice_play_at's v0
 // through, and the asm callers keep it as the sound handle, so the NM version returns it.
-u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
-    return func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+/* was func_10010F88 */
+u16 sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
+    return sound_voice_play_at(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 #else
-void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
-    func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+void sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
+    sound_voice_play_at(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 #endif
-u16 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
+/* was func_10010FFC */
+u16 sound_play_for_actor(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
 {
   f32 f;
   u8 idx;
@@ -1061,7 +1104,7 @@ u16 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
   }
   if (*(s32 *) (arg5 + 0x318) != 0)
   {
-    arg0 = func_10010BE8(arg0, arg1, arg2, 0x40, arg3, arg4, D_80041FD9);
+    arg0 = sound_voice_play(arg0, arg1, arg2, 0x40, arg3, arg4, D_80041FD9);
   }
   else
   {
@@ -1087,12 +1130,13 @@ u16 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
     {
       f = f * 0.00390625f;
     }
-    arg0 = func_10010E78(arg0, arg1, arg2, arg3, arg4, 0, *(f32 *) (arg5 + 0x14), *(f32 *) (arg5 + 0x18), *(f32 *) (arg5 + 0x1C), 500, (s32) (2000.0f * f) + 501);
+    arg0 = sound_voice_play_at(arg0, arg1, arg2, arg3, arg4, 0, *(f32 *) (arg5 + 0x14), *(f32 *) (arg5 + 0x18), *(f32 *) (arg5 + 0x1C), 500, (s32) (2000.0f * f) + 501);
   }
   return arg0;
 }
 
-void func_100111C8(u16 arg0) {
+/* was func_100111C8 */
+void sound_voice_stop(u16 arg0) {
     struct120 *tmp = &D_800425E0[arg0 & 0xF];
 
     if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
@@ -1103,18 +1147,20 @@ void func_100111C8(u16 arg0) {
     }
 }
 
-void func_1001123C(u16 arg0) {
+/* was func_1001123C */
+void sound_voice_stop_deferred(u16 arg0) {
     struct120 *tmp = &D_800425E0[arg0 & 0xF];
 
     if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
-        if (func_100112BC(arg0, 1) == 0) {
+        if (sound_stop_queue_push(arg0, 1) == 0) {
             func_10017594(tmp->unk8);
             tmp->unk8 = 0;
         }
     }
 }
 
-s32 func_100112BC(s32 arg0, s32 arg1) {
+/* was func_100112BC */
+s32 sound_stop_queue_push(s32 arg0, s32 arg1) {
     struct49 *temp_a0;
     s32 temp_v1 = D_80041F50;
 
@@ -1133,7 +1179,8 @@ s32 func_100112BC(s32 arg0, s32 arg1) {
 typedef struct { u16 id; u8 timer; u8 slot; } SfxPend;
 #define PEND ((SfxPend *)D_80041F10)
 
-void func_10011310(void)
+/* was func_10011310 */
+void sound_stop_queue_process(void)
 {
   s32 slot;
   s32 removed;
@@ -1186,7 +1233,8 @@ void func_10011310(void)
   D_80041F50 = n;
 }
 
-s32 func_1001147C(u16 arg0) {
+/* was func_1001147C */
+s32 sound_voice_get_id(u16 arg0) {
     struct120 *tmp;
 
     if (arg0 != 0) {
@@ -1201,10 +1249,11 @@ s32 func_1001147C(u16 arg0) {
 #ifdef NON_MATCHING
 // sound_source_mix: volume / pan / distance of a sound at (x, y, z) for the nearest listener (P151). With more than
 // one listener (D_80082FA0 = last index) it picks the one whose ear position (ex, ey, ez) is closest; then
-// func_1000A420 with the source relative to the ear, the listener's heading and the source relative to the listener
+// sound_calc_pan_volume with the source relative to the ear, the listener's heading and the source relative to the listener
 // (x, y, z) for the distance falloff between `outer` and `inner`. *outVol = that volume scaled by gain / 0x8000.
 // Returns the distance.
-s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist) {
+/* was func_100114D0 */
+s32 sound_source_mix(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist) {
     SfxListener *best = D_80042308;
     SfxListener *l;
     u32 min;
@@ -1227,13 +1276,13 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outP
             }
         }
     }
-    dist = func_1000A420(x - best->ex, y - best->ey, z - best->ez, best->f, x - best->x, y - best->y, z - best->z, outer,
+    dist = sound_calc_pan_volume(x - best->ex, y - best->ey, z - best->ez, best->f, x - best->x, y - best->y, z - best->z, outer,
                          inner, (s32)outPan, &vol, (s32)outDist);
     *outVol = (u32)(vol * gain) >> 15;
     return dist;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_100114D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sound_source_mix.s")
 #endif
 #ifdef NON_MATCHING
 /* SfxEnt.unk10 flags used by the update pass */
@@ -1242,7 +1291,7 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outP
 #define SFX_SMOOTH      0x0004 /* pitch ratio follows the distance change (Doppler-like), smoothed */
 #define SFX_KEEP        0x0008 /* keep the entry when the voice ends / goes silent */
 #define SFX_CALLBACK    0x0010 /* unk14 may adjust the parameters (non-zero: the entry is freed) */
-#define SFX_LISTENER    0x0040 /* position relative to listener D_80042308[0] (func_1000A750) */
+#define SFX_LISTENER    0x0040 /* position relative to listener D_80042308[0] (sound_path_calc_pan_volume) */
 #define SFX_FREE        0x0080
 #define SFX_FIXED_PAN   0x0100 /* pan 0x40, not computed */
 #define SFX_MIRROR      0x0200 /* mirrored pan, flips the 0x80 bit */
@@ -1250,10 +1299,11 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outP
 #define SFX_SKIP_ONCE   0x1000
 
 /* Updates the sound entries [first, min(*count, end)): drops ended voices, computes volume / pan / pitch from the
- * position (func_100114D0 or the listener-relative func_1000A750), starts a voice for an entry without one
- * (func_10010BE8) or sends the changed parameters to the playing one (func_1000F85C 8 = volume, 4 = pan,
- * 0x100 = pan high bit | slot, 0x11 = pitch ratio). Entries that fall silent are freed (func_1000FE88) or stopped. */
-void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
+ * position (sound_source_mix or the listener-relative sound_path_calc_pan_volume), starts a voice for an entry without one
+ * (sound_voice_play) or sends the changed parameters to the playing one (sound_voice_set_param 8 = volume, 4 = pan,
+ * 0x100 = pan high bit | slot, 0x11 = pitch ratio). Entries that fall silent are freed (sfx_emitter_free_index) or stopped. */
+/* was func_10011624 */
+void sfx_emitters_update(struct15 *arg0, s32 *count, s32 first, s32 end) {
     SfxEnt *e;
     SfxListener *lis;
     u32 flags;
@@ -1284,7 +1334,7 @@ void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
             continue;
         }
         voice = e->unk24;
-        if ((flags & SFX_PLAYING) && voice != 0 && func_1000F3D0(voice) == 0) {
+        if ((flags & SFX_PLAYING) && voice != 0 && sound_voice_is_playing(voice) == 0) {
             /* the voice has ended */
             flags &= ~SFX_PLAYING;
             voice = 0;
@@ -1311,11 +1361,11 @@ void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
         }
         if (flags & SFX_LISTENER) {
             lis = &D_80042308[0];
-            pos = func_1000A750(e->unk4, lis->ex, lis->ey, lis->ez, lis->f, lis->x, lis->y, lis->z, e->unk8, e->unkA,
+            pos = sound_path_calc_pan_volume(e->unk4, lis->ex, lis->ey, lis->ez, lis->f, lis->x, lis->y, lis->z, e->unk8, e->unkA,
                                 &pan, &vol, &dist);
             vol = (e->unkC * vol) >> 15;
         } else {
-            pos = func_100114D0(e->unk2, e->unk4, e->unk6, e->unkC, e->unk8, e->unkA, panOut, (s32 *) &vol,
+            pos = sound_source_mix(e->unk2, e->unk4, e->unk6, e->unkC, e->unk8, e->unkA, panOut, (s32 *) &vol,
                                 (s32 *) &dist);
         }
         if (D_800BEA35 != 0) {
@@ -1327,7 +1377,7 @@ void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
         if ((flags & SFX_CALLBACK) && e->unk14 != NULL) {
             e->unk10 = flags;
             if (e->unk14((struct15 *) e, &pos, &vol, &pan, &pitch, &slot, &sound) != 0) {
-                func_1000FE88(arg0, i, count);
+                sfx_emitter_free_index(arg0, i, count);
                 continue;
             }
             voice = e->unk24;
@@ -1341,11 +1391,11 @@ void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
         if (vol == 0) {
             /* silent */
             if (!(flags & SFX_KEEP)) {
-                func_1000FE88(arg0, i, count);
+                sfx_emitter_free_index(arg0, i, count);
                 continue;
             }
             if (voice != 0) {
-                func_100111C8(voice);
+                sound_voice_stop(voice);
             }
             flags &= ~SFX_PLAYING;
             e->unk24 = 0;
@@ -1374,20 +1424,20 @@ void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
                     fx = 1;
                     break;
             }
-            voice = func_10010BE8(0, sound, vol, pan, pitch, hi, fx);
+            voice = sound_voice_play(0, sound, vol, pan, pitch, hi, fx);
             if (voice != 0) {
                 flags |= SFX_PLAYING;
                 e->unk0 = sound;
             }
         } else {
             if (vol != e->unk26) {
-                func_1000F85C(voice, 8, vol);
+                sound_voice_set_param(voice, 8, vol);
             }
             if (pan != (e->unk22 & 0x7F)) {
-                func_1000F85C(voice, 4, pan);
+                sound_voice_set_param(voice, 4, pan);
             }
             if (hi != (e->unk23 | (e->unk22 & 0x80))) {
-                func_1000F85C(voice, 0x100, hi);
+                sound_voice_set_param(voice, 0x100, hi);
             }
             if (flags & SFX_SMOOTH) {
                 d = (s32) ((e->unk28 - dist) * D_800BE9E4) / 3;
@@ -1405,7 +1455,7 @@ void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
                 ratio.f = e->unk2C + (ratio.f - e->unk2C) * 0.3f;
             }
             if (ratio.f != e->unk2C) {
-                func_1000F85C(voice, 0x11, ratio.i);
+                sound_voice_set_param(voice, 0x11, ratio.i);
             }
         }
         e->unk28 = dist;
@@ -1418,9 +1468,10 @@ void func_10011624(struct15 *arg0, s32 *count, s32 first, s32 end) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011624.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/sfx_emitters_update.s")
 #endif
-void func_10011BB8(void) {
+/* was func_10011BB8 */
+void sound_update_frame(void) {
     s32 i;
     s32 j;
     s32 step;
@@ -1443,8 +1494,8 @@ void func_10011BB8(void) {
             D_80042308[i].ez = *(f32 *)(obj + 0x300);
             D_80042308[i].f = *(f32 *)(obj + 0x380);
         }
-        func_10011310();
-        func_10011624(D_80041FE0, &D_80042B00, 0, D_80042B00);
+        sound_stop_queue_process();
+        sfx_emitters_update(D_80041FE0, &D_80042B00, 0, D_80042B00);
         for (i = 0, j = 0; i < D_80042B00; i++) {
             D_80041FE0[j] = D_80041FE0[i];
             if (!(D_80041FE0[j].unk10 & 0x80)) {
@@ -1471,10 +1522,12 @@ void func_10011BB8(void) {
     }
 }
 
-void func_10011E88(s32 arg0) {
+/* was func_10011E88 */
+void sound_level_hook_nop(s32 arg0) {
 }
 
-void func_10011E94(s32 arg0) {
+/* was func_10011E94 */
+void sound_set_pause_mute(s32 arg0) {
     if (arg0) {
         D_80041F61 = 1;
     } else {
@@ -1484,9 +1537,9 @@ void func_10011E94(s32 arg0) {
 
 s32 floor_flags_surface_type(s32);
 #ifdef NON_MATCHING
-u16 func_1000F568(s32, u16); /* P157: two parameters (the asm reads a0 / a1 only, as every other caller declares) */
+u16 sound_pick_variant(s32, u16); /* P157: two parameters (the asm reads a0 / a1 only, as every other caller declares) */
 #else
-u16 func_1000F568(s32, u16, s32, s32);
+u16 sound_pick_variant(s32, u16, s32, s32);
 #endif
 typedef struct { u16 a; u16 b; } SndPair;
 // rodata_inject: cdefined 0x2C5A0 0x2C758
@@ -1515,7 +1568,8 @@ const SndPair D_8002C5A0[22][5] = {
     { { 0x2328, 9000 }, { 0x3FFE, 9000 }, { 0x2328, 9000 }, { 0x2328, 9000 }, { 0x0000, 0 } },
 };
 
-u16 func_10011EB8(s32 arg0, s16 *arg1, s32 arg2)
+/* was func_10011EB8 */
+u16 sound_surface_footstep(s32 arg0, s16 *arg1, s32 arg2)
 {
   s32 *new_var;
   s32 v;
@@ -1538,15 +1592,15 @@ u16 func_10011EB8(s32 arg0, s16 *arg1, s32 arg2)
     if (!D_8002C5A0 && !D_8002C5A0 && !D_8002C5A0) { // fakematch: permuter, always false
     }
 #ifdef NON_MATCHING
-    v = func_1000F568(v, D_8002C5A0[arg0][*new_var].b);
+    v = sound_pick_variant(v, D_8002C5A0[arg0][*new_var].b);
 #else
-    v = func_1000F568(v, D_8002C5A0[arg0][*new_var].b, *new_var, arg0);
+    v = sound_pick_variant(v, D_8002C5A0[arg0][*new_var].b, *new_var, arg0);
 #endif
   }
   return v;
 }
 // NON-MATCHING: whats going on here
-// u16 func_10011EB8(s32 arg0, s16 *arg1, s32 arg2, s32 arg3) {
+// u16 sound_surface_footstep(s32 arg0, s16 *arg1, s32 arg2, s32 arg3) {
 //     struct120 *temp_v1_2;
 //     s32 temp_v0;
 //     s32 temp_a0;
@@ -1562,7 +1616,7 @@ u16 func_10011EB8(s32 arg0, s16 *arg1, s32 arg2)
 //     temp_v1_2 = &D_8002C240[temp_v0 + arg2];
 //     temp_a0 = temp_v1_2->unk0;
 //     if (temp_v1_2->unk2 >= 2) {
-//         temp_a0 = func_1000F568(temp_v0, temp_v1_2->unk2);
+//         temp_a0 = sound_pick_variant(temp_v0, temp_v1_2->unk2);
 //     }
 //     return temp_a0;
 // }

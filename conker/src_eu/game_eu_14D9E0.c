@@ -7,7 +7,7 @@ void camera_look_mode_defaults(u8 *arg0);
 
 
 #ifdef NON_MATCHING
-void func_151CA150(u8 *arg0, s32 arg1); // defined in game_eu_1F7960 (two arguments)
+void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1); // defined in game_eu_1F7960 (two arguments)
 
 /* was func_151201D0 */
 void camera_look_enter(u8 *arg0) {
@@ -52,7 +52,7 @@ void camera_look_enter(u8 *arg0) {
         (*(f32 *)((u8 *)var_v1 + 0x3C)) = 0.0f;
         sp20 = (s32) temp_v0;
         sp1C = var_v1;
-        func_151CA150(arg0, temp_v0);
+        aim_hud_spawn_for_mode(arg0, temp_v0);
         (*(s8 *)((u8 *)arg0 + 0x84C)) = 1;
     } else {
         if ((temp_v0 == 2) || (temp_v0 == 0x13)) {
@@ -142,7 +142,7 @@ typedef struct {
     f32 offX;      // 0x0C: sideways look offset x / z (eased)
     f32 unk10;
     f32 offZ;      // 0x14
-    f32 yawVel;    // 0x18: easing state of yaw / pitch (func_15049978)
+    f32 yawVel;    // 0x18: easing state of yaw / pitch (math_spring_approach_angle)
     f32 pitchVel;  // 0x1C
     f32 yawGoal;   // 0x20: mode 3 (return) target yaw
     f32 dist3;     // 0x24: mode 3 distance / height / y
@@ -175,12 +175,12 @@ typedef struct {
 
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                    u16 argA, s32 argB, f32 argC, f32 argD);
-void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void camera_look_exit(u8 *arg0);
 void camera_update_eye_orbit(u8 *arg0);
 void camera_update_eye_height(u8 *arg0);
-void func_151CA484(u8 *arg0);
+void aim_hud_clear(u8 *arg0);
 
 // player_camera_update: per-frame player camera (+0x740 block, camera object +0x3D4, player object +0x3D0,
 // controller +0x36C). Gets the floor height under the camera (collision_find_floor), the player distance +0x370, sets the
@@ -291,12 +291,12 @@ void camera_look_update(u8 *arg0) {
             }
             if (reach || cam->force != 0) {
                 if (PU8(0x600) != 0) {
-                    func_15049978(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 10.0f, 18.0f, PF32(0x7B4));
+                    math_spring_approach_angle(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 10.0f, 18.0f, PF32(0x7B4));
                 } else {
-                    func_15049978(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 5.0f, 9.0f, PF32(0x7B4));
+                    math_spring_approach_angle(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 5.0f, 9.0f, PF32(0x7B4));
                 }
-                func_150498A0(&PF32(0x194), PF32(0x198), &PF32(0x7D0), 5.0f, 9.0f, PF32(0x7B4));
-                func_150498A0(&PF32(0x18C), PF32(0x190), &PF32(0x7D4), 5.0f, 9.0f, PF32(0x7B4));
+                math_spring_approach(&PF32(0x194), PF32(0x198), &PF32(0x7D0), 5.0f, 9.0f, PF32(0x7B4));
+                math_spring_approach(&PF32(0x18C), PF32(0x190), &PF32(0x7D4), 5.0f, 9.0f, PF32(0x7B4));
                 PF32(0x39C) = PF32(0x37C) * 0.017453292f;
             }
         } else {
@@ -319,11 +319,11 @@ void camera_look_update(u8 *arg0) {
         }
         if (CAM_MODE_RIDE(mode)) {
             if (PU8(0x84C) == 0) {
-                func_151CA150(arg0, mode);
+                aim_hud_spawn_for_mode(arg0, mode);
                 PU8(0x84C) = 1;
             }
         } else if (PU8(0x84C) != 0) {
-            func_151CA484(arg0);
+            aim_hud_clear(arg0);
             PU8(0x84C) = 0;
         }
         if (mode != 0xD) {
@@ -434,13 +434,13 @@ void camera_look_update(u8 *arg0) {
                 PF32(0x194) = PF32(0x198);
                 PF32(0x18C) = PF32(0x190);
             } else if (mode != 0 || special) {
-                func_15049978(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 3.91f, 8.21f, PF32(0x7B4));
-                func_15049978(&cam->pitch, cam->pitchTarget, &cam->pitchVel, 3.91f, 8.21f, PF32(0x7B4));
-                func_150498A0(&PF32(0x194), PF32(0x198), &PF32(0x7D0), 3.91f, 8.21f, PF32(0x7B4));
-                func_150498A0(&PF32(0x18C), PF32(0x190), &PF32(0x7D4), 3.91f, 8.21f, PF32(0x7B4));
+                math_spring_approach_angle(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 3.91f, 8.21f, PF32(0x7B4));
+                math_spring_approach_angle(&cam->pitch, cam->pitchTarget, &cam->pitchVel, 3.91f, 8.21f, PF32(0x7B4));
+                math_spring_approach(&PF32(0x194), PF32(0x198), &PF32(0x7D0), 3.91f, 8.21f, PF32(0x7B4));
+                math_spring_approach(&PF32(0x18C), PF32(0x190), &PF32(0x7D4), 3.91f, 8.21f, PF32(0x7B4));
             } else {
-                func_15049978(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 4.3f, 7.3f, PF32(0x7B4));
-                func_15049978(&cam->pitch, cam->pitchTarget, &cam->pitchVel, 4.3f, 7.3f, PF32(0x7B4));
+                math_spring_approach_angle(&PF32(0x37C), cam->yawTarget, &cam->yawVel, 4.3f, 7.3f, PF32(0x7B4));
+                math_spring_approach_angle(&cam->pitch, cam->pitchTarget, &cam->pitchVel, 4.3f, 7.3f, PF32(0x7B4));
             }
         }
         view = PPTR(0x3D4);
@@ -504,7 +504,7 @@ void camera_look_update(u8 *arg0) {
             *(s8 *) (PPTR(0x3D4) + 0x198) = 0;
             PS16(0x73C) = 0;
         } else {
-            func_15049978(&PF32(0x37C), cam->yawGoal, &cam->yawVel, 5.0f, 9.0f, PF32(0x7B4));
+            math_spring_approach_angle(&PF32(0x37C), cam->yawGoal, &cam->yawVel, 5.0f, 9.0f, PF32(0x7B4));
         }
     }
 
@@ -523,12 +523,12 @@ void camera_look_update(u8 *arg0) {
             cam->offZ = oz;
             cam->offXVel = 0.0f;
         } else {
-            func_150498A0(&cam->offX, ox, &cam->offXVel, 4.0f, 9.0f, PF32(0x7B4));
-            func_150498A0(&cam->offZ, oz, &cam->offZVel, 4.0f, 9.0f, PF32(0x7B4));
+            math_spring_approach(&cam->offX, ox, &cam->offXVel, 4.0f, 9.0f, PF32(0x7B4));
+            math_spring_approach(&cam->offZ, oz, &cam->offZVel, 4.0f, 9.0f, PF32(0x7B4));
         }
     } else {
-        func_150498A0(&cam->offX, 0.0f, &cam->offXVel, 4.0f, 9.0f, PF32(0x7B4));
-        func_150498A0(&cam->offZ, 0.0f, &cam->offZVel, 4.0f, 9.0f, PF32(0x7B4));
+        math_spring_approach(&cam->offX, 0.0f, &cam->offXVel, 4.0f, 9.0f, PF32(0x7B4));
+        math_spring_approach(&cam->offZ, 0.0f, &cam->offZVel, 4.0f, 9.0f, PF32(0x7B4));
     }
     view = PPTR(0x3D4);
     *(f32 *) (view + 0x148) = *(f32 *) (view + 0x148) + cam->offX;
@@ -672,9 +672,9 @@ void camera_look_mode_defaults(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_151CA484(u8 *arg0);
+void aim_hud_clear(u8 *arg0);
 #else
-s32 func_151CA484(u8 *);
+s32 aim_hud_clear(u8 *);
 #endif
 
 /* was func_15121E34 */
@@ -715,7 +715,7 @@ void camera_look_exit(u8 *arg0)
     obj_fade_command(*((struct127 **) (((u8 *) arg0) + 0x3D0)), 2U, 0xFFU, 0x20U, (s32) (*((u8 *) (((u8 *) arg0) + 0x23D))));
     if ((*((u8 *) (((u8 *) arg0) + 0x84C))) != 0)
     {
-      func_151CA484(arg0);
+      aim_hud_clear(arg0);
       *((u8 *) (((u8 *) arg0) + 0x84C)) = 0U;
     }
   }

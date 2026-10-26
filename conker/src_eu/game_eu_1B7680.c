@@ -4,7 +4,8 @@
 
 
 #define F(o) (*(f32 *)(p + (o)))
-void func_15189E70(void *arg0, u8 arg1) {
+/* was func_15189E70 */
+void area_drift_emitter_create(void *arg0, u8 arg1) {
     u8 *p;
     s32 flag;
 
@@ -31,11 +32,11 @@ void func_15189E70(void *arg0, u8 arg1) {
 #undef F
 
 #ifdef NON_MATCHING
-s32 func_151464B8(s32);
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+s32 player_mask_hides_all(s32);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern u8 D_800BEA50[];
 
-/* particle spec passed to func_15148310 (argument 12), 0x5C bytes */
+/* particle spec passed to trail_spawn (argument 12), 0x5C bytes */
 typedef struct {
     /* 0x00 */ s32 w00, w04, w08, w0C, w10, w14, w18;
     /* 0x1C */ u8 b1C, b1D;
@@ -55,16 +56,17 @@ typedef struct {
 } DriftSpec;
 
 /*
- * area_drift_emitter_update: P190. Per-frame update (D_8008B848 type 0x1A +0) of the emitter func_15189E70 creates
+ * area_drift_emitter_update: P190. Per-frame update (D_8008B848 type 0x1A +0) of the emitter area_drift_emitter_create creates
  * (p + 0x10: the 0x50-byte area parameters: +0x18 / +0x1C / +0x20 corner, +0x24 / +0x28 / +0x2C size, +0x30 / +0x34
  * speed base / range, +0x38 / +0x3C rate base / range, +0x40 / +0x44, +0x48 / +0x4A, +0x4C / +0x50, +0x54 / +0x56,
  * +0x58 / +0x5C random bases / ranges, +0x10 / +0x12 yaw centre / spread, +0x14 / +0x16 pitch base / range).
- * Nothing while the trigger +0x6C is set and func_151464B8 says so. Every 50 frames (+0x60 countdown) it checks that
+ * Nothing while the trigger +0x6C is set and player_mask_hides_all says so. Every 50 frames (+0x60 countdown) it checks that
  * a player (D_800BEA50[0 .. D_80082FA0], records D_800DBFF0 0x9A0 bytes, position +0x2F8) is within 1581 units
  * (squared 2500000), else does nothing; then accumulates rate * D_800BE9A4 in +0x64 and spawns one particle per
  * whole unit above 1 (random point in the box, random direction from two byte angles, random sizes / colours).
  */
-void func_15189F70(u8 *p) {
+/* was func_15189F70 */
+void area_drift_emitter_update(u8 *p) {
     DriftSpec spec;
     u8 *pl;
     u8 *part;
@@ -72,7 +74,7 @@ void func_15189F70(u8 *p) {
     s16 yaw, pitch;
     f32 dx, dy, dz, f, speed, sinYaw, cosYaw, sinPitch, cosPitch, horiz;
 
-    if (*(s32 *)(p + 0x6C) != 0 && func_151464B8(*(s32 *)(p + 0x6C)) != 0) {
+    if (*(s32 *)(p + 0x6C) != 0 && player_mask_hides_all(*(s32 *)(p + 0x6C)) != 0) {
         return;
     }
     *(s16 *)(p + 0x60) -= D_800BE9E4;
@@ -137,7 +139,7 @@ void func_15189F70(u8 *p) {
         spec.f34 = random_float() * *(f32 *)(p + 0x50) + *(f32 *)(p + 0x4C);
         spec.b3F = random_int() % (u32)(*(s16 *)(p + 0x4A) + 1) + *(s16 *)(p + 0x48);
         spec.h50 = random_int() % (u32)(*(s16 *)(p + 0x56) + 1) + *(s16 *)(p + 0x54);
-        part = func_15148310((u8 *)spec.pos, (s32)&spec.speed, 8, 1, (p[0x70] & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0,
+        part = trail_spawn((u8 *)spec.pos, (s32)&spec.speed, 8, 1, (p[0x70] & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0,
                              (u8 *)&spec, 0, p[0xC], p[1]);
         if (part != NULL) {
             memcpy(*(u8 **)(part + 0x98) + 0x48, &spec.floorY, 4);
@@ -146,7 +148,7 @@ void func_15189F70(u8 *p) {
     } while (1.0f < *(f32 *)(p + 0x64));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7680/func_15189F70.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7680/area_drift_emitter_update.s")
 #endif
 
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
@@ -154,7 +156,8 @@ u8 impact_current_kind(void);
 extern f64 D_800A7788;
 extern f32 D_800A7790;
 
-s32 func_1518A42C(u8 *arg0) {
+/* was func_1518A42C */
+s32 drift_particle_hit_floor(u8 *arg0) {
     s32 pad[2];
     u8 *obj;
     u8 *tbl;
@@ -175,6 +178,7 @@ s32 func_1518A42C(u8 *arg0) {
     return 1;
 }
 
-s32 func_1518A540(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1518A540 */
+s32 drift_particle_noop(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 1;
 }

@@ -5,8 +5,8 @@
 
 extern f32 D_800A1940;
 extern f32 D_800A1944;
-u8 func_151464B8(s32);
-s32 func_151432BC(s32, f32 *, f32 *, f32 *, f32 *);
+u8 player_mask_hides_all(s32);
+s32 spawn_region_random_point(s32, f32 *, f32 *, f32 *, f32 *);
 
 /* was func_150ECAA0 */
 void fx_area_emitter_update(u8 *arg0) {
@@ -20,7 +20,7 @@ void fx_area_emitter_update(u8 *arg0) {
     f32 sp68;
     f32 *v;
 
-    if (func_151464B8(*(s32 *)(arg0 + 0x30)) != 0) {
+    if (player_mask_hides_all(*(s32 *)(arg0 + 0x30)) != 0) {
         return;
     }
     v = (f32 *)(arg0 + 0x28);
@@ -28,7 +28,7 @@ void fx_area_emitter_update(u8 *arg0) {
     if (v[3] > 1.0f) {
         tmp.w = 0.0f;
         do {
-            func_151432BC(*(s32 *)v, &tmp.x, &tmp.z, &sp68, &tmp.y);
+            spawn_region_random_point(*(s32 *)v, &tmp.x, &tmp.z, &sp68, &tmp.y);
             temp_v0 = func_15149130((random_int() % 131U) + 80, -1, 0x5A, -1, 1, 0, 0x10, arg0[0xC], arg0[1]);
             if (temp_v0 != NULL) {
                 memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
@@ -39,7 +39,7 @@ void fx_area_emitter_update(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* was func_150ECC30 */
 void fx_point_particle_emitter_update(u8 *arg0) {
@@ -161,7 +161,7 @@ void fx_point_particle_emitter_update(u8 *arg0) {
             temp_f6 = (random_float() * 80.0f) + 92.0f;
             sp.uC8 = temp_f6;
             sp.uC4 = temp_f6;
-            temp_v0 = func_151307F0(&sp.u9C, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = particle_spawn_ex(&sp.u9C, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0xA8, &sp.u8C, 0x10);
             }
@@ -204,7 +204,7 @@ void obj_tint_fx_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
+void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 
 /* was func_150ED10C */
 void obj_tint_fx_update(u8 *arg0) {
@@ -219,21 +219,21 @@ void obj_tint_fx_update(u8 *arg0) {
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         return;
     }
-    func_1502ED88(sp28, (*(u8 *)((u8 *)temp_v0 + 5)), (*(u8 *)((u8 *)temp_v0 + 6)), (*(u8 *)((u8 *)temp_v0 + 7)), (s32) (*(u8 *)((u8 *)temp_v0 + 8)), 0, (s32) (*(u8 *)((u8 *)temp_v0 + 9)));
+    obj_tint_set_flash(sp28, (*(u8 *)((u8 *)temp_v0 + 5)), (*(u8 *)((u8 *)temp_v0 + 6)), (*(u8 *)((u8 *)temp_v0 + 7)), (s32) (*(u8 *)((u8 *)temp_v0 + 8)), 0, (s32) (*(u8 *)((u8 *)temp_v0 + 9)));
 }
 
 void obj_tint_fx_spawn(u8 *, u8, u8, u8, u8, u8, s16, u8, s32);
-s32 func_151CA070(struct127 *, u8, s32);
+s32 object_explode_air_burst(struct127 *, u8, s32);
 
 /* was func_150ED180 */
 void obj_hit_green_tint(s32 arg0, u8 arg1, s32 arg2) {
-    func_151CA070(arg0, arg1, arg2);
+    object_explode_air_burst(arg0, arg1, arg2);
     obj_tint_fx_spawn((u8 *)arg0, 0, 0xFF, 0, 0xFF, 4, -1, arg1, arg2);
 }
 
 #ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern f32 D_80088E70; /* current tint r, g, b */
 extern f32 D_80088E74;
 extern f32 D_80088E78;
@@ -315,9 +315,9 @@ void camera_update_map_tint(u8 *obj) {
         event_dispatch_alt(2, 0x9000, 8, hi, lo);
         *(f32 *) (obj + 0x190) = 220.0f;
     }
-    func_150498A0(&D_80088E70, D_80088E7C, &D_80088E88, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    func_150498A0(&D_80088E74, D_80088E80, &D_80088E8C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
-    func_150498A0(&D_80088E78, D_80088E84, &D_80088E90, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&D_80088E70, D_80088E7C, &D_80088E88, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&D_80088E74, D_80088E80, &D_80088E8C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    math_spring_approach(&D_80088E78, D_80088E84, &D_80088E90, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
     event_dispatch_alt(1, 0x30F3, 0x12, (u8) TINT_F2U(D_80088E70));
     event_dispatch_alt(1, 0x30F4, 0x12, (u8) TINT_F2U(D_80088E74));
     event_dispatch_alt(1, 0x30F5, 0x12, (u8) TINT_F2U(D_80088E78));

@@ -6,10 +6,10 @@ s/    comb = (d->u42 \& 0xF0) >> 4;/    comb = d->u42 \& 0xF0;/ % plain
 s/    sinV = D_800DD608\[view\];/    sinV = D_800DD608[0];/ % view1
 s/    cosV = D_800DD618\[view\];/    cosV = D_800DD608[view];/ % plain
 s/    if (d->u60 == 2) {/    if (d->u60 != 2) {/ % plain swap
-s/    gfx = func_15142E24(gfx, \&D_80090F10\[d->u41\], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 3);/    gfx = func_15142E24(gfx, \&D_80090F10[d->u41], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 2);/ % plain
-s/    gfx = func_15142C10(gfx, d->u28, d->u28, d->u28, 0xFF, \&flag);/    gfx = func_15142C10(gfx, d->u28, d->u28, d->u41, 0xFF, \&flag);/ % plain
-s/    gfx = func_15142B7C(gfx, 1, 0x160600);/    gfx = func_15142B7C(gfx, 1, 0x160601);/ % plain
-s/    gfx = (s32) func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8\[mode \* 2 + 1\] | D_800A4EA8\[mode \* 2\],/    gfx = (s32) func_15142FBC(gfx, D_800D30BC | 0x2CA0, D_800A4EA8[mode * 2 + 1] | D_800A4EA8[mode * 2],/ % plain
+s/    gfx = gfx_load_texture_cached(gfx, \&D_80090F10\[d->u41\], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 3);/    gfx = gfx_load_texture_cached(gfx, \&D_80090F10[d->u41], 0, 0, 0, 0, d->u41, 0, 0, \&flag, 2);/ % plain
+s/    gfx = gfx_env_color_cached(gfx, d->u28, d->u28, d->u28, 0xFF, \&flag);/    gfx = gfx_env_color_cached(gfx, d->u28, d->u28, d->u41, 0xFF, \&flag);/ % plain
+s/    gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);/    gfx = gfx_geometry_mode_cached(gfx, 1, 0x160601);/ % plain
+s/    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8\[mode \* 2 + 1\] | D_800A4EA8\[mode \* 2\],/    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x2CA0, D_800A4EA8[mode * 2 + 1] | D_800A4EA8[mode * 2],/ % plain
 s/    if (\*(u16 \*) (obj + 0x1E) \& 2) {/    if (*(u16 *) (obj + 0x1E) \& 4) {/ % emit0
 s/        hy = \*(f32 \*) (obj + 0x14);/        hy = *(f32 *) (obj + 0x10);/ % emit
 s/        sPrev = sCur;$/        sPrev = 0;/ % emit

@@ -24,7 +24,8 @@ extern s32 D_80088BA0;
 // With 0x5072: when camera_pop_mode(.., 3) succeeds or D_80088BA0 is 0: +0x84 |= 4, D_80088BA0 = 1, anim 0,
 // +0x3D4->0x198 = 0, +0x73C = 0, +0x1B4 = 3, camera_apply_zoom_level, +0x190 = 0, +0x674 = 0 unless +0x6C8 is busy.
 // Finally (except the early returns) +0x190 = 0 while the pad has bit 4.
-void func_150C8300(u8 *obj) {
+/* was func_150C8300 */
+void player_flight_mode_update(u8 *obj) {
     s32 b;
     s32 c;
     s32 e;
@@ -103,7 +104,7 @@ void func_150C8300(u8 *obj) {
         }
         D_80088BA0 = 0;
         if (*(s32 *) (obj + 0x5F0) & 4) {
-            other = (u8 *) func_15083E90(0x10);
+            other = (u8 *) obj_find_by_setup_id(0x10);
             if (other != NULL && (*(u8 **) (obj + 0x3D0))[0x65] != 0) {
                 *(f32 *) (*(u8 **) (obj + 0x3D0) + 0x14) = *(f32 *) (other + 0x14);
                 *(f32 *) (*(u8 **) (obj + 0x3D0) + 0x18) = *(f32 *) (other + 0x18);
@@ -138,5 +139,5 @@ void func_150C8300(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5B10/func_150C8300.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5B10/player_flight_mode_update.s")
 #endif

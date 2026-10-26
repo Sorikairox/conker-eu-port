@@ -93,7 +93,7 @@ void camera_event_queue_clear(struct108 *arg0);
 void camera_pivot_slot_reset(struct108 *arg0, s32 arg1);
 void camera_shake_reset(struct108 *arg0);
 void camera_update_underwater_mode(struct108 *arg0);
-void func_150858A0(void *arg0, s32 arg1, s32 arg2);
+void obj_place_at_start(void *arg0, s32 arg1, s32 arg2);
 extern s32 D_800898C0;
 extern s32 D_800898C4[];
 extern s32 D_800898D4[];
@@ -167,7 +167,7 @@ void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     camera_shake_reset(arg0);
     camera_update_underwater_mode(arg0);
     CAM_F(0x674) = 1.0f;
-    func_150858A0(*(void **)(p + 0x3D0), arg3, 0);
+    obj_place_at_start(*(void **)(p + 0x3D0), arg3, 0);
     func_15005A60(arg0, arg2);
     CAM_W(0x2E0) = CAM_W(0x2BC);
     CAM_W(0x2E4) = CAM_W(0x2C0);

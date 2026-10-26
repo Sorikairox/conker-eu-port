@@ -16,11 +16,11 @@
 \#^        verts\[i \* 2 + 1\]\[2\] = p\[2\] - n\[2\];$#s/- n/+ n/
 \#^            \*(s16 \*) (obj + D_800BE9C0 \* 0x40 + i \* 0x10 + 0x10 + j \* 2) = (s32) verts\[i\]\[j\];$#s/0x40 + i/0x20 + i/
 \#^            \*(s16 \*) (obj + D_800BE9C0 \* 0x40 + i \* 0x10 + 0x10 + j \* 2) = (s32) verts\[i\]\[j\];$#s/+ 0x10 + j/+ 0x12 + j/
-\#^    gfx = func_15095380(gfx, D_8008CDEC\[\*(s16 \*) (obj + 0xD8)\], 0, spr, 0, 0, 0, 2, 3);$#s/2, 3)/2, 2)/
-\#^    gfx = func_15095380(gfx, D_8008CDEC\[\*(s16 \*) (obj + 0xD8)\], 0, spr, 0, 0, 0, 2, 3);$#s/0xD8/0xDA/
+\#^    gfx = sprite_load_texture(gfx, D_8008CDEC\[\*(s16 \*) (obj + 0xD8)\], 0, spr, 0, 0, 0, 2, 3);$#s/2, 3)/2, 2)/
+\#^    gfx = sprite_load_texture(gfx, D_8008CDEC\[\*(s16 \*) (obj + 0xD8)\], 0, spr, 0, 0, 0, 2, 3);$#s/0xD8/0xDA/
 \#^    flag = 0;$#s/0/1/
-\#^    gfx = func_15142FBC(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);$#s/0x82CA0/0x2CA0/
-\#^    gfx = func_15142FBC(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);$#s/0x504A50/0x504A51/
+\#^    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);$#s/0x82CA0/0x2CA0/
+\#^    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);$#s/0x504A50/0x504A51/
 \#^    cmd\[0\] = 0x01004008;#s/0x01004008/0x01004009/
 \#^    cmd\[1\] = (u32) (obj + D_800BE9C0 \* 0x40 + 0x10);$#s/+ 0x10)/+ 0x14)/
 \#^    cmd\[2\] = 0x05000206;#s/0x05000206/0x05000207/

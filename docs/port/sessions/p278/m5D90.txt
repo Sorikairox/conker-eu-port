@@ -14,7 +14,7 @@
 \#^        if (1e-05f < len) {#s/1e-05f/1e-04f/
 \#^            vec3_scale((struct17 \*) n, 1\.0f / len#s/1\.0f/2.0f/
 \#^            vel\[1\] = #s/0x48/0x4C/
-\#^            len = func_150ADDE0(unit, vel);#s/unit, vel/vel, unit/
+\#^            len = vec3f_dot(unit, vel);#s/unit, vel/vel, unit/
 \#^            vec3_scale((struct17 \*) unit, len + len#s/len + len/len/
 \#^            vec3_sub(#s/(struct17 \*) vel, (struct17 \*) n/(struct17 *) n, (struct17 *) vel/
 \#^            \*(f32 \*) (p + 0x44) = fac \* n\[0\] \* 0\.8f;#s/0\.8f/0.81f/

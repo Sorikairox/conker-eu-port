@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-// P251: readable C for the MP3 Huffman group (hand-written asm func_151F9060 / func_151F911C / func_151F9184 /
-// func_151F933C). The two leaf routines used a private register ABI (a0 = byte pointer, t0 = bit position, s1 = bit
+// P251: readable C for the MP3 Huffman group (hand-written asm mp3_huff_decode_pair / mp3_huff_read_bits / mp3_huff_decode_big_values /
+// mp3_huff_decode_count1). The two leaf routines used a private register ABI (a0 = byte pointer, t0 = bit position, s1 = bit
 // count, s0 = tree, s5 = lookup base, a2 = table; results in v0 / t1) and were only called by 9184 / 933C, so they
 // are static helpers on a bit reader here. The asm's a0 is always buf + (t0 >> 3), so only the bit position is kept.
 typedef struct {
@@ -18,7 +18,7 @@ extern u8 **D_800E0E20;     /* per table: Huffman tree (NULL for the unused tabl
 extern u8 *D_800E0E24;      /* [table][256] fast lookup by the next 8 bits: +0 = (y << 4) | x, +0x2200 = code
                                length (0 = longer than 8 bits: walk the tree) */
 
-// huff_get_bits (func_151F911C): the next n bits MSB first from the unaligned big-endian word at the read
+// huff_get_bits (mp3_huff_read_bits): the next n bits MSB first from the unaligned big-endian word at the read
 // position (lwl / lwr); the shifts are mod 32 like sllv / srlv.
 static u32 huff_get_bits(HuffReader *r, s32 n) {
     u8 *p = r->buf + (r->pos >> 3);
@@ -29,7 +29,7 @@ static u32 huff_get_bits(HuffReader *r, s32 n) {
     return w >> ((32 - n) & 0x1F);
 }
 
-// huff_get_bit: one bit (the sign-bit reads inlined in func_151F9184).
+// huff_get_bit: one bit (the sign-bit reads inlined in mp3_huff_decode_big_values).
 static s32 huff_get_bit(HuffReader *r) {
     s32 b = (r->buf[r->pos >> 3] >> (7 - (r->pos & 7))) & 1;
 
@@ -37,7 +37,7 @@ static s32 huff_get_bit(HuffReader *r) {
     return b;
 }
 
-// huff_decode_pair (func_151F9060): decodes one Huffman code of table `table` into (x, y). Fast path: the next 8
+// huff_decode_pair (mp3_huff_decode_pair): decodes one Huffman code of table `table` into (x, y). Fast path: the next 8
 // bits index the lookup; a non-zero length consumes that many bits. Else walk the tree bit by bit from the root.
 static void huff_decode_pair(HuffReader *r, s32 table, s32 *x, s32 *y) {
     u8 *p = r->buf + (r->pos >> 3);
@@ -59,18 +59,21 @@ static void huff_decode_pair(HuffReader *r, s32 table, s32 *x, s32 *y) {
     *y = (s8) node[3];
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/func_151F9060.s")
+/* was func_151F9060 */
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_decode_pair.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/func_151F911C.s")
+/* was func_151F911C */
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_read_bits.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * mp3util_get_bits: P190 readable C for the hand-written func_151F9150.s. Returns the next `numbits` bits of buffer
+ * mp3util_get_bits: P190 readable C for the hand-written mp3_get_bits.s. Returns the next `numbits` bits of buffer
  * at bit *offset (MSB first; the asm reads the big-endian word at byte *offset >> 3 unaligned with lwl / lwr) and
  * advances *offset. The right shift is (32 - numbits) mod 32 (srlv), so numbits 0 returns the whole shifted word.
  */
-s32 func_151F9150(u8 *buffer, s32 *offset, s32 numbits) {
+/* was func_151F9150 */
+s32 mp3_get_bits(u8 *buffer, s32 *offset, s32 numbits) {
     u32 pos = *offset;
     u8 *p = buffer + (pos >> 3);
     u32 word = ((u32)p[0] << 24) | ((u32)p[1] << 16) | ((u32)p[2] << 8) | p[3];
@@ -80,17 +83,18 @@ s32 func_151F9150(u8 *buffer, s32 *offset, s32 numbits) {
     return word >> ((32 - numbits) & 0x1F);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/func_151F9150.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_get_bits.s")
 #endif
 
 #ifdef NON_MATCHING
-// huff_decode_big_values: P251 readable C for func_151F9184 (hand asm). Decodes (x, y) pairs with table `table`
+// huff_decode_big_values: P251 readable C for mp3_huff_decode_big_values (hand asm). Decodes (x, y) pairs with table `table`
 // from line i up to `end` (exclusive, two lines per pair; nothing when end <= i). A value 15 of a table with
 // linbits is extended by `linbits` raw bits (+ 15); each non-zero value is followed by its sign bit (x's sign is
 // read before y's extension). Writes the values to *out (s16 pairs) and the sign flags to *signs (one byte per
 // value, 0 for a zero value), advances *bitpos, *out and *signs, returns the new line index. Caller:
 // mp3dec_read_granule (game_221290), once per region.
-s32 func_151F9184(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 linbits, s32 end, s16 **out, u8 **signs) {
+/* was func_151F9184 */
+s32 mp3_huff_decode_big_values(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 linbits, s32 end, s16 **out, u8 **signs) {
     HuffReader r;
     s16 *o = *out;
     u8 *s = *signs;
@@ -120,16 +124,17 @@ s32 func_151F9184(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 linbits, s32 end, 
     return i;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/func_151F9184.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_decode_big_values.s")
 #endif
 
 #ifdef NON_MATCHING
-// huff_decode_count1: P251 readable C for func_151F933C (hand asm). Decodes quadruples (four one-bit values
+// huff_decode_count1: P251 readable C for mp3_huff_decode_count1 (hand asm). Decodes quadruples (four one-bit values
 // v, w, x, y packed in the low nibble of table `table`'s result) from line i while i < 576 and the bit position
 // is before `endBit` (both tested before every quadruple). Reads 4 bits ahead for the signs, takes one per non-zero
 // value (MSB first) and gives the unused ones back. Writes 4 s16 values and 4 sign flags per quadruple, advances
 // *bitpos, *out and *signs, returns the new line index. Caller: mp3dec_read_granule (game_221290).
-s32 func_151F933C(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 endBit, s16 **out, u8 **signs) {
+/* was func_151F933C */
+s32 mp3_huff_decode_count1(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 endBit, s16 **out, u8 **signs) {
     HuffReader r;
     s16 *o = *out;
     u8 *s = *signs;
@@ -166,18 +171,19 @@ s32 func_151F933C(u8 *buf, s32 *bitpos, s32 table, s32 i, s32 endBit, s16 **out,
     return i;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/func_151F933C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_huff_decode_count1.s")
 #endif
 
 #ifdef NON_MATCHING
-// mp3_imdct36_hybrid: P251 readable C for func_151F94E0. Long-block (36-point) IMDCT of one subband for the MP3
+// mp3_imdct36_hybrid: P251 readable C for mp3_imdct36_hybrid. Long-block (36-point) IMDCT of one subband for the MP3
 // hybrid synthesis, then windowing and overlap-add (the fast algorithm of maplay / JLayer's inv_mdct, 9-point DCTs
 // on the even and odd inputs). `in` holds the 18 dequantised spectral lines of subband `sb` and is used as scratch
 // (prefix sums). `out` gets the 18 output samples (window * IMDCT + the previous granule's overlap `prev`; the odd
 // samples of odd subbands are negated: frequency inversion), `prev` gets the new overlap. `win` is one of the
 // game's four sine_block[36] windows. Caller: mp3dec_decode_frame (game_221290).
 // The expressions keep the asm's evaluation order and its (signed) constants so the float results are bit-exact.
-void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
+/* was func_151F94E0 */
+void mp3_imdct36_hybrid(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
     f32 t[18];      /* 0x00 9-point DCT results: even part t[0..8], odd part t[9..17] */
     f32 res[18];    /* 0x48 the 18 independent IMDCT outputs */
     f32 i00, iip12, i66;
@@ -292,5 +298,5 @@ void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/func_151F94E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_226870/mp3_imdct36_hybrid.s")
 #endif

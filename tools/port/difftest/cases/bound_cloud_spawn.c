@@ -1,5 +1,5 @@
-s32 func_15046F70(u8 *, u16, f32, u8 *);
-void func_1504715C(void *, u8 *);
+s32 collision_floor_probe(u8 *, u16, f32, u8 *);
+void hitinfo_from_obj_floor(void *, u8 *);
 s32 obj_send_hit(struct127 *, s32, u16, s32);
 s32 light_create_flicker_preset(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(u8 *, struct127 **, s32);
@@ -121,8 +121,8 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u18C = arg0->y_position + 100.0f;
         sp.u1A0 = arg0->z_position;
         sp.u190 = sp.u1A0;
-        func_1504715C(&sp.u1A4, arg0);
-        if (func_15046F70(&sp.u188, 0, -10000.0f, &sp.u1A4) /* P93: was the bit pattern 0xC61C4000 as an int */ != 0) {
+        hitinfo_from_obj_floor(&sp.u1A4, arg0);
+        if (collision_floor_probe(&sp.u188, 0, -10000.0f, &sp.u1A4) /* P93: was the bit pattern 0xC61C4000 as an int */ != 0) {
             sp.u197 = 1;
             sp.u19C = sp.u1A4;
         } else {
@@ -146,7 +146,7 @@ void bound_cloud_spawn(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u100 = 0.0f;
         sp.uF4 = temp_f16;
         sp.u104 = *(struct_eu_bytes24 *)(&sp.u1A4);
-        sp.u128 = func_1000FA64(0x69EU, (s16) (s32) sp.u198, (s16) (s32) sp.u19C, (s16) (s32) sp.u1A0, 0x7D00, 0xBB8U, 0x1F4, 0, NULL, 0, 0, 0);
+        sp.u128 = sfx_emitter_start(0x69EU, (s16) (s32) sp.u198, (s16) (s32) sp.u19C, (s16) (s32) sp.u1A0, 0x7D00, 0xBB8U, 0x1F4, 0, NULL, 0, 0, 0);
         if (sp.u197 != 0) {
             var_v0 = 1;
         } else {

@@ -14,11 +14,11 @@ s/sqrtf(dx \* dx + dz \* dz)/sqrtf(dx * dx + dy * dy)/ % cullvis
 s/fabsf(dy) + /dy + / % bigneg
 s/+ \*(f32 \*) ((u8 \*) rec + 0x2C)),/+ *(f32 *) ((u8 *) rec + 0x28)),/ % cullvis
 s/                           sEmit2CullFar\[0\])) {/                           10000.0f)) {/ % cullvis
-s/        if (!func_150A6840(/        if (func_150A6840(/ % cull cullvis
+s/        if (!camera_view_test_sphere(/        if (camera_view_test_sphere(/ % cull cullvis
 s/e\[0x25\] \* 0x20 + 0xA0/e[0x25] * 0x20 + 0xA8/ % base
 s/(e + 0x84, slot, e/(e + 0x84, 0, e/ % slot1
 \#^    if (vtx == NULL) {#s/==/!=/ % base novtx
-s/cam = func_15144B34(slot);/cam = func_15144B34(0);/ % slot1
+s/cam = camera_get_pos(slot);/cam = camera_get_pos(0);/ % slot1
 \#^    flag = 1;#s/1/2/ % base
 s/(s32) D_80091414, 0, 0, 0, 0, 0x6B/(s32) D_80091414, 0, 0, 0, 0, 0x6A/ % base
 s/0x6B, 0, 0, &flag, 3);/0x6B, 0, 0, \&flag, 4);/ % base

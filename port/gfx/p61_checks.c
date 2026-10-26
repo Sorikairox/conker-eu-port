@@ -1,11 +1,11 @@
 /* P61 ?p61check=N: runtime checks of port-b P59's converted C (link-time wraps, N = calls logged in detail per
  * function, then every 256th). Only cross-TU calls are wrapped (wasm-ld --wrap redirects undefined references), so
  * the intra-TU ones are seen through their cross-TU callees:
- *  - player_lose_life (life lost: respawn / checkpoint restart / game over), its callee func_1501C710 (arguments);
+ *  - player_lose_life (life lost: respawn / checkpoint restart / game over), its callee game_request_transition (arguments);
  *  - obj_contact_pass (record-vs-record contact pass): calls, and whether it moved the record (x / z before / after);
- *  - func_1508000C (floor-material effects, only called inside game_eu_AC770.c): seen through its sound calls
- *    func_1000D96C / func_1000DE1C (ambient loop ids 0x15..0x17, D_800D1CE4) and func_1000E7A0 / func_1000E8C4;
- *  - func_1507C170 (animation frame advance; called from game_eu_6CFB0.c): frame before / after, the end callback
+ *  - obj_surface_effects_update (floor-material effects, only called inside game_eu_AC770.c): seen through its sound calls
+ *    music_play_song / music_stop_song (ambient loop ids 0x15..0x17, D_800D1CE4) and music_post_event_request / music_clear_event_flag1;
+ *  - anim_advance_frame (animation frame advance; called from game_eu_6CFB0.c): frame before / after, the end callback
  *    (anim +0), loops / holds. */
 #include <stdint.h>
 #include "../ultra/pc_mem.h"
@@ -23,7 +23,7 @@ static int want(unsigned n) { return on() && (n <= (unsigned)fl || n % 256 == 0)
 static float F(const unsigned char *r, int o) { return *(const float *)(r + o); }
 static int recno(const void *r) { return (int)(((const unsigned char *)r - D_800CC2D0) / REC); }
 
-/* ---- player_lose_life (life lost) and func_1501C710 */
+/* ---- player_lose_life (life lost) and game_request_transition */
 static int in_d4f8;
 void __real_player_lose_life(int idx);
 void __wrap_player_lose_life(int idx) {
@@ -40,14 +40,14 @@ void __wrap_player_lose_life(int idx) {
                  "+65 %02X +E4 %04X\n", n, port_frame_count, idx, st, *(const int *)r, x, y, z, F(r, 0x14), F(r, 0x18),
                  F(r, 0x1C), vbe_ld8(r + 0x65), vbe_ld16(r + 0xE4));
 }
-void __real_func_1501C710(int a0, int a1, int a2, int a3, int a4);
-void __wrap_func_1501C710(int a0, int a1, int a2, int a3, int a4) {
+void __real_game_request_transition(int a0, int a1, int a2, int a3, int a4);
+void __wrap_game_request_transition(int a0, int a1, int a2, int a3, int a4) {
     static unsigned n;
     n++;
     if (want(n))
-        port_log("[p61] func_1501C710 call %u frame %u%s: a0 %d a1 %08X (%04X) a2 %d a3 %d a4 %d\n", n, port_frame_count,
+        port_log("[p61] game_request_transition call %u frame %u%s: a0 %d a1 %08X (%04X) a2 %d a3 %d a4 %d\n", n, port_frame_count,
                  in_d4f8 ? " (inside player_lose_life)" : "", a0, a1, a1 ? vbe_ld16((void *)(uintptr_t)a1) : 0, a2, a3, a4);
-    __real_func_1501C710(a0, a1, a2, a3, a4);
+    __real_game_request_transition(a0, a1, a2, a3, a4);
 }
 
 /* ---- obj_contact_pass (contact pass) */
@@ -64,42 +64,42 @@ void __wrap_obj_contact_pass(void *rec, int idx) {
                  n, port_frame_count, recno(rec), idx, x, F(r, 0x14), z, F(r, 0x1C), moved);
 }
 
-/* ---- func_1508000C's sound calls */
+/* ---- obj_surface_effects_update's sound calls */
 extern int port_p110_inmus; /* P110: set during level_start_music (level music) */
-void __real_func_1000D96C(int a0, int a1, int a2);
-void __wrap_func_1000D96C(int a0, int a1, int a2) {
+void __real_music_play_song(int a0, int a1, int a2);
+void __wrap_music_play_song(int a0, int a1, int a2) {
     static unsigned n;
     n++;
     if (want(n) || port_p110_inmus || (a0 >= 0x15 && a0 <= 0x17 && on()))
-        port_log("[p61] func_1000D96C (sound start) call %u frame %u: id %d (0x%X) %d %d | D_800D1CE4 %d\n", n,
+        port_log("[p61] music_play_song (sound start) call %u frame %u: id %d (0x%X) %d %d | D_800D1CE4 %d\n", n,
                  port_frame_count, a0, a0, a1, a2, D_800D1CE4);
-    __real_func_1000D96C(a0, a1, a2);
+    __real_music_play_song(a0, a1, a2);
 }
-void __real_func_1000DE1C(int a0, int a1);
-void __wrap_func_1000DE1C(int a0, int a1) {
+void __real_music_stop_song(int a0, int a1);
+void __wrap_music_stop_song(int a0, int a1) {
     static unsigned n;
     n++;
     if (want(n) || port_p110_inmus || (a0 >= 0x15 && a0 <= 0x17 && on()))
-        port_log("[p61] func_1000DE1C (sound stop) call %u frame %u: id %d (0x%X) %d | D_800D1CE4 %d\n", n,
+        port_log("[p61] music_stop_song (sound stop) call %u frame %u: id %d (0x%X) %d | D_800D1CE4 %d\n", n,
                  port_frame_count, a0, a0, a1, D_800D1CE4);
-    __real_func_1000DE1C(a0, a1);
+    __real_music_stop_song(a0, a1);
 }
-void __real_func_1000E7A0(unsigned a0, int a1);
-void __wrap_func_1000E7A0(unsigned a0, int a1) {
+void __real_music_post_event_request(unsigned a0, int a1);
+void __wrap_music_post_event_request(unsigned a0, int a1) {
     static unsigned n;
     n++;
-    if (want(n)) port_log("[p61] func_1000E7A0 call %u frame %u: %u %d\n", n, port_frame_count, a0, a1);
-    __real_func_1000E7A0(a0, a1);
+    if (want(n)) port_log("[p61] music_post_event_request call %u frame %u: %u %d\n", n, port_frame_count, a0, a1);
+    __real_music_post_event_request(a0, a1);
 }
-void __real_func_1000E8C4(int a0);
-void __wrap_func_1000E8C4(int a0) {
+void __real_music_clear_event_flag1(int a0);
+void __wrap_music_clear_event_flag1(int a0) {
     static unsigned n;
     n++;
-    if (want(n)) port_log("[p61] func_1000E8C4 call %u frame %u: %d\n", n, port_frame_count, a0);
-    __real_func_1000E8C4(a0);
+    if (want(n)) port_log("[p61] music_clear_event_flag1 call %u frame %u: %d\n", n, port_frame_count, a0);
+    __real_music_clear_event_flag1(a0);
 }
 
-/* ---- P63 ?p63anim=N: per-call animation state of func_1507C170 (record 0's anim block): id (+4 low 15 bits,
+/* ---- P63 ?p63anim=N: per-call animation state of anim_advance_frame (record 0's anim block): id (+4 low 15 bits,
  * 0x8000 hold), frame +8, speed +0x10, last frame +0x18, loop start +0x20, stream +0x28, previous id +6, blend step
  * +0x3A / countdown +0x3C, header bytes +0x40[3] (last) / [5] / [7]; marks LOOP (frame went back), END-CB (the end
  * callback window end-1 was crossed with a callback set) and NEW (id or stream changed inside the call = the callback
@@ -169,9 +169,9 @@ void __wrap_obj_start_anim(void *obj, int id, float speed, float blend, float fr
 }
 
 
-/* ---- P63 ?p63cb=N: proves that func_1507C170 calls the end-of-animation callback (anim +0) and with which argument:
+/* ---- P63 ?p63cb=N: proves that anim_advance_frame calls the end-of-animation callback (anim +0) and with which argument:
  * for the first N end crossings of record 0's animation the callback word is swapped for p63cb_probe (logged with a
- * JS stack: the caller must be func_1507C170) and put back afterwards. DIAGNOSTIC: the game's own callback does
+ * JS stack: the caller must be anim_advance_frame) and put back afterwards. DIAGNOSTIC: the game's own callback does
  * not run for those N calls (calling it from this non-vbe TU could trap on a signature mismatch). */
 static unsigned p63cb_hits, p63cb_armed;
 static void *p63cb_anim;
@@ -197,9 +197,9 @@ static void p63cb_disarm(void *anim, unsigned cb) {
     if (*(unsigned *)anim == (unsigned)(uintptr_t)&p63cb_probe) *(unsigned *)anim = cb;
 }
 
-/* ---- func_1507C170 (animation frame advance) */
-void __real_func_1507C170(void *anim, float step, void *rec, int player);
-void __wrap_func_1507C170(void *anim, float step, void *rec, int player) {
+/* ---- anim_advance_frame (animation frame advance) */
+void __real_anim_advance_frame(void *anim, float step, void *rec, int player);
+void __wrap_anim_advance_frame(void *anim, float step, void *rec, int player) {
     static unsigned n, loops;
     const unsigned char *a = anim;
     unsigned cb = a ? *(const unsigned *)a : 0;
@@ -208,14 +208,14 @@ void __wrap_func_1507C170(void *anim, float step, void *rec, int player) {
     float last0 = a ? F(a, 0x18) : 0;
     n++;
     if (a && cb && p63cb_arm(anim, cb)) {
-        __real_func_1507C170(anim, step, rec, player);
+        __real_anim_advance_frame(anim, step, rec, player);
         p63cb_disarm(anim, cb);
     } else
-        __real_func_1507C170(anim, step, rec, player);
+        __real_anim_advance_frame(anim, step, rec, player);
     if (a) p63_anim_log(a, step, rec ? recno(rec) : -1, id0, s28, f0, last0, cb);
     if (a && F(a, 8) < f0) loops++;
     if (want(n) || (a && F(a, 8) < f0 && loops <= 8 && on()))
-        port_log("[p61] func_1507C170 call %u frame %u: anim %08X step %g rec %d player %d | +28 %08X cb +0 %08X | "
+        port_log("[p61] anim_advance_frame call %u frame %u: anim %08X step %g rec %d player %d | +28 %08X cb +0 %08X | "
                  "frame %g -> %g (+10 speed %g, +18 %g)%s\n", n, port_frame_count, (unsigned)(uintptr_t)anim, step,
                  rec ? recno(rec) : -1, player, a ? *(const unsigned *)(a + 0x28) : 0, cb, f0, a ? F(a, 8) : 0,
                  a ? F(a, 0x10) : 0, a ? F(a, 0x18) : 0, a && F(a, 8) < f0 ? " LOOP/END" : "");

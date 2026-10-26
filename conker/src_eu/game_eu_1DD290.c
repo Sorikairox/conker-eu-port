@@ -40,7 +40,8 @@ const Unk800AA1D0 D_800AA1D0[27] = {
 
 s32 beam_impact_effects(struct17 *, struct17 *, f32, u8, s32);
 
-void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+/* was func_151AFA80 */
+void obj_bone_beam_impact(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     struct17 a;
     struct17 b;
     u8 *m;
@@ -50,8 +51,8 @@ void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     if (arg0 != NULL && (base = *(u8 **)(arg0 + 0x1D4)) != NULL && (arg0[0x74] & 0xF) != 0xF) {
         e = &((u8 *)D_800AA1D0)[arg1 * 0x1C];
         m = base; m += e[0] << 6;
-        func_15143134(e + 4, &a, m);
-        func_15143134(e + 0x10, &b, m);
+        mtx_transform_point_or_origin(e + 4, &a, m);
+        mtx_transform_point_or_origin(e + 0x10, &b, m);
         beam_impact_effects(&a, &b, ((random_float() * 170.0f) + 71.0f) * 0.01f, arg2, arg3);
     }
 }

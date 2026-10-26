@@ -6,7 +6,8 @@
 
 extern u32 D_800383D0;
 extern s16 D_800383D4;
-void func_100038E0(void)
+/* was func_100038E0 */
+void debug_port_write_4040(void)
 {
   int new_var;
   volatile s16 *p = (volatile s16 *) 0xBC000C02;
@@ -14,13 +15,14 @@ void func_100038E0(void)
  do { D_800383D0 = (u32) p; D_800383D4 = new_var; *p = new_var; } while (0);
 }
 // NON-MATCHING: wtf is this
-// s32 func_100038E0(void) {
+// s32 debug_port_write_4040(void) {
 //     D_80038070 = 0xBC000C02; // -0.007815362885594368 ?
 //     D_80038074 = (u16)0x4040;
 //     D_BC000C02 = (u16)0x4040;
 //     return 0xBC000C02;
 // }
 
-s32 func_1000390C(void) {
+/* was func_1000390C */
+s32 init_stub_return_zero(void) {
     return 0;
 }

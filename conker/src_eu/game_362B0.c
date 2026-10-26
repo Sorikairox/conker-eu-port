@@ -15,7 +15,7 @@ extern f32 (*D_800DE290[])[3]; /* 40 points per slot */
 extern u8 D_8008D3F0[];        /* .game_data: 0x18-byte area records */
 // area_points_alloc: takes the next slot (D_800DDE50) for level area `area`: allocates its 40 zeroed points
 // (0x1E0 bytes), sets the last one's z to the area record's s16 at +0x14 (D_8008D3F0, 0x18 bytes each), clears the
-// record's byte +0x17. Called twice from level_obj_init_area_points (areas 0 and 1); func_15182D40 reads the slots.
+// record's byte +0x17. Called twice from level_obj_init_area_points (areas 0 and 1); water_waves_update reads the slots.
 /* was func_15008E10 */
 void area_points_alloc(s32 area) {
     s32 i;

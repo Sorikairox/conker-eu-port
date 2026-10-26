@@ -576,7 +576,7 @@ def _selfproto_retype(code, func, hm, dm):
 # ---------------------------------------------------------------- P17: float literals -> the rodata symbol the asm loads
 def fix_litsym(code, why=None, func=None, src=None):
     """DIFFER workaround (P17): in some candidates a TU float literal reads back as 0 in difftest (seen in
-    func_1503EE68 -0.3f, func_151B97C4 0.0234f; the literal value is bit-exact). Replace each f32 literal whose
+    breakable_scatter_pieces -0.3f, swinging_lamp_swing_update 0.0234f; the literal value is bit-exact). Replace each f32 literal whose
     bits equal a word the asm loads with `lwc1 %lo(D_X)` by D_X itself (extern f32), which reads the ROM's rodata."""
     import glob as _g, struct as _st
     if not func: return None

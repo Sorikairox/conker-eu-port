@@ -5,7 +5,7 @@ s/        if (len < 0.0001f) {/        if (len < 0.00001f) {/ % deg deg2
 s/        dz = nz \/ len;/        dz = nz \/ ny;/ % tilt flat
 s/        if (slot != 0xFF \&\& fabsf(dy) < 0.9f) {/        if (slot != 0xFF \&\& dy < 0.9f) {/ % flat tilt flatdn
 s/            mtxf_look_at(mtx, 0.0f, 0.0f, 0.0f, dx, dy, dz, 0.0f, 1.0f, 0.0f);/            mtxf_look_at(mtx, 0.0f, 0.0f, 0.0f, dx, dz, dy, 0.0f, 1.0f, 0.0f);/ % tilt
-s/            func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, (f32 \*) (D_800D9D80 + slot \* 28 + 0x10),/            func_150A7E40(mtx, 0.0f, 1.0f, 0.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),/ % tilt
+s/            mtxf_transform_point(mtx, 0.0f, 0.0f, 1.0f, (f32 \*) (D_800D9D80 + slot \* 28 + 0x10),/            mtxf_transform_point(mtx, 0.0f, 1.0f, 0.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),/ % tilt
 s/        D_800D9D80\[slot \* 28 + 3\] = 0;/        D_800D9D80[slot * 28 + 2] = 0;/ % k11s1 flat deg
 s/    if (slot != 0xFF \&\& flat) {/    if (flat) {/ % k10s0 tiltFF
 s/    rec.y = (s32) y;/    rec.y = (s32) z;/ % k11s1
@@ -28,7 +28,7 @@ s/            more = 0;/            more = 1;/ % k7s0 k9full
 s/        speed = random_float() \* 957.0f + base;/        speed = random_float() * 958.0f + base;/ % k11s1
 s/            speed += speed;/            speed += base;/ % k4s2
 s/            dy = 1.0f;/            dy = 0.5f;/ % k11s1
-s/            func_150A7E40(mtx, s \* 0.5f, c \* 0.5f, 1.0f, \&dx, \&dy, \&dz);/            func_150A7E40(mtx, c * 0.5f, s * 0.5f, 1.0f, \&dx, \&dy, \&dz);/ % tilt tilt0
+s/            mtxf_transform_point(mtx, s \* 0.5f, c \* 0.5f, 1.0f, \&dx, \&dy, \&dz);/            mtxf_transform_point(mtx, c * 0.5f, s * 0.5f, 1.0f, \&dx, \&dy, \&dz);/ % tilt tilt0
 s/        kz = 0.315f \* dz;/        kz = 0.315f * dx;/ % k11s1
 s/ 2 + 0x182;/ 2 + 0x181;/ % k11s1
 s/        rec.vy = (s32) (speed \* dy);/        rec.vy = (s32) (speed * kz);/ % k11s1

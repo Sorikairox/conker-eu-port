@@ -11,7 +11,7 @@ extern u8 _osContNumControllers; // __osMaxControllers
 extern OSMesgQueue __osEepromTimerQ;
 extern OSMesg __osEepromTimerMsg;
 void __osSiCreateAccessQueue(void);
-s32 func_10025B60(s32, void *); // __osSiRawStartDma
+s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 void __osContGetInitData(u8 *pattern, OSContStatus *data);
 void __osPackRequestData(u8 cmd);
 
@@ -36,9 +36,9 @@ s32 osContInit(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     }
     _osContNumControllers = MAXCONTROLLERS;
     __osPackRequestData(CONT_CMD_REQUEST_STATUS);
-    ret = func_10025B60(OS_WRITE, &__osContPifRam);
+    ret = os_si_raw_start_dma(OS_WRITE, &__osContPifRam);
     osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
-    ret = func_10025B60(OS_READ, &__osContPifRam);
+    ret = os_si_raw_start_dma(OS_READ, &__osContPifRam);
     osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
     __osContGetInitData(bitpattern, data);
     _osLastSentSiCmd = CONT_CMD_REQUEST_STATUS;

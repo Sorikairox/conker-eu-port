@@ -17,4 +17,4 @@ s/            spec.f\[2\] = 3.21f;/            spec.f[2] = 3.2f;/
 s/            spec.f\[3\] = 5.0f;/            spec.f[3] = 10.0f;/
 s/    spec.obj = obj;/    spec.obj = NULL;/
 s/    spec.id = ((u8 \*) obj)\[0x3B\];/    spec.id = 0;/
-s/func_1518C240((s32) &spec, arg1, arg2);/func_1518C240((s32) \&spec, arg2, arg1);/
+s/drip_effect_create((s32) &spec, arg1, arg2);/drip_effect_create((s32) \&spec, arg2, arg1);/

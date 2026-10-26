@@ -1,4 +1,4 @@
-# P238 func_15191E2C (owner_effect_watch) mutants: sed % setup names
+# P238 model_drip_wait_owner (owner_effect_watch) mutants: sed % setup names
 s/    if (\*(s32 \*) owner == 0 || e\[0x2C\] != owner\[0x3B\]) {/    if (e[0x2C] != owner[0x3B]) {/ % gone
 s/    if (\*(s32 \*) owner == 0 || e\[0x2C\] != owner\[0x3B\]) {/    if (*(s32 *) owner == 0) {/ % otherid
 s/e\[0x2C\] != owner\[0x3B\]/e[0x2C] != owner[0x3A]/ % keep
@@ -8,8 +8,8 @@ s/        if (e\[0xD\] & 1) {/        if (e[0xD] \& 2) {/ % respawn1
 s/            rec\[8\] |= 1;/            rec[8] = 1;/ % respawn1
 s/            \*(s16 \*) (rec + 6) = \*(s16 \*) (e + 0xE);/            *(s16 *) (rec + 6) = *(u8 *) (e + 0xE);/ % respawn1
 s/            \*(s16 \*) (rec + 6) = 300;/            *(s16 *) (rec + 6) = 301;/ % respawn0
-s/        func_15190770((u8 \*\*) rec, 0, e\[0xC\], e\[1\]);/        func_15190770((u8 **) rec, 0, e[0xD], e[1]);/ % respawn1
-s/        func_15190770((u8 \*\*) rec, 0, e\[0xC\], e\[1\]);/        func_15190770((u8 **) rec, 0, e[0xC], e[0]);/ % respawn1
-s/        func_15190770((u8 \*\*) rec, 0, e\[0xC\], e\[1\]);/        func_15190770((u8 **) e, 0, e[0xC], e[1]);/ % respawn1
+s/        model_drip_create((u8 \*\*) rec, 0, e\[0xC\], e\[1\]);/        model_drip_create((u8 **) rec, 0, e[0xD], e[1]);/ % respawn1
+s/        model_drip_create((u8 \*\*) rec, 0, e\[0xC\], e\[1\]);/        model_drip_create((u8 **) rec, 0, e[0xC], e[0]);/ % respawn1
+s/        model_drip_create((u8 \*\*) rec, 0, e\[0xC\], e\[1\]);/        model_drip_create((u8 **) e, 0, e[0xC], e[1]);/ % respawn1
 1,/        done = 1;/s/        done = 1;/        done = 0;/ % gone
 s/    if (done) {/    if (!done) {/ % keep

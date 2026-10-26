@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5) {
+/* was func_150498A0 */
+void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5) {
     f32 sp4;
     f32 temp_f0;
     f32 temp_f18;
@@ -35,10 +36,11 @@ void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5)
     *arg2 = 0.0f;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_770B0/func_150498A0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_770B0/math_spring_approach.s")
 #endif
 #ifdef NON_MATCHING
-void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5) {
+/* was func_15049978 */
+void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5) {
     f32 sp1C;
     f32 temp_f0;
     f32 temp_f0_2;
@@ -79,5 +81,5 @@ block_10:
     func_15048758(arg0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_770B0/func_15049978.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_770B0/math_spring_approach_angle.s")
 #endif

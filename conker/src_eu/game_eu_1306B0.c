@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING
-void func_15145548(void *, void *, void *, void *, f32 *); /* P270 */
+void segment_closest_point(void *, void *, void *, void *, f32 *); /* P270 */
 #endif
 
 
@@ -213,14 +213,14 @@ void attached_particle_handle_event(s32 arg0, s32 arg1, u8 arg2) {
 }
 
 #ifdef NON_MATCHING
-u8 * func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
-void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3);
-s32 func_1514654C(u8 *, s32, s32, u8 **, u8 **, s32);
+u8 * attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
+void mtx_transform_points(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3);
+s32 model_node_points_to_world(u8 *, s32, s32, u8 **, u8 **, s32);
 
 // attached_points_update: refreshes the two attachment points of arg0 (arg0 + 0x34 / + 0x40) from its owner
 // (arg0 + 0x110): 0 when the owner changed or is gone, 1 when it has no model / is hidden or after the update. With
-// a joint id (+0x11C != -1) the points come from that joint (func_1514654C), else from the owner's matrix list
-// (func_15145EA4); sets bit 0 of +0x124 on success. P124: the point lists are 2-element arrays (m2c had 4 locals).
+// a joint id (+0x11C != -1) the points come from that joint (model_node_points_to_world), else from the owner's matrix list
+// (mtx_transform_points); sets bit 0 of +0x124 on success. P124: the point lists are 2-element arrays (m2c had 4 locals).
 /* was func_15103310 */
 s32 attached_points_update(u8 *arg0) {
     u8 *dst[2];
@@ -245,15 +245,15 @@ s32 attached_points_update(u8 *arg0) {
     src[1] = att + 0x24;
     joint = *(s16 *)(att + 0xC);
     if (joint != -1) {
-        node = (s32) func_15031C4C(owner, joint, 0);
+        node = (s32) attachment_find_by_slot(owner, joint, 0);
         if (node == 0) {
             return 0;
         }
-        if (func_1514654C(owner, node, *(s32 *)(att + 0x10), dst, src, 2) == 0) {
+        if (model_node_points_to_world(owner, node, *(s32 *)(att + 0x10), dst, src, 2) == 0) {
             return 0;
         }
     } else {
-        func_15145EA4((f32 **) dst, (f32 **) src, (Mtx *) (*(s32 *)(owner + 0x1D4) + *(s32 *)(att + 8)), 2);
+        mtx_transform_points((f32 **) dst, (f32 **) src, (Mtx *) (*(s32 *)(owner + 0x1D4) + *(s32 *)(att + 8)), 2);
     }
     att[0x14] |= 1;
     return 1;
@@ -314,11 +314,11 @@ s16 *attached_strip_draw(u8 *arg0, s16 arg1) {
     u8 *temp_v0;
     u8 *temp_v1;
 
-    temp_s1 = func_15144B34((s32) arg1);
+    temp_s1 = camera_get_pos((s32) arg1);
     if (!((*(u8 *)((u8 *)arg0 + 0x124)) & 1)) {
         return NULL;
     }
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u50, &sp.u43);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u50, &sp.u43);
     sp.u4C = sp.u50;
     if (sp.u50 != NULL) {
         if (sp.u43 != 0) {
@@ -344,7 +344,7 @@ s16 *attached_strip_draw(u8 *arg0, s16 arg1) {
         sp.u88 = temp_f16;
         sp38 = temp_v0;
         sp.u84 = temp_f6 - (*(f32 *)((u8 *)temp_v0 + 0x20));
-        func_15145548(temp_v0 + 0x18, &sp.u7C, temp_s1, &sp.u6C, &sp.u48);  /* P270: m2c passed live f12/f14 as two extra leading args (asm: a0 = arg0 + 0x128) */
+        segment_closest_point(temp_v0 + 0x18, &sp.u7C, temp_s1, &sp.u6C, &sp.u48);  /* P270: m2c passed live f12/f14 as two extra leading args (asm: a0 = arg0 + 0x128) */
         temp_f0_2 = sp.u6C - (*(f32 *)((u8 *)temp_s1 + 0));
         temp_f2_2 = sp.u70 - (*(f32 *)((u8 *)temp_s1 + 4));
         temp_f12_2 = sp.u74 - (*(f32 *)((u8 *)temp_s1 + 8));
@@ -395,7 +395,7 @@ s16 *attached_strip_draw(u8 *arg0, s16 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/attached_strip_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151308E4(s32 *, s32, s32, u8, s32);
+s32 particle_spawn_basic(s32 *, s32, s32, u8, s32);
 extern s32 D_80088F70;
 
 /* was func_151037D4 */
@@ -498,7 +498,7 @@ void flip_sprite_particle_spawn(s16 arg0, u8 arg1, f32 arg2, u8 *arg3, u8 arg4, 
     sp.u90 = -1;
     sp.u91 = 0;
     sp.u92 = arg4;
-    func_151308E4(&sp.u2C, 1, 0, arg5, arg6);
+    particle_spawn_basic(&sp.u2C, 1, 0, arg5, arg6);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/flip_sprite_particle_spawn.s")

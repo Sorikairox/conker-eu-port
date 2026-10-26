@@ -2,7 +2,7 @@ s/    rec->flags16 |= 4;/    rec->flags16 |= 8;/ % t1
 s/    snd = rec->opts >> 24;/    snd = rec->opts >> 16;/ % t1 t1_snd
 s/    b.spawn.pos0\[1\] = rec->y;/    b.spawn.pos0[1] = rec->z;/ % t1
 s/    mtxf_rotate_xyz_deg(m, rec->angX, rec->angY, 0.0f);/    mtxf_rotate_xyz_deg(m, rec->angY, rec->angX, 0.0f);/ % t1
-s/    func_150A7E40(m, 0.0f, 0.0f, -500.0f,/    func_150A7E40(m, 0.0f, 0.0f, 500.0f,/ % t1
+s/    mtxf_transform_point(m, 0.0f, 0.0f, -500.0f,/    mtxf_transform_point(m, 0.0f, 0.0f, 500.0f,/ % t1
 s/    b.spawn.pos1\[1\] += b.spawn.pos0\[1\];/    b.spawn.pos1[1] += b.spawn.pos0[2];/ % t1
 s/    b.emit.range\[1\] = rec->rangeX;/    b.emit.range[1] = rec->rangeY;/ % t1
 s/    b.emit.range\[0\] = b.emit.range\[1\];/    b.emit.range[0] = b.emit.range[3];/ % t1

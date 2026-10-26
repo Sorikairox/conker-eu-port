@@ -1,4 +1,4 @@
-# P250 func_15147B48 mutants: sed % setup names
+# P250 obj_fx_point_impact_d0 mutants: sed % setup names
 s/if (level >= 0x73) {/if (level > 0x73) {/ % high
 s/hit\[6\], 1.0f, 1.0f/hit[5], 1.0f, 1.0f/ % high
 s/fx_spawn_impact_burst(0xB, pos,/fx_spawn_impact_burst(0xA, pos,/ % high

@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void func_10004470(void) {
+/* was func_10004470 */
+void pi_init_dma_queues(void) {
     int i;
     osCreatePiManager(150, &D_800388B0, &D_800380E0, 0xC8);
 
@@ -18,7 +19,8 @@ void func_10004470(void) {
     D_8003A571 = 0;
 }
 
-s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
+/* was func_10004514 */
+s32 rom_dma_read(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
     OSMesgQueue *msgQueue;
     OSIoMesg tmpIoMsg;
     OSIoMesg *ioMsg;
@@ -26,7 +28,7 @@ s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
 
     sp3c = __osRunningThread->id - 3;
     if ((size < 0xC8U) && (sp3c == 0)) {
-        func_1000480C(devAddr, dramAddr, size);
+        rom_read_direct(devAddr, dramAddr, size);
         return;
     }
     if ((sp3c >= 4) || ( sp3c < 0)) {
@@ -57,7 +59,8 @@ s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
     }
 }
 
-void func_10004674(void) {
+/* was func_10004674 */
+void rom_dma_wait_queued(void) {
     int i;
     for (i = 0; i < D_8003A571; i++)
     {
@@ -67,7 +70,8 @@ void func_10004674(void) {
     D_8003A571 = 0;
 }
 
-void func_100046E4(u32 devAddr, u8 *dramAddr, u32 size) {
+/* was func_100046E4 */
+void rom_dma_read_chunked(u32 devAddr, u8 *dramAddr, u32 size) {
     OSIoMesg ioMsg;
     OSMesg msg;
     u32 sent;
@@ -112,7 +116,8 @@ extern OSThread D_80035C70;
  * word is split into the high half (for the halfword at +2) and the low half (for the next one).
  * The copy loops are do / while loops tested on the index after the step (unsigned), like the asm.
  */
-void func_1000480C(s32 devAddr, void *dramAddr, u32 size) {
+/* was func_1000480C */
+void rom_read_direct(s32 devAddr, void *dramAddr, u32 size) {
     u32 w;
     u32 i;
     u32 end;
@@ -166,5 +171,5 @@ void func_1000480C(s32 devAddr, void *dramAddr, u32 size) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_4470/func_1000480C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_4470/rom_read_direct.s")
 #endif

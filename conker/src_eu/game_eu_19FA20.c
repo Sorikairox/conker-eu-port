@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-u8 *func_15172210(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
+/* was func_15172210 */
+u8 *decal_alloc(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
     s32 var_a0;
     u8 *t;
     if (arg5 == 0) {
@@ -30,25 +31,26 @@ u8 *func_15172210(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, u8 
 
 #ifdef NON_MATCHING
 extern s32 D_8008CDEC; /* sprite texture descriptors (u8 * per id): u16 width / height at +6 / +8 */
-s32 func_15173090(u8 *, f32, f32, f32, f32, s32, s32, s32);
+s32 decal_place_on_floor(u8 *, f32, f32, f32, f32, s32, s32, s32);
 
-// sprite_spawn_at: allocates a sprite (func_15172210: kind `kind`, texture `tex`, flags ...) and places it at
-// (x, y, z): normally through func_15173090 (size `size`, `arg7`, `radius`; the sprite is freed again with
+// sprite_spawn_at: allocates a sprite (decal_alloc: kind `kind`, texture `tex`, flags ...) and places it at
+// (x, y, z): normally through decal_place_on_floor (size `size`, `arg7`, `radius`; the sprite is freed again with
 // node_destroy when that fails); with flags bit 1 as a flat quad of half side `radius` at height y, UVs from the
 // texture's size (+6 / +8, + 0x100, << 5), 0x2000 on +0x18 / +0x1A / +0x2A / +0x48.
-void func_151722BC(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s32 arg7, s32 radius, s32 flags,
+/* was func_151722BC */
+void decal_spawn_at(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s32 arg7, s32 radius, s32 flags,
                    s32 argA, s32 argB, u8 argC, s32 argD) {
     u8 *v;
     u8 *t;
     f32 r;
     s16 h;
 
-    v = func_15172210(kind, arg4, tex, flags, argA, argB, argC, argD);
+    v = decal_alloc(kind, arg4, tex, flags, argA, argB, argC, argD);
     if (v == NULL) {
         return;
     }
     if (!(flags & 2)) {
-        if (func_15173090(v + 0x10, x, y, z, size, arg7, radius,
+        if (decal_place_on_floor(v + 0x10, x, y, z, size, arg7, radius,
                           *(u16 *) (((u8 **) &D_8008CDEC)[v[0x58]] + 6)) == 0) {
             node_destroy((struct102 *) v);
         }
@@ -79,26 +81,28 @@ void func_151722BC(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s3
     *(s16 *) (v + 0x3A) = (*(u16 *) (t + 8) + 0x100) << 5;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/func_151722BC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_spawn_at.s")
 #endif
 
-s32 func_15172B6C(s32, s32, f32, f32, f32, f32, s32, s32);
+s32 decal_fit_to_triangle(s32, s32, f32, f32, f32, f32, s32, s32);
 extern s32 D_8008CDEC;
 
-void func_15172474(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC) {
+/* was func_15172474 */
+void decal_spawn_on_triangle(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC) {
     u8 *temp_v0;
     u8 *sp2C;
 
-    temp_v0 = func_15172210(arg4, arg5, arg6, arg8, arg9, argA, (s32) argB, argC);
+    temp_v0 = decal_alloc(arg4, arg5, arg6, arg8, arg9, argA, (s32) argB, argC);
     if (temp_v0 != NULL) {
         sp2C = temp_v0;
-        if (func_15172B6C((s32)((u8 *)temp_v0 + 0x10), arg3, arg0, arg1, arg2, 0.0f, arg7, *(u16 *)((u8 *)((s32 *)&D_8008CDEC)[*((u8 *)temp_v0 + 0x58)] + 6)) == 0) {
+        if (decal_fit_to_triangle((s32)((u8 *)temp_v0 + 0x10), arg3, arg0, arg1, arg2, 0.0f, arg7, *(u16 *)((u8 *)((s32 *)&D_8008CDEC)[*((u8 *)temp_v0 + 0x58)] + 6)) == 0) {
             node_destroy((struct102 *)sp2C);
         }
     }
 }
 
-void func_15172530(struct102 *arg0) {
+/* was func_15172530 */
+void decal_tick(struct102 *arg0) {
     s16 temp_v0;
     s32 temp_v0_2;
 
@@ -140,7 +144,8 @@ extern u32 D_800DD5E4;
 extern s32 D_800DD5E8;
 extern s16 D_800DD5EC;
 
-u8 *func_15172634(u8 *arg0, u8 *arg1, s32 arg2) {
+/* was func_15172634 */
+u8 *decal_draw(u8 *arg0, u8 *arg1, s32 arg2) {
     struct {
         s32 u8C;
         s32 u90;
@@ -193,7 +198,7 @@ u8 *func_15172634(u8 *arg0, u8 *arg1, s32 arg2) {
         if ((var_t0 != D_800DD5E4) || (var_v1 != D_800DD5E8)) {
             sp.u90 = var_v1;
             sp.u94 = var_t0;
-            temp_v0_2 = func_15095380(var_s0, sp88, temp_a2, &sp.u98, 0, 0, 0, 2, 3);
+            temp_v0_2 = sprite_load_texture(var_s0, sp88, temp_a2, &sp.u98, 0, 0, 0, 2, 3);
             D_800DD5E4 = sp.u94;
             var_s0 = temp_v0_2;
             D_800DD5E8 = sp.u90;
@@ -242,7 +247,7 @@ u8 *func_15172634(u8 *arg0, u8 *arg1, s32 arg2) {
         }
         sp.uB8 = var_t0_2;
         sp.uB4 = D_800DD5EC & 0xF0;
-        temp_v0_3 = func_15142FBC(var_s0, sp84 | 0x80000 | D_800D30BC | 0x2CB0, sp80, &sp.u8C);
+        temp_v0_3 = gfx_other_mode_cached(var_s0, sp84 | 0x80000 | D_800D30BC | 0x2CB0, sp80, &sp.u8C);
         var_t2 = sp.uB4;
         var_s0_2 = temp_v0_3;
         var_a0 = 0x40;
@@ -342,7 +347,7 @@ u8 *func_15172634(u8 *arg0, u8 *arg1, s32 arg2) {
     return var_s0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/func_15172634.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_draw.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A7524;
@@ -352,7 +357,8 @@ extern s32 D_800A73B0;
 extern s32 D_800A73C0;
 extern s32 D_800A73D0;
 
-s32 func_15172B6C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
+/* was func_15172B6C */
+s32 decal_fit_to_triangle(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
     struct {
         f32 u64;
         f32 u68;
@@ -499,16 +505,17 @@ s32 func_15172B6C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s3
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/func_15172B6C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_fit_to_triangle.s")
 #endif
 #ifdef NON_MATCHING
 void collision_find_floor_default_range(s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32);
-s32 func_15172B6C(s32, s32, f32, f32, f32, f32, s32, s32);
+s32 decal_fit_to_triangle(s32, s32, f32, f32, f32, f32, s32, s32);
 // sprite_place_on_floor: moves (x, z) by `dist` along the angle `angle` - 90 degrees (x += dist sin, z += dist cos of
 // angle - 90), looks up the floor under the new point (collision_find_floor_default_range: floor object and height) and places the
-// sprite there (func_15172B6C with the floor, x, the floor height, z, angle, arg6 and the low byte of arg7).
-// Returns func_15172B6C's result, 0 when there is no floor or the floor height is the "none" value -10000.
-s32 func_15173090(u8 *spr, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 arg6, s32 arg7) {
+// sprite there (decal_fit_to_triangle with the floor, x, the floor height, z, angle, arg6 and the low byte of arg7).
+// Returns decal_fit_to_triangle's result, 0 when there is no floor or the floor height is the "none" value -10000.
+/* was func_15173090 */
+s32 decal_place_on_floor(u8 *spr, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 arg6, s32 arg7) {
     s32 floor;
     f32 floorY;
     s32 tri;
@@ -528,8 +535,8 @@ s32 func_15173090(u8 *spr, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 arg6, s
     if (floorY == -10000.0f) {
         return 0;
     }
-    return func_15172B6C((s32) spr, floor, x, floorY, z, angle, arg6, (u8) arg7);
+    return decal_fit_to_triangle((s32) spr, floor, x, floorY, z, angle, arg6, (u8) arg7);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/func_15173090.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19FA20/decal_place_on_floor.s")
 #endif

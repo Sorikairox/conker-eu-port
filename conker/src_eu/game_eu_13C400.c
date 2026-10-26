@@ -9,7 +9,7 @@ s32 zone_tree_leaf_index(u8 *arg0);
 
 
 #ifdef NON_MATCHING
-void func_150ADD90(u8 *, u8 *, u8 *);
+void vec3f_cross(u8 *, u8 *, u8 *);
 extern s32 D_800D3720;
 
 /* was func_1510EBF0 */
@@ -47,7 +47,7 @@ s32 collision_candidate_is_floor(s32 arg0) {
         sp.u2C = (f32) ((*(s16 *)((u8 *)temp_a3 + 0)) - (*(s16 *)((u8 *)temp_v0_2 + 0)));
         sp.u30 = (f32) ((*(s16 *)((u8 *)temp_a3 + 2)) - (*(s16 *)((u8 *)temp_v0_2 + 2)));
         sp.u34 = (f32) ((*(s16 *)((u8 *)temp_a3 + 4)) - (*(s16 *)((u8 *)temp_v0_2 + 4)));
-        func_150ADD90(&sp.u38, &sp.u2C, &sp.u20);
+        vec3f_cross(&sp.u38, &sp.u2C, &sp.u20);
         if (sp.u24 < 0.0f) {
             return 0;
         }
@@ -81,8 +81,8 @@ void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s3
 #ifdef NON_MATCHING
 /*
  * P53: floor / ceiling lookup under (x, z) = (arg7, arg9) over the 4 collision areas (D_800894C0[area] == 1):
- * 0 / 1 level tree (func_150A3F50), 2 world objects (func_150A6A48 + func_150A49D0 + func_150A48C0), 3 records
- * (func_150A5480). Each area leaves its candidate floors in D_800D3720 (16 bytes: +0 height in 24.8, +4 triangle
+ * 0 / 1 level tree (floor_collect_level_tris), 2 world objects (world_objects_in_box + world_objects_transform_mesh + floor_collect_world_obj_tris), 3 records
+ * (floor_collect_record_tris). Each area leaves its candidate floors in D_800D3720 (16 bytes: +0 height in 24.8, +4 triangle
  * (3 vertex offsets), +8 vertex base (0 = level), +0xC object / record index); collision_candidate_is_floor(i) says whether
  * candidate i is not a floor (a ceiling).
  * Outputs: arg0 = floor triangle, arg1 / arg2 = s16[9] vertices of the floor / object ceiling, arg3 = floor y,
@@ -90,11 +90,11 @@ void collision_find_floor_no_fallback(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s3
  * +0x1A0 object, +0x274 standing-on record, +0x17C ceiling). argA = the y the actor came from, argD / argE the
  * object search y range, argF != 0: no fallback floor when nothing is in [y - ..., y + step].
  */
-s32 func_150A3F50(s32, s32);
-s32 func_150A48C0(s32, s32, s32, s32 *);
-s32 func_150A5480(s32, s32);
-s32 func_150A6A48(s32, s32, s32 *, s32, s32, s32, s32, s32);
-s32 func_150A49D0(s32 count, s32 *idList, s32 force);
+s32 floor_collect_level_tris(s32, s32);
+s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
+s32 floor_collect_record_tris(s32, s32);
+s32 world_objects_in_box(s32, s32, s32 *, s32, s32, s32, s32, s32);
+s32 world_objects_transform_mesh(s32 count, s32 *idList, s32 force);
 s32 collision_candidate_is_floor(s32 arg0);
 extern s32 D_800D3720;
 extern s32 D_800D3C00;
@@ -190,12 +190,12 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
         found = 0;
         collision_select_area(area);
         if (area == 2) {
-            objs = func_150A6A48((s16)x, (s16)z, &objList, argB, x, z, (s32)argD, (s32)argE);
-            func_150A49D0(objs, &D_800D3C00, 0);
+            objs = world_objects_in_box((s16)x, (s16)z, &objList, argB, x, z, (s32)argD, (s32)argE);
+            world_objects_transform_mesh(objs, &D_800D3C00, 0);
             if (arg4 != 0) {
                 t0 = 0;
-                func_150A49D0(objList, &D_800D3C50, 0);
-                cnt = func_150A48C0(x, z, objList, &D_800D3C50);
+                world_objects_transform_mesh(objList, &D_800D3C50, 0);
+                cnt = floor_collect_world_obj_tris(x, z, objList, &D_800D3C50);
                 if (cnt != 0) {
                     cmax = -10000.0f;
                     for (k = 0; k < cnt; k++) {
@@ -219,11 +219,11 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
                     }
                 }
             }
-            n = func_150A48C0(x, z, objs, &D_800D3C00);
+            n = floor_collect_world_obj_tris(x, z, objs, &D_800D3C00);
         } else if (area == 3) {
-            n = func_150A5480(x, z);
+            n = floor_collect_record_tris(x, z);
         } else {
-            n = func_150A3F50(x, z);
+            n = floor_collect_level_tris(x, z);
         }
         total += n;
         if (first) {
@@ -381,8 +381,8 @@ s32 collision_find_floor_ceiling(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150A48C0(s32, s32, s32, s32 *);
-s32 func_150A49D0(s32, s32 *, s32);
+s32 floor_collect_world_obj_tris(s32, s32, s32, s32 *);
+s32 world_objects_transform_mesh(s32, s32 *, s32);
 s32 func_150A69A8(s32, s32, s32 *, s32);
 extern s32 D_800D3720;
 extern s32 D_800D3C50;
@@ -404,8 +404,8 @@ f32 collision_object_floor_height(f32 arg0, f32 arg1, f32 arg2) {
     sp20 = temp_f6;
     sp1C = temp_f10;
     func_150A69A8((s16) temp_f6, (s16) temp_f10, &sp.u28, (s32) arg1);
-    func_150A49D0(sp.u28, &D_800D3C50, 0);
-    if (func_150A48C0(sp20, sp1C, sp.u28, &D_800D3C50) != 0) {
+    world_objects_transform_mesh(sp.u28, &D_800D3C50, 0);
+    if (floor_collect_world_obj_tris(sp20, sp1C, sp.u28, &D_800D3C50) != 0) {
         var_f2 = (f32) D_800D3720 * 0.00390625f;
     } else {
         var_f2 = -10000.0f;
@@ -507,7 +507,7 @@ s32 floor_flags_surface_type(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150A3F50(s32, s32);
+s32 floor_collect_level_tris(s32, s32);
 extern s32 D_800D3720;
 
 /* was func_1510FE58 */
@@ -526,7 +526,7 @@ s32 collision_level_nearest_height(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
     u8 *var_v0;
 
     collision_select_area(0);
-    temp_v0 = func_150A3F50(arg0, arg2);
+    temp_v0 = floor_collect_level_tris(arg0, arg2);
     if (temp_v0 == 0) {
         return -0x2710;
     }
@@ -584,7 +584,7 @@ block_13:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/collision_level_nearest_height.s")
 #endif
 #ifdef NON_MATCHING
-void func_150A6C40(s32);
+void pvs_row_apply(s32);
 void camera_zone_flag_update(s32);
 extern s32 D_800DC1F0;
 extern s32 D_800DC1F4;
@@ -615,7 +615,7 @@ void player_zone_update(s32 arg0) {
     temp_v1 = ((s32 *)((u8 *)&D_800DC260 + (arg0 * 2)));
     if (temp_v0_3 != *temp_v1) {
         *temp_v1 = (s16) temp_v0_3;
-        func_150A6C40(arg0);
+        pvs_row_apply(arg0);
     }
     if (D_800BE9F0 == 0x3C) {
         camera_zone_flag_update(arg0);

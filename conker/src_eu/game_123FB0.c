@@ -5,8 +5,8 @@
 
 #ifdef NON_MATCHING
 s32 event_dispatch(s32, s32, ...);
-f32 func_150ADDE0(struct17 *, struct17 *);
-void func_15049978(f32 *, f32, s32 *, f32, f32, f32);
+f32 vec3f_dot(struct17 *, struct17 *);
+void math_spring_approach_angle(f32 *, f32, s32 *, f32, f32, f32);
 extern struct17 D_800A1F50;  /* (0, 98, -5530) */
 extern struct17 D_800A1F5C;  /* (0, 98, 1198) */
 extern struct17 D_800D9E70;
@@ -15,7 +15,7 @@ extern struct17 D_800D9E70;
 // (+0x3D0) is alive, sets flags 0xC0001000 in +0x84 and steers the camera: t = the projection of +0x2A4 on the
 // segment D_800A1F50 -> D_800A1F5C (0.75 x, clamped to 0..1); the two button groups pick a side offset of -900 / +900
 // (distance 220) or none (294); event_dispatch_alt gets (offset, -20, 6728 t - 5530); the angle +0x37C eases towards the
-// D_800D9E70 heading - 180 (func_15049978) and +0x39C is it in radians. Otherwise the flags are cleared.
+// D_800D9E70 heading - 180 (math_spring_approach_angle) and +0x39C is it in radians. Otherwise the flags are cleared.
 /* was func_150F6B00 */
 void camera_segment_track(struct108 *arg0) {
     struct17 toObj;
@@ -29,9 +29,9 @@ void camera_segment_track(struct108 *arg0) {
         arg0->unk84 |= 0xC0001000;
         vec3_diff(&D_800A1F50, (struct17 *) &arg0->unk2A4, &toObj);
         vec3_diff(&D_800A1F50, &D_800A1F5C, &axis);
-        invLen = 1.0f / func_150AD930((f32 *) &axis);
+        invLen = 1.0f / vec3f_magnitude((f32 *) &axis);
         vec3_normalize(&axis, &dir);
-        t = func_150ADDE0(&dir, &toObj) * invLen * 0.75f;
+        t = vec3f_dot(&dir, &toObj) * invLen * 0.75f;
         if (t < 0.0f) {
             t = 0.0f;
         } else if (1.0f < t) {
@@ -48,7 +48,7 @@ void camera_segment_track(struct108 *arg0) {
             arg0->unk374 = 294.0f;
         }
         event_dispatch_alt(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f * t + -5530.0f));
-        func_15049978(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,
+        math_spring_approach_angle(&arg0->unk37C, vec3_heading_deg(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,
                       arg0->unk7B4);
         arg0->unk39C = arg0->unk37C * 0.017453292f;
     } else {
@@ -71,7 +71,7 @@ void camera_segment_track(struct108 *arg0) {
 //         arg0->unk84 |= 0xC0001000;
 //         vec3_diff(&D_800A1B80, &arg0->unk2A4, &tmp.unk14);
 //         vec3_diff(&D_800A1B80, &D_800A1B8C, &tmp.unk8);
-//         tmp.unk0 = 1.0f / func_150AD930(&tmp.unk8);
+//         tmp.unk0 = 1.0f / vec3f_magnitude(&tmp.unk8);
 //         vec3_normalize(&tmp.unk8, &tmp.unk20);
 //         temp_f2 = func_150AD900(&tmp.unk20, &tmp.unk14) * tmp.unk0 * 0.75f;
 //         if (temp_f2 < 0.0f) {

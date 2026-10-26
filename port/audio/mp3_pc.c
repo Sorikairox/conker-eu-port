@@ -4,13 +4,13 @@
  * hand-written asm in game_eu_226870 / game_eu_227BF0, which the port links as stubs. Without them a
  * voice stream decodes to nothing, so this file supplies C equivalents:
  *
- *   func_151F9150  get bits            (P199: now game C, game_eu_226870.c)
- *   func_151F9184  Huffman big_values  translated from the asm (fast byte table + tree walk)
- *   func_151F933C  Huffman count1      translated from the asm
- *   func_151F94E0  IMDCT, long blocks  written from the MPEG-1 Layer III description (ISO 11172-3)
- *   func_151FA3E0  IMDCT, short blocks idem
+ *   mp3_get_bits  get bits            (P199: now game C, game_eu_226870.c)
+ *   mp3_huff_decode_big_values  Huffman big_values  translated from the asm (fast byte table + tree walk)
+ *   mp3_huff_decode_count1  Huffman count1      translated from the asm
+ *   mp3_imdct36_hybrid  IMDCT, long blocks  written from the MPEG-1 Layer III description (ISO 11172-3)
+ *   mp3_imdct12_short  IMDCT, short blocks idem
  *
- * The register-level helpers func_151F9060 (one Huffman symbol) and func_151F911C (bits for a
+ * The register-level helpers mp3_huff_decode_pair (one Huffman symbol) and mp3_huff_read_bits (bits for a
  * caller-held bit position) use private register conventions and are folded in here.
  *
  * Compiled through the vbe pass (port/Makefile BOOT_SRC), so game memory reads are plain C.
@@ -18,7 +18,7 @@
  * branch converts its asm (game_eu_226870.c / game_eu_227BF0.c), or the link sees two definitions.
  *
  * Asm semantics checked against the IMDCT asm: frequency inversion (odd subbands, odd outputs) is
- * done inside func_151F94E0 / func_151FA3E0 (`andi a1, 1`), the window is arg4 (long blocks), the
+ * done inside mp3_imdct36_hybrid / mp3_imdct12_short (`andi a1, 1`), the window is arg4 (long blocks), the
  * output is window * imdct + overlap (arg3) and the new overlap goes back to arg3. */
 #include <ultra64.h>
 #include <math.h>
@@ -38,13 +38,13 @@ static u32 getbits(u8 *buf, s32 *pos, s32 n) {
     return v;
 }
 
-/* func_151F9150 (get bits): removed in P199, the game C (P190, game_eu_226870.c mp3util_get_bits) defines it now */
+/* mp3_get_bits (get bits): removed in P199, the game C (P190, game_eu_226870.c mp3util_get_bits) defines it now */
 
-/* P258: port-b P251 made func_151F9184 / func_151F933C (Huffman, with the static helpers 9060 / 911C) and func_151F94E0
+/* P258: port-b P251 made mp3_huff_decode_big_values / mp3_huff_decode_count1 (Huffman, with the static helpers 9060 / 911C) and mp3_imdct36_hybrid
  * (IMDCT 36) game C (game_eu_226870.c, bit-exact with the asm). These P14 PC versions are kept for A/B runs only:
  * build with -DP258_MP3_PC_OLD and without the game C ones. */
 #ifdef P258_MP3_PC_OLD
-/* func_151F9060: one Huffman symbol of table `tbl`. Returns the first value, *second gets the other. */
+/* mp3_huff_decode_pair: one Huffman symbol of table `tbl`. Returns the first value, *second gets the other. */
 static s32 huff(u8 *buf, s32 *pos, s32 tbl, s32 *second) {
     u8 *p = buf + ((u32)*pos >> 3);
     s32 sh = *pos & 7;
@@ -78,7 +78,7 @@ static s32 huff(u8 *buf, s32 *pos, s32 tbl, s32 *second) {
 
 /* big_values region: pairs (x, y) with optional linbits and sign bits; values go to *out (s16
  * pairs), sign flags to *sgn (bytes). Returns the new sample index. */
-s32 func_151F9184(u8 *buf, s32 *bitpos, s32 tbl, s32 idx, s32 linbits, s32 end, s16 **out, u8 **sgn) {
+s32 mp3_huff_decode_big_values(u8 *buf, s32 *bitpos, s32 tbl, s32 idx, s32 linbits, s32 end, s16 **out, u8 **sgn) {
     s32 pos = *bitpos;
     s16 *o = *out;
     u8 *s = *sgn;
@@ -103,7 +103,7 @@ s32 func_151F9184(u8 *buf, s32 *bitpos, s32 tbl, s32 idx, s32 linbits, s32 end, 
 
 /* count1 region: quadruples (v, w, x, y) of 0/1 from table 32/33, then up to 4 sign bits. The asm
  * reads 4 bits and gives back the unused ones. Stops at bit `endbit` or sample 576. */
-s32 func_151F933C(u8 *buf, s32 *bitpos, s32 tbl, s32 idx, s32 endbit, s16 **out, u8 **sgn) {
+s32 mp3_huff_decode_count1(u8 *buf, s32 *bitpos, s32 tbl, s32 idx, s32 endbit, s16 **out, u8 **sgn) {
     s32 pos = *bitpos;
     s16 *o = *out;
     u8 *s = *sgn;
@@ -157,7 +157,7 @@ static void overlap_out(const f32 *z, s32 sb, f32 *out, f32 *prev) {
 }
 
 #ifdef P258_MP3_PC_OLD
-void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
+void mp3_imdct36_hybrid(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
     f32 z[36];
     s32 i, k;
     if (!tabs_ok) imdct_tables();
@@ -173,9 +173,9 @@ void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
 
 /* three 12-point IMDCTs over the interleaved short-block values in[w + 3k], each windowed and
  * placed at 6 + 6w in the 36-sample block */
-/* P318: port-b P317 made func_151FA3E0 (IMDCT, short blocks) game C (game_eu_227BF0.c); this P14 PC version is kept for A/B runs only (-DP318_MP3_PC_OLD, without the game C one) */
+/* P318: port-b P317 made mp3_imdct12_short (IMDCT, short blocks) game C (game_eu_227BF0.c); this P14 PC version is kept for A/B runs only (-DP318_MP3_PC_OLD, without the game C one) */
 #ifdef P318_MP3_PC_OLD
-void func_151FA3E0(f32 *in, s32 sb, f32 *out, f32 *prev) {
+void mp3_imdct12_short(f32 *in, s32 sb, f32 *out, f32 *prev) {
     f32 z[36];
     s32 i, k, w;
     if (!tabs_ok) imdct_tables();

@@ -44,23 +44,23 @@ for F in "$@"; do NR=$NR0
     continue
   fi
   # P235: the candidate is the whole NM block (as the session drafts: mutant line numbers match; a matching-C function
-  # such as func_151D52B4 keeps its matching body in the #else arm). NMBLOCK_BODY=1 = old behaviour (body only).
+  # such as trail_smoke_particle_update keeps its matching body in the #else arm). NMBLOCK_BODY=1 = old behaviour (body only).
   wh=(NMBLOCK_WHOLE=1); [ -n "$NMBLOCK_BODY" ] && wh=(-u NMBLOCK_WHOLE)
   C=$W/$F.c; env "${wh[@]}" python3 tools/port/nmblock.py $F $C > /dev/null || { echo "$F: no C definition"; continue; }
   envs=(); tr=${TR:-4}
-  # P239: knob DRAFT=path tests a recorded test variant instead of the NM block (e.g. func_1518FE0C: the shipped
-  # s32 (u8 *, void *) table-signature body is one word longer and its jal to the adjacent func_1518FE50 falls inside
+  # P239: knob DRAFT=path tests a recorded test variant instead of the NM block (e.g. bone_sparks_burst: the shipped
+  # s32 (u8 *, void *) table-signature body is one word longer and its jal to the adjacent bone_sparks_emit falls inside
   # the candidate range, so difftest cannot stub it; the void one-argument variant has the same body)
   cs=""; for k in $kn; do case $k in TR=*) [ -z "$TR" ] && tr=${k#TR=};; DRAFT=*) C=${k#DRAFT=};; CANDSED=*) cs=${k#CANDSED=};; NR=*) [ -z "$NR0" ] && NR=${k#NR=};; *) envs+=("$k");; esac; done
   # P244: knob CANDSED=file applies `sed -f file` to the candidate (and to the body layout) before every run, for test-only
   # edits that must track the current NM block (unlike DRAFT=); the sed must keep line numbers (mutants are line-numbered).
-  # func_15065E18: the C passes item_effect_spawn's unused a1 as 0, the asm leaves garbage there -> 1-argument prototype.
+  # player_item_action: the C passes item_effect_spawn's unused a1 as 0, the asm leaves garbage there -> 1-argument prototype.
   if [ -n "$cs" ]; then sed -f "$cs" $C > $W/${F}_cs.c || { echo "$F: CANDSED $cs failed"; continue; }; C=$W/${F}_cs.c; fi
   T=build/difftest_rv_${F}_$$
   dt() { local u=(); [ -n "$NOARGMEM" ] && u=(-u DIFFTEST_ARGMEM)  # mut.sh P73: the random phase runs without ARGMEM
     # P243: `env -u` must come before the K=V assignments: after them env took `-u` as the command, so with any
     # registry knob the no-ARGMEM random run printed nothing, randok stayed empty and random kills never counted
-    # (mutants were killed only by setups; func_150D1D20's 3 random-only mutants all "survived"). RVENV_OLD=1 = old order.
+    # (mutants were killed only by setups; view_scroll_overlay_draw's 3 random-only mutants all "survived"). RVENV_OLD=1 = old order.
     if [ -n "$RVENV_OLD" ]; then env "${envs[@]}" "${u[@]}" DIFFTEST_TMP=$T "$@"; else env "${u[@]}" "${envs[@]}" DIFFTEST_TMP=$T "$@"; fi 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | dtcut; }
   # P259: keep difftest's static "[knob not a jal target ...]" note (a knob keyed on a non-EU address) after the cut
   # verdict when no CUT is given (CUT=N callers compare the cut text, e.g. `= DIFFER`, and stay as before)
@@ -77,7 +77,7 @@ for F in "$@"; do NR=$NR0
     grep -vE '^\s*(#|$)' "$s" | while IFS='!' read -r n a p r rf ow ww wb v1; do
       n=$(echo $n); [ $# -gt 0 ] && ! [[ " $* " == *" $n "* ]] && continue
       # P244: a non-empty setup field wins over the same registry knob (dt's `env "${envs[@]}"` used to override it:
-      # func_15170648's random-phase knob DIFFTEST_ARG=5=0|1|2 replaced every setup's arguments -> 0 / 4 UNSURE)
+      # particle_quad_edge_sparks's random-phase knob DIFFTEST_ARG=5=0|1|2 replaced every setup's arguments -> 0 / 4 UNSURE)
       local sw=() kv; for kv in "DIFFTEST_ARG=$(echo $a)" "DIFFTEST_POKE=$(echo $p)" "DIFFTEST_RET=$(echo $r)" "DIFFTEST_RETF=$(echo $rf)" \
           "DIFFTEST_OUTA=$(echo $ow)" "DIFFTEST_OUTW=$(echo $ww)" "DIFFTEST_OUTB=$(echo $wb)" "DIFFTEST_RETV1=$(echo $v1)"; do [ -n "${kv#*=}" ] && sw+=("$kv"); done
       o=$(DIFFTEST_EXACT='*' DIFFTEST_ARG="$(echo $a)" DIFFTEST_POKE="$(echo $p)" DIFFTEST_RET="$(echo $r)" DIFFTEST_RETF="$(echo $rf)" \
@@ -107,7 +107,7 @@ for F in "$@"; do NR=$NR0
       e=$(echo "$e" | sed 's/ *$//'); tot=$((tot+1))
       sed "$e" $Cm > $M 2>/dev/null || { inv="$inv sed:[$e]"; continue; }; cmp -s $Cm $M && { na=$((na+1)); continue; }
       if [ "${NR:-100}" != 0 ] && [ -n "$randok" ] && [ "$(NOARGMEM=1 CUT=6 dt tools/port/difftest.sh $F $M --trials ${NR:-100} --seed 1)" = DIFFER ]; then k=$((k+1)); continue; fi
-      # P244: named setups are looked up in every setup file of the row (before: the first file only, so func_15177360's
+      # P244: named setups are looked up in every setup file of the row (before: the first file only, so flyer_model_draw's
       # m7360b mutants naming s7360b setups ran nothing and were "invalid"); a mutant without names runs the first file
       hit=""; first=${st%%,*}
       # synchronous (STOP ends the runner at the first non-EQUIV setup): a `< <(runset)` loop left the runner going

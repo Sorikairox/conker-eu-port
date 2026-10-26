@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """P54: the floor candidate collectors (hand asm) vs their NON_MATCHING C:
-  func_150A3F50 (level: all triangles or the BSP tree), func_150A48C0 (world objects), func_150A5480 (records),
-  all three around the shared per-triangle test func_150A408C (C: floor_tri), and func_150A6A48 (object box list).
+  floor_collect_level_tris (level: all triangles or the BSP tree), floor_collect_world_obj_tris (world objects), floor_collect_record_tris (records),
+  all three around the shared per-triangle test func_150A408C (C: floor_tri), and world_objects_in_box (object box list).
 Reference: VR4300 interpreter (nmasm_vr.Ref) on build/conker.eu.elf; candidate: Unicorn on build_nm/conker.eu.elf.
 Entry registers: $gp = 0 and $v1 = 0 (the asm uses the caller's $gp as the tag of the all-triangles path and $v1 as
 the "previous index" of a leaf list starting with a delta; the C uses 0).
 Synthetic mode: random triangles (vertex pool, offsets / bounds tables, bounds sometimes perturbed), random trees
 (nested nodes, sibling chains, leaf lists mixing deltas and 15-bit indices, > 0x27 hits), objects, records.
 Level mode (--level L): the level's area tables are built by nmasm_level's pipeline (asm collision_build_level_tris in Unicorn on
-build/conker.eu.elf from the ROM), func_150A4ED4(area) selects them, then func_150A3F50 runs at points on / near
+build/conker.eu.elf from the ROM), func_150A4ED4(area) selects them, then floor_collect_level_tris runs at points on / near
 real triangles, with D_800DBE62 = 0 and 1. Compared: v0, s0-s7 / fp / sp, all RDRAM except the stack.
 Run in the container from /conker/conker: python3 ../tools/port/difftest/nmasm_floorsets.py [N] [seed]
    [--only 3f50|48c0|5480|6a48] [--level 0x21 --rom ../baserom.eu.z64]"""
@@ -119,7 +119,7 @@ def synth(ref, cand, base, rng, n, only):
                 k = rng.randrange(4); d = rng.choice([1, 2, 2, 3])
                 W(m, BND + 8 * j + 2 * k, 'h', max(-32768, min(32767, (x, z)[k & 1] + (d if k < 2 else -d))))
             if kind == '3f50t': tree(rng, m, nt, x, z)
-            ok, v0, info = run(ref, cand, m, (0x150A3F50, 'func_150A3F50'), (x, z))
+            ok, v0, info = run(ref, cand, m, (0x150A3F50, 'floor_collect_level_tris'), (x, z))
         elif kind == '48c0':
             nobj = rng.randint(1, 5); per = []
             vs = tris(rng, m, nt, BASES + 0x1000, True)
@@ -132,7 +132,7 @@ def synth(ref, cand, base, rng, n, only):
             ids = [rng.randrange(nobj) for _ in range(rng.randint(0, 6))]
             for i, q in enumerate(ids): W(m, IDS + 2 * i, 'H', q)
             x, z = point(rng, vs)
-            ok, v0, info = run(ref, cand, m, (0x150A48C0, 'func_150A48C0'), (x, z, len(ids), IDS))
+            ok, v0, info = run(ref, cand, m, (0x150A48C0, 'floor_collect_world_obj_tris'), (x, z, len(ids), IDS))
         elif kind == '5480':
             vs = tris(rng, m, nt, BASES + 0x1000, True)
             for i in range(25):
@@ -149,7 +149,7 @@ def synth(ref, cand, base, rng, n, only):
                 W(m, OFS6490 + 4 * md, 'I', VOFS)
             m[phys(D39FC)] = rng.randint(0, 26)
             x, z = point(rng, vs)
-            ok, v0, info = run(ref, cand, m, (0x150A5480, 'func_150A5480'), (x, z))
+            ok, v0, info = run(ref, cand, m, (0x150A5480, 'floor_collect_record_tris'), (x, z))
         else:
             nobj = rng.choice([0, 1, 5, 30])
             W(m, OBJS, 'I', OBJA); W(m, NOBJ, 'i', nobj)
@@ -165,7 +165,7 @@ def synth(ref, cand, base, rng, n, only):
             else: x2, z2 = x + rng.randint(0, sc), z + rng.randint(0, sc)
             y = rng.choice([-10000, rng.randint(-sc, sc)]); y2 = rng.randint(-sc, sc)
             W(m, OUTC, 'I', 0xDEADBEEF)
-            ok, v0, info = run(ref, cand, m, (0x150A6A48, 'func_150A6A48'), (x, z, OUTC, rng.choice([0, 1, 3, nobj])),
+            ok, v0, info = run(ref, cand, m, (0x150A6A48, 'world_objects_in_box'), (x, z, OUTC, rng.choice([0, 1, 3, nobj])),
                                stack=(x2, z2, y, y2))
         key = '%s:%s' % (kind, 'hit' if v0 else 'none' if v0 == 0 else '')
         hist[key] = hist.get(key, 0) + 1
@@ -202,7 +202,7 @@ def level_mode(ref, cand, rng, n, levelno, rom):
             v = [list(R(m, R(m, vofs + 12 * ti + 4 * k, 'I')[0], '3h')) for k in range(3)]
             x, z = point(rng, [v]) if rng.random() < 0.9 else (rng.randint(-8000, 8000), rng.randint(-8000, 8000))
             m[phys(DBE62)] = t & 1
-            ok, v0, info = run(ref, cand, m, (0x150A3F50, 'func_150A3F50'), (x, z))
+            ok, v0, info = run(ref, cand, m, (0x150A3F50, 'floor_collect_level_tris'), (x, z))
             key = 'area%d tree%d %s' % (area, t & 1, 'hit' if v0 else 'none')
             hist[key] = hist.get(key, 0) + 1
             if ok and v0 and t < 4:

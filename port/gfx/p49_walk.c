@@ -1,4 +1,4 @@
-/* P49: ?p49walk=N runtime check of P47's walk handler func_1504CB98 (state 1), link-time wrap.
+/* P49: ?p49walk=N runtime check of P47's walk handler obj_state_walk (state 1), link-time wrap.
  * Logs the player record before / after each call (first N calls, then every `p49every` calls, default 32):
  * position, velocities, yaw (+0x76 / +0x7A), target speed (+0x44), the pad (D_800CC6A4), the handler's flag
  * word D_800CC6DC, and which asm stubs the handler reached (port_stub_trace_hook), with call counts. */
@@ -43,8 +43,8 @@ static void p49_line(const char *tag, const unsigned char *r) {
              u ? vbe_ld8(u + 0x52) : 0, u ? vbe_ld8(u + 0x197) : 0, u ? vbe_ld8(u + 0x198) : 0, u ? vbe_ld8(u + 0x11A) : 0, u ? (short)vbe_ld16(u + 0x12) : 0);
 }
 
-void __real_func_1504CB98(void *arg0);
-void __wrap_func_1504CB98(void *arg0) {
+void __real_obj_state_walk(void *arg0);
+void __wrap_obj_state_walk(void *arg0) {
     static int flag = -1, every = -1;
     static unsigned calls;
     const unsigned char *r = (const unsigned char *)arg0;
@@ -52,7 +52,7 @@ void __wrap_func_1504CB98(void *arg0) {
     int log;
     unsigned i;
     if (flag < 0) { flag = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
-    if (!flag) { __real_func_1504CB98(arg0); return; }
+    if (!flag) { __real_obj_state_walk(arg0); return; }
     calls++;
     log = calls <= (unsigned)flag || calls % (unsigned)every == 0;
     x0 = F(0x14); z0 = F(0x1C);
@@ -68,7 +68,7 @@ void __wrap_func_1504CB98(void *arg0) {
     for (i = 0; i < st_count; i++) st_n[i] = 0;
     { void (*prev_hook)(const char *) = port_stub_trace_hook; /* P88: restore, don't clear (?p88watch) */
     port_stub_trace_hook = p49_hook;
-    __real_func_1504CB98(arg0);
+    __real_obj_state_walk(arg0);
     port_stub_trace_hook = prev_hook; }
     if (log) {
         char buf[600]; int n = 0;
@@ -89,7 +89,7 @@ void __wrap_func_1504CB98(void *arg0) {
 /* P52: with ?p49walk set, also
  *  - wrap obj_apply_gravity (P50 C gravity; the call from the walk handler): y / y_velocity / +0x28 before and after,
  *    gravity +0x24 and the frame time D_800D1550[0] (an f32 array, P50), first p49walk calls then every p49every;
- *  - wrap func_1502C1D4 (P48 C object update loop, called from game_45B80.c): record 0's model fields after it
+ *  - wrap objects_update_all (P48 C object update loop, called from game_45B80.c): record 0's model fields after it
  *    (+0x1D4 model instance, +0x2D0 animation state, id +4, D_800D19A0[id] loaded model, D_800C52F0[id]). */
 extern float D_800D1550[];
 extern unsigned D_800D19A0[];
@@ -109,9 +109,9 @@ void __wrap_obj_apply_gravity(void *rec) {
                  "+28 %g -> %g | +180 %g floor118 %g\n", calls, port_frame_count, D_800D1550[0],
                  *(const unsigned *)D_800D1550, F(0x24), y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180), F(0x118));
 }
-void __real_func_1502C1D4(void);
-/* P116: func_1502C1D4 follows each record's +0x65 parent chain (1-based slot) with no bound; a cycle hangs the game
- * thread (seen after the scene-1 setup spawns of func_15083F30). If one is found, the 25 records are logged (first 4
+void __real_objects_update_all(void);
+/* P116: objects_update_all follows each record's +0x65 parent chain (1-based slot) with no bound; a cycle hangs the game
+ * thread (seen after the scene-1 setup spawns of obj_spawn_attached). If one is found, the 25 records are logged (first 4
  * times) and the frame's object update is skipped instead of hanging. */
 static int p116_cycle(void) {
     static unsigned logged;
@@ -138,17 +138,17 @@ static int p116_cycle(void) {
     }
     return bad >= 0;
 }
-void __wrap_func_1502C1D4(void) {
+void __wrap_objects_update_all(void) {
     static int flag = -1;
     static unsigned calls;
     const unsigned char *r = D_800CC2D0;
     if (p116_cycle()) return;
-    __real_func_1502C1D4();
+    __real_objects_update_all();
     if (flag < 0) { flag = port_flag("p49walk"); }
     calls++;
     if (flag && (calls <= 3 || (calls & 255) == 0)) {
         unsigned id = U8(4);
-        port_log("[p52] func_1502C1D4 call %u frame %u: rec0 state %d id %02X +65 %02X +1D4 %08X +2D0 %08X "
+        port_log("[p52] objects_update_all call %u frame %u: rec0 state %d id %02X +65 %02X +1D4 %08X +2D0 %08X "
                  "D_800D19A0[id] %08X D_800C52F0[id] %u +74 %02X\n", calls, port_frame_count, *(const int *)r, id,
                  U8(0x65), *(const unsigned *)(r + 0x1D4), *(const unsigned *)(r + 0x2D0), D_800D19A0[id],
                  vbe_ld16(&D_800C52F0[id]), U8(0x74));
@@ -192,22 +192,22 @@ static int p55_ref(float x, float z, float ylim, float *best, float *top, int *n
 }
 static float r_best, r_top, r_y; static int r_bi = -3, r_ntri, r_n3f50 = -1, r_calls, r_on;
 static int r_n48c0 = -1, r_n5480 = -1;
-int __real_func_150A48C0(int x, int z, int cnt, int ids);
-int __wrap_func_150A48C0(int x, int z, int cnt, int ids) {
-    int n = __real_func_150A48C0(x, z, cnt, ids);
+int __real_floor_collect_world_obj_tris(int x, int z, int cnt, int ids);
+int __wrap_floor_collect_world_obj_tris(int x, int z, int cnt, int ids) {
+    int n = __real_floor_collect_world_obj_tris(x, z, cnt, ids);
     if (r_on) r_n48c0 = n;
     return n;
 }
-int __real_func_150A5480(int x, int z);
-int __wrap_func_150A5480(int x, int z) {
-    int n = __real_func_150A5480(x, z);
+int __real_floor_collect_record_tris(int x, int z);
+int __wrap_floor_collect_record_tris(int x, int z) {
+    int n = __real_floor_collect_record_tris(x, z);
     if (r_on) r_n5480 = n;
     return n;
 }
 static float r_minx, r_maxx, r_minz, r_maxz, r_miny, r_maxy;
-int __real_func_150A3F50(int x, int z);
-int __wrap_func_150A3F50(int x, int z) {
-    int n = __real_func_150A3F50(x, z);
+int __real_floor_collect_level_tris(int x, int z);
+int __wrap_floor_collect_level_tris(int x, int z) {
+    int n = __real_floor_collect_level_tris(x, z);
     if (r_on) {
         float b, t; int nt, bi;
         r_calls++;
@@ -565,7 +565,7 @@ void __wrap_obj_ctrl_floor_contact(void *rec, float a1) {
 
 /* P101 DIAGNOSTIC ?p101mus=1: at each call of the level-start music function level_start_music (game_2D4B0.c, still an
  * asm stub = does nothing; its m2c draft starts the level songs from the level header D_800B0DF0 +0x2C..+0x39 through
- * func_1000D96C): the level D_800BE9F0, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
+ * music_play_song): the level D_800BE9F0, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
 extern unsigned char *D_800B0DF0;
 extern int D_800BE9F0, D_800B1248;
 int port_p110_inmus;
@@ -580,7 +580,7 @@ void __wrap_level_start_music(void) {
         port_log("[p101] level_start_music (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",
                  port_frame_count, D_800BE9F0, (unsigned)(uintptr_t)h, h ? b : "-", D_800B1248);
     }
-    port_p110_inmus = 1; /* P110: func_1000D96C / DE1C calls from inside are logged by p61_checks.c */
+    port_p110_inmus = 1; /* P110: music_play_song / DE1C calls from inside are logged by p61_checks.c */
     __real_level_start_music();
     port_p110_inmus = 0;
 }

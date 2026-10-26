@@ -5,14 +5,15 @@
 
 #include "macros.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out);
+s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out);
 s32 quadtree_tri_box_test(struct_eu_bytes24 arg0);
-void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list);
+void quadtree_write_leaf_list(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list);
 extern s32 D_800DC26C;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry */
 extern s32 D_800DC274;   /* grid table: s16 x, z per entry */
 #endif
 
-void func_15001970(void) {
+/* was func_15001970 */
+void collision_build_reset(void) {
     s32 pad;
     s32 tmp;
 
@@ -35,25 +36,26 @@ extern s16 D_800DC260;
 extern s16 D_800DC262;
 extern s16 D_800DC264;
 extern s16 D_800DC266;
-void func_10023BC0(void);  /* __osPiGetAccess */
-void func_10023C04(void);  /* __osPiRelAccess */
+void os_pi_get_access(void);  /* __osPiGetAccess */
+void os_pi_rel_access(void);  /* __osPiRelAccess */
 
-/* Node pool for the level quadtrees (func_15001B10 hands out 14-byte nodes, func_15002008 appends the leaf lists).
+/* Node pool for the level quadtrees (quadtree_alloc_node hands out 14-byte nodes, quadtree_write_leaf_list appends the leaf lists).
  * The size per level doubles unless the cart word at ROM 0xD24 is 0x98CCE31A. */
-void func_15001A08(void) {
+/* was func_15001A08 */
+void quadtree_alloc_node_pool(void) {
     s32 size;
     s32 word;
 
     size = D_80091EA0[D_800BE9F0];
-    func_10023BC0();
+    os_pi_get_access();
     while (IO_READ(PI_STATUS_REG) & 3) {
     }
     word = IO_READ(D_80000308 | 0xB0000D24);
-    func_10023C04();
+    os_pi_rel_access();
     if (word != 0x98CCE31A) {
         size <<= 1;
     }
-    D_800B11EC = allocate_memory(size, 1, 0, 0);   /* implicit int declaration (func_15001970) */
+    D_800B11EC = allocate_memory(size, 1, 0, 0);   /* implicit int declaration (collision_build_reset) */
     D_800B0DE0 = (u8 *) D_800B11EC;
     D_800B0DCC = 0;
     D_800B0DD0 = 0;
@@ -63,10 +65,10 @@ void func_15001A08(void) {
     D_800DC266 = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15001A08.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/quadtree_alloc_node_pool.s")
 #endif
 // NON-MATCHING: JUSTREG (US draft)
-// void func_15001A08(void) {
+// void quadtree_alloc_node_pool(void) {
 //     s32 sp24;
 //     s32 tmp;
 //     s32 sp1C;
@@ -97,7 +99,8 @@ void func_15001A08(void) {
 //     D_800DBE36 = 0;
 // }
 
-u16* func_15001B10(void) {
+/* was func_15001B10 */
+u16* quadtree_alloc_node(void) {
     u16 *temp_v0;
 
     D_800B0DE0 = ALIGN4(D_800B0DE0);
@@ -111,17 +114,20 @@ u16* func_15001B10(void) {
     return temp_v0;
 }
 
-void func_15001B5C(u8 arg0) {
+/* was func_15001B5C */
+void quadtree_pool_put_byte(u8 arg0) {
     *D_800B0DE0++ = arg0;
 }
 
-void func_15001B8C(u16 arg0) {
+/* was func_15001B8C */
+void quadtree_pool_put_u16_be(u16 arg0) {
    D_800B0DE0[0] = (arg0 >> 8);
    D_800B0DE0[1] = arg0 & 0xFF;
    D_800B0DE0 += 2;
 }
 
-void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2) {
+/* was func_15001BC8 */
+void quadtree_build_area(s32 arg0, s16 *arg1, s16 *arg2) {
     u16 *tmp;
     s16 *sp20;
     s32 i;
@@ -136,10 +142,10 @@ void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2) {
         sp20[i + 1] = i;
     }
 
-    tmp = func_15001DE0(0, 0, 32768, 32768, 0, sp20);
+    tmp = quadtree_build_node(0, 0, 32768, 32768, 0, sp20);
     D_800DBE08[arg0] = tmp;
-    func_15002560(tmp, 0);
-    func_10004074(sp20);
+    quadtree_link_siblings(tmp, 0);
+    heap_free(sp20);
 
     // regalloc fix:
     if (1) { }
@@ -152,13 +158,14 @@ void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2) {
     }
 }
 
-void func_15001CEC(s32 arg0) {
+/* was func_15001CEC */
+void quadtree_build_area_flat(s32 arg0) {
     u16 *temp_v0;
     s16 *sp20;
     s32 i;
 
     collision_select_area(arg0);
-    temp_v0 = func_15001B10();
+    temp_v0 = quadtree_alloc_node();
 
     D_800DBE08[arg0] = temp_v0;
 
@@ -177,11 +184,12 @@ void func_15001CEC(s32 arg0) {
         sp20[i + 1] = i;
     }
 
-    func_15002008(-0x8000, 0x8000, -0x8000, 0x8000, sp20);
-    func_10004074(sp20);
+    quadtree_write_leaf_list(-0x8000, 0x8000, -0x8000, 0x8000, sp20);
+    heap_free(sp20);
 }
 
-u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+/* was func_15001DE0 */
+u16 *quadtree_build_node(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     u16 *temp_v0;
     u16 *temp_v0_2;
     u16 *temp_v0_3;
@@ -208,8 +216,8 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     sp4C = arg1 - arg3;
     sp48 = arg1 + arg3;
 
-    if ((func_15002248(sp54, sp50, sp4C, sp48, &sp7C, &sp78, arg5, &sp58) < tmp0) || (arg2 < tmp1)) {
-        temp_v0 = func_15001B10();
+    if ((quadtree_filter_box_tris(sp54, sp50, sp4C, sp48, &sp7C, &sp78, arg5, &sp58) < tmp0) || (arg2 < tmp1)) {
+        temp_v0 = quadtree_alloc_node();
         D_800B0DD0 = (D_800B0DD0 + 1);
         temp_v0[0] = sp7C;
         temp_v0[1] = sp78;
@@ -218,9 +226,9 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         temp_v0[5] = arg1;
         temp_v0[2] = 0;
         temp_v0[6] = 0;
-        func_15002008(sp54, sp50, sp4C, sp48, sp58);
+        quadtree_write_leaf_list(sp54, sp50, sp4C, sp48, sp58);
     } else {
-        temp_v0 = func_15001B10();
+        temp_v0 = quadtree_alloc_node();
         temp_v0[0] = sp7C;
         temp_v0[1] = sp78;
         temp_v0[3] = arg2;
@@ -228,15 +236,15 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         temp_v0[5] = arg1;
         temp_v0[2] = 0;
 
-        temp_v0_2 = func_15001DE0(arg0 - (arg2 >> 1), arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
+        temp_v0_2 = quadtree_build_node(arg0 - (arg2 >> 1), arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
         temp_v0[6] = (s32)temp_v0_2 - (s32)temp_v0;
-        temp_v0_3 = func_15001DE0(arg0 - (arg2 >> 1), (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58);
+        temp_v0_3 = quadtree_build_node(arg0 - (arg2 >> 1), (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58);
         temp_v0_2[2] = (s32)temp_v0_3 - (s32)temp_v0_2;
-        temp_v0_4 = func_15001DE0((arg2 >> 1) + arg0, arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
+        temp_v0_4 = quadtree_build_node((arg2 >> 1) + arg0, arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
         temp_v0_3[2] = (s32)temp_v0_4 - (s32)temp_v0_3;
-        temp_v0_4[2] = (s32)func_15001DE0((arg2 >> 1) + arg0, (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58) - (s32)temp_v0_4;
+        temp_v0_4[2] = (s32)quadtree_build_node((arg2 >> 1) + arg0, (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58) - (s32)temp_v0_4;
     }
-    func_10004074(sp58);
+    heap_free(sp58);
     return temp_v0;
 }
 
@@ -247,7 +255,8 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
  * the box test quadtree_tri_box_test (0 = inside). The first kept index is written as a big-endian halfword | 0x8000;
  * the next ones as one byte (index - previous) when that is below 0x80, else again as a halfword | 0x8000.
  * A 0 byte ends the list. Vertex pointers up to 0x80000000 count as (0, 0, 0). */
-void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
+/* was func_15002008 */
+void quadtree_write_leaf_list(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
     s32 n;
     s32 prev;
     s32 k;
@@ -283,13 +292,13 @@ void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
             }
             if (quadtree_tri_box_test(tri.s) == 0) {
                 if (prev == -1) {
-                    func_15001B8C(idx | 0x8000);
+                    quadtree_pool_put_u16_be(idx | 0x8000);
                 } else {
                     d = idx - prev;
                     if (d < 0x80) {
-                        func_15001B5C(d & 0xFF);
+                        quadtree_pool_put_byte(d & 0xFF);
                     } else {
-                        func_15001B8C(idx | 0x8000);
+                        quadtree_pool_put_u16_be(idx | 0x8000);
                     }
                 }
                 prev = idx;
@@ -297,18 +306,19 @@ void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
             src++;
         } while (src != end);
     }
-    func_15001B5C(0);
+    quadtree_pool_put_byte(0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15002008.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/quadtree_write_leaf_list.s")
 #endif
 #ifdef NON_MATCHING
 
-/* Quadtree build helper of func_15001DE0: keeps the entries of the u16 index list `in` (in[0] = count)
+/* Quadtree build helper of quadtree_build_node: keeps the entries of the u16 index list `in` (in[0] = count)
  * whose triangle (relative to the box centre) passes the box test quadtree_tri_box_test (0 = inside), writes
  * them to a new list *out (in[0] layout; the caller frees it) and returns their count. *xmin / *zmax get
  * the grid-snapped x minimum / z maximum of the kept entries (grid step 2 << D_80082FA0). */
-s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out) {
+/* was func_15002248 */
+s32 quadtree_filter_box_tris(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out) {
     s32 step = 1 << (D_80082FA0 + 1);
     s32 lo = step - 1;
     s32 mask = -step;
@@ -376,9 +386,10 @@ s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in,
     return cnt;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15002248.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/quadtree_filter_box_tris.s")
 #endif
-void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1) {
+/* was func_15002560 */
+void quadtree_link_siblings(struct_eu_qnode *arg0, struct_eu_qnode *arg1) {
     struct_eu_qnode *s1;
     struct_eu_qnode *s0;
     s32 off;
@@ -401,14 +412,15 @@ void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1) {
         s1 = (struct_eu_qnode *)((u8 *)arg0 + arg0->unkC);
         while (s1->unk4 != 0) {
             s0 = (struct_eu_qnode *)((u8 *)s1 + s1->unk4);
-            func_15002560(s1, s0);
+            quadtree_link_siblings(s1, s0);
             s1 = s0;
         }
         arg0 = s1;
     }
 }
 
-void func_150025FC(void) {
+/* was func_150025FC */
+void collision_load_level_grid(void) {
     s32 tmp0;
     s32 tmp1;
     s32 tmp2;
@@ -423,27 +435,31 @@ void func_150025FC(void) {
     if (tmp2 == 0) {
         D_800BE5D0 = 0;
     } else {
-        func_150183D0(D_800DBE28, tmp1, tmp2, tmp3);
-        func_10004074(tmp3);
+        pvs_setup(D_800DBE28, tmp1, tmp2, tmp3);
+        heap_free(tmp3);
     }
 }
 
-void func_150026C4(s32 arg0) {
+/* was func_150026C4 */
+void collision_begin_area(s32 arg0) {
     D_800DBE38 = 0;
     collision_select_area(arg0);
 }
 
-void func_150026E8(s32 arg0) {
+/* was func_150026E8 */
+void collision_end_area(s32 arg0) {
     D_800DBE18[arg0] = D_800DBE38;
     D_800DBE4C = D_800DBE38;
     D_800B0DE4 += D_800DBE38;
 }
 
-void func_15002724(s32 arg0) {
-    D_800DBE38 += func_150027F8(arg0);
+/* was func_15002724 */
+void collision_count_dl_tris(s32 arg0) {
+    D_800DBE38 += dl_count_triangles(arg0);
 }
 
-void func_15002754(void) {
+/* was func_15002754 */
+void collision_alloc_area_arrays(void) {
     D_800B0DC0 = (D_800B0DC0 + 3) & ~3;
     D_800DC208[D_800DC280] = D_800B0DC0;
     D_800B0DC0 += D_800DBE38 * 12;
@@ -456,7 +472,8 @@ void func_15002754(void) {
 }
 
 
-s32 func_150027F8(Gfx *arg0) {
+/* was func_150027F8 */
+s32 dl_count_triangles(Gfx *arg0) {
     s32 i;
     s32 count;
     s32 cmd;
@@ -479,7 +496,8 @@ s32 func_150027F8(Gfx *arg0) {
     return count;
 }
 
-s32 func_15002878(void) {
+/* was func_15002878 */
+s32 collision_max_area_tris(void) {
     s32 i;
     s32 tmp;
     s32 highest;
@@ -518,7 +536,8 @@ typedef struct ModelVtxRange {
  * G_TRI1 (0x05), G_TRI2 (0x06) and the packed 4-triangle commands 0x10..0x1F (5-bit indices). Already built: 0.
  * Allocation failure: 1. Vertex buffer indices are assumed < 32, as in the game's lists (the asm's buffer is 32 words).
  */
-s32 func_150028BC(s32 id) {
+/* was func_150028BC */
+s32 model_build_collision_tables(s32 id) {
     s32 vtxOfs[32];
     s32 idx[3];
     ModelVtxRange *ranges;
@@ -555,7 +574,7 @@ s32 func_150028BC(s32 id) {
     }
     D_800C6070[id] = allocate_memory(D_800C5D38[id] * 12, 1, 0, 2);
     if (D_800C6070[id] == 0) {
-        func_10004074(D_800C5C08[id]);
+        heap_free(D_800C5C08[id]);
         D_800C5C08[id] = 0;
         return 1;
     }
@@ -654,10 +673,11 @@ s32 func_150028BC(s32 id) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_150028BC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/model_build_collision_tables.s")
 #endif
 
-void func_15002F40(s32 arg0) {
+/* was func_15002F40 */
+void collision_set_step_size(s32 arg0) {
     if (arg0 == 50 || arg0 == 51) {
         D_800DBE64 = 150.0f;
         return;
@@ -669,11 +689,13 @@ void func_15002F40(s32 arg0) {
     D_800DBE64 = 50.0f;
 }
 
-s32 func_15002FA0(s32 arg0) {
+/* was func_15002FA0 */
+s32 xor_f0f0f0f0(s32 arg0) {
     return arg0 ^ 0xF0F0F0F0;
 }
 
-void func_15002FB4(s32 arg0) {
+/* was func_15002FB4 */
+void level_load_header(s32 arg0) {
     struct00 *sp3C; // TBD
     s32 sp38;
     s32 sp34;
@@ -692,8 +714,8 @@ void func_15002FB4(s32 arg0) {
             func_150AD770();
         }
     }
-    func_151EF040(func_15002FA0(0x40F0FAAC), &sp2C);
-    sp2C = func_15002FA0(sp2C);
+    func_151EF040(xor_f0f0f0f0(0x40F0FAAC), &sp2C);
+    sp2C = xor_f0f0f0f0(sp2C);
     if (sp2C != 0xE7B00F09) {
         temp_v0 = D_800B0DF0;
         temp_v0->unk12 >>= 1;
@@ -713,5 +735,6 @@ void func_15002FB4(s32 arg0) {
     }
 }
 
-void func_1500310C(void) {
+/* was func_1500310C */
+void level_stub_noop(void) {
 }

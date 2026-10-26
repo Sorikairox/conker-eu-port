@@ -27,8 +27,8 @@ s32 stub_return_one_b(s32 arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 void collision_select_area(s32 arg0);
-s32 func_150A3F50(s32, s32);
-/* floor triangles found by func_150A3F50 (16-byte records) */
+s32 floor_collect_level_tris(s32, s32);
+/* floor triangles found by floor_collect_level_tris (16-byte records) */
 typedef struct {
     s32 h;      /* height, 1/256 units */
     u8 **vtx;   /* three vertex bases */
@@ -38,7 +38,7 @@ typedef struct {
 extern FloorHit4BB4 D_800D3720[];
 extern f32 D_800A2740; /* 10000.0 */
 
-// floor_height_below: floor height at (x, z) closest to `y`. func_150A3F50 lists the floor triangles under the
+// floor_height_below: floor height at (x, z) closest to `y`. floor_collect_level_tris lists the floor triangles under the
 // point in D_800D3720; those whose third vertex lies on the positive side of the edge from vertex 0 to 1 (x / z
 // plane) are kept, and of these the one whose height (h / 256) is nearest to y is written to *out. Returns 0
 // when nothing is found, else 1.
@@ -54,7 +54,7 @@ s32 floor_height_below(f32 x, f32 z, f32 y, f32 *out) {
     s16 *v;
 
     collision_select_area(0);
-    n = func_150A3F50((s32) x, (s32) z);
+    n = floor_collect_level_tris((s32) x, (s32) z);
     if (n == 0) {
         return 0;
     }

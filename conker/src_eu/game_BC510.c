@@ -7,8 +7,8 @@ void hud_health_drop_piece(void);
 void hud_health_update(void);
 void underwater_bubbles_update(void); /* P129 */
 void underwater_air_meter_update(void); /* P129 */
-s32 func_1518C900(s32);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+s32 shared_dl_acquire(s32);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 extern s16 D_8009E060[];
 #endif
 
@@ -100,7 +100,7 @@ void hud_health_update(void) {
                 *var_v1 = var_a0->unk80;
                 sp30 = (s32 *) var_a0;
                 sp2C = (s32 *) var_v1;
-                func_100043B4((s32 *) var_a0, 3U);
+                heap_set_block_tag((s32 *) var_a0, 3U);
             } else {
                 var_a0->unkB4 = (u8) temp_v0;
                 var_v1 = &var_a0->unk80;
@@ -120,7 +120,7 @@ void hud_health_update(void) {
                 var_v0 = D_800D2457;
             } while (var_v0 != D_800CC8BA);
         }
-        func_10010F30(0x1A6, 0x7FFFU, 0x40U, 0, 0U);
+        sound_play_2d(0x1A6, 0x7FFFU, 0x40U, 0, 0U);
     } else if ((s32) var_v0 < (s32) D_800CC8BA) {
         D_800D2864 = 0xF0;
         if (var_v0 != D_800CC8BA) {
@@ -178,7 +178,7 @@ void hud_health_update(void) {
                         var_a0_3 += 1;
                     } while (var_a0_3 != var_v0_2);
                 }
-                func_10010F30(0x1A6, 0x7FFFU, 0x40U, 0, 0U);
+                sound_play_2d(0x1A6, 0x7FFFU, 0x40U, 0, 0U);
             }
         } else {
             var_v0_3 = D_800D2457 - D_800D2456;
@@ -269,7 +269,7 @@ void hud_health_drop_piece(void) {
     temp_v0->unk80 = D_800D245C;
     D_800D245C = temp_v0;
     guMtxL2F(&sp48, (D_800D2456 << 7) + ((D_800BE9C0 ^ 1) << 6) + &D_800D2590);
-    func_1503E5F8(&sp48, &temp_v0->unk84, &temp_v0->unk88, &temp_v0->unk8C, &temp_v0->unk9C, &temp_v0->unkA0, &temp_v0->unkA4, &sp44, &sp44, &sp44);
+    mtxf_decompose(&sp48, &temp_v0->unk84, &temp_v0->unk88, &temp_v0->unk8C, &temp_v0->unk9C, &temp_v0->unkA0, &temp_v0->unkA4, &sp44, &sp44, &sp44);
 
     temp_v0->unk90 = (u32)((random_int() & 0xF) + 10);
     temp_v0->unk94 = (u32)((random_int() & 0x1F) + 20);
@@ -313,8 +313,8 @@ void underwater_bubbles_update(void) {
     }
     value = D_800CC2D0[0].in_water ? D_800CC2D0[0].unkB2 : 0;
     /* The asm never sets the spawn flag (sp+0x44) to non-zero: it only clears it (value < 0x5B, or delay 0) and
-     * otherwise reads whatever the stack slot holds. On the N64 that slot is always the s1 that func_1517ABB0
-     * saved there just before (game_frame_end_update -> func_1517ABB0, then -> hud_health_air_update -> hud_health_update, which
+     * otherwise reads whatever the stack slot holds. On the N64 that slot is always the s1 that player_morph_cache_age
+     * saved there just before (game_frame_end_update -> player_morph_cache_age, then -> hud_health_air_update -> hud_health_update, which
      * never writes it): game_frame_step's s1 = the address of its display list pointer (EU 0x800BEDF0), never 0. So the
      * flag is effectively "spawn allowed". The asm's delay (s7) is stack garbage only when value < 0x5B, where
      * it is never used (no spawn); 0 here. */
@@ -398,9 +398,9 @@ void underwater_bubbles_update(void) {
 #endif
 #ifdef NON_MATCHING
 s32 *hud_clock_draw(s32 *arg0);
-Gfx *func_15095350(Gfx *arg0);
-Gfx *func_15096D44(Gfx *arg0);
-void func_1518CF74(s32 arg0);
+Gfx *sprite_gfx_begin(Gfx *arg0);
+Gfx *sprite_gfx_begin_alt(Gfx *arg0);
+void shared_dl_release(s32 arg0);
 Gfx *hud_health_draw(Gfx *, s32);
 Gfx *hud_air_meter_draw(Gfx *);
 Gfx *mp_hud_draw_views(Gfx *);
@@ -466,13 +466,13 @@ u8 *hud_draw(u8 *arg0) {
     if (D_800D2848 != (f32)D_8009E084) {
         gdl = hud_health_draw(gdl, 0);
     } else if (D_800D29A8 != 0) {
-        func_1518CF74(0xB8);
+        shared_dl_release(0xB8);
         D_800D29A8 = 0;
     }
     gdl = hud_air_meter_draw(gdl);
-    gdl = func_15095350(gdl);
+    gdl = sprite_gfx_begin(gdl);
     gdl = hud_bubbles_draw(gdl);
-    gdl = func_15096D44(gdl);
+    gdl = sprite_gfx_begin_alt(gdl);
     if (D_800BEFC4 < gdl - D_800BEDE8[D_800BE9C0]) {
         return (u8 *)start;
     }
@@ -503,7 +503,7 @@ Gfx *hud_health_draw(Gfx *gdlArg, s32 arg1) {
     u8 *var_s1;
 
     if (D_800D29A8 == 0) {
-        D_800D29A8 = func_1518C900(0xB8);
+        D_800D29A8 = shared_dl_acquire(0xB8);
     }
     (*(s32 *)((u8 *)arg0 + 0)) = 0xD9F1FDFE;
     (*(s32 *)((u8 *)arg0 + 4)) = 0;
@@ -584,7 +584,7 @@ Gfx *hud_health_draw(Gfx *gdlArg, s32 arg1) {
         mf[3][0] = (f32)pos[0];
         mf[3][1] = (f32)pos[1];
         mf[3][2] = (f32)pos[2];
-        func_150A7A48(mf, rot, mf);
+        mtxf_mul(mf, rot, mf);
         guMtxF2L(mf, (Mtx *)(mtx + (D_800BE9C0 << 6)));
         ((s32 *)var_s1)[0] = 0xDA380003;
         ((s32 *)var_s1)[1] = (s32)(mtx + (D_800BE9C0 << 6));
@@ -613,15 +613,15 @@ Gfx *hud_health_draw(Gfx *gdlArg, s32 arg1) {
 #endif
 #ifdef NON_MATCHING
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
-u8 *func_15095380(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
-u8 *func_15095E58(u8 *, s32 *, f32, f32);
+u8 *sprite_load_texture(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
+u8 *sprite_draw_at_screen(u8 *, s32 *, f32, f32);
 extern s32 D_80090784;
 extern s32 D_80091BF0;
 
 /* was func_15090630 */
 Gfx *hud_bubbles_draw(Gfx *gdlArg) {
     u8 *arg0 = (u8 *)gdlArg;
-    s32 sprBuf[4]; /* sprite state for func_15095380 / func_15095E58: +6 w, +8 h (s16), +0xA alpha, +0xD flip flags */
+    s32 sprBuf[4]; /* sprite state for sprite_load_texture / sprite_draw_at_screen: +6 w, +8 h (s16), +0xA alpha, +0xD flip flags */
     u8 *spr = (u8 *)sprBuf;
     s32 sp84;
     f32 temp_f0;
@@ -659,13 +659,13 @@ Gfx *hud_bubbles_draw(Gfx *gdlArg) {
             if (var_s5 != 0) {
                 var_s5 = 0;
                 texture_cache_lookup(D_80091BF0, &sp84, 3, 0);
-                var_s2 = func_15095380(var_s2, &D_80090784, 0, (s32 *)spr, 0, 0, 0, 2, 3);
+                var_s2 = sprite_load_texture(var_s2, &D_80090784, 0, (s32 *)spr, 0, 0, 0, 2, 3);
             }
             temp_f0 = math_sin_u8((*(u8 *)((u8 *)var_s0 + 0xF)));
             temp_f2 = (f32) (*(s16 *)((u8 *)var_s0 + 6));
             *(s16 *)(spr + 6) = (s16) (s32) (temp_f2 * ((0.2f * temp_f0) + 1.0f));
             *(s16 *)(spr + 8) = (s16) (s32) (temp_f2 * ((-0.2f * temp_f0) + 1.0f));
-            var_s2 = func_15095E58(var_s2, (s32 *)spr, (f32) (*(s16 *)((u8 *)var_s0 + 0)), (f32) (*(s16 *)((u8 *)var_s0 + 2)));
+            var_s2 = sprite_draw_at_screen(var_s2, (s32 *)spr, (f32) (*(s16 *)((u8 *)var_s0 + 0)), (f32) (*(s16 *)((u8 *)var_s0 + 2)));
         }
         var_s0 += 0x10;
     } while ((u32) var_s0 < (u32) &D_800D28E0);
@@ -688,9 +688,9 @@ Gfx *hud_bubbles_draw(Gfx *gdlArg) {
             *(s8 *)(spr + 0xD) = var_s1;
             if (var_s5_2 != 0) {
                 var_s5_2 = 0;
-                var_s2 = func_15095380(var_s2, &D_80091BF0, 0, (s32 *)spr, 0, 0, 0, 2, 3);
+                var_s2 = sprite_load_texture(var_s2, &D_80091BF0, 0, (s32 *)spr, 0, 0, 0, 2, 3);
             }
-            var_s2 = func_15095E58(var_s2, (s32 *)spr, (f32) temp_s3, (f32) temp_s4);
+            var_s2 = sprite_draw_at_screen(var_s2, (s32 *)spr, (f32) temp_s3, (f32) temp_s4);
             var_v1 = (*(s16 *)((u8 *)var_s0_2 + 0xA)) - D_800BE9E4;
             if (var_v1 < 0) {
                 var_v1 = 0;
@@ -735,7 +735,7 @@ extern u16 D_80090612;
 extern u16 D_80090616;
 extern u16 D_8009061E;
 extern u16 D_80090622;
-s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC);
+s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC);
 
 // underwater_air_meter_update: animates the HUD air meter while the player is under water (object 0's in_water,
 // unkB2 = time under water): loads model 0xB9 once, blends its vertices towards the target shape around the air
@@ -800,7 +800,7 @@ void underwater_air_meter_update(void) {
         }
     }
     if (am->dl == 0) {
-        func_15030100(0xB9, &dls, &count, &data, &out10, &out8, &outC);
+        model_asset9_load_refcounted(0xB9, &dls, &count, &data, &out10, &out8, &outC);
         am->dl = *dls;
         am->count = ((u32)dls - (u32)data) >> 4;
         am->vtx[0] = (u8 *)data;
@@ -1180,9 +1180,9 @@ extern f32 D_8009E248;     /* map centre x offset (3.6) */
 // (33 entries, scaled by the hi-res factor D_800901BC, texture step `scale`) is the same as hud_draw's.
 // D_80090160 selects the parts, each drawn per view (D_80082FA0 + 1 views, skipped when D_80087270[p] == 10;
 // view rectangle D_800BE628: y top 0x24, y bottom 0x28, x left 0x2C, x right 0x30):
-//   0x002: placing digit (sheet 0xD16, cell from func_150859AC(p, 3)) at the top left;
+//   0x002: placing digit (sheet 0xD16, cell from player_stat_get(p, 3)) at the top left;
 //   0x400 / 0x800: score (D_80090174 s16 table at 0x46) / "(team name)" text at the top centre;
-//   0x010: two lives bars (sheet 0xD18 cell 0x620 / 0xA0, lengths from func_150859AC(p, 4));
+//   0x010: two lives bars (sheet 0xD18 cell 0x620 / 0xA0, lengths from player_stat_get(p, 4));
 //   0x004: status icons at the top right: icon by the player's state (sheet 0xD18 via hud_icon_sheet_load), and in
 //          interaction state 0x1E the vehicle / weapon icons (sheet 0xD19) with a red ammo / fuel bar;
 //   the "on fire" counter (sheet 0xD15) for players in state 0x26 / 0x3A, one icon per unit of 0x19A;
@@ -1270,7 +1270,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
                     gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0x80);
                 }
                 ix = table[5] + x;
-                k = func_150859AC((s16)p, 3);
+                k = player_stat_get((s16)p, 3);
                 s = D_80087764[k & 3] << 5;
                 t = D_80087768[k >> 2] << 5;
                 if (ready) {
@@ -1379,7 +1379,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
                 if (!loaded) {
                     gdl = hud_icon_sheet_load(gdl, 0, &ready);
                 }
-                k = func_150859AC((s16)p, 4);
+                k = player_stat_get((s16)p, 4);
                 ix = table[22] + x;
                 len = ((k + 1) >> 1) * 5;
                 if (len != 0 && ready) {
@@ -1596,7 +1596,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
         gdl->words.w1 = 0x00504244;
         gdl++;
         for (p = 0; p < D_80090130; p++) {
-            if (func_150859AC((s16)p, 3) <= 0) {
+            if (player_stat_get((s16)p, 3) <= 0) {
                 continue;
             }
             view = (struct_eu_BE628 *)D_800BE628 + p;
@@ -1615,7 +1615,7 @@ Gfx *mp_hud_draw_views(Gfx *gdl) {
             gdl++;
             for (i = 0; i < 25; i++) {
                 obj = &D_800CC2D0[i];
-                if (i != p && !(i < D_8008FD8C && func_150859AC((s16)i, 3) > 0) && obj->unk328 == 0) {
+                if (i != p && !(i < D_8008FD8C && player_stat_get((s16)i, 3) > 0) && obj->unk328 == 0) {
                     continue;
                 }
                 gDPPipeSync(gdl++);
@@ -1659,7 +1659,7 @@ void hud_clock_set_enabled(s32 arg0) {
 
 /* was func_15093878 */
 void hud_clock_load(void) {
-    D_800D2448 = func_1518C900(0xBA);
+    D_800D2448 = shared_dl_acquire(0xBA);
     D_800D244C = allocate_memory(0x80, 1, 1, 0);
 }
 
@@ -1711,7 +1711,7 @@ loop_1:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/hud_clock_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15086218(f32 y);
+s32 rail_band_for_height(f32 y);
 extern f32 D_8009E24C; /* radar world -> screen scale, 2-4 players (0.0135) */
 extern f32 D_8009E250; /* radar zoom of the big radar (1.329) */
 extern f32 D_8009E254; /* radar world -> screen scale, 1 player (0.02025) */
@@ -1727,8 +1727,8 @@ extern u16 D_800E0FFC;  /* bit per player object: hidden from the radar */
 // texture step is size * 2 / 3); `big` moves it by (-0x1C6, -0x46) quarter pixels and scales it. Every other
 // object slot 0..24 with a team (unk328) inside the range is drawn as a coloured dot, rotated by the view's yaw
 // (D_800DBFF0[p].unk37C, degrees); for the player slots below D_8008FD8C the dot is hidden when the player is
-// out of the game (func_150859AC modes 3 / 4), flagged in D_800E0FFC, dead, or in state 0x21. A black mark above
-// or below the dot shows a different height level (func_15086218). When the view's object is in state 0x25 the
+// out of the game (player_stat_get modes 3 / 4), flagged in D_800E0FFC, dead, or in state 0x21. A black mark above
+// or below the dot shows a different height level (rail_band_for_height). When the view's object is in state 0x25 the
 // radar centres on player 0 (or 1 when its camera mode is 3), which is skipped as well. Returns the advanced DL,
 // or `gdl` unchanged when the texture is not loaded.
 /* was func_15093B58 */
@@ -1790,7 +1790,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
     gdl++;
 
     for (p = 0; p < D_80090130; p++) {
-        if (func_150859AC((s16)p, 3) <= 0) {
+        if (player_stat_get((s16)p, 3) <= 0) {
             continue;
         }
         view = (struct_eu_BE628 *)D_800BE628 + p;
@@ -1844,7 +1844,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
         }
         rx = ref->x_position;
         rz = ref->z_position;
-        my_level = func_15086218(ref->y_position);
+        my_level = rail_band_for_height(ref->y_position);
 
         for (i = 0; i < 25; i++) {
             if (i == p || i == self) {
@@ -1856,7 +1856,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
             }
             team = obj->unk328 - 1;
             if (i < D_8008FD8C) {
-                if (func_150859AC((s16)i, 3) <= 0 || func_150859AC((s16)i, 4) <= 0 || (D_800E0FFC & (1 << i)) ||
+                if (player_stat_get((s16)i, 3) <= 0 || player_stat_get((s16)i, 4) <= 0 || (D_800E0FFC & (1 << i)) ||
                     obj->health == 0 || (((u8 *)obj->unk31C)[0x75] & 0x7F) == 0x21) {
                     team = -1;
                 }
@@ -1880,7 +1880,7 @@ Gfx *radar_draw(Gfx *gdl, s32 size, s16 *table, s32 mode, s32 big) {
             cy = (s32)((dx * s + dz * c) * zoom) + y0;
             gSPScisTextureRectangle(gdl++, cx - dot, cy - dot, cx + dot, cy + dot, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
 
-            level = func_15086218(obj->y_position);
+            level = rail_band_for_height(obj->y_position);
             if (level == my_level) {
                 continue;
             }

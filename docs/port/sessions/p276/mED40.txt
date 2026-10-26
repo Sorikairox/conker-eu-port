@@ -2,7 +2,7 @@
 \#^    kinds\[0\] = 0xBE;$#s/0xBE/0xBD/
 \#^    kinds\[1\] = 0xBF;$#s/0xBF/0xBD/
 \#^    t.kind = kinds\[random_int() & 1\];$#s/& 1/\& 0/
-\#^    func_1514470C(\*(u8 \*\*) (p + 0x2C), t.pos);$#s/0x2C/0x30/
+\#^    spawn_region_random_point_3d(\*(u8 \*\*) (p + 0x2C), t.pos);$#s/0x2C/0x30/
 \#^    d\[0\] = to\[0\] - t.pos\[0\];$#s/- t/+ t/
 \#^    d\[2\] = to\[2\] - t.pos\[2\];$#s/to\[2\]/to[1]/
 \#^    speed = random_float() \* 30.0f + 25.0f;$#s/30.0f/31.0f/
@@ -13,7 +13,7 @@
 \#^    rec.time = len / spd;$#s/len/unused/
 \#^    rec.flat\[1\] = 0.0f;$#s/0.0f/1.0f/
 \#^    rec.flat\[2\] = d\[2\];$#s/d\[2\]/d[1]/
-\#^    func_15145128(rec.flat, rec.flat, NULL, NULL);$#s/rec.flat, rec.flat/d, rec.flat/
+\#^    vec3_normalize_len(rec.flat, rec.flat, NULL, NULL);$#s/rec.flat, rec.flat/d, rec.flat/
 \#^    rec.side\[0\] = -rec.flat\[2\];$#s/-rec/rec/
 \#^    rec.side\[1\] = 0.0f;$#s/0.0f/1.0f/
 \#^    t.u2 = 0x3B03;$#s/0x3B03/0x3B02/

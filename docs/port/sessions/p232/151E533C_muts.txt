@@ -26,7 +26,7 @@ s/        level = 0x1D;/        level = 0x1C;/ % r3_none
 s/        D_800E0B94 = 3;/        D_800E0B94 = 4;/ % r3_none
 s/        D_80090120 = 4;/        D_80090120 = 0;/ % r2_two
 s/    D_800D3260 = 0;/    D_800D3260 = 1;/ % r2_none
-s/    func_1501C710(6, level, 0, 0, 1);/    func_1501C710(6, level, 0, 0, 0);/ % r2_none
-s/    func_151E5D28();/    ;/ % r2_none
+s/    game_request_transition(6, level, 0, 0, 1);/    game_request_transition(6, level, 0, 0, 0);/ % r2_none
+s/    player_order_reset();/    ;/ % r2_none
 s/    D_8008FD8C = 1;/    D_8008FD8C = 2;/ % r2_none
 s/    D_80090130 = 1;/    D_80090130 = 2;/ % r2_none

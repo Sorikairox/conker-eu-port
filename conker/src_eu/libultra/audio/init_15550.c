@@ -41,7 +41,7 @@ void func_10015550(N_ALCSPlayer *csp, s32 arg1) {
 // s127: DK64 n_sndplayer.c func_global_asm_80735AA0 (sound player init) with Conker's 0x58-byte sound
 // states, the D_8002BA44 driver, an extra config word at sndp 0x54 and the 4-arg n_alEvtqPostEvent
 // s127: DK64 n_sndplayer.c func_global_asm_80735DBC (_n_handleEvent) with Conker's changes: sounds are
-// loaded on demand (event 0x4000 -> func_1001BD34, retried while unk40 > 0), no-sound events are
+// loaded on demand (event 0x4000 -> n_synth_load_instrument, retried while unk40 > 0), no-sound events are
 // re-posted, fx bus (0x2000) and 0x8000 events, the dead "freed too early" prints in the stop case
 typedef struct {
     /* 0x00 */ s32 pad0[4];
@@ -89,9 +89,9 @@ typedef struct {
 #define SND_MIN155(a, b) ((a) < (b) ? (a) : (b))
 #define SND_MAX155(a, b) ((a) > (b) ? (a) : (b))
 
-ALSound *func_1001BD34(N_ALSynth *drvr, SndTbl155 **arg1, s16 arg2);
-void func_1001BE1C(N_ALSynth *drvr, SndTbl155 *arg1, s16 arg2);
-void func_10002088(const char *fmt, ...);
+ALSound *n_synth_load_instrument(N_ALSynth *drvr, SndTbl155 **arg1, s16 arg2);
+void n_synth_release_instrument(N_ALSynth *drvr, SndTbl155 *arg1, s16 arg2);
+void init_debug_printf_stub(const char *fmt, ...);
 void func_1001E2A0(N_ALVoice *v, u8 pan);
 void func_1001E350(N_ALVoice *v, u8 arg1);
 void func_10016E90();
@@ -235,7 +235,7 @@ void _n_handleEvent(SndEvt155 *event)
             switch (event->type) {
             case 0x4000:
                 if (sound == NULL) {
-                    sound = func_1001BD34(D_8002BA2C->drvr, &state->unk3C->unkC, state->unk4C);
+                    sound = n_synth_load_instrument(D_8002BA2C->drvr, &state->unk3C->unkC, state->unk4C);
                     state->sound = sound;
                     if (sound == NULL) {
                         event->type = 0x4000;
@@ -302,7 +302,7 @@ void _n_handleEvent(SndEvt155 *event)
                 fxmix = (state->fxmix & 0x7f) + (keymap->keyMax & 0xf) * 8;
                 fxmix = SND_MIN155(127, SND_MAX155(0, fxmix));
                 fxmix |= state->fxmix & 0x80;
-                func_1001BE1C(D_8002BA2C->drvr, state->unk3C->unkC, state->unk4C);
+                n_synth_release_instrument(D_8002BA2C->drvr, state->unk3C->unkC, state->unk4C);
                 n_alSynStartVoiceParams(&state->voice, sound->wavetable, state->pitch * state->basepitch, vol, pan, fxmix, 0, 0.0f, 0, delta);
                 state->state = AL_PLAYING;
                 D_8002BA30++;
@@ -337,8 +337,8 @@ void _n_handleEvent(SndEvt155 *event)
                         func_10016F80(&D_8002BA2C->evtq, (s32)state, 0x40);
                         if (1) { // fakematch: dead debug prints
                         } else {
-                            func_10002088("snd %d has been freed too early - %d\n\n\n\n\n", state->state, state->state);
-                            func_10002088("-2 sound has been freed too early - %d\n\n\n\n\n", state->state);
+                            init_debug_printf_stub("snd %d has been freed too early - %d\n\n\n\n\n", state->state, state->state);
+                            init_debug_printf_stub("-2 sound has been freed too early - %d\n\n\n\n\n", state->state);
                         }
                         delta = sound->envelope->releaseTime / state->basepitch / state->pitch;
                         n_alSynSetVol(&state->voice, 0, delta);

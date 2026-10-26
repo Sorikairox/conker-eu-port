@@ -15,13 +15,13 @@ s/        if (top - \*(s16 \*) (p + 0x12) != \*(s32 \*) (p + 0x80)) {/        if
 s/            \*(s16 \*) (p + 0x12) = top + \*(s32 \*) (p + 0x80);/            *(s16 *) (p + 0x12) = top - *(s32 *) (p + 0x80);/
 s/    if ((p\[0x4F\] \& 4) \&\& /    if ((p[0x4F] \& 8) \&\& /
 s/ + 0x31C))\[0x57\] == 1) {/ + 0x31C))[0x57] != 0) {/
-s/        func_1518BC20(\*(f32 \*) ((u8 \*) D_800CC2D0 + 0x14), \*(f32 \*) ((u8 \*) D_800CC2D0 + 0x18),/        func_1518BC20(*(f32 *) ((u8 *) D_800CC2D0 + 0x18), *(f32 *) ((u8 *) D_800CC2D0 + 0x18),/
+s/        rubble_burst_with_dust(\*(f32 \*) ((u8 \*) D_800CC2D0 + 0x14), \*(f32 \*) ((u8 \*) D_800CC2D0 + 0x18),/        rubble_burst_with_dust(*(f32 *) ((u8 *) D_800CC2D0 + 0x18), *(f32 *) ((u8 *) D_800CC2D0 + 0x18),/
 s/                      \*(f32 \*) ((u8 \*) D_800CC2D0 + 0x1C), 0xFF, 0);/                      *(f32 *) ((u8 *) D_800CC2D0 + 0x1C), 0xFE, 0);/
 s/        if (mode == 0) {/        if (mode != 3) {/
-s/            func_1516547C(3, D_800BEE0B, NULL, 0xFF, 0);/            func_1516547C(2, D_800BEE0B, NULL, 0xFF, 0);/
+s/            cam_wobble_start_preset(3, D_800BEE0B, NULL, 0xFF, 0);/            cam_wobble_start_preset(2, D_800BEE0B, NULL, 0xFF, 0);/
 s/            rumble.unk2 = 0x3C;/            rumble.unk2 = 0x28;/
 s/            rumble.unk4 = 8;/            rumble.unk4 = 7;/
-s/            func_151D8E18(\&rumble, 0, 0xFF, 0);/            func_151D8E18(\&rumble, 1, 0xFF, 0);/
+s/            rumble_request(\&rumble, 0, 0xFF, 0);/            rumble_request(\&rumble, 1, 0xFF, 0);/
 s/        if (low != \*(s16 \*) (p + 0x12)) {/        if (top != *(s16 *) (p + 0x12)) {/
 s/            \*(s16 \*) (p + 0x12) = low;/            *(s16 *) (p + 0x12) = top;/
 s/        if (!(p\[0x4F\] \& 4) \&\& !(p\[0x73\] \& 4)) {/        if (!(p[0x4F] \& 4)) {/
@@ -59,9 +59,9 @@ s/                mode = 3;/                mode = 0;/
 s/                if (kind == 2) {/                if (kind == 4) {/
 s/                    p\[0x6E\] = 1;/                    p[0x6F] = 1;/
 s/                    p\[0x10E\] = 1;/                    p[0x10E] = 2;/
-s/                    func_1508F26C(2, (u16) ((p - (u8 \*) D_800DBEF4) \/ 0xA0));/                    func_1508F26C(2, (u16) ((p - (u8 *) D_800DBEF4) \/ 0x50));/
-s/                    func_1508F26C(2, (u16) ((p - (u8 \*) D_800DBEF4 + 0xA0) \/ 0xA0));/                    func_1508F26C(1, (u16) ((p - (u8 *) D_800DBEF4 + 0xA0) \/ 0xA0));/
-s/                    func_1508F26C(2, (u16) ((p - (u8 \*) D_800DBEF4 + 0xA0) \/ 0xA0));/                    func_1508F26C(2, (u16) ((p - (u8 *) D_800DBEF4) \/ 0xA0));/
+s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) D_800DBEF4) \/ 0xA0));/                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4) \/ 0x50));/
+s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) D_800DBEF4 + 0xA0) \/ 0xA0));/                    link_group_remove_members(1, (u16) ((p - (u8 *) D_800DBEF4 + 0xA0) \/ 0xA0));/
+s/                    link_group_remove_members(2, (u16) ((p - (u8 \*) D_800DBEF4 + 0xA0) \/ 0xA0));/                    link_group_remove_members(2, (u16) ((p - (u8 *) D_800DBEF4) \/ 0xA0));/
 s/        \*(s16 \*) (p + 0x12) += 3;/        *(s16 *) (p + 0x12) += 4;/
 s/        if (\*(s16 \*) (p + 0x12) >= top) {/        if (*(s16 *) (p + 0x12) > top) {/
 s/            mode = 0;/            mode = 2;/

@@ -8,7 +8,8 @@ extern f32 D_800A0480;
 extern f32 D_800A0484;
 s32 event_dispatch(s32, s32, ...);
 
-void func_150BED50(struct108 *arg0) {
+/* was func_150BED50 */
+void player_seat_camera_update(struct108 *arg0) {
     s32 sp28;
     s32 temp_t0;
     s32 temp_v0;
@@ -43,5 +44,5 @@ void func_150BED50(struct108 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EC560/func_150BED50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EC560/player_seat_camera_update.s")
 #endif

@@ -1,4 +1,4 @@
-# P286 mutants for func_1517D5E4 (sprite_billboard_quad_draw)
+# P286 mutants for ambient_billboard_quad_draw (sprite_billboard_quad_draw)
 /if (slot >= (u32) D_800DDD0C) {/s/(u32) D_800DDD0C/D_800DDD0C - 1/
 /if (slot >= (u32) D_800DDD0C) {/s/slot >= (u32) D_800DDD0C/(s32) slot >= D_800DDD0C/
 /g\[1\] = (u32) &D_8008D340;/s/&D_8008D340/\&D_8008D340 + 1/

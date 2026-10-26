@@ -8,7 +8,7 @@ extern u8 _osLastSentSiCmd;      // __osContLastCmd
 extern u8 _osContNumControllers; // __osMaxControllers
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_10025B60(s32, void *); // __osSiRawStartDma
+s32 os_si_raw_start_dma(s32, void *); // __osSiRawStartDma
 static void contreaddata_text_017C(void);
 
 
@@ -43,14 +43,14 @@ s32 osContStartReadData(OSMesgQueue *mq) {
     __osSiGetAccess();
     if (_osLastSentSiCmd != CONT_CMD_READ_BUTTON) {
         contreaddata_text_017C();
-        ret = func_10025B60(OS_WRITE, &__osContPifRam);
+        ret = os_si_raw_start_dma(OS_WRITE, &__osContPifRam);
         osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     }
     for (i = 0; i < 16; i++) {
         __osContPifRam.ramarray[i] = 0xFF;
     }
     __osContPifRam.pifstatus = 0;
-    ret = func_10025B60(OS_READ, &__osContPifRam);
+    ret = os_si_raw_start_dma(OS_READ, &__osContPifRam);
     _osLastSentSiCmd = CONT_CMD_READ_BUTTON;
     __osSiRelAccess();
     return ret;

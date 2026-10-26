@@ -10,14 +10,14 @@ void zone_stub(s32 arg0) {
 #ifdef NON_MATCHING
 extern u8 D_80088CF0[8];
 extern u8 D_80088CF8[8];
-s32 func_150A3794(u8 *, s32, s32, s32);
+s32 trigger_contains_point(u8 *, s32, s32, s32);
 u8 *world_record_find(u8);
-void func_150A2D44(s32, s32);
+void trigger_set_disabled(s32, s32);
 
 // trigger_zones_check: hit callback (D_800E0D64, set in game_3DC30) for the point (x, y, z): for each of
-// the 8 zones D_80088CF0 (D_800D34B8 records of 0x34 bytes) that contains it (func_150A3794), the matching
+// the 8 zones D_80088CF0 (D_800D34B8 records of 0x34 bytes) that contains it (trigger_contains_point), the matching
 // D_80088CF8 object id gets state 3 in its +0x73 low bits (world_record_find), or the zone itself is triggered
-// (func_150A2D44(zone, 1)) when the id is 0. Returns 0 (the asm leaves the last helper's v0; the caller
+// (trigger_set_disabled(zone, 1)) when the id is 0. Returns 0 (the asm leaves the last helper's v0; the caller
 // ignores it).
 /* was func_150DE8AC */
 s32 trigger_zones_check(s32 x, s32 y, s32 z) {
@@ -25,12 +25,12 @@ s32 trigger_zones_check(s32 x, s32 y, s32 z) {
     s32 i;
 
     for (i = 0; i < 8; i++) {
-        if (func_150A3794(D_800D34B8 + D_80088CF0[i] * 0x34, x, y, z) != 0) {
+        if (trigger_contains_point(D_800D34B8 + D_80088CF0[i] * 0x34, x, y, z) != 0) {
             if (D_80088CF8[i] != 0) {
                 obj = world_record_find(D_80088CF8[i]);
                 obj[0x73] = (obj[0x73] & ~3) | 3;
             } else {
-                func_150A2D44(D_80088CF0[i], 1);
+                trigger_set_disabled(D_80088CF0[i], 1);
             }
         }
     }
@@ -124,8 +124,8 @@ void obj_sine_wobble_update(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/obj_sine_wobble_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_1514470C(u8 *, f32 *);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+void spawn_region_random_point_3d(u8 *, f32 *);
+s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
 s32 memcpy(u8 *, void *, s32);
 
 // beam_link_fire: timer handler of a link effect p (timer s16 at p+0x28, two objects at p+0x2C / p+0x30). When the
@@ -181,12 +181,12 @@ void beam_link_fire(u8 *p) {
     kinds[1] = 0xBF;
     t.kind = kinds[random_int() & 1];
     timer = (s16 *) (p + 0x28);
-    func_1514470C(*(u8 **) (p + 0x2C), t.pos);
-    func_1514470C(*(u8 **) (p + 0x30), to);
+    spawn_region_random_point_3d(*(u8 **) (p + 0x2C), t.pos);
+    spawn_region_random_point_3d(*(u8 **) (p + 0x30), to);
     d[0] = to[0] - t.pos[0];
     d[1] = to[1] - t.pos[1];
     d[2] = to[2] - t.pos[2];
-    func_15145128(d, rec.vel, &len, &unused);
+    vec3_normalize_len(d, rec.vel, &len, &unused);
     speed = random_float() * 30.0f + 25.0f;
     spd = speed;
     if (t.kind == 0xBF) {
@@ -199,7 +199,7 @@ void beam_link_fire(u8 *p) {
     rec.flat[0] = d[0];
     rec.flat[1] = 0.0f;
     rec.flat[2] = d[2];
-    func_15145128(rec.flat, rec.flat, NULL, NULL);
+    vec3_normalize_len(rec.flat, rec.flat, NULL, NULL);
     rec.side[0] = -rec.flat[2];
     rec.side[1] = 0.0f;
     rec.side[2] = rec.flat[0];

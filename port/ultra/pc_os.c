@@ -276,7 +276,7 @@ void __osInitialize_common(void) { port_log("[os] __osInitialize_common\n"); }
 void osInvalICache(void *p, s32 n) { (void)p; (void)n; }
 void osInvalDCache(void *p, s32 n) { (void)p; (void)n; }
 void osWritebackDCache(void *p, s32 n) { (void)p; (void)n; }
-void func_10024190(void *p, s32 n) { (void)p; (void)n; } /* P25: unnamed osWritebackDCache (init_eu_23CC0.s, cache 0x19 loop) */
+void os_writeback_dcache(void *p, s32 n) { (void)p; (void)n; } /* P25: unnamed osWritebackDCache (init_eu_23CC0.s, cache 0x19 loop) */
 void osWritebackDCacheAll(void) {}
 void osMapTLB(s32 i, OSPageMask m, void *v, u32 e, u32 o, s32 a) { (void)i; (void)m; (void)v; (void)e; (void)o; (void)a; }
 void osUnmapTLB(s32 i) { (void)i; }
@@ -461,7 +461,7 @@ static int io_slot(u32 a, const char *what) {
 }
 s32 osPiRawReadIo(u32 devAddr, u32 *data);
 u32 __port_io_read(u32 a) {
-    if ((a & 0xF0000000u) == 0xB0000000u) {   /* P42: KSEG1 cart domain (IO_READ(osRomBase | dev), e.g. func_15001A08's
+    if ((a & 0xF0000000u) == 0xB0000000u) {   /* P42: KSEG1 cart domain (IO_READ(osRomBase | dev), e.g. quadtree_alloc_node_pool's
                                                 * ROM 0xD24 check word, 0x98CCE31A): the big-endian ROM word */
         u32 v = 0;
         static int logged;
@@ -517,7 +517,7 @@ static void rom_copy(u32 dev, void *dst, u32 size) {
 
 /* P19: libultra osPiRawReadIo (game TU init_eu_26AD0.c; weak via port_prefix.h) polls PI_STATUS and reads
  * IO_READ(osRomBase | devAddr), i.e. a KSEG1 hardware address. Used by the anti-piracy check in
- * func_15002FB4 (ROM word 0xA5C). PC: the big-endian ROM word at the cart-domain offset. */
+ * level_load_header (ROM word 0xA5C). PC: the big-endian ROM word at the cart-domain offset. */
 s32 osPiRawReadIo(u32 devAddr, u32 *data) {
     u32 off = devAddr & 0x0FFFFFFC;
     u32 v = 0;
@@ -525,7 +525,7 @@ s32 osPiRawReadIo(u32 devAddr, u32 *data) {
         v = (u32)port_rom[off] << 24 | (u32)port_rom[off + 1] << 16 | (u32)port_rom[off + 2] << 8 | port_rom[off + 3];
     else
         port_log("[pi] raw read 0x%08X out of ROM\n", devAddr);
-    {   /* P46: log the first raw reads (func_15002FB4's 0xA5C check; func_150A16A4's kind-8 trigger reads 0xB0000454) */
+    {   /* P46: log the first raw reads (level_load_header's 0xA5C check; trigger_zones_update_object's kind-8 trigger reads 0xB0000454) */
         static int n;
         if (n++ < 8) port_log("[pi] raw read 0x%08X = 0x%08X\n", devAddr, v);
     }

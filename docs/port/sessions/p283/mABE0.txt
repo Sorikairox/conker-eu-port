@@ -5,18 +5,18 @@
 \#^    mtx_get_translation(\*(u8 \*\*) #s/0x11/0x12/
 \#^    mtx_get_translation(\*(u8 \*\*) #s/0x1A/0x1B/
 \#^    pos\[1\] = #s/0x180/0x17C/
-\#^    func_15143E94(5, 0x4022);#s/0x4022/0x4023/
-\#^    func_151664F0(-1, #s/+ 6\.0f/+ 5.0f/
-\#^    func_151664F0(-1, #s/0x19, 0x12/0x12, 0x19/
-\#^    func_151664F0(-1, #s/alpha, 1)/alpha, 0)/
+\#^    fx_try_camera_shake(5, 0x4022);#s/0x4022/0x4023/
+\#^    water_ring_spawn(-1, #s/+ 6\.0f/+ 5.0f/
+\#^    water_ring_spawn(-1, #s/0x19, 0x12/0x12, 0x19/
+\#^    water_ring_spawn(-1, #s/alpha, 1)/alpha, 0)/
 \#^    right = heading + 0x3C;#s/+ 0x3C/+ 0x3D/
 \#^    left = heading - 0x3C;#s/- 0x3C/+ 0x3C/
-\#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/+ 30, 5/+ 31, 5/
-\#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/50\.0f + 40\.0f/50.0f + 60.0f/
-\#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/(u32) r1/r1/
-\#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/right, left/left, right/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/+ 30, 5/+ 31, 5/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/50\.0f + 40\.0f/50.0f + 60.0f/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/(u32) r1/r1/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\], pos\[2\], size \* 50#s/right, left/left, right/
 \#^    probe\[1\] = pos\[1\] + 100\.0f;#s/100/50/
-\#^    if (func_15046F70(probe, 0, #s/- 100/+ 100/
+\#^    if (collision_floor_probe(probe, 0, #s/- 100/+ 100/
 \#^        size = random_float() \* 200#s/+ 200\.0f/+ 100.0f/
 \#^        spr\.type = 0x2A;#s/0x2A/0x2B/
 \#^        spr\.tex = 0x7340;#s/0x7340/0x7341/
@@ -31,8 +31,8 @@
 \#^        p = sprite_fx_spawn_cam((s32) \&spr, 0, 0, #s/hit\[0\], pos/pos[1], pos/
 \#^                          (r3 \& 1) + (r2 \& 1) \* 2#s/(r3 \& 1) + (r2 \& 1) \* 2/(r2 \& 1) + (r3 \& 1) * 2/
 \#^                          (r3 \& 1) + (r2 \& 1) \* 2#s/, 4, alpha/, 5, alpha/
-\#^        if (p != NULL \&\& func_1518B140#s/== 0/!= 0/
-\#^        if (p != NULL \&\& func_1518B140#s/, 1)/, 0)/
-\#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], size \* 40#s/6, 6, 0/6, 5, 0/
-\#^    func_1514CBE8(pos\[0\], pos\[1\], pos\[2\], size \* 40#s/40\.0f + 60\.0f/40.0f + 40.0f/
-\#^    func_1504715C(hit, obj);#s/hit, obj/hit, NULL/
+\#^        if (p != NULL \&\& timed_queue_push#s/== 0/!= 0/
+\#^        if (p != NULL \&\& timed_queue_push#s/, 1)/, 0)/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\], pos\[2\], size \* 40#s/6, 6, 0/6, 5, 0/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\], pos\[2\], size \* 40#s/40\.0f + 60\.0f/40.0f + 40.0f/
+\#^    hitinfo_from_obj_floor(hit, obj);#s/hit, obj/hit, NULL/

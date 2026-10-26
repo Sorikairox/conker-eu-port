@@ -8,12 +8,13 @@ extern u8 D_8009FBE8[];
 
 
 #ifdef NON_MATCHING
-void func_1504715C(void *, u8 *);
-s32 func_15143E24(struct127 *);
+void hitinfo_from_obj_floor(void *, u8 *);
+s32 obj_get_local_yaw_byte(struct127 *);
 extern s32 D_8009FBE4;
 extern s32 D_8009FBEC;
 
-void func_150B0B90(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3) {
+/* was func_150B0B90 */
+void obj_hit_impact_fx_spawn(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3) {
     struct {
         s16 u3C;
         s16 u3E;
@@ -90,13 +91,13 @@ void func_150B0B90(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3) {
     sp.u134 = arg0->x_position;
     sp.u138 = arg0->y_position;
     sp.u13C = arg0->z_position;
-    sp.u133 = func_15143E24(arg1) + 0x40;
-    func_1504715C(&sp.u10C, arg0);
+    sp.u133 = obj_get_local_yaw_byte(arg1) + 0x40;
+    hitinfo_from_obj_floor(&sp.u10C, arg0);
     if (arg0->id == 0xA6) {
         sp.u104 = sp.u138 + 50.0f;
         sp.u100 = sp.u134;
         sp.u108 = sp.u13C;
-        func_151C384C(&sp.u100, temp_s1 & 0xFF, arg3);
+        fire_embers_spawn(&sp.u100, temp_s1 & 0xFF, arg3);
         sp.uC4 = 0xA;
         sp.uC8 = 0xA;
         (*(f32 *)((u8 *)(&sp.uCC) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u134) + 0));
@@ -115,7 +116,7 @@ void func_150B0B90(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3) {
         sp.uF4 = 0.707f;
         sp.uF8 = 0.507f;
         sp.uFC = 26.411001f;
-        func_15152700(&sp.uC4, ((u8 *)&D_8009FBE0), &D_8009FBE4, 1, 0.0f, 0U, (u8) temp_s1, arg3);
+        emit_textured_burst(&sp.uC4, ((u8 *)&D_8009FBE0), &D_8009FBE4, 1, 0.0f, 0U, (u8) temp_s1, arg3);
         return;
     }
     sp.u88 = 0xA;
@@ -136,7 +137,7 @@ void func_150B0B90(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3) {
     sp.uB8 = 0.049000002f;
     sp.uBC = 0.102000006f;
     sp.uC0 = 26.411001f;
-    func_15152700(&sp.u88, ((u8 *)&D_8009FBE8), &D_8009FBEC, 1, 0.0f, 0U, (u8) temp_s1, arg3);
+    emit_textured_burst(&sp.u88, ((u8 *)&D_8009FBE8), &D_8009FBEC, 1, 0.0f, 0U, (u8) temp_s1, arg3);
     sp.u44.unk0 = (*(f32 *)((u8 *)(&sp.u134) + 0));
     sp.u44.unk4 = (*(f32 *)((u8 *)(&sp.u134) + 4));
     sp.u44.unk8 = (*(f32 *)((u8 *)(&sp.u134) + 8));
@@ -163,10 +164,10 @@ void func_150B0B90(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3) {
     sp.u60 = 15.1f;
     sp.u64 = 20.800001f;
     sp.u7C = 0.5f;
-    func_15154488((struct_eu_15154488 *) &sp.u3C, &sp.u44, (s32) &sp.u10C, temp_s1 & 0xFF, arg3);
+    emit_sparks_in_angle_range((struct_eu_15154488 *) &sp.u3C, &sp.u44, (s32) &sp.u10C, temp_s1 & 0xFF, arg3);
     sp.u78 = 1;
-    func_15154488((struct_eu_15154488 *) &sp.u3C, &sp.u44, (s32) &sp.u10C, temp_s1 & 0xFF, arg3);
+    emit_sparks_in_angle_range((struct_eu_15154488 *) &sp.u3C, &sp.u44, (s32) &sp.u10C, temp_s1 & 0xFF, arg3);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DE3A0/func_150B0B90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DE3A0/obj_hit_impact_fx_spawn.s")
 #endif

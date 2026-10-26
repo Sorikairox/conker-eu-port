@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-u8 *func_15164CF0(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_15164CF0 */
+u8 *cam_wobble_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     u8 *p;
     struct127 *obj;
     struct108 *e;
@@ -33,7 +34,8 @@ u8 *func_15164CF0(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     return p;
 }
 
-void func_15164DF8(u8 *arg0) {
+/* was func_15164DF8 */
+void cam_wobble_stop_at_half_cycle(u8 *arg0) {
     arg0[0x10] |= 2;
 }
 
@@ -43,12 +45,13 @@ extern f32 (*D_8008B734[])(u8 *);
 extern f32 D_800A6F00; // 6 consecutive limits (all pi)
 
 // object_wobble_update: per-frame update of a 6-channel wobble / fade record (D_8008B4D4 handler). Optional life
-// timer (+0x10 & 1: +0x14 -= frames) and end check (+0x11: D_8008B730 callback, 0 = done) end it via func_15164DF8.
+// timer (+0x10 & 1: +0x14 -= frames) and end check (+0x11: D_8008B730 callback, 0 = done) end it via cam_wobble_stop_at_half_cycle.
 // The amplitude scale is 1 or the +0x12 callback of D_8008B734 (+0x10 & 4). Each channel i with a speed (+0x30 + 4i)
-// advances its phase (+0x48 + 4i, wrapped by func_15144B68), records the half-cycle in +0x60 + i (phase < pi), stops
+// advances its phase (+0x48 + 4i, wrapped by wrap_angle_rad), records the half-cycle in +0x60 + i (phase < pi), stops
 // itself at a half-cycle change when +0x10 & 2, and adds sin(phase) * amplitude (+0x18 + 4i) * scale to float i of
 // target record +0x16 of D_800DD210 (0x18 bytes each). When every speed is 0 the record is freed (node_destroy).
-void func_15164E0C(u8 *arg0) {
+/* was func_15164E0C */
+void cam_wobble_update(u8 *arg0) {
     u8 prev[6];
     f32 scale;
     f32 phase;
@@ -68,7 +71,7 @@ void func_15164E0C(u8 *arg0) {
         }
     }
     if (done) {
-        func_15164DF8(arg0);
+        cam_wobble_stop_at_half_cycle(arg0);
     }
     for (i = 0; i < 6; i++) {
         prev[i] = arg0[0x60 + i];
@@ -79,7 +82,7 @@ void func_15164E0C(u8 *arg0) {
     }
     for (i = 0; i < 6; i++) {
         if (*(f32 *) (arg0 + 0x30 + i * 4) != 0.0f) {
-            phase = func_15144B68(*(f32 *) (arg0 + 0x48 + i * 4) + *(f32 *) (arg0 + 0x30 + i * 4) * D_800BE9A4);
+            phase = wrap_angle_rad(*(f32 *) (arg0 + 0x48 + i * 4) + *(f32 *) (arg0 + 0x30 + i * 4) * D_800BE9A4);
             *(f32 *) (arg0 + 0x48 + i * 4) = phase;
             arg0[0x60 + i] = (phase < (&D_800A6F00)[i]);
             if ((arg0[0x10] & 2) && prev[i] != arg0[0x60 + i]) {
@@ -96,22 +99,24 @@ void func_15164E0C(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/func_15164E0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_update.s")
 #endif
 
-void func_15165454(void) {
+/* was func_15165454 */
+void cam_wobble_clear_offsets(void) {
     bzero(D_800DD210, 0x60);
 }
 
 #ifdef NON_MATCHING
 /* P177 */
-u8 *func_15165B98(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5);
+u8 *cam_wobble_spawn_params(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
-// screen_effect_preset: starts preset `kind` (0..7) of the func_15165B98 effect (record kind 0x39 via func_15164CF0)
+// screen_effect_preset: starts preset `kind` (0..7) of the cam_wobble_spawn_params effect (record kind 0x39 via cam_wobble_spawn)
 /* for view `view`: a block of 15 floats (3 periods, 9 coefficients, 3 more), with (-1, 0) for presets 0..3 and 7,
  * (0, 0) for 4 and (1, 0x18) for 5 / 6; presets 5 and 6 also copy 0x18 bytes of `data` to the new record's +0x108.
  * Returns the record (NULL when none was made; the asm returns a stale v0 for kind >= 8, NULL here). */
-u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
+/* was func_1516547C */
+u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
     f32 p[15];
     u8 *rec;
 
@@ -132,7 +137,7 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 6.0f;
         p[13] = 17.0f;
         p[14] = 48.0f;
-        return func_15165B98((u8 *)p, view, -1, 0, arg3, arg4);
+        return cam_wobble_spawn_params((u8 *)p, view, -1, 0, arg3, arg4);
     case 1:
         p[0] = 20.0f;
         p[1] = 19.0f;
@@ -149,7 +154,7 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 3.0f;
         p[13] = 5.0f;
         p[14] = 30.0f;
-        return func_15165B98((u8 *)p, view, -1, 0, arg3, arg4);
+        return cam_wobble_spawn_params((u8 *)p, view, -1, 0, arg3, arg4);
     case 2:
         p[0] = 10.0f;
         p[1] = 7.0f;
@@ -166,7 +171,7 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 2.0f;
         p[13] = 27.0f;
         p[14] = 15.0f;
-        return func_15165B98((u8 *)p, view, -1, 0, arg3, arg4);
+        return cam_wobble_spawn_params((u8 *)p, view, -1, 0, arg3, arg4);
     case 3:
         p[0] = 7.0f;
         p[1] = 11.0f;
@@ -183,7 +188,7 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 5.0f;
         p[13] = 15.0f;
         p[14] = 12.0f;
-        return func_15165B98((u8 *)p, view, -1, 0, arg3, arg4);
+        return cam_wobble_spawn_params((u8 *)p, view, -1, 0, arg3, arg4);
     case 4:
         p[0] = 8.0f;
         p[1] = 17.0f;
@@ -200,7 +205,7 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 5.0f;
         p[13] = 3.0f;
         p[14] = 45.0f;
-        return func_15165B98((u8 *)p, view, 0, 0, arg3, arg4);
+        return cam_wobble_spawn_params((u8 *)p, view, 0, 0, arg3, arg4);
     case 5:
         p[0] = 15.0f;
         p[1] = 10.0f;
@@ -217,7 +222,7 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 5.0f;
         p[13] = 5.0f;
         p[14] = 25.0f;
-        rec = func_15165B98((u8 *)p, view, 1, 0x18, arg3, arg4);
+        rec = cam_wobble_spawn_params((u8 *)p, view, 1, 0x18, arg3, arg4);
         if (rec != NULL) {
             memcpy(rec + 0x108, data, 0x18);
         }
@@ -238,7 +243,7 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 5.0f;
         p[13] = 5.0f;
         p[14] = 25.0f;
-        rec = func_15165B98((u8 *)p, view, 1, 0x18, arg3, arg4);
+        rec = cam_wobble_spawn_params((u8 *)p, view, 1, 0x18, arg3, arg4);
         if (rec != NULL) {
             memcpy(rec + 0x108, data, 0x18);
         }
@@ -259,16 +264,17 @@ u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4) {
         p[12] = 4.0f;
         p[13] = 10.0f;
         p[14] = 16.0f;
-        return func_15165B98((u8 *)p, view, -1, 0, arg3, arg4);
+        return cam_wobble_spawn_params((u8 *)p, view, -1, 0, arg3, arg4);
     }
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/func_1516547C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_start_preset.s")
 #endif
 
 #ifdef NON_MATCHING
-u8 *func_15165B98(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5) {
+/* was func_15165B98 */
+u8 *cam_wobble_spawn_params(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5) {
     struct {
         f32 u38;
         f32 u3C;
@@ -395,17 +401,18 @@ u8 *func_15165B98(u8 *arg0, s32 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5) {
     sp.uCC = (*(f32 *)((u8 *)arg0 + 0x34));
     sp.uD4 = 0.0f;
     sp.uD0 = (*(f32 *)((u8 *)arg0 + 0x38));
-    temp_v0 = func_15164CF0(&sp.uD8, arg3 + 0xA0, arg4, arg5);
+    temp_v0 = cam_wobble_spawn(&sp.uD8, arg3 + 0xA0, arg4, arg5);
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 0x68, &sp.u38, 0xA0);
     }
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/func_15165B98.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_spawn_params.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15165E4C(u8 *arg0) {
+/* was func_15165E4C */
+s32 cam_wobble_beh_envelope(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f12;
     f32 temp_f2;
@@ -467,27 +474,29 @@ s32 func_15165E4C(u8 *arg0) {
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/func_15165E4C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_beh_envelope.s")
 #endif
-f32 func_15166120(void *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4);
+f32 cam_wobble_fade_by_distance(void *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4);
 
 #ifdef NON_MATCHING
-/* P162: entry 1 of D_8008B734; func_15164E0C (asm) stores the entry's f0 result, so this returns func_15166120's
+/* P162: entry 1 of D_8008B734; cam_wobble_update (asm) stores the entry's f0 result, so this returns cam_wobble_fade_by_distance's
    f32 instead of void. */
 // object_distance_fade: fade factor of the object at obj + 0x108 (near / range / scale at +0x114 / +0x118 / +0x11C)
-f32 func_151660F0(u8 *arg0) {
-    return func_15166120(arg0, arg0 + 0x108, *(s32 *)(arg0 + 0x114), *(s32 *)(arg0 + 0x118), *(f32 *)(arg0 + 0x11C));
+/* was func_151660F0 */
+f32 cam_wobble_distance_fade(u8 *arg0) {
+    return cam_wobble_fade_by_distance(arg0, arg0 + 0x108, *(s32 *)(arg0 + 0x114), *(s32 *)(arg0 + 0x118), *(f32 *)(arg0 + 0x11C));
 }
 #else
-void func_151660F0(u8 *arg0) {
-    func_15166120(arg0, arg0 + 0x108, *(s32 *)(arg0 + 0x114), *(s32 *)(arg0 + 0x118), *(f32 *)(arg0 + 0x11C));
+void cam_wobble_distance_fade(u8 *arg0) {
+    cam_wobble_fade_by_distance(arg0, arg0 + 0x108, *(s32 *)(arg0 + 0x114), *(s32 *)(arg0 + 0x118), *(f32 *)(arg0 + 0x11C));
 }
 #endif
 
 #ifdef NON_MATCHING
-f32 func_15143E64(void *);
+f32 vec3_length(void *);
 
-f32 func_15166120(void * arg0_p, void * arg1_p, s32 arg2, s32 arg3, f32 arg4) {
+/* was func_15166120 */
+f32 cam_wobble_fade_by_distance(void * arg0_p, void * arg1_p, s32 arg2, s32 arg3, f32 arg4) {
     u8 * arg0 = (u8 *) arg0_p;
     u8 * arg1 = (u8 *) arg1_p;
     struct {
@@ -499,11 +508,11 @@ f32 func_15166120(void * arg0_p, void * arg1_p, s32 arg2, s32 arg3, f32 arg4) {
     f32 temp_f0;
     f32 var_f2;
 
-    temp_v0 = func_15144B34((s32) (*(u8 *)((u8 *)arg0 + 0x16)));
+    temp_v0 = camera_get_pos((s32) (*(u8 *)((u8 *)arg0 + 0x16)));
     sp.u20 = (*(f32 *)((u8 *)arg1 + 0)) - (*(f32 *)((u8 *)temp_v0 + 0));
     sp.u24 = (*(f32 *)((u8 *)arg1 + 4)) - (*(f32 *)((u8 *)temp_v0 + 4));
     sp.u28 = (*(f32 *)((u8 *)arg1 + 8)) - (*(f32 *)((u8 *)temp_v0 + 8));
-    temp_f0 = func_15143E64(&sp.u20);
+    temp_f0 = vec3_length(&sp.u20);
     if (temp_f0 < (*(f32 *)&(arg2))) {
         var_f2 = 1.0f;
     } else if (((*(f32 *)&(arg2)) + (*(f32 *)&(arg3))) < temp_f0) {
@@ -514,5 +523,5 @@ f32 func_15166120(void * arg0_p, void * arg1_p, s32 arg2, s32 arg3, f32 arg4) {
     return var_f2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/func_15166120.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/cam_wobble_fade_by_distance.s")
 #endif

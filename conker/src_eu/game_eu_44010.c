@@ -5,10 +5,10 @@
 void *allocate_memory(s32, s32, s32, s32);
 u32 asset_load_into(u8 *, s32, s32, s32, s32);
 s32 asset_get_size(s32, s32, s32);
-void func_150170C4(s32);
-u8 func_15084208(s32, s32);
-void func_15082D5C(s32, s32, s32);
-s32 func_15173218(s32);
+void level_entry_data_load(s32);
+u8 setup_next_free_id(s32, s32);
+void setup_entries_spawn_range(s32, s32, s32);
+s32 warp_request_cancel(s32);
 extern u8 D_1A3750[];
 extern u8 D_1A3840[];
 extern u8 D_1A3B40[];
@@ -24,7 +24,8 @@ extern u16 D_800BE9B8;
 extern s32 D_800BE9C8;
 extern u8 D_800D2520;
 
-void func_15016800(void) {
+/* was func_15016800 */
+void setup_load_type_assets(void) {
     struct {
         s32 u50;
     } sp;
@@ -76,20 +77,21 @@ loop_4:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/func_15016800.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/setup_load_type_assets.s")
 #endif
 #ifdef NON_MATCHING
 /* P36: level setup load (level arg0). DMAs the fixed player-slot setup table (ROM D_1A3840..D_1A3B40 for the
  * multiplayer-style levels 0x1A / 0x24 / 0x2B / 0x2D / 0x30 / 0x33 / 0x34 / 0x3F, else D_1A3750..D_1A3840) into
  * D_800D20FC (allocated with room for the level's setup asset (2, 0xE, level) from asset_get_size), D_800D2521 =
  * D_800D2520 = its entry count (0x30 bytes each), then appends the level's entries (asset_load_into) and counts them in
- * D_800D2520; func_150170C4(level); allocates + clears D_800D252C (spawned flags, 1 byte each) and D_800D2530 (respawn
+ * D_800D2520; level_entry_data_load(level); allocates + clears D_800D252C (spawned flags, 1 byte each) and D_800D2530 (respawn
  * timers, u16); D_800D1968 = 0. Each player slot i < D_8008FD8C enabled in the mask D_800D2340 gets e[2] = 0, a type
- * byte e[4] (and extra fields) from its character func_150859AC(i, 1), flag 0x4000000 in levels 0x32 / 0x33, and the
- * position / angle of object D_800CC2D0[i]; disabled slots get e[2] = 1. func_15016800(); entries with e[0x28] == 0
- * get func_15084208(count, i). Finally the player slots are spawned (func_15082D5C(level, 1, 1)), func_15173218(0),
- * then the other entries (func_15082D5C(level, 1, 0)). */
-void func_15016950(s32 arg0) {
+ * byte e[4] (and extra fields) from its character player_stat_get(i, 1), flag 0x4000000 in levels 0x32 / 0x33, and the
+ * position / angle of object D_800CC2D0[i]; disabled slots get e[2] = 1. setup_load_type_assets(); entries with e[0x28] == 0
+ * get setup_next_free_id(count, i). Finally the player slots are spawned (setup_entries_spawn_range(level, 1, 1)), warp_request_cancel(0),
+ * then the other entries (setup_entries_spawn_range(level, 1, 0)). */
+/* was func_15016950 */
+void level_setup_load(s32 arg0) {
     u8 *tbl;
     u8 *tblEnd;
     u32 size;
@@ -121,12 +123,12 @@ void func_15016950(s32 arg0) {
     }
     size = tblEnd - tbl;
     D_800D20FC = allocate_memory(asset_get_size(2, 0xE, arg0) + size, 1, 2, 0);
-    func_10004514((s32) tbl, (void *) D_800D20FC, size, 1);
+    rom_dma_read((s32) tbl, (void *) D_800D20FC, size, 1);
     n = size / 0x30;
     D_800D2520 = n;
     D_800D2521 = n & 0xFF;
     D_800D2520 += asset_load_into((u8 *) D_800D20FC + (n & 0xFF) * 0x30, 0, 2, 0xE, arg0) / 0x30;
-    func_150170C4(arg0);
+    level_entry_data_load(arg0);
     cnt = D_800D2520;
     D_800D252C = allocate_memory(cnt, 1, 0, 0);
     D_800D2530 = allocate_memory(cnt * 2, 1, 0, 0);
@@ -138,7 +140,7 @@ void func_15016950(s32 arg0) {
             ((u8 *) D_800D20FC)[off + 2] = 1;
             continue;
         }
-        ch = func_150859AC((s16) i, 1);
+        ch = player_stat_get((s16) i, 1);
         e = (u8 *) D_800D20FC + off;
         e[2] = 0;
         if ((u32) ch < 41) {
@@ -254,18 +256,18 @@ void func_15016950(s32 arg0) {
         *(s16 *) (e + 0xA) = (s32) *(f32 *) (obj + 0x1C);
         e[0xC] = *(u16 *) (obj + 0x76) >> 8;
     }
-    func_15016800();
+    setup_load_type_assets();
     for (i = 0, off = 0; i < D_800D2520; i++, off += 0x30) {
         if (((u8 *) D_800D20FC)[off + 0x28] == 0) {
-            ((u8 *) D_800D20FC)[off + 0x28] = func_15084208(D_800D2520, i);
+            ((u8 *) D_800D20FC)[off + 0x28] = setup_next_free_id(D_800D2520, i);
         }
     }
-    func_15082D5C(arg0, 1, 1);
-    func_15173218(0);
-    func_15082D5C(arg0, 1, 0);
+    setup_entries_spawn_range(arg0, 1, 1);
+    warp_request_cancel(0);
+    setup_entries_spawn_range(arg0, 1, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/func_15016950.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/level_setup_load.s")
 #endif
 #ifdef NON_MATCHING
 /* D_800D2520: setup entry count, D_800D2521: first entry of the level's own part; D_800D2104 (EU 0x800D2524, s32 *
@@ -276,7 +278,8 @@ void func_15016950(s32 arg0) {
 // the D_800D2520 setup entries; each player slot (i < D_8008FD8C) gets a zeroed 16-byte block of kind 2. Then the
 // level's asset (2, 0x10, level) gives 8-byte records {offset, kind} for the entries from D_800D2521 on: a record
 // with a non-zero offset sets the entry's kind (low byte) and its block = asset + offset.
-void func_150170C4(s32 level) {
+/* was func_150170C4 */
+void level_entry_data_load(s32 level) {
     u8 *asset = NULL;
     u32 *rec;
     s32 n = D_800D2520;
@@ -305,5 +308,5 @@ void func_150170C4(s32 level) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/func_150170C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_44010/level_entry_data_load.s")
 #endif

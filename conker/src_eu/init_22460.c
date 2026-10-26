@@ -32,7 +32,7 @@ typedef struct {
 } CustomPVoice;
 
 #define func_global_asm_80741070 func_10022460
-#define func_global_asm_80740100 func_100214F0
+#define func_global_asm_80740100 n_adpcm_pull
 Acmd *func_global_asm_80740100(CustomPVoice *, s16 *, s32, Acmd *);
 
 void *func_global_asm_80741070(CustomPVoice *arg0, s16 *arg1, Acmd *arg2) {
@@ -84,7 +84,7 @@ void *func_global_asm_80741070(CustomPVoice *arg0, s16 *arg1, Acmd *arg2) {
 //     sp34 = arg2;
 //     sp32 = 368; // 0x170;
 //     if (arg0->unk50 != 0) {
-//         sp34 = func_100214F0(arg0, &sp32, 0xB8, arg2);
+//         sp34 = n_adpcm_pull(arg0, &sp32, 0xB8, arg2);
 //         sp20 = sp34 = &sp34->unk8;
 //         sp20->unk0 = (sp32 & 0xFFFFFF) | 0xA000000;
 //         sp20->unk4 = ((((s32 )arg1 & 0xFFFF) << 16) | 368);
@@ -97,7 +97,7 @@ void *func_global_asm_80741070(CustomPVoice *arg0, s16 *arg1, Acmd *arg2) {
 //         sp24 = arg0->unk54 + (arg0->unk4C * 184.0f);
 //         sp2C = sp24;
 //         arg0->unk54 = (sp24 - sp2C);
-//         sp34 = func_100214F0(arg0, &sp32, sp2C, arg2);
+//         sp34 = n_adpcm_pull(arg0, &sp32, sp2C, arg2);
 //         sp28 = arg0->unk4C * 32768.0f;
 //
 //         sp1C = sp34 = &sp34->unk8;

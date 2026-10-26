@@ -68,14 +68,14 @@ u8 *blob_shadow_create(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 /* P125 */
 f32 math_cos_u8(u8);
 f32 math_sin_u8(u8 arg0);
-s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
+s32 floor_tri_height(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
 s32 floor_triangle_slope(s16 **tris, s16 *verts, f32 *outA, f32 *outB);
 void collision_find_floor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
 
 /* blob_shadow_update: per frame, the blob shadow record rec (blob_shadow_create) of its owner *(rec + 0x110):
  * rec[0x120] 0 = an object (f32 position +0x14..+0x1C, floor height +0x180 (id 0x25 uses it as its height), floor
  * triangles +0x188 / +0x18C, size u16 +0x160 * f32 +0x14C, facing u16 +0x7A), 1 = a node with s16 position +0x10..
- * +0x14 (skipped when its byte +0x6E is 1; its floor comes from func_150A44A4 on the packed floor *(+0x94) + 0x128,
+ * +0x14 (skipped when its byte +0x6E is 1; its floor comes from floor_tri_height on the packed floor *(+0x94) + 0x128,
  * else collision_find_floor fills it; size (byte +0x4D * 4) * f32 +0x2C). Stores the floor point at +0x114..+0x11C; above
  * the floor, gets the floor slope (floor_triangle_slope), scales the shadow by size / clamp(200 + height, 800), sets the
  * alpha +0x122 (fade in by 5 per frame step when rec[0x124] & 1, else 32000 / distance up to 0xA0) and writes the
@@ -120,7 +120,7 @@ void blob_shadow_update(u8 *rec) {
             return;
         }
         packed = *(u8 **) (o + 0x94) + 0x128;
-        if (func_150A44A4(*(s16 *) (o + 0x10), *(s16 *) (o + 0x14), 0, packed, &floor_y) == 0) {
+        if (floor_tri_height(*(s16 *) (o + 0x10), *(s16 *) (o + 0x14), 0, packed, &floor_y) == 0) {
             y = *(s16 *) (o + 0x12);
             collision_find_floor(0, (s32) packed, (s32) &floor_y, 0, 0, 0, *(s16 *) (o + 0x10), y, *(s16 *) (o + 0x14), y,
                           o[0x71] + 1, 0, -10000.0f, y);

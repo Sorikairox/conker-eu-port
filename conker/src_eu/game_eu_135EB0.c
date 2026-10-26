@@ -64,7 +64,7 @@ void obj_impact_burst(struct127 *arg0, u8 arg1, s32 arg2) {
     sp.u58 = -0.8f;
     sp.u5C = 0.344f;
     sp.u6C = 26.411001f;
-    func_15152700(&sp.u34, ((u8 *)&D_800A2800), &D_800A2804, 1, 40.0f, 0U, (u8) (s32) arg1, arg2);
+    emit_textured_burst(&sp.u34, ((u8 *)&D_800A2800), &D_800A2804, 1, 40.0f, 0U, (u8) (s32) arg1, arg2);
     object_hit_effects(arg0, 1, 1, 1, 0, 0, (s32) arg1, arg2);
 }
 #else

@@ -1,4 +1,4 @@
-# P255 func_151B69D0 (trail_ring_age_update) mutants: sed % setup names
+# P255 trail_ring_age_update (trail_ring_age_update) mutants: sed % setup names
 s/if (count < 2 \&\& (\*(u16/if (count < 1 \&\& (*(u16/ % done
 s/(obj + 0x1E) \& 8)) {/(obj + 0x1E) \& 4)) {/ % done one
 s/        return 0;/        return 2;/ % done

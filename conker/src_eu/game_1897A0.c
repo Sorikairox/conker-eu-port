@@ -9,7 +9,7 @@ void *streak_spawn(s32 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5)
     u8 *temp_v0;
 
     arg0[4] = 10;
-    temp_v0 = func_15147FF0(arg0, arg1 + 0x40, 0x10, 8, 8, 8, 0, 0, arg3, arg4, arg5);
+    temp_v0 = fxrec_spawn(arg0, arg1 + 0x40, 0x10, 8, 8, 8, 0, 0, arg3, arg4, arg5);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -108,15 +108,15 @@ s32 streak_update_fade(u8 *arg0) {
 }
 #ifdef NON_MATCHING
 /* P175 */
-void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+void vtx_slot_buffer_get(s32 *, s16, s32, Vtx **, u8 *);
+void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+s32 gfx_load_texture_cached(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 s32 gfx_set_combine_mode(s32, u8, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
-s32 func_15142FBC(s32, s32, s32, s8 *);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, s8 *);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
+s32 gfx_other_mode_cached(s32, s32, s32, s8 *);
 f32 sqrtf(f32);
 extern s32 D_80091228[];  /* streak texture descriptor */
 extern s32 D_800D30BC;
@@ -165,9 +165,9 @@ extern s32 D_800A4EA8[];  /* render mode pairs (2 words each) */
  * of +0x25 entries, count +0x2C. Each point gets two vertices offset by +-n (STREAK_NORMAL; camera of view arg2 at
  * D_800DBFF0 + arg2 * 0x9A0 + 0x2F8): texture s runs 0..0x800 along the ribbon, t = 0x3FF / 0 across it, and the
  * alpha fades from 0 at the head to rec +0x1A at the tail. Each segment emits one 4-vertex load and two triangles.
- * Vertices come from func_151D6310 (2 per point + 10 spare). Sets the texture D_80091228 (combine 0x3E), combine
- * rec +0x21, geometry mode rec +0x24 / +0x28, the env / prim colours from rec +0x15..+0x1F (func_151441A4 /
- * func_151442FC), render mode 0x80000 | 0x2CA0 | D_800D30BC (| 0x100000 with rec +0x14 flag 1) with the
+ * Vertices come from vtx_slot_buffer_get (2 per point + 10 spare). Sets the texture D_80091228 (combine 0x3E), combine
+ * rec +0x21, geometry mode rec +0x24 / +0x28, the env / prim colours from rec +0x15..+0x1F (fx_calc_color_mode_a /
+ * fx_calc_color_mode_b), render mode 0x80000 | 0x2CA0 | D_800D30BC (| 0x100000 with rec +0x14 flag 1) with the
  * D_800A4EA8 entry rec +0x20. Returns the display list end; draws nothing with fewer than 2 points. */
 /* was func_1515C6F4 */
 s32 streak_draw(u8 *obj, s32 gfx, s16 arg2) {
@@ -197,7 +197,7 @@ s32 streak_draw(u8 *obj, s32 gfx, s16 arg2) {
     if (*(s8 *) (obj + 0x2C) < 2) {
         return gfx;
     }
-    func_151D6310((s32 *) (obj + 0x84), arg2, obj[0x25] * 0x20 + 0xA0, &v, NULL);
+    vtx_slot_buffer_get((s32 *) (obj + 0x84), arg2, obj[0x25] * 0x20 + 0xA0, &v, NULL);
     if (v == NULL) {
         return gfx;
     }
@@ -205,16 +205,16 @@ s32 streak_draw(u8 *obj, s32 gfx, s16 arg2) {
     flag = 1;
     pts = *(u8 **) (obj + 0x94);
     cam = (f32 *) ((u8 *) D_800DBFF0 + arg2 * 0x9A0 + 0x2F8);
-    func_151441A4(&r0, &g0, &b0, &a0, rec[0x1B], rec[0x1C], rec[0x1D], rec[0x1E], rec[0x17], rec[0x18], rec[0x19],
+    fx_calc_color_mode_a(&r0, &g0, &b0, &a0, rec[0x1B], rec[0x1C], rec[0x1D], rec[0x1E], rec[0x17], rec[0x18], rec[0x19],
                   rec[0x1A], rec[0x1F], rec[0x15]);
-    func_151442FC(&r1, &g1, &b1, &a1, rec[0x1B], rec[0x1C], rec[0x1D], rec[0x1E], rec[0x17], rec[0x18], rec[0x19],
+    fx_calc_color_mode_b(&r1, &g1, &b1, &a1, rec[0x1B], rec[0x1C], rec[0x1D], rec[0x1E], rec[0x17], rec[0x18], rec[0x19],
                   rec[0x1A], rec[0x1F], rec[0x16]);
-    gfx = func_15142E24(gfx, D_80091228, 0, 0, 0, 0, 0x42, 0, 0, &flag, 0x3E);
+    gfx = gfx_load_texture_cached(gfx, D_80091228, 0, 0, 0, 0, 0x42, 0, 0, &flag, 0x3E);
     gfx = gfx_set_combine_mode(gfx, rec[0x21], &flag);
-    gfx = func_15142B7C(gfx, *(s32 *) (rec + 0x24), *(s32 *) (rec + 0x28));
-    gfx = func_15142CF0(gfx, 0, 0, r0, g0, b0, a0, &flag);
-    gfx = func_15142C10(gfx, r1, g1, b1, a1, &flag);
-    gfx = func_15142FBC(gfx, ((rec[0x14] & 1) ? 0x100000 : 0) | 0x80000 | D_800D30BC | 0x2CA0,
+    gfx = gfx_geometry_mode_cached(gfx, *(s32 *) (rec + 0x24), *(s32 *) (rec + 0x28));
+    gfx = gfx_prim_color_cached(gfx, 0, 0, r0, g0, b0, a0, &flag);
+    gfx = gfx_env_color_cached(gfx, r1, g1, b1, a1, &flag);
+    gfx = gfx_other_mode_cached(gfx, ((rec[0x14] & 1) ? 0x100000 : 0) | 0x80000 | D_800D30BC | 0x2CA0,
                         D_800A4EA8[rec[0x20] * 2 + 1] | D_800A4EA8[rec[0x20] * 2], &flag);
 
     i = *(s8 *) (obj + 0x2E) - 1;
@@ -375,8 +375,8 @@ struct260 *fx_source_emitter_spawn(s32 *arg0) {
 
 // fat struct
 #ifdef NON_MATCHING
-void func_15143794(s16, s16, f32, void *);
-s32 func_151530A8(s32 *, u8, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 emit_streaks_from_spec(s32 *, u8, s32);
 
 /* was func_1515D130 */
 void fx_source_emitter_update(u8 *arg0) {
@@ -495,11 +495,11 @@ void fx_source_emitter_update(u8 *arg0) {
             sp.uCD = 0;
             sp.uC8 = (*(f32 *)((u8 *)temp_s0 + 0x3C));
             temp_s2 = random_int();
-            func_15143794((s16) (temp_s2 & 0xFF), (s16) (0x40 - (random_int() & 0x7F)), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 6)), &sp.u64);
+            vec3_from_angles_byte((s16) (temp_s2 & 0xFF), (s16) (0x40 - (random_int() & 0x7F)), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 6)), &sp.u64);
             sp.u64 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 0));
             sp.u68 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 2));
             sp.u6C += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 4));
-            func_151530A8(&sp.u5C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+            emit_streaks_from_spec(&sp.u5C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
             (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f);
     }

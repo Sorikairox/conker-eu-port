@@ -4,8 +4,8 @@ body's clang IR with the EU asm of the same function.
 
 Bug class (P116): P15-era m2c bodies that are wrong in C although the N64 build never compiled them:
   * pointer stride: `var_s6 += 4` on a `u8 **` (asm `addiu s6,s6,4` = one pointer), `(n * 0x78) + &D_800C3AA8` on an
-    `s32 *` (scaled x4) -- func_1502457C;
-  * load width: `*(s32 *)p != -0xE` where the asm does `lb` -- func_150337A8.
+    `s32 *` (scaled x4) -- scene_event_track_pass;
+  * load width: `*(s32 *)p != -0xE` where the asm does `lb` -- attachment_tile_scroll_update.
 
 Usage (worktree root, after `eval "$(tools/eu_port/wt.sh env web)"`; runs on the host, needs Homebrew LLVM `opt`):
     python3 port/tools/m2c_sanity.py [--out docs/port/m2c_sanity.tsv] [--func NAME] [--top 40] [--all]
@@ -38,7 +38,7 @@ Kinds
             `D_x[i]`, or `&SYM[i]` / any of these kept in an m2c temp local) and whose index is `x*K (+c)` / `x<<c`:
             effective byte scale K*S. asm side: each `addu r, base, idx` on a register holding that loaded pointer
             records the index multiplier (lin tracker; spills to sp slots followed; jal delay slots run before the
-            call). high when the asm adds x*K to that same base and never x*K*S (func_15022440: `(sp38 * 0x30) +
+            call). high when the asm adds x*K to that same base and never x*K*S (cutscene_actor_spawn_obj: `(sp38 * 0x30) +
             D_800D20FC` on struct258 *, asm adds a1*0x30); med/low for an unknown base with K but no K*S anywhere.
   pindex  : (P135) plain `p[i]` on such a base with sizeof(*p) = S while the asm indexes that base only with
             multipliers != S. Bodies over hand-written asm (nm_asm/, "Handwritten" / "in assembly") are low.
@@ -956,7 +956,7 @@ def compare(name, aacc, iacc):
                 if not (adir & idir):
                     conf = 'low'
                 # asm loads bytes/halves here but the IR never loads that size anywhere in the function, and loads a
-                # wider value at this offset (func_150337A8: `*(s32 *)p == -0xE` vs `lb`) -> high
+                # wider value at this offset (attachment_tile_scroll_update: `*(s32 *)p == -0xE` vs `lb`) -> high
                 elif any(w < 4 and tot(I, w) < tot(A, w) and any(d == 'L' for sg_, d, x in A[L][w]) for w in ax) and not {w for w in iw if w < 4} and \
                         any(d == 'L' for w in iw if w > max(ax) for sg_, d, x in I[L][w]):
                     conf = 'high'

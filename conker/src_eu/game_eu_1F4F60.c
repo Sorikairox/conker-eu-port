@@ -5,13 +5,14 @@
 
 #ifdef NON_MATCHING
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-u8 *func_151C7B1C(f32 *, u8 *, f32 *, u8 *, u8 *, u8 *, u8, u8, u8, u8, s16, s16, s16, u8, u8, u8, u8, u8, u8, f32, f32, u8, u8, s32);
+u8 *laser_create(f32 *, u8 *, f32 *, u8 *, u8 *, u8 *, u8, u8, u8, u8, s16, s16, s16, u8, u8, u8, u8, u8, u8, f32, f32, u8, u8, s32);
 
 // record_beam_start: D_80082EA0 entry 8 (level-start record). Unless rec +0x14 is 1: the segment from the record's
 // point (s16 x, y, z) along the length +8 rotated by the angles +0xC / +0x10; two ray casts (func_150ACEA0) from its
-// middle towards both ends give the end points (geometry hits); when both hit, func_151C7B1C builds the beam between
+// middle towards both ends give the end points (geometry hits); when both hit, laser_create builds the beam between
 // them with the colour +0x1C (r, g, b bytes) and the option bits / bytes of +0x18 and +0x20. Always returns 1.
-s32 func_151C7750(u8 *rec) {
+/* was func_151C7750 */
+s32 laser_record_start(u8 *rec) {
     f32 m[4][4];
     f32 p0[3];
     f32 p1[3];
@@ -38,7 +39,7 @@ s32 func_151C7750(u8 *rec) {
     p0[1] = *(s16 *) (rec + 2);
     p0[2] = *(s16 *) (rec + 4);
     mtxf_rotate_xyz_deg(m, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
-    func_150A7E40(m, 0.0f, *(s16 *) (rec + 8), 0.0f, &p1[0], &p1[1], &p1[2]);
+    mtxf_transform_point(m, 0.0f, *(s16 *) (rec + 8), 0.0f, &p1[0], &p1[1], &p1[2]);
     p1[0] += p0[0];
     p1[1] += p0[1];
     p1[2] += p0[2];
@@ -58,27 +59,27 @@ s32 func_151C7750(u8 *rec) {
     opt = *(u32 *) (rec + 0x18);
     col = *(u32 *) (rec + 0x1C);
     sc = *(u32 *) (rec + 0x20);
-    func_151C7B1C(hitA, triA, hitB, triB, rec, rec, col & 0xFF, (col >> 8) & 0xFF, (col >> 16) & 0xFF,
+    laser_create(hitA, triA, hitB, triB, rec, rec, col & 0xFF, (col >> 8) & 0xFF, (col >> 16) & 0xFF,
                   (opt >> 24) & 1, opt & 0xFF, (opt >> 8) & 0xFF, (opt >> 16) & 0xFF, (opt >> 25) & 1, (opt >> 26) & 1,
                   ((opt >> 27) & 1) == 0, ((opt >> 29) & 1) == 0, (opt >> 30) & 1, (opt >> 28) & 1,
                   (f32) (sc & 0xFF) * 0.024639944f, (f32) ((sc >> 8) & 0xFF) * 0.003079993f, (opt >> 31) == 0, 0xFF, 1);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C7750.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_record_start.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P175 */
 void collision_select_area(s32);
 s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
-void func_151C9748(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8 noshadow, u8 arg7, s32 arg8);
-u8 *func_151C957C(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 noshadow, u8 arg8, s32 arg9);
-s32 func_151C8D5C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
+void laser_end_pieces_spawn(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8 noshadow, u8 arg7, s32 arg8);
+u8 *laser_glow_spawn(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 noshadow, u8 arg8, s32 arg9);
+s32 laser_hum_sound_update(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 s32 memcpy(s32, u8 *, s32);
 
-/* The beam's emitter block (0xA0 bytes, copied to the beam record +0x110; read by func_151C8880 / func_151C8448). */
+/* The beam's emitter block (0xA0 bytes, copied to the beam record +0x110; read by laser_update / laser_draw). */
 typedef struct {
     f32 u00[4];      /* 0x00: random sizes */
     f32 u10[2];      /* 0x10 */
@@ -89,7 +90,7 @@ typedef struct {
     u8 pad30[4];     /* 0x30: never written */
     u8 *glowA;       /* 0x34: written in the record after the copy */
     u8 *glowB;       /* 0x38 */
-    u8 *pieceA[3];   /* 0x3C: func_151C9748 at end A */
+    u8 *pieceA[3];   /* 0x3C: laser_end_pieces_spawn at end A */
     u8 *pieceB[3];   /* 0x48: at end B */
     f32 u54;         /* 0x54 = 0 */
     u8 u58;          /* 0x58 = 0 */
@@ -127,15 +128,16 @@ typedef struct {
     u8 pad48[0x10];
 } BeamSpawn;
 
-// beam_create: builds a beam between two geometry hits (func_151C7750, record_beam_start). Needs a ground id at
-/* both ends (zone_tree_find_leaf). Spawns the three end pieces at each end (func_151C9748, base oriented by the hit
+// beam_create: builds a beam between two geometry hits (laser_record_start, record_beam_start). Needs a ground id at
+/* both ends (zone_tree_find_leaf). Spawns the three end pieces at each end (laser_end_pieces_spawn, base oriented by the hit
  * triangle; if any of the six fails, all are freed and nothing is built), an optional hum (arg9: light_create_flicker_preset at
  * the middle) and the beam record (effect3d_spawn, kind 0x59, colour r / g / b) whose +0x110 gets the emitter block
  * (BeamEmit: random sizes / phases / rates, pieces, triangles, args 10..12, option bits). With arg16 and a valid
- * direction (func_15145128) a glow record (func_151C957C) runs 500 units inwards from 20 units inside each end.
- * Unless arg21 (repeat) the owner's +0x14 is set to 1 (one-shot). With the hum, func_1000FA64 attaches the
- * func_151C8D5C sound callback. Returns the beam record or NULL. */
-u8 *func_151C7B1C(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5, u8 r, u8 g, u8 b, u8 hum,
+ * direction (vec3_normalize_len) a glow record (laser_glow_spawn) runs 500 units inwards from 20 units inside each end.
+ * Unless arg21 (repeat) the owner's +0x14 is set to 1 (one-shot). With the hum, sfx_emitter_start attaches the
+ * laser_hum_sound_update sound callback. Returns the beam record or NULL. */
+/* was func_151C7B1C */
+u8 *laser_create(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5, u8 r, u8 g, u8 b, u8 hum,
                   s16 len0, s16 len1, s16 len2, u8 opt0, u8 opt1, u8 noshadow, u8 glow, u8 arg17, u8 opt3,
                   f32 arg19, f32 arg20, u8 repeat, u8 arg22, s32 arg23) {
     BeamEmit e;
@@ -204,13 +206,13 @@ u8 *func_151C7B1C(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5,
     neg[0] = -spawn.d[0];
     neg[1] = -spawn.d[1];
     neg[2] = -spawn.d[2];
-    /* func_151C9748 leaves the pointers unwritten when the hit triangle is degenerate (stack garbage on N64) */
+    /* laser_end_pieces_spawn leaves the pointers unwritten when the hit triangle is degenerate (stack garbage on N64) */
     for (i = 0; i < 3; i++) {
         e.pieceA[i] = NULL;
         e.pieceB[i] = NULL;
     }
-    func_151C9748(e.pieceA, hitA, triA, neg, e.groundA, alt, noshadow, arg22, 0);
-    func_151C9748(e.pieceB, hitB, triB, spawn.d, e.groundB, alt, noshadow, arg22, 0);
+    laser_end_pieces_spawn(e.pieceA, hitA, triA, neg, e.groundA, alt, noshadow, arg22, 0);
+    laser_end_pieces_spawn(e.pieceB, hitB, triB, spawn.d, e.groundB, alt, noshadow, arg22, 0);
     if (e.pieceA[0] == NULL || e.pieceA[1] == NULL || e.pieceA[2] == NULL || e.pieceB[0] == NULL ||
         e.pieceB[1] == NULL || e.pieceB[2] == NULL) {
         for (i = 0; i < 3; i++) {
@@ -271,7 +273,7 @@ u8 *func_151C7B1C(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5,
     u[0] = spawn.d[0];
     u[1] = spawn.d[1];
     u[2] = spawn.d[2];
-    if (func_15145128(u, u, &w0, &w1) != 0 && glow) {
+    if (vec3_normalize_len(u, u, &w0, &w1) != 0 && glow) {
         /* from 20 units inside each end, 500 units inwards */
         ux = u[0] * 20.0f;
         uy = u[1] * 20.0f;
@@ -291,28 +293,29 @@ u8 *func_151C7B1C(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5,
         rq[0] = rp[0] - vx;
         rq[1] = rp[1] - vy;
         rq[2] = rp[2] - vz;
-        ((BeamEmit *) (rec + 0x110))->glowA = func_151C957C(rec, p, q, r, g, b, e.groundA, noshadow, arg22, arg23);
-        ((BeamEmit *) (rec + 0x110))->glowB = func_151C957C(rec, rp, rq, r, g, b, e.groundB, noshadow, arg22, arg23);
+        ((BeamEmit *) (rec + 0x110))->glowA = laser_glow_spawn(rec, p, q, r, g, b, e.groundA, noshadow, arg22, arg23);
+        ((BeamEmit *) (rec + 0x110))->glowB = laser_glow_spawn(rec, rp, rq, r, g, b, e.groundB, noshadow, arg22, arg23);
     } else {
         ((BeamEmit *) (rec + 0x110))->glowA = NULL;
         ((BeamEmit *) (rec + 0x110))->glowB = NULL;
     }
     if (((BeamEmit *) (rec + 0x110))->sound != 0) {
-        func_1000FA64(0x4D0, mid[0], mid[1], mid[2], 0x1F40, 0xFA, 0x64, (s32) func_151C8D5C, rec + 0x110, 0, 8,
+        sfx_emitter_start(0x4D0, mid[0], mid[1], mid[2], 0x1F40, 0xFA, 0x64, (s32) laser_hum_sound_update, rec + 0x110, 0, 8,
                       random_int() & 0xFF);
     }
     return rec;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C7B1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_create.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15145548(void *, void *, void *, void *, f32 *);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void segment_closest_point(void *, void *, void *, void *, f32 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, u8 *, s32);
 
-u8 *func_151C8448(u8 *arg0, s16 arg1) {
+/* was func_151C8448 */
+u8 *laser_draw(u8 *arg0, s16 arg1) {
     struct {
         u8 u43;
         u8 pad44[0x4];
@@ -367,7 +370,7 @@ u8 *func_151C8448(u8 *arg0, s16 arg1) {
     }
     arg1 = temp_a1;
     sp38 = temp_t0;
-    func_151D6310(arg0 + 0x100, temp_a1, 0x40, &sp.u84, &sp.u43);
+    vtx_slot_buffer_get(arg0 + 0x100, temp_a1, 0x40, &sp.u84, &sp.u43);
     sp.u80 = sp.u84;
     if (sp.u84 != NULL) {
         if (sp.u43 != 0) {
@@ -378,13 +381,13 @@ u8 *func_151C8448(u8 *arg0, s16 arg1) {
             memcpy((*(s32 *)((u8 *)temp_v1 + 0x100)), temp_a1_2, 0x40);
             memcpy((*(s32 *)((u8 *)temp_v1 + 0x100)) + 0x40, temp_a1_2, 0x40);
         }
-        temp_v0_2 = func_15144B34((s32) arg1);
+        temp_v0_2 = camera_get_pos((s32) arg1);
         temp_a2 = temp_v0_2;
         sp.u70 = (*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34));
         sp.u74 = (*(f32 *)((u8 *)arg0 + 0x44)) - (*(f32 *)((u8 *)arg0 + 0x38));
         sp.u7C = temp_v0_2;
         sp.u78 = (*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C));
-        func_15145548(arg0 + 0x34, &sp.u70, temp_a2, &sp.u64, 0);
+        segment_closest_point(arg0 + 0x34, &sp.u70, temp_a2, &sp.u64, 0);
         temp_f0 = sp.u64 - (*(f32 *)((u8 *)sp.u7C + 0));
         temp_f2 = sp.u68 - (*(f32 *)((u8 *)sp.u7C + 4));
         temp_f12 = sp.u6C - (*(f32 *)((u8 *)sp.u7C + 8));
@@ -436,10 +439,11 @@ u8 *func_151C8448(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C8448.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151C8880(u8 *arg0) {
+/* was func_151C8880 */
+s32 laser_update(u8 *arg0) {
     s16 temp_v1;
     u8 *temp_a0;
     u8 *temp_a0_2;
@@ -475,8 +479,8 @@ s32 func_151C8880(u8 *arg0) {
     if ((*(u8 *)((u8 *)arg0 + 0x196)) & 2) {
         (*(f32 *)((u8 *)temp_s0_2 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x18)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x20)) * D_800BE9A4));
         (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0x1C)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x24)) * D_800BE9A4));
-        (*(f32 *)((u8 *)temp_s0_2 + 0x18)) = func_15144B68((*(f32 *)((u8 *)temp_s0_2 + 0x18)));
-        (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = func_15144B68((*(f32 *)((u8 *)temp_s0_2 + 0x1C)));
+        (*(f32 *)((u8 *)temp_s0_2 + 0x18)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x18)));
+        (*(f32 *)((u8 *)temp_s0_2 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x1C)));
         (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) ((func_150AD78C((*(f32 *)((u8 *)temp_s0_2 + 0x18))) * (*(f32 *)((u8 *)temp_s0_2 + 0x10))) + (*(f32 *)((u8 *)temp_s0_2 + 8)));
         temp_v0 = (*(u8 **)((u8 *)temp_s0_2 + 0x2C));
         (*(f32 *)((u8 *)temp_s0_2 + 4)) = (f32) ((func_150AD78C((*(f32 *)((u8 *)temp_s0_2 + 0x1C))) * (*(f32 *)((u8 *)temp_s0_2 + 0x14))) + (*(f32 *)((u8 *)temp_s0_2 + 0xC)));
@@ -527,14 +531,15 @@ s32 func_151C8880(u8 *arg0) {
     }
     if ((*(u8 *)((u8 *)temp_s0_2 + 0x86)) & 8) {
         (*(s8 *)((u8 *)arg0 + 0x5C)) = (s8) (u32) ((func_150AD78C((*(f32 *)((u8 *)temp_s0_2 + 0x98))) * 112.5f) + 142.5f);
-        (*(f32 *)((u8 *)temp_s0_2 + 0x98)) = func_15144B68((*(f32 *)((u8 *)temp_s0_2 + 0x98)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x9C)) * D_800BE9A4));
+        (*(f32 *)((u8 *)temp_s0_2 + 0x98)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0x98)) + ((*(f32 *)((u8 *)temp_s0_2 + 0x9C)) * D_800BE9A4));
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C8880.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_update.s")
 #endif
-void func_151C8C24(u8 *arg0, s32 arg1) {
+/* was func_151C8C24 */
+void laser_test_obj_broadcast(u8 *arg0, s32 arg1) {
     s32 sp18[2];
     if (arg0 != NULL) {
         sp18[0] = (s32)arg0;
@@ -543,17 +548,18 @@ void func_151C8C24(u8 *arg0, s32 arg1) {
     }
 }
 
-s32 func_151C8D90(u8 *, u8 *);
-void func_151C8F4C(u8 *, u8 *);
-void func_151C8C5C(u8 *arg0, s32 *arg1, u8 arg2) {
+s32 laser_hits_object(u8 *, u8 *);
+void laser_break_effects(u8 *, u8 *);
+/* was func_151C8C5C */
+void laser_handle_message(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *v;
     u8 **q = &arg0;
     switch (arg2) {
     case 0x20:
         v = (*q) + 0x110;
         if ((v[0x86] & 0x10) && (*(s32 *)(v + 0x28) == arg1[1])) {
-            if (func_151C8D90((u8 *)arg1[0], (*q))) {
-                func_151C8F4C((u8 *)arg1[0], (*q));
+            if (laser_hits_object((u8 *)arg1[0], (*q))) {
+                laser_break_effects((u8 *)arg1[0], (*q));
             }
         }
         break;
@@ -563,14 +569,15 @@ void func_151C8C5C(u8 *arg0, s32 *arg1, u8 arg2) {
             switch (((u8 *)arg1)[4]) {
             case 0: v[0x86] |= 2; break;
             case 1: v[0x86] &= ~2; break;
-            case 2: func_151C8F4C(NULL, (*q)); break;
+            case 2: laser_break_effects(NULL, (*q)); break;
             }
         }
         break;
     }
 }
 
-s32 func_151C8D5C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+/* was func_151C8D5C */
+s32 laser_hum_sound_update(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
     u8 *p;
     s16 *q;
     p = *(u8 **)(arg0 + 0x18);
@@ -583,15 +590,16 @@ s32 func_151C8D5C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s1
 
 #ifdef NON_MATCHING
 /* P177 */
-s32 func_1507C7C0(u8 *, s16 *, s16 *, s16 *);
-s32 func_151451F0(f32 *, f32 *, f32 *, f32, f32, s32, s32, f32 *, f32 *);
+s32 obj_collision_cylinder(u8 *, s16 *, s16 *, s16 *);
+s32 segment_sphere_hit(f32 *, f32 *, f32 *, f32, f32, s32, s32, f32 *, f32 *);
 
 // beam_hits_object: whether the beam segment of `rec` (end points +0x34 / +0x40) crosses `obj`'s collision body.
 /* The body is an ellipsoid of radius (model kind obj +4 < 0xBB, not 0xFF: D_800D1C90[kind] +0x1A x obj +0x14C, else
- * 50) around obj's position raised by half its height (func_1507C7C0); the segment's y is scaled by radius /
- * half-height about that centre to make it a sphere, then func_151451F0 tests the ray (start, unit direction) against
+ * 50) around obj's position raised by half its height (obj_collision_cylinder); the segment's y is scaled by radius /
+ * half-height about that centre to make it a sphere, then segment_sphere_hit tests the ray (start, unit direction) against
  * the sphere within the segment length. 0 when the height is 0 or the segment has no length. */
-s32 func_151C8D90(u8 *obj, u8 *rec) {
+/* was func_151C8D90 */
+s32 laser_hits_object(u8 *obj, u8 *rec) {
     f32 centre[3];
     f32 start[3];
     f32 dir[3];
@@ -616,7 +624,7 @@ s32 func_151C8D90(u8 *obj, u8 *rec) {
     } else {
         radius = 50.0f;
     }
-    func_1507C7C0(obj, &height, &width, &rad);
+    obj_collision_cylinder(obj, &height, &width, &rad);
     if ((f32)height == 0.0f) {
         return 0;
     }
@@ -632,42 +640,43 @@ s32 func_151C8D90(u8 *obj, u8 *rec) {
     dir[0] = *(f32 *)(rec + 0x40) - start[0];
     dir[1] = endY - start[1];
     dir[2] = *(f32 *)(rec + 0x48) - start[2];
-    if (!func_15145128(dir, dir, (s32 *)&len, (s32 *)&inv)) {
+    if (!vec3_normalize_len(dir, dir, (s32 *)&len, (s32 *)&inv)) {
         return 0;
     }
-    if (func_151451F0(start, dir, centre, radius, len, (s32)hitA, (s32)hitB, &tA, &tB) == 0) {
+    if (segment_sphere_hit(start, dir, centre, radius, len, (s32)hitA, (s32)hitB, &tA, &tB) == 0) {
         return 0;
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C8D90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_hits_object.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P177 */
 void fx_scorch_decal_spawn(f32, u8, s32 *, f32 *, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_1515016C(u8 *arg0, u8 arg1, s32 arg2);
-u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
+void emit_spray_from_surface(u8 *arg0, u8 arg1, s32 arg2);
+u8 *cam_wobble_start_preset(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
 s32 obj_send_hit(struct127 *obj, s32 flags, u16 val, s32 arg3);
-s32 func_1000EC24();
+s32 sfx_cb_delayed_play_2d();
 extern s32 D_800AB010[]; /* hit-sound flags by beam piece kind: 0x17, 0x18 */
 
 // beam_hit_effects: the effects when the beam `rec` is broken (by obj, from the 0x20 / 0x3A messages of
-/* func_151C8C5C; obj NULL for the scripted break). At each end (+0x34 with the surface record +0x16A and the
- * direction +0x4C; +0x40 with +0x17C and the reversed direction): a spark spray (func_1515016C, the block below),
+/* laser_handle_message; obj NULL for the scripted break). At each end (+0x34 with the surface record +0x16A and the
+ * direction +0x4C; +0x40 with +0x17C and the reversed direction): a spark spray (emit_spray_from_surface, the block below),
  * a flash (light_create_with_ctrl kind 3) and a scorch mark (fx_scorch_decal_spawn). With obj: the screen effect preset 2 for obj's
- * view (func_1516547C), a rumble (func_151D8E18) and obj's hit reaction (obj_send_hit, flags D_800AB010 by the
+ * view (cam_wobble_start_preset), a rumble (rumble_request) and obj's hit reaction (obj_send_hit, flags D_800AB010 by the
  * piece kind at +0x1A4). Then the two sounds (0x2F5 at end A, 0x2F6 at end B) and node_destroy(rec).
  * (The mark positions are the end points: the asm saves v0 = rec + 0x34 / + 0x40 in the delay slot of the
- * func_1515016C calls, before the call.) */
-void func_151C8F4C(u8 *obj, u8 *rec) {
+ * emit_spray_from_surface calls, before the call.) */
+/* was func_151C8F4C */
+void laser_break_effects(u8 *obj, u8 *rec) {
     struct {
         f32 dir[3];      /* 0x00 */
         u8 hit[0x12];    /* 0x0C surface record */
         u8 pad1E[2];
         f32 range;       /* 0x20 */
-        s32 countBase;   /* 0x24 spray parameters (func_1514FE68) */
+        s32 countBase;   /* 0x24 spray parameters (emit_spray_particles) */
         s32 countExtra;  /* 0x28 */
         f32 pos[3];      /* 0x2C */
         f32 speedBase;   /* 0x38 */
@@ -734,7 +743,7 @@ void func_151C8F4C(u8 *obj, u8 *rec) {
     for (i = 0; i < 0x12; i++) {
         spray.hit[i] = rec[0x16A + i];
     }
-    func_1515016C((u8 *)&spray, rec[0xC], rec[1]);
+    emit_spray_from_surface((u8 *)&spray, rec[0xC], rec[1]);
 
     beam = rec + 0x110;
     spray.pos[0] = *(f32 *)(rec + 0x40);
@@ -746,7 +755,7 @@ void func_151C8F4C(u8 *obj, u8 *rec) {
     for (i = 0; i < 0x12; i++) {
         spray.hit[i] = beam[0x6C + i];
     }
-    func_1515016C((u8 *)&spray, rec[0xC], rec[1]);
+    emit_spray_from_surface((u8 *)&spray, rec[0xC], rec[1]);
 
     at[0] = *(f32 *)(rec + 0x34);
     at[1] = *(f32 *)(rec + 0x38);
@@ -771,25 +780,25 @@ void func_151C8F4C(u8 *obj, u8 *rec) {
                   1, 1, 0, 0, 0, rec[0xC], 0);
 
     if (obj != NULL) {
-        func_1516547C(2, (*(u8 **)(obj + 0x318))[0x23D], NULL, rec[0xC], rec[1]);
+        cam_wobble_start_preset(2, (*(u8 **)(obj + 0x318))[0x23D], NULL, rec[0xC], rec[1]);
         rumble.unk0 = 1;
         rumble.unk2 = 0x28;
         rumble.unk5 = 1;
         rumble.unk4 = 8;
         rumble.unk6 = -1;
-        func_151D8E18(&rumble, 0, 0xFF, 0);
+        rumble_request(&rumble, 0, 0xFF, 0);
     }
     if (obj != NULL) {
         obj_send_hit((struct127 *)obj, D_800AB010[beam[0x94]], 0, -1);
     }
-    func_10010F88(0x2F5, 0x7FFF, random_int() % 500U, 0, 0, *(f32 *)(rec + 0x34), *(f32 *)(rec + 0x38),
+    sound_play_at(0x2F5, 0x7FFF, random_int() % 500U, 0, 0, *(f32 *)(rec + 0x34), *(f32 *)(rec + 0x38),
                   *(f32 *)(rec + 0x3C), 0x7D0, 0x898);
-    func_1000FA64(0x2F6, *(f32 *)(rec + 0x40), *(f32 *)(rec + 0x44), *(f32 *)(rec + 0x48), 0x7FFF, 0x898, 0x7D0,
-                  (s32)func_1000EC24, (void *)5, 0, 0, random_int() % 500U);
+    sfx_emitter_start(0x2F6, *(f32 *)(rec + 0x40), *(f32 *)(rec + 0x44), *(f32 *)(rec + 0x48), 0x7FFF, 0x898, 0x7D0,
+                  (s32)sfx_cb_delayed_play_2d, (void *)5, 0, 0, random_int() % 500U);
     node_destroy((struct102 *)rec);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C8F4C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_break_effects.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -798,10 +807,11 @@ u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 ar
                   s32 arg9);
 s32 memcpy(s32, u8 *, s32);
 
-// beam_glow_spawn: one glow of a beam (func_151C7B1C): a particle emitter (particle_emitter_spawn, kind 0x15, emitter size
+// beam_glow_spawn: one glow of a beam (laser_create): a particle emitter (particle_emitter_spawn, kind 0x15, emitter size
 /* 0x64) from `from` to `to` in colour r / g / b with the ground id, shadow flag 0x1000000 when `noshadow`; the
  * beam record is stored at the new record's +0x170. Returns the glow record or NULL. */
-u8 *func_151C957C(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 noshadow, u8 arg8, s32 arg9) {
+/* was func_151C957C */
+u8 *laser_glow_spawn(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 noshadow, u8 arg8, s32 arg9) {
     struct {
         u8 kind;     /* 0x00 = 0x15 */
         u8 u01;      /* 0x01 = 3 */
@@ -883,23 +893,24 @@ u8 *func_151C957C(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 
     return glow;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C957C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_glow_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P175 */
-s32 func_15132FBC(void *, s32, s32, s32, u8, s32);
-s32 func_15133CD0(s32, u8 *);
-s32 func_15144E80(u8 *, f32 *, f32 *, f32 *);
-void func_15145974(f32 *, f32 *, f32 *);
+s32 mdl_particle_spawn(void *, s32, s32, s32, u8, s32);
+s32 mdl_particle_mtx_rot_scale3(s32, u8 *);
+s32 tri_calc_normal(u8 *, f32 *, f32 *, f32 *);
+void vec3_to_yaw_pitch_deg(f32 *, f32 *, f32 *);
 s32 memcpy(s32, u8 *, s32);
 
-// beam_end_pieces_spawn: the three pieces of one beam end (func_151C7B1C): from the hit triangle `tri`
-// (func_15144E80: its normal / axes) the orientation of the base; spawns with func_15132FBC (kind 3) the base
+// beam_end_pieces_spawn: the three pieces of one beam end (laser_create): from the hit triangle `tri`
+// (tri_calc_normal: its normal / axes) the orientation of the base; spawns with mdl_particle_spawn (kind 3) the base
 // (sound 0x36, no delay) and two arm pieces (0x37 / 0x38, delay 0x14) at `pos`, writes them to out[0..2] and runs
-// func_15133CD0 on both 0x40-byte parts of each; the arms also get the 0x14-byte animation list at +0x170 (alt set
-// = the other model ids). out[] is left unchanged when func_15144E80 fails.
-void func_151C9748(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8 noshadow, u8 arg7, s32 arg8) {
+// mdl_particle_mtx_rot_scale3 on both 0x40-byte parts of each; the arms also get the 0x14-byte animation list at +0x170 (alt set
+// = the other model ids). out[] is left unchanged when tri_calc_normal fails.
+/* was func_151C9748 */
+void laser_end_pieces_spawn(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8 noshadow, u8 arg7, s32 arg8) {
     struct {
         f32 u00;     /* 0x00 = 1 */
         f32 u04;     /* 0x04 = 1 */
@@ -940,10 +951,10 @@ void func_151C9748(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8
     s32 i;
     s32 k;
 
-    if (func_15144E80(tri, ax, ay, az) == 0) {
+    if (tri_calc_normal(tri, ax, ay, az) == 0) {
         return;
     }
-    func_15145974(az, &blk.spin[1], &blk.spin[0]);
+    vec3_to_yaw_pitch_deg(az, &blk.spin[1], &blk.spin[0]);
     blk.u00 = 1.0f;
     blk.u04 = 1.0f;
     blk.spin[0] += 90.0f;
@@ -975,10 +986,10 @@ void func_151C9748(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8
     blk.u72 = 1;
     blk.u74 = 0xFF;
     blk.u69 = -1;
-    out[0] = (u8 *) func_15132FBC(&blk, 3, 0xFF, 0, arg7, arg8);
+    out[0] = (u8 *) mdl_particle_spawn(&blk, 3, 0xFF, 0, arg7, arg8);
     if (out[0] != NULL) {
         for (i = 0; i < 0x80; i += 0x40) {
-            func_15133CD0((s32) (out[0] + i + 0x90), out[0]);
+            mdl_particle_mtx_rot_scale3((s32) (out[0] + i + 0x90), out[0]);
         }
     }
     blk.u69 = 2;
@@ -998,7 +1009,7 @@ void func_151C9748(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8
             anim.id1 = alt ? 0x8A : 0x8E;
             blk.sound = 0x38;
         }
-        out[k] = (u8 *) func_15132FBC(&blk, 3, 0xFF, 0x14, arg7, arg8);
+        out[k] = (u8 *) mdl_particle_spawn(&blk, 3, 0xFF, 0x14, arg7, arg8);
         if (out[k] == NULL) {
             if (k == 1) {
                 continue;
@@ -1006,16 +1017,17 @@ void func_151C9748(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8
             return;
         }
         for (i = 0; i < 0x80; i += 0x40) {
-            func_15133CD0((s32) (out[k] + i + 0x90), out[k]);
+            mdl_particle_mtx_rot_scale3((s32) (out[k] + i + 0x90), out[k]);
         }
         memcpy((s32) (out[k] + 0x170), (u8 *) &anim, 0x14);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9748.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/laser_end_pieces_spawn.s")
 #endif
 
-void func_151C9A84(struct210 *arg0) {
+/* was func_151C9A84 */
+void laser_retire(struct210 *arg0) {
     u8 *p;
     struct102 *a;
     struct210 **pa = &arg0; // fakematch: arg0 address taken keeps it in its home slot
@@ -1023,7 +1035,7 @@ void func_151C9A84(struct210 *arg0) {
     p = (u8 *)*pa + 0x110;
     if (*(s32 *)((u8 *)*pa + 0x13C) != 0) {
         node_destroy(*(struct102 **)(p + 0x2C));
-        func_1000FD38(func_151C8D5C, p, 0);
+        sfx_emitter_stop_by_callback(laser_hum_sound_update, p, 0);
     }
     p = (u8 *)*pa;
     a = *(struct102 **)(p + 0x144);
@@ -1055,7 +1067,8 @@ void func_151C9A84(struct210 *arg0) {
     effect3d_retire(arg0);
 }
 
-void func_151C9B88(struct210 *arg0) {
+/* was func_151C9B88 */
+void laser_delete(struct210 *arg0) {
     u8 *p;
     struct102 *a;
     struct210 **pa = &arg0; // fakematch: arg0 address taken keeps it in its home slot
@@ -1063,7 +1076,7 @@ void func_151C9B88(struct210 *arg0) {
     p = (u8 *)*pa + 0x110;
     if (*(s32 *)((u8 *)*pa + 0x13C) != 0) {
         node_destroy(*(struct102 **)(p + 0x2C));
-        func_1000FD38(func_151C8D5C, p, 0);
+        sfx_emitter_stop_by_callback(laser_hum_sound_update, p, 0);
     }
     p = (u8 *)*pa;
     a = *(struct102 **)(p + 0x144);
@@ -1095,7 +1108,8 @@ void func_151C9B88(struct210 *arg0) {
     effect3d_free(arg0);
 }
 
-s32 func_151C9C8C(u8 *arg0, s32 arg1) {
+/* was func_151C9C8C */
+s32 laser_piece_is_on(u8 *arg0, s32 arg1) {
     s32 *q = &arg1; // fakematch: arg1 home store
     u8 *p = *(u8 **)(arg0 + 0x170) + 0x110;
     if (p[0x86] & 2) {
@@ -1104,37 +1118,39 @@ s32 func_151C9C8C(u8 *arg0, s32 arg1) {
     return 0;
 }
 
-void func_151C9CBC(s32 arg0, s32 arg1) {
+/* was func_151C9CBC */
+void laser_switch_broadcast(s32 arg0, s32 arg1) {
     s32 tmp[2];
     tmp[0] = arg1;
     *(u8 *)(tmp + 1) = arg0;
     fx_lists_broadcast_a(tmp, 0x3A);
 }
 
-s32 func_1504715C(s32 *, struct127 *);
+s32 hitinfo_from_obj_floor(s32 *, struct127 *);
 #ifdef NON_MATCHING
 /* P170 */
-s32 func_15046F70(f32 *, s32, f32, s32 *);
+s32 collision_floor_probe(f32 *, s32, f32, s32 *);
 f32 random_float(void);
 s32 random_int(void);
 void fx_scorch_decal_spawn(f32, u8, s32 *, f32 *, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_151D5404(struct17 *, f32, f32, f32, s16, s16, s32, s32);
-void func_151D58E4(struct17 *, f32, f32, f32, s16, s32, s32);
-s32 func_151D5AC4(struct17 *, u8, s32);
-void func_151D45A4(struct17 *, u8, s32);
+void rumble_all_players_at(struct17 *, f32, f32, f32, s16, s16, s32, s32);
+void cam_shake_all_players(struct17 *, f32, f32, f32, s16, s32, s32);
+s32 smoke_cloud_spawn(struct17 *, u8, s32);
+void explosion_light_spawn(struct17 *, u8, s32);
 void fx_debris_emitter_spawn(struct17 *, s16, u8, s32);
-s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
+s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
 s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-void func_151CA070(struct127 *arg0, u8 arg1, s32 arg2);
+u16 sound_play_at(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+void object_explode_air_burst(struct127 *arg0, u8 arg1, s32 arg2);
 
 // object_explode: the big explosion at an object (135 units above its position +0x14/+0x18/+0x1C). On the ground
 // (+0x2D8 == 0) a scorch mark (fx_scorch_decal_spawn) where a ray 200 units down hits a floor with flag 1, and the debris
-// burst object_hit_effects; then the blast effects func_151D5404 / func_151D58E4 / func_151D5AC4 / func_151D45A4, the
-// sparks fx_debris_emitter_spawn (at the scorch point when there is one), the flash func_15154728, the sound 0x60D, and in
-// the air the extra burst func_151CA070. Nothing for a NULL object.
-void func_151C9740(struct127 *obj, u8 arg1, s32 arg2) {
-    s32 ground[9];  /* floor query (func_1504715C / func_15046F70): f32 height at +0, flags byte +0x1C */
+// burst object_hit_effects; then the blast effects rumble_all_players_at / cam_shake_all_players / smoke_cloud_spawn / explosion_light_spawn, the
+// sparks fx_debris_emitter_spawn (at the scorch point when there is one), the flash spark_shower_spawn, the sound 0x60D, and in
+// the air the extra burst object_explode_air_burst. Nothing for a NULL object.
+/* was func_151C9740 */
+void object_explode_big(struct127 *obj, u8 arg1, s32 arg2) {
+    s32 ground[9];  /* floor query (hitinfo_from_obj_floor / collision_floor_probe): f32 height at +0, flags byte +0x1C */
     struct17 probe;
     u8 inAir;
     u8 scorched;
@@ -1154,8 +1170,8 @@ void func_151C9740(struct127 *obj, u8 arg1, s32 arg2) {
     inAir = (*(f32 *) ((u8 *) obj + 0x2D8) != 0.0f) ? 1 : 0;
     if (!inAir) {
         probe = pos;
-        func_1504715C(ground, obj);
-        if (func_15046F70((f32 *) &probe, 0, pos.unk4 - 200.0f, ground) != 0 && (((u8 *) ground)[0x1C] & 1)) {
+        hitinfo_from_obj_floor(ground, obj);
+        if (collision_floor_probe((f32 *) &probe, 0, pos.unk4 - 200.0f, ground) != 0 && (((u8 *) ground)[0x1C] & 1)) {
             mark.unk0 = probe.unk0;
             mark.unk4 = *(f32 *) &ground[0];
             mark.unk8 = probe.unk8;
@@ -1167,38 +1183,40 @@ void func_151C9740(struct127 *obj, u8 arg1, s32 arg2) {
                           0, arg1, 0);
         }
     }
-    func_151D5404(&pos, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
-    func_151D58E4(&pos, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
-    func_151D5AC4(&pos, arg1, arg2);
-    func_151D45A4(&pos, arg1, arg2);
+    rumble_all_players_at(&pos, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
+    cam_shake_all_players(&pos, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
+    smoke_cloud_spawn(&pos, arg1, arg2);
+    explosion_light_spawn(&pos, arg1, arg2);
     fx_debris_emitter_spawn(scorched ? &mark : &pos, (u32) random_int() % 62 + 120, arg1, arg2);
     r = random_float();
-    func_15154728((f32 *) &pos, r + r + 8.0f, 2.4641099f, (u32) random_int() % 56 + 200, 0.0f, arg1, arg2);
+    spark_shower_spawn((f32 *) &pos, r + r + 8.0f, 2.4641099f, (u32) random_int() % 56 + 200, 0.0f, arg1, arg2);
     if (!inAir) {
         object_hit_effects(obj, 0, 0, 1, 0, 0, arg1, arg2);
     }
-    func_10010F88(0x60D, 0x7D00, 0, 0, 0, (s32) pos.unk0, (s32) pos.unk4, (s32) pos.unk8, 500, 1000);
+    sound_play_at(0x60D, 0x7D00, 0, 0, 0, (s32) pos.unk0, (s32) pos.unk4, (s32) pos.unk8, 500, 1000);
     if (inAir) {
-        func_151CA070(obj, arg1, arg2);
+        object_explode_air_burst(obj, arg1, arg2);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9740.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/object_explode_big.s")
 #endif
 
-void func_151AC3F0(struct17 *, s32 *, s32, u8, s32);
-void func_151CA070(struct127 *arg0, u8 arg1, s32 arg2) {
+void debris_burst_spawn(struct17 *, s32 *, s32, u8, s32);
+/* was func_151CA070 */
+void object_explode_air_burst(struct127 *arg0, u8 arg1, s32 arg2) {
     struct17 pos;
     s32 sp20[9];
 
     pos.unk0 = *(f32 *)((u8 *)arg0 + 0x14);
     pos.unk4 = *(f32 *)((u8 *)arg0 + 0x180) + 2.0f;
     pos.unk8 = *(f32 *)((u8 *)arg0 + 0x1C);
-    func_1504715C(sp20, arg0);
-    func_151AC3F0(&pos, sp20, 2, arg1, arg2);
+    hitinfo_from_obj_floor(sp20, arg0);
+    debris_burst_spawn(&pos, sp20, 2, arg1, arg2);
 }
 
-s32 func_151CA0E0(u8 *arg0)
+/* was func_151CA0E0 */
+s32 laser_light_sync(u8 *arg0)
 {
   u8 *new_var2;
   u8 *new_var;
@@ -1215,7 +1233,8 @@ s32 func_151CA0E0(u8 *arg0)
   return 1;
 }
 
-s32 func_151CA114(u8 *arg0, s8 *arg1)
+/* was func_151CA114 */
+s32 laser_piece_visibility_update(u8 *arg0, s8 *arg1)
 {
   u8 *new_var;
   new_var = *((u8 **) (((u8 *) arg0) + 0x188)); // fakematch: pointer in a named local (permuter)

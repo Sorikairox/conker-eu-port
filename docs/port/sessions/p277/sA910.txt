@@ -1,4 +1,4 @@
-# func_1517A910 setups: gfx 80480000, obj 80460000 (byte 0 = type, 0xB2 seen bits, 0xB3 alpha), player a2
+# puff_sprite_draw setups: gfx 80480000, obj 80460000 (byte 0 = type, 0xB2 seen bits, 0xB3 alpha), player a2
 cull8seen ! 0=80480000,1=80460000,2=1 ! 80460000=08000000,804600B0=00000280 ! 1510B460=1 ! ! ! !
 cull8unseen ! 0=80480000,1=80460000,2=1 ! 80460000=08000000,804600B0=00000180 ! 1510B460=1 ! ! ! !
 cull3 ! 0=80480000,1=80460000,2=2 ! 80460000=03000000,804600B0=000007FF ! 1510B460=1 ! ! ! !

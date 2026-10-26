@@ -1,8 +1,8 @@
-# P243 func_151472D0 (object_effect10_spawn) mutants: sed % setup names
+# P243 obj_fx_point_effect10 (object_effect10_spawn) mutants: sed % setup names
 s/if (\*(s32 \*)(obj + 0x1D4) != 0)/if (*(s32 *)(obj + 0x1D4) == 0)/ % hit nomodel
 s/(obj + 0x1D4)/(obj + 0x1D0)/ % hit nomodel
 s/(sp.pt, obj, (s32) sp.rec, id) != 0/(sp.pt, obj, (s32) sp.rec, id) == 0/ % hit miss
-s/func_15146E00(sp.pt, obj, (s32) sp.rec, id)/func_15146E00(sp.pt, obj, (s32) sp.rec, 1)/ % hit
+s/obj_fx_point_probe_floor(sp.pt, obj, (s32) sp.rec, id)/obj_fx_point_probe_floor(sp.pt, obj, (s32) sp.rec, 1)/ % hit
 s/fx_spawn_impact_particle(10,/fx_spawn_impact_particle(11,/ % hit
 s/0.011764706f/0.0117f/ % hit big
 s/0.7111111f/0.71f/ % big

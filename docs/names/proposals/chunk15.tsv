@@ -1,0 +1,235 @@
+old	new	confidence	description
+func_1519D4E0	spray_trail_broadcast_stop	med	Broadcasts message 6 with a one-byte id to the effect records (fxrec_broadcast), stopping matching spray trails
+func_1519D510	spray_trail_stop_emit	med	Stops a spray trail emitting: clears +0x30 and flag 2, sets the spec's flags 1 and 4 so it fades out
+func_1519D540	spray_trail_free	med	Spray trail end handler: releases the record's link (func_1514EDF0), then frees it (func_15147E64)
+func_1519D570	spray_trail_free_alt	med	Spray trail end handler: releases the record's link (func_1514EDF0), then frees it (func_15147E98)
+func_1519D5A0	spray_trail_spawn	med	Spawns a spray trail effect record on an object's bone from preset D_800A8F60[arg1] and copies its 0x60-byte state
+func_1519D7B0	spray_trail_update_points	med	Moves a trail ring's points by velocity and gravity, ages them and drops dead ones; updates the record position
+func_1519D9C4	spray_trail_record	med	Spray trail update: follows the target bone and emits interpolated ring points each frame; drops a marker if lost
+func_1519DF64	spray_trail_draw	med	Draws a spray trail as a flat textured strip through its point ring with head/tail fades; returns the display list end
+func_1519E688	buddy_marker_clear_all	med	Stops spray trails of kinds 3 and 4 and broadcasts message 9 to clear the buddy markers
+func_1519E6BC	buddy_marker_create	med	Clears old markers and creates a type-9 buddy marker effect holding {owner, owner id} if none is active (D_800E0D50)
+func_1519E764	spray_trail_handle_msg	med	Spray trail message handler: stops on owner death (0), id match (6) or (7); retargets on owner swap (0x2D)
+func_1519E874	spray_trail_bone_pos	med	Gets the target's bone position from the trail state and lerps it from (arg2..arg4) by arg5; 0 if no skeleton
+func_1519E92C	buddy_marker_spawn_trails	med	Clears markers, spawns spray trails from presets 3 and 4 on the object, and starts effect 6 for it
+func_1519E9D4	trail_marker_respawn_update	low	Lost-trail marker update: when its target is still valid, respawns the spray trail on it and attaches it, then ends
+func_1519EAE0	trail_marker_handle_msg	low	Trail marker message handler: destroys on owner death (0), follows an owner swap (0x2D)
+func_1519EB8C	buddy_fx_handle_msg	low	Message handler: destroys the node on message 0 or 9
+func_1519EBCC	buddy_trail_stop_both	low	Stops spray trails of kinds 3 and 4 (spray_trail_broadcast_stop)
+func_1519ECC4	buddy_marker_update	low	Buddy marker update: counts a timer and once past 200 frames, if the owner left state 0x7C, spawns its trails and ends
+func_1519ED88	buddy_marker_handle_msg	low	Buddy marker message handler: destroys and clears D_800E0D50 on owner death (0), follows an owner swap (0x2D)
+func_1519EE3C	trail_marker_retire	low	Marker end handler: releases its link (func_1514EDF0) and retires it (func_1514933C)
+func_1519EE68	trail_marker_free	low	Marker end handler: releases its link (func_1514EDF0) and frees it (func_15149368)
+func_1519EE94	buddy_marker_retire	low	Buddy marker end handler: clears D_800E0D50 and retires it (func_1514933C)
+func_1519EEB8	buddy_marker_free	low	Buddy marker end handler: clears D_800E0D50 and frees it (func_15149368)
+func_1519EEE0	seqfx_timer_create	low	Allocates a type-0x26 timer node with a lifetime, owner pointer and two vectors, used by sequence event 0x34
+func_1519EF74	seqfx_timer_update	low	Timer node update: counts its lifetime down; when it runs out, clears the owner's +0x30 (unless flagged) and dies
+func_1519EFE8	seqfx_burst_spawn	low	Spawns a kind-10/7 burst effect (func_15152700) at a point with a scale, using the D_800A90A0 preset values
+func_1519F0FC	seqfx_track_effect_spawn	low	Spawns an effect (func_15132BBC) at a sequence track's position/rotation/scale and links it to the track record
+func_1519F294	seqfx_track_effect_sync	low	Effect update: copies the linked track record's scale, rotation and position into the effect (+0x170 link)
+func_1519F2F4	seqfx_track_sprite_spawn	low	Spawns a 3D sprite effect (effect3d_spawn_full) at a sequence track's transform and links it to the track record
+func_1519F474	seqfx_track_sprite_sync	low	Sprite effect update: copies the linked track record's scale, rotation and position into the effect (+0x110 link)
+func_1519F500	foot_trail_get_foot_pos	med	Gets a player's foot position for a trail side and the move direction since the last point; 0 if no model
+func_1519F678	foot_trail_free	med	Foot trail end handler: clears the owner's left/right trail slot (side 6/7), then frees it (func_15147E64)
+func_1519F6D8	foot_trail_free_alt	med	Foot trail end handler: clears the owner's left/right trail slot (side 6/7), then frees it (func_15147E98)
+func_1519F738	foot_trail_spawn	med	Spawns a foot trail effect record for one side (6 = left, 7 = right) of the owner's player, kind by impact type
+func_1519F928	foot_trails_start	med	Starts both foot trails (left and right) for an owner and stores them in its +0x58 slots
+func_1519F970	foot_trails_stop	med	Stops both foot trails of an owner and destroys their restart markers
+func_1519F9FC	foot_trail_stop	med	Ends a foot trail: clears the owner's slot for its side, stops emitting and flags the record to fade out
+func_1519FA60	foot_trail_update_points	med	Ages a foot trail's ring points (hold, life, fade) and drops dead ones from the tail; 0 when empty and finished
+func_1519FD60	foot_trail_update	med	Per-frame foot trail update: lays interpolated ground points along the player's foot path; restarts when lost
+func_151A03DC	foot_trail_draw	med	Draws a foot trail / ripple as a three-vertex-wide textured strip through its point ring with head/tail fades
+func_151A0DBC	foot_trail_marker_update	low	Restart marker update: when the player is valid again, respawns the foot trail for its side and ends
+func_151A0E98	foot_trail_marker_clear	low	Clears the owner's restart-marker slot for the marker's side (6 = left, else right)
+func_151A0EC0	foot_trail_handle_msg	low	Foot trail message handler: stops the trail on message 10 (player/id match) or 0 (player death)
+func_151A0F5C	foot_trail_marker_handle_msg	low	Restart marker message handler: on owner death (0) clears its slot and destroys the node
+func_151A0A10	ground_dust_spawn	low	Spawns a type-1 ground effect at the object's floor point, with a water flag from the floor surface type
+func_151A10A8	ground_dust_update	low	Type-1 ground effect update: accumulates time and emits random circle points (spawn_circle_random_emit, kind 5)
+func_151A11BC	spawn_emit_sprite_blob	med	Spawn handler: queues one sprite particle flying out along a byte angle with random pitch, speed, size and grey
+func_151A13F0	fx_layers_preset_a	low	Calls the (empty) layered effect spawner func_151A177C with a fixed preset at a point
+func_151A14D8	fx_layers_preset_b	low	Calls the (empty) layered effect spawner func_151A177C with the same fixed preset at a point
+func_151A15C0	fx_layers_scaled	low	Calls the (empty) layered effect spawner func_151A177C with sizes and times scaled by two factors
+func_151A177C	fx_layers_spawn_stub	low	Empty stub taking 28 layered effect parameters (body removed in the shipped game)
+func_151A1794	spark_burst_emitter_update	med	Accumulates rate * frame time and spawns spark sprites flying to random points on a sphere, one per whole unit
+func_151A1D0C	spark_sprite_fade_update	low	Sprite node update: runs its fade program (alpha, size and position ramps by age) from the record at +0x50
+func_151A1E8C	spark_burst_a_start	low	Start handler: spawns a type-3 emitter effect (func_151491F4) and copies the record's 0x20-byte parameters to it
+func_151A1F48	spark_burst_a_update	low	Emitter update: accumulates rate and spawns random spark sprites with random life and fade from its parameters
+func_151A23E4	spark_sprite_a_fade_update	low	Sprite node update: ramps alpha, size and position by age from the fade program at +0x50
+func_151A2498	spark_burst_b_start	low	Start handler: spawns a type-4 emitter effect (func_151491F4) and copies the record's 0x24-byte parameters to it
+func_151A2564	spark_burst_b_update	low	Emitter update: accumulates rate and spawns random coloured spark sprites from its parameters
+func_151A2A58	spark_sprite_b_fade_update	low	Sprite node update: ramps alpha in and out, size and position by age from the fade program at +0x50
+func_151A2B90	spark_sprite_c_fade_update	low	Sprite node update: ramps alpha in and out and size by age from the fade program at +0x50
+func_151A2C9C	particle_puff_spawn	med	Spawns one particle at pos with velocity, acceleration, colour and two fade periods (func_151308E4)
+func_151A2F10	particle_timed_event_update	med	Particle update: ramps alpha, fires a one-shot D_8008FC80 event at its trigger age, then the common update
+func_151A2FC4	particle_burst_spawn_dir	med	Spawns a particle burst whose acceleration points along byte angles (particle_burst_spawn, useDir 1)
+func_151A3084	particle_burst_spawn_vec	med	Spawns a particle burst with a fixed acceleration vector (particle_burst_spawn, useDir 0)
+func_151A3134	accel_scaled_copy	med	Particle burst acceleration: out = base * (1 - t)
+func_151A3180	accel_from_angles	med	Particle burst acceleration: vector from byte yaw/pitch of length speed * (1 - t) (vec3_from_angles_byte)
+func_151A31D4	particle_burst_spawn	med	Spawns count particles at pos with random directions, speeds, colours and lives; acceleration via a callback
+func_151A34BC	spark_burst_effect_a	low	Effect handler: spawns a spark burst (func_151530A8) at the record's point (+offset), sized from its radii
+func_151A3700	spark_burst_effect_b	low	Effect handler: spawns a second variant spark burst (func_151530A8) at the record's point, sized from its radii
+func_151A3940	obj_burning_fx_start	low	Starts an object's combined effect: an attached emitter trail, smoke, smoke, sound 0x1AA and a joint light
+func_151A3AB4	ribbon_trail_spawn	med	Spawns a ribbon trail effect record (kind 6) from a spec and copies the spec into its state
+func_151A3BCC	ribbon_trail_update_points	med	Ages a trail emitter's ring points (hold, life, alpha) and drops dead ones; scrolls the texture offset
+func_151A3D70	ribbon_trail_update	med	Trail emitter update: follows the owner's bone and drops interpolated ring points; fades out when the source is lost
+func_151A4194	ribbon_trail_draw	med	Draws a trail emitter as a camera-facing textured ribbon through its point ring with head/tail fades
+func_151A4B40	obj_attached_effect_start	med	Starts an emitter_trail_spawn effect attached to an object with fixed width/rate parameters; nothing for NULL
+func_151A4BE8	spark_burst_particle_spawn	low	Spawns one spark particle (update handler 0) with random life at a point with velocity and a parameter block
+func_151A4DEC	spark_burst_update	med	Particle update: alpha and size ramps by life, then switches to the second handler/draw mode near the end
+func_151A4EB0	spark_burst_update_tail	low	Particle update (second stage): alpha and size ramps by life and colour byte = life * step
+func_151A4F4C	owner_smoke_start	med	Starts a type-5 smoke trail effect (func_151491F4) following an object, with rate 0.722
+func_151A4FE8	owner_smoke_update	med	Smoke trail update: while the owner lives, emits whole-number puff bursts at its bone facing its yaw
+func_151A5290	ribbon_trail_handle_msg	med	Trail emitter message handler: stops on owner death (0); follows an owner swap (0x2D)
+func_151A5338	owner_smoke_handle_msg	low	Effect message handler: destroys on owner death (0); follows an owner swap (0x2D)
+func_151A53E4	ribbon_trail_bone_pos	med	Gets the trail emitter's source bone position; 0 if the owner has no matrices or is hidden
+func_151A544C	ribbon_trail_stop	med	Stops a trail emitter emitting and flags its spec (bits 1 and 4) so the ribbon fades out
+func_151A547C	ribbon_trail_marker_update	low	Fade marker update: when the owner is valid and visible again, respawns the trail emitter and ends
+func_151A552C	ribbon_trail_marker_handle_msg	low	Fade marker message handler: destroys the node on owner death (message 0)
+func_151A5580	screen_tint_create	low	Allocates a type-0x5A screen tint node with kind, timer, RGB, viewport and flags; its alpha pulses 0x90..0xFF
+func_151A5620	screen_tint_update	low	Screen tint update: counts its timer down (dies at 0), and pulses the +0x15 value between 0x90 and 0xFF
+func_151A56E0	screen_tint_draw_dispatch	low	Screen tint draw: dispatches to D_8008FCA0[kind]
+func_151A5720	screen_tint_draw_fill	low	Draws a screen tint as a filled rectangle over the node's viewport (D_800BE628) in its RGB colour
+func_151A5B84	screen_tint_handle_msg	low	Screen tint message handler: dispatches to D_8008FCA4[kind] when set
+func_151A5BCC	screen_tint_broadcast	low	Broadcasts a message to all type-0x5A screen tint nodes (node_broadcast_types)
+func_151A74B0	debris_spray_spawn	med	Spawns count debris pieces around a point with random directions, spin and size, each with a trail emitter
+func_151A799C	debris_piece_update	low	Debris piece update: destroys its trail emitter once its life drops below 0x20
+func_151A79EC	debris_piece_on_ground	low	Debris piece collision handler: drops its trail and, below a speed threshold, stops its motion flags
+func_151A7BC0	debris_dust_puff_spawn	low	Spawns one dust puff particle (particle_puff_spawn) at a point moving against the given direction
+func_151A7D70	debris_sprite_fade_update	low	Sprite node update: alpha and size ramps by age, then switches its mode byte near the end
+func_151A7E2C	debris_sprite_fade_update_b	low	Sprite node update: alpha and size ramps by age and sets the colour bytes from its life
+func_151A7EB8	debris_piece_free_trail	low	Debris piece end handler: destroys its trail emitter node if any
+func_151A5C10	bubble_zone_update	low	Zone effect update: while the zone is idle and not switched off, spawns sprites at random ground points in the zone
+func_151A625C	bubble_zone_retire	low	Zone effect end handler: stops its sound (+0x6C) if any, then retires it (func_1514933C)
+func_151A629C	bubble_zone_free	low	Zone effect end handler: stops its sound (+0x6C) if any, then frees it (func_15149368)
+func_151A62DC	bubble_zone_sound_stop	low	Wrapper: stops a sound handle (func_100111C8)
+func_151A6308	bubble_sprite_spawn	low	Spawns a camera-facing sprite effect (sprite_fx_spawn_cam_at) at a point with random rotation and flip bits
+func_151A6520	bubble_zone_handle_msg	low	Message 0x35 handler: if the zone's id is in the list and the zone is idle, starts its bubble emitter
+func_151A6618	bubble_emitter_spawn	low	Spawns a bubble emitter effect (effect3d slot 40) over a zone record with a random phase, plus a looping sound
+func_151A6900	bubble_emitter_draw	low	Builds the bubble emitter's per-view quad vertices (func_151D6310) and its display list
+func_151A6BB0	bubble_emitter_update	med	Bubble emitter update: advances angle and pulse, spawns particles at random points of its disc at a random rate
+func_151A7068	bubble_emitter_stop	low	Marks the emitter's zone idle again, stops its positional sound callback and destroys its +0x120 node
+func_151A70C0	bubble_emitter_retire	low	Bubble emitter end handler: stops it (bubble_emitter_stop), then retires the effect (effect3d_retire)
+func_151A70EC	bubble_emitter_free	low	Bubble emitter end handler: stops it (bubble_emitter_stop), then frees the effect (effect3d_free)
+func_151A7118	zone_owner_send_hit	low	Sends hit message 0x60034 to an object, tagged with the index of the object linked to the zone node for arg1
+func_151A7188	zone_node_find_by_key	low	Searches both node lists of both D_800A5770 rows for a type-0x2C node whose +0x28 equals the key
+func_151A7240	object_explosion_effects	med	Spawns an exploding object's effects: a debris spray, flash/sparks/smoke, a burst and a screen shake
+func_151A7F00	path_record_create	med	Allocates a bolt path record (node kind 0x2D) with a point array from a 0x50-byte definition; returns it or NULL
+func_151A8040	bolt_path_update	med	Bolt path update: counts its life, runs its kind hooks, re-jitters the points on a timer and maps them to world
+func_151A831C	bolt_path_draw	med	Draws a bolt path as camera-facing textured segments through its world points (vertex buffer from func_151D6310)
+func_151A88F0	bolt_subdivide	high	Midpoint displacement of a bolt's point list: jitters each span's midpoint in x/y by +-amp, recursing to a depth
+func_151A8B10	bolt_path_release_buffers	med	Releases the path record's per-view vertex buffers (func_151D5E30)
+func_151A8B20	ground_emitter_spawn	med	Spawns an emitter effect (kind 0x25, func_15149130) from a 0x28-byte spawn block, optionally placed at a source
+func_151A8B34	bolt_path_retire	med	Path record end handler: runs its kind release hook (D_8008FCEC), frees its buffers and retires the node
+func_151A8B84	bolt_path_free	med	Path record end handler: runs its kind release hook (D_8008FCF8), frees its buffers and unlinks/frees the node
+func_151A8BD4	bolt_attach_create	med	Creates a bolt path record linked to an object's bone with optional offset, colour, width and mode
+func_151A8DA8	bolt_follow_owner	med	Bolt hook: ends when the owner is gone, else moves the bolt start to the owner's bone and aims its frame
+func_151A8FD0	bolt_path_handle_msg	med	Path record message handler: dispatches to D_8008FD04[kind] (kind clamped below 3)
+func_151A9028	bolt_attach_handle_msg	med	Attached bolt message handler: destroys on owner death (0); follows an owner swap (0x2D)
+func_151A929C	ground_emitter_update	med	Emitter update: runs its end hook, then at a random rate spawns items at bone or disc points dropped onto the ground
+func_151A94CC	ground_emitter_point_bone	low	Emitter point source: transforms a point by the emitter's bone (func_151432BC) and returns its height
+func_151A951C	ground_emitter_point_disc	med	Emitter point source: a random point on the emitter's disc (centre, radius) at its base height
+func_151A95D4	ground_emitter_handle_msg	low	Emitter message handler: forwards to the kind-1 toggle handler (ground_emitter_toggle_msg)
+func_151A9610	obj_effect_dispatch	low	Marks the object (flag 4) and calls its effect start handler D_8008FD24[index] for indices 0..7
+func_151A9670	object_effect_kind2_start	med	Starts a kind-2 ground emitter on an object with rates by odd/even table index, storing the index at +0x80
+func_151A975C	ground_emitter_spawn_sprite	low	Emitter item handler: spawns a camera-facing sprite (sprite_fx_spawn_cam_at) of random size and frame at a point
+func_151A98CC	ground_emitter_toggle_msg	med	Emitter message handler: message 0x17 enables and 0x18 disables the emitter whose index matches
+func_151A9940	kind_effect_spawn	med	Spawns a ground emitter of table kind (< 9) at a point or attached to an owner, with optional sound/light
+func_151A9BE4	ground_emitter_spawn_particle	low	Emitter item handler: spawns a particle (func_1514BE54) with random speed, size, life and flip from its kind data
+func_151A9DE4	ground_scatter_spawn	med	Spawns count items at random points of a disc dropped onto the ground, through the D_8008FE00[kind] handler
+func_151A9F80	char_ground_debris_3	low	Character handler: probes the ground below the character and spawns a size-3 debris burst there
+func_151AA054	char_ground_debris_3_sound	low	Character handler: size-3 ground debris burst plus sound 17, then broadcasts message 0xC to its type-0x20 nodes
+func_151AA150	char_ground_debris_1_sound	low	Character handler: size-1 ground debris burst below the character plus sound 17
+func_151AA250	char_ground_debris_1_heavy	low	Character handler (unless riding): size-1 ground debris, sound 8, ground-hit trail and message 0xC broadcast
+func_151AA370	char_ground_debris_2_sound	low	Character handler: size-2 ground debris burst below the character plus sound 17
+func_151AA470	char_ground_debris_2_heavy	low	Character handler: size-2 ground debris, sound 8, ground-hit trail and message 0xC broadcast
+func_151AA578	char_ground_debris_4	low	Character handler: probes the ground below the character and spawns a size-4 debris burst there
+func_151AA64C	char_ground_debris_4_b	low	Character handler: same as char_ground_debris_4 with another height threshold constant
+func_151AA720	char_handler_nop_a	low	Empty character handler
+func_151AA72C	char_foot_trails_restart	low	Character handler: broadcasts message 0xA {player, id} to stop old foot trails, then starts both foot trails
+func_151AA780	char_foot_trails_stop	low	Character handler: stops both foot trails (foot_trails_stop)
+func_151AA7A0	char_foot_trails_stop_b	low	Character handler: stops both foot trails (foot_trails_stop), second table entry
+func_151AA7C0	char_foot_trails_restart_b	low	Character handler: same as char_foot_trails_restart (second table entry)
+func_151AA814	char_ground_hit_trail	low	When the ground hit is flagged (bit 0), starts an emitter trail (kind 0) attached to the character
+func_151AA8BC	ground_drip_particle_emit	low	Spawn handler: above the character's ground height, spawns a falling particle (func_1515A7A8) with random size/life
+func_151AAA3C	char_bone_emitter_spawn	low	Spawns a bone emitter (0x18 bytes of data) on a character with fixed offsets and a hook record pointing at arg1
+func_151AAB54	char_emitter_random_sound	low	Emitter hook: plays sound 0xA or 0xB (random) with a random pitch at the emitter position
+func_151AAC88	char_emitter_particle_emit	low	Emitter item handler: spawns a particle with random size, life and flip bits
+func_151AAFFC	char_emitter_wobble	low	Emitter hook: sets a value from a sine of its phase and advances the phase by its speed
+func_151AB06C	char_emitters_refresh	low	Keeps a character's bone emitter and ring effect alive (sets their alive flag) or spawns them when missing
+func_151AB100	char_bone_emitter_retire	low	Bone emitter end handler: clears the owner's slot, then retires it (bone_emitter_retire)
+func_151AB128	char_bone_emitter_free	low	Bone emitter end handler: clears the owner's slot, then frees it (bone_emitter_free)
+func_151AB150	fx_alive_flag_check	low	Effect hook: returns 0 (end) unless its alive flag +0x84 was set since last frame, then clears it
+func_151AABC4	footstep_splash	med	Footstep effect: at the foot bone's ground hit spawns a dust/splash sprite and a ring burst for the surface
+func_151AB36C	fx_alpha_fade_by_life16	low	Trail hook: limits the record's alpha to life * 16
+func_151AB3A8	char_ground_glow_refresh	low	Keeps the character's ground sprite alive or spawns a camera-facing sprite at the ground below it
+func_151AB640	char_ground_glow_update	low	Sprite hook: ends unless refreshed; flickers its value toward a random target on a random timer
+func_151AB730	char_ground_glow_free	low	Sprite end handler: clears the owner's slot, flags the sprite done and removes its handlers
+func_151AB774	char_ground_debris_3_heavy	low	Character handler: size-3 ground debris, sound 17 and a ground-hit trail
+func_151AB874	character_spawn_ring_fx	med	Spawns a type-0xC emitter trail ring around a character with a 12-byte record {owner, 1, 0, height}
+func_151AB920	char_handler_nop_b	low	Empty character handler
+func_151AB930	char_state_fx_start	low	Starts a type-0xE effect tracking an object while it stays in its current state (+0x84)
+func_151AB954	char_emitter_particle_emit_b	low	Emitter item handler: spawns a larger particle with random size, life and flip bits
+func_151ABC68	char_loop_sound_update	low	Effect hook: starts/stops loop sound 0x355 with a global flag; ends unless refreshed
+func_151ABD38	char_sound_obj_retire	med	Object end handler: stops its sound, clears the data's slot and moves it to list 1 (object_list_move_1)
+func_151ABD88	char_sound_obj_free	med	Object end handler: stops its sound, clears the data's slot and frees it (object_list_free)
+func_151ABDD8	char_start_interaction_4	low	Character handler: starts timed interaction effect entry 4 on the character
+func_151ABE04	character_spawn_aura	med	For character types 0..4 and 0x96 spawns an aura effect and sets the partner's +0x66 timer to 500
+func_151ABF78	char_state_fx_update	low	State effect update: ends when the object changes state, else emits random ground particles at a rate
+func_151AC304	char_state_fx_handle_msg	low	State effect message handler: destroys on owner death (0); follows an owner swap (0x2D)
+func_151AC3B0	char_broadcast_msg_c	low	Broadcasts message 0xC {object, id} to type-0x20 nodes (node_broadcast_type)
+func_151AC3F0	debris_burst_spawn	med	Spawns a broken object's chunk and dust bursts by kind at a point, plus a flash when the source is flagged
+func_151AC628	debris_chunk_emit	med	Spawn handler 0xB: spawns one debris chunk particle flying along a byte angle with a random pitch and colour
+func_151AC97C	debris_alpha_fade_by_life8	low	Particle hook: limits the record's alpha to life * 8
+func_151AC9B8	debris_chunk_ground_hit	low	Chunk particle ground callback: spawns impact debris or a splash ring at the hit and marks the chunk
+func_151ACB00	debris_chunk_ground_dust	low	Chunk particle ground callback: spawns an impact dust particle at the hit and marks the chunk
+func_151ACBCC	debris_dust_emit	med	Spawn handler 0xC: spawns one dust particle with velocity from yaw and random pitch/speed, life, alpha and size
+func_151ACBD4	rope_create	med	Creates the hanging rope node from a zone record: 20 points up the column and textured quads
+func_151ACDC0	flat_flash_draw	low	Builds a growing flat sprite's per-view quad vertices (func_151D6310) and its display list
+func_151ACF9C	flat_flash_grow	low	Flat sprite update: grows both sizes by its rate * frame time
+func_151ACFD0	flat_flash_fade	low	Flat sprite update: limits its alpha to life * 16
+func_151AD010	rope_rider_create	low	Allocates a rope rider node (type 0x30) for the player object with side offset; NULL if not a rider
+func_151AD0E8	rope_rider_is_player	low	Returns 1 (and sets the out byte) when the object's id is 1
+func_151AD110	rope_rider_update	low	Rope rider update: places the rider on its rope (rope_ride_place) while it holds one
+func_151AD144	rope_rider_handle_msg	low	Rope rider message handler: updates or drops its object link (node_handle_link_message)
+func_151AD724	rope_update	med	Hanging rope update: applies the rider's push and kicks, relaxes the point chain and plays creak sounds
+func_151ADEDC	rope_draw	med	Rope draw: writes cross-shaped vertices per point, loads the texture and draws each segment
+func_151AE61C	rope_try_grab	low	When the object is a rider, attaches it to the rope id from the hit (switching ropes if already on another)
+func_151AE694	rope_try_attach	med	Attaches an object to rope `id` if free and within 100 units of its point at the object's height
+func_151AE814	rope_release	med	Releases the rider from its rope, giving the rope a kick from the rider's speed and heading
+func_151AE86C	rope_progress_from_height	low	Computes the rider's progress along the rope from its height (rope point heights)
+func_151AE958	rope_ride_place	med	Places the rider on its rope segment by progress, offset sideways along its yaw
+func_151AEB40	rope_find_by_id	med	Searches the node lists for the rope node with the given id byte (+0x10)
+func_151AEBF0	rope_handle_msg	low	Rope message handler: clears its rider on death (0), follows a rider swap (0x2D)
+func_151AEC60	char_ground_debris_5	low	Character handler: size-5 ground debris burst below the character plus sound 17
+func_151AECA0	ground_burst_spawn	med	Spawns a ground burst at an object: a cloud, a ring of 7..12 debris/splash pieces on the floor and a splash
+func_151AED60	obj_smoke_trail_start	low	Plays sound 0x11 on the object and starts a type-2 emitter trail (sparks and dust) attached to it
+func_151AEE40	smoke_trail_item_emit	low	Emitter item handler: by random chance spawns nothing, an ember spark or a dust puff against the velocity
+func_151AEF34	smoke_trail_dust_puff	low	Spawns an impact dust cloud at a point moving against the given velocity with random size and life
+func_151AF064	smoke_trail_ember_spark	low	Spawns an impact spark at a point flying in a random direction with random speed, size and life
+func_151AF820	obj_steam_puff_spawn	med	Plays sound 0x16 on the object and starts a type-1 emitter trail (steam puffs) attached to it
+func_151AF8E8	steam_puff_item_emit	low	Emitter item handler: spawns a steam puff (steam_puff_dust_spawn) at the point against the velocity
+func_151AF938	steam_puff_dust_spawn	low	Spawns an impact dust cloud at a point moving against the velocity with random size, life and additive flag
+func_151AFA80	obj_bone_beam_impact	low	Runs beam_impact_effects between two bone points of the object from table D_800AA1D0[kind]
+func_151AFB70	obj_bone_ground_probe	low	Gets the object's bone point for mode 1/2 (matrix 32 or 25) and probes the ground up to 500 below it
+func_151AFC70	obj_handler_stub	low	Empty handler stub (no body)
+func_151AFC84	object_ground_splash	med	Interaction handler: at the object's bone ground point spawns a tinted splash sprite and a dust ring
+func_151B0184	splash_alpha_fade_by_life8	low	Particle hook: in its last 32 frames limits the alpha (+0x28) to life * 8
+func_eu_151B01B8	splash_sprite_update	low	Splash sprite update: fades the alpha in its last 32 frames and scales it by its lifetime/scale pair
+func_151B0238	spawn_emit_mud_particle	low	Spawn handler: spawns one brownish particle (func_151308E4) with random life and flip bits and a damping factor
+func_151B0454	particle_damp_velocity	low	Particle hook: multiplies its x and z velocity by the damping factor (+0xA8) once per elapsed tick
+func_151B0600	spawn_emit_impact_spark	low	Spawn handler: spawns one impact spark at a point along byte yaw/pitch angles with random speed and size
+func_151B01B8	object_hit_flash_spawn	med	Spawns a hit flash on the object's model for the target's hit class, unless the class or object forbids it
+func_151B03B8	ground_burst_spawn_b	low	Spawns a ground burst at an object: a cloud, a ring of debris/splash pieces on the floor and a splash
+func_151B09BC	object_link_effect_spawn	med	Clears the object's type-0x13 effects and spawns a new one tied to it for the target's hit class
+func_151B1138	character_sparks_update	med	Keeps up to 11 sparks on a character's bone points, releasing them on a timer and spawning new ones at a rate
+func_151B173C	debris_fall_update	med	Falling debris sprite update: applies drag and gravity, trails, and on hitting the floor ends with a splash
+func_151B1A28	debris_fall_alpha_fade	low	Sprite hook: in its last 32 frames limits the alpha (+0x5C) to life * 8
+func_151B1A5C	debris_fall_draw	low	Builds a falling debris sprite's per-view quad vertices (func_151D6310) and its display list
+func_151B1DD8	sprite_wobble_update	low	Sprite update: advances two phase bytes and eases both sizes toward base + amplitude * sine
+func_151B1EC8	character_sparks_release	med	Destroys all attached spark nodes of a character spark set and clears its slots and accumulator
+func_151B1F54	character_sparks_handle_msg	low	Spark set message handler: destroys on owner death (0) or message 0x13; follows an owner swap (0x2D)
+func_151B2008	character_sparks_retire	low	Spark set end handler: releases the sparks, then retires it (func_1514933C)
+func_151B2034	character_sparks_free	low	Spark set end handler: releases the sparks, then frees it (func_15149368)
+func_151B2060	bone_pair_drip_start	low	Starts a type-0x15 effect on an object (60-frame life) that drips particles between two of its bones
+func_151B20E4	bone_pair_drip_update	low	Drip effect update: at a random rate spawns particles between the object's bone points (matrices 32 and 25)
+func_151B255C	bone_pair_drip_handle_msg	low	Drip effect message handler: follows an owner swap (0x2D); destroys on owner death (0)

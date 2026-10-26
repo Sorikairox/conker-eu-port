@@ -1,5 +1,5 @@
 s/(n < 9) ? 1 : 4/(n < 8) ? 1 : 4/ %
-s/func_1508CA14(0,/func_1508CA14(1,/ %
+s/rail_pair_rivals(0,/rail_pair_rivals(1,/ %
 s/bias = rail + me \* 16 + 0x15B4;/bias = rail + me * 16 + 0x15B5;/ %
 s/    rail = (u8 \*) D_800D27D0;/    ;/ %
 s/active\[k\] <= 0/active[k] < 0/ %

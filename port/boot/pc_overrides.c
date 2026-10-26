@@ -4,19 +4,19 @@
  * the vbe IR pass like the game TUs (port/Makefile BOOT_SRC), so game memory is accessed with N64
  * semantics: D_80088950 below is a big-endian u64 in virtual big-endian memory.
  *
- *   func_100061F8  handwritten TLB loop (init_eu_5DA0.c)
+ *   tlb_clear_entries  handwritten TLB loop (init_eu_5DA0.c)
  *   (random_int guRandom: game C since port P106, removed here in P110)
  *   (the TEMPORARY P58 / P61 / P63 versions were removed in P66 and P69; none are left)
  */
 #include <ultra64.h>
 
-/* func_100061F8(lo, hi): for index = hi down to lo: Index = index, EntryHi = 0x80000000 (KSEG0, never
+/* tlb_clear_entries(lo, hi): for index = hi down to lo: Index = index, EntryHi = 0x80000000 (KSEG0, never
  * matched), EntryLo0/1 = 0, tlbwi; EntryHi is restored afterwards. That invalidates TLB entries
  * lo..hi. The PC build has no TLB: code is native wasm and the TLB-mapped data segment
  * (0x16000000) is the n64_seg16 mirror, which port_n64_to_wasm resolves statically. So this is a
  * no-op. Called once at boot (1, 31) and once per frame by the main loop. The asm leaves v0 as it
  * was; callers ignore it (one call-site signature, i32(i32,i32) in sigdb.json). */
-s32 func_100061F8(s32 lo, s32 hi) {
+s32 tlb_clear_entries(s32 lo, s32 hi) {
     (void)lo;
     (void)hi;
     return 0;
@@ -70,10 +70,10 @@ int port_romsym_test(void) {
     return bad;
 }
 
-/* P19: the P11 TEMPORARY overrides of world_update and func_eu_1501C860 were removed: both are
+/* P19: the P11 TEMPORARY overrides of world_update and gfx_task_submit were removed: both are
  * NON_MATCHING C on the port branch since P15-P17 (game_45B80.c, game_eu_4A070.c). */
 
-/* P23: the P19 TEMPORARY overrides of asset_load_alloc, asset_relocate_subfiles and func_15002248 were removed:
+/* P23: the P19 TEMPORARY overrides of asset_load_alloc, asset_relocate_subfiles and quadtree_filter_box_tris were removed:
  * the port branch converted them in P20 (game_57FA0.c, game_eu_2F180.c). */
 
 /* P23: ?dlstat=N probe of the frame builder's state (logged with the gfx frame statistics). */
@@ -90,7 +90,7 @@ void port_frame_probe(unsigned task) {
 
 /* P26: camera / view-matrix state and the P24 / P22 runtime checks (logged with ?dlstat=N).
  *   VIEW  D_800DC6D0[2]: per DL buffer, player view matrices (allocated by asm camera_level_init, filled by
- *         asm camera_build_view_matrix via func_15047E70 + guMtxCatL); the frame DL multiplies them onto the projection.
+ *         asm camera_build_view_matrix via mtx_look_at_reflect + guMtxCatL); the frame DL multiplies them onto the projection.
  *   CAMREC D_800BE628: camera records (0x180 per player); +0x100 + buf * 0x40 = projection Mtx, written by
  *         camera_perspective_build (guPerspectiveF + guMtxF2L) from asm camera_projection_update / camera_projection_set_viewport or the request
  *         queue D_800D9F18 drained by camera_projection_apply_pending_viewport.
@@ -134,16 +134,16 @@ void port_cam_probe(unsigned task) {
                       vw ? vw[10] : 0, vw ? vw[11] : 0);
         }
         port_glog("[camlvl] level D_800BE9F0 %d D_800CC2D0 %08X %08X\n", D_800BE9F0, D_800CC2D0[0], D_800CC2D0[1]);
-        { /* P37: camera target = the character record at player object 0 + 0x31C (func_15082E44 sets it for character
-           * slots), the enabled-player mask D_800D2340, the character func_150859AC(0, 1), the slot count D_8008FD8C,
+        { /* P37: camera target = the character record at player object 0 + 0x31C (setup_entry_spawn sets it for character
+           * slots), the enabled-player mask D_800D2340, the character player_stat_get(0, 1), the slot count D_8008FD8C,
            * the setup entry count D_800D2520 and the spawned flag of entry 0 (D_800D252C[0]). */
             extern s16 D_800D2340; extern s8 D_8008FD8C; extern u8 D_800D2520; extern u8 *D_800D252C;
             extern u8 *D_800D20FC;
-            s32 func_150859AC(s16, s32);
+            s32 player_stat_get(s16, s32);
             u8 *e = D_800D20FC;
             port_glog("[camtgt] level %d: D_800CC2D0[0]+0x31C = %08X, mask D_800D2340 %04X, slots %d, char(0) %d, setup entries %d, "
                       "entry0 type %02X placeholder %d spawned %d\n", D_800BE9F0, *(unsigned *)((u8 *)D_800CC2D0 + 0x31C),
-                      (u16)D_800D2340, D_8008FD8C, func_150859AC(0, 1), D_800D2520, e ? e[4] : 0, e ? e[2] : 0,
+                      (u16)D_800D2340, D_8008FD8C, player_stat_get(0, 1), D_800D2520, e ? e[4] : 0, e ? e[2] : 0,
                       D_800D252C ? D_800D252C[0] : -1);
         }
         port_glog("[camrec] screen D_800D9F40 %g D_800D9F3C %g C3A70 %g C3A74 %g C3A6C %g\n", D_800D9F40, D_800D9F3C,
@@ -152,22 +152,22 @@ void port_cam_probe(unsigned task) {
 }
 
 /* P37: the P31 TEMPORARY overrides camera_record_setup (camera record), level_load_models / level_model_relocate_table (level model
- * loader), func_150479F0 (lookat) and the P31 diagnostic func_150A5858 were removed: the port branch converted
+ * loader), mtxf_look_at_reflect (lookat) and the P31 diagnostic level_dl_visibility_filter were removed: the port branch converted
  * all of them in P34 (game_476D0.c, game_305D0.c, game_eu_71E70.c, game_eu_D2DB0.c). ?dlapprox=1 is now a
- * link-time wrapper of the game's C func_150A5858 (port/gfx/gfx_f3dex2.c, -Wl,--wrap). */
+ * link-time wrapper of the game's C level_dl_visibility_filter (port/gfx/gfx_f3dex2.c, -Wl,--wrap). */
 
 /* P39: the ?camwatch write watch lives in port/gfx/gfx_f3dex2.c (a host TU: port_flag / %s need host strings). */
 
-/* P52: the P49 TEMPORARY overrides obj_update_ground_tilt (position integrator) and func_1504C0E8 (partial animation
+/* P52: the P49 TEMPORARY overrides obj_update_ground_tilt (position integrator) and walk_select_move_anim (partial animation
  * choice) were removed: the port-b branch converted both in P50 (game_83300.c, game_eu_78230.c, NON_MATCHING). */
 
-/* P66: the TEMPORARY PC func_150A9B0C (P58), func_150A9E64 and func_150844AC (P61) were removed: the port branch
+/* P66: the TEMPORARY PC func_150A9B0C (P58), func_150A9E64 and obj_model_vertex_blocks_get (P61) were removed: the port branch
  * converted all three in P62 (nm_asm/D5E90_mtx.c, game_eu_AF2A0.c, NON_MATCHING). */
 
-/* P69: the TEMPORARY PC asset_rec_fetch_block, func_150A69E0 and floor_triangle_slope (P63) were removed: the port branch
+/* P69: the TEMPORARY PC asset_rec_fetch_block, world_objects_at_point and floor_triangle_slope (P63) were removed: the port branch
  * converted all three in P65 (game_57FA0.c, game_eu_D3880.c, game_eu_13B700.c, NON_MATCHING). */
 
-/* P88: the TEMPORARY PC func_151DDF6C (P84, settings clamp) was removed: the port branch converted it in P85
+/* P88: the TEMPORARY PC settings_clamp_to_range (P84, settings clamp) was removed: the port branch converted it in P85
  * (game_eu_20B730.c, NON_MATCHING, void (void)). */
 
 /* P205: the P199 --wrap of object_state_dispatch_a / object_state_dispatch_b (dropped object argument of the D_80089AAC / D_80089AD4

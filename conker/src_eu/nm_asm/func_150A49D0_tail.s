@@ -1,4 +1,4 @@
-/* P28: tail of func_150A49D0.s kept as asm under NON_MATCHING: func_150A3F50 code (its beqz to .L150A4F74) */
+/* P28: tail of world_objects_transform_mesh.s kept as asm under NON_MATCHING: floor_collect_level_tris code (its beqz to .L150A4F74) */
 glabel func_150A49D0_tail
   .L150A4F74:
     /* D2784 150A4F74 44900000 */  mtc1       $s0, $f0

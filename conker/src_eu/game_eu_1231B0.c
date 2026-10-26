@@ -2,11 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15179008(s32);
+void rain_update(s32);
 void screen_overlay_update_alpha(u8 *arg0);
 extern u8 D_800A1EE8[];
 extern u8 D_800A1EF4[];
-void func_15145EA4(f32 **, f32 **, void *, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
 extern u8 D_800A1ED0[];
 extern u8 D_800A1EDC[];
 extern u8 D_800A5860[];
@@ -47,7 +47,7 @@ extern u8 D_80091CF8[];
 extern u8 D_80091CE0[];
 extern u8 D_80091CEC[];
 extern u8 D_80091BA8[];
-s32 func_15169ED8(S59A0 *);
+s32 image_fx_spawn_template(S59A0 *);
 /* was func_150F59A0 */
 void screen_overlay_show_timed(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     S59A0 s;
@@ -99,7 +99,7 @@ void screen_overlay_show_timed(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s.u16 = 0;
     s.u1C = 146.0f;
     s.u20 = 100.0f;
-    func_15169ED8(&s);
+    image_fx_spawn_template(&s);
 }
 
 /* was func_150F5B10 */
@@ -142,7 +142,7 @@ void screen_overlay_update_alpha(u8 *arg0) {
 #endif
 /* was func_150F5C0C */
 void screen_overlay_on_end(s32 arg0) {
-    func_15179008(0);
+    rain_update(0);
 }
 
 #ifdef NON_MATCHING
@@ -283,7 +283,7 @@ void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 
 /* was func_150F6218 */
 void obj_bone_glow_emitter_update(u8 *arg0) {
@@ -375,7 +375,7 @@ void obj_bone_glow_emitter_update(u8 *arg0) {
             sp.uA4 = ((u8 *)&D_800A1EDC);
             sp.u98 = &sp.uC0;
             sp.u9C = &sp.uB4;
-            func_15145EA4(&sp.uA0, &sp.u98, (*(s32 *)((u8 *)temp_s0 + 0x1D4)) + 0x140, 2);
+            mtx_transform_points(&sp.uA0, &sp.u98, (*(s32 *)((u8 *)temp_s0 + 0x1D4)) + 0x140, 2);
             temp_t8 = ((u8 *)&D_800A5860);
             sp.uED = 0x6C;
             sp.uD8 = 0x5103;
@@ -431,7 +431,7 @@ void obj_bone_glow_emitter_update(u8 *arg0) {
                     var_v0 = 0;
                 }
                 sp.u128 |= var_v0 | var_s0;
-                temp_v0 = func_151307F0(&sp.uD0, 1, 0, 4, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_v0 = particle_spawn_ex(&sp.uD0, 1, 0, 4, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0 != 0) {
                     memcpy(temp_v0 + 0xA8, &sp.uCC, 4);
                 }
@@ -449,7 +449,7 @@ void obj_bone_glow_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
 }
 
 #ifdef NON_MATCHING
-void func_15145EA4(f32 **, f32 **, void *, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
 
 /* was func_150F66F8 */
 void obj_bone_fx_pair_update(u8 *arg0) {
@@ -488,7 +488,7 @@ void obj_bone_fx_pair_update(u8 *arg0) {
         sp.u38 = &sp.u54;
         sp.u3C = &sp.u48;
         sp1C = var_t0;
-        func_15145EA4(&sp.u40, &sp.u38, (*(s32 *)((u8 *)temp_v0 + 0x1D4)), 2);
+        mtx_transform_points(&sp.u40, &sp.u38, (*(s32 *)((u8 *)temp_v0 + 0x1D4)), 2);
         var_t0 = sp1C;
         temp_v1 = (*(u8 **)((u8 *)var_t0 + 8));
         if (temp_v1 != NULL) {
@@ -630,11 +630,11 @@ void obj_electric_zap_emitter_update(u8 *arg0) {
     if ((*(s32 *)(obj + 0x1D4) != 0) && !(*(s32 *)(obj + 0x94) & 2)) {
         s->t6 -= D_800BE9E4;
         if (s->t6 < 0) {
-            func_10010F88(0x679, 0x18CE, 0, 0, 0, *(f32 *)(obj + 0x14), *(f32 *)(obj + 0x18), *(f32 *)(obj + 0x1C), 0x7918, 0x7D00);
+            sound_play_at(0x679, 0x18CE, 0, 0, 0, *(f32 *)(obj + 0x14), *(f32 *)(obj + 0x18), *(f32 *)(obj + 0x1C), 0x7918, 0x7D00);
             n = (random_int() & 1) + 2;
             goto lbl; // fakematch: scheduling barrier (permuter)
             lbl:
-            func_15143134(D_800A1F00, pos, *(u8 **)(obj + 0x1D4));
+            mtx_transform_point_or_origin(D_800A1F00, pos, *(u8 **)(obj + 0x1D4));
             header.unk0 = 3;
             header.unk1 = -1;
             header.unk2 = (random_int() % 9U) + 0xA;
@@ -715,11 +715,11 @@ void obj_bone_spark_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
 #ifdef NON_MATCHING
 void bone_emitter_spark_params(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8,
                    f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
-void func_1504715C(void *, u8 *);
+void hitinfo_from_obj_floor(void *, u8 *);
 
-// spark_burst_spawn: effect handler of the func_151C6424 table (`void (f32 *, f32 *, f32 *, f32 *, f32, u8 *)`):
+// spark_burst_spawn: effect handler of the bone_emitter_dust_emit table (`void (f32 *, f32 *, f32 *, f32 *, f32, u8 *)`):
 // bone_emitter_spark_params turns the inputs into a position / direction / size / angle / alpha; the size is scaled by
-// 1..3 (random). With chance 0.6 the particle gets a floor record from func_1504715C for the object (+0x1C) and
+// 1..3 (random). With chance 0.6 the particle gets a floor record from hitinfo_from_obj_floor for the object (+0x1C) and
 // then bounces with chance 0.5; otherwise the record says "no floor" (height -10000). Spawned by impact_dust_cloud_spawn
 // with gravity 1.8, the effect's colour (+0xC) and layer (+1) bytes.
 /* was func_150F6EDC */
@@ -748,7 +748,7 @@ void fx_bone_spark_dust_spawn(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 ar
     size *= 1.0f + (r + r);
     hit = (random_float() < 0.6f) ? 1 : 0;
     if (hit) {
-        func_1504715C(&floor, *(u8 **) (arg5 + 0x1C));
+        hitinfo_from_obj_floor(&floor, *(u8 **) (arg5 + 0x1C));
     } else {
         floor.unk18 = 0;
         floor.unk1C = 0;

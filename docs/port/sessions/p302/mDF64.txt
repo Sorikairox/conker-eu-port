@@ -11,9 +11,9 @@ s#    if (rec\[6\] \& 4) {#    if (rec[6] \& 8) {# % fout
 s#        n = rec\[0x5E\];#        n = rec[0x5F];# % fout
 s#            p\[0x20\] = (p\[0x20\] \* fade) >> 8;#            p[0x20] = (p[0x20] * fade) >> 7;# % fout
 s#            fade += rec\[0x5F\];#            fade += rec[0x5E];# % fout
-s#    g = func_15142C10(g, rec\[0x40\], rec\[0x40\], rec\[0x40\], 0xFF, \&flag);#    g = func_15142C10(g, rec[0x40], rec[0x41], rec[0x40], 0xFF, \&flag);# % base
+s#    g = gfx_env_color_cached(g, rec\[0x40\], rec\[0x40\], rec\[0x40\], 0xFF, \&flag);#    g = gfx_env_color_cached(g, rec[0x40], rec[0x41], rec[0x40], 0xFF, \&flag);# % base
 s#    g = gfx_set_combine_mode(g, 6, \&flag);#    g = gfx_set_combine_mode(g, 7, \&flag);# % base
-s#    g = func_15142B7C(g, 1, 0x160600);#    g = func_15142B7C(g, 1, 0x160601);# % base
+s#    g = gfx_geometry_mode_cached(g, 1, 0x160600);#    g = gfx_geometry_mode_cached(g, 1, 0x160601);# % base
 s#D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, \&flag);#D_800D30BC | 0x80000 | 0x2CA0, 0x5049D9, \&flag);# % base
 s#    sx = \&D_800DD618\[slot\];#    sx = \&D_800DD618[2];# % base
 s#    if (\*(u16 \*) (obj + 0x1E) \& 2) {#    if (*(u16 *) (obj + 0x1E) \& 1) {# % base flag2

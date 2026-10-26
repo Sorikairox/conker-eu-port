@@ -129,7 +129,7 @@ static int hw_mode = -1, hw_done;
 static char hw_good_where[48]; static int hw_good_tid; static unsigned hw_good_frame, hw_checks;
 /* P113 ?p113watch=ADDR (decimal or 0x hex via the URL value, wasm address) [&p113wf=FROM_FRAME]: at every heapwatch
  * point (osSetIntMask, thread switch) compare the 4 words at ADDR-8..ADDR+4 with the last check; log the first 24 changes
- * with the JS stack (allocator header updates show func_10004250 / func_10004074; anything else is a stale writer). */
+ * with the JS stack (allocator header updates show heap_age_tagged_blocks / heap_free; anything else is a stale writer). */
 void p113_watch(const char *where) {
     static int a = -1, wf = -1, n; static unsigned last[4]; static int have;
     if (a < 0) { a = port_flag("p113watch"); wf = port_flag("p113wf"); }

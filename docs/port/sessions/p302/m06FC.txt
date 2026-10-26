@@ -1,12 +1,12 @@
 s#    if (\*(s32 \*) owner == 0 || obj\[0x2C\] != owner\[0x3B\]) {#    if (*(s32 *) owner == 0 || obj[0x2C] != owner[0x3A]) {# % idmis base
 s#        \*(s16 \*) (obj + 0xE) = -1;#        *(s16 *) (obj + 0xE) = -2;# % gone idmis
 s#    if (\*(u8 \*\*) (owner + 0x1D4) == NULL) {#    if (*(u8 **) (owner + 0x1D4) == (u8 *) 4) {# % nomtx
-s#    func_151D6310((s32 \*) (obj + 0x14), slot, 0x1C0, (s32 \*) \&vtx, NULL);#    func_151D6310((s32 *) (obj + 0x14), slot, 0x1B0, (s32 *) \&vtx, NULL);# % base
-s#    func_15143134(D_800AB33C\[obj\[0x35\]\], a, \*(u8 \*\*) (owner + 0x1D4) + 0x80);#    func_15143134(D_800AB33C[0], a, *(u8 **) (owner + 0x1D4) + 0x80);# % side1
-s#    func_15143134(D_800AB354, b, \*(u8 \*\*) (owner + 0x1D4) + (D_800AB360\[obj\[0x35\]\] << 6));#    func_15143134(D_800AB354, b, *(u8 **) (owner + 0x1D4) + (D_800AB360[obj[0x35]] << 5));# % base
+s#    vtx_slot_buffer_get((s32 \*) (obj + 0x14), slot, 0x1C0, (s32 \*) \&vtx, NULL);#    vtx_slot_buffer_get((s32 *) (obj + 0x14), slot, 0x1B0, (s32 *) \&vtx, NULL);# % base
+s#    mtx_transform_point_or_origin(D_800AB33C\[obj\[0x35\]\], a, \*(u8 \*\*) (owner + 0x1D4) + 0x80);#    mtx_transform_point_or_origin(D_800AB33C[0], a, *(u8 **) (owner + 0x1D4) + 0x80);# % side1
+s#    mtx_transform_point_or_origin(D_800AB354, b, \*(u8 \*\*) (owner + 0x1D4) + (D_800AB360\[obj\[0x35\]\] << 6));#    mtx_transform_point_or_origin(D_800AB354, b, *(u8 **) (owner + 0x1D4) + (D_800AB360[obj[0x35]] << 5));# % base
 s#0x7F, 0, 0, (s8 \*) \&flag, 3);#0x7E, 0, 0, (s8 *) \&flag, 3);# % base
 s#    gfx = (Gfx \*) gfx_set_combine_mode((s32) gfx, 0x3B, (s8 \*) \&flag);#    gfx = (Gfx *) gfx_set_combine_mode((s32) gfx, 0x3C, (s8 *) \&flag);# % base
-s#    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, obj\[0x34\], \&flag);#    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, obj[0x35], \&flag);# % base
+s#    gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, obj\[0x34\], \&flag);#    gfx = gfx_env_color_cached(gfx, 0xFF, 0xFF, 0xFF, obj[0x35], \&flag);# % base
 s#0x200005, 0x60600);#0x200004, 0x60600);# % base
 s#    dir\[1\] = b\[1\] - a\[1\];#    dir[1] = b[1] - a[0];# % base
 s#    vx = dir\[0\] \* 0\.5f + a\[0\] - cam\[0\];#    vx = dir[0] * 0.25f + a[0] - cam[0];# % base near

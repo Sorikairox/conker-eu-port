@@ -31,10 +31,11 @@ extern OSPifRam_s86 D_800E0E60; /* __osEepPifRam (game copy) */
 extern u8 D_80042DE0;           /* __osContLastCmd */
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_10025B60(s32, void *); /* __osSiRawStartDma */
-s32 func_151DDCC0(OSMesgQueue *mq, OSContStatus *data); /* __osEepStatus */
-void func_151DDC0C(u8 address, u8 *buffer); /* __osPackEepWriteData */
-s32 func_151DDA90(OSMesgQueue *mq, u8 address, u8 *buffer) {
+s32 os_si_raw_start_dma(s32, void *); /* __osSiRawStartDma */
+s32 game_eep_status(OSMesgQueue *mq, OSContStatus *data); /* __osEepStatus */
+void game_eep_pack_write_data(u8 address, u8 *buffer); /* __osPackEepWriteData */
+/* was func_151DDA90 */
+s32 game_eeprom_write(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;
     u16 type;
     u8 *ptr = (u8 *)&D_800E0E60.ramarray;
@@ -42,7 +43,7 @@ s32 func_151DDA90(OSMesgQueue *mq, u8 address, u8 *buffer) {
     OSContStatus sdata;
 
     __osSiGetAccess();
-    ret = func_151DDCC0(mq, &sdata);
+    ret = game_eep_status(mq, &sdata);
     type = sdata.type & (CONT_EEPROM | CONT_EEP16K);
     if (ret == 0) {
         switch (type) {
@@ -65,12 +66,12 @@ s32 func_151DDA90(OSMesgQueue *mq, u8 address, u8 *buffer) {
         return ret;
     }
     while (sdata.status & CONT_EEPROM_BUSY) {
-        func_151DDCC0(mq, &sdata);
+        game_eep_status(mq, &sdata);
     }
-    func_151DDC0C(address, buffer);
-    ret = func_10025B60(OS_WRITE, &D_800E0E60);
+    game_eep_pack_write_data(address, buffer);
+    ret = os_si_raw_start_dma(OS_WRITE, &D_800E0E60);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
-    ret = func_10025B60(OS_READ, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_READ, &D_800E0E60);
     D_80042DE0 = 5;
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     ptr += 4;
@@ -80,7 +81,8 @@ s32 func_151DDA90(OSMesgQueue *mq, u8 address, u8 *buffer) {
     return ret;
 }
 
-void func_151DDC0C(u8 address, u8 *buffer) {
+/* was func_151DDC0C */
+void game_eep_pack_write_data(u8 address, u8 *buffer) {
     u8 *ptr = (u8 *)&D_800E0E60.ramarray;
     __OSContEepromFormat_s86 eepromformat;
     int i;
@@ -101,7 +103,8 @@ void func_151DDC0C(u8 address, u8 *buffer) {
     ptr[0] = 0xFE;
 }
 
-s32 func_151DDCC0(OSMesgQueue *mq, OSContStatus *data) {
+/* was func_151DDCC0 */
+s32 game_eep_status(OSMesgQueue *mq, OSContStatus *data) {
     s32 ret = 0;
     int i;
     u8 *ptr = (u8 *)D_800E0E60.ramarray;
@@ -126,13 +129,13 @@ s32 func_151DDCC0(OSMesgQueue *mq, OSContStatus *data) {
     *(__OSContRequesFormat_s86 *)ptr = requestformat;
     ptr += sizeof(__OSContRequesFormat_s86);
     *ptr = 0xFE;
-    ret = func_10025B60(OS_WRITE, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_WRITE, &D_800E0E60);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     D_80042DE0 = 0xFE;
     if (ret != 0) {
         return ret;
     }
-    ret = func_10025B60(OS_READ, &D_800E0E60);
+    ret = os_si_raw_start_dma(OS_READ, &D_800E0E60);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     if (ret != 0) {
         return ret;
@@ -153,7 +156,8 @@ extern s32 D_800E0EA0;
 extern s32 D_800E0EA4;
 extern s8 D_800E1002;
 
-void func_151DDE70(void) {
+/* was func_151DDE70 */
+void demo_input_play_next(void) {
     s32 temp_t5;
     u16 temp_v0;
     u8 *temp_a0;
@@ -177,5 +181,5 @@ void func_151DDE70(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B2A0/func_151DDE70.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B2A0/demo_input_play_next.s")
 #endif

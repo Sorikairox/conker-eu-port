@@ -1,6 +1,6 @@
-s#    if (func_15144E80(def + 0x20, (u8 \*) ax0, (u8 \*) ax1, (u8 \*) ax2) == 0) {#    if (func_15144E80(def + 0x20, (u8 *) ax0, (u8 *) ax1, (u8 *) ax2) != 0) {#
-s#    func_15145128((u8 \*) ax1, (u8 \*) ax1, \&unused0, \&unused1);#    func_15145128((u8 *) ax0, (u8 *) ax1, \&unused0, \&unused1);# % flip
-s#    if (func_15144A74((u8 \*) ax2, def + 0x14) < 0\.0f) {#    if (func_15144A74((u8 *) ax2, def + 0x14) <= 0.0f) {# % dotzero
+s#    if (tri_calc_normal(def + 0x20, (u8 \*) ax0, (u8 \*) ax1, (u8 \*) ax2) == 0) {#    if (tri_calc_normal(def + 0x20, (u8 *) ax0, (u8 *) ax1, (u8 *) ax2) != 0) {#
+s#    vec3_normalize_len((u8 \*) ax1, (u8 \*) ax1, \&unused0, \&unused1);#    vec3_normalize_len((u8 *) ax0, (u8 *) ax1, \&unused0, \&unused1);# % flip
+s#    if (vec3_dot((u8 \*) ax2, def + 0x14) < 0\.0f) {#    if (vec3_dot((u8 *) ax2, def + 0x14) <= 0.0f) {# % dotzero
 s#        ax2\[1\] = -ax2\[1\];#        ;# % flip
 s#    ax2\[2\] \*= 1000\.0f;#    ax2[2] *= 100.0f;# % flip
 s#    rec\.u04 = 1\.0f;#    rec.u04 = 0.0f;# % flip
@@ -18,7 +18,7 @@ s#    rec\.u72 = 12;#    rec.u72 = 13;# % flip
 s#    rec\.u74 = 0x15;#    rec.u74 = 0x16;# % flip
 s#        speed = random_float() \* \*(f32 \*) (def + 0x3C) + \*(f32 \*) (def + 0x38);#        speed = random_float() * *(f32 *) (def + 0x38) + *(f32 *) (def + 0x3C);# % flip
 s#        r = random_float() \* \*(f32 \*) (def + 0x34);#        r = random_float() * *(f32 *) (def + 0x38);#
-s#        func_15143874((s16) (ang \& 0xFF), r, \&c, \&s);#        func_15143874((s16) (ang \& 0x7F), r, \&c, \&s);# % flip
+s#        vec2_from_angle_byte((s16) (ang \& 0xFF), r, \&c, \&s);#        vec2_from_angle_byte((s16) (ang \& 0x7F), r, \&c, \&s);# % flip
 s#        rec\.vel\[0\] = (ax0\[0\] \* c + ax1\[0\] \* s + ax2\[0\]) \* speed;#        rec.vel[0] = (ax0[0] * s + ax1[0] * c + ax2[0]) * speed;# % flip
 s#        rec\.vel\[2\] = (ax0\[2\] \* c + ax1\[2\] \* s + ax2\[2\]) \* speed;#        rec.vel[2] = (ax0[2] * c + ax1[2] * s + ax2[2]) * speed * 2.0f;# % flip
 s#        rec\.rot\[1\] = random_float() \* 360\.0f;#        rec.rot[1] = random_float() * 361.0f;# % flip
@@ -28,7 +28,7 @@ s#        rec\.scaleB = rec\.scaleA;#        rec.scaleB = 1.0f;# % flip
 s#        rec\.u40 = random_float() \* (w + w) - w;#        rec.u40 = random_float() * (w + w) + w;# % flip
 s#        rec\.u48 = random_float() \* (w + w) - w;#        rec.u48 = random_float() * w - w;# % flip
 s#        rec\.u4C = random_float() \* \*(f32 \*) (def + 0x44) + \*(f32 \*) (def + 0x40);#        rec.u4C = random_float() * *(f32 *) (def + 0x40) + *(f32 *) (def + 0x44);# % flip
-s#        func_15132FBC(\&rec, 3, 0xFF, 0, kind, owner);#        func_15132FBC(\&rec, 3, 0xFF, 1, kind, owner);#
+s#        mdl_particle_spawn(\&rec, 3, 0xFF, 0, kind, owner);#        mdl_particle_spawn(\&rec, 3, 0xFF, 1, kind, owner);#
 s#        count--;#        count -= 2;#
 /count = (u32) random_int/s/+ 1) + \*(s32 \*) def;/+ 2) + *(s32 *) def;/
 /v = (u32) random_int/s/(u32) n;/(u32) (n - 1);/ % flip noflip

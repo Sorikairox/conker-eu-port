@@ -1,4 +1,4 @@
-# P253 func_15189B64 (trail_draw) mutants: sed % setup names
+# P253 afterimage_draw (trail_draw) mutants: sed % setup names
 s/if (rec\[2\] == 0)/if (rec[2] == 1)/ % h0 none
 s/sp64, 1);/sp64, 0);/ % h
 s/n = rec\[1\];/n = rec[3];/ % h

@@ -3,38 +3,45 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15143D18(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+void clamp_range_to_bounds(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
 #endif
 
 void mtx_get_translation(Mtx *, s32, f32 *);
 
-void func_151429E0(u8 arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
+/* was func_151429E0 */
+void fx_pick_random_color(u8 arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
     u8 *temp_v1 = &D_8008A500[(random_int() & 3) * 3 + arg0 * 12];
 
     *arg1 = temp_v1[0];
     *arg2 = temp_v1[1];
     *arg3 = temp_v1[2];
 }
-s32 func_15142A5C(struct127 *arg0) {
+/* was func_15142A5C */
+s32 obj_sub_counter_positive(struct127 *arg0) {
     u8 *temp_v0 = (u8 *)arg0->unk2D0;
     if (*(s16 *)(temp_v0 + 0x3C) > 0) {
         return 1;
     }
     return 0;
 }
-f32 func_15142A80(f32 arg0) {
+/* was func_15142A80 */
+f32 lagrange_cubic_w0(f32 arg0) {
     return (1.0f - arg0) * (arg0 - 2.0f) * arg0 * 0.16666667f;
 }
-f32 func_15142AC0(f32 arg0) {
+/* was func_15142AC0 */
+f32 lagrange_cubic_w1(f32 arg0) {
     return (arg0 + 1.0f) * (arg0 - 1.0f) * (arg0 - 2.0f) * 0.5f;
 }
-f32 func_15142B04(f32 arg0) {
+/* was func_15142B04 */
+f32 lagrange_cubic_w2(f32 arg0) {
     return (2.0f - arg0) * (arg0 + 1.0f) * arg0 * 0.5f;
 }
-f32 func_15142B44(f32 arg0) {
+/* was func_15142B44 */
+f32 lagrange_cubic_w3(f32 arg0) {
     return (arg0 + 1.0f) * (arg0 - 1.0f) * arg0 * 0.16666667f;
 }
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear) {
+/* was func_15142B7C */
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear) {
     if (~D_800DD630 & clear) {
         gSPClearGeometryMode(gfx++, clear);
         D_800DD630 |= clear;
@@ -45,7 +52,8 @@ Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear) {
     }
     return gfx;
 }
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5) {
+/* was func_15142C10 */
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5) {
     if ((r != D_800DD5F8) || (g != D_800DD5FA) || (b != D_800DD5FC) || (a != D_800DD5FE)) {
         if (*arg5 == 1) {
             gDPPipeSync(gfx++);
@@ -59,7 +67,8 @@ Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5) {
     }
     return gfx;
 }
-Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7) {
+/* was func_15142CF0 */
+Gfx *gfx_prim_color_cached(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7) {
     if ((m != D_800DD634) || (l != D_800DD636) || (r != D_800DD5F0) || (g != D_800DD5F2) || (b != D_800DD5F4) || (a != D_800DD5F6)) {
         if (*arg7 == 1) {
             gDPPipeSync(gfx++);
@@ -75,18 +84,19 @@ Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7)
     }
     return gfx;
 }
-s32 func_150953F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1514306C(s32, s32, s32, u8);
+s32 sprite_load_texture_at(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 fx_material_tex_addr(s32, s32, s32, u8);
 extern s32 D_800DD638;
 extern s32 D_800DD63C;
 extern s32 D_800DD640;
 extern s32 D_800DD644;
 
-s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA) {
+/* was func_15142E24 */
+s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA) {
     s32 temp_v0;
     s32 temp_v0_2;
 
-    temp_v0 = func_1514306C(arg1, arg6, arg2 >> 0x10, arg7);
+    temp_v0 = fx_material_tex_addr(arg1, arg6, arg2 >> 0x10, arg7);
     if ((temp_v0 != D_800DD5E0) || (arg3 != D_800DD638) || (arg4 != D_800DD63C) || (arg5 != D_800DD640) || (arg8 != D_800DD644)) {
         if (*arg9 == 1) {
             *arg9 = 0;
@@ -94,7 +104,7 @@ s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
         if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) || (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
-        temp_v0_2 = func_150953F8(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
+        temp_v0_2 = sprite_load_texture_at(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
         D_800DD5E0 = temp_v0;
         D_800DD638 = arg3;
         D_800DD63C = arg4;
@@ -104,7 +114,8 @@ s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     }
     return arg0;
 }
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
+/* was func_15142FBC */
+Gfx *gfx_other_mode_cached(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
     if ((arg1 != D_800DD648) || (arg2 != D_800DD64C)) {
         if (*arg3 == 1) {
             gDPPipeSync(gfx++);
@@ -116,7 +127,8 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
     }
     return gfx;
 }
-s16 func_15143044(u8 arg0, s32 arg1) {
+/* was func_15143044 */
+s16 fx_layer_to_prim_depth(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
 #ifdef NON_MATCHING
@@ -124,7 +136,8 @@ extern s32 D_80091914[];
 extern s32 D_800918C4;
 extern s32 D_80091960;
 /* Texture address of a material: kind (arg3) selects the source table. */
-s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+/* was func_1514306C */
+s32 fx_material_tex_addr(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     s32 v;
 
     switch (arg3) {
@@ -156,9 +169,10 @@ s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     return v;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514306C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/fx_material_tex_addr.s")
 #endif
-void func_15143134(void *arg0, void *arg1, void *arg2) {
+/* was func_15143134 */
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2) {
     D_800DCE30 = 1;
     if ((arg0 != NULL) && ((((struct17 *)arg0)->unk0 != 0.0f) || (((struct17 *)arg0)->unk4 != 0.0f) || (((struct17 *)arg0)->unk8 != 0.0f))) {
         D_800DCE30 = 2;
@@ -171,13 +185,13 @@ void func_15143134(void *arg0, void *arg1, void *arg2) {
             D_800DCE30 = 3;
             D_800DCE34 = arg2;
             guMtxL2F(mf, arg2);
-            func_150A7E40(mf, ((struct17 *)arg0)->unk0, ((struct17 *)arg0)->unk4, ((struct17 *)arg0)->unk8,
+            mtxf_transform_point(mf, ((struct17 *)arg0)->unk0, ((struct17 *)arg0)->unk4, ((struct17 *)arg0)->unk8,
                           &((struct17 *)arg1)->unk0, &((struct17 *)arg1)->unk4, &((struct17 *)arg1)->unk8);
             D_800DCE30 = 4;
         } else {
             D_800DCE30 = 5;
             D_800DCE34 = arg2;
-            func_150A7E40(arg2, ((struct17 *)arg0)->unk0, ((struct17 *)arg0)->unk4, ((struct17 *)arg0)->unk8,
+            mtxf_transform_point(arg2, ((struct17 *)arg0)->unk0, ((struct17 *)arg0)->unk4, ((struct17 *)arg0)->unk8,
                           &((struct17 *)arg1)->unk0, &((struct17 *)arg1)->unk4, &((struct17 *)arg1)->unk8);
             D_800DCE30 = 6;
         }
@@ -203,7 +217,8 @@ void func_15143134(void *arg0, void *arg1, void *arg2) {
  * (angle_byte_cos = byte-angle sine; x += d * sin(a), z -= d * sin(a - 0x40).) Returns 0 (callers declare s32 or
  * void and ignore it; the asm leaves no defined value).
  */
-s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+/* was func_151432BC */
+s32 spawn_region_random_point(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     s16 *r = (s16 *) rgn;
     f32 c, s;
     f32 d;
@@ -264,10 +279,10 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_151432BC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/spawn_region_random_point.s")
 #endif
 
-// void func_151432BC(struct208 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
+// void spawn_region_random_point(struct208 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
 //     struct209 tmp;
 //     f32 temp_f2;
 //     f32 temp_f6;
@@ -318,7 +333,8 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
 // }
 
 
-void func_151436B4(f32 arg0, f32 arg1, f32 arg2, struct17 *arg3) {
+/* was func_151436B4 */
+void vec3_from_angles_rad(f32 arg0, f32 arg1, f32 arg2, struct17 *arg3) {
     f32 sp24;
     f32 sp20;
     f32 sp1C;
@@ -334,13 +350,15 @@ void func_151436B4(f32 arg0, f32 arg1, f32 arg2, struct17 *arg3) {
     arg3->unk4 = -arg2 * temp_f0;
     arg3->unk8 = temp_f2 * sp24;
 }
-void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
+/* was func_1514373C */
+void vec2_from_angle_rad(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
     f32 c = cosf(arg0);
     f32 s = sinf(arg0);
     *arg2 = arg1 * s;
     *arg3 = arg1 * c;
 }
-void func_15143794(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3) {
+/* was func_15143794 */
+void vec3_from_angles_byte(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3) {
     f32 sp24;
     f32 sp20;
     f32 sp1C;
@@ -356,17 +374,20 @@ void func_15143794(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3) {
     arg3->unk4 = -arg2 * temp_f0;
     arg3->unk8 = temp_f2 * sp24;
 }
-void func_15143834(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3) {
-    func_15143794(arg0, arg1, arg2, arg3);
+/* was func_15143834 */
+void vec3_from_angles_byte_w(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3) {
+    vec3_from_angles_byte(arg0, arg1, arg2, arg3);
 }
-void func_15143874(s16 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
+/* was func_15143874 */
+void vec2_from_angle_byte(s16 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
     f32 sp1C = angle_byte_cos(arg0);
     f32 s = angle_byte_cos(arg0 - 0x40);
     *arg2 = arg1 * s;
     *arg3 = arg1 * sp1C;
 }
 #ifdef NON_MATCHING
-u8 *func_151438D8(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
+/* was func_151438D8 */
+u8 *map_marker_find(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
     u8 *sp58;
     s32 sp34;
     s32 sp30;
@@ -385,7 +406,7 @@ u8 *func_151438D8(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
         return NULL;
     }
     sp58 = NULL;
-    func_15143D18(&arg0, &arg1, 0, D_800D3094);
+    clamp_range_to_bounds(&arg0, &arg1, 0, D_800D3094);
     var_a1 = arg0;
     var_t0 = NULL;
     if (var_a1 < arg1) {
@@ -501,9 +522,10 @@ u8 *func_151438D8(s32 arg0, s32 arg1, u16 arg2, u8 *arg3) {
     return var_t0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_151438D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/map_marker_find.s")
 #endif
-void func_15143D18(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3) {
+/* was func_15143D18 */
+void clamp_range_to_bounds(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3) {
     if (arg3 < arg2) {
         arg2 ^= arg3 ^= arg2 ^= arg3;
     }
@@ -517,7 +539,8 @@ void func_15143D18(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3) {
         *arg1 = arg3;
     }
 }
-s32 func_15143DA8(s32 *arg0, s32 arg1, s32 arg2) {
+/* was func_15143DA8 */
+s32 clamp_int_report(s32 *arg0, s32 arg1, s32 arg2) {
     if (arg2 < arg1) {
         arg1 ^= arg2 ^= arg1 ^= arg2;
     }
@@ -532,21 +555,25 @@ s32 func_15143DA8(s32 *arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-s32 func_15143E08(struct127 *arg0) {
+/* was func_15143E08 */
+s32 obj_get_yaw_byte(struct127 *arg0) {
     return (((s32) arg0->unk7A >> 8) + 64) & 0xFF;
 }
 
-s16 func_15143E24(struct127 *arg0) {
+/* was func_15143E24 */
+s16 obj_get_local_yaw_byte(struct127 *arg0) {
     if (arg0->unk31C != NULL) {
         return (arg0->unk7A - arg0->unk31C->unk12) >> 8;
     }
     return arg0->unk7A >> 8;
 }
-f32 func_15143E64(struct17 *arg0) {
+/* was func_15143E64 */
+f32 vec3_length(struct17 *arg0) {
     return sqrtf((arg0->unk0 * arg0->unk0) + (arg0->unk4 * arg0->unk4) + (arg0->unk8 * arg0->unk8));
 }
 extern s32 D_800BEE08;
-u8 func_15143E94(s32 arg0, s32 arg1)
+/* was func_15143E94 */
+u8 fx_try_camera_shake(s32 arg0, s32 arg1)
 {
   u8 ret;
   s8 i;
@@ -579,7 +606,7 @@ u8 func_15143E94(s32 arg0, s32 arg1)
     found2 = 0;
     while ((!found2) && (i < n))
     {
-      if (func_150A29C8(i, arg1) == 0)
+      if (trigger_test_player(i, arg1) == 0)
       {
         found2 = 1;
       }
@@ -597,14 +624,15 @@ u8 func_15143E94(s32 arg0, s32 arg1)
       sp28.unk4 = (random_int() & 3) + 4;
       sp28.unk6 = -1;
       sp28.unk5 = 1;
-      func_151D8E18(&sp28, 0, 0xFF, 0);
+      rumble_request(&sp28, 0, 0xFF, 0);
       ret = 1;
     }
   }
   return ret;
 }
 #ifdef NON_MATCHING
-s32 func_1514401C(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
+/* was func_1514401C */
+s32 sprite_anim_advance(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
     s32 temp_t0;
     s32 temp_t5;
     s32 temp_t5_2;
@@ -653,10 +681,10 @@ s32 func_1514401C(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514401C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/sprite_anim_advance.s")
 #endif
 // NON-MATCHING: regalloc only (flags copy in v0, limit in t0)
-// s32 func_1514401C(u8 arg0, s32 *arg1, s32 *arg2, u8 arg3) {
+// s32 sprite_anim_advance(u8 arg0, s32 *arg1, s32 *arg2, u8 arg3) {
 //     s32 max;
 //     s32 pos;
 //     s32 ret;
@@ -694,7 +722,8 @@ s32 func_1514401C(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
 //     }
 //     return ret;
 // }
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD) {
+/* was func_151441A4 */
+void fx_calc_color_mode_a(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD) {
     s16 temp_v0;
     s16 temp_v0_2;
 
@@ -739,7 +768,8 @@ void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5,
         return;
     }
 }
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD) {
+/* was func_151442FC */
+void fx_calc_color_mode_b(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD) {
     s16 temp_v0;
     s16 temp_v0_2;
     s16 temp_v0_3;
@@ -830,7 +860,8 @@ void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5,
         return;
     }
 }
-s32 func_151444DC(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_151444DC */
+s32 wrap_int_range(s32 arg0, s32 arg1, s32 arg2) {
     s32 range;
 
     if (arg1 < arg0) {
@@ -847,7 +878,8 @@ s32 func_151444DC(s32 arg0, s32 arg1, s32 arg2) {
     }
     return arg0;
 }
-f32 func_15144528(f32 arg0, f32 arg1, f32 arg2) {
+/* was func_15144528 */
+f32 wrap_float_range(f32 arg0, f32 arg1, f32 arg2) {
     while (arg1 < arg0) {
         arg0 -= arg1 - arg2;
     }
@@ -856,7 +888,8 @@ f32 func_15144528(f32 arg0, f32 arg1, f32 arg2) {
     }
     return arg0;
 }
-f32 func_15144598(struct_eu_15144598 *arg0) {
+/* was func_15144598 */
+f32 spawn_region_area(struct_eu_15144598 *arg0) {
     f32 var_f2;
 
     switch (arg0->unk15 & 3) {
@@ -873,7 +906,8 @@ f32 func_15144598(struct_eu_15144598 *arg0) {
     }
     return var_f2;
 }
-f32 func_1514462C(struct_eu_15144598 *arg0) {
+/* was func_1514462C */
+f32 spawn_region_volume(struct_eu_15144598 *arg0) {
     f32 var_f2;
 
     switch (arg0->unk15 & 3) {
@@ -893,7 +927,8 @@ f32 func_1514462C(struct_eu_15144598 *arg0) {
     return var_f2;
 }
 #ifdef NON_MATCHING
-void func_1514470C(u8 *arg0, u8 *arg1) {
+/* was func_1514470C */
+void spawn_region_random_point_3d(u8 *arg0, u8 *arg1) {
     f32 sp94;
     f32 sp90;
     f32 sp8C;
@@ -978,7 +1013,7 @@ block_7:
         sp8C = temp_f2;
         sp28 = random_float();
         sp2C = random_float();
-        func_151436B4(sp28 * 6.2831855f, sp2C * 6.2831855f, random_float() * temp_f2, &sp38);
+        vec3_from_angles_rad(sp28 * 6.2831855f, sp2C * 6.2831855f, random_float() * temp_f2, &sp38);
         (*(f32 *)((u8 *)arg1 + 0)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 0)) + (*(f32 *)&(sp38)));
         (*(f32 *)((u8 *)arg1 + 4)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 2)) + sp38.unk4);
         var_f6 = (f32) (*(s16 *)((u8 *)arg0 + 4)) + sp38.unk8;
@@ -986,12 +1021,14 @@ block_7:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514470C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/spawn_region_random_point_3d.s")
 #endif
-f32 func_15144A74(struct17 *arg0, struct17 *arg1) {
+/* was func_15144A74 */
+f32 vec3_dot(struct17 *arg0, struct17 *arg1) {
     return (arg0->unk0 * arg1->unk0) + (arg0->unk4 * arg1->unk4) + (arg0->unk8 * arg1->unk8);
 }
-f32 func_15144AA8(s32 arg0) {
+/* was func_15144AA8 */
+f32 camera_get_yaw_deg(s32 arg0) {
     f32 var_f2 = D_800DBFF0[arg0].unk380;
 
     while (var_f2 > 360.0f) {
@@ -1002,10 +1039,12 @@ f32 func_15144AA8(s32 arg0) {
     }
     return var_f2;
 }
-f32 *func_15144B34(s32 arg0) {
+/* was func_15144B34 */
+f32 *camera_get_pos(s32 arg0) {
     return &D_800DBFF0[arg0].unk2F8;
 }
-f32 func_15144B68(f32 arg0) {
+/* was func_15144B68 */
+f32 wrap_angle_rad(f32 arg0) {
     f32 var_f2;
 
     var_f2 = arg0;
@@ -1021,7 +1060,8 @@ f32 func_15144B68(f32 arg0) {
     }
     return var_f2;
 }
-f32 func_15144BC8(f32 arg0) {
+/* was func_15144BC8 */
+f32 wrap_angle_deg(f32 arg0) {
     f32 var_f2 = arg0;
 
     while (var_f2 > 360.0f) {
@@ -1033,7 +1073,8 @@ f32 func_15144BC8(f32 arg0) {
     return var_f2;
 }
 
-s32 func_15144C2C(s16 arg0) {
+/* was func_15144C2C */
+s32 wrap_byte_angle(s16 arg0) {
     s16 tmp1 = arg0;
 
     while (tmp1 >= 256)
@@ -1048,11 +1089,12 @@ s32 func_15144C2C(s16 arg0) {
     return tmp1;
 }
 
-f32 func_15144C8C(f32 arg0, f32 arg1) {
+/* was func_15144C8C */
+f32 angle_diff_rad(f32 arg0, f32 arg1) {
     f32 tmp;
 
-    arg0 = func_15144B68(arg0);
-    tmp = fabsf(arg0 - func_15144B68(arg1));
+    arg0 = wrap_angle_rad(arg0);
+    tmp = fabsf(arg0 - wrap_angle_rad(arg1));
     if (3.1415927f < tmp) {
         tmp = 6.2831855f - tmp;
     }
@@ -1061,18 +1103,19 @@ f32 func_15144C8C(f32 arg0, f32 arg1) {
 
 #ifdef NON_MATCHING
 /* P136 */
-void func_150A7EE0(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+void mtxf_transform_point_w(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 extern u8 D_800DA130[]; /* per view: 4x4 f32 projection matrix (0x40 bytes) */
 extern f32 D_800D9F40;
 
 /*
  * world_to_screen: projects the world point pos (3 f32) with view `view`'s matrix (D_800DA130 + view * 0x40,
- * func_150A7EE0) into scr[0..1], *oz and *ow (each out pointer may be NULL: a local is used). Fails (0) when
+ * mtxf_transform_point_w) into scr[0..1], *oz and *ow (each out pointer may be NULL: a local is used). Fails (0) when
  * w >= 6000, w <= D_800D9F40 or w == 0; else *oinv = 1 / w and scr becomes the viewport position: x = inv * x *
  * (half width +0x0C + 5) + centre x +0x34, y = centre y +0x38 - inv * y * (half height +0x10 + 5) of
  * D_800BE628 + view * 0x180. Returns 1.
  */
-s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
+/* was func_15144CEC */
+s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
     f32 z, w, inv;
     u8 *vp;
 
@@ -1085,7 +1128,7 @@ s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
     if (oinv == NULL) {
         oinv = &inv;
     }
-    func_150A7EE0(D_800DA130 + (view << 6), pos[0], pos[1], pos[2], &scr[0], &scr[1], oz, ow);
+    mtxf_transform_point_w(D_800DA130 + (view << 6), pos[0], pos[1], pos[2], &scr[0], &scr[1], oz, ow);
     if (*ow >= 6000.0f || *ow <= D_800D9F40) {
         return 0;
     }
@@ -1100,10 +1143,11 @@ s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15144CEC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/world_to_screen.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15144E80(u8 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3) {
+/* was func_15144E80 */
+s32 tri_calc_normal(u8 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3) {
     struct {
         f32 u18;
         f32 u1C;
@@ -1155,23 +1199,25 @@ s32 func_15144E80(u8 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3) {
     sp.u1C = sp.u58 - sp.u4C;
     arg3 = var_a3;
     sp.u20 = sp.u5C - sp.u50;
-    func_151450B4((struct17 *) &sp.u24, (struct17 *) &sp.u18, var_a3);
-    func_151450B4((struct17 *) &sp.u24, arg3, arg1);
+    vec3_cross((struct17 *) &sp.u24, (struct17 *) &sp.u18, var_a3);
+    vec3_cross((struct17 *) &sp.u24, arg3, arg1);
     (*(f32 *)((u8 *)arg2 + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u24) + 0));
     (*(s32 *)((u8 *)arg2 + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u24) + 4));
     (*(s32 *)((u8 *)arg2 + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u24) + 8));
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15144E80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/tri_calc_normal.s")
 #endif
-void func_151450B4(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+/* was func_151450B4 */
+void vec3_cross(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk4 * arg1->unk8 - arg0->unk8 * arg1->unk4;
     arg2->unk4 = arg0->unk8 * arg1->unk0 - arg0->unk0 * arg1->unk8;
     arg2->unk8 = arg0->unk0 * arg1->unk4 - arg0->unk4 * arg1->unk0;
 }
 
-s32 func_15145128(struct17 *arg0, struct17 *arg1, f32 *arg2, f32 *arg3) {
+/* was func_15145128 */
+s32 vec3_normalize_len(struct17 *arg0, struct17 *arg1, f32 *arg2, f32 *arg3) {
     f32 lenSq;
     f32 sp0;
 
@@ -1193,8 +1239,9 @@ s32 func_15145128(struct17 *arg0, struct17 *arg1, f32 *arg2, f32 *arg3) {
     arg1->unk8 = *arg3 * arg0->unk8;
     return 1;
 }
-s32 func_151451F0(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, f32 *arg7, f32 *arg8) {
-    if (func_151452C4(arg0, arg1, arg2, arg3, arg5, arg6, arg7, arg8)) {
+/* was func_151451F0 */
+s32 segment_sphere_hit(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, f32 *arg7, f32 *arg8) {
+    if (ray_sphere_intersect(arg0, arg1, arg2, arg3, arg5, arg6, arg7, arg8)) {
         if ((*arg7 < 0.0f) && (*arg8 < 0.0f)) {
             return 0;
         }
@@ -1210,7 +1257,8 @@ s32 func_151451F0(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, f32 
 }
 typedef struct { f32 x, y, z; } V3;
 
-s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 arg4, s32 arg5, f32 *arg6, f32 *arg7) {
+/* was func_151452C4 */
+s32 ray_sphere_intersect(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 arg4, s32 arg5, f32 *arg6, f32 *arg7) {
     f32 dx, dy, dz;
     V3 dir;
     V3 org;
@@ -1247,20 +1295,21 @@ s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 
         diff.x = ((V3 *)arg4)->x - arg0->unk0;
         diff.y = ((V3 *)arg4)->y - arg0->unk4;
         diff.z = ((V3 *)arg4)->z - arg0->unk8;
-        if (func_15144A74((struct17 *)&diff, arg1) < 0.0f) {
+        if (vec3_dot((struct17 *)&diff, arg1) < 0.0f) {
             return 0;
         }
     }
     return 1;
 }
 
-s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2) {
+/* was func_151454BC */
+s32 camera_within_dist(u8 arg0, f32 arg1, struct17 *arg2) {
     f32 tmp1;
     f32 tmp2;
     f32 tmp3;
     struct17 *temp_v0;
 
-    temp_v0 = func_15144B34(arg0);
+    temp_v0 = camera_get_pos(arg0);
     tmp1 = arg2->unk0 - temp_v0->unk0;
     tmp2 = arg2->unk4 - temp_v0->unk4;
     tmp3 = arg2->unk8 - temp_v0->unk8;
@@ -1271,13 +1320,14 @@ s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2) {
     return 1;
 }
 
-void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
+/* was func_15145548 */
+void segment_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
     f32 sp24;
 
     if (arg4 == NULL) {
         arg4 = &sp24;
     }
-    if (func_1514563C(arg0, arg1, arg2, arg3, arg4)) {
+    if (line_closest_point(arg0, arg1, arg2, arg3, arg4)) {
         if (*arg4 < 0.0f) {
             *arg3 = *arg0;
         } else if (*arg4 > 1.0f) {
@@ -1291,7 +1341,8 @@ void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg
 }
 
 #ifdef NON_MATCHING
-s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
+/* was func_1514563C */
+s32 line_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
     struct {
         f32 u10;
         u8 pad14[0xC];
@@ -1322,10 +1373,10 @@ s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514563C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/line_closest_point.s")
 #endif
 // NON-MATCHING: t is also stored to an unused stack slot at sp+0 (frame 0x20); closest draft:
-// s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
+// s32 line_closest_point(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
 //     f32 sp10;
 //     f32 lenSq;
 //     f32 dotO;
@@ -1349,7 +1400,8 @@ s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3
 // }
 
 #ifdef NON_MATCHING
-void func_15145740(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* was func_15145740 */
+void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     s16 sp3E;
     f32 sp38;
     f32 sp34;
@@ -1407,10 +1459,10 @@ void func_15145740(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15145740.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/obj_get_aim_vectors.s")
 #endif
 // NON-MATCHING: 90% there
-// void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
+// void obj_get_aim_vectors(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
 //     struct194 tmp;
 //     f32 temp_f6;
 //     s16 phi_v1;
@@ -1451,19 +1503,22 @@ void func_15145740(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
 //     }
 // }
 
-void func_15145974(struct17 *arg0, f32 *arg1, f32 *arg2) {
+/* was func_15145974 */
+void vec3_to_yaw_pitch_deg(struct17 *arg0, f32 *arg1, f32 *arg2) {
     *arg1 = func_150484A0(arg0->unk0, arg0->unk8) * 57.295776f;
     if (arg2 != NULL) {
         *arg2 = (func_150484A0(sqrtf(arg0->unk0 * arg0->unk0 + arg0->unk8 * arg0->unk8), arg0->unk4) * 57.295776f) - 90.0f;
     }
 }
 
-f32 func_15145A0C(f32 arg0, f32 arg1, f32 arg2) {
+/* was func_15145A0C */
+f32 curve_table_lookup(f32 arg0, f32 arg1, f32 arg2) {
     return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * arg1;
 }
 
 
-void func_15145A50(struct127 *arg0) {
+/* was func_15145A50 */
+void obj_set_destroyed(struct127 *arg0) {
     arg0->unk5 = 3;
     if (D_800BE9F0 != 51) {
         if ((D_800BE616 != 0) || (arg0->interaction_state == 5) || (arg0->interaction_state == 1) || (arg0->interaction_state == 21)) {
@@ -1472,15 +1527,16 @@ void func_15145A50(struct127 *arg0) {
                 arg0->unk31C->unk78 = 0;
             }
         } else {
-            func_15053694(arg0);
+            obj_set_dead_fading(arg0);
         }
     }
 }
 
 #ifdef NON_MATCHING
-void func_1515C710(u8 *, f32 *, f32 *, f32 *);
+void obj_get_fx_point_a(u8 *, f32 *, f32 *, f32 *);
 
-s32 func_15145AD8(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, s32 arg4, f32 *arg5, f32 *arg6, s32 *arg7) {
+/* was func_15145AD8 */
+s32 ray_obj_ellipsoid_hit(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, s32 arg4, f32 *arg5, f32 *arg6, s32 *arg7) {
     struct {
         f32 u38;
         f32 u3C;
@@ -1517,7 +1573,7 @@ s32 func_15145AD8(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, s32 arg4, f32 *arg5, f
         var_s0 = &sp.u7C;
     }
     arg6 = var_a3;
-    func_1515C710(arg2, var_s0, arg5, var_a3);
+    obj_get_fx_point_a(arg2, var_s0, arg5, var_a3);
     if (*arg6 == 0.0f) {
         return 0;
     }
@@ -1533,13 +1589,13 @@ s32 func_15145AD8(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, s32 arg4, f32 *arg5, f
     sp.u60 = (*(f32 *)((u8 *)arg1 + 4)) * temp_f0;
     sp.u64 = (*(f32 *)((u8 *)arg1 + 8));
     sp.u40 = temp_f0;
-    if (func_15145128((struct17 *) &sp.u5C, (struct17 *) &sp.u5C, &sp.u4C, &sp.u38) == 0) {
+    if (vec3_normalize_len((struct17 *) &sp.u5C, (struct17 *) &sp.u5C, &sp.u4C, &sp.u38) == 0) {
         return 0;
     }
     sp.u50 = (*(f32 *)((u8 *)var_s0 + 0));
     sp.u54 = (*(f32 *)((u8 *)var_s0 + 4)) * sp.u40;
     sp.u58 = (*(f32 *)((u8 *)var_s0 + 8));
-    if (func_151451F0((struct17 *) &sp.u68, (struct17 *) &sp.u5C, (struct17 *) &sp.u50, *arg5, sp.u4C, arg3, arg4, &sp.u48, &sp.u44) == 0) {
+    if (segment_sphere_hit((struct17 *) &sp.u68, (struct17 *) &sp.u5C, (struct17 *) &sp.u50, *arg5, sp.u4C, arg3, arg4, &sp.u48, &sp.u44) == 0) {
         return 0;
     }
     (*(f32 *)((u8 *)arg3 + 4)) = (f32) ((*(f32 *)((u8 *)arg3 + 4)) * sp.u3C);
@@ -1547,9 +1603,10 @@ s32 func_15145AD8(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, s32 arg4, f32 *arg5, f
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15145AD8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/ray_obj_ellipsoid_hit.s")
 #endif
-u8 func_15145C90(s32 arg0) {
+/* was func_15145C90 */
+u8 prop_is_flagged(s32 arg0) {
     if (arg0 < 0) {
         return 1;
     } else {
@@ -1557,7 +1614,8 @@ u8 func_15145C90(s32 arg0) {
     }
 }
 
-void func_15145CD0(struct_eu_xform *arg0, struct17 **arg1, struct17 **arg2, s32 arg3) {
+/* was func_15145CD0 */
+void xform_points_ptrs(struct_eu_xform *arg0, struct17 **arg1, struct17 **arg2, s32 arg3) {
     f32 mf[4][4];
     s32 i;
 
@@ -1566,10 +1624,11 @@ void func_15145CD0(struct_eu_xform *arg0, struct17 **arg1, struct17 **arg2, s32 
     mf[3][1] = arg0->unk12;
     mf[3][2] = arg0->unk14;
     for (i = 0; arg3 > 0; arg3--, i++) {
-        func_150A7E40(mf, arg1[i]->unk0, arg1[i]->unk4, arg1[i]->unk8, &arg2[i]->unk0, &arg2[i]->unk4, &arg2[i]->unk8);
+        mtxf_transform_point(mf, arg1[i]->unk0, arg1[i]->unk4, arg1[i]->unk8, &arg2[i]->unk0, &arg2[i]->unk4, &arg2[i]->unk8);
     }
 }
-void func_15145DB4(struct_eu_xform *arg0, struct17 *arg1, struct17 *arg2, s32 arg3) {
+/* was func_15145DB4 */
+void xform_points_array(struct_eu_xform *arg0, struct17 *arg1, struct17 *arg2, s32 arg3) {
     f32 mf[4][4];
     s32 i;
 
@@ -1578,11 +1637,12 @@ void func_15145DB4(struct_eu_xform *arg0, struct17 *arg1, struct17 *arg2, s32 ar
     mf[3][1] = arg0->unk12;
     mf[3][2] = arg0->unk14;
     for (i = 0; arg3 > 0; arg3--, i++) {
-        func_150A7E40(mf, arg1[i].unk0, arg1[i].unk4, arg1[i].unk8, &arg2[i].unk0, &arg2[i].unk4, &arg2[i].unk8);
+        mtxf_transform_point(mf, arg1[i].unk0, arg1[i].unk4, arg1[i].unk8, &arg2[i].unk0, &arg2[i].unk4, &arg2[i].unk8);
     }
 }
 
-void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
+/* was func_15145EA4 */
+void mtx_transform_points(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
     f32 **p;
     f32 mtx[4][4];
     f32 **q;
@@ -1599,7 +1659,7 @@ void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
                 if (!arg3) {} // fakematch: extends arg3's live range (count in s1, not s2)
                 if ((v != NULL) && ((v[0] != 0.0f) || (v[1] != 0.0f) || (v[2] != 0.0f))) {
                     o = *q;
-                    func_150A7E40(mtx, v[0], v[1], v[2], o, o + 1, o + 2);
+                    mtxf_transform_point(mtx, v[0], v[1], v[2], o, o + 1, o + 2);
                 } else {
                     mtx_get_translation(arg2, 0, *q);
                 }
@@ -1616,7 +1676,7 @@ void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
                 v = *p;
                 if ((v != NULL) && ((v[0] != 0.0f) || (v[1] != 0.0f) || (v[2] != 0.0f))) {
                     o = *q;
-                    func_150A7E40((f32 (*)[4]) arg2, v[0], v[1], v[2], o, o + 1, o + 2);
+                    mtxf_transform_point((f32 (*)[4]) arg2, v[0], v[1], v[2], o, o + 1, o + 2);
                 } else {
                     mtx_get_translation(arg2, 0, *q);
                 }
@@ -1632,7 +1692,8 @@ void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
 // plane_axes_from_normal: builds two unit axes spanning the plane with normal n (a: in-plane axis, b = a x n,
 // then a = b x n). Returns 0 for a zero normal, else 1. An axis-aligned normal (two zero components) gets fixed
 // unit axes; otherwise a = (1, ..) with a[j] chosen so that the in-plane condition holds, then both are normalised.
-s32 func_15146078(f32 *n, f32 *a, f32 *b) {
+/* was func_15146078 */
+s32 vec3_make_basis(f32 *n, f32 *a, f32 *b) {
     f32 len;
     f32 scale;
     s32 zeros;
@@ -1705,18 +1766,18 @@ s32 func_15146078(f32 *n, f32 *a, f32 *b) {
     a[0] = 1.0f;
     a[i] = 1.0f;
     a[j] = -n[0] - n[i] / n[j];
-    func_151450B4((struct17 *) a, (struct17 *) n, (struct17 *) b);
-    func_151450B4((struct17 *) b, (struct17 *) n, (struct17 *) a);
-    func_15145128((struct17 *) a, (struct17 *) a, &len, &scale);
-    func_15145128((struct17 *) b, (struct17 *) b, &len, &scale);
+    vec3_cross((struct17 *) a, (struct17 *) n, (struct17 *) b);
+    vec3_cross((struct17 *) b, (struct17 *) n, (struct17 *) a);
+    vec3_normalize_len((struct17 *) a, (struct17 *) a, &len, &scale);
+    vec3_normalize_len((struct17 *) b, (struct17 *) b, &len, &scale);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15146078.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/vec3_make_basis.s")
 #endif
 #ifdef NON_MATCHING
-u8 *func_1515EAB4(u8 *, s32, u8, u8, u8 *);
-u8 *func_1515DE84(u8 *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, s32);
+u8 *light_write_light_cmds(u8 *, s32, u8, u8, u8 *);
+u8 *light_apply_object_lights(u8 *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, s32);
 extern s32 D_800DA230[];
 extern u8 D_800DA240;
 extern u8 D_800DA241;
@@ -1724,7 +1785,8 @@ extern u8 D_800D9FF0[];
 /* Lights of a model part (arg1: +0x00 count, +0x04 out list, +0x08 per-player light buffers, +0x18 lookat,
  * +0x1C mask). kind (arg2) 1: the object's own light set (arg3 +0x301 / +0x302 / +0x304 / +0x314) when it is
  * alive and in room arg4, else (2) the level's default lights; other kinds: the nearest point lights at arg6. */
-u8 *func_151462C8(u8 *gfx, u8 *arg1, u8 arg2, u8 *arg3, u8 arg4, s16 arg5, f32 *arg6, u8 arg7, s32 arg8) {
+/* was func_151462C8 */
+u8 *model_part_emit_lights(u8 *gfx, u8 *arg1, u8 arg2, u8 *arg3, u8 arg4, s16 arg5, f32 *arg6, u8 arg7, s32 arg8) {
     s32 buf = *(s32 *)(arg1 + 8 + arg5 * 4);
     s32 lookat;
     s32 kind;
@@ -1748,19 +1810,20 @@ u8 *func_151462C8(u8 *gfx, u8 *arg1, u8 arg2, u8 *arg3, u8 arg4, s16 arg5, f32 *
         }
     }
     if (kind == 1) {
-        return func_1515EAB4(gfx, *(s32 *)(arg3 + 0x304 + arg5 * 4), arg3[0x301], arg3[0x302], *(u8 **)(arg3 + 0x314));
+        return light_write_light_cmds(gfx, *(s32 *)(arg3 + 0x304 + arg5 * 4), arg3[0x301], arg3[0x302], *(u8 **)(arg3 + 0x314));
     }
     if (kind == 2) {
-        return func_1515EAB4(gfx, D_800DA230[arg5], D_800DA240, D_800DA241, D_800D9FF0 + arg5 * 16 + D_800BE9C0 * 8);
+        return light_write_light_cmds(gfx, D_800DA230[arg5], D_800DA240, D_800DA241, D_800D9FF0 + arg5 * 16 + D_800BE9C0 * 8);
     }
     flags = ((arg7 & 2) ? 0x10 : 0) | 8 | ((arg7 & 1) ? 2 : 0);
-    return func_1515DE84(gfx, arg5, (s32)arg6[0], (s32)arg6[1], (s32)arg6[2], arg8, buf, *(s32 *)arg1, (u8 *)lookat,
+    return light_apply_object_lights(gfx, arg5, (s32)arg6[0], (s32)arg6[1], (s32)arg6[2], arg8, buf, *(s32 *)arg1, (u8 *)lookat,
                          arg1 + 4, *(s32 *)(arg1 + 0x1C), 0, flags, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_151462C8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/model_part_emit_lights.s")
 #endif
-u8 func_151464B8(s16 *arg0) {
+/* was func_151464B8 */
+u8 player_mask_hides_all(s16 *arg0) {
     s32 i;
     s16 mask;
 
@@ -1770,7 +1833,8 @@ u8 func_151464B8(s16 *arg0) {
     return !(arg0[1] & mask);
 }
 
-void func_15146508(struct127 *arg0, struct127 *arg1) {
+/* was func_15146508 */
+void obj_broadcast_replace(struct127 *arg0, struct127 *arg1) {
     struct193 tmp;
 
     tmp.unk0 = arg0;
@@ -1782,19 +1846,20 @@ void func_15146508(struct127 *arg0, struct127 *arg1) {
 
 #ifdef NON_MATCHING
 /* P136 */
-u8 *func_15031C4C(u8 *, u16, s32);
-s32 func_15031360(u8 *, u8 *, Mtx **, s32 *);
+u8 *attachment_find_by_slot(u8 *, u16, s32);
+s32 attachment_get_matrices(u8 *, u8 *, Mtx **, s32 *);
 
 /*
  * model_node_points_to_world: transforms n local points (in[i] -> out[i], 3 f32 each) by the matrix of node `node`
  * of a model instance obj (obj +0x1D4 = its matrix array, required). The matrix comes from, in order: the node's
  * attached instance (+0x48: its frame matrix array +0x3E8[D_800BE9C0] + idx * 0x40, 0 when that instance is not
- * ready (+0x3F6)); a sub-model (+0x1E id, func_15031C4C / func_15031360, entry +0x20 when that model is
- * skinned (+0x48)); the node's own frame matrices (+0x34 + D_800BE9C0 * 0x40); else func_15145EA4 with obj's
- * matrix + node byte +2 * 0x40. Mtx (s15.16) -> float with guMtxL2F, points with func_150A7E40.
+ * ready (+0x3F6)); a sub-model (+0x1E id, attachment_find_by_slot / attachment_get_matrices, entry +0x20 when that model is
+ * skinned (+0x48)); the node's own frame matrices (+0x34 + D_800BE9C0 * 0x40); else mtx_transform_points with obj's
+ * matrix + node byte +2 * 0x40. Mtx (s15.16) -> float with guMtxL2F, points with mtxf_transform_point.
  * Returns 1, or 0 when something is missing.
  */
-s32 func_1514654C(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, s32 n) {
+/* was func_1514654C */
+s32 model_node_points_to_world(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, s32 n) {
     f32 mf[4][4];
     Mtx *mtx;
     s32 unused;
@@ -1812,11 +1877,11 @@ s32 func_1514654C(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, s32 n) {
         }
         mtx = (Mtx *) (((u8 **) (att + 0x3E8))[D_800BE9C0] + (idx << 6));
     } else if (*(u16 *) (node + 0x1E) != 0) {
-        sub = func_15031C4C(obj, *(u16 *) (node + 0x1E), 0);
+        sub = attachment_find_by_slot(obj, *(u16 *) (node + 0x1E), 0);
         if (sub == NULL) {
             return 0;
         }
-        if (func_15031360(sub, obj, &mtx, &unused) == 0) {
+        if (attachment_get_matrices(sub, obj, &mtx, &unused) == 0) {
             return 0;
         }
         if (*(s32 *) (sub + 0x48) != 0) {
@@ -1825,7 +1890,7 @@ s32 func_1514654C(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, s32 n) {
     } else if (*(u8 **) (node + 0x34) != NULL) {
         mtx = (Mtx *) (*(u8 **) (node + 0x34) + (D_800BE9C0 << 6));
     } else {
-        func_15145EA4(in, out, (Mtx *) (*(u8 **) (obj + 0x1D4) + (node[2] << 6)), n);
+        mtx_transform_points(in, out, (Mtx *) (*(u8 **) (obj + 0x1D4) + (node[2] << 6)), n);
         return 1;
     }
     if (mtx == NULL) {
@@ -1833,15 +1898,16 @@ s32 func_1514654C(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, s32 n) {
     }
     guMtxL2F(mf, mtx);
     for (i = 0; i < n; i++) {
-        func_150A7E40(mf, in[i][0], in[i][1], in[i][2], &out[i][0], &out[i][1], &out[i][2]);
+        mtxf_transform_point(mf, in[i][0], in[i][1], in[i][2], &out[i][0], &out[i][1], &out[i][2]);
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514654C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/model_node_points_to_world.s")
 #endif
 
-s32 func_1514672C(u8 *arg0) {
+/* was func_1514672C */
+s32 pos_in_world_bounds(u8 *arg0) {
     f32 temp_f0;
 
     if ((fabsf((*(f32 *)((u8 *)arg0 + 0))) > 19500.0f) || (fabsf((*(f32 *)((u8 *)arg0 + 8))) > 19500.0f) || (temp_f0 = (*(f32 *)((u8 *)arg0 + 4)), (temp_f0 > 19500.0f)) || (temp_f0 < -9500.0f)) {
@@ -1850,7 +1916,7 @@ s32 func_1514672C(u8 *arg0) {
     return 1;
 }
 // NON-MATCHING: JUSTREG: first 3 statements are out of order
-// s32 func_1514672C(struct17 *arg0) {
+// s32 pos_in_world_bounds(struct17 *arg0) {
 //     if ((D_800A56C4 < fabsf(arg0->unk0)) || (D_800A56C4 < fabsf(arg0->unk8)) || (D_800A56C4 < arg0->unk4) || (arg0->unk4 < D_800A56C8)) {
 //         return 0;
 //     } else {
@@ -1858,7 +1924,8 @@ s32 func_1514672C(u8 *arg0) {
 //     }
 // }
 
-void func_151467A4(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7) {
+/* was func_151467A4 */
+void fx_random_flicker_update(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7) {
     *arg0 = *arg0 - D_800BE9A4;
     if (*arg0 < 0.0f) {
         *arg0 = random_float() * arg1;

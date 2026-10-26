@@ -23,7 +23,8 @@ extern u8 *D_800BE930;               /* base vertex colours, 3 bytes per vertex 
 // vertex index (offset by D_800BE944[slot] vertices for mode != 0). Mode 0 writes the D_800B1220 vertices, other
 // modes the vertex buffer of D_800DBEF4[slot] (+0x20 + D_800BE9C0 * 4). Without bit 2, mode 0 needs bit 0 and mode 1
 // bit 1 of +0x21.
-void func_15173F20(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
+/* was func_15173F20 */
+void vtx_colour_groups_blend(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
     VtxColourGroup *grp;
     u8 *vtxBuf;
     u8 *from;
@@ -86,22 +87,24 @@ void func_15173F20(s32 mesh, s32 mode, s32 t, s32 group, s32 slot) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1730/func_15173F20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1730/vtx_colour_groups_blend.s")
 
-s32 func_15173F20();
+s32 vtx_colour_groups_blend();
 #endif
 
-void func_151741D0(s32 arg0, s32 arg1) {
-    func_15173F20(0, 0, arg0, arg1, 0);
+/* was func_151741D0 */
+void vtx_colour_world_blend(s32 arg0, s32 arg1) {
+    vtx_colour_groups_blend(0, 0, arg0, arg1, 0);
 }
 
 s32 world_record_find(u8);
-void func_15174200(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_15174200 */
+void vtx_colour_record_blend(s32 arg0, s32 arg1, s32 arg2) {
     u8 *p = (u8 *)world_record_find(arg2);
     u32 v; // fakematch: named temp fixes the order of the argument setup
 
     if (p != NULL) {
         v = *(u16 *)(p + 0x54) & 0xFFFF7FFF;
-        func_15173F20(v, 1, arg0, arg1, (p - (u8 *)D_800DBEF4) / 0xA0);
+        vtx_colour_groups_blend(v, 1, arg0, arg1, (p - (u8 *)D_800DBEF4) / 0xA0);
     }
 }

@@ -8,7 +8,8 @@ extern f32 D_800A0AD4;
 extern f32 D_800A0AD8;
 extern f32 D_800A0ADC;
 
-void func_150CD2A0(f32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* was func_150CD2A0 */
+void ground_colour_by_depth(f32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     f32 temp_f0;
     f32 temp_f0_2;
 

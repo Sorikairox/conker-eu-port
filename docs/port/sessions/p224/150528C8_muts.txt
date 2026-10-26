@@ -38,9 +38,9 @@ s/(o + 0x22C) \& 8)) {/(o + 0x22C) \& 4)) {/
 s/OBJ_F32(o, 0x20) \* -2.5f/OBJ_F32(o, 0x20) * -2.0f/
 s/if (o\[0x104\] != 0) {/if (o[0x105] != 0) {/
 s/(o + 0x7A) + 0x4000) \* 0.0054931640625f;/(o + 0x7A) + 0x2000) * 0.0054931640625f;/
-s/func_15052760(arg0, yaw);/func_15052760(arg0, 0);/
+s/obj_lean_into_turn(arg0, yaw);/obj_lean_into_turn(arg0, 0);/
 s/if (o\[4\] == 0x9E) {/if (o[4] == 0x9F) {/
 s/(o + 0x2E4) = 0;/(o + 0x2E0) = 0;/
 s/D_800C3E78 < D_80090130)/D_800C3E78 <= D_80090130)/
-s/|| func_150535F4(arg0) == 0) {/|| func_150535F4(arg0) != 0) {/
-s/func_15021834(arg0, 0, -1);/func_15021834(arg0, 0, 1);/
+s/|| obj_check_death(arg0) == 0) {/|| obj_check_death(arg0) != 0) {/
+s/cutscene_actor_apply_track(arg0, 0, -1);/cutscene_actor_apply_track(arg0, 0, 1);/

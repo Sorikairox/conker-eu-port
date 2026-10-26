@@ -14,7 +14,7 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
   // VOICETEST=<hex voice clip id>[:calls]: voice stream handler + MP3 decoder + MP3 ABI (P14)
   if (process.env.VOICETEST) setTimeout(() => { const [r, f] = process.env.VOICETEST.split(':'); M._port_voice_test(parseInt(r, 16), +(f || 2000)); }, 1500);
   // P27 PADTEST=1: scripted pad 0 input through the heap pad state (same path as the page's keyboard):
-  // A + Start + stick (80, -40) from 3 s, released at 4 s; the PIF model and func_1501BBB8 log [pad] lines
+  // A + Start + stick (80, -40) from 3 s, released at 4 s; the PIF model and cont_read_frame log [pad] lines
   if (process.env.PADTEST && M._port_pad_state) {
     const p = M._port_pad_state() >> 2;
     setTimeout(() => { M.HEAP32[p + 1] = 0x9000; M.HEAP32[p + 2] = 80; M.HEAP32[p + 3] = -40; console.log('[padtest] press A+Start, stick 80,-40'); }, 3000);

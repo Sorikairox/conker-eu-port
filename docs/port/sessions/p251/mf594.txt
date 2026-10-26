@@ -15,7 +15,7 @@
 \#^            v = 0;$#s/0/1/
 \#^    if (arg0\[0x24\] == 0 && v == 0) {$#s/&&/||/
 \#^    if (arg0\[0x24\] == 0 && v == 0) {$#s/0x24/0x25/
-\#^    func_1516FDD4(arg0);$#s/arg0/arg0 + 4/
+\#^    particle_move_xz(arg0);$#s/arg0/arg0 + 4/
 \#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/0x14/0x16/
 \#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/(s16 \*)/(u16 *)/
 \#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/grow\[kind\]/scale[kind]/
@@ -23,5 +23,5 @@
 \#^    \*(s16 \*) (arg0 + 0x14) = size;$#s/size/size + 1/
 \#^    if (kind == 3) {$#s/3/2/
 \#^        \*(s16 \*) (arg0 + 0x18) = 100;$#s/100/101/
-\#^    func_1516FEBC((s32) arg0, scale\[kind\]);$#s/scale/grow/
+\#^    particle_scale_vel_xz((s32) arg0, scale\[kind\]);$#s/scale/grow/
 \#^    return 0;$#s/0/1/

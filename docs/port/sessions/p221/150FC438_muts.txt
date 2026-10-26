@@ -16,7 +16,7 @@ s/fx.u2 = -1;/fx.u2 = 0;/
 s/fx.time = 0x12C;/fx.time = 0x12D;/
 s/fx.f\[2\] = 19.0f;/fx.f[2] = 20.0f;/
 s/fx.f\[11\] = D_800A22A0;/fx.f[11] = D_800A229C;/
-s/func_15164CF0((u8 \*) \&fx, 0, 0xFF, 1)/func_15164CF0((u8 *) \&fx, 1, 0xFF, 1)/
-s/\*(u8 \*\*) (rec + 0x28 + 0x10) = func_15164CF0/(void) func_15164CF0/
+s/cam_wobble_spawn((u8 \*) \&fx, 0, 0xFF, 1)/cam_wobble_spawn((u8 *) \&fx, 1, 0xFF, 1)/
+s/\*(u8 \*\*) (rec + 0x28 + 0x10) = cam_wobble_spawn/(void) cam_wobble_spawn/
 s/if (other == NULL || \*(u8 \*\*) ((u8 \*) other + 0x318) == NULL) {/if (other == NULL) {/
 s/fx.player = (\*(u8 \*\*) ((u8 \*) other + 0x318))\[0x23D\];/fx.player = 0;/

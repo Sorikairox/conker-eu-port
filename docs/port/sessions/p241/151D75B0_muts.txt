@@ -1,4 +1,4 @@
-# P241 func_151D75B0 (money_popup_draw) mutants: sed % setup names
+# P241 money_popup_draw (money_popup_draw) mutants: sed % setup names
 s/    if (\*(s32 \*) owner == 0 || data\[4\] != owner\[0x3B\]) {/    if (data[4] != owner[0x3B]) {/ % gone
 s/    if (\*(s32 \*) owner == 0 || data\[4\] != owner\[0x3B\]) {/    if (*(s32 *) owner == 0) {/ % otherid
 s/data\[4\] != owner\[0x3B\]/data[5] != owner[0x3B]/ % fade

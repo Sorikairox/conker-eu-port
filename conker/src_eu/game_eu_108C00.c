@@ -6,7 +6,7 @@
 #ifdef NON_MATCHING
 // limb_trail_effect_spawn: spawns a type 0x17 effect record (effect3d_spawn_default) along the limb `idx` of obj's skeleton
 // (obj + 0x1D4, 0x40-byte matrices): the two limb points D_80088CB0[idx] / D_80088CBC[idx] are transformed by the
-// limb's matrix (func_15143134), their scaled difference gives the direction; nothing is spawned when its XZ length
+// limb's matrix (mtx_transform_point_or_origin), their scaled difference gives the direction; nothing is spawned when its XZ length
 // is below D_800A0FB0. The record gets the start point and the normalised XZ direction, and its fields 0x110..0x138
 // come from the per-limb tables (direction, speeds, scales, mode byte).
 typedef struct {
@@ -61,8 +61,8 @@ void joint_beam_spawn(u8 *obj, s32 idx, u8 group, s32 arg3) {
         return;
     }
     mtx = bones + (D_80088CC8[idx] << 6);
-    func_15143134(D_80088CB0[idx], a, mtx);
-    func_15143134(D_80088CBC[idx], b, mtx);
+    mtx_transform_point_or_origin(D_80088CB0[idx], a, mtx);
+    mtx_transform_point_or_origin(D_80088CBC[idx], b, mtx);
     scale = D_80088CCC[idx];
     dir[0] = scale * (b[0] - a[0]);
     dir[1] = scale * (b[1] - a[1]);
@@ -166,7 +166,7 @@ s32 beam_motion_step(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_motion_step.s")
 #endif
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
 /* was func_150DB858 */
@@ -185,7 +185,7 @@ u8 *beam_build_quad_vtx_b(u8 *arg0, s16 arg1) {
     s32 temp_a1;
     u8 *temp_v0;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u44, &sp.u37);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u44, &sp.u37);
     sp.u40 = sp.u44;
     if (sp.u44 != NULL) {
         if (sp.u37 != 0) {
@@ -223,7 +223,7 @@ u8 *beam_build_quad_vtx_b(u8 *arg0, s16 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/beam_build_quad_vtx_b.s")
 #endif
 #ifdef NON_MATCHING
-// anim_event_effect_spawn: animation event 0x32 (func_150268BC): when all five pointers are set and span != 0, spawns
+// anim_event_effect_spawn: animation event 0x32 (scene_event_run_b): when all five pointers are set and span != 0, spawns
 // a type 0x17 effect record (effect3d_spawn_default with flags 0x401, 0x243A, colour 0xC8 x4, lifetime span, group arg6 and
 // arg7) and links it to its sources: +0x110 = a0, +0x114 = a1, +0x118 = a2, +0x11C = a4, +0x120 = a3 (P195).
 typedef struct {
@@ -289,7 +289,7 @@ s32 beam_alpha_from_value(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 
 /* was func_150DBC94 */
@@ -313,7 +313,7 @@ u8 *beam_build_quad_vtx_c(u8 *arg0, s16 arg1) {
     u8 *temp_v0;
     u8 *temp_v1;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u54, &sp.u37);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u54, &sp.u37);
     sp.u50 = sp.u54;
     if (sp.u54 != NULL) {
         if (sp.u37 != 0) {

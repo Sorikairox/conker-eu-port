@@ -16,7 +16,8 @@ extern s32 D_80088AB0;
 // 0x4000 is held. Finally flag 0x100 of +0x5F0 follows "0x200A / 0xB7 and 0xBC set and 0xBB not -1": while it holds
 // the player (camera_push_mode kind 3) is seated on the object's last slot (camera_set_followed_obj) with speeds as above and
 // +0x190 = 0 / 135 by the animation flag 4; else on leaving (camera_pop_mode 3) it returns to slot +0x23D.
-void func_150B6CC0(u8 *p) {
+/* was func_150B6CC0 */
+void player_carry_state_update(u8 *p) {
     s32 i;
     s32 on;
     s32 v;
@@ -92,5 +93,5 @@ void func_150B6CC0(u8 *p) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E44D0/func_150B6CC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E44D0/player_carry_state_update.s")
 #endif

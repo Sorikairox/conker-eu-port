@@ -27,15 +27,16 @@ void __osSiRelAccess(void) {
     osSendMesg(&D_80042E38, NULL, OS_MESG_NOBLOCK);
 }
 
-void func_10024190(void *, s32); // osWritebackDCache
+void os_writeback_dcache(void *, s32); // osWritebackDCache
 
 // __osSiRawStartDma
-s32 func_10025B60(s32 direction, void *dramAddr) {
+/* was func_10025B60 */
+s32 os_si_raw_start_dma(s32 direction, void *dramAddr) {
     if (__osSiDeviceBusy()) {
         return -1;
     }
     if (direction == OS_WRITE) {
-        func_10024190(dramAddr, 64);
+        os_writeback_dcache(dramAddr, 64);
     }
     IO_WRITE(SI_DRAM_ADDR_REG, osVirtualToPhysical(dramAddr));
     if (direction == OS_READ) {

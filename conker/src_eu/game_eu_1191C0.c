@@ -16,7 +16,7 @@ void target_volume_hit_check_offset(void *arg0, void *arg1, s32 arg2) {
     target_volume_hit_check(arg0, sp1C, arg2);
 }
 
-s32 func_150A2D44(s32, s32);
+s32 trigger_set_disabled(s32, s32);
 s32 target_volume_explode(u8 *, s32, s32);
 extern s32 D_80088E40[];
 extern s32 D_80088E50[];
@@ -31,26 +31,26 @@ s32 target_volume_hit_check(u8 *arg0, f32 *arg1, s32 arg2) {
     s32 temp_s2;
     s32 var_s1;
 
-    sp44 = func_15083E90(9U);
+    sp44 = obj_find_by_setup_id(9U);
     if (sp44 != NULL) {
         for (var_s1 = 0; var_s1 < 4; var_s1++) {
             temp_s2 = D_80088E40[var_s1];
             temp_lo = temp_s2 * 0x34;
-            if (func_150A3990(temp_lo + D_800D34B8, arg0, arg1, arg2) != 0) {
-                func_150A2D44(temp_s2, 1);
+            if (trigger_segment_hit(temp_lo + D_800D34B8, arg0, arg1, arg2) != 0) {
+                trigger_set_disabled(temp_s2, 1);
                 sp44->unk2E8 = var_s1 + 1;
                 target_volume_explode(temp_lo + D_800D34B8, 0xFF, 1);
                 return 1;
             }
         }
         for (var_s1 = 0; var_s1 < 8; var_s1++) {
-            if (func_150A3990((D_80088E50[var_s1] * 0x34) + D_800D34B8, arg0, arg1, arg2) != 0) {
+            if (trigger_segment_hit((D_80088E50[var_s1] * 0x34) + D_800D34B8, arg0, arg1, arg2) != 0) {
                 return 1;
             }
         }
         return 0;
     }
-    if (func_150A3990(D_800D34B8 + 0xF70, arg0, arg1, arg2) != 0) {
+    if (trigger_segment_hit(D_800D34B8 + 0xF70, arg0, arg1, arg2) != 0) {
         (*(s32 *)((u8 *)D_800D34B8 + 0xF88)) = 1;
     }
     return 0;
@@ -142,7 +142,7 @@ void world_obj_tilt_spring_update(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-/* func_15132BBC spark template (fx_fireworks_burst); pad bytes stay unset like the asm's */
+/* mdl_particle_spawn_ex spark template (fx_fireworks_burst); pad bytes stay unset like the asm's */
 typedef struct {
     f32 u0;         /* 0x00 9.0 */
     f32 u4;         /* 0x04 D_800A18B8 (0.435) */
@@ -151,7 +151,7 @@ typedef struct {
     f32 pos[3];     /* 0x10 D_800A5860 */
     f32 scale[3];   /* 0x1C */
     f32 dir[3];     /* 0x28 D_800A1878[i] */
-    f32 vel[3];     /* 0x34 func_15143794 */
+    f32 vel[3];     /* 0x34 vec3_from_angles_byte */
     f32 u40;        /* 0x40 */
     f32 u44;        /* 0x44 */
     f32 u48;        /* 0x48 */
@@ -189,18 +189,18 @@ extern u8 D_800A18A8[];
 
 #ifdef NON_MATCHING
 void fx_debris_emitter_spawn(void *, s16, u8, s32);
-s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
-s32 func_1516547C(s32, s32, s32, s32, s32);
-void func_151D45A4(u8 *, u8, s32);
-s32 func_151D5AC4(f32 *, s32, s32);
-s32 func_15132BBC(f32 *, s32, s32, s32, s32, s32, s32);
-void func_15143794(s16, s16, f32, void *);
+s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
+s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
+void explosion_light_spawn(u8 *, u8, s32);
+s32 smoke_cloud_spawn(f32 *, s32, s32);
+s32 mdl_particle_spawn_ex(f32 *, s32, s32, s32, s32, s32, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 
-// fireworks_burst: sound (func_1516547C 2), a flash at D_800A186C (fx_debris_emitter_spawn, size 120..181) and the effects at
-// D_800A1860 (func_151D5AC4 / func_151D45A4 / func_15154728 radius 12..16), then four spark showers (func_15132BBC
-// type 3), one per D_800A1878 direction, each with a random launch velocity (func_15143794: angle 45..70, yaw
-// -25..-10, speed 15..45), sizes and a life of 50..100 frames. Returns the last func_15132BBC result; `arg0` (the
-// event id the dispatcher func_1509DB90 passes) is unused.
+// fireworks_burst: sound (cam_wobble_start_preset 2), a flash at D_800A186C (fx_debris_emitter_spawn, size 120..181) and the effects at
+// D_800A1860 (smoke_cloud_spawn / explosion_light_spawn / spark_shower_spawn radius 12..16), then four spark showers (mdl_particle_spawn_ex
+// type 3), one per D_800A1878 direction, each with a random launch velocity (vec3_from_angles_byte: angle 45..70, yaw
+// -25..-10, speed 15..45), sizes and a life of 50..100 frames. Returns the last mdl_particle_spawn_ex result; `arg0` (the
+// event id the dispatcher event_effect_stop passes) is unused.
 /* was func_150EBE44 */
 s32 fx_fireworks_burst(s32 arg0) {
     SparkBE44 t;
@@ -210,12 +210,12 @@ s32 fx_fireworks_burst(s32 arg0) {
     u32 b;
     s32 ret;
 
-    func_1516547C(2, D_800BEE0B, 0, 0xFF, 1);
+    cam_wobble_start_preset(2, D_800BEE0B, 0, 0xFF, 1);
     fx_debris_emitter_spawn(D_800A186C, (u32) random_int() % 62 + 120, 0xFF, 1);
-    func_151D5AC4(D_800A1860, 0xFF, 1);
-    func_151D45A4((u8 *) D_800A1860, 0xFF, 1);
+    smoke_cloud_spawn(D_800A1860, 0xFF, 1);
+    explosion_light_spawn((u8 *) D_800A1860, 0xFF, 1);
     f = random_float();
-    func_15154728(D_800A1860, f * 4.0f + 12.0f, 1.64099991f, (u32) random_int() % 56 + 200, 0.0f, 0xFF, 1);
+    spark_shower_spawn(D_800A1860, f * 4.0f + 12.0f, 1.64099991f, (u32) random_int() % 56 + 200, 0.0f, 0xFF, 1);
     t.u8 = 1.0f;
     t.uC = 1.0f;
     t.u0 = 9.0f;
@@ -248,13 +248,13 @@ s32 fx_fireworks_burst(s32 arg0) {
         a = random_int();
         b = random_int();
         f = random_float();
-        func_15143794(a % 26 + 45, (b & 0xF) - 25, f * 30.0f + 15.0f, t.vel);
+        vec3_from_angles_byte(a % 26 + 45, (b & 0xF) - 25, f * 30.0f + 15.0f, t.vel);
         t.u40 = random_float() * 15.1080008f + -7.55400038f; /* D_800A18C8, D_800A18C4 */
         t.u48 = random_float() * 15.1080008f + -7.55400038f;
         t.u4C = random_float() * 0.617000043f + -1.62100005f; /* D_800A18C0, D_800A18BC */
         t.life = (u32) random_int() % 51 + 50;
         t.u56 = D_800A18A8[i];
-        ret = func_15132BBC((f32 *) &t, 3, 0xFF, 0, 0, 0xFF, 1);
+        ret = mdl_particle_spawn_ex((f32 *) &t, 3, 0xFF, 0, 0, 0xFF, 1);
     }
     return ret;
 }
@@ -264,10 +264,10 @@ s32 fx_fireworks_burst(s32 arg0) {
 
 #ifdef NON_MATCHING
 void fx_debris_emitter_spawn(void *, s16, u8, s32);
-s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
-s32 func_1516547C(s32, s32, s32, s32, s32);
-void func_151D45A4(u8 *, u8, s32);
-s32 func_151D5AC4(f32 *, s32, s32);
+s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, s32, s32);
+s32 cam_wobble_start_preset(s32, s32, s32, s32, s32);
+void explosion_light_spawn(u8 *, u8, s32);
+s32 smoke_cloud_spawn(f32 *, s32, s32);
 
 /* was func_150EC200 */
 s32 target_volume_explode(u8 *arg0, s32 arg1, s32 arg2) {
@@ -304,19 +304,19 @@ s32 target_volume_explode(u8 *arg0, s32 arg1, s32 arg2) {
     sp.u80 = 0;
     sp.u82 = -1;
     sp.u81 = 1;
-    func_151D8E18((structEU_151D8E18 *) &sp.u7C, 0, temp_s1 & 0xFF, arg2);
-    func_1516547C(0, 0, 0, temp_s1 & 0xFF, arg2);
+    rumble_request((structEU_151D8E18 *) &sp.u7C, 0, temp_s1 & 0xFF, arg2);
+    cam_wobble_start_preset(0, 0, 0, temp_s1 & 0xFF, arg2);
     var_s0 = 0;
     do {
-        func_151D45A4(&sp.u8C, temp_s1 & 0xFF, arg2);
-        func_151D5AC4(&sp.u8C, temp_s1 & 0xFF, arg2);
+        explosion_light_spawn(&sp.u8C, temp_s1 & 0xFF, arg2);
+        smoke_cloud_spawn(&sp.u8C, temp_s1 & 0xFF, arg2);
         temp_f20 = random_float();
         temp_t8 = (random_int() % 56U) + 0xC8;
         var_f18 = (f32) temp_t8;
         if (temp_t8 < 0) {
             var_f18 += 4294967296.0f;
         }
-        temp_v0 = func_15154728(&sp.u8C, (temp_f20 * 4.0f) + 12.0f, 1.6409999f, var_f18, 0.0f, temp_s1, arg2);
+        temp_v0 = spark_shower_spawn(&sp.u8C, (temp_f20 * 4.0f) + 12.0f, 1.6409999f, var_f18, 0.0f, temp_s1, arg2);
         temp_t9 = (var_s0 + 1) & 0xFF;
         temp_at = temp_t9 < 2;
         var_s0 = temp_t9;

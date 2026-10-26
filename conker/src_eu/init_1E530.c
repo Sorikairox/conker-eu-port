@@ -9,9 +9,9 @@
 #define _n_loadOutputBuffer func_1001F28C
 #define _n_loadBuffer func_1001F5A4
 #define _n_saveBuffer func_1001F79C
-#define _n_filterBuffer(a, b, c, d) func_1001F978((struct55 *) (a), b, c, d)
-#define _doModFunc(a, b) func_1001FA78((void *) (a), b)
-#define func_global_asm_8073F8A0 func_100210C0
+#define _n_filterBuffer(a, b, c, d) n_reverb_filter_buffer((struct55 *) (a), b, c, d)
+#define _doModFunc(a, b) n_reverb_do_mod_func((void *) (a), b)
+#define func_global_asm_8073F8A0 n_aux_bus_pull
 #define _init_lpfilter init_lpfilter
 #define D_global_asm_807FF0F4 D_800428C4
 #define D_global_asm_807FF0F6 D_800428C6
@@ -40,8 +40,8 @@ typedef struct {
 Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, s32 arg2, s32 buff, Acmd *p);
 Acmd *_n_loadBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff,s32 count, Acmd *p);
 Acmd *_n_saveBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff, Acmd *p);
-Acmd *func_1001F978(struct55 *arg0, s32 arg1, s32 arg2, Acmd *p);
-f32 func_1001FA78(f32 arg0[4][4], s32 arg1);
+Acmd *n_reverb_filter_buffer(struct55 *arg0, s32 arg1, s32 arg2, Acmd *p);
+f32 n_reverb_do_mod_func(f32 arg0[4][4], s32 arg1);
 Acmd *func_global_asm_8073F8A0(s32 sampleOffset, Acmd *cmdptr, s32 fxBus, s32 *numpulls);
 void init_lpfilter(ALLowPass *arg0);
 
@@ -408,7 +408,8 @@ Acmd *_n_saveBuffer(ALFx *arg0, s32 arg1, s16 *arg2, s32 arg3, Acmd *arg4) {
 //     return sp34;
 // }
 
-Acmd *func_1001F978(struct55 *arg0, s32 arg1, s32 arg2, Acmd *p) {
+/* was func_1001F978 */
+Acmd *n_reverb_filter_buffer(struct55 *arg0, s32 arg1, s32 arg2, Acmd *p) {
     Acmd *ptr = p;
     s16 tmp = arg2 >> 8;
 
@@ -418,7 +419,8 @@ Acmd *func_1001F978(struct55 *arg0, s32 arg1, s32 arg2, Acmd *p) {
     return ptr;
 }
 
-f32 func_1001FA78(f32 arg0[4][4], s32 arg1) {
+/* was func_1001FA78 */
+f32 n_reverb_do_mod_func(f32 arg0[4][4], s32 arg1) {
     f32 tmp;
 
     arg0[1][1] += arg0[1][0] * arg1;

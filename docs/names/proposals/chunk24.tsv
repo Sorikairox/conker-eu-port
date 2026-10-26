@@ -1,0 +1,99 @@
+old	new	confidence	description
+func_1000EB00	sfx_cb_ambient_random_chirp	med	Emitter callback: silent while paused or volume 0; every 128..255 ticks re-arms and picks sound 0x6C..0x6E at random
+func_1000EBC4	sfx_cb_fade_out	high	Emitter callback: after its timer runs out lowers the volume by 1000 per tick; returns 1 (free) once it drops below 0
+func_1000EC24	sfx_cb_delayed_play_2d	high	Emitter callback: counts down a delay (a new sound id restarts it), then plays the sound as a 2D sound and frees the emitter
+func_1000ECCC	sfx_cb_delayed_object_sound2	high	Emitter callback: after a delay plays the stored sound in the object's second slot (actor_sound_play2) unless one is playing
+func_1000EDA0	sfx_cb_delayed_object_sound	high	Emitter callback: after a delay plays the stored sound on the object (untracked object sound, func_10010630) and frees itself
+func_1000EE70	sfx_cb_follow_object	high	Emitter callback: copies the object's position and pan while it lives with the same id; else frees unless the voice is non-looping
+func_1000EF40	sfx_cb_keep_until_silent	med	Emitter callback: clears the free flag so the emitter persists; when the volume is 0 stops its voice and clears the sound id
+func_1000EFB4	sfx_cb_follow_object_anim	med	Emitter callback: follows the object while its +0x84 id is in the emitter's list; else plays a matching end sound (0xCB, 0x2D7..) and frees
+func_1000F1A8	sound_voices_reset	high	Clears the 16 voice slots (D_800425E0) and the emitter / stop-queue counts, resets the mixer state
+func_1000F248	sound_level_init	high	Per-level sound setup: resets voices, sets fade / mono / reverb options by level id, allocates the variant table, sets bus volumes
+func_1000F3D0	sound_voice_is_playing	high	Returns 1 when the voice slot of handle arg0 (or slot index < 16) has a live voice that is still playing
+func_1000F44C	sound_voice_is_looping	med	Returns 1 when handle arg0's voice is live and has flag 2 in +0x53 (looping), with interrupts disabled
+func_1000F4D8	sound_id_is_playing	high	Returns 1 when any of the 16 voice slots is playing sound id arg0 (low 15 bits)
+func_1000F568	sound_pick_variant	high	Picks one of n variants of sound base at random, avoiding repeats until every variant played (D_80041F5C bitmask)
+func_1000F6B8	sound_listener_volume_pan	high	Volume of a sound at (x, y, z) for the nearest listener between two ranges; writes the pan to *arg4 (func_1000A420)
+func_1000F85C	sound_voice_set_param	high	Sends parameter arg1 (8 volume, 4 pan, 0x10 pitch cents, 0x11 pitch ratio, 0x100 fx) to handle arg0's voice if it plays
+func_1000F91C	sound_voice_update_3d	high	Recomputes a playing voice's volume, pan, fx and pitch from a world position (sound_listener_volume_pan)
+func_1000F9D4	sound_voice_update_pan	high	Recomputes only the pan (and its high bit) of a playing voice from a world position
+func_1000FA64	sfx_emitter_start	high	Claims one of the 32 positional sound emitters for a sound at a position with ranges, callback and flags; returns the voice handle
+func_1000FC18	sfx_emitter_stop_at	high	Stops and frees every emitter with sound id, position and range equal to the arguments
+func_1000FD38	sfx_emitter_stop_by_callback	high	Stops and frees every emitter whose callback and two data words equal the arguments
+func_1000FDF4	sfx_emitter_stop_by_voice	high	Stops and frees every emitter whose voice handle is arg0
+func_1000FE88	sfx_emitter_free_index	high	Stops the voice of emitter arg1 (if below *arg2) and marks it free; returns 1 when the index is out of range
+func_1000FEF0	sfx_emitter_find_by_voice	high	Returns the index of the live emitter with voice handle arg0 and data words arg1 / arg2, -1 if none
+func_1000FF90	sfx_emitter_find_by_callback	high	Returns the index of the live emitter with callback arg0 and data words arg1 / arg2 (-1 = any), -1 if none
+func_1001001C	sfx_emitter_set_volume_pitch	high	Sets volume and pitch (cents) of every emitter matching callback and data words
+func_100100E0	sfx_emitter_replace_callback	high	Replaces callback and data words of every emitter matching the old callback and data words
+func_10010154	actor_sound_play	high	Plays a sound on an object (players 2D with pan, others as a following emitter); handle kept in obj+0x8E
+func_10010344	actor_sound_play2	high	As actor_sound_play for the object's second sound slot (handle obj+0x8C); negative volume = fixed pan
+func_10010558	actor_sound_play2_delayed	high	Plays actor_sound_play2 now, or after arg5 ticks through an emitter with sfx_cb_delayed_object_sound2
+func_10010630	actor_sound_play_untracked	high	Plays a sound on an object without keeping a handle: 2D for players, else a following emitter keyed by unique id
+func_10010720	actor_sound_play_untracked_delay	high	Plays actor_sound_play_untracked now, or after arg5 ticks through an emitter with sfx_cb_delayed_object_sound
+func_100107F8	actor_sound_is_playing	high	Returns 1 when the object's first sound slot (obj+0x8E / its emitter) is still playing, else clears the handle
+func_10010894	actor_sound2_is_playing	high	Returns 1 when the object's second sound slot (obj+0x8C / its emitter) is still playing, else clears the handle
+func_1001091C	actor_sound_set_volume	high	Sets the volume of the object's first sound (voice for players, its emitter otherwise)
+func_100109D0	actor_sound_stop	high	Stops the object's first sound (voice or following emitter) and clears obj+0x8E
+func_10010A3C	actor_sound2_stop	high	Stops the object's second sound (voice or following emitter) and clears obj+0x8C
+func_10010AA8	actor_sounds_stop_loops	med	Stops both object sound slots where looping and frees their emitters, then clears both handles
+func_10010BE8	sound_voice_play	high	Starts sound arg1 in a voice slot (reusing handle arg0's slot) with volume, pan, pitch and fx; returns the new handle
+func_10010E78	sound_voice_play_at	high	Starts a voice for a sound at a world position (volume and pan from the nearest listener); 0 when inaudible
+func_10010F30	sound_play_2d	high	Plays a sound with no owner as a plain 2D voice (volume, pan, pitch, fx)
+func_10010F88	sound_play_at	high	Plays a sound with no owner at a world position (sound_voice_play_at with handle 0)
+func_10010FFC	sound_play_for_actor	med	Plays a sound for an actor: 2D for players, else at its position at 3/4 volume with a range scaled by its size
+func_100111C8	sound_voice_stop	high	Stops handle arg0's voice now and clears its slot
+func_1001123C	sound_voice_stop_deferred	high	Queues handle arg0's voice to stop next tick (sound_stop_queue_push); stops it now when the queue is full
+func_100112BC	sound_stop_queue_push	high	Adds handle arg0 with delay arg1 to the 16-entry pending stop queue (D_80041F10); 0 when full
+func_10011310	sound_stop_queue_process	high	Counts down the pending stop queue, stopping and clearing voices whose delay ran out, and compacts it
+func_1001147C	sound_voice_get_id	high	Returns the sound id (15 bits) playing in handle arg0's slot, -1 when the handle is stale or 0
+func_100114D0	sound_source_mix	high	Volume, pan and distance of a sound at (x, y, z) for the nearest listener, volume scaled by gain; returns the distance
+func_10011624	sfx_emitters_update	high	Updates emitters [first, end): runs callbacks, computes volume / pan / pitch, starts or updates voices, frees silent ones
+func_10011BB8	sound_update_frame	high	Per-frame sound update: listener positions from players, stop queue, emitters (compacted), music bus volume fade / mute
+func_10011E88	sound_level_hook_nop	low	Empty function called with the level id from sound_level_init
+func_10011E94	sound_set_pause_mute	high	Sets the pause mute request (D_80041F61) that silences buses 0 and 1 in sound_update_frame
+func_10011EB8	sound_surface_footstep	high	Footstep sound for a floor surface type and step index from D_8002C5A0 (random variant); outputs volume per player count
+func_10001000	boot_entrypoint	high	N64 entrypoint (hand asm): clears BSS, sets the boot stack and jumps to the boot COP0 setup (func_10005DA0)
+func_10003570	os_create_vi_manager	high	libultra osCreateViManager: sets up the VI / counter event queue and starts the VI manager thread
+func_100036E8	os_vi_manager_main	high	libultra viMgrMain thread: swaps VI contexts on retrace, sends the client message, advances the time, runs timers
+func_10005860	os_motor_stop	high	libultra osMotorStop: sends the rumble pak stop block for the channel and returns the status
+func_10005990	os_motor_start	high	libultra osMotorStart: sends the rumble pak start block for the channel and returns the status
+func_10005AD0	os_motor_init	high	libultra osMotorInit: probes the rumble pak at 0x400 and prebuilds the start / stop PIF blocks
+func_10005C38	os_make_motor_data	high	libultra _MakeMotorData: builds a PIF RAM block that writes buffer to the pak address for a channel
+func_10005DA0	boot_map_init_segment	med	Boot (hand asm): maps TLB entry 0 for the 0x10000000 init segment, then jumps to func_10001050
+func_10005B04	tlb_area_init	med	Reserves the code / TLB page area (retrying smaller sizes), keeps its address and allocates its page bitmap
+func_10005BE0	tlb_page_bitmap_reset	high	Fills the TLB page bitmap with 0xFF and masks the unused bits of its last byte
+func_10005F1C	tlb_miss_load_segment	med	TLB-miss refill (hand asm): finds a free page, DMAs and rzip-inflates the missing game segment page, writes the TLB
+func_100061F8	tlb_clear_entries	high	Writes invalid entries to TLB indices arg1 down to arg0
+func_10006530	rzip_inflate	high	Inflates an rzip record src into dst using the work area for tables; returns the output length (0 on error)
+func_1000654C	rzip_inflate_impl	high	Inflater entry: skips the record header, sets the output limit and runs the block loop
+func_1000661C	rzip_inflate_loop	high	Inflater block loop: decodes blocks until the last one
+func_10006670	rzip_inflate_block	high	Reads a deflate block header and dispatches to the stored / fixed / dynamic decoder
+func_10006714	rzip_inflate_dynamic	high	Decodes a dynamic-Huffman deflate block (builds its tables, then inflate_codes)
+func_10006B18	rzip_inflate_stored	high	Copies a stored (uncompressed) deflate block
+func_10006C1C	rzip_inflate_fixed	high	Decodes a fixed-Huffman deflate block with the boot-built tables at D_8003C230
+func_10006C5C	rzip_huft_build	high	huft_build: builds Huffman decoding tables from code lengths
+func_100070F0	rzip_inflate_codes	high	inflate_codes: decodes literals / length-distance pairs with the given tables
+func_1000738C	rzip_build_fixed_tables	high	Builds the fixed literal / distance Huffman tables at D_8003C230 once at boot
+func_10007AA8	os_exc_send_mesg	high	exceptasm send_mesg (continues into handle_CpU / __osEnqueueAndYield): posts an event message, wakes a waiting thread
+func_10007CC8	os_enqueue_thread	high	libultra __osEnqueueThread: inserts a thread into a queue ordered by priority
+func_10007D14	os_pop_thread	high	libultra __osPopThread: unlinks and returns the head of a thread queue
+func_10007D28	os_dispatch_thread	high	libultra __osDispatchThread: pops the next runnable thread, restores its context and erets
+func_10007F64	crash_print_hex32	med	Crash screen (hand asm): draws a 32-bit value as 8 hex digits with crash_draw_glyph
+func_10007FB4	crash_print_string	med	Crash screen (hand asm): draws a NUL-terminated string (0-9, A-Z) with crash_draw_glyph
+func_10008018	crash_draw_glyph	med	Crash screen (hand asm): draws one 8x8 font glyph into both framebuffers and advances the cursor
+func_10008090	debug_syscall_trap	high	Executes a syscall instruction (debug stop used by the display-list checker)
+func_1000809C	debugger_crash_entry	med	Crash / debugger entry (hand asm): blanks the screen, prints status, DMAs and maps the debugger, calls func_16000B14
+func_10008410	os_map_tlb_rdb	high	libultra __osMapTLBRdb: maps TLB entry 0 to the RDB port at 0xB8000000
+func_10023B70	os_pi_create_access_queue	high	libultra __osPiCreateAccessQueue: creates the PI access message queue and posts its token
+func_10023BC0	os_pi_get_access	high	libultra __osPiGetAccess: creates the PI access queue if needed and waits for its token
+func_10023C04	os_pi_rel_access	high	libultra __osPiRelAccess: returns the PI access token
+func_10023DA0	os_epi_raw_start_dma	high	libultra osEPiRawStartDma: starts a PI DMA for a handle's domain once the PI is idle
+func_10024190	os_writeback_dcache	high	libultra osWritebackDCache (hand asm): writes back the data cache lines of a range
+func_10024720	os_vi_init	high	libultra __osViInit: clears the VI contexts and sets the TV-type mode and clock, then swaps the context
+func_10025210	os_vi_get_next_framebuffer	high	libultra osViGetNextFramebuffer: returns the framebuffer queued for the next retrace
+func_10025B60	os_si_raw_start_dma	high	libultra __osSiRawStartDma: starts a 64-byte SI DMA to / from PIF RAM
+func_10025E40	os_pack_ram_write_data	high	libultra __osPackRamWriteData: builds the PIF RAM block for a controller pak write
+func_10026204	os_pack_ram_read_data	high	libultra __osPackRamReadData: builds the PIF RAM block for a controller pak read
+func_10027990	os_pfs_init	high	libultra osPfsInit: checks the controller pak, reads its id and fills the OSPfs
+func_10027B50	os_leo_disk_init	high	libultra osLeoDiskInit: fills the 64DD PI handle, sets domain 2 timings and links it into the PI table

@@ -5,7 +5,8 @@
 
 typedef struct { f32 x, y, z; } V3;
 
-s32 func_151B65C0(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, u8 argA, u8 argB, u8 argC, s32 argD) {
+/* was func_151B65C0 */
+s32 ripple_spawn_alt(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, u8 argA, u8 argB, u8 argC, s32 argD) {
     s32 obj;
     s32 n;
     struct {
@@ -97,7 +98,7 @@ s32 func_151B65C0(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5, s1
     sp.uA0 = 0;
     sp.uA2 = n;
     sp.uA4 = 0xFF / n;
-    obj = func_15132FBC((u8 *)&sp.u28[2], 3, 0xFF, 8, argC, argD);
+    obj = mdl_particle_spawn((u8 *)&sp.u28[2], 3, 0xFF, 8, argC, argD);
     if (obj != 0) {
         memcpy(obj + 0x170, &sp, 8);
     }
@@ -105,9 +106,10 @@ s32 func_151B65C0(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5, s1
 }
 
 #ifdef NON_MATCHING
-s32 func_15133E04(u8 *); /* P98: the asm reads a0 = the object */
+s32 mdl_particle_fall_update(u8 *); /* P98: the asm reads a0 = the object */
 
-void func_151B6804(u8 *arg0) {
+/* was func_151B6804 */
+void ripple_alt_update(u8 *arg0) {
     u8 *sp18;
     f32 *temp_v0;
     f32 temp_f12;
@@ -127,8 +129,8 @@ void func_151B6804(u8 *arg0) {
     temp_f2 = temp_f12 + (sinf((*(f32 *)((u8 *)temp_v0_2 + 0))) * (0.061000004f * temp_f12));
     (*(f32 *)((u8 *)arg0 + 0x1C)) = temp_f2;
     (*(f32 *)((u8 *)arg0 + 0x18)) = temp_f2;
-    func_15133E04(arg0);
+    mdl_particle_fall_update(arg0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3DD0/func_151B6804.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3DD0/ripple_alt_update.s")
 #endif

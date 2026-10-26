@@ -6,7 +6,7 @@
  *    port_pif_dma(), which copies the 64-byte block, runs it and posts OS_EVENT_SI;
  *  - the PC osContStartReadData packs the libultra controller-read block (cmd 0x01 on channels 0-3)
  *    into PIF RAM and runs it; osContGetReadData unpacks the replies like libultra's
- *    __osContGetReadData (button, stick, errno = CHNL_ERR). The game's per-frame read func_1501BBB8
+ *    __osContGetReadData (button, stick, errno = CHNL_ERR). The game's per-frame read cont_read_frame
  *    (game_eu_49310.c, C) calls both.
  *
  * Input comes from the page (port/web/main.js): it writes port_pads[] in the wasm heap directly
@@ -161,9 +161,9 @@ void port_pif_dma(int write, void *d) {
 
 /* P236: libultra's osContInit (init_eu_256E0.c) ends with osCreateMesgQueue(&__osEepromTimerQ, &__osEepromTimerMsg, 1)
  * (EU D_80042E08 / D_80042E20). This replacement skipped it, so the queue stayed zeroed (msgCount 0): the EEPROM
- * long write's timer message (osEepromLongWrite func_151DD4A0 -> osSetTimer) was dropped by osSendMesg, the per-frame
- * pump func_151DD588(0) never advanced, and the NEXT save blocked for good in func_151DD4A0's
- * `while (func_151DD588(1))` (osRecvMesg OS_MESG_BLOCK on a queue nobody can fill). Seen after P232 made
+ * long write's timer message (osEepromLongWrite eeprom_async_write_start -> osSetTimer) was dropped by osSendMesg, the per-frame
+ * pump eeprom_async_write_step(0) never advanced, and the NEXT save blocked for good in eeprom_async_write_start's
+ * `while (eeprom_async_write_step(1))` (osRecvMesg OS_MESG_BLOCK on a queue nobody can fill). Seen after P232 made
  * save_slot_write save_slot_pack C: first save at the level 6 entry (frame 17824), the game thread froze at the next one
  * (level 0x18 scene 2 request, frame 19116). Created once, as libultra does (guarded by __osContinitialized). */
 extern OSMesgQueue D_80042E08; /* __osEepromTimerQ */
@@ -207,7 +207,7 @@ s32 osContStartReadData(OSMesgQueue *mq) {
     return 0;
 }
 
-/* P27: log what the game's per-frame read func_1501BBB8 gets (first changes of pad 0), and on the
+/* P27: log what the game's per-frame read cont_read_frame gets (first changes of pad 0), and on the
  * next read what it made of it: D_800BED38[0] (dead-zoned pad) and D_800BED50[0] (new presses).
  * Weak: the scheduler demo links this file without the game. ?padlog=N raises the limit (default 8). */
 extern OSContPad D_800BED38[4] __attribute__((weak));
@@ -255,7 +255,7 @@ void osContGetReadData(OSContPad *pad) {
 }
 
 /* ---------------- P27 save test: EEPROM write/read through PIF commands 0x05 / 0x04 ----------------
- * The game's own save path (osEepromLongWrite func_151DD4A0, pumped per frame by func_151DD588) only
+ * The game's own save path (osEepromLongWrite eeprom_async_write_start, pumped per frame by eeprom_async_write_step) only
  * runs from its save menus, which are still asm. This drives the same PIF device with the same command
  * blocks libultra's __osPackEepWriteData / __osPackEepReadData build, on channel 4.
  * mode 1: write 64 bytes derived from `seed` to blocks 0x38..0x3F; mode 2: read them back and compare. */

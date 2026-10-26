@@ -11,7 +11,7 @@ s/    \*(s32 \*) (rec + 8) = stamp;/    *(s32 *) (rec + 8) = stamp + 1;/ % s0
 s/    if (D_8002AC5C == 0) {/    if (D_8002AC5C != 0) {/ % s0 s0_off
 s/            D_800BE778\[i\] = 0xFE;/            D_800BE778[i] = 0xFF;/ % s0
 s/        for (i = 0; i < 8; i++) {/        for (i = 0; i < 7; i++) {/ % s0
-s/        func_151DDA90(\&D_800BE900, area \* 16 + 0x13, D_800BE778);/        func_151DDA90(\&D_800BE900, area * 16 + 0x12, D_800BE778);/ % s0
+s/        game_eeprom_write(\&D_800BE900, area \* 16 + 0x13, D_800BE778);/        game_eeprom_write(\&D_800BE900, area * 16 + 0x12, D_800BE778);/ % s0
 s/    if (D_800BE810 == NULL) {/    if (D_800BE810 != NULL) {/ % s0 widths_alloc
 s/        D_800BE810 = (u8 \*) asset_load(NULL, 1, 7) + 8;/        D_800BE810 = (u8 *) asset_load(NULL, 1, 7);/ % widths_alloc
 s/    p\[0\] = slot;/    p[0] = slot + 1;/ % s0
@@ -22,7 +22,7 @@ s/    for (i = 0; i < 27; i++) {/    for (i = 0; i < 26; i++) {/ % s0
 s/        \*p++ = ((u8 \*) D_800D2E4C)\[i\];/        *p++ = ((u8 *) D_800D2E4C)[i + 1];/ % s0
 s/    for (i = 0; i < 9; i++) {   /    for (i = 0; i < 8; i++) {   / % s0
 s/    p\[0\] = D_800BE3DF;/    p[0] = D_800BE800;/ % s0
-s/    D_800BE804 = func_150859AC(0, 6);/    D_800BE804 = func_150859AC(0, 5);/ % s0
+s/    D_800BE804 = player_stat_get(0, 6);/    D_800BE804 = player_stat_get(0, 5);/ % s0
 s/    p\[0\] = (u32) D_800BE804 >> 8;/    p[0] = (u32) D_800BE804 >> 16;/ % s0
 s/    p\[1\] = D_800BE804;/    p[1] = 0;/ % s0
 s/    p\[2\] = (u32) D_800BE3E8 >> 24;/    p[2] = (u32) D_800BE3E8 >> 23;/ % s0
@@ -42,5 +42,5 @@ s/    sum = 0xCC;/    sum = 0xCD;/ % s0
 s/    for (i = 2; i < 0x80; i++) {/    for (i = 2; i < 0x7F; i++) {/ % s0
 s/        sum += D_800BE778\[i\] << (i \& 3);/        sum += D_800BE778[i] << (i \& 7);/ % s0
 s/    \*(u16 \*) D_800BE778 = sum;/    *(u16 *) D_800BE778 = sum + 1;/ % s0
-s/        func_151DD4A0(\&D_800BE900, area \* 16 + 4, D_800BE778, 0x80);/        func_151DD4A0(\&D_800BE900, area * 16 + 4, D_800BE778, 0x7F);/ % s0
-s/        func_151DD4A0(\&D_800BE900, area \* 16 + 4, D_800BE778, 0x80);/        func_151DD4A0(\&D_800BE900, area * 16 + 5, D_800BE778, 0x80);/ % s0
+s/        eeprom_async_write_start(\&D_800BE900, area \* 16 + 4, D_800BE778, 0x80);/        eeprom_async_write_start(\&D_800BE900, area * 16 + 4, D_800BE778, 0x7F);/ % s0
+s/        eeprom_async_write_start(\&D_800BE900, area \* 16 + 4, D_800BE778, 0x80);/        eeprom_async_write_start(\&D_800BE900, area * 16 + 5, D_800BE778, 0x80);/ % s0

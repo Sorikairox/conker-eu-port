@@ -17,7 +17,8 @@ extern OSViContext_s86 *D_8002C134; /* __osViNext */
 u32 __osDisableInt(void);
 void __osRestoreInt(u32);
 
-void func_151EFE00(u32 func) {
+/* was func_151EFE00 */
+void game_os_pi_set_control(u32 func) {
     register u32 saveMask;
 
     saveMask = __osDisableInt();

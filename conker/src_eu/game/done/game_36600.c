@@ -11,7 +11,7 @@ void func_15009150(s32 arg0) {
     D_800DDD61 = 0;
     D_800DD2D0 = 0;
     if ((D_800DCDD0 != 0) && (D_8008CFFC[D_800B0DF0->unk10] != 0)) {
-        tmp = func_1517E080(0, 0xFF);
+        tmp = flare_node_add(0, 0xFF);
         tmp->unk2E = 3;
     }
 }

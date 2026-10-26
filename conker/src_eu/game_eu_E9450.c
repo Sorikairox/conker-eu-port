@@ -4,9 +4,10 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 mdl_particle_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
-void func_150BB760(u8 *arg0) {
+/* was func_150BB760 */
+void obj20_trail_chunk_spawn(u8 *arg0) {
     struct {
         f32 u7C;
         f32 u80;
@@ -150,14 +151,14 @@ void func_150BB760(u8 *arg0) {
         sp.uC0 = 25.0f - (random_float() * 50.0f);
         sp.uD0 = (random_int() & 0x1F) + 0x3C;
         sp.u80 = (random_float() * 0.2f) + 0.25f;
-        func_15132FBC(&sp.u7C, 3, 0xFF, 0, 0xFF, 0);
+        mdl_particle_spawn(&sp.u7C, 3, 0xFF, 0, 0xFF, 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BB760.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/obj20_trail_chunk_spawn.s")
 #endif
 #ifdef NON_MATCHING
-/* func_15132FBC particle request (0x7C bytes; same layout as game_eu_E5830's BreakChunk) */
+/* mdl_particle_spawn particle request (0x7C bytes; same layout as game_eu_E5830's BreakChunk) */
 typedef struct {
     /* 0x00 */ f32 size;
     /* 0x04 */ f32 u04;
@@ -222,7 +223,8 @@ void *node_spawn_vtx_sprite(void *rec, u8 arg1, s32 arg2);
  * sparks (impact_spark_spawn) thrown up and carried along by half the object's speed (+0x3C, heading +0x76); two dust
  * chunks (sprite 0) sized from +0x14C / +0x150; and sound 0x6590 at the object's position. The asm returns 1 for an
  * object of another type, else a scratch value; the only caller ignores it. */
-void func_150BC03C(u8 *obj) {
+/* was func_150BC03C */
+void object_impact_debris(u8 *obj) {
     ImpactShadow shadow;
     ImpactChunk chunk;
     f32 vel[3];
@@ -346,7 +348,7 @@ void func_150BC03C(u8 *obj) {
         chunk.vel[2] = oz + vz;
         chunk.spinX = 25.0f - random_float() * 50.0f;
         chunk.spinY = 25.0f - random_float() * 50.0f;
-        func_15132FBC((s32) &chunk, 3, 0xFF, 0, 0xFF, 0);
+        mdl_particle_spawn((s32) &chunk, 3, 0xFF, 0, 0xFF, 0);
     }
 
     /* sparks */
@@ -418,13 +420,13 @@ void func_150BC03C(u8 *obj) {
         chunk.vel[2] = r * ps * s + oz;
         chunk.spinX = 30.0f - random_float() * 60.0f;
         chunk.spinY = 30.0f - random_float() * 60.0f;
-        func_15132FBC((s32) &chunk, 3, 0xFF, 0, 0xFF, 0);
+        mdl_particle_spawn((s32) &chunk, 3, 0xFF, 0, 0xFF, 0);
     }
-    func_10010F88(0xAA, 0x6590, 0, 0, 0, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C), 200,
+    sound_play_at(0xAA, 0x6590, 0, 0, 0, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C), 200,
                   2000);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BC03C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/object_impact_debris.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -433,7 +435,8 @@ void func_150BC03C(u8 *obj) {
  * position, upward speed 0.05 * the y speed, stop at the first failed spawn; 2..5 sparks (impact_spark_spawn, sprites
  * 0x19..0x20); then 0..2 dust chunks (sprite 0) sized from +0x14C, rotated like the object (+0xB8 / +0x40 / +0xC4).
  * The asm returns 1 for an object of another type, else a scratch value; the only caller ignores it. */
-void func_150BC968(u8 *obj) {
+/* was func_150BC968 */
+void object_impact_debris_hard(u8 *obj) {
     ImpactChunk chunk;
     f32 vel[3];
     f32 pos[3];
@@ -526,7 +529,7 @@ void func_150BC968(u8 *obj) {
         chunk.spinX = 25.0f - random_float() * 50.0f;
         chunk.spinY = 25.0f - random_float() * 50.0f;
         chunk.life = (random_int() & 0x3F) + 100;
-        if (func_15132FBC((s32) &chunk, 3, 0xFF, 0, 0xFF, 0) == 0) {
+        if (mdl_particle_spawn((s32) &chunk, 3, 0xFF, 0, 0xFF, 0) == 0) {
             ok = FALSE;
         }
         n--;
@@ -611,15 +614,16 @@ void func_150BC968(u8 *obj) {
         chunk.vel[2] = r * dx * s;
         chunk.spinX = 30.0f - random_float() * 60.0f;
         chunk.spinY = 30.0f - random_float() * 60.0f;
-        func_15132FBC((s32) &chunk, 3, 0xFF, 0, 0xFF, 0);
+        mdl_particle_spawn((s32) &chunk, 3, 0xFF, 0, 0xFF, 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BC968.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/object_impact_debris_hard.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_150BCBBC(u8 *arg0) {
+/* was func_150BCBBC */
+void obj20_side_chunks_spawn(u8 *arg0) {
     struct {
         f32 uA4;
         f32 uA8;
@@ -753,7 +757,7 @@ loop_6:
             sp.uE4 = 25.0f - (random_float() * 50.0f);
             sp.uE8 = 25.0f - (random_float() * 50.0f);
             var_s2 -= 1;
-            if (func_15132FBC(&sp.uA4, 3, 0xFF, 0, 0xFF, 0) == 0) {
+            if (mdl_particle_spawn(&sp.uA4, 3, 0xFF, 0, 0xFF, 0) == 0) {
                 var_s4 = 0;
             }
             if ((var_s2 != 0) && (var_s4 != 0)) {
@@ -763,10 +767,11 @@ loop_6:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BCBBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/obj20_side_chunks_spawn.s")
 #endif
 /* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
-s32 func_150BD498(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
+/* was func_150BD498 */
+s32 debris_floor_settle_bounce(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(arg0 + 0x10) * 1.1f + arg4;
     if (*(f32 *)(arg0 + 0x48) > -2.0f) {
         *(f32 *)(arg0 + 0x44) = 0.0f;
@@ -787,14 +792,14 @@ s32 func_150BD498(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15132BBC(void *, s32, s32, s32, s32, s32, s32);
-s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
-void func_1514470C(u8 *node, u8 *pos);
-void func_15143794(s16, s16, f32, void *);
-void func_151D58E4(struct17 *, f32, f32, f32, s16, s32, s32);
+s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
+s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
+void spawn_region_random_point_3d(u8 *node, u8 *pos);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+void cam_shake_all_players(struct17 *, f32, f32, f32, s16, s32, s32);
 void *memcpy(void *, const void *, s32);
 
-/* rodata of func_150BD550 (bit-exact copies: the NM link drops this file's .rodata / .late_rodata) */
+/* rodata of blast_debris_and_smoke (bit-exact copies: the NM link drops this file's .rodata / .late_rodata) */
 static const u8 sBlastCyl[2] = { 0x4C, 0x4D };             /* D_800A0260: the two D_800D34B8 cylinders */
 static const f32 sBlastSpinBase[1] = { -22.733002f };     /* D_800A02CC 0xC1B5DD30 */
 static const f32 sBlastSpinRange[1] = { 45.466003f };     /* D_800A02D0 0x4235DD30 */
@@ -814,10 +819,11 @@ static const f32 sSmokeU54Range[1] = { 0.559f };          /* D_800A0304 0x3F0F1A
 static const f32 sSmokeU54Base[1] = { -0.777f };          /* D_800A0308 0xBF46E979 */
 
 // blast_debris_and_smoke: an explosion at the two collision cylinders 0x4C / 0x4D: 13..21 tumbling debris pieces
-// (func_15132BBC requests from a random point of either cylinder, func_1514470C, flying out at a random angle,
-// func_15143794), 17..25 smoke puffs (func_151307F0, type 0x5103, its +0xA8 gets 0.917), then a light flash
-// (func_151D58E4) and a shock ring (func_151D5404) at cylinder 0x4C. arg0 / owner are passed on to every spawn.
-void func_150BD550(u8 arg0, s32 owner) {
+// (mdl_particle_spawn_ex requests from a random point of either cylinder, spawn_region_random_point_3d, flying out at a random angle,
+// vec3_from_angles_byte), 17..25 smoke puffs (particle_spawn_ex, type 0x5103, its +0xA8 gets 0.917), then a light flash
+// (cam_shake_all_players) and a shock ring (rumble_all_players_at) at cylinder 0x4C. arg0 / owner are passed on to every spawn.
+/* was func_150BD550 */
+void blast_debris_and_smoke(u8 arg0, s32 owner) {
     struct {
         f32 u00, u04;       /* 0x00: 1.0 */
         f32 size[2];        /* 0x08 */
@@ -911,14 +917,14 @@ void func_150BD550(u8 arg0, s32 owner) {
         debris.rot[2] = random_float() * 360.0f;
         debris.spinA = random_float() * sBlastSpinRange[0] + sBlastSpinBase[0];
         debris.spinB = random_float() * sBlastSpinRange[0] + sBlastSpinBase[0];
-        func_1514470C(cyl[random_int() & 1], (u8 *) debris.pos);
+        spawn_region_random_point_3d(cyl[random_int() & 1], (u8 *) debris.pos);
         r1 = random_int();
         r2 = random_int();
         rf = random_float();
-        func_15143794((u32) r1 % 31 - 0x54, (u32) r2 % 26 - 0x2D, rf * sBlastSpeedRange[0] + sBlastSpeedBase[0],
+        vec3_from_angles_byte((u32) r1 % 31 - 0x54, (u32) r2 % 26 - 0x2D, rf * sBlastSpeedRange[0] + sBlastSpeedBase[0],
                       debris.vel);
         debris.u4C = random_float() * sBlastU4CRange[0] + sBlastU4CBase[0];
-        func_15132BBC(&debris, 3, 0xFF, 0, 0, arg0, owner);
+        mdl_particle_spawn_ex(&debris, 3, 0xFF, 0, 0, arg0, owner);
     }
 
     /* smoke */
@@ -961,14 +967,14 @@ void func_150BD550(u8 arg0, s32 owner) {
         smoke.life2 = smoke.life = random_int() % 31U + 0x1E;
         smoke.u14[7] = random_int() % 101U + 0x9B;
         smoke.size[0] = smoke.size[1] = random_float() * sSmokeSizeRange[0] + sSmokeSizeBase[0];
-        func_1514470C(cyl[random_int() & 1], (u8 *) smoke.pos);
+        spawn_region_random_point_3d(cyl[random_int() & 1], (u8 *) smoke.pos);
         r1 = random_int();
         r2 = random_int();
         rf = random_float();
-        func_15143794((u32) r1 % 41 - 0x59, (u32) r2 % 51 - 0x40, rf * sSmokeSpeedRange[0] + sSmokeSpeedBase[0],
+        vec3_from_angles_byte((u32) r1 % 41 - 0x59, (u32) r2 % 51 - 0x40, rf * sSmokeSpeedRange[0] + sSmokeSpeedBase[0],
                       smoke.vel);
         smoke.u54 = random_float() * sSmokeU54Range[0] + sSmokeU54Base[0];
-        p = (u8 *) func_151307F0((s32 *) &smoke, 1, 0, 4, arg0, owner);
+        p = (u8 *) particle_spawn_ex((s32 *) &smoke, 1, 0, 4, arg0, owner);
         if (p != NULL) {
             memcpy(p + 0xA8, &tail, 4);
         }
@@ -978,12 +984,12 @@ void func_150BD550(u8 arg0, s32 owner) {
     at[0] = ((s16 *) cyl[0])[0];
     at[1] = ((s16 *) cyl[0])[1];
     at[2] = ((s16 *) cyl[0])[2];
-    func_151D58E4((struct17 *) at, 0.0f, 1000.0f, 0.001f, 5, arg0, owner);
+    cam_shake_all_players((struct17 *) at, 0.0f, 1000.0f, 0.001f, 5, arg0, owner);
     at2[0] = ((s16 *) cyl[0])[0];
     at2[1] = ((s16 *) cyl[0])[1];
     at2[2] = ((s16 *) cyl[0])[2];
-    func_151D5404((struct17 *) at2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, owner);
+    rumble_all_players_at((struct17 *) at2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, owner);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BD550.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/blast_debris_and_smoke.s")
 #endif

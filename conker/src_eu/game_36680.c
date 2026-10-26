@@ -16,7 +16,7 @@ void level_lights_reset(void) {
     D_800DCD80 = 0;
     D_800DCD84 = 0;
 
-    func_1515D4D4(255, 255, 255, 0);
+    light_set_level_colour(255, 255, 255, 0);
 
     D_800DCD24[0] = 0;
     D_800DCD24[1] = 0;
@@ -95,7 +95,7 @@ void level_hotspot_setup(s32 arg0) {
         switch (temp_t7) {                          /* switch 1; irregular */
         case 10:                                    /* switch 1 */
             sp34 = temp_t4;
-            func_1515D4D4(sp70, sp6C, sp68, 0U);
+            light_set_level_colour(sp70, sp6C, sp68, 0U);
             temp_t0 = (*(s32 *)((u8 *)((D_800D34B8 + temp_t4)) + 0x20));
             if (temp_t0 != 0) {
                 ambient_fx_dispatch(temp_t0);
@@ -108,7 +108,7 @@ void level_hotspot_setup(s32 arg0) {
             temp_v1_2 = (*(u32 *)((u8 *)temp_v0_2 + 0x18));
             temp_t0_2 = (*(u32 *)((u8 *)temp_v0_2 + 0x20));
             sp44 = temp_t0_2 & 0xFFFF;
-            temp_v0_3 = func_1515DB1C((*(s16 *)((u8 *)temp_v0_2 + 0)), (*(s16 *)((u8 *)temp_v0_2 + 2)), (*(s16 *)((u8 *)temp_v0_2 + 4)), ((u32) (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) >> 8) & 0xFF, sp70, sp6C, sp68, (temp_v1_2 >> 0x18) & 0x7F, (temp_v1_2 >> 0x1F) & 1, (temp_t0_2 >> 0x10) & 0xFFFF);
+            temp_v0_3 = light_add_point_ext((*(s16 *)((u8 *)temp_v0_2 + 0)), (*(s16 *)((u8 *)temp_v0_2 + 2)), (*(s16 *)((u8 *)temp_v0_2 + 4)), ((u32) (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) >> 8) & 0xFF, sp70, sp6C, sp68, (temp_v1_2 >> 0x18) & 0x7F, (temp_v1_2 >> 0x1F) & 1, (temp_t0_2 >> 0x10) & 0xFFFF);
             if ((temp_v0_3 != 0) && (sp44 != 0)) {
                 hotspot_fx_dispatch(temp_v0_3, sp44);
                 return;
@@ -210,12 +210,12 @@ void hotspot_fx_type16(s32 arg0, s32 arg1) {
 
 /* was func_15009818 */
 void hotspot_fx_type17(s32 arg0, s32 arg1) {
-    func_151B8DB0(arg0, 0, 0xFF, 1);
+    swinging_lamp_spawn(arg0, 0, 0xFF, 1);
 }
 
 /* was func_15009844 */
 void hotspot_fx_type18(s32 arg0, s32 arg1) {
-    func_151B8DB0(arg0, 1, 0xFF, 1);
+    swinging_lamp_spawn(arg0, 1, 0xFF, 1);
 }
 
 /* was func_15009870 */
@@ -293,7 +293,7 @@ void hotspot_fx_type31(s32 arg0, s32 arg1) {
 
     tmp.unk4 = 0.0f;
     tmp.unk8 = 90.0f;
-    tmp.unk0 = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
+    tmp.unk0 = light_fx_add(0, 0.0f, 0, 0, 0, 220, 220, 255);
     temp_v0 = light_ctrl_spawn(arg0, 2, 16, 300, 0, 12, 255, 1);
     if (temp_v0 != 0) {
         memcpy(&temp_v0->unk18, &tmp, 12);
@@ -307,7 +307,7 @@ void hotspot_fx_type32(s32 arg0, s32 arg1) {
 
     tmp.unk4 = 0.0f;
     tmp.unk8 = 50.0f;
-    tmp.unk0 = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
+    tmp.unk0 = light_fx_add(0, 0.0f, 0, 0, 0, 220, 220, 255);
     temp_v0 = light_ctrl_spawn(arg0, 2, 16, 300, 0, 12, 255, 1);
     if (temp_v0 != 0) {
         memcpy(&temp_v0->unk18, &tmp, 12);
@@ -366,7 +366,7 @@ void hotspot_fx_type42(s32 arg0, s32 arg1) {
 
     tmp.unk4 = 0.0f;
     tmp.unk8 = 60.0f;
-    tmp.unk0 = func_15187EC0(1, 0.1f, 100, 100, 100, 255, 100, 100);
+    tmp.unk0 = light_fx_add(1, 0.1f, 100, 100, 100, 255, 100, 100);
     temp_v0 = light_ctrl_spawn(arg0, 2, 16, 300, 0, 12, 255, 1);
     if (temp_v0 != 0) {
         memcpy(&temp_v0->unk18, &tmp, 12);
@@ -422,7 +422,7 @@ void hotspot_fx_type55(s32 arg0, s32 arg1) {
 void hotspot_fx_type51_54(s32 arg0, s32 arg1) {
     u8 sp1C[4] = D_80095B70;
 
-    func_151B8DB0(arg0, sp1C[arg1 - 0x33], 0xFF, 1);
+    swinging_lamp_spawn(arg0, sp1C[arg1 - 0x33], 0xFF, 1);
 }
 
 /* was func_1500A2F4 */
@@ -505,7 +505,7 @@ void hotspot_fx_type73_75(s32 arg0, s32 arg1) {
     s32 i;
 
     i = (D_800BE9F0 == 6) ? 1 : 0;
-    if (func_150B0AEC(sp24[i][arg1 - 0x49], sp30) != 0) {
+    if (world_record_anchor_init(sp24[i][arg1 - 0x49], sp30) != 0) {
         sp48.unk0 = 0;
         sp48.unk1 = 0x17;
         sp48.unk2 = 300;

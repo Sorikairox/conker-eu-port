@@ -19,7 +19,7 @@
 \#^    spec.u1C = 40.92f;$#s/40.92f/40.9f/
 \#^    spec.u10 = 21.9f;$#s/21.9f/21.8f/
 \#^    spec.u14 = 1.46f;$#s/1.46f/1.45f/
-\#^    func_15151FA8((u8 \*) &spec, flag, 1);$#s/flag, 1/flag, 0/
+\#^    emit_sparks_by_angles((u8 \*) &spec, flag, 1);$#s/flag, 1/flag, 0/
 \#^    spec.u24\[6\] = 7;$#s/7/6/
 \#^    spec.u24\[7\] = 0;$#d
 \#^    spec.u20 = 57.5f;$#s/57.5f/57.0f/
@@ -33,4 +33,4 @@
 \#^    t.u24 = -2.0210001f;$#s/-2.0210001f/-2.021f/
 \#^    t.u28 = 0.89400005f;$#s/0.89400005f/0.894f/
 \#^    t.u34 = 848.0f;$#s/848.0f/1152.0f/
-\#^    func_151506E8(&t, &t.u8, 0, flag, 1);$#s/0, flag, 1/0, flag, 0/
+\#^    emit_dust_by_angles(&t, &t.u8, 0, flag, 1);$#s/0, flag, 1/0, flag, 0/

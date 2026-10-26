@@ -120,7 +120,7 @@ def main():
             if m.group(1) == m.group(3):
                 passthru.add(m.group(2))
         passthru.update(gfx_re.findall(text))
-        # P29: `Gfx *f(T, Gfx *, ...)`: the DL pointer is not the first argument (func_150A5858 in the now-C
+        # P29: `Gfx *f(T, Gfx *, ...)`: the DL pointer is not the first argument (level_dl_visibility_filter in the now-C
         # player_view_dl_build takes it as a1), so the stub returns that argument instead of 0 / a0.
         for m in gfx_any_re.finditer(text):
             parms = [x.strip() for x in m.group(2).split(',')]
@@ -133,7 +133,7 @@ def main():
             by_addr.setdefault(a_, nm_)
     npass = ndl = 0
     # P199: name -> (index of the DL argument, argument count); checked against the asm (returns v0 = that argument)
-    # P212: func_151A03DC (foot-trail / ripple draw, D_8008A5A0 table, v0 = a1) removed: C since port P204
+    # P212: foot_trail_draw (foot-trail / ripple draw, D_8008A5A0 table, v0 = a1) removed: C since port P204
     DL_INDIRECT = {}
     for n in funcs:
         sigs = undef_f[n]

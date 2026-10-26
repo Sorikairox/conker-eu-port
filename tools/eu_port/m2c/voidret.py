@@ -2,7 +2,7 @@
 # usage: voidret.py indir outdir -- in each draft, local prototypes `s32 func_X(...)` whose
 # result is never used (every call is a bare statement) become `void func_X(...)`.
 # m2c types unused call results as s32; a non-void return makes IDO keep v0 out of the way,
-# which shifts register allocation (func_1503F5A0). Writes only changed drafts.
+# which shifts register allocation (breakable_cb_settle). Writes only changed drafts.
 import sys,os,re,glob
 ind,outd=sys.argv[1],sys.argv[2]; os.makedirs(outd,exist_ok=True)
 n=0

@@ -20,27 +20,28 @@ void sprite_fx_set_handlers();
 
 #ifdef NON_MATCHING
 void mtx_get_translation(void *, s32, void *);
-s32 func_15143E94(s32, s32);
-void func_151664F0(s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
-void func_1504715C(void *, u8 *);
-s32 func_15046F70(f32 *, s32, f32, f32 *);
+s32 fx_try_camera_shake(s32, s32);
+void water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void spawn_circle_random_emit(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+void hitinfo_from_obj_floor(void *, u8 *);
+s32 collision_floor_probe(f32 *, s32, f32, f32 *);
 struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
-s32 func_1518B140(u8 *arg0, s32 arg1, u8 arg2);
+s32 timed_queue_push(u8 *arg0, s32 arg1, u8 arg2);
 void node_destroy(struct102 *arg0);
 /* the .s's late_rodata D_800A0240 / D_800A0244 / D_800A0248 (0.7111111, 1.02, 0.95) is gone in the NM link */
 static const f32 D_800A0240[1] = { 0.711111128f }; /* 0x3F360B61 (arrays: IDO puts scalar float statics in .data) */
-static const f32 D_800A0244_[1] = { 1.01999998f }; /* 0x3F828F5C, read by func_150BB4CC */
+static const f32 D_800A0244_[1] = { 1.01999998f }; /* 0x3F828F5C, read by puff_particle_spawn_dir */
 #define D_800A0244 D_800A0244_[0]
-static const f32 D_800A0248_[1] = { 0.949999988f }; /* 0x3F733333, read by func_150BB4CC */
+static const f32 D_800A0248_[1] = { 0.949999988f }; /* 0x3F733333, read by puff_particle_spawn_dir */
 #define D_800A0248 D_800A0248_[0]
 
 // foot_splash_effect: water / dust splash at foot bone 0x11 (kind 0) or 0x1A (kind 1) of object `obj` (skipped for a
 // missing object, state 0 or 8, or no model at +0x1D4), at the object's own height +0x180: sound 0x4022, a ring
-// func_151664F0, a spray func_1514CBE8 (heading = current camera's +0x380 * 0.7111 +- 60). When the ground probe
-// (func_15046F70, 100 above to 100 below) hits, also a ripple sprite (sprite_fx_spawn_cam, template 0x7340) that is added
+// water_ring_spawn, a spray spawn_circle_random_emit (heading = current camera's +0x380 * 0.7111 +- 60). When the ground probe
+// (collision_floor_probe, 100 above to 100 below) hits, also a ripple sprite (sprite_fx_spawn_cam, template 0x7340) that is added
 // to list D_80088750 or freed; then a second smaller spray. `alpha` is passed on to every spawn.
-void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
+/* was func_150BABE0 */
+void foot_splash_effect(u8 *obj, u8 kind, u8 alpha) {
     struct {
         s32 tex;
         s16 life;
@@ -75,18 +76,18 @@ void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
     /* callers pass kind 0 or 1; the asm leaves the bone uninitialised for other values */
     mtx_get_translation(*(u8 **) (obj + 0x1D4), kind == 0 ? 0x11 : 0x1A, pos);
     pos[1] = *(f32 *) (obj + 0x180);
-    func_15143E94(5, 0x4022);
-    func_151664F0(-1, (s32) pos[0], (s32) (pos[1] + 6.0f), (s32) pos[2], 0x19, 0x12, 0, alpha, 1);
+    fx_try_camera_shake(5, 0x4022);
+    water_ring_spawn(-1, (s32) pos[0], (s32) (pos[1] + 6.0f), (s32) pos[2], 0x19, 0x12, 0, alpha, 1);
     size = random_float();
     r1 = random_int();
     right = heading + 0x3C;
     left = heading - 0x3C;
-    func_1514CBE8(pos[0], pos[1], pos[2], size * 50.0f + 40.0f, right, left, (u32) r1 % 11 + 30, 5, 0, 0.0f, 0, alpha);
-    func_1504715C(hit, obj);
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], size * 50.0f + 40.0f, right, left, (u32) r1 % 11 + 30, 5, 0, 0.0f, 0, alpha);
+    hitinfo_from_obj_floor(hit, obj);
     probe[0] = pos[0];
     probe[1] = pos[1] + 100.0f;
     probe[2] = pos[2];
-    if (func_15046F70(probe, 0, pos[1] - 100.0f, hit)) {
+    if (collision_floor_probe(probe, 0, pos[1] - 100.0f, hit)) {
         size = random_float() * 200.0f + 200.0f;
         spr.type = 0x2A;
         spr.pad7 = 0;
@@ -110,24 +111,25 @@ void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
         r3 = random_int();
         p = sprite_fx_spawn_cam((s32) &spr, 0, 0, (s32) &hit[1], pos[0], hit[0], pos[2], size, size, r1 & 0xFF,
                           (r3 & 1) + (r2 & 1) * 2, 4, alpha, 0);
-        if (p != NULL && func_1518B140((u8 *) D_80088750, (s32) p, 1) == 0) {
+        if (p != NULL && timed_queue_push((u8 *) D_80088750, (s32) p, 1) == 0) {
             node_destroy((struct102 *) p);
         }
     }
     size = random_float();
     r1 = random_int();
-    func_1514CBE8(pos[0], pos[1], pos[2], size * 40.0f + 60.0f, right, left, (u32) r1 % 7 + 6, 6, 0, 0.0f, 0, alpha);
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], size * 40.0f + 60.0f, right, left, (u32) r1 % 7 + 6, 6, 0, 0.0f, 0, alpha);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E88D0/func_150BABE0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E88D0/foot_splash_effect.s")
 #endif
 
 #ifndef NON_MATCHING
 extern f32 D_800A0244;
 extern f32 D_800A0248;
 #endif
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_150BB4CC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+/* was func_150BB4CC */
+s32 puff_particle_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         s32 u34;
         s32 u38;
@@ -220,14 +222,15 @@ s32 func_150BB4CC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u56 = 1;
     sp.u58 = D_800A0244;
     scale = D_800A0248;
-    obj = func_151308E4(&sp, 0, 4, argE, 1);
+    obj = particle_spawn_basic(&sp, 0, 4, argE, 1);
     if (obj != 0) {
         memcpy(obj + 0xA8, &scale, 4);
     }
     return 1;
 }
 
-s32 func_150BB740(u8 *arg0, s32 arg1) {
+/* was func_150BB740 */
+s32 particle_shrink_update(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
     for (i = D_800BE9E4; i != 0; i--) {
@@ -237,7 +240,8 @@ s32 func_150BB740(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-void func_150BB8E8(struct_eu_E88D0 *arg0) {
+/* was func_150BB8E8 */
+void sprite_fx_init_fade50(struct_eu_E88D0 *arg0) {
     arg0->unk18 |= 1;
     arg0->unk1C = 50;
     arg0->unkB0 = arg0->unk1C;
@@ -245,7 +249,8 @@ void func_150BB8E8(struct_eu_E88D0 *arg0) {
     sprite_fx_set_handlers(arg0, 6, arg0->unk81);
 }
 
-s32 func_150BB930(struct_eu_E88D0 *arg0) {
+/* was func_150BB930 */
+s32 sprite_fx_fade_out_update(struct_eu_E88D0 *arg0) {
     if (arg0->unk1C < arg0->unkB0) {
         s16 temp_lo = arg0->unk1C * arg0->unkB2;
         if (temp_lo < arg0->unk28) {
@@ -255,7 +260,8 @@ s32 func_150BB930(struct_eu_E88D0 *arg0) {
     return 1;
 }
 
-s32 func_150BB978(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+/* was func_150BB978 */
+s32 chunk_particle_spawn_dir(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     s16 spBE;
     f32 spB8;
     f32 spB4;
@@ -342,6 +348,6 @@ s32 func_150BB978(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u98 = 0;
     sp.u9A = 1;
     sp.u9C = 0xFF;
-    func_15132FBC(&sp, 3, 0xFF, 0, argE, 0);
+    mdl_particle_spawn(&sp, 3, 0xFF, 0, argE, 0);
     return 1;
 }

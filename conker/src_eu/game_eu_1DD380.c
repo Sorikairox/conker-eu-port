@@ -3,35 +3,37 @@
 #include "variables.h"
 
 
-s32 func_15046F70(f32 *, s32, f32, s32);
-s32 func_1504715C(s32, struct127 *);
+s32 collision_floor_probe(f32 *, s32, f32, s32);
+s32 hitinfo_from_obj_floor(s32, struct127 *);
 extern u8 D_800AA4D0[];
 extern u8 D_800AA4DC[];
-s32 func_151AFB70(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
+/* was func_151AFB70 */
+s32 obj_bone_ground_probe(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     f32 sp2C[3];
 
     if ((arg3 != 1) && (arg3 != 2)) {
         return 0;
     }
-    func_15143134((arg3 == 1) ? D_800AA4DC : D_800AA4D0, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0x800 : *(u8 **)(arg1 + 0x1D4) + 0x640);
+    mtx_transform_point_or_origin((arg3 == 1) ? D_800AA4DC : D_800AA4D0, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0x800 : *(u8 **)(arg1 + 0x1D4) + 0x640);
     if (arg2 == 0) {
         return 1;
     }
     sp2C[0] = arg0[0];
     sp2C[1] = arg0[1] + 100.0f;
     sp2C[2] = arg0[2];
-    func_1504715C(arg2, (struct127 *) arg1);
-    return func_15046F70(sp2C, 0, arg0[1] - 500.0f, arg2);
+    hitinfo_from_obj_floor(arg2, (struct127 *) arg1);
+    return collision_floor_probe(sp2C, 0, arg0[1] - 500.0f, arg2);
 }
 
-s32 func_151AFC70(s32 arg0, s32 arg1) {
+/* was func_151AFC70 */
+s32 obj_handler_stub(s32 arg0, s32 arg1) {
     return 0xC;
 }
 
 #ifdef NON_MATCHING
 /* P292 */
-void func_150CD2A0(f32, f32 *, f32 *, f32 *);
-void func_1514CBE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
+void ground_colour_by_depth(f32, f32 *, f32 *, f32 *);
+void spawn_circle_random_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
 void *memcpy(void *, const void *, s32);
 
 /* rodata D_800AA4E8 / D_800AA4EC (bit-exact copies: the NM link drops this file's .late_rodata) */
@@ -42,11 +44,12 @@ static const f32 sSplashScaleB[1] = { 0.001f };     /* 0x3A83126F */
 #define SPLASH_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
 
 // object_ground_splash: handler of D_8008A0B4 entry 12 (EU 0x8008A4B4, called by obj_interaction_update with (obj, arg1, 0)):
-// when obj has a model (+0x1D4) and func_151AFB70 finds its effect point (pos) and the ground under it for mode arg1
-// (1 / 2), spawns a 0x50-type splash particle there (effect3d_spawn_oriented_simple: 4 vertices tinted by func_150CD2A0's colour of
+// when obj has a model (+0x1D4) and obj_bone_ground_probe finds its effect point (pos) and the ground under it for mode arg1
+// (1 / 2), spawns a 0x50-type splash particle there (effect3d_spawn_oriented_simple: 4 vertices tinted by ground_colour_by_depth's colour of
 // pos z in level 0x14, white elsewhere; size 0.091..0.112, height from obj's u16 +0x7A >> 8, +10 for mode 1, -10 otherwise;
-// its +0x128 gets a lifetime / scale pair) and a dust ring (func_1514CBE8: radius 29..46, 5..15 frames). arg2 unused.
-void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
+// its +0x128 gets a lifetime / scale pair) and a dust ring (spawn_circle_random_emit: radius 29..46, 5..15 frames). arg2 unused.
+/* was func_151AFC84 */
+void object_ground_splash(u8 *obj, s32 arg1, s32 arg2) {
     struct {
         s16 r, g, b, a, z;
     } verts[4];
@@ -70,7 +73,7 @@ void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
         f32 scale;          /* +0x12C */
     } tail;
     f32 r, g, b;
-    s32 ground[9];          /* func_151AFB70's ground record: [0] = height (f32), +4 passed on */
+    s32 ground[9];          /* obj_bone_ground_probe's ground record: [0] = height (f32), +4 passed on */
     f32 pos[3];
     s32 cr, cg, cb;
     s32 i;
@@ -81,11 +84,11 @@ void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
     if (obj == NULL || *(void **) (obj + 0x1D4) == NULL) {
         return;
     }
-    if (func_151AFB70(pos, obj, (s32) ground, (u8) arg1) == 0) {
+    if (obj_bone_ground_probe(pos, obj, (s32) ground, (u8) arg1) == 0) {
         return;
     }
     if (D_800BE9F0 == 0x14) {
-        func_150CD2A0(pos[2], &r, &g, &b);
+        ground_colour_by_depth(pos[2], &r, &g, &b);
         cr = SPLASH_F2U(r) & 0xFF;
         cg = SPLASH_F2U(g) & 0xFF;
         cb = SPLASH_F2U(b) & 0xFF;
@@ -134,13 +137,14 @@ void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
         memcpy(p + 0x128, &tail, 8);
     }
     ringLife = random_int() % 11U + 5;
-    func_1514CBE8(pos[0], pos[1], pos[2], random_float() * 17.0f + 29.0f, 0, 0xFF, ringLife, 0x10, 0, 0.0f, 0, 0xFF);
+    spawn_circle_random_emit(pos[0], pos[1], pos[2], random_float() * 17.0f + 29.0f, 0, 0xFF, ringLife, 0x10, 0, 0.0f, 0, 0xFF);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DD380/func_151AFC84.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DD380/object_ground_splash.s")
 #endif
 
-s32 func_151B0184(u8 *arg0) {
+/* was func_151B0184 */
+s32 splash_alpha_fade_by_life8(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);
     s32 temp_v1;
 
@@ -153,7 +157,8 @@ s32 func_151B0184(u8 *arg0) {
     return 1;
 }
 
-s32 func_eu_151B01B8(u8 *arg0)
+/* was func_eu_151B01B8 */
+s32 splash_sprite_update(u8 *arg0)
 {
   f32 temp_f0;
   s32 temp_v1;
@@ -181,9 +186,10 @@ s32 func_eu_151B01B8(u8 *arg0)
   return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
-s32 func_151308E4(void *, s32, s32, u8, s32);
-s32 func_151B0238(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 particle_spawn_basic(void *, s32, s32, u8, s32);
+/* was func_151B0238 */
+s32 spawn_emit_mud_particle(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     struct {
         s32 u34;
         s32 u38;
@@ -246,7 +252,7 @@ s32 func_151B0238(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u64 = arg2;
     sp.u68 = arg3;
     sp.u6C = arg4;
-    func_15143794(arg8, (s16) ((random_int() % 21U) - 0x14), ((random_float() * 301.0f) + 500.0f) * 0.01f, sp.u7C);
+    vec3_from_angles_byte(arg8, (s16) ((random_int() % 21U) - 0x14), ((random_float() * 301.0f) + 500.0f) * 0.01f, sp.u7C);
     sp.u8C = 0xE05;
     sp.u88 = 0.0f;
     if (random_int() & 1) {
@@ -262,14 +268,15 @@ s32 func_151B0238(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u56 = 0x19;
     sp.u58 = 1.04f;
     scale = 0.94900006f;
-    obj = func_151308E4(&sp, 1, 4, argE, 1);
+    obj = particle_spawn_basic(&sp, 1, 4, argE, 1);
     if (obj != 0) {
         memcpy(obj + 0xA8, &scale, 4);
     }
     return 1;
 }
 
-s32 func_151B0454(u8 *arg0, s32 arg1) {
+/* was func_151B0454 */
+s32 particle_damp_velocity(u8 *arg0, s32 arg1) {
     s32 i;
     f32 *p = (f32 *)(arg0 + 0xA8);
     for (i = D_800BE9E4; i != 0; i--) {

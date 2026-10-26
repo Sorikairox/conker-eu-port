@@ -2,30 +2,32 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 #endif
 
 
-f32 func_15144A74(u8 *, u8 *);
-s32 func_15144E80(u8 *, u8 *, u8 *, u8 *);
+f32 vec3_dot(u8 *, u8 *);
+s32 tri_calc_normal(u8 *, u8 *, u8 *, u8 *);
 
-void func_1514FBB0(u8 *arg0, u8 *arg1) {
+/* was func_1514FBB0 */
+void emit_disc_from_surface(u8 *arg0, u8 *arg1) {
     arg1[0] = 2;
     *(f32 *)(arg1 + 0x28) = *(f32 *)(arg0 + 0x20);
-    if ((func_15144E80(arg0 + 0xC, arg1 + 0x10, arg1 + 0x1C, arg1 + 4) != 0) && (func_15144A74(arg1 + 4, arg0) < 0.0f)) {
+    if ((tri_calc_normal(arg0 + 0xC, arg1 + 0x10, arg1 + 0x1C, arg1 + 4) != 0) && (vec3_dot(arg1 + 4, arg0) < 0.0f)) {
         *(f32 *)(arg1 + 4) = -*(f32 *)(arg1 + 4);
         *(f32 *)(arg1 + 8) = -*(f32 *)(arg1 + 8);
         *(f32 *)(arg1 + 0xC) = -*(f32 *)(arg1 + 0xC);
     }
 }
 
-s32 func_15145128(u8 *, u8 *, void *, void *);
-s32 func_15146078(u8 *, s32 *, s32 *);
-s32 func_1514FC58(u8 *arg0) {
+s32 vec3_normalize_len(u8 *, u8 *, void *, void *);
+s32 vec3_make_basis(u8 *, s32 *, s32 *);
+/* was func_1514FC58 */
+s32 emit_disc_prepare(u8 *arg0) {
     s32 f;
     f = arg0[0];
     if (!(f & 1)) {
-        if (func_15145128(arg0 + 4, arg0 + 4, 0, 0) == 0) {
+        if (vec3_normalize_len(arg0 + 4, arg0 + 4, 0, 0) == 0) {
             return 0;
         }
         *(f32 *)(arg0 + 4) *= 1000.0f;
@@ -34,16 +36,16 @@ s32 func_1514FC58(u8 *arg0) {
         *(f32 *)(arg0 + 0xC) *= 1000.0f;
     }
     if (!(f & 2)) {
-        if (func_15146078(arg0 + 4, (s32 *)(arg0 + 0x10), (s32 *)(arg0 + 0x1C)) == 0) {
+        if (vec3_make_basis(arg0 + 4, (s32 *)(arg0 + 0x10), (s32 *)(arg0 + 0x1C)) == 0) {
             return 0;
         }
         f = arg0[0] |= 6;
     }
     if (!(f & 4)) {
-        if (func_15145128(arg0 + 0x10, arg0 + 0x10, 0, 0) == 0) {
+        if (vec3_normalize_len(arg0 + 0x10, arg0 + 0x10, 0, 0) == 0) {
             return 0;
         }
-        if (func_15145128(arg0 + 0x1C, arg0 + 0x1C, 0, 0) == 0) {
+        if (vec3_normalize_len(arg0 + 0x1C, arg0 + 0x1C, 0, 0) == 0) {
             return 0;
         }
         arg0[0] |= 4;
@@ -51,13 +53,14 @@ s32 func_1514FC58(u8 *arg0) {
     return 1;
 }
 
-void func_15143874(s16, f32, f32 *, f32 *);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 
-f32 *func_1514FD78(f32 *arg0, f32 arg1, f32 *arg2) {
+/* was func_1514FD78 */
+f32 *emit_disc_random_point(f32 *arg0, f32 arg1, f32 *arg2) {
     f32 s;
     f32 c;
 
-    func_15143874(random_int() & 0xFF, arg0[10] * random_float(), &c, &s);
+    vec2_from_angle_byte(random_int() & 0xFF, arg0[10] * random_float(), &c, &s);
     arg2[0] = (arg0[1] + (arg0[7] * s + arg0[4] * c)) * arg1;
     arg2[1] = (arg0[2] + (arg0[8] * s + arg0[5] * c)) * arg1;
     arg2[2] = (arg0[3] + (arg0[9] * s + arg0[6] * c)) * arg1;
@@ -66,13 +69,14 @@ f32 *func_1514FD78(f32 *arg0, f32 arg1, f32 *arg2) {
 
 #ifdef NON_MATCHING
 /* P159 */
-void func_15143874(s16, f32, f32 *, f32 *);
-void func_151A3084(s32, s32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+void particle_burst_spawn_vec(s32, s32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 // spray_particles_spawn: scales `normal` by 1000 (in place) and spawns base + rand % (extra + 1) particles
-// (func_151A3084) at p's point, each moving along normal plus a random offset in the plane of axisA / axisB
-// (func_15143874: random angle, radius rand * spread), times a random speed; size, life and the rest come from
-// the parameter block p (func_151C01F0 fills one).
-void func_1514FE68(u8 *p, u8 *normal, s32 *axisA, s32 *axisB, f32 spread, s32 arg5, s32 arg6) {
+// (particle_burst_spawn_vec) at p's point, each moving along normal plus a random offset in the plane of axisA / axisB
+// (vec2_from_angle_byte: random angle, radius rand * spread), times a random speed; size, life and the rest come from
+// the parameter block p (impact_spray_params_init fills one).
+/* was func_1514FE68 */
+void emit_spray_particles(u8 *p, u8 *normal, s32 *axisA, s32 *axisB, f32 spread, s32 arg5, s32 arg6) {
     typedef struct {
         s32 countBase;     /* 0x00 */
         s32 countExtra;    /* 0x04 */
@@ -118,34 +122,36 @@ void func_1514FE68(u8 *p, u8 *normal, s32 *axisA, s32 *axisB, f32 spread, s32 ar
     for (; count != 0; count--) {
         speed = random_float() * sp->speedRange + sp->speedBase;
         angle = random_int();
-        func_15143874(angle & 0xFF, random_float() * spread, &c, &s);
+        vec2_from_angle_byte(angle & 0xFF, random_float() * spread, &c, &s);
         vel[0] = (a[0] * c + b[0] * s + n[0]) * speed;
         vel[1] = (a[1] * c + b[1] * s + n[1]) * speed;
         vel[2] = (a[2] * c + b[2] * s + n[2]) * speed;
         r1 = random_float();
         r2 = random_float();
         life = (u32)random_int() % (u32)(sp->lifeExtra + 1) + sp->lifeBase;
-        func_151A3084((s32)sp->pos, (s32)vel, r1 * sp->sizeRange + sp->sizeBase, r2 * sp->size2Range + sp->size2Base,
+        particle_burst_spawn_vec((s32)sp->pos, (s32)vel, r1 * sp->sizeRange + sp->sizeBase, r2 * sp->size2Range + sp->size2Base,
                       life, sp->u34, sp->u38, sp->u3C, sp->u40, sp->u44, sp->u46, sp->u48, sp->u4A, sp->u4C, sp->u4E,
                       sp->u50, (u8)arg5, arg6);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1514FE68.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_spray_particles.s")
 #endif
 
-s32 func_15146078(u8 *, s32 *, s32 *);
-void func_1514FE68(u8 *, u8 *, s32 *, s32 *, f32, s32, s32);
-void func_15150108(u8 *arg0, u8 arg1, s32 arg2) {
+s32 vec3_make_basis(u8 *, s32 *, s32 *);
+void emit_spray_particles(u8 *, u8 *, s32 *, s32 *, f32, s32, s32);
+/* was func_15150108 */
+void emit_spray_along_normal(u8 *arg0, u8 arg1, s32 arg2) {
     s32 sp34[3];
     s32 sp28[3];
-    if (func_15146078(arg0, sp34, sp28) != 0) {
-        func_1514FE68(arg0 + 0x10, arg0, sp34, sp28, (*(f32 *)((u8 *)arg0 + 0xC)), (s32) arg1, arg2);
+    if (vec3_make_basis(arg0, sp34, sp28) != 0) {
+        emit_spray_particles(arg0 + 0x10, arg0, sp34, sp28, (*(f32 *)((u8 *)arg0 + 0xC)), (s32) arg1, arg2);
     }
 }
 
-s32 func_15145128(u8 *, u8 *, void *, void *);
-void func_1515016C(u8 *arg0, u8 arg1, s32 arg2) {
+s32 vec3_normalize_len(u8 *, u8 *, void *, void *);
+/* was func_1515016C */
+void emit_spray_from_surface(u8 *arg0, u8 arg1, s32 arg2) {
     f32 a[3];
     s32 a1;
     s32 a2;
@@ -155,25 +161,26 @@ void func_1515016C(u8 *arg0, u8 arg1, s32 arg2) {
     f32 c[3];
     s32 c1;
     s32 c2;
-    if (func_15144E80(arg0 + 0xC, (u8 *)a, (u8 *)b, (u8 *)c) != 0) {
-        func_15145128((u8 *)a, (u8 *)a, &a1, &a2);
-        func_15145128((u8 *)b, (u8 *)b, &b1, &b2);
-        func_15145128((u8 *)c, (u8 *)c, &c1, &c2);
-        if (func_15144A74((u8 *)c, arg0) < 0.0f) {
+    if (tri_calc_normal(arg0 + 0xC, (u8 *)a, (u8 *)b, (u8 *)c) != 0) {
+        vec3_normalize_len((u8 *)a, (u8 *)a, &a1, &a2);
+        vec3_normalize_len((u8 *)b, (u8 *)b, &b1, &b2);
+        vec3_normalize_len((u8 *)c, (u8 *)c, &c1, &c2);
+        if (vec3_dot((u8 *)c, arg0) < 0.0f) {
             c[0] = -c[0];
             c[1] = -c[1];
             c[2] = -c[2];
         }
-        func_1514FE68(arg0 + 0x24, (u8 *)c, (s32 *)a, (s32 *)b, *(f32 *)(arg0 + 0x20), arg1, arg2);
+        emit_spray_particles(arg0 + 0x24, (u8 *)c, (s32 *)a, (s32 *)b, *(f32 *)(arg0 + 0x20), arg1, arg2);
     }
 }
 
-s32 func_151A2FC4(u8 *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_15150258(u8 *arg0, u8 arg1, s32 arg2) {
+s32 particle_burst_spawn_dir(u8 *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+/* was func_15150258 */
+void emit_random_sprites(u8 *arg0, u8 arg1, s32 arg2) {
     s32 n;
     n = *(s32 *)(arg0 + 8) + (random_int() % (u32)(*(s32 *)(arg0 + 0xC) + 1));
     while (n != 0) {
-        func_151A2FC4(arg0 + 0x10,
+        particle_burst_spawn_dir(arg0 + 0x10,
             *(s16 *)(arg0 + 0) + (random_int() % (u32)(*(s16 *)(arg0 + 2) + 1)),
             *(s16 *)(arg0 + 4) + (random_int() % (u32)(*(s16 *)(arg0 + 6) + 1)),
             *(f32 *)(arg0 + 0x1C) + *(f32 *)(arg0 + 0x20) * random_float(),
@@ -187,30 +194,32 @@ void func_15150258(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-void func_1514FBB0();
+void emit_disc_from_surface();
 #ifdef NON_MATCHING
-s32 func_151504B4();
+s32 emit_dust_on_disc();
 #else
-void func_151504B4();
+void emit_dust_on_disc();
 #endif
 
-void func_1515046C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_1515046C */
+void emit_dust_on_surface_disc(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     u8 sp24[0x2C];
-    func_1514FBB0(arg0, sp24);
-    func_151504B4(sp24, arg1, arg2, arg3, arg4);
+    emit_disc_from_surface(arg0, sp24);
+    emit_dust_on_disc(sp24, arg1, arg2, arg3, arg4);
 }
 
 #ifdef NON_MATCHING
 /* P153 */
-s32 func_1514FC58(u8 *arg0);
-f32 *func_1514FD78(f32 *arg0, f32 arg1, f32 *arg2);
+s32 emit_disc_prepare(u8 *arg0);
+f32 *emit_disc_random_point(f32 *arg0, f32 arg1, f32 *arg2);
 
-// path_particles_spawn: P153: when the path / curve `path` is usable (func_1514FC58) spawns def +0xC + random
-// [0, def +0xE] particles (impact_dust_cloud_spawn) along it: each at a random point (func_1514FD78 at def +0x10 + random *
+// path_particles_spawn: P153: when the path / curve `path` is usable (emit_disc_prepare) spawns def +0xC + random
+// [0, def +0xE] particles (impact_dust_cloud_spawn) along it: each at a random point (emit_disc_random_point at def +0x10 + random *
 // +0x14) with sprite def +0x31, size +0x1C + random * +0x20, life +0x18 + random [0, +0x1A], alpha +0x24 + random
 // [0, +0x25], speed +0x28 + random * +0x2C, flag 1 below chance +0x34, scale 1.4 x 1.4, owner / owner arg,
 // +0x38, flag 2 below chance +0x3C. The asm returns nothing; the callers' prototypes say s32 (game_eu_1FB080): 0.
-s32 func_151504B4(f32 *path, u8 *def, s32 owner, s32 arg3, s32 arg4) {
+/* was func_151504B4 */
+s32 emit_dust_on_disc(f32 *path, u8 *def, s32 owner, s32 arg3, s32 arg4) {
     f32 pos[3];
     f32 size;
     f32 speed;
@@ -220,12 +229,12 @@ s32 func_151504B4(f32 *path, u8 *def, s32 owner, s32 arg3, s32 arg4) {
     s32 rAlpha;
     s32 n;
 
-    if (func_1514FC58((u8 *) path) == 0) {
+    if (emit_disc_prepare((u8 *) path) == 0) {
         return 0;
     }
     n = (u32) random_int() % (u32) (*(s16 *) (def + 0xE) + 1) + *(s16 *) (def + 0xC);
     while (n != 0) {
-        func_1514FD78(path, random_float() * *(f32 *) (def + 0x14) + *(f32 *) (def + 0x10), pos);
+        emit_disc_random_point(path, random_float() * *(f32 *) (def + 0x14) + *(f32 *) (def + 0x10), pos);
         size = random_float();
         rLife = random_int();
         rAlpha = random_int();
@@ -243,12 +252,12 @@ s32 func_151504B4(f32 *path, u8 *def, s32 owner, s32 arg3, s32 arg4) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151504B4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_dust_on_disc.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P155 */
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 typedef struct {
     u8 pad0[0xC];
     s16 countMin;  /* +0x0C */
@@ -274,9 +283,10 @@ typedef struct {
 } Def06E8;
 // particle_spray_spawn: spawns countMin + rand(countRange + 1) particles of def (impact_dust_cloud_spawn), each with a random
 // direction (yaw / pitch ranges `angles` = {yaw base, yaw range, pitch base, pitch range}) and speed turned into a
-// velocity by func_15143794, and random size, life, alpha, spin and two chance flags from def; scale 1.4.
+// velocity by vec3_from_angles_byte, and random size, life, alpha, spin and two chance flags from def; scale 1.4.
 // Returns 0 (the asm leaves v0 unset; the callers ignore it).
-s32 func_151506E8(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_151506E8 */
+s32 emit_dust_by_angles(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
     s16 *a = angles;
     Def06E8 *d = def;
     f32 vel[3];
@@ -293,7 +303,7 @@ s32 func_151506E8(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
         r1 = random_int();
         r2 = random_int();
         f = random_float();
-        func_15143794(r1 % (u32)(a[1] + 1) + a[0], r2 % (u32)(a[3] + 1) + a[2], f * d->speedRange + d->speedMin, vel);
+        vec3_from_angles_byte(r1 % (u32)(a[1] + 1) + a[0], r2 % (u32)(a[3] + 1) + a[2], f * d->speedRange + d->speedMin, vel);
         size = random_float();
         r1 = random_int();
         r2 = random_int();
@@ -308,13 +318,13 @@ s32 func_151506E8(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151506E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_dust_by_angles.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P181 */
-void func_15143794(s16, s16, f32, void *);
-s32 func_15132BBC(void *, s32, s32, s32, s32, s32, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
 // spark_burst_spawn: P181: spawns def +0 + rand % (def +4 + 1) particles (0 = none) from the burst definition
@@ -324,9 +334,10 @@ s32 memcpy(s32, f32 *, s32);
 // texture ((s32 *)def +0x48)[k] for a random k < def +0x50 with size ((f32 *)def +0x4C)[k] x (def +0x28 + random x
 // +0x2C) (+0 = def +0x44 x size), +4 = def +0x3C + random x +0x40. With chance def +0x38 the particle is solid
 // (+0x61 = 13, +0x63 = def +0x59), else +0x61 = 8. Flags 0x121E9, plus 0x800 and effect kind 3 (else 0) when
-// def +0x58 bit 0 is set. Effect via func_15132BBC (def +0x34, extra bytes def +0x5C copied from def +0x60 to
+// def +0x58 bit 0 is set. Effect via mdl_particle_spawn_ex (def +0x34, extra bytes def +0x5C copied from def +0x60 to
 // +0x170, owner arg2 / arg3). The asm leaves a stale v0; the callers ignore it (s32 matches their prototype).
-s32 func_15150970(s32 *arg0, s16 *ang, u8 arg2, s32 arg3) {
+/* was func_15150970 */
+s32 emit_spark_burst(s32 *arg0, s16 *ang, u8 arg2, s32 arg3) {
     u8 *def = (u8 *)arg0;
     struct {
         f32 u00;       /* +0x00 */
@@ -402,12 +413,12 @@ s32 func_15150970(s32 *arg0, s16 *ang, u8 arg2, s32 arg3) {
         p.rot[0] = random_float() * 360.0f;
         p.rot[1] = random_float() * 360.0f;
         p.rot[2] = random_float() * 360.0f;
-        func_15143794(angA, angB, random_float() * *(f32 *)(def + 0x18) + *(f32 *)(def + 0x14), p.vel);
+        vec3_from_angles_byte(angA, angB, random_float() * *(f32 *)(def + 0x18) + *(f32 *)(def + 0x14), p.vel);
         p.spinX = random_float() * (*(f32 *)(def + 0x30) + *(f32 *)(def + 0x30)) - *(f32 *)(def + 0x30);
         p.spinZ = random_float() * (*(f32 *)(def + 0x30) + *(f32 *)(def + 0x30)) - *(f32 *)(def + 0x30);
         p.fade = random_float() * *(f32 *)(def + 0x20) + *(f32 *)(def + 0x1C);
         p.life = (u32) random_int() % (u32) (*(s16 *)(def + 0x26) + 1) + *(s16 *)(def + 0x24);
-        func_15143794(angA, angB, *(f32 *)(def + 0x54), p.pos);
+        vec3_from_angles_byte(angA, angB, *(f32 *)(def + 0x54), p.pos);
         p.pos[0] += *(f32 *)(def + 0x8);
         p.pos[1] += *(f32 *)(def + 0xC);
         p.pos[2] += *(f32 *)(def + 0x10);
@@ -416,7 +427,7 @@ s32 func_15150970(s32 *arg0, s16 *ang, u8 arg2, s32 arg3) {
         p.sizeY = (*(f32 **)(def + 0x4C))[k] * (*(f32 *)(def + 0x28) + random_float() * *(f32 *)(def + 0x2C));
         p.sizeX = p.sizeY;
         p.u00 = *(f32 *)(def + 0x44) * p.sizeX;
-        e = (u8 *)func_15132BBC(&p, (def[0x58] & 1) ? 3 : 0, 0xFF, *(s32 *)(def + 0x34), *(s32 *)(def + 0x5C), arg2,
+        e = (u8 *)mdl_particle_spawn_ex(&p, (def[0x58] & 1) ? 3 : 0, 0xFF, *(s32 *)(def + 0x34), *(s32 *)(def + 0x5C), arg2,
                                 arg3);
         if (*(s32 *)(def + 0x5C) > 0 && e != NULL) {
             memcpy((s32)(e + 0x170), *(f32 **)(def + 0x60), *(s32 *)(def + 0x5C));
@@ -426,13 +437,13 @@ s32 func_15150970(s32 *arg0, s16 *ang, u8 arg2, s32 arg3) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150970.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_spark_burst.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 allocate_memory(s32, s32, s32, s32);
-s32 func_15132BBC(void *, s32, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
 // base + rand % (extra + 1) (random_int, unsigned remainder)
@@ -440,11 +451,12 @@ s32 memcpy(s32, f32 *, s32);
 
 // debris_burst_spawn: spawns base + rand % (extra + 1) pieces (at most n) of the n kinds ids[] / scales[]; each
 // piece takes a random kind not used yet in this burst (a temporary n-byte used map from allocate_memory), at the
-// spec's point plus a random offset (func_15143794 with length arg10) moving in a random direction, with random
+// spec's point plus a random offset (vec3_from_angles_byte with length arg10) moving in a random direction, with random
 // spins, sway, life and size (scales[k] x random), solid (+0x50 bit 0, +0x61 = 0xD, +0x63 = spec +0x40) with
-// chance spec +0x3C; effect kind 3 via func_15132BBC (arg9, extra bytes arg5 copied from arg4 to +0x170, arg13 /
+// chance spec +0x3C; effect kind 3 via mdl_particle_spawn_ex (arg9, extra bytes arg5 copied from arg4 to +0x170, arg13 /
 // arg14). Option bits: arg7 -> 0x80, arg11 -> 0x4000, arg12 -> 0x100000. The result is unused by all callers.
-s32 func_15150D7C(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+/* was func_15150D7C */
+s32 emit_debris_burst(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
                   s32 arg9, f32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14) {
     typedef struct {
         s32 countBase;      /* 0x00 */
@@ -544,8 +556,8 @@ s32 func_15150D7C(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s
     for (; count != 0; count--) {
         a = RAND_SPREAD(sp->angXBase, sp->angXExtra);
         b = RAND_SPREAD(sp->angYBase, sp->angYExtra);
-        func_15143794(a, b, random_float() * sp->speedRange + sp->speedBase, fx.vel);
-        func_15143794(a, b, arg10, fx.pos);
+        vec3_from_angles_byte(a, b, random_float() * sp->speedRange + sp->speedBase, fx.vel);
+        vec3_from_angles_byte(a, b, arg10, fx.pos);
         fx.pos[0] += sp->pos[0];
         fx.pos[1] += sp->pos[1];
         fx.pos[2] += sp->pos[2];
@@ -590,7 +602,7 @@ s32 func_15150D7C(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s
             fx.u63 = 0;
             fx.u61 = 8;
         }
-        e = (u8 *) func_15132BBC(&fx, 3, 0xFF, arg9, arg5, (u8) arg13, arg14);
+        e = (u8 *) mdl_particle_spawn_ex(&fx, 3, 0xFF, arg9, arg5, (u8) arg13, arg14);
         if (arg4 != 0 && e != NULL) {
             memcpy((s32) (e + 0x170), (f32 *) arg4, arg5);
         }
@@ -599,10 +611,10 @@ s32 func_15150D7C(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s
 }
 #undef RAND_SPREAD
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150D7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_debris_burst.s")
 #endif
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 #ifdef NON_MATCHING
 /* P59: arg 2 (z) is f32 in the definition (src_eu/nm_asm/D5E90.c); wasm needs the exact signature. */
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
@@ -611,9 +623,10 @@ s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *
 s32 func_150ACEA0(f32, f32, s32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 #define RAY_Z0(p) (*(s32 *)(p))
 #endif
-s32 func_15145C90(s32);
+s32 prop_is_flagged(s32);
 
-void func_1515128C(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_1515128C */
+void emit_debris_on_near_surfaces(u8 *arg0, u8 arg1, s32 arg2) {
     s32 n;
     f32 spC0[3];
     u8 spAC[0x14];
@@ -624,12 +637,12 @@ void func_1515128C(u8 *arg0, u8 arg1, s32 arg2) {
 
     n = *(s32 *)(arg0 + 0) + (random_int() % (u32)(*(s32 *)(arg0 + 4) + 1));
     while (n != 0) {
-        func_15143794(*(s16 *)(arg0 + 0x14) + (random_int() % (u32)(*(s16 *)(arg0 + 0x16) + 1)),
+        vec3_from_angles_byte(*(s16 *)(arg0 + 0x14) + (random_int() % (u32)(*(s16 *)(arg0 + 0x16) + 1)),
             *(s16 *)(arg0 + 0x18) + (random_int() % (u32)(*(s16 *)(arg0 + 0x1A) + 1)), 100.0f, spC0);
         hit = spAC; // fakematch: named pointer to spAC (permuter), both calls use it
         if (func_150ACEA0(*(f32 *)(arg0 + 8), *(f32 *)(arg0 + 0xC), RAY_Z0(arg0 + 0x10), spC0[0], spC0[1], spC0[2], 0,
                 hit, &spA0[0], &spA0[1], &spA0[2], &sp9C, &sp98, 0, 0.0f) != 0) {
-            if (func_15145C90(sp98) != 0) {
+            if (prop_is_flagged(sp98) != 0) {
                 if (sp9C < *(f32 *)(arg0 + 0x1C)) {
                     impact_debris_spawn(*(u8 *)(arg0 + 0x2C), *(f32 *)(arg0 + 0x20) + *(f32 *)(arg0 + 0x24) * random_float(),
                         (random_int() % 156U) + 100, (s32)hit, (struct17 *)spA0,
@@ -642,10 +655,11 @@ void func_1515128C(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-void func_15143794(s16, s16, f32, void *);
-s32 func_1518A930(u8 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s32, u8, s32, u8, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 tumble_debris_spawn(u8 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s32, u8, s32, u8, s32);
 
-void func_15151500(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+/* was func_15151500 */
+void emit_tumbling_pieces(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     f32 spBC[3];
     f32 d;
     s32 n;
@@ -660,12 +674,12 @@ void func_15151500(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
         spA8[0] = random_float() * 360.0f;
         spA8[1] = random_float() * 360.0f;
         spA8[2] = random_float() * 360.0f;
-        func_15143794(*(s16 *)(arg0 + 0x1C) + (random_int() % (u32)(*(s16 *)(arg0 + 0x1E) + 1)),
+        vec3_from_angles_byte(*(s16 *)(arg0 + 0x1C) + (random_int() % (u32)(*(s16 *)(arg0 + 0x1E) + 1)),
             *(s16 *)(arg0 + 0x20) + (random_int() % (u32)(*(s16 *)(arg0 + 0x22) + 1)),
             *(f32 *)(arg0 + 0x24) + *(f32 *)(arg0 + 0x28) * random_float(), sp9C);
         spBC[0] = random_float() * d - *(f32 *)(arg0 + 0x2C);
         spBC[2] = random_float() * d - *(f32 *)(arg0 + 0x2C);
-        func_1518A930(arg0 + 8, spA8, *(f32 *)(arg0 + 0x14) + *(f32 *)(arg0 + 0x18) * random_float(), sp9C, spBC,
+        tumble_debris_spawn(arg0 + 8, spA8, *(f32 *)(arg0 + 0x14) + *(f32 *)(arg0 + 0x18) * random_float(), sp9C, spBC,
             *(f32 *)(arg0 + 0x30) + *(f32 *)(arg0 + 0x34) * random_float(), *(f32 *)(arg0 + 0x38),
             *(u8 *)(arg0 + 0x3C), *(s16 *)(arg0 + 0x3E) + (random_int() % (u32)(*(s16 *)(arg0 + 0x40) + 1)),
             arg1, 0, arg2, arg3);
@@ -676,7 +690,8 @@ void func_15151500(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
 
-void func_1515176C(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_1515176C */
+void emit_effect3d_from_surface(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         f32 u84;
         f32 u88;
@@ -768,11 +783,11 @@ void func_1515176C(u8 *arg0, s32 arg1, s32 arg2) {
     sp.uF6 = (*(u8 *)((u8 *)arg0 + 0x5C));
     sp.uF7 = (*(u8 *)((u8 *)arg0 + 0x5D));
     sp.uA0 = (*(f32 *)((u8 *)arg0 + 0x6C));
-    if (func_15144E80(arg0 + 0x1C, &sp.u138, &sp.u124, &sp.u110) != 0) {
-        func_15145128(&sp.u138, &sp.u138, &sp.u134, &sp.u130);
-        func_15145128(&sp.u124, &sp.u124, &sp.u120, &sp.u11C);
-        func_15145128(&sp.u110, &sp.u110, &sp.u10C, &sp.u108);
-        if (func_15144A74(&sp.u110, arg0 + 0x10) < 0.0f) {
+    if (tri_calc_normal(arg0 + 0x1C, &sp.u138, &sp.u124, &sp.u110) != 0) {
+        vec3_normalize_len(&sp.u138, &sp.u138, &sp.u134, &sp.u130);
+        vec3_normalize_len(&sp.u124, &sp.u124, &sp.u120, &sp.u11C);
+        vec3_normalize_len(&sp.u110, &sp.u110, &sp.u10C, &sp.u108);
+        if (vec3_dot(&sp.u110, arg0 + 0x10) < 0.0f) {
             sp.u110 = -(*(f32 *)&(sp.u110));
             sp.u114 = -sp.u114;
             sp.u118 = -sp.u118;
@@ -785,7 +800,7 @@ void func_1515176C(u8 *arg0, s32 arg1, s32 arg2) {
         if (var_s2 != 0) {
             do {
                 temp_s1 = random_int();
-                func_15143874((s16) (temp_s1 & 0xFF), random_float() * (*(f32 *)((u8 *)arg0 + 0x30)), &sp.u84, &sp.u88);
+                vec2_from_angle_byte((s16) (temp_s1 & 0xFF), random_float() * (*(f32 *)((u8 *)arg0 + 0x30)), &sp.u84, &sp.u88);
                 temp_f20 = (random_float() * (*(f32 *)((u8 *)arg0 + 0x58))) + (*(f32 *)((u8 *)arg0 + 0x54));
                 sp.uB4 = (s16) (s32) ((random_float() * (f32) (*(s16 *)((u8 *)arg0 + 0x3A))) + (f32) (*(s16 *)((u8 *)arg0 + 0x38)));
                 temp_f16 = (random_float() * (*(f32 *)((u8 *)arg0 + 0x40))) + (*(f32 *)((u8 *)arg0 + 0x3C));
@@ -815,10 +830,11 @@ void func_1515176C(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1515176C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_effect3d_from_surface.s")
 #endif
 #ifdef NON_MATCHING
-void func_15151BE0(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_15151BE0 */
+void emit_sparks_from_surface(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         f32 u88;
         f32 u8C;
@@ -868,11 +884,11 @@ void func_15151BE0(u8 *arg0, s32 arg1, s32 arg2) {
     s32 temp_s1;
     s32 var_s2;
 
-    if (func_15144E80(arg0 + 0x18, &sp.uC4, &sp.uB0, &sp.u9C) != 0) {
-        func_15145128(&sp.uC4, &sp.uC4, &sp.uC0, &sp.uBC);
-        func_15145128(&sp.uB0, &sp.uB0, &sp.uAC, &sp.uA8);
-        func_15145128(&sp.u9C, &sp.u9C, &sp.u98, &sp.u94);
-        if (func_15144A74(&sp.u9C, arg0 + 0xC) < 0.0f) {
+    if (tri_calc_normal(arg0 + 0x18, &sp.uC4, &sp.uB0, &sp.u9C) != 0) {
+        vec3_normalize_len(&sp.uC4, &sp.uC4, &sp.uC0, &sp.uBC);
+        vec3_normalize_len(&sp.uB0, &sp.uB0, &sp.uAC, &sp.uA8);
+        vec3_normalize_len(&sp.u9C, &sp.u9C, &sp.u98, &sp.u94);
+        if (vec3_dot(&sp.u9C, arg0 + 0xC) < 0.0f) {
             sp.u9C = -(*(f32 *)&(sp.u9C));
             sp.uA0 = -sp.uA0;
             sp.uA4 = -sp.uA4;
@@ -895,7 +911,7 @@ void func_15151BE0(u8 *arg0, s32 arg1, s32 arg2) {
         if (var_s2 != 0) {
             do {
                 temp_s1 = random_int();
-                func_15143874((s16) (temp_s1 & 0xFF), random_float() * (*(f32 *)((u8 *)arg0 + 0x2C)), &sp.u88, &sp.u8C);
+                vec2_from_angle_byte((s16) (temp_s1 & 0xFF), random_float() * (*(f32 *)((u8 *)arg0 + 0x2C)), &sp.u88, &sp.u8C);
                 temp_f20 = (random_float() * (*(f32 *)((u8 *)arg0 + 0x44))) + (*(f32 *)((u8 *)arg0 + 0x40));
                 sp.uEF = (random_int() % (u32) ((*(u8 *)((u8 *)arg0 + 0x72)) + 1)) + (*(u8 *)((u8 *)arg0 + 0x71));
                 sp.u109 = (random_int() % (u32) ((*(s16 *)((u8 *)arg0 + 0x4E)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x4C));
@@ -905,19 +921,20 @@ void func_15151BE0(u8 *arg0, s32 arg1, s32 arg2) {
                 sp.uD8 = (((*(f32 *)&(sp.uC4)) * sp.u88) + ((*(f32 *)&(sp.uB0)) * sp.u8C) + sp.u9C) * temp_f20;
                 sp.uDC = ((sp.uC8 * sp.u88) + (sp.uB4 * sp.u8C) + sp.uA0) * temp_f20;
                 sp.uE0 = ((sp.uCC * sp.u88) + (sp.uB8 * sp.u8C) + sp.uA4) * temp_f20;
-                func_15148310(&sp.uF4, &sp.uD4, 0, (*(s32 *)((u8 *)arg0 + 0x58)), (*(s32 *)((u8 *)arg0 + 0x5C)), (*(s32 *)((u8 *)arg0 + 0x60)), (*(s32 *)((u8 *)arg0 + 0x64)), (*(s32 *)((u8 *)arg0 + 0x68)), (*(s32 *)((u8 *)arg0 + 0x6C)), (*(s32 *)((u8 *)arg0 + 0x74)), (*(s32 *)((u8 *)arg0 + 0x78)), arg0 + 0x7C, 0, arg1 & 0xFF, arg2);
+                trail_spawn(&sp.uF4, &sp.uD4, 0, (*(s32 *)((u8 *)arg0 + 0x58)), (*(s32 *)((u8 *)arg0 + 0x5C)), (*(s32 *)((u8 *)arg0 + 0x60)), (*(s32 *)((u8 *)arg0 + 0x64)), (*(s32 *)((u8 *)arg0 + 0x68)), (*(s32 *)((u8 *)arg0 + 0x6C)), (*(s32 *)((u8 *)arg0 + 0x74)), (*(s32 *)((u8 *)arg0 + 0x78)), arg0 + 0x7C, 0, arg1 & 0xFF, arg2);
                 var_s2 -= 1;
             } while (var_s2 != 0);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15151BE0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sparks_from_surface.s")
 #endif
 #ifdef NON_MATCHING
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
-void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_15151FA8 */
+void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         f32 uBC;
         f32 uC0;
@@ -981,20 +998,20 @@ void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2) {
             sp.uC0 = temp_f2 * temp_f26;
             sp.uC4 = -temp_f20 * temp_f22;
             sp.uC8 = temp_f2 * temp_f24;
-            func_15148310(&sp.uDC, &sp.uBC, 0, (*(s32 *)((u8 *)arg0 + 0x3C)), (*(s32 *)((u8 *)arg0 + 0x40)), (*(s32 *)((u8 *)arg0 + 0x44)), (*(s32 *)((u8 *)arg0 + 0x48)), (*(s32 *)((u8 *)arg0 + 0x4C)), (*(s32 *)((u8 *)arg0 + 0x50)), (*(s32 *)((u8 *)arg0 + 0x58)), (*(s32 *)((u8 *)arg0 + 0x5C)), arg0 + 0x60, 0, arg1 & 0xFF, arg2);
+            trail_spawn(&sp.uDC, &sp.uBC, 0, (*(s32 *)((u8 *)arg0 + 0x3C)), (*(s32 *)((u8 *)arg0 + 0x40)), (*(s32 *)((u8 *)arg0 + 0x44)), (*(s32 *)((u8 *)arg0 + 0x48)), (*(s32 *)((u8 *)arg0 + 0x4C)), (*(s32 *)((u8 *)arg0 + 0x50)), (*(s32 *)((u8 *)arg0 + 0x58)), (*(s32 *)((u8 *)arg0 + 0x5C)), arg0 + 0x60, 0, arg1 & 0xFF, arg2);
             var_s3 -= 1;
         } while (var_s3 != 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15151FA8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sparks_by_angles.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15145128(u8 *, u8 *, void *, void *);
-void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
+s32 vec3_normalize_len(u8 *, u8 *, void *, void *);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
 
-/* func_15132FBC particle request built by func_151522DC (0x7C bytes; layout as Spark9768 in game_161520) */
+/* mdl_particle_spawn particle request built by emit_impact_flash_spray (0x7C bytes; layout as Spark9768 in game_161520) */
 typedef struct {
     /* 0x00 */ f32 u00;
     /* 0x04 */ f32 u04;
@@ -1027,14 +1044,15 @@ typedef struct {
     /* 0x76 */ u8 pad76[6];
 } Flash22DC;
 
-// impact_flash_spray: spawns def +0 + random [0, def +4] kind-3 particles (func_15132FBC) at def +8 for an impact
-// flash (def = the 0x58-byte request of func_151BBBCC). The surface record at def +0x20 gives three axes
-// (func_15144E80, each normalised by func_15145128); the third is flipped to face def +0x14 and scaled by 1000. Each
-// particle moves along (a0 * c + a1 * s + a2) * speed, (c, s) = func_15143874(random angle, random * def +0x34),
+// impact_flash_spray: spawns def +0 + random [0, def +4] kind-3 particles (mdl_particle_spawn) at def +8 for an impact
+// flash (def = the 0x58-byte request of shot_impact_effects). The surface record at def +0x20 gives three axes
+// (tri_calc_normal, each normalised by vec3_normalize_len); the third is flipped to face def +0x14 and scaled by 1000. Each
+// particle moves along (a0 * c + a1 * s + a2) * speed, (c, s) = vec2_from_angle_byte(random angle, random * def +0x34),
 // speed = def +0x38 + random * def +0x3C; random rotation (0..360 per axis), a random keyframe v of `n`
 // (frames[v] at +0x56, scales[v] * (def +0x4C + random * def +0x50) as both scales), drift +-def +0x54 on +0x40 /
 // +0x48, +0x4C = def +0x40 + random * def +0x44, life def +0x48 + random [0, def +0x4A].
-void func_151522DC(u8 *def, s32 *frames, f32 *scales, s32 n, u8 kind, s32 owner) {
+/* was func_151522DC */
+void emit_impact_flash_spray(u8 *def, s32 *frames, f32 *scales, s32 n, u8 kind, s32 owner) {
     Flash22DC rec;
     f32 ax0[3];
     f32 ax1[3];
@@ -1050,13 +1068,13 @@ void func_151522DC(u8 *def, s32 *frames, f32 *scales, s32 n, u8 kind, s32 owner)
     f32 unused0;
     f32 unused1;
 
-    if (func_15144E80(def + 0x20, (u8 *) ax0, (u8 *) ax1, (u8 *) ax2) == 0) {
+    if (tri_calc_normal(def + 0x20, (u8 *) ax0, (u8 *) ax1, (u8 *) ax2) == 0) {
         return;
     }
-    func_15145128((u8 *) ax0, (u8 *) ax0, &unused0, &unused1);
-    func_15145128((u8 *) ax1, (u8 *) ax1, &unused0, &unused1);
-    func_15145128((u8 *) ax2, (u8 *) ax2, &unused0, &unused1);
-    if (func_15144A74((u8 *) ax2, def + 0x14) < 0.0f) {
+    vec3_normalize_len((u8 *) ax0, (u8 *) ax0, &unused0, &unused1);
+    vec3_normalize_len((u8 *) ax1, (u8 *) ax1, &unused0, &unused1);
+    vec3_normalize_len((u8 *) ax2, (u8 *) ax2, &unused0, &unused1);
+    if (vec3_dot((u8 *) ax2, def + 0x14) < 0.0f) {
         ax2[0] = -ax2[0];
         ax2[1] = -ax2[1];
         ax2[2] = -ax2[2];
@@ -1095,7 +1113,7 @@ void func_151522DC(u8 *def, s32 *frames, f32 *scales, s32 n, u8 kind, s32 owner)
         speed = random_float() * *(f32 *) (def + 0x3C) + *(f32 *) (def + 0x38);
         ang = random_int();
         r = random_float() * *(f32 *) (def + 0x34);
-        func_15143874((s16) (ang & 0xFF), r, &c, &s);
+        vec2_from_angle_byte((s16) (ang & 0xFF), r, &c, &s);
         rec.vel[0] = (ax0[0] * c + ax1[0] * s + ax2[0]) * speed;
         rec.vel[1] = (ax0[1] * c + ax1[1] * s + ax2[1]) * speed;
         rec.vel[2] = (ax0[2] * c + ax1[2] * s + ax2[2]) * speed;
@@ -1112,26 +1130,27 @@ void func_151522DC(u8 *def, s32 *frames, f32 *scales, s32 n, u8 kind, s32 owner)
         rec.u48 = random_float() * (w + w) - w;
         rec.u4C = random_float() * *(f32 *) (def + 0x44) + *(f32 *) (def + 0x40);
         rec.life = (u32) random_int() % (u32) (*(s16 *) (def + 0x4A) + 1) + *(s16 *) (def + 0x48);
-        func_15132FBC(&rec, 3, 0xFF, 0, kind, owner);
+        mdl_particle_spawn(&rec, 3, 0xFF, 0, kind, owner);
         count--;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151522DC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_impact_flash_spray.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P179 */
-s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
-void func_15143794(s16, s16, f32, void *);
+s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 
-// particle_burst_spawn: P179: spawns def +0 + random [0, def +4] kind-3 particles (func_15132FBC record block,
+// particle_burst_spawn: P179: spawns def +0 + random [0, def +4] kind-3 particles (mdl_particle_spawn record block,
 /* 0x76 bytes) from the burst definition `arg0`: each at a random direction (angles def +0x14 + random [0, +0x16],
  * +0x18 + random [0, +0x1A]) `dist` from the centre def +8, moving that way at def +0x1C + random x +0x20, spin
  * +-def +0x38 about x / z, random rotation 0..360 on all axes, life def +0x2C + random [0, +0x2E], fade
  * def +0x24 + random x +0x28, texture tex[k] for a random k < ntex with size scale[k] x (def +0x30 + random x
  * +0x34). Flags 0x29E8, plus 0x100000 when `flag`; owner / owner arg arg6 / arg7. */
-void func_15152700(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7) {
+/* was func_15152700 */
+void emit_textured_burst(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7) {
     u8 *def = arg0;
     s32 *tex = arg1;
     f32 *scale = arg2;
@@ -1197,12 +1216,12 @@ void func_15152700(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 ar
         p.rot[0] = random_float() * 360.0f;
         p.rot[1] = random_float() * 360.0f;
         p.rot[2] = random_float() * 360.0f;
-        func_15143794(angA, angB, random_float() * *(f32 *)(def + 0x20) + *(f32 *)(def + 0x1C), p.vel);
+        vec3_from_angles_byte(angA, angB, random_float() * *(f32 *)(def + 0x20) + *(f32 *)(def + 0x1C), p.vel);
         p.spinX = random_float() * (*(f32 *)(def + 0x38) + *(f32 *)(def + 0x38)) - *(f32 *)(def + 0x38);
         p.spinZ = random_float() * (*(f32 *)(def + 0x38) + *(f32 *)(def + 0x38)) - *(f32 *)(def + 0x38);
         p.fade = random_float() * *(f32 *)(def + 0x28) + *(f32 *)(def + 0x24);
         p.life = (u32) random_int() % (u32) (*(s16 *)(def + 0x2E) + 1) + *(s16 *)(def + 0x2C);
-        func_15143794(angA, angB, arg4, p.pos);
+        vec3_from_angles_byte(angA, angB, arg4, p.pos);
         p.pos[0] += *(f32 *)(def + 0x8);
         p.pos[1] += *(f32 *)(def + 0xC);
         p.pos[2] += *(f32 *)(def + 0x10);
@@ -1210,27 +1229,28 @@ void func_15152700(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 ar
         p.texture = tex[k];
         p.sizeY = scale[k] * (*(f32 *)(def + 0x30) + random_float() * *(f32 *)(def + 0x34));
         p.sizeX = p.sizeY;
-        func_15132FBC(&p, 3, 0xFF, 0, arg6, arg7);
+        mdl_particle_spawn(&p, 3, 0xFF, 0, arg6, arg7);
         n--;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152700.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_textured_burst.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_15143794(s16, s16, f32, void *);
-s32 func_15157E08(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 anim_model_fx_spawn_moving(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
 
 // base + rand % (extra + 1) (random_int, unsigned remainder)
 #define RAND_SPREAD(base, extra) ((u32) random_int() % (u32) ((extra) + 1) + (base))
 
-// particle_burst_from_spec_b: as particle_burst_from_spec (func_151530A8) for the second spec layout: base +
-// rand % (extra + 1) particles (func_15157E08, kind spec +0x3C, size base + rand x range) at the spec's point,
-// each with a random life, three random angles (0..360), a random scalar, a random direction (func_15143794),
+// particle_burst_from_spec_b: as particle_burst_from_spec (emit_streaks_from_spec) for the second spec layout: base +
+// rand % (extra + 1) particles (anim_model_fx_spawn_moving, kind spec +0x3C, size base + rand x range) at the spec's point,
+// each with a random life, three random angles (0..360), a random scalar, a random direction (vec3_from_angles_byte),
 // three random colour scalars and one more random scalar; flags / colours / the rest are copied once.
-// arg1 / arg2 go to func_15157E08. The result is unused by its caller (game_eu_1C13E0).
-s32 func_15152A90(s32 *arg0, u8 arg1, s32 arg2) {
+// arg1 / arg2 go to anim_model_fx_spawn_moving. The result is unused by its caller (game_eu_1C13E0).
+/* was func_15152A90 */
+s32 emit_burst_from_spec_b(s32 *arg0, u8 arg1, s32 arg2) {
     typedef struct {
         s32 countBase;      /* 0x00 */
         s32 countExtra;     /* 0x04 */
@@ -1265,7 +1285,7 @@ s32 func_15152A90(s32 *arg0, u8 arg1, s32 arg2) {
     struct {
         f32 ang[3];         /* 0x00 */
         f32 u0C;            /* 0x0C */
-        f32 dir[3];         /* 0x10, func_15143794 */
+        f32 dir[3];         /* 0x10, vec3_from_angles_byte */
         f32 col[3];         /* 0x1C */
         f32 u28;            /* 0x28 */
         f32 u2C;            /* 0x2C */
@@ -1350,24 +1370,24 @@ s32 func_15152A90(s32 *arg0, u8 arg1, s32 arg2) {
         ra = random_int();
         rb = random_int();
         len = random_float() * sp->lenRange + sp->lenBase;
-        func_15143794(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
+        vec3_from_angles_byte(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
                       len, part.dir);
         for (i = 0; i < 3; i++) {
             part.col[i] = random_float() * sp->colRange[i] + sp->colBase[i];
         }
         part.u28 = random_float() * sp->u28Range + sp->u28Base;
         size = random_float() * sp->sizeRange + sp->sizeBase;
-        func_15157E08((s8 *) &blk, (f32 *) &part, sp->kind, size, 0, 0, 0, arg1, arg2);
+        anim_model_fx_spawn_moving((s8 *) &blk, (f32 *) &part, sp->kind, size, 0, 0, 0, arg1, arg2);
     }
     return 0;
 }
 #undef RAND_SPREAD
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152A90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_burst_from_spec_b.s")
 #endif
 
-void func_15143794(s16, s16, f32, void *);
-void func_150CD3C0(void *, u8, u8);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+void spark_record_spawn(void *, u8, u8);
 extern void (*D_8008B000[])(u8 *);
 typedef struct { f32 v[3]; } V3_2de4;
 typedef struct {
@@ -1382,7 +1402,8 @@ typedef struct {
     f32 z;
 } S_2de4;
 
-void func_15152DE4(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_15152DE4 */
+void emit_coloured_points(u8 *arg0, u8 arg1, s32 arg2) {
     s32 pad; // fakematch: unused slot above the struct (frame size)
     S_2de4 sp;
     s32 n;
@@ -1394,7 +1415,7 @@ void func_15152DE4(u8 *arg0, u8 arg1, s32 arg2) {
     sp.a = *(f32 *)(arg0 + 0x24);
     sp.z = *(f32 *)(arg0 + 0x48);
     while (n != 0) {
-        func_15143794(*(s16 *)(arg0 + 0x14) + (random_int() % (u32)(*(s16 *)(arg0 + 0x16) + 1)),
+        vec3_from_angles_byte(*(s16 *)(arg0 + 0x14) + (random_int() % (u32)(*(s16 *)(arg0 + 0x16) + 1)),
             *(s16 *)(arg0 + 0x18) + (random_int() % (u32)(*(s16 *)(arg0 + 0x1A) + 1)),
             *(f32 *)(arg0 + 0x1C) + *(f32 *)(arg0 + 0x20) * random_float(), sp.p);
         sp.b = *(f32 *)(arg0 + 0x28) + *(f32 *)(arg0 + 0x2C) * random_float();
@@ -1410,14 +1431,15 @@ void func_15152DE4(u8 *arg0, u8 arg1, s32 arg2) {
             sp.c[2] = 0xFF;
             sp.c[3] = 0xFF;
         }
-        func_150CD3C0(&sp, arg1, (u8)arg2);
+        spark_record_spawn(&sp, arg1, (u8)arg2);
         n--;
     }
 }
 
 extern u8 D_800A63C0[][3];
 
-void func_1515302C(u8 *arg0) {
+/* was func_1515302C */
+void colour_pick_random_fire(u8 *arg0) {
     u8 i = random_int() % 5U;
     u8 *e = D_800A63C0[i];
 
@@ -1428,17 +1450,18 @@ void func_1515302C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 void *streak_spawn(s32 *, s32, void *, s32, u8, s32);
 
 // base + rand % (extra + 1) (random_int, unsigned remainder)
 #define RAND_SPREAD(base, extra) ((u32) random_int() % (u32) ((extra) + 1) + (base))
 
 // particle_burst_from_spec: spawns base + rand % (extra + 1) particles (streak_spawn) at the spec's point; each
-// one gets random life / flag byte, two random scalars, a random direction (func_15143794: two s16 angles and a
+// one gets random life / flag byte, two random scalars, a random direction (vec3_from_angles_byte: two s16 angles and a
 // length, each base + random) and two random 4-byte colours; the rest of the 0x3C-byte particle block is copied
 // from the spec once. arg1 / arg2 go to streak_spawn (owner byte, extra word). The result is unused by all callers.
-s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
+/* was func_151530A8 */
+s32 emit_streaks_from_spec(s32 *arg0, u8 arg1, s32 arg2) {
     typedef struct {
         s32 countBase;      /* 0x00 */
         s32 countExtra;     /* 0x04 */
@@ -1478,7 +1501,7 @@ s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
     } BurstSpec;
     struct {
         f32 a;              /* 0x00 */
-        f32 dir[3];         /* 0x04, func_15143794 */
+        f32 dir[3];         /* 0x04, vec3_from_angles_byte */
         f32 b;              /* 0x10 */
         u8 u14[3];          /* 0x14 */
         u8 colA[4];         /* 0x17 */
@@ -1538,7 +1561,7 @@ s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
         ra = random_int();
         rb = random_int();
         len = random_float() * sp->lenRange + sp->lenBase;
-        func_15143794(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
+        vec3_from_angles_byte(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
                       len, part.dir);
         for (i = 0; i < 4; i++) {
             part.colA[i] = RAND_SPREAD(sp->colABase[i], sp->colAExtra[i]);
@@ -1553,13 +1576,14 @@ s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
 }
 #undef RAND_SPREAD
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151530A8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_streaks_from_spec.s")
 #endif
 
 #ifdef NON_MATCHING
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
-void func_151534E0(u8 *arg0, s32 arg1) {
+/* was func_151534E0 */
+void emit_sparks_by_angles_b(u8 *arg0, s32 arg1) {
     struct {
         s32 uA8;
         s32 uAC;
@@ -1636,18 +1660,19 @@ void func_151534E0(u8 *arg0, s32 arg1) {
             sp.uD0 = temp_f2 * temp_f28;
             sp.uD4 = -temp_f20 * temp_f24;
             sp.uD8 = temp_f2 * temp_f26;
-            func_15148310(&sp.uEC, &sp.uCC, 0, (*(s32 *)((u8 *)arg0 + 0x3C)), (*(s32 *)((u8 *)arg0 + 0x40)), (*(s32 *)((u8 *)arg0 + 0x44)), (*(s32 *)((u8 *)arg0 + 0x48)), (*(s32 *)((u8 *)arg0 + 0x4C)), (*(s32 *)((u8 *)arg0 + 0x50)), 0, 0, &sp.uA8, 0, arg1 & 0xFF, 1);
+            trail_spawn(&sp.uEC, &sp.uCC, 0, (*(s32 *)((u8 *)arg0 + 0x3C)), (*(s32 *)((u8 *)arg0 + 0x40)), (*(s32 *)((u8 *)arg0 + 0x44)), (*(s32 *)((u8 *)arg0 + 0x48)), (*(s32 *)((u8 *)arg0 + 0x4C)), (*(s32 *)((u8 *)arg0 + 0x50)), 0, 0, &sp.uA8, 0, arg1 & 0xFF, 1);
             var_s3 -= 1;
         } while (var_s3 != 0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151534E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sparks_by_angles_b.s")
 #endif
 #ifdef NON_MATCHING
 s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 
-void func_15153808(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_15153808 */
+void emit_sprite_nodes_by_angles(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         s32 u88;
         u8 pad8C[0x8];
@@ -1733,14 +1758,14 @@ void func_15153808(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15153808.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_sprite_nodes_by_angles.s")
 #endif
 #ifdef NON_MATCHING
 /* P150 (hand C, replaces the batch m2c body) */
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, f32 *, s32);
 
-// particle template handed to func_151307F0 (0x67 bytes used)
+// particle template handed to particle_spawn_ex (0x67 bytes used)
 typedef struct {
     /* 0x00 */ s32 u0;
     /* 0x04 */ s32 u4;
@@ -1771,13 +1796,14 @@ typedef struct {
     /* 0x66 */ u8 u66;
 } BurstParticle;
 
-// particle_burst_spawn: spawns a burst of particles from a request (e.g. the pickup flash of func_151BF678):
+// particle_burst_spawn: spawns a burst of particles from a request (e.g. the pickup flash of pickup_burst_spawn):
 // count = +0 + random [0, +2]; each particle gets the request's fixed fields, a random life (+0x10 / +0x12),
 // value +0x14 / +0x18, size (+0x30 + random * +0x34), byte +0x23 / +0x24 and +0x54 + random * +0x58, and a
 // velocity of speed +0x4C + random * +0x50 along yaw +0x44 / +0x48 and pitch +0x46 / +0x4A (256 steps per
-// turn). It is created through func_151307F0(template, +0x64, 0, 4, owner, ownerArg) and its +0xA8 gets +0x68.
+// turn). It is created through particle_spawn_ex(template, +0x64, 0, 4, owner, ownerArg) and its +0xA8 gets +0x68.
 // tag = template byte 0x66.
-void func_15153BA4(u8 *req, s32 tag, s32 owner, s32 ownerArg) {
+/* was func_15153BA4 */
+void emit_particle_burst_req(u8 *req, s32 tag, s32 owner, s32 ownerArg) {
     BurstParticle p;
     f32 spin;
     f32 speed;
@@ -1840,14 +1866,14 @@ void func_15153BA4(u8 *req, s32 tag, s32 owner, s32 ownerArg) {
         p.vel[2] = horiz * sinYaw;
         p.u54 = random_float() * *(f32 *)(req + 0x58) + *(f32 *)(req + 0x54);
         p.u1B = (u32) random_int() % (u32) (req[0x24] + 1) + req[0x23];
-        part = func_151307F0((s32) &p, req[0x64], 0, 4, owner, ownerArg);
+        part = particle_spawn_ex((s32) &p, req[0x64], 0, 4, owner, ownerArg);
         if (part != 0) {
             memcpy(part + 0xA8, &spin, 4);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15153BA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/emit_particle_burst_req.s")
 #endif
 typedef struct { f32 v[3]; } V3_3f24;
 typedef struct {
@@ -1864,12 +1890,13 @@ typedef struct {
     s16 i;
 } S_3f24;
 #ifdef NON_MATCHING
-s32 func_15156700(S_3f24 *, u8, s32, u8, s32);
+s32 line_fx_spawn(S_3f24 *, u8, s32, u8, s32);
 #else
-void func_15156700(S_3f24 *, u8, s32, u8, s32);
+void line_fx_spawn(S_3f24 *, u8, s32, u8, s32);
 #endif
 
-void func_15153F24(u8 *arg0, u8 arg1) {
+/* was func_15153F24 */
+void emit_line_sparks_by_angles(u8 *arg0, u8 arg1) {
     S_3f24 sp;
     s32 n;
     s16 a;
@@ -1908,30 +1935,32 @@ void func_15153F24(u8 *arg0, u8 arg1) {
         sp.d = *(s16 *)(arg0 + 0x32) + (random_int() % (u32)(*(s16 *)(arg0 + 0x34) + 1));
         sp.f = *(f32 *)(arg0 + 0x38) + *(f32 *)(arg0 + 0x3C) * random_float();
         sp.g = *(u8 *)(arg0 + 0x40) + (random_int() % (u32)(*(u8 *)(arg0 + 0x41) + 1));
-        func_15156700(&sp, *(u8 *)(arg0 + 0x46), 0, arg1, 0);
+        line_fx_spawn(&sp, *(u8 *)(arg0 + 0x46), 0, arg1, 0);
         n--;
     }
 }
 
-void func_1515423C(u8 *, s32, s32, u8, s32);
+void emit_sparks_on_disc(u8 *, s32, s32, u8, s32);
 
-void func_151541F4(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_151541F4 */
+void emit_sparks_on_surface_disc(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     u8 sp24[0x2C];
-    func_1514FBB0(arg0, sp24);
-    func_1515423C(sp24, arg1, arg2, arg3, arg4);
+    emit_disc_from_surface(arg0, sp24);
+    emit_sparks_on_disc(sp24, arg1, arg2, arg3, arg4);
 }
 
 s32 impact_spark_spawn(struct17 *, s32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-void func_1515423C(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_1515423C */
+void emit_sparks_on_disc(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     s32 n;
     f32 spA8[3];
 
-    if (func_1514FC58(arg0) != 0) {
+    if (emit_disc_prepare(arg0) != 0) {
         n = random_int();
         n = *(s16 *)((u8 *)arg1 + 0x24) + (n % (u32)(*(s16 *)((u8 *)arg1 + 0x26) + 1));
         while (n != 0) {
-            func_1514FD78((f32 *)arg0, *(f32 *)((u8 *)arg1 + 0x1C) + *(f32 *)((u8 *)arg1 + 0x20) * random_float(), spA8);
+            emit_disc_random_point((f32 *)arg0, *(f32 *)((u8 *)arg1 + 0x1C) + *(f32 *)((u8 *)arg1 + 0x20) * random_float(), spA8);
             impact_spark_spawn((struct17 *)arg1, (s32 *)spA8,
                 *(f32 *)((u8 *)arg1 + 0x14) + *(f32 *)((u8 *)arg1 + 0x18) * random_float(),
                 *(s16 *)((u8 *)arg1 + 0x2C) + (random_int() % (u32)(*(s16 *)((u8 *)arg1 + 0x2E) + 1)),
@@ -1946,16 +1975,17 @@ void func_1515423C(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 s32 impact_spark_spawn(struct17 *, s32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_15154488 */
+void emit_sparks_in_angle_range(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4) {
     s32 n;
     s32 spA8[3];
 
     n = *(s16 *)((u8 *)arg1 + 0x24) + (random_int() % (u32)(*(s16 *)((u8 *)arg1 + 0x26) + 1));
     while (n != 0) {
-        func_15143794(arg0->unk0 + (random_int() % (u32)(arg0->unk2 + 1)),
+        vec3_from_angles_byte(arg0->unk0 + (random_int() % (u32)(arg0->unk2 + 1)),
             arg0->unk4 + (random_int() % (u32)(arg0->unk6 + 1)),
             *(f32 *)((u8 *)arg1 + 0x1C) + *(f32 *)((u8 *)arg1 + 0x20) * random_float(), spA8);
         impact_spark_spawn(arg1, spA8,
@@ -1973,13 +2003,14 @@ void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, 
 
 #ifdef NON_MATCHING
 /* P159 */
-s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
-// spark_shower_spawn: spawns a spark particle (func_15132FBC, 0x18 extra bytes at +0x170) at pos lasting `time`
+s32 mdl_particle_spawn(void *, s32, s32, s32, s32, s32);
+// spark_shower_spawn: spawns a spark particle (mdl_particle_spawn, 0x18 extra bytes at +0x170) at pos lasting `time`
 // (> 0, else nothing) with brightness `bright` (also its life byte, IDO f32 -> u8 conversion); `flat` != 0 makes it
 // a flat spark turning around y (yaw / spin from it), else it gets random angles and a random x / z drift
 // (+-4.256). The extra bytes keep time / size / brightness, the fade rate bright / time^2 and the flat flag.
 // Returns the particle or 0.
-s32 func_15154728(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 arg5, s32 arg6) {
+/* was func_15154728 */
+s32 spark_shower_spawn(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 arg5, s32 arg6) {
     struct {
         /* extra data copied to particle +0x170 (0x18 bytes) */
         f32 age;
@@ -1989,7 +2020,7 @@ s32 func_15154728(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 arg5, s
         f32 fade;
         u8 isFlat;
         u8 pad3D[3];
-        /* spawn block for func_15132FBC */
+        /* spawn block for mdl_particle_spawn */
         f32 scaleX;
         f32 scaleY;
         f32 u48;
@@ -2075,17 +2106,18 @@ s32 func_15154728(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 arg5, s
     sp.uB2 = 1;
     sp.uB4 = 0xFF;
     sp.u94 = 300;
-    p = func_15132FBC(&sp.scaleX, 0, 0, 0x18, arg5, arg6);
+    p = mdl_particle_spawn(&sp.scaleX, 0, 0, 0x18, arg5, arg6);
     if (p != 0) {
         memcpy((u8 *)p + 0x170, &sp, 0x18);
     }
     return p;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15154728.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/spark_shower_spawn.s")
 #endif
 
-s32 func_15154A9C(u8 *arg0) {
+/* was func_15154A9C */
+s32 spark_shower_update(u8 *arg0) {
     f32 *p;
     f32 s;
     f32 t;
@@ -2106,29 +2138,30 @@ s32 func_15154A9C(u8 *arg0) {
     return 1;
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 #ifdef NON_MATCHING
-void func_151C64F4(s32, void *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
+void debris_sprite_spawn(s32, void *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 #else
-void func_151C64F4(s32, void *, f32, s32, s32, s32, f32, s32, s32, u8, s32);
+void debris_sprite_spawn(s32, void *, f32, s32, s32, s32, f32, s32, s32, u8, s32);
 #endif
-void func_15154BF4(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_15154BF4 */
+void emit_rings_random_yaw(u8 *arg0, u8 arg1, s32 arg2) {
     s32 sp80[4];
     s32 n;
     n = *(s16 *)(arg0 + 0) + (random_int() % (u32)(*(s16 *)(arg0 + 2) + 1));
     if (n > 0) {
         do {
-            func_15143794(random_int() & 0xFF, *(s16 *)(arg0 + 0xA) + (random_int() % (u32)(*(s16 *)(arg0 + 0xE) + 1)),
+            vec3_from_angles_byte(random_int() & 0xFF, *(s16 *)(arg0 + 0xA) + (random_int() % (u32)(*(s16 *)(arg0 + 0xE) + 1)),
                 *(f32 *)(arg0 + 0x10) + *(f32 *)(arg0 + 0x14) * random_float(), sp80);
 #ifdef NON_MATCHING
-            func_151C64F4(*(s32 *)(arg0 + 4), sp80, *(f32 *)(arg0 + 0x18) + *(f32 *)(arg0 + 0x1C) * random_float(),
+            debris_sprite_spawn(*(s32 *)(arg0 + 4), sp80, *(f32 *)(arg0 + 0x18) + *(f32 *)(arg0 + 0x1C) * random_float(),
                 *(f32 *)(arg0 + 0x20),
                 *(u8 *)(arg0 + 0x24) + (random_int() % (u32)(*(u8 *)(arg0 + 0x25) + 1)),
                 *(s16 *)(arg0 + 0x26) + (random_int() % (u32)(*(s16 *)(arg0 + 0x28) + 1)),
                 *(f32 *)(arg0 + 0x2C) + *(f32 *)(arg0 + 0x30) * random_float(),
                 random_float() < *(f32 *)(arg0 + 0x34), *(s32 *)(arg0 + 0x38), arg1, arg2);
 #else
-            func_151C64F4(*(s32 *)(arg0 + 4), sp80, *(f32 *)(arg0 + 0x18) + *(f32 *)(arg0 + 0x1C) * random_float(),
+            debris_sprite_spawn(*(s32 *)(arg0 + 4), sp80, *(f32 *)(arg0 + 0x18) + *(f32 *)(arg0 + 0x1C) * random_float(),
                 *(s32 *)(arg0 + 0x20),
                 *(u8 *)(arg0 + 0x24) + (random_int() % (u32)(*(u8 *)(arg0 + 0x25) + 1)),
                 *(s16 *)(arg0 + 0x26) + (random_int() % (u32)(*(s16 *)(arg0 + 0x28) + 1)),
@@ -2142,7 +2175,8 @@ void func_15154BF4(u8 *arg0, u8 arg1, s32 arg2) {
 
 typedef struct { f32 x, y, z; } V3;
 
-s32 func_15154DF4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, s32 arg5)
+/* was func_15154DF4 */
+s32 glow_pulse_spawn(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, s32 arg5)
 {
   s32 obj;
   struct 
@@ -2231,7 +2265,7 @@ s32 func_15154DF4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, s32 arg5)
   sp.uB2 = 1;
   sp.uB4 = 0xFF;
   sp.u94 = 0x12C;
-  obj = func_15132FBC((u8 *) (&sp.u2C[5]), 0, 0, 0x14, arg4, arg5);
+  obj = mdl_particle_spawn((u8 *) (&sp.u2C[5]), 0, 0, 0x14, arg4, arg5);
   if (obj != 0)
   {
     memcpy(obj + 0x170, &sp, 0x14);
@@ -2239,7 +2273,8 @@ s32 func_15154DF4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, s32 arg5)
   return obj;
 }
 
-s32 func_15154FF8(u8 *arg0) {
+/* was func_15154FF8 */
+s32 glow_pulse_update(u8 *arg0) {
     f32 *p;
     f32 s;
 

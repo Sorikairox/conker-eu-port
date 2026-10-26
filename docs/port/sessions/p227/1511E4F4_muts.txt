@@ -21,7 +21,7 @@ s/PK_U8(p, 0x300) == 0) {/PK_U8(p, 0x300) == 2) {/ % noplay
 s/if (\*(s32 \*) (obj + 0x84) == 1 \&\& PK_U8(p, 0x128) != 0) {/if (*(s32 *) (obj + 0x84) == 1 \&\& PK_U8(p, 0x128) == 0) {/ % filt1
 s/if (\*(s32 \*) (obj + 0x84) == 2 \&\& PK_U8(p, 0x128) == 0) {/if (*(s32 *) (obj + 0x84) == 2 \&\& PK_U8(p, 0x128) == 2) {/ % filt2
 s/== 3 \&\& (PK_U8(p, 0x128) \& 1)/== 3 \&\& (PK_U8(p, 0x128) \& 2)/ % filt3 filt3b
-s/if (item != -1 \&\& func_15031C4C(p, item, 0) != 0) {/if (item != -1 \&\& func_15031C4C(p, item, 1) != 0) {/ % k54
+s/if (item != -1 \&\& attachment_find_by_slot(p, item, 0) != 0) {/if (item != -1 \&\& attachment_find_by_slot(p, item, 1) != 0) {/ % k54
 s/dz = (f32) PK_S16(obj, 0x14) - p->z_position;/dz = (f32) PK_S16(obj, 0x12) - p->z_position;/ % take
 s/\* 0.015625f;/* 0.0156f;/ % edge_99_9
 s/size \*= 1.4f;/size *= 1.3f;/ % big
@@ -34,7 +34,7 @@ s/y - r < PK_F32(p, 0x18) + (f32) h)/y - r < PK_F32(p, 0x18))/ % too_low low_h
 s/\*(s32 \*) (obj + 0x80) = PK_U8(p, 0x3B);/*(s32 *) (obj + 0x80) = PK_U8(p, 0x3A);/ % take
 s/            s->state = 3;$/            s->state = 2;/ % take
 s/pickup_collect_sound_play(obj, p);/pickup_collect_sound_play(obj, p + 1);/ % take
-s/func_151D6F20((s32) p, (s32) obj);/func_151D6F20((s32) obj, (s32) p);/ % take
+s/pickup_burst_in_mp_level((s32) p, (s32) obj);/pickup_burst_in_mp_level((s32) obj, (s32) p);/ % take
 s/                    break;$/                    ;/ % take_p0
 s/PK_F32(obj, 0x34) += 0.26f \* s->scale;/PK_F32(obj, 0x34) += 0.25f * s->scale;/ % st0_grow
 s/if (s->scale <= PK_F32(obj, 0x34)) {/if (s->scale < PK_F32(obj, 0x34)) {/ % st0_zero

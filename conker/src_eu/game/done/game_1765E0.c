@@ -60,7 +60,7 @@ void func_15149264(struct260 *arg0) {
 }
 
 void func_15149318(struct260 *arg0) {
-    func_151D5E30(&arg0->unk14);
+    vtx_slot_buffers_free(&arg0->unk14);
 }
 
 void func_1514933C(struct260 *arg0) {

@@ -29,7 +29,7 @@ extern f32 D_80099074;
 void obj_build_inverse_mtx(s32 arg0, s32 arg1) {
     struct191 tmp;
 
-    func_1503E5F8(arg0, &tmp.unk194, &tmp.unk190, &tmp.unk18C, &tmp.unk17C, &tmp.unk178, &tmp.unk174, &tmp.unk188, &tmp.unk184, &tmp.unk180);
+    mtxf_decompose(arg0, &tmp.unk194, &tmp.unk190, &tmp.unk18C, &tmp.unk17C, &tmp.unk178, &tmp.unk174, &tmp.unk188, &tmp.unk184, &tmp.unk180);
     guMtxIdentF(&tmp.unk80);
     tmp.unkA4 = -tmp.unk194;
     tmp.unkA8 = -tmp.unk190;
@@ -39,9 +39,9 @@ void obj_build_inverse_mtx(s32 arg0, s32 arg1) {
     mtxf_rotate_xyz_deg(&tmp.unkF4,            0, -tmp.unk178,           0);
     mtxf_rotate_xyz_deg(&tmp.unkB4,            0,           0, -tmp.unk174);
 
-    func_150A7A48(&tmp.unk80,  &tmp.unkB4, &tmp.unk40);
-    func_150A7A48(&tmp.unk40,  &tmp.unkF4, &tmp.unk0);
-    func_150A7A48(&tmp.unk0,  &tmp.unk134, arg1);
+    mtxf_mul(&tmp.unk80,  &tmp.unkB4, &tmp.unk40);
+    mtxf_mul(&tmp.unk40,  &tmp.unkF4, &tmp.unk0);
+    mtxf_mul(&tmp.unk0,  &tmp.unk134, arg1);
 }
 
 #ifdef NON_MATCHING
@@ -257,7 +257,7 @@ void vec3_scale(struct17 *arg0, f32 arg1, struct17 *arg2) {
 
 /* was func_1504917C */
 void vec3_normalize(struct17 *arg0, struct17 *arg1) {
-    f32 tmp = func_150AD930(arg0);
+    f32 tmp = vec3f_magnitude(arg0);
     if (tmp != 0.0f) {
         tmp = 1.0f / tmp;
     }

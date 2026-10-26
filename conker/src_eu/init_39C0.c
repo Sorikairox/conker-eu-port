@@ -3,22 +3,24 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_10003ACC(s32 arg0, s32 arg1, s32 arg2);
+void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2);
 
 
-void func_100039C0(void) {
+/* was func_100039C0 */
+void video_init_screen(void) {
     D_800BE620 = 292; // screen width px
     D_800BE624 = 216; // screen height px
     D_800380A0 = (f32) D_800BE620 / 292.0f;
     D_800380A4 = (f32) D_800BE624 / 216.0f;
     D_800BE9C4 = allocate_memory(D_800BE620 * D_800BE624 * 2, 255, 3, 0);
-    func_10003ACC(0, 0, 0);
+    framebuffer_fill_color(0, 0, 0);
     screen_setup_viewports(D_800BE620, D_800BE624);
     // EU: the VI mode is no longer set here
 }
 
 #ifdef NON_MATCHING
-void func_10003ACC(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_10003ACC */
+void framebuffer_fill_color(s32 arg0, s32 arg1, s32 arg2) {
     s16 *var_v1_2;
     s16 temp_t8;
     s32 temp_a1;
@@ -68,13 +70,14 @@ block_10:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/func_10003ACC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/framebuffer_fill_color.s")
 #endif
 // EU only
 #ifdef NON_MATCHING
 extern s32 D_8002AF20;
 
-void func_10003C10(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
+/* was func_10003C10 */
+void vi_mode_set_window(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     s32 temp_a2;
     s32 temp_f8;
     s32 temp_t6;
@@ -106,5 +109,5 @@ void func_10003C10(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/func_10003C10.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/vi_mode_set_window.s")
 #endif

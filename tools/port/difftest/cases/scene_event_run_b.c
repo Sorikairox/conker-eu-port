@@ -1,137 +1,137 @@
 /* --- callees: C definitions elsewhere (signatures copied) --- */
-void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
+void mp3_voice_play(s32 arg0, s32 arg1, s32 arg2);
 void func_151F2D6C(s32, s32);
 void func_151F2BA8(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
-void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
+void particle_emitter_node_spawn(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
                    u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15,
                    u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F,
                    u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29,
                    u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30);
-void func_151BA1A0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
+void spark_sprite_burst_spawn(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
                    s16 argA, s16 argB, s16 argC, s32 argD, u8 argE, s32 argF);
 void node_spawn_sprite_quad(void *arg0, u8 arg1, s32 arg2);
 void beam_effect_spawn_attached(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                    s16 argA, s16 argB, u16 argC, u8 argD);
-void func_1516ECE8(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_150BF47C(s32 arg0);
+void particle_emitter_preset_packed_pos(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
+void twin_particle_emitters_spawn(s32 arg0);
 f32 math_sin_u8(u8 arg0);
-void func_151DCE6C(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
-void func_150BA4C0(u8 *arg0, u8 arg1, s32 arg2);
-void func_151A3940(u8 *arg0, u8 arg1);
-void func_151664F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8);
-void func_150B2974(u8 *arg0, s32 arg1, s32 arg2);
+void flash_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
+void crumble_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void obj_burning_fx_start(u8 *arg0, u8 arg1);
+void water_ring_spawn(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8);
+void obj_blast_fx_spawn(u8 *arg0, s32 arg1, s32 arg2);
 void point_emitter_spawn_preset(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
-s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
-void func_150D0148(f32 arg0);
+s32 fb_zoom_fx_spawn(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
+void bouncing_sprites_broadcast_drop(f32 arg0);
 void func_151494E0(s32, u8);
 struct260 *segment_effect_spawn(u8 *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7);
 struct260 *vent_smoke_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
 struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
 void swing_lamp_post_target(s32 arg0, s32 arg1, u8 arg2);
-void func_151A9940(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
-u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_150AFC18(s16 arg0, u8 arg1, s32 arg2);
+void kind_effect_spawn(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
+u8 *model_drip_create(u8 **arg0, s32 arg1, u8 arg2, s32 arg3);
+void fb_fx_spawn_simple(s16 arg0, u8 arg1, s32 arg2);
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 void obj_bone_glow_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
-void func_1519F0FC(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4);
+void seqfx_track_effect_spawn(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4);
 void obj_bone_spark_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
-void func_150D0644(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_150D07C4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_150D09D4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_1519F2F4(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-s32 func_15046F70(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
+void text_pager_spawn_caption(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void text_pager_spawn_console(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void text_pager_spawn_title(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void seqfx_track_sprite_spawn(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+s32 collision_floor_probe(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
 f32 random_float(void);
 s32 random_int(void);
 s32 fx_splash_spawn(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9,
                   s32 argA);
 void zap_bolt_spawn_path(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3);
-s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
-struct260 *func_151B57F0(s16 arg0, u8 arg1, s32 arg2);
-struct260 *func_151932B8(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
-s32 *func_151905AC(u8 *arg0, s32 *arg1);
-s32 func_1518FA8C(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
+struct260 *electric_bolt_spawn(s16 arg0, u8 arg1, s32 arg2);
+struct260 *body_dust_effect_start(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
+s32 *bone_sparks_presets_for_kind(u8 *arg0, s32 *arg1);
+s32 bone_sparks_attach_preset(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32 point_emitter_spawn(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3);
 s32 anim_fx_bone_emitter_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
 void anim_fx_trail_spawn(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
-void func_150C7520(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
-u8 *func_1519EEE0(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-void func_1516F868(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_1516F730(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
+void obj_bone_emitters_restart(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
+u8 *seqfx_timer_create(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+void particle_emitter_preset_obj_pair(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void particle_emitter_preset_obj_burst(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void fx_ground_splats_around(struct127 *arg0, f32 arg1, u8 arg2, s32 arg3);
-void func_1504715C(void *out, u8 *obj);
-void func_150CAE30(u8 *arg0);
+void hitinfo_from_obj_floor(void *out, u8 *obj);
+void landing_dust_spray(u8 *arg0);
 void swing_lamp_post_toggle(void);
-u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
-void func_151C5B38(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2);
+u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
+void gun_muzzle_sparks_spawn(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void gun_muzzle_flash_light(u8 *arg0, u8 arg1, s32 arg2);
 void obj_bone14_spark_burst(u8 *arg0, u8 arg1, s32 arg2);
 void obj_joint_spark_spray(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
 void obj_bone_spark_spray(u8 *arg0, u8 arg1, s32 arg2);
 void obj_muzzle_blast(u8 *arg0, u8 arg1, s32 arg2);
-s32 func_151BEE00(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98 */
-void func_150BAEF4(u8 *arg0, u8 arg1, s32 arg2);
-void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2);
-void func_15143134(void *arg0, void *arg1, void *arg2);
-void func_151C384C(void *arg0, u8 arg1, s32 arg2);
-void func_151C9CBC(s32 arg0, s32 arg1);
+s32 life_pickup_spawn(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98 */
+void obj_heavy_impact_fx(u8 *arg0, u8 arg1, s32 arg2);
+void explosion_smoke_flash_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void mtx_transform_point_or_origin(void *arg0, void *arg1, void *arg2);
+void fire_embers_spawn(void *arg0, u8 arg1, s32 arg2);
+void laser_switch_broadcast(s32 arg0, s32 arg1);
 void obj_angle_point_effect(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_151CC840(s32 arg0);
-void func_1519EFE8(f32 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4);
+void aim_hud_send_flash(s32 arg0);
+void seqfx_burst_spawn(f32 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4);
 s32 object_arc_to_surface_spawn(u8 *, s16, s16, s16, s32, f32, f32, s32, s32, s8 *, s32, s32);
-s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3);
+s32 particle_spawn_smoke_puff(u8 *arg0, f32 arg1, u8 arg2, s32 arg3);
 void obj_set_dying_flags(struct127 *arg0);
 void object_hit_effect(struct127 *arg0, s32 arg1, s32 arg2);
-void func_15193660(u8 *arg0, u8 arg1, s32 arg2);
-void func_151A0A10(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
-void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
+void obj_head_particle_burst(u8 *arg0, u8 arg1, s32 arg2);
+void ground_dust_spawn(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
+void emit_sparks_in_angle_range(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
 void impact_spawn_debris_burst(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
+void obj_bone_beam_impact(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
 void smoke_column_spawn_far(s32 arg0);
 void fx_twin_beams_spawn(u8 arg0);
-void func_1518B7D4(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4);
-void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6);
-void func_15171B70(u8 *arg0, u8 arg1, s32 arg2);
-void func_15172164(struct127 *arg0, u8 arg1);
-void func_15171434(s32 arg0, u8 arg1, s32 arg2);
-void func_15171734(u8 *arg0);
-void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_1516F2D8(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
+void rubble_scatter_spawn(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4);
+void rubble_scatter_spawn_ex(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6);
+void debris_sparks_rect_by_type(u8 *arg0, u8 arg1, s32 arg2);
+void debris_obj_destroy_by_id(struct127 *arg0, u8 arg1);
+void debris_crate_break_by_level(s32 arg0, u8 arg1, s32 arg2);
+void debris_obj_remove_explode(u8 *arg0);
+void rubble_burst_with_dust(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void particle_emitter_preset_obj3a(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void fx_point_emitter_spawn(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
 void *memcpy(void *s1, const void *s2, size_t n);
 /* --- callees still in asm: declared from this function's call sites (arity and widths from the asm) --- */
-void func_15177F90(u8 kind, u8 *pos, s32, s32 x, s32 y, s32 z, s32, s32 span, s32 flag, s32, s32 w6);
-void func_150B0574(f32 *from, f32 *to, u8 flag, s32);
+void swarm_spawn(u8 kind, u8 *pos, s32, s32 x, s32 y, s32 z, s32, s32 span, s32 flag, s32, s32 w6);
+void beam_trail_spawn(f32 *from, f32 *to, u8 flag, s32);
 f32 math_cos_u8(u8 angle);
-void func_1516FAB8(s32 x, s32 y, s32 z, s32 span, s32 dx, s32, s32 dz, s32, s32, s32, s32, s32, s32, s32, s32, s32 flag, s32);
+void particle_spray_pair_spawn(s32 x, s32 y, s32 z, s32 span, s32 dx, s32, s32 dz, s32, s32, s32, s32, s32, s32, s32, s32, s32 flag, s32);
 s32 beam_effect_spawn(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, struct127 *, s32, s32,
                   s32, s32, s32, f32, f32, f32, f32, f32, f32);
 void event_object_effect_spawn(u8 *obj, s16 span, s32, s32, f32, s32, s32 flag, s32);
 void trail_follower_spawn(u8 *rec, s16 span, u8 flag, s32);
-void func_150C4620(u8 *obj, s16 span, u8 flag, s32);
-void func_150CFB90(s16 span, u8 flag, s32);
-void func_151925C4(u8 *obj, s16 span, u8 flag, s32);
+void damage_smoke_spawn(u8 *obj, s16 span, u8 flag, s32);
+void screen_bar_spawn(s16 span, u8 flag, s32);
+void obj_dust_effect(u8 *obj, s16 span, u8 flag, s32);
 void score_banner_spawn(s16 span, u8 flag, s32);
-s32 func_151B09BC(u8 *obj, s32, s16 span, u8 flag, s32);
-u8 *func_1518D1C0(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);
+s32 object_link_effect_spawn(u8 *obj, s32, s16 span, u8 flag, s32);
+u8 *character_effect_attach(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);
 void blood_splash_spawn(f32 *offset, f32, f32, f32, s32, s32, s32, s32 span, s32, s32, s32 flag, s32);
 void beam_spawn_points(u8 *pos, u8 *, u8 *, u8 *, u8 *, s32 span, s32 flag, s32);
-s32 func_1514DA28(s16, s16);
-s32 func_1514654C(u8 *obj, u8 *att, s32, f32 **, u8 **, s32);
-void func_151CFFFC(u8 *obj, u8 flag, s32);
-void func_151C62D0(u8 *obj, u8 b5, s32, u8 *att, s32 kind, s32 flag, s32);
+s32 char_fx_slot_derives(s16, s16);
+s32 model_node_points_to_world(u8 *obj, u8 *att, s32, f32 **, u8 **, s32);
+void object_shatter_effects(u8 *obj, u8 flag, s32);
+void object_gun_fire(u8 *obj, u8 b5, s32, u8 *att, s32 kind, s32 flag, s32);
 void object_explode(u8 *obj, u8 flag, s32);
 s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void obj_limb_muzzle_burst(u8 *obj, u8, u8, u8 flag, s32);
-void func_15171100(void *pos, s32, s32, s32, s32 flag, s32);
-s32 func_151A74B0(void *spray, s32, u8 flag, s32);
+void debris_crate_break_pieces(void *pos, s32, s32, s32, s32 flag, s32);
+s32 debris_spray_spawn(void *spray, s32, u8 flag, s32);
 void smoke_columns_spawn(u8 flag);
 void joint_beam_spawn(u8 *obj, s32, u8 flag, s32);
-void func_1514948C(u8 n, f32 x, f32 y, f32 z, s32, s32, s32, f32, s32, f32, f32, s32 flag);
+void trail_spawn_directed(u8 n, f32 x, f32 y, f32 z, s32, s32, s32, f32, s32, f32, f32, s32 flag);
 void spark_effect_on_event(u8 *obj, s32, u8 flag);
 
-/* one 8-byte script event (func_1502AB94's table entry) */
+/* one 8-byte script event (scene_event_run's table entry) */
 typedef struct {
     s8  type;    /* 0x0B sound, 0x11 table byte, 0x05 effect */
     u8  delta;
@@ -141,7 +141,7 @@ typedef struct {
     s16 w6;
 } ScriptEvent;
 
-/* particle spray of sub-types 0x4D / 0x4E (func_151A74B0); 0x28 / 0x2C are left unset */
+/* particle spray of sub-types 0x4D / 0x4E (debris_spray_spawn); 0x28 / 0x2C are left unset */
 typedef struct {
     s16 count;
     f32 pos[3];
@@ -188,29 +188,29 @@ static const u8 sBones5F19[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };                
 #define O_PTR(o, off) (*(u8 **) ((u8 *) (o) + (off)))
 
 /* frames until the next event of this type and id on the track: the effect's duration */
-#define SPAN(ev, out) (func_15023C60((u32) (ev), (ev)->type, track, (out), 1, (ev)->id, 0, 0, 0, 0, player) - now)
+#define SPAN(ev, out) (scene_event_find_next((u32) (ev), (ev)->type, track, (out), 1, (ev)->id, 0, 0, 0, 0, player) - now)
 #define REC(player, track) ((u8 *) &(&D_800C3958)[player][track])
 #define OBJ_INDEX(obj) ((s32) ((u8 *) (obj) - (u8 *) D_800CC2D0) / 812)
 
-/* Script event interpreter (middle handler of func_1502AB94). `arg0` is one 8-byte ScriptEvent of track `track` of
+/* Script event interpreter (middle handler of scene_event_run). `arg0` is one 8-byte ScriptEvent of track `track` of
  * player `player`; `now` = the current frame, `value` = the byte type 0x11 stores, `obj` / `rec` = the object or the
  * player's D_800C3958 record the track drives, `data` = its position (f32 x, y, z), `flag` = passed on to the effects.
  * Type 0x0B plays / fades / stops a sound, type 0x11 sets a per-track byte, type 0x05 starts effect `id` (most only
  * when b4 == 0; "span" = frames until the next event with the same type and id). Returns 1 when handled, else 0. */
-s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *rec, u8 *data, s32 flag) {
+s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 *obj, u8 *rec, u8 *data, s32 flag) {
     ScriptEvent *ev = (ScriptEvent *) arg0;
     f32 *pos = (f32 *) data;
     u8 *r;
-    u8 *next;   /* out slot of func_15023C60 (never read) */
+    u8 *next;   /* out slot of scene_event_find_next (never read) */
     s32 span;
     s32 vol;
     s32 i;
 
     if (ev->type == 0x0B) {   /* sound */
         if (ev->b4 == 0) {
-            func_1001263C(ev->id, ev->w6 == 0 ? 0x10000 : (ev->w6 << 16) / 255, 0x40);
+            mp3_voice_play(ev->id, ev->w6 == 0 ? 0x10000 : (ev->w6 << 16) / 255, 0x40);
         } else if (ev->b4 == 1) {
-            span = func_15023C60((u32) ev, ev->type, track, &next, 1, ev->id, 1, 2, 0, 0, player) - now;
+            span = scene_event_find_next((u32) ev, ev->type, track, &next, 1, ev->id, 1, 2, 0, 0, player) - now;
             vol = ev->w6 == 0 ? 0x10000 : (ev->w6 << 16) / 255;
             func_151F2D6C(vol, (span * 0x5604) / 50);
         } else if (ev->b4 == 3) {
@@ -252,7 +252,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         c = D_800844D8[k];   /* N64: from a stack copy of the table taken before the span call */
         grow = (size * 40) / 4096;
         /* a0 / a1: the two halves of the `data` pointer, as the N64 code passes them */
-        func_1516DF0C((s16) ((s32) data >> 16), (s16) (s32) data, 0, 0x1B, 0, c[0], c[1], c[2], c[3], c[4], c[5], 0, 1,
+        particle_emitter_node_spawn((s16) ((s32) data >> 16), (s16) (s32) data, 0, 0x1B, 0, c[0], c[1], c[2], c[3], c[4], c[5], 0, 1,
                       6, 0, 0, 0, 0, 0, (size >> 3) >> 8, (size >> 3) & 0xFF, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, span, grow,
                       grow, 0xFF, 14, 8, 8, 0x25, 0, 0xFF, 8, 0, 0, player, 0, 0, flag, 0);
         break;
@@ -260,13 +260,13 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x0A:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_151BA1A0(3, 3, 0, 0, 0, 800, 1200, 400, 200, 0x66, 0x1C7, 2, span, (s32) data, flag, 0);
+            spark_sprite_burst_spawn(3, 3, 0, 0, 0, 800, 1200, 400, 200, 0x66, 0x1C7, 2, span, (s32) data, flag, 0);
         }
         break;
     case 0x0B:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_151BA1A0(0x2F, 1, 0, 0, 0, 2000, 1000, 400, 200, 0x400, 0x400, 6, span, (s32) data, flag, 0);
+            spark_sprite_burst_spawn(0x2F, 1, 0, 0, 0, 2000, 1000, 400, 200, 0x400, 0x400, 6, span, (s32) data, flag, 0);
         }
         break;
     case 0x0C: {
@@ -293,7 +293,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x19:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_15177F90(ev->b5 != 0 ? ev->b5 : 12, data, 0xFF, pos[0], pos[1], pos[2], 0, span, flag, 0, ev->w6);
+            swarm_spawn(ev->b5 != 0 ? ev->b5 : 12, data, 0xFF, pos[0], pos[1], pos[2], 0, span, flag, 0, ev->w6);
         }
         break;
     case 0x1A: {
@@ -307,7 +307,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             to[0] = O_F32(r, 0);
             to[1] = O_F32(r, 0x38) + O_F32(r, 4);
             to[2] = O_F32(r, 8);
-            func_150B0574(from, to, (u8) flag, 1);
+            beam_trail_spawn(from, to, (u8) flag, 1);
         } else {
             r = REC(player, track);
             beam_effect_spawn(0, p[0], p[1], p[2], O_F32(r, 0), O_F32(r, 0x38) + O_F32(r, 4), O_F32(r, 8), 40.0f, 0.0f, 8.0f,
@@ -326,10 +326,10 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (ev->b4 == 0) {
             switch ((u16) ev->w6) {
             case 0:
-                func_1516ECE8((u32) data, span, ev->b5, (u8) flag, 0);
+                particle_emitter_preset_packed_pos((u32) data, span, ev->b5, (u8) flag, 0);
                 break;
             case 1:
-                func_150BF47C(span);
+                twin_particle_emitters_spawn(span);
                 break;
             case 2: {   /* two sprays either side of the object, along its yaw */
                 f32 x = O_F32(obj, 0x14);
@@ -338,33 +338,33 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 u8 angle = O_U16(obj, 0x7A) >> 8;
                 f32 sn = math_sin_u8(angle);
                 f32 cs = math_cos_u8(angle);
-                func_1516FAB8(x + 20.0f, y + 475.0f, z, span, 14.0f * sn, 0xB00, 14.0f * cs, 200, 50, 10, 6, 7, 0xBE,
+                particle_spray_pair_spawn(x + 20.0f, y + 475.0f, z, span, 14.0f * sn, 0xB00, 14.0f * cs, 200, 50, 10, 6, 7, 0xBE,
                               0xBE, 0xBE, (u8) flag, 0);
-                func_1516FAB8(x - 24.0f, y + 476.0f, z, span, -23.0f * sn, 0x800, -23.0f * cs, 200, 50, 10, 6, 7, 0xBE,
+                particle_spray_pair_spawn(x - 24.0f, y + 476.0f, z, span, -23.0f * sn, 0x800, -23.0f * cs, 200, 50, 10, 6, 7, 0xBE,
                               0xBE, 0xBE, (u8) flag, 0);
                 break;
             }
             case 3:
-                func_151DCE6C(data, span, 1, 1, flag, 0);
+                flash_smoke_emitter_spawn(data, span, 1, 1, flag, 0);
                 break;
             case 4:
-                func_151DCE6C(data, span, 0, 0, flag, 0);
+                flash_smoke_emitter_spawn(data, span, 0, 0, flag, 0);
                 break;
             }
         }
         break;
     case 0x1F:
         if (obj != NULL) {
-            func_150BA4C0((u8 *) obj, (u8) flag, 1);
+            crumble_emitter_spawn((u8 *) obj, (u8) flag, 1);
         }
         break;
     case 0x00:
         if (obj != NULL) {
-            func_151A3940((u8 *) obj, (u8) flag);
+            obj_burning_fx_start((u8 *) obj, (u8) flag);
         }
         break;
     case 0x20:
-        func_151664F0(-1, pos[0], pos[1], pos[2], 20, 20, 1, flag, 1);
+        water_ring_spawn(-1, pos[0], pos[1], pos[2], 20, 20, 1, flag, 1);
         break;
     case 0x06:
     case 0x3E:
@@ -372,7 +372,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x2A:
         break;
     case 0x07:
-        func_150B2974((u8 *) obj, 9, -1);
+        obj_blast_fx_spawn((u8 *) obj, 9, -1);
         break;
     case 0x21:
         if (ev->b4 == 0) {
@@ -381,7 +381,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         break;
     case 0x60:
         if (ev->b4 == 0) {
-            func_150CE660((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);   /* 4th argument 0 (P80) */
+            fb_zoom_fx_spawn((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);   /* 4th argument 0 (P80) */
         }
         break;
     case 0x65:
@@ -390,13 +390,13 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 s8 level = ev->w6;
                 func_151494E0((s32) &level, 0x51);
             } else if (ev->b5 == 0x13) {
-                func_150D0148(ev->w6 * 0.01f * 300.0f - 150.0f);
+                bouncing_sprites_broadcast_drop(ev->w6 * 0.01f * 300.0f - 150.0f);
             }
         }
         if (ev->b4 != 0) {
             break;
         }
-        span = func_15023C60((u32) ev, ev->type, track, &next, 1, ev->id, 1, 1, 1, ev->b5, player) - now;
+        span = scene_event_find_next((u32) ev, ev->type, track, &next, 1, ev->id, 1, 1, 1, ev->b5, player) - now;
         switch (ev->b5) {
         case 1:
             event_object_effect_spawn((u8 *) obj, span, -1, 0, 0.00071f, 0, flag, 1);
@@ -425,7 +425,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             p[0] = O_F32(r, 0);
             p[1] = O_F32(r, 4);
             p[2] = O_F32(r, 8);
-            func_151A9940(5, 1, NULL, (s32) p, -10000.0f, 100.0f, span, (u8) flag, 1);
+            kind_effect_spawn(5, 1, NULL, (s32) p, -10000.0f, 100.0f, span, (u8) flag, 1);
             break;
         }
         case 9: {
@@ -452,7 +452,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 s.kind = 0;
                 break;
             }
-            func_15190770((u8 **) &s, 0, (u8) flag, 1);
+            model_drip_create((u8 **) &s, 0, (u8) flag, 1);
             break;
         }
         case 10:
@@ -461,7 +461,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         case 11: {
             struct260 *e;
             s16 zero[2];
-            func_150AFC18(span, (u8) flag, 1);
+            fb_fx_spawn_simple(span, (u8) flag, 1);
             zero[0] = 0;
             zero[1] = 0;
             e = func_15149130(span, -1, 0x4B, -1, 1, 0, (struct37 *) 4, (u8) flag, 1);
@@ -474,14 +474,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             obj_bone_glow_emitter_spawn((u8 *) obj, span, (u8) flag, 1);
             break;
         case 13:
-            func_1519F0FC(REC(player, track), (u16) ev->w6 < 0xE9 ? ev->w6 : 0, span, (u8) flag, 1);
+            seqfx_track_effect_spawn(REC(player, track), (u16) ev->w6 < 0xE9 ? ev->w6 : 0, span, (u8) flag, 1);
             break;
         case 15:
             if (obj != NULL && span > 0) {
                 O_S32(obj, 0x2EC) = 1;
                 O_F32(obj, 0x2D8) = span * 0.5f;
                 O_F32(obj, 0x2DC) = 1.0f / O_F32(obj, 0x2D8);
-                func_150C4620((u8 *) obj, span, (u8) flag, 1);
+                damage_smoke_spawn((u8 *) obj, span, (u8) flag, 1);
             }
             break;
         case 16:
@@ -490,22 +490,22 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             }
             break;
         case 17:
-            func_150D0644(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_caption(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
             break;
         case 18:
-            func_150D07C4(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_console(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
             break;
         case 19:
-            func_150CFB90(span, (u8) flag, 1);
+            screen_bar_spawn(span, (u8) flag, 1);
             break;
         case 20:
-            func_151925C4((u8 *) obj, span, (u8) flag, 1);
+            obj_dust_effect((u8 *) obj, span, (u8) flag, 1);
             break;
         case 21:
-            func_150D09D4(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
+            text_pager_spawn_title(ev->w6 & 0xFF, D_800C3A00[player][ev->w6], span, (u8) flag, 1);
             break;
         case 22:
-            func_1519F2F4(REC(player, track), (u16) ev->w6 < 0xCF ? (u16) ev->w6 : 0, span, (u8) flag, 1);
+            seqfx_track_sprite_spawn(REC(player, track), (u16) ev->w6 < 0xCF ? (u16) ev->w6 : 0, span, (u8) flag, 1);
             break;
         case 23:
             score_banner_spawn(span, (u8) flag, 1);
@@ -530,7 +530,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             probe[0] = p[0];
             probe[1] = p[1] + 100.0f;
             probe[2] = p[2];
-            if (func_15046F70((u8 *) probe, 0, p[1] - 1000.0f, (u8 *) &hit) != 0 && hit.surface != 3) {
+            if (collision_floor_probe((u8 *) probe, 0, p[1] - 1000.0f, (u8 *) &hit) != 0 && hit.surface != 3) {
                 found = 1;
                 p[1] = hit.y;
             } else {
@@ -566,26 +566,26 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             s.unk5 = 1;
             s.unk6 = -1;
             s.unk2 = span;
-            func_151D8E18(&s, 0, (u8) flag, 1);
+            rumble_request(&s, 0, (u8) flag, 1);
             break;
         }
         }
         break;
     case 0x5B:
         if (ev->b4 == 0) {
-            func_151B57F0(SPAN(ev, &next), (u8) flag, 0);
+            electric_bolt_spawn(SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x5D:
         if (ev->b4 == 0) {
-            func_151932B8((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);
+            body_dust_effect_start((u8 *) obj, SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x5E:
         if (ev->b5 == 1) {
-            func_151B09BC((u8 *) obj, 0, 1000, (u8) flag, 0);
+            object_link_effect_spawn((u8 *) obj, 0, 1000, (u8) flag, 0);
         } else if (ev->b4 == 0) {
-            func_151B09BC((u8 *) obj, 0, SPAN(ev, &next), (u8) flag, 0);
+            object_link_effect_spawn((u8 *) obj, 0, SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x4C:
@@ -594,12 +594,12 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             span = SPAN(ev, &next);
             if (kind == 0x49 || kind == 0x58) {
                 s32 n;
-                u8 *list = (u8 *) func_151905AC((u8 *) obj, &n);
+                u8 *list = (u8 *) bone_sparks_presets_for_kind((u8 *) obj, &n);
                 if (list != NULL && ev->w6 < n) {
-                    func_1518FA8C((s32) obj, list[ev->w6], span, -1, -1, -1, 0, 0, flag, 1);
+                    bone_sparks_attach_preset((s32) obj, list[ev->w6], span, -1, -1, -1, 0, 0, flag, 1);
                 }
             } else {
-                func_1518D1C0((u8 *) obj, ev->b5, span, 0, flag, 1, D_80096DEC);
+                character_effect_attach((u8 *) obj, ev->b5, span, 0, flag, 1, D_80096DEC);
             }
         }
         break;
@@ -633,7 +633,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             f32 offset[2];
             f32 ra, rb, rc;
             u32 rd;
-            span = func_15023C60((u32) ev, ev->type, track, &next, 1, ev->id, 0, 0, 1, ev->b5, player) - now;
+            span = scene_event_find_next((u32) ev, ev->type, track, &next, 1, ev->id, 0, 0, 1, ev->b5, player) - now;
             offset[0] = random_float() * 200.0f + -100.0f;
             offset[1] = random_float() * 300.0f + -150.0f;
             ra = random_float();
@@ -647,7 +647,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
     case 0x0F:
         span = SPAN(ev, &next);
         if (ev->b4 == 0) {
-            func_150C7520((u8 *) obj, span, (u8) flag, 1);
+            obj_bone_emitters_restart((u8 *) obj, span, (u8) flag, 1);
         }
         break;
     case 0x32:
@@ -666,10 +666,10 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 idx = 13;
             }
             for (node = O_PTR(obj, 0x2F4); node != NULL; node = O_PTR(node, 0x14)) {
-                if (idx == O_S16(node, 0x1C) || func_1514DA28(O_S16(D_8008AF88[idx], 4), O_S16(node, 0x1C)) != 0) {
+                if (idx == O_S16(node, 0x1C) || char_fx_slot_derives(O_S16(D_8008AF88[idx], 4), O_S16(node, 0x1C)) != 0) {
                     r = REC(player, track);
                     O_S32(O_PTR(node, 0x10), 0x30) =
-                        (s32) func_1519EEE0(span, (s32) O_PTR(node, 0x10), 0, (s32) (r + 0x30), (s32) (r + 0x20), flag, 0);
+                        (s32) seqfx_timer_create(span, (s32) O_PTR(node, 0x10), 0, (s32) (r + 0x30), (s32) (r + 0x20), flag, 0);
                 }
             }
         }
@@ -678,7 +678,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (obj != NULL) {
             span = SPAN(ev, &next);
             if (ev->b4 == 0) {
-                func_1516F868(OBJ_INDEX(obj), span, span, 0, flag, 0);
+                particle_emitter_preset_obj_pair(OBJ_INDEX(obj), span, span, 0, flag, 0);
             }
         }
         break;
@@ -686,7 +686,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (obj != NULL) {
             span = SPAN(ev, &next);
             if (ev->b4 == 0) {
-                func_1516F730(OBJ_INDEX(obj), span, (u8) flag, 0);
+                particle_emitter_preset_obj_burst(OBJ_INDEX(obj), span, (u8) flag, 0);
             }
         }
         break;
@@ -705,15 +705,15 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 } hit;
                 f32 probe[3];
                 f32 p[3];
-                func_1504715C(&hit, (u8 *) obj);
+                hitinfo_from_obj_floor(&hit, (u8 *) obj);
                 probe[0] = O_F32(obj, 0x14);
                 probe[1] = O_F32(obj, 0x18) + 100.0f;
                 probe[2] = O_F32(obj, 0x1C);
-                if (func_15046F70((u8 *) probe, 0, O_F32(obj, 0x18) - 300.0f, (u8 *) &hit) != 0) {
+                if (collision_floor_probe((u8 *) probe, 0, O_F32(obj, 0x18) - 300.0f, (u8 *) &hit) != 0) {
                     p[0] = probe[0];
                     p[1] = hit.y;
                     p[2] = probe[2];
-                    func_150CAE30((u8 *) p);
+                    landing_dust_spray((u8 *) p);
                 }
             }
             break;
@@ -730,14 +730,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                 case 0x74:
                 case 0x75:
                 case 0x7A: {
-                    u8 *att = func_15031C4C((u8 *) obj, 0x46, 0);
+                    u8 *att = attachment_find_by_slot((u8 *) obj, 0x46, 0);
                     if (att != NULL) {
                         u8 buf[16];
                         f32 *src = D_800AAE70;
                         u8 *dst = buf;
-                        if (func_1514654C((u8 *) obj, att, 0, &src, &dst, 1) != 0) {
-                            func_151C5B38((s32) obj, (s32) buf, 0x46, (u8) flag, 1);
-                            func_151C5C54(buf, (u8) flag, 1);
+                        if (model_node_points_to_world((u8 *) obj, att, 0, &src, &dst, 1) != 0) {
+                            gun_muzzle_sparks_spawn((s32) obj, (s32) buf, 0x46, (u8) flag, 1);
+                            gun_muzzle_flash_light(buf, (u8) flag, 1);
                         }
                     }
                     break;
@@ -760,23 +760,23 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             p[0] = O_F32(r, 0);
             p[1] = O_F32(r, 4);
             p[2] = O_F32(r, 8);
-            func_151BEE00(p, O_F32(r, 0x10), 1, 0, 2, flag, 1);
+            life_pickup_spawn(p, O_F32(r, 0x10), 1, 0, 2, flag, 1);
             break;
         }
         case 4:
-            func_151CFFFC((u8 *) obj, (u8) flag, 1);
+            object_shatter_effects((u8 *) obj, (u8) flag, 1);
             break;
         case 5:
             if (obj != NULL) {
                 u8 *att = NULL;
                 if (ev->w6 != 0) {
-                    att = func_15031C4C((u8 *) obj, ev->b5 != 0 ? 0xA4 : 0xA5, 0);
+                    att = attachment_find_by_slot((u8 *) obj, ev->b5 != 0 ? 0xA4 : 0xA5, 0);
                 }
-                func_151C62D0((u8 *) obj, ev->b5, 1, att, ev->b5 != 0 ? 0xA4 : 0xA5, flag, 1);
+                object_gun_fire((u8 *) obj, ev->b5, 1, att, ev->b5 != 0 ? 0xA4 : 0xA5, flag, 1);
             }
             break;
         case 6:
-            func_150BAEF4((u8 *) obj, 9, -1);
+            obj_heavy_impact_fx((u8 *) obj, 9, -1);
             break;
         case 7:
             object_explode((u8 *) obj, (u8) flag, 1);
@@ -786,7 +786,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             p[0] = pos[0];
             p[1] = pos[1];
             p[2] = pos[2];
-            func_151D5BF8((u8 *) p, (u8) flag, 1);
+            explosion_smoke_flash_spawn((u8 *) p, (u8) flag, 1);
             break;
         }
         case 9:
@@ -810,14 +810,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
                     entry = c.v[(u32) random_int() % 6];
                     break;
                 }
-                func_15143134(entry, out, O_PTR(obj, 0x1D4) + (sBones5F10[ev->b5] << 6));
-                func_151C384C(out, (u8) flag, 1);
+                mtx_transform_point_or_origin(entry, out, O_PTR(obj, 0x1D4) + (sBones5F10[ev->b5] << 6));
+                fire_embers_spawn(out, (u8) flag, 1);
             }
             break;
         case 11: {
             u8 k = 0;
             do {
-                func_151C9CBC(1, (s32) (D_800D34B8 + sLights5F11[k] * 0x34));
+                laser_switch_broadcast(1, (s32) (D_800D34B8 + sLights5F11[k] * 0x34));
                 k++;
             } while (k < 4);
             break;
@@ -828,14 +828,14 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             break;
         }
         case 13:
-            func_151CC840((s32) D_800DBFF0);
+            aim_hud_send_flash((s32) D_800DBFF0);
             break;
         case 14: {
             f32 p[3];
             p[0] = pos[0];
             p[1] = pos[1];
             p[2] = pos[2];
-            func_1519EFE8(p, (u16) ev->b5 < 0xE9 ? (u16) ev->b5 : 0, ev->w6 != 0 ? ev->w6 * 0.01f : 1.0f, (u8) flag, 1);
+            seqfx_burst_spawn(p, (u16) ev->b5 < 0xE9 ? (u16) ev->b5 : 0, ev->w6 != 0 ? ev->w6 * 0.01f : 1.0f, (u8) flag, 1);
             break;
         }
         case 15: {   /* blue-white sparks */
@@ -867,23 +867,23 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             s.unk4 = 8;
             s.unk5 = 1;
             s.unk6 = -1;
-            func_151D8E18(&s, 0, (u8) flag, 1);
+            rumble_request(&s, 0, (u8) flag, 1);
             break;
         }
         case 18:
             if (O_PTR(obj, 0x1D4) != NULL) {
                 ScriptOffsets2 t = sOffsets5F18;
                 f32 out[3];
-                func_15143134(t.v[ev->b5], out, O_PTR(obj, 0x1D4));
-                func_15132454((u8 *) out, 0.646f, (u8) flag, 0);
+                mtx_transform_point_or_origin(t.v[ev->b5], out, O_PTR(obj, 0x1D4));
+                particle_spawn_smoke_puff((u8 *) out, 0.646f, (u8) flag, 0);
             }
             break;
         case 19:
             if (O_PTR(obj, 0x1D4) != NULL) {
                 ScriptOffsets8 t = sOffsets5F19;
                 f32 out[3];
-                func_15143134(t.v[ev->b5], out, O_PTR(obj, 0x1D4) + (sBones5F19[ev->b5] << 6));
-                func_15132454((u8 *) out, 6.9900002f, (u8) flag, 0);
+                mtx_transform_point_or_origin(t.v[ev->b5], out, O_PTR(obj, 0x1D4) + (sBones5F19[ev->b5] << 6));
+                particle_spawn_smoke_puff((u8 *) out, 6.9900002f, (u8) flag, 0);
             }
             break;
         case 20: {
@@ -895,7 +895,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             s.x = O_F32(r, 0);
             s.y = O_F32(r, 4) + 50.0f;
             s.z = O_F32(r, 8);
-            func_15171100(&s, 1, 1, 2, flag, 0);
+            debris_crate_break_pieces(&s, 1, 1, 2, flag, 0);
             break;
         }
         case 21:
@@ -906,13 +906,13 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             break;
         case 22:
             if (obj != NULL) {
-                func_15193660((u8 *) obj, (u8) flag, 0);
+                obj_head_particle_burst((u8 *) obj, (u8) flag, 0);
             }
             break;
         }
         break;
     case 0x40:
-        func_151A0A10((u8 *) obj, 0x28, (u8) flag, 1);
+        ground_dust_spawn((u8 *) obj, 0x28, (u8) flag, 1);
         break;
     case 0x4D: {
         ScriptSpray s;
@@ -941,7 +941,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s.unk4C = -3.0f;
         s.unk48 = 0.0f;
         s.unk50 = 6.0f;
-        func_151A74B0(&s, 1, (u8) flag, 1);
+        debris_spray_spawn(&s, 1, (u8) flag, 1);
         break;
     }
     case 0x4E: {
@@ -971,7 +971,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s.unk4C = -4.0f;
         s.unk48 = 0.0f;
         s.unk50 = 8.0f;
-        func_151A74B0(&s, 1, (u8) flag, 1);
+        debris_spray_spawn(&s, 1, (u8) flag, 1);
         break;
     }
     case 0x4F: {
@@ -1002,7 +1002,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s.unk24 = 25.0f;
         s.unk28 = 20.2f;
         s.unk40 = 0.5f;
-        func_15154488(&s, &s.unk8, 0, (u8) flag, 1);
+        emit_sparks_in_angle_range(&s, &s.unk8, 0, (u8) flag, 1);
         break;
     }
     case 0x24: {
@@ -1023,11 +1023,11 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (kind >= 27) {
             kind = 0;
         }
-        func_151AFA80((u8 *) obj, kind, (u8) flag, 0);
+        obj_bone_beam_impact((u8 *) obj, kind, (u8) flag, 0);
         break;
     }
     case 0x47:
-        func_151925C4((u8 *) obj, 50, (u8) flag, 0);
+        obj_dust_effect((u8 *) obj, 50, (u8) flag, 0);
         break;
     case 0x2E:
         smoke_columns_spawn((u8) flag);
@@ -1047,7 +1047,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (ev->b5 != 0) {
             b5 = ev->b5;
         }
-        func_1514948C(n, pos[0], pos[1], pos[2], O_F32(r, 0x20) * 0.05f, (O_F32(r, 0x10) + 180.0f) * 0.7111111f,
+        trail_spawn_directed(n, pos[0], pos[1], pos[2], O_F32(r, 0x20) * 0.05f, (O_F32(r, 0x10) + 180.0f) * 0.7111111f,
                       O_F32(r, 0xC) * 0.7111111f, O_F32(r, 0x38) * 0.1f + 0.5f, b5, O_F32(r, 0x18) * 0.1f + 1.0f, scale,
                       flag);
         break;
@@ -1079,35 +1079,35 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             len = ev->w6;
         }
         if (ev->id == 0x27) {
-            func_1518B7D4((s32) data, len, speed, n, flag);
+            rubble_scatter_spawn((s32) data, len, speed, n, flag);
         } else {
-            func_1518B818((s32) data, len, speed, n, 30, 100, (u8) flag);
+            rubble_scatter_spawn_ex((s32) data, len, speed, n, 30, 100, (u8) flag);
         }
         break;
     }
     case 0x28:
         if (rec != NULL) {
-            func_15171B70(rec, (u8) flag, 0);
+            debris_sparks_rect_by_type(rec, (u8) flag, 0);
         } else if (obj != NULL) {
-            func_15172164(obj, (u8) flag);
+            debris_obj_destroy_by_id(obj, (u8) flag);
         }
         break;
     case 0x29:
         if (rec != NULL) {
-            func_15171434((s32) rec, (u8) flag, 0);
+            debris_crate_break_by_level((s32) rec, (u8) flag, 0);
         } else if (obj != NULL) {
-            func_15171734((u8 *) obj);
+            debris_obj_remove_explode((u8 *) obj);
         }
         break;
     case 0x2B:
-        func_1518BC20(pos[0], pos[1], pos[2], (u8) flag, 0);
+        rubble_burst_with_dust(pos[0], pos[1], pos[2], (u8) flag, 0);
         break;
     case 0x2C:
         SPAN(ev, &next);
         break;
     case 0x2F:
         if (obj != NULL && ev->b4 == 0) {
-            func_1516F2D8(OBJ_INDEX(obj), SPAN(ev, &next), (u8) flag, 0);
+            particle_emitter_preset_obj3a(OBJ_INDEX(obj), SPAN(ev, &next), (u8) flag, 0);
         }
         break;
     case 0x39:

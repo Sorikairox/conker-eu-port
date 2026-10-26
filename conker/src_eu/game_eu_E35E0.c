@@ -5,7 +5,8 @@
 
 extern s32 D_800CC76A;
 
-u8 *func_150B5DD0(u8 *arg0, s32 arg1) {
+/* was func_150B5DD0 */
+u8 *obj_adjust_entries_type4b(u8 *arg0, s32 arg1) {
     if (D_800C35EA == 1) {
         return arg0;
     }
@@ -13,9 +14,10 @@ u8 *func_150B5DD0(u8 *arg0, s32 arg1) {
     (*(u16 *)((u8 *)arg0 + 2)) = *(u16 *)((u8 *)&D_800CC76A + (arg1 * 0x32C));
     return arg0 + 4;
 }
-void func_150B5F1C(f32 *, u8, s32);
-void func_150B60E0(u8 *, u8 *);
-void func_150B5E30(u8 *arg0) {
+void zap_burst_spawn_small(f32 *, u8, s32);
+void obj_get_skel_point_down205(u8 *, u8 *);
+/* was func_150B5E30 */
+void zap_emitter_update(u8 *arg0) {
     s32 pad; // fakematch: frame/spill slot padding
     f32 sp28[3];
     u8 *a3;
@@ -29,24 +31,25 @@ void func_150B5E30(u8 *arg0) {
             sp28[0] = *(f32 *)(a3 + 0x14);
             sp28[1] = *(f32 *)(a3 + 0x18);
             sp28[2] = *(f32 *)(a3 + 0x1C);
-            func_150B5F1C(sp28, arg0[0xC], arg0[1]);
+            zap_burst_spawn_small(sp28, arg0[0xC], arg0[1]);
         }
         if (random_float() < 0.10824f) {
-            func_150B60E0(a3, (u8 *)sp28);
-            func_150B5F1C(sp28, arg0[0xC], arg0[1]);
+            obj_get_skel_point_down205(a3, (u8 *)sp28);
+            zap_burst_spawn_small(sp28, arg0[0xC], arg0[1]);
         }
     }
 }
 
 #ifdef NON_MATCHING
-void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2);
-s32 func_150B6314(u8 *, u8, s32);
-s32 func_151530A8(s32 *, u8, s32);
+void zap_light_flash(u8 *arg0, u8 arg1, s32 arg2);
+s32 zap_particle_spawn(u8 *, u8, s32);
+s32 emit_streaks_from_spec(s32 *, u8, s32);
 
-// smoke_puff_spawn: like func_150B5C38 with other numbers: spawns particle record kind 5 / 5 at `pos`
-// (func_151530A8: 20, 10.08, -1.353, 0.731, 39, 35, life -31 / 80, colours 255 / 0, ...) and then the two follow-up
-// emitters func_150B6314 / func_150B64E0 at the same point.
-void func_150B5F1C(f32 *pos, u8 arg1, s32 arg2) {
+// smoke_puff_spawn: like zap_burst_spawn with other numbers: spawns particle record kind 5 / 5 at `pos`
+// (emit_streaks_from_spec: 20, 10.08, -1.353, 0.731, 39, 35, life -31 / 80, colours 255 / 0, ...) and then the two follow-up
+// emitters zap_particle_spawn / zap_light_flash at the same point.
+/* was func_150B5F1C */
+void zap_burst_spawn_small(f32 *pos, u8 arg1, s32 arg2) {
     struct {
         s32 kind;
         s32 sub;
@@ -158,20 +161,21 @@ void func_150B5F1C(f32 *pos, u8 arg1, s32 arg2) {
     rec.u8D = 0;
     rec.u8E = -1;
     rec.u8F = -1;
-    func_151530A8(&rec.kind, arg1, arg2);
-    func_150B6314((u8 *)pos, arg1, arg2);
-    func_150B64E0((u8 *)pos, arg1, arg2);
+    emit_streaks_from_spec(&rec.kind, arg1, arg2);
+    zap_particle_spawn((u8 *)pos, arg1, arg2);
+    zap_light_flash((u8 *)pos, arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B5F1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/zap_burst_spawn_small.s")
 #endif
 
 typedef struct { s32 x, y, z; } V3i;
-void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2);
-s32 func_150B6314(u8 *, u8, s32);
-s32 func_151530A8(s32 *, u8, s32);
+void zap_light_flash(u8 *arg0, u8 arg1, s32 arg2);
+s32 zap_particle_spawn(u8 *, u8, s32);
+s32 emit_streaks_from_spec(s32 *, u8, s32);
 
-void func_150B5C38(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150B5C38 */
+void zap_burst_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 
     struct {
         s32 u1C;
@@ -283,15 +287,16 @@ void func_150B5C38(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u8D = 0;
     sp.u8E = -1;
     sp.u8F = -1;
-    func_151530A8(&sp.u1C, arg1, arg2);
-    func_150B6314(arg0, arg1, arg2);
-    func_150B64E0(arg0, arg1, arg2);
+    emit_streaks_from_spec(&sp.u1C, arg1, arg2);
+    zap_particle_spawn(arg0, arg1, arg2);
+    zap_light_flash(arg0, arg1, arg2);
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
-s32 func_150B6314(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150B6314 */
+s32 zap_particle_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u28;
         s32 u2C;
@@ -388,12 +393,13 @@ s32 func_150B6314(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u8B = -1;
     sp.u8C = -1;
     sp.u8D = 4;
-    return func_151307F0(&sp.u28, 1, 0, 0, (s32) arg1, arg2);
+    return particle_spawn_ex(&sp.u28, 1, 0, 0, (s32) arg1, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B6314.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/zap_particle_spawn.s")
 #endif
-void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150B64E0 */
+void zap_light_flash(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
     s32 sp3C[3];
 
@@ -407,21 +413,23 @@ void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2) {
     light_create_with_ctrl(sp48, sp3C, (random_int() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
 }
 
-void func_150B60E0(u8 *arg0, u8 *arg1) {
+/* was func_150B60E0 */
+void obj_get_skel_point_down205(u8 *arg0, u8 *arg1) {
 #ifdef NON_MATCHING
-    /* D_800A0000 = {0, -205, 0} sits in func_150B696C's GLOBAL_ASM rodata (default build only) */
+    /* D_800A0000 = {0, -205, 0} sits in cutscene_beam_spawn's GLOBAL_ASM rodata (default build only) */
     static const f32 D_800A0000_vec[3] = { 0.0f, -205.0f, 0.0f };
-    func_15143134((void *) D_800A0000_vec, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
+    mtx_transform_point_or_origin((void *) D_800A0000_vec, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
 #else
-    func_15143134(D_800A0000, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
+    mtx_transform_point_or_origin(D_800A0000, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
 #endif
 }
 
 #ifdef NON_MATCHING
 s32 bolt_spawn(f32 *, f32 *, s32, f32 *, f32, s32, s32, s32);
-void func_1514373C(f32, f32, f32 *, f32 *);
+void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 
-void func_150B65F0(u8 *arg0) {
+/* was func_150B65F0 */
+void bolt_ring_update(u8 *arg0) {
     struct {
         f32 u74;
         f32 u78;
@@ -489,7 +497,7 @@ void func_150B65F0(u8 *arg0) {
             sp.u78 = (f32) ((*(s16 *)((u8 *)temp_s1 + 2)) + (*(s16 *)((u8 *)temp_s1 + 8)));
             do {
                 temp_v0_2 = random_int();
-                func_1514373C((f32) (temp_v0_2 & 0xFF), (f32) (*(s16 *)((u8 *)temp_s1 + 6)), &sp.u80, &sp.u88);
+                vec2_from_angle_rad((f32) (temp_v0_2 & 0xFF), (f32) (*(s16 *)((u8 *)temp_s1 + 6)), &sp.u80, &sp.u88);
                 sp.u80 += (f32) (*(s16 *)((u8 *)temp_s1 + 0));
                 sp.u88 += (f32) (*(s16 *)((u8 *)temp_s1 + 4));
                 temp_t1 = ((temp_v0_2 & 0xFF) + (random_int() % 129U) + 0x40) & 0xFF;
@@ -497,7 +505,7 @@ void func_150B65F0(u8 *arg0) {
                 if (temp_t1 < 0) {
                     var_f12 += 4294967296.0f;
                 }
-                func_1514373C(var_f12, (f32) (*(s16 *)((u8 *)temp_s1 + 6)), &sp.u74, &sp.u7C);
+                vec2_from_angle_rad(var_f12, (f32) (*(s16 *)((u8 *)temp_s1 + 6)), &sp.u74, &sp.u7C);
                 sp.u74 += (f32) (*(s16 *)((u8 *)temp_s1 + 0));
                 sp.u7C += (f32) (*(s16 *)((u8 *)temp_s1 + 4));
                 bolt_spawn(&sp.u80, &sp.u74, 4, &sp.u8C, 0.43500003f, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
@@ -507,16 +515,17 @@ void func_150B65F0(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B65F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/bolt_ring_update.s")
 #endif
-void func_150B6930(struct102 *arg0, s32 arg1, u8 arg2) {
+/* was func_150B6930 */
+void bolt_ring_on_message(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x4A) {
         node_destroy(arg0);
     }
 }
 
 #ifdef NON_MATCHING
-/* func_150B696C's ROM statics (D_800A000C ... D_800A005C, the default build keeps them in its GLOBAL_ASM rodata) */
+/* cutscene_beam_spawn's ROM statics (D_800A000C ... D_800A005C, the default build keeps them in its GLOBAL_ASM rodata) */
 static const f32 D_800A000C_nm[3][3] = {
     { 0.0f, 0.0f, 0.0f }, { 2325.0f, 2915.0f, 904.0f }, { -1815.0f, 1412.0f, -3192.0f },
 };
@@ -525,14 +534,15 @@ static const f32 D_800A003C_nm[3] = { 1.84f, 1.5430001f, 1.5430001f };
 static const f32 D_800A0048_nm[3] = { 47.0f, 130.0f, 130.0f };
 static const s16 D_800A0054_nm[3] = { 30, 70, 70 };
 static const s32 D_800A005C_nm[3] = { 20, 50, 50 };
-s32 func_150B443C(void *, f32 *, s16);
-void func_15143794(s16, s16, f32, f32 *);
+s32 water_jet_spawn(void *, f32 *, s16);
+void vec3_from_angles_byte(s16, s16, f32, f32 *);
 
-// cutscene_beam_spawn: spawns effect record `kind` (0..2) through func_150B443C: kind 0 starts at a random-ish
+// cutscene_beam_spawn: spawns effect record `kind` (0..2) through water_jet_spawn: kind 0 starts at a random-ish
 // point (angle_byte_cos samples * 10, y 3) aimed at (1005 - 150 s, 351, -1706 - 150 s); kinds 1 / 2 start at a
-// func_15143794 direction point (-69 / 28 or 24 / 15, length 9.35) aimed at a fixed ROM target. The per-kind
+// vec3_from_angles_byte direction point (-69 / 28 or 24 / 15, length 9.35) aimed at a fixed ROM target. The per-kind
 // sizes / colours / timings come from the function's ROM tables.
-void func_150B696C(u8 kind) {
+/* was func_150B696C */
+void cutscene_beam_spawn(u8 kind) {
     struct {
         f32 pos[3];
         f32 u0C;
@@ -565,12 +575,12 @@ void func_150B696C(u8 kind) {
         to[1] = 351.0f;
         to[2] = -1706.0f - angle_byte_cos(0xEA) * 150.0f;
     } else if (kind == 1) {
-        func_15143794(-0x45, 0x1C, 9.3499994f, rec.pos);
+        vec3_from_angles_byte(-0x45, 0x1C, 9.3499994f, rec.pos);
         to[0] = D_800A000C_nm[kind][0];
         to[1] = D_800A000C_nm[kind][1];
         to[2] = D_800A000C_nm[kind][2];
     } else {
-        func_15143794(0x18, 0xF, 9.3499994f, rec.pos);
+        vec3_from_angles_byte(0x18, 0xF, 9.3499994f, rec.pos);
         to[0] = D_800A000C_nm[kind][0];
         to[1] = D_800A000C_nm[kind][1];
         to[2] = D_800A000C_nm[kind][2];
@@ -594,13 +604,14 @@ void func_150B696C(u8 kind) {
     rec.u36 = D_800A0054_nm[kind];
     rec.u38 = 0;
     rec.u3C = 0.3f;
-    func_150B443C(&rec, to, D_800A005C_nm[kind]);
+    water_jet_spawn(&rec, to, D_800A005C_nm[kind]);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B696C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/cutscene_beam_spawn.s")
 #endif
 
-s32 func_150B6BBC(u8 *arg0) {
+/* was func_150B6BBC */
+s32 beam_set_mode_by_state(u8 *arg0) {
     u8 *p = *(u8 **)(arg0 + 0x18);
     s32 ret = 1;
 
@@ -621,12 +632,13 @@ s32 func_150B6BBC(u8 *arg0) {
     return ret;
 }
 
-s32 func_15182BE0(u8, u8, u8, s32, s16, u8, u8, s32);
+s32 screen_colour_fade_fx_start(u8, u8, u8, s32, s16, u8, u8, s32);
 
-void func_150B6C34(u8 arg0, s32 arg1) {
+/* was func_150B6C34 */
+void screen_flash_zap(u8 arg0, s32 arg1) {
     s32 pad;
     u32 sp28;
 
     sp28 = random_int();
-    func_15182BE0(0xCC, 0xCC, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (random_int() % 11U) + 0xF, 0, (s32) arg0, arg1);
+    screen_colour_fade_fx_start(0xCC, 0xCC, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (random_int() % 11U) + 0xF, 0, (s32) arg0, arg1);
 }

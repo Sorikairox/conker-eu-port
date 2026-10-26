@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-/* P281: readable C for func_151FA3E0 (Rare hand asm, MP3 short-block IMDCT). */
+/* P281: readable C for mp3_imdct12_short (Rare hand asm, MP3 short-block IMDCT). */
 extern f32 D_800B116C, D_800B1170;              /* 3-point stage cosines */
 extern f32 D_800B1174, D_800B1178, D_800B117C;  /* odd-part twiddles */
 extern f32 D_800B1180, D_800B1184, D_800B1188, D_800B118C, D_800B1190, D_800B1194; /* 6-point scale */
@@ -14,7 +14,8 @@ extern f32 D_800B11B0, D_800B11B4, D_800B11B8, D_800B11BC, D_800B11C0, D_800B11C
 // by the input butterflies), overlapped into a 36-float buffer (window w at offset 6 + 6 w). The first 18 floats
 // plus the previous granule's tail `prev` give `out` (odd subbands: every odd line negated, the frequency
 // inversion); the last 18 replace `prev`.
-void func_151FA3E0(f32 *in, s32 subband, f32 *out, f32 *prev) {
+/* was func_151FA3E0 */
+void mp3_imdct12_short(f32 *in, s32 subband, f32 *out, f32 *prev) {
     f32 t[16];
     f32 acc[36];
     f32 *x;
@@ -104,5 +105,5 @@ void func_151FA3E0(f32 *in, s32 subband, f32 *out, f32 *prev) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_227BF0/func_151FA3E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_227BF0/mp3_imdct12_short.s")
 #endif

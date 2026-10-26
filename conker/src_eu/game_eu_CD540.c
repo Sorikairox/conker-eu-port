@@ -6,13 +6,13 @@
 #ifdef NON_MATCHING
 struct249 *event_find(s16 arg0);
 struct249 *event_start(s32 id, s32 arg1);
-void func_150AE760(void);
-void func_1501C710(s32, s32, s32, s32, s32);
-void func_151733EC(struct127 *arg0, s32 arg1, s32 arg2);
-void func_1517F3B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s8 arg4, s32 arg5);
-void func_151E5B94(s32 arg0);
-void func_151E89C0(void);
-void func_151E5528(void);
+void event_vm_abort(void);
+void game_request_transition(s32, s32, s32, s32, s32);
+void warp_request_start(struct127 *arg0, s32 arg1, s32 arg2);
+void screen_fade_start(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s8 arg4, s32 arg5);
+void mp_match_end(s32 arg0);
+void credits_start(void);
+void game_mode_set_10(void);
 void text_printf(s32 arg0, ...);
 extern s32 D_800D3268;          /* id of the event the VM is running */
 extern s32 D_800D3378;          /* save bits changed */
@@ -25,8 +25,9 @@ extern char D_8009F870[];       /* "%d" */
 // event_action_game_state: game-state actions of the event scripts (native 6, D_80088874 entry 4, ids 0x5xxx).
 // id = the event id the action applies to (call id without the nibble), args = the VM stack (args[2].. = values
 // pushed below the id and the action). Actions 1 / 3 / 11 abort the running script when they stop the event that
-// runs it: `func_150AE760(); return 0;` must stay at both sites (the VM checks the abort flag after the call).
-s32 func_1509FD30(s32 id, s32 action, s32 *args) {
+// runs it: `event_vm_abort(); return 0;` must stay at both sites (the VM checks the abort flag after the call).
+/* was func_1509FD30 */
+s32 event_action_game_state(s32 id, s32 action, s32 *args) {
     u8 *bits;
     struct249 *ev;
     s32 i;
@@ -49,7 +50,7 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             }
             ev->unk0 |= 0x8000;
             if (id == D_800D3268) {
-                func_150AE760();
+                event_vm_abort();
                 return 0;
             }
             return 1;
@@ -83,12 +84,12 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             return 0;
         case 7: /* change level (four values pushed) */
             if (D_800D3C60 == 4) {
-                func_1501C710(2, args[2], args[3], 0, 0);
+                game_request_transition(2, args[2], args[3], 0, 0);
             }
             return 0;
         case 8:
             if (D_800D3C60 == 4) {
-                func_151733EC(D_800CC2D0, args[2] & 0xFFF, args[3] & 0xFFF);
+                warp_request_start(D_800CC2D0, args[2] & 0xFFF, args[3] & 0xFFF);
             }
             return 0;
         case 9: /* set / clear a bit of D_800D2E60 */
@@ -102,9 +103,9 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             D_800D2E43 = 1;
             return 0;
         case 10:
-            func_151E5B94(args[2]);
+            mp_match_end(args[2]);
             return 0;
-        case 11: /* finish the event, func_151E5B94(0) and abort the running script */
+        case 11: /* finish the event, mp_match_end(0) and abort the running script */
             ev = event_find(id);
             bits = (u8 *) D_800D2E4C + (id >> 3);
             *bits |= 1 << (id & 7);
@@ -114,8 +115,8 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
                 return 0;
             }
             ev->unk0 |= 0x8000;
-            func_151E5B94(0);
-            func_150AE760();
+            mp_match_end(0);
+            event_vm_abort();
             return 0;
         case 12: /* timer start: both stamps, or only the first */
             if (args[2] < 0) {
@@ -146,11 +147,11 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             }
             return 0;
         case 17:
-            func_1517F3B0(0, 0, 0, 0, 1, 0);
+            screen_fade_start(0, 0, 0, 0, 1, 0);
             return 0;
         case 18:
             for (i = 0; i <= D_80082FA0; i++) {
-                func_1517F3B0(args[2], args[3], args[4], args[5], args[6], i);
+                screen_fade_start(args[2], args[3], args[4], args[5], args[6], i);
             }
             return 0;
         case 19:
@@ -159,10 +160,10 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
             *(s32 *) &D_800BE9F4 = (s8) D_800BE3DF;
             return 0;
         case 20: /* attract idle check (-> mode 8) */
-            func_151E89C0();
+            credits_start();
             return 0;
         case 21: /* -> mode 10 */
-            func_151E5528();
+            game_mode_set_10();
             return 0;
         case 22: /* debug print */
             text_printf((s32) D_8009F870, args[2]);
@@ -174,14 +175,14 @@ s32 func_1509FD30(s32 id, s32 action, s32 *args) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CD540/func_1509FD30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CD540/event_action_game_state.s")
 #endif
 
 #ifdef NON_MATCHING
 struct249 *event_find(s16 arg0);
 f32 random_float(void);
-s32 func_151E6710(s32 arg0);
-s32 func_1517F51C(s32 arg0);
+s32 mp_player_team(s32 arg0);
+s32 screen_fade_is_opaque(s32 arg0);
 extern s32 D_800D3C60;          /* values pushed for the current native call */
 extern s8 D_800E0FE1;
 extern u16 D_8009015C;
@@ -192,7 +193,8 @@ extern u8 D_800D3260;
 // event_query_game_state: game-state queries of the event scripts (native 5, D_80088838 entry 4, ids 0x5xxx), the
 // result goes to the VM's result register. id = the event id (for the event queries), args = the VM stack
 // (args[2].. = values pushed below the id and the query).
-s32 func_150A02EC(s32 id, s32 query, s32 *args) {
+/* was func_150A02EC */
+s32 event_query_game_state(s32 id, s32 query, s32 *args) {
     s32 mask;
     s32 sum;
     s32 pick;
@@ -214,7 +216,7 @@ s32 func_150A02EC(s32 id, s32 query, s32 *args) {
             }
             return mask & ~D_800D18A0;
         case 0x1E:
-            return func_151E6710(args[2]);
+            return mp_player_team(args[2]);
         case 0x1F:
             return D_800BE9F8;
         case 0x20:
@@ -261,12 +263,12 @@ s32 func_150A02EC(s32 id, s32 query, s32 *args) {
                 return (ev->unk0 & 0x2000) == 0;
             }
         case 0x2C:
-            return func_1517F51C((D_800D3C60 == 3) ? args[2] : 0);
+            return screen_fade_is_opaque((D_800D3C60 == 3) ? args[2] : 0);
         case 0x2D:
             return D_800D3260;
     }
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CD540/func_150A02EC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CD540/event_query_game_state.s")
 #endif

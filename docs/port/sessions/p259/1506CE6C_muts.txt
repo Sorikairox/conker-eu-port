@@ -11,7 +11,7 @@ s/    snap = FALSE;/    snap = TRUE;/ % m0
 s/if (mode == 5 || mode == 9 || mode == 10) {/if (mode == 5 || mode == 9) {/ % m10
 s/if (mode == 5 || mode == 9 || mode == 10) {/if (mode == 9 || mode == 10) {/ % m5
 s/view \* 0x40);/view * 0x30);/ % m5
-s/func_150A7E40(mtx, 0.0f, 0.0f, 1.0f,/func_150A7E40(mtx, 0.0f, 1.0f, 0.0f,/ % m5
+s/mtxf_transform_point(mtx, 0.0f, 0.0f, 1.0f,/mtxf_transform_point(mtx, 0.0f, 1.0f, 0.0f,/ % m5
 s/dir_x -= mtx\[3\]\[0\];/dir_x -= mtx[3][1];/ % m5
 s/dir_y -= mtx\[3\]\[1\];/;/ % m5
 s/dir_z -= mtx\[3\]\[2\];/dir_z += mtx[3][2];/ % m5
@@ -39,7 +39,7 @@ s/    case 18:/    case 19:/ % m18 m19
 s/pitch = pitch \* 2.2f + 7.0f;/pitch = pitch * 2.2f + 6.0f;/ % m15
 s/        height = 3.3f;/        height = 3.0f;/ % m15
 s/        height = 2.4f;/        height = 2.0f;/ % m1
-s/func_15145974(D_800CCA0C + 0xE8, \&yaw, \&pitch);/func_15145974(D_800CCA0C + 0xE4, \&yaw, \&pitch);/ % m3
+s/vec3_to_yaw_pitch_deg(D_800CCA0C + 0xE8, \&yaw, \&pitch);/vec3_to_yaw_pitch_deg(D_800CCA0C + 0xE4, \&yaw, \&pitch);/ % m3
 s/target\[0\] = \*(f32 \*) (D_800CCA0C + 0xDC);/target[0] = 0.0f;/ % m3
 s/target\[1\] = \*(f32 \*) (D_800CCA0C + 0xE0);/target[1] = *(f32 *) (D_800CCA0C + 0xE4);/ % m3
 s/        pitch = -pitch;/        ;/ % m3

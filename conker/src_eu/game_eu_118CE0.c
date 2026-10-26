@@ -6,8 +6,8 @@ void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
 #endif
 
 
-s32 func_15046F70(f32 *, s32, f32, s32);
-s32 func_1504715C(s32, struct127 *);
+s32 collision_floor_probe(f32 *, s32, f32, s32);
+s32 hitinfo_from_obj_floor(s32, struct127 *);
 s32 mtx_get_translation(s32, s32, f32 *, u8);
 /* was func_150EB4D0 */
 s32 obj_foot_pos_probe_ground(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
@@ -25,8 +25,8 @@ s32 obj_foot_pos_probe_ground(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     sp2C[0] = arg0[0];
     sp2C[1] = arg0[1] + 10.0f;
     sp2C[2] = arg0[2];
-    func_1504715C(arg2, arg1);
-    return func_15046F70(sp2C, 0, arg0[1] - 50.0f, arg2);
+    hitinfo_from_obj_floor(arg2, arg1);
+    return collision_floor_probe(sp2C, 0, arg0[1] - 50.0f, arg2);
 }
 
 s32 obj_query_table6(s32);

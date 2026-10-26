@@ -4,9 +4,10 @@
 
 
 #ifdef NON_MATCHING
-int func_151EFDD0(void);
+int game_gu_random(void);
 
-s32 func_1500F240(f32 arg0, f32 arg1, f32 arg2) {
+/* was func_1500F240 */
+s32 mist_puff_spawn(f32 arg0, f32 arg1, f32 arg2) {
     struct {
         s32 u48;
         s16 u4C;
@@ -26,7 +27,7 @@ s32 func_1500F240(f32 arg0, f32 arg1, f32 arg2) {
 
     sp.u4E = 0x38;
     sp.u50 = 0;
-    sp.u54 = (func_151EFDD0() % 4096) + 0x4000;
+    sp.u54 = (game_gu_random() % 4096) + 0x4000;
     sp.u48 = 0x20014;
     sp.u4C = 1;
     sp.u58 = 0xFF;
@@ -39,9 +40,10 @@ s32 func_1500F240(f32 arg0, f32 arg1, f32 arg2) {
     return sprite_fx_spawn_quad((s32) &sp.u48, 0, 0U, 0U, arg0, arg1, arg2, 110.0f, 110.0f, 0U, 0U, 0, 0xFFU, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3CA50/func_1500F240.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3CA50/mist_puff_spawn.s")
 #endif
-void func_1500F328(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_1500F328 */
+void level_fx_spawn_box_a(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct260 *temp_v0;
 
     temp_v0 = func_151491F4((s16) ((random_int() & 0x7F) + 0xA), 1, -1, 1U, 0U, 0xA, 0xFFU, 0);
@@ -56,9 +58,9 @@ void func_1500F328(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #ifdef NON_MATCHING
 extern s32 D_800D9CF0[];
-void func_15189E70(void *arg0, u8 arg1);
+void area_drift_emitter_create(void *arg0, u8 arg1);
 
-/* emitter spec copied by func_15189E70 (0x50 bytes) */
+/* emitter spec copied by area_drift_emitter_create (0x50 bytes) */
 typedef struct {
     /* 0x00 */ s16 angle;       /* heading byte angle - 0x40 */
     /* 0x02 */ s16 h02, h04, h06;
@@ -90,21 +92,22 @@ static const f32 D_80096614_c[9][6] = {
     { 872.0f, -1680.0f, 687.0f, 772.0f, -1676.0f, 931.0f },
 };
 
-// level_mist_setup: level-object init (D_80083120[8]): two func_1500F328 spawns, four func_1500F240 objects whose
+// level_mist_setup: level-object init (D_80083120[8]): two level_fx_spawn_box_a spawns, four mist_puff_spawn objects whose
 // handles go to D_800D9CF0[0..3] (x 4054 / 3890 / 4380 / 4218, y -1692, z 0 / -78 / -664 / -740), then nine
-// drifting emitters (func_15189E70, flag 1) along a chain of path segments; each spec gets its start, the vector to
+// drifting emitters (area_drift_emitter_create, flag 1) along a chain of path segments; each spec gets its start, the vector to
 // the segment end and the heading atan2(dx, dz) as a byte angle - 0x40.
-void func_1500F3BC(void) {
+/* was func_1500F3BC */
+void level_mist_setup(void) {
     DriftSpecF3BC spec;
     const f32 *seg;
     s32 i;
 
-    func_1500F328(0x1612, -0x553, -0x2DC, -0x69F);
-    func_1500F328(0x1633, -0x553, -0x3C2, -0x69F);
-    D_800D9CF0[0] = func_1500F240(D_80096600_c[1], D_80096600_c[0], 0.0f);
-    D_800D9CF0[1] = func_1500F240(D_80096600_c[2], D_80096600_c[0], -78.0f);
-    D_800D9CF0[2] = func_1500F240(D_80096600_c[3], D_80096600_c[0], -664.0f);
-    D_800D9CF0[3] = func_1500F240(D_80096600_c[4], D_80096600_c[0], -740.0f);
+    level_fx_spawn_box_a(0x1612, -0x553, -0x2DC, -0x69F);
+    level_fx_spawn_box_a(0x1633, -0x553, -0x3C2, -0x69F);
+    D_800D9CF0[0] = mist_puff_spawn(D_80096600_c[1], D_80096600_c[0], 0.0f);
+    D_800D9CF0[1] = mist_puff_spawn(D_80096600_c[2], D_80096600_c[0], -78.0f);
+    D_800D9CF0[2] = mist_puff_spawn(D_80096600_c[3], D_80096600_c[0], -664.0f);
+    D_800D9CF0[3] = mist_puff_spawn(D_80096600_c[4], D_80096600_c[0], -740.0f);
 
     spec.w48 = 3;
     spec.w4C = 2;
@@ -132,9 +135,9 @@ void func_1500F3BC(void) {
         spec.dir[1] = seg[4] - seg[1];
         spec.dir[2] = seg[5] - seg[2];
         spec.angle = (s32) (func_150484A0(spec.dir[0], spec.dir[2]) * D_80096634_c[0]) - 0x40;
-        func_15189E70(&spec, 1);
+        area_drift_emitter_create(&spec, 1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3CA50/func_1500F3BC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3CA50/level_mist_setup.s")
 #endif

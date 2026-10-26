@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15080628(void);
+void lipsync_poll_text_queue(void);
 u8 *world_record_find(u8);
 extern u8 D_800C3938[][0x19];
-void func_15021834(struct127 *, s32, s32);
+void cutscene_actor_apply_track(struct127 *, s32, s32);
 extern s32 D_eu_800C3A60;
 extern s32 D_800C39D0;
 extern s32 D_800C3A68;
@@ -13,11 +13,11 @@ extern u16 *D_800C39E8[];
 extern u16 *D_800C39F0[];
 extern s32 D_800C3B98[][30];
 extern s32 D_800C3AA8[][30];
-s32 func_15022A8C(s32 *);
-struct127 *func_15083E90(u8);
+s32 cutscene_obj_takes_part(s32 *);
+struct127 *obj_find_by_setup_id(u8);
 #endif
-// hoisted forward declaration(s) for func_1501E7A8
-s32 func_1507EE9C(struct127 *);
+// hoisted forward declaration(s) for cutscene_actors_reset_anim
+s32 face_anim_reset_default(struct127 *);
 
 
 #ifdef NON_MATCHING
@@ -41,9 +41,10 @@ extern s32 D_800C1480;
 extern u8 *D_800BEFBC;
 extern u8 *D_800BEEF0;
 void render_dl_buffers_init(void);
-void func_1501CC1C(void);
+void gfx_load_ucode(void);
 
-void func_eu_1501C860(s32 arg0, s32 arg1) {
+/* was func_eu_1501C860 */
+void gfx_task_submit(s32 arg0, s32 arg1) {
     s32 *task;
     s32 cap;
     s32 n;
@@ -72,7 +73,7 @@ void func_eu_1501C860(s32 arg0, s32 arg1) {
     }
     D_800BEEF4[0x48 / 4] = base;
     D_800BEEF4[0x4C / 4] = ((D_800BE9D0 - (s32)D_800BEDE8[D_800BE9C0]) >> 3) << 3;
-    func_1501CC1C();
+    gfx_load_ucode();
     D_800BEEF4[0x18 / 4] = 1;                                  /* M_GFXTASK */
     D_800BEEF4[0x1C / 4] = 4;                                  /* OS_TASK_LOADABLE */
     D_800BEEF4[0x20 / 4] = (s32)D_10029400;
@@ -110,7 +111,7 @@ void func_eu_1501C860(s32 arg0, s32 arg1) {
     D_800BEEC8++;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_eu_1501C860.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/gfx_task_submit.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_2D810;
@@ -123,7 +124,8 @@ extern u8 *D_800BEFBC;
 extern s32 D_800BEFD0;
 extern s32 D_800C1480;
 
-void func_1501CC1C(void) {
+/* was func_1501CC1C */
+void gfx_load_ucode(void) {
     s32 sp2C;
     s32 sp28;
     u8 *sp20;
@@ -153,31 +155,32 @@ void func_1501CC1C(void) {
         sp20 = temp_v0;
         sp2C = (s32) var_t0;
         sp28 = var_t1;
-        func_10004514((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1))), &D_800C1480, (*(s32 *)((u8 *)temp_v0 + 4)) - temp_v1, 1);
+        rom_dma_read((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1))), &D_800C1480, (*(s32 *)((u8 *)temp_v0 + 4)) - temp_v1, 1);
         temp_v1_2 = (*(s32 *)((u8 *)temp_v0 + 8));
         temp_a1 = ((s32 *)((u8 *)&D_800C1480 + ((*(s32 *)((u8 *)temp_v0 + 4)) - (*(s32 *)((u8 *)temp_v0 + 0)))));
         D_800BEFBC = temp_a1;
-        func_10004514((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1_2))), temp_a1, (*(s32 *)((u8 *)temp_v0 + 0xC)) - temp_v1_2, 1);
+        rom_dma_read((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1_2))), temp_a1, (*(s32 *)((u8 *)temp_v0 + 0xC)) - temp_v1_2, 1);
         D_80084400 = (s8) var_t0;
         temp_v0_2 = ((s32 *)((u8 *)&D_80084408 + ((var_t0 + var_t1) * 0x10)));
         D_80084404 = (s8) var_t1;
         temp_v1_3 = (*(s32 *)((u8 *)temp_v0_2 + 0));
         sp20 = temp_v0_2;
-        func_10004514((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1_3))), &D_800BEFD0, (*(s32 *)((u8 *)temp_v0_2 + 4)) - temp_v1_3, 1);
+        rom_dma_read((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1_3))), &D_800BEFD0, (*(s32 *)((u8 *)temp_v0_2 + 4)) - temp_v1_3, 1);
         temp_a1_2 = ((s32 *)((u8 *)&D_800BEFD0 + ((*(s32 *)((u8 *)temp_v0_2 + 4)) - (*(s32 *)((u8 *)temp_v0_2 + 0)))));
         D_800BEEF0 = temp_a1_2;
         temp_v1_4 = (*(s32 *)((u8 *)temp_v0_2 + 8));
-        func_10004514((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1_4))), temp_a1_2, (*(s32 *)((u8 *)temp_v0_2 + 0xC)) - temp_v1_4, 1);
+        rom_dma_read((s32) (((s32 *)((u8 *)&D_2D810 + temp_v1_4))), temp_a1_2, (*(s32 *)((u8 *)temp_v0_2 + 0xC)) - temp_v1_4, 1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CC1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/gfx_load_ucode.s")
 #endif
 #ifdef NON_MATCHING
 extern void *D_800C3D80[][30];   /* 16-byte block per actor */
 
 /* Clears (0xFF) the 16-byte block of every actor of sequence slot `slot`. */
-void func_1501CDA0(s32 slot) {
+/* was func_1501CDA0 */
+void cutscene_clear_actor_blocks(s32 slot) {
     s32 i;
     s32 j;
 
@@ -188,16 +191,17 @@ void func_1501CDA0(s32 slot) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CDA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_clear_actor_blocks.s")
 #endif
 
 #ifdef NON_MATCHING
-/* Length of cutscene slot `slot` (P84 browser blocker: func_1501E364 waits for it): the end frame of the first
+/* Length of cutscene slot `slot` (P84 browser blocker: cutscene_check_finished waits for it): the end frame of the first
  * camera track when it has one (record +0x12 != -9999 and the slot's first camera word >= 4), else the latest end
  * (+0x0A) of the camera tracks of the active actors, else the last key (frame at -2 of key k, D_800C39F0 count)
  * of their actor tracks. D_800C3A68 = the length in 60 Hz frames, D_eu_800C3A60[slot] = it in 50 Hz frames
  * (EU: * 50 / 60). */
-void func_1501CE34(s32 slot) {
+/* was func_1501CE34 */
+void cutscene_compute_length(s32 slot) {
     s32 *len = &(&D_eu_800C3A60)[slot];
     u16 *cams;
     u8 n;
@@ -255,10 +259,11 @@ void func_1501CE34(s32 slot) {
     *len = end * 50 / 60;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CE34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_compute_length.s")
 #endif
 
-s32 func_1501D064(s32 arg0) {
+/* was func_1501D064 */
+s32 cutscene_sum_actor_counts(s32 arg0) {
     s32 sum = 0;
     s32 i;
 
@@ -269,7 +274,7 @@ s32 func_1501D064(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-/* P87: declarations for func_1501D044 / func_1501DB18 / func_1501E888 */
+/* P87: declarations for cutscene_slot_reset / cutscene_scan_start_events / cutscene_end */
 extern s32 D_800C39D0;
 extern s32 D_800C39D8[];
 extern u8 D_800C39E0[];
@@ -308,24 +313,25 @@ extern u8 D_800C39C9;
 extern u8 D_800C40BC;
 extern u8 D_800C39CA;
 extern u8 D_800844A0[][3];       /* RGB rows */
-void func_15023464(void);
-s32 func_15023C60(u32, s32, s32, u8 **, s32, s32, s32, s32, s32, s32, s32);
-void func_1517F3B0(s32, s32, s32, s32, s8, s32);
+void subtitle_slots_clear(void);
+s32 scene_event_find_next(u32, s32, s32, u8 **, s32, s32, s32, s32, s32, s32, s32);
+void screen_fade_start(s32, s32, s32, s32, s8, s32);
 void node_broadcast_all(s32, u8);
-void func_1502348C(void);
-void func_15023684(s32);
-void func_1501EA84(s32);
-void func_1501E5AC(s32);
+void subtitle_slots_close_all(void);
+void cutscene_teardown_player(s32);
+void cutscene_end_camera_objs(s32);
+void cutscene_free_tables(s32);
 void camera_projection_set_fov(s32, f32, f32, f32);
-void func_1501E7A8(s32);
-void func_1501D348(s32, s32, s32, s32, s32);
+void cutscene_actors_reset_anim(s32);
+void cutscene_scene_load(s32, s32, s32, s32, s32);
 #endif
 #ifdef NON_MATCHING
-/* Resets cutscene slot `slot` and the shared cutscene state (func_1501D348, before a scene is loaded): no
+/* Resets cutscene slot `slot` and the shared cutscene state (cutscene_scene_load, before a scene is loaded): no
  * script position / script wait (D_800C39D8 = -100), slot not loaded, no actors, camera actor D_800C3A18 =
- * 0xFF (func_15020F6C picks it again), cleared look / fade state, D_800C3A94 / D_800C3A98 = 999, then
- * func_15023464. */
-void func_1501D044(s32 slot) {
+ * 0xFF (cutscene_apply_cameras picks it again), cleared look / fade state, D_800C3A94 / D_800C3A98 = 999, then
+ * subtitle_slots_clear. */
+/* was func_1501D044 */
+void cutscene_slot_reset(s32 slot) {
     D_800C39D8[slot] = -100;
     (&D_800C39D0)[slot] = 0;
     D_800C39E0[slot] = 0;
@@ -360,18 +366,19 @@ void func_1501D044(s32 slot) {
     D_800C3A92 = 0;
     D_800C40BD = 100;
     D_800C40BE = -1;
-    func_15023464();
+    subtitle_slots_clear();
     D_80090124 = 0;
     D_800C3670 = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D044.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_slot_reset.s")
 #endif
 
 s32 asset_load_with_subfiles(s32 *, s32, s32 *, s32, s32, s32, s32);
 extern s32 D_800C3A88;
 
-s32 func_1501D240(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_1501D240 */
+s32 cutscene_load_scene_asset(s32 arg0, s32 arg1, s32 arg2) {
     s32 sp34;
     s32 sp30;
     s32 temp_v0;
@@ -385,7 +392,8 @@ s32 func_1501D240(s32 arg0, s32 arg1, s32 arg2) {
     return temp_v0;
 }
 
-void func_1501D2C4(s32 arg0, s32 arg1) {
+/* was func_1501D2C4 */
+void cutscene_mark_seen(s32 arg0, s32 arg1) {
     if (D_800C3670 == 0) {
         D_800C3A60[arg0] |= 1ULL << arg1;
     }
@@ -399,7 +407,7 @@ s32 cutscene_was_seen(s32 arg0, s32 arg1) {
 #ifdef PORT
     /* DELIBERATE PORT CHANGE (P320, user request): the browser / native port treats every cutscene as already seen,
      * so any cutscene can be skipped on the first viewing (the original only allows it after it was watched once).
-     * Nothing is written: the seen bits (func_1501D2C4, saved to the EEPROM) are still recorded as on the N64.
+     * Nothing is written: the seen bits (cutscene_mark_seen, saved to the EEPROM) are still recorded as on the N64.
      * Not in the default eu or the plain NON_MATCHING build (no PORT define there). */
     return 1;
 #endif
@@ -413,15 +421,15 @@ s32 cutscene_was_seen(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-/* Load scene `scene` (asset group 3, type 6, found by func_1501D240) of level `level` into sequence slot `slot`.
+/* Load scene `scene` (asset group 3, type 6, found by cutscene_load_scene_asset) of level `level` into sequence slot `slot`.
  * Skipped while the slot is already loaded (D_800C35EA[slot] == 1) or a level change is pending (D_800C35C4).
- * For another level than the current one (D_800BE9F0) the level change is requested instead (func_1501C710;
+ * For another level than the current one (D_800BE9F0) the level change is requested instead (game_request_transition;
  * D_800C35C4 = scene + 1, D_800C35C5 = "the slot was empty").
  * The asset is a header {u16 nActors, nCameras, nSounds, nWords} followed by 8-byte records {s32 value, u32 bits}
  * (record 0 is the header pointer itself): nActors actor records, one record for D_800C3A10[slot], nActors
  * more (not read here), nCameras, nSounds, then nWords plain words. The per-slot tables (u16 arrays of
  * bits >> 3, the 30-entry value tables, actor state blocks) are allocated and filled, the optional setup
- * callback D_8008448C[callback] runs, and the sequence is started (func_1501CDA0 ... func_1501DB18). */
+ * callback D_8008448C[callback] runs, and the sequence is started (cutscene_clear_actor_blocks ... cutscene_scan_start_events). */
 typedef void (*SceneSetupFunc)(s32 level, s32 scene, s32 slot, s32 arg);
 typedef struct {
     s32 value;
@@ -436,23 +444,23 @@ typedef struct {
 } SceneActor;          /* 0x40 bytes, D_800C3E70[slot][actor] */
 
 void *allocate_memory(s32, s32, s32, s32);
-void func_1501C710(s32, s32, s32, s32, s32);
-void func_1501D044(s32);
-void func_1501CDA0(s32);
-void func_1501CE34(s32);
-void func_15022C4C(s32);
-void func_15020430(s32, s32);
-void func_15023980(void);
-void func_150222DC(s32);
-void func_150222F0(s32);
-void func_1501E888(s32, s32);
-void func_1502457C(s32, s32);
-void func_1501ECA4(s32);
-void func_150228F0(s32);
-void func_150227FC(s32);
-void func_150225D0(s32);
-void func_15020F6C(s32);
-void func_1501DB18(s32);
+void game_request_transition(s32, s32, s32, s32, s32);
+void cutscene_slot_reset(s32);
+void cutscene_clear_actor_blocks(s32);
+void cutscene_compute_length(s32);
+void cutscene_place_scene(s32);
+void cutscene_path_compute_length(s32, s32);
+void scene_stub_noop(void);
+void cutscene_obj_list_clear(s32);
+void cutscene_record_list_clear(s32);
+void cutscene_end(s32, s32);
+void scene_event_track_pass(s32, s32);
+void cutscene_camera_track_pass(s32);
+void cutscene_spawn_actors(s32);
+void cutscene_claim_records(s32);
+void cutscene_actor_pass(s32);
+void cutscene_apply_cameras(s32);
+void cutscene_scan_start_events(s32);
 extern u8 D_800C39C8;
 extern u8 D_800C40B8;
 extern u16 *D_800C39E8[];        /* actors: bits >> 3 */
@@ -469,7 +477,8 @@ extern void *D_800C4170;
 extern s32 D_800C39D0;
 extern u8 *D_800C3A10[];        /* the record after the actors */
 
-void func_1501D348(s32 level, s32 scene, s32 slot, s32 callback, s32 callbackArg) {
+/* was func_1501D348 */
+void cutscene_scene_load(s32 level, s32 scene, s32 slot, s32 callback, s32 callbackArg) {
     u8 *loaded;
     u8 state;
     SceneRecord *rec;
@@ -488,7 +497,7 @@ void func_1501D348(s32 level, s32 scene, s32 slot, s32 callback, s32 callbackArg
     D_800C3C94 = callbackArg;
     if (level != D_800BE9F0) {
         D_800C35C4 = scene + 1;
-        func_1501C710(1, level, 0, 0, 0);
+        game_request_transition(1, level, 0, 0, 0);
         if (*loaded != 0) {
             D_800C35C5 = 0;
         } else {
@@ -502,8 +511,8 @@ void func_1501D348(s32 level, s32 scene, s32 slot, s32 callback, s32 callbackArg
         D_800C39C8 = D_800BE9F0;
         D_800C40B8 = scene;
     }
-    func_1501D044(slot);
-    if (func_1501D240(level, scene, slot) == 0) {
+    cutscene_slot_reset(slot);
+    if (cutscene_load_scene_asset(level, scene, slot) == 0) {
         return;
     }
     rec = ((SceneRecord **)&D_800C3A88)[slot];
@@ -562,46 +571,47 @@ void func_1501D348(s32 level, s32 scene, s32 slot, s32 callback, s32 callbackArg
     if (callback != 0) {
         D_8008448C[callback](level, scene, slot, callbackArg);
     }
-    n = func_1501D064(slot);
+    n = cutscene_sum_actor_counts(slot);
     D_800C40BA = n;
     D_800C4170 = allocate_memory((u16)n * 12, 1, 0, 0);
     (&D_800C39D0)[slot] = 0;
 
     /* start the sequence */
-    func_1501CDA0(slot);
-    func_1501CE34(slot);
-    func_15022C4C(slot);
+    cutscene_clear_actor_blocks(slot);
+    cutscene_compute_length(slot);
+    cutscene_place_scene(slot);
     for (i = 0; i < D_800C3A5A[slot]; i++) {
-        func_15020430(i, slot);
+        cutscene_path_compute_length(i, slot);
     }
-    func_15023980();
+    scene_stub_noop();
     *loaded = 1;
     D_800C3638 = 1;
-    func_150222DC(slot);
-    func_150222F0(slot);
+    cutscene_obj_list_clear(slot);
+    cutscene_record_list_clear(slot);
     if (D_800C3A5A[slot] == 0) {
-        func_1501E888(0, slot);
+        cutscene_end(0, slot);
     }
-    func_1502457C(1, slot);
-    func_1501ECA4(slot);
-    func_150228F0(slot);
-    func_150227FC(slot);
-    func_150225D0(slot);
-    func_15020F6C(slot);
+    scene_event_track_pass(1, slot);
+    cutscene_camera_track_pass(slot);
+    cutscene_spawn_actors(slot);
+    cutscene_claim_records(slot);
+    cutscene_actor_pass(slot);
+    cutscene_apply_cameras(slot);
     D_800DBFF4[0] = 4;
-    func_1501DB18(slot);
+    cutscene_scan_start_events(slot);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D348.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_scene_load.s")
 #endif
 
 #ifdef NON_MATCHING
 /* Start of cutscene slot `slot`: scans the sound / event track (D_800C3AA8[slot][i] + 0x18) of every actor with
- * func_15023C60 (type 5) for the event codes 0x1E, 0x0E, 0x68, 0x44 (flags D_800C40B9, D_800C40BC, D_800C39CA,
+ * scene_event_find_next (type 5) for the event codes 0x1E, 0x0E, 0x68, 0x44 (flags D_800C40B9, D_800C40BC, D_800C39CA,
  * D_800C39C9), 0x77 (start position D_800C40AE = its frame) and 1 (the earliest one sets the screen colour
- * func_1517F3B0 from the RGB row D_800844A0[key[5]], key +6 == 1: with fade). The script position
+ * screen_fade_start from the RGB row D_800844A0[key[5]], key +6 == 1: with fade). The script position
  * D_800C39D0[slot] starts at D_800C40AE. */
-void func_1501DB18(s32 slot) {
+/* was func_1501DB18 */
+void cutscene_scan_start_events(s32 slot) {
     u8 *found;
     u8 *rec;
     u8 *rgb;
@@ -621,96 +631,98 @@ void func_1501DB18(s32 slot) {
             continue;
         }
         found = NULL;
-        func_15023C60((u32)(rec + 0x18), 5, i, &found, 1, 0x1E, 0, 0, 0, 0, slot);
+        scene_event_find_next((u32)(rec + 0x18), 5, i, &found, 1, 0x1E, 0, 0, 0, 0, slot);
         if (found != NULL) {
             D_800C40B9 = 1;
         }
         found = NULL;
-        func_15023C60((u32)(rec + 0x18), 5, i, &found, 1, 0xE, 0, 0, 0, 0, slot);
+        scene_event_find_next((u32)(rec + 0x18), 5, i, &found, 1, 0xE, 0, 0, 0, 0, slot);
         if (found != NULL) {
             D_800C40BC = 1;
         }
         found = NULL;
-        func_15023C60((u32)(rec + 0x18), 5, i, &found, 1, 0x68, 0, 0, 0, 0, slot);
+        scene_event_find_next((u32)(rec + 0x18), 5, i, &found, 1, 0x68, 0, 0, 0, 0, slot);
         if (found != NULL) {
             D_800C39CA = 1;
         }
         found = NULL;
-        func_15023C60((u32)(rec + 0x18), 5, i, &found, 1, 0x44, 0, 0, 0, 0, slot);
+        scene_event_find_next((u32)(rec + 0x18), 5, i, &found, 1, 0x44, 0, 0, 0, 0, slot);
         if (found != NULL) {
             D_800C39C9 = 1;
         }
         found = NULL;
-        v = func_15023C60((u32)(rec + 0x18), 5, i, &found, 1, 0x77, 0, 0, 0, 0, slot);
+        v = scene_event_find_next((u32)(rec + 0x18), 5, i, &found, 1, 0x77, 0, 0, 0, 0, slot);
         if (found != NULL) {
             D_800C40AE = v;
         }
         found = NULL;
-        v = func_15023C60((u32)(rec + 0x18), 5, i, &found, 1, 1, 1, 0, 0, 0, slot);
+        v = scene_event_find_next((u32)(rec + 0x18), 5, i, &found, 1, 1, 1, 0, 0, 0, slot);
         if (found != NULL && (best == -1 || v < best)) {
             best = v;
             rgb = D_800844A0[(s8)found[5]];
             if (*(s16 *)(found + 6) == 1) {
-                func_1517F3B0(rgb[0], rgb[1], rgb[2], 0, 1, 0);
+                screen_fade_start(rgb[0], rgb[1], rgb[2], 0, 1, 0);
             } else {
-                func_1517F3B0(rgb[0], rgb[1], rgb[2], 0, 0, 0);
+                screen_fade_start(rgb[0], rgb[1], rgb[2], 0, 0, 0);
             }
         }
     }
     (&D_800C39D0)[slot] = D_800C40AE;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501DB18.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_scan_start_events.s")
 #endif
 
 #ifdef NON_MATCHING
 /* Starts cutscene slot `slot`: script position D_800C39D0[slot] = start D_eu_800C3A60[slot] + D_800BEA08, runs the
- * camera / actor tracks once (func_1501ECA4, func_15020F6C, with func_1502457C around them), then gives every
- * live object that takes part (func_15022A8C, current object index in D_800C3E78) its first actor frame
- * (func_15021834(obj, slot, -1)) and ends with func_1501E888(1, slot). */
-void func_1501DE84(s32 slot) {
+ * camera / actor tracks once (cutscene_camera_track_pass, cutscene_apply_cameras, with scene_event_track_pass around them), then gives every
+ * live object that takes part (cutscene_obj_takes_part, current object index in D_800C3E78) its first actor frame
+ * (cutscene_actor_apply_track(obj, slot, -1)) and ends with cutscene_end(1, slot). */
+/* was func_1501DE84 */
+void cutscene_start(s32 slot) {
     struct127 *obj;
     s32 i;
 
     (&D_800C39D0)[slot] = (&D_eu_800C3A60)[slot] + D_800BEA08;
-    func_1502457C(1, 0);
-    func_1501ECA4(0);
-    func_1502457C(0, 0);
-    func_15020F6C(0);
+    scene_event_track_pass(1, 0);
+    cutscene_camera_track_pass(0);
+    scene_event_track_pass(0, 0);
+    cutscene_apply_cameras(0);
     for (i = 0, obj = D_800CC2D0; i < 25; i++, obj++) {
         if (*(s32 *)obj != 0) {
             D_800C3E78 = i;
-            if (func_15022A8C((s32 *)obj) != 0) {
-                func_15021834(obj, slot, -1);
+            if (cutscene_obj_takes_part((s32 *)obj) != 0) {
+                cutscene_actor_apply_track(obj, slot, -1);
             }
         }
     }
-    func_1501E888(1, slot);
+    cutscene_end(1, slot);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501DE84.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_start.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_100127D0(void);
+s32 mp3_voice_is_playing(void);
 void func_151F2BA8(void);
 struct127 *obj_find_child_nth(struct127 *, s32);
 void obj_remove(struct127 *, s32);
-void func_1501DE84(s32 slot);
-void func_1517F3B0(s32, s32, s32, s32, s8, s32);
-void func_1000E17C(void);
+void cutscene_start(s32 slot);
+void screen_fade_start(s32, s32, s32, s32, s8, s32);
+void music_restart_type13_songs(void);
 
 /* End of cutscene slot `slot` (called by cutscene_update_skip with the slot left in a0): func_151F2BA8 when
- * func_100127D0, remove object 0's attachment 0 (obj_find_child_nth / obj_remove), run func_1501DE84(slot) once and
+ * mp3_voice_is_playing, remove object 0's attachment 0 (obj_find_child_nth / obj_remove), run cutscene_start(slot) once and
  * again while D_800C40B9 was set before the call and no level change is pending (D_800C35C4); screen colour
- * func_1517F3B0(0, 0, 0, 0x19, 0, 0) unless D_800C39C9, D_800C40AA == 1 or D_800C40AD; clear +0xA4 of every live
- * object (D_800CC2D0, 25), D_800C3663 = 0, func_1000E17C, D_800DBFF4[0] = 4, D_800C3A92 = 1. */
-void func_1501DF70(s32 slot) {
+ * screen_fade_start(0, 0, 0, 0x19, 0, 0) unless D_800C39C9, D_800C40AA == 1 or D_800C40AD; clear +0xA4 of every live
+ * object (D_800CC2D0, 25), D_800C3663 = 0, music_restart_type13_songs, D_800DBFF4[0] = 4, D_800C3A92 = 1. */
+/* was func_1501DF70 */
+void cutscene_end_skip(s32 slot) {
     struct127 *p;
     u8 flag;
     s32 i;
 
-    if (func_100127D0() != 0) {
+    if (mp3_voice_is_playing() != 0) {
         func_151F2BA8();
     }
     p = obj_find_child_nth(D_800CC2D0, 0);
@@ -719,10 +731,10 @@ void func_1501DF70(s32 slot) {
     }
     do {
         flag = D_800C40B9;
-        func_1501DE84(slot);
+        cutscene_start(slot);
     } while (flag != 0 && D_800C35C4 == 0);
     if (D_800C39C9 == 0 && (s8)D_800C40AA != 1 && D_800C40AD == 0) {
-        func_1517F3B0(0, 0, 0, 0x19, 0, 0);
+        screen_fade_start(0, 0, 0, 0x19, 0, 0);
     }
     for (i = 0; i < 25; i++) {
         if (D_800CC2D0[i].interaction_state != 0) {
@@ -730,12 +742,12 @@ void func_1501DF70(s32 slot) {
         }
     }
     D_800C3663 = 0;
-    func_1000E17C();
+    music_restart_type13_songs();
     D_800DBFF4[0] = 4;
     D_800C3A92 = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501DF70.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_end_skip.s")
 #endif
 #ifdef NON_MATCHING
 /* P96: cutscene_can_skip */
@@ -789,8 +801,8 @@ s32 cutscene_can_skip(s32 slot, u8 *unused) {
     if (!(D_800BEB30 & 0x20)) {
         return 0;
     }
-    /* D_800C40BC: the scene script carries the "no skip" event 0xE (func_1501DB18), or an event set it
-     * (func_1509C850 case 6).
+    /* D_800C40BC: the scene script carries the "no skip" event 0xE (cutscene_scan_start_events), or an event set it
+     * (event_action_scene case 6).
      * DELIBERATE PORT CHANGE (P320): the port ignores it so every cutscene can be skipped with L, the opening
      * (level 0x18 scene 1) included; that one carries the marker, so it can never be skipped on the N64. */
     if (D_800C40BC != 0) {
@@ -815,8 +827,8 @@ s32 cutscene_can_skip(s32 slot, u8 *unused) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_can_skip.s")
 #endif
-void func_1000E17C(void);
-void func_1501DF70(s32);
+void music_restart_type13_songs(void);
+void cutscene_end_skip(s32);
 s32 cutscene_can_skip(s32, u8 *);
 s32 func_151F2CDC(void);
 extern s8 D_80090124;
@@ -832,8 +844,8 @@ void cutscene_update_skip(s32 arg0) {
             if (((*(&D_eu_800C3A60 + arg0) - *(&D_800C39D0 + arg0)) >= 0x4C)) {
                 D_800C3C88 = 1;
                 D_800C40A9 = 0x19;
-                func_1517F3B0(0, 0, 0, 0x19, 1, 0);
-                func_1000E17C();
+                screen_fade_start(0, 0, 0, 0x19, 1, 0);
+                music_restart_type13_songs();
                 if ((func_151F2CDC() == 1) || (func_151F2CDC() == 2)) {
                     func_151F2D6C(0, 0x2B02);
                 }
@@ -846,21 +858,22 @@ void cutscene_update_skip(s32 arg0) {
         }
         D_800C40A9 = 0;
         D_800C3C88 = 2;
-        /* P82: the asm leaves arg0 (the slot) in a0; func_1501DF70 reads it (arity scan row, dropped argument) */
-        func_1501DF70(arg0);
+        /* P82: the asm leaves arg0 (the slot) in a0; cutscene_end_skip reads it (arity scan row, dropped argument) */
+        cutscene_end_skip(arg0);
         D_800C3C88 = 0;
     }
 }
 
 #ifdef NON_MATCHING
-void func_1501E46C(s32);
-void func_1501E888(s32, s32);
-void func_1501ECA4(s32);
-void func_15020F6C(s32);
-void func_1502457C(s32, s32);
+void cutscene_advance_position(s32);
+void cutscene_end(s32, s32);
+void cutscene_camera_track_pass(s32);
+void cutscene_apply_cameras(s32);
+void scene_event_track_pass(s32, s32);
 extern u8 D_800C40AC;
 
-void func_1501E364(s32 arg0) {
+/* was func_1501E364 */
+void cutscene_check_finished(s32 arg0) {
     s32 var_s1;
     u8 *temp_s0;
 
@@ -869,14 +882,14 @@ loop_1:
     temp_s0 = &(&D_800C35EA)[var_s1];
     if ((*temp_s0 == 1) && ((&D_800C39D0)[var_s1] >= (&D_eu_800C3A60)[var_s1])) {
         if (D_800C40AC == 0) {
-            func_1501E888(0, var_s1);
+            cutscene_end(0, var_s1);
             if (*temp_s0 == 1) {
                 var_s1 = 0;
-                func_1501E46C(0);
-                func_1502457C(1, 0);
-                func_1501ECA4(0);
-                func_1502457C(0, 0);
-                func_15020F6C(0);
+                cutscene_advance_position(0);
+                scene_event_track_pass(1, 0);
+                cutscene_camera_track_pass(0);
+                scene_event_track_pass(0, 0);
+                cutscene_apply_cameras(0);
                 goto loop_1;
             }
         } else {
@@ -885,7 +898,7 @@ loop_1:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E364.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_check_finished.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_800C39D8[];
@@ -896,7 +909,8 @@ extern u8 D_eu_800C3E78;
 /* Per-player counter step (P15, hand C from the asm): remembers the previous value D_800C39D8[i] of
  * D_800C39D0[i], and for an active player (D_800C35EA[i] == 1) advances it by D_800BEA08 (player 0
  * only when D_800BEAC0 == 0), clamped to D_eu_800C3A60[i]. */
-void func_1501E46C(s32 i) {
+/* was func_1501E46C */
+void cutscene_advance_position(s32 i) {
     s32 *cur = &(&D_800C39D0)[i];
     s32 lim;
 
@@ -915,7 +929,7 @@ void func_1501E46C(s32 i) {
         D_800C39D8[i] = -1;
     }
     if (func_151F2CDC() == 1) {
-        func_15080628();
+        lipsync_poll_text_queue();
     }
     lim = (&D_eu_800C3A60)[i];
     if (*cur >= lim) {
@@ -923,20 +937,21 @@ void func_1501E46C(s32 i) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E46C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_advance_position.s")
 #endif
 #ifdef NON_MATCHING
-/* P92: declarations for func_1501E5AC */
-void func_10004074(s32);   /* free */
+/* P92: declarations for cutscene_free_tables */
+void heap_free(s32);   /* free */
 #endif
 
 #ifdef NON_MATCHING
-/* Frees the tables of cutscene slot `slot` (scene teardown, func_1501E888), when a scene asset is loaded
+/* Frees the tables of cutscene slot `slot` (scene teardown, cutscene_end), when a scene asset is loaded
  * (D_800C3A88[slot], first word = its header {u16 nActors, ...}): every actor's path length table and sample
  * table (SceneActor +4 / +0x38, actors with path keys only), the actor array D_800C3E70, the camera records
  * D_800C3958, the per-actor blocks D_800C3D80, the u16 tables D_800C39E8 / D_800C39F0 / D_800C39F8, the words
  * D_800C3A00, the shared D_800C4170 and the asset itself; all pointers become NULL. */
-void func_1501E5AC(s32 slot) {
+/* was func_1501E5AC */
+void cutscene_free_tables(s32 slot) {
     u16 *hdr;
     s32 i;
 
@@ -946,37 +961,38 @@ void func_1501E5AC(s32 slot) {
     hdr = *(u16 **)(&D_800C3A88)[slot];
     for (i = 0; i < hdr[0]; i++) {
         if (D_800C39E8[slot][i] != 0) {
-            func_10004074((s32)D_800C3E70[slot][i].keys);
-            func_10004074((s32)D_800C3E70[slot][i].state);
+            heap_free((s32)D_800C3E70[slot][i].keys);
+            heap_free((s32)D_800C3E70[slot][i].state);
         }
     }
-    func_10004074((s32)D_800C3E70[slot]);
+    heap_free((s32)D_800C3E70[slot]);
     D_800C3E70[slot] = NULL;
-    func_10004074((s32)(&D_800C3958)[slot]);
+    heap_free((s32)(&D_800C3958)[slot]);
     (&D_800C3958)[slot] = NULL;
     for (i = 0; i < hdr[0]; i++) {
-        func_10004074((s32)D_800C3D80[slot][i]);
+        heap_free((s32)D_800C3D80[slot][i]);
         D_800C3D80[slot][i] = NULL;
     }
-    func_10004074((s32)D_800C39E8[slot]);
-    func_10004074((s32)D_800C39F0[slot]);
-    func_10004074((s32)D_800C39F8[slot]);
-    func_10004074((s32)D_800C3A00[slot]);
+    heap_free((s32)D_800C39E8[slot]);
+    heap_free((s32)D_800C39F0[slot]);
+    heap_free((s32)D_800C39F8[slot]);
+    heap_free((s32)D_800C3A00[slot]);
     D_800C39E8[slot] = NULL;
     D_800C39F0[slot] = NULL;
     D_800C39F8[slot] = NULL;
     D_800C3A00[slot] = NULL;
-    func_10004074((s32)D_800C4170);
+    heap_free((s32)D_800C4170);
     D_800C4170 = NULL;
-    func_10004074((&D_800C3A88)[slot]);
+    heap_free((&D_800C3A88)[slot]);
     (&D_800C3A88)[slot] = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E5AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_free_tables.s")
 #endif
 extern u8 *D_800C3A10[];
 
-void func_1501E7A8(s32 arg0)
+/* was func_1501E7A8 */
+void cutscene_actors_reset_anim(s32 arg0)
 {
   s32 var_s0;
   s32 n;
@@ -995,7 +1011,7 @@ void func_1501E7A8(s32 arg0)
       p = (*tbl) + var_s0;
       if ((*((u16 *) p)) == 2)
       {
-        e = func_15083E90(p[2]);
+        e = obj_find_by_setup_id(p[2]);
         if (e == 0)
         {
           s32 blk_t; // fakematch: block-local decl (shape D)
@@ -1013,7 +1029,7 @@ void func_1501E7A8(s32 arg0)
             *((u8 *) (((u8 *) e) + 0x6D)) = 0;
             *((s8 *) (((u8 *) e) + 0x6B)) = 0;
           }
-          func_1507EE9C(e);
+          face_anim_reset_default(e);
           n = *cnt;
         }
       }
@@ -1029,12 +1045,13 @@ void func_1501E7A8(s32 arg0)
 
 #ifdef NON_MATCHING
 /* End of cutscene slot `slot` (skipped != 0: cut short, event 0xF, else 0x10 to node_broadcast_all with the scene
- * number): position back to the start D_800C40AE, scene marked as seen (func_1501D2C4), slot unloaded,
- * per-scene teardown (func_1501E7A8, func_1502348C, func_15023684, func_1501EA84, func_1501E5AC), view reset
+ * number): position back to the start D_800C40AE, scene marked as seen (cutscene_mark_seen), slot unloaded,
+ * per-scene teardown (cutscene_actors_reset_anim, subtitle_slots_close_all, cutscene_teardown_player, cutscene_end_camera_objs, cutscene_free_tables), view reset
  * (camera_projection_set_fov with the game camera's +0x19C / +0x1A0). A queued follow-up scene (D_800C39E2 = scene + 1,
- * level D_800C39E3, 0x25 = load it into level 0x25 temporarily) is loaded at once (func_1501D348, slot state
+ * level D_800C39E3, 0x25 = load it into level 0x25 temporarily) is loaded at once (cutscene_scene_load, slot state
  * 2); otherwise the screen fade / pause flags are cleared. */
-void func_1501E888(s32 skipped, s32 slot) {
+/* was func_1501E888 */
+void cutscene_end(s32 skipped, s32 slot) {
     u8 *loaded;
     struct108 *gameCam;
     u8 scene;
@@ -1050,16 +1067,16 @@ void func_1501E888(s32 skipped, s32 slot) {
     node_broadcast_all((s32)&scene, skipped ? 0xF : 0x10);
     D_800C39D8[slot] = -100;
     (&D_800C39D0)[slot] = D_800C40AE;
-    func_1501D2C4(D_800BE9F0, (&D_800C3A08)[slot]);
+    cutscene_mark_seen(D_800BE9F0, (&D_800C3A08)[slot]);
     *loaded = 0;
     D_800C3638 = 0;
-    func_1501E7A8(slot);
-    func_1502348C();
+    cutscene_actors_reset_anim(slot);
+    subtitle_slots_close_all();
     D_800C3A86 = 0;
     D_800C3683 = 0;
-    func_15023684(slot);
-    func_1501EA84(slot);
-    func_1501E5AC(slot);
+    cutscene_teardown_player(slot);
+    cutscene_end_camera_objs(slot);
+    cutscene_free_tables(slot);
     D_800C3A6C = 0.0f;
     D_800C3A70 = 0.0f;
     D_800C3A74 = 0.0f;
@@ -1072,13 +1089,13 @@ void func_1501E888(s32 skipped, s32 slot) {
             D_800BE9F0 = 0x25;
         }
         D_800C3671 = 0;
-        func_1501D348(level, D_800C39E2 - 1, slot, D_800C3C90, D_800C3C94);
+        cutscene_scene_load(level, D_800C39E2 - 1, slot, D_800C3C90, D_800C3C94);
         if (D_800C39E3 == 0x25) {
             D_800BE9F0 = savedLevel;
         }
     } else {
         if (D_800C40AB != 0) {
-            func_1517F3B0(0, 0, 0, 0x19, 0, 0);
+            screen_fade_start(0, 0, 0, 0x19, 0, 0);
         }
         D_80090124 = 0;
         D_800C3670 = 0;
@@ -1086,14 +1103,14 @@ void func_1501E888(s32 skipped, s32 slot) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E888.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_end.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P92: declarations for func_1501EA84 */
+/* P92: declarations for cutscene_end_camera_objs */
 void camera_queue_event(struct108 *, s32, void *);
-void func_15022864(s32);
-void func_1502298C(s32);
+void cutscene_restore_records(s32);
+void cutscene_release_listed_objs(s32);
 extern s32 D_800C3A20;   /* camera event block */
 extern s32 D_800D121C;   /* end of the object table D_800CC2D0 */
 extern f32 D_80096D74;   /* unset D_800C3A94 */
@@ -1101,16 +1118,17 @@ extern f32 D_80096D78;   /* unset D_800C3A98 */
 #endif
 
 #ifdef NON_MATCHING
-/* Scene end, camera and objects of cutscene slot `slot` (called by func_1501E888). The camera event block
+/* Scene end, camera and objects of cutscene slot `slot` (called by cutscene_end). The camera event block
  * D_800C3A20 = {1, slot, .., eye = game camera +0x2F8..0x300, 0, +0x388, +0x37C} is sent to the game camera
  * (camera_queue_event event 7) unless D_800C3671; then event 8 with D_800C3A94 at +0xC unless it is unset
  * (D_80096D74), and event 10 with D_800C3A98 / D_800C3A9C unless that is unset (D_80096D78). Without a queued
  * follow-up scene (D_800C39E2) and D_800C3671: event 6 (with the slot number as its data), skipped once when
- * D_800C3AA0 is set (it is cleared). Then func_1502298C (unless D_800C3A7E[slot]) and func_15022864; every
- * object of the scene (func_15022A8C) gets byte +0xA4 and the floats +0xB8 / +0xC4 cleared. Without a follow-up
+ * D_800C3AA0 is set (it is cleared). Then cutscene_release_listed_objs (unless D_800C3A7E[slot]) and cutscene_restore_records; every
+ * object of the scene (cutscene_obj_takes_part) gets byte +0xA4 and the floats +0xB8 / +0xC4 cleared. Without a follow-up
  * scene: D_eu_800C3E78 = 2, D_800C3663 = 0, the start angle / position D_800C39B4 / D_800C39AC come back from
  * D_800C39C0 / D_800C39B8. */
-void func_1501EA84(s32 slot) {
+/* was func_1501EA84 */
+void cutscene_end_camera_objs(s32 slot) {
     struct108 *cam;
     s32 *ev;
     u8 *obj;
@@ -1145,11 +1163,11 @@ void func_1501EA84(s32 slot) {
         }
     }
     if ((&D_800C3A7E)[slot] == 0) {
-        func_1502298C(slot);
+        cutscene_release_listed_objs(slot);
     }
-    func_15022864(slot);
+    cutscene_restore_records(slot);
     for (obj = (u8 *)D_800CC2D0; obj != (u8 *)&D_800D121C; obj += 0x32C) {
-        if (*(s32 *)obj != 0 && func_15022A8C((s32 *)obj) != 0) {
+        if (*(s32 *)obj != 0 && cutscene_obj_takes_part((s32 *)obj) != 0) {
             obj[0xA4] = 0;
             *(f32 *)(obj + 0xB8) = 0.0f;
             *(f32 *)(obj + 0xC4) = 0.0f;
@@ -1165,27 +1183,27 @@ void func_1501EA84(s32 slot) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501EA84.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_end_camera_objs.s")
 #endif
 #ifdef NON_MATCHING
 /* P87: camera / actor track key (8 bytes, D_800C3B98[slot][actor] arrays) */
 typedef struct {
     f32 value;
-    u8 mode;     /* interpolation into the next key: 0 = spline (func_15049AD0), else linear */
+    u8 mode;     /* interpolation into the next key: 0 = spline (catmull_rom_eval), else linear */
     u8 channel;  /* 0 .. 14 */
     s16 frame;   /* 60 Hz frames */
 } TrackKey;
 #define TRACK_NONE (-9999)
 #define TRACK_NONE_F (-9999.0f)   /* D_80096D7C / D_80096DA0: no value */
 extern f32 D_800C39C4;
-f32 func_15049AD0(s32 *, s32, f32);
-void func_1501FF10(s32, f32, f32 *, s32);
-void func_1501FD34(s32, f32, f32 *, f32 *, f32 *, s32);
-s32 func_1501F7D4(s32, f32, f32 *, s32, s32 *);
-void func_15020090(u8 *, s32, s32, s32);
+f32 catmull_rom_eval(s32 *, s32, f32);
+void cutscene_actor_heading_at(s32, f32, f32 *, s32);
+void cutscene_actor_place_at(s32, f32, f32 *, f32 *, f32 *, s32);
+s32 cutscene_path_point_at(s32, f32, f32 *, s32, s32 *);
+void cutscene_path_ctrl_points(u8 *, s32, s32, s32);
 extern f32 D_80096D84; /* 0.01 */
 extern f32 D_80096D80; /* 0.01 */
-void func_15020920(s32, s32, s32);
+void cutscene_path_prepare_segment(s32, s32, s32);
 extern f32 D_80096D9C; /* 0.01 */
 extern f32 D_80096D88; /* 0.01 */
 extern f32 D_80096D8C; /* radians to degrees */
@@ -1196,11 +1214,12 @@ extern f32 D_80096D8C; /* radians to degrees */
  * then per-type defaults, entry type = u16 at D_800C3A10[slot] + i * 8). Its keys D_800C3B98[slot][i] (count
  * D_800C39F0[slot][i]) are 8-byte TrackKey records on 15 channels; each channel is evaluated at the current
  * frame (script position * 60 / 50, or D_800C3A68 once the slot has ended): before the first key -> no value,
- * at / after the last key -> last value, else spline (mode 0, func_15049AD0 over the 4 surrounding keys) or
- * linear between the two keys around the frame. Channel 10 (roll) goes to func_1501FF10 when the actor has a
+ * at / after the last key -> last value, else spline (mode 0, catmull_rom_eval over the 4 surrounding keys) or
+ * linear between the two keys around the frame. Channel 10 (roll) goes to cutscene_actor_heading_at when the actor has a
  * look step (D_800C3D80 byte 0 != 0xFF), else channel 7 sets cam[4]; the other channels overwrite cam[3..16]
- * where they have a value; func_1501FD34 then places cam[0..2]. D_800C3638 = 0 while running, 1 after. */
-void func_1501ECA4(s32 slot) {
+ * where they have a value; cutscene_actor_place_at then places cam[0..2]. D_800C3638 = 0 while running, 1 after. */
+/* was func_1501ECA4 */
+void cutscene_camera_track_pass(s32 slot) {
     TrackKey *keys;
     TrackKey *key;
     f32 *cam;
@@ -1373,7 +1392,7 @@ void func_1501ECA4(s32 slot) {
                     if (!(flags & 8)) {
                         pts[3] = pts[2];
                     }
-                    out[ch] = func_15049AD0((s32 *)pts, 0, t);
+                    out[ch] = catmull_rom_eval((s32 *)pts, 0, t);
                 } else {
                     /* linear between the channel's keys nextIdx-1 (ia) and nextIdx (ib) */
                     seen = 0;
@@ -1399,7 +1418,7 @@ void func_1501ECA4(s32 slot) {
             out[10] = 0.0f;
         }
         if (*(u8 *)D_800C3D80[slot][i] != 0xFF) {
-            func_1501FF10(i, out[10], &cam[4], slot);
+            cutscene_actor_heading_at(i, out[10], &cam[4], slot);
         } else if (out[7] != TRACK_NONE_F) {
             cam[4] = out[7];
         }
@@ -1442,24 +1461,25 @@ void func_1501ECA4(s32 slot) {
         if (out[12] != TRACK_NONE_F) {
             cam[16] = out[12];
         }
-        func_1501FD34(i, out[10], &cam[0], &cam[1], &cam[2], slot);
+        cutscene_actor_place_at(i, out[10], &cam[0], &cam[1], &cam[2], slot);
     }
     D_800C3638 = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501ECA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_camera_track_pass.s")
 #endif
 
 #ifdef NON_MATCHING
 /* Path point lookup for actor `actor` of cutscene slot `slot` at distance `dist` along its path: binary search of
  * the segment start lengths (SceneActor +4, D_800C39E8 key count entries) gives `seg` (*segOut); a segment change
- * (SceneActor +0x3C) prepares the segment's cubic (func_15020920: coefficients D / C / B / A at +0x08 / +0x14 /
+ * (SceneActor +0x3C) prepares the segment's cubic (cutscene_path_prepare_segment: coefficients D / C / B / A at +0x08 / +0x14 /
  * +0x20 / +0x2C, xyz each). Curved segment (key shape +6 == 0): binary search of the 101 sample lengths
  * (SceneActor +0x38) gives the sample k; out[0..2] / out[3..5] = the cubic at u = k * 0.01 and (k + 1) * 0.01;
- * returns k. Straight segment: out[0..2] = out[3..5] = the point between the middle control points (func_15020090)
+ * returns k. Straight segment: out[0..2] = out[3..5] = the point between the middle control points (cutscene_path_ctrl_points)
  * at the distance's fraction of the segment; the asm then returns an uninitialised stack word (callers only read
  * the result of a curved segment): 0 here. A slot without keys leaves `seg` uninitialised in the asm (0 here). */
-s32 func_1501F7D4(s32 actor, f32 dist, f32 *out, s32 slot, s32 *segOut) {
+/* was func_1501F7D4 */
+s32 cutscene_path_point_at(s32 actor, f32 dist, f32 *out, s32 slot, s32 *segOut) {
     SceneActor *a;
     f32 pts[12];
     f32 *tab;
@@ -1496,10 +1516,10 @@ s32 func_1501F7D4(s32 actor, f32 dist, f32 *out, s32 slot, s32 *segOut) {
     }
     *segOut = seg;
     if (seg != a->pad3C[0]) {
-        func_15020920(actor, seg, slot);
+        cutscene_path_prepare_segment(actor, seg, slot);
     }
     shape = *(u16 *)(D_eu_800C3C88[slot][actor] + seg * 8 + 6);
-    func_15020090((u8 *)pts, D_eu_800C3C88[slot][actor], seg, D_800C39E8[slot][actor]);
+    cutscene_path_ctrl_points((u8 *)pts, D_eu_800C3C88[slot][actor], seg, D_800C39E8[slot][actor]);
     if (shape == 0) {
         tab = a->state;
         lo = 0;
@@ -1540,15 +1560,16 @@ s32 func_1501F7D4(s32 actor, f32 dist, f32 *out, s32 slot, s32 *segOut) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501F7D4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_path_point_at.s")
 #endif
 #ifdef NON_MATCHING
 /* Place actor `actor` of cutscene slot `slot` at `t` percent (clamped to 0..100) of its path length (SceneActor
- * +0, needs >= 2 path keys). func_1501F7D4 finds the segment `seg` holding that distance, two points (ends[0..2],
+ * +0, needs >= 2 path keys). cutscene_path_point_at finds the segment `seg` holding that distance, two points (ends[0..2],
  * ends[3..5]) and the sample `k` of the actor's length table (SceneActor +0x38). On a curved segment (key shape
- * +6 == 0, func_15020430) the position is interpolated between the two points by the distance's fraction between
+ * +6 == 0, cutscene_path_compute_length) the position is interpolated between the two points by the distance's fraction between
  * the lengths of samples k and k + 1; on a straight one it is the first point. */
-void func_1501FD34(s32 actor, f32 t, f32 *x, f32 *y, f32 *z, s32 slot) {
+/* was func_1501FD34 */
+void cutscene_actor_place_at(s32 actor, f32 t, f32 *x, f32 *y, f32 *z, s32 slot) {
     SceneActor *a;
     f32 ends[6];
     f32 dist;
@@ -1568,7 +1589,7 @@ void func_1501FD34(s32 actor, f32 t, f32 *x, f32 *y, f32 *z, s32 slot) {
     }
     a = &D_800C3E70[slot][actor];
     dist = *(f32 *)a->pad0 * t * D_80096D84;
-    k = func_1501F7D4(actor, dist, ends, slot, &seg);
+    k = cutscene_path_point_at(actor, dist, ends, slot, &seg);
     if (*(u16 *)(D_eu_800C3C88[slot][actor] + seg * 8 + 6) == 0) {
         len = (f32 *)a->state + k;
         if (len[1] - len[0] == 0.0f) {
@@ -1586,15 +1607,16 @@ void func_1501FD34(s32 actor, f32 t, f32 *x, f32 *y, f32 *z, s32 slot) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501FD34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_actor_place_at.s")
 #endif
 #ifdef NON_MATCHING
 /* Heading of actor `actor` of cutscene slot `slot` at `t` percent (clamped to 0..100) of its path length (needs
- * >= 2 path keys), in degrees (func_150484A0(dx, dz) * D_80096D8C). func_1501F7D4 finds the segment for that
- * distance: on a curved segment (key shape +6 == 0, func_15020430) the direction runs between the two curve
+ * >= 2 path keys), in degrees (func_150484A0(dx, dz) * D_80096D8C). cutscene_path_point_at finds the segment for that
+ * distance: on a curved segment (key shape +6 == 0, cutscene_path_compute_length) the direction runs between the two curve
  * points it returns (first - second), on a straight one between the segment's middle control points
- * (func_15020090, third - second). */
-void func_1501FF10(s32 actor, f32 t, f32 *out, s32 slot) {
+ * (cutscene_path_ctrl_points, third - second). */
+/* was func_1501FF10 */
+void cutscene_actor_heading_at(s32 actor, f32 t, f32 *out, s32 slot) {
     f32 pts[12];
     f32 ends[6];
     f32 dx;
@@ -1610,22 +1632,23 @@ void func_1501FF10(s32 actor, f32 t, f32 *out, s32 slot) {
     if (t < 0.0f) {
         t = 0.0f;
     }
-    func_1501F7D4(actor, *(f32 *)D_800C3E70[slot][actor].pad0 * t * D_80096D88, ends, slot, &seg);
+    cutscene_path_point_at(actor, *(f32 *)D_800C3E70[slot][actor].pad0 * t * D_80096D88, ends, slot, &seg);
     if (*(u16 *)(D_eu_800C3C88[slot][actor] + seg * 8 + 6) == 0) {
         dx = ends[0] - ends[3];
         dz = ends[2] - ends[5];
     } else {
-        func_15020090((u8 *)pts, D_eu_800C3C88[slot][actor], seg, D_800C39E8[slot][actor]);
+        cutscene_path_ctrl_points((u8 *)pts, D_eu_800C3C88[slot][actor], seg, D_800C39E8[slot][actor]);
         dx = pts[6] - pts[3];
         dz = pts[8] - pts[5];
     }
     *out = func_150484A0(dx, dz) * D_80096D8C;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501FF10.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_actor_heading_at.s")
 #endif
 #ifdef NON_MATCHING
-void func_15020090(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_15020090 */
+void cutscene_path_ctrl_points(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     s16 *var_t0;
     s16 var_t6;
     s16 var_t6_2;
@@ -1745,16 +1768,17 @@ block_10:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15020090.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_path_ctrl_points.s")
 #endif
 #ifdef NON_MATCHING
 /* Path length of actor `actor` of cutscene slot `slot` (needs >= 2 path keys, D_800C39E8 count; keys are the
  * 8-byte records D_eu_800C3C88[slot][actor], +6 = segment shape). For every segment the 4 control points come
- * from func_15020090; keys[seg] (D_800C3E70 actor +4) = the length up to the segment's start. A curved segment
+ * from cutscene_path_ctrl_points; keys[seg] (D_800C3E70 actor +4) = the length up to the segment's start. A curved segment
  * (shape 0) is measured as a Catmull-Rom curve sampled every 0.01 (chords between successive samples, the
  * previous sample in the other half of `prev`, which carries over between segments), a straight one as the
  * distance between its two middle points. +0 = the total length, keys[count - 1] = it too; +0x3C = 0xFF. */
-void func_15020430(s32 actor, s32 slot) {
+/* was func_15020430 */
+void cutscene_path_compute_length(s32 actor, s32 slot) {
     SceneActor *act;
     s32 seg;
     s32 c;
@@ -1784,8 +1808,8 @@ void func_15020430(s32 actor, s32 slot) {
     cur = 0;
     for (seg = 0; seg < D_800C39E8[slot][actor] - 1; seg++) {
         shape = *(u16 *)(D_eu_800C3C88[slot][actor] + seg * 8 + 6);
-        /* P87: the asm leaves the key count in a3; func_15020090 reads it (dropped argument) */
-        func_15020090((u8 *)pts, D_eu_800C3C88[slot][actor], seg, D_800C39E8[slot][actor]);
+        /* P87: the asm leaves the key count in a3; cutscene_path_ctrl_points reads it (dropped argument) */
+        cutscene_path_ctrl_points((u8 *)pts, D_eu_800C3C88[slot][actor], seg, D_800C39E8[slot][actor]);
         ((f32 *)D_800C3E70[slot][actor].keys)[seg] = total;
         if (shape == 0) {
             for (c = 0; c < 3; c++) {
@@ -1825,19 +1849,20 @@ void func_15020430(s32 actor, s32 slot) {
     D_800C3E70[slot][actor].pad3C[0] = 0xFF;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15020430.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_path_compute_length.s")
 #endif
 
 #ifdef NON_MATCHING
 /* Prepares segment `seg` of the path of actor `actor` of cutscene slot `slot` (needs seg < key count - 1).
- * The segment's control points P0..P3 (func_15020090, xyz each) give the Catmull-Rom cubic
+ * The segment's control points P0..P3 (cutscene_path_ctrl_points, xyz each) give the Catmull-Rom cubic
  * D + (C + (B + A u) u) u with D = P1, C = (P2 - P0) / 2, B = P0 - 2.5 P1 + 2 P2 - P3 / 2,
  * A = (P3 - P0) / 2 + 1.5 (P1 - P2), stored per axis at SceneActor +0x08 / +0x14 / +0x20 / +0x2C.
  * The 101-entry length table (SceneActor +0x38) gets the path length at each sample: on a curved segment (key
  * shape +6 == 0) the segment start length (keys[seg]) plus the chord lengths between the samples at u = 0, 0.01,
  * ...; on a straight one i / 101 of the segment length (keys[seg + 1] - keys[seg]), from 0. SceneActor +0x3C
  * remembers the prepared segment. */
-void func_15020920(s32 actor, s32 seg, s32 slot) {
+/* was func_15020920 */
+void cutscene_path_prepare_segment(s32 actor, s32 seg, s32 slot) {
     SceneActor *a;
     f32 pts[12];
     f32 cA[3];
@@ -1868,7 +1893,7 @@ void func_15020920(s32 actor, s32 seg, s32 slot) {
     len = ((f32 *)a->keys)[seg];
     shape = *(u16 *)(D_eu_800C3C88[slot][actor] + seg * 8 + 6);
     flip = 0;
-    func_15020090((u8 *)pts, D_eu_800C3C88[slot][actor], seg, cnt);
+    cutscene_path_ctrl_points((u8 *)pts, D_eu_800C3C88[slot][actor], seg, cnt);
     if (shape == 0) {
         c = (f32 *)a->pad8;
         for (i = 0; i < 3; i++) {
@@ -1913,13 +1938,13 @@ void func_15020920(s32 actor, s32 seg, s32 slot) {
     a->pad3C[0] = seg;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15020920.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_path_prepare_segment.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1502330C(s32, s32);
+s32 cutscene_find_camera_actor(s32, s32);
 void camera_queue_event(struct108 *, s32, void *);
 void camera_process_events(struct108 *);
-void func_1517DB6C(s16, s16, s16, s32, s32, s32);
+void ambient_extra_flame_queue_cam(s16, s16, s16, s32, s32, s32);
 extern u8 D_800C3A18;
 extern s32 D_800C3A20;   /* camera event block (camera_queue_event event 7) */
 extern f32 D_800C3A40;   /* D_800C3A20 + 0x20: look target */
@@ -1927,20 +1952,21 @@ extern f32 D_800C3A44;
 extern f32 D_800C3A48;
 #endif
 #ifdef NON_MATCHING
-/* Applies the camera records of cutscene slot `slot` (written by func_1501ECA4) to the game. D_800C3A18 = the
- * actor whose record drives the game camera (func_1502330C at the current script position, cached until reset
+/* Applies the camera records of cutscene slot `slot` (written by cutscene_camera_track_pass) to the game. D_800C3A18 = the
+ * actor whose record drives the game camera (cutscene_find_camera_actor at the current script position, cached until reset
  * to 0xFF). Two passes over the active actors (D_800C39F0 / D_800C39E8 counts != 0): pass 0 every entry type
  * but 1, pass 1 type 1 (the camera; so the camera sees the objects already placed). Entry = 8 bytes at
  * D_800C3A10[slot] + i * 8: u16 type, u8 a, s8 b, s16 c.
  *   type 1 (camera, only actor D_800C3A18): clamps cam[13] / cam[15] / cam[16] to -20 .. 40, fills the camera
  *     event block D_800C3A20 (eye cam[0..2]; target by a: 1 = actor b's position raised by c (+ cam[14]),
- *     2 = object func_15083E90(b), 3 = entity world_record_find(b) raised by c, 0 = angle mode) and sends it to the
+ *     2 = object obj_find_by_setup_id(b), 3 = entity world_record_find(b) raised by c, 0 = angle mode) and sends it to the
  *     game camera D_800DBFF0 (camera_queue_event event 7; event 5 + camera_process_events first unless flag 0x40000).
  *   type 3: entity world_record_find(a) gets position / angles / scale (* 0.01) / alpha from the record.
- *   type 2: object func_15083E90(a) takes its actor frame (func_15021834(obj, slot, i)).
- *   type 5: when cam[13] >= 1, func_1517DB6C at the record position with cam[6] / cam[7].
+ *   type 2: object obj_find_by_setup_id(a) takes its actor frame (cutscene_actor_apply_track(obj, slot, i)).
+ *   type 5: when cam[13] >= 1, ambient_extra_flame_queue_cam at the record position with cam[6] / cam[7].
  * D_800C3638 = 0 while running, 1 after. */
-void func_15020F6C(s32 slot) {
+/* was func_15020F6C */
+void cutscene_apply_cameras(s32 slot) {
     f32 *cams;
     f32 *cam;
     f32 *other;
@@ -1960,7 +1986,7 @@ void func_15020F6C(s32 slot) {
     }
     D_800C3638 = 0;
     if (D_800C3A18 == 0xFF) {
-        D_800C3A18 = func_1502330C(slot, (&D_800C39D0)[slot]);
+        D_800C3A18 = cutscene_find_camera_actor(slot, (&D_800C39D0)[slot]);
     }
     ev = (u8 *)&D_800C3A20;
     for (pass = 0; pass != 2; pass++) {
@@ -2033,7 +2059,7 @@ void func_15020F6C(s32 slot) {
                             break;
                         case 2:
                             /* look at object ent[3] */
-                            e = (u8 *)func_15083E90(ent[3]);
+                            e = (u8 *)obj_find_by_setup_id(ent[3]);
                             if (e == NULL) {
                                 continue;
                             }
@@ -2105,12 +2131,12 @@ void func_15020F6C(s32 slot) {
                     e[0x8A] = (a >= 0x100) ? 0xFF : (a >= 0) ? a : 0;
                     break;
                 case 2:
-                    func_15021834(func_15083E90(ent[2]), slot, i);
+                    cutscene_actor_apply_track(obj_find_by_setup_id(ent[2]), slot, i);
                     break;
                 case 5:
                     cam = (f32 *)(&D_800C3958)[slot] + i * 17;
                     if (1.0f <= cam[13]) {
-                        func_1517DB6C((s32)cam[0], (s32)cam[1], (s32)cam[2], 0, (s32)cam[6], (s32)cam[7]);
+                        ambient_extra_flame_queue_cam((s32)cam[0], (s32)cam[1], (s32)cam[2], 0, (s32)cam[6], (s32)cam[7]);
                     }
                     break;
             }
@@ -2119,7 +2145,7 @@ void func_15020F6C(s32 slot) {
     D_800C3638 = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15020F6C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_apply_cameras.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2139,7 +2165,8 @@ extern f32 D_80096DBC; /* degrees to the 16-bit angle */
 #define A834_F(o) (*(f32 *)((u8 *)obj + (o)))
 #define A834_M(o) (*(f32 *)(mk + (o)))
 
-void func_15021834(struct127 *arg0, s32 arg1, s32 arg2) {
+/* was func_15021834 */
+void cutscene_actor_apply_track(struct127 *arg0, s32 arg1, s32 arg2) {
     s32 i;
     s32 end;
     s32 scaled;
@@ -2165,7 +2192,7 @@ void func_15021834(struct127 *arg0, s32 arg1, s32 arg2) {
         if (D_800C39E8[arg1][i] == 0) continue;
         e = D_800C3A10[arg1] + i * 8;
         if (*(u16 *)e != 2) continue;
-        obj = func_15083E90(e[2]);
+        obj = obj_find_by_setup_id(e[2]);
         if (obj == NULL || obj != arg0) continue;
         mk = (u8 *)(&D_800C3958)[arg1] + i * 0x44;
         ox = A834_F(0x14);
@@ -2242,7 +2269,7 @@ void func_15021834(struct127 *arg0, s32 arg1, s32 arg2) {
     D_800C3638 = 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15021834.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_actor_apply_track.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2253,7 +2280,8 @@ extern f32 D_80096DC0;
  * written to pos, returns 0. Without one, look step +1: entity 0 = fixed angles (record i +0x24 / +0x28 / +0x2C
  * to outB / outA / outC, returns 1), else the camera point (D_800DBFF0 +0x2F8) raised by r[6]. No step: pos =
  * D_80096DC0 x3. */
-s32 func_15021E60(f32 *outA, f32 *outB, f32 *outC, f32 *pos, s32 player, s32 slot) {
+/* was func_15021E60 */
+s32 cutscene_player_look_target(f32 *outA, f32 *outB, f32 *outC, f32 *pos, s32 player, s32 slot) {
     u16 *ids;
     u8 *e;
     u8 *step;
@@ -2309,15 +2337,16 @@ s32 func_15021E60(f32 *outA, f32 *outB, f32 *outC, f32 *pos, s32 player, s32 slo
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15021E60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_player_look_target.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 D_80096DC4;
-/* Look limits of the actor of player `player` in sequence slot `slot` (same search as func_15021E60): both
+/* Look limits of the actor of player `player` in sequence slot `slot` (same search as cutscene_player_look_target): both
  * pairs are cleared, then entity record i +0x3C (into b[0], b[1]) and +0x40 (into a[0], a[1]) unless they hold the
  * "unset" value D_80096DC4. Returns 1 when the actor was found. */
-s32 func_150220CC(f32 *a, f32 *b, s32 player, s32 slot) {
+/* was func_150220CC */
+s32 cutscene_player_look_limits(f32 *a, f32 *b, s32 player, s32 slot) {
     u16 *ids;
     u8 *e;
     f32 *q;
@@ -2358,10 +2387,11 @@ s32 func_150220CC(f32 *a, f32 *b, s32 player, s32 slot) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150220CC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_player_look_limits.s")
 #endif
 
-void func_15022238(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
+/* was func_15022238 */
+void cutscene_set_focus_point(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
     D_800C39B4 = arg3;
     D_800C39AC[0] = arg0;
     D_800C39AC[1] = arg1;
@@ -2369,25 +2399,29 @@ void func_15022238(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
     D_800C3663 = 1;
 }
 
-void func_15022290(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
+/* was func_15022290 */
+void cutscene_set_focus_point2(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
     D_800C39C0 = arg3;
     D_800C39B8[0] = arg0;
     D_800C39B8[1] = arg1;
     D_800C39B8[2] = arg2;
 }
 
-void func_150222DC(s32 arg0) {
+/* was func_150222DC */
+void cutscene_obj_list_clear(s32 arg0) {
     D_800C3930[arg0] = 0;
 }
 
-void func_150222F0(s32 arg0) {
+/* was func_150222F0 */
+void cutscene_record_list_clear(s32 arg0) {
     D_800C396A[arg0] = 0;
 }
 
 #ifdef NON_MATCHING
 /* P36: add id to the list `list` (D_800C3938[list], 25 bytes, count D_800C3930[list]) unless present. Returns the
  * 1-based position when found, else the old count (the new entry's index). */
-s32 func_15022304(s32 id, s32 list) {
+/* was func_15022304 */
+s32 cutscene_obj_list_add(s32 id, s32 list) {
     u8 *cnt = (u8 *) &D_800C3930 + list;
     u8 *a = (u8 *) &D_800C3938 + list * 25;
     s32 n = *cnt;
@@ -2406,17 +2440,18 @@ s32 func_15022304(s32 id, s32 list) {
     return i;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022304.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_obj_list_add.s")
 #endif
 extern u16 *D_800C39E8[];
 extern u8 *D_800C3A10[];
-void func_15022388(s32 arg0, s32 arg1) {
+/* was func_15022388 */
+void cutscene_actor_reset_obj(s32 arg0, s32 arg1) {
     struct127 *obj;
     u8 *e;
     if (D_800C39E8[arg1][arg0] != 0) {
         e = D_800C3A10[arg1] + arg0 * 8;
         if (*(u16 *)e == 2) {
-            obj = func_15083E90(e[2]);
+            obj = obj_find_by_setup_id(e[2]);
             if (obj != NULL) {
                 *((u8 *)obj + 0x6C) = 0;
                 *((u8 *)obj + 0x6D) = 0;
@@ -2427,7 +2462,7 @@ void func_15022388(s32 arg0, s32 arg1) {
                 *(s16 *)((u8 *)obj + 0x27C) = 0;
                 *(s16 *)((u8 *)obj + 0x27E) = 0;
                 *(s16 *)((u8 *)obj + 0x280) = 0;
-                func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
+                face_anim_start(obj, 0, 3, 0xFFFF, 0xA);
                 *((u8 *)obj + 0x71) = 0;
             }
         }
@@ -2435,11 +2470,12 @@ void func_15022388(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15022304(s32, s32);
-s32 func_15082E44(u8 *, s32, s32, s32, s32);
+s32 cutscene_obj_list_add(s32, s32);
+s32 setup_entry_spawn(u8 *, s32, s32, s32, s32);
 extern u8 D_800D2520;
 
-s32 func_15022440(s32 arg0, s32 arg1) {
+/* was func_15022440 */
+s32 cutscene_actor_spawn_obj(s32 arg0, s32 arg1) {
     struct127 *sp3C;
     s32 sp38;
     s32 sp34;
@@ -2457,7 +2493,7 @@ s32 func_15022440(s32 arg0, s32 arg1) {
             temp_v0 = (*(u8 *)((u8 *)temp_v1 + 2));
             sp2C = temp_a2;
             sp34 = (s32) temp_v0;
-            var_v0 = func_15083E0C(temp_v0);
+            var_v0 = setup_entry_find_by_id(temp_v0);
             if (var_v0 != -1) {
                 sp38 = var_v0;
                 sp2C = temp_a2;
@@ -2478,12 +2514,12 @@ s32 func_15022440(s32 arg0, s32 arg1) {
                     return var_v0;
                 }
                 if (sp38 < (s32) D_800D2520) {
-                    func_15082E44((u8 *) D_800D20FC + sp38 * 0x30, sp38, 0, arg1, 0);
+                    setup_entry_spawn((u8 *) D_800D20FC + sp38 * 0x30, sp38, 0, arg1, 0);
                     var_v0 = obj_find_by_spawn(sp38);
                     if (var_v0 != 0) {
                         sp3C = (struct127 *) var_v0;
                         obj_start_anim((struct127 *) var_v0, 0U, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-                        var_v0 = func_15022304(((u8 *) sp3C - (u8 *) D_800CC2D0) / 812, arg1);
+                        var_v0 = cutscene_obj_list_add(((u8 *) sp3C - (u8 *) D_800CC2D0) / 812, arg1);
                     }
                 }
                 /* Duplicate return node #13. Try simplifying control flow for better match */
@@ -2494,13 +2530,14 @@ s32 func_15022440(s32 arg0, s32 arg1) {
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022440.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_actor_spawn_obj.s")
 #endif
 #ifdef NON_MATCHING
 /* Actor pass of cutscene slot `slot`: for each of its D_800C3A5A[slot] actors that has a camera and actor track
  * (D_800C39F0 / D_800C39E8 words != 0) and a record of kind 2 (D_800C3A10[slot] + 8 i), finds the object
- * (func_15083E90(record[2])) and gives it its actor frame (func_15021834(obj, slot, i)). */
-void func_150225D0(s32 slot) {
+ * (obj_find_by_setup_id(record[2])) and gives it its actor frame (cutscene_actor_apply_track(obj, slot, i)). */
+/* was func_150225D0 */
+void cutscene_actor_pass(s32 slot) {
     struct127 *obj;
     u8 *rec;
     s32 i;
@@ -2511,15 +2548,15 @@ void func_150225D0(s32 slot) {
         }
         rec = D_800C3A10[slot] + i * 8;
         if (*(u16 *)rec == 2) {
-            obj = func_15083E90(rec[2]);
+            obj = obj_find_by_setup_id(rec[2]);
             if (obj != NULL) {
-                func_15021834(obj, slot, i);
+                cutscene_actor_apply_track(obj, slot, i);
             }
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150225D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_actor_pass.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -2528,7 +2565,8 @@ extern u8 D_800C3970[];
 /* Adds `id` to sequence slot `slot`'s id list (D_800C3970, 30 bytes per slot, count D_800C396A[slot]) unless it
  * is already there. Returns i + 1 for an id found at index i, else the old count (the loop counter, as the
  * original). The list is not bounded. */
-s32 func_150226E8(u8 id, s32 slot) {
+/* was func_150226E8 */
+s32 cutscene_record_list_add(u8 id, s32 slot) {
     u8 *list = &D_800C3970[slot * 30];
     s32 count = D_800C396A[slot];
     s32 i = 0;
@@ -2544,13 +2582,14 @@ s32 func_150226E8(u8 id, s32 slot) {
     return i;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150226E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_record_list_add.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150226E8(u8, s32);
+s32 cutscene_record_list_add(u8, s32);
 
-s32 func_15022764(s32 arg0, s32 arg1) {
+/* was func_15022764 */
+s32 cutscene_actor_claim_record(s32 arg0, s32 arg1) {
     u8 *sp1C;
     s32 var_v0;
     u8 *temp_v1;
@@ -2562,7 +2601,7 @@ s32 func_15022764(s32 arg0, s32 arg1) {
             var_v0 = world_record_find((*(u8 *)((u8 *)temp_v1 + 2)));
             if ((var_v0 != 0) && ((*(u8 *)((u8 *)var_v0 + 0x6E)) == 1)) {
                 sp1C = (u8 *) var_v0;
-                var_v0 = func_150226E8((*(u8 *)((u8 *)var_v0 + 0x72)), arg1);
+                var_v0 = cutscene_record_list_add((*(u8 *)((u8 *)var_v0 + 0x72)), arg1);
                 (*(s8 *)((u8 *)sp1C + 0x6E)) = 0;
             }
         }
@@ -2570,11 +2609,12 @@ s32 func_15022764(s32 arg0, s32 arg1) {
     return var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022764.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_actor_claim_record.s")
 #endif
-s32 func_15022764(s32, s32);
+s32 cutscene_actor_claim_record(s32, s32);
 
-void func_150227FC(s32 arg0) {
+/* was func_150227FC */
+void cutscene_claim_records(s32 arg0) {
     s32 var_s0;
     u8 *temp_s1;
 
@@ -2582,7 +2622,7 @@ void func_150227FC(s32 arg0) {
     var_s0 = 0;
     if ((s32) *temp_s1 > 0) {
         do {
-            func_15022764(var_s0, arg0);
+            cutscene_actor_claim_record(var_s0, arg0);
             var_s0 += 1;
         } while (var_s0 < (s32) *temp_s1);
     }
@@ -2590,7 +2630,8 @@ void func_150227FC(s32 arg0) {
 
 u8 *world_record_find(u8);
 extern u8 D_800C3970[];
-void func_15022864(s32 arg0)
+/* was func_15022864 */
+void cutscene_restore_records(s32 arg0)
 {
   s32 i;
   u8 *cnt;
@@ -2599,10 +2640,11 @@ void func_15022864(s32 arg0)
  do { i = 0; if ((*cnt) > 0) { p = D_800C3970 + (arg0 * 0x1E); do { world_record_find(*p)[0x6E] = 1; i += 1; p += 1; } while (i < (*cnt)); } } while (0);
 }
 
-void func_15022388(s32, s32);
-s32 func_15022440(s32, s32);
+void cutscene_actor_reset_obj(s32, s32);
+s32 cutscene_actor_spawn_obj(s32, s32);
 
-void func_150228F0(s32 arg0) {
+/* was func_150228F0 */
+void cutscene_spawn_actors(s32 arg0) {
     s32 var_s0;
     u8 *temp_s2;
 
@@ -2612,8 +2654,8 @@ void func_150228F0(s32 arg0) {
         var_s0 = 0;
         if ((s32) *temp_s2 > 0) {
             do {
-                func_15022440(var_s0, arg0);
-                func_15022388(var_s0, arg0);
+                cutscene_actor_spawn_obj(var_s0, arg0);
+                cutscene_actor_reset_obj(var_s0, arg0);
                 var_s0 += 1;
             } while (var_s0 < (s32) *temp_s2);
         }
@@ -2623,7 +2665,8 @@ void func_150228F0(s32 arg0) {
 
 extern u8 D_800C3938[][0x19];
 
-void func_1502298C(s32 arg0)
+/* was func_1502298C */
+void cutscene_release_listed_objs(s32 arg0)
 {
   s32 i;
   u8 *new_var; // fakematch: permuter temp
@@ -2646,7 +2689,8 @@ void func_1502298C(s32 arg0)
   }
 }
 
-void func_15022A40(s32 *arg0) {
+/* was func_15022A40 */
+void cutscene_event_dispatch(s32 *arg0) {
     s32 v = arg0[0];
 
     if ((v == 27) || (v == 4)) {
@@ -2664,7 +2708,8 @@ extern u8 D_800CC3FF;   /* D_800CC2D0[0] + 0x12F: actor id of an object (0x32C-b
  * is the actor id of its owner D_800CC2D0[obj[0x65]] (byte at +0x12F) when it has one, else its own byte +0x3B.
  * Returns 2 (owned) / 1 when an active actor of that slot has entry type 2 (object) with that id (entry byte
  * +2), else 0 (also for no object, a free slot obj[0] == 0, or no scene loaded in slot 0). */
-s32 func_15022A8C(s32 *obj) {
+/* was func_15022A8C */
+s32 cutscene_obj_takes_part(s32 *obj) {
     u8 *ent;
     u8 owner;
     u8 id;
@@ -2695,11 +2740,12 @@ s32 func_15022A8C(s32 *obj) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022A8C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_obj_takes_part.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15022BB0(s32 arg0, s32 arg1) {
+/* was func_15022BB0 */
+s32 cutscene_room_has_actor(s32 arg0, s32 arg1) {
     s32 var_v0;
     u16 *var_a2;
     u8 temp_v1;
@@ -2723,23 +2769,24 @@ loop_2:
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022BB0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_room_has_actor.s")
 #endif
 #ifdef NON_MATCHING
-void func_15022238(s16, s16, s16, f32);
+void cutscene_set_focus_point(s16, s16, s16, f32);
 f32 sinf(f32);
 f32 cosf(f32);
 #endif
 #ifdef NON_MATCHING
 /* Places the scene of cutscene slot `slot` in the level: the first actor whose entry (D_800C3A10[slot] + i * 8)
  * is an anchor moves every actor's path keys (s16 x, y, z at D_eu_800C3C88[slot][j] + k * 8):
- *   type 6: by the offset from the anchor's first key to object func_15083E90(b) (a == 0) or entity
+ *   type 6: by the offset from the anchor's first key to object obj_find_by_setup_id(b) (a == 0) or entity
  *     world_record_find(b) (a == 1); other a: nothing.
  *   type 7: rotated about the anchor's first key by D_800C39B4 - its channel-7 key angle (stored in
  *     D_800C39C4) and moved onto D_800C39AC; the channel-7 keys of the other camera tracks turn by the same
  *     angle unless their sound record +0x20 is 7.
- * func_15022238 gets the anchor (unless D_800C3663). */
-void func_15022C4C(s32 slot) {
+ * cutscene_set_focus_point gets the anchor (unless D_800C3663). */
+/* was func_15022C4C */
+void cutscene_place_scene(s32 slot) {
     TrackKey *keys;
     u8 *ent;
     u8 *o;
@@ -2777,11 +2824,11 @@ void func_15022C4C(s32 slot) {
         if (*(u16 *)ent == 6) {
             if (D_800C3663 == 0) {
                 p = (s16 *)D_eu_800C3C88[slot][i];
-                func_15022238(p[0], p[1], p[2], 0.0f);
+                cutscene_set_focus_point(p[0], p[1], p[2], 0.0f);
                 ent = D_800C3A10[slot] + i * 8;
             }
             if (ent[2] == 0) {
-                o = (u8 *)func_15083E90(ent[3]);
+                o = (u8 *)obj_find_by_setup_id(ent[3]);
                 if (o == NULL) {
                     return;
                 }
@@ -2827,7 +2874,7 @@ void func_15022C4C(s32 slot) {
             }
             if (D_800C3663 == 0) {
                 p = (s16 *)D_eu_800C3C88[slot][i];
-                func_15022238(p[0], p[1], p[2], ang);
+                cutscene_set_focus_point(p[0], p[1], p[2], ang);
             }
             rot = D_800C39B4 - ang;
             D_800C39C4 = rot;
@@ -2870,15 +2917,16 @@ void func_15022C4C(s32 slot) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022C4C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_place_scene.s")
 #endif
 
 #ifdef NON_MATCHING
 /* Camera actor of cutscene slot `slot`: of the slot's sound / event records D_800C3AA8[slot][i] (i < the actor
- * count D_800C3A5A[slot]) asks func_15023C60 (type 3) for the nearest event; the record it reports with the
+ * count D_800C3A5A[slot]) asks scene_event_find_next (type 3) for the nearest event; the record it reports with the
  * smallest distance gives the actor (s16 at +2). Without one the first actor with entry type 1 (u16 at
  * D_800C3A10[slot] + i * 8), else 0. `pos` (the script position) is not read. */
-s32 func_1502330C(s32 slot, s32 pos) {
+/* was func_1502330C */
+s32 cutscene_find_camera_actor(s32 slot, s32 pos) {
     u8 *found;
     s32 best;
     s32 dist;
@@ -2890,7 +2938,7 @@ s32 func_1502330C(s32 slot, s32 pos) {
     for (i = 0; i < D_800C3A5A[slot]; i++) {
         if (D_800C3AA8[slot][i] != 0) {
             found = NULL;
-            dist = func_15023C60(D_800C3AA8[slot][i] + 0x18, 3, i, &found, 0, 0, 0, 0, 0, 0, slot);
+            dist = scene_event_find_next(D_800C3AA8[slot][i] + 0x18, 3, i, &found, 0, 0, 0, 0, 0, 0, slot);
             if (found != NULL && dist < best) {
                 best = dist;
                 actor = *(s16 *)(found + 2);
@@ -2909,30 +2957,33 @@ s32 func_1502330C(s32 slot, s32 pos) {
     return actor;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502330C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_find_camera_actor.s")
 #endif
-void func_15023464(void) {
+/* was func_15023464 */
+void subtitle_slots_clear(void) {
     bzero(D_800C3CA0, 0xA8);
 }
 
-void func_1502348C(void) {
+/* was func_1502348C */
+void subtitle_slots_close_all(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
         if ((s16)D_800C3CA0[i].unk0 != 0) {
-            func_1516D850(*(s32 *)((u8 *)&D_800C3CA0[i] + 0x34));
+            text_box_close_now(*(s32 *)((u8 *)&D_800C3CA0[i] + 0x34));
             *(s32 *)((u8 *)&D_800C3CA0[i] + 0x34) = 0;
             D_800C3CA0[i].unk0 = 0;
         }
     }
 }
 
-void func_150234E8(s16 *arg0, s32 arg1) {
+/* was func_150234E8 */
+void subtitle_slot_close(s16 *arg0, s32 arg1) {
     if (arg1 != 0) {
-        func_1516D850(*(s32 *)((u8 *)arg0 + 0x34));
+        text_box_close_now(*(s32 *)((u8 *)arg0 + 0x34));
         *(s32 *)((u8 *)arg0 + 0x34) = 0;
     } else if (*(u8 *)((u8 *)arg0 + 0xC) != 0) {
-        func_1516D898(*(s32 *)((u8 *)arg0 + 0x34));
+        text_box_request_finish(*(s32 *)((u8 *)arg0 + 0x34));
     } else {
         *(s32 *)((u8 *)arg0 + 0x34) = 0;
     }
@@ -2942,7 +2993,8 @@ void func_150234E8(s16 *arg0, s32 arg1) {
 #ifdef NON_MATCHING
 extern s32 D_800C4168;
 
-s16 *func_1502354C(s32 arg0, s32 arg1) {
+/* was func_1502354C */
+s16 *subtitle_slot_get(s32 arg0, s32 arg1) {
     s16 *sp20;                                      /* compiler-managed */
     struct163 *sp1C;
     s16 *sp18;                                      /* compiler-managed */
@@ -2964,7 +3016,7 @@ loop_1:
             arg0 = var_a3;
             sp1C = D_800C3CA0;
             sp20 = NULL;
-            func_150234E8((s16 *) D_800C3CA0, 1);
+            subtitle_slot_close((s16 *) D_800C3CA0, 1);
             var_a3 = arg0;
             var_t0 = sp1C;
             var_t1 = NULL;
@@ -2978,7 +3030,7 @@ loop_1:
             arg0 = var_a3;
             sp1C = var_t0;
             sp20 = NULL;
-            func_150234E8((s16 *) var_a2, 1);
+            subtitle_slot_close((s16 *) var_a2, 1);
             var_a3 = arg0;
             var_t1 = NULL;
         }
@@ -2992,7 +3044,7 @@ loop_1:
         sp1C = D_800C3CA0;
         arg0 = var_a3;
         sp20 = var_t1;
-        func_150234E8((s16 *) D_800C3CA0, 1);
+        subtitle_slot_close((s16 *) D_800C3CA0, 1);
         var_a3 = arg0;
         var_t0 = sp1C;
     }
@@ -3005,22 +3057,23 @@ loop_1:
     return (s16 *) var_t0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502354C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/subtitle_slot_get.s")
 #endif
 #ifdef NON_MATCHING
-/* P92: declarations for func_15023684 */
+/* P92: declarations for cutscene_teardown_player */
 void hud_bubbles_reset(void);
-void func_1507F640(void);
+void player_idle_animation(void);
 extern f32 D_80096DCC;   /* no water level (-10000) */
 #endif
 #ifdef NON_MATCHING
-/* Scene teardown, player (func_1501E888): clears flag 0x200 of object 0 (+0x25C) and, unless D_800C39CA, resets
- * the player object func_15083E90(1) (D_800C3E78 = its index): speeds / timers cleared; in water (water level
+/* Scene teardown, player (cutscene_end): clears flag 0x200 of object 0 (+0x25C) and, unless D_800C39CA, resets
+ * the player object obj_find_by_setup_id(1) (D_800C3E78 = its index): speeds / timers cleared; in water (water level
  * +0x118 set, D_80096DCC = none, and above the feet +0x18): swimming (+0xAD = 1, hud_bubbles_reset when the water
  * is deeper than 50 above the floor +0x1A6 or the model flag +0x31C->+0x20 bit 0 is set), else standing on the
  * floor +0x180 (+0x20 = -4, +0x24 = 5). Then the height above the floor (+0x28), cleared input / state bytes,
- * D_800D154C = the player and the idle animation (func_1507F640). `slot` is not read. */
-void func_15023684(s32 slot) {
+ * D_800D154C = the player and the idle animation (player_idle_animation). `slot` is not read. */
+/* was func_15023684 */
+void cutscene_teardown_player(s32 slot) {
     u8 *p;
     f32 water;
 
@@ -3028,7 +3081,7 @@ void func_15023684(s32 slot) {
     if (D_800C39CA != 0) {
         return;
     }
-    p = (u8 *)func_15083E90(1);
+    p = (u8 *)obj_find_by_setup_id(1);
     if (p == NULL) {
         return;
     }
@@ -3064,7 +3117,7 @@ void func_15023684(s32 slot) {
     p[0x104] = 0;
     *(f32 *)(p + 0x28) = *(f32 *)(p + 0x18) - *(f32 *)(p + 0x180);
     D_800D154C = (struct127 *)p;
-    func_1507F640();
+    player_idle_animation();
     (*(u8 **)(p + 0x31C))[0x23] = 0;
     p[0x276] = 0;
     *(s16 *)(p + 0x282) = 0;
@@ -3073,38 +3126,39 @@ void func_15023684(s32 slot) {
     (*(u8 **)(p + 0x31C))[0x31] = 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15023684.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_teardown_player.s")
 #endif
 #ifdef NON_MATCHING
-void func_15021834(struct127 *, s32, s32);
+void cutscene_actor_apply_track(struct127 *, s32, s32);
 extern s32 D_eu_800C3A60;
 extern s32 D_800C39D0;
-s32 func_15022A8C(s32 *);
-void func_1504A730(void);
+s32 cutscene_obj_takes_part(s32 *);
+void objects_run_state_handlers(void);
 void objects_animate_textures(void);
-void func_1507EB1C(s32 *);
-void func_150802A8(s32 *);
+void face_anim_timer_step(s32 *);
+void player_idle_state_update(s32 *);
 extern u8 D_800C3A78;
 
-void func_1502378C(void) {
+/* was func_1502378C */
+void cutscene_update_objects(void) {
     struct127 *var_s0;
     u8 var_s1;
 
     var_s0 = D_800CC2D0;
     var_s1 = 0;
     if (D_800C3A78 != 0) {
-        func_1504A730();
+        objects_run_state_handlers();
         return;
     }
     do {
         if (var_s0->interaction_state != 0) {
             D_800C3E78 = var_s1;
-            func_15022A40(&var_s0->interaction_state);
-            func_1507EB1C(&var_s0->interaction_state);
-            if (func_15022A8C(&var_s0->interaction_state) != 0) {
-                func_15021834(&var_s0->interaction_state, 0, -1);
+            cutscene_event_dispatch(&var_s0->interaction_state);
+            face_anim_timer_step(&var_s0->interaction_state);
+            if (cutscene_obj_takes_part(&var_s0->interaction_state) != 0) {
+                cutscene_actor_apply_track(&var_s0->interaction_state, 0, -1);
                 obj_model_reset(var_s0);
-                func_150802A8(&var_s0->interaction_state);
+                player_idle_state_update(&var_s0->interaction_state);
                 var_s0->unk2FF = 1;
             }
         }
@@ -3114,5 +3168,5 @@ void func_1502378C(void) {
     objects_animate_textures();
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502378C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/cutscene_update_objects.s")
 #endif

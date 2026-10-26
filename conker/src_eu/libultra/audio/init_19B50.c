@@ -153,7 +153,7 @@ void func_1001A3E0(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 void func_1001A3FC(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_1001263C(arg0->unk36 * 100 + arg3, 0x7FFF, 0x40);
+    mp3_voice_play(arg0->unk36 * 100 + arg3, 0x7FFF, 0x40);
 }
 
 void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {

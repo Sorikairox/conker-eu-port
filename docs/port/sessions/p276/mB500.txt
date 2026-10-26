@@ -12,13 +12,13 @@
 \#^    q.u2C = 0;$#s/= 0/= 1/
 \#^    q.pos\[1\] = 19500.0f;$#s/19500/19000/
 \#^    q.hit = -10000.0f;$#s/-10000/-9000/
-\#^    if (func_15046C6C(q.pos, 0, pos\[1\], &q.hit) != 0) {$#s/pos\[1\]/q.pos[1]/
+\#^    if (collision_floor_all(q.pos, 0, pos\[1\], &q.hit) != 0) {$#s/pos\[1\]/q.pos[1]/
 \#^        rec\[5\] = q.hit;$#s/q.hit/q.pos[1]/
 \#^        y0 = pos\[1\] + -250.0f;$#s/-250/-200/
 \#^        q2.u28 = 0;$#s/= 0/= 1/
 \#^        q2.hit = -10000.0f;$#s/-10000/-9000/
 \#^        q2.pos\[1\] = pos\[1\];$#s/= pos\[1\]/= y0/
-\#^        if (func_15046C6C(q2.pos, 0, y0, &q2.hit) != 0) {$#s/y0/pos[1]/
+\#^        if (collision_floor_all(q2.pos, 0, y0, &q2.hit) != 0) {$#s/y0/pos[1]/
 \#^            rec\[1\] = y0;$#s/= y0/= pos[1]/
 \#^    rec\[4\] = 0.0f;$#s/0.0f/1.0f/
 \#^    rec\[3\] = 195.0f \* 0.001f;$#s/195/196/

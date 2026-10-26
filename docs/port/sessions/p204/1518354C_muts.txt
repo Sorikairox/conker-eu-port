@@ -10,15 +10,15 @@ s/surface + 300.0f < pl->y_position/surface + 200.0f < pl->y_position/
 s/dx = pl->x_position - (f32) \*(s16 \*) (model + 0x10);/dx = pl->x_position;/
 s/dz = pl->z_position - (f32) \*(s16 \*) (model + 0x14);/dz = pl->z_position - (f32) *(s16 *) (model + 0x12);/
 s/(f32) \*(s16 \*) (type + 0x10), 0.0f);/(f32) -*(s16 *) (type + 0x10), 0.0f);/
-s/func_150A7E40(mtx, dx, 0.0f, dz,/func_150A7E40(mtx, dz, 0.0f, dx,/
+s/mtxf_transform_point(mtx, dx, 0.0f, dz,/mtxf_transform_point(mtx, dz, 0.0f, dx,/
 s/\&ox, \&oy, \&oz);/\&oz, \&oy, \&ox);/
 s/oz > 0.0f ||/oz >= 0.0f ||/
 s/oz < (f32) \*(s16 \*) (type + 0xC)/oz <= (f32) *(s16 *) (type + 0xC)/
 s/ox < 0.0f ||/ox <= 0.0f ||/
 s/ox > (f32) \*(s16 \*) (type + 0xE)/ox >= (f32) *(s16 *) (type + 0xE)/
 s/ox > (f32) \*(s16 \*) (type + 0xE)/ox > (f32) *(s16 *) (type + 0xC)/
-s/func_151834C8((s32) oz, water)/func_151834C8((s32) ox, water)/
-s/func_151834C8((s32) oz, water)/func_151834C8((s32) oz, slot)/
+s/water_wave_slot_of_z((s32) oz, water)/water_wave_slot_of_z((s32) ox, water)/
+s/water_wave_slot_of_z((s32) oz, water)/water_wave_slot_of_z((s32) oz, slot)/
 s/\*kind \* 0x18 + 0x16)/*kind * 0x18 + 0x17)/
 s/push = \*(s8 \*)/push = *(u8 *)/
 s/if (slot == own) {/if (slot == own + 2) {/

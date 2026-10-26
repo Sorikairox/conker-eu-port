@@ -1,4 +1,4 @@
-# P250 func_150BF24C mutants: sed % setup names
+# P250 impact_effect_b mutants: sed % setup names
 s/if (level >= 0x4C) {/if (level > 0x4C) {/ % high
 s/hit\[6\], 3.232f/hit[5], 3.232f/ % high
 s/3.232f, D_800A04A8/3.23f, D_800A04A8/ % high

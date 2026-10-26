@@ -1,9 +1,9 @@
-/* Session P11: runtime check of the converted C scheduler thread func_100049E0 (init_49E0.c, P7,
+/* Session P11: runtime check of the converted C scheduler thread sched_thread_main (init_49E0.c, P7,
  * "UNVERIFIED by difftest"). vbe TU (port/Makefile BOOT_SRC): game memory has N64 semantics.
  *
  * A test thread (priority 12, below the scheduler's 13) waits a few frames, then sends one gfx task
  * and one audio task to the scheduler's task queue D_8003B200 (EU 0x8003B560), the queue the game's
- * audio frame func_10009... (init_8F90.c) uses. Path in func_100049E0:
+ * audio frame func_10009... (init_8F90.c) uses. Path in sched_thread_main:
  *   retrace (msg 0) -> takes the task into D_8002AC54, arms the timeout timer D_8003A8E8 (msg 3)
  *   msg 3           -> osSpTaskLoad / osSpTaskStartGo   (PC: gfx_run_task / aud_run_alist)
  *   msg 2 (SP done) -> osSendMesg(task->msgQ, task->msg)
@@ -19,7 +19,7 @@ extern unsigned port_sp_tasks_by_type[8];
 extern void *port_sp_watch;          /* P21: osSpTaskStartGo counts runs of this data_ptr */
 extern unsigned port_sp_watch_runs;
 extern OSMesgQueue D_8003B200, D_8003B1E8;  /* audio/"timeout" task queue, gfx task queue */
-s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 top, s32 mayFail);
+s32 heap_alloc_tagged(s32 size, s32 tag, s32 align, s32 top, s32 mayFail);
 
 static OSThread st_thread;
 static u64 st_stack[0x400];
@@ -27,7 +27,7 @@ static OSMesgQueue st_q, st_rq;    /* done messages, retrace messages */
 static OSMesg st_buf[4], st_rbuf[2];
 static struct { void *next; OSMesgQueue *msgQ; s32 flags; } st_client; /* SchedClient (init_49E0.c) */
 extern u16 D_8003B240;              /* the retrace message the scheduler sends to its clients */
-void func_100051C8(void *client, OSMesgQueue *q); /* game: add a retrace client (init_50A0.c) */
+void sched_add_client(void *client, OSMesgQueue *q); /* game: add a retrace client (init_50A0.c) */
 static unsigned st_retraces, st_badmsg;
 /* wait for the next retrace message from the C scheduler (exercises its client loop) */
 static void wait_retrace(void) {
@@ -50,9 +50,9 @@ static int run_one(OSScTask *t, u32 type, u32 *list, u32 bytes, u32 tag) {
     t->list.t.type = type;
     t->list.t.data_ptr = (u64 *)list;
     t->list.t.data_size = bytes;
-    /* gfx tasks go through D_8003B1E8 (func_10004DB0 -> func_10004F00, done after SP + DP events,
-     * func_10004FE0 -> func_10005020); audio through D_8003B200 (timer msg 3, done on SP event).
-     * (A gfx task sent to D_8003B200 crashes func_10005020: its DP event completes a NULL D_8002AC50.) */
+    /* gfx tasks go through D_8003B1E8 (sched_try_start_gfx_task -> sched_start_gfx_task, done after SP + DP events,
+     * sched_try_swap_buffer -> sched_swap_framebuffer); audio through D_8003B200 (timer msg 3, done on SP event).
+     * (A gfx task sent to D_8003B200 crashes sched_swap_framebuffer: its DP event completes a NULL D_8002AC50.) */
     osSendMesg(type == M_GFXTASK ? &D_8003B1E8 : &D_8003B200, (OSMesg)t, OS_MESG_BLOCK);
     while (osRecvMesg(&st_q, &m, OS_MESG_NOBLOCK) == -1) {
         if (port_frame_count - f0 > 30) {
@@ -69,7 +69,7 @@ static int run_one(OSScTask *t, u32 type, u32 *list, u32 bytes, u32 tag) {
     return ((u32)m != tag) + (port_sp_watch_runs != 1);
 }
 
-/* walk the allocator's block list (func_10003C6C / func_10003BD0 layout: next, prev, info = tag<<24 |
+/* walk the allocator's block list (heap_alloc_tagged / heap_init layout: next, prev, info = tag<<24 |
  * size, data at +0xC) and the free list; check links, bounds and that the blocks tile the heap */
 extern void *D_800380B4, *D_800380B8;
 extern u32 D_80038098;
@@ -127,7 +127,7 @@ static void sched_test_thread(void *arg) {
     (void)arg;
     osCreateMesgQueue(&st_q, st_buf, 4);
     osCreateMesgQueue(&st_rq, st_rbuf, 2);
-    /* func_100050A0 (scheduler init, inside func_15007830) clears the client list, so register only
+    /* sched_init (scheduler init, inside func_15007830) clears the client list, so register only
      * once the scheduler thread has started (it sets D_8003A928 = 4); poll with a 1-frame OS timer */
     {
         static OSTimer tm;
@@ -138,12 +138,12 @@ static void sched_test_thread(void *arg) {
             osRecvMesg(&st_rq, &m, OS_MESG_BLOCK);
         }
     }
-    func_100051C8(&st_client, &st_rq);
+    sched_add_client(&st_client, &st_rq);
     while (port_frame_count < 4) wait_retrace();
-    /* the allocator (func_10003C6C, C since P7) supplies the memory: a runtime check of it too */
-    t = (OSScTask *)func_10003C6C(sizeof(OSScTask), 0x7E, 2, 0, 0);
-    dl = (u32 *)func_10003C6C(16, 0x7E, 2, 0, 0);
-    al = (u32 *)func_10003C6C(16, 0x7E, 2, 0, 0);
+    /* the allocator (heap_alloc_tagged, C since P7) supplies the memory: a runtime check of it too */
+    t = (OSScTask *)heap_alloc_tagged(sizeof(OSScTask), 0x7E, 2, 0, 0);
+    dl = (u32 *)heap_alloc_tagged(16, 0x7E, 2, 0, 0);
+    al = (u32 *)heap_alloc_tagged(16, 0x7E, 2, 0, 0);
     port_log("[schedtest] task %08X dl %08X alist %08X\n", (u32)t, (u32)dl, (u32)al);
     if (!t || !dl || !al) { port_log("[schedtest] FAIL (allocation)\n"); port_sched_test_result = 1; return; }
     dl[0] = 0xDF000000; dl[1] = 0;            /* G_ENDDL */

@@ -111,7 +111,7 @@ u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     temp_v0 = (*(s8 *)((u8 *)arg1 + 0x12));
     if (temp_v0 != -1) {
         arg2 = var_a2;
-        // P250: the handlers (sky_dome_project_uv, func_151BA634) are s32 (u8 *, s32); a2 / a3 are only leftovers in the asm
+        // P250: the handlers (sky_dome_project_uv, object_screen_uv_project) are s32 (u8 *, s32); a2 / a3 are only leftovers in the asm
         temp_v0_2 = ((s32 (**)(u8 *, s32)) &D_80089FC8)[temp_v0](arg1, var_a2);
         var_a2 = arg2;
         if (temp_v0_2 == 0) {
@@ -140,13 +140,13 @@ s32 mesh_effect_load_identity(s32 arg0, s32 arg1) {
 
 /* was func_1513B9A8 */
 void mesh_effect_retire(struct132 *arg0) {
-    func_100043B4(arg0->unk4C, 4);
+    heap_set_block_tag(arg0->unk4C, 4);
     node_retire(arg0);
 }
 
 /* was func_1513B9DC */
 void mesh_effect_free(struct132 *arg0) {
-    func_100043B4(arg0->unk4C, 4);
+    heap_set_block_tag(arg0->unk4C, 4);
     node_unlink_free(arg0);
 }
 
@@ -180,7 +180,7 @@ void mesh_effect_on_msg(u8 *arg0, s32 arg1, u8 arg2) {
         swing_lamp_handle_event(arg0, arg1, arg2);
         break;
     case 2:
-        func_151BAA18(arg0, arg1, arg2);
+        screen_uv_mesh_handle_message(arg0, arg1, arg2);
         break;
     }
 }
@@ -252,7 +252,7 @@ extern f32 D_800A4E60;          // 8.328f
 
 // water_texcoords_update: object-type handler (table D_80089FC8 + 0x14). Calls mesh_effect_load_identity first, then rewrites the
 // texture coordinates of the nine vertex groups of the object's current vertex buffer (obj + 0x58 + D_800BE9C0 * 16
-// + part * 4) so each group's texture faces the player camera point (func_15144B34(part)) seen from its centre
+// + part * 4) so each group's texture faces the player camera point (camera_get_pos(part)) seen from its centre
 // D_800A4DA0[k]: s = horizontal offset along the camera direction * (sin(rec + 0xC) * 1.21 + 2.854) - scroll u,
 // t = height * (sin(rec + 0x10) * 1.994 + 8.328) - scroll v, where rec = obj + obj[0x50] + 0xF8 holds the scroll
 // (+0 / +4, taken mod 1024) and the two wave phases. Returns 1.
@@ -277,7 +277,7 @@ s32 water_texcoords_update(s32 obj, s16 part) {
     rec = (f32 *) (obj + *(s32 *) (obj + 0x50) + 0xF8);
     scaleS = sinf(rec[3]) * D_800A4E54 + D_800A4E58;
     scaleT = sinf(rec[4]) * D_800A4E5C + D_800A4E60;
-    cam = func_15144B34(part);
+    cam = camera_get_pos(part);
     scrollS = rec[0] - (f32) (s32) (rec[0] * (1.0f / 1024.0f)) * 1024.0f;
     scrollT = rec[1] - (f32) (s32) (rec[1] * (1.0f / 1024.0f)) * 1024.0f;
     for (k = 0; k < 9; k++) {
@@ -322,14 +322,14 @@ s32 water_wave_update(u8 *arg0) {
     Wave1513BEB0 *w = (Wave1513BEB0 *)(arg0 + *(s32 *)(arg0 + 0x50) + (0, 0xF8)); // fakematch: comma keeps addu a0,t6 order
 
     w->c += D_800A4E64 * D_800BE9A4;
-    f = func_15144B68(w->c);
+    f = wrap_angle_rad(w->c);
     w->c = f;
     w->a += D_800A4E68 * D_800BE9A4;
     w->b = sinf(f) * D_800A4E6C;
     w->d += D_800A4E70 * D_800BE9A4;
     w->e += D_800A4E74 * D_800BE9A4;
-    w->d = func_15144B68(w->d);
-    w->e = func_15144B68(w->e);
+    w->d = wrap_angle_rad(w->d);
+    w->e = wrap_angle_rad(w->e);
     while (w->a > 4096.0f) {
         w->a -= 4096.0f;
     }

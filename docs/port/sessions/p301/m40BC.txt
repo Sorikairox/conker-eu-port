@@ -1,4 +1,4 @@
-# P301 mutants for func_151C40BC (impact_effects_spawn)
+# P301 mutants for surface_impact_effects (impact_effects_spawn)
 /if (level == 0x2B || level == 0x30) {/s/0x2B/0x2C/
 /if (level == 0x2B || level == 0x30) {/s/ || level == 0x30//
 /type = (surface == 1) ? 3 : 4;/s/? 3 : 4/? 4 : 4/
@@ -70,8 +70,8 @@
 /debris.pos\[2\] = pos\[2\];/s/pos\[2\];/pos[1];/
 /debris.u26 = 0x19;/s/0x19/0x18/
 /debris.u61 = -1;/s/-1/1/
-/func_15153BA4((u8 \*) &debris/s/debrisTag/smokeTag/
-/func_15153BA4((u8 \*) &debris/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/emit_particle_burst_req((u8 \*) &debris/s/debrisTag/smokeTag/
+/emit_particle_burst_req((u8 \*) &debris/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /if (random_float() < flashChance) {/s/flashChance/debrisChance/
 /flash.unk2 = /s/+ 3;/+ 4;/
 /flash.unk1 = -1;/s/-1/1/

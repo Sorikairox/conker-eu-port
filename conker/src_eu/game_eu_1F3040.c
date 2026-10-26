@@ -4,20 +4,20 @@
 
 
 #ifdef NON_MATCHING
-/* func_151C5280's .s owned this rodata (bone-space muzzle points); the NM link drops it, so NM gets copies.
-   D_800AAE7C is the second point of D_800AAE70 (read by func_151C5B38); game_eu_51190 has its own copy. */
+/* gun_muzzle_smoke_spawn's .s owned this rodata (bone-space muzzle points); the NM link drops it, so NM gets copies.
+   D_800AAE7C is the second point of D_800AAE70 (read by gun_muzzle_sparks_spawn); game_eu_51190 has its own copy. */
 static const f32 D_800AAE70[6] = { -113.828796f, -14.0823936f, 14.5422001f, -124.648605f, -14.0823936f, 14.5422001f };
 static const f32 D_800AAE7C[3] = { -124.648605f, -14.0823936f, 14.5422001f };
 static const f32 D_800AAE88[3] = { 7.31999874f, -14.0823936f, 4.54220057f };
 static const f32 D_800AAE94[1] = { 0.00100000005f }; /* 0x3A83126F (arrays: IDO puts scalar float statics in .data) */
 static const f32 D_800AAE98[1] = { 0.00333333341f }; /* 0x3B5A740E */
 
-void func_15145740(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
-u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
-s32 func_1514654C(u8 *, u8 *, s32, f32 **, f32 **, s32);
-void func_151C5B38(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2);
-u8 *func_151C284C(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
+void obj_get_aim_vectors(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
+u8 *attachment_find_by_slot(u8 *arg0, s32 arg1, s32 arg2);
+s32 model_node_points_to_world(u8 *, u8 *, s32, f32 **, f32 **, s32);
+void gun_muzzle_sparks_spawn(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void gun_muzzle_flash_light(u8 *arg0, u8 arg1, s32 arg2);
+u8 *tracer_spawn(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                   f32 argA, u8 argB, u8 *argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, s8 arg13,
                   s32 arg14, f32 arg15, u8 arg16, s8 arg17, s32 arg18, u8 arg19, s32 arg1A);
 #else
@@ -27,12 +27,13 @@ extern f32 D_800AAE7C[];
 
 #ifdef NON_MATCHING
 // gun_muzzle_smoke_spawn: smoke trail from object `obj`'s gun. Direction = the object's facing vector
-// (func_15145740) * 0.001. With a model (+0x1D4) the two muzzle points D_800AAE70 / D_800AAE88 are taken through
-// attachment 0x46 (func_15031C4C / func_1514654C; bail out when either fails), then sparks (func_151C5C54) and, on a
-// random odd value, a flash (func_151C5B38); without a model the start is the object position (+0x14) raised by 106
-// and pushed 120 along the direction, the end 82 back. Then the smoke stream func_151C284C (alpha 0xFF with a model,
+// (obj_get_aim_vectors) * 0.001. With a model (+0x1D4) the two muzzle points D_800AAE70 / D_800AAE88 are taken through
+// attachment 0x46 (attachment_find_by_slot / model_node_points_to_world; bail out when either fails), then sparks (gun_muzzle_flash_light) and, on a
+// random odd value, a flash (gun_muzzle_sparks_spawn); without a model the start is the object position (+0x14) raised by 106
+// and pushed 120 along the direction, the end 82 back. Then the smoke stream tracer_spawn (alpha 0xFF with a model,
 // else 0x80; mode -1 when D_800BE616 is set, else 2). `flag` / `arg2` are passed on.
-void func_151C5280(u8 *obj, u8 flag, s32 arg2) {
+/* was func_151C5280 */
+void gun_muzzle_smoke_spawn(u8 *obj, u8 flag, s32 arg2) {
     f32 *in[2];
     f32 *out[2];
     f32 a, b;
@@ -46,7 +47,7 @@ void func_151C5280(u8 *obj, u8 flag, s32 arg2) {
     if (obj == NULL) {
         return;
     }
-    func_15145740((struct127 *) obj, (s32) dir, (s32) side, 0, 0.0f);
+    obj_get_aim_vectors((struct127 *) obj, (s32) dir, (s32) side, 0, 0.0f);
     dir[0] *= D_800AAE94[0];
     dir[1] *= D_800AAE94[0];
     dir[2] *= D_800AAE94[0];
@@ -55,16 +56,16 @@ void func_151C5280(u8 *obj, u8 flag, s32 arg2) {
         in[1] = (f32 *) D_800AAE88;
         out[0] = start;
         out[1] = end;
-        att = func_15031C4C(obj, 0x46, 0);
+        att = attachment_find_by_slot(obj, 0x46, 0);
         if (att == NULL) {
             return;
         }
-        if (func_1514654C(obj, att, 0, in, out, 2) == 0) {
+        if (model_node_points_to_world(obj, att, 0, in, out, 2) == 0) {
             return;
         }
-        func_151C5C54((u8 *) start, flag, arg2);
+        gun_muzzle_flash_light((u8 *) start, flag, arg2);
         if (random_int() & 1) {
-            func_151C5B38((s32) obj, (s32) start, 0x46, flag, arg2);
+            gun_muzzle_sparks_spawn((s32) obj, (s32) start, 0x46, flag, arg2);
         }
     } else {
         start[0] = *(f32 *) (obj + 0x14);
@@ -80,17 +81,18 @@ void func_151C5280(u8 *obj, u8 flag, s32 arg2) {
     a = random_float();
     b = random_float();
     r = random_int();
-    func_151C284C((u8 *) start, NULL, (u8 *) end, (u8 *) dir, 1, 0, 300.0f, D_800AAE98[0], a * 10.0f + 25.0f,
+    tracer_spawn((u8 *) start, NULL, (u8 *) end, (u8 *) dir, 1, 0, 300.0f, D_800AAE98[0], a * 10.0f + 25.0f,
                   b * 150.0f + 400.0f, 80.0f, r % 56 + 200, obj, 1, 1, 0, *(u8 **) (obj + 0x1D4) != NULL ? 0xFF : 0x80,
                   0, 1, 0, 0x1A, 0.0f, 0xFF, D_800BE616 ? -1 : 2, 0, flag, arg2);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C5280.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/gun_muzzle_smoke_spawn.s")
 #endif
 
 s32 attached_particle_spawn(s32, s32, f32 *, f32 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
 
-void func_151C5B38(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
+/* was func_151C5B38 */
+void gun_muzzle_sparks_spawn(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     f32 s[2];
 
     s[1] = ((random_float() * 1001.0f) + 604.0f) * 0.01f;
@@ -98,7 +100,8 @@ void func_151C5B38(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     attached_particle_spawn(arg0, 0, D_800AAE70, D_800AAE7C, s, (random_int() & 3) + 6, (random_int() % 1U) + 0xFF /* fakematch: rand % 1 range-0 rand (folded, call + spill kept) */, (random_float() * 270.0f) + 359.0f, arg1, 0xFF, 0, arg2, arg3, arg4);
 }
 
-void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151C5C54 */
+void gun_muzzle_flash_light(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
     s32 sp3C[3];
 
@@ -113,15 +116,16 @@ void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+s32 particle_spawn_ex(s32 *, s32, s32, s32, s32, s32);
 s32 impact_setup_segment(s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32, s32);
-void func_15143794(s16, s16, f32, void *);
-void func_15143874(s16, f32, f32 *, f32 *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
 s32 impact_spark_spawn(s32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 impact_glow_spawn(s32 *, f32, s32, s16, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
-void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7) {
+/* was func_151C5D2C */
+void impact_glow_sparks_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7) {
     struct {
         f32 uB8;
         s32 uBC;
@@ -220,7 +224,7 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
             if (temp_v1 != 0) {
                 do {
                     temp_f20 = ((random_float() * 33.0f) + 60.0f) * 0.1f;
-                    func_15143874((s16) (random_int() & 0xFF), temp_f20, &sp.u150, &sp.u154);
+                    vec2_from_angle_byte((s16) (random_int() & 0xFF), temp_f20, &sp.u150, &sp.u154);
                     sp.u144 = (sp.u168 * sp.u150) + (sp.u15C * sp.u154);
                     sp.u148 = (sp.u16C * sp.u150) + (sp.u160 * sp.u154);
                     sp.u14C = (sp.u170 * sp.u150) + (sp.u164 * sp.u154);
@@ -289,7 +293,7 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
                 do {
                     temp_s1_4 = random_int();
                     temp_s0_3 = random_int();
-                    func_15143794((s16) (temp_s1_4 & 0xFF), (s16) ((temp_s0_3 & 0x3F) * -1), (random_float() * 7.0f) + 2.0f, &sp.u104);
+                    vec3_from_angles_byte((s16) (temp_s1_4 & 0xFF), (s16) ((temp_s0_3 & 0x3F) * -1), (random_float() * 7.0f) + 2.0f, &sp.u104);
                     temp_f16 = random_float() * 117.0f;
                     sp.u114 &= ~0xC0;
                     sp.u110 = (temp_f16 + -197.0f) * 0.001f;
@@ -308,7 +312,7 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
                     temp_f2_2 = (random_float() * 122.0f) + 77.0f;
                     sp.uE4 = temp_f2_2;
                     sp.uE8 = temp_f2_2;
-                    temp_v0 = func_151307F0(&sp.uBC, 1, 0, 4, (s32) arg6, arg7);
+                    temp_v0 = particle_spawn_ex(&sp.uBC, 1, 0, 4, (s32) arg6, arg7);
                     if (temp_v0 != 0) {
                         memcpy(temp_v0 + 0xA8, &sp.uB8, 4);
                     }
@@ -319,10 +323,11 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C5D2C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/impact_glow_sparks_spawn.s")
 #endif
 void bone_emitter_spark_params(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
-void func_151C6424(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
+/* was func_151C6424 */
+void bone_emitter_dust_emit(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
     f32 sp6C[3];
     f32 sp60[3];
     f32 sp54[3];
@@ -336,7 +341,7 @@ void func_151C6424(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
 }
 
 #ifdef NON_MATCHING
-/* func_151307F0's sprite particle template (same layout as SprTmpl5268 in game_eu_101080) */
+/* particle_spawn_ex's sprite particle template (same layout as SprTmpl5268 in game_eu_101080) */
 typedef struct {
     /* 0x00 */ s32 u0;
     /* 0x04 */ s32 u4;
@@ -374,11 +379,12 @@ typedef struct {
 } DebrisExtra64F4;
 
 // debris_sprite_spawn: spawns one tumbling debris sprite (sprite 0x6C, colour E2 B2 60 FF 39 0F 00 + alpha) with
-// func_151307F0 at *pos moving with *vel. arg2 goes to template +0x54, spin is stored at the particle's +0xA8,
+// particle_spawn_ex at *pos moving with *vel. arg2 goes to template +0x54, spin is stored at the particle's +0xA8,
 // the record {1, 0, 0.703} at +0xB0. life -1 = 300 frames (and no mode bit 1), size sets both size fields, bright
 // selects u60[2] 0x1D / 0xA; random flip bits 0x40 / 0x80. Callers ignore the returned particle (void here, as in
 // every prototype).
-void func_151C64F4(s32 pos, f32 *vel, f32 arg2, f32 spin, s32 alpha, s32 life, f32 size, s32 bright, s32 room,
+/* was func_151C64F4 */
+void debris_sprite_spawn(s32 pos, f32 *vel, f32 arg2, f32 spin, s32 alpha, s32 life, f32 size, s32 bright, s32 room,
                    u8 kind, s32 owner) {
     /* one frame record, laid out like the asm's stack (sp30 extra, sp3C spin copy, sp40 template) */
     struct {
@@ -442,14 +448,14 @@ void func_151C64F4(s32 pos, f32 *vel, f32 arg2, f32 spin, s32 alpha, s32 life, f
     }
     f.t.size[1] = size;
     f.t.size[0] = size;
-    p = func_151307F0((s32 *) &f.t, 1, room, 0x10, kind, owner);
+    p = particle_spawn_ex((s32 *) &f.t, 1, room, 0x10, kind, owner);
     if (p != 0) {
         memcpy(p + 0xA8, &f.spin, 4);
         memcpy(p + 0xB0, (f32 *) &f.extra, 8);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C64F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/debris_sprite_spawn.s")
 #endif
 
 typedef struct {
@@ -458,8 +464,9 @@ typedef struct {
     u8 b0; u8 b1; s16 h0; s16 h1; s16 pad;
     f32 g0; f32 g1; f32 g2; s32 q;
 } SpawnC6750;
-void func_15154BF4(SpawnC6750 *, u8, s32);
-void func_151C6750(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+void emit_rings_random_yaw(SpawnC6750 *, u8, s32);
+/* was func_151C6750 */
+void hit_debris_ring_burst(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     SpawnC6750 s;
 
     s.f0 = 5.0f;
@@ -482,10 +489,11 @@ void func_151C6750(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     s.g1 = 109.0f;
     s.g2 = 1.0f;
     s.q = arg1;
-    func_15154BF4(&s, arg2, arg3);
+    emit_rings_random_yaw(&s, arg2, arg3);
 }
 
-s32 func_151C6840(u8 *arg0, s32 arg1, s32 arg2) {
+/* was func_151C6840 */
+s32 obj_kind_can_take_hit(u8 *arg0, s32 arg1, s32 arg2) {
     switch (arg0[4]) {
         case 0x5A:
         case 0x74:

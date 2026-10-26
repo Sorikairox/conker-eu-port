@@ -8,10 +8,11 @@ extern s32 D_800BEE20;
 extern s32 D_800BEE24;
 extern u16 D_800CC7A2;
 void func_15016680(void);
-void func_1501C51C(void);
+void rumble_stop_all(void);
 
-void func_1501C710(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_1501C51C();
+/* was func_1501C710 */
+void game_request_transition(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4) {
+    rumble_stop_all();
     D_800D2132 = 0;
     switch (arg0) {
     case 0:

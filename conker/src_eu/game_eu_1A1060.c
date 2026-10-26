@@ -11,8 +11,9 @@ typedef struct {
 } Info3850;
 extern Info3850 D_8008D010;
 extern s8 D_800DD710;
-s32 func_15173954(s32, s32, s32, s32, s32);
-void func_15173850(s32 arg0) {
+s32 fog_blend_presets(s32, s32, s32, s32, s32);
+/* was func_15173850 */
+void fog_init_from_level(s32 arg0) {
     if (*(s16 *)((u8 *)D_800B0DF0 + 0x40) == *(s16 *)((u8 *)D_800B0DF0 + 0x3C) && *(s16 *)((u8 *)D_800B0DF0 + 0x3C) == 0) {
         *(s16 *)((u8 *)D_800B0DF0 + 0x40) = 100;
     }
@@ -28,14 +29,15 @@ void func_15173850(s32 arg0) {
     D_8008D010.b = *(u16 *)((u8 *)D_800B0DF0 + 0);
     if ((s8)D_800B0DF0->pad2A[0x1C] != -1) {
         D_800DD710 = 1;
-        func_15173954((s8)D_800B0DF0->pad2A[0x1C], (s8)D_800B0DF0->pad2A[0x1C], arg0, 0, -1);
+        fog_blend_presets((s8)D_800B0DF0->pad2A[0x1C], (s8)D_800B0DF0->pad2A[0x1C], arg0, 0, -1);
     } else {
         D_800DD710 = 0;
-        func_15173954(0, 0, arg0, 0, -1);
+        fog_blend_presets(0, 0, arg0, 0, -1);
     }
 }
 
-s32 func_15173948(s32 arg0, s32 arg1)
+/* was func_15173948 */
+s32 fog_identity_stub(s32 arg0, s32 arg1)
 {
   return arg0;
   if (arg0)
@@ -44,14 +46,15 @@ s32 func_15173948(s32 arg0, s32 arg1)
 }
 
 #ifdef NON_MATCHING
-s8 func_15173F04(s32 arg0);
+s8 fog_level_preset_get(s32 arg0);
 extern s32 D_800DD714;          /* current fog/colour state: c[4] at +0, then halfwords at +4..+0x10 */
 extern s16 D_800DD718, D_800DD71A, D_800DD71C, D_800DD71E, D_800DD720;
 extern u16 D_800DD722, D_800DD724;
 
 /* Blend fog/colour preset `from` toward `to` by t/4096 into slot `dest` of D_8008D010 (or, for -1, the current
  * state D_800DD714; note its halfword order differs from a table entry). Presets 0x7C..0x7F are aliases. */
-s32 func_15173954(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
+/* was func_15173954 */
+s32 fog_blend_presets(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
     Info3850 *table = &D_8008D010;
     u8 *out;
     s16 *v0;
@@ -96,7 +99,7 @@ s32 func_15173954(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
             *sel = 2;
             break;
         case 0x7E:
-            *sel = func_15173F04(arg2);
+            *sel = fog_level_preset_get(arg2);
             break;
         }
     }
@@ -135,28 +138,30 @@ s32 func_15173954(s32 from, s32 to, s32 arg2, s32 t, s32 dest) {
     return a2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1060/func_15173954.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1060/fog_blend_presets.s")
 #endif
-s32 func_15173954(s32, s32, s32, s32, s32);
+s32 fog_blend_presets(s32, s32, s32, s32, s32);
 extern s32 D_800DC2D8;
 extern s32 D_800DD714;
 
-void func_15173E34(s32 arg0) {
+/* was func_15173E34 */
+void fog_apply_level_default(s32 arg0) {
     if ((s8) D_800B0DF0->pad2A[0x1C] == -1) {
         if (D_800DBFF0->unk5F0 & 1) {
-            func_15173954(6, 6, arg0, 0, -1);
+            fog_blend_presets(6, 6, arg0, 0, -1);
             (*(u8 *)((u8 *)(&D_800DC2D8) + 0)) = (u8) (*(u8 *)((u8 *)(&D_800DD714) + 0));
             (*(u8 *)((u8 *)(&D_800DC2D8) + 1)) = (u8) (*(u8 *)((u8 *)(&D_800DD714) + 1));
             (*(u8 *)((u8 *)(&D_800DC2D8) + 2)) = (u8) (*(u8 *)((u8 *)(&D_800DD714) + 2));
             return;
         }
-        func_15173954(0, 0, arg0, 0, -1);
+        fog_blend_presets(0, 0, arg0, 0, -1);
         (*(u8 *)((u8 *)(&D_800DC2D8) + 0)) = (u8) D_800B0DF0->unk5;
         (*(u8 *)((u8 *)(&D_800DC2D8) + 1)) = (u8) D_800B0DF0->unk6;
         (*(u8 *)((u8 *)(&D_800DC2D8) + 2)) = (u8) D_800B0DF0->unk7;
     }
 }
 
-s8 func_15173F04(s32 arg0) {
+/* was func_15173F04 */
+s8 fog_level_preset_get(s32 arg0) {
     return (s8) D_800B0DF0->pad2A[0x1C];
 }

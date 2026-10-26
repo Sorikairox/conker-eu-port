@@ -134,7 +134,7 @@ typedef struct {
 /*
  * record_particle_emitter_start: P230: start handler of a particle-emitter record. Marks the record started
  * (+0x16 |= 4) and fills a spawn block: position from the record, the "to" point = position + (0, 0, -500)
- * rotated by the record's angles (mtxf_rotate_xyz_deg / func_150A7E40), kind D_8009693C[colour >> 24], flags
+ * rotated by the record's angles (mtxf_rotate_xyz_deg / mtxf_transform_point), kind D_8009693C[colour >> 24], flags
  * D_80096950[colour >> 24] + 3, life 300, colour from +0x18, scale 1, and an optional sound
  * (opts top byte: collision_select_area(0); zone_tree_find_leaf(x, z)). The emitter block gets the ranges +6 / +8, the spreads
  * (opts bytes 1 / 0) / 255 and a per-type sub kind (+0x58); type 8 and 13..18 emitters also get a tail at +0x170
@@ -166,7 +166,7 @@ s32 record_particle_emitter_start(Rec150130B4 *rec) {
     b.spawn.pos0[1] = rec->y;
     b.spawn.pos0[2] = rec->z;
     mtxf_rotate_xyz_deg(m, rec->angX, rec->angY, 0.0f);
-    func_150A7E40(m, 0.0f, 0.0f, -500.0f, &b.spawn.pos1[0], &b.spawn.pos1[1], &b.spawn.pos1[2]);
+    mtxf_transform_point(m, 0.0f, 0.0f, -500.0f, &b.spawn.pos1[0], &b.spawn.pos1[1], &b.spawn.pos1[2]);
     b.spawn.pos1[0] += b.spawn.pos0[0];
     b.spawn.pos1[1] += b.spawn.pos0[1];
     b.spawn.pos1[2] += b.spawn.pos0[2];
@@ -323,8 +323,8 @@ extern f32 D_800969F4;
 /*
  * P80: effect spawn from a record (s16 x, y, z at +0 / +2 / +4, s16 +6, s16 radius +8, f32 angles +0xC / +0x10):
  * nothing for radius 0. Else an effect (func_15149130 type 0x19) gets a 0x34-byte block: position, the unit
- * direction (0, 2r, 0) rotated by the angles (mtxf_rotate_xyz_deg / func_150A7E40) times 1 / 2r, 2r, (f32) +6, the two
- * angles, 0 and D_800969F0 / D_800969F4; then a sound / particle (func_1000FA64 0x67C) at (x, y + r, z).
+ * direction (0, 2r, 0) rotated by the angles (mtxf_rotate_xyz_deg / mtxf_transform_point) times 1 / 2r, 2r, (f32) +6, the two
+ * angles, 0 and D_800969F0 / D_800969F4; then a sound / particle (sfx_emitter_start 0x67C) at (x, y + r, z).
  */
 /* was func_15013778 */
 s32 effect_spawn_record(s16 *rec) {
@@ -359,7 +359,7 @@ s32 effect_spawn_record(s16 *rec) {
     blk.pos[1] = rec[1];
     blk.pos[2] = rec[2];
     mtxf_rotate_xyz_deg(m, *(f32 *) (rec + 6), *(f32 *) (rec + 8), 0.0f);
-    func_150A7E40(m, 0.0f, blk.size, 0.0f, &blk.dir[0], &blk.dir[1], &blk.dir[2]);
+    mtxf_transform_point(m, 0.0f, blk.size, 0.0f, &blk.dir[0], &blk.dir[1], &blk.dir[2]);
     blk.dir[0] *= inv;
     blk.dir[1] *= inv;
     blk.dir[2] *= inv;
@@ -368,7 +368,7 @@ s32 effect_spawn_record(s16 *rec) {
         memcpy(e + 0x28, &blk, 0x34);
     }
     r = rec[4];
-    func_1000FA64(0x67C, rec[0], rec[1] + r, rec[2], 0x2EE0, r * 2, r / 2, (s32) func_1000EF40, NULL, 0, 8, 0);
+    sfx_emitter_start(0x67C, rec[0], rec[1] + r, rec[2], 0x2EE0, r * 2, r / 2, (s32) sfx_cb_keep_until_silent, NULL, 0, 8, 0);
     return 1;
 }
 #else
@@ -514,7 +514,7 @@ s32 record_ambient_effect_start(Obj150139AC *arg0) {
         tmp.unk6C = 0;
     }
     if (e->unk33) {
-        tmp.unk44 = func_1000FA64(0x4D, arg0->unk0, arg0->unk2, arg0->unk4, 0x5DC0, 0x3E8, 0x12C, 0, 0, 0, 0, 0);
+        tmp.unk44 = sfx_emitter_start(0x4D, arg0->unk0, arg0->unk2, arg0->unk4, 0x5DC0, 0x3E8, 0x12C, 0, 0, 0, 0, 0);
     } else {
         tmp.unk44 = 0;
     }
@@ -561,14 +561,14 @@ s32 record_emitter_start(struct134 *arg0) {
     pos[2] = arg0->unk4;
     temp_v0 = arg0->unk18;
 #ifdef NON_MATCHING
-    func_151BEE00(pos, *(f32 *)&arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
+    life_pickup_spawn(pos, *(f32 *)&arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
 #else
-    func_151BEE00(pos, arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
+    life_pickup_spawn(pos, arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
 #endif
     return 1;
 }
 
-s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
+s32 spark_spawn_from_desc(f32 *, s32, s32, s32, s32, s32);
 extern f32 D_80096A04;
 extern f32 D_80096A08;
 extern f32 D_80096A0C;
@@ -641,14 +641,14 @@ s32 record_particle_burst_start(u8 *arg0) {
     sp.u44 = D_80096A1C * b;
     sp.u40 = D_80096A20 * c; sp.u48 = D_80096A24 * c; sp.u4C = D_80096A28 * c;
 
-    func_15149AC0(&sp.u30, 0xA, 1, (u8)((*(s32 *)(arg0 + 0x18) != 0) ? 2 : 1), 0xFF, 1);
+    spark_spawn_from_desc(&sp.u30, 0xA, 1, (u8)((*(s32 *)(arg0 + 0x18) != 0) ? 2 : 1), 0xFF, 1);
     return 1;
 }
 
 
 /* was func_15013F9C */
 s32 record_start_1cd2c0(s32 arg0) {
-    func_151CD2C0(arg0, 0xFF, 1);
+    spout_ctrl_spawn(arg0, 0xFF, 1);
     return 1;
 }
 
@@ -709,7 +709,7 @@ s32 record_effect33_start(struct134 *arg0) {
 
     arg0->unk16 |= 4;
     tmp.unk0 = arg0;
-    tmp.unk4 = func_15144598(arg0);
+    tmp.unk4 = spawn_region_area(arg0);
     tmp.unk8 = 0.0f;
     collision_select_area(0);
     tmp.unkC = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
@@ -729,7 +729,7 @@ s32 record_kind_effect_start(struct134 *arg0) {
     s32 f1 = (flags & 1) ? 1 : 0;
     s32 f10 = (flags & 0x10) ? 0x10 : 0;
 
-    func_151A9940(f10 | f1 | f2 | f4 | f8, ((u8 *)arg0)[0x1F], arg0, 0, D_80096A2C, 100.0f, -1, 255, 1);
+    kind_effect_spawn(f10 | f1 | f2 | f4 | f8, ((u8 *)arg0)[0x1F], arg0, 0, D_80096A2C, 100.0f, -1, 255, 1);
     return 1;
 }
 
@@ -794,7 +794,7 @@ s32 record_effect29_start(struct134 *arg0) {
     b = (((u32)arg0->unk1C >> 16) & 0xFFFF) * D_80096A30;
     c = ((u32)arg0->unk20 & 0xFFFF) * D_80096A30;
     d = (((u32)arg0->unk20 >> 16) & 0xFFFF) * D_80096A30;
-    r = func_1514462C((struct_eu_15144598 *)arg0);
+    r = spawn_region_volume((struct_eu_15144598 *)arg0);
     tmp.unk0 = arg0;
     tmp.unk4 = a * r * D_80096A34;
     tmp.unk8 = b * r * D_80096A34;
@@ -808,7 +808,7 @@ s32 record_effect29_start(struct134 *arg0) {
     return 1;
 }
 #ifdef NON_MATCHING
-void func_15145974(void *, f32 *, f32 *);
+void vec3_to_yaw_pitch_deg(void *, f32 *, f32 *);
 /* the 0x38-byte parameter block screen_effect_start copies to the effect at +0x28 */
 typedef struct {
     u8 *rec;          /* 0x00 */
@@ -829,7 +829,7 @@ typedef struct {
 } Effect150144B8;
 // screen_effect_start: P259: start handler of a level record `rec` (s16 +6 / +8, f32 +0xC / +0x10, flags +0x16,
 // packed bytes +0x18 / +0x1C): sets flag 4; in single player (D_80082FA0 < 2) projects the point 100 above
-// (+0xC, 0, +0x10) to the screen (mtxf_rotate_xyz_deg / func_150A7E40 / func_15145974, scaled by pi/180) and spawns effect
+// (+0xC, 0, +0x10) to the screen (mtxf_rotate_xyz_deg / mtxf_transform_point / vec3_to_yaw_pitch_deg, scaled by pi/180) and spawns effect
 // 300 / 0x2A (func_15149130) with a parameter block from the packed bytes: count min + rand % (range + 1), two s16,
 // two scales / 64, angle func_150484A0(+6, +8), spin byte / 256 * pi/4, a frame count with its inverse and
 // +8 / frames. Always returns 1.
@@ -847,8 +847,8 @@ s32 screen_effect_start(u8 *rec) {
         return 1;
     }
     mtxf_rotate_xyz_deg(mtx, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
-    func_150A7E40(mtx, 0.0f, 100.0f, 0.0f, &pos[0], &pos[1], &pos[2]);
-    func_15145974(pos, &e.screen_x, &e.screen_y);
+    mtxf_transform_point(mtx, 0.0f, 100.0f, 0.0f, &pos[0], &pos[1], &pos[2]);
+    vec3_to_yaw_pitch_deg(pos, &e.screen_x, &e.screen_y);
     e.screen_x *= 0.017453292f;
     e.screen_y *= 0.017453292f;
     e.min = *(u32 *) (rec + 0x18) & 0xFF;
@@ -1106,13 +1106,13 @@ s32 record_effect49_start(struct134 *arg0) {
 }
 
 /* was func_150150A4 */
-s32 record_light_list_add(s32 arg0) {   /* P76: a0 passes through to func_1515F1B0 */
-    struct17 *temp_v0 = func_1515F1B0(arg0);
+s32 record_light_list_add(s32 arg0) {   /* P76: a0 passes through to spawn_region_entry_alloc */
+    struct17 *temp_v0 = spawn_region_entry_alloc(arg0);
     if (temp_v0 == NULL) {
         return 1;
     }
 
-    func_1515F25C(&D_800DCDC4, temp_v0);
+    spawn_region_list_push(&D_800DCDC4, temp_v0);
     D_800DCD90 += temp_v0->unk8;
     return 1;
 }
@@ -1222,7 +1222,7 @@ typedef struct {
 
 // record_quad_zone_start: start handler (void, D_80082EA0 entry 0x34) of a rectangular zone record: marks it started
 // (+0x14 = 1), turns the rectangle (+-halfX, 0, +-halfZ) around the record's position by its angles (mtxf_rotate_xyz_deg /
-// func_150A7E40) into 4 world corners, stores the 4 edge vectors (next corner - corner) and the sound id of the spot
+// mtxf_transform_point) into 4 world corners, stores the 4 edge vectors (next corner - corner) and the sound id of the spot
 // (collision_select_area(0); zone_tree_find_leaf(x, z)), and hands that 0x74-byte block to a new func_15149130 object (+0x28).
 /* was func_15015354 */
 void record_quad_zone_start(Rec15015354 *src) {
@@ -1266,7 +1266,7 @@ void record_quad_zone_start(Rec15015354 *src) {
     m[3][1] = pos[1];
     m[3][2] = pos[2];
     for (i = 0; i < 4; i++) {
-        func_150A7E40(m, local[i][0], local[i][1], local[i][2], &blk.corner[i][0], &blk.corner[i][1],
+        mtxf_transform_point(m, local[i][0], local[i][1], local[i][2], &blk.corner[i][0], &blk.corner[i][1],
                       &blk.corner[i][2]);
     }
     for (i = 0; i < 4; i++) {
@@ -1299,7 +1299,7 @@ s32 record_effect68_start(struct134 *arg0) {
     arg0->unk16 |= 4;
     *(u8 *)&arg0->unk14 = 1;
     tmp.unk0 = arg0;
-    tmp.unk4 = func_15144598(arg0);
+    tmp.unk4 = spawn_region_area(arg0);
     collision_select_area(0);
     tmp.unk8 = zone_tree_find_leaf(arg0->unk0, arg0->unk4);
     tmp.unkC = 0;
@@ -1310,13 +1310,13 @@ s32 record_effect68_start(struct134 *arg0) {
     return 1;
 }
 #ifdef NON_MATCHING
-s32 func_151ACBD4(s8 *, s32);
+s32 rope_create(s8 *, s32);
 
 /*
  * P85: spawn handler: a vertical zone from record rec (s16 position +0 / +2 / +4, s16 length +8, angles +0xC / +0x10
  * as f32 bits, kind +0x18). Kinds below 6 / 7 / 2 are skipped on levels 0xB / 0x2C / 0x26. The far end is the
  * (0, length, 0) direction rotated by the angles (not added to the position, as in the original); the upper / lower
- * point (by y) and the height |dy| go to func_151ACBD4 with the kind. Always returns 1.
+ * point (by y) and the height |dy| go to rope_create with the kind. Always returns 1.
  */
 /* was func_150156F4 */
 s32 record_rope_zone_start(u8 *rec) {
@@ -1350,7 +1350,7 @@ s32 record_rope_zone_start(u8 *rec) {
     pos[0] = *(s16 *) (rec + 0);
     pos[1] = *(s16 *) (rec + 2);
     pos[2] = *(s16 *) (rec + 4);
-    func_150A7E40(m, 0.0f, *(s16 *) (rec + 8), 0.0f, &pts[1][0], &pts[1][1], &pts[1][2]);
+    mtxf_transform_point(m, 0.0f, *(s16 *) (rec + 8), 0.0f, &pts[1][0], &pts[1][1], &pts[1][2]);
     pts[0][0] = *(s16 *) (rec + 0);
     pts[0][1] = *(s16 *) (rec + 2);
     pts[0][2] = *(s16 *) (rec + 4);
@@ -1365,7 +1365,7 @@ s32 record_rope_zone_start(u8 *rec) {
     zone.bottom[2] = pts[i][2];
     zone.flag = 0;
     zone.height = fabsf(pts[1][1] - pts[0][1]);
-    func_151ACBD4(&zone.kind, 0);
+    rope_create(&zone.kind, 0);
     return 1;
 }
 #else

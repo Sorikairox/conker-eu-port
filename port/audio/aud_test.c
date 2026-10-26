@@ -2,7 +2,7 @@
  * messages is still asm, so no M_AUDTASK arrives yet. This drives the game's C n_audio synthesizer
  * directly and runs the command lists it builds through the audio HLE (aud_abi.c):
  *
- *   heap (alHeapInit) -> n_alInit / n_alSynNew (config values from func_10008180 / func_10008F90's asm, two type-6 fx busses)
+ *   heap (alHeapInit) -> n_alInit / n_alSynNew (config values from audio_system_init / audio_mgr_init's asm, two type-6 fx busses)
  *   -> one sound record from the ROM's sound bank -> n_alSynAllocVoice + n_alSynStartVoiceParams
  *   -> n_alAudioFrame (C command-list builder) -> aud_run_alist -> PCM -> WAV / SDL.
  *
@@ -10,7 +10,7 @@
  * (rzip), (0x17,1) the sound records Rare loads on demand, (0x17,2) the sample table. A record is
  * ALSound(+0) / ALEnvelope(+0x10) / ALKeyMap(+0x20) / ALWaveTable(+0x28) / ALADPCMBook with
  * record-relative pointers; the wavetable base is relative to the sample table. The game's loader
- * (func_10009CBC) is asm, so the record is loaded and relocated here the same way func_10012C5C does.
+ * (snd_cache_load_on_demand) is asm, so the record is loaded and relocated here the same way func_10012C5C does.
  *
  * Compiled through the vbe pass (port/Makefile BOOT_SRC): game memory semantics. Entry:
  * port_audio_test(record_offset, frames), exported; node: AUDTEST=<hex record> in boot.sh,
@@ -35,7 +35,7 @@ void aud_wav_append(const void *buf, unsigned frames);
 void aud_wav_finish(int rate);
 
 #define ASSET_TABLE 0xAB2240u
-#define OUT_RATE 22020 /* func_10008180: 0x5604 */
+#define OUT_RATE 22020 /* audio_system_init: 0x5604 */
 #define FRAME 736      /* 4 x 184 samples per n_alAudioFrame call */
 
 typedef struct {
@@ -98,7 +98,7 @@ int port_audio_test(u32 rec_off, int frames) {
     c.unk14 = c.unk18 = c.unk1C = c.unk20 = (void *)cb_none;
     c.unk24 = (s32)tbl; c.heap = heap; c.outputRate = OUT_RATE;
     c.fxTypes[0] = c.fxTypes[1] = 6; c.fxTypes[2] = c.fxTypes[3] = 0;
-    /* fx parameter tables: func_10008F90 copies D_8002B1A4 (2 x 0x108 bytes) to its stack */
+    /* fx parameter tables: audio_mgr_init copies D_8002B1A4 (2 x 0x108 bytes) to its stack */
     c.params0 = D_8002B1A4; c.params1 = D_8002B1A4 + 0x108;
     n_alInit(D_8003E9E0, &c);
 
@@ -142,7 +142,7 @@ int port_audio_test(u32 rec_off, int frames) {
  * envelope mixer setup and ENVMIXER. Each call covers 184 samples; the test appends INTERLEAVE +
  * SAVEBUFF and runs the list through the audio HLE (aud_abi.c), like the game's func at init_1FB40.c.
  *
- * Voice clips are asset (0x16, id) (func_1001263C: asset_lookup_rom(&size, 2, 22, id)); the decoder's
+ * Voice clips are asset (0x16, id) (mp3_voice_play: asset_lookup_rom(&size, 2, 22, id)); the decoder's
  * tables are assets (0x17,4) Huffman tree index, (0x17,5) fast table, (0x17,6) trees, which
  * func_151F2960 loads with the asm asset loader; here they are DMA'd directly. The game's stream
  * DMA callback func_151F3C4C uses the audio DMA table (asm-initialised), so a PC one reads the ROM.

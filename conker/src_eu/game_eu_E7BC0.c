@@ -5,15 +5,15 @@
 
 #ifdef NON_MATCHING
 /* P153 */
-s32 func_150A3538(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
+s32 trigger_point_in_kind3(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
 s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 a6, s32 a7, s32 a8, s32 a9, s32 a10, s32 a11,
                   s32 a12, s32 a13, f32 a14);
-u8 func_15145C90(s32 arg0);
-void func_1515176C(u8 *arg0, s32 arg1, s32 arg2);
+u8 prop_is_flagged(s32 arg0);
+void emit_effect3d_from_surface(u8 *arg0, s32 arg1, s32 arg2);
 
-/* the stack blocks of func_150BA3B0 in one struct so the layout is the N64 one (offsets = original sp offsets) */
+/* the stack blocks of water_splash_spawn in one struct so the layout is the N64 one (offsets = original sp offsets) */
 typedef struct {
-    struct {                  /* sp70: splash ring, func_1515176C argument 0 (0x74 bytes) */
+    struct {                  /* sp70: splash ring, emit_effect3d_from_surface argument 0 (0x74 bytes) */
         s16 u0;               /* 0x00 */
         s16 u2;               /* 0x02 */
         f32 pos[3];           /* 0x04: ray hit point */
@@ -63,13 +63,14 @@ typedef struct {
 } Frame3B0;
 
 // water_splash_spawn: P153: splash where obj (pos +0x14) meets the water between it and (x, z): when neither
-// func_150A3538 test (2, 1) holds at the object's position, casts a ray from 80 units above the object towards
-// (x, z) (func_150ACEA0); on a hit whose surface passes func_15145C90 it spawns a drop record (sprite_fx_spawn_cam_at,
-// random life 100..150, alpha 155..255, random size 40..60 and flips) and always a ring (func_1515176C) at the hit
-// point. The original first checksums the code range func_151E86A4..func_151E870C (anti-tamper: sets
+// trigger_point_in_kind3 test (2, 1) holds at the object's position, casts a ray from 80 units above the object towards
+// (x, z) (func_150ACEA0); on a hit whose surface passes prop_is_flagged it spawns a drop record (sprite_fx_spawn_cam_at,
+// random life 100..150, alpha 155..255, random size 40..60 and flips) and always a ring (emit_effect3d_from_surface) at the hit
+// point. The original first checksums the code range menu_settings_apply_checked..menu_spawn_character (anti-tamper: sets
 // D_800843F0[0] = 0xFF unless the sum of ~words is 0x38424614); the port's code is not N64 code, so that check
 // is left out (it passes on an unmodified cartridge).
-void func_150BA3B0(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
+/* was func_150BA3B0 */
+void water_splash_spawn(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
     Frame3B0 f;
     f32 dx;
     f32 dz;
@@ -81,10 +82,10 @@ void func_150BA3B0(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
     if (obj == NULL) {
         return;
     }
-    if (func_150A3538(2, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x18), (s32) *(f32 *) (obj + 0x1C)) != 0) {
+    if (trigger_point_in_kind3(2, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x18), (s32) *(f32 *) (obj + 0x1C)) != 0) {
         return;
     }
-    if (func_150A3538(1, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x18), (s32) *(f32 *) (obj + 0x1C)) != 0) {
+    if (trigger_point_in_kind3(1, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x18), (s32) *(f32 *) (obj + 0x1C)) != 0) {
         return;
     }
     dx = -(*(f32 *) (obj + 0x14) - x);
@@ -94,7 +95,7 @@ void func_150BA3B0(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
                       0.0f) == 0) {
         return;
     }
-    if (func_15145C90(f.surface) != 0) {
+    if (prop_is_flagged(f.surface) != 0) {
         f.drop.u6 = 6;
         f.drop.u7 = 0;
         f.drop.kindFlags = 0x9F01;
@@ -160,13 +161,14 @@ void func_150BA3B0(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
     f.ring.u4C[3] = 0.0235f;
     f.ring.u6C[0] = 0.940404f;
     f.ring.u6C[1] = 1.0840001f; /* 0x3F8AC084 */
-    func_1515176C((u8 *) &f.ring, arg3, arg4);
+    emit_effect3d_from_surface((u8 *) &f.ring, arg3, arg4);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E7BC0/func_150BA3B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E7BC0/water_splash_spawn.s")
 #endif
 
-s32 func_150BA83C(u8 *arg0) {
+/* was func_150BA83C */
+s32 fx_fade_in_byte28_update(u8 *arg0) {
     s16 temp_v0;
 
     temp_v0 = (*(s16 *)((u8 *)arg0 + 0x1C));
@@ -176,7 +178,8 @@ s32 func_150BA83C(u8 *arg0) {
     return 1;
 }
 
-s32 func_150BA85C(f32 *arg0) {
+/* was func_150BA85C */
+s32 fx_gravity_spin_update(f32 *arg0) {
     arg0[0x114 / 4] += D_800A01FC * D_800BE9A4;
     arg0[0x34 / 4] += arg0[0x110 / 4] * D_800BE9A4;
     arg0[0x38 / 4] += arg0[0x114 / 4] * D_800BE9A4;
@@ -190,7 +193,8 @@ s32 func_150BA85C(f32 *arg0) {
 /* P143 */
 // effect_fade_by_height: update handler (D_8008A100 slot 2) of a sprite effect: alpha +0x5C = min(life +0x1C * 16,
 // height above +0x124 (y +0x38 minus floor) * 4, 255). Returns 0 (effect ends) once it is below the floor, else 1.
-s32 func_150BA904(u8 *fx) {
+/* was func_150BA904 */
+s32 effect_fade_by_height(u8 *fx) {
     f32 height = *(f32 *)(fx + 0x38) - *(f32 *)(fx + 0x124);
     s32 byLife;
     s32 byHeight;
@@ -210,5 +214,5 @@ s32 func_150BA904(u8 *fx) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E7BC0/func_150BA904.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E7BC0/effect_fade_by_height.s")
 #endif

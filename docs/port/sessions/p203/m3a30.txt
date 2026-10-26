@@ -16,12 +16,12 @@ s/    if ((random_int() \& 1) || material == 0) {/    if ((random_int() \& 2) ||
 s/    if ((random_int() \& 1) || material == 0) {/    if ((random_int() \& 1) \&\& material == 0) {/
 s/    if (kind == 1) {/    if (kind == 2) {/
 s/            if (D_80082FA0 == 0) {/            if (D_80082FA0 != 1) {/
-s/func_1000FA64(snd, (s32) pos\[0\], (s32) pos\[1\], (s32) pos\[2\], 0x4000/func_1000FA64(snd, (s32) pos[0], (s32) pos[2], (s32) pos[1], 0x4000/
-s/0x4000, 0x4B0, 0x320, (s32) func_1000EC24/0x4000, 0x4B0, 0x330, (s32) func_1000EC24/
+s/sfx_emitter_start(snd, (s32) pos\[0\], (s32) pos\[1\], (s32) pos\[2\], 0x4000/sfx_emitter_start(snd, (s32) pos[0], (s32) pos[2], (s32) pos[1], 0x4000/
+s/0x4000, 0x4B0, 0x320, (s32) sfx_cb_delayed_play_2d/0x4000, 0x4B0, 0x330, (s32) sfx_cb_delayed_play_2d/
 s/(void \*) 0x28, 0, 0, 0);/(void *) 0x28, 0, 1, 0);/
 s/                snd = 0x106;/                snd = 0x107;/
 s/            snd = 0xB0;/            snd = 0xB1;/
-s/func_10010E78(0, snd, 0x6590/func_10010E78(0, snd, 0x6591/
+s/sound_voice_play_at(0, snd, 0x6590/sound_voice_play_at(0, snd, 0x6591/
 s/(s32) pos\[2\], 500, 800);/(s32) pos[2], 500, 801);/
 s/    if (random_float() < D_800DCE54) {/    if (random_float() <= D_800DCE54) {/
 s/        sparks.count = 5 >> D_800DCE50;/        sparks.count = 5 >> (D_800DCE50 + 1);/
@@ -41,11 +41,11 @@ s/        sparks.w60 = 0x60600;/        sparks.w60 = 0x60601;/
 s/        sparks.h66 = 0x19;/        sparks.h66 = 0x18;/
 s/        sparks.f6C = 1.0f;/        sparks.f6C = 2.0f;/
 s/        sparks.b72 = 0xFF;/        sparks.b72 = 0;/
-s/        func_151530A8(\&sparks, arg4, arg5);/        func_151530A8(\&sparks, arg5, arg4);/
+s/        emit_streaks_from_spec(\&sparks, arg4, arg5);/        emit_streaks_from_spec(\&sparks, arg5, arg4);/
 s/    if (type != 0 \&\& D_80082FA0 < 2) {/    if (type != 0 \&\& D_80082FA0 < 1) {/
 s/    if (type != 0 \&\& D_80082FA0 < 2) {/    if (D_80082FA0 < 2) {/
 s/        part.pos\[1\] = pos\[1\];/        part.pos[1] = pos[2];/
-s/func_15145974(dir, \&part.rot\[1\], \&part.rot\[0\]);/func_15145974(dir, \&part.rot[0], \&part.rot[1]);/
+s/vec3_to_yaw_pitch_deg(dir, \&part.rot\[1\], \&part.rot\[0\]);/vec3_to_yaw_pitch_deg(dir, \&part.rot[0], \&part.rot[1]);/
 s/        part.b60 = 0xFF;/        part.b60 = 0;/
 s/        part.b68 = 2;/        part.b68 = 3;/
 s/        part.h74 = 0x15;/        part.h74 = 0x16;/
@@ -55,7 +55,7 @@ s/        part.scale\[2\] = 0.65f;/        part.scale[2] = 0.6f;/
 s/        part.rot\[2\] = 0.0f;/        part.rot[2] = 1.0f;/
 s/        part.kind = type;/        part.kind = kind;/
 s/        if (big) {/        if (!big) {/
-s/if (func_15145128(dir, normal, \&na, \&nb) != 0) {/if (func_15145128(dir, normal, \&na, \&nb) == 0) {/
+s/if (vec3_normalize_len(dir, normal, \&na, \&nb) != 0) {/if (vec3_normalize_len(dir, normal, \&na, \&nb) == 0) {/
 s/speed = random_float() \* 12.0f + 3.0f;/speed = random_float() * 12.0f + 4.0f;/
 s/part.vel\[0\] = -normal\[0\] \* speed;/part.vel[0] = normal[0] * speed;/
 s/part.vel\[2\] = -normal\[2\] \* speed;/part.vel[2] = -normal[1] * speed;/
@@ -63,7 +63,7 @@ s/part.spin\[1\] = (random_float() \* 203280.0f + -101640.0f) \* 0.0001f;/part.s
 s/part.spin\[3\] = (random_float() \* 449.0f + -744.0f) \* 0.001f;/part.spin[3] = (random_float() * 449.0f + -745.0f) * 0.001f;/
 s/                part.tex = 0x39E8;/                part.tex = 0x3980;/
 s/                part.b61 = 8;/                part.b61 = 0xC;/
-s/func_15132FBC(\&part, 3, 0xFF, 0, arg4, arg5);/func_15132FBC(\&part, 3, 0xFF, 0x10, arg4, arg5);/
+s/mdl_particle_spawn(\&part, 3, 0xFF, 0, arg4, arg5);/mdl_particle_spawn(\&part, 3, 0xFF, 0x10, arg4, arg5);/
 s/trail.life = (random_int() \& 0xF) + 0x14;/trail.life = (random_int() \& 0x1F) + 0x14;/
 s/            trail.f4 = 0.0f;/            trail.f4 = 1.0f;/
 s/trail.f8 = (random_float() \* 10000.0f + 10000.0f) \* 0.0001f;/trail.f8 = (random_float() * 10000.0f + 1000.0f) * 0.0001f;/
@@ -74,7 +74,7 @@ s/            part.spin\[1\] = part.rot\[1\];/            part.spin[1] = part.ro
 s/            part.spin\[2\] = part.rot\[2\];/            part.spin[2] = 0.5f;/
 s/            part.tex = 0x3980;/            part.tex = 0x39E8;/
 s/            part.spin\[3\] = 0.0f;/            part.spin[3] = 1.0f;/
-s/p = func_15132FBC(\&part, 3, 0xFF, 0x10, arg4, arg5);/p = func_15132FBC(\&part, 3, 0xFF, 0, arg4, arg5);/
+s/p = mdl_particle_spawn(\&part, 3, 0xFF, 0x10, arg4, arg5);/p = mdl_particle_spawn(\&part, 3, 0xFF, 0, arg4, arg5);/
 s/            if (p != NULL) {/            if (p == NULL) {/
 s/memcpy(p + 0x170, \&trail, sizeof(trail));/memcpy(p + 0x174, \&trail, sizeof(trail));/
 s/    if (found \&\& material != 0) {/    if (found) {/

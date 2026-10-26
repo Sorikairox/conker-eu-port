@@ -2,24 +2,28 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150C0F48(void *);
+void smoke_trail_destroy_puffs(void *);
 
 
-void func_150C0EB0(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150C0EB0 */
+void smoke_trail_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x20), (s32)(arg0 + 0x24), (s32)arg0);
 }
 
-void func_150C0EF0(void *arg0) {
-    func_150C0F48(arg0);
+/* was func_150C0EF0 */
+void smoke_trail_retire(void *arg0) {
+    smoke_trail_destroy_puffs(arg0);
     node_retire(arg0);
 }
 
-void func_150C0F1C(void *arg0) {
-    func_150C0F48(arg0);
+/* was func_150C0F1C */
+void smoke_trail_free(void *arg0) {
+    smoke_trail_destroy_puffs(arg0);
     node_unlink_free(arg0);
 }
 
-void func_150C0F48(void *arg0) {
+/* was func_150C0F48 */
+void smoke_trail_destroy_puffs(void *arg0) {
     s16 var_s0;
     s32 temp_s2;
     var_s0 = (*(s16 *)((u8 *)arg0 + 0x44));
@@ -35,7 +39,8 @@ void func_150C0F48(void *arg0) {
 #ifdef NON_MATCHING
 void * memcpy(void *, const void *, s32);
 
-u8 *func_150C0FC0(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150C0FC0 */
+u8 *smoke_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *temp_v0_4;
     u8 *temp_v0_3;
     u8 *temp_v0;
@@ -90,20 +95,20 @@ block_5:
     return temp_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C0FC0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/smoke_trail_spawn.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern f32 D_800BE9A4;
 extern s32 D_800BE9E4;
 
 typedef struct {
-    /* 0x00 */ u8 *rec; /* the smoke puff (func_151307F0 record) */
+    /* 0x00 */ u8 *rec; /* the smoke puff (particle_spawn_ex record) */
     /* 0x04 */ s16 next;
     /* 0x06 */ s16 pad6;
 } TrailSlot1138;
 
-/* smoke trail (object type 0x25, made by func_150C0FC0; +0x18..0x33 come from its template) */
+/* smoke trail (object type 0x25, made by smoke_trail_spawn; +0x18..0x33 come from its template) */
 typedef struct {
     /* 0x00 */ u8 u0;
     /* 0x01 */ u8 owner;
@@ -128,7 +133,7 @@ typedef struct {
     /* 0x46 */ s16 free;       /* free slot list head */
 } Trail1138;
 
-/* func_151307F0's sprite particle template (the func_15153BA4 layout, as SprTmpl5268 in game_eu_101080) */
+/* particle_spawn_ex's sprite particle template (the emit_particle_burst_req layout, as SprTmpl5268 in game_eu_101080) */
 typedef struct {
     /* 0x00 */ s32 u0;
     /* 0x04 */ s32 u4;
@@ -164,7 +169,8 @@ typedef struct {
 // speed is not below 3, the trail adds rate * D_800BE9A4 to accum and spawns one blue-grey smoke puff (sprite 0x6C,
 // size 67..84, alpha 80..200, life 70..91, random flips, drifting 40..73 in a random direction) per whole unit from
 // the free slot list; each puff gets the trail pointer at +0xA8 and its slot moves to the used list.
-void func_150C1138(Trail1138 *obj) {
+/* was func_150C1138 */
+void smoke_trail_update(Trail1138 *obj) {
     s32 pos[3]; /* f32 x, y, z */
     SprTmpl1138 t;
     Trail1138 *self;
@@ -257,7 +263,7 @@ void func_150C1138(Trail1138 *obj) {
                     t.mode |= ((random_int() & 1) ? 0x40 : 0) | flipX;
                     t.life = t.u22 = (u32) random_int() % 22 + 70;
                     t.u24 = 1.0352269f; /* D_800A0590 */
-                    obj->slots[slot].rec = (u8 *) func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner);
+                    obj->slots[slot].rec = (u8 *) particle_spawn_ex((s32) &t, 1, 0, 4, obj->room, obj->owner);
                     rec = obj->slots[slot].rec;
                     if (rec != NULL) {
                         memcpy(rec + 0xA8, &self, 4);
@@ -286,16 +292,17 @@ void func_150C1138(Trail1138 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C1138.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/smoke_trail_update.s")
 #endif
 
 #ifdef NON_MATCHING
 /*
- * pool_slot_release: particle death handler 0 (D_80089BA0, called by func_1513095C before the free). The owner
+ * pool_slot_release: particle death handler 0 (D_80089BA0, called by particle_sprite_update before the free). The owner
  * at +0xA8 keeps 8-byte slots at +0x40 (object pointer, s16 next) in a used list (head +0x44) and a free list
  * (head +0x46); the slot holding this particle is unlinked from the used list and pushed on the free list.
  */
-void func_150C1698(u8 *arg0) {
+/* was func_150C1698 */
+void pool_slot_release(u8 *arg0) {
     u8 *pool = *(u8 **)(arg0 + 0xA8);
     s16 head = *(s16 *)(pool + 0x44);
     s16 prev = -1;
@@ -329,5 +336,5 @@ void func_150C1698(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C1698.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/pool_slot_release.s")
 #endif

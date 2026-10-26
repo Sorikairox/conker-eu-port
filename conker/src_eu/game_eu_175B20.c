@@ -6,14 +6,15 @@
 #ifdef NON_MATCHING
 s32 memcpy(u8 *, s32, s32);
 
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE) {
+/* was func_15148310 */
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE) {
     u8 *sp3C;
     u8 *sp38;
     u8 *temp_a0;
     u8 *temp_v0;
 
     (*(s32 *)((u8 *)arg0 + 0x10)) = 1;
-    temp_v0 = func_15147FF0(arg0, arg2 + 0x48, 0x14, 1, 0, 1, arg9, argA, argC, (u8) (s32) argD, argE);
+    temp_v0 = fxrec_spawn(arg0, arg2 + 0x48, 0x14, 1, 0, 1, arg9, argA, argC, (u8) (s32) argD, argE);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -38,7 +39,7 @@ u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return sp3C;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15148310.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_spawn.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 (*D_8008A780[])(u8 *);
@@ -46,11 +47,12 @@ extern s32 (*D_8008A798[])(u8 *);
 extern s32 (*D_8008A7CC[])(u8 *, s32, s32, s32, f32, s32); /* = D_8008A7D0 - 4: the hit handlers */
 
 // trail_step: per-frame step of a trail particle (type table D_8008A5A0 entry 1).
-/* obj +0x98 is the trail record (func_15148310): +0x20 / +0x21 select the motion handlers (D_8008A780 / D_8008A798,
+/* obj +0x98 is the trail record (trail_spawn): +0x20 / +0x21 select the motion handlers (D_8008A780 / D_8008A798,
  * 0 = none), +0x22 the end handler (D_8008A7CC, the hit handler table D_8008A7D0 shifted by one); +0x18 flag 0x40 fades the alpha +0x1B in with the timer (obj +0x1C
  * times rate +0x1E, while the timer is below +0x1C). Stores the oldest point (index +0x2D of the +0x94 point list,
  * 0x14 bytes each) in obj +0x54, or 0 when the list is empty. Returns 0 when a handler ends the trail, else 1. */
-s32 func_15148428(u8 *obj) {
+/* was func_15148428 */
+s32 trail_step(u8 *obj) {
     u8 *rec = *(u8 **)(obj + 0x98);
     s8 done = 0;
     s32 a;
@@ -89,20 +91,20 @@ s32 func_15148428(u8 *obj) {
     return !done;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15148428.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_step.s")
 #endif
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
-f32 *func_15144B34(s32 arg0);
-s32 func_1514306C(s32, s32, s32, u8);
-s32 func_150954E4(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
-s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
+f32 *camera_get_pos(s32 arg0);
+s32 fx_material_tex_addr(s32, s32, s32, u8);
+s32 gfx_load_texture_tile(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
+void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
+s32 gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, s8 *);
 s32 gfx_set_combine_mode(s32, u8, s8 *);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 f32 sqrtf(f32);
 extern s32 D_80091914[];
 extern s32 D_80091954[];
@@ -129,11 +131,12 @@ extern s32 D_800A4EA8[];
 /* The points (obj +0x94, 0x14 bytes: x, y, z, vy, s16 texture t at +0x10) run from the newest (+0x2E - 1) back to
  * the oldest (+0x2D), ring of +0x25 entries. Each point gets two vertices, offset by +-n where n is the normal of
  * (point - camera) x (segment) scaled to the half width rec +0; each segment emits one 4-vertex load and two
- * triangles. Vertices come from func_151D6310 (2 per point but the last, double-buffered on D_800BE9C0). Sets the
- * texture (func_150954E4, only when it changed: D_800DD5E0), the colours rec +0x44 / +0x45 at alpha rec +0x1B,
+ * triangles. Vertices come from vtx_slot_buffer_get (2 per point but the last, double-buffered on D_800BE9C0). Sets the
+ * texture (gfx_load_texture_tile, only when it changed: D_800DD5E0), the colours rec +0x44 / +0x45 at alpha rec +0x1B,
  * the geometry mode rec +0x2C / +0x30, combine rec +0x3B and render mode rec +0x28 | +0x3C | +0x40 with the
  * D_800A4EA8 entry rec +0x34. Returns the display list end; draws nothing with fewer than 2 points. */
-s32 func_151485AC(u8 *obj, s32 gfx, s16 arg2) {
+/* was func_151485AC */
+s32 trail_draw(u8 *obj, s32 gfx, s16 arg2) {
     u8 *rec = *(u8 **)(obj + 0x98);
     u8 *pts;
     f32 *cam;
@@ -158,7 +161,7 @@ s32 func_151485AC(u8 *obj, s32 gfx, s16 arg2) {
     if (*(s8 *)(obj + 0x2C) < 2) {
         return gfx;
     }
-    func_151D6310((s32 *)(obj + 0x84), arg2, obj[0x25] * 0x20 - 0x20, (s32 *)&v, NULL);
+    vtx_slot_buffer_get((s32 *)(obj + 0x84), arg2, obj[0x25] * 0x20 - 0x20, (s32 *)&v, NULL);
     if (v == NULL) {
         return gfx;
     }
@@ -166,21 +169,21 @@ s32 func_151485AC(u8 *obj, s32 gfx, s16 arg2) {
         v += (obj[0x25] * 2 - 2) * 0x10;
     }
     flag = 1;
-    cam = func_15144B34(arg2);
+    cam = camera_get_pos(arg2);
     pts = *(u8 **)(obj + 0x94);
-    tex = func_1514306C(0, rec[0x19], 0, 2);
+    tex = fx_material_tex_addr(0, rec[0x19], 0, 2);
     if (tex != D_800DD5E0) {
         D_80091954[0] = D_80091914[rec[0x19]];
-        gfx = func_150954E4(gfx, D_80091954, 0, 0, 0, 0, 2, 0x100, 0x100, (rec[0x18] & 0x80) ? 0x3E : 3);
+        gfx = gfx_load_texture_tile(gfx, D_80091954, 0, 0, 0, 0, 2, 0x100, 0x100, (rec[0x18] & 0x80) ? 0x3E : 3);
         D_800DD5E0 = tex;
     }
-    func_151441A4(&r0, &g0, &b0, &a0, 0, 0, 0, 0, 0, 0, 0, rec[0x1B], rec[0x1A], *(s8 *)(rec + 0x44));
-    func_151442FC(&r1, &g1, &b1, &a1, 0, 0, 0, 0, 0, 0, 0, rec[0x1B], rec[0x1A], *(s8 *)(rec + 0x45));
-    gfx = func_15142B7C(gfx, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30));
-    gfx = func_15142C10(gfx, r1, g1, b1, a1, &flag);
-    gfx = func_15142CF0(gfx, 0, 0, r0, g0, b0, a0, &flag);
+    fx_calc_color_mode_a(&r0, &g0, &b0, &a0, 0, 0, 0, 0, 0, 0, 0, rec[0x1B], rec[0x1A], *(s8 *)(rec + 0x44));
+    fx_calc_color_mode_b(&r1, &g1, &b1, &a1, 0, 0, 0, 0, 0, 0, 0, rec[0x1B], rec[0x1A], *(s8 *)(rec + 0x45));
+    gfx = gfx_geometry_mode_cached(gfx, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30));
+    gfx = gfx_env_color_cached(gfx, r1, g1, b1, a1, &flag);
+    gfx = gfx_prim_color_cached(gfx, 0, 0, r0, g0, b0, a0, &flag);
     gfx = gfx_set_combine_mode(gfx, rec[0x3B], &flag);
-    gfx = (s32)func_15142FBC(gfx, *(s32 *)(rec + 0x28) | 0x80000 | D_800D30BC | 0x2C00 | *(s32 *)(rec + 0x3C) | *(s32 *)(rec + 0x40),
+    gfx = (s32)gfx_other_mode_cached(gfx, *(s32 *)(rec + 0x28) | 0x80000 | D_800D30BC | 0x2C00 | *(s32 *)(rec + 0x3C) | *(s32 *)(rec + 0x40),
                              D_800A4EA8[*(s32 *)(rec + 0x34) * 2 + 1] | D_800A4EA8[*(s32 *)(rec + 0x34) * 2], &flag);
 
     i = *(s8 *)(obj + 0x2E) - 1;
@@ -276,7 +279,7 @@ s32 func_151485AC(u8 *obj, s32 gfx, s16 arg2) {
 }
 #undef TRAIL_VTX
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_151485AC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_draw.s")
 #endif
 #ifdef NON_MATCHING
 // trail_grow: motion handler 1 of a trail (D_8008A780): moves the points and adds one per frame until full.
@@ -284,8 +287,9 @@ s32 func_151485AC(u8 *obj, s32 gfx, s16 arg2) {
  * +0x2E (exclusive), count +0x2C. Each point falls by gravity rec +0x10 (rec = obj +0x98) into its vy and moves by
  * (rec +4, vy, rec +0xC) times the frame time D_800BE9A4. While the ring has room, the obj position (+0x10) is added
  * at the head with vy = rec +8 and the texture t of all points is ramped 0..0x1000 (0x1000..0 with rec +0x18 flag
- * 0x20); once full, rec +0x20 becomes 3 (func_15149114, if rec +0x18 & 0x17) or 2 (func_15149064). Returns 1. */
-s32 func_15148E34(u8 *obj) {
+ * 0x20); once full, rec +0x20 becomes 3 (trail_fall, if rec +0x18 & 0x17) or 2 (trail_move_points). Returns 1. */
+/* was func_15148E34 */
+s32 trail_grow(u8 *obj) {
     u8 *pts = *(u8 **)(obj + 0x94);
     u8 *rec = *(u8 **)(obj + 0x98);
     u8 *p;
@@ -344,10 +348,11 @@ s32 func_15148E34(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15148E34.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_grow.s")
 #endif
 typedef struct { f32 x; f32 y; f32 z; f32 vy; s16 a; s16 pad12; } Part9064;
-s32 func_15149064(u8 *arg0) {
+/* was func_15149064 */
+s32 trail_move_points(u8 *arg0) {
     Part9064 *base;
     f32 *v;
     s32 i;
@@ -370,21 +375,22 @@ s32 func_15149064(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15046F70(f32 *, s32, f32, u8 *);
-s32 func_1518CAEC(u8 *, s32, s32, s32, f32);
-s32 func_1518CC0C(u8 *, s32, s32, s32, f32, s32);
+s32 collision_floor_probe(f32 *, s32, f32, u8 *);
+s32 drip_stream_splash(u8 *, s32, s32, s32, f32);
+s32 drip_stream_splash_dust(u8 *, s32, s32, s32, f32, s32);
 s32 streak_on_land_debris(u8 *, s32, s32, s32, f32, s32);
 s32 streak_on_land_burst(void *, s32, s32, s32, f32, s32);
 extern s32 (*D_8008A7D0[])(u8 *, s32, s32, s32, f32, s32);
 extern s32 (*D_8008A7F0[])(u8 *, s32, s32, s32, f32, s32);
 
 // trail_fall: motion handler 3 of a full trail (D_8008A780): moves the points and checks the oldest for a hit.
-/* Points as func_15148E34 (all of them, from the head +0x2E back to the oldest +0x2D). With rec +0x18 & 0x17 (rec =
+/* Points as trail_grow (all of them, from the head +0x2E back to the oldest +0x2D). With rec +0x18 & 0x17 (rec =
  * obj +0x98) and the oldest point moving down, the segment from its old height to the new one is tested against
- * the collision (func_15046F70, result in obj +0x60..); on a hit the handler rec +0x24 (D_8008A7F0, when the hit
+ * the collision (collision_floor_probe, result in obj +0x60..); on a hit the handler rec +0x24 (D_8008A7F0, when the hit
  * kind obj +0x7D is 3) or rec +0x23 (D_8008A7D0) gets the old position, the hit height +0x60 and obj +0x64.
  * Returns 0 when that handler does, else 1. */
-s32 func_15149114(u8 *obj) {
+/* was func_15149114 */
+s32 trail_fall(u8 *obj) {
     u8 *rec = *(u8 **)(obj + 0x98);
     u8 *pts = *(u8 **)(obj + 0x94);
     s32 old[3]; /* the oldest point before the move (x, y, z as words) */
@@ -424,7 +430,7 @@ s32 func_15149114(u8 *obj) {
     seg[0] = *(f32 *)(p + 0);
     seg[1] = *(f32 *)&old[1];
     seg[2] = *(f32 *)(pts + *(s8 *)(obj + 0x2D) * 0x14 + 8);
-    if (!func_15046F70(seg, 0, *(f32 *)(pts + *(s8 *)(obj + 0x2D) * 0x14 + 4), obj + 0x60)) {
+    if (!collision_floor_probe(seg, 0, *(f32 *)(pts + *(s8 *)(obj + 0x2D) * 0x14 + 4), obj + 0x60)) {
         return 1;
     }
     if (obj[0x7D] == 3) {
@@ -441,14 +447,15 @@ s32 func_15149114(u8 *obj) {
     return D_8008A7D0[k](obj, old[0], old[1], old[2], *(f32 *)(obj + 0x60), (s32)(obj + 0x64)) != 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15149114.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_fall.s")
 #endif
 #ifdef NON_MATCHING
 // trail_shrink: motion handler 4 of a trail (D_8008A780): drops the newest point each frame and re-ramps the rest.
 /* Count obj +0x2C, ring of +0x25 points obj +0x94 (0x14 bytes, u16 texture t at +0x10) from the oldest +0x2D to the
  * head +0x2E. Returns 0 (the trail ends) when fewer than 3 points are left; else removes the head point and sets
  * the texture t of the others to a 0..0x1000 ramp (0x1000..0 with rec +0x18 flag 0x20, rec = obj +0x98), returns 1. */
-s32 func_15149350(u8 *obj) {
+/* was func_15149350 */
+s32 trail_shrink(u8 *obj) {
     u8 *rec;
     u8 *pts;
     s32 i;
@@ -485,9 +492,10 @@ s32 func_15149350(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15149350.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_shrink.s")
 #endif
-s32 func_15149468(u8 **arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* was func_15149468 */
+s32 trail_start_shrink(u8 **arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *temp = arg0[0x98 / 4];
     temp[0x20] = 4;
     return 1;
@@ -496,7 +504,7 @@ s32 func_15149468(u8 **arg0, s32 arg1, s32 arg2, s32 arg3) {
 #ifdef NON_MATCHING
 /* P136 */
 /*
- * trail_spawn_directed: spawns one trail particle (func_15148310, kind 0, handler pair 1 / 0) of type n at
+ * trail_spawn_directed: spawns one trail particle (trail_spawn, kind 0, handler pair 1 / 0) of type n at
  * (x, y, z) with sprite `sprite` and tint tint + 3. Its velocity has length speed along the byte angles pitch /
  * yaw (angle_byte_cos = byte-angle sine): (speed sin(pitch) sin(yaw - 0x40), -speed sin(pitch - 0x40),
  * speed sin(pitch) sin(yaw)); motion block speed slot = drag, scale = scale, flags 8 (0x28 for type 0xA),
@@ -504,7 +512,8 @@ s32 func_15149468(u8 **arg0, s32 arg1, s32 arg2, s32 arg3) {
  * The asm leaves some block bytes unwritten (spawn +0x14 / +0x18, motion floor +0x14 and timers +0x1C / +0x1E,
  * render +0x1E): the C clears them.
  */
-void func_1514948C(u8 n, f32 x, f32 y, f32 z, s32 tint, s32 yaw, s32 pitch, f32 speed, s32 sprite, f32 drag, f32 scale,
+/* was func_1514948C */
+void trail_spawn_directed(u8 n, f32 x, f32 y, f32 z, s32 tint, s32 yaw, s32 pitch, f32 speed, s32 sprite, f32 drag, f32 scale,
                    u8 flag) {
     struct {
         s32 render[3]; /* sp4C */
@@ -572,13 +581,14 @@ void func_1514948C(u8 n, f32 x, f32 y, f32 z, s32 tint, s32 yaw, s32 pitch, f32 
     rb.b0 = 0;
     rb.b1 = 9;
     rb.pad[0] = rb.pad[1] = 0;
-    func_15148310((u8 *) &sb, (s32) &mb, 0, 1, 0, 0, 0, 0, 0, 0, 0, (u8 *) &rb, 0, flag, 1);
+    trail_spawn((u8 *) &sb, (s32) &mb, 0, 1, 0, 0, 0, 0, 0, 0, 0, (u8 *) &rb, 0, flag, 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_1514948C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/trail_spawn_directed.s")
 #endif
 
-s32 func_15149638(u8 *arg0) {
+/* was func_15149638 */
+s32 trail_alpha_from_timer(u8 *arg0) {
     u8 *temp_v0;
     s32 temp_v1;
 
@@ -594,6 +604,7 @@ s32 func_15149638(u8 *arg0) {
     return 1;
 }
 
-void func_15149674(s32 arg0) {
-    func_15147E64(arg0);
+/* was func_15149674 */
+void trail_die_retire(s32 arg0) {
+    fxrec_die_retire(arg0);
 }

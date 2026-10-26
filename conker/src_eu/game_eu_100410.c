@@ -75,7 +75,7 @@ s32 flake_particle_spawn(s32 kind, u8 *mtx, u8 arg2, u8 arg3) {
 #endif
 
 #ifdef NON_MATCHING
-void func_1514373C(f32, f32, f32 *, f32 *);
+void vec2_from_angle_rad(f32, f32, f32 *, f32 *);
 
 /* was func_150D2E34 */
 void fx_sprite_shower_update(u8 *arg0) {
@@ -168,9 +168,9 @@ void fx_sprite_shower_update(u8 *arg0) {
             temp_f4 = 22.0f - (*(f32 *)((u8 *)temp_s0 + 0x18));
             sp.uD0 = temp_f4;
             if (temp_f4 > 0.0f) {
-                func_1514373C((*(f32 *)((u8 *)temp_s0 + 4)), (f32) (*(s16 *)((u8 *)temp_s2 + 6)), &sp.u9C, &sp.uA4);
+                vec2_from_angle_rad((*(f32 *)((u8 *)temp_s0 + 4)), (f32) (*(s16 *)((u8 *)temp_s2 + 6)), &sp.u9C, &sp.uA4);
                 sp.uA0 = (f32) (*(s16 *)((u8 *)temp_s2 + 8));
-                func_150A7E40(temp_s0 + 0x1C, sp.u9C, sp.uA0, sp.uA4, &sp.u104, &sp.u108, &sp.u10C);
+                mtxf_transform_point(temp_s0 + 0x1C, sp.u9C, sp.uA0, sp.uA4, &sp.u104, &sp.u108, &sp.u10C);
                 sp.uF0 = (random_float() * 25.0f) + 50.0f;
                 temp_f2 = (random_float() * 1024.0f) + -2560.0f + 2048.0f;
                 sp.uA8 = temp_f2;
@@ -242,7 +242,7 @@ u8 *beam_build_quad_vtx(u8 *arg0, s16 arg1) {
     u8 *temp_v1;
     u8 *temp_v1_2;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u94, &sp.u47);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u94, &sp.u47);
     sp.u90 = sp.u94;
     if (sp.u94 != NULL) {
         if (sp.u47 != 0) {
@@ -253,7 +253,7 @@ u8 *beam_build_quad_vtx(u8 *arg0, s16 arg1) {
             memcpy((*(s32 *)((u8 *)temp_v1 + 0x100)), temp_a1, 0x40);
             memcpy((*(s32 *)((u8 *)temp_v1 + 0x100)) + 0x40, temp_a1, 0x40);
         }
-        temp_v0 = func_15144B34((s32) arg1);
+        temp_v0 = camera_get_pos((s32) arg1);
         sp.u80 = (*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34));
         sp.u84 = (*(f32 *)((u8 *)arg0 + 0x44)) - (*(f32 *)((u8 *)arg0 + 0x38));
         temp_f8 = (*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C));
@@ -270,7 +270,7 @@ u8 *beam_build_quad_vtx(u8 *arg0, s16 arg1) {
         sp.u60 = sp.u6C - (*(f32 *)((u8 *)temp_v0 + 4));
         sp.u74 = temp_f0 + sp.u80;
         sp.u64 = sp.u70 - (*(f32 *)((u8 *)temp_v0 + 8));
-        func_150ADD90(temp_f12, temp_f14, &sp.u80, &sp.u5C, &sp.u50);
+        vec3f_cross(temp_f12, temp_f14, &sp.u80, &sp.u5C, &sp.u50);
         sp28 = sp.u50;
         temp_f0_2 = (sp.u50 * sp.u50) + (sp.u54 * sp.u54) + (sp.u58 * sp.u58);
         if (temp_f0_2 != 0.0f) {
@@ -324,8 +324,8 @@ s32 beam_scroll_fade_step(u8 *arg0) {
     *(f32 *)(arg0 + 0x128) = (*(f32 *)(arg0 + 0x130) * D_800BE9A4) + *(f32 *)(arg0 + 0x128);
     *(f32 *)(arg0 + 0x12C) = (*(f32 *)(arg0 + 0x134) * D_800BE9A4) + *(f32 *)(arg0 + 0x12C);
     temp_s0 = arg0 + 0x110;
-    (*(f32 *)((u8 *)temp_s0 + 0x18)) = func_15144B68((*(f32 *)((u8 *)arg0 + 0x128)));
-    (*(f32 *)((u8 *)temp_s0 + 0x1C)) = func_15144B68((*(f32 *)((u8 *)temp_s0 + 0x1C)));
+    (*(f32 *)((u8 *)temp_s0 + 0x18)) = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x128)));
+    (*(f32 *)((u8 *)temp_s0 + 0x1C)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0 + 0x1C)));
     *(f32 *)(temp_s0 + 0) = *(f32 *)(temp_s0 + 8) + (*(f32 *)(temp_s0 + 0x10) * sinf(*(f32 *)(temp_s0 + 0x18)));
     *(f32 *)(temp_s0 + 4) = *(f32 *)(temp_s0 + 0xC) + (*(f32 *)(temp_s0 + 0x14) * sinf(*(f32 *)(temp_s0 + 0x1C)));
     (*(f32 *)((u8 *)temp_s0 + 0x28)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x28)) - D_800BE9A4);

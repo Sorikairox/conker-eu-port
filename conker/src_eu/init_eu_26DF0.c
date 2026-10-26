@@ -27,10 +27,10 @@ void __osSetHWIntrRoutine(OSHWIntr interrupt, s32 (*handler)(void)) {
 #define __OSGlobalIntMask D_8002C06C
 #define __osEventStateTab D_80042CA0
 #define __osRunQueue D_8002C148
-#define __osEnqueueThread func_10007CC8
-#define __osPopThread func_10007D14
-#define __osEPiRawStartDma func_10023DA0
-#define osEPiRawStartDma func_10023DA0
+#define __osEnqueueThread os_enqueue_thread
+#define __osPopThread os_pop_thread
+#define __osEPiRawStartDma os_epi_raw_start_dma
+#define osEPiRawStartDma os_epi_raw_start_dma
 extern s32 osDiskExist;
 extern OSPiHandle *__osDiskHandle;
 extern u32 __OSGlobalIntMask;

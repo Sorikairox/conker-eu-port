@@ -1,4 +1,4 @@
-# P253 func_151894F4 (trail_matrix_history_push_world) mutants: sed % setup names
+# P253 afterimage_history_push_world (trail_matrix_history_push_world) mutants: sed % setup names
 s/s32 cur = D_800BE9C0 \* n;/s32 cur = D_800BE9C0;/ % h1
 s/(D_800BE9C0 ^ 1) \* n/(D_800BE9C0 ^ 1)/ % h0
 s/k < D_800DC318\[0\]; k++/k < D_800DC318[0] - 1; k++/ % last

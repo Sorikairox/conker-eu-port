@@ -6,7 +6,7 @@
 #     written (= the caller uses a return value)?
 #   - C dispatchers (NM C referencing the table symbol): the line is listed for review (call used in an expression?).
 # Reports: (a) tables whose C entries disagree on return kind (void / value) or parameter count,
-#          (b) void C entries in tables whose asm dispatcher reads v0 after the jalr (P159 func_151C1EF0 case).
+#          (b) void C entries in tables whose asm dispatcher reads v0 after the jalr (P159 object_filter_not_listed case).
 # P162: D_ names resolved to EU addresses via undefined_syms.eu.txt (US names like D_80082FA4 live elsewhere in EU);
 #       each jalr is tied to the table it loads from (register trace), only those jalrs are checked for v0 / f0 use.
 # Run from the worktree root: python3 tools/port/tablesig.py (P253: moved from docs/port/sessions/p214; the container

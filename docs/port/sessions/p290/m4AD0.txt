@@ -21,7 +21,7 @@ s/if (size != 0 \&\&/if (size != 1 \&\&/
 s/< k->smokePct/<= k->smokePct/
 s/y + 20.0f;/y + 10.0f;/
 s/pos\[2\] = z;/pos[2] = x;/
-s/func_151C384C(pos, 0xFF, 1)/func_151C384C(pos, 0xFF, 0)/
+s/fire_embers_spawn(pos, 0xFF, 1)/fire_embers_spawn(pos, 0xFF, 0)/
 s/D_800D9D83\[slot \* 28\] = 100;/D_800D9D83[slot * 27] = 100;/
 s/D_800D9D83\[slot \* 28\] = 0;/D_800D9D83[slot * 28] = 1;/
 s/} else if (slot != 0xFF) {/} else if (slot != 0xFE) {/

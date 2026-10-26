@@ -140,7 +140,8 @@ void n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s3
 }
 
 // n_alEvtqFlushType that also returns the time of the first flushed event
-s32 func_1001C4F0(ALEventQueue *evtq, s16 type) {
+/* was func_1001C4F0 */
+s32 n_evtq_flush_type_first(ALEventQueue *evtq, s16 type) {
     ALLink *thisNode;
     ALLink *nextNode;
     N_ALEventListItem *thisItem;

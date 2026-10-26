@@ -33,7 +33,8 @@ typedef struct {
     s16 u56;
 } Blk58_89B0;
 
-u8 *func_151B89B0(u8 *arg0) {
+/* was func_151B89B0 */
+u8 *bullet_glow_spawn(u8 *arg0) {
     s32 pad; // fakematch: 4-byte hole above tmp
     u8 *tmp;
     Blk58_89B0 blk;
@@ -76,7 +77,8 @@ u8 *func_151B89B0(u8 *arg0) {
     return temp_v0;
 }
 
-s32 func_151B8B5C(u8 *arg0)
+/* was func_151B8B5C */
+s32 bullet_glow_follow_update(u8 *arg0)
 {
     u8 *p = *(u8 **)(arg0 + 0x110);
     if (p != NULL) {
@@ -93,17 +95,19 @@ s32 func_151B8B5C(u8 *arg0)
 #ifdef NON_MATCHING
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
-s32 func_151B8BEC(s32 arg0, s16 arg1) {
+/* was func_151B8BEC */
+s32 bullet_glow_draw(s32 arg0, s16 arg1) {
     return beam_quad_build_b(arg0, arg1);
 }
 #else
-void func_151B8BEC(s32 arg0, s16 arg1) {
+void bullet_glow_draw(s32 arg0, s16 arg1) {
     beam_quad_build_b(arg0, arg1);
 }
 #endif
 
 extern f32 D_800DCE54;
-s32 func_151B8C18(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151B8C18 */
+s32 bullet_smoke_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *p;
     struct_eu_EF410 sp18;
 
@@ -121,21 +125,22 @@ s32 func_151B8C18(u8 *arg0, u8 arg1, s32 arg2) {
     return point_emitter_spawn(&sp18, 0, arg1, arg2);
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 #ifdef NON_MATCHING
-s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
 #else
-s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 #endif
 
-void func_151B8CA4(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+/* was func_151B8CA4 */
+void bullet_debris_spray_emit(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     f32 sp6C[9];
     f32 temp_f2;
 
     sp6C[6] = arg0;
     sp6C[7] = arg1;
     sp6C[8] = arg2;
-    func_15143794((s16) (random_int() & 0xFF), (s16) ((random_int() % 65U) - 0x20), random_float() * 945.0f * 0.01f, &sp6C[3]);
+    vec3_from_angles_byte((s16) (random_int() & 0xFF), (s16) ((random_int() % 65U) - 0x20), random_float() * 945.0f * 0.01f, &sp6C[3]);
     temp_f2 = (random_float() * 157.0f) + 604.0f;
     sp6C[0] = 0.0f;
     sp6C[1] = 0.0f;
@@ -145,25 +150,26 @@ void func_151B8CA4(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
     sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
 #ifdef NON_MATCHING
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
+    particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
 #else
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+    particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((random_float() * 157.0f) + -151.0f) * 0.001f, (random_float() * 55.0f) + 75.0f, (random_int() % 26U) + 0x19, (random_int() % 101U) + 0x64, 0xA, 0x19, 0, -1, 0, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
 #endif
 }
 
 #ifdef NON_MATCHING
 extern u8 D_800AA898[]; /* s32[4]: the 4 smoke textures */
 extern u8 D_800A5860[]; /* zero vector */
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 random_int(void);
 f32 random_float(void);
 
 // smoke_puff_spawn: spawns one big smoke puff particle (random texture of the 4 in D_800AA898, half size
 // 900..1400, white, alpha 0xFF, 300 frames, fade from 1 at rate 0xFF, draw 6 / update 5, random flip flags 0x40 /
-// 0x80) at the object's position +0x38, in its room (+0xC) for its owner (+0x1) through func_151307F0.
-// Returns func_151307F0's result (the new particle): P215, the asm returns it and port-b's asm caller func_151C0698
-// stores it at its particle payload +0x84 (func_151C1730 dereferences it every frame).
-s32 func_151B8EB8(u8 *obj) {
+// 0x80) at the object's position +0x38, in its room (+0xC) for its owner (+0x1) through particle_spawn_ex.
+// Returns particle_spawn_ex's result (the new particle): P215, the asm returns it and port-b's asm caller projectile_fire
+// stores it at its particle payload +0x84 (bullet_update dereferences it every frame).
+/* was func_151B8EB8 */
+s32 bullet_smoke_puff_spawn(u8 *obj) {
     s32 textures[4];
     struct {
         s32 handlers;   /* +0x00: 0x200005 */
@@ -249,8 +255,8 @@ s32 func_151B8EB8(u8 *obj) {
     req.u65 = 0;
     req.u5C = 0;
     req.u66 = 0xFF;
-    return func_151307F0((s32) &req, 1, 0, 0, obj[0xC], obj[1]);
+    return particle_spawn_ex((s32) &req, 1, 0, 0, obj[0xC], obj[1]);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E61C0/func_151B8EB8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E61C0/bullet_smoke_puff_spawn.s")
 #endif

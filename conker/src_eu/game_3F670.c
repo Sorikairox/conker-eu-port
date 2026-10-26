@@ -87,7 +87,7 @@ void debris_spawn_linked(s32 arg0) {
     sp.u98 = 0;
     sp.u9A = 1;
     sp.u9C = 0xFF;
-    temp_v0 = (u8 *) func_15132FBC(&sp, 0, 0, 4, 0xFF, 1);
+    temp_v0 = (u8 *) mdl_particle_spawn(&sp, 0, 0, 4, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 0x170, &sp34, 4);
         for (i = 0; i < 2; i = (u8)(i + 1)) {

@@ -1,4 +1,4 @@
-# P246 func_150C1BC0 (emit_point_debris) mutants: sed % setup names
+# P246 emit_point_debris (emit_point_debris) mutants: sed % setup names
 s/13U - 0x3F/13U - 0x3E/ % base
 s/13U - 0x3F/12U - 0x3F/ % base
 s/sp = angle_byte_cos(pitch \& 0xFF)/sp = angle_byte_cos(pitch \& 0x7F)/ % base neg

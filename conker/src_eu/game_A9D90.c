@@ -17,7 +17,7 @@ void player_set_respawn_wait(struct127 *arg0, s32 arg1) {
 
 // "goto" hell
 #ifdef NON_MATCHING
-void func_1517FD84(s32, f32, f32, f32, s32);
+void hud_lens_set_target(s32, f32, f32, f32, s32);
 extern u16 D_8009015C;
 extern s32 D_800BEB30;
 extern u16 D_800D1CC2;
@@ -62,10 +62,10 @@ void player_update_life_states(void) {
                                 var_v0 = var_s1->unk31C->unk120;
                             }
                             if (var_v0 == 0xB) {
-                                func_1517F3B0(0, 0, 0, 0xF, 1, var_s2);
+                                screen_fade_start(0, 0, 0, 0xF, 1, var_s2);
                                 var_s1->unk31C->unk120 = 0xC;
                             } else if (var_v0 == 0xC) {
-                                if (func_1517F51C(var_s2, 0) != 0) {
+                                if (screen_fade_is_opaque(var_s2, 0) != 0) {
                                     player_lose_life(var_s2);
                                 }
                             } else {
@@ -86,14 +86,14 @@ void player_update_life_states(void) {
                                     }
                                 }
                                 var_s1->unk31C->pad126 += D_800BE9E4;
-                                if ((*(u16 *)((u8 *)&D_800BEB30 + (var_s2 * 2)) & 0x8000) || ((D_800BE616 != 0) && (var_s1->unk31C->unk84 == 0)) || (func_150859AC((s16) var_s2, 3) < 2) || ((temp_s0_2 = var_s1->unk31C, (temp_s0_2->unk84 == 1)) && ((s16) temp_s0_2->pad126 >= 0xB5))) {
+                                if ((*(u16 *)((u8 *)&D_800BEB30 + (var_s2 * 2)) & 0x8000) || ((D_800BE616 != 0) && (var_s1->unk31C->unk84 == 0)) || (player_stat_get((s16) var_s2, 3) < 2) || ((temp_s0_2 = var_s1->unk31C, (temp_s0_2->unk84 == 1)) && ((s16) temp_s0_2->pad126 >= 0xB5))) {
                                     var_s1->unk31C->unk122 = 1;
                                 }
                                 if (D_8009015C & 0x80) {
                                     var_s1->unk31C->unk122 = 0;
                                 }
                                 obj_get_held_point((u8 *) var_s1, &sp.u68, &sp.u64, &sp.u60);
-                                func_1517FD84(0, sp.u68, sp.u64, sp.u60, var_s2);
+                                hud_lens_set_target(0, sp.u68, sp.u64, sp.u60, var_s2);
                                 temp_s0_3 = var_s1->unk31C;
                                 if ((temp_s0_3->unk122 != 0) && (temp_s0_3->unk120 == 5)) {
                                     temp_s0_3->unk120 = 6;
@@ -143,13 +143,13 @@ void player_enter_dead_state(struct127 *arg0) {
     arg0->unk31C->unk120 = 3;
 
     if (temp_lo <= D_80082FA0) {
-        func_15181D70(temp_lo);
+        hud_lens_start_scripted(temp_lo);
     }
 }
 
 #ifdef NON_MATCHING
 void node_broadcast_all(s32 arg0, u8 arg1);
-void func_1504BAF0(struct127 *);
+void obj_drop_carried(struct127 *);
 u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3);
 extern u16 D_8009015C;
 extern s16 D_800E0F00[];
@@ -198,7 +198,7 @@ s32 player_hit_reaction(struct127 *obj, s32 kind) {
             D_800E0F00[idx]++;
         }
         if ((D_8009015C & 0x20) && obj->unk128 == 0) {
-            func_15085710(1, 10, 1);
+            player_stat_modify(1, 10, 1);
         }
     }
     msg.obj = obj;
@@ -299,7 +299,7 @@ s32 player_hit_reaction(struct127 *obj, s32 kind) {
     if (obj->unk13C != 0) {
         saved = D_800D154C;
         D_800D154C = obj;
-        func_1504BAF0(obj);
+        obj_drop_carried(obj);
         D_800D154C = saved;
     }
 
@@ -330,13 +330,13 @@ void player_send_event(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     event_dispatch_alt(3, tmp | 0x2000, arg1, arg2, arg3, arg4);
 }
 #ifdef NON_MATCHING
-void func_15085710(s16, s16, s32);
-s32 func_150859AC(s16 arg0, s32 arg1);
-s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
+void player_stat_modify(s16, s16, s32);
+s32 player_stat_get(s16 arg0, s32 arg1);
+s32 setup_entry_spawn(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
 void camera_controller_init(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
-void func_150858A0(void *arg0, s32 arg1, s32 arg2);
-void func_15182338(s32);
-void func_150891D4(u8 *arg0);
+void obj_place_at_start(void *arg0, s32 arg1, s32 arg2);
+void hud_lens_reset(s32);
+void rail_record_resync(u8 *arg0);
 extern u8 D_800BE616;
 extern s32 D_800BE9F0;
 extern s8 D_8008726C;
@@ -347,12 +347,12 @@ extern struct127 D_800CC2D0[];
 // mp_player_respawn: multiplayer respawn of a player object (D_800CC2D0[idx], 0x32C bytes) after a lost life.
 // Keeps the character record's (+0x31C) +0x1AA / +0x1AF / +0x1B0 and the object's +0x328 across the reset; the team /
 // colour byte is ctl +0x11B in multiplayer (D_800BE616), else -1. In level 0x2B a player whose stat 1 is 17..32 gets a
-// random 17..32 back (func_15085710(idx, 0, n)) and its D_800D20FC entry +4 becomes 0x9C (n < 29) or 0x9D. Then the
-// object is reset (obj_remove), its D_800D20FC entry re-placed at a start point (func_15082E44, under the
-// D_800D18A8 flag), and human players (idx <= D_80082FA0) get their camera / HUD reset (camera_controller_init, func_15182338,
-// two func_1517F3B0 fades), others func_150858A0. Finally the control state is cleared, flags +0x22C |= 0x100,
+// random 17..32 back (player_stat_modify(idx, 0, n)) and its D_800D20FC entry +4 becomes 0x9C (n < 29) or 0x9D. Then the
+// object is reset (obj_remove), its D_800D20FC entry re-placed at a start point (setup_entry_spawn, under the
+// D_800D18A8 flag), and human players (idx <= D_80082FA0) get their camera / HUD reset (camera_controller_init, hud_lens_reset,
+// two screen_fade_start fades), others obj_place_at_start. Finally the control state is cleared, flags +0x22C |= 0x100,
 // health D_8008726C, and in multiplayer a 150-frame invulnerability (+0x125, ctl +0x1B1); in level 0x33 (race) also
-// a 120-frame event (player_send_event) and a rail re-sync (func_150891D4). void: the callers ignore v0.
+// a 120-frame event (player_send_event) and a rail re-sync (rail_record_resync). void: the callers ignore v0.
 /* was func_1507D1D8 */
 void mp_player_respawn(struct127 *rec) {
     u8 *obj = (u8 *) rec;
@@ -372,10 +372,10 @@ void mp_player_respawn(struct127 *rec) {
     }
     if (D_800BE9F0 == 0x2B) {
         idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
-        n = func_150859AC((s16) idx, 1);
+        n = player_stat_get((s16) idx, 1);
         if (n >= 0x11 && n < 0x21) {
             n = (random_int() & 0xF) + 0x11;
-            func_15085710((s16) idx, 0, n);
+            player_stat_modify((s16) idx, 0, n);
             if (n < 0x1D) {
                 ((u8 *) D_800D20FC)[idx * 0x30 + 4] = 0x9C;
             } else {
@@ -386,17 +386,17 @@ void mp_player_respawn(struct127 *rec) {
     idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
     obj_remove(rec, 0);
     D_800D18A8 = 1;
-    func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
+    setup_entry_spawn((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
     (*(u8 **) (obj + 0x31C))[0x1B0] = keep1B0;
     (*(u8 **) (obj + 0x31C))[0x1AF] = keep1AF;
     obj[0x328] = keep328;
     if (idx <= D_80082FA0) {
         camera_controller_init((struct108 *) ((u8 *) D_800DBFF0 + idx * 0x9A0), idx, D_800BEE12, team);
-        func_15182338(idx);
-        func_1517F3B0(0, 0, 0, 0, 1, idx);
-        func_1517F3B0(0, 0, 0, 0x1E, 0, idx);
+        hud_lens_reset(idx);
+        screen_fade_start(0, 0, 0, 0, 1, idx);
+        screen_fade_start(0, 0, 0, 0x1E, 0, idx);
     } else {
-        func_150858A0(obj, team, 0);
+        obj_place_at_start(obj, team, 0);
     }
     D_800D18A8 = 0;
     (*(u8 **) (obj + 0x31C))[0x120] = 0;
@@ -417,7 +417,7 @@ void mp_player_respawn(struct127 *rec) {
         (*(u8 **) (obj + 0x31C))[0x1B1] = 0x96;
         if (D_800BE9F0 == 0x33) {
             player_send_event(idx, 0x78, 0, 0, 0);
-            func_150891D4(obj);
+            rail_record_resync(obj);
         }
     }
 }
@@ -426,10 +426,10 @@ void mp_player_respawn(struct127 *rec) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15085710(s16, s16, s32);
-s32 func_150859AC(s16 arg0, s32 arg1);
+void player_stat_modify(s16, s16, s32);
+s32 player_stat_get(s16 arg0, s32 arg1);
 void mp_player_respawn(struct127 *);
-void func_1501C710(s32, s32, s32, s32, s32);
+void game_request_transition(s32, s32, s32, s32, s32);
 void game_over_apply_pending(void);
 extern u16 D_8009015C;
 extern s8 D_8008726C;
@@ -445,9 +445,9 @@ extern s8 D_80090134;
 extern s8 D_800BEA38;
 extern struct127 D_800CC2D0[];
 
-/* A player record (index idx) has lost a life. With lives left (func_150859AC(idx, 3)) the life counter (5) is
+/* A player record (index idx) has lost a life. With lives left (player_stat_get(idx, 3)) the life counter (5) is
  * reset and the record respawns: in multiplayer (D_800BE616) via mp_player_respawn or a 10-frame timer, else a
- * checkpoint restart (func_1501C710). Out of lives: game over (single player) or the player is marked out in
+ * checkpoint restart (game_request_transition). Out of lives: game over (single player) or the player is marked out in
  * D_800D18A0 (multiplayer); then the active-player counters drop. void: no caller uses a result. */
 /* was func_1507D4F8 */
 void player_lose_life(s32 idx) {
@@ -455,10 +455,10 @@ void player_lose_life(s32 idx) {
     u8 *ctl;
 
     if (!(D_8009015C & 1)) {
-        func_15085710(idx, 4, 1);
+        player_stat_modify(idx, 4, 1);
     }
-    if (func_150859AC(idx, 3) != 0) {
-        func_15085710(idx, 5, D_8008726C);
+    if (player_stat_get(idx, 3) != 0) {
+        player_stat_modify(idx, 5, D_8008726C);
         rec = &D_800CC2D0[idx];
         *(s16 *)((u8 *)rec + 0xB2) = 0;
         if (D_800BE616 != 0) {
@@ -471,9 +471,9 @@ void player_lose_life(s32 idx) {
         }
         D_800D18A8 = 1;
         if (!(D_800D2E4C->unk19 & 4) && D_8008FDA8 >= 0) {
-            func_1501C710(1, 0x22, 0, 0, 0);
+            game_request_transition(1, 0x22, 0, 0, 0);
         } else {
-            func_1501C710(2, (s8)D_800BE3DF, D_800BE800, 0, 0);
+            game_request_transition(2, (s8)D_800BE3DF, D_800BE800, 0, 0);
         }
         return;
     }
@@ -481,9 +481,9 @@ void player_lose_life(s32 idx) {
         D_800D2E43 = 1;
         game_over_apply_pending();
         D_800D18A8 = 1;
-        func_15085710(idx, 5, D_8008726C);
-        func_15085710(idx, 2, D_80087260);
-        func_1501C710(1, 0x18, 0, 0, 0);
+        player_stat_modify(idx, 5, D_8008726C);
+        player_stat_modify(idx, 2, D_80087260);
+        game_request_transition(1, 0x18, 0, 0, 0);
     } else {
         D_800D18A0 |= 1 << idx;
     }
@@ -503,11 +503,11 @@ void player_lose_life(s32 idx) {
 //     struct127 *temp_a0;
 //
 //     if ((D_8008FDBC & 1) == 0) {
-//         func_15085710(arg0, 4, 1);
+//         player_stat_modify(arg0, 4, 1);
 //     }
 //     // sp24 = (?32) arg0;
-//     if (func_150859AC(arg0, 3) != 0) {
-//         func_15085710(arg0, 5, D_8008726C); //temp_ret =
+//     if (player_stat_get(arg0, 3) != 0) {
+//         player_stat_modify(arg0, 5, D_8008726C); //temp_ret =
 //         temp_a0 = &D_800CC2D0[arg0];
 //         temp_a0->unkB2 = (u16)0;
 //         if (D_800BE616 == 0) {
@@ -530,8 +530,8 @@ void player_lose_life(s32 idx) {
 //         D_800D2E43 = (u8)1;
 //         game_over_apply_pending();
 //         D_800D18A8 = (u8)1;
-//         func_15085710(arg0, 5, D_8008726C);
-//         func_15085710(arg0, 2, D_80087260);
+//         player_stat_modify(arg0, 5, D_8008726C);
+//         player_stat_modify(arg0, 2, D_80087260);
 //         func_1501C730(1, 0x18, 0, 0, 0);
 //     } else {
 //         D_800D18A0 = (u16) (D_800D18A0 | (1 << (s32) arg0));
@@ -549,27 +549,27 @@ void player_lose_life(s32 idx) {
 extern u8 D_800BE616;
 extern s32 D_800BE9F0;
 extern u8 D_800C35EA;
-void func_150B0828(u8 *arg0, u8 arg1, s32 arg2);
-void func_150C04E0(u8 *obj);
+void obj_impact_burst_spawn(u8 *arg0, u8 arg1, s32 arg2);
+void object_land_puff(u8 *obj);
 void explosion_ground_effect(struct127 *arg0);
 void fx_big_explosion_at_obj(u8 *arg0, s32 arg1, s32 arg2);
-void func_151C9740(struct127 *obj, u8 arg1, s32 arg2);
-void func_151CFFFC(u8 *obj, u8 flag, s32 arg2);
-void func_150BE994(u8 *arg0, s32 arg1, s32 arg2);
+void object_explode_big(struct127 *obj, u8 arg1, s32 arg2);
+void object_shatter_effects(u8 *obj, u8 flag, s32 arg2);
+void obj_debris_dust_burst(u8 *arg0, s32 arg1, s32 arg2);
 void object_set_all_flags(s32 arg0, s32 arg1);
 void owner_spawn_children(u8 *owner);
 s32 player_hit_reaction(struct127 *obj, s32 kind);
-void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2);
-void func_15145A50(struct127 *arg0);
+void object_model_shatter(u8 *obj, u8 arg1, s32 arg2);
+void obj_set_destroyed(struct127 *arg0);
 u8 *world_record_find(u8 id);
 struct127 *player_find_owned_object(struct127 *owner, struct127 *unused1, s32 unused2);
 s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
-void func_150B8020(u8 *obj, u8 owner, s32 arg2);
-void func_150BC968(u8 *obj);
-void func_150BC03C(u8 *obj);
-void func_151A7240(u8 *obj, u8 arg1, s32 arg2);
+void object_break_effects(u8 *obj, u8 owner, s32 arg2);
+void object_impact_debris_hard(u8 *obj);
+void object_impact_debris(u8 *obj);
+void object_explosion_effects(u8 *obj, u8 arg1, s32 arg2);
 void object_explode(u8 *obj, u8 owner, s32 arg2);
-void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2);
+void destroy_burst_spawn(struct127 *arg0, u8 arg1, s32 arg2);
 /* object_destroy_effects: the break / death effects of an object by its type (byte +4): one effect function per
  * type (owner 0xFF, flag 1), the type-0x20 crate picks the hard / soft debris by its y speed +0x20. Types 5 /
  * 0xAD..0xAF clear +0x328, release (object_set_all_flags / owner_spawn_children) and return 1. Types 0x28 / 0x77 shatter the
@@ -592,30 +592,30 @@ s32 object_destroy_effects(struct127 *arg0) {
             owner_spawn_children(obj);
             return 1;
         case 0x0D:
-            func_150B8020(obj, 0xFF, 1);
+            object_break_effects(obj, 0xFF, 1);
             break;
         case 0x10:
         case 0x38:
         case 0x91:
-            func_150C04E0(obj);
+            object_land_puff(obj);
             break;
         case 0x20:
             if (*(f32 *) (obj + 0x20) < -20.0f) {
-                func_150BC968(obj);
+                object_impact_debris_hard(obj);
             } else {
-                func_150BC03C(obj);
+                object_impact_debris(obj);
             }
             break;
         case 0x25:
             if (*(s32 *) (obj + 0x2EC) != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
-                func_151CFFFC(obj, 0xFF, 1);
+                object_shatter_effects(obj, 0xFF, 1);
             }
             break;
         case 0x28:
         case 0x77:
             rec = NULL;
-            func_151BAAC8(obj, 0xFF, 1);
-            func_15145A50(arg0);
+            object_model_shatter(obj, 0xFF, 1);
+            obj_set_destroyed(arg0);
             if (D_800BE616 != 0) {
                 player_hit_reaction(arg0, 6);
                 rec = world_record_find(obj[0x127] + 0xB);
@@ -650,17 +650,17 @@ s32 object_destroy_effects(struct127 *arg0) {
             explosion_ground_effect(arg0);
             break;
         case 0x44:
-            func_151D2860(arg0, 0xFF, 1);
+            destroy_burst_spawn(arg0, 0xFF, 1);
             break;
         case 0x47:
-            func_151C9740((struct127 *) obj, 0xFF, 1);
+            object_explode_big((struct127 *) obj, 0xFF, 1);
             break;
         case 0x4A:
             fx_big_explosion_at_obj(obj, 0xFF, 1);
             break;
         case 0x4F:
         case 0x83:
-            func_151A7240(obj, 0xFF, 1);
+            object_explosion_effects(obj, 0xFF, 1);
             break;
         case 0x53:
             if (D_800BE616 != 0) {
@@ -669,10 +669,10 @@ s32 object_destroy_effects(struct127 *arg0) {
             }
             break;
         case 0x79:
-            func_150BE994(obj, 0xFF, 1);
+            obj_debris_dust_burst(obj, 0xFF, 1);
             break;
         case 0x7F:
-            func_150B0828(obj, 0xFF, 1);
+            obj_impact_burst_spawn(obj, 0xFF, 1);
             break;
         case 0x90:
             if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
@@ -689,7 +689,7 @@ s32 object_destroy_effects(struct127 *arg0) {
 
 /* was func_1507DB44 */
 void object_set_all_flags(s32 arg0, s32 arg1) {
-    func_1503DE70(arg0, arg1, -1);
+    breakable_request_flag_entry(arg0, arg1, -1);
 }
 
 /* was func_1507DB64 */
@@ -698,7 +698,7 @@ void a9d90_stub(void) {
 
 #ifdef NON_MATCHING
 s32 texture_cache_lookup(s32 *, s32, s32, s32);
-void func_15182338(s32);
+void hud_lens_reset(s32);
 extern s32 D_80086F20;
 extern u16 D_800D1CC2;
 extern s32 D_800D1CC4;
@@ -774,8 +774,8 @@ u8 *player_draw_out_overlay(u8 *arg0, s32 arg1) {
             goto block_6;
         }
         D_800D1CC2 = temp_a2 & ~temp_t0;
-        func_15182338(arg1);
-        func_1517F3B0(0, 0, 0, 0x78, 0, arg1);
+        hud_lens_reset(arg1);
+        screen_fade_start(0, 0, 0, 0x78, 0, arg1);
     } else {
         temp_v0_3 = ((s32 *)((u8 *)&D_800D1CC4 + arg1));
         temp_t5 = *temp_v0_3 + 4;
@@ -812,11 +812,11 @@ block_6:
 void obj_set_dying_flags(struct127 *arg0) {
 
     if (arg0->interaction_state == 1) {
-        func_150836CC(arg0, 0x44);
-        func_150836CC(arg0, 0x23);
+        obj_setup_undo(arg0, 0x44);
+        obj_setup_undo(arg0, 0x23);
         arg0->unk9C |= 0xF000;
-        func_150836CC(arg0, 0x44);
-        func_150836CC(arg0, 0x23);
+        obj_setup_undo(arg0, 0x44);
+        obj_setup_undo(arg0, 0x23);
         return;
     }
 
@@ -864,9 +864,9 @@ void obj_set_hit_flags_by_kind(u8 *arg0, s32 arg1) {
     }
 }
 #ifdef NON_MATCHING
-void func_1501D348(s32, s32, s32, s32, s32);
-void func_15022238(s16, s16, s16, f32);
-s32 func_150851E0(s32, s32, s32, s16 *, s32 *, s32 *, u8 *, s32 *, s32 *, s32, s32 *);
+void cutscene_scene_load(s32, s32, s32, s32, s32);
+void cutscene_set_focus_point(s16, s16, s16, f32);
+s32 level_start_point_get(s32, s32, s32, s16 *, s32 *, s32 *, u8 *, s32 *, s32 *, s32, s32 *);
 
 /* was func_1507DFE4 */
 void level_restart_at_start_point(s32 arg0, s32 arg1) {
@@ -888,7 +888,7 @@ void level_restart_at_start_point(s32 arg0, s32 arg1) {
     s32 temp_t8;
 
     if (D_800C35EA != 1) {
-        func_150851E0(0, arg0, 1, &sp.u5C, &(*(s32 *)((u8 *)&sp + 0x18)), &sp.u4F, &sp.u4E, &sp.u44, &sp.u48, 1, &sp.u38);
+        level_start_point_get(0, arg0, 1, &sp.u5C, &(*(s32 *)((u8 *)&sp + 0x18)), &sp.u4F, &sp.u4E, &sp.u44, &sp.u48, 1, &sp.u38);
         if (sp.u38 == 0) {
             sp.u3C = 1;
             goto block_5;
@@ -896,12 +896,12 @@ void level_restart_at_start_point(s32 arg0, s32 arg1) {
         if (sp.u38 == 1) {
             sp.u3C = 3;
 block_5:
-            func_15022238(sp.u5C, sp.u5E, (*(s32 *)((u8 *)&sp + 0x28)), ((f32) (sp.u4E - 0x40) * 1.40625f) + 180.0f);
+            cutscene_set_focus_point(sp.u5C, sp.u5E, (*(s32 *)((u8 *)&sp + 0x28)), ((f32) (sp.u4E - 0x40) * 1.40625f) + 180.0f);
             temp_t8 = D_800BE9F0;
             D_800BE9F0 = 0x25;
             D_800C3671 = 1;
             sp.u64 = temp_t8;
-            func_1501D348(0x25, sp.u3C, 0, 0, 0);
+            cutscene_scene_load(0x25, sp.u3C, 0, 0, 0);
             D_800C3670 = 1;
             D_800BE9F0 = sp.u64;
         }
@@ -927,7 +927,7 @@ s32 checkpoint_get_restart_index(s32 arg0) {
         return 0;
     }
     D_800BE9F4 = (u16 *)(s32)(s8)D_800BE3DF;
-    func_150851E0(0, D_800BE800, 1, sp54, sp48, &sp43, &sp42, &sp44, &sp3C, 1, &sp5C);
+    level_start_point_get(0, D_800BE800, 1, sp54, sp48, &sp43, &sp42, &sp44, &sp3C, 1, &sp5C);
     return sp5C + 1;
 }
 /* was func_1507E1D0 */
@@ -947,7 +947,7 @@ void obj_get_held_point(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
         } else if (temp_v0 == 0x1E) {
             var_a2 += 0xC0;
         }
-        func_15143134(sp28, sp1C, var_a2);
+        mtx_transform_point_or_origin(sp28, sp1C, var_a2);
         *arg1 = sp1C[0];
         *arg2 = sp1C[1];
         *arg3 = sp1C[2];

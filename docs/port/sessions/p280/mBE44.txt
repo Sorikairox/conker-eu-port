@@ -1,11 +1,11 @@
-\#^    func_1516547C(2, D_800BEE0B#s/(2,/(1,/ % a
+\#^    cam_wobble_start_preset(2, D_800BEE0B#s/(2,/(1,/ % a
 \#^    fx_debris_emitter_spawn(D_800A186C#s/\(.\) 62 + 120/\1 61 + 120/ % a
 \#^    fx_debris_emitter_spawn(D_800A186C#s/(u32) func/(s32) func/ % a
-\#^    func_151D5AC4(D_800A1860#s/0xFF/0xFE/ % a
-\#^    func_151D45A4(#s/D_800A1860/D_800A186C/ % a
-\#^    func_15154728(#s/f \* 4.0f/f * 3.0f/ % a
-\#^    func_15154728(#s/\(.\) 56 + 200/\1 56 + 201/ % a
-\#^    func_15154728(#s/1.64099991f/1.641f/ % a
+\#^    smoke_cloud_spawn(D_800A1860#s/0xFF/0xFE/ % a
+\#^    explosion_light_spawn(#s/D_800A1860/D_800A186C/ % a
+\#^    spark_shower_spawn(#s/f \* 4.0f/f * 3.0f/ % a
+\#^    spark_shower_spawn(#s/\(.\) 56 + 200/\1 56 + 201/ % a
+\#^    spark_shower_spawn(#s/1.64099991f/1.641f/ % a
 \#^    t.u8 = 1.0f;$#s/1.0f/0.0f/ % a
 \#^    t.u0 = 9.0f;$#s/9.0f/8.0f/ % a
 \#^    t.u4 = #s/0.435000032f/0.435f/ % a
@@ -22,14 +22,14 @@
 \#^    t.u78 = 0;$#d % a
 \#^    for (i = 0; i < 4; i++) {$#s/< 4/< 3/ % a
 \#^        \*(VecBE44 \*) t.dir = D_800A1878\[i\];$#s/\[i\]/[0]/ % a
-\#^        func_15143794(a#s/a \(.\) 26/b \1 26/ % a
-\#^        func_15143794(a#s/(b \& 0xF) - 25/(b \& 0x7) - 25/ % a
-\#^        func_15143794(a#s/f \* 30.0f + 15.0f/f * 30.0f + 16.0f/ % a
+\#^        vec3_from_angles_byte(a#s/a \(.\) 26/b \1 26/ % a
+\#^        vec3_from_angles_byte(a#s/(b \& 0xF) - 25/(b \& 0x7) - 25/ % a
+\#^        vec3_from_angles_byte(a#s/f \* 30.0f + 15.0f/f * 30.0f + 16.0f/ % a
 \#^        t.u40 = #s/-7.55400038f/-7.554f/ % a
 \#^        t.u48 = #s/15.1080008f/15.108f/ % a
 \#^        t.u4C = #s/-1.62100005f/-1.6211f/ % a
 \#^        t.u4C = #s/0.617000043f/0.617f/ % a
 \#^        t.life = #s/\(.\) 51 + 50/\1 51 + 51/ % a
 \#^        t.u56 = D_800A18A8\[i\];$#s/\[i\]/[i + 1]/ % a
-\#^        ret = func_15132BBC((f32 \*) &t, 3#s/, 3,/, 2,/ % a
+\#^        ret = mdl_particle_spawn_ex((f32 \*) &t, 3#s/, 3,/, 2,/ % a
 \#^    return ret;$#s/ ret;/ 0;/ % a

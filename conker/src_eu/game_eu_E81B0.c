@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_150BA4C0(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150BA4C0 */
+void crumble_emitter_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -22,11 +23,12 @@ void func_150BA4C0(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-void func_15143794(s16, s16, f32, void *);
-void func_1515C7B4(u8 *, f32 *, f32 *, f32 *);
-s32 func_1518A930(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, s32, s32, s32, s32, s32, s32);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+void obj_get_fx_point_b(u8 *, f32 *, f32 *, f32 *);
+s32 tumble_debris_spawn(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, s32, s32, s32, s32, s32, s32);
 
-void func_150BAA3C(u8 *arg0) {
+/* was func_150BAA3C */
+void crumble_emitter_update(u8 *arg0) {
     struct {
         f32 uB4;
         f32 uB8;
@@ -67,11 +69,11 @@ void func_150BAA3C(u8 *arg0) {
         if ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f) {
             sp.uD8 = ((*(f32 *)((u8 *)temp_s4 + 0x14C)) + (*(f32 *)((u8 *)temp_s4 + 0x150))) * 0.5f;
             temp_s5 = ((s32) (*(u16 *)((u8 *)temp_s4 + 0x76)) >> 8) - 0x40;
-            func_1515C7B4(temp_s4, &sp.uF0, &sp.uEC, &sp.uE8);
+            obj_get_fx_point_b(temp_s4, &sp.uF0, &sp.uEC, &sp.uE8);
             sp.uE0 = 0.0f;
             do {
                 temp_s0 = random_int();
-                func_15143794((s16) ((((u32) temp_s0 % 127U) + temp_s5) - 0x3F), (s16) ((random_int() % 31U) - 0x32), sp.uEC, &sp.uCC);
+                vec3_from_angles_byte((s16) ((((u32) temp_s0 % 127U) + temp_s5) - 0x3F), (s16) ((random_int() % 31U) - 0x32), sp.uEC, &sp.uCC);
                 temp_f6 = sp.uD0 * (*(f32 *)((u8 *)temp_s4 + 0xF0));
                 sp.uCC += sp.uF0;
                 sp.uD0 = temp_f6;
@@ -88,24 +90,26 @@ void func_150BAA3C(u8 *arg0) {
                 sp.uE4 = (random_float() * 18.645f) + -9.3225f;
                 temp_f22 = random_float();
                 temp_f20 = random_float();
-                func_1518A930(&sp.uCC, &sp.uC0, ((temp_f22 * 0.080000006f) + 0.1f) * sp.uD8, &sp.uB4, &sp.uDC, (temp_f20 * 0.324f) + -0.563f, 0.944854f, 7, (random_int() % 41U) + 0x3C, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                tumble_debris_spawn(&sp.uCC, &sp.uC0, ((temp_f22 * 0.080000006f) + 0.1f) * sp.uD8, &sp.uB4, &sp.uDC, (temp_f20 * 0.324f) + -0.563f, 0.944854f, 7, (random_int() % 41U) + 0x3C, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s1 + 8)) > 1.0f);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E81B0/func_150BAA3C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E81B0/crumble_emitter_update.s")
 #endif
-void func_150BADD0(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150BADD0 */
+void crumble_emitter_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-s32 func_1504715C(s32, u8 *);
-s32 func_15046F70(f32 *, s32, f32, s32);
+s32 hitinfo_from_obj_floor(s32, u8 *);
+s32 collision_floor_probe(f32 *, s32, f32, s32);
 extern f32 D_800A0230;
 
-s32 func_150BAE10(f32 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
+/* was func_150BAE10 */
+s32 obj_get_ground_point(f32 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     f32 sp24[3];
 
     arg0[0] = *(f32 *)(arg1 + 0x14);
@@ -121,20 +125,22 @@ s32 func_150BAE10(f32 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     sp24[0] = arg0[0];
     sp24[1] = arg0[1] + 100.0f;
     sp24[2] = arg0[2];
-    func_1504715C(arg2, arg1);
-    return func_15046F70(sp24, 0, arg0[1] - 100.0f, arg2);
+    hitinfo_from_obj_floor(arg2, arg1);
+    return collision_floor_probe(sp24, 0, arg0[1] - 100.0f, arg2);
 }
 
-s32 func_150BAEE0(s32 arg0, s32 arg1) {
+/* was func_150BAEE0 */
+s32 crumble_return_9(s32 arg0, s32 arg1) {
     return 9;
 }
 
 #ifdef NON_MATCHING
-s32 func_15143E94(s32, s32);
-void func_1514CBE8(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
-s32 func_151664F0(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 fx_try_camera_shake(s32, s32);
+void spawn_circle_random_emit(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+s32 water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_150BAEF4(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_150BAEF4 */
+void obj_heavy_impact_fx(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
         s32 u48;
         u8 pad4C[0x20];
@@ -147,17 +153,17 @@ void func_150BAEF4(u8 *arg0, u8 arg1, s32 arg2) {
     f32 sp38;
 
     if ((*(s32 *)((u8 *)arg0 + 0x1D4)) != 0) {
-        sp43 = func_150BAE10(&sp.u6C, arg0, (s32) &sp.u48, (s32) arg1);
-        func_151D5404((struct17 *) &sp.u6C, 1307.0f, 2000.0f, 0.0005f, 0xC, 0xF, 0xFF, 0);
-        func_15143E94(5, 0x4022);
+        sp43 = obj_get_ground_point(&sp.u6C, arg0, (s32) &sp.u48, (s32) arg1);
+        rumble_all_players_at((struct17 *) &sp.u6C, 1307.0f, 2000.0f, 0.0005f, 0xC, 0xF, 0xFF, 0);
+        fx_try_camera_shake(5, 0x4022);
         if (sp43 != 0) {
             sp44 = (s32) (D_800DBFF0[D_80082FA4].unk380 * 0.7111111f);
-            func_151664F0(-1, (s32) sp.u6C, (s32) (sp.u70 + 6.0f), (s32) sp.u74, 0x19, 0x12, 0, 0xFF, 1);
+            water_ring_spawn(-1, (s32) sp.u6C, (s32) (sp.u70 + 6.0f), (s32) sp.u74, 0x19, 0x12, 0, 0xFF, 1);
             sp38 = random_float();
-            func_1514CBE8(sp.u6C, sp.u70, sp.u74, (sp38 * 50.0f) + 40.0f, sp44 + 0x3C, sp44 - 0x3C, (random_int() % 11U) + 0x1E, 5, 0, 0.0f, 0, 0xFF);
+            spawn_circle_random_emit(sp.u6C, sp.u70, sp.u74, (sp38 * 50.0f) + 40.0f, sp44 + 0x3C, sp44 - 0x3C, (random_int() % 11U) + 0x1E, 5, 0, 0.0f, 0, 0xFF);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E81B0/func_150BAEF4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E81B0/obj_heavy_impact_fx.s")
 #endif

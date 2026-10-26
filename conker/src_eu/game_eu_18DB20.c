@@ -4,19 +4,20 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1517F470(s32);
-s32 func_15182238(s32);
+s32 screen_fade_alpha(s32);
+s32 hud_lens_is_off(s32);
 extern u8 D_800C35EA;
 extern void (*D_8008B478[])(u8 *, u16 *);
 
 /*
  * framebuffer_effects_apply: runs the framebuffer handlers (D_8008B478, index effect+0x10, -1 = none) of the
- * type-0x34 effects of both list groups on the frame about to be swapped (called by func_10005020).
+ * type-0x34 effects of both list groups on the frame about to be swapped (called by sched_swap_framebuffer).
  * Flag bits at effect+0xE: 4 = skip this frame once (cleared here), 2 = not while D_800C35EA == 1,
- * 8 = only while func_15182238(0) is set and func_1517F470(0) is 0. Walks with the D_800DD5C8 safe-next
+ * 8 = only while hud_lens_is_off(0) is set and screen_fade_alpha(0) is 0. Walks with the D_800DD5C8 safe-next
  * stack so a handler may free its effect.
  */
-void func_15160310(u16 *fb) {
+/* was func_15160310 */
+void fb_fx_apply_all(u16 *fb) {
     u8 i;
     u8 *node;
     u8 flags;
@@ -36,9 +37,9 @@ void func_15160310(u16 *fb) {
                     run = FALSE;
                 }
                 if (flags & 8) {
-                    if (func_15182238(0) == 0) {
+                    if (hud_lens_is_off(0) == 0) {
                         run = FALSE;
-                    } else if (func_1517F470(0) != 0) {
+                    } else if (screen_fade_alpha(0) != 0) {
                         run = FALSE;
                     }
                 }
@@ -52,10 +53,11 @@ void func_15160310(u16 *fb) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18DB20/func_15160310.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18DB20/fb_fx_apply_all.s")
 #endif
 
-u8 *func_151604E4(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+/* was func_151604E4 */
+u8 *fb_fx_spawn(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     u8 *temp_v0;
 
     temp_v0 = node_alloc(0x34, arg3, arg1 + 0x18, 1, (u8) (s32) arg2, 1U);
@@ -67,7 +69,8 @@ u8 *func_151604E4(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
 }
 
 extern s32 (*D_8008B470[])(void);
-void func_1516055C(u8 *arg0) {
+/* was func_1516055C */
+void fb_fx_update(u8 *arg0) {
     s32 pad;
     u8 ret = 0;
 
@@ -85,7 +88,8 @@ void func_1516055C(u8 *arg0) {
     }
 }
 
-void func_eu_15160600(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_eu_15160600 */
+void fb_fx_on_message(u8 *arg0, s32 arg1, u8 arg2) {
     void (*temp_v0)(u8 *, s32, u8) = D_8008B484[arg0[0x14]];
 
     if (temp_v0 != NULL) {
@@ -93,7 +97,8 @@ void func_eu_15160600(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_15160648(u8 *arg0) {
+/* was func_15160648 */
+s32 fb_fx_debug_tweak(u8 *arg0) {
     s32 i;
     f32 *p;
 
@@ -107,7 +112,8 @@ s32 func_15160648(u8 *arg0) {
     return 1;
 }
 
-void func_151607E4(s32 arg0, u8 arg1) {
+/* was func_151607E4 */
+void fb_fx_broadcast(s32 arg0, u8 arg1) {
     const s32 sp1C[1] = {0x34};
 
     node_broadcast_types(sp1C, 0x1, arg0, arg1);

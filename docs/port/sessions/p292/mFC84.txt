@@ -1,8 +1,8 @@
 \#^    if (obj == NULL || \*(void \*\*) (obj + 0x1D4) == NULL)#s/0x1D4/0x1D0/
-\#^    if (func_151AFB70(pos, obj, (s32) ground, (u8) arg1) == 0)#s/(u8) arg1/1/
-\#^    if (func_151AFB70(pos, obj, (s32) ground, (u8) arg1) == 0)#s/== 0/!= 0/
+\#^    if (obj_bone_ground_probe(pos, obj, (s32) ground, (u8) arg1) == 0)#s/(u8) arg1/1/
+\#^    if (obj_bone_ground_probe(pos, obj, (s32) ground, (u8) arg1) == 0)#s/== 0/!= 0/
 \#^    if (D_800BE9F0 == 0x14)#s/0x14/0x13/
-\#^        func_150CD2A0(pos\[2\], #s/pos\[2\]/pos[0]/
+\#^        ground_colour_by_depth(pos\[2\], #s/pos\[2\]/pos[0]/
 \#^        cr = SPLASH_F2U(r)#s/SPLASH_F2U(r)/(s32) r/
 \#^        cg = SPLASH_F2U(g)#s/(g)/(b)/
 \#^        cb = SPLASH_F2U(b) & 0xFF;#s/ & 0xFF//
@@ -46,8 +46,8 @@
 \#^        memcpy(p + 0x128#s/0x128/0x12C/
 \#^    ringLife = #s/11U/10U/
 \#^    ringLife = #s/+ 5/+ 6/
-\#^    func_1514CBE8(pos\[0\], pos\[1\]#s/17.0f/16.0f/
-\#^    func_1514CBE8(pos\[0\], pos\[1\]#s/29.0f/28.0f/
-\#^    func_1514CBE8(pos\[0\], pos\[1\]#s/0x10, 0, 0.0f/0x11, 0, 0.0f/
-\#^    func_1514CBE8(pos\[0\], pos\[1\]#s/0xFF, ringLife/0xFE, ringLife/
-\#^    func_1514CBE8(pos\[0\], pos\[1\]#s/pos\[1\], pos\[2\]/pos[2], pos[1]/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\]#s/17.0f/16.0f/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\]#s/29.0f/28.0f/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\]#s/0x10, 0, 0.0f/0x11, 0, 0.0f/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\]#s/0xFF, ringLife/0xFE, ringLife/
+\#^    spawn_circle_random_emit(pos\[0\], pos\[1\]#s/pos\[1\], pos\[2\]/pos[2], pos[1]/

@@ -5,7 +5,8 @@
 #ifdef NON_MATCHING
 void text_printf_at(s32, s32, u8, s32, ...);
 
-s32 func_150D06B0(u8 *arg0) {
+/* was func_150D06B0 */
+s32 text_pager_draw_caption(u8 *arg0) {
     u8 *sp20;
     s32 temp_t0;
     s32 var_s0;
@@ -40,17 +41,18 @@ s32 func_150D06B0(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/func_150D06B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/text_pager_draw_caption.s")
 #endif
-u8 *func_150D0420(u8, s32, s16, s32, s32, s32, u8, s32);
+u8 *text_pager_spawn(u8, s32, s16, s32, s32, s32, u8, s32);
 s32 memcpy(s32, void *, s32);
-void func_150D07C4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {    s32 sfpad;
+/* was func_150D07C4 */
+void text_pager_spawn_console(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {    s32 sfpad;
 
     struct { f32 x; s16 y; } sp2C;
     u8 *temp_v0;
     sp2C.y = 0;
     sp2C.x = 0.0f;
-    temp_v0 = func_150D0420(arg0, arg1, arg2, 8, 1, 0, arg3, arg4);
+    temp_v0 = text_pager_spawn(arg0, arg1, arg2, 8, 1, 0, arg3, arg4);
     if (temp_v0 != NULL) {
         memcpy((*(s32 *)((u8 *)temp_v0 + 0x48)), &sp2C, 8);
     }
@@ -61,12 +63,13 @@ typedef struct {
     f32 t;  /* fraction of the next character */
     s16 n;  /* characters shown */
 } TypeState_150D083C;
-// console_text_type: P253. Handler (s32 (u8 *), function table at ELF file offset 0x248C44, between func_150D06B0 and
-// func_150D0A44) of a text box (+0x28 text block: +0x14 length, +0x15 index of the current string in the pointer
+// console_text_type: P253. Handler (s32 (u8 *), function table at ELF file offset 0x248C44, between text_pager_draw_caption and
+// text_pager_draw_title) of a text box (+0x28 text block: +0x14 length, +0x15 index of the current string in the pointer
 // list at +0x18; +0x48 typing state). Types the string out: flag 1 of +0x30 restarts it; while not complete, the
 // fraction advances by 0.437 * D_800BE9A4 and each whole step shows one more character (at most the length). Draws
 // "C:> " + the shown characters + " " + 0xBB (cursor) in colour (0, 255, 0, 150) at (15, 190). Returns 1.
-s32 func_150D083C(u8 *p) {
+/* was func_150D083C */
+s32 text_pager_draw_console(u8 *p) {
     char prompt[] = "C:> ";
     u8 buf[0x50];
     u8 *txt = p + 0x28;
@@ -97,15 +100,16 @@ s32 func_150D083C(u8 *p) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/func_150D083C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/text_pager_draw_console.s")
 #endif
 
-u8 *func_150D0420(u8, s32, s16, s32, s32, s32, u8, s32);
-void func_150D09D4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
+u8 *text_pager_spawn(u8, s32, s16, s32, s32, s32, u8, s32);
+/* was func_150D09D4 */
+void text_pager_spawn_title(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     s8 sp30[8];
     u8 *temp_v0;
     sp30[0] = 0;
-    temp_v0 = func_150D0420(arg0, arg1, arg2, 8, 2, 0, arg3, arg4);
+    temp_v0 = text_pager_spawn(arg0, arg1, arg2, 8, 2, 0, arg3, arg4);
     if (temp_v0 != NULL) {
         memcpy(*(void **)(temp_v0 + 0x48), sp30, 1);
     }
@@ -114,7 +118,8 @@ void func_150D09D4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
 #ifdef NON_MATCHING
 void text_printf_at(s32, s32, u8, s32, ...);
 
-s32 func_150D0A44(u8 *arg0) {
+/* was func_150D0A44 */
+s32 text_pager_draw_title(u8 *arg0) {
     u8 *sp20;
     s32 temp_t0;
     s32 var_s0;
@@ -149,5 +154,5 @@ s32 func_150D0A44(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/func_150D0A44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/text_pager_draw_title.s")
 #endif

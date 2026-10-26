@@ -1,17 +1,17 @@
-/* P281: readable C for func_10001550 (compiled C, 296 insns): libc _Ldtob. */
+/* P281: readable C for init_printf_ldtob (compiled C, 296 insns): libc _Ldtob. */
 #include "libc/stdlib.h"
 void *memcpy(void *, const void *, size_t);
 extern const f64 D_8002C270[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
 extern const f64 D_8002C2C8;     /* 1e8 */
 extern const char D_8002C2B8[];  /* "NaN" */
 extern const char D_8002C2BC[];  /* "Inf" */
-s16 func_100019F0(s16 *arg0, struct05 *arg1);
-void func_10001AA8(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
+s16 init_printf_ldunscale(s16 *arg0, struct05 *arg1);
+void init_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 // format_double_digits (libc _Ldtob): converts the double in px->v for printf conversion `code` (e f g E G): default
 // precision 6 (1 for %g with precision 0), "NaN" / "Inf" copied as is, otherwise scales the value by powers of ten
 // to 8-digit groups, generates up to 19 digits, drops leading zeros, rounds to the significant digit count and hands
-// the digits to func_10001AA8 (_Genld).
-void func_10001550(void *arg0, u8 code) {
+// the digits to init_printf_genld (_Genld).
+void init_printf_ldtob(void *arg0, u8 code) {
     _Pft *px = arg0;
     u8 buf[0x20];
     u8 *p;
@@ -36,7 +36,7 @@ void func_10001550(void *arg0, u8 code) {
     } else if (px->prec == 0 && (code == 'g' || code == 'G')) {
         px->prec = 1;
     }
-    err = func_100019F0(&xexp, (struct05 *) px);
+    err = init_printf_ldunscale(&xexp, (struct05 *) px);
     if (err > 0) {
         px->n1 = 3;
         memcpy(px->s, (err == 2) ? D_8002C2B8 : D_8002C2BC, 3);
@@ -113,5 +113,5 @@ void func_10001550(void *arg0, u8 code) {
             }
         }
     }
-    func_10001AA8(px, code, p, nsig, xexp);
+    init_printf_genld(px, code, p, nsig, xexp);
 }

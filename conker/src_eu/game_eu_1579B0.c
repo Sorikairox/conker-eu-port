@@ -167,5 +167,5 @@ void camera_freecam_update(u8 *cam) {
 
 /* was func_1512A8D0 */
 void camera_title_carousel_update(u8 *arg0) {
-    func_151E73C8(arg0[0x23D], arg0);
+    menu_camera_update(arg0[0x23D], arg0);
 }

@@ -1,4 +1,4 @@
-# P241 func_151A9670 (object_effect_kind2_start) mutants: sed % setup names
+# P241 object_effect_kind2_start (object_effect_kind2_start) mutants: sed % setup names
 s/    spawn.kind = 2;/    spawn.kind = 3;/ % odd
 s/    spawn.owner = obj;/    spawn.owner = NULL;/ % odd
 s/    spawn.a = (idx \& 1) ? 1.4e-6f : 4e-7f;/    spawn.a = (idx \& 1) ? 1.5e-6f : 4e-7f;/ % odd
@@ -11,8 +11,8 @@ s/    spawn.b24 = 1;/    spawn.b24 = 0;/ % odd
 s/    spawn.b25 = -1;/    spawn.b25 = 0;/ % odd
 s/    spawn.b26 = 0;/    spawn.b26 = 1;/ % odd
 s/    extra = idx;/    extra = idx + 1;/ % odd
-s/    p = func_151A8B20(\&spawn, -1, 1, 0xFF, 0);/    p = func_151A8B20(\&spawn, -1, 2, 0xFF, 0);/ % odd
-s/    p = func_151A8B20(\&spawn, -1, 1, 0xFF, 0);/    p = func_151A8B20(\&spawn, 0, 1, 0xFF, 0);/ % odd
-s/    p = func_151A8B20(\&spawn, -1, 1, 0xFF, 0);/    p = func_151A8B20(\&spawn, -1, 1, 0xFF, 1);/ % odd
+s/    p = ground_emitter_spawn(\&spawn, -1, 1, 0xFF, 0);/    p = ground_emitter_spawn(\&spawn, -1, 2, 0xFF, 0);/ % odd
+s/    p = ground_emitter_spawn(\&spawn, -1, 1, 0xFF, 0);/    p = ground_emitter_spawn(\&spawn, 0, 1, 0xFF, 0);/ % odd
+s/    p = ground_emitter_spawn(\&spawn, -1, 1, 0xFF, 0);/    p = ground_emitter_spawn(\&spawn, -1, 1, 0xFF, 1);/ % odd
 s/    if (p != NULL) {/    if (p == NULL) {/ % odd
 s/        memcpy((u8 \*) p + 0x80, \&extra, 1);/        memcpy((u8 *) p + 0x7F, \&extra, 1);/ % odd

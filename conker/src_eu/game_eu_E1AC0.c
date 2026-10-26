@@ -2,16 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_150B5568(u8 *arg0);
+void water_jet_spray_spawn(u8 *arg0);
 #endif
 
 
-s32 func_151482D4(s32, s32);
+s32 fxrec_broadcast(s32, s32);
 
-void func_150B42B0(void) {
+/* was func_150B42B0 */
+void water_jets_stop_all(void) {
     s8 sp24[4];
 
-    func_151482D4(0, 5);
+    fxrec_broadcast(0, 5);
     sp24[0] = 0;
     func_151494E0((s32) sp24, 0x18U);
     sp24[0] = 2;
@@ -26,26 +27,29 @@ void func_150B42B0(void) {
     func_151494E0((s32) sp24, 0x18U);
 }
 
-s32 func_1000FC18(u16, s16, s16, s16, s32);
-void func_15147E64(u8 *);
+s32 sfx_emitter_stop_at(u16, s16, s16, s16, s32);
+void fxrec_die_retire(u8 *);
 
-void func_150B4354(u8 *arg0) {
-    func_1000FC18(0x221, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x18)), 0xFA0);
-    func_15147E64(arg0);
+/* was func_150B4354 */
+void water_jet_die_retire(u8 *arg0) {
+    sfx_emitter_stop_at(0x221, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x18)), 0xFA0);
+    fxrec_die_retire(arg0);
 }
 
-s32 func_1000FC18(u16, s16, s16, s16, s32);
-void func_15147E98(u8 *);
+s32 sfx_emitter_stop_at(u16, s16, s16, s16, s32);
+void fxrec_die_free(u8 *);
 
-void func_150B43C8(u8 *arg0) {
-    func_1000FC18(0x221, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x18)), 0xFA0);
-    func_15147E98(arg0);
+/* was func_150B43C8 */
+void water_jet_die_free(u8 *arg0) {
+    sfx_emitter_stop_at(0x221, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x10)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x18)), 0xFA0);
+    fxrec_die_free(arg0);
 }
 
 #ifdef NON_MATCHING
 s32 memcpy(s32 *, s32 *, s32);
 
-u8 *func_150B443C(s32 *arg0, u8 *arg1, s16 arg2) {
+/* was func_150B443C */
+u8 *water_jet_spawn(s32 *arg0, u8 *arg1, s16 arg2) {
     struct {
         s32 u44;
         u8 pad48[0x3C];
@@ -82,19 +86,20 @@ u8 *func_150B443C(s32 *arg0, u8 *arg1, s16 arg2) {
     (*(f32 *)((u8 *)(&sp.u9C) + 4)) = (f32) (*(f32 *)((u8 *)arg1 + 4));
     (*(f32 *)((u8 *)(&sp.u9C) + 8)) = (f32) (*(f32 *)((u8 *)arg1 + 8));
     sp.uAC = 9;
-    temp_v0 = func_15147FF0(&sp.u9C, 0x58, 0x24, 7, 7, 7, 0, 0, 0, 0xFFU, 1);
+    temp_v0 = fxrec_spawn(&sp.u9C, 0x58, 0x24, 7, 7, 7, 0, 0, 0, 0xFFU, 1);
     sp40 = temp_v0;
     if (temp_v0 != NULL) {
-        func_1000FA64(0x221U, (s16) (s32) (*(f32 *)((u8 *)arg1 + 0)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 4)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 8)), 0x61A8, 0xFA0U, 0x258, (s32) func_1000EF40, NULL, 0, 8, random_int() & 0x40);
+        sfx_emitter_start(0x221U, (s16) (s32) (*(f32 *)((u8 *)arg1 + 0)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 4)), (s16) (s32) (*(f32 *)((u8 *)arg1 + 8)), 0x61A8, 0xFA0U, 0x258, (s32) sfx_cb_keep_until_silent, NULL, 0, 8, random_int() & 0x40);
         memcpy((*(s32 **)((u8 *)sp40 + 0x98)), &sp.u44, 0x58);
     }
     return sp40;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B443C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_spawn.s")
 #endif
 typedef struct { f32 x, y, z; } V3s64;
-s32 func_150B45C8(u8 *arg0) {
+/* was func_150B45C8 */
+s32 water_jet_points_update(u8 *arg0) {
     s32 temp_v1;
     s32 var_a1;
     s32 var_a2;
@@ -148,7 +153,8 @@ s32 func_150B45C8(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150B4774(u8 *arg0) {
+/* was func_150B4774 */
+s32 water_jet_emit_update(u8 *arg0) {
     struct {
         f32 u80;
         f32 u84;
@@ -198,7 +204,7 @@ s32 func_150B4774(u8 *arg0) {
         do {
             (*(f32 *)((u8 *)temp_s2 + 0x54)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0x54)) + (*(f32 *)((u8 *)temp_s2 + 0x3C)));
             if ((*(f32 *)((u8 *)temp_s2 + 0x54)) > 1.0f) {
-                func_150B5568(arg0);
+                water_jet_spray_spawn(arg0);
             }
             temp_t9 = temp_s3 + ((*(s8 *)((u8 *)arg0 + 0x2E)) * 0x24);
             (*(s32 *)((u8 *)temp_t9 + 0)) = (s32) (*(s32 *)((u8 *)temp_s5 + 0));
@@ -258,15 +264,15 @@ s32 func_150B4774(u8 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B4774.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_emit_update.s")
 #endif
 #ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, s32, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
-u8 *func_15142C10(u8 *, s32, s32, s32, s32, s8 *);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_load_texture_cached(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
+u8 *gfx_env_color_cached(u8 *, s32, s32, s32, s32, s8 *);
 extern s32 D_800915E8;
 extern s32 D_800D30BC;
 
@@ -286,10 +292,11 @@ typedef struct {
 // << 6, t 0x43C0 / 0x4000, white with alpha (fade * style +0x26) >> 8. Style (+0x98) bits 2 / 4 first rewrite the
 // fade ramps from the oldest (start 0, step +0x33, +0x32 points) / the newest (step +0x35, +0x34 points). When s
 // grows between two points the last pair is repeated with s - 0x4000 (texture wrap). With +0x1E bit 1 the ribbon
-// starts at the trail's own position (+0x10). Vertices from func_151D6310 (+0x84 buffer, (count << 5) + 0xA0 bytes;
+// starts at the trail's own position (+0x10). Vertices from vtx_slot_buffer_get (+0x84 buffer, (count << 5) + 0xA0 bytes;
 // none -> gfx unchanged); render state: texture D_800915E8, combine 0x4D, grey +0x24, geometry 1 / 0x160600,
 // othermode D_800D30BC | 0x82CA0 / 0x5049D8.
-u8 *func_150B4BF0(u8 *trail, u8 *gfx, s16 arg2) {
+/* was func_150B4BF0 */
+u8 *water_jet_ribbon_draw(u8 *trail, u8 *gfx, s16 arg2) {
     BeamPoint *pts;
     BeamPoint *p;
     u8 *style;
@@ -317,7 +324,7 @@ u8 *func_150B4BF0(u8 *trail, u8 *gfx, s16 arg2) {
     if (*(s8 *) (trail + 0x2C) < 2) {
         return gfx;
     }
-    func_151D6310((s32 *) (trail + 0x84), arg2, (trail[0x25] << 5) + 0xA0, (s32 *) &v, 0);
+    vtx_slot_buffer_get((s32 *) (trail + 0x84), arg2, (trail[0x25] << 5) + 0xA0, (s32 *) &v, 0);
     if (v == NULL) {
         return gfx;
     }
@@ -358,11 +365,11 @@ u8 *func_150B4BF0(u8 *trail, u8 *gfx, s16 arg2) {
         } while (n != 0 && i != *(s8 *) (trail + 0x2E));
     }
 
-    gfx = (u8 *) func_15142E24(gfx, &D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
-    gfx = (u8 *) func_15142B7C((s32) gfx, 1, 0x160600);
+    gfx = (u8 *) gfx_load_texture_cached(gfx, &D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = (u8 *) gfx_geometry_mode_cached((s32) gfx, 1, 0x160600);
     gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4D, &flag);
-    gfx = func_15142C10(gfx, style[0x24], style[0x24], style[0x24], 0xFF, &flag);
-    gfx = func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+    gfx = gfx_env_color_cached(gfx, style[0x24], style[0x24], style[0x24], 0xFF, &flag);
+    gfx = gfx_other_mode_cached((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     if (*(u16 *) (trail + 0x1E) & 2) {
         next = *(s8 *) (trail + 0x2E) - 1;
@@ -517,10 +524,11 @@ u8 *func_150B4BF0(u8 *trail, u8 *gfx, s16 arg2) {
     return gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B4BF0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_ribbon_draw.s")
 #endif
 
-void func_150B5540(u8 *arg0) {
+/* was func_150B5540 */
+void water_jet_stop(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
 
     arg0[0x30] = 0;
@@ -529,10 +537,11 @@ void func_150B5540(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s32 D_8009FFC0;
 
-void func_150B5568(u8 *arg0) {
+/* was func_150B5568 */
+void water_jet_spray_spawn(u8 *arg0) {
     struct {
         f32 uC0;
         f32 uC4;
@@ -616,15 +625,16 @@ void func_150B5568(u8 *arg0) {
         sp.uD0 = temp_f18;
         sp.uC8 = temp_f20 * temp_f30;
         sp.uCC = temp_f20 * spB4;
-        func_15148310(&sp.uE0, &sp.uC0, 0, 1, 7, 0, 0, 0, 0, 0, 0, &sp.u100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        trail_spawn(&sp.uE0, &sp.uC0, 0, 1, 7, 0, 0, 0, 0, 0, 0, &sp.u100, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         (*(f32 *)((u8 *)temp_s3 + 0x54)) = (f32) ((*(f32 *)((u8 *)temp_s3 + 0x54)) - 1.0f);
     } while ((*(f32 *)((u8 *)temp_s3 + 0x54)) > 1.0f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B5568.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/water_jet_spray_spawn.s")
 #endif
-void func_150B586C(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_150B586C */
+void water_jet_message(u8 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 5) {
-        func_150B5540(arg0);
+        water_jet_stop(arg0);
     }
 }

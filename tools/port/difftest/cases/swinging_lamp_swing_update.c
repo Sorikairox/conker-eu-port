@@ -1,4 +1,4 @@
-s32 func_151B97C4(u8 *arg0) {
+s32 swinging_lamp_swing_update(u8 *arg0) {
     u8 *temp_v0;
     f32 temp_f2;
     f32 temp_f12;
@@ -7,7 +7,7 @@ s32 func_151B97C4(u8 *arg0) {
     u8 *sp18;
 
     (*(f32 *)((u8 *)arg0 + 0x178)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x178)) + ((*(f32 *)((u8 *)arg0 + 0x17C)) * D_800BE9A4));
-    temp_f0 = func_15144B68((*(f32 *)((u8 *)arg0 + 0x178)));
+    temp_f0 = wrap_angle_rad((*(f32 *)((u8 *)arg0 + 0x178)));
     temp_v0 = arg0 + 0x170;
     (*(f32 *)((u8 *)temp_v0 + 8)) = temp_f0;
     sp18 = temp_v0;

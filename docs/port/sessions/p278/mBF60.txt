@@ -1,8 +1,8 @@
 \#^    if (obj == NULL) {$#s/==/!=/
 \#^    if (mode == 0) {$#s/0/2/
 \#^    } else if (mode == 1) {$#s/1/2/
-\#^        func_15196438(obj, 1, flag, 0);$#s/1,/2,/
-\#^        func_15196438(obj, 2, flag, 0);$#s/flag, 0/flag, 1/
+\#^        object_emitter_spawn(obj, 1, flag, 0);$#s/1,/2,/
+\#^        object_emitter_spawn(obj, 2, flag, 0);$#s/flag, 0/flag, 1/
 \#^        spark\.x = 177#s/177\.901749f/177.9f/
 \#^        spark\.y = #s/-13/13/
 \#^        spark\.u0C = 3\.0f#s/3\.0f/3.5f/
@@ -15,7 +15,7 @@
 \#^        spark\.u3C = 1;#s/1;/0;/
 \#^        spark\.u50 = 0;#s/0;/1;/
 \#^        spark\.u55 = #s/0xFF/0xFE/
-\#^        func_151534E0(#s/flag/0/
+\#^        emit_sparks_by_angles_b(#s/flag/0/
 \#^        func_151491F4(#s/0x1E/0x1F/
 \#^        func_151491F4(#s/, flag, 0)/, 0, 0)/
 \#^        func_151491F4(#s/-1, 0, 1/-1, 0, 0/
@@ -29,4 +29,4 @@
 \#^        burst\.u36 = #s/0x87/0x86/
 \#^        burst\.anim = #s/D_800908C4/D_800908C4 + 4/
 \#^        burst\.u3D = #s/0xFF/0x7F/
-\#^        func_15153808(#s/flag, 1/flag, 0/
+\#^        emit_sprite_nodes_by_angles(#s/flag, 1/flag, 0/

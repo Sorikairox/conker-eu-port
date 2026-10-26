@@ -3,35 +3,37 @@
 #include "variables.h"
 
 
-void func_150158C0(void) {
+/* was func_150158C0 */
+void glyph_count_reset(void) {
     D_800CC16C = 0;
 }
 
 #ifdef NON_MATCHING
-void func_10004074(s32);
-void func_150159E8(u8 *, s32, s32);
+void heap_free(s32);
+void glyph_rle_to_texture(u8 *, s32, s32);
 extern u32 D_80083310[][2];
 
 /* load ROM range #idx (D_80083310[idx] = {start, end}) into a temporary buffer and hand each record
-   (big-endian size at +4, at least 16 bytes) to func_150159E8 */
-void func_150158D0(s16 idx) {
-    u8 *buf = (u8 *)func_10003C6C(0x2800, 1, 2, 1, 0);
+   (big-endian size at +4, at least 16 bytes) to glyph_rle_to_texture */
+/* was func_150158D0 */
+void glyph_set_load_rom(s16 idx) {
+    u8 *buf = (u8 *)heap_alloc_tagged(0x2800, 1, 2, 1, 0);
     u32 *range = D_80083310[idx];
     u8 *rec;
     s32 i;
 
-    func_10004514(range[0], buf, range[1] - range[0], 1);
+    rom_dma_read(range[0], buf, range[1] - range[0], 1);
     rec = buf;
     i = 0;
     while ((u32)(rec + 0xF) < (u32)(buf + range[1] - range[0])) {
-        func_150159E8(rec, i, idx);
+        glyph_rle_to_texture(rec, i, idx);
         rec += (rec[4] << 24) + (rec[5] << 16) + (rec[6] << 8) + rec[7];
         i++;
     }
-    func_10004074((s32)buf);
+    heap_free((s32)buf);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_430D0/func_150158D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_430D0/glyph_set_load_rom.s")
 #endif
 #ifdef NON_MATCHING
 extern u8 *D_80085D20[];
@@ -44,7 +46,8 @@ extern u8 *D_80085D24[];
  * TMEM 8-byte word swap (x ^ 4). The tables are re-read for every access, as the original does. */
 #define GLYPH(k) (D_80085D24[set][idx * 4 + (k)])
 #define TEX(o) (D_80085D20[set][idx * 224 + (o)])
-void func_150159E8(u8 *src, s32 idx, s32 set) {
+/* was func_150159E8 */
+void glyph_rle_to_texture(u8 *src, s32 idx, s32 set) {
     s32 stride;
     s32 row;
     s32 x;
@@ -90,5 +93,5 @@ void func_150159E8(u8 *src, s32 idx, s32 set) {
 #undef GLYPH
 #undef TEX
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_430D0/func_150159E8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_430D0/glyph_rle_to_texture.s")
 #endif

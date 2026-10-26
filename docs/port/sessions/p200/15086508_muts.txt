@@ -1,19 +1,19 @@
 s/    res = 0xFF;/    res = 0xFE;/
-s/    near = func_15086268(x, y, z, 0, func_15086218(y));/    near = func_15086268(x, y, z, 1, func_15086218(y));/
-s/    near = func_15086268(x, y, z, 0, func_15086218(y));/    near = func_15086268(x, y, z, 0, func_15086218(z));/
+s/    near = rail_node_nearest(x, y, z, 0, rail_band_for_height(y));/    near = rail_node_nearest(x, y, z, 1, rail_band_for_height(y));/
+s/    near = rail_node_nearest(x, y, z, 0, rail_band_for_height(y));/    near = rail_node_nearest(x, y, z, 0, rail_band_for_height(z));/
 s/    if ((s8) count > 0 \&\& near != 0xFF) {/    if (count > 0 \&\& near != 0xFF) {/
 s/    if ((s8) count > 0 \&\& near != 0xFF) {/    if ((s8) count >= 0 \&\& near != 0xFF) {/
 s/    if ((s8) count > 0 \&\& near != 0xFF) {/    if ((s8) count > 0) {/
-s/        if (zone != NULL \&\& func_150A3794(zone, (s32) x, (s32) y, (s32) z) != 0) {/        if (func_150A3794(zone, (s32) x, (s32) y, (s32) z) != 0) {/
-s/        if (zone != NULL \&\& func_150A3794(zone, (s32) x, (s32) y, (s32) z) != 0) {/        if (zone != NULL) {/
-s/func_150A3794(zone, (s32) x, (s32) y, (s32) z)/func_150A3794(zone, (s32) x, (s32) z, (s32) y)/
-s/            res = func_150867D4(near, (s8) count, (s8) first, list, sel);/            res = func_150867D4(near, (s8) count, first, list, sel);/
-s/            res = func_150867D4(near, (s8) count, (s8) first, list, sel);/            res = func_150867D4(near, (s8) count, 0, list, sel);/
+s/        if (zone != NULL \&\& trigger_contains_point(zone, (s32) x, (s32) y, (s32) z) != 0) {/        if (trigger_contains_point(zone, (s32) x, (s32) y, (s32) z) != 0) {/
+s/        if (zone != NULL \&\& trigger_contains_point(zone, (s32) x, (s32) y, (s32) z) != 0) {/        if (zone != NULL) {/
+s/trigger_contains_point(zone, (s32) x, (s32) y, (s32) z)/trigger_contains_point(zone, (s32) x, (s32) z, (s32) y)/
+s/            res = rail_route_next(near, (s8) count, (s8) first, list, sel);/            res = rail_route_next(near, (s8) count, first, list, sel);/
+s/            res = rail_route_next(near, (s8) count, (s8) first, list, sel);/            res = rail_route_next(near, (s8) count, 0, list, sel);/
 s/            radius = ((u8 \*) node)\[8\];/            radius = ((u8 *) node)[9];/
 s/            r2 = (f32) radius + (f32) radius;/            r2 = (f32) radius;/
 s/            if (1e8f < r2 \* r2) {/            if (1e8f <= r2 * r2) {/
 s/            if (1e8f < r2 \* r2) {/            if (1e6f < r2 * r2) {/
-s/                res = func_150867D4(near, (s8) count, (s8) first, list, sel);/                res = func_150867D4(near, count, (s8) first, list, sel);/
+s/                res = rail_route_next(near, (s8) count, (s8) first, list, sel);/                res = rail_route_next(near, count, (s8) first, list, sel);/
 s/                for (k = 0; k < 5; k++) {/                for (k = 0; k < 4; k++) {/
 s/                    link = ((u8 \*) node)\[9 + k\];/                    link = ((u8 *) node)[8 + k];/
 s/                    ez = to->unk4 - node->unk4;/                    ez = to->unk2 - node->unk4;/

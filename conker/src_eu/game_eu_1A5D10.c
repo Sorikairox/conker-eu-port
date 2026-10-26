@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-/* 0x38-byte particle template copied to rec +0x10 (func_15177F90) */
+/* 0x38-byte particle template copied to rec +0x10 (swarm_spawn) */
 typedef struct {
     s32 u0;         /* 0x00 D_8008CE04 */
     u8 *owner;      /* 0x04 the 0x3A emitter record */
@@ -37,7 +37,8 @@ f32 math_cos_u8(u8 arg0);
 // debris_burst_spawn: makes a type 0x3A emitter record (attached to `pos` when given, else at the packed point x, y, z)
 // and `count` type 0x3B particles around (x, z) within radius 50 at height y - 78 + [0, 255], each a copy of a 0x38-byte
 // template (size 0x118, or 0x8C when w6 is set; life 7..14 frames). Stops at the first failed allocation.
-void func_15177F90(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s32 span, s32 flag, s32 arg9, s32 w6) {
+/* was func_15177F90 */
+void swarm_spawn(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s32 span, s32 flag, s32 arg9, s32 w6) {
     Puff7F90 t;
     u8 *rec;
     s16 size;
@@ -112,7 +113,7 @@ void func_15177F90(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15177F90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/swarm_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -128,7 +129,8 @@ extern u8 *D_8008CDEC[];
 // The climb +0x32 is 100..227, negated when the leader is lower than own +0x22 - 50 - random 0..63; +0x30 is
 // clamped to +-0x400. The sprite frame +0x10 (D_8008CDEC[6..9]) and mirror flag +0x44 come from the velocity seen
 // from the camera angle (D_800DBFF0 +0x380 in degrees); +0x1C bit 8 toggles every frame.
-void func_151787D8(u8 *obj) {
+/* was func_151787D8 */
+void swarm_follower_update(u8 *obj) {
     u8 *lead = *(u8 **) (obj + 0x14);
     s32 heading = *(s16 *) (obj + 0x2A);
     struct17 rel;
@@ -240,7 +242,7 @@ void func_151787D8(u8 *obj) {
     *(u8 **) (obj + 0x10) = D_8008CDEC[frame];
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_151787D8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/swarm_follower_update.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -248,7 +250,8 @@ s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player);
 
 /* P186: the asm leaves arg1 / arg2 in a1 / a2 at the jal and node_billboard_draw reads them (object, player view):
  * pass them (dropped-arguments lesson). */
-s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
+/* was func_15178CC0 */
+s32 swarm_follower_draw(s32 arg0, u8 *arg1, s16 arg2) {
     u8 *p = *(u8 **)(arg1 + 0x14);
     if (p[0x36] & (1 << arg2)) {
         return node_billboard_draw(arg0, arg1, arg2);
@@ -256,7 +259,7 @@ s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
     return arg0;
 }
 #else
-s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
+s32 swarm_follower_draw(s32 arg0, u8 *arg1, s16 arg2) {
     u8 *p = *(u8 **)(arg1 + 0x14);
     if (p[0x36] & (1 << arg2)) {
         return node_billboard_draw(arg0);
@@ -265,20 +268,22 @@ s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
 }
 #endif
 
-void func_eu_15178D14(void) {}
+/* was func_eu_15178D14 */
+void swarm_empty_stub(void) {}
 
 #ifdef NON_MATCHING
 extern s32 D_80082FA0;
 extern u8 D_800DA030[];
-s32 func_150A6840(s32, s32 *, f32, f32, f32, f32, f32, f32);
+s32 camera_view_test_sphere(s32, s32 *, f32, f32, f32, f32, f32, f32);
 
-// debris_emitter_update: per-frame update of a func_15177F90 emitter record. Saves the position (+0x18..+0x20, s32)
+// debris_emitter_update: per-frame update of a swarm_spawn emitter record. Saves the position (+0x18..+0x20, s32)
 // as the previous one (s16 +0x28..+0x2C) and moves it at most 16 units towards the target: the f32 point that +0x10
 // points to when s16 +0x14 is -0x8000, else the s16 point at +0x10. Sets the per-view visibility mask +0x36
-// (func_150A6840 for views 0..D_80082FA0, radius 100, range 2500), keeps the rumble sound 0x4A2 (handle +0x2E)
+// (camera_view_test_sphere for views 0..D_80082FA0, radius 100, range 2500), keeps the rumble sound 0x4A2 (handle +0x2E)
 // playing when +0x37 is set, and moves the s16 +0x32 by (frame step + 40) towards 0x780 while the target (raised by
 // s16 +0x30) is more than 100 units away, else towards 0x3C0.
-void func_15178D1C(u8 *rec) {
+/* was func_15178D1C */
+void swarm_leader_update(u8 *rec) {
     f32 *p;
     f32 tx;
     f32 ty;
@@ -326,7 +331,7 @@ void func_15178D1C(u8 *rec) {
     }
     mask = 0;
     for (i = 0; i <= D_80082FA0; i++) {
-        if (func_150A6840(D_800BE628 + i * 0x180, (s32 *) (D_800DA030 + i * 0x40), *(s32 *) (rec + 0x18),
+        if (camera_view_test_sphere(D_800BE628 + i * 0x180, (s32 *) (D_800DA030 + i * 0x40), *(s32 *) (rec + 0x18),
                           *(s32 *) (rec + 0x1C), *(s32 *) (rec + 0x20), 100.0f, 100.0f, 2500.0f) != 0) {
             mask |= 1 << i;
         }
@@ -334,10 +339,10 @@ void func_15178D1C(u8 *rec) {
     rec[0x36] = mask;
     if (rec[0x37] != 0) {
         if (*(u16 *) (rec + 0x2E) == 0) {
-            *(u16 *) (rec + 0x2E) = func_10010F88(0x4A2, 10000, 0, 0, 0, *(s32 *) (rec + 0x18),
+            *(u16 *) (rec + 0x2E) = sound_play_at(0x4A2, 10000, 0, 0, 0, *(s32 *) (rec + 0x18),
                                                   *(s32 *) (rec + 0x1C), *(s32 *) (rec + 0x20), 100, 800);
         } else {
-            func_1000F91C(*(u16 *) (rec + 0x2E), 10000, 0, 0, 0, *(s32 *) (rec + 0x18), *(s32 *) (rec + 0x1C),
+            sound_voice_update_3d(*(u16 *) (rec + 0x2E), 10000, 0, 0, 0, *(s32 *) (rec + 0x18), *(s32 *) (rec + 0x1C),
                           *(s32 *) (rec + 0x20), 100, 800);
         }
     }
@@ -370,10 +375,11 @@ void func_15178D1C(u8 *rec) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178D1C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/swarm_leader_update.s")
 #endif
 
-u8 *func_15179108(u8 arg0) {
+/* was func_15179108 */
+u8 *swarm_find_by_id(u8 arg0) {
     u8 *var_v1 = D_800DD368;
 
     while (var_v1 != NULL) {
@@ -385,10 +391,11 @@ u8 *func_15179108(u8 arg0) {
     return NULL;
 }
 
-void func_15179154(u8 arg0, s32 arg1, s16 arg2) {
+/* was func_15179154 */
+void swarm_set_target_ptr(u8 arg0, s32 arg1, s16 arg2) {
     u8 *temp_v0;
 
-    temp_v0 = func_15179108(arg0);
+    temp_v0 = swarm_find_by_id(arg0);
     if (temp_v0 != NULL) {
         (*(s32 *)((u8 *)temp_v0 + 0x10)) = arg1;
         (*(s32 *)((u8 *)temp_v0 + 0x14)) = 0x80000000;
@@ -396,9 +403,10 @@ void func_15179154(u8 arg0, s32 arg1, s16 arg2) {
     }
 }
 
-void func_151791A4(u8 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4) {
+/* was func_151791A4 */
+void swarm_set_target_pos(u8 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4) {
     u8 *temp_v0;
-    temp_v0 = func_15179108(arg0);
+    temp_v0 = swarm_find_by_id(arg0);
     if (temp_v0 != NULL) {
         *(s32 *)(temp_v0 + 0x10) = (arg1 << 0x10) | (arg2 & 0xFFFF);
         *(s32 *)(temp_v0 + 0x14) = arg3 << 0x10;
@@ -407,14 +415,15 @@ void func_151791A4(u8 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15178C9C(s32 arg0, s32 arg1) {
+/* was func_15178C9C */
+s32 swarm_distance_to_obj(s32 arg0, s32 arg1) {
     s32 temp_f10;
     s32 temp_f16;
     s32 temp_f8;
     struct127 *temp_a2;
     u8 *temp_v0;
 
-    temp_v0 = func_15179108(arg0 & 0xFF);
+    temp_v0 = swarm_find_by_id(arg0 & 0xFF);
     if (temp_v0 != NULL) {
         temp_a2 = &D_800CC2D0[arg1];
         temp_f16 = (s32) (temp_a2->x_position - (f32) (*(s32 *)((u8 *)temp_v0 + 0x18)));
@@ -425,14 +434,15 @@ s32 func_15178C9C(s32 arg0, s32 arg1) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178C9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/swarm_distance_to_obj.s")
 #endif
 extern s32 D_800DD36C;
-s32 func_15179314(u8 *arg0) {
+/* was func_15179314 */
+s32 swarm_destroy(u8 *arg0) {
     u8 *next; // fakematch: declared before p to move the spill slot to 0x20
     u8 *p = (u8 *)D_800DD36C;
 
-    func_100111C8(*(u16 *)(arg0 + 0x2E));
+    sound_voice_stop(*(u16 *)(arg0 + 0x2E));
     while (p != NULL) {
         next = *(u8 **)(p + 8);
         if (*(u8 **)(p + 0x14) == arg0) {
@@ -443,8 +453,9 @@ s32 func_15179314(u8 *arg0) {
     node_unlink_free(arg0);
 }
 
-s32 func_15179314(u8 *);
-void func_15178E14(u8 arg0)
+s32 swarm_destroy(u8 *);
+/* was func_15178E14 */
+void swarm_destroy_by_id(u8 arg0)
 {
-    func_15179314(func_15179108(arg0));
+    swarm_destroy(swarm_find_by_id(arg0));
 }

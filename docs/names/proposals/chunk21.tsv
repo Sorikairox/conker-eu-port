@@ -1,0 +1,214 @@
+old	new	confidence	description
+func_15096970	camera_timed_records_clear	high	Clears the three 0x24-byte timed camera records D_800D31E0 and the active flag D_800D2DB4
+func_15096DB0	camera_timed_records_any_active	high	Returns 1 when any of the first n timed camera records D_800D31E0 is in use, else 0
+func_15096E78	camera_timed_record_update	high	Steps timed camera record idx (script op 12): starts the door-style camera path, counts the timer down, restores the camera at the end
+func_15097118	camera_timed_records_update	med	Per frame (not while a cutscene plays): updates the first active timed camera record and stops at the first still running
+func_15097188	event_action_camera	high	Camera "set" handler of the event script tables (D_80088894): positions / targets, door camera, timed records, speeds, settings
+func_150979AC	event_query_camera	high	Camera "get" handler of the event script tables (D_80088858): speeds, timed record state, xz distance to a marker, object behind camera
+func_15097BA8	camera_timed_push_back	med	While a timed camera record runs, moves camera id's position and target back along their direction by the factor D_800D3250[id]
+func_15097D20	script_entity_object_id	high	Object id (0x2000 | n) of script entity n: spawns the entity when it has a record but no live object; -1 when that fails
+func_15097DDC	script_object_remove	high	Removes object id: sets the entity record's removed flag and kills the object (func_15060F28 or func_15053430); returns 999999
+func_15097E9C	event_action_object	high	Object action handler of the event scripts (ids 0x2xxx): move, turn, animate, spawn ... commands on object id; 0 when missing
+func_1509A024	event_query_object	high	Object query handler of the event scripts (entry 1 of D_80088838): fields, packed positions, distances and states of object id
+func_1509C850	event_action_scene	high	Scene actions of the event scripts (ids 0x1xxx): start scenes / cutscenes (cases 1, 3, 4 return 1, 0 while a scene is playing)
+func_1509CBD8	event_query_scene	high	Scene queries of the event scripts: scene / cutscene playing or finished, no scene playing, debug skip flag
+func_1509CD0C	cutscene_focus_on_object	med	Sets cutscene focus point 1 (or 2 when arg1) at object arg0, facing the main camera's yaw + 180
+func_1509CE20	event_table_get_block	med	Returns word +0 of event table entry D_800877D0[i] (the event's block / script pointer)
+func_1509CE40	event_table_get_u16_8	low	Returns the u16 at +8 of event table entry D_800877D0[i]
+func_1509CE60	event_table_get_id_field	low	Returns the low 12 bits of the u16 at +0xA of event table entry D_800877D0[i]
+func_1509CE88	event_table_get_word4	low	Returns word +4 of event table entry D_800877D0[i]
+func_1509CEA8	event_table_find_by_word4	med	Index of the first event table entry (of 0xCC) with a block whose word +4 & 0x1FFFFFFF equals arg0 - 1; 0xCC when none
+func_1509CF78	event_table_count	high	Counts the event table entries D_800877D0 (204) that have a block (word +0 != 0)
+func_1509CBD4	event_prereqs_met	high	Recursively checks that every prerequisite event in D_800877D0[id] +0xC has its save bit set in D_800D2E4C
+func_1509D0A4	event_unlock_chain	med	Wrapper: unlocks event arg0's follow-up list recursively (func_1509D0C4)
+func_1509D0C4	event_unlock_chain_rec	med	Unlocks the follow-up list (+0xC of D_800877D0 entry) of event arg0 through event_list_unlock, recursing into each event
+func_1509D104	save_unlocks_apply	med	Sets the save bits of event arg0's unlock list and marks newly reached events state 3 (recursing); returns how many were new
+func_1509D1EC	save_unlocks_propagate	high	Unlocks arg0's list, then expands every event in state 3 until a whole pass unlocks nothing new
+func_1509D274	event_list_unlock	high	For each id of a 0xFFFF-terminated list: calls cb(id), sets its state byte D_800D2E70 to 3 and its save bit in D_800D2E4C
+func_1509D338	save_route_table_load	high	Loads and relocates the save-route table into D_800D33D0; stores the route count; 0 when nothing was loaded
+func_1509D464	save_route_table_free	high	Frees the save-route table D_800D33D0 (func_10004074) and clears the pointer
+func_1509D49C	save_route_check	high	Route arg1 of the save-route table: returns its first requirement / target ids and 1 when all its requirement bits are set
+func_1509D590	event_effect_command	high	Native "start" handler 14 of the event VM (D_800887C0): starts effects / spawns, returns handles as (h << 6) | 0xE004
+func_1509DB90	event_effect_stop	med	Native "stop" handler of the effect commands (D_800887FC): stops what event_effect_command started (zap bolts, lights, effects)
+func_1509DD0C	event_action_effect	med	Effect-bank action handler (D_80088874): light controls, effect list broadcasts, level lights mode, laser and fx messages by id
+func_1509DFCC	event_query_effect	med	Effect-bank query handler (D_80088838): handle status of spawned effects (ids 4..6), node list state checks (0x19)
+func_1509E330	rail_script_set_ease	low	Rail stop-table handler: with 3 words and args[1] == 1 sets eased value slot args[2] (D_800D33E0 / D_800D33F8) to args[3] / 65536
+func_1509E3C4	rail_script_nop	high	Empty rail script handler
+func_1509E3D4	event_action_rail	high	Rail race / camera script command handler: cmd selects the action, args from +8; returns callee results or eased values * 65536
+func_1509E7EC	event_query_rail	med	Rail race query handler: rail node distances, race state, racer counts per node, object packed positions, eased values * 65536
+func_1509EB20	event_action_stream	med	Streamed-audio action handler: 0 plays stream arg0 (volume, func_1001263C), 1 sets its volume / fade, 2 stops it
+func_1509EBD0	event_query_stream	med	Streamed-audio query handler: query 3 returns 1 while the stream is playing (func_151F2CDC == 1)
+func_1509EC10	event_action_music	med	Music-track action handler (init_B1B0 sound tracks): start, volume with fade, pause, fades by command for track id & 0xFFF
+func_1509ED80	event_query_music	med	Music-track query handler: 7 = track finished (func_1000E0F8), 8 = track state (func_1000E8F0)
+func_1509EDE0	event_action_world_object	med	World-object action handler: enable / disable, move along rail nodes, settings and effects on world record arg0 (func_151149AC)
+func_1509F254	event_query_world_object	med	World-object query handler on world record arg0: object counts by state, positions and record fields
+func_1509F4D0	event_sound_command	high	Native "start" handler 7 of the event VM: plays random / positional / object sounds; returns the handle as (h << 16) | 0x7000
+func_1509F728	event_sound_stop	high	Native "stop" handler of the sound commands: stops the sound handle args[0] >> 16 (func_100111C8)
+func_1509F764	event_action_sound	med	Sound action handler: 0 / 1 stop / alternate the object sound of args[2], 2 plays a positional loop at an object
+func_1509F81C	event_query_sound	low	Sound query handler: always 0
+func_1509F834	sound_play_random_on_object	high	Plays a random sound from id range arg0..arg1 not yet used in mask on object arg4; returns the mask with the played bit toggled
+func_1509F95C	sound_play_random_world_object	high	Plays a random sound from range arg0..arg1 as the positional sound of world record arg3 (world_object_sound_play)
+func_1509F9C8	sound_play_random_at_trigger	med	Plays a random sound from range arg0..arg1 at the position of trigger record arg3 (D_800D34B8), returning its handle
+func_1509FA88	sound_play_random	high	Plays a random non-positional sound from range arg0..arg1 at volume arg2 (func_10010F30)
+func_1509FAD4	sound_play_on_object	high	Plays sound arg0 on object arg2 unless it already has one (forced with arg5)
+func_1509FB40	sound_stop_on_object	med	Stops object arg0's sound (func_10010A3C when arg1, else func_100109D0)
+func_1509FB90	sound_play_plain	med	Plays non-positional sound arg0 with volume / pan arguments (func_10010F30)
+func_1509FBC8	sound_play_at_object	high	Plays sound arg0 at the position of object arg1 (func_10010F88); 0 when the object is missing
+func_1509FC5C	sound_loop_at_object	low	Starts sound arg0 at full volume at object arg1's position through func_1000F91C (looping variant)
+func_1509FCE0	event_query_stub	low	Event handler table stub: returns 0
+func_1509FCF8	event_action_trap	low	Event handler table stub that calls the crash trap func_150ADC50 and returns 0
+func_1509FD30	event_action_game_state	high	Game-state actions of the event scripts (ids 0x5xxx): start / stop events, save bits, player state; may abort the running script
+func_150A02EC	event_query_game_state	high	Game-state queries of the event scripts (ids 0x5xxx): save flag bits, player mask, weighted random pick, controller state
+func_150A00F0	event_timers_reset	high	Clears the 10 event timer slots D_800D3430 (inactive, count and timer 0); level start
+func_150A067C	event_timers_update	high	Per frame: running timer slots add the frame time and bump their count each period of their kind (with optional modulus)
+func_150A0744	event_timer_start	high	Starts timer slot arg0 with kind args[1] (count 0, not running); 0 when already active
+func_150A07B0	event_action_timer	high	Timer action handler: 0 run, 1 pause, 2 set the count of timer slot arg0
+func_150A0854	event_query_timer	high	Timer query handler: query 3 returns the count of timer slot arg0
+func_150A0890	event_action_trigger	high	Trigger action handler: enable / disable, set kind arguments, position, masked fields, laser mode of trigger record arg0
+func_150A09B8	event_query_trigger	high	Trigger query handler (entry 3 of D_80088838): touched-by tests, touching player, fields of the 0x34-byte trigger records
+func_150A09D0	triggers_update	med	Per-frame update of the trigger records D_800D34B8 by kind: sound triggers, music fades, ambient effect timers, camera markers
+func_150A11F4	trigger_cache_angles	high	Caches sin / cos of a trigger's two rotation angles (+0xC, +0x10 degrees) at +0x24..+0x30
+func_150A126C	trigger_reflect_queue_objects	med	For each enabled kind-6 trigger: queues the mirrored draw (reflect_queue_object) of objects inside it
+func_150A1520	ptr_offset_0x400	low	Returns arg0 + 0x400
+func_150A152C	trigger_camera_zones_apply	med	Tests a camera's position against kind-1 triggers: sets / clears camera flag 0x40000 and the height limit +0x364
+func_150A16A4	trigger_zones_update_object	high	Per frame per object: finds the zone mask of its position and fires every touched trigger by kind, recording touched bits
+func_150A2280	trigger_test_object	high	Tests whether an object touches trigger record arg1 (shape by +0x15 & 3); returns 0 when inside, 1 when outside
+func_150A28C4	trigger_sound_start	med	Starts a trigger's positional sound (func_1000FA64 with id +0x1C >> 16 at its position) unless already started; marks it started
+func_150A29A0	trigger_ambfx_start	med	Starts the trigger's ambient effect (ambfx_effect_start) and stores its slot in +0x1C, or keeps the running one alive
+func_150A2AB4	trigger_zone_event_fire	med	Fires a touched zone trigger by subtype +0x17: lightning flash, fog colour, electric arc, sound, laser, kind-9 handler, spout
+func_150A2C6C	trigger_warp_check	high	For objects not in a warp: requests the warp of every kind-8 trigger the object touches (warp_request_start)
+func_150A2D44	trigger_set_disabled	high	Sets trigger arg0's disabled flag (+0x14); disabling clears its touched bit for all 16 players
+func_150A2E20	trigger_set_kind_args	high	Sets trigger arg0's argument +0x18 and subtype +0x17 (unless -1) and clears its state word +0x1C
+func_150A29C8	trigger_test_player	high	Whether player / object arg0 is outside trigger arg1: uses the recorded touched bits for players, else a direct test
+func_150A2FCC	trigger_first_touched	high	First trigger of the id list that object / player arg0 touches; -1 when none
+func_150A3184	trigger_find_touching_player	high	First active player whose touched bits contain trigger arg0; -1 when none
+func_150A3264	trigger_test_camera	high	Tests camera arg0's position against trigger arg1 (0 when inside, 1 when outside)
+func_150A332C	trigger_plane_side	med	Whether point (x, y, z) lies on the back side of a plane-shaped trigger (rotation cached at +0x24..+0x30)
+func_150A33C4	trigger_plane_side_object	high	Plane-side test of object arg0 against plane-shaped trigger arg1 (shape 3); 0 for other shapes
+func_150A3484	trigger_plane_side_camera	high	Plane-side test of camera arg0's position against plane-shaped trigger arg1 (shape 3); 0 for other shapes
+func_150A3538	trigger_point_in_kind3	high	Whether point (x, y, z) lies inside an enabled kind-3 trigger with subtype arg0
+func_150A3674	trigger_find_at_point	high	First enabled trigger of kind arg0 and subtype arg1 containing point (arg2, arg3, arg4); NULL when none
+func_150A3794	trigger_contains_point	high	Whether trigger record arg0 contains the integer point (arg1, arg2, arg3)
+func_150A3810	trigger_get_fields	high	Reads trigger arg0's subtype +0x17 and words +0x18 / +0x1C / +0x20 into the four out-pointers
+func_150A3878	trigger_set_fields_masked	high	Writes trigger arg0's subtype / +0x18 / +0x1C / +0x20 for each bit set in mask arg1
+func_150A3924	trigger_set_position	high	Sets trigger arg0's position (s16 x, y, z)
+func_150A3990	trigger_segment_hit	med	Segment test against an enabled cylinder-shaped trigger (trigger_cylinder_segment_hit); 0 for other shapes or disabled
+func_150A39E4	trigger_cylinder_segment_hit	high	Intersects segment p0 -> p1 with a trigger's rotated cylinder; writes the entry point and returns 1 on a hit
+func_150A3F50	floor_collect_level_tris	high	Collects the level floor triangles under (x, z) (all, or via the BSP tree) into D_800D3720; returns the count
+func_150A48C0	floor_collect_world_obj_tris	high	Collects the floor triangles under (x, z) of the world objects in an id list into D_800D3720; returns the count
+func_150A5480	floor_collect_record_tris	high	Collects the floor triangles under (x, z) of the 25 object records' meshes (area 3) into D_800D3720; returns the count
+func_150A44A4	floor_tri_height	high	Floor height (24.8) of a triangle (pointers or packed) under (x, z), clamped to its y range; returns out on a hit, else 0
+func_150A49D0	world_objects_transform_mesh	high	Transforms the collision vertices of a list of world objects to world space and refreshes their triangle bounds
+func_150A4ED4	collision_area_select_tables	high	Selects the collision tables (vertices, bounds, tree) of area arg0
+func_150A4FE4	obj_floor_mesh_update	high	Builds the world-space floor mesh (vertices, xz / y bounds) of an object record near another, or frees it
+func_150A55A0	mesh_dl_cull_copy	high	Copies an F3DEX2 display list, dropping triangles the view cannot see; returns the output end
+func_150A563C	mesh_dl_cull_copy_loop	med	Inner loop label of mesh_dl_cull_copy's hand asm (not entered from elsewhere)
+func_150A5858	level_dl_visibility_filter	high	Walks the level node tree for visible triangles, then copies the level DL keeping only visible triangle commands
+func_150A5BE8	level_dl_filter_loop	low	Inner loop label of level_dl_visibility_filter's hand asm (not a function of its own)
+func_150A5D08	level_dl_state_flush	med	Private subroutine of level_dl_visibility_filter: emits the deferred render-state commands before kept triangles
+func_150A5F98	level_box_corner_outcode	med	Private subroutine of level_dl_visibility_filter: frustum outcode of one node box corner
+func_150A6070	shadow_level_triangles	high	Projects the masked level triangles with the light matrix into shadow vertices; returns the vertex end
+func_150A6324	shadow_object_triangles	high	Projects the triangles of listed world objects with the light matrix into shadow vertices
+func_150A661C	shadow_project_vertex_entry	high	Private hand-asm helper: transforms one s16 vertex by the shadow light matrix
+func_150A66F0	view_sphere_depth	high	Frustum test of a box around (x, y, z) with matrix m; returns 0 when outside, else the rounded depth
+func_150A6834	view_test_epilogue	low	Shared epilogue entry of the hand-asm view tests (empty in C)
+func_150A6840	camera_view_test_sphere	high	View test of a sphere / box against camera record cam's side planes; 0 when outside, else the rounded depth (at least 1)
+func_150A69A8	world_objects_at_point_below	med	world_objects_in_box over the point (x, z) and heights -10000 .. y2
+func_150A69E0	world_objects_at_point	high	world_objects_in_box over the point (x, z) at all heights (-10000 .. 20000)
+func_150A6A48	world_objects_in_box	high	Lists the world objects whose box overlaps the given x / z / y range into D_800D3C00 (count returned) or D_800D3C50
+func_150A6C40	pvs_row_apply	high	Decodes PVS row D_800DC260[view] (Huffman stream) and writes bit view of each level record's visibility word
+func_150A6D40	sprite_billboard_draw	high	Draws a camera-facing sprite quad with texture / combine / alpha state caching; returns the new gfx pointer
+func_150A7480	vtx_wave_y_per_vertex	high	Offsets vertex y by a cosine wave with per-vertex amplitude
+func_150A75A0	vtx_wave_y	high	Offsets vertex y by a cosine wave with the state's amplitude
+func_150A76A8	vtx_wave_y_colour	high	Cosine wave on vertex y (state amplitude) with the vertex colour following the wave
+func_150A7840	vtx_wave_y_colour_per_vertex	high	Cosine wave on vertex y with per-vertex amplitude and colour following the wave
+func_150A79FC	vtx_wave_y_normal_colour	high	Per-vertex amplitude wave on y whose colour encodes the wave's direction
+func_150A7BD0	vtx_wave_cos_lookup	med	Private sine-by-quarter lookup entry of vtx_wave_y_normal_colour's hand asm
+func_150A7E40	mtxf_transform_point	high	Transforms point (x, y, z, 1) by the 4x4 float matrix and writes x, y, z
+func_150A7EE0	mtxf_transform_point_w	high	Transforms point (x, y, z, 1) by the 4x4 float matrix and writes x, y, z and w
+func_150A7EF4	mtxf_transform_point_w_tail	med	Second half of the mtxf_transform_point_w trampoline (computes w); not a function of its own
+func_150A7A48	mtxf_mul	high	4x4 float matrix product c = a * b; c may alias a or b
+func_150A80F0	mtx_scale_fixed	high	Builds a fixed-point (s15.16) scale matrix diag(x, y, z, 1)
+func_150A82D0	mtx_rotate_xyz_deg_fixed	high	Builds a fixed-point rotation matrix from three angles in degrees, no translation
+func_150ADD90	vec3f_cross	high	Cross product of two float 3-vectors into arg2
+func_150ADDE0	vec3f_dot	high	Dot product of two float 3-vectors
+func_150AD930	vec3f_magnitude	high	Length of a float 3-vector
+func_150ADE40	approx_dist2_int	high	Octagonal integer estimate of the 2D distance between (x0, z0) and (x1, z1)
+func_150ADFD0	event_vm_run	high	Event script interpreter: runs event block blk from entry entry until its outermost return
+func_150AE5D8	event_native_start_cmd	high	VM native: calls the D_800887C0 "start" handler chosen by the id word's nibble
+func_150AE5E8	event_native_stop_cmd	high	VM native: calls the D_800887FC "stop" handler chosen by the id word's nibble
+func_150AE5F8	event_native_query	high	VM native: calls the D_80088838 query handler by the id word's nibble (id, args[1], args)
+func_150AE60C	event_native_action	high	VM native: calls the D_80088874 action handler by the id word's nibble (id, args[1], args)
+func_150AE674	event_native_random	high	VM native: random number below args[0]
+func_150AE690	event_native_frame_time	high	VM native: frames since the last update (D_800BE9A0)
+func_150AE6A0	event_native_fixed_mul	high	VM native: 16.16 fixed-point product
+func_150AE6BC	event_native_fixed_div	high	VM native: 16.16 fixed-point quotient
+func_150AE6D4	event_native_timer_up	high	VM native: timer counting up by the frame time (negative timers stop at 0, 0 becomes 1)
+func_150AE714	event_native_timer_down	high	VM native: timer counting down by the frame time (stops at 1, 1 becomes 0)
+func_150AE760	event_vm_abort	high	Aborts the running event script
+func_150AE780	object_sway_update	high	Object handler: advances two phases and drives a sine sway at +0x20 / +0x28
+func_150AE83C	object_handler_true	low	Object handler table stub: returns 1
+func_150AE84C	object_quad_vtx_build	low	Builds a 4-vertex quad for an object record from its node matrix and size (vertex pool func_151D6310); NULL when none
+func_150AEEB0	obj_trail_burst_spawn	med	Spawns up to 30 rising trails on a ring of radius 100 around an object (stops when trail_spawn fails)
+func_150AF6A0	trail_alpha_from_life	med	Trail update: sets the trail's alpha to life * 32 (max 255); 0 when it went negative
+func_150AF6E0	world_pair_hit_player	low	When world record arg0 (else arg1) has flag bit 0 set, sends hit 0x3F to the player (0x6E00 / 0xEE00)
+func_150AF7C0	ground_fx_spawn_at_span	low	Calls ground_fx_spawn_random with heights from the span record arg1 (+2 + +8, +2)
+func_150AF808	smoke_emitter_update_small	low	Effect update: accumulates a random rate and spawns small wobbling smoke particles (size 80..150) at its position
+func_150AFBC4	particle_wobble_damp_update	med	Particle update: applies the wobble offset and damps the velocity by the stored factor; returns 1
+func_150AFC18	fb_fx_spawn_simple	med	Spawns a framebuffer effect node (fb_fx_spawn) of type 2 with span arg0
+func_150AFC70	fb_fx_gray_callback	med	Framebuffer callback: turns the whole frame buffer arg1 gray (framebuffer_green_to_gray over 0x1ECC0 bytes)
+func_150AFCA4	sprite_emitter_update	low	Effect update: on two random timers spawns 2D sprites (sprite2d_spawn) at random offsets around its position
+func_150B00D4	fx_bob_update	med	Effect update: advances a phase and sets y (+0x10) = base + amplitude * sin(phase)
+func_150B0148	particle_emitter_preset_spawn	low	Spawns a fixed-preset particle emitter node (particle_emitter_node_spawn) with size / count arguments
+func_150B0290	nodes_destroy_for_player	med	Destroys the nodes of list D_800DD2C4 owned by the current player D_800C3E78
+func_150B0344	player_joint_beam_spawn	high	Spawns a line effect and attached beam from the player's joint 3 (side 0) or 2 (side 1)
+func_150B051C	world_pair_hit_player_level	low	Runs world_pair_hit_player with records 0xE2 / 0xE1 in level 6 (after rain_update), else 0xDF / 0xDE
+func_150B0574	beam_trail_spawn	high	Spawns a 3-strand trail from `from` along to - from and records an attached glow in its extra word
+func_150B07A0	beam_trail_free_extra	high	Destroys the node held in a trail's extra word (+0x170)
+func_150B07D0	beam_trail_die_retire	high	Frees the trail's extra node and retires the model particle (mdl_particle_die_retire)
+func_150B07FC	beam_trail_die_free	high	Frees the trail's extra node and frees the model particle (mdl_particle_die_free)
+func_150B0828	obj_impact_burst_spawn	med	Spawns a particle burst and a textured burst 30 above an object's position
+func_150B0AEC	world_record_anchor_init	low	Fills a record with world record arg0's position and constants (-150, 4.5); 0 when the record does not exist
+func_150B0B90	obj_hit_impact_fx_spawn	med	Impact effects of an object hit (kind 0xA6: embers and burst, others sparks / burst) facing the hitter
+func_150B0F40	wake_spray_point_pick	high	Picks a random spray point beside / behind an object (and its angle) for the wake spray
+func_150B1114	wake_spray_spawn_default	high	wake_spray_spawn with owner 0xFF and flag 1
+func_150B1138	wake_spray_spawn	high	Creates the wake spray effect record (type 0x43) following an object
+func_150B11C0	wake_spray_link_message	med	Message handler of the wake spray: forwards link messages for its object (node_handle_link_message)
+func_150B1200	wake_spray_update	high	Wake spray update: while the owner rides fast enough, spawns spray particles beside the object; ends when the object is gone
+func_150B15D0	obj_whirlpool_pull_update	med	Object update: pulls a swimming player within range towards / around the object (sets player velocity and height)
+func_150B17DC	obj_path_bank_update	low	Object update: path-height collision, movement and a smoothed banking roll from the heading change; releases when done
+func_150B1964	held_object_update	high	Update of an object that may be held, thrown or resting: heights, pull towards a target, collision box, move, animation
+func_150B1CBC	obj_carrier_update	low	Object update: carries the state-10 object (riding: locked on top; else circles it below) and faces the player
+func_150B1EC0	sinking_object_update	high	Per-frame update of an object sinking / floating in water, with ripples
+func_150B2290	framebuffer_green_to_gray	high	Turns RGBA5551 pixels in [start, end) gray by copying the green field into red and blue
+func_150B2300	camera_flags_from_events	med	Sets / clears camera record flags (+0x84 bit 0x10000) and an object height from event queries 0x4054 / 0x405C / 0x405B
+func_150B23C0	smoke_emitter_spawn	low	Creates a timed smoke emitter effect record (type 0x49, life 69..201) at a position
+func_150B2470	smoke_emitter_update_large	low	Effect update: accumulates a random rate and spawns large wobbling smoke particles (size 405..908) at its position
+func_150B2820	view_progress_setup	high	Configures a view record's flags and distances from game progress queries
+func_150B2960	emit_handler_ten	low	Spawn handler stub: returns 10
+func_150B2974	obj_blast_fx_spawn	med	Blast effects at an object's floor position: circle emit, rumble for all players and explosion light
+func_150B2A50	emit_point_spark	high	Spawn handler: queues one spark particle at (x, y, z) along byte angle a with a random pitch
+func_150B2C20	pipe_explode_effects	high	Effects of pipe `pipe` bursting: camera shake, debris, smoke, sparks, water jet and sounds
+func_150B3394	pipe_explode_spawn_chunk	high	Spawn handler 9: one flying pipe chunk particle at the ring point
+func_150B3668	pipe_explode_spawn_debris	high	Spawn handler 10: one debris particle with tweakable life, gravity, speed and scale
+func_150B3B8C	debris_ground_stop_update	med	Particle update: stops motion when below its floor height, else damps the velocities
+func_150B3C6C	trail_alpha_fade	med	Trail update: lowers the trail's alpha to at most life * 16
+func_150B3CA8	trail_hit_splash	high	Trail hit handler: shrinks the trail, spawns a splash sprite and a falling child trail
+func_150B3AB0	obj_joint_blast_fx	med	Blast at an object's joint: camera shake, arc emit, rumble and explosion light
+func_150B40EC	emit_point_spark_ring	high	Spawn handler: one spark particle along angle0 tilted by the point angle a
+func_150B42B0	water_jets_stop_all	med	Broadcasts stop (5) to effect records and message 0x18 to keys 0..5 (stops all water jets)
+func_150B4354	water_jet_die_retire	med	Plays sound 0x221 at the jet and retires its effect record
+func_150B43C8	water_jet_die_free	med	Plays sound 0x221 at the jet and frees its effect record
+func_150B443C	water_jet_spawn	med	Spawns a water / steam jet effect record from a 0x40-byte spec at a position and starts its sound
+func_150B45C8	water_jet_points_update	med	Advances the jet's ring of points (motion, life) and drops expired ones; stores the oldest point position
+func_150B4774	water_jet_emit_update	med	Jet update: emits new ring points with random spread and spawns spray drops
+func_150B4BF0	water_jet_ribbon_draw	high	Draws the jet's points as a camera-facing textured ribbon
+func_150B5540	water_jet_stop	med	Stops a water jet emitting (clears its emit flags)
+func_150B5568	water_jet_spray_spawn	med	Spawns the jet's spray drops (trail_spawn) in random directions while the accumulator is above 1
+func_150B586C	water_jet_message	med	Message handler of the water jet: message 5 stops it
+func_150B58B0	obj_electrify_fx_spawn	med	Creates the electric aura effect record (type 0x23) on an object, life arg1 (300 default)
+func_150B5988	obj_electrify_fx_update	med	Electric aura update: flashes the object's tint and spawns lightning arcs and sparks from it
+func_150B5CA4	obj_electrify_asset_release	med	Releases attach-effect asset 6 of the electric aura
+func_150B5CC8	obj_electrify_die_retire	med	Releases the aura asset and retires the effect record
+func_150B5CF4	obj_electrify_die_free	med	Releases the aura asset and frees the effect record
+func_150B5D20	obj_electrify_message	med	Electric aura message handler: destroy with its object (0), follow object swaps (0x2D)

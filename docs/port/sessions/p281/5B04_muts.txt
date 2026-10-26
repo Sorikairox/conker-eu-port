@@ -1,8 +1,8 @@
 s/D_8003C220 = 0x1FC;/D_8003C220 = 0x1FD;/
 s/D_8003C222 = 0x3FF;/D_8003C222 = 0x3FE;/
-s/area = func_10003C6C(pages << 12, 0xFF, 4, 1, 2);/area = func_10003C6C(pages << 11, 0xFF, 4, 1, 2);/
-s/area = func_10003C6C(pages << 12, 0xFF, 4, 1, 2);/area = func_10003C6C(pages << 12, 0xFF, 3, 1, 2);/
-s/area = func_10003C6C(pages << 12, 0xFF, 4, 1, 2);/area = func_10003C6C(pages << 12, 0xFF, 4, 1, 0);/
+s/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);/area = heap_alloc_tagged(pages << 11, 0xFF, 4, 1, 2);/
+s/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);/area = heap_alloc_tagged(pages << 12, 0xFF, 3, 1, 2);/
+s/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);/area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 0);/
 s/if (area != 0) {/if (area > 0) {/
 s/        pages = prev;/        pages = pages - 1;/
 s/        D_8003C218 = pages;/        D_8003C218 = prev;/

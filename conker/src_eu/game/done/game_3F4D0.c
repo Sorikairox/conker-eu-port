@@ -20,5 +20,5 @@ void func_15012020(s32 arg0, s32 arg1) {
     tmp.unk25 = -1;
     tmp.unk26 = 3;
 
-    func_151A8B20(&tmp, -1, 0, 0xFF, 0);
+    ground_emitter_spawn(&tmp, -1, 0, 0xFF, 0);
 }

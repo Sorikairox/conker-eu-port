@@ -570,7 +570,7 @@ static void apply_state(void) {
      * ?p273oldcvg=1 restores the old behaviour. */
     { static int oc = -1; if (oc < 0) oc = port_flag("p273oldcvg");
       glUniform1i(u_cvg, (oth_l & 0x2000) && (oc || (oth_l & 0x1000)) ? ((oth_l & 0x4000) ? 2 : 1) : 0); }
-    /* P144: CVG_X_ALPHA + CLR_ON_CVG without FORCE_BL (e.g. the logo-end iris, func_15180AF0 / func_1518010C: black
+    /* P144: CVG_X_ALPHA + CLR_ON_CVG without FORCE_BL (e.g. the logo-end iris, hud_sniper_scope_draw / hud_scope_lens_draw: black
      * combiner, I8 lens alpha): coverage = pixel coverage * alpha and the colour is written only on coverage
      * overflow, so texels with low alpha leave the framebuffer alone (approximated as "discard below 0.5"). Before,
      * the whole lens square was drawn opaque black. ?p144nocvgx=1 restores the old behaviour. */
@@ -783,7 +783,7 @@ static void put(const V *v, float sshift, float tshift) {
     o[8] = v->s * sshift; o[9] = v->t * tshift; o[10] = v->fog;
 }
 
-/* P61 ?p61model=N: the game's own model DL. func_1502CFEC (port P57 C) emits, per visible sub-DL k of a model,
+/* P61 ?p61model=N: the game's own model DL. obj_draw_model_dl (port P57 C) emits, per visible sub-DL k of a model,
  * G_MTX (MV load) D_800C42B8 + G_DL D_800C48A8[model][k]. Its G_MTX word is `&D_800C42B8 & 0x1FFFFFFF` like the asm's
  * physical D_C42B8; in wasm the label is a mirror address (< 0x20000000), so the mask keeps it and gfx_addr takes the
  * wasm class; a true N64 physical value (< 8 MB) takes the segment-0 / RDRAM-mirror class. That G_MTX word marks the
@@ -1030,14 +1030,14 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
     if (oldl < 0) oldl = port_flag("p94oldlight");
     const unsigned char *amb = lbuf + 0x60 + 48 * (M + (!light_bg && oldl)), *sun = lbuf + 0x60 + 48 * (oldl ? M : M - 1);
     float c[3] = {amb[0] / 255.0f, amb[1] / 255.0f, amb[2] / 255.0f};
-    {   /* P42 DIAGNOSTIC ?lvlwhite=1: the level's start colour (record M) is func_1515DE84's `arg8` = the colour that the
-         * still-asm func_1515E7E8 should write into its uninitialised local `col`; with the stub it is stack garbage
+    {   /* P42 DIAGNOSTIC ?lvlwhite=1: the level's start colour (record M) is light_apply_object_lights's `arg8` = the colour that the
+         * still-asm light_get_zone_colour should write into its uninitialised local `col`; with the stub it is stack garbage
          * (P39: a green tint, P42: 000000 = a black level). The flag makes a black BG start colour white. */
         static int lw = -1;
         if (lw < 0) lw = port_flag("lvlwhite");
         /* P44: ?lvlwhite=2 forces white for any BG start colour (the stack garbage can be a dim green, not 000000) */
         if (lw && light_bg && (lw >= 2 || (!amb[0] && !amb[1] && !amb[2]))) c[0] = c[1] = c[2] = 1.0f;
-        /* P46: ?lvlcol=N logs the first N changes of the BG start colour (P43: func_1515E7E8 is C and fills it) */
+        /* P46: ?lvlcol=N logs the first N changes of the BG start colour (P43: light_get_zone_colour is C and fills it) */
         static int lc = -1, lcn;
         static unsigned lcprev = 0xFFFFFFFFu;
         if (lc < 0) lc = port_flag("lvlcol");
@@ -1398,13 +1398,13 @@ void gfx_run_dl(const void *dl) {
         case 0xD9: geom = (geom & (w0 & 0xFFFFFF)) | w1; state_dirty = 1; break; /* G_GEOMETRYMODE */
         case 0xDA: {                                          /* G_MTX */
             const unsigned char *p = gfx_addr(w1);
-            if (p61_flag && D_800C42B8 && w1 == ((unsigned)(uintptr_t)D_800C42B8 & 0x1FFFFFFF)) {   /* P61: func_1502CFEC's G_MTX */
+            if (p61_flag && D_800C42B8 && w1 == ((unsigned)(uintptr_t)D_800C42B8 & 0x1FFFFFFF)) {   /* P61: obj_draw_model_dl's G_MTX */
                 p61_mtx++; p61_pend = 1;
                 if (!p61_mark++) {
                     port_log("[p61] first model G_MTX %08X %08X at %p (task %u): resolves to %p, &D_800C42B8 %p (%s)\n", w0, w1,
                              (const void *)(pc - 8), gfx_stats.tasks, (const void *)p, (const void *)D_800C42B8,
                              p == D_800C42B8 ? "same" : "DIFFERENT");
-                    for (int k = -24; k < 0; k++)   /* func_1502CFEC's setup before it */
+                    for (int k = -24; k < 0; k++)   /* obj_draw_model_dl's setup before it */
                         port_log("[p61]   %p: %08X %08X\n", (const void *)(pc - 8 + 8 * k), rd32(pc - 8 + 8 * k), rd32(pc - 4 + 8 * k));
                 }
             } else if (p61_depth >= 0) p61_icls[p61_cls(w1)]++, p61_imtx++;
@@ -1496,7 +1496,7 @@ void gfx_run_dl(const void *dl) {
             const unsigned char *t = gfx_addr(w1);
             if (!t) { gfx_stats.bad_addr++; break; }
             if (w1 == 0) { /* P55: G_DL 0 only comes from an asm stub that returned a NULL DL (hud_health_draw draws
-                            * D_800D29A8 = stub func_1518C900(0xB8)); RDRAM 0 is code, running it crashed the renderer */
+                            * D_800D29A8 = stub shared_dl_acquire(0xB8)); RDRAM 0 is code, running it crashed the renderer */
                 static int logged;
                 gfx_stats.bad_addr++;
                 if (!logged++) port_log("[gfx] G_DL to address 0 at %p skipped (a stub returned a NULL display list)\n", (const void *)(pc - 8));
@@ -1765,14 +1765,14 @@ void gfx_run_task(void *task) {
     }
 }
 
-/* P37: ?dlapprox=1 and the visibility-walk check, as a link-time wrapper (-Wl,--wrap=func_150A5858, port/Makefile)
- * of the game's C func_150A5858 (game_eu_D2DB0.c, port P34; the P31 PC stand-in is gone). The level loader is the
+/* P37: ?dlapprox=1 and the visibility-walk check, as a link-time wrapper (-Wl,--wrap=level_dl_visibility_filter, port/Makefile)
+ * of the game's C level_dl_visibility_filter (game_eu_D2DB0.c, port P34; the P31 PC stand-in is gone). The level loader is the
  * game's C level_load_models (P34), so the P33 ?nolvlload flag is gone too.
  *   default: call the game C; with ?vislog=N log the first N calls: source tris (0x05: 1, 0x06: 2, 0x10-0x1F: 4 vis
  *            slots), kept tris and commands in the emitted DL, visible tri slots, and once the leaf-list check below.
  *   dlapprox: emit gSPDisplayList(dl) instead (the whole level DL, no culling; diagnostic only).
  * Game memory: words are native, bytes / halfwords go through vbe_ld8 / vbe_ld16. */
-uint32_t *__real_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int mask);
+uint32_t *__real_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int mask);
 extern unsigned D_800D3668, D_800D3A8C, D_800DC278;
 static int vis_tris(const uint32_t *p, const uint32_t *end, unsigned *ncmd) {
     int t = 0; unsigned n = 0;
@@ -1785,7 +1785,7 @@ static int vis_tris(const uint32_t *p, const uint32_t *end, unsigned *ncmd) {
     if (ncmd) *ncmd = n;
     return t;
 }
-uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int mask) {
+uint32_t *__wrap_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int mask) {
     static int dla = -1, vlog = -1, calls;
     uint32_t *r;
     if (dla < 0) { dla = port_flag("dlapprox"); vlog = port_flag("vislog"); }
@@ -1801,7 +1801,7 @@ uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3
     (void)npre;
     if (D_800D3A8C <= D_800D3668 || (D_800D3A8C - D_800D3668) & 7 || !D_800DC278) {
         /* P37 GUARD (not a stand-in): the walk's inputs are missing. The visibility-byte range [D_800D3668, D_800D3A8C)
-         * (EU 0x800D3A88 / 0x800D3A8C) is sized by collision_build_level_tris from func_15002878() = the largest per-area triangle
+         * (EU 0x800D3A88 / 0x800D3A8C) is sized by collision_build_level_tris from collision_max_area_tris() = the largest per-area triangle
          * count D_800DBE18[], which the still-asm collision_scan_level_dl (game_2DF70, the level-DL triangle walk) counts in
          * D_800DBE38; the node tree D_800DC278 = D_800DBE08[area] (func_150A4ED4) is built from those triangles.
          * With collision_scan_level_dl stubbed the range is empty, and the clear loop (a do-while, as in the asm) runs off the end
@@ -1810,7 +1810,7 @@ uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3
         if (nlog++ < 2) port_log("[vis] skipped (inputs missing): vis [%08X, %08X) tree %08X\n", D_800D3668, D_800D3A8C, D_800DC278);
         return gdl;
     }
-    r = __real_func_150A5858(dl, gdl, mtx, a3, a4, mask);
+    r = __real_level_dl_visibility_filter(dl, gdl, mtx, a3, a4, mask);
     { /* P42: the first vlog calls of every (dl, tree) pair, so the level after the boot level is logged too */
         static int lastdl, lasttree;
         if (dl != lastdl || (int)D_800DC278 != lasttree) {
@@ -1914,7 +1914,7 @@ void port_camwatch(const char *where) {
     if (cw_flag < 0) cw_flag = port_flag("camwatch");
     if (!cw_flag) return;
     { /* first hit of the camera-path stubs: who calls them */
-        static const char *const who[] = {"func_1504CB98", "camera_update_target", "camera_update_eye_orbit", "camera_dispatch_mode", "camera_update_target_height",
+        static const char *const who[] = {"obj_state_walk", "camera_update_target", "camera_update_eye_orbit", "camera_dispatch_mode", "camera_update_target_height",
                                           "camera_update_transition", "camera_update_aim_mode"};
         static unsigned seen;
         for (i = 0; i < (int)(sizeof who / sizeof who[0]); i++)
@@ -1938,13 +1938,13 @@ void port_camwatch(const char *where) {
     cw_have = 1;
 }
 void __real_camera_build_view_matrix(void *arg0);
-void func_1000D96C(int, int, int);
+void music_play_song(int, int, int);
 void __wrap_camera_build_view_matrix(void *arg0) {
     { /* P99 DIAGNOSTIC ?p99snd=F: at frame >= F start sound 0x15 once through the game's own entry (the floor-material
-       * ambient loop func_1508000C starts), to tell "no sound requested" from "audio path broken" */
+       * ambient loop obj_surface_effects_update starts), to tell "no sound requested" from "audio path broken" */
         static int sf = -1, done = 0;
         if (sf < 0) sf = port_flag("p99snd");
-        if (sf > 0 && !done && port_frame_count >= (unsigned)sf) { done = 1; func_1000D96C(0x15, 0, 0); }
+        if (sf > 0 && !done && port_frame_count >= (unsigned)sf) { done = 1; music_play_song(0x15, 0, 0); }
     }
     if (cw_flag < 0) cw_flag = port_flag("camwatch");
     if (cw_flag) {
@@ -1988,28 +1988,28 @@ void __wrap_camera_build_view_matrix(void *arg0) {
 }
 
 /* P39: ?p38check=N runtime checks of the P38 C (link-time wraps; N = how many calls to log in detail).
- *  - func_15186D04 (shadows): opcode histogram of what it appends to the frame DL (VTX 01, TRI1 05, TRI2 06,
+ *  - shadow_draw_all (shadows): opcode histogram of what it appends to the frame DL (VTX 01, TRI1 05, TRI2 06,
  *    Rare TRI4 10..1F, DL / ENDDL), and per call the triangle slots per vertex load (the strip splitter output).
- *  - func_1504A730 (per-frame object update): D_800CC6A4 after the call, and whether it is left pointing into
+ *  - objects_run_state_handlers (per-frame object update): D_800CC6A4 after the call, and whether it is left pointing into
  *    the dead stack frame (the 6-byte buffer used for objects >= 4).
- *  - func_150A6840 (view test): every call is checked against an independent double-precision version of the
+ *  - camera_view_test_sphere (view test): every call is checked against an independent double-precision version of the
  *    asm (c.ule / c.olt / c.ult NaN rules, cvt.w.s round-to-nearest-even), with an exit histogram. */
 static int p38_flag = -1;
 static int p38_on(void) { if (p38_flag < 0) p38_flag = port_flag("p38check"); return p38_flag; }
-uint8_t *__real_func_15186D04(uint8_t *gdl, int arg1);
-/* P158 DIAGNOSTIC ?p158null=1: character_spawn_handlers func_1514D6CC (game_eu_17A800) dispatches D_8008AE10 handlers by
- * the indices of character_handler_indices func_1514CFF0 (C, side-effect free). Logs the call when the null zone word
+uint8_t *__real_shadow_draw_all(uint8_t *gdl, int arg1);
+/* P158 DIAGNOSTIC ?p158null=1: character_spawn_handlers char_fx_init (game_eu_17A800) dispatches D_8008AE10 handlers by
+ * the indices of character_handler_indices char_fx_handler_indices (C, side-effect free). Logs the call when the null zone word
  * null+0x14 changes across it (the 0x400 written at the new-game scene start, frame 4560), with the indices / handlers. */
 /* P161 ?p161fix=1 test wrap of record_start_dispatch removed in P171: port-b P164 passes the record in the game C. */
-int __real_func_1514D6CC(void *arg0);
-int func_1514CFF0(void *arg0, int *outSub, int *outMode, int *outType);
-int __wrap_func_1514D6CC(void *arg0) {
+int __real_char_fx_init(void *arg0);
+int char_fx_handler_indices(void *arg0, int *outSub, int *outMode, int *outType);
+int __wrap_char_fx_init(void *arg0) {
     static int on = -1; static unsigned logged;
     if (on < 0) on = port_flag("p158null");
-    if (on <= 0) return __real_func_1514D6CC(arg0);
+    if (on <= 0) return __real_char_fx_init(arg0);
     unsigned before = *(volatile unsigned *)(uintptr_t)0x14;
-    int sub = -1, mode = -1, type = -1, fl = func_1514CFF0(arg0, &sub, &mode, &type);
-    int r = __real_func_1514D6CC(arg0);
+    int sub = -1, mode = -1, type = -1, fl = char_fx_handler_indices(arg0, &sub, &mode, &type);
+    int r = __real_char_fx_init(arg0);
     unsigned after = *(volatile unsigned *)(uintptr_t)0x14;
     if ((before != after || logged < 6) && logged < 40) {
         extern unsigned char D_800A62B8[], D_800A62A0[], D_800CC2D0[]; extern unsigned D_8008AE10[]; extern unsigned char D_8008AF30[];
@@ -2022,13 +2022,13 @@ int __wrap_func_1514D6CC(void *arg0) {
     }
     return r;
 }
-/* P158 DIAGNOSTIC ?p158light=N: every Nth call of shadow_light_projection func_151848D8 (game_eu_1B1ED0): object, slot,
+/* P158 DIAGNOSTIC ?p158light=N: every Nth call of shadow_light_projection shadow_light_projection (game_eu_1B1ED0): object, slot,
  * the returned light distance, the slot's smoothed light position D_800DE3E0[slot], the object position and the default
  * light direction D_800DE440 (why the shadow streak is long). */
-float __real_func_151848D8(int obj, int slot, float sx, float sy, float sz, float prev);
-float __wrap_func_151848D8(int obj, int slot, float sx, float sy, float sz, float prev) {
+float __real_shadow_light_projection(int obj, int slot, float sx, float sy, float sz, float prev);
+float __wrap_shadow_light_projection(int obj, int slot, float sx, float sy, float sz, float prev) {
     static int n = -1; static unsigned calls, logged;
-    float r = __real_func_151848D8(obj, slot, sx, sy, sz, prev);
+    float r = __real_shadow_light_projection(obj, slot, sx, sy, sz, prev);
     if (n < 0) n = port_flag("p158light");
     static int from = -1; if (from < 0) from = port_flag("p158f");
     if (n > 0 && port_frame_count >= (unsigned)from && calls++ % (unsigned)n == 0 && logged < 400) {
@@ -2044,12 +2044,12 @@ float __wrap_func_151848D8(int obj, int slot, float sx, float sy, float sz, floa
     }
     return r;
 }
-uint8_t *__wrap_func_15186D04(uint8_t *gdl, int arg1) {
+uint8_t *__wrap_shadow_draw_all(uint8_t *gdl, int arg1) {
     static unsigned calls, tot_vtx, tot_t1, tot_t2, tot_t4, tot_cmd, tot_other;
     static int p137 = -1;
     if (p137 < 0) p137 = port_flag("p137noshadow");
     if (p137 > 0) return gdl; /* P137 DIAGNOSTIC ?p137noshadow=1: skip the object shadow DL (render-to-texture pass) */
-    uint8_t *r = __real_func_15186D04(gdl, arg1);
+    uint8_t *r = __real_shadow_draw_all(gdl, arg1);
     if (p38_on()) {
         unsigned vtx = 0, t1 = 0, t2 = 0, t4 = 0, other = 0, n = 0, slots = 0, maxslots = 0;
         const uint32_t *w;
@@ -2091,12 +2091,12 @@ uint8_t *__wrap_func_15186D04(uint8_t *gdl, int arg1) {
     return r;
 }
 extern unsigned D_800CC6A4;
-void __real_func_1504A730(void);
-void __wrap_func_1504A730(void) {
+void __real_objects_run_state_handlers(void);
+void __wrap_objects_run_state_handlers(void) {
     static unsigned calls, stack_left;
     volatile unsigned char here = 0;
     unsigned before = D_800CC6A4, after, sp = (unsigned)(uintptr_t)&here;
-    __real_func_1504A730();
+    __real_objects_run_state_handlers();
     after = D_800CC6A4;
     if (p38_on()) {
         int in_stack = after < sp && sp - after < 0x10000; /* below our frame = the callee's dead frame */
@@ -2108,7 +2108,7 @@ void __wrap_func_1504A730(void) {
     }
 }
 extern float D_800D9F40;
-int __real_func_150A6840(int cam, int *mtx, float x, float y, float z, float r, float ry, float far);
+int __real_camera_view_test_sphere(int cam, int *mtx, float x, float y, float z, float r, float ry, float far);
 static int v6840_ref(int cam, const float *m, float x, float y, float z, float r, float ry, float far, int *exitno) {
     /* the asm order and grouping, in float (every product / sum rounded to f32 as on the FPU) */
     const float *c = (const float *)(uintptr_t)cam;
@@ -2125,9 +2125,9 @@ static int v6840_ref(int cam, const float *m, float x, float y, float z, float r
     *exitno = 6;
     { int k = (int)lrintf(w); return k ? k : 1; }
 }
-int __wrap_func_150A6840(int cam, int *mtx, float x, float y, float z, float r, float ry, float far) {
+int __wrap_camera_view_test_sphere(int cam, int *mtx, float x, float y, float z, float r, float ry, float far) {
     static unsigned calls, bad, ex[7];
-    int got = __real_func_150A6840(cam, mtx, x, y, z, r, ry, far);
+    int got = __real_camera_view_test_sphere(cam, mtx, x, y, z, r, ry, far);
     if (p38_on()) {
         int e, want = v6840_ref(cam, (const float *)mtx, x, y, z, r, ry, far, &e);
         calls++; ex[e]++;
@@ -2147,30 +2147,30 @@ int __wrap_func_150A6840(int cam, int *mtx, float x, float y, float z, float r, 
 }
 
 /* P46: ?p46check=N runtime checks of P43's frame-DL C (link-time wraps; N = how many calls to log in detail).
- *  - func_1502BDC0 (object list draw; calls the now-C func_1502CC64 per object part): commands it appends per mode.
- *  - func_15196560 (texture scrolling): the D_800E0D18 list, scroll position (+0xE / +0x10) and speed (+0x12 / +0x13). */
+ *  - objects_draw_pass (object list draw; calls the now-C obj_draw_part per object part): commands it appends per mode.
+ *  - texscroll_update (texture scrolling): the D_800E0D18 list, scroll position (+0xE / +0x10) and speed (+0x12 / +0x13). */
 static int p46_flag = -1;
 extern unsigned char D_800CC2D0[], D_800C3638, D_800C3A7A;
 int obj_get_player_alpha(void *rec, int part);
 static unsigned p46_bdc0_calls, p46_bdc0_cmds[4], p46_bdc0_n[4], p46_6560_calls;
-void *__real_func_1502BDC0(void *gdl, int mode, short player);
-void *__wrap_func_1502BDC0(void *gdl, int mode, short player) {
+void *__real_objects_draw_pass(void *gdl, int mode, short player);
+void *__wrap_objects_draw_pass(void *gdl, int mode, short player) {
     void *r;
     if (p46_flag < 0) p46_flag = port_flag("p46check");
-    r = __real_func_1502BDC0(gdl, mode, player);
+    r = __real_objects_draw_pass(gdl, mode, player);
     if (p46_flag) {
         unsigned d = (unsigned)((char *)r - (char *)gdl) / 8, k = (unsigned)mode & 3;
         p46_bdc0_cmds[k] += d; p46_bdc0_n[k]++;
         if (p46_bdc0_calls < (unsigned)p46_flag || (p46_bdc0_calls & 255) == 0) {
             const unsigned char *r0 = D_800CC2D0;
-            port_log("[p46] func_1502BDC0 #%u frame %u mode %d player %d: %u commands appended | rec0 state %u id %02X "
+            port_log("[p46] objects_draw_pass #%u frame %u mode %d player %d: %u commands appended | rec0 state %u id %02X "
                      "unk5 %02X +74 %02X +1D4 %08X +1C8 %02X alpha(obj_get_player_alpha) %d | D_800C3638 %u D_800C3A7A %u\n",
                      p46_bdc0_calls, port_frame_count, mode, player, d, *(const unsigned *)r0, vbe_ld8(r0 + 4),
                      vbe_ld8(r0 + 5), vbe_ld8(r0 + 0x74), *(const unsigned *)(r0 + 0x1D4), vbe_ld8(r0 + 0x1C8),
                      obj_get_player_alpha((void *)r0, player), vbe_ld8(&D_800C3638), vbe_ld8(&D_800C3A7A));
         }
         if ((p46_bdc0_calls & 1023) == 1023)
-            port_log("[p46] func_1502BDC0 %u calls: mode1 %u calls %u cmds, mode2 %u calls %u cmds, other %u calls %u cmds\n",
+            port_log("[p46] objects_draw_pass %u calls: mode1 %u calls %u cmds, mode2 %u calls %u cmds, other %u calls %u cmds\n",
                      p46_bdc0_calls + 1, p46_bdc0_n[1], p46_bdc0_cmds[1], p46_bdc0_n[2], p46_bdc0_cmds[2],
                      p46_bdc0_n[0] + p46_bdc0_n[3], p46_bdc0_cmds[0] + p46_bdc0_cmds[3]);
     }
@@ -2178,15 +2178,15 @@ void *__wrap_func_1502BDC0(void *gdl, int mode, short player) {
     return r;
 }
 extern unsigned D_800E0D18;
-int __real_func_15196560(int a0, int a1);
-int __wrap_func_15196560(int a0, int a1) {
+int __real_texscroll_update(int a0, int a1);
+int __wrap_texscroll_update(int a0, int a1) {
     int r;
     if (p46_flag < 0) p46_flag = port_flag("p46check");
-    r = __real_func_15196560(a0, a1);
+    r = __real_texscroll_update(a0, a1);
     if (p46_flag && (p46_6560_calls < (unsigned)p46_flag || (p46_6560_calls & 255) == 0)) {
         const unsigned char *e = (const unsigned char *)D_800E0D18;
         int n = 0;
-        port_log("[p46] func_15196560 #%u frame %u (DLs %08X %08X):\n", p46_6560_calls, port_frame_count, a0, a1);
+        port_log("[p46] texscroll_update #%u frame %u (DLs %08X %08X):\n", p46_6560_calls, port_frame_count, a0, a1);
         while (e && n < 6) {
             port_log("[p46]   ent %08X pos %u %u size %u %u speed %d %d levels %u\n", (unsigned)e, vbe_ld16(e + 0xE),
                      vbe_ld16(e + 0x10), vbe_ld16(e + 0xA), vbe_ld16(e + 0xC), (signed char)vbe_ld8(e + 0x12),

@@ -5,14 +5,15 @@
 extern u8 D_800A4EA8[];
 #endif
 
-void func_15158F90(u8 *arg0);
+void dl_fx_free_lights(u8 *arg0);
 
 
-s32 func_1515D9B0(void);
-s32 func_1515D9F0(s32);
+s32 light_alloc_lookat_buf(void);
+s32 light_alloc_light_buf(s32);
 void *memcpy(void *, const void *, u32);
 
-s32 func_15158620(s32 src, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6) {
+/* was func_15158620 */
+s32 dl_fx_spawn(s32 src, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6) {
     u8 *p;
     s32 i;
 
@@ -30,21 +31,23 @@ s32 func_15158620(s32 src, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 a
     *(s32 *)(p + 0xF0) = 0;
     if (arg1 != 0) {
         for (i = 0; i <= D_80082FA0; i++) {
-            ((s32 *)(p + 0xE0))[i] = func_1515D9F0(arg1);
+            ((s32 *)(p + 0xE0))[i] = light_alloc_light_buf(arg1);
         }
-        *(s32 *)(p + 0xF0) = func_1515D9B0();
+        *(s32 *)(p + 0xF0) = light_alloc_lookat_buf();
     }
     return (s32)p;
 }
 
-s32 func_15158620(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
+s32 dl_fx_spawn(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
 
-void func_15158748(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    func_15158620(arg0, 0, 0, arg1, arg2, arg3, arg4);
+/* was func_15158748 */
+void dl_fx_spawn_unlit(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    dl_fx_spawn(arg0, 0, 0, arg1, arg2, arg3, arg4);
 }
 
 extern s32 (*D_8008B1A0[])(void);
-void func_15158794(u8 *arg0) {
+/* was func_15158794 */
+void dl_fx_update(u8 *arg0) {
     s32 pad;
     u8 ret = 0;
 
@@ -64,17 +67,18 @@ void func_15158794(u8 *arg0) {
 
 #ifdef NON_MATCHING
 s32 gfx_set_combine_mode(s32, u8, s8 *);
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-u8 *func_151462C8(u8 *, u8 *, u8, s32, s32, s32, u8 *, s32, s32);
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+s32 gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, s8 *);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
+void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+u8 *model_part_emit_lights(u8 *, u8 *, u8, s32, s32, s32, u8 *, s32, s32);
 extern s32 D_8008B1AC;
 extern s32 D_8008B358;
 
-u8 *func_15158838(u8 *arg0, u8 *arg1, s16 arg2) {
+/* was func_15158838 */
+u8 *dl_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     struct {
         s8 u5B;
         s16 u5C;
@@ -103,19 +107,19 @@ u8 *func_15158838(u8 *arg0, u8 *arg1, s16 arg2) {
         goto block_3;
     }
 block_3:
-    temp_s1_2 = func_15142B7C(arg0, (*(s32 *)((u8 *)arg1 + 0x1C)), (*(s32 *)((u8 *)arg1 + 0x20)));
-    func_151441A4(&sp.u6A, &sp.u68, &sp.u66, &sp.u64, (s32) (*(u8 *)((u8 *)arg1 + 0x3C)), (s32) (*(u8 *)((u8 *)arg1 + 0x3D)), (s32) (*(u8 *)((u8 *)arg1 + 0x3E)), (s32) (*(u8 *)((u8 *)arg1 + 0x3F)), (s32) (*(u8 *)((u8 *)arg1 + 0x38)), (s32) (*(u8 *)((u8 *)arg1 + 0x39)), (s32) (*(u8 *)((u8 *)arg1 + 0x3A)), (s32) (*(u8 *)((u8 *)arg1 + 0x3B)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x34)));
-    func_151442FC(&sp.u62, &sp.u60, &sp.u5E, &sp.u5C, (s32) (*(u8 *)((u8 *)arg1 + 0x3C)), (s32) (*(u8 *)((u8 *)arg1 + 0x3D)), (s32) (*(u8 *)((u8 *)arg1 + 0x3E)), (s32) (*(u8 *)((u8 *)arg1 + 0x3F)), (s32) (*(u8 *)((u8 *)arg1 + 0x38)), (s32) (*(u8 *)((u8 *)arg1 + 0x39)), (s32) (*(u8 *)((u8 *)arg1 + 0x3A)), (s32) (*(u8 *)((u8 *)arg1 + 0x3B)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x35)));
+    temp_s1_2 = gfx_geometry_mode_cached(arg0, (*(s32 *)((u8 *)arg1 + 0x1C)), (*(s32 *)((u8 *)arg1 + 0x20)));
+    fx_calc_color_mode_a(&sp.u6A, &sp.u68, &sp.u66, &sp.u64, (s32) (*(u8 *)((u8 *)arg1 + 0x3C)), (s32) (*(u8 *)((u8 *)arg1 + 0x3D)), (s32) (*(u8 *)((u8 *)arg1 + 0x3E)), (s32) (*(u8 *)((u8 *)arg1 + 0x3F)), (s32) (*(u8 *)((u8 *)arg1 + 0x38)), (s32) (*(u8 *)((u8 *)arg1 + 0x39)), (s32) (*(u8 *)((u8 *)arg1 + 0x3A)), (s32) (*(u8 *)((u8 *)arg1 + 0x3B)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x34)));
+    fx_calc_color_mode_b(&sp.u62, &sp.u60, &sp.u5E, &sp.u5C, (s32) (*(u8 *)((u8 *)arg1 + 0x3C)), (s32) (*(u8 *)((u8 *)arg1 + 0x3D)), (s32) (*(u8 *)((u8 *)arg1 + 0x3E)), (s32) (*(u8 *)((u8 *)arg1 + 0x3F)), (s32) (*(u8 *)((u8 *)arg1 + 0x38)), (s32) (*(u8 *)((u8 *)arg1 + 0x39)), (s32) (*(u8 *)((u8 *)arg1 + 0x3A)), (s32) (*(u8 *)((u8 *)arg1 + 0x3B)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x35)));
     temp_v1 = ((*(s32 *)((u8 *)arg1 + 0x24)) * 8) + ((u8 *)&D_800A4EA8);
     temp_v1_2 = (*(u8 *)((u8 *)arg1 + 0x10));
-    var_s1 = func_15142FBC(gfx_set_combine_mode(func_15142CF0(func_15142C10(temp_s1_2, sp.u62, sp.u60, sp.u5E, (s32) sp.u5C, &sp.u5B), 0, 0, sp.u6A, (s32) sp.u68, (s32) sp.u66, (s32) sp.u64, &sp.u5B), (*(u8 *)((u8 *)arg1 + 0x2B)), &sp.u5B), (*(s32 *)((u8 *)arg1 + 0x18)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x2C)) | (*(s32 *)((u8 *)arg1 + 0x30)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u5B);
+    var_s1 = gfx_other_mode_cached(gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(temp_s1_2, sp.u62, sp.u60, sp.u5E, (s32) sp.u5C, &sp.u5B), 0, 0, sp.u6A, (s32) sp.u68, (s32) sp.u66, (s32) sp.u64, &sp.u5B), (*(u8 *)((u8 *)arg1 + 0x2B)), &sp.u5B), (*(s32 *)((u8 *)arg1 + 0x18)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x2C)) | (*(s32 *)((u8 *)arg1 + 0x30)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u5B);
     if (temp_v1_2 & 2) {
         if (temp_v1_2 & 4) {
             var_v0 = 1;
         } else {
             var_v0 = 0;
         }
-        var_s1 = func_151462C8(var_s1, arg1 + 0xD8, (*(u8 *)((u8 *)arg1 + 0x45)), (*(s32 *)((u8 *)arg1 + 0x40)), (s32) (*(u8 *)((u8 *)arg1 + 0x44)), (s32) arg2, arg1 + 0x48, var_v0, 0);
+        var_s1 = model_part_emit_lights(var_s1, arg1 + 0xD8, (*(u8 *)((u8 *)arg1 + 0x45)), (*(s32 *)((u8 *)arg1 + 0x40)), (s32) (*(u8 *)((u8 *)arg1 + 0x44)), (s32) arg2, arg1 + 0x48, var_v0, 0);
     }
     (*(s32 *)((u8 *)var_s1 + 0)) = 0xDA380003;
     temp_s1 = var_s1 + 8;
@@ -125,9 +129,10 @@ block_3:
     return temp_s1 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158838.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/dl_fx_draw.s")
 #endif
-s32 func_15158AFC(Mtx *arg0, u8 *arg1) {
+/* was func_15158AFC */
+s32 dl_fx_mtx_rotate_scale(Mtx *arg0, u8 *arg1) {
     f32 *r;
     f32 mf[4][4];
 
@@ -150,7 +155,8 @@ s32 func_15158AFC(Mtx *arg0, u8 *arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15158BF4(u8 *arg0) {
+/* was func_15158BF4 */
+s32 dl_fx_beh_move(u8 *arg0) {
     struct {
         f32 u20;
         f32 u24;
@@ -240,12 +246,13 @@ block_5:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158BF4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/dl_fx_beh_move.s")
 #endif
 typedef struct { f32 m[4][4]; } MtxF_s82;
 extern MtxF_s82 D_8008B1B8;
 
-s32 func_15158E90(Mtx *arg0, u8 *arg1) {
+/* was func_15158E90 */
+s32 dl_fx_mtx_scaled_template(Mtx *arg0, u8 *arg1) {
     f32 s;
     u8 *p;
     MtxF_s82 mf;
@@ -269,30 +276,34 @@ s32 func_15158E90(Mtx *arg0, u8 *arg1) {
     return 1;
 }
 
-void func_15158F90(u8 *arg0) {
+/* was func_15158F90 */
+void dl_fx_free_lights(u8 *arg0) {
     s32 i;
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (((s32 *)(arg0 + 0xE0))[i]) {
-            func_100043B4(((s32 *)(arg0 + 0xE0))[i], 4);
+            heap_set_block_tag(((s32 *)(arg0 + 0xE0))[i], 4);
         }
     }
     if (*(s32 *)(arg0 + 0xF0) != 0) {
-        func_100043B4(*(s32 *)(arg0 + 0xF0), 4);
+        heap_set_block_tag(*(s32 *)(arg0 + 0xF0), 4);
     }
 }
 
-void func_15159014(void *arg0) {
-    func_15158F90(arg0);
+/* was func_15159014 */
+void dl_fx_retire(void *arg0) {
+    dl_fx_free_lights(arg0);
     node_retire(arg0);
 }
 
-void func_15159040(void *arg0) {
-    func_15158F90(arg0);
+/* was func_15159040 */
+void dl_fx_free(void *arg0) {
+    dl_fx_free_lights(arg0);
     node_unlink_free(arg0);
 }
 
-s32 func_1515906C(u8 *arg0) {
+/* was func_1515906C */
+s32 dl_fx_beh_fade_out(u8 *arg0) {
     s32 temp_v1;
     if (*(s16 *)(arg0 + 0x14) < *(s16 *)(arg0 + 0xF8)) {
         temp_v1 = *(s32 *)(arg0 + 0xFC) * *(s16 *)(arg0 + 0x14);
@@ -303,7 +314,8 @@ s32 func_1515906C(u8 *arg0) {
     return 1;
 }
 
-void func_151590AC(u8 *arg0, s32 *arg1, u8 arg2)
+/* was func_151590AC */
+void dl_fx_on_message(u8 *arg0, s32 *arg1, u8 arg2)
 {
   s32 a;
   if (arg2 == 0x2D) {
@@ -329,9 +341,10 @@ void func_151590AC(u8 *arg0, s32 *arg1, u8 arg2)
   }
 }
 
-s32 func_151598E0(u8 *, u8 *, u8 *);
+s32 move_watch_pick_kind(u8 *, u8 *, u8 *);
 
-u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_15159140 */
+u8 *move_watch_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *p;
 
     if (arg0 == NULL) {
@@ -357,7 +370,7 @@ u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2) {
     }
     *(s32 *)(p + 0x10) = 1;
     *(s32 *)(p + 0x14) = 0;
-    if (func_151598E0(arg0, p + 0x1D, p) == 0) {
+    if (move_watch_pick_kind(arg0, p + 0x1D, p) == 0) {
         node_delete((struct102 *)p);
         return NULL;
     }
@@ -365,7 +378,8 @@ u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2) {
     return p;
 }
 
-void func_15159244(void **arg0) {
-    func_1514EDF0(arg0, arg0[0x18 / 4]);
+/* was func_15159244 */
+void move_watch_retire(void **arg0) {
+    char_fx_detach_effect(arg0, arg0[0x18 / 4]);
     node_retire(arg0);
 }

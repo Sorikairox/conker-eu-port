@@ -6,7 +6,8 @@
 #ifdef NON_MATCHING
 extern s32 D_800D1CD0;
 
-void func_15016380(s32 arg0) {
+/* was func_15016380 */
+void level_load_ptr_table_3c(s32 arg0) {
     s32 *temp_v0;
     s32 *temp_v0_2;
     s32 temp_a3;
@@ -72,5 +73,5 @@ block_9:
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_43B90/func_15016380.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_43B90/level_load_ptr_table_3c.s")
 #endif

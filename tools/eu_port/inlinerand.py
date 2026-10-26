@@ -9,7 +9,7 @@ exactly once afterwards, writes variants:
                        left to right, so inline rands keep the ref's call order when they are used in order)
   <outprefix>_named.c  input unchanged except that m2c's `(u8) (v & 0xFF)` casts become `v & 0xFF`
   <outprefix>_mix<k>.c only the first k temps stay named (the ref often names the early rands and inlines
-                       the last one: s109 func_150BA26C / storm_debris_ground_splash / func_150D1714)
+                       the last one: s109 obj_sprite_fx_spawn / storm_debris_ground_splash / bone_spark_emitter_emit)
 Also rewrites `(u8) (RAND() & 0xFF)` into `RAND() & 0xFF` (an explicit mask gives the ref's `andi`).
 Screen the outputs with `m2c/tryall <func> <outprefix>_*.c`. Self-contained, no repo imports.
 """

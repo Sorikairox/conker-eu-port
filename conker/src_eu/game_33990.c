@@ -20,7 +20,7 @@ void save_game_defaults(void) {
 
 #ifdef NON_MATCHING
 s32 asset_load(s32 *arg0, s32 arg1, ...);
-void func_10024190(void *, s32); /* osWritebackDCache */
+void os_writeback_dcache(void *, s32); /* osWritebackDCache */
 extern u8 *D_800BE810;           /* bit widths of the 69 packed save fields (asset 1/7, +8) */
 extern s32 D_800BE804;
 
@@ -29,7 +29,7 @@ extern s32 D_800BE804;
  * save_game_defaults (defaults) and, if a slot is loaded (D_800BE7FC >= 0) while D_80082F50 is set, the 27-byte state
  * at D_800D2E4C is put back. Good block: byte 2 = slot kind (sp+0x7F), bytes 3..6 = a time stamp (big-endian),
  * 27 bytes of D_800D2E4C, 9 bytes of D_800D2E60, D_800BE3DF, D_800BE800, D_800BE804 (u16, also passed to
- * func_15085710(0, 9, .)), D_800BE3E8, then the 69 bit fields of D_800C3A60 (u64 each, widths D_800BE810, MSB
+ * player_stat_modify(0, 9, .)), D_800BE3E8, then the 69 bit fields of D_800C3A60 (u64 each, widths D_800BE810, MSB
  * first). While D_80082F50 is set and the kind is < 3, the slot record D_800BE818[kind] is refreshed when the stamp
  * is newer (count of set bits in D_800D2E4C, D_800BE3E8, D_800BE3DF, stamp, slot, D_800BE804); D_800BE7FC keeps the
  * best count (D_800BE7FE = 1 when D_800D2E68 bit 5 is set), otherwise the old D_800D2E4C state is put back.
@@ -56,10 +56,10 @@ void save_slot_load(s8 arg0) {
     if (D_800BE810 == NULL) {
         D_800BE810 = (u8 *) asset_load(NULL, 1, 7) + 8;
     }
-    func_10024190(D_800BE778, 0x80);
+    os_writeback_dcache(D_800BE778, 0x80);
     osInvalDCache(D_800BE778, 0x80);
     block = arg0 * 16 + 4;
-    func_151DD950(&D_800BE900, block, D_800BE778, 0x80);
+    game_eeprom_long_read(&D_800BE900, block, D_800BE778, 0x80);
     sum = 0xCC;
     for (i = 2; i < 0x80; i++) {
         sum = (sum + (D_800BE778[i] << (i & 3))) & 0xFFFF;
@@ -92,7 +92,7 @@ void save_slot_load(s8 arg0) {
     D_800BE804 = p[2] << 8;
     D_800BE804 = (p[2] << 8) | p[3];
     p += 4;
-    func_15085710(0, 9, D_800BE804);
+    player_stat_modify(0, 9, D_800BE804);
     D_800BE3E8 = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
     cur = p[4];
     p += 5;
@@ -158,16 +158,16 @@ void save_slot_load(s8 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_slot_load.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_150859AC(s16, s32);
+s32 player_stat_get(s16, s32);
 
 /* save_slot_pack: P232. Writes save slot `slot` (record D_800BE818[slot]): bumps the slot's time stamp (+8, 31 bits)
  * and moves it to the highest EEPROM slot area (0..3) that no live record (+8 >= 0) uses (+0xE). Unless the EEPROM
  * is disabled (D_8002AC5C), the area's last block (area * 16 + 0x13) is first overwritten with 0xFE bytes. The
  * 0x80-byte block D_800BE778 is the inverse of save_slot_load's layout: u16 checksum, slot, stamp (big-endian), 27
- * bytes of *D_800D2E4C, 9 bytes of D_800D2E60, D_800BE3DF, D_800BE800, D_800BE804 = func_150859AC(0, 6) (u16),
+ * bytes of *D_800D2E4C, 9 bytes of D_800D2E60, D_800BE3DF, D_800BE800, D_800BE804 = player_stat_get(0, 6) (u16),
  * D_800BE3E8 (u32), then the 69 values of D_800C3A60 packed MSB first with the widths D_800BE810 (a last partial
  * byte is not stored; the 0x45 bytes after D_800BE3E8 are cleared first). Checksum = 0xCC + bytes 2..0x7F shifted
- * left by index & 3 (16 bits). Written with func_151DD4A0 (osEepromLongWrite) to block area * 16 + 4. */
+ * left by index & 3 (16 bits). Written with eeprom_async_write_start (osEepromLongWrite) to block area * 16 + 4. */
 /* was func_15006BEC */
 void save_slot_write(s32 slot) { /* the asm uses the whole a0 (callers pass an s8) */
     u8 *rec = (u8 *) &D_800BE818[slot];
@@ -203,7 +203,7 @@ void save_slot_write(s32 slot) { /* the asm uses the whole a0 (callers pass an s
             D_800BE778[i] = 0xFE;
         }
         osWritebackDCacheAll();
-        func_151DDA90(&D_800BE900, area * 16 + 0x13, D_800BE778);
+        game_eeprom_write(&D_800BE900, area * 16 + 0x13, D_800BE778);
     }
     if (D_800BE810 == NULL) {
         D_800BE810 = (u8 *) asset_load(NULL, 1, 7) + 8;
@@ -224,7 +224,7 @@ void save_slot_write(s32 slot) { /* the asm uses the whole a0 (callers pass an s
     p[0] = D_800BE3DF;
     p[1] = D_800BE800;
     p += 2;
-    D_800BE804 = func_150859AC(0, 6);
+    D_800BE804 = player_stat_get(0, 6);
     p[0] = (u32) D_800BE804 >> 8;
     p[1] = D_800BE804;
     p[2] = (u32) D_800BE3E8 >> 24;
@@ -260,7 +260,7 @@ void save_slot_write(s32 slot) { /* the asm uses the whole a0 (callers pass an s
     *(u16 *) D_800BE778 = sum;
     osWritebackDCacheAll();
     if (D_8002AC5C == 0) {
-        func_151DD4A0(&D_800BE900, area * 16 + 4, D_800BE778, 0x80);
+        eeprom_async_write_start(&D_800BE900, area * 16 + 4, D_800BE778, 0x80);
     }
 }
 #else
@@ -288,8 +288,8 @@ void save_slot_erase(s32 arg0) {
         do {
             temp_v0 = (var_s0_2 * 0x10) + 4;
             if (arg0 == *var_s2) {
-                func_151DDA90(&D_800BE900, temp_v0 & 0xFF, D_800BE778);
-                func_151DDA90(&D_800BE900, (temp_v0 + 1) & 0xFF, D_800BE778);
+                game_eeprom_write(&D_800BE900, temp_v0 & 0xFF, D_800BE778);
+                game_eeprom_write(&D_800BE900, (temp_v0 + 1) & 0xFF, D_800BE778);
             }
             var_s0_2 += 1;
             var_s2 += 1;
@@ -354,7 +354,7 @@ void save_config_load(void) {
     s32 var_v1;
     u8 *var_a0;
 
-    func_151DD950(&D_800BE900, 0x44U, &D_800BE710, 0x70);
+    game_eeprom_long_read(&D_800BE900, 0x44U, &D_800BE710, 0x70);
     var_a0 = D_800BE714;
     var_v0 = ((D_800BE712 * 4) + 0xCC + (D_800BE713 * 8)) & 0xFFFF;
     var_v1 = 4;
@@ -391,15 +391,15 @@ void save_config_write(void) {
     } while (var_v1 != 0x68);
     D_800BE710.checksum = temp_t9;
     if (D_8002AC5C == 0) {
-        sp18 = func_151DD4A0(&D_800BE900, 0x44U, &D_800BE710, 0x70);
+        sp18 = eeprom_async_write_start(&D_800BE900, 0x44U, &D_800BE710, 0x70);
     }
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/save_config_write.s")
 #endif
 #ifdef NON_MATCHING
-void func_151DDF6C(void); /* P85: takes no arguments (the asm reads none) */
-void func_151E86A4(void);
+void settings_clamp_to_range(void); /* P85: takes no arguments (the asm reads none) */
+void menu_settings_apply_checked(void);
 extern u8 D_800BE77A;
 extern s32 D_800E102C;
 
@@ -419,7 +419,7 @@ void save_options_load(void) {
     u8 temp_t3;
     u8 temp_t4;
 
-    func_151DD950(&D_800BE900, 0U, D_800BE778, 0x20);
+    game_eeprom_long_read(&D_800BE900, 0U, D_800BE778, 0x20);
     var_v0 = 0xCC;
     var_v1 = &D_800BE77A;
     var_a0 = 2;
@@ -457,8 +457,8 @@ void save_options_load(void) {
         } while ((s32)var_v0_3 != (s32)&D_800E102C);
     }
     (*(s8 *)((u8 *)D_800E1010 + 0x10)) = temp_a1;
-    func_151DDF6C();
-    func_151E86A4();
+    settings_clamp_to_range();
+    menu_settings_apply_checked();
     D_800901D0 = 1;
 }
 #else
@@ -467,7 +467,7 @@ void save_options_load(void) {
 #ifdef NON_MATCHING
 // save_options_write: copies the 0x1C option bytes D_800E1010..D_800E102C to D_800BE778 + 2, stores their checksum
 // (0xCC + sum of byte i << (i & 3) over bytes 2..29, 16 bits) in the first halfword and, unless EEPROM writes are
-// off (D_8002AC5C), writes the 0x20-byte block to EEPROM block 0 (func_151DD4A0 = osEepromLongWrite).
+// off (D_8002AC5C), writes the 0x20-byte block to EEPROM block 0 (eeprom_async_write_start = osEepromLongWrite).
 /* was func_15007558 */
 void save_options_write(void) {
     s8 *src;
@@ -484,7 +484,7 @@ void save_options_write(void) {
     }
     *(u16 *)D_800BE778 = sum;
     if (D_8002AC5C == 0) {
-        func_151DD4A0(&D_800BE900, 0, D_800BE778, 0x20);
+        eeprom_async_write_start(&D_800BE900, 0, D_800BE778, 0x20);
     }
 }
 #else

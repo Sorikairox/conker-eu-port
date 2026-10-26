@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-/* P124: the 0x3C-byte effect template func_15169ED8 copies into a new effect record (+0x10); same layout as S59A0
+/* P124: the 0x3C-byte effect template image_fx_spawn_template copies into a new effect record (+0x10); same layout as S59A0
  * in game_eu_1231B0.c. m2c had split it into 20 separate stack locals, which clang lays out on its own. */
 typedef struct {
     void *u0;
@@ -36,7 +36,7 @@ typedef struct {
     u8 u39;
     u8 pad3A[2];
 } EffectTemplate1386C0;
-u8 *func_15169ED8(void *);
+u8 *image_fx_spawn_template(void *);
 extern s32 D_80091B9C;
 
 // effect_spawn_sum_counter: spawns a type-0xA effect (template D_80091B9C at 228, 252.59) whose words 8 / 0xC
@@ -71,7 +71,7 @@ void effect_spawn_sum_counter(s32 arg0, s32 arg1, s32 arg2) {
     t.u16 = 0;
     t.u1C = 228.0f;
     t.u20 = 252.59259f;
-    func_15169ED8(&t);
+    image_fx_spawn_template(&t);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1386C0/effect_spawn_sum_counter.s")

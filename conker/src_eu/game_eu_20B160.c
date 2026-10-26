@@ -3,15 +3,16 @@
 #include "variables.h"
 
 
-s32 func_151DD588(s32);
-s32 func_151DD6F0(OSMesgQueue *, u8, void *);
-s32 func_151DD950(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes) {
+s32 eeprom_async_write_step(s32);
+s32 game_eeprom_read(OSMesgQueue *, u8, void *);
+/* was func_151DD950 */
+s32 game_eeprom_long_read(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes) {
     s32 ret = 0;
 
-    while (func_151DD588(1) != 0) {
+    while (eeprom_async_write_step(1) != 0) {
     }
     while (nbytes > 0) {
-        ret = func_151DD6F0(mq, address, buffer);
+        ret = game_eeprom_read(mq, address, buffer);
         if (ret != 0) {
             return ret;
         }

@@ -2,14 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_1519F500(u8 *arg0, u8 arg1, u8 *arg2);
+s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2);
 #endif
 
 
 #ifdef NON_MATCHING
 extern f32 D_800A90C0;
 extern f32 D_800A90C4;
-s32 func_1519F500(u8 *arg0, u8 arg1, u8 *arg2) {
+/* was func_1519F500 */
+s32 foot_trail_get_foot_pos(u8 *arg0, u8 arg1, u8 *arg2) {
     u8 *temp_v0;
     u8 temp_v0_2;
     struct127 *var_a3;
@@ -41,7 +42,7 @@ s32 func_1519F500(u8 *arg0, u8 arg1, u8 *arg2) {
         sp28 = temp_f12 * temp_f2;
     } else {
         sp3C = var_a3;
-        temp_v0_2 = func_15143E08(var_a3);
+        temp_v0_2 = obj_get_yaw_byte(var_a3);
         sp1F = temp_v0_2;
         sp2C = angle_byte_cos(temp_v0_2 & 0xFF);
         var_a3 = sp3C;
@@ -65,9 +66,10 @@ s32 func_1519F500(u8 *arg0, u8 arg1, u8 *arg2) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F500.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_get_foot_pos.s")
 #endif
-void func_1519F678(u8 *arg0) {
+/* was func_1519F678 */
+void foot_trail_free(u8 *arg0) {
     u8 **temp_v0 = *(u8 ***)(arg0 + 0x98);
     s32 *temp_a0;
 
@@ -80,10 +82,11 @@ void func_1519F678(u8 *arg0) {
             temp_a0[2] = 0;
         }
     }
-    func_15147E64(arg0);
+    fxrec_die_retire(arg0);
 }
 
-void func_1519F6D8(u8 *arg0) {
+/* was func_1519F6D8 */
+void foot_trail_free_alt(u8 *arg0) {
     u8 **temp_v0 = *(u8 ***)(arg0 + 0x98);
     s32 *temp_a0;
 
@@ -96,7 +99,7 @@ void func_1519F6D8(u8 *arg0) {
             temp_a0[2] = 0;
         }
     }
-    func_15147E98(arg0);
+    fxrec_die_free(arg0);
 }
 
 #ifdef NON_MATCHING
@@ -104,7 +107,8 @@ u8 impact_current_kind(void);
 s32 memcpy(s32, u8 **, s32);
 extern s32 D_800AB7F4;
 
-s32 func_1519F738(u8 *arg0, u8 arg1) {
+/* was func_1519F738 */
+s32 foot_trail_spawn(u8 *arg0, u8 arg1) {
     struct {
         u8 * u48;
         s8 u4C;
@@ -188,7 +192,7 @@ s32 func_1519F738(u8 *arg0, u8 arg1) {
     sp.u94 = 1.5f;
     sp.u68 = (*(f32 *)((u8 *)temp_v1 + 0x14));
     sp.u6C = (*(f32 *)((u8 *)temp_v1 + 0x1C));
-    if (func_1519F500(&sp.u48, arg1 & 0xFF, &sp.u98) != 0) {
+    if (foot_trail_get_foot_pos(&sp.u48, arg1 & 0xFF, &sp.u98) != 0) {
         (*(s32 *)((u8 *)(&sp.u58) + 0)) = (s32) (*(s32 *)((u8 *)(&sp.u98) + 0));
         (*(s32 *)((u8 *)(&sp.u58) + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u98) + 4));
         (*(s32 *)((u8 *)(&sp.u58) + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u98) + 8));
@@ -198,7 +202,7 @@ s32 func_1519F738(u8 *arg0, u8 arg1) {
     sp.u72 = (*(u8 *)((u8 *)temp_v0_2 + 0));
     sp.u73 = (*(u8 *)((u8 *)temp_v0_2 + 1));
     sp.u74 = (*(u8 *)((u8 *)temp_v0_2 + 2));
-    temp_v0_3 = func_15147FF0(&sp.u98, 0x50, 0x24, 5, 5, 5, 0, 0, (s32) (arg0 + 0x34), 0xFFU, 1);
+    temp_v0_3 = fxrec_spawn(&sp.u98, 0x50, 0x24, 5, 5, 5, 0, 0, (s32) (arg0 + 0x34), 0xFFU, 1);
     var_v1 = temp_v0_3;
     if (temp_v0_3 != NULL) {
         sp44 = temp_v0_3;
@@ -208,41 +212,44 @@ s32 func_1519F738(u8 *arg0, u8 arg1) {
     return (s32) var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F738.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_spawn.s")
 #endif
-s32 func_1519F738(u8 *, u8);
-void func_1519F928(u8 *arg0) {
+s32 foot_trail_spawn(u8 *, u8);
+/* was func_1519F928 */
+void foot_trails_start(u8 *arg0) {
     s32 *p = (s32 *)(arg0 + 0x58);
-    p[0] = func_1519F738(arg0, 6);
+    p[0] = foot_trail_spawn(arg0, 6);
     p[1] = 0;
-    p[2] = func_1519F738(arg0, 7);
+    p[2] = foot_trail_spawn(arg0, 7);
     p[3] = 0;
 }
 
-void func_151A0E98(u8 *);
-void func_1519F9FC(u8 *);
+void foot_trail_marker_clear(u8 *);
+void foot_trail_stop(u8 *);
 
-void func_1519F970(u8 *arg0) {
+/* was func_1519F970 */
+void foot_trails_stop(u8 *arg0) {
     u8 *v = arg0 + 0x58;
 
     if (*(s32 *)(arg0 + 0x58) != 0) {
-        func_1519F9FC(*(u8 **)(arg0 + 0x58));
+        foot_trail_stop(*(u8 **)(arg0 + 0x58));
     }
     if (*(u8 **)(v + 8) != NULL) {
-        func_1519F9FC(*(u8 **)(v + 8));
+        foot_trail_stop(*(u8 **)(v + 8));
     }
     if (*(u8 **)(v + 4) != NULL) {
-        func_151A0E98(*(u8 **)(v + 4));
+        foot_trail_marker_clear(*(u8 **)(v + 4));
         node_destroy(*(struct102 **)(v + 4));
     }
     if (*(u8 **)(v + 0xC) != NULL) {
-        func_151A0E98(*(u8 **)(v + 0xC));
+        foot_trail_marker_clear(*(u8 **)(v + 0xC));
         node_destroy(*(struct102 **)(v + 0xC));
     }
 }
 
 #ifdef NON_MATCHING
-void func_1519F9FC(u8 *arg0) {
+/* was func_1519F9FC */
+void foot_trail_stop(u8 *arg0) {
     s32 temp_v1;
     u8 *temp_a1;
     u8 *temp_v0;
@@ -264,13 +271,14 @@ void func_1519F9FC(u8 *arg0) {
     (*(u8 *)((u8 *)temp_v0 + 4)) = (u8) ((*(u8 *)((u8 *)temp_v0 + 4)) | 1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F9FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_stop.s")
 #endif
 #ifdef NON_MATCHING
 extern f32 D_800A90D0;
-s32 func_15045AF0(f32 *, s32, f32, u8 *);
+s32 collision_floor_dynamic_b_full(f32 *, s32, f32, u8 *);
 
-s32 func_1519FA60(u8 *arg0) {
+/* was func_1519FA60 */
+s32 foot_trail_update_points(u8 *arg0) {
     struct {
         f32 u58;
         f32 u5C;
@@ -320,7 +328,7 @@ s32 func_1519FA60(u8 *arg0) {
             if ((temp_f0 > D_800A90D0) || (fabsf(sp.u60) > D_800A90D0)) {
                 goto block_17;
             }
-            if (func_15045AF0(&sp.u58, 0, (*(f32 *)((u8 *)temp_s1 + 8)) - 30.0f, arg0 + 0x60) != 0) {
+            if (collision_floor_dynamic_b_full(&sp.u58, 0, (*(f32 *)((u8 *)temp_s1 + 8)) - 30.0f, arg0 + 0x60) != 0) {
                 (*(f32 *)((u8 *)temp_s1 + 8)) = (f32) (*(f32 *)((u8 *)arg0 + 0x60));
             } else {
 block_17:
@@ -357,7 +365,7 @@ block_17:
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519FA60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_update_points.s")
 #endif
 #ifdef NON_MATCHING
 /* P191 */
@@ -381,16 +389,17 @@ typedef struct {
 // foot_trail_update: P191: per-frame update of a foot trail effect t (side t +0x20: 6 = left, 7 = right) of the
 // player owning the trail record rec (t +0x98; rec +0 = the owner object, whose +0x18 is the player): returns 0
 // when the player is gone (no state / model) or the owner id no longer matches. The first frame takes the foot
-// position (func_1519F500 into t +0x10) as the record's last point; later frames re-take it (when that fails the
-// trail is ended, func_1519F9FC, and a new trail effect func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0) is started for
+// position (foot_trail_get_foot_pos into t +0x10) as the record's last point; later frames re-take it (when that fails the
+// trail is ended, foot_trail_stop, and a new trail effect func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0) is started for
 // the side). The distance moved times rec +0x8 accumulates in rec +0xC; while it is above 1 a point is laid every
 // unit: position interpolated from the last point, width rec +0x38 + rec +0x3C * phase, alpha / hold / life /
 // phase from the record (rec +0x28 advances by +0x44 + random [0, +0x45]), a sideways drift (the move direction
-// turned left or right, times rec +0x4C), moved by drift * phase and dropped onto the ground (func_15045AF0 from
+// turned left or right, times rec +0x4C), moved by drift * phase and dropped onto the ground (collision_floor_dynamic_b_full from
 // 100 above the water surface, or above the player when there is no surface; points beyond +-20000 or without
 // ground are not added). The point before the newest one gets the average of its drift and the new one. Returns 1.
 // Rare reads the unit direction uninitialised when the foot did not move (asm: stack garbage); here it is 0.
-s32 func_1519FD60(u8 *t) {
+/* was func_1519FD60 */
+s32 foot_trail_update(u8 *t) {
     u8 *rec = *(u8 **) (t + 0x98);
     TrailPointFD60 *pts = *(TrailPointFD60 **) (t + 0x94);
     u8 *owner = *(u8 **) rec;
@@ -428,7 +437,7 @@ s32 func_1519FD60(u8 *t) {
     }
     started = 0;
     if (!(*(u16 *) (t + 0x1E) & 4)) {
-        if (func_1519F500(rec, t[0x23], t + 0x10) == 0) {
+        if (foot_trail_get_foot_pos(rec, t[0x23], t + 0x10) == 0) {
             return 1;
         }
         started = 1;
@@ -437,8 +446,8 @@ s32 func_1519FD60(u8 *t) {
         *(f32 *) (rec + 0x18) = *(f32 *) (t + 0x18);
         *(u16 *) (t + 0x1E) |= 4;
     }
-    if (!started && func_1519F500(rec, t[0x23], t + 0x10) == 0) {
-        func_1519F9FC(t);
+    if (!started && foot_trail_get_foot_pos(rec, t[0x23], t + 0x10) == 0) {
+        foot_trail_stop(t);
         key.owner = *(u8 **) rec;
         key.side = *(s32 *) (t + 0x20);
         slots = key.owner + 0x58;
@@ -524,7 +533,7 @@ s32 func_1519FD60(u8 *t) {
         ok = 1;
         if (fabsf(probe[0]) > 20000.0f || fabsf(probe[2]) > 20000.0f) {
             ok = 0;
-        } else if (func_15045AF0(probe, 0, probe[1] - 200.0f, t + 0x60) != 0) {
+        } else if (collision_floor_dynamic_b_full(probe, 0, probe[1] - 200.0f, t + 0x60) != 0) {
             q->y = *(f32 *) (t + 0x60);
         } else {
             ok = 0;
@@ -558,21 +567,21 @@ s32 func_1519FD60(u8 *t) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519FD60.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_update.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P204 */
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
+s32 gfx_load_texture_cached(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Gfx *gfx_geometry_mode_cached(Gfx *, s32, s32);
+Gfx *gfx_env_color_cached(Gfx *, s32, s32, s32, s32, u8 *);
+Gfx *gfx_prim_color_cached(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
 Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+Gfx *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 extern u8 D_800911BC[];
 extern s32 D_800D30BC;
-/* trail point (0x24 bytes): the same layout as port-b's TrailPointFD60 (func_1519FD60 writes them) */
+/* trail point (0x24 bytes): the same layout as port-b's TrailPointFD60 (foot_trail_update writes them) */
 typedef struct {
     f32 x;        /* 0x00 */
     f32 z;        /* 0x04 */
@@ -590,7 +599,7 @@ typedef struct {
 
 // foot_trail_draw: D_8008A644 draw handler (kind 5) of a foot trail / water ripple effect t (ring of t[0x25] points
 // at t +0x94, tail t +0x2D, head t +0x2E, count t +0x2C; record rec = t +0x98). Returns gfx unchanged when there are
-// fewer than 2 points or no vertex buffer (func_151D6310 slot `slot` in t +0x84, 0x30 bytes per point + 0x120).
+// fewer than 2 points or no vertex buffer (vtx_slot_buffer_get slot `slot` in t +0x84, 0x30 bytes per point + 0x120).
 // Otherwise: rec flag 2 sets the points' fade (+0x14) from the tail on, 0, +rec[0x41], ... for rec[0x40] points;
 // rec flag 4 scales the fade from the head back by 0, rec[0x43], ... / 256 for rec[0x42] points. Then the render
 // state (texture D_800911BC, colour rec +0x2A..0x2C, combine) and a strip from the newest point back to the tail:
@@ -598,7 +607,8 @@ typedef struct {
 // edges alpha 0, centre alpha = alpha * fade / 256, texture v from rec +0x46 (wrapped to +-1024 when +0x46 + +0x4A
 // overflows) / middle / +0x46 + +0x4A, mirrored for the right foot (t +0x20 != 6)), four triangles per segment.
 // With t +0x1E bit 2 the strip starts at the live foot position t +0x10 (width rec +0x38) instead of the newest point.
-s32 func_151A03DC(u8 *t, s32 gfxArg, s16 slot) {
+/* was func_151A03DC */
+s32 foot_trail_draw(u8 *t, s32 gfxArg, s16 slot) {
     Gfx *gfx = (Gfx *) gfxArg;
     u8 *rec;
     TrailPoint03DC *pts;
@@ -630,7 +640,7 @@ s32 func_151A03DC(u8 *t, s32 gfxArg, s16 slot) {
     if (*(s8 *) (t + 0x2C) < 2) {
         return (s32) gfx;
     }
-    func_151D6310((s32 *) (t + 0x84), slot, t[0x25] * 0x30 + 0x120, (s32 *) &vtx, NULL);
+    vtx_slot_buffer_get((s32 *) (t + 0x84), slot, t[0x25] * 0x30 + 0x120, (s32 *) &vtx, NULL);
     if (vtx == NULL) {
         return (s32) gfx;
     }
@@ -679,12 +689,12 @@ s32 func_151A03DC(u8 *t, s32 gfxArg, s16 slot) {
         } while (i != *(s8 *) (t + 0x2E));
     }
 
-    gfx = (Gfx *) func_15142E24((s32) gfx, (s32) D_800911BC, 0, 0, 0, 0, 0x39, 0, 0, &flag, 0x3E);
-    gfx = func_15142B7C(gfx, 1, 0x160600);
-    gfx = func_15142C10(gfx, rec[0x2A], rec[0x2B], rec[0x2C], 0xFF, &flag);
-    gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &flag);
+    gfx = (Gfx *) gfx_load_texture_cached((s32) gfx, (s32) D_800911BC, 0, 0, 0, 0, 0x39, 0, 0, &flag, 0x3E);
+    gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);
+    gfx = gfx_env_color_cached(gfx, rec[0x2A], rec[0x2B], rec[0x2C], 0xFF, &flag);
+    gfx = gfx_prim_color_cached(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &flag);
     gfx = gfx_set_combine_mode(gfx, 7, &flag);
-    gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+    gfx = gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     /* first cross-section: the live foot position or the newest point; q = the next point towards the tail */
     if (*(u16 *) (t + 0x1E) & 2) {
@@ -856,11 +866,12 @@ s32 func_151A03DC(u8 *t, s32 gfxArg, s16 slot) {
     return (s32) gfx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A03DC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_draw.s")
 #endif
 
 #ifdef NON_MATCHING
-void func_151A0DBC(u8 *arg0) {
+/* was func_151A0DBC */
+void foot_trail_marker_update(u8 *arg0) {
     u8 *sp28;
     u8 sp23;
     u8 *sp18;
@@ -888,7 +899,7 @@ void func_151A0DBC(u8 *arg0) {
         sp23 = 1;
         sp28 = temp_t0;
         sp18 = temp_a2;
-        temp_v0_2 = func_1519F738(temp_a0, (*(u8 *)((u8 *)temp_a2 + 4)));
+        temp_v0_2 = foot_trail_spawn(temp_a0, (*(u8 *)((u8 *)temp_a2 + 4)));
         var_v1 = 1;
         if ((*(u8 *)((u8 *)temp_a2 + 4)) == 6) {
             (*(s32 *)((u8 *)temp_t0 + 0)) = temp_v0_2;
@@ -897,15 +908,16 @@ void func_151A0DBC(u8 *arg0) {
         }
     }
     if (var_v1 != 0) {
-        func_151A0E98(arg0);
+        foot_trail_marker_clear(arg0);
         (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
         (*(u8 *)((u8 *)arg0 + 0xD)) = (u8) ((*(u8 *)((u8 *)arg0 + 0xD)) | 1);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A0DBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/foot_trail_marker_update.s")
 #endif
-void func_151A0E98(u8 *arg0) {
+/* was func_151A0E98 */
+void foot_trail_marker_clear(u8 *arg0) {
     u8 *p = *(u8 **)(arg0 + 0x28) + 0x58;
     if (arg0[0x2C] == 6) {
         *(s32 *)(p + 4) = 0;
@@ -914,7 +926,8 @@ void func_151A0E98(u8 *arg0) {
     }
 }
 
-void func_151A0EC0(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_151A0EC0 */
+void foot_trail_handle_msg(u8 *arg0, u8 *arg1, u8 arg2) {
     s32 temp_t6;
     unsigned int new_var; // fakematch: field temp pins t7/v1 register choice
     unsigned int new_var2; // fakematch: same for the second branch
@@ -927,21 +940,22 @@ void func_151A0EC0(u8 *arg0, u8 *arg1, u8 arg2) {
     if (temp_t6 == 0xA) {
         temp_v0 = *temp_v1;
         if ((temp_v0 != NULL) && (((new_var = *(s32 *)(temp_v0 + 0x18)) == *(s32 *)(arg1 + 0)) || (*(u8 *)(temp_v0 + 0x1C) == *(u8 *)(arg1 + 4)))) {
-            func_1519F9FC(arg0);
+            foot_trail_stop(arg0);
         }
     } else if (temp_t6 == 0) {
         temp_v0_2 = *temp_v1;
         if ((temp_v0_2 != NULL) && ((new_var2 = *(s32 *)(temp_v0_2 + 0x18)) == *(s32 *)(arg1 + 0))) {
-            func_1519F9FC(arg0);
+            foot_trail_stop(arg0);
         }
     }
 }
 
-void func_151A0F5C(u8 *arg0, u8 *arg1, u8 arg2) {
+/* was func_151A0F5C */
+void foot_trail_marker_handle_msg(u8 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = *(u8 **)(*(u8 **)(arg0 + 0x28) + 0x18);
     if (arg2 == 0) {
         if (((s32)v == *(s32 *)arg1) || (v[0x3B] == arg1[4])) {
-            func_151A0E98(arg0);
+            foot_trail_marker_clear(arg0);
             node_destroy(arg0);
         }
     }

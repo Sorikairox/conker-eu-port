@@ -18,14 +18,14 @@ s32 level_part_is_active(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15174F10(s32 arg0, s32 arg1);
-void func_150A2D44(s32, s32);
-void func_150A3924(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
+void level_anim_frame_counter_tick(s32 arg0, s32 arg1);
+void trigger_set_disabled(s32, s32);
+void trigger_set_position(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
 extern u8 D_800D9D70[3];
 
 // level_lights_and_scroll_update: per-frame level handler (table D_8008D0C0); does nothing unless arg0 is 0. Steps
-// the D_800DD835 counter (func_15174F10(5, 4)), places light slots 3 / 4 at objects 6 / 7 (200 above them; a slot
-// whose object is missing is switched off with func_150A2D44(slot, 1)). Then for the three parts i (segment i + 2):
+// the D_800DD835 counter (level_anim_frame_counter_tick(5, 4)), places light slots 3 / 4 at objects 6 / 7 (200 above them; a slot
+// whose object is missing is switched off with trigger_set_disabled(slot, 1)). Then for the three parts i (segment i + 2):
 // the fade D_800D9D70[i] rises by D_800BE9E4 up to 0x60 while level_part_is_active(i) is on (else 0), and the first
 // G_SETTILESIZE after the part's G_SETTIMG of segment address (i + 2) << 24 in the level display list D_800B0E00[0]
 // gets its low coordinate advanced by fade / 16 * D_800BE9E4 (on) or both coordinates set to 2 (off).
@@ -45,18 +45,18 @@ void level_lights_and_scroll_update(s32 arg0) {
     if (arg0 != 0) {
         return;
     }
-    func_15174F10(5, 4);
+    level_anim_frame_counter_tick(5, 4);
     kind = 6;
     slot = 3;
     for (i = 0; i < 2; i++) {
-        obj = (u8 *) func_15083E90(kind);
+        obj = (u8 *) obj_find_by_setup_id(kind);
         kind = 7;
         if (obj != NULL) {
-            func_150A2D44(slot, 0);
-            func_150A3924(slot, (s32) *(f32 *) (obj + 0x14), (s32) (*(f32 *) (obj + 0x18) + 200.0f),
+            trigger_set_disabled(slot, 0);
+            trigger_set_position(slot, (s32) *(f32 *) (obj + 0x14), (s32) (*(f32 *) (obj + 0x18) + 200.0f),
                           (s32) *(f32 *) (obj + 0x1C));
         } else {
-            func_150A2D44(slot, 1);
+            trigger_set_disabled(slot, 1);
         }
         slot = 4;
     }
@@ -306,7 +306,7 @@ void effect_attach_to_obj(u8 *arg0, s32 arg1, u8 arg2) {
 /* was func_150E0880 */
 void water_effect_start_once(void) {
     if (D_80088D20 == 0) {
-        func_1515F170(6, 0);
+        light_group_set_disabled(6, 0);
         water_effect_spawn();
         D_80088D20 = 1;
     }
@@ -351,11 +351,11 @@ void obj_emitter_trail_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     emitter_trail_spawn(&sp, 0, arg1, arg2);
 }
 
-void func_15143794(s16, s16, f32, void *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
 #ifdef NON_MATCHING
-s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
 #else
-s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 particle_puff_spawn(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 #endif
 
 /* was func_150E0978 */
@@ -366,7 +366,7 @@ void fx_debris_spray_vel(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     sp6C[6] = arg0;
     sp6C[7] = arg1;
     sp6C[8] = arg2;
-    func_15143794((s16) (random_int() & 0xFF), (s16) (((u32) random_int() % 65U) - 0x20), random_float() * 5.87f, &sp6C[3]);
+    vec3_from_angles_byte((s16) (random_int() & 0xFF), (s16) (((u32) random_int() % 65U) - 0x20), random_float() * 5.87f, &sp6C[3]);
     temp_f2 = (random_float() * 0.16900001f) + 0.186f;
     sp6C[0] = 0.0f;
     sp6C[1] = 0.0f;
@@ -375,9 +375,9 @@ void fx_debris_spray_vel(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
     sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
 #ifdef NON_MATCHING
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0.986891f, (random_float() * 0.23f) + -0.337f, (random_float() * 200.0f) + 150.0f, ((u32) random_int() % 26U) + 0x28, (random_int() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F7CA4E3) */
+    particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 0.986891f, (random_float() * 0.23f) + -0.337f, (random_float() * 200.0f) + 150.0f, ((u32) random_int() % 26U) + 0x28, (random_int() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F7CA4E3) */
 #else
-    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F7CA4E3, (random_float() * 0.23f) + -0.337f, (random_float() * 200.0f) + 150.0f, ((u32) random_int() % 26U) + 0x28, (random_int() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+    particle_puff_spawn(&sp6C[6], sp6C, &sp6C[3], 0x3F7CA4E3, (random_float() * 0.23f) + -0.337f, (random_float() * 200.0f) + 150.0f, ((u32) random_int() % 26U) + 0x28, (random_int() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
 #endif
 }
 
@@ -415,7 +415,7 @@ void *attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *,
 #else
 s32 attached_particle_spawn(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32, s32, s32, s32);
 #endif
-s32 func_15145EA4(f32 **, s32 **, s32, s32);
+s32 mtx_transform_points(f32 **, s32 **, s32, s32);
 extern u8 D_80088D28;
 #ifdef NON_MATCHING
 /* the rodata of level_lights_and_scroll_update.s (D_800A1340 / D_800A1358), gone from the NM build: local copies */
@@ -438,7 +438,7 @@ void obj_joint_spark_spray(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     }
         sp54 = D_800A1340[arg1];
         sp50 = sp64;
-        func_15145EA4(&sp54, &sp50, *(s32 *)(arg0 + 0x1D4) + (D_80088D28 << 6), 1);
+        mtx_transform_points(&sp54, &sp50, *(s32 *)(arg0 + 0x1D4) + (D_80088D28 << 6), 1);
         sp58[1] = (random_float() * 1) + 2.0f;
         sp58[0] = (random_float() * 14.0f) + 28.0f;
         attached_particle_spawn(arg0, D_80088D28, (f32 *)((u8 *)D_800A1340 + arg1 * 12), (f32 *)((u8 *)D_800A1358 + arg1 * 12), sp58, (random_int() % 3U) + 4, (random_int() % 156U) + 0x64, (random_float() * 300.0f) + 400.0f, (u8 *)sp64, 0xFF, 0, -1, arg2, arg3);

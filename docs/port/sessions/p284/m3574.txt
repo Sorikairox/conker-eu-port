@@ -37,10 +37,10 @@
 \#^        obj->unk44 \*= 0.9f;$#s/0.9f/0.8f/
 \#^        obj->unk44 = d + d;$#s/d + d/d/
 \#^        obj->unk44 = 0.0f;$#s/0.0f/1.0f/
-\#^    func_15052490(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) \* scale);$#s/2.0f -/1.0f -/
-\#^    func_15052490(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) \* scale);$#s/obj->unk78/obj->unk7A/
+\#^    obj_roll_pitch_step(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) \* scale);$#s/2.0f -/1.0f -/
+\#^    obj_roll_pitch_step(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) \* scale);$#s/obj->unk78/obj->unk7A/
 \#^    if (obj->unk44 < 0.2f) {$#s/0.2f/0.3f/
-\#^    } else if (func_100107F8(obj) == 0) {$#s/==/!=/
+\#^    } else if (actor_sound_is_playing(obj) == 0) {$#s/==/!=/
 \#^            D_800D1580 = 0x630;$#s/0x630/0x631/
 \#^            D_800D1580 = 0x67A;$#s/0x67A/0x67B/
 \#^            D_800D1580 = 0x62A;$#s/0x62A/0x62B/

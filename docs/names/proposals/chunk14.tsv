@@ -1,0 +1,233 @@
+old	new	confidence	description
+func_15188D80	afterimage_start	high	Start or extend the afterimage trail of a model object: reuse its D_800DF7C8 node or append one with a zeroed matrix-history buffer
+func_15188EBC	afterimage_start_world	med	Start or extend an afterimage trail for a world object (list D_800DFBFC, type 1, one-matrix 0x180-byte history buffer)
+func_15188FC8	afterimage_list_append	high	Append a node at the tail of a singly linked afterimage list (next pointer at +0xC)
+func_1518900C	afterimage_stop	high	Set the remaining duration of every afterimage node of an object to 0 so it fades out
+func_15189040	afterimage_remove_object	high	Unlink and free every afterimage node (and its history buffer) belonging to an object
+func_151890E4	afterimage_list_update	high	Tick an afterimage list: count durations down, run the per-type update, fade alpha in/out and free faded nodes
+func_15189270	afterimage_list_draw	high	Set the afterimage render state and call the per-type draw handler of every node in a list
+func_151893B8	afterimage_history_push	high	Shift an object's afterimage bone-matrix history by one step and append its current bone matrices
+func_151894F4	afterimage_history_push_world	high	Shift a world object's afterimage matrix history by one step and append its current world matrix
+func_15189688	afterimage_clamp_spacing	med	Pull each history step's bone translations toward the next step so consecutive steps are at most rec[4] units apart
+func_15189B14	afterimage_free_history	high	Afterimage release handler: free the node's matrix-history buffer
+func_15189B3C	afterimage_world_free_history	med	World afterimage release handler: free the node's matrix-history buffer
+func_15189B64	afterimage_draw	high	Draw a model object's afterimages once per filled history step with increasing alpha
+func_15189D14	afterimage_world_draw	med	Draw a world object's afterimages: its mesh once per filled history matrix with increasing alpha (+0x8A)
+func_151898C0	afterimage_set_skin	med	Set the +0x14 value (swapped into the object's +0x94 while drawing) of an object's afterimage node
+func_15189E70	area_drift_emitter_create	high	Create an area drift emitter node (type 0x1A) from 0x50 bytes of area parameters, with zone trigger and floor height
+func_15189F70	area_drift_emitter_update	high	Area drift emitter tick: when a player is near, accumulate the spawn rate and spawn particles at random points of the box
+func_1518A42C	drift_particle_hit_floor	med	Drift particle handler: when below its floor height, maybe spawn impact dust there and switch the particle to state 4
+func_1518A540	drift_particle_noop	low	Particle callback that does nothing and returns 1
+func_1518A560	bone_effect_spawn	med	Spawn a particle emitter (type 0xB) and copy its 0x20-byte bone attachment block to +0x170
+func_1518A604	effect_follow_bone	high	Update handler keeping an effect attached to a model bone: transforms its two local points by the bone matrix
+func_1518A784	bone_effect_check_model_state	med	Visibility check: pick the effect size and colour from the model's state byte +0x68 (state 0xF hides it)
+func_1518A858	bone_effect_check_flag6A	low	Visibility check: hide the effect while the model's byte +0x6A is set
+func_1518A894	bone_effect_check_flag6F	low	Visibility check: show the effect only while the model's byte +0x6F is set
+func_1518A8D0	bone_effect_on_model_swap	med	Event 0x2D handler: when the attached model is one of a swapped pair, retarget the attachment to the other model and id
+func_1518A930	tumble_debris_spawn	med	Spawn a tumbling debris particle (func_15158620) with position, velocity, spin, drag and gravity in its +0xF8 / +0x100 block
+func_1518AB64	tumble_debris_update	med	Tumbling debris tick: apply gravity and per-frame drag to velocity, integrate position and rotation angles
+func_1518AE84	tumble_debris_build_matrix	med	Build the debris matrix from its rotation angles, uniform scale +0x10C and position +0x48
+func_1518AF80	timed_queue_tick	med	Bounded release queue tick: when its timer expires drop the oldest item and call its release callback (D_8008D960)
+func_1518AADC	timed_queue_create	med	Create a bounded release queue node (type 0x1D) with capacity, timer reload and flags
+func_1518B0D0	timed_queue_item_alloc	med	Allocate a queue item node (type 0x1E) holding a value and its release callback index
+func_1518B140	timed_queue_push	med	Push a value into a release queue, reset its timer and release the oldest item when over capacity
+func_1518B290	rubble_piece_hit_ground	med	Rubble piece handler: once below its ground height, shatter into 4-7 smaller pieces plus a dust puff and end (0)
+func_1518B71C	rubble_piece_above_ground	med	Rubble piece handler: return 0 once the piece has fallen below its ground height +0x170
+func_1518B748	rubble_piece_fade	med	Rubble piece handler: set alpha to min(life * 4, height above ground / 2); end when below ground
+func_1518B7D4	rubble_scatter_spawn	med	Spawn N rubble pieces scattered around a point (kind 4, alpha 0xFF)
+func_1518B818	rubble_scatter_spawn_ex	med	Spawn N rubble pieces at random points around a position snapped to the ground, each with 1-4 small chips
+func_1518BC20	rubble_burst_with_dust	med	Spawn 3-10 flung rubble pieces around a point plus one dust cloud burst (func_1518CFF0)
+func_1518C000	drip_effect_attach	med	Attach a type-0x1F drip effect to an object unless it has one; parameters depend on the object kind (0..4 or 7)
+func_1518C164	drip_effect_detach	med	Destroy the type-0x1F drip effect nodes belonging to an object
+func_1518C240	drip_effect_create	high	Allocate a type-0x1F drip effect node, copy its 0x1C-byte spec and randomise its two spawn timers
+func_1518C2D0	drip_effect_update	med	Drip effect tick: for each of the object's two points, when its timer expires spawn a falling stream particle there
+func_1518C628	drip_stream_update	med	Drip stream tick: grow the stream from its attachment point, apply gravity to its segments, then detach and fall
+func_1518CAB0	drip_stream_fade	med	Drip stream handler: set alpha from the remaining life (life * 8, capped at 0xFF)
+func_1518CAEC	drip_stream_splash	med	Drip stream floor handler: spawn a splash sprite (0x12) at the head segment and switch the stream to state 4
+func_1518CC0C	drip_stream_splash_dust	med	Drip stream floor handler: spawn a splash sprite plus an impact dust particle at the head segment
+func_1518CDC0	drip_effect_on_event	med	Drip effect event handler: retarget on model swap (0x2D), destroy when its object is removed (0)
+func_1518C900	shared_dl_acquire	high	Reference-counted load of display-list asset (9, id): load and relocate it on first use, return the display list
+func_1518CF74	shared_dl_release	high	Drop a reference to display-list asset id (except 0x1E4); free it when the count reaches 0
+func_1518CFF0	puff_sprite_spawn	med	Spawn one sprite (node_spawn_sprite) from a puff spec: position (float or s16), size, fade, colours scaled by alpha
+func_1518D218	sprite_uv_scroll_update	med	Sprite tick: add the packed scroll speed +0x14 to the UV offsets +0x34/+0x36; at life 0 call its D_8008D970 handler
+func_1518D290	object_ring_burst_particles	high	Spawn 25-35 particles on a half ring around an object, each moving away from the ring centre
+func_1518D1C0	character_effect_attach	high	Attach effect type 1..18 (fire, smoke, impacts...) to an object as a kind-0x21 effect record, optionally clearing old ones
+func_1518DC50	character_effect_update	high	Kind-0x21 character effect tick: follow the owner model, release expired particles and spawn new ones at model points
+func_1518E808	effect_sound_follow_owner	med	Positional sound callback: copy the owner's position into the sound's s16 position; returns 1 when the owner is gone
+func_1518E878	character_effect_free_particles	high	Destroy all 100 particle slots of a character effect and reset its live count and spawn accumulator
+func_1518E8EC	character_effect_set_type	med	Change a character effect's type byte +0x22, freeing its particles when it differs
+func_1518E934	character_effect_create	high	Allocate a kind-0x21 character effect record (0x9EC bytes) from a 12-byte owner / time / type header
+func_1518EA10	character_effect_cleanup	med	Free a character effect's particles and notify its owner (func_1514EDF0)
+func_1518EA3C	character_effect_retire	med	Clean up a character effect and retire its node
+func_1518EA68	character_effect_unlink_free	med	Clean up a character effect and unlink and free its node
+func_1518EA94	character_effect_init_spark	med	Spawn-block init for character effect particles: kind 0x13 or 0x14 at random, random flip, alpha 0xFF
+func_1518EB48	character_effect_init_smoke	low	Spawn-block init for character effect particles: kind 0x16, random flip, palette colour 3 or 4, alpha 0xC8
+func_1518EBDC	character_effect_end_chain3	med	Character effect end handler: attach effect type 3 to the same owner and keep running 0x80 more frames untimed
+func_1518EC44	character_effect_end_chain4	med	Character effect end handler: attach effect type 4 to the same owner and keep running 0x80 more frames untimed
+func_1518ECAC	particle_quad_velocity_build	high	Build a view's quad vertices for a particle, leaning it by its screen-space motion (flames)
+func_1518F080	line_quad_build	high	Build the camera-facing quad of a line effect from A towards B, cut at the +0x30 fraction
+func_1518F4C4	line_particle_move_damped	med	Line particle tick: apply drag and gravity to velocity, move both ends, then pull the tail end toward the head
+func_1518F5C8	line_particle_move	med	Line particle tick: apply drag and gravity to velocity and move both ends of the line
+func_1518F678	particle_shrink_fade	med	Particle tick: shrink width and height by the +0x154 rate, fade alpha with the remaining life
+func_1518F6CC	particle_shrink_height_fade	med	Particle tick: shrink the height by the +0x154 rate, fade alpha with the remaining life
+func_1518F710	flame_particle_flicker	med	Flame particle tick: pick new random target height, width and colour on timers and ease toward them
+func_1518F8F4	flame_particle_settle	low	Flame particle tick: pick the random target height and width once, then ease toward them
+func_1518F9CC	character_effect_broadcast	med	Broadcast a message to every kind-0x21 character effect node
+func_1518FA0C	character_effect_on_message	med	Character effect message handler: link messages, destroy on 0x49 when it belongs to the given object or id
+func_1518FA8C	bone_sparks_attach_preset	med	Attach bone-spark preset N of the object's kind table (func_15190334) to an object
+func_1518FB40	bone_sparks_attach	med	Spawn a bone-spark controller (attach_ctrl_spawn) on an object with optional light, asset reference and sound
+func_1518FD34	bone_sparks_tick	high	Bone-spark tick: add rate * frame time to the spark counter, emit sparks and run the tick handler
+func_1518FDC8	bone_sparks_release	high	Bone-spark release: run the emitter's release handler (D_8008DA20) if any
+func_1518FE0C	bone_sparks_burst	high	Bone-spark burst: set the spark counter to base + random spread and emit them all at once
+func_1518FE50	bone_sparks_emit	high	Emit one spark per whole counter unit at random attachment points of the owner's bones, each tied to its bone
+func_15190174	bone_spark_follow_look	med	Spark follower move: set the particle position and move its look point (effect3d_look_follow)
+func_151901B4	bone_spark_follow_look_up	med	Spark follower move: set the particle position and set its look point straight up (effect3d_look_set_up)
+func_151901F4	bone_spark_release_toward	med	Spark follower release: give the particle a velocity toward the target, random speed, life and handlers
+func_15190334	bone_sparks_table_for_kind	med	Map an object kind to its bone-spark preset table index; only preset level 0 exists
+func_151905AC	bone_sparks_presets_for_kind	med	Return the list of bone-spark preset numbers (and count flag) for an object kind, NULL for others
+func_1519078C	bone_sparks_light_create	med	Create a flickering light following an object, coloured from per-preset tables (24 presets)
+func_15190940	bone_sparks_light_update	med	Bone-spark light behaviour: flicker its intensity and follow its object's position
+func_15190970	bone_sparks_light_on_event	med	Bone-spark light event handler: destroy it when its object (or id) is removed (event 0)
+func_151909C4	bone_sparks_light_unlink	med	Clear the light pointer +0x84 of the bone-spark controller that owns this light
+func_151909D4	bone_sparks_light_retire	med	Unlink a bone-spark light from its controller and retire it
+func_15190A00	bone_sparks_light_free	med	Unlink a bone-spark light from its controller and free it
+func_15190A2C	bone_sparks_node_release	med	Bone-spark controller release: destroy its light, stop its positional sound and release its asset
+func_15190A88	bone_sparks_detach_owner	med	Broadcast message 0x2A to all attach controllers (type 0x3E) to drop those owned by an object
+func_15190AC0	bone_sparks_on_message	med	Bone-spark controller message handler: free on 0x2A for its owner, then call its per-preset handler
+func_15190B2C	bone_sparks_tick_hurt	low	Bone-spark tick handler: send hit 0x60021 to the owner at a fixed interval and keep its attachment +0x46 at 1000
+func_15190C34	bone_sparks_owner_release	high	Bone-spark release handler: clear byte +0x1AC of the owner's attachment +0x31C
+func_15190C50	bone_sparks_on_model_swap	med	Message 0x2D handler: retarget the controller to the other model of a swapped pair
+func_1519072C	object_effects_detach_all	med	Detach all attach controllers (0x2A) and character effects (0x49) belonging to an object
+func_15190770	model_drip_create	med	Stop older drip emitters of the owner (message 0xE) and allocate a type-0x20 drip emitter with a 60-slot drop table
+func_15190DB0	model_drip_retire	med	Release a drip emitter's hanging drops and retire its node
+func_15190DDC	model_drip_unlink_free	med	Release a drip emitter's hanging drops and unlink and free its node
+func_15190E08	model_drip_update	high	Drip emitter tick: hanging drops follow points on the owner model, expired ones fall, new ones spawn at the rate
+func_1519150C	drop_wobble_update	med	Drop particle tick: advance two wobble angles and ease width and height toward base + amplitude * cos
+func_151915FC	drop_quad_velocity_build	med	Build a view's quad vertices for a drop, leaning it by its screen-space motion
+func_15191970	model_drip_drop_all	high	Let every hanging drop of a drip emitter fall (handlers, life) and clear its slot table
+func_15191A90	drop_fall_update	high	Falling drop tick: gravity, drag and trail; on a floor hit spawn dust, debris or a splash ring and end
+func_15191DEC	drop_fade	med	Drop particle tick: cap alpha at life * rate once the life is below the fade start
+func_15191E2C	model_drip_wait_owner	med	Pending drip emitter tick: once the owner has bone matrices create the real drip emitter, then end
+func_15191EF0	model_drip_on_message	med	Drip emitter message handler: 0xD stops it in 100 frames, 0xC/0xE/0x50 for its owner or 0x4E destroy it
+func_15191FF4	model_drip_wait_on_message	med	Pending drip emitter message handler: same stop/destroy rules on its +0x28 owner record
+func_151920FC	model_drip_broadcast	med	Send a message to the drip effects (func_151494E0) and broadcast it to the drip emitter node type
+func_15192150	obj_dust_effect_spawn	high	Start a type-0x1D dust effect object that follows an object at an offset with the given spawn parameters
+func_151922C4	obj_dust_effect_update	high	Dust effect tick: accumulate the rate and spawn dust particles at the object's offset point, some landing on the ground
+func_151925AC	dust_drop_particle_spawn	med	Spawn one dust / water drop particle (func_151308E4) with size, life, frames, wobble block and landing height
+func_15192878	dust_drop_wobble	med	Dust drop tick: advance its size wobble (particle_calc_wobble) into width and height
+func_151928C8	water_drop_splash_update	high	Drop tick: when below its water level spawn a splash ring and a spray droplet there and end
+func_15192AEC	dust_drop_wobble_splash	med	Dust drop tick: wobble, then the water splash check
+func_151925C4	obj_dust_effect	high	Start the dust / splash effect matching an object's kind (types 0..3) via obj_dust_effect_spawn
+func_15192CEC	obj_dust_effect_on_message	med	Dust effect message handler: forward link messages for its +0x28 object record
+func_15192800	obj_surface_handler_dispatch	med	Run the object-class handler (D_8008FC00) chosen by the surface type under the object (5 / 6 / other)
+func_15192E20	obj_surface_handler_class	med	Map an object kind to its surface-handler class: kinds 0..4 -> 0, 0x53 -> 1; returns 0 for others
+func_15192E90	slide_dust_effect_start	low	Start effect type 0x14 (func_151491F4) that sheds dust from an object; the object record is copied to +0x28
+func_15192F14	slide_dust_effect_update	low	Dust effect tick: at a random rate spawn brown dust particles beside the object, pushed along the surface vector
+func_151932B8	body_dust_effect_start	low	Start a timed effect type 0x18 (func_151491F4) that sheds dust from an object's body (script event 0x5D)
+func_15193360	body_dust_effect_update	low	Body dust tick: at a random rate spawn brown dust particles from bone 1 of the object, flung sideways
+func_151937A4	slide_dust_effect_on_event	med	Dust effect event handler: retarget on model swap (0x2D), destroy when its object is removed (0)
+func_15193850	body_dust_effect_on_event	med	Body dust effect event handler: retarget on model swap (0x2D), destroy when its object is removed (0)
+func_15193900	ceiling_drip_spawn	low	Drip source tick: spawn a falling drop sprite (texture 0x45) from its point toward its floor height, rearm 100-227 frames
+func_15193A24	ceiling_drip_fall_update	med	Drop sprite tick: grow while forming, then fall with increasing speed; at the floor maybe spawn a splash and end
+func_15193660	obj_head_particle_burst	low	Spawn a particle burst (emit_burst_from_spec_b) at bone 10 of an object's model (object script action)
+func_151937F4	obj_bone_debris_emitter_attach	low	Attach a bone emitter (bone_emitter_spawn) to an object with fixed offsets, rate and life 750 (object script action)
+func_15193E54	bone_debris_emitter_init	low	Emitter init handler: set the velocity scale +0x74 from a rodata constant
+func_15193E6C	bone_debris_emit	low	Emitter handler: when the bone moved fast enough spawn a spinning debris model along the motion (func_15157E08)
+func_15194210	hit_impact_effect	high	Spawn the impact effect at the last hit point for a struck object's material: embers or a small/large spark blast
+func_151942B0	hit_react_impact_large	med	Hit reaction: large impact effect at the hit point for the struck object
+func_15194858	hit_react_impact_small	med	Hit reaction: small impact effect at the hit point for the struck object
+func_15194890	hit_react_lava_boulder	med	Hit reaction: attach character effect 10 (lava boulder impact) to struck characters (kinds 0..4)
+func_15194904	hit_react_fire_imp	med	Hit reaction: attach character effect 12 (fire imp impact) to struck characters (kinds 0..4)
+func_15194978	hit_react_puff_burst	low	Hit reaction for characters: func_151AED60 effect plus a debris burst 50 above the object
+func_15194AF8	hit_react_attacker_fx_burst	low	Hit reaction: func_150C7520 effect on the attacker for 500 frames, then hit_react_puff_burst
+func_15194B3C	hit_debris_burst	high	Debris burst 270 above a hit object, aimed from the attacker's heading, unless its hit class forbids it
+func_15194794	hit_react_class_fx_steam	low	Hit reaction: class-based hit effects (func_151B01B8, func_151B09BC 1000) plus a steam puff for characters
+func_15194D80	hit_react_burst_shake	low	Hit reaction for characters and kind 0x53: debris burst 95 above the object and a random camera shake
+func_15194F50	hit_react_none	high	Hit reaction that does nothing
+func_15194F64	hit_react_camera_cut	low	In game mode 1 with flag 8 set, start a camera-cut fade on the target unless its cooldown is running (1000)
+func_15194FD8	hit_react_generic	med	Hit reaction: set the dying flags, run the generic hit effect and maybe a camera cut
+func_15195024	obj_hit_death_sound	med	Set an object's +0x9C death flags and play its death sound (kinds 0x75 / 0x80)
+func_1519508C	obj_hit_effects_full	med	Spawn the object's hit-class effect, run all hit effects and the death sound
+func_15195104	hit_react_default	med	Hit reaction: impact effect for kind 0x53, else full hit effects and maybe a camera cut
+func_15195160	obj_hit_retire	high	Per-kind hit reaction: switch off, destroy and set state 6 for most kinds; kinds 0x16 / 0x7C release their rider
+func_151952F0	hit_react_character	med	Hit reaction: start the character reaction effect on the target (not bound)
+func_15195314	hit_react_character_bound	med	Hit reaction: start the character reaction effect on the target, bound to the attacker
+func_15195338	hit_react_lava	med	Hit reaction: bound character reaction (or character effect 11, lava) plus func_1514B8D4 at the object
+func_151953C4	hit_react_kind3E_A6	low	Hit reaction: call func_150B0B90 for objects of kind 0x3E or 0xA6
+func_15195418	hit_react_flash_retire	low	Hit reaction: screen flash (func_15182BE0) when the object has a +0x318 block, then obj_hit_retire
+func_151954B8	hit_react_blast_retire	low	Hit reaction: func_151C0648 effect 50 above the object, hit effects, destroy and state 6
+func_15195564	character_hit_react	high	Reset a target's reaction state and start its reaction effect, optionally bound to the attacker
+func_15195750	obj_hit_split_halves	med	Kill an object and spawn a copy so both halves fly apart with random speeds and angles
+func_15195A98	hit_react_impact_sides	med	Hit reaction: object impact effects at two points 20 units on either side of the object along the hit direction
+func_15195BC0	hit_react_class_fx	low	Hit reaction: class-based hit effects func_151B01B8 and func_151B09BC (1000 frames)
+func_15195C08	hit_react_retire_if_dead	med	Hit reaction: when the target's health is 0 destroy it (state 6); attacker kind 0x47 clears its +0x1CA
+func_15195CA8	hit_react_camera_shake	med	Hit reaction: random camera shake of 20-30 (func_151D8E18)
+func_15195D20	dnode_alloc_push_front	med	Allocate a node and push it at the front of a doubly linked list given its tail and head pointers
+func_eu_15195D94	texscroll_stub	low	Empty function (EU-only stub next to the texture-scroll code)
+func_15195D9C	texscroll_reset	high	Clear the texture-scroll entry and chain lists and reset the next new scroll id to -2
+func_15195DD8	dl_find_scroll_texture	high	Find the n-th G_SETTIMG of a texture in a display list and return the index and run length of its G_SETTILESIZE
+func_15195EF4	texscroll_entry_create	high	Allocate a texture-scroll entry: texture size (optionally doubled), start position and default speed
+func_15195FF4	texscroll_id_identity	low	Return the first argument unchanged (texture-scroll id hook)
+func_15195AA8	level_dl_add_texture_scroll	high	Register scrolling for a texture in a level display list, recording its tile-size commands in a scroll entry
+func_15196344	dl_add_texture_scroll	high	Register scrolling for a texture in a model display list, linking each match to a scroll entry
+func_15195FB0	texture_anim_start_for	high	Start texture scrolling on a model's texture-set display list (+0x1C) and return the scroll handle
+func_15196560	texscroll_update	high	Write each scroll entry's G_SETTILESIZE words into the level and linked display lists, then advance by its speed
+func_15196888	texscroll_set_speed	high	Set the s / t scroll speed bytes of a texture-scroll entry
+func_151968A0	emitter_retire	med	Model emitter death: run its stop and sound-stop handlers, then retire the effect record
+func_15196924	emitter_unlink_free	med	Model emitter death: run its stop and sound-stop handlers, then unlink and free the effect record
+func_15196438	object_emitter_spawn	high	Spawn emitter kind N (D_800A8B80) attached to an object's model node with its record, speed and start sound
+func_15196CB8	emitter_path_update	med	Model emitter path tick: move ring points with gravity, age and fade them, spawn smoke and run path handlers
+func_151970BC	emitter_update_points	high	Model emitter tick: follow the model node and append interpolated ring points for each emit step
+func_151976B8	emitter_ribbon_draw	high	Draw the model emitter's ring of points as a textured camera-facing ribbon
+func_15197F68	emitter_speed_const_a	low	Emitter speed handler: constant 1.32
+func_15197F7C	emitter_speed_debug_power	med	Emitter speed handler: the flamethrower debug tweak value "power" / 100
+func_15197FD8	emitter_speed_const_b	low	Emitter speed handler: constant 10.9
+func_15197A7C	emitter_stop_for_obj	med	Send message 8 (func_151482D4) to stop the model emitters attached to an object
+func_15198024	line_particle_move_two_vel	med	Line particle tick: damp and apply gravity to the velocities of both ends and move them
+func_1519812C	emitter_particle_shrink_fade	low	Emitter particle tick: shrink width and height by rate +0x164, fade alpha with the remaining life
+func_15198180	beam_quad_build	high	Build the camera-facing quad of a beam from +0x34 toward +0x40, cut at the +0x30 fraction
+func_151985C4	emitter_on_message	med	Model emitter message handler: stop on 0 / 2 / 8 for its object, retarget on model swap (0x2D)
+func_15198680	trail_smoke_spawn	high	Spawn smoke puffs between a path point and the next according to the owner's smoke rate
+func_15198AE0	path_flame_touch_player	high	Path handler: hurt player 0 and set it on fire when it touches a flame path point; advance the current point
+func_15198D3C	path_pass_points_near_objects	high	Path handler: advance the current point past points near enemy objects
+func_15198EEC	path_hit_scene_nodes	high	Path handler: hit scene nodes within the path points' radius (sound, type 0x18, burn state)
+func_151991D0	emitter_sound_start	high	Start sound 0x1AA at full volume and return its voice handle
+func_15199200	emitter_sound_update	med	Move the model emitter's voice to its current path point
+func_151992B0	emitter_sound_stop	med	Stop the model emitter's voice when it has path points
+func_151992EC	emitter_sound_noop	low	Model emitter sound handler that does nothing
+func_151992F8	emitter_streak_burst	med	While the side counter +0x7C is above 1 spawn streak particles from the emitter toward random sphere points
+func_1519961C	spray_particles_burst	high	While the counter +0x88 is above 1 spawn sprite particles on a sphere around a point, flying outward
+func_15199924	emitter_stop	med	Stop a model emitter: clear its emit flags and mark its record finished (flags 1 and 4)
+func_15199954	emitter_owner_flag_clear	med	Clear byte +0x14 of the per-player flamethrower state of the emitter's owner (D_800E0900)
+func_151999BC	emitter_owner_flag_set	med	Set byte +0x14 of the per-player flamethrower state of the emitter's owner (D_800E0900)
+func_15199A28	spec_emitter_spawn	high	Spawn a type-0x12C emitter object attached to a model node from a spec, with sound, init handler and light
+func_15199834	spec_emitter_stop_for_obj	med	Send message 0x26 (func_151482D4) to stop the spec emitters attached to an object
+func_15199DDC	spec_emitter_on_message	med	Spec emitter message handler: destroy on 0 / 2 / 0x26 for its object, retarget on model swap (0x2D)
+func_15199E98	spec_emitter_retire	med	Clean up a spec emitter and retire its effect record
+func_15199EC4	spec_emitter_unlink_free	med	Clean up a spec emitter and unlink and free its effect record
+func_15199EF0	spec_emitter_cleanup	med	Run a spec emitter's stop and sound-stop handlers and destroy its light
+func_15199F80	emitter2_path_update	high	Spec emitter path tick: move the ring points with gravity, place the model on the current point, update sound
+func_1519A1A4	emitter2_flame_update	high	Spec emitter tick: append interpolated ring points from the model node and spawn spray sparks and sprites
+func_1519AF14	emitter2_trail_update	high	Spec emitter ribbon trail tick: age points, emit sparks along the trail, run state and collision handlers
+func_1519BA28	emitter2_flame_draw	high	Draw the spec emitter's ring of points as a textured camera-facing strip
+func_1519C38C	point_integrate_gravity	high	Integrate a point and its velocity over time t with vertical gravity
+func_1519C428	emitter2_owner_flag_clear	med	Clear byte +0x14 of the per-player flamethrower state of the spec emitter's owner
+func_1519C490	emitter2_owner_flag_set	med	Set byte +0x14 of the per-player flamethrower state of the spec emitter's owner
+func_1519C4FC	emitter2_sound_start	high	Start sound 0x1AA at full volume and return its voice handle
+func_1519C52C	emitter2_sound_update	med	Move the spec emitter's voice to its current path point
+func_1519C5DC	emitter2_sound_stop	med	Stop the spec emitter's voice
+func_1519C60C	emitter2_light_create	med	Create a light (light_create_with_ctrl) at a position for a spec emitter, with fixed colour and falloff data
+func_1519C770	emitter2_light_retire	med	Unlink a spec emitter's light from it and retire the light
+func_1519C79C	emitter2_light_free	med	Unlink a spec emitter's light from it and free the light
+func_1519C7C8	emitter2_light_unlink	med	Clear the light handle +0x148 of the spec emitter that owns this light
+func_1519C7DC	line_particle_move_drag	med	Line particle tick: per-frame drag on both end velocities, rise rate, and integrate both ends
+func_1519CA54	particle_shrink_fade_steps	med	Particle tick: shrink width and height once per elapsed frame, cap alpha at life * rate near the end
+func_1519CADC	spark_quad_build	low	Draw-table quad builder for a view slot (vertex buffer from func_151D6310)
+func_1519CE80	emitter2_check_owner_anim	med	Spec emitter check: keep running only while the owner's animation is one of its two stored ids
+func_1519CEB8	emitter2_path_fx_quarter	low	Spec emitter state handler: spawn effect 0x1C every 0.25 path length step along the path
+func_1519CEE0	emitter2_path_fx_half	low	Spec emitter state handler: spawn effect 0x1D every 0.5 path length step along the path
+func_1519CF08	emitter2_path_fx_dense	low	Spec emitter state handler: spawn effect 0x1D every 0.2 path length step along the path
+func_1519CF34	trail_emitter_spawn	high	Spawn the type-0xF trail emitter on node 9 of the owner from fixed spec constants
+func_1519D2D4	trail_emitter_watch_owner	med	End the effect (untimed -> life -1) when its owner is gone, dead (kind 0xFF) or replaced
+func_1519D320	path_trail_spawn_effects	high	Spawn an attack effect at even spacing along an emitter's path, for its owner object
+func_15196270	texscroll_link_dl	high	Append a (display list, tile-size index, count) link to a scroll entry's chain unless already present

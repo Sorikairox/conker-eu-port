@@ -8,7 +8,8 @@ extern SlotEnt D_800D3430[];
 
 #ifdef NON_MATCHING
 // slots_reset: clears the 10 slots of D_800D3430 (inactive, count and timer 0); level start (level_state_init).
-void func_150A00F0(void) {
+/* was func_150A00F0 */
+void event_timers_reset(void) {
     SlotEnt *v;
 
     for (v = D_800D3430; v != D_800D3430 + 10; v++) {
@@ -18,7 +19,7 @@ void func_150A00F0(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CDDE0/func_150A00F0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CDDE0/event_timers_reset.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -27,7 +28,8 @@ extern u16 D_800888BC[]; /* count modulus per kind (0: none) */
 
 /* Per frame: every active, running slot (of the 10) adds D_800BE9E4 to its timer; each time the timer reaches the
  * period of its kind it wraps and the count goes up (modulo the kind's modulus when that is set). */
-void func_150A067C(void) {
+/* was func_150A067C */
+void event_timers_update(void) {
     SlotEnt *v;
     u32 period;
 
@@ -46,10 +48,11 @@ void func_150A067C(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CDDE0/func_150A067C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CDDE0/event_timers_update.s")
 #endif
 
-s32 func_150A0744(s32 arg0, u8 *arg1)
+/* was func_150A0744 */
+s32 event_timer_start(s32 arg0, u8 *arg1)
 {
     SlotEnt *v = &D_800D3430[arg0];
 
@@ -63,7 +66,8 @@ s32 func_150A0744(s32 arg0, u8 *arg1)
     return 1;
 }
 
-s32 func_150A07B0(s32 arg0, s32 arg1, u8 *arg2)
+/* was func_150A07B0 */
+s32 event_action_timer(s32 arg0, s32 arg1, u8 *arg2)
 {
     switch (arg1) {
     case 0:
@@ -79,7 +83,8 @@ s32 func_150A07B0(s32 arg0, s32 arg1, u8 *arg2)
     return 0;
 }
 
-s32 func_150A0854(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_150A0854 */
+s32 event_query_timer(s32 arg0, s32 arg1, s32 arg2) {
     if (arg1 == 3) {
         return D_800D3434[arg0].unk0;
     }

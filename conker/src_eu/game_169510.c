@@ -16,8 +16,8 @@ typedef struct {
 
 void sprite_quad_set_texcoords(Vtx *arg0, u8 arg1, u8 arg2);
 void sprite_quad_set_colors(Vtx *arg0, struct_eu_vtxcol *arg1);
-s32 func_1515D9B0(void);
-s32 func_1515D9F0(s32);
+s32 light_alloc_lookat_buf(void);
+s32 light_alloc_light_buf(s32);
 
 
 #ifdef NON_MATCHING
@@ -154,9 +154,9 @@ struct210 *sprite_fx_spawn(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4,
     temp_v0->unk9C = 0;
     if (arg5) {
         for (i = 0; i <= D_80082FA0; i++) {
-            temp_v0->unk8C[i] = func_1515D9F0(arg5);
+            temp_v0->unk8C[i] = light_alloc_light_buf(arg5);
         }
-        temp_v0->unk9C = func_1515D9B0();
+        temp_v0->unk9C = light_alloc_lookat_buf();
     }
     if (arg7) {
         *(struct167 *)temp_v0->unkA4 = *arg7;
@@ -256,11 +256,11 @@ void sprite_fx_free_buffers(struct210 *arg0) {
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (arg0->unk8C[i]) {
-            func_100043B4(arg0->unk8C[i], 4);
+            heap_set_block_tag(arg0->unk8C[i], 4);
         }
     }
     if (arg0->unk9C != 0) {
-        func_100043B4(arg0->unk9C, 4);
+        heap_set_block_tag(arg0->unk9C, 4);
     }
 }
 
@@ -290,7 +290,7 @@ void sprite_fx_dispatch_b(struct210 *arg0) {
 
 /* was func_1513CA48 */
 void effect3d_release_slot(struct210 *arg0) {
-    func_151D5E30(&arg0->unk100);
+    vtx_slot_buffers_free(&arg0->unk100);
 }
 
 /* was func_1513CA6C */
@@ -313,11 +313,11 @@ void effect3d_free_buffers(struct210 *arg0) {
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (arg0->unkA4[i]) {
-            func_100043B4(arg0->unkA4[i], 4);
+            heap_set_block_tag(arg0->unkA4[i], 4);
         }
     }
     if (arg0->unkB4 != 0) {
-        func_100043B4(arg0->unkB4, 4);
+        heap_set_block_tag(arg0->unkB4, 4);
     }
 }
 
@@ -347,14 +347,14 @@ void effect3d_dispatch_b(struct210 *arg0) {
 }
 
 #ifdef NON_MATCHING
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-Gfx *func_15142CF0(s32, s32, s32, s16, s32, s32, s32, u8 *);
-s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-u8 *func_15142FBC(Gfx *, s32, s32, u8 *);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-s32 func_151462C8(u8 *, u8 *, s32, s32, s32, s32, u8 *, s32, s32);
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+Gfx *gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, u8 *);
+s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
+void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+s32 model_part_emit_lights(u8 *, u8 *, s32, s32, s32, s32, u8 *, s32, s32);
 extern s32 D_800D30BC;
 
 /* was func_1513CBF0 */
@@ -408,19 +408,19 @@ u8 *sprite_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             } else {
                 var_v0 = 0;
             }
-            temp_s1 = func_151462C8(var_s1, arg1 + 0x84, 0, 0, 0, (s32) arg2, arg1 + 0xA4, 2, var_v0);
+            temp_s1 = model_part_emit_lights(var_s1, arg1 + 0x84, 0, 0, 0, (s32) arg2, arg1 + 0xA4, 2, var_v0);
             if ((*(s32 *)((u8 *)arg1 + 0x18)) & 0x100) {
                 var_v0_2 = (*(u8 *)((u8 *)arg1 + 0x2E));
             } else {
                 var_v0_2 = 3;
             }
-            func_151441A4(&sp.u6E, &sp.u6C, &sp.u6A, &sp.u68, (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), (s32) (*(u8 *)((u8 *)arg1 + 0x2C)), (s32) (*(u8 *)((u8 *)arg1 + 0x2D)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) var_v0_2);
+            fx_calc_color_mode_a(&sp.u6E, &sp.u6C, &sp.u6A, &sp.u68, (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), (s32) (*(u8 *)((u8 *)arg1 + 0x2C)), (s32) (*(u8 *)((u8 *)arg1 + 0x2D)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) var_v0_2);
             if ((*(s32 *)((u8 *)arg1 + 0x18)) & 0x200) {
                 var_v0_3 = (*(u8 *)((u8 *)arg1 + 0x2F));
             } else {
                 var_v0_3 = 4;
             }
-            func_151442FC(&sp.u66, &sp.u64, &sp.u62, &sp.u60, (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), (s32) (*(u8 *)((u8 *)arg1 + 0x2C)), (s32) (*(u8 *)((u8 *)arg1 + 0x2D)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) var_v0_3);
+            fx_calc_color_mode_b(&sp.u66, &sp.u64, &sp.u62, &sp.u60, (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), (s32) (*(u8 *)((u8 *)arg1 + 0x2C)), (s32) (*(u8 *)((u8 *)arg1 + 0x2D)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) var_v0_3);
             var_v1 = 0;
             if (sp.u76 & 0x10) {
                 var_v1 = 0x200;
@@ -434,23 +434,23 @@ u8 *sprite_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                 var_v0_4 = 0;
             }
             temp_v1 = (*(u8 *)((u8 *)arg1 + 0x1E));
-            var_s1_2 = func_15142B7C(temp_s1, var_v0_4 | var_v1 | 1, 0x600);
+            var_s1_2 = gfx_geometry_mode_cached(temp_s1, var_v0_4 | var_v1 | 1, 0x600);
             if (temp_v1 != 0xFF) {
                 if ((*(s32 *)((u8 *)arg1 + 0x18)) & 0x20000) {
                     var_v0_5 = 0x3E;
                 } else {
                     var_v0_5 = 3;
                 }
-                var_s1_2 = func_15142E24(var_s1_2, &D_80090F10[temp_v1], (*(s32 *)((u8 *)arg1 + 0x20)), 2, 0, 0, (s32) temp_v1, 0, 0, &sp.u7B, var_v0_5);
+                var_s1_2 = gfx_load_texture_cached(var_s1_2, &D_80090F10[temp_v1], (*(s32 *)((u8 *)arg1 + 0x20)), 2, 0, 0, (s32) temp_v1, 0, 0, &sp.u7B, var_v0_5);
             }
-            temp_a0 = gfx_set_combine_mode(func_15142CF0(func_15142C10(var_s1_2, sp.u66, sp.u64, sp.u62, (s32) sp.u60, &sp.u7B), 0, 0, sp.u6E, (s32) sp.u6C, (s32) sp.u6A, (s32) sp.u68, &sp.u7B), sp.u79, &sp.u7B);
+            temp_a0 = gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(var_s1_2, sp.u66, sp.u64, sp.u62, (s32) sp.u60, &sp.u7B), 0, 0, sp.u6E, (s32) sp.u6C, (s32) sp.u6A, (s32) sp.u68, &sp.u7B), sp.u79, &sp.u7B);
             if ((*(u8 *)((u8 *)arg1 + 0x1E)) == 0xFF) {
                 var_v0_6 = 0;
             } else {
                 var_v0_6 = D_800D30BC;
             }
             temp_v1_2 = (sp.u7A * 8) + ((u8 *)&D_800A4EA8);
-            temp_v0_2 = func_15142FBC(temp_a0, var_v0_6 | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u7B);
+            temp_v0_2 = gfx_other_mode_cached(temp_a0, var_v0_6 | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u7B);
             (*(u8 **)((u8 *)temp_v0_2 + 4)) = (u8 *) (arg1 + 0x40);
             (*(s32 *)((u8 *)temp_v0_2 + 0)) = 0x01004008;
             (*(s32 *)((u8 *)temp_v0_2 + 8)) = 0x05000204;
@@ -639,12 +639,12 @@ void * effect3d_spawn_full(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u
         var_s0_2 = temp_v0;
         if (D_80082FA0 >= 0) {
             do {
-                (*(s32 *)((u8 *)var_s0_2 + 0xA4)) = func_1515D9F0(arg7);
+                (*(s32 *)((u8 *)var_s0_2 + 0xA4)) = light_alloc_light_buf(arg7);
                 var_s1_2 += 1;
                 var_s0_2 += 4;
             } while (D_80082FA0 >= var_s1_2);
         }
-        (*(s32 *)((u8 *)temp_v0 + 0xB4)) = func_1515D9B0();
+        (*(s32 *)((u8 *)temp_v0 + 0xB4)) = light_alloc_lookat_buf();
     }
     return temp_v0;
 }
@@ -666,7 +666,7 @@ void effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
 
 #ifdef NON_MATCHING
 // record_spawn_default: effect3d_spawn_full with the default parameter block D_800A4AA0 and no extra words; returns the
-// new record (the asm leaves effect3d_spawn_full's v0 in v0; func_15149AC0 copies into it). P128.
+// new record (the asm leaves effect3d_spawn_full's v0 in v0; spark_spawn_from_desc copies into it). P128.
 // functions.h declares it with this return type under NON_MATCHING (P131 merge).
 /* was func_1513D524 */
 struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
@@ -707,8 +707,8 @@ void effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg
 
 #ifdef NON_MATCHING
 s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
-s32 func_15144E80(s32, f32 *, f32 *, s32 *);
-s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+s32 tri_calc_normal(s32, f32 *, f32 *, s32 *);
+s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
 
 /* was func_1513D6FC */
 s32 effect3d_build_axes(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
@@ -818,13 +818,13 @@ s32 effect3d_build_axes(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4,
     }
     sp.u7C = angle_byte_cos((arg1 - 0x40) & 0xFF);
     sp.u78 = angle_byte_cos((u8) arg1);
-    if (func_15144E80(arg5, &sp.u6C, &sp.u60, &sp.u54) == 0) {
+    if (tri_calc_normal(arg5, &sp.u6C, &sp.u60, &sp.u54) == 0) {
         return 0;
     }
-    if (func_15145128(&sp.u6C, &sp.u6C, &sp.u50, &sp.u4C) == 0) {
+    if (vec3_normalize_len(&sp.u6C, &sp.u6C, &sp.u50, &sp.u4C) == 0) {
         return 0;
     }
-    if (func_15145128(&sp.u60, &sp.u60, &sp.u50, &sp.u4C) == 0) {
+    if (vec3_normalize_len(&sp.u60, &sp.u60, &sp.u50, &sp.u4C) == 0) {
         return 0;
     }
     temp_f0_2 = arg2 * sp.u78;
@@ -947,13 +947,13 @@ block_23:
 //     } else {
 //         sp7C = angle_byte_cos(arg1 - 64);
 //         sp78 = angle_byte_cos(arg1);
-//         if (func_15144E80(arg5, &sp6C, &sp60, &sp54) == 0) {
+//         if (tri_calc_normal(arg5, &sp6C, &sp60, &sp54) == 0) {
 //             return 0;
 //         }
-//         if (func_15145128(&sp6C, &sp6C, &sp50, &sp4C) == 0) {
+//         if (vec3_normalize_len(&sp6C, &sp6C, &sp50, &sp4C) == 0) {
 //             return 0;
 //         }
-//         if (func_15145128(&sp60, &sp60, &sp50, &sp4C) == 0) {
+//         if (vec3_normalize_len(&sp60, &sp60, &sp50, &sp4C) == 0) {
 //             return 0;
 //         }
 //         temp_f0 = arg2 * sp78;
@@ -971,13 +971,13 @@ block_23:
 // }
 
 #ifdef NON_MATCHING
-Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-Gfx *func_15142CF0(s32, s32, s32, s16, s32, s32, s32, u8 *);
-s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-u8 *func_15142FBC(Gfx *, s32, s32, u8 *);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
+Gfx *gfx_env_color_cached(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+Gfx *gfx_prim_color_cached(s32, s32, s32, s16, s32, s32, s32, u8 *);
+s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
+void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
+void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 extern s32 D_8008A1BC;
 extern s32 D_800D30BC;
 
@@ -1035,7 +1035,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
             temp_v1_2 = (*(s32 **)((u8 *)temp_v0 + 0x100));
             if (temp_v1_2 != NULL) {
                 sp54 = temp_v0;
-                func_100043B4(temp_v1_2, 2U);
+                heap_set_block_tag(temp_v1_2, 2U);
                 (*(s32 **)((u8 *)temp_v0 + 0x100)) = NULL;
             }
         } else {
@@ -1048,7 +1048,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                 temp_v1_3 = (*(s32 **)((u8 *)temp_v0_3 + 0x100));
                 if (temp_v1_3 != NULL) {
                     sp54 = temp_v0_3;
-                    func_100043B4(temp_v1_3, 2U);
+                    heap_set_block_tag(temp_v1_3, 2U);
                     (*(s32 **)((u8 *)temp_v0_3 + 0x100)) = NULL;
                 }
             } else {
@@ -1060,7 +1060,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                     temp_v1_4 = (*(s32 **)((u8 *)temp_v0_5 + 0x100));
                     if (temp_v1_4 != NULL) {
                         sp54 = temp_v0_5;
-                        func_100043B4(temp_v1_4, 2U);
+                        heap_set_block_tag(temp_v1_4, 2U);
                         (*(s32 **)((u8 *)temp_v0_5 + 0x100)) = NULL;
                     }
                 } else {
@@ -1069,19 +1069,19 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                     } else {
                         var_v0 = 0;
                     }
-                    arg0 = (u8 *) func_151462C8(arg0, arg1 + 0x9C, 0, 0, 0, (s32) arg2, arg1 + 0x34, 2, var_v0);
+                    arg0 = (u8 *) model_part_emit_lights(arg0, arg1 + 0x9C, 0, 0, 0, (s32) arg2, arg1 + 0x34, 2, var_v0);
                     if ((*(s32 *)((u8 *)arg1 + 0x58)) & 0x40000) {
                         var_v0_2 = (*(u8 *)((u8 *)arg1 + 0x5E));
                     } else {
                         var_v0_2 = 4;
                     }
-                    func_151441A4(&sp.u88, &sp.u86, &sp.u84, &sp.u82, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x5C)), (s32) (*(u8 *)((u8 *)arg1 + 0x5D)), (s32) var_v0_2);
+                    fx_calc_color_mode_a(&sp.u88, &sp.u86, &sp.u84, &sp.u82, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x5C)), (s32) (*(u8 *)((u8 *)arg1 + 0x5D)), (s32) var_v0_2);
                     if ((*(s32 *)((u8 *)arg1 + 0x58)) & 0x80000) {
                         var_v0_3 = (*(u8 *)((u8 *)arg1 + 0x5F));
                     } else {
                         var_v0_3 = 5;
                     }
-                    func_151442FC(&sp.u80, &sp.u7E, &sp.u7C, &sp.u7A, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x5C)), (s32) (*(u8 *)((u8 *)arg1 + 0x5D)), (s32) var_v0_3);
+                    fx_calc_color_mode_b(&sp.u80, &sp.u7E, &sp.u7C, &sp.u7A, (s32) (*(u8 *)((u8 *)arg1 + 0x28)), (s32) (*(u8 *)((u8 *)arg1 + 0x29)), (s32) (*(u8 *)((u8 *)arg1 + 0x2A)), (s32) (*(u8 *)((u8 *)arg1 + 0x2B)), 0xFF, 0xFF, 0xFF, (s32) (*(u8 *)((u8 *)arg1 + 0x5C)), (s32) (*(u8 *)((u8 *)arg1 + 0x5D)), (s32) var_v0_3);
                     var_v0_4 = 0;
                     if (sp76 & 0x4000) {
                         var_v0_4 = 0x200;
@@ -1093,7 +1093,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                         var_v0_4 |= 0x20000;
                     }
                     temp_t0 = (*(u8 *)((u8 *)arg1 + 0x18));
-                    var_a0 = func_15142B7C(arg0, var_v0_4 | 1, 0x600);
+                    var_a0 = gfx_geometry_mode_cached(arg0, var_v0_4 | 1, 0x600);
                     if (temp_t0 != 0xFF) {
                         temp_v1_5 = (*(s32 *)((u8 *)arg1 + 0x58));
                         if (temp_v1_5 & 0x200000) {
@@ -1106,10 +1106,10 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                         } else {
                             var_v0_5 = 3;
                         }
-                        arg0 = func_15142E24(var_a0, &D_80090F10[temp_t0], (*(s32 *)((u8 *)arg1 + 0x20)), var_a3, 0, 0, (s32) temp_t0, 0, 0, &sp.u8B, var_v0_5);
+                        arg0 = gfx_load_texture_cached(var_a0, &D_80090F10[temp_t0], (*(s32 *)((u8 *)arg1 + 0x20)), var_a3, 0, 0, (s32) temp_t0, 0, 0, &sp.u8B, var_v0_5);
                         var_a0 = arg0;
                     }
-                    temp_a0 = gfx_set_combine_mode(func_15142CF0(func_15142C10(var_a0, sp.u80, sp.u7E, sp.u7C, (s32) sp.u7A, &sp.u8B), 0xF2, 0, sp.u88, (s32) sp.u86, (s32) sp.u84, (s32) sp.u82, &sp.u8B), sp78, &sp.u8B);
+                    temp_a0 = gfx_set_combine_mode(gfx_prim_color_cached(gfx_env_color_cached(var_a0, sp.u80, sp.u7E, sp.u7C, (s32) sp.u7A, &sp.u8B), 0xF2, 0, sp.u88, (s32) sp.u86, (s32) sp.u84, (s32) sp.u82, &sp.u8B), sp78, &sp.u8B);
                     if ((*(s32 *)((u8 *)arg1 + 0x58)) & 0x20000000) {
                         var_t0 = 0x100000;
                     } else {
@@ -1121,7 +1121,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                         var_v0_6 = D_800D30BC;
                     }
                     temp_v1_6 = (sp79 * 8) + ((u8 *)&D_800A4EA8);
-                    temp_v0_6 = func_15142FBC(temp_a0, var_v0_6 | (var_t0 | 0x80000) | 0x2CA0, (*(s32 *)((u8 *)temp_v1_6 + 4)) | (*(s32 *)((u8 *)temp_v1_6 + 0)), &sp.u8B);
+                    temp_v0_6 = gfx_other_mode_cached(temp_a0, var_v0_6 | (var_t0 | 0x80000) | 0x2CA0, (*(s32 *)((u8 *)temp_v1_6 + 4)) | (*(s32 *)((u8 *)temp_v1_6 + 0)), &sp.u8B);
                     (*(s32 *)((u8 *)temp_v0_6 + 0)) = 0x01004008;
                     (*(s32 *)((u8 *)temp_v0_6 + 4)) = sp6C;
                     arg0 = temp_v0_6 + 0x10;
@@ -1269,11 +1269,11 @@ void sprite_quad_stub_b(void) {
 
 #ifdef NON_MATCHING
 s32 floor_triangle_slope(s32, s32, f32 *, f32 *);
-s32 func_15144E80(s32, f32 *, f32 *, s32 *);
-s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+s32 tri_calc_normal(s32, f32 *, f32 *, s32 *);
+s32 vec3_normalize_len(f32 *, f32 *, s32 *, s32 *);
 /* Corners of a sprite quad (4 Vtx at vtx + 0x40): centre (x, y, z), half sizes w / h, rotated by angle in the
- * screen plane. With a camera (arg2) the quad uses the camera's right / up axes (func_15144E80, normalised by
- * func_15145128); without one it is built in x / z and tilted by the view slopes of floor_triangle_slope(arg1).
+ * screen plane. With a camera (arg2) the quad uses the camera's right / up axes (tri_calc_normal, normalised by
+ * vec3_normalize_len); without one it is built in x / z and tilted by the view slopes of floor_triangle_slope(arg1).
  * Returns 0 when the axes are not available. */
 /* was func_1513E2AC */
 s32 sprite_quad_place_cam(s32 vtx, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 h, u8 angle) {
@@ -1291,11 +1291,11 @@ s32 sprite_quad_place_cam(s32 vtx, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 
     s16 i;
 
     if (arg2 != 0) {
-        if (func_15144E80(arg2, right, up, NULL) == 0) {
+        if (tri_calc_normal(arg2, right, up, NULL) == 0) {
             return 0;
         }
-        func_15145128(right, right, NULL, NULL);
-        func_15145128(up, up, NULL, NULL);
+        vec3_normalize_len(right, right, NULL, NULL);
+        vec3_normalize_len(up, up, NULL, NULL);
         ws = w * s;
         wc = w * c;
         rx = ws * right[0] + wc * up[0];
@@ -1411,10 +1411,10 @@ s32 effect3d_apply_velocity(struct_eu_1513E6E8 *arg0) {
 
 #ifdef NON_MATCHING
 /* P143 */
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite_quad_build_scaled: builds the 4 corner vertices (+-half width +0x2C, +-half height +0x30, z 0) of a
 // sprite effect's quad for display list slot `slot`: rotation from the angles +0x40/+0x44/+0x48, matrix rows scaled
-// by +0x4C/+0x50/+0x54, translated to +0x34/+0x38/+0x3C. func_151D6310 hands out the slot's vertex buffer (pointer
+// by +0x4C/+0x50/+0x54, translated to +0x34/+0x38/+0x3C. vtx_slot_buffer_get hands out the slot's vertex buffer (pointer
 // table at +0x100); when it is new, both halves (0x40 bytes each) are first filled from the template at +0xC0.
 // Returns the written vertices, or NULL when no buffer is available. (Draw-table D_8008A1BC entry.)
 /* was func_1513E83C */
@@ -1426,7 +1426,7 @@ u8 *sprite_quad_build_scaled(u8 *fx, s16 slot) {
     u8 fresh;
     s16 i;
 
-    func_151D6310((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
+    vtx_slot_buffer_get((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
     start = vtx;
     if (vtx == NULL) {
         return NULL;
@@ -1457,7 +1457,7 @@ u8 *sprite_quad_build_scaled(u8 *fx, s16 slot) {
     mtx[2][1] *= *(f32 *)(fx + 0x54);
     mtx[2][2] *= *(f32 *)(fx + 0x54);
     for (i = 0; i < 4; i++) {
-        func_150A7E40(mtx, corner[i][0], corner[i][1], 0.0f, &corner[i][0], &corner[i][1], &corner[i][2]);
+        mtxf_transform_point(mtx, corner[i][0], corner[i][1], 0.0f, &corner[i][0], &corner[i][1], &corner[i][2]);
         *(s16 *)(vtx + 0) = (s32)corner[i][0];
         *(s16 *)(vtx + 2) = (s32)corner[i][1];
         *(s16 *)(vtx + 4) = (s32)corner[i][2];
@@ -1471,7 +1471,7 @@ u8 *sprite_quad_build_scaled(u8 *fx, s16 slot) {
 #endif
 // ???
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 extern s32 D_800DD608;
 extern s32 D_800DD618;
 
@@ -1512,7 +1512,7 @@ u8 *sprite_quad_build_screen(u8 *arg0, u8 arg1, s16 arg2) {
     s32 temp_t0;
     u8 *temp_v0;
 
-    func_151D6310(arg0 + 0x100, arg2, 0x40, &sp.u64, &sp.u37);
+    vtx_slot_buffer_get(arg0 + 0x100, arg2, 0x40, &sp.u64, &sp.u37);
     sp.u60 = sp.u64;
     if (sp.u64 != NULL) {
         if (sp.u37 != 0) {
@@ -1605,10 +1605,10 @@ s32 sprite_quad_build_screen_b(s32 arg0, s16 arg1) {
 
 #ifdef NON_MATCHING
 /* P143 */
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite_quad_build: builds the 4 corner vertices (+-half width +0x2C, +-half height +0x30, z 0) of a sprite
 // effect's quad for display list slot `slot`, rotated by the angles +0x40/+0x44/+0x48 and translated to
-// +0x34/+0x38/+0x3C (no scale; sprite_quad_build_scaled is the scaled variant). New vertex buffers from func_151D6310 are first
+// +0x34/+0x38/+0x3C (no scale; sprite_quad_build_scaled is the scaled variant). New vertex buffers from vtx_slot_buffer_get are first
 // filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL when there is no buffer.
 // (Draw-table D_8008A1BC entry.)
 /* was func_1513EE14 */
@@ -1621,7 +1621,7 @@ u8 *sprite_quad_build_rot(u8 *fx, s16 slot) {
     u8 fresh;
     s32 i;
 
-    func_151D6310((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
+    vtx_slot_buffer_get((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
     start = vtx;
     if (vtx == NULL) {
         return NULL;
@@ -1643,7 +1643,7 @@ u8 *sprite_quad_build_rot(u8 *fx, s16 slot) {
     in[3][0] = *(f32 *)(fx + 0x2C);
     in[3][1] = -*(f32 *)(fx + 0x30);
     for (i = 0; i < 4; i++) {
-        func_150A7E40(mtx, in[i][0], in[i][1], 0.0f, &out[i][0], &out[i][1], &out[i][2]);
+        mtxf_transform_point(mtx, in[i][0], in[i][1], 0.0f, &out[i][0], &out[i][1], &out[i][2]);
     }
     for (i = 0; i < 4; i++) {
         *(s16 *)(vtx + 0) = (s32)out[i][0];
@@ -1705,7 +1705,7 @@ u8 *sprite_quad_build_screen_rot(u8 *arg0, s16 arg1) {
     s32 temp_t0;
     u8 *temp_v0;
 
-    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u8C, &sp.u4B);
+    vtx_slot_buffer_get(arg0 + 0x100, arg1, 0x40, &sp.u8C, &sp.u4B);
     sp.u88 = sp.u8C;
     if (sp.u8C != NULL) {
         if (sp.u4B != 0) {
@@ -1792,7 +1792,7 @@ void sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1) {
 // emits gDPSetCombineLERP for combine mode arg1 (table D_800A4F88), preceded by a pipe sync if *arg2 == 1
 /* was func_1513F4E4 */
 Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2) {
-    s32 mode = func_15143044(arg1, 0);
+    s32 mode = fx_layer_to_prim_depth(arg1, 0);
 
     if (mode != D_800DD5EE) {
         if (*arg2 == 1) {
@@ -1974,9 +1974,9 @@ void beam_quad_build_b(s32 arg0, s16 arg1) {
 
 // beam_quad_build: builds the 4 vertices of a camera-facing beam quad for display list slot `slot`: from the start
 // point +0x34/+0x38/+0x3C towards +0x40/+0x44/+0x48, the length scaled by +0x30 x scale[1], the half width
-// +0x2C x scale[0] along cross(direction, middle - camera) (func_150ADD90; the camera point from func_15144B34).
+// +0x2C x scale[0] along cross(direction, middle - camera) (vec3f_cross; the camera point from camera_get_pos).
 // `flip` picks the vertex order (start+, start-, end-, end+ or start-, end-, end+, start+). New vertex buffers from
-// func_151D6310 are first filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL
+// vtx_slot_buffer_get are first filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL
 // when there is no buffer. Called by beam_quad_build_a (order 0) / beam_quad_build_b (order 1).
 /* was func_1513FAB4 */
 u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot) {
@@ -1993,7 +1993,7 @@ u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot) {
     u8 *start;
     u8 fresh;
 
-    func_151D6310((s32 *) (fx + 0x100), slot, 0x40, (s32 *) &vtx, &fresh);
+    vtx_slot_buffer_get((s32 *) (fx + 0x100), slot, 0x40, (s32 *) &vtx, &fresh);
     start = vtx;
     if (vtx == NULL) {
         return NULL;
@@ -2002,7 +2002,7 @@ u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot) {
         memcpy(*(u8 **) (fx + 0x100 + slot * 4), fx + 0xC0, 0x40);
         memcpy(*(u8 **) (fx + 0x100 + slot * 4) + 0x40, fx + 0xC0, 0x40);
     }
-    cam = func_15144B34(slot);
+    cam = camera_get_pos(slot);
     halfWidth = *(f32 *) (fx + 0x2C) * scale[0];
     len = *(f32 *) (fx + 0x30) * scale[1];
     dir[0] = *(f32 *) (fx + 0x40) - *(f32 *) (fx + 0x34);
@@ -2017,7 +2017,7 @@ u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot) {
     toCam[0] = *(f32 *) (fx + 0x34) + dir[0] * 0.5f - cam[0];
     toCam[1] = *(f32 *) (fx + 0x38) + dir[1] * 0.5f - cam[1];
     toCam[2] = *(f32 *) (fx + 0x3C) + dir[2] * 0.5f - cam[2];
-    func_150ADD90((u8 *) dir, (u8 *) toCam, (u8 *) side);
+    vec3f_cross((u8 *) dir, (u8 *) toCam, (u8 *) side);
     lenSq = side[0] * side[0] + side[1] * side[1] + side[2] * side[2];
     if (lenSq == 0.0f) {
         side[0] = side[1] = side[2] = 0.0f;
@@ -2109,10 +2109,10 @@ void sprite_quad_set_colors(Vtx *arg0, struct_eu_vtxcol *arg1) {
 
 #ifdef NON_MATCHING
 /* P143 */
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite_quad_build_flat: same result as sprite_quad_build_rot (corner quad +-0x2C / +-0x30 rotated by +0x40/+0x44/+0x48,
 // translated to +0x34/+0x38/+0x3C, no scale), written as a loop over corners kept in place. New vertex buffers from
-// func_151D6310 are first filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL
+// vtx_slot_buffer_get are first filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL
 // when there is no buffer. (Draw-table D_8008A1BC entry.)
 /* was func_15140190 */
 u8 *sprite_quad_build_flat(u8 *fx, s16 slot) {
@@ -2123,7 +2123,7 @@ u8 *sprite_quad_build_flat(u8 *fx, s16 slot) {
     u8 fresh;
     u8 i;
 
-    func_151D6310((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
+    vtx_slot_buffer_get((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
     start = vtx;
     if (vtx == NULL) {
         return NULL;
@@ -2149,7 +2149,7 @@ u8 *sprite_quad_build_flat(u8 *fx, s16 slot) {
     mtx[3][1] = *(f32 *)(fx + 0x38);
     mtx[3][2] = *(f32 *)(fx + 0x3C);
     for (i = 0; i < 4; i++) {
-        func_150A7E40(mtx, corner[i][0], corner[i][1], 0.0f, &corner[i][0], &corner[i][1], &corner[i][2]);
+        mtxf_transform_point(mtx, corner[i][0], corner[i][1], 0.0f, &corner[i][0], &corner[i][1], &corner[i][2]);
         *(s16 *)(vtx + 0) = (s32)corner[i][0];
         *(s16 *)(vtx + 2) = (s32)corner[i][1];
         *(s16 *)(vtx + 4) = (s32)corner[i][2];
@@ -2173,7 +2173,7 @@ void fx_lists_broadcast_b(s32 arg0, u8 arg1) {
 }
 
 #ifdef NON_MATCHING
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 
 /* was func_15140410 */
 u8 *sprite_quad_build_axes(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3) {
@@ -2196,7 +2196,7 @@ u8 *sprite_quad_build_axes(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3) {
     s32 temp_a1;
     u8 *temp_v0;
 
-    func_151D6310(arg0 + 0x100, arg3, 0x40, &sp.u64, &sp.u47);
+    vtx_slot_buffer_get(arg0 + 0x100, arg3, 0x40, &sp.u64, &sp.u47);
     sp.u60 = sp.u64;
     if (sp.u64 != NULL) {
         if (sp.u47 != 0) {

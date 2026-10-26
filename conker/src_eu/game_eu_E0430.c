@@ -5,12 +5,12 @@
 
 #ifdef NON_MATCHING
 /* P197 */
-s32 func_151A74B0(void *spray, s32 mode, u8 view, s32 arg3);
-void func_1514CDC8(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 count, u8 kind, s32 arg9, f32 argA,
+s32 debris_spray_spawn(void *spray, s32 mode, u8 view, s32 arg3);
+void spawn_arc_emit(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 count, u8 kind, s32 arg9, f32 argA,
                    s32 argB, u8 argC);
-void func_15153F24(u8 *arg0, u8 arg1);
-void func_151534E0(u8 *arg0, s32 arg1);
-u8 *func_150B443C(s32 *arg0, u8 *arg1, s16 arg2);
+void emit_line_sparks_by_angles(u8 *arg0, u8 arg1);
+void emit_sparks_by_angles_b(u8 *arg0, s32 arg1);
+u8 *water_jet_spawn(s32 *arg0, u8 *arg1, s16 arg2);
 
 extern s32 D_800BEE08;
 
@@ -28,11 +28,12 @@ static const PipeSpot D_8009FCF0[3] = {
 
 // pipe_explode_effects: P197 (difftest as a void variant, d_2c20.c): the effects of pipe `pipe` (0..2, D_8009FCF0: position and facing angle) bursting in
 // view `view` ("../Effects/PipeExploded/pipeexploded.c"): camera_shake_start on the current player's state (7, 1), a spray
-// of 3..4 pieces (func_151A74B0), 1..2 debris bursts (func_1514CDC8, radius 31..104, 4..6 pieces), a smoke cloud
-// (func_15153F24), two spark bursts (func_151534E0), clears the pipe's two earlier effects of type 0x17
+// of 3..4 pieces (debris_spray_spawn), 1..2 debris bursts (spawn_arc_emit, radius 31..104, 4..6 pieces), a smoke cloud
+// (emit_line_sparks_by_angles), two spark bursts (emit_sparks_by_angles_b), clears the pipe's two earlier effects of type 0x17
 // (func_151494E0, keys 2 * pipe and 2 * pipe + 1), a water / steam jet 150 units in front of the pipe
-// (func_150B443C, 20) and the sounds 0xE7 / 0x22 at the pipe (func_10010F88).
-s32 func_150B2C20(s32 pipe, s32 view) {
+// (water_jet_spawn, 20) and the sounds 0xE7 / 0x22 at the pipe (sound_play_at).
+/* was func_150B2C20 */
+s32 pipe_explode_effects(s32 pipe, s32 view) {
     struct {
         s16 count;       /* 0x00 */
         u8 pad2[2];
@@ -129,13 +130,13 @@ s32 func_150B2C20(s32 pipe, s32 view) {
     spray.u55 = 0;
     spray.u56 = 0x32;
     spray.u58 = 0x19;
-    func_151A74B0(&spray, 0, view, 1);
+    debris_spray_spawn(&spray, 0, view, 1);
 
     /* debris bursts */
     n = (random_int() & 1) + 1;
     while (n-- != 0) {
         r = random_float() * 73.0f + 31.0f;
-        func_1514CDC8(p->pos[0], p->pos[1], p->pos[2], r, p->angle + 0x40, 0, 0xFF, (u32) random_int() % 3 + 4,
+        spawn_arc_emit(p->pos[0], p->pos[1], p->pos[2], r, p->angle + 0x40, 0, 0xFF, (u32) random_int() % 3 + 4,
                       9, 0, 0.009615385f, 0, view);
     }
 
@@ -172,7 +173,7 @@ s32 func_150B2C20(s32 pipe, s32 view) {
     smoke.u42 = 0xA;
     smoke.u44 = 0x19;
     smoke.u46 = 0;
-    func_15153F24((u8 *) &smoke, view);
+    emit_line_sparks_by_angles((u8 *) &smoke, view);
 
     /* sparks, twice */
     sparks.pos[0] = p->pos[0];
@@ -204,14 +205,14 @@ s32 func_150B2C20(s32 pipe, s32 view) {
     sparks.u3C[5] = 0;
     sparks.u54 = 0xFF;
     sparks.u55 = 0xA0;
-    func_151534E0((u8 *) &sparks, (u8) view);
+    emit_sparks_by_angles_b((u8 *) &sparks, (u8) view);
     sparks.u24[0] = 0xA;
     sparks.u24[1] = 6;
     sparks.u24[8] = 0x64;
     sparks.u24[9] = 0;
     sparks.u39 = 9;
     sparks.u3C[3] = 5;
-    func_151534E0((u8 *) &sparks, (u8) view);
+    emit_sparks_by_angles_b((u8 *) &sparks, (u8) view);
 
     /* jet from 150 units in front of the pipe */
     s = angle_byte_cos(p->angle);
@@ -245,19 +246,19 @@ s32 func_150B2C20(s32 pipe, s32 view) {
     func_151494E0((s32) key, 0x17);
     key[0] = (u8) pipe * 2 + 1;      /* D_8009FD2C {1, 3, 5} */
     func_151494E0((s32) key, 0x17);
-    func_150B443C((s32 *) &jet, (u8 *) at, 20);
+    water_jet_spawn((s32 *) &jet, (u8 *) at, 20);
 
-    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, (s32) p->pos[0], (s32) p->pos[1], (s32) p->pos[2], 1000, 3000);
-    func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s32) p->pos[0], (s32) p->pos[1], (s32) p->pos[2], 1000, 3000);
+    sound_play_at(0xE7, 0x7FFF, 0, 2, 0, (s32) p->pos[0], (s32) p->pos[1], (s32) p->pos[2], 1000, 3000);
+    sound_play_at(0x22, 0x7FFF, 0, 0, 0, (s32) p->pos[0], (s32) p->pos[1], (s32) p->pos[2], 1000, 3000);
     return 0; /* s32 for the caller game_eu_142E40.c (s32 (s32, s32)); nobody reads it (the asm leaves func_10010F88s v0) */
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/func_150B2C20.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/pipe_explode_effects.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P139 */
-/* P139: particle request passed to func_15132FBC by the pipe-explode spawn handlers (0x7C bytes; same layout as
+/* P139: particle request passed to mdl_particle_spawn by the pipe-explode spawn handlers (0x7C bytes; same layout as
  * game_eu_103160.c's DebrisParticle). */
 typedef struct {
     /* 0x00 */ f32 scale[4];
@@ -287,18 +288,19 @@ typedef struct {
     /* 0x78 */ s32 u78;
 } PipeParticleReq;
 
-s32 func_15132FBC(void *req, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn(void *req, s32, s32, s32, s32, s32);
 f32 random_float(void);
 f32 angle_byte_cos(u8);
 /*
- * pipe_explode_spawn_chunk: D_8008ADA0 spawn handler 9 (called per ring point by func_1514C860 with (mode, index,
- * px, py, pz, cx, cy, cz, a, angle0, r, arg8, arg9, argA, argB)). Spawns one particle (func_15132FBC, request
+ * pipe_explode_spawn_chunk: D_8008ADA0 spawn handler 9 (called per ring point by spawn_ring_emit with (mode, index,
+ * px, py, pz, cx, cy, cz, a, angle0, r, arg8, arg9, argA, argB)). Spawns one particle (mdl_particle_spawn, request
  * (3, 0xFF, 0, argB, 0)) at the point (px, py, pz): sprite 0x1C, life 100, flags 0x9E8, scale (1, 0.2, s, s) with
  * s random in 29.8..102.3, random x / z spin in -40..40 and gravity -0.837..-2.589. It flies outwards at a random
  * speed 18..49 in the direction yaw = angle0 + 60 * sin(a) * r * arg9 - 0x40, pitch = 48 * cos(a) - 0x14 (byte
  * angles, angle_byte_cos = sine). Returns 1 (keep emitting).
  */
-s32 func_150B3394(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f32 cz, s32 a, s32 angle0, f32 r,
+/* was func_150B3394 */
+s32 pipe_explode_spawn_chunk(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f32 cz, s32 a, s32 angle0, f32 r,
                   s32 arg8, f32 arg9, s32 argA, s32 argB) {
     PipeParticleReq req;
     f32 cosA;
@@ -361,11 +363,11 @@ s32 func_150B3394(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f
     req.u72 = 1;
     req.u74 = 0xFF;
     req.scale[3] = size;
-    func_15132FBC(&req, 3, 0xFF, 0, argB & 0xFF, 0);
+    mdl_particle_spawn(&req, 3, 0xFF, 0, argB & 0xFF, 0);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/func_150B3394.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/pipe_explode_spawn_chunk.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -391,17 +393,18 @@ extern char D_8009FEE8[];
 s32 debug_tweak_int(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 /*
- * pipe_explode_spawn_debris: D_8008ADA0 spawn handler 10 (pipeexplode.c; called per ring point by func_1514C860
+ * pipe_explode_spawn_debris: D_8008ADA0 spawn handler 10 (pipeexplode.c; called per ring point by spawn_ring_emit
  * with (mode, index, px, py, pz, cx, cy, cz, a, angle0, r, arg8, arg9, argA, argB)). Reads its tunables through
  * debug_tweak_int (id, name, min, max, default, file, line): life (300), min grav / grav range (/1000), min speed /
- * speed range, min scale / scale range (/10), xz angle, yz angle. Spawns one particle (func_15132FBC, request
+ * speed range, min scale / scale range (/10), xz angle, yz angle. Spawns one particle (mdl_particle_spawn, request
  * (3, 0xFF, 4, argB, 0)) at (px, py, pz): sprite 0x1C, life + 0x20, flags 0x29E9, scale (s / 10, 0.2, s, s) with
  * s = min scale + random * scale range, random x / z spin in -2..2, gravity min grav + random * grav range. It
  * flies at min speed + random * speed range in the direction yaw = angle0 + xz * sin(a) * r * arg9 - 0x40,
  * pitch = yz * cos(a) - 0x14 (byte angles, angle_byte_cos = sine). The new particle's +0x170 gets -18.0
  * (memcpy). Returns 1 (keep emitting).
  */
-s32 func_150B3668(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f32 cz, s32 a, s32 angle0, f32 r,
+/* was func_150B3668 */
+s32 pipe_explode_spawn_debris(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f32 cz, s32 a, s32 angle0, f32 r,
                   s32 arg8, f32 arg9, s32 argA, s32 argB) {
     PipeParticleReq req;
     f32 floorY;
@@ -485,19 +488,20 @@ s32 func_150B3668(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f
     req.u72 = 0x20;
     req.u74 = 7;
     req.scale[3] = size;
-    p = func_15132FBC(&req, 3, 0xFF, 4, argB & 0xFF, 0);
+    p = mdl_particle_spawn(&req, 3, 0xFF, 4, argB & 0xFF, 0);
     if (p != 0) {
         memcpy((u8 *) p + 0x170, &floorY, 4);
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/func_150B3668.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/pipe_explode_spawn_debris.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
-s32 func_150B3B8C(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
+/* was func_150B3B8C */
+s32 debris_ground_stop_update(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     f32 temp_f0;
     f32 temp_f2;
     s32 temp_t1;
@@ -534,9 +538,10 @@ s32 func_150B3B8C(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/func_150B3B8C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/debris_ground_stop_update.s")
 #endif
-s32 func_150B3C6C(u8 *arg0) {
+/* was func_150B3C6C */
+s32 trail_alpha_fade(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
     s32 var_v1 = *(s16 *)(arg0 + 0x1C) * 16;
 
@@ -551,15 +556,16 @@ s32 func_150B3C6C(u8 *arg0) {
 
 #ifdef NON_MATCHING
 struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
-u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+u8 *trail_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s16 D_80088AA0[3];   /* splash colours (15, 16, 17) */
 
 /* trail_hit_splash: trail hit handler (D_8008A7D0 [5]) of particle `obj` hitting the ground at height `y`: the trail
  * record (obj +0x98) goes to state 4 (shrink); a splash sprite (sprite_fx_spawn_cam kind 0x11, life 150, a random colour
  * of D_80088AA0, size 50..100, the record's alpha bytes +0x1A / +0x1B) at the trail's current point (obj +0x94,
- * 20-byte points, index +0x2D) and a falling child trail (func_15148310: 3/4 of the record's +0 width, +4, random
+ * 20-byte points, index +0x2D) and a falling child trail (trail_spawn: 3/4 of the record's +0 width, +4, random
  * length 15..30, +0xC / +0x10, colour bytes +0x19..+0x1B, life 60, the obj's +0x25) are spawned. Returns 1. */
-s32 func_150B3CA8(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* was func_150B3CA8 */
+s32 trail_hit_splash(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     u8 *pts = *(u8 **)(obj + 0x94);
     u8 *rec = *(u8 **)(obj + 0x98);
     s16 colours[3];
@@ -656,9 +662,9 @@ s32 func_150B3CA8(u8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     shape.v4 = *(f32 *)(rec + 0x4);
     shape.length = random_float() * 15.0f + 15.0f;
     shape.vC = *(f32 *)(rec + 0xC);
-    func_15148310((u8 *)&at, (s32)&shape, 0, 1, 7, 0, 0, 0, 0, 0, 0, (u8 *)&style, 0, obj[0xC], obj[1]);
+    trail_spawn((u8 *)&at, (s32)&shape, 0, 1, 7, 0, 0, 0, 0, 0, 0, (u8 *)&style, 0, obj[0xC], obj[1]);
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/func_150B3CA8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E0430/trail_hit_splash.s")
 #endif

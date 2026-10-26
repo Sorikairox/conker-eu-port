@@ -6,7 +6,8 @@
 #ifdef NON_MATCHING
 extern s16 D_80083336;
 
-u8 *func_15174270(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 arg6) {
+/* was func_15174270 */
+u8 *occlusion_probe_readback_emit(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 arg6) {
     s32 temp_f6;
     s32 temp_f8;
     s32 temp_t2;
@@ -189,7 +190,7 @@ u8 *func_15174270(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s1
     return temp_v0 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/func_15174270.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/occlusion_probe_readback_emit.s")
 #endif
 #ifdef NON_MATCHING
 typedef struct {
@@ -212,8 +213,9 @@ void camera_world_to_screen(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32
 /* Occlusion probes (3 entries, e.g. lens flares): first, for entries read back in the current DL buffer
  * (state == D_800BE9C0 + 1), decode the z-buffer word and, when within 300 of the projected depth, call the entry's
  * callback with the pixel colour; then for new requests (state 3) project the point for player 0 and, when it lands
- * inside the viewport, queue the readback (func_15174270). Only runs when player == 0. */
-Gfx *func_1517485C(Gfx *gdl, s16 player) {
+ * inside the viewport, queue the readback (occlusion_probe_readback_emit). Only runs when player == 0. */
+/* was func_1517485C */
+Gfx *occlusion_probes_update(Gfx *gdl, s16 player) {
     s32 i;
     s32 z, c, d;
     s32 x, y;
@@ -259,12 +261,12 @@ Gfx *func_1517485C(Gfx *gdl, s16 player) {
         if (y < (s32)*(f32 *)(cam + 0x24) || !(y < (s32)*(f32 *)(cam + 0x28))) {
             continue;
         }
-        gdl = (Gfx *)func_15174270((u8 *)gdl, x, y, 1, (s32)D_800DD740[i], (s32)D_800DD758[i], player);
+        gdl = (Gfx *)occlusion_probe_readback_emit((u8 *)gdl, x, y, 1, (s32)D_800DD740[i], (s32)D_800DD758[i], player);
     }
     return gdl;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/func_1517485C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/occlusion_probes_update.s")
 #endif
 typedef struct {
     f32 x, y, z;
@@ -278,7 +280,8 @@ typedef struct {
 extern Ent_DD778 D_800DD778[];
 #endif
 
-s32 func_15174B60(f32 arg0, f32 arg1, f32 arg2, struct_eu_bytes24 *arg3, s8 arg4, s32 arg5) {
+/* was func_15174B60 */
+s32 occlusion_probe_request(f32 arg0, f32 arg1, f32 arg2, struct_eu_bytes24 *arg3, s8 arg4, s32 arg5) {
     s32 i;
 
     for (i = 0; i < 3; i++) {

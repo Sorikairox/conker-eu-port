@@ -6,7 +6,8 @@
 #ifdef NON_MATCHING
 extern s16 D_80084814;
 
-void func_1503FCE0(s16 arg0, s16 *arg1, s16 *arg2) {
+/* was func_1503FCE0 */
+void select_menu_read_stick(s16 arg0, s16 *arg1, s16 *arg2) {
     s16 temp_v1;
     s16 temp_v1_3;
     s16 temp_v1_4;
@@ -61,9 +62,10 @@ void func_1503FCE0(s16 arg0, s16 *arg1, s16 *arg2) {
     *arg2 = var_v0_2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D4F0/func_1503FCE0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D4F0/select_menu_read_stick.s")
 #endif
-void func_1503FB08(void) {
+/* was func_1503FB08 */
+void select_menu_reset(void) {
     D_80084818 = 0;
     D_800C6C70 = 0.0f;
     D_8008481C = 0;
@@ -72,12 +74,12 @@ void func_1503FB08(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1509CF78(void);
-s32 func_1509CEA8(s32);
-u8 *func_1509CE20(s32);
-s32 func_1509CE88(s32);
-void func_15042BC4(u8 *, s32 *, s32 *, s32 *);
-Gfx *func_15041A9C(Gfx *, f32, f32, u8 *, s32, s32, s32, s32, f32, f32, s32);
+s32 event_table_count(void);
+s32 event_table_find_by_word4(s32);
+u8 *event_table_get_block(s32);
+s32 event_table_get_word4(s32);
+void text_measure_string(u8 *, s32 *, s32 *, s32 *);
+Gfx *text_draw_string(Gfx *, f32, f32, u8 *, s32, s32, s32, s32, f32, f32, s32);
 s32 strlen(const char *);
 extern u16 D_800BEB30;     /* buttons pressed this frame */
 extern u8 D_80084828;      /* selected entry */
@@ -87,15 +89,16 @@ extern u8 D_80098CF4[];    /* marker line drawn above some entries */
 extern u8 D_80098CF8[];    /* blink text of the selected entry */
 extern u8 D_8008482C[];    /* empty text */
 
-// menu_list_update_draw: scrolling text menu of func_1509CF78() entries (19 rows shown, the selected entry
-// D_80084828 in the middle). `select` buttons pick the selected entry when it is unlocked (bit func_1509CEA8(i + 1) of
-// D_800D2E4C) and return its id; `cancel` or B (0x4000) return -1. Up (4) / down (8) or the stick (func_1503FCE0)
+// menu_list_update_draw: scrolling text menu of event_table_count() entries (19 rows shown, the selected entry
+// D_80084828 in the middle). `select` buttons pick the selected entry when it is unlocked (bit event_table_find_by_word4(i + 1) of
+// D_800D2E4C) and return its id; `cancel` or B (0x4000) return -1. Up (4) / down (8) or the stick (select_menu_read_stick)
 // start a scroll (D_80084818 = -1 / 1) that moves the offset D_800C6C70 by 1.25 per tick up to +-11, then steps the
 // selection by 1 (3 with Z held). Pressing 0x30 together locks the menu for 60 ticks (level_state_clear /
 // level_state_init, D_8008481C) and shows D_80098CE0 on every row. Rows fade in / out at the edges (alpha 64 per
 // row); the selected row is red (blinking D_80098CF8 every 30 ticks, D_80084820 / D_80084824), others white;
-// entries with func_1509CE88 < 0 get the marker D_80098CF4 above them. Returns -2 while no choice is made.
-s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
+// entries with event_table_get_word4 < 0 get the marker D_80098CF4 above them. Returns -2 while no choice is made.
+/* was func_1503FE30 */
+s32 select_menu_update_draw(Gfx **gfxp, u16 cancel, u16 select) {
     u16 buttons;
     s32 count;
     u8 visible;
@@ -125,7 +128,7 @@ s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
     row = 0;
     w = 0;
     h = 0;
-    count = func_1509CF78();
+    count = event_table_count();
     g = *gfxp;
     *gfxp = g + 1;
     ((s32 *) g)[0] = 0xDE000000; /* gSPDisplayList(D_80085D30) */
@@ -147,17 +150,17 @@ s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
     }
 
     if (buttons & select) {
-        a = func_1509CEA8(D_80084828 + 1);
-        b = func_1509CEA8(D_80084828 + 1);
+        a = event_table_find_by_word4(D_80084828 + 1);
+        b = event_table_find_by_word4(D_80084828 + 1);
         if (!(((u8 *) D_800D2E4C)[a >> 3] & (1 << (b & 7)))) {
-            return func_1509CEA8(D_80084828 + 1);
+            return event_table_find_by_word4(D_80084828 + 1);
         }
     }
     if ((buttons & cancel) || (buttons & 0x4000)) {
         return -1;
     }
 
-    func_1503FCE0(0, &stickX, &stickY);
+    select_menu_read_stick(0, &stickX, &stickY);
     if (D_80084818 != 0) {
         D_800C6C70 += 1.25f * (s32) (D_80084818 * D_800BE9E4);
         if (D_800C6C70 < -11.0f) {
@@ -204,30 +207,30 @@ s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
     }
 
     do {
-        id = func_1509CEA8(idx + 1);
+        id = event_table_find_by_word4(idx + 1);
         if (D_8008481C != 0) {
             text = D_80098CE0;
-            func_15042BC4(text, &w, &h, &d);
+            text_measure_string(text, &w, &h, &d);
         } else {
-            func_15042BC4(func_1509CE20(id), &w, &h, &d);
+            text_measure_string(event_table_get_block(id), &w, &h, &d);
             if (((u8 *) D_800D2E4C)[id >> 3] & (1 << (id & 7))) {
                 if (D_80084828 == idx) {
-                    text = D_80084824 ? D_80098CF8 : func_1509CE20(id);
-                    func_15042BC4(text, &w, &hSel, &d);
+                    text = D_80084824 ? D_80098CF8 : event_table_get_block(id);
+                    text_measure_string(text, &w, &hSel, &d);
                 } else {
-                    text = func_1509CE20(id);
+                    text = event_table_get_block(id);
                 }
             } else {
-                text = func_1509CE20(id);
+                text = event_table_get_block(id);
             }
         }
         x = D_800BE620 * 0.5f - (w >> 1);
         top = y + 1.0f;
         yy = top + D_800C6C70;
-        if (func_1509CE88(id) < 0) {
-            func_15042BC4(D_80098CF4, &w2, &h2, &d);
+        if (event_table_get_word4(id) < 0) {
+            text_measure_string(D_80098CF4, &w2, &h2, &d);
             off = D_800C6C70;
-            *gfxp = func_15041A9C(*gfxp, D_800BE620 * 0.5f - (w2 >> 1), top + off, D_80098CF4, 0xFF, 0xFF, 0xFF, alpha,
+            *gfxp = text_draw_string(*gfxp, D_800BE620 * 0.5f - (w2 >> 1), top + off, D_80098CF4, 0xFF, 0xFF, 0xFF, alpha,
                                   4096.0f, 4096.0f, strlen((char *) D_80098CF4));
             y += h2;
             yy += h2;
@@ -243,9 +246,9 @@ s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
             text = D_8008482C;
         }
         if (D_8008481C == 0 && (D_80084828 != idx || D_80084818 != 0)) {
-            *gfxp = func_15041A9C(*gfxp, x, yy, text, 0xFF, 0xFF, 0xFF, alpha, 4096.0f, 4096.0f, strlen((char *) text));
+            *gfxp = text_draw_string(*gfxp, x, yy, text, 0xFF, 0xFF, 0xFF, alpha, 4096.0f, 4096.0f, strlen((char *) text));
         } else {
-            *gfxp = func_15041A9C(*gfxp, x, yy, text, 0xFF, 0, 0, alpha, 4096.0f, 4096.0f, strlen((char *) text));
+            *gfxp = text_draw_string(*gfxp, x, yy, text, 0xFF, 0, 0, alpha, 4096.0f, 4096.0f, strlen((char *) text));
         }
         idx++;
         y += h;
@@ -256,5 +259,5 @@ s32 func_1503FE30(Gfx **gfxp, u16 cancel, u16 select) {
     return -2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D4F0/func_1503FE30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6D4F0/select_menu_update_draw.s")
 #endif

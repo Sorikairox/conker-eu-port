@@ -3,7 +3,7 @@
 #include "variables.h"
 
 void func_10007BA4(OSThread **);     // __osEnqueueAndYield
-OSThread *func_10007D14(OSThread **); // __osPopThread
+OSThread *os_pop_thread(OSThread **); // __osPopThread
 
 s32 osJamMesg(OSMesgQueue *mq, OSMesg msg, s32 flag) {
     register u32 saveMask;
@@ -23,7 +23,7 @@ s32 osJamMesg(OSMesgQueue *mq, OSMesg msg, s32 flag) {
     mq->msg[mq->first] = msg;
     mq->validCount++;
     if (mq->mtqueue->next != NULL) {
-        t = func_10007D14(&mq->mtqueue);
+        t = os_pop_thread(&mq->mtqueue);
         osStartThread(t);
     }
     __osRestoreInt(saveMask);

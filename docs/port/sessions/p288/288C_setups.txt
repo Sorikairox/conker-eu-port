@@ -1,4 +1,4 @@
-# P281 debug_printf_ldtob (debugger _Ldtob, copy of the func_10001550 setups). arg0 = _Pft at 80480000 (v.ld 0x0, s 0x8 -> 80490000, prec 0x24), arg1 = code.
+# P281 debug_printf_ldtob (debugger _Ldtob, copy of the init_printf_ldtob setups). arg0 = _Pft at 80480000 (v.ld 0x0, s 0x8 -> 80490000, prec 0x24), arg1 = code.
 # P281: the debugger segment is not in difftest's ROM image: its constant table is poked in every setup.
 # RET 16002D2C = debug_printf_ldunscale (_Ldunscale: -1 finite, 0 zero, 1 inf, 2 nan); OUTB writes its s16 exponent (a0);
 # ldiv (10023500) is computed by difftest (P281 ldiv helper): real digits.

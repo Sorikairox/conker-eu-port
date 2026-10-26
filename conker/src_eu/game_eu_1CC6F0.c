@@ -7,7 +7,8 @@ extern u8 D_800A5860[];
 #endif
 
 
-u8 *func_1519EEE0(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
+/* was func_1519EEE0 */
+u8 *seqfx_timer_create(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     u8 *temp_v0;
     temp_v0 = node_alloc(0x26, arg6, 0x2C, 1, (u8) (s32) arg5, 1U);
     if (temp_v0 == NULL) {
@@ -23,7 +24,8 @@ u8 *func_1519EEE0(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
     return temp_v0;
 }
 
-void func_1519EF74(struct102 *arg0) {
+/* was func_1519EF74 */
+void seqfx_timer_update(struct102 *arg0) {
     s32 var_v0;
 
     if (*(s32 *)((u8 *)arg0 + 0x10) & 1) {
@@ -67,7 +69,8 @@ extern f32 D_800A90A8;
 extern f32 D_800A90AC;
 extern f32 D_800A90B0;
 
-void func_1519EFE8(V3_1519EFE8 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4) {
+/* was func_1519EFE8 */
+void seqfx_burst_spawn(V3_1519EFE8 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4) {
     Sp_1519EFE8 s;
     s32 i;
     f32 f;
@@ -90,13 +93,14 @@ void func_1519EFE8(V3_1519EFE8 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4) {
     s.x34 = D_800A90AC;
     s.x38 = D_800A90B0;
     i = arg1;
-    func_15152700(&s, &i, &f, 1, 0.0f, 0, arg3, arg4);
+    emit_textured_burst(&s, &i, &f, 1, 0.0f, 0, arg3, arg4);
 }
 
 #ifdef NON_MATCHING
-s32 func_15132BBC(f32 *, s32, s32, s32, s32, s32, s32);
+s32 mdl_particle_spawn_ex(f32 *, s32, s32, s32, s32, s32, s32);
 
-void func_1519F0FC(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4) {
+/* was func_1519F0FC */
+void seqfx_track_effect_spawn(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4) {
     struct {
         u8 * u38;
         f32 u3C;
@@ -188,15 +192,16 @@ void func_1519F0FC(u8 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4) {
     sp.u88 = 0.0f;
     sp.u90 = arg2;
     sp.u92 = arg1;
-    temp_v0_2 = func_15132BBC(&sp.u3C, 3, 0xFF, 0, 4, (s32) arg3, arg4);
+    temp_v0_2 = mdl_particle_spawn_ex(&sp.u3C, 3, 0xFF, 0, 4, (s32) arg3, arg4);
     if (temp_v0_2 != 0) {
         memcpy(temp_v0_2 + 0x170, &sp.u38, 4);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/func_1519F0FC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/seqfx_track_effect_spawn.s")
 #endif
-s32 func_1519F294(u8 *arg0) {
+/* was func_1519F294 */
+s32 seqfx_track_effect_sync(u8 *arg0) {
     u8 *temp_v1;
 
     temp_v1 = (*(u8 **)((u8 *)arg0 + 0x170));
@@ -238,7 +243,8 @@ typedef struct {
     s16 u56;
 } Blk58;
 
-void func_1519F2F4(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
+/* was func_1519F2F4 */
+void seqfx_track_sprite_spawn(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     Blk58 blk;
     u8 *tmp;
     u8 *temp_v0;
@@ -281,7 +287,8 @@ void func_1519F2F4(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-s32 func_1519F474(u8 *arg0) {
+/* was func_1519F474 */
+s32 seqfx_track_sprite_sync(u8 *arg0) {
     u8 *temp_v1;
 
     temp_v1 = (*(u8 **)((u8 *)arg0 + 0x110));

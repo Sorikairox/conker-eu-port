@@ -1,4 +1,4 @@
-# P246 func_150BF5F4 (fade_slide_update) mutants: sed % setup names
+# P246 fade_slide_update (fade_slide_update) mutants: sed % setup names
 s/level += D_800BE9E4 \* e\[0x27\]/level += D_800BE9E4 * e[0x26]/ % up
 s/if (max < level)/if (max + 1 < level)/ % up1
 s/level = max;/level = max - 1;/ % upclamp

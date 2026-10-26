@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""P28: compare the hand-asm blob func_150A49D0.s (entry points func_150A49D0 and func_150A4ED4; reference build
+"""P28: compare the hand-asm blob world_objects_transform_mesh.s (entry points world_objects_transform_mesh and func_150A4ED4; reference build
 build/conker.eu.elf, with the asm sin/cos) with the NON_MATCHING C (build_nm/conker.eu.elf, C sin/cos), whole, in
 Unicorn. difftest cannot do this: the asm keeps values in f1-f13 across its sin/cos calls (the hand-written sin/cos
 leave them alone) and difftest's stubs return random f2.
-allocate_memory / func_10004074 (free) are hooked in both images. Random scenes: objects at 0x80400000 (D_800DBEF4),
+allocate_memory / heap_free (free) are hooked in both images. Random scenes: objects at 0x80400000 (D_800DBEF4),
 both transform paths (kind 0xFF = D_800DC338 matrix, else rotation/scale/translation), cached vertices (flags70 & 1),
 force on/off, flags6F & 0x80, per-triangle bounds. Compared: 0x80400000-0x80600000 and 0x800DBE00-0x800DC400.
 Run in the container from /conker/conker after both builds: python3 ../tools/port/difftest/nmasm_blob49D0.py [N] [seed]"""
@@ -55,7 +55,7 @@ class Img:
             mu.reg_write(UC_MIPS_REG_V0, p)
         def free(mu, addr, size, ud):
             self.log.append(('F', mu.reg_read(UC_MIPS_REG_A0)))
-        for name, cb in (('allocate_memory', alloc), ('func_10004074', free)):
+        for name, cb in (('allocate_memory', alloc), ('heap_free', free)):
             # the hook only sets v0 / logs; the stub `jr $ra; nop` returns (writing PC in a hook crashes Unicorn)
             a = self.s[name]; mu.mem_write(a, struct.pack('>II', 0x03E00008, 0)); mu.hook_add(UC_HOOK_CODE, cb, begin=a, end=a)
         return mu
@@ -118,7 +118,7 @@ for t in range(n):
         rng = random.Random(seed * 100003 + t)
         img.log = []; img.fail_alloc = fail
         args = scene(rng, mu)
-        r = img.run(mu, 'func_150A49D0', args)
+        r = img.run(mu, 'world_objects_transform_mesh', args)
         outs.append((dump(mu), img.log, r))
     stats[outs[0][2]] = stats.get(outs[0][2], 0) + 1
     stats['49D0'] += 1; stats['allocfail'] += fail == 0
@@ -126,7 +126,7 @@ for t in range(n):
         bad += 1
         if bad <= 5:
             d = next((i for i in range(len(outs[0][0])) if outs[0][0][i] != outs[1][0][i]), None)
-            print('DIFF func_150A49D0 trial %d: first byte %s, logs equal %s, ref %s cand %s' % (
+            print('DIFF world_objects_transform_mesh trial %d: first byte %s, logs equal %s, ref %s cand %s' % (
                 t, d if d is None else hex(d), outs[0][1] == outs[1][1], outs[0][2], outs[1][2]))
 # func_150A4ED4: area tables -> current-area globals
 for t in range(n // 5):

@@ -1,4 +1,4 @@
-# P238 func_150C1B60 (spawn_ring_kind2_small) mutants: sed % setup names
+# P238 spawn_ring_kind2_small (spawn_ring_kind2_small) mutants: sed % setup names
 s/z, 80\.0f, 0, 3/z, 81.0f, 0, 3/ % tagFF
 s/80\.0f, 0, 3, 0x19/80.0f, 1, 3, 0x19/ % tagFF
 s/0, 3, 0x19, 2/0, 4, 0x19, 2/ % tagFF
@@ -8,5 +8,5 @@ s/0x19, 2, 0, 0\.0f, 0, tag/0x19, 2, 1, 0.0f, 0, tag/ % tagFF
 s/2, 0, 0\.0f, 0, tag/2, 0, 1.0f, 0, tag/ % tagFF
 s/0\.0f, 0, tag/0.0f, 1, tag/ % tagFF
 s/tag & 0xFF)/tag)/ % tag1234
-s/func_1514C860(x, y, z,/func_1514C860(y, x, z,/ % tagFF
-s/func_1514C860(x, y, z,/func_1514C860(x, y, y,/ % tagFF
+s/spawn_ring_emit(x, y, z,/spawn_ring_emit(y, x, z,/ % tagFF
+s/spawn_ring_emit(x, y, z,/spawn_ring_emit(x, y, y,/ % tagFF

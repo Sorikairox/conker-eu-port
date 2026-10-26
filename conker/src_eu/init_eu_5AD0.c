@@ -6,13 +6,14 @@
 #include "controller.h"
 s32 __osContRamRead(OSMesgQueue *mq, int channel, u16 address, u8 *buffer);
 s32 __osContRamWrite(OSMesgQueue *mq, int channel, u16 address, u8 *buffer, int force);
-void func_10005C38(int channel, u16 address, u8 *buffer, OSPifRam *mdata);
+void os_make_motor_data(int channel, u16 address, u8 *buffer, OSPifRam *mdata);
 extern u8 D_8003C1D0[0x20];
 extern u8 D_8003C1F0[0x20];
 extern u8 D_8003C0D0[];
 extern u8 D_8003BFD0[];
 
-s32 func_10005AD0(OSMesgQueue *mq, OSPfs *pfs, int channel) {
+/* was func_10005AD0 */
+s32 os_motor_init(OSMesgQueue *mq, OSPfs *pfs, int channel) {
     s32 ret;
     int i;
     u8 temp[BLOCKSIZE];
@@ -42,13 +43,14 @@ s32 func_10005AD0(OSMesgQueue *mq, OSPfs *pfs, int channel) {
         D_8003C1F0[i] = 1;
         D_8003C1D0[i] = 0;
     }
-    func_10005C38(channel, 0x600, D_8003C1F0, (OSPifRam *)(D_8003C0D0 + (channel << 6)));
-    func_10005C38(channel, 0x600, D_8003C1D0, (OSPifRam *)(D_8003BFD0 + (channel << 6)));
+    os_make_motor_data(channel, 0x600, D_8003C1F0, (OSPifRam *)(D_8003C0D0 + (channel << 6)));
+    os_make_motor_data(channel, 0x600, D_8003C1D0, (OSPifRam *)(D_8003BFD0 + (channel << 6)));
     return 0;
 }
 
 // libultra io/motor.c _MakeMotorData (old version)
-void func_10005C38(int channel, u16 address, u8 *buffer, OSPifRam *mdata) {
+/* was func_10005C38 */
+void os_make_motor_data(int channel, u16 address, u8 *buffer, OSPifRam *mdata) {
     u8 *ptr = (u8 *)mdata->ramarray;
     __OSContRamReadFormat ramreadformat;
     int i;

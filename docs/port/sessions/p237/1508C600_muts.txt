@@ -1,4 +1,4 @@
-# P237 func_1508C600 (rail_pair_sight) mutants: sed % setup names
+# P237 rail_pair_sight (rail_pair_sight) mutants: sed % setup names
 s/    ra = (u8 \*) obj_find_by_spawn(a \& 0xFFFF0FFF);/    ra = (u8 *) obj_find_by_spawn(a);/ % ids_hi
 s/    rb = (u8 \*) obj_find_by_spawn(b \& 0xFFFF0FFF);/    rb = (u8 *) obj_find_by_spawn(a \& 0xFFFF0FFF);/ % ff_clear
 s/    if (ra != NULL \&\& rb != NULL) {/    if (ra != NULL) {/ % nullB
@@ -24,8 +24,8 @@ s/        dx = xb - xa;/        dx = xb + xa;/ % ff_clear
 s/        dist = sqrtf(dx \* dx + dy \* dy + dz \* dz);/        dist = sqrtf(dx * dx + dz * dz);/ % ff_hit60
 s/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist > hit) {/ % ff_hitfar ff_hitnear
 s/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 1, \&h0, \&h1, \&h2, \&hit, 0, 0, 0.0f) == 0 || dist < hit) {/ % ff_clear
-s/            if (0.0f < func_15087204(xa, ya, za, dx, dz)) {/            if (0.0f <= func_15087204(xa, ya, za, dx, dz)) {/ % ff_ab
-s/            if (0.0f < func_15087204(xa, ya, za, dx, dz)) {/            if (0.0f < func_15087204(xa, ya, za, dx, dy)) {/ % ff_clear
+s/            if (0.0f < rail_wall_hit(xa, ya, za, dx, dz)) {/            if (0.0f <= rail_wall_hit(xa, ya, za, dx, dz)) {/ % ff_ab
+s/            if (0.0f < rail_wall_hit(xa, ya, za, dx, dz)) {/            if (0.0f < rail_wall_hit(xa, ya, za, dx, dy)) {/ % ff_clear
 s/            seen = 1;/            seen = 0;/ % ff_clear
 s/        \*(s32 \*) ((u8 \*) D_800D27D0 + 0x16C0 + a \* 4) |= 1 << b;/        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + a * 4) = 1 << b;/ % ff_clear
 s/        \*(s32 \*) ((u8 \*) D_800D27D0 + 0x16C0 + b \* 4) |= 1 << a;/        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + b * 4) |= 1 << b;/ % ff_clear

@@ -6,7 +6,8 @@
 
 extern OSTime D_80042D40;
 extern u32 D_80042D48;
-OSTime func_151F0C80(void) {
+/* was func_151F0C80 */
+OSTime game_os_get_time(void) {
     u32 tmptime;
     u32 elapseCount;
     OSTime currentCount;

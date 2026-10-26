@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-void func_1500F980(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_1500F980 */
+void level_fx_spawn_box_b(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     struct260 *temp_v0;
 
     temp_v0 = func_151491F4((s16) ((random_int() & 0x7F) + 0xA), 1, -1, 1U, 0U, 0xA, 0xFFU, 0);
@@ -17,7 +18,7 @@ void func_1500F980(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151ACBD4(s8 *, s32);
+s32 rope_create(s8 *, s32);
 extern s32 D_800966D0;
 extern s32 D_800966E8;
 extern s32 D_80096700;
@@ -30,7 +31,8 @@ extern f32 D_800DD1E4;
 extern f32 D_800DD1EC;
 extern f32 D_800DD1F0;
 
-void func_1500FA14(void) {
+/* was func_1500FA14 */
+void level_ropes_setup(void) {
     struct {
         s8 u24;
         u8 pad25[0x3];
@@ -59,7 +61,7 @@ void func_1500FA14(void) {
     (*(s32 *)((u8 *)(&sp.u28) + 0x14)) = (s32) (*(s32 *)((u8 *)(&D_800966D0) + 0x14));
     sp.u24 = 1;
     sp.u40 = fabsf(sp.u2C - sp.u38);
-    func_151ACBD4(&sp.u24, 0);
+    rope_create(&sp.u24, 0);
     (*(s32 *)((u8 *)(&sp.u28) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800966E8) + 0));
     (*(s32 *)((u8 *)(&sp.u28) + 4)) = (s32) (*(s32 *)((u8 *)(&D_800966E8) + 4));
     (*(s32 *)((u8 *)(&sp.u28) + 0xC)) = (s32) (*(s32 *)((u8 *)(&D_800966E8) + 0xC));
@@ -68,7 +70,7 @@ void func_1500FA14(void) {
     (*(s32 *)((u8 *)(&sp.u28) + 0x14)) = (s32) (*(s32 *)((u8 *)(&D_800966E8) + 0x14));
     sp.u24 = 2;
     sp.u40 = fabsf(sp.u2C - sp.u38);
-    func_151ACBD4(&sp.u24, 0);
+    rope_create(&sp.u24, 0);
     (*(s32 *)((u8 *)(&sp.u28) + 0)) = (s32) (*(s32 *)((u8 *)(&D_80096700) + 0));
     (*(s32 *)((u8 *)(&sp.u28) + 4)) = (s32) (*(s32 *)((u8 *)(&D_80096700) + 4));
     (*(s32 *)((u8 *)(&sp.u28) + 0xC)) = (s32) (*(s32 *)((u8 *)(&D_80096700) + 0xC));
@@ -77,7 +79,7 @@ void func_1500FA14(void) {
     (*(s32 *)((u8 *)(&sp.u28) + 0x14)) = (s32) (*(s32 *)((u8 *)(&D_80096700) + 0x14));
     sp.u24 = 3;
     sp.u40 = fabsf(sp.u2C - sp.u38);
-    func_151ACBD4(&sp.u24, 0);
+    rope_create(&sp.u24, 0);
     (*(s32 *)((u8 *)(&sp.u28) + 0)) = (s32) (*(s32 *)((u8 *)(&D_80096718) + 0));
     (*(s32 *)((u8 *)(&sp.u28) + 4)) = (s32) (*(s32 *)((u8 *)(&D_80096718) + 4));
     (*(s32 *)((u8 *)(&sp.u28) + 8)) = (s32) (*(s32 *)((u8 *)(&D_80096718) + 8));
@@ -92,12 +94,12 @@ void func_1500FA14(void) {
     (*(s32 *)((u8 *)(&sp.u28) + 0x14)) = (s32) (*(s32 *)((u8 *)(&D_80096730) + 0x14));
     sp.u24 = 5;
     sp.u40 = fabsf(sp.u2C - sp.u38);
-    func_151ACBD4(&sp.u24, 0);
-    func_1500F980(-0x6E7, -0x46A, 0x421, -0x648, 1);
-    func_1500F980(-0xA71, 0x71B, 0x82B, -0x602, 2);
-    func_1500F980(-0x870, 0x36E, 0x4E1, -0x602, 2);
-    func_1500F980(-0xBD5, 0x3F1, 0x659, -0x602, 2);
-    func_1500F980(-0xE6B, -0x263, -0x427, -0x647, 1);
+    rope_create(&sp.u24, 0);
+    level_fx_spawn_box_b(-0x6E7, -0x46A, 0x421, -0x648, 1);
+    level_fx_spawn_box_b(-0xA71, 0x71B, 0x82B, -0x602, 2);
+    level_fx_spawn_box_b(-0x870, 0x36E, 0x4E1, -0x602, 2);
+    level_fx_spawn_box_b(-0xBD5, 0x3F1, 0x659, -0x602, 2);
+    level_fx_spawn_box_b(-0xE6B, -0x263, -0x427, -0x647, 1);
     D_800DD1D4 = (f32) (*(u8 *)((u8 *)(&D_800DCD20) + 0));
     var_f8 = (f32) (*(u8 *)((u8 *)(&D_800DCD20) + 1));
     if ((s32) (*(u8 *)((u8 *)(&D_800DCD20) + 1)) < 0) {
@@ -136,5 +138,5 @@ void func_1500FA14(void) {
     D_800DD1F0 = var_f10_2;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3D190/func_1500FA14.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3D190/level_ropes_setup.s")
 #endif

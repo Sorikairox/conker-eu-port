@@ -4,13 +4,13 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15132BBC(void *, s32, s32, s32, s32, u8, s32);
-void func_151664F0(s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_151D58E4(f32 *, f32, f32, f32, u8, u8, s32);
-s32 func_151D5AC4(f32 *, u8, s32);
-void func_151D45A4(f32 *, u8, s32);
-s32 func_15154728(f32 *, f32, f32, f32, f32, u8, s32);
-s32 func_151A74B0(void *, s32, u8, s32);
+s32 mdl_particle_spawn_ex(void *, s32, s32, s32, s32, u8, s32);
+void water_ring_spawn(s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void cam_shake_all_players(f32 *, f32, f32, f32, u8, u8, s32);
+s32 smoke_cloud_spawn(f32 *, u8, s32);
+void explosion_light_spawn(f32 *, u8, s32);
+s32 spark_shower_spawn(f32 *, f32, f32, f32, f32, u8, s32);
+s32 debris_spray_spawn(void *, s32, u8, s32);
 s32 memcpy(void *, void *, s32);
 
 extern f32 D_80088D00[];        /* fragment base speed by kind */
@@ -32,7 +32,7 @@ static const f32 D_800A12EC_c[1] = { 0.0009871669f };  /* 0x3A8163D3 */
 static const f32 D_800A12F0_c[1] = { -0.7f };          /* 0xBF333333 */
 static const f32 D_800A12F4_c[1] = { -0.62f };         /* 0xBF1EB852 */
 
-/* func_15132BBC fragment request (0x7C bytes on the stack; unset pad bytes stay stack garbage like the asm's) */
+/* mdl_particle_spawn_ex fragment request (0x7C bytes on the stack; unset pad bytes stay stack garbage like the asm's) */
 typedef struct {
     f32 u0;         /* 0x00 15 */
     f32 u4;         /* 0x04 0.2 */
@@ -65,7 +65,7 @@ typedef struct {
     s32 u78;        /* 0x78 */
 } Frag240;
 
-/* func_151A74B0 shock ring request (0x5C bytes on the stack) */
+/* debris_spray_spawn shock ring request (0x5C bytes on the stack) */
 typedef struct {
     s16 count;      /* 0x00 3..6 */
     u8 pad2[2];
@@ -89,11 +89,11 @@ typedef struct {
     f32 v[3];
 } Vec240;
 
-// big_explosion_spawn: explosion at pos: 15 fragments (func_15132BBC; offsets D_800A1130, kind D_800A1298 picks the
+// big_explosion_spawn: explosion at pos: 15 fragments (mdl_particle_spawn_ex; offsets D_800A1130, kind D_800A1298 picks the
 // speed D_80088D00 + D_80088D0C * random, spin from D_800A1220 / D_800A11E4 * D_800A125C * 0.019), then the light
-// (func_151664F0), two shock waves (func_151D5404 / func_151D58E4), func_151D5AC4, func_151D45A4, the sound
-// (func_15154728), a 3..6 piece shock ring (func_151A74B0, scaled by the current camera's +0x380) and a type 0xF
-// object whose +0x28 gets the position. Callers: func_1509D590 (asm) and game_eu_CA630's C, both (pos, 0xFF, 1).
+// (water_ring_spawn), two shock waves (rumble_all_players_at / cam_shake_all_players), smoke_cloud_spawn, explosion_light_spawn, the sound
+// (spark_shower_spawn), a 3..6 piece shock ring (debris_spray_spawn, scaled by the current camera's +0x380) and a type 0xF
+// object whose +0x28 gets the position. Callers: event_effect_command (asm) and game_eu_CA630's C, both (pos, 0xFF, 1).
 /* was func_150DF240 */
 void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
     Frag240 fr;
@@ -146,15 +146,15 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
         fr.u4C = random_float() * D_800A12E0_c[0] + D_800A12DC_c[0];
         fr.life = (u32) random_int() % 111 + 0x82;
         fr.tex = (random_int() & 1) ? 0xC4 : 0xC5;
-        func_15132BBC(&fr, 3, 0xFF, 0, 0, room, arg2);
+        mdl_particle_spawn_ex(&fr, 3, 0xFF, 0, 0, room, arg2);
     }
-    func_151664F0(-1, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0x1E, 0x32, 0, room, arg2);
-    func_151D5404((struct17 *) pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 0xF, 0x14, room, arg2);
-    func_151D58E4(pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 5, room, arg2);
-    func_151D5AC4(pos, room, arg2);
-    func_151D45A4(pos, room, arg2);
+    water_ring_spawn(-1, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0x1E, 0x32, 0, room, arg2);
+    rumble_all_players_at((struct17 *) pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 0xF, 0x14, room, arg2);
+    cam_shake_all_players(pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 5, room, arg2);
+    smoke_cloud_spawn(pos, room, arg2);
+    explosion_light_spawn(pos, room, arg2);
     f = random_float();
-    func_15154728(pos, f * 4.0f + 12.0f, 1.6409999f, (f32) ((u32) random_int() % 56 + 0xC8), 0.0f, room, arg2);
+    spark_shower_spawn(pos, f * 4.0f + 12.0f, 1.6409999f, (f32) ((u32) random_int() % 56 + 0xC8), 0.0f, room, arg2);
 
     ring.count = (random_int() & 3) + 3;
     ring.u10 = 0xBE;
@@ -181,7 +181,7 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
     ring.u20[9] = D_800A12F0_c[0];
     ring.u20[10] = D_800A12F4_c[0];
     ring.u20[11] = -5.0f;
-    func_151A74B0(&ring, 0, room, arg2);
+    debris_spray_spawn(&ring, 0, room, arg2);
 
     at = *(Vec240 *) pos;
     e = (u8 *) func_15149130(0xF, 8, -1, -1, 1, 0, (struct37 *) 0xC, room, arg2);
@@ -194,14 +194,14 @@ void big_explosion_spawn(f32 *pos, u8 room, s32 arg2) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15046C6C(f32 *, s32, f32, f32 *);
+s32 collision_floor_all(f32 *, s32, f32, f32 *);
 void fx_debris_emitter_spawn(f32 *, s16, u8, s32);
-void func_151A9DE4(f32 *, f32, f32, void *, s32, u8, s32, u8, s32);
+void ground_scatter_spawn(f32 *, f32, f32, void *, s32, u8, s32, u8, s32);
 // ground_burst_effect: P253. Handler (void (u8 *), function table at ELF file offset 0x24A880, next to fx_ring_particle_spawn /
 // light_groups_send_msg22_all) of an effect object at p (+0x28 position, +0xC / +1 passed on to the spawners). Probes the ground
-// from 500 above the position down to 500 below (func_15046C6C; the hit record's first word is the ground height):
+// from 500 above the position down to 500 below (collision_floor_all; the hit record's first word is the ground height):
 // on a hit the effect sits on the ground (x, ground, z), else at the object's own position. Spawns
-// fx_debris_emitter_spawn(pos, 120..181) there, then func_151A9DE4 from 500 above pos down to 500 below it (radius 250,
+// fx_debris_emitter_spawn(pos, 120..181) there, then ground_scatter_spawn from 500 above pos down to 500 below it (radius 250,
 // 3..5 pieces).
 /* was func_150DF8B4 */
 void ground_burst_effect(u8 *p) {
@@ -215,7 +215,7 @@ void ground_burst_effect(u8 *p) {
     probe[0] = *(f32 *) (p + 0x28);
     probe[1] = *(f32 *) (p + 0x2C) + 500.0f;
     probe[2] = *(f32 *) (p + 0x30);
-    if (func_15046C6C(probe, 0, probe[1] - 1000.0f, hit) != 0) {
+    if (collision_floor_all(probe, 0, probe[1] - 1000.0f, hit) != 0) {
         ground[0] = *(f32 *) (p + 0x28);
         ground[1] = hit[0];
         ground[2] = *(f32 *) (p + 0x30);
@@ -228,16 +228,16 @@ void ground_burst_effect(u8 *p) {
     *(s32 *) &top[1] = *(s32 *) &pos[1];
     *(s32 *) &top[2] = *(s32 *) &pos[2];
     top[1] += 500.0f;
-    func_151A9DE4(top, top[1] - 1000.0f, 250.0f, hit, (random_int() % 3U) + 3, 1, 0, p[0xC], p[1]);
+    ground_scatter_spawn(top, top[1] - 1000.0f, 250.0f, hit, (random_int() % 3U) + 3, 1, 0, p[0xC], p[1]);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/ground_burst_effect.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
+s32 spark_spawn_from_desc(f32 *, s32, s32, s32, s32, s32);
 
-void func_15143874(s16, f32, f32 *, f32 *); /* P95 */
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *); /* P95 */
 /* was func_150DFA38 */
 void puff_cluster_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     struct {
@@ -308,11 +308,11 @@ void puff_cluster_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     sp.uC8 = 0.045f;
     sp.uC0 = 0.0f;
     sp.uCC = 0.7f;
-    func_15149AC0(&sp.u88, 0xA, 0, 0, temp_s7, arg4);
+    spark_spawn_from_desc(&sp.u88, 0xA, 0, 0, temp_s7, arg4);
     var_s0 = (random_int() % 3U) + 1;
     if (var_s0 > 0) {
         do {
-            func_15143874((s16) (random_int() & 0xFF), 30.0f, &sp.u88, &sp.u90); /* P95: was 0x41F00000 as an int */
+            vec2_from_angle_byte((s16) (random_int() & 0xFF), 30.0f, &sp.u88, &sp.u90); /* P95: was 0x41F00000 as an int */
             sp.u88 += (*(f32 *)((u8 *)arg0 + 0));
             sp.u90 += (*(f32 *)((u8 *)arg0 + 8));
             temp_f20_2 = (random_float() * 0.5f) + 0.75f;
@@ -326,7 +326,7 @@ void puff_cluster_spawn(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             sp.uAC = (random_int() % 151U) + 0x96;
             sp.uB4 = (random_int() % 156U) + 0x64;
             sp.uB7 = 0;
-            func_15149AC0(&sp.u88, 0xA, 0, 0, temp_s7, arg4);
+            spark_spawn_from_desc(&sp.u88, 0xA, 0, 0, temp_s7, arg4);
             var_s0 -= 1;
         } while (var_s0 != 0);
     }

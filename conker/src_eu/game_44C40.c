@@ -18,7 +18,7 @@ void level_state_clear(void) {
 void level_state_init(void) {
     event_list_unload(1);
     bzero(&D_800D2F48, 0xC);
-    func_150A00F0();
+    event_timers_reset();
     D_800D2DB0 = D_800968C0;
     D_800D2E41 = 0xA;
     D_800D2E42 = 6;
@@ -148,7 +148,7 @@ block_18:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/zones_load.s")
 #endif
 #ifdef NON_MATCHING
-void func_150A11F4(u8 *);
+void trigger_cache_angles(u8 *);
 void zone_compute_bbox(u8 *, u8 *);
 extern u8 *D_800D34BC;
 extern u64 D_800D34C0[3];
@@ -178,7 +178,7 @@ void zones_build_overlap_masks(u8 *arg0, u32 arg1) {
 
     D_800D34BC = (u8 *)allocate_memory(n * 0x28, 1, 1, 0);
     for (i = 0; i < n; i++) {
-        func_150A11F4(arg0 + i * 0x34);
+        trigger_cache_angles(arg0 + i * 0x34);
         zone_compute_bbox(arg0 + i * 0x34, D_800D34BC + i * 0x28);
     }
     bzero(D_800D34C0, 0x18);
@@ -232,8 +232,8 @@ void zones_build_overlap_masks(u8 *arg0, u32 arg1) {
 #ifdef NON_MATCHING
 void mtxf_translate(f32 (*)[4], s32, s32, s32); /* axis as f32 bit patterns (game_D5250.c) */
 void mtxf_rotate_xyz_deg(f32 (*)[4], f32, f32, f32);
-void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
-void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
+void mtxf_mul(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void mtxf_transform_point(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
 
 /* P64 (level load): bounding box of a 0x34-byte zone (s16 x / y / z at +0, size +6 / +8 / +0xA, f32 angles +0xC /
  * +0x10, shape = +0x15 & 3) into the 0x28-byte zone record `out` (s16 min x / max x / min y / max y / min z / max z
@@ -262,9 +262,9 @@ void zone_compute_bbox(u8 *zone, u8 *out) {
             sy.f = *(s16 *)(zone + 8) * 0.5f;
             sz.f = *(s16 *)(zone + 6);
             mtxf_scale(m, sx.bits, sy.bits, sz.bits);
-            func_150A7A48(rot, m, m);
+            mtxf_mul(rot, m, m);
             mtxf_rotate_xyz_deg(rot, *(f32 *)(zone + 0xC), *(f32 *)(zone + 0x10), 0.0f);
-            func_150A7A48(m, rot, m);
+            mtxf_mul(m, rot, m);
             break;
         case 1:
             sx.f = *(s16 *)(zone + 6);
@@ -278,9 +278,9 @@ void zone_compute_bbox(u8 *zone, u8 *out) {
             sy.f = *(s16 *)(zone + 8) * 0.5f;
             sz.f = *(s16 *)(zone + 0xA);
             mtxf_scale(m, sx.bits, sy.bits, sz.bits);
-            func_150A7A48(rot, m, m);
+            mtxf_mul(rot, m, m);
             mtxf_rotate_xyz_deg(rot, *(f32 *)(zone + 0xC), *(f32 *)(zone + 0x10), 0.0f);
-            func_150A7A48(m, rot, m);
+            mtxf_mul(m, rot, m);
             break;
         default:
             point_only = TRUE;
@@ -292,7 +292,7 @@ void zone_compute_bbox(u8 *zone, u8 *out) {
             cx = (i & 1) ? 1.0f : -1.0f;
             cy = (i & 2) ? 1.0f : -1.0f;
             cz = (i & 4) ? 1.0f : -1.0f;
-            func_150A7E40(m, cx, cy, cz, &px, &py, &pz);
+            mtxf_transform_point(m, cx, cy, cz, &px, &py, &pz);
             if (px < min_x) {
                 min_x = px;
             } else if (max_x < px) {

@@ -3,7 +3,7 @@
 \#^    scaleS = sinf(rec\[3\])#s/rec\[3\]/rec[2]/
 \#^    scaleS = #s/D_800A4E54 + D_800A4E58/D_800A4E58 + D_800A4E54/
 \#^    scaleT = sinf(rec\[4\])#s/D_800A4E60/D_800A4E58/
-\#^    cam = func_15144B34(part);#s/part/0/
+\#^    cam = camera_get_pos(part);#s/part/0/
 \#^    scrollS = #s/1024\.0f;/1000.0f;/
 \#^    scrollS = #s/(s32)/(u16)/
 \#^    scrollT = rec\[1\]#s/rec\[1\] - /rec[0] - /

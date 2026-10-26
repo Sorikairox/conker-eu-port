@@ -32,7 +32,8 @@ extern u8 D_800428C6[];
 s32 func_151F2E88(s32 arg0, Acmd **arg1);
 void func_1001CF38(FB40Fx *fx, f32 rate);
 
-Acmd *func_1001FB40(s32 sampleOffset, Acmd *cmdList) {
+/* was func_1001FB40 */
+Acmd *n_main_bus_pull(s32 sampleOffset, Acmd *cmdList) {
     Acmd *ptr = cmdList;
     s32 i;
     s32 j;

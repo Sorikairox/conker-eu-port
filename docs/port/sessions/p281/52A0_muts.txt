@@ -6,8 +6,8 @@ s/if (D_8002AE14 != 0) {/if (D_8002AE14 == 0) {/
 s/any = 1;/any = 2;/
 s/if (any == 1 \&\& D_8002AE18 == 0) {/if (any == 1 || D_8002AE18 == 0) {/
 s/osRecvMesg(&D_800BE900, &D_800BEDB0, OS_MESG_BLOCK);/osRecvMesg(\&D_800BE900, \&D_800BEDB0, OS_MESG_NOBLOCK);/
-s/func_10005AD0(&D_800BE900, &D_800BEB80\[i\], i);/func_10005AD0(\&D_800BE900, \&D_800BEB80[i], 0);/
-s/func_10005860(&D_800BEB80\[i\]);/func_10005860(\&D_800BEB80[0]);/
+s/os_motor_init(&D_800BE900, &D_800BEB80\[i\], i);/os_motor_init(\&D_800BE900, \&D_800BEB80[i], 0);/
+s/os_motor_stop(&D_800BEB80\[i\]);/os_motor_stop(\&D_800BEB80[0]);/
 s/D_800BED68\[i\] = 0;/D_800BED64[i] = 0;/
 s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD8/
 s/D_8003BFC0 + 0x7270E0/D_8003BFC0 + 0x2272E0/

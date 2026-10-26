@@ -5,7 +5,7 @@
 
 // need to figure out the structs
 #ifdef NON_MATCHING
-s32 func_151ACBD4(s8 *, s32);
+s32 rope_create(s8 *, s32);
 extern s32 D_80090648;
 extern s32 D_80096750;
 
@@ -26,8 +26,8 @@ void level_obj_init_ropes(void) {
     s8 temp_s2;
     s8 var_s0;
 
-    func_15195AA8((*(s32 *)((u8 *)D_800B0E00 + 0)), (*(s32 *)((u8 *)(&D_80090648) + 0x50)), 0, -1, 0, 0, 0, -8);
-    func_15195AA8((*(s32 *)((u8 *)D_800B0E00 + 4)), (*(s32 *)((u8 *)(&D_80090648) + 0x50)), 0, -1, 0, 1, 0, -8);
+    level_dl_add_texture_scroll((*(s32 *)((u8 *)D_800B0E00 + 0)), (*(s32 *)((u8 *)(&D_80090648) + 0x50)), 0, -1, 0, 0, 0, -8);
+    level_dl_add_texture_scroll((*(s32 *)((u8 *)D_800B0E00 + 4)), (*(s32 *)((u8 *)(&D_80090648) + 0x50)), 0, -1, 0, 1, 0, -8);
     sp.u6C = 0;
     var_s1 = &D_80096750;
     var_s0 = 0;
@@ -41,7 +41,7 @@ void level_obj_init_ropes(void) {
         (*(s32 *)((u8 *)(&sp.u50) + 0x14)) = (s32) (*(s32 *)((u8 *)var_s1 + 0x14));
         sp.u4C = temp_s2;
         sp.u68 = fabsf(sp.u54 - sp.u60);
-        func_151ACBD4(&sp.u4C, 0);
+        rope_create(&sp.u4C, 0);
         var_s0 = temp_s2;
         var_s1 += 6;   /* 0x18 bytes */
     } while (temp_s2 != 6);

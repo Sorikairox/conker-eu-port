@@ -1,4 +1,4 @@
-# P263 func_150B696C (cutscene_beam_spawn): kind 0..2 (callers pass 0..2; larger kinds index past the ROM tables); EU jal angle_byte_cos 15142948, func_15143794 15143D04 (OUTA fills the position), func_150B443C 150B443C (ARGMEM record 64 / target 12 in the registry knobs)
+# P263 cutscene_beam_spawn (cutscene_beam_spawn): kind 0..2 (callers pass 0..2; larger kinds index past the ROM tables); EU jal angle_byte_cos 15142948, vec3_from_angles_byte 15143D04 (OUTA fills the position), water_jet_spawn 150B443C (ARGMEM record 64 / target 12 in the registry knobs)
 k0 ! 0=0 ! ! ! 15142948=3E800000;3F000000;3F400000;3FC00000 ! ! ! 
 k1 ! 0=1 ! ! ! ! 15143D04=3:3F800000;40000000;40400000 ! ! 
 k2 ! 0=2 ! ! ! ! 15143D04=3:3F800000;40000000;40400000 ! ! 

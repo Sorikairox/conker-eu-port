@@ -174,8 +174,8 @@ s32 swing_lamp_update(u8 *arg0) {
     *(f32 *)(temp_s0_2 + 8) = *(f32 *)(temp_s0 + 0x100) + (0.0857f * D_800BE9A4);
     *(f32 *)(temp_s0_2 + 0xC) = *(f32 *)(temp_s0_2 + 0xC) + (0.0783f * D_800BE9A4);
     temp_s0 = temp_s0_2;
-    *(f32 *)(temp_s0 + 8) = func_15144B68(*(f32 *)(temp_s0 + 8));
-    *(f32 *)(temp_s0 + 0xC) = func_15144B68(*(f32 *)(temp_s0 + 0xC));
+    *(f32 *)(temp_s0 + 8) = wrap_angle_rad(*(f32 *)(temp_s0 + 8));
+    *(f32 *)(temp_s0 + 0xC) = wrap_angle_rad(*(f32 *)(temp_s0 + 0xC));
     *(f32 *)(temp_s0 + 0) = sinf(*(f32 *)(temp_s0 + 8)) * 7.1050005f;
     new_var = temp_s0;
     *(f32 *)(temp_s0 + 4) = sinf(*(f32 *)(new_var + 0xC)) * 7.1050005f;
@@ -240,8 +240,8 @@ s32 swing_lamp_update_b(u8 *arg0) {
     temp_s0_2 = temp_s0 + 0xF8;
     (*(f32 *)((u8 *)temp_s0_2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x100)) + (D_800A2850 * D_800BE9A4));
     (*(f32 *)((u8 *)temp_s0_2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s0_2 + 0xC)) + (D_800A2854 * D_800BE9A4));
-    (*(f32 *)((u8 *)temp_s0_2 + 8)) = func_15144B68((*(f32 *)((u8 *)temp_s0_2 + 8)));
-    (*(f32 *)((u8 *)temp_s0_2 + 0xC)) = func_15144B68((*(f32 *)((u8 *)temp_s0_2 + 0xC)));
+    (*(f32 *)((u8 *)temp_s0_2 + 8)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 8)));
+    (*(f32 *)((u8 *)temp_s0_2 + 0xC)) = wrap_angle_rad((*(f32 *)((u8 *)temp_s0_2 + 0xC)));
     (*(f32 *)((u8 *)temp_s0_2 + 0)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 8))) * D_800A2858);
     (*(f32 *)((u8 *)temp_s0_2 + 4)) = (f32) (sinf((*(f32 *)((u8 *)temp_s0_2 + 0xC))) * D_800A2858);
     swing_lamp_target_timer_tick(arg0);
@@ -306,7 +306,7 @@ s32 swing_lamp_light_update(u8 *arg0)
   mf[2][0] *= 0.157f;
   mf[2][1] *= 0.157f;
   mf[2][2] *= 0.157f;
-  func_150A7E40(mf, 0.0f, -1108.0f, 0.0f, &out.x, &out.y, &out.z);
+  mtxf_transform_point(mf, 0.0f, -1108.0f, 0.0f, &out.x, &out.y, &out.z);
   if ((arg0 && arg0) && arg0) // fakematch: permuter, scheduling
   {
   }
@@ -382,7 +382,7 @@ void swing_lamp_post_toggle(void) {
 // vertex record rec for player slot `slot`: builds this frame's matrix (rec +0x78 + D_800BE9C0 * 0x40) as a
 // translation to (p[0], p[4], p[1]) with p = rec + +0x50 + 0xF8, scaled by 0.157, and maps the 16 vertices of the
 // slot's copy (rec +0x58[D_800BE9C0 * 4 + slot]) to texture coordinates: each vertex goes through the matrix; s
-// follows its position across the camera direction (func_15144B34(slot), x / z normalised; straight ahead when its
+// follows its position across the camera direction (camera_get_pos(slot), x / z normalised; straight ahead when its
 // x and y are both tiny) as 32 * (26 + 0.213 * side), t its height as 32 * (81 + 0.358 * y). Returns 1.
 /* was func_151096A0 */
 s32 sky_dome_project_uv(u8 *rec, s32 slot) {
@@ -411,7 +411,7 @@ s32 sky_dome_project_uv(u8 *rec, s32 slot) {
     mtx[2][1] *= 0.157f;
     mtx[2][2] *= 0.157f;
     guMtxF2L(mtx, (Mtx *) (rec + 0x78 + D_800BE9C0 * 0x40));
-    cam = func_15144B34((s16) slot);
+    cam = camera_get_pos((s16) slot);
     if (fabsf(cam[0]) > 0.0001f || fabsf(cam[1]) > 0.0001f) {
         inv = 1.0f / sqrtf(cam[0] * cam[0] + cam[2] * cam[2]);
         cx = cam[2] * inv;
@@ -422,7 +422,7 @@ s32 sky_dome_project_uv(u8 *rec, s32 slot) {
     }
     for (i = 0; i < 16; i++) {
         v = *(Vtx **) (rec + D_800BE9C0 * 0x10 + (s16) slot * 4 + 0x58) + i;
-        func_150A7E40(mtx, v->v.ob[0], v->v.ob[1], v->v.ob[2], &ox, &oy, &oz);
+        mtxf_transform_point(mtx, v->v.ob[0], v->v.ob[1], v->v.ob[2], &ox, &oy, &oz);
         v->v.tc[0] = (s32) (((ox * cx + oz * cz) * 0.21300001f + 26.0f) * 32.0f);
         v->v.tc[1] = (s32) ((oy * 0.358f + 81.0f) * 32.0f);
     }

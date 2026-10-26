@@ -1,4 +1,4 @@
-# P263 func_15097188 (camera_script_set) mutants: sed % setup names
+# P263 event_action_camera (camera_script_set) mutants: sed % setup names
 s/if (D_80082FA0 < id) {/if (D_80082FA0 <= id) {/ % lim3
 s/id \* 0x9A0)/id * 0x9A4)/ % op2
 /case 2:/,/case 3:/s/cam->unk358 = cam->unk2FC;/;/ % op2
@@ -23,15 +23,15 @@ s/rec\[1\] = id;/rec[1] = id + 1;/ % op12m7
 s/if (D_800D3C60 >= 6) {/if (D_800D3C60 > 6) {/ % op12m6
 s/if (D_800D3C60 >= 7) {/if (D_800D3C60 > 7) {/ % op12m7
 s/\*(f32 \*) (rec + 0x10) = 1.0f;/*(f32 *) (rec + 0x10) = 0.5f;/ % op12m5
-s/if (func_15096DB0(a\[2\]) == 0) {/if (func_15096DB0(a[2]) != 0) {/ % op12m7 op12busy
+s/if (camera_timed_records_any_active(a\[2\]) == 0) {/if (camera_timed_records_any_active(a[2]) != 0) {/ % op12m7 op12busy
 /case 14:/,/case 15:/s/cam->unk2C4 = (f32) a\[4\];/cam->unk2C4 = (f32) a[3];/ % op14
 /case 14:/,/case 15:/s/cam->unk300 = (f32) a\[7\];/cam->unk300 = (f32) a[6];/ % op14
 s/            cam->unk194 = (f32) a\[3\];/            cam->unk194 = (f32) a[2];/ % op15m4
 s/        cam->unk190 = (f32) a\[2\];/        cam->unk190 = (f32) a[3];/ % op16m4
 s/if ((D_800D3C60 == 5 \&\& a\[4\] != 0) || /if ((D_800D3C60 == 5) || / % op17d op17e
 s/id \* 0x68) == 5) {/id * 0x68) == 4) {/ % op17b op17c
-s/camera_set_followed_obj(cam, func_15084000(a\[2\] \& 0xFFF));/camera_set_followed_obj(cam, func_15084000(a[2] \& 0x1FFF));/ % op18
-s/camera_set_second_target(cam, func_15084000(a\[2\] \& 0xFFF));/camera_set_second_target(cam, func_15084000(a[2]));/ % op19
+s/camera_set_followed_obj(cam, obj_slot_by_spawn(a\[2\] \& 0xFFF));/camera_set_followed_obj(cam, obj_slot_by_spawn(a[2] \& 0x1FFF));/ % op18
+s/camera_set_second_target(cam, obj_slot_by_spawn(a\[2\] \& 0xFFF));/camera_set_second_target(cam, obj_slot_by_spawn(a[2]));/ % op19
 s/cam->unk1A8 = (f32) a\[3\] \* (1.0f \/ 65536.0f);/cam->unk1A8 = (f32) a[3] * (1.0f \/ 32768.0f);/ % op20m5
 s/            cam->unk1A0 = cam->unk1A8;/            cam->unk1A0 = cam->unk1A4;/ % op20m5
 s/\*(s16 \*) (mk + 4) = a\[5\];/*(s16 *) (mk + 4) = a[4];/ % op21

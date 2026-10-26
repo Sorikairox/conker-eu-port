@@ -1,5 +1,5 @@
-/* P202 DIAGNOSTIC ?p202fx=N: character effects (port-b P197 made func_1518DC50 character_effect_update C).
- *  - func_1518D1C0 character_effect_attach (cross-TU calls only: game_eu_17A800 character spawn handlers, game_eu_51190
+/* P202 DIAGNOSTIC ?p202fx=N: character effects (port-b P197 made character_effect_update character_effect_update C).
+ *  - character_effect_attach character_effect_attach (cross-TU calls only: game_eu_17A800 character spawn handlers, game_eu_51190
  *    event tracks, game_eu_1C1A20 impacts, game_981E0): frame, owner, owner id (+0x3B), position, type, time, clear,
  *    view, returned record. First N calls in detail, then every 64th.
  *  - effect3d_spawn_default (particle spawn, all callers): count per 500 frames, to see whether effects spawn anything. */
@@ -13,10 +13,10 @@ extern unsigned port_frame_count;
 static int fl = -1;
 static int on(void) { if (fl < 0) fl = port_flag("p202fx"); return fl; }
 
-void *__real_func_1518D1C0(void *obj, short type, short time, unsigned char clear, unsigned char view, int arg5, char *name);
-void *__wrap_func_1518D1C0(void *obj, short type, short time, unsigned char clear, unsigned char view, int arg5, char *name) {
+void *__real_character_effect_attach(void *obj, short type, short time, unsigned char clear, unsigned char view, int arg5, char *name);
+void *__wrap_character_effect_attach(void *obj, short type, short time, unsigned char clear, unsigned char view, int arg5, char *name) {
     static unsigned n, per[32];
-    void *r = __real_func_1518D1C0(obj, type, time, clear, view, arg5, name);
+    void *r = __real_character_effect_attach(obj, type, time, clear, view, arg5, name);
     if (!on()) return r;
     n++; per[type & 31]++;
     if (n <= (unsigned)fl || n % 64 == 0) {

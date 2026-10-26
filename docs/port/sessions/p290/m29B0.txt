@@ -40,9 +40,9 @@ s/speed = 1.0f + 1.0f;/speed = 1.0f;/
 s/rate = D_800A3860 + D_800A3864;/rate = D_800A3860;/
 s/            speed += speed;/            ;/
 s/            rate += rate;/            rate += speed;/
-s/func_150498A0(&CAMF(0x2F8), v\[0\], &CAMF(0x3C0), speed, rate, CAMF(0x7B4));/func_150498A0(\&CAMF(0x2F8), v[0], \&CAMF(0x3C0), rate, speed, CAMF(0x7B4));/
-s/func_150498A0(&CAMF(0x2FC), v\[1\], &CAMF(0x3C4)/func_150498A0(\&CAMF(0x2FC), v[1], \&CAMF(0x3C0)/
-s/func_150498A0(&CAMF(0x300), v\[2\], &CAMF(0x3C8), speed, rate, CAMF(0x7B4));/func_150498A0(\&CAMF(0x300), v[2], \&CAMF(0x3C8), speed, rate, 0.0f);/
+s/math_spring_approach(&CAMF(0x2F8), v\[0\], &CAMF(0x3C0), speed, rate, CAMF(0x7B4));/math_spring_approach(\&CAMF(0x2F8), v[0], \&CAMF(0x3C0), rate, speed, CAMF(0x7B4));/
+s/math_spring_approach(&CAMF(0x2FC), v\[1\], &CAMF(0x3C4)/math_spring_approach(\&CAMF(0x2FC), v[1], \&CAMF(0x3C0)/
+s/math_spring_approach(&CAMF(0x300), v\[2\], &CAMF(0x3C8), speed, rate, CAMF(0x7B4));/math_spring_approach(\&CAMF(0x300), v[2], \&CAMF(0x3C8), speed, rate, 0.0f);/
 s/\[0x102\] == 0 && !(\*(u16 \*) (cam + 0x36A) & 0x10)) {/[0x102] == 0 \&\& !(*(u16 *) (cam + 0x36A) \& 0x20)) {/
 s/dy = CAMF(0x2FC) - CAMF(0x2C0);/dy = 0.0f;/
 s/+ dz \* dz) < 120.0f) {/+ dz * dz) < 100.0f) {/

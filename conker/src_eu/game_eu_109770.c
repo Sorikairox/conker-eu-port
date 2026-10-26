@@ -4,13 +4,13 @@
 
 
 #ifdef NON_MATCHING
-void func_151534E0(u8 *arg0, s32 arg1);
-void func_15153808(u8 *arg0, s32 arg1, s32 arg2);
-u8 *func_15196438(u8 *, s32, u8, s32);
+void emit_sparks_by_angles_b(u8 *arg0, s32 arg1);
+void emit_sprite_nodes_by_angles(u8 *arg0, s32 arg1, s32 arg2);
+u8 *object_emitter_spawn(u8 *, s32, u8, s32);
 extern u8 D_800908C4[];
 
-// spark_effect_on_event: event effect for obj. mode 0: starts emitter kind 1 on obj (func_15196438), a spark burst
-// (func_151534E0 spec at x 177.9 / z -1708), sound effect 0x1E (func_151491F4) and a sprite burst (func_15153808 spec,
+// spark_effect_on_event: event effect for obj. mode 0: starts emitter kind 1 on obj (object_emitter_spawn), a spark burst
+// (emit_sparks_by_angles_b spec at x 177.9 / z -1708), sound effect 0x1E (func_151491F4) and a sprite burst (emit_sprite_nodes_by_angles spec,
 // D_800908C4 animation); mode 1: emitter kind 2 only; other modes and a NULL obj do nothing. flag goes to every call.
 /* was func_150DBF60 */
 void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
@@ -40,7 +40,7 @@ void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
         return;
     }
     if (mode == 0) {
-        func_15196438(obj, 1, flag, 0);
+        object_emitter_spawn(obj, 1, flag, 0);
         spark.x = 177.901749f;
         spark.y = -13.3882484f;
         spark.z = -1708.0238f;
@@ -70,7 +70,7 @@ void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
         spark.u50 = 0;
         spark.u54 = 0xFF;
         spark.u55 = 0xFF;
-        func_151534E0((u8 *) &spark, flag);
+        emit_sparks_by_angles_b((u8 *) &spark, flag);
         func_151491F4(0x1E, -1, 0, 1, 0, 0, flag, 0);
         burst.x = 177.901749f;
         burst.y = -13.3882484f;
@@ -99,9 +99,9 @@ void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
         burst.anim = D_800908C4;
         burst.u3C = 0xFF;
         burst.u3D = 0xFF;
-        func_15153808((u8 *) &burst, flag, 1);
+        emit_sprite_nodes_by_angles((u8 *) &burst, flag, 1);
     } else if (mode == 1) {
-        func_15196438(obj, 2, flag, 0);
+        object_emitter_spawn(obj, 2, flag, 0);
     }
 }
 #else
@@ -109,7 +109,7 @@ void spark_effect_on_event(u8 *obj, s32 mode, u8 flag) {
 #endif
 
 #ifdef NON_MATCHING
-void func_151534E0(u8 *arg0, s32 arg1);
+void emit_sparks_by_angles_b(u8 *arg0, s32 arg1);
 
 /* was func_150DC1E0 */
 void spark_burst_handler(u8 *arg0) {
@@ -175,7 +175,7 @@ void spark_burst_handler(u8 *arg0) {
     sp.u38 = 5.0f;
     sp.u2C = 0.32f;
     sp.u30 = 0.0f;
-    func_151534E0((u8 *) &sp.u18, (*(u8 *)((u8 *)arg0 + 0xC)));   /* the callee never reads a2 */
+    emit_sparks_by_angles_b((u8 *) &sp.u18, (*(u8 *)((u8 *)arg0 + 0xC)));   /* the callee never reads a2 */
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/spark_burst_handler.s")
@@ -187,11 +187,11 @@ extern f32 D_800A1028, D_800A102C, D_800A1030, D_800A1034, D_800A1038, D_800A103
     D_800A1094, D_800A1098, D_800A109C, D_800A10A0, D_800A10A4, D_800A10A8, D_800A10AC, D_800A10B0, D_800A10B4,
     D_800A10B8, D_800A10BC;
 extern u8 D_80090778[], D_800907C4[];
-struct127 *func_15083E90(u8 arg0);
+struct127 *obj_find_by_setup_id(u8 arg0);
 
-// item_effect_spawn: starts the effect record of preset `kind` (func_15147FF0: kind 0x120, 300 frames... spec below)
+// item_effect_spawn: starts the effect record of preset `kind` (fxrec_spawn: kind 0x120, 300 frames... spec below)
 // and fills its 0x11C-byte data (rec + 0x98). Presets 0 / 5 use the D_80090778 animation and positions of their own;
-// presets 1..4 the D_800907C4 one, placed by the object func_15083E90(6) (y 736; z depends on kind, the x / z pair
+// presets 1..4 the D_800907C4 one, placed by the object obj_find_by_setup_id(6) (y 736; z depends on kind, the x / z pair
 // and +0x24 on whether that object's +0x84 is 6). Returns the record, NULL for an unknown preset, a missing
 // object or a full pool. arg1 is unused (fountain_start_preset passes its record).
 /* was func_150DC2F0 */
@@ -328,7 +328,7 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
     case 2:
     case 3:
     case 4:
-        obj = func_15083E90(6);
+        obj = obj_find_by_setup_id(6);
         if (obj == NULL) {
             return NULL;
         }
@@ -439,7 +439,7 @@ u8 *item_effect_spawn(u8 kind, s32 arg1) {
     }
     spec.u10 = 5;
     d.u116 = 0x1B8;
-    rec = func_15147FF0(&spec, 0x120, 0x18, 4, 4, 4, 0, 0, 0, 0xFF, 1);
+    rec = fxrec_spawn(&spec, 0x120, 0x18, 4, 4, 4, 0, 0, 0, 0xFF, 1);
     if (rec != NULL) {
         memcpy(*(u8 **) (rec + 0x98), &d, 0x11C);
     }
@@ -504,13 +504,13 @@ extern f32 D_800A10C0;
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 u8 *impact_spark_spawn(f32 *, f32 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
 
-// fountain_step: step handler 4 of D_8008A5A0 (`s32 (u8 *)`, func_15147FF0's per-frame step) for the effect of
+// fountain_step: step handler 4 of D_8008A5A0 (`s32 (u8 *)`, fxrec_spawn's per-frame step) for the effect of
 // item_effect_spawn. Moves the water points of the ring obj +0x94 (see fountain_emit) from the newest back to the oldest:
 // vy (+0xC) gains d +0x18 per second, y follows. A point that drops below the water level d +0x24 lands: it makes
 // sprites (impact_spark_spawn, counter d +0xA0 / rate +0x9C; half alpha and tint 7 when d +0x41 is 0x18), drops
 // (node_spawn_sprite, counter +0xD0 / rate +0xCC) and splash rings (sprite_fx_spawn_quad, counter +0x108 / rate +0x104) around
 // it, and becomes the oldest point (older ones are dropped, y clamped to the level). The oldest four points then fade
-// in (alpha 0 / 0x3F / 0x7F / 0xBE). When d +0x116 is a sound id it is replayed (func_10010F30, id + rand % 10)
+// in (alpha 0 / 0x3F / 0x7F / 0xBE). When d +0x116 is a sound id it is replayed (sound_play_2d, id + rand % 10)
 // whenever the countdown +0x114 runs out. obj +0x54..+0x5C gets the oldest point (0 when the ring is empty).
 // Always returns 1.
 /* was func_150DCAD8 */
@@ -687,7 +687,7 @@ s32 fountain_step(u8 *obj) {
         if (t > 0) {
             d->u114 = t;
         } else {
-            func_10010F30((u32) random_int() % 10 + d->u116, 0x7FFF, 0x40, 0, 0);
+            sound_play_2d((u32) random_int() % 10 + d->u116, 0x7FFF, 0x40, 0, 0);
             d->u114 = random_int() & 0xC;
         }
     }
@@ -711,7 +711,7 @@ s32 fountain_step(u8 *obj) {
 extern f32 D_800A10C4;
 void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
-// fountain_emit: emitter handler 4 of D_8008A5DC (`s32 (u8 *)`, func_15147FF0's per-frame step) for the effect of
+// fountain_emit: emitter handler 4 of D_8008A5DC (`s32 (u8 *)`, fxrec_spawn's per-frame step) for the effect of
 // item_effect_spawn. The data d = obj +0x98 swings the emitter around obj +0x10 / +0x18 (angles +0x04 / +0x0C advance
 // by a random step per frame, radii +0x00 / +0x08) and moves it there in +0x20 steps (+0x20 grows by rate +0x1C;
 // nothing happens until it passes 0.99999). Each step adds a point to the ring obj +0x94 (0x18 bytes: x, y, z, vy,
@@ -867,12 +867,12 @@ s32 fountain_emit(u8 *obj) {
 extern f32 D_800DD608[], D_800DD618[]; /* per view: camera yaw sine / cosine */
 extern s32 D_800D30BC;
 extern s32 D_800A4EA8[];
-void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
-s32 func_15142E24(s32, struct_eu_80090F10 *, s32, s32, s32, s32, s32, u8, s32, s8 *, s32);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
+void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
+s32 gfx_load_texture_cached(s32, struct_eu_80090F10 *, s32, s32, s32, s32, s32, u8, s32, s8 *, s32);
+s32 gfx_geometry_mode_cached(s32, s32, s32);
+s32 gfx_env_color_cached(s32, s32, s32, s32, s32, s8 *);
 s32 gfx_set_combine_mode(s32, u8, s8 *);
-u8 *func_15142FBC(s32, s32, s32, s8 *);
+u8 *gfx_other_mode_cached(s32, s32, s32, s8 *);
 
 /* One strip vertex at (px, py, pz): texture s / t (swapped when d +0x60 is 2), white, alpha `alpha`. */
 #define FOUNTAIN_VTX(px, py, pz, s, t, alpha) \
@@ -890,12 +890,12 @@ u8 *func_15142FBC(s32, s32, s32, s8 *);
         v += 0x10; \
     } while (0)
 
-// fountain_draw: draw handler 4 of D_8008A644 (`s32 (u8 *, s32 gfx, s16 view)`, func_151481BC) for the effect of
+// fountain_draw: draw handler 4 of D_8008A644 (`s32 (u8 *, s32 gfx, s16 view)`, fxrec_draw) for the effect of
 // item_effect_spawn: the water points (obj +0x94, see fountain_emit) as one strip from the newest to the oldest, each
 // point widened by its +0x10 sideways to the camera (D_800DD608 / D_800DD618[view]); while the effect still emits
 // (obj +0x1E flag 2) the strip starts at the object itself. Texture D_80090F10[d +0x41] (s from the point byte
 // +0x16; where s grows backwards the last pair is repeated with s - 0x4000 so the texture wraps), colour d +0x28,
-// combine / render mode from the nibbles of d +0x42. Vertices come from func_151D6310. Returns the display list
+// combine / render mode from the nibbles of d +0x42. Vertices come from vtx_slot_buffer_get. Returns the display list
 // end; draws nothing with fewer than 2 points. The asm takes the head's alpha (emitting case) through an index it
 // never sets (stack slot sp+0x98): this C uses the newest point there.
 /* was func_150DDBC0 */
@@ -915,7 +915,7 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
     if (*(s8 *) (obj + 0x2C) < 2) {
         return gfx;
     }
-    func_151D6310((s32 *) (obj + 0x84), view, obj[0x25] * 0x20 + 0xA0, (s32 *) &v, NULL);
+    vtx_slot_buffer_get((s32 *) (obj + 0x84), view, obj[0x25] * 0x20 + 0xA0, (s32 *) &v, NULL);
     if (v == NULL) {
         return gfx;
     }
@@ -933,11 +933,11 @@ s32 fountain_draw(u8 *obj, s32 gfx, s16 view) {
         sIdx = 0;
         tIdx = 1;
     }
-    gfx = func_15142E24(gfx, &D_80090F10[d->u41], 0, 0, 0, 0, d->u41, 0, 0, &flag, 3);
-    gfx = func_15142C10(gfx, d->u28, d->u28, d->u28, 0xFF, &flag);
+    gfx = gfx_load_texture_cached(gfx, &D_80090F10[d->u41], 0, 0, 0, 0, d->u41, 0, 0, &flag, 3);
+    gfx = gfx_env_color_cached(gfx, d->u28, d->u28, d->u28, 0xFF, &flag);
     gfx = gfx_set_combine_mode(gfx, comb, &flag);
-    gfx = func_15142B7C(gfx, 1, 0x160600);
-    gfx = (s32) func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[mode * 2 + 1] | D_800A4EA8[mode * 2],
+    gfx = gfx_geometry_mode_cached(gfx, 1, 0x160600);
+    gfx = (s32) gfx_other_mode_cached(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[mode * 2 + 1] | D_800A4EA8[mode * 2],
                               &flag);
     if (*(u16 *) (obj + 0x1E) & 2) {
         /* still emitting: the strip starts at the object */

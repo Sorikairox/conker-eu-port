@@ -1,4 +1,4 @@
-# P197 mutants of func_1518DC50 (sed expression % setup names; empty = all)
+# P197 mutants of character_effect_update (sed expression % setup names; empty = all)
 s/if (!(e->flags \& 1)) {/if (!(e->flags \& 2)) {/
 s/            e->mode = 1;/            e->mode = 3;/
 s/        if (e->live != 0) {/        if (e->live > 1) {/

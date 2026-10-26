@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void math_spring_approach_angle(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void camera_update_eye_base(struct108 *arg0);
 void camera_update_eye_orbit(struct108 *arg0);
 void camera_update_eye_height(u8 *arg0);
@@ -23,8 +23,8 @@ extern f32 D_800A3824;
 // camera_follow_update: per-frame yaw update of a player camera (arg0; +0x3D0 = the followed player object, +0x3D4
 // its character record), then the position / collision / shake steps (camera_update_eye_base, camera_update_eye_orbit, camera_update_eye_height).
 // Locked cameras (+0x5F0 & 0x10 with pad bit 0x10 held, *+0x36C) and +0x698 skip the yaw part. In multiplayer (or
-// camera modes +0x23E 9 / 0x3B) with ctl +0x1B3 set: the yaw +0x37C eases (func_15049978) toward the player's facing
-// - 180, with the multiplayer gains +0x96C / +0x970 easing to 5 / 8 (func_150498A0). Else the target yaw is the
+// camera modes +0x23E 9 / 0x3B) with ctl +0x1B3 set: the yaw +0x37C eases (math_spring_approach_angle) toward the player's facing
+// - 180, with the multiplayer gains +0x96C / +0x970 easing to 5 / 8 (math_spring_approach). Else the target yaw is the
 // facing + turn (+0x7C) - 180 - arg1, minus the locked-camera tilt (+0x2E4 >> 16) and the ctl +0x12 offset for the
 // riding modes (9, 0x37..0x39, 0x3B, 0x12), wrapped by func_15048758; +0x23C snaps the yaw to ctl +0x18C (taking its
 // saved position +0x160 into +0x2F8 / +0x304 once) or the target, else it eases with mode-dependent gains (unless
@@ -48,12 +48,12 @@ void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
         if (D_800BE616 != 0) {
             CAM_F32(0x97C) = 5.0f;
             CAM_F32(0x980) = 8.0f;
-            func_150498A0((f32 *) (cam + 0x96C), 5.0f, (f32 *) (cam + 0x98C), 1.0f, 2.0f, CAM_F32(0x7B4));
-            func_150498A0((f32 *) (cam + 0x970), CAM_F32(0x980), (f32 *) (cam + 0x990), 1.0f, 2.0f, CAM_F32(0x7B4));
-            func_15049978((f32 *) (cam + 0x37C), *(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) - 180.0f, (f32 *) (cam + 0x7C8),
+            math_spring_approach((f32 *) (cam + 0x96C), 5.0f, (f32 *) (cam + 0x98C), 1.0f, 2.0f, CAM_F32(0x7B4));
+            math_spring_approach((f32 *) (cam + 0x970), CAM_F32(0x980), (f32 *) (cam + 0x990), 1.0f, 2.0f, CAM_F32(0x7B4));
+            math_spring_approach_angle((f32 *) (cam + 0x37C), *(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) - 180.0f, (f32 *) (cam + 0x7C8),
                           CAM_F32(0x96C), CAM_F32(0x970), CAM_F32(0x7B4));
         } else {
-            func_15049978((f32 *) (cam + 0x37C), *(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) - 180.0f, (f32 *) (cam + 0x7C8),
+            math_spring_approach_angle((f32 *) (cam + 0x37C), *(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) - 180.0f, (f32 *) (cam + 0x7C8),
                           5.0f, 8.0f, CAM_F32(0x7B4));
         }
         CAM_F32(0x39C) = CAM_F32(0x37C) * D_800A3810;
@@ -100,7 +100,7 @@ void camera_follow_yaw_update(struct108 *arg0, f32 arg1) {
                 rate = D_800A3820;
             }
             if (D_800BEE2C == 0) {
-                func_15049978((f32 *) (cam + 0x37C), yaw, (f32 *) (cam + 0x7C8), gain, rate, CAM_F32(0x7B4));
+                math_spring_approach_angle((f32 *) (cam + 0x37C), yaw, (f32 *) (cam + 0x7C8), gain, rate, CAM_F32(0x7B4));
             }
         }
         CAM_F32(0x39C) = CAM_F32(0x37C) * D_800A3824;

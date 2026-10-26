@@ -3,7 +3,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void fx_sparks_emit(u8 *arg0);
-void func_1000FD38(s32, s32, s32);
+void sfx_emitter_stop_by_callback(s32, s32, s32);
 #endif
 
 
@@ -73,10 +73,10 @@ void prop_owner_effects_clear(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15046F70(f32 *, s32, f32, u8 *);
+s32 collision_floor_probe(f32 *, s32, f32, u8 *);
 s32 bolt_arc_spawn(s16 *, s32, u8, u8);
-void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_151464B8(s32);
+void vec2_from_angle_byte(s16, f32, f32 *, f32 *);
+s32 player_mask_hides_all(s32);
 
 /* was func_15104C44 */
 void fx_ground_arcs_update(u8 *arg0) {
@@ -126,9 +126,9 @@ void fx_ground_arcs_update(u8 *arg0) {
     if ((*(s16 *)((u8 *)arg0 + 0x30)) >= 0) {
         (*(s16 *)((u8 *)temp_s1 + 8)) = (s16) ((*(s16 *)((u8 *)temp_s1 + 8)) - D_800BE9E4);
         if ((*(s16 *)((u8 *)temp_s1 + 8)) < 0) {
-            func_1000FD38(func_1000EF40, (*(s32 *)((u8 *)temp_s1 + 0)), 0);
+            sfx_emitter_stop_by_callback(sfx_cb_keep_until_silent, (*(s32 *)((u8 *)temp_s1 + 0)), 0);
         }
-        if (func_151464B8((*(s32 *)((u8 *)temp_s1 + 0x44))) == 0) {
+        if (player_mask_hides_all((*(s32 *)((u8 *)temp_s1 + 0x44))) == 0) {
             (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((0.19700001f + (random_float() * 0.3f)) * D_800BE9A4));
             if ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f) {
                 sp.u8E = 1;
@@ -149,14 +149,14 @@ void fx_ground_arcs_update(u8 *arg0) {
                 sp.uA0 = ((*(f32 *)((u8 *)temp_s1 + 0x10)) + (*(f32 *)((u8 *)temp_s1 + 0x1C))) - 180.0f;
                 do {
                     temp_s0 = random_int();
-                    func_15143874((s16) (temp_s0 & 0xFF), ((random_float() * 0.5f) + 0.5f) * (*(f32 *)((u8 *)temp_s1 + 0x18)), &sp.u80, &sp.u88);
+                    vec2_from_angle_byte((s16) (temp_s0 & 0xFF), ((random_float() * 0.5f) + 0.5f) * (*(f32 *)((u8 *)temp_s1 + 0x18)), &sp.u80, &sp.u88);
                     sp.u80 += (*(f32 *)((u8 *)temp_s1 + 0xC));
                     sp.u88 += (*(f32 *)((u8 *)temp_s1 + 0x14));
-                    if (func_15046F70(&sp.u80, 0, (*(f32 *)((u8 *)temp_s1 + 0x10)), sp60) != 0) {
+                    if (collision_floor_probe(&sp.u80, 0, (*(f32 *)((u8 *)temp_s1 + 0x10)), sp60) != 0) {
                         temp_s0_2 = random_int();
-                        func_15143874((s16) (temp_s0_2 & 0xFF), random_float() * 220.0f, &sp.u78, &sp.u7C);
+                        vec2_from_angle_byte((s16) (temp_s0_2 & 0xFF), random_float() * 220.0f, &sp.u78, &sp.u7C);
                         temp_s0_3 = random_int();
-                        func_15143874((s16) (temp_s0_3 & 0xFF), random_float() * 220.0f, &sp.u70, &sp.u74);
+                        vec2_from_angle_byte((s16) (temp_s0_3 & 0xFF), random_float() * 220.0f, &sp.u70, &sp.u74);
                         sp.u9C = (*(f32 *)((u8 *)temp_s1 + 0xC)) + sp.u78;
                         sp.uB4 = sp.u80;
                         sp.uA4 = (*(f32 *)((u8 *)temp_s1 + 0x14)) + sp.u7C;
@@ -180,7 +180,7 @@ void fx_ground_arcs_update(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_ground_arcs_update.s")
 #endif
 #ifdef NON_MATCHING
-void func_1000FD38(s32, s32, s32);
+void sfx_emitter_stop_by_callback(s32, s32, s32);
 
 /* was func_15104FF8 */
 void fx_ground_arcs_on_msg(s32 arg0, s32 arg1, s32 arg2) {
@@ -195,11 +195,11 @@ void fx_ground_arcs_on_msg(s32 arg0, s32 arg1, s32 arg2) {
         temp_v0 = (*(u8 **)((u8 *)temp_v1 + 0));
         if ((*(u8 *)((u8 *)temp_v0 + 0x14)) == 1) {
             (*(s16 *)((u8 *)temp_v1 + 8)) = 0xFA;
-            sp3C = func_1000EF40;
+            sp3C = sfx_cb_keep_until_silent;
             sp40 = temp_v1;
-            func_1000FD38(func_1000EF40, temp_v0, 0);
+            sfx_emitter_stop_by_callback(sfx_cb_keep_until_silent, temp_v0, 0);
             temp_v0_2 = (*(u8 **)((u8 *)temp_v1 + 0));
-            func_1000FA64(0x236U, (*(s16 *)((u8 *)temp_v0_2 + 0)), (*(s16 *)((u8 *)temp_v0_2 + 2)), (*(s16 *)((u8 *)temp_v0_2 + 4)), 0x4000, 0x5DCU, 0x3E8, (s32) sp3C, temp_v0_2, 0, 8, 0);
+            sfx_emitter_start(0x236U, (*(s16 *)((u8 *)temp_v0_2 + 0)), (*(s16 *)((u8 *)temp_v0_2 + 2)), (*(s16 *)((u8 *)temp_v0_2 + 4)), 0x4000, 0x5DCU, 0x3E8, (s32) sp3C, temp_v0_2, 0, 8, 0);
         }
     }
 }
@@ -208,7 +208,7 @@ void fx_ground_arcs_on_msg(s32 arg0, s32 arg1, s32 arg2) {
 #endif
 #ifdef NON_MATCHING
 s32 bolt_spawn(f32 *, f32 *, s32, f32 *, f32, s32, s32, s32);
-s32 func_151464B8(s32);
+s32 player_mask_hides_all(s32);
 
 /* was func_151050B0 */
 void fx_quad_bolts_update(u8 *arg0) {
@@ -261,7 +261,7 @@ void fx_quad_bolts_update(u8 *arg0) {
         func_151494E0(0, 0x39U);
         func_151494E0(0, 0x4BU);
     }
-    if (func_151464B8((*(s32 *)((u8 *)temp_s2 + 0x6C))) == 0) {
+    if (player_mask_hides_all((*(s32 *)((u8 *)temp_s2 + 0x6C))) == 0) {
         (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.040000003f + (random_float() * 0.07f)) * D_800BE9A4));
         if ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f) {
             sp.uB0 = 0x64;
@@ -331,14 +331,14 @@ void fx_quad_bolts_on_msg(struct207 *arg0, s32 *arg1, u8 arg2) {
 
 #ifdef NON_MATCHING
 typedef struct { s16 v[9]; } HitSurface558C; /* 0x12-byte surface record (func_150ACEA0) */
-void func_151C384C(void *, u8, s32);
-void func_151522DC(void *, s32 *, f32 *, s32, u8, s32);
+void fire_embers_spawn(void *, u8, s32);
+void emit_impact_flash_spray(void *, s32 *, f32 *, s32, u8, s32);
 struct210 *cam_sprite_puff_spawn(f32, u8, s32, u8 *, s16, u8, u8, s32, u8, s32);
 
 // impact_debris_burst: hit effect of object p (state at p + 0x110 = s: impact point s+0x30, normal s+0x60, surface
 // record s+0x6C, flags s+0x88). Always throws debris with cam_sprite_puff_spawn (speed 15..40, 200..255, 50..130); on
-// surface type 9 (flags & 0x1F) it adds embers (func_151C384C) with chance 0.4 and stops. Otherwise embers with
-// chance 0.1, and with chance 0.4 an animated impact flash (func_151522DC, one keyframe {0x85, 0.1}) at the point
+// surface type 9 (flags & 0x1F) it adds embers (fire_embers_spawn) with chance 0.4 and stops. Otherwise embers with
+// chance 0.1, and with chance 0.4 an animated impact flash (emit_impact_flash_spray, one keyframe {0x85, 0.1}) at the point
 // facing back along the normal.
 /* was func_1510558C */
 void impact_debris_burst(u8 *p) {
@@ -376,12 +376,12 @@ void impact_debris_burst(u8 *p) {
                   *(s32 *) (s + 0x88), p[0xC], p[1]);
     if ((*(s32 *) (s + 0x88) & 0x1F) == 9) {
         if (random_float() < 0.4f) {
-            func_151C384C(pos, p[0xC], p[1]);
+            fire_embers_spawn(pos, p[0xC], p[1]);
         }
         return;
     }
     if (random_float() < 0.1f) {
-        func_151C384C(pos, p[0xC], p[1]);
+        fire_embers_spawn(pos, p[0xC], p[1]);
     }
     if (random_float() < 0.4f) {
         frames[0] = 0x85;
@@ -405,7 +405,7 @@ void impact_debris_burst(u8 *p) {
         flash.u4C = 0.060000002f;
         flash.u50 = 0.142f;
         flash.u54 = 25.777f;
-        func_151522DC(&flash, frames, scales, 1, p[0xC], p[1]);
+        emit_impact_flash_spray(&flash, frames, scales, 1, p[0xC], p[1]);
     }
 }
 #else
@@ -429,9 +429,9 @@ void fx_sparks_on_msg(struct207 *arg0, s32 arg1, u8 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151432BC(u8 *, s32 *, s32 *, s32 *, s32 *);
-void func_15143794(s16, s16, f32, void *);
-s32 func_151464B8(s32);
+s32 spawn_region_random_point(u8 *, s32 *, s32 *, s32 *, s32 *);
+void vec3_from_angles_byte(s16, s16, f32, void *);
+s32 player_mask_hides_all(s32);
 s32 streak_spawn(s32 *, s32, f32 *, s32, s32, s32);
 
 /* was func_151058B4 */
@@ -483,7 +483,7 @@ void fx_sparks_emit(u8 *arg0) {
     s32 temp_s1;
     u8 *temp_s4;
 
-    if (func_151464B8((*(s32 *)((u8 *)arg0 + 0x30))) == 0) {
+    if (player_mask_hides_all((*(s32 *)((u8 *)arg0 + 0x30))) == 0) {
         temp_s4 = arg0 + 0x28;
         var_f20 = ((random_float() * 0.0013f) + 0.0018999999f) * (*(f32 *)((u8 *)temp_s4 + 4));
         if (var_f20 > 1.0f) {
@@ -516,12 +516,12 @@ void fx_sparks_emit(u8 *arg0) {
             do {
                 sp.uAA = (random_int() % 101U) + 0x9B;
                 sp.uE1 = (random_int() & 3) + 3;
-                func_151432BC((*(u8 **)((u8 *)temp_s4 + 0)), &sp.uCC, &sp.uD4, &sp.u8C, &sp.u88);
+                spawn_region_random_point((*(u8 **)((u8 *)temp_s4 + 0)), &sp.uCC, &sp.uD4, &sp.u8C, &sp.u88);
                 sp.uD8 = (random_int() % 31U) + 0x1E;
                 sp.u90 = (random_float() * 10.13f) + 7.3999996f;
                 temp_s0 = random_int();
                 temp_s1 = random_int();
-                func_15143794((s16) (temp_s0 & 0xFF), (s16) (((u32) temp_s1 % 22U) - 0x36), (random_float() * 20.0f) + 30.0f, &sp.u94);
+                vec3_from_angles_byte((s16) (temp_s0 & 0xFF), (s16) (((u32) temp_s1 % 22U) - 0x36), (random_float() * 20.0f) + 30.0f, &sp.u94);
                 sp.uA0 = (random_float() * 1.4860001f) + -3.048f;
                 streak_spawn(&sp.uCC, 0, &sp.u90, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 var_f20 -= 1.0f;
@@ -578,7 +578,7 @@ void fx_sparks_emit(u8 *arg0) {
 //     void *temp_s4;
 //     f32 phi_f20;
 //
-//     if (func_151464B8(arg0->unk30) == 0) {
+//     if (player_mask_hides_all(arg0->unk30) == 0) {
 //         temp_s4 = arg0 + 0x28;
 //         temp_f20 = ((random_float() * *(void *)0x800A23EC) + *(void *)0x800A23F0) * temp_s4->unk4;
 //         if (temp_f20 > 1.0f) {
@@ -614,12 +614,12 @@ void fx_sparks_emit(u8 *arg0) {
 // loop_3:
 //             spAA = (random_int() % 0x65U) + 0x9B;
 //             spE1 = (random_int() & 3) + 3;
-//             func_151432BC(temp_s4->unk0, &spCC, &spD4, &sp8C, &sp88);
+//             spawn_region_random_point(temp_s4->unk0, &spCC, &spD4, &sp8C, &sp88);
 //             spD8 = (random_int() % 0x1FU) + 0x1E;
 //             sp90 = (random_float() * temp_f24) + temp_f26;
 //             temp_s0 = random_int();
 //             temp_s1 = random_int();
-//             func_15143794((s16) (temp_s0 & 0xFF), (s16) ((temp_s1 % 0x16U) - 0x36), (random_float() * 20.0f) + 30.0f, &sp94);
+//             vec3_from_angles_byte((s16) (temp_s0 & 0xFF), (s16) ((temp_s1 % 0x16U) - 0x36), (random_float() * 20.0f) + 30.0f, &sp94);
 //             spA0 = (random_float() * *(void *)0x800A23FC) + *(void *)0x800A2400;
 //             streak_spawn(&spCC, 0, &sp90, 0, (?32) arg0->unkC, (?32) arg0->unk1);
 //             temp_f20_2 = phi_f20 - 1.0f;
@@ -634,7 +634,7 @@ void fx_sparks_emit(u8 *arg0) {
 /* was func_15105BC8 */
 void fx_shake_if_active(struct204 *arg0) {
     if ((arg0->unk34 & 1) != 0) {
-        func_1508B20C(arg0->unk28->unk0, arg0->unk28->unk2, arg0->unk28->unk4, 500.0f);
+        rail_event_add(arg0->unk28->unk0, arg0->unk28->unk2, arg0->unk28->unk4, 500.0f);
     }
 }
 

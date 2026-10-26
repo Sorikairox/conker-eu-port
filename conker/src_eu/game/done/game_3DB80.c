@@ -9,7 +9,7 @@ s32 func_150106D0(struct39 *arg0) {
     struct37 *temp_v0;
 
     tmp.unk0 = arg0;
-    tmp.unk4 = func_15144598(arg0);
+    tmp.unk4 = spawn_region_area(arg0);
     tmp.unkC = 0.0f;
 
     collision_select_area(0);

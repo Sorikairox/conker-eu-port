@@ -162,10 +162,10 @@ typedef struct {
 
 #define CSP_CHAN(c) (((CSPChanState *)seqp->chanState)[c])
 
-void  func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice);
-s32   func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
-u8    func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
-s32   func_1001C4F0(ALEventQueue *evtq, s16 type);
+void  n_seqp_unmap_voice(N_ALSeqPlayer *seqp, N_ALVoice *voice);
+s32   n_seqp_cancel_voice_kill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
+u8    n_seqp_voice_fx_mix(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
+s32   n_evtq_flush_type_first(ALEventQueue *evtq, s16 type);
 void  func_1001CA90(N_ALVoice *v, f32 pitch);
 f32   func_1001CEA4(s32 arg0);
 void *func_1001D9B0(s32 arg0);
@@ -206,7 +206,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                 __n_seqpStopOsc((N_ALSeqPlayer *)seqp, vs);
             }
 
-            func_1001AAE0((N_ALSeqPlayer *)seqp, voice);
+            n_seqp_unmap_voice((N_ALSeqPlayer *)seqp, voice);
             break;
 
         case 6: /* AL_SEQP_ENV_EVT */
@@ -283,7 +283,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
 
             for (vs = seqp->vAllocHead; vs != NULL; ) {
                 if (vs->envPhase != 3) {
-                    n_alSynSetFXMix(&vs->voice, func_1001B310(vs, seqp));
+                    n_alSynSetFXMix(&vs->voice, n_seqp_voice_fx_mix(vs, seqp));
                 }
                 vs = vs->next;
             }
@@ -330,7 +330,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
         case 0x10: /* pause */
             if (seqp->state == AL_PLAYING) {
                 seqp->state = 3;
-                *(s32 *)seqp->unk88 = func_1001C4F0(&seqp->evtq, 0);
+                *(s32 *)seqp->unk88 = n_evtq_flush_type_first(&seqp->evtq, 0);
             }
             break;
 
@@ -344,7 +344,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                         __n_seqpStopOsc((N_ALSeqPlayer *)seqp, vs);
                     }
 
-                    func_1001AAE0((N_ALSeqPlayer *)seqp, &vs->voice);
+                    n_seqp_unmap_voice((N_ALSeqPlayer *)seqp, &vs->voice);
                 }
 
                 seqp->state = AL_STOPPED;
@@ -362,12 +362,12 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
 
         case 0x12: /* AL_SEQP_STOPPING_EVT */
             if (seqp->state == AL_PLAYING || seqp->state == 3) {
-                func_1001C4F0(&seqp->evtq, 0);
-                func_1001C4F0(&seqp->evtq, 0x16);
-                func_1001C4F0(&seqp->evtq, 2);
+                n_evtq_flush_type_first(&seqp->evtq, 0);
+                n_evtq_flush_type_first(&seqp->evtq, 0x16);
+                n_evtq_flush_type_first(&seqp->evtq, 2);
 
                 for (vs = seqp->vAllocHead; vs != 0; vs = vs->next) {
-                    if (func_1001ADA4((N_ALSeqPlayer *)seqp, &vs->voice, KILL_TIME)) {
+                    if (n_seqp_cancel_voice_kill((N_ALSeqPlayer *)seqp, &vs->voice, KILL_TIME)) {
                         __n_seqpReleaseVoice((N_ALSeqPlayer *)seqp, &vs->voice, KILL_TIME);
                     }
                 }
@@ -463,14 +463,14 @@ static void __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp)
 // jump table
 // s127: DK64 n_csplayer.c func_global_asm_80733D8C (__CSPHandleMIDIMsg) with Conker's changes: channels
 // with unk36 set re-queue every non-program-change message, controller handlers come from a
-// table (D_8002BDA0), program change goes through func_1001B7D0 and may re-queue itself
+// table (D_8002BDA0), program change goes through n_cseqp_set_inst_chan_state and may re-queue itself
 typedef ALMicroTime (*CSPOscInit)(void **oscState, f32 *initVal, u8 oscType, u8 rate, u8 depth, u8 delay, u8 arg6);
 extern ALMicroTime D_80042BB0[];
 extern void (*D_8002BDA0[])(N_ALCSPlayer *, N_ALEvent *, u8, u8);
 extern void (*D_8002C310[])(N_ALCSPlayer *, N_ALEvent *, u8, u8);
-ALSound *func_1001B07C(N_ALCSPlayer *seqp, u8 key, u8 vel, u8 chan);
-N_ALVoiceState *func_1001AFEC(N_ALCSPlayer *seqp, u8 key, u8 chan);
-s32 func_1001B7D0(N_ALCSPlayer *seqp, s32 id, u8 chan);
+ALSound *n_seqp_lookup_sound_quick(N_ALCSPlayer *seqp, u8 key, u8 vel, u8 chan);
+N_ALVoiceState *n_seqp_lookup_voice(N_ALCSPlayer *seqp, u8 key, u8 chan);
+s32 n_cseqp_set_inst_chan_state(N_ALCSPlayer *seqp, s32 id, u8 chan);
 
 void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 {
@@ -532,7 +532,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 
             chanstate = &CSP_CHAN(chan);
 
-            sound = func_1001B07C(seqp, key, byte2, chan);
+            sound = n_seqp_lookup_sound_quick(seqp, key, byte2, chan);
             if (sound == NULL) {
                 break;
             }
@@ -643,7 +643,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 
             pitch = vstate->pitch * chanstate->pitchBend * vstate->vibrato;
 
-            fxmix = func_1001B310(vstate, seqp);
+            fxmix = n_seqp_voice_fx_mix(vstate, seqp);
 
             sp76 = chanstate->unk14;
 
@@ -696,7 +696,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
         }
 
     case AL_MIDI_NoteOff:
-        vstate = func_1001AFEC(seqp, key, chan);
+        vstate = n_seqp_lookup_voice(seqp, key, chan);
         ALFlagFailIf(!vstate, seqp->debugFlags & NOTE_OFF_ERR_MASK, ERR_ALSEQP_OFF_VOICE);
 
         chanstate = &CSP_CHAN(chan);
@@ -720,7 +720,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
         break;
 
     case AL_MIDI_PolyKeyPressure:
-        vstate = func_1001AFEC(seqp, key, chan);
+        vstate = n_seqp_lookup_voice(seqp, key, chan);
         ALFailIf(!vstate, ERR_ALSEQP_POLY_VOICE);
 
         vstate->velocity = byte2;
@@ -764,7 +764,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
     case AL_MIDI_ProgramChange:
         sp90 = (CSP_CHAN(chan).unk8 << 7) + key;
         if (sp90 < seqp->bank->instCount) {
-            if (func_1001B7D0(seqp, sp90, chan)) {
+            if (n_cseqp_set_inst_chan_state(seqp, sp90, chan)) {
                 evt.type = 2;
                 evt.msg.midi.ticks = 0;
                 evt.msg.midi.status = chan | AL_MIDI_ProgramChange;

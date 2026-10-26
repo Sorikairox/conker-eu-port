@@ -1,6 +1,6 @@
 # P310 mutants for beam_effect_update, round 2: the mE2294 survivors with their killing setups (genE2294.py second round)
-/width = (f32) (func_151EFDD0() .* 70) + 40.0f;/s/40.0f/41.0f/ % w0ray w0ff
-/width = (f32) (func_151EFDD0() .* 70) + 40.0f;/s/70)/71)/ % w0ray w0ff
+/width = (f32) (game_gu_random() .* 70) + 40.0f;/s/40.0f/41.0f/ % w0ray w0ff
+/width = (f32) (game_gu_random() .* 70) + 40.0f;/s/70)/71)/ % w0ray w0ff
 /heading = \*(u16 \*) (target + 0x76) - \*(s16 \*) (\*(u8 \*\*) (target + 0x31C) + 0x12);/s/\*(s16 \*) (\*(u8/*(u16 *) (*(u8/ % aim_hs
 /heading = \*(u16 \*) (target + 0x76) - \*(s16 \*) (\*(u8 \*\*) (target + 0x31C) + 0x12);/s/\*(u16 \*) (target/*(s16 *) (target/ % aim_hu
 /^                    alpha = 1.0f;/d % aim_fd0 aim_fd0f

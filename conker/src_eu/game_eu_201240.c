@@ -9,7 +9,7 @@
 typedef struct {
     s16 v[9];
 } ImpactSurface;
-/* P203: spark burst spec for func_151530A8 (0x74 bytes; bytes 0x59..0x5B and 0x6B are never set) */
+/* P203: spark burst spec for emit_streaks_from_spec (0x74 bytes; bytes 0x59..0x5B and 0x6B are never set) */
 typedef struct {
     s32 count;        /* 0x00 5 >> D_800DCE50 */
     s32 count2;       /* 0x04 4 >> D_800DCE50 */
@@ -35,10 +35,10 @@ typedef struct {
     f32 f6C;          /* 0x6C 1 */
     u8 b70, b71, b72, b73; /* 0x70 0xFF, 0, 0xFF, 0xFF */
 } ImpactSparks;
-/* P203: particle spec for func_15132FBC (0x76 bytes used; 0x59..0x5B, 0x69, 0x6B, 0x71 never set) */
+/* P203: particle spec for mdl_particle_spawn (0x76 bytes used; 0x59..0x5B, 0x69, 0x6B, 0x71 never set) */
 typedef struct {
     f32 scale[4];     /* 0x00 1, 1, 0.65, 0.65 */
-    f32 rot[3];       /* 0x10 / 0x14 from the direction (func_15145974), 0x18 0 */
+    f32 rot[3];       /* 0x10 / 0x14 from the direction (vec3_to_yaw_pitch_deg), 0x18 0 */
     f32 one[3];       /* 0x1C 1, 1, 1 */
     f32 pos[3];       /* 0x28 */
     f32 vel[3];       /* 0x34 */
@@ -63,13 +63,13 @@ typedef struct {
     f32 f4, f8, fC;
 } ImpactTrail;
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, f32 *, ImpactSurface *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-u8 func_15145C90(s32 arg0);
-void func_15145974(f32 *dir, f32 *yaw, f32 *pitch);
-s32 func_15145128(f32 *dir, f32 *out, f32 *a, f32 *b);
-s32 func_151530A8(ImpactSparks *spec, u8 arg1, s32 arg2);
-u8 *func_15132FBC(ImpactParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+u8 prop_is_flagged(s32 arg0);
+void vec3_to_yaw_pitch_deg(f32 *dir, f32 *yaw, f32 *pitch);
+s32 vec3_normalize_len(f32 *dir, f32 *out, f32 *a, f32 *b);
+s32 emit_streaks_from_spec(ImpactSparks *spec, u8 arg1, s32 arg2);
+u8 *mdl_particle_spawn(ImpactParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void *cam_sprite_puff_spawn(f32 size, u8 arg1, ImpactSurface *surf, f32 *pos, s16 life, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), passed by address */
+s32 sfx_cb_delayed_play_2d(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), passed by address */
 void *memcpy(void *, const void *, s32);
 extern u8 D_800DCE50;  /* spark count shift (0 = full) */
 extern f32 D_800DCE54; /* spark chance */
@@ -77,15 +77,16 @@ extern f32 D_800DCE54; /* spark chance */
 // impact_effect_spawn: P203: effects where a shot or blow hits `pos` coming along `dir`. The surface: the caller's
 // hit record (`hit`, 0x12 bytes) at pos, else a ray from pos - dir along dir (func_150ACEA0) gives the hit point,
 // surface and material id (-1 when nothing is hit). kind (0..5, others do nothing) picks the particle type (0x34,
-// 0x4D, 0x57, 0x58, 0x0C, none). `big` = a random odd number or a surface without material (func_15145C90 == 0).
-// Kind 1 (bullet) plays a ricochet: a random 0x459..0x45B one-shot (func_1000FA64, only in one-player mode, then
-// the follow-up sound 0x106) when big, else 0xB0, through func_10010E78 at the position. With chance D_800DCE54 a
-// spark burst (func_151530A8, 5 >> D_800DCE50 sparks). In one- and two-player modes the particle of the kind: when
-// big a fast debris piece thrown back along the surface normal (func_15145128) with random spin, else a slow puff
+// 0x4D, 0x57, 0x58, 0x0C, none). `big` = a random odd number or a surface without material (prop_is_flagged == 0).
+// Kind 1 (bullet) plays a ricochet: a random 0x459..0x45B one-shot (sfx_emitter_start, only in one-player mode, then
+// the follow-up sound 0x106) when big, else 0xB0, through sound_voice_play_at at the position. With chance D_800DCE54 a
+// spark burst (emit_streaks_from_spec, 5 >> D_800DCE50 sparks). In one- and two-player modes the particle of the kind: when
+// big a fast debris piece thrown back along the surface normal (vec3_normalize_len) with random spin, else a slow puff
 // with a trail block (+0x170) along the direction's angles. A material surface that was hit also gets a decal
 // (cam_sprite_puff_spawn, size 15..35, life 300). arg4 / arg5 are passed to every spawner (view / owner).
 // Returns 0: the asm leaves the last callee's v0, which no caller reads (s32 for game_eu_981C0's prototype).
-s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s32 arg5) {
+/* was func_151D3A30 */
+s32 bullet_impact_effects(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s32 arg5) {
     f32 hit_pos[3];
     ImpactSurface surf;
     s32 surf_id;
@@ -140,7 +141,7 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         surf = *hit;
         found = TRUE;
     }
-    material = func_15145C90(surf_id);
+    material = prop_is_flagged(surf_id);
     if ((random_int() & 1) || material == 0) {
         big = TRUE;
     } else {
@@ -150,14 +151,14 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         if (big) {
             snd = (u32) random_int() % 3 + 0x459;
             if (D_80082FA0 == 0) {
-                func_1000FA64(snd, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0x4000, 0x4B0, 0x320, (s32) func_1000EC24,
+                sfx_emitter_start(snd, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0x4000, 0x4B0, 0x320, (s32) sfx_cb_delayed_play_2d,
                               (void *) 0x28, 0, 0, 0);
                 snd = 0x106;
             }
         } else {
             snd = 0xB0;
         }
-        func_10010E78(0, snd, 0x6590, (u32) random_int() % 500 - 250, 0, 0, (s32) pos[0], (s32) pos[1],
+        sound_voice_play_at(0, snd, 0x6590, (u32) random_int() % 500 - 250, 0, 0, (s32) pos[0], (s32) pos[1],
                       (s32) pos[2], 500, 800);
     }
     if (random_float() < D_800DCE54) {
@@ -203,13 +204,13 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         sparks.b71 = 0;
         sparks.b72 = 0xFF;
         sparks.b73 = 0xFF;
-        func_151530A8(&sparks, arg4, arg5);
+        emit_streaks_from_spec(&sparks, arg4, arg5);
     }
     if (type != 0 && D_80082FA0 < 2) {
         part.pos[0] = pos[0];
         part.pos[1] = pos[1];
         part.pos[2] = pos[2];
-        func_15145974(dir, &part.rot[1], &part.rot[0]);
+        vec3_to_yaw_pitch_deg(dir, &part.rot[1], &part.rot[0]);
         part.b58 = 0;
         part.w5C = 0;
         part.b60 = 0xFF;
@@ -230,7 +231,7 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
         part.rot[2] = 0.0f;
         part.kind = type;
         if (big) {
-            if (func_15145128(dir, normal, &na, &nb) != 0) {
+            if (vec3_normalize_len(dir, normal, &na, &nb) != 0) {
                 speed = random_float() * 12.0f + 3.0f;
                 part.life = (u32) random_int() % 11 + 0x1E;
                 part.vel[0] = -normal[0] * speed;
@@ -242,7 +243,7 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
                 part.spin[3] = (random_float() * 449.0f + -744.0f) * 0.001f;
                 part.tex = 0x39E8;
                 part.b61 = 8;
-                func_15132FBC(&part, 3, 0xFF, 0, arg4, arg5);
+                mdl_particle_spawn(&part, 3, 0xFF, 0, arg4, arg5);
             }
         } else {
             trail.life = (random_int() & 0xF) + 0x14;
@@ -259,7 +260,7 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
             part.tex = 0x3980;
             part.b61 = 0xC;
             part.spin[3] = 0.0f;
-            p = func_15132FBC(&part, 3, 0xFF, 0x10, arg4, arg5);
+            p = mdl_particle_spawn(&part, 3, 0xFF, 0x10, arg4, arg5);
             if (p != NULL) {
                 memcpy(p + 0x170, &trail, sizeof(trail));
             }
@@ -271,16 +272,17 @@ s32 func_151D3A30(f32 *pos, f32 *dir, ImpactSurface *hit, s32 kind, s32 arg4, s3
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D3A30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/bullet_impact_effects.s")
 #endif
 
-s32 func_151D4300(u8 *arg0) {
+/* was func_151D4300 */
+s32 impact_puff_wobble_update(u8 *arg0) {
     u8 *v;
 
     v = arg0 + 0x170;
     if (*(s16 *)(arg0 + 0x170) > 0) {
         *(f32 *)(v + 4) = (*(f32 *)(v + 8) * D_800BE9A4) + *(f32 *)(v + 4);
-        *(f32 *)(v + 4) = func_15144B68(*(f32 *)(v + 4));
+        *(f32 *)(v + 4) = wrap_angle_rad(*(f32 *)(v + 4));
         *(f32 *)(arg0 + 0x24) = *(f32 *)(arg0 + 0x54) + (*(f32 *)(v + 0xC) * sinf(*(f32 *)(v + 4)));
         *(s16 *)(v + 0) = *(s16 *)(v + 0) - D_800BE9E4;
     } else {
@@ -289,11 +291,12 @@ s32 func_151D4300(u8 *arg0) {
     return 1;
 }
 
-void func_151D43B4(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
+/* was func_151D43B4 */
+void obj_bone_point_or_pos(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
     u8 *temp_v0;
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0x1D4));
     if (temp_v0 != 0) {
-        func_15143134(arg2, (u8 *) arg1, (u8 *)((s32)temp_v0 + (arg3 << 6)));
+        mtx_transform_point_or_origin(arg2, (u8 *) arg1, (u8 *)((s32)temp_v0 + (arg3 << 6)));
         return;
     }
     (*(f32 *)((u8 *)arg1 + 0)) = (f32) (*(f32 *)((u8 *)arg0 + 0x14));
@@ -305,7 +308,8 @@ void func_151D43B4(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
 /* P159 */
 // object_sound_between: plays sound `sound` (attack_spawn_at_point) at the midpoint of a and b for object obj (its index
 // in D_800CC2D0); the facing is obj's u16 at +0x76, minus the s16 at +0x12 of its parent (+0x31C) when it has one.
-void func_151D441C(struct127 *obj, f32 *a, f32 *b, s32 sound) {
+/* was func_151D441C */
+void object_effect_between(struct127 *obj, f32 *a, f32 *b, s32 sound) {
     u8 *parent;
     u16 facing;
 
@@ -319,10 +323,11 @@ void func_151D441C(struct127 *obj, f32 *a, f32 *b, s32 sound) {
                   facing, 0, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D441C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_effect_between.s")
 #endif
 
-void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151D44C4 */
+void muzzle_light_small_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
     s32 sp3C[3];
 
@@ -336,7 +341,8 @@ void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2) {
     light_create_with_ctrl(sp48, sp3C, (random_int() % 13U) + 0x14, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
 }
 
-void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151D45A4 */
+void explosion_light_spawn(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
     s32 sp3C[3];
 
@@ -355,9 +361,10 @@ void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
 s32 attack_spawn_at_point(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
 // object_sounds_at: plays the sounds `sound1` and `sound2` (attack_spawn_at_point) at pos for object obj (its index in
 // D_800CC2D0) with `flags` and a source point: with dir, pos - 90 * dir and dir's binary angle - 0x4000 (odd) as
-// facing; without, pos raised by half the height of `model` (func_1507C7C0, when given) and facing 0. arg4 is
+// facing; without, pos raised by half the height of `model` (obj_collision_cylinder, when given) and facing 0. arg4 is
 // unused. Returns 0 (the asm leaves v0 unset; the caller ignores it).
-s32 func_151D4684(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4, s32 sound1, s32 sound2, s32 flags) {
+/* was func_151D4684 */
+s32 object_effects_at(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4, s32 sound1, s32 sound2, s32 flags) {
     f32 at[3];
     s16 height;
     f32 a;
@@ -378,7 +385,7 @@ s32 func_151D4684(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4
         ((s32 *)at)[1] = ((s32 *)pos)[1];
         ((s32 *)at)[2] = ((s32 *)pos)[2];
         if (model != NULL) {
-            func_1507C7C0(model, &height, NULL, NULL);
+            obj_collision_cylinder(model, &height, NULL, NULL);
             at[1] += height >> 1;
         }
         facing = 0;
@@ -389,14 +396,15 @@ s32 func_151D4684(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4684.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_effects_at.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P155 */
 // object_sound_at: plays sound `sound` (attack_spawn_at_point) at pos for object obj (its index in D_800CC2D0), with the
 // direction of dir (x / z, binary angle - 0x4000, odd) or 0 without dir. arg3 is unused.
-void func_151D4898(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
+/* was func_151D4898 */
+void object_effect_at(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
     f32 a;
     u32 angle;
     s32 facing;
@@ -411,12 +419,13 @@ void func_151D4898(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
     attack_spawn_at_point(pos[0], pos[1], pos[2], sound, obj - D_800CC2D0, facing, 0, 0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4898.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_effect_at.s")
 #endif
 
 typedef struct { f32 x, y, z; } V3;
 
-void func_151D49B8(u8 *arg0, u8 *arg1, s32 arg2, u8 *arg3, f32 arg4, u8 arg5, s32 arg6) {
+/* was func_151D49B8 */
+void bone_streak_fx_start(u8 *arg0, u8 *arg1, s32 arg2, u8 *arg3, f32 arg4, u8 arg5, s32 arg6) {
     struct {
         s32 u38[6];
         u8 pad50[0x4];
@@ -461,7 +470,7 @@ void func_151D49B8(u8 *arg0, u8 *arg1, s32 arg2, u8 *arg3, f32 arg4, u8 arg5, s3
         s32 uCC;
     } sp;
 
-    func_1503F6F4(arg2, &sp.u38[3], &sp.u38[4], &sp.u38[5], &sp.u54[4], &sp.u68[0], &sp.u68[1], &sp.u38[0], &sp.u38[1], &sp.u38[2]);
+    mtx_decompose(arg2, &sp.u38[3], &sp.u38[4], &sp.u38[5], &sp.u54[4], &sp.u68[0], &sp.u68[1], &sp.u38[0], &sp.u38[1], &sp.u38[2]);
     sp.u54[4] += 180.0f;
     {
         f32 temp_f0;
@@ -502,11 +511,12 @@ void func_151D49B8(u8 *arg0, u8 *arg1, s32 arg2, u8 *arg3, f32 arg4, u8 arg5, s3
         sp.uC4 = (*(u8 *)((u8 *)arg3 + 0x3B));
         sp.uC6 = 6;
         sp.uC8 = 0x2A;
-        func_15132FBC((u8 *)&sp.u54, 3, 0xFF, 0, (s32) arg5, arg6);
+        mdl_particle_spawn((u8 *)&sp.u54, 3, 0xFF, 0, (s32) arg5, arg6);
     }
 }
 
-void func_151D4668(u8 *arg0) {
+/* was func_151D4668 */
+void obj_point_fx_broadcast_kill(u8 *arg0) {
     struct {
         u8 *unk0;
         u8 unk4;
@@ -535,7 +545,8 @@ typedef struct {
 // object_point_effect_spawn: fills a 0x20-byte record (object, kind, the kind's point on the object from the
 // D_80090010 handler when the object has bone matrices and obj[0x74] low nibble != 0xF) and spawns event 0x41 /
 // kind 0x35 through func_15149130 with it. Returns 0 (callers in game_981E0 declare it implicitly as int).
-s32 func_151D469C(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
+/* was func_151D469C */
+s32 object_point_effect_spawn(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
     ObjEffectRec_151D469C rec;
     u8 *p;
 
@@ -559,13 +570,13 @@ s32 func_151D469C(u8 *obj, u8 kind, s16 arg2, u8 arg3, s32 arg4) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D469C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_point_effect_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-/* P222: readable C for func_151D4D44 (game_eu_201240, 297 words). */
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-f32 func_15143E64(struct17 *arg0);
+/* P222: readable C for object_trail_smoke_update (game_eu_201240, 297 words). */
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+f32 vec3_length(struct17 *arg0);
 
 typedef struct {
     s32 w00;        /* 0x00 0x200005 */
@@ -594,14 +605,15 @@ typedef struct {
     f32 fC;             /* 0.915686 */
 } SmokeData_151D4D44;   /* copied to the particle's +0xA8 */
 
-// object_trail_smoke_update: update handler (table D_8008A980) of the event record that func_151D469C spawns (kind
+// object_trail_smoke_update: update handler (table D_8008A980) of the event record that object_point_effect_spawn spawns (kind
 // 0x35, its 0x20-byte object record at +0x28: object, id, sound, point kind, accumulator +0x34, flags +0x38, point
 // +0x3C). Ends the event (+0xE = -1) when the object is gone or reused (id +0x2C != obj[0x3B]). Re-reads the point from
 // the object's D_80090010 handler (bone matrices present and obj[0x74] low nibble != 0xF). When the old point was
 // valid and the point moved at most 5 units, the accumulator grows by (0.2 + rand * 0.209) per second and each whole
-// unit emits one smoke particle (func_151307F0, layer ev[0xC] / ev[1]) at a random spot on the move segment, with
+// unit emits one smoke particle (particle_spawn_ex, layer ev[0xC] / ev[1]) at a random spot on the move segment, with
 // random size / alpha / life and its 16-byte data at +0xA8.
-void func_151D4D44(u8 *ev) {
+/* was func_151D4D44 */
+void object_trail_smoke_update(u8 *ev) {
     ObjEffectRec_151D469C *rec = (ObjEffectRec_151D469C *) (ev + 0x28);
     u8 *obj;
     struct17 old;
@@ -630,7 +642,7 @@ void func_151D4D44(u8 *ev) {
     d.unk0 = rec->point[0] - old.unk0;
     d.unk4 = rec->point[1] - old.unk4;
     d.unk8 = rec->point[2] - old.unk8;
-    if (func_15143E64(&d) > 5.0f) {
+    if (vec3_length(&d) > 5.0f) {
         return;
     }
     rec->unkC += (0.2f + random_float() * 0.209f) * D_800BE9A4;
@@ -685,7 +697,7 @@ void func_151D4D44(u8 *ev) {
         spec.rgba1[3] = (u32) random_int() % 61 + 0x3C;
         spec.life = (u32) random_int() % 11 + 0x46;
         spec.size[0] = spec.size[1] = random_float() * 40.0f + 40.0f;
-        p = (u8 *) func_151307F0((s32) &spec, 1, 0, 0x10, ev[0xC], ev[1]);
+        p = (u8 *) particle_spawn_ex((s32) &spec, 1, 0, 0x10, ev[0xC], ev[1]);
         if (p != NULL) {
             memcpy(p + 0xA8, &data, 0x10);
         }
@@ -693,10 +705,11 @@ void func_151D4D44(u8 *ev) {
     } while (rec->unkC > 1.0f);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4D44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_trail_smoke_update.s")
 #endif
 
-void func_151D51E8(struct102 *arg0, u8 *arg1, u8 arg2)
+/* was func_151D51E8 */
+void obj_point_fx_on_message(struct102 *arg0, u8 *arg1, u8 arg2)
 {
   u8 *p = (u8 *)arg0 + 0x28;
   if (arg2 == 0x3C) {
@@ -714,59 +727,62 @@ void func_151D51E8(struct102 *arg0, u8 *arg1, u8 arg2)
 }
 
 #ifdef NON_MATCHING
-// P231 (P230 implicit_scan): func_15131EC8 takes (f32 *, f32); the matching C below calls it without a prototype and
+// P231 (P230 implicit_scan): vec_damp_xyz_per_tick takes (f32 *, f32); the matching C below calls it without a prototype and
 // passes the f32's bit pattern as an int (lands in a1 either way on N64, wrong type on the port). Same fix as
-// func_150AFBC4 (game_eu_DCEF0, P230).
-void func_15131D98(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3);
-void func_15131EC8(f32 *arg0, f32 arg1);
-s32 func_151D52B4(u8 *arg0, s32 arg1) {
+// particle_wobble_damp_update (game_eu_DCEF0, P230).
+void particle_update_wobble_offset(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3);
+void vec_damp_xyz_per_tick(f32 *arg0, f32 arg1);
+/* was func_151D52B4 */
+s32 trail_smoke_particle_update(u8 *arg0, s32 arg1) {
     u8 *p = arg0 + 0xA8;
 
-    func_15131D98(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
-    func_15131EC8((f32 *)(arg0 + 0x58), *(f32 *)(p + 0xC));
+    particle_update_wobble_offset(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
+    vec_damp_xyz_per_tick((f32 *)(arg0 + 0x58), *(f32 *)(p + 0xC));
     return 1;
 }
 #else
-s32 func_151D52B4(u8 *arg0, s32 arg1) {
+s32 trail_smoke_particle_update(u8 *arg0, s32 arg1) {
     u8 *p = arg0 + 0xA8;
 
-    func_15131D98(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
-    func_15131EC8(arg0 + 0x58, *(s32 *)(p + 0xC));
+    particle_update_wobble_offset(arg0, arg0 + 0xAC, p, arg0 + 0xAA);
+    vec_damp_xyz_per_tick(arg0 + 0x58, *(s32 *)(p + 0xC));
     return 1;
 }
 #endif
 
 #ifdef NON_MATCHING
-/* P160: func_151D469C takes the object as a pointer */
-// object_bone_point_effects: spawns the point effects of bone points 0 and 1 of obj (func_151D469C kinds 0, 1)
-void func_151D5308(s32 arg0) {
-    func_151D469C((u8 *)arg0, 0, 0x50, 0xFF, 1);
-    func_151D469C((u8 *)arg0, 1, 0x50, 0xFF, 1);
+/* P160: object_point_effect_spawn takes the object as a pointer */
+// object_bone_point_effects: spawns the point effects of bone points 0 and 1 of obj (object_point_effect_spawn kinds 0, 1)
+/* was func_151D5308 */
+void object_bone_point_effects(s32 arg0) {
+    object_point_effect_spawn((u8 *)arg0, 0, 0x50, 0xFF, 1);
+    object_point_effect_spawn((u8 *)arg0, 1, 0x50, 0xFF, 1);
 }
 #else
-void func_151D5308(s32 arg0) {
-    func_151D469C(arg0, 0, 0x50, 0xFF, 1);
-    func_151D469C(arg0, 1, 0x50, 0xFF, 1);
+void object_bone_point_effects(s32 arg0) {
+    object_point_effect_spawn(arg0, 0, 0x50, 0xFF, 1);
+    object_point_effect_spawn(arg0, 1, 0x50, 0xFF, 1);
 }
 #endif
 
 #ifdef NON_MATCHING
 /* P179 */
-void func_151C2600(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4);
+void hit_spark_sound_play(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4);
 void object_impact_effects(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5);
 void obj_set_dying_flags(struct127 *arg0);
 void object_hit_effect(struct127 *arg0, s32 arg1, s32 arg2);
 s32 obj_send_hit(struct127 *, s32, u16, s32);
 
 // object_take_hit: P179: a hit on `obj` by `attacker` (or NULL) at `pos` / `pos2`, direction `dir`, hit record `rec`
-/* (or NULL). Body kinds that react with a spark (the list below) get func_151C2600 (attacker, pos, dir, 9, rec +4
+/* (or NULL). Body kinds that react with a spark (the list below) get hit_spark_sound_play (attacker, pos, dir, 9, rec +4
  * or 0). A kind-0xA / type-3 hit record (rec +0x58 / +0x59) wears down the shield count obj +0x1CA: at 3 or more it
  * loses one, else it is cleared, obj_set_dying_flags / object_hit_effect (obj, 0xFF, 1) run and the message flags become
  * 0x100020 (else `flags` | 0x60000). Then object_impact_effects (obj, pos, pos2, dir, arg7, arg8); and only if the count
  * was non-zero on entry, the message obj_send_hit(obj, flags | 0x80000, (dir angle - 0x4000) | 1, attacker index
  * or -1). The angle is func_150484A0(dir x, dir z) x 65536 / 2pi converted as IDO's float -> unsigned (negative ->
  * 0xFFFF). */
-void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
+/* was func_151D535C */
+void object_take_hit(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
     u8 count;
     s32 untouched;
     s32 w;
@@ -779,7 +795,7 @@ void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags
         case 0x60: case 0x61: case 0x66: case 0x67: case 0x70: case 0x73: case 0x77: case 0x7B: case 0x89:
         case 0x8C: case 0x8E: case 0x8F: case 0x91: case 0x9E: case 0xA6: case 0xAB: case 0xAC: case 0xB2:
         case 0xB4: case 0x5B:
-            func_151C2600(attacker, pos, (u8 *) dir, 9, (rec != NULL) ? *(f32 *)(rec + 4) : 0.0f);
+            hit_spark_sound_play(attacker, pos, (u8 *) dir, 9, (rec != NULL) ? *(f32 *)(rec + 4) : 0.0f);
             break;
     }
     count = obj[0x1CA];
@@ -805,10 +821,11 @@ void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags
                   (attacker != NULL) ? (struct127 *) attacker - D_800CC2D0 : -1);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D535C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_take_hit.s")
 #endif
 
-void func_151D56F8(u8 *arg0) {
+/* was func_151D56F8 */
+void weapon_count_shot(u8 *arg0) {
     if (*(s16 *)(*(u8 **)(arg0 + 0x31C) + 0x24) > 0) {
         *(s16 *)(*(u8 **)(arg0 + 0x31C) + 0x24) -= 1;
     }
@@ -816,7 +833,8 @@ void func_151D56F8(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_151D5724(u8 *arg0, u8 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, u8 *arg5, u8 *arg6, u8 **arg7, u8 **arg8, u8 *arg9) {
+/* was func_151D5724 */
+void weapon_find_aim_target(u8 *arg0, u8 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, u8 *arg5, u8 *arg6, u8 **arg7, u8 **arg8, u8 *arg9) {
     u8 *sp54;
     struct17 sp48;
     struct17 sp3C;
@@ -833,8 +851,8 @@ void func_151D5724(u8 *arg0, u8 *arg1, struct17 *arg2, struct17 *arg3, struct17 
         temp_v0 = (*(u8 **)((u8 *)arg0 + 0x31C));
         if ((temp_v0 != NULL) && (((*(u8 *)((u8 *)temp_v0 + 0x198)) == 2) || ((*(u8 *)((u8 *)temp_v0 + 0x84)) != 0))) {
             sp54 = temp_v0 + 0x13C;
-            func_151450B4(arg2, arg3, &sp48);
-            func_151450B4(&sp48, arg4, &sp3C);
+            vec3_cross(arg2, arg3, &sp48);
+            vec3_cross(&sp48, arg4, &sp3C);
             if (arg9 != NULL) {
                 var_f14 = (*(f32 *)((u8 *)arg9 + 0)) - (*(f32 *)((u8 *)sp54 + 0));
                 var_f16 = (*(f32 *)((u8 *)arg9 + 4)) - (*(f32 *)((u8 *)sp54 + 4));
@@ -863,12 +881,13 @@ void func_151D5724(u8 *arg0, u8 *arg1, struct17 *arg2, struct17 *arg3, struct17 
     *arg8 = NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5724.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/weapon_find_aim_target.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1516547C(s32, s32, s32 *, s32, s32);
+s32 cam_wobble_start_preset(s32, s32, s32 *, s32, s32);
 
-void func_151D58E4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
+/* was func_151D58E4 */
+void cam_shake_all_players(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     struct {
         s32 u3C;
         u8 pad40[0x8];
@@ -887,13 +906,13 @@ void func_151D58E4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32
     sp.u50 = arg3;
     if ((D_80082FA0 + 1) > 0) {
         do {
-            func_1516547C(arg4 & 0xFF, var_s0 & 0xFF, &sp.u3C, arg5 & 0xFF, arg6);
+            cam_wobble_start_preset(arg4 & 0xFF, var_s0 & 0xFF, &sp.u3C, arg5 & 0xFF, arg6);
             var_s0 += 1;
         } while (D_80082FA0 >= var_s0);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D58E4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/cam_shake_all_players.s")
 #endif
 typedef struct {
     struct17 pos;
@@ -902,7 +921,8 @@ typedef struct {
     f32 unk14;
     u8 unk18;
 } Blk_151D5404;
-void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7) {
+/* was func_151D5404 */
+void rumble_all_players_at(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7) {
     s32 i;
     Blk_151D5404 sp38;
     structEU_151D8E18 sp30;
@@ -919,7 +939,7 @@ void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 a
     for (i = 0; i < D_80082FA0 + 1; i++) {
         sp30.unk5 = 1 << i;
         sp38.unk18 = i;
-        p = func_151D8E18(&sp30, 0x1C, 0xFF, 0);
+        p = rumble_request(&sp30, 0x1C, 0xFF, 0);
         if (p != 0) {
             memcpy((u8 *)p + 0x18, &sp38, 0x1C);
         }
@@ -928,11 +948,12 @@ void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 a
 
 #ifdef NON_MATCHING
 /* P155 */
-void func_15150258(u8 *, u8, s32);
-// smoke_cloud_spawn: spawns a smoke cloud at pos (f32[3]) through func_15150258 with a fixed emitter block (0x5C
+void emit_random_sprites(u8 *, u8, s32);
+// smoke_cloud_spawn: spawns a smoke cloud at pos (f32[3]) through emit_random_sprites with a fixed emitter block (0x5C
 // bytes: 9 puffs over 3 frames, colours 323 / 214 / 203 / 263, sizes 677..895, drift (0.602, -1.732, 1.512) at 45).
-// Returns 0 (the asm leaves func_15150258's v0; callers ignore it).
-s32 func_151D5AC4(u8 *pos, u8 arg1, s32 arg2) {
+// Returns 0 (the asm leaves emit_random_sprites's v0; callers ignore it).
+/* was func_151D5AC4 */
+s32 smoke_cloud_spawn(u8 *pos, u8 arg1, s32 arg2) {
     struct {
         s16 u1C;
         s16 u1E;
@@ -990,39 +1011,41 @@ s32 func_151D5AC4(u8 *pos, u8 arg1, s32 arg2) {
     sp.u70 = 0xC;
     sp.u72 = 0x14;
     sp.u74 = 0;
-    func_15150258((u8 *)&sp, arg1, arg2);
+    emit_random_sprites((u8 *)&sp, arg1, arg2);
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5AC4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/smoke_cloud_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
+s32 spark_shower_spawn(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
 #else
-void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
+void spark_shower_spawn(u8 *, f32, s32, f32, f32, u8, s32);
 #endif
-s32 func_151D5AC4(u8 *, u8, s32);
+s32 smoke_cloud_spawn(u8 *, u8, s32);
 
-void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2) {
+/* was func_151D5BF8 */
+void explosion_smoke_flash_spawn(u8 *arg0, u8 arg1, s32 arg2) {
 
-    func_151D5AC4(arg0, arg1, arg2);
-    func_151D45A4(arg0, arg1, arg2);
+    smoke_cloud_spawn(arg0, arg1, arg2);
+    explosion_light_spawn(arg0, arg1, arg2);
 #ifdef NON_MATCHING
-    func_15154728(arg0, (random_float() * 4.0f) + 12.0f, 1.6409999f, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FD20C49) */
+    spark_shower_spawn(arg0, (random_float() * 4.0f) + 12.0f, 1.6409999f, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FD20C49) */
 #else
-    func_15154728(arg0, (random_float() * 4.0f) + 12.0f, 0x3FD20C49, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2);
+    spark_shower_spawn(arg0, (random_float() * 4.0f) + 12.0f, 0x3FD20C49, (random_int() % 56U) + 0xC8, 0.0f, arg1, arg2);
 #endif
 }
 
 #ifdef NON_MATCHING
 /* P155 */
-void func_15145EA4(f32 **, f32 **, void *, s32);
-void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+void bone_streak_fx_start(u8 *, u8 *, s32, u8 *, f32, u8, s32);
 // bone_beam_spawn: unless obj has no bone matrices (+0x1D4) or is hidden (+0x74 low nibble 0xF), transforms the
-// points a and b by bone `bone` (func_15145EA4, two points) and starts the effect func_151D49B8 at a's world
+// points a and b by bone `bone` (mtx_transform_points, two points) and starts the effect bone_streak_fx_start at a's world
 // position along b - a (with the bone matrix, obj, scale, alpha and flags).
-void func_151D5714(struct127 *obj, f32 *a, f32 *b, u8 bone, f32 scale, u8 alpha, s32 flags) {
+/* was func_151D5714 */
+void bone_beam_spawn(struct127 *obj, f32 *a, f32 *b, u8 bone, f32 scale, u8 alpha, s32 flags) {
     f32 *outs[2];
     f32 *ins[2];
     u8 *mtx;
@@ -1037,29 +1060,30 @@ void func_151D5714(struct127 *obj, f32 *a, f32 *b, u8 bone, f32 scale, u8 alpha,
     mtx = (u8 *)obj->unk1D4 + bone * 64;
     ins[0] = a;
     ins[1] = b;
-    func_15145EA4(ins, outs, mtx, 2);
+    mtx_transform_points(ins, outs, mtx, 2);
     dir[0] -= at[0];
     dir[1] -= at[1];
     dir[2] -= at[2];
-    func_151D49B8((u8 *)at, (u8 *)dir, (s32)mtx, (u8 *)obj, scale, alpha, flags);
+    bone_streak_fx_start((u8 *)at, (u8 *)dir, (s32)mtx, (u8 *)obj, scale, alpha, flags);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5714.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/bone_beam_spawn.s")
 #endif
 
 #ifdef NON_MATCHING
 extern f32 *D_8009002C[]; /* P216: per-mouth point (2 entries) */
 extern u8 *D_80090034[];  /* P216: per-mouth bone index (2 entries) */
-s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
-void func_15063A54(struct127 *);
-s32 func_151D5FC8(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *point, u8 bone);
+s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+void obj_notify_hit_target(struct127 *);
+s32 object_mouth_point(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *point, u8 bone);
 // mouth_aim_ray: P216: for mouth `which` (0 / 1, table D_8009002C point + D_80090034 bone): the mouth point and
-// aim direction (func_151D5FC8), the impact / target search (func_151D5724, two result pointers, NULL = use the
+// aim direction (object_mouth_point), the impact / target search (weapon_find_aim_target, two result pointers, NULL = use the
 // mouth point / the direction), then the control block (obj +0x31C) gets flag +0x109 = 1 and the far point
-// +0xB8 = hitA + hitB * 9999. The segment from the mouth to that point is normalised (func_15145128) and, when it has
-// a length, cast as a ray (func_15081A90, result at control +0xB0, range 1.01 * length). Ends with func_15063A54.
-// Callers (func_15063AA0, asm) ignore v0.
-void func_151D5DA8(struct127 *obj, u8 which) {
+// +0xB8 = hitA + hitB * 9999. The segment from the mouth to that point is normalised (vec3_normalize_len) and, when it has
+// a length, cast as a ray (ray_cast_world, result at control +0xB0, range 1.01 * length). Ends with obj_notify_hit_target.
+// Callers (obj_run_pending_actions, asm) ignore v0.
+/* was func_151D5DA8 */
+void mouth_aim_ray(struct127 *obj, u8 which) {
     f32 mouth[3];
     f32 dir[3];
     f32 sp94[3];
@@ -1072,8 +1096,8 @@ void func_151D5DA8(struct127 *obj, u8 which) {
     f32 len;
     u8 *ctl;
 
-    func_151D5FC8(obj, mouth, dir, (s32)sp94, (s32)sp88, D_8009002C[which], *D_80090034[which]);
-    func_151D5724((u8 *)obj, (u8 *)mouth, (struct17 *)dir, (struct17 *)sp94, (struct17 *)sp88, (u8 *)sp7C,
+    object_mouth_point(obj, mouth, dir, (s32)sp94, (s32)sp88, D_8009002C[which], *D_80090034[which]);
+    weapon_find_aim_target((u8 *)obj, (u8 *)mouth, (struct17 *)dir, (struct17 *)sp94, (struct17 *)sp88, (u8 *)sp7C,
                   (u8 *)sp70, (u8 **)&hitA, (u8 **)&hitB, NULL);
     ((u8 *)obj->unk31C)[0x109] = 1;
     if (hitA == NULL) {
@@ -1090,34 +1114,35 @@ void func_151D5DA8(struct127 *obj, u8 which) {
         seg[0] = *(f32 *)(ctl + 0xB8) - mouth[0];
         seg[1] = *(f32 *)((u8 *)obj->unk31C + 0xBC) - mouth[1];
         seg[2] = *(f32 *)((u8 *)obj->unk31C + 0xC0) - mouth[2];
-        if (func_15145128(seg, seg, &len, NULL) != 0) {
-            func_15081A90(obj, mouth[0], mouth[1], mouth[2], seg[0], seg[1], seg[2], (u8 *)obj->unk31C + 0xB0,
+        if (vec3_normalize_len(seg, seg, &len, NULL) != 0) {
+            ray_cast_world(obj, mouth[0], mouth[1], mouth[2], seg[0], seg[1], seg[2], (u8 *)obj->unk31C + 0xB0,
                           len * 1.01f, 0, 0, 0, -1, 0, 0);
         }
     }
-    func_15063A54(obj);
+    obj_notify_hit_target(obj);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5DA8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/mouth_aim_ray.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P155 */
-void func_15145EA4(f32 **, f32 **, void *, s32);
-// object_mouth_point: P155: func_15145740 (obj, dir, arg3, arg4, 0.811), then out = `point` transformed by obj's
-// bone `bone` (func_15145EA4) or, without bone matrices, obj's position + 49 up + 34 to the side of dir (x / z
+void mtx_transform_points(f32 **, f32 **, void *, s32);
+// object_mouth_point: P155: obj_get_aim_vectors (obj, dir, arg3, arg4, 0.811), then out = `point` transformed by obj's
+// bone `bone` (mtx_transform_points) or, without bone matrices, obj's position + 49 up + 34 to the side of dir (x / z
 // normalised, (0, 1) when both are below 0.0001). Returns 0 (the asm leaves v0 unset; the caller ignores it).
-s32 func_151D5FC8(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *point, u8 bone) {
+/* was func_151D5FC8 */
+s32 object_mouth_point(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *point, u8 bone) {
     f32 *ins[1];
     f32 *outs[1];
     f32 n;
     f32 sx, sz;
 
-    func_15145740(obj, (s32)dir, arg3, arg4, 0.81100005f);
+    obj_get_aim_vectors(obj, (s32)dir, arg3, arg4, 0.81100005f);
     if (obj->unk1D4 != NULL) {
         outs[0] = out;
         ins[0] = point;
-        func_15145EA4(ins, outs, (u8 *)obj->unk1D4 + bone * 64, 1);
+        mtx_transform_points(ins, outs, (u8 *)obj->unk1D4 + bone * 64, 1);
         return 0;
     }
     if (fabsf(dir[0]) > 0.0001f || fabsf(dir[2]) > 0.0001f) {
@@ -1134,17 +1159,18 @@ s32 func_151D5FC8(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *p
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5FC8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/object_mouth_point.s")
 #endif
 
 #ifdef NON_MATCHING
 /* P159 */
 extern s32 (*D_80087030[])(u8 *, s32, s32);
-// objects_hit_by_segment: tests the segment start / dir (func_151452C4) against every live object of D_800CC2D0
+// objects_hit_by_segment: tests the segment start / dir (ray_sphere_intersect) against every live object of D_800CC2D0
 // (not self, kind byte +4 not 0xFF unless level 0x23, state +5 not 3, flag 0x40 at +0xF8, passing filter
 // D_80087030[filter](obj, self, filterArg) unless filter is -1) as a sphere at its position raised by +0xD6 with
 // diameter 2 * max(+0xD2, +0xD4). Returns a mask with bit i cleared for each hit object i (all other bits set).
-s32 func_151D611C(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterArg) {
+/* was func_151D611C */
+s32 objects_hit_by_segment(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterArg) {
     f32 center[3];
     f32 out0[3];
     f32 out1[3];
@@ -1184,7 +1210,7 @@ s32 func_151D611C(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterArg) {
         center[0] = *(f32 *)(obj + 0x14);
         center[1] = *(f32 *)(obj + 0x18) + (f32)*(s16 *)(obj + 0xD6);
         center[2] = *(f32 *)(obj + 0x1C);
-        if (func_151452C4((struct17 *)start, (struct17 *)dir, (struct17 *)center, radius + radius, (s32)out0,
+        if (ray_sphere_intersect((struct17 *)start, (struct17 *)dir, (struct17 *)center, radius + radius, (s32)out0,
                           (s32)out1, &dist0, &dist1)) {
             mask &= ~(1 << i);
         }
@@ -1192,12 +1218,13 @@ s32 func_151D611C(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterArg) {
     return mask;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D611C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/objects_hit_by_segment.s")
 #endif
 
 s32 allocate_memory(s32, s32, s32, s32);
 
-void func_151D6310(s32 *arg0, s16 arg1, s32 arg2, s32 *arg3, u8 *arg4) {
+/* was func_151D6310 */
+void vtx_slot_buffer_get(s32 *arg0, s16 arg1, s32 arg2, s32 *arg3, u8 *arg4) {
     u8 dummy;
 
     if (arg4 == NULL) {
@@ -1215,7 +1242,8 @@ void func_151D6310(s32 *arg0, s16 arg1, s32 arg2, s32 *arg3, u8 *arg4) {
     *arg3 = arg0[arg1] + (D_800BE9C0 ? 0 : arg2);
 }
 
-void func_151D5E30(s32 **arg0)
+/* was func_151D5E30 */
+void vtx_slot_buffers_free(s32 **arg0)
 {
   s32 *new_var;
   u8 i;
@@ -1228,6 +1256,6 @@ void func_151D5E30(s32 **arg0)
     if (t)
     {
       new_var = arg0[i]; // fakematch: re-load of the element after the test
-      func_100043B4(new_var, 3);
+      heap_set_block_tag(new_var, 3);
  } }
 }

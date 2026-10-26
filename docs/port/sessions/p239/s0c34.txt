@@ -1,3 +1,3 @@
-# P239 setups for func_15190C34 (bone_sparks_owner_release). self 0x80450000, owner 0x80460000, attachment 0x80470000. Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
+# P239 setups for bone_sparks_owner_release (bone_sparks_owner_release). self 0x80450000, owner 0x80460000, attachment 0x80470000. Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
 att ! 0=80450000 ! 80450010=80460000,8046031C=80470000,804701AC=7F7F7F7F ! ! ! ! !
 none ! 0=80450000 ! 80450010=80460000,8046031C=00000000 ! ! ! ! !

@@ -1,15 +1,15 @@
 extern f32 D_800AAE24[4]; /* the ember emitter's 4 float parameters (D_800AAE24..D_800AAE30) */
-s32 func_151530A8(s32 *, u8, s32);
-s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 emit_streaks_from_spec(s32 *, u8, s32);
+s32 particle_spawn_ex(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 random_int(void);
 f32 random_float(void);
 
 // fire_embers_spawn: the ember burst of a fire at `pos` (room `room`, owner `owner`): an ember emitter
-// (func_151530A8, type 5 / 7, 4 parameters from D_800AAE24, sizes 15 / 30, colour block, handlers 0x200005 /
-// 0x60600), one glow sprite (func_151307F0: texture 0x2B of set 0x4403, 6..12 frames, half size 106..302, fade from
+// (emit_streaks_from_spec, type 5 / 7, 4 parameters from D_800AAE24, sizes 15 / 30, colour block, handlers 0x200005 /
+// 0x60600), one glow sprite (particle_spawn_ex: texture 0x2B of set 0x4403, 6..12 frames, half size 106..302, fade from
 // 3 at rate 0x55, random flip flags 0x40 / 0x80) and a light flash (light_create_with_ctrl: 6..12 frames, type 5 or 6) at the
 // truncated position.
-void func_151C384C(void *arg0, u8 room, s32 owner) {
+void fire_embers_spawn(void *arg0, u8 room, s32 owner) {
     f32 *pos = arg0;
     struct {
         s32 type;       /* +0x00: 5 */
@@ -134,7 +134,7 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
     emit.u71 = 0;
     emit.u72 = -1;
     emit.u73 = -1;
-    func_151530A8((s32 *) &emit, room, owner);
+    emit_streaks_from_spec((s32 *) &emit, room, owner);
 
     req.texture = 0x2B;
     req.texSet = 0x4403;
@@ -178,7 +178,7 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
     req.u63 = -1;
     req.u64 = -1;
     req.u65 = 4;
-    func_151307F0((s32) &req, 1, 0, 0, room, owner);
+    particle_spawn_ex((s32) &req, 1, 0, 0, room, owner);
 
     flash.unk0 = 3;
     flash.unk1 = -1;

@@ -12,8 +12,8 @@
 \#^        life = (random_int() & 0xF) + 10;$#s/+ 10/+ 11/
 \#^        life = (random_int() & 0xF)#s/0xF)/0x1F)/
 \#^        vx = (s32) (200.0f \* s);$#s/\* s/* c/
-\#^        func_1516DA58((s32) (radius \* s + x), py, (s32) pz, 0xD, 0, col\[0\], col\[1\], col\[2\]#s/col\[1\], col\[2\]/col[2], col[1]/
-\#^        func_1516DA58((s32) (radius \* s + x)#s/0xD, 0,/0xD, 1,/
+\#^        particle_sprite_spawn((s32) (radius \* s + x), py, (s32) pz, 0xD, 0, col\[0\], col\[1\], col\[2\]#s/col\[1\], col\[2\]/col[2], col[1]/
+\#^        particle_sprite_spawn((s32) (radius \* s + x)#s/0xD, 0,/0xD, 1,/
 \#^                      (vx >> 8) & 0xFF, vx & 0xFF#s/(vx >> 8) \& 0xFF, vx \& 0xFF/vx \& 0xFF, (vx >> 8) \& 0xFF/
 \#^                      (vx >> 8) & 0xFF, vx & 0xFF#s/vz \& 0xFF, 0, 0, 5/vz \& 0xFF, 0, 0, 6/
 \#^                      (vx >> 8) & 0xFF, vx & 0xFF#s/speed, speed,/speed, speed + 1,/

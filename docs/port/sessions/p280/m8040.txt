@@ -8,9 +8,9 @@
 \#^    if ((s8) obj\[0x2D\] != -1 && !done) {$#s/0x2D/0x2C/ % hookd
 \#^        \*(f32 \*) (obj + 0x68) -= D_800BE9A4;$#s/-=/+=/ % all
 \#^        if (\*(f32 \*) (obj + 0x68) < 0.0f) {$#s/</>/ % all
-\#^            func_151A88F0(obj, 0, #s/- 1/- 2/ % all
-\#^            func_151A88F0(obj, 0, #s/100/99/ % all
-\#^            func_151A88F0(obj, 0, #s/0x20/0x24/ % all
+\#^            bolt_subdivide(obj, 0, #s/- 1/- 2/ % all
+\#^            bolt_subdivide(obj, 0, #s/100/99/ % all
+\#^            bolt_subdivide(obj, 0, #s/0x20/0x24/ % all
 \#^            \*(f32 \*) (obj + 0x68) = random_float() #s/0x18/0x14/ % all
 \#^            \*(f32 \*) (obj + 0x68) = random_float() #s/+ \*(f32 \*) (obj + 0x14)// % all
 \#^        if (obj\[0x1C\] & 2) {$#s/2/1/ % notimer

@@ -46,14 +46,14 @@ extern f32 D_150AA11C[]; /* sine table: 513 entries over a quarter turn */
 #define ANIM_PTR(a, o) (*(u8 **)((u8 *)(a) + (o)))
 
 /* The descriptors (state +0x40 / +0x210) are animation headers read raw from the ROM by anim_start_entry, and the
- * key-frame stream is raw ROM data (func_1502DB14): both are read as big-endian bytes (on the N64 the same as the
+ * key-frame stream is raw ROM data (anim_copy_keyframes): both are read as big-endian bytes (on the N64 the same as the
  * asm's lh / lhu / ldl / ldr; in a little-endian port they stay correct as long as the loader does not swap them). */
 #define DESC_U16(p) ((u16)(((p)[0] << 8) | (p)[1]))
 #define DESC_S16(p) ((s16)(((p)[0] << 8) | (p)[1]))
 #define BE_S16(p) ((s16)(((p)[0] << 8) | (p)[1]))
 
 /* work tables (on the stack, like the asm's below its frame): 3 tables of 12 * count bytes, then the asm's
- * 0x100-byte gap. Sized for count <= 72 (header byte 1 = joints + 1; func_1502DE74's remap buffer has 0x44 slots,
+ * 0x100-byte gap. Sized for count <= 72 (header byte 1 = joints + 1; obj_build_model_instance's remap buffer has 0x44 slots,
  * Conker's animations have 29); the asm sizes them by the count. */
 #define NM_ANIM_MAXCNT 72
 
@@ -405,7 +405,7 @@ static void nmAnimTrans(f32 *mt, u8 *e, s16 *tt) {
  * func_150A86B0: the joint matrices of a model instance.
  * arena: &D_800C42A8 (advanced by n matrices); m: root matrix; anim: animation state (object +0x2D0; 0: copy m
  * into one matrix, func_150A8680); skel: skeleton entries (D_800C5000[id]); n: joints; buf: per-object angle /
- * scale adjustments (func_150342D0); remap: per-slot callback index (model header +0x29) or NULL; height: added
+ * scale adjustments (obj_adjust_list_build); remap: per-slot callback index (model header +0x29) or NULL; height: added
  * to the root y.
  * Animation 1 alone, or blended (quaternion slerp-free nlerp) with the next key-frame pair (D_80088904) or with
  * animation 2 (+0x3C weight / 1024). Each joint matrix is (scale x rotation, bone offset) times its parent's;

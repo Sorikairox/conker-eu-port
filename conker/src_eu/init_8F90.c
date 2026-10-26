@@ -3,8 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1000A348(void);
-void func_10004074(s32);
+void snd_cache_flush_unused(void);
+void heap_free(s32);
 extern s32 D_8003E724;
 #endif
 
@@ -30,7 +30,7 @@ extern OSMesgQueue D_8003E9A8;
 extern s32 D_8003E9E0;
 extern void *D_8003E730[];
 extern u32 D_8002B194;
-s32 func_100095A0();
+s32 audio_do_frame();
 struct AudTask {
         void *next;
         u32 state;
@@ -60,8 +60,8 @@ extern OSMesgQueue D_8003B560;
 extern u8 D_10029400[];
 extern u8 D_100294D0[];
 extern u8 D_8002CCC0[];
-void func_100099BC(void);
-void func_1000A03C(void);
+void audio_clear_dma(void);
+void snd_cache_update_dmas(void);
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
 
 
@@ -129,21 +129,22 @@ extern OSMesgQueue D_80041A90;
 extern OSMesg D_80041AA8[];
 extern OSThread D_8003E3A0;
 extern u8 D_8002AE40;
-s32 func_10009FFC(void);
+s32 snd_cache_dma_new(void);
 
-void func_10008F90(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
+/* was func_10008F90 */
+void audio_mgr_init(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
     u32 i;
     u32 n;
     f32 fsize;
     AmFxParams params;
 
-    func_10012588((s32) D_8003E710);
-    c->dmaproc = func_10009980;
+    mp3_voice_init((s32) D_8003E710);
+    c->dmaproc = audio_dma_new;
     c->outputRate = osAiSetFrequency(arg2->frequency);
-    c->unk14 = func_10009FFC;
-    c->unk18 = func_10009B2C;
-    c->unk1C = func_10009B90;
-    c->unk20 = func_10009B4C;
+    c->unk14 = snd_cache_dma_new;
+    c->unk18 = snd_cache_entry_unref;
+    c->unk1C = snd_cache_entry_ref;
+    c->unk20 = snd_cache_entry_release;
 
     /* Samples per frame (25 fps), rounded up to a multiple of 184 plus one more block. */
     fsize = arg2->unk4 * (f32) c->outputRate / 25.0f;
@@ -203,15 +204,15 @@ void func_10008F90(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
     osCreateMesgQueue(&D_8003E970, D_8003E988, 8);
     osCreateMesgQueue(&D_80041638, D_80041650, 0x20);
     osCreateMesgQueue(&D_80041A90, D_80041AA8, 0x28);
-    osCreateThread(&D_8003E3A0, 4, (void (*)(void *)) func_10009400, 0, (void *) &D_800406A0, pri);
+    osCreateThread(&D_8003E3A0, 4, (void (*)(void *)) audio_thread_main, 0, (void *) &D_800406A0, pri);
     D_8002AE40 = 1;
     osStartThread(&D_8003E3A0);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10008F90.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/audio_mgr_init.s")
 #endif
 // NON-MATCHING: so much to do
-// void func_10008F90(struct15 *arg0, OSPri arg1, struct52 *arg2) {
+// void audio_mgr_init(struct15 *arg0, OSPri arg1, struct52 *arg2) {
 //     // ? sp160;
 //     s32 sp58;
 //     // ? *temp_t4_2;
@@ -242,14 +243,14 @@ void func_10008F90(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
 //     // u32 phi_s0_2;
 //     // void *phi_s0_3;
 //
-//     func_10012588(&D_8003E370);
-//     arg0->unk10 = func_10009980;
+//     mp3_voice_init(&D_8003E370);
+//     arg0->unk10 = audio_dma_new;
 //     temp_v0 = osAiSetFrequency(arg2->unk0);
 //     arg0->unk2C = temp_v0;
-//     arg0->unk14 = func_10009FFC;
-//     arg0->unk18 = func_10009B2C;
-//     arg0->unk1C = func_10009B90;
-//     arg0->unk20 = func_10009B4C;
+//     arg0->unk14 = snd_cache_dma_new;
+//     arg0->unk18 = snd_cache_entry_unref;
+//     arg0->unk1C = snd_cache_entry_ref;
+//     arg0->unk20 = snd_cache_entry_release;
 //     temp_f0 = ((f32) (u32) arg2->unk4 * (f32) temp_v0) / 30.0f;
 //     temp_f8 = (s32) temp_f0;
 //     D_80040F8C = temp_f8;
@@ -353,19 +354,21 @@ void func_10008F90(AmSynConfig *c, OSPri pri, AmConfig *arg2) {
 //     osCreateMesgQueue(&D_8003E5D0, &D_8003E5E8, 8);
 //     osCreateMesgQueue(&D_80041298, &D_800412B0, 32);
 //     osCreateMesgQueue(&D_800416F0, &D_80041708, 40);
-//     osCreateThread(&D_8003E3A0, 4, (void *) func_10009400, 0, &D_800406A0, arg1);
+//     osCreateThread(&D_8003E3A0, 4, (void *) audio_thread_main, 0, &D_800406A0, arg1);
 //     D_8002AE40 = (u8)1;
 //     osStartThread(&D_8003E3A0);
 // }
 
-void func_100093CC(void) {
+/* was func_100093CC */
+void audio_thread_stop(void) {
     if (D_8002AE40 != 0) {
         osStopThread(&D_8003E3A0);
     }
 }
 
 // audio thread
-void func_10009400(s32 arg0) {
+/* was func_10009400 */
+void audio_thread_main(s32 arg0) {
     s32 pad; // fakematch: 4-byte frame slot above msg
     u8 done = 0;
     AmMsg *msg = NULL;
@@ -375,7 +378,7 @@ void func_10009400(s32 arg0) {
     s32 first = 1;
 
     client.x = 0;
-    func_100051C8((OSPfs *) &client, &D_8003E970);
+    sched_add_client((OSPfs *) &client, &D_8003E970);
     while (!done) {
         osRecvMesg(&D_8003E970, (OSMesg *) &msg, OS_MESG_BLOCK);
         if (D_8002AC5C) {
@@ -386,7 +389,7 @@ void func_10009400(s32 arg0) {
                 if (count >= 2) {
                     count = 0;
                 }
-                if (count == 0 && func_100095A0(D_8003E730[D_8002B194 % 3], lastInfo)) {
+                if (count == 0 && audio_do_frame(D_8003E730[D_8002B194 % 3], lastInfo)) {
                     if (!first) {
                         osRecvMesg(&D_8003E9A8, (OSMesg *) &msg, OS_MESG_BLOCK);
                         lastInfo = msg->data;
@@ -410,7 +413,7 @@ void func_10009400(s32 arg0) {
 }
 
 // NON-MATCHING: a long way to go
-// void func_10009400(s32 arg0) {
+// void audio_thread_main(s32 arg0) {
 //     OSMesg *msg;
 //     s32 sp54;
 //     OSPfs *sp4C;
@@ -427,7 +430,7 @@ void func_10009400(s32 arg0) {
 //     phi_s5 = 0;
 //     phi_s4 = 1;
 //     phi_s1 = 0;
-//     func_100051C8(&sp4C, &D_8003E5D0);
+//     sched_add_client(&sp4C, &D_8003E5D0);
 //     do {
 //         osRecvMesg(&D_8003E5D0, &msg, 1);
 //         if (D_8002AC5C != 0) {
@@ -443,7 +446,7 @@ void func_10009400(s32 arg0) {
 //             if (phi_s0 >= 2U) {
 //                 phi_s0_2 = 0U;
 //             }
-//             if (phi_s0_2 == 0 && (func_100095A0(D_8003E390[D_8002AE44 % 3U], phi_s5) != 0)) {
+//             if (phi_s0_2 == 0 && (audio_do_frame(D_8003E390[D_8002AE44 % 3U], phi_s5) != 0)) {
 //                 if (phi_s4 == 0) {
 //                     osRecvMesg(&D_8003E608, &msg, 1);
 //                     phi_s5 = ((struct53*)msg)->unk4;
@@ -461,7 +464,8 @@ void func_10009400(s32 arg0) {
 //     }
 // }
 
-s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
+/* was func_100095A0 */
+s32 audio_do_frame(AudioInfo *info, AudioInfo *lastInfo) {
     s16 *audioPtr;
     Acmd *cmdp;
     s32 cmdLen;
@@ -471,8 +475,8 @@ s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
     u32 ret;
 
     audioPtr = (s16 *) osVirtualToPhysical(info->data);
-    func_100099BC();
-    func_1000A03C();
+    audio_clear_dma();
+    snd_cache_update_dmas();
     samplesLeft = IO_READ(AI_LEN_REG) >> 2;
     if (lastInfo) {
         osAiSetNextBuffer(lastInfo->unk4, lastInfo->frameSamples << 2);
@@ -521,7 +525,7 @@ s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
 }
 
 // NON-MATCHING: so far away
-// s32 func_100095A0(struct50 *arg0, struct51 *arg1) {
+// s32 audio_do_frame(struct50 *arg0, struct51 *arg1) {
 //     s32 sp3C;
 //     s32 sp34;
 //     u32 sp30;
@@ -533,8 +537,8 @@ s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
 //     s32 phi_a2;
 //
 //     sp3C = osVirtualToPhysical(arg0->unk0);
-//     func_100099BC();
-//     func_1000A03C();
+//     audio_clear_dma();
+//     snd_cache_update_dmas();
 //     temp_a2 = sp3C;
 //     temp_t7 = (u32) AI_A4500004 >> 2;
 //     phi_v1 = (s32) temp_t7;
@@ -588,7 +592,8 @@ s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
 //     return 1;
 // }
 
-s32 func_100097CC(u32 addr, s32 len, s32 state) {
+/* was func_100097CC */
+s32 audio_dma_callback(u32 addr, s32 len, s32 state) {
     void *foundBuffer;
     s32 delta, addrEnd, buffEnd;
     AMDMABuffer *dmaPtr, *lastDmaPtr;
@@ -640,7 +645,7 @@ s32 func_100097CC(u32 addr, s32 len, s32 state) {
 }
 
 // NON-MATCHING: another horrible function
-// s32 func_100097CC(u32 arg0, s32 arg1, s32 arg2) {
+// s32 audio_dma_callback(u32 arg0, s32 arg1, s32 arg2) {
 //     s32 sp2C;
 //     s32 sp28;
 //     s32 temp_a3;
@@ -730,17 +735,19 @@ s32 func_100097CC(u32 addr, s32 len, s32 state) {
 //     return osVirtualToPhysical(sp2C) + sp28;
 // }
 
-s32 func_10009980(s32 *arg0) {
+/* was func_10009980 */
+s32 audio_dma_new(s32 *arg0) {
     if (D_80040F78.unk0 == 0) {
         D_80040F78.unk4 = (u8) 0;
         D_80040F78.unk8 = &D_800406B8;
         D_80040F78.unk0 = 1;
     }
     *arg0 = 0;
-    return func_100097CC;
+    return audio_dma_callback;
 }
 
-void func_100099BC(void) {
+/* was func_100099BC */
+void audio_clear_dma(void) {
     u32 i;
     OSIoMesg *iomsg = 0;
     AMDMABuffer *dmaPtr, *nextPtr;
@@ -776,22 +783,25 @@ void func_100099BC(void) {
 }
 
 
-void func_10009B2C(struct54 *arg0) {
+/* was func_10009B2C */
+void snd_cache_entry_unref(struct54 *arg0) {
     if (((s32)arg0 & 1) == 0) {
         arg0->unk14--;
     }
 }
 
-void func_10009B4C(struct54 *arg0) { // struct147 unk14 is wrong type
+/* was func_10009B4C */
+void snd_cache_entry_release(struct54 *arg0) { // struct147 unk14 is wrong type
     if (((s32)arg0 & 1) == 0) {
         arg0->unk14--;
         if (arg0->unk14 == 0) {
-            func_10009BE4(arg0);
+            snd_cache_entry_free(arg0);
         }
     }
 }
 
-void func_10009B90(struct54 *arg0) {
+/* was func_10009B90 */
+void snd_cache_entry_ref(struct54 *arg0) {
     if (((s32)arg0 & 1) == 0) {
         if (1 == arg0->unk15) {
             if (1 == arg0->unk16) {
@@ -807,7 +817,8 @@ void func_10009B90(struct54 *arg0) {
 #ifdef NON_MATCHING
 s32 func_150ADC50(struct147 *);
 
-void func_10009BE4(struct54 *arg0) {
+/* was func_10009BE4 */
+void snd_cache_entry_free(struct54 *arg0) {
     struct54 *temp_a1;
     struct54 *temp_v0;
     struct54 *temp_v0_2;
@@ -844,9 +855,9 @@ void func_10009BE4(struct54 *arg0) {
     arg0->unk4 = NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10009BE4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/snd_cache_entry_free.s")
 #endif
-// void func_10009BE4(struct00 *arg0) {
+// void snd_cache_entry_free(struct00 *arg0) {
 //     struct00 *temp_a1;
 //     struct00 *temp_v0;
 //     struct00 *temp_v1;
@@ -886,7 +897,7 @@ void func_10009BE4(struct54 *arg0) {
 // }
 
 #ifdef NON_MATCHING
-// Sound-bank on-demand loader (the n_alSynNew DMA callback set up by func_10009FFC).
+// Sound-bank on-demand loader (the n_alSynNew DMA callback set up by snd_cache_dma_new).
 // *slot holds either a packed ROM reference (bit 0 set: ROM offset in bits 8.., size byte in bits 0..7)
 // or, once loaded, a pointer to its cache entry. A ROM reference is replaced by a fresh cache entry
 // (from the free list, else the last idle loaded entry is evicted) and an async PI DMA is started;
@@ -912,7 +923,7 @@ extern s32 D_8002B1A0;          /* PI DMA messages in flight this frame */
 extern OSIoMesg D_800416D0[];
 extern OSMesgQueue D_80041A90;
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-void func_10024190(void *addr, s32 size); /* osWritebackDCache */
+void os_writeback_dcache(void *addr, s32 size); /* osWritebackDCache */
 
 #define SND_CACHE_UNLINK(e)              \
     {                                    \
@@ -924,7 +935,8 @@ void func_10024190(void *addr, s32 size); /* osWritebackDCache */
         }                                \
     }
 
-s32 func_10009CBC(void *arg0, s32 arg1) {
+/* was func_10009CBC */
+s32 snd_cache_load_on_demand(void *arg0, s32 arg1) {
     u32 *slot = arg0;
     u32 ref = *slot;
     SndCacheEntry *e;
@@ -968,7 +980,7 @@ s32 func_10009CBC(void *arg0, s32 arg1) {
         }
         if (e != NULL) {
             *e->slot = e->romRef;
-            func_100043B4((s32 *)e->data, 4);
+            heap_set_block_tag((s32 *)e->data, 4);
             e->data = NULL;
             e->slot = NULL;
             if (e == sndCache.used) {
@@ -1010,7 +1022,7 @@ s32 func_10009CBC(void *arg0, s32 arg1) {
         e->data = NULL;
     }
     if (e->data != NULL) {
-        func_10024190(e->data, alignedSize);
+        os_writeback_dcache(e->data, alignedSize);
         osInvalDCache(e->data, alignedSize);
         osPiStartDma(&D_800416D0[D_8002B1A0++], OS_MESG_PRI_HIGH, OS_READ, (ref >> 5) & ~7, e->data, alignedSize,
                      &D_80041A90);
@@ -1019,9 +1031,10 @@ s32 func_10009CBC(void *arg0, s32 arg1) {
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10009CBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/snd_cache_load_on_demand.s")
 #endif
-s32 func_10009FFC(void) {
+/* was func_10009FFC */
+s32 snd_cache_dma_new(void) {
     if (D_800406A0.unk0 == 0) {
         D_800406A0.unk4 = NULL;
         D_800406A0.unk8 = &D_80040AC8;
@@ -1029,15 +1042,16 @@ s32 func_10009FFC(void) {
         D_800406A0.unk10 = NULL;
         D_800406A0.unk0 = (u8)1U;
     }
-    return func_10009CBC;
+    return snd_cache_load_on_demand;
 }
 
 #ifdef NON_MATCHING
 /* Audio bank DMA bookkeeping: for each pending DMA (D_8002B1A0), poll D_80041A90; a finished message (+8 = bank
  * address) moves its node from the loading list (D_800406A0.unkC) to the loaded list (.unk4), relocating the bank's
  * pointer table once (unk16 == 1). Then nodes of the release list (.unk10) whose instruments are no longer in use
- * (+0xA flags of each entry) are freed (func_10004074) and moved to the free list (.unk8). */
-void func_1000A03C(void) {
+ * (+0xA flags of each entry) are freed (heap_free) and moved to the free list (.unk8). */
+/* was func_1000A03C */
+void snd_cache_update_dmas(void) {
     u32 pending = D_8002B1A0;
     s32 received = 0;
     u32 i, j;
@@ -1112,7 +1126,7 @@ void func_1000A03C(void) {
         if (found == 0) {
             s->unk14 = 0;
             s->unk15 = 0;
-            func_10004074(s->unk10);
+            heap_free(s->unk10);
             s->unkC = 0;
             if (s == D_800406A0.unk10) {
                 D_800406A0.unk10 = next;
@@ -1140,12 +1154,12 @@ void func_1000A03C(void) {
         s = next;
     }
     if (D_8003E724 != 0) {
-        func_1000A348();
+        snd_cache_flush_unused();
         D_8003E724 = 0;
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_1000A03C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/snd_cache_update_dmas.s")
 #endif
 typedef struct ACBuf_s {
     ALLink node;
@@ -1165,7 +1179,8 @@ typedef struct {
 } ACState;
 #define acState (*(ACState *)&D_800406A0)
 
-void func_1000A348(void) {
+/* was func_1000A348 */
+void snd_cache_flush_unused(void) {
     ACBuf *dmaPtr, *nextPtr;
     s32 *p;
 

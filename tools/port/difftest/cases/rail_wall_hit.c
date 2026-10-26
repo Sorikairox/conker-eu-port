@@ -1,9 +1,9 @@
 // rail_wall_hit: where the move from (x, z) by (dx, dz) first crosses a wall: the type-1 nodes of D_800D2778 in the
-// height band of `y` (node +6 = func_15086218(y)) and their links (+9..+0xD) to higher-numbered type-1 nodes form
+// height band of `y` (node +6 = rail_band_for_height(y)) and their links (+9..+0xD) to higher-numbered type-1 nodes form
 // segments; a segment counts when the move's start and end lie on different sides of its line and the crossing
 // point lies within the segment. Returns -1 when none is hit, else the move length times the crossing fraction of
 // the last segment whose line the move crossed (Rare uses that fraction, not the smallest one it keeps).
-f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
+f32 rail_wall_hit(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     struct_eu_800D2778 *a;
     struct_eu_800D2778 *b;
     s32 band;
@@ -21,7 +21,7 @@ f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     f32 hit;
     f32 best;
 
-    band = func_15086218(y);
+    band = rail_band_for_height(y);
     best = 100.0f;
     s = 0.0f; // only read after a crossing set it
     for (i = 0; i < D_80087630; i++) {

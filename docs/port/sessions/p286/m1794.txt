@@ -1,4 +1,4 @@
-# P286 mutants for func_151A1794 (spark_burst_emitter_update)
+# P286 mutants for spark_burst_emitter_update (spark_burst_emitter_update)
 /e->accum = e->accum + e->rate \* D_800BE9A4;/s/e->rate \* //
 /if (!(1.0f < e->accum)) {/s/1.0f </1.0f <=/
 /t.colour\[2\] = 0xFF;/s/0xFF/0xFE/
