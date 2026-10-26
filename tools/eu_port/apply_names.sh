@@ -26,6 +26,7 @@ for c in sys.argv[1:]:
         f = line.rstrip('\n').split('\t')
         if len(f) < 4: sys.exit(f'chunk{c}: bad row {f}')
         o, n, conf, d = f[:4]
+        n = n.lower()   # names that embed an address use lowercase hex
         if not re.fullmatch(r'func_[0-9A-F]{8}', o) or not re.fullmatch(r'[a-z][a-z0-9_]{2,47}', n): sys.exit(f'chunk{c}: bad name {o} {n}')
         if o in have: print(f'skip {o}: already in names.tsv'); continue
         rows.append((o, n, conf, d.replace('\t', ' ')))
