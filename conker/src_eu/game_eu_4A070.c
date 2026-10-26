@@ -391,8 +391,17 @@ void func_1501D2C4(s32 arg0, s32 arg1) {
     }
 }
 
+/* scene_seen: has scene arg1 of level arg0 been seen (bit in the saved D_800C3A60[level]), or is D_800C3670 set?
+ * Only the cutscene-skip test func_1501E0C8 asks this. */
 s32 func_1501D330(s32 arg0, s32 arg1) {
     u64 bit;
+#ifdef PORT
+    /* DELIBERATE PORT CHANGE (P320, user request): the browser / native port treats every cutscene as already seen,
+     * so any cutscene can be skipped on the first viewing (the original only allows it after it was watched once).
+     * Nothing is written: the seen bits (func_1501D2C4, saved to the EEPROM) are still recorded as on the N64.
+     * Not in the default eu or the plain NON_MATCHING build (no PORT define there). */
+    return 1;
+#endif
     if (D_800C3670 != 0) {
         return 1;
     }
@@ -754,7 +763,13 @@ s32 func_1501E0C8(s32 slot, u8 *unused) {
         }
     }
     if (level == 0x21) {
+#ifdef PORT
+        /* DELIBERATE PORT CHANGE (P320): the boot intro (level 0x21) can be skipped with Start from the first
+         * power-on; the N64 allows it only after a reset (osResetType D_8000030C == 1, i.e. it was seen once). */
+        if ((D_800BEB30 & 0x1000) && D_800C39D0 >= 0xFB) {
+#else
         if ((D_800BEB30 & 0x1000) && D_8000030C == 1 && D_800C39D0 >= 0xFB) {
+#endif
             return 1;
         }
         return 0;
@@ -762,9 +777,15 @@ s32 func_1501E0C8(s32 slot, u8 *unused) {
     if (!(D_800BEB30 & 0x20)) {
         return 0;
     }
+#ifndef PORT
+    /* D_800C40BC: the scene script carries the "no skip" event 0xE (func_1501DB18), or an event set it
+     * (func_1509C850 case 6).
+     * DELIBERATE PORT CHANGE (P320): the port ignores it so every cutscene can be skipped with L, the opening
+     * (level 0x18 scene 1) included; that one carries the marker, so it can never be skipped on the N64. */
     if (D_800C40BC != 0) {
         return 0;
     }
+#endif
     if (D_800D3260 != 0) {
         return 1;
     }

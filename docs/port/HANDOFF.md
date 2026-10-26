@@ -10,6 +10,18 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P320 (port-web) (session P320, 2026-10-26). Details: `docs/port/sessions/P320.md`
+- Cutscenes skippable from the first viewing, PORT build only (`#ifdef PORT` in game_eu_4A070.c, "DELIBERATE PORT
+  CHANGE" comments): func_1501D330 (seen query, D_800C3A60 save bits) returns 1; func_1501E0C8 ignores the "no skip"
+  marker D_800C40BC (the opening 18/1 has it) and the osResetType gate of the boot intro (level 0x21, Start).
+  Skip button is L (keyboard R). No save writes added. Checks green; default eu byte-identical.
+- det=2: L in the opening skips to level 0x29 ("One of those days") and gameplay, 0 traps; Start skips the boot intro.
+- Game-C debug logs need port_glog (port_log prints nothing from a vbe TU).
+## Next steps (from P320)
+1. If a skipped scene ever leaves state wrong, first suspect scenes with the 0xE marker (D_800C40BC); limit change 3
+   to level 0x18 scene 1 if needed.
+2. Earlier P319 items still open (route re-tune, K0 sites).
+
 ## P319 (port-web) (session P319, 2026-10-26). Details: `docs/port/sessions/P319.md`
 - First browser test of the 100% build. Boot trapped in free() from func_100014C4 (K0_TO_PHYS / PHYS_TO_K0 pair on
   D_8003BE74 / D_8003BE70 set by the now-C func_10005B04). Fixed port side: vbe.py K0_PHYS_SITES. Checks green.
