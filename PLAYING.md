@@ -52,7 +52,7 @@ Other commands:
 | C buttons | I J K L |
 | D-pad | Arrow keys |
 
-**Skipping cutscenes:** press **L** (the **R** key, or the L touch button) to skip any cutscene, even the first time you see it. The original game only allows this for scenes already seen; this is a deliberate change in the browser build only, and your save is unaffected. Start skips the boot intro.
+**Skipping cutscenes:** hold **L** (the **R** key, or the L touch button) for 3 seconds to skip any cutscene, even the first time you see it. A ring around an L badge at the bottom right of the picture fills up while you hold it. The original game only allows this for scenes already seen; this is a deliberate change in the browser build only, and your save is unaffected. Start skips the boot intro.
 
 **Phones and tablets:** on-screen touch controls appear by themselves (the **Touch** button toggles them). The game is also online at https://conker-web-port.netlify.app (you still need your own ROM).
 
