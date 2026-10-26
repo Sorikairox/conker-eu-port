@@ -1,0 +1,3 @@
+# Function rename table (P322): old<TAB>new<TAB>short description. Source of truth for tools/eu_port/rename.py.
+# Add a row, run `tools/eu_port/rename.py --check`, then apply and `--verify` (docs/RENAMING.md).
+old	new	description
