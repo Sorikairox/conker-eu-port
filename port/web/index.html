@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Conker Port</title>
 <style>
   :root { --bg: #111317; --panel: #1b1e24; --panel2: #23272f; --line: #343a45; --fg: #d8dde6; --muted: #8a93a3;
@@ -63,6 +63,40 @@
   #console { background: #0b0c0f; border-radius: 4px; padding: 8px 10px; margin: 8px 0 0; height: 360px; overflow: auto;
              font: 12px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-all; }
   .pass { color: var(--ok); } .fail { color: var(--bad); } .stub { color: var(--accent); }
+  /* touch controls: fixed layer over the page, only the controls take touches */
+  #touch { position: fixed; inset: 0; pointer-events: none; z-index: 10; user-select: none; -webkit-user-select: none; }
+  #touch[hidden] { display: none; }
+  #touch > * { position: absolute; pointer-events: auto; touch-action: none; -webkit-touch-callout: none; }
+  #touch .tb { display: flex; align-items: center; justify-content: center; border-radius: 50%; font: 600 15px system-ui, sans-serif;
+               color: rgba(255, 255, 255, .9); background: rgba(40, 44, 52, .45); border: 2px solid rgba(255, 255, 255, .35); }
+  #touch .tb.on { background: rgba(224, 166, 58, .6); border-color: var(--accent); }
+  #touch .tb.c { width: 42px; height: 42px; font-size: 12px; background: rgba(200, 160, 30, .35); }
+  #touch .tb.sh { width: 64px; height: 38px; border-radius: 10px; font-size: 13px; }
+  #tk-A { width: 70px; height: 70px; right: calc(116px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); background: rgba(50, 90, 200, .45); }
+  #tk-B { width: 56px; height: 56px; right: calc(176px + env(safe-area-inset-right)); bottom: calc(96px + env(safe-area-inset-bottom)); background: rgba(40, 150, 70, .45); }
+  #tk-CU { right: calc(54px + env(safe-area-inset-right)); bottom: calc(132px + env(safe-area-inset-bottom)); }
+  #tk-CL { right: calc(100px + env(safe-area-inset-right)); bottom: calc(88px + env(safe-area-inset-bottom)); }
+  #tk-CR { right: calc(8px + env(safe-area-inset-right)); bottom: calc(88px + env(safe-area-inset-bottom)); }
+  #tk-CD { right: calc(54px + env(safe-area-inset-right)); bottom: calc(44px + env(safe-area-inset-bottom)); }
+  #tk-R { right: calc(10px + env(safe-area-inset-right)); bottom: calc(196px + env(safe-area-inset-bottom)); }
+  #tk-Z { left: calc(84px + env(safe-area-inset-left)); bottom: calc(196px + env(safe-area-inset-bottom)); }
+  #tk-L { left: calc(10px + env(safe-area-inset-left)); bottom: calc(196px + env(safe-area-inset-bottom)); }
+  #tk-START { width: 56px; height: 30px; border-radius: 15px; font-size: 11px; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom)); }
+  #tk-stick { left: 0; bottom: 0; width: 45vw; height: 190px; }
+  #tk-base { position: absolute; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; pointer-events: none;
+             background: rgba(40, 44, 52, .35); border: 2px solid rgba(255, 255, 255, .3); }
+  #tk-knob { position: absolute; width: 54px; height: 54px; margin: -27px 0 0 -27px; left: 50%; top: 50%; border-radius: 50%;
+             background: rgba(255, 255, 255, .45); }
+  @media (orientation: portrait) { #tk-START { bottom: calc(200px + env(safe-area-inset-bottom)); } }
+  body.touch { overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
+  body.touch #screen { touch-action: none; }
+  body.touch #keyhint { display: none; }
+  body.touch main { padding: 4px 0; }
+  body.touch #screen { width: min(100%, calc((100dvh - 60px) * 4 / 3)); border-radius: 0; }
+  /* touch fullscreen (whole page, so the controls stay visible): game only, as large as fits */
+  body.touch.fs header, body.touch.fs aside { display: none; }
+  body.touch.fs main { padding: 0; align-items: center; }
+  body.touch.fs #screen { width: min(100vw, calc(100dvh * 4 / 3)); }
   @media (max-width: 900px) { main { flex-direction: column; padding: 16px; } aside { width: 100%; } #screen { width: 100%; } }
 </style>
 </head>
@@ -71,6 +105,7 @@
   <h1>Conker port</h1>
   <button id="start" class="primary" disabled>Start</button>
   <button id="pause" aria-pressed="false" disabled title="Pause (also automatic when the tab is hidden)">Pause</button>
+  <button id="t-touch" aria-pressed="false" title="On-screen touch controls">Touch</button>
   <button id="fullscreen" title="Fullscreen (F11 or this button)">Fullscreen</button>
   <label class="vol" title="Volume">Vol <input id="volume" type="range" min="0" max="100" value="80"></label>
   <span class="spacer"></span>
@@ -115,6 +150,13 @@
     </section>
   </aside>
 </main>
+<div id="touch" hidden>
+  <div id="tk-stick"><div id="tk-base"><div id="tk-knob"></div></div></div>
+  <div class="tb" id="tk-A">A</div><div class="tb" id="tk-B">B</div>
+  <div class="tb c" id="tk-CU">C▲</div><div class="tb c" id="tk-CL">C◀</div><div class="tb c" id="tk-CR">C▶</div><div class="tb c" id="tk-CD">C▼</div>
+  <div class="tb sh" id="tk-L">L</div><div class="tb sh" id="tk-Z">Z</div><div class="tb sh" id="tk-R">R</div>
+  <div class="tb" id="tk-START">START</div>
+</div>
 <script src="main.js"></script>
 </body>
 </html>

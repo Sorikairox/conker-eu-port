@@ -164,6 +164,62 @@ function gamepadPad(gp) {
   if (ax(3) > 0.5) b |= N64.CD; if (ax(3) < -0.5) b |= N64.CU;
   return { present: true, b, x: sx, y: sy };
 }
+// ---------------------------------------------------------------- touch controls (phones / tablets)
+// Floating stick: the first touch in the left zone sets the centre, dragging up to STICK_PX gives full tilt.
+// Buttons hold their bit while touched; each uses its own pointer, so several can be held at once.
+const touch = { b: 0, x: 0, y: 0, stickId: null, cx: 0, cy: 0 };
+const STICK_PX = 50;
+function setTouch(on) {
+  $('touch').hidden = !on;
+  document.body.classList.toggle('touch', on);
+  $('t-touch').setAttribute('aria-pressed', String(on));
+  store.set('touch', on);
+  if (!on) { touch.b = touch.x = touch.y = 0; touch.stickId = null; }
+}
+const capture = (el, e) => { try { el.setPointerCapture(e.pointerId); } catch (_) { /* synthetic or already gone */ } };
+(function initTouch() {
+  for (const el of document.querySelectorAll('#touch .tb')) {
+    const bit = N64[el.id.slice(3)];
+    const ids = new Set();
+    const down = (e) => {
+      e.preventDefault(); capture(el, e); ids.add(e.pointerId);
+      touch.b |= bit; el.classList.add('on'); if (navigator.vibrate) navigator.vibrate(8);
+    };
+    const up = (e) => { ids.delete(e.pointerId); if (!ids.size) { touch.b &= ~bit; el.classList.remove('on'); } };
+    el.addEventListener('pointerdown', down);
+    for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) el.addEventListener(ev, up);
+  }
+  const zone = $('tk-stick'), base = $('tk-base'), knob = $('tk-knob');
+  const place = (x, y) => { const r = zone.getBoundingClientRect(); base.style.left = (x - r.left) + 'px'; base.style.top = (y - r.top) + 'px'; };
+  const rest = () => { const r = zone.getBoundingClientRect(); place(r.left + 90, r.top + r.height - 80); knob.style.transform = ''; };
+  const move = (e) => {
+    if (e.pointerId !== touch.stickId) return;
+    let dx = e.clientX - touch.cx, dy = e.clientY - touch.cy;
+    const m = Math.hypot(dx, dy);
+    if (m > STICK_PX) { dx *= STICK_PX / m; dy *= STICK_PX / m; }
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    let x = dx / STICK_PX, y = -dy / STICK_PX;
+    if (Math.hypot(x, y) < 0.12) x = y = 0;   // small dead zone
+    [touch.x, touch.y] = octagon(x, y);
+  };
+  zone.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (touch.stickId !== null) return;
+    capture(zone, e);
+    touch.stickId = e.pointerId; touch.cx = e.clientX; touch.cy = e.clientY;
+    place(e.clientX, e.clientY); knob.style.transform = '';
+  });
+  zone.addEventListener('pointermove', move);
+  const end = (e) => { if (e.pointerId !== touch.stickId) return; touch.stickId = null; touch.x = touch.y = 0; rest(); };
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) zone.addEventListener(ev, end);
+  window.addEventListener('resize', () => { if (touch.stickId === null) rest(); });
+  $('touch').addEventListener('contextmenu', (e) => e.preventDefault());
+  $('t-touch').onclick = () => { setTouch($('touch').hidden); if (!$('touch').hidden) rest(); };
+  const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+  setTouch(Q.get('touch') ? Q.get('touch') === '1' : store.get('touch', coarse));
+  rest();
+})();
+
 let lastPadText = '';
 function pollInput() {
   const gps = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter((g) => g && g.connected);
@@ -172,6 +228,7 @@ function pollInput() {
   }
   // pad 0 = keyboard merged with the first gamepad; pads 1-3 = further gamepads
   const pads = [keyboardPad(), null, null, null];
+  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y }; }
   gps.forEach((gp, i) => {
     const g = gamepadPad(gp);
     if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y }; }
@@ -319,10 +376,18 @@ $('eep-import').addEventListener('change', (e) => importEep(e.target.files[0]));
 
 // ---------------------------------------------------------------- fullscreen, pause, volume, audio
 function fullscreen() {
-  const s = $('screen');
+  // with touch controls on, the whole page goes fullscreen (the controls live outside #screen)
+  const s = document.body.classList.contains('touch') ? document.documentElement : $('screen');
   if (document.fullscreenElement) document.exitFullscreen();
-  else if (s.requestFullscreen) s.requestFullscreen().catch((e) => log('fullscreen: ' + e.message, 'fail'));
+  else if (s.requestFullscreen) {
+    s.requestFullscreen().then(() => {
+      if (s === document.documentElement && screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+    }).catch((e) => log('fullscreen: ' + e.message, 'fail'));
+  }
 }
+document.addEventListener('fullscreenchange', () => {
+  document.body.classList.toggle('fs', document.fullscreenElement === document.documentElement);
+});
 $('fullscreen').onclick = fullscreen;
 $('canvas').addEventListener('dblclick', fullscreen);
 
