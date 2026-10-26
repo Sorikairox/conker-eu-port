@@ -44,3 +44,21 @@ row in the table (a C-only helper split out of an asm routine) just gets its sou
   re-run the script (step 3) so new uses get renamed; textual conflicts on the renamed lines must be resolved by hand.
 - Secondary entry points inside another function (func_150A4ED4, func_150A69A8) keep their names (apply_names.sh
   skips them).
+
+## Globals (data symbols)
+
+The same table and script rename globals: a row `D_<ADDR>	g_<name>	description`. 3920 globals used by C code were
+named this way (docs/names/globals.tsv lists them by chunk, docs/names/proposals/globalsNN.tsv holds the proposals);
+`tools/eu_port/apply_names.sh gNN` applies a chunk. Differences from functions:
+- A global has no C definition here (its data comes from the ROM), so `/* was D_<ADDR> */` is added to each
+  file-scope declaration line (inside the line's trailing comment when it has one).
+- The build tools find a renamed global's address through names.tsv (`n64mem.RENAMED_FROM`), and the data stubs and
+  the `port_cdata` name strings keep the original D_ order and names.
+- String literals are not renamed (log texts keep the D_ name), except a literal that is exactly the name
+  (`__asm__("D_X")` labels).
+- Proof: data names are not in the binary, so a globals batch must leave `conker.wasm` byte-identical;
+  apply_names.sh builds before and after and refuses the batch otherwise (`tools/eu_port/wasm_sig.py` gives the md5
+  without the name section). Symbols below 0x10000000 are ROM offsets / numbers and are not renamed.
+- Naming: `g_` + snake_case, subsystem prefix; fields of the object table are `g_objects_<field>` (object 0) and
+  `g_obj<N>_<field>`; unnamed float constants `<prefix>_k_<addr>`; function tables `_fns`; a second D_ name for the
+  same EU address `_alias`; elements of per-player arrays `_p1`..`_p3`.
