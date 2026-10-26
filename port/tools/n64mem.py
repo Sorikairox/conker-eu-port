@@ -180,7 +180,9 @@ def generate(outdir, defined_f, defined_d, stubbed, undef_data, addr):
     T += ['};', '', f'const unsigned port_functab_count = {len(ftab)};', 'const PortFn port_functab[] = {']
     T += [f'    {{0x{a:08X}, (void *){n}, "{n}"}},' for a, n in ftab]
     T += ['};', '', f'const unsigned port_cdata_count = {len(ctargets)};', 'const PortCData port_cdata[] = {']
-    T += [f'    {{0x{a:08X}, 0x{size:X}, {n}, "{n}"}},' for a, size, n in sorted(ctargets.values())]
+    # the diagnostic name string keeps the original D_ name of a renamed global (names.tsv), so a rename pass leaves
+    # the wasm byte-identical
+    T += [f'    {{0x{a:08X}, 0x{size:X}, {n}, "{RENAMED_FROM.get(n, n)}"}},' for a, size, n in sorted(ctargets.values())]
     T += ['};']
     open(f'{outdir}/n64mem_tab.c', 'w').write('\n'.join(T) + '\n')
     with open(f'{outdir}/n64mem_report.txt', 'w') as f:
