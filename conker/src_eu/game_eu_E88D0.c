@@ -15,19 +15,19 @@ typedef struct {
     /* 0xB2 */ s16 unkB2;
 } struct_eu_E88D0;
 
-void func_1513F6C0();
+void sprite_fx_set_handlers();
 
 
 #ifdef NON_MATCHING
-void func_15142314(void *, s32, void *);
+void mtx_get_translation(void *, s32, void *);
 s32 func_15143E94(s32, s32);
 void func_151664F0(s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 void func_1504715C(void *, u8 *);
 s32 func_15046F70(f32 *, s32, f32, f32 *);
-struct210 *func_1513C73C(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
+struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
 s32 func_1518B140(u8 *arg0, s32 arg1, u8 arg2);
-void func_1516972C(struct102 *arg0);
+void node_destroy(struct102 *arg0);
 /* the .s's late_rodata D_800A0240 / D_800A0244 / D_800A0248 (0.7111111, 1.02, 0.95) is gone in the NM link */
 static const f32 D_800A0240[1] = { 0.711111128f }; /* 0x3F360B61 (arrays: IDO puts scalar float statics in .data) */
 static const f32 D_800A0244_[1] = { 1.01999998f }; /* 0x3F828F5C, read by func_150BB4CC */
@@ -38,7 +38,7 @@ static const f32 D_800A0248_[1] = { 0.949999988f }; /* 0x3F733333, read by func_
 // foot_splash_effect: water / dust splash at foot bone 0x11 (kind 0) or 0x1A (kind 1) of object `obj` (skipped for a
 // missing object, state 0 or 8, or no model at +0x1D4), at the object's own height +0x180: sound 0x4022, a ring
 // func_151664F0, a spray func_1514CBE8 (heading = current camera's +0x380 * 0.7111 +- 60). When the ground probe
-// (func_15046F70, 100 above to 100 below) hits, also a ripple sprite (func_1513C73C, template 0x7340) that is added
+// (func_15046F70, 100 above to 100 below) hits, also a ripple sprite (sprite_fx_spawn_cam, template 0x7340) that is added
 // to list D_80088750 or freed; then a second smaller spray. `alpha` is passed on to every spawn.
 void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
     struct {
@@ -73,7 +73,7 @@ void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
         return;
     }
     /* callers pass kind 0 or 1; the asm leaves the bone uninitialised for other values */
-    func_15142314(*(u8 **) (obj + 0x1D4), kind == 0 ? 0x11 : 0x1A, pos);
+    mtx_get_translation(*(u8 **) (obj + 0x1D4), kind == 0 ? 0x11 : 0x1A, pos);
     pos[1] = *(f32 *) (obj + 0x180);
     func_15143E94(5, 0x4022);
     func_151664F0(-1, (s32) pos[0], (s32) (pos[1] + 6.0f), (s32) pos[2], 0x19, 0x12, 0, alpha, 1);
@@ -108,10 +108,10 @@ void func_150BABE0(u8 *obj, u8 kind, u8 alpha) {
         r1 = func_150ADA20();
         r2 = func_150ADA20();
         r3 = func_150ADA20();
-        p = func_1513C73C((s32) &spr, 0, 0, (s32) &hit[1], pos[0], hit[0], pos[2], size, size, r1 & 0xFF,
+        p = sprite_fx_spawn_cam((s32) &spr, 0, 0, (s32) &hit[1], pos[0], hit[0], pos[2], size, size, r1 & 0xFF,
                           (r3 & 1) + (r2 & 1) * 2, 4, alpha, 0);
         if (p != NULL && func_1518B140((u8 *) D_80088750, (s32) p, 1) == 0) {
-            func_1516972C((struct102 *) p);
+            node_destroy((struct102 *) p);
         }
     }
     size = func_150ADA68();
@@ -174,8 +174,8 @@ s32 func_150BB4CC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     f32 spAC;
     f32 temp_f2;
 
-    spB8 = func_151423D8(arg8 - 0x40);
-    spB4 = func_151423D8(arg8);
+    spB8 = angle_byte_cos(arg8 - 0x40);
+    spB4 = angle_byte_cos(arg8);
     sp.u51 = 0x29;
     sp.u3C = 0xE03;
     sp.u34 = 0x200005;
@@ -199,8 +199,8 @@ s32 func_150BB4CC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u68 = arg3;
     sp.u6C = arg4;
     spBE = (func_150ADA20() % 11U) - 0xC;
-    spB0 = func_151423D8(spBE - 0x40);
-    spAC = func_151423D8(spBE);
+    spB0 = angle_byte_cos(spBE - 0x40);
+    spAC = angle_byte_cos(spBE);
     temp_f2 = (func_150ADA68() * 11.0f) + 15.0f;
     sp.u7C[0] = temp_f2 * spAC * spB8;
     sp.u7C[1] = -temp_f2 * spB0;
@@ -242,7 +242,7 @@ void func_150BB8E8(struct_eu_E88D0 *arg0) {
     arg0->unk1C = 50;
     arg0->unkB0 = arg0->unk1C;
     arg0->unkB2 = 5;
-    func_1513F6C0(arg0, 6, arg0->unk81);
+    sprite_fx_set_handlers(arg0, 6, arg0->unk81);
 }
 
 s32 func_150BB930(struct_eu_E88D0 *arg0) {
@@ -297,8 +297,8 @@ s32 func_150BB978(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     } sp;
     f32 temp_f2;
 
-    spB8 = func_151423D8(arg8 - 0x40);
-    spB4 = func_151423D8(arg8);
+    spB8 = angle_byte_cos(arg8 - 0x40);
+    spB4 = angle_byte_cos(arg8);
     sp.u28[4] = 0.0f;
     sp.u28[5] = 0.0f;
     sp.u28[6] = 0.0f;
@@ -311,8 +311,8 @@ s32 func_150BB978(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     sp.u28[12] = arg4;
     sp.u28[1] = 0.2f;
     spBE = (func_150ADA20() % 13U) - 0x34;
-    spB0 = func_151423D8(spBE - 0x40);
-    spAC = func_151423D8(spBE);
+    spB0 = angle_byte_cos(spBE - 0x40);
+    spAC = angle_byte_cos(spBE);
     temp_f2 = (func_150ADA68() * 9.0f) + 3.0f;
     sp.u5C = temp_f2 * spAC * spB8;
     sp.u60 = -temp_f2 * spB0;

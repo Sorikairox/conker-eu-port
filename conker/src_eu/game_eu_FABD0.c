@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-struct210 *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 void *memcpy(void *, const void *, s32);
 
 /* func_150CD3C0's input (func_15152DE4's S_2de4) */
@@ -19,7 +19,7 @@ typedef struct {
     /* 0x30 */ f32 z;
 } SparkIn_D3C0;
 
-/* func_1513D524 parameter block (sp74) */
+/* effect3d_spawn_default parameter block (sp74) */
 typedef struct {
     /* 0x00 */ u8 type;
     /* 0x02 */ s16 flags;
@@ -54,7 +54,7 @@ typedef struct {
     /* 0x3C */ f32 z;
 } SparkExtra_D3C0;
 
-// spark_record_spawn: spawns one type 0x57 effect record (func_1513D524, flags 0x2D03, 0xC03E1) for func_15152DE4's
+// spark_record_spawn: spawns one type 0x57 effect record (effect3d_spawn_default, flags 0x2D03, 0xC03E1) for func_15152DE4's
 // spark description: life, colour (alpha 0xFF; the 4th byte goes to +0x44), size and position from `in`, a random
 // orientation (0..360 each axis). The record's +0x110 block gets in's velocity, b, a, z and random spins
 // ((rand * 20000 - 10000) / 1000 per axis) and rates. room / group go to the spawner's last two arguments.
@@ -104,7 +104,7 @@ void func_150CD3C0(SparkIn_D3C0 *in, u8 room, u8 group) {
     x.u2C = func_150ADA68() * 360.0f;
     x.u34 = func_150ADA68() * 1210.0f * 0.0001f;
     x.u38 = (func_150ADA68() * 12960.0f + 15241.0f) * 0.0001f;
-    rec = (u8 *) func_1513D524((s32) &s, 0x13, 0x1E, 0, 0x11, 0, 0x40, room, group);
+    rec = (u8 *) effect3d_spawn_default((s32) &s, 0x13, 0x1E, 0, 0x11, 0, 0x40, room, group);
     if (rec != NULL) {
         memcpy(rec + 0x110, &x, sizeof(x));
     }

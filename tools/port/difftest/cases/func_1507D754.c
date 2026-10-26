@@ -15,7 +15,7 @@ void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2);
 void func_15145A50(struct127 *arg0);
 u8 *func_151149AC(u8 id);
 struct127 *func_1507515C(struct127 *owner); // test copy: callee ignores a1 / a2
-s32 func_15136C3C(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
+s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
 void func_150B8020(u8 *obj, u8 owner, s32 arg2);
 void func_150BC968(u8 *obj);
 void func_150BC03C(u8 *obj);
@@ -76,7 +76,7 @@ s32 func_1507D754(struct127 *arg0) {
                 }
                 item = func_1507515C(arg0);
                 if (item != NULL && D_800C35EA != 1) {
-                    func_15136C3C((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
+                    object_hit_effects((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
                 }
             }
             if (rec != NULL) {

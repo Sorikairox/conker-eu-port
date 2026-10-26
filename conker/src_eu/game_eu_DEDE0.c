@@ -233,14 +233,14 @@ void func_150597FC(struct127 *);
 f32 func_150489B0(u8);
 void func_1510F800(s32);
 s32 func_1510FE58(s32, s32, s32, s32 *);
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
+void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
 // sinking_object_update: per-frame update of an object sinking / floating in water: flags (0x80, 0x4 while moving
 // faster than 1), unkB0 25, stunned 10, unk239 3, unkFC 0xA7, unk80 1; a pending reset (unk25C bit 6) puts its old
 // position on the player's. In a water region (unk13D) it calls func_150562FC and sinks (unkB8 eases towards -20 with
 // factor 0.2, else towards 0) once unk21C reaches 9, unless the region's D_800B8AC4 entry is set and D_800CC670 bit 2
 // is clear. Facing / animation / func_150597FC / func_1505E650 / release as usual. In water, 40 in 256 frames spawn
-// a ripple record (func_15167D84) at a random point up to 40 x xz_scale around it, drifting with the player's speed.
+// a ripple record (node_spawn_sprite) at a random point up to 40 x xz_scale around it, drifting with the player's speed.
 void func_150B1EC0(struct127 *obj) {
     struct {
         s32 u00;
@@ -339,7 +339,7 @@ void func_150B1EC0(struct127 *obj) {
     rec.u2E = 0;
     rec.u2F = 0xFF;
     rec.u34 = 0;
-    func_15167D84(&rec, 0, 0, -1, 0xFF, 0);
+    node_spawn_sprite(&rec, 0, 0, -1, 0xFF, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1EC0.s")

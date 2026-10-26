@@ -118,7 +118,7 @@ EM_JS(int, __port_p205_goto_char, (int i), {
     return v === null || i >= v.length ? 0 : v.charCodeAt(i);
 });
 #define GO_MAX 100   /* P236: 32 -> 100 (3 race laps) */
-extern float D_800DD600[2];   /* camera yaw of view 0: sin, cos (func_15167310) */
+extern float D_800DD600[2];   /* camera yaw of view 0: sin, cos (node_lists_run_view_update) */
 static int go_n = -1, go_i, go_btn;
 static unsigned go_f, go_arrive, go_stuck_f;
 static float go_r, go_x[GO_MAX], go_z[GO_MAX];
@@ -405,7 +405,7 @@ void __wrap_func_150877C0(int player, int mode, float speed) {
     }
 }
 
-/* P240 DIAGNOSTIC: count func_151B61A0 ripple_spawn_flat calls (P234 C; only caller func_1513783C in game_161520.c,
+/* P240 DIAGNOSTIC: count func_151B61A0 ripple_spawn_flat calls (P234 C; only caller object_break_effects_floor in game_161520.c,
  * so the --wrap sees every call). ?p240rip=N logs the first N calls and then every 64th: frame, position, life,
  * result. Calls through unchanged. */
 int __real_func_151B61A0(float *pos, float *vel, float scale, float *dir, float *acc, float speed, short life,

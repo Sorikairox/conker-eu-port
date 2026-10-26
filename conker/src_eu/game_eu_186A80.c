@@ -4,7 +4,7 @@
 
 void func_15159270(void **arg0) {
     func_1514EDF0(arg0, arg0[0x18 / 4]);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 #ifdef NON_MATCHING
@@ -93,7 +93,7 @@ void func_15159514(u8 *arg0, u8 *arg1, u8 arg2)
   {
     if ((*key == *(s32 *)arg1) || (arg0[0x1C] == arg1[4]))
     {
-      func_1516972C((struct102 *)arg0);
+      node_destroy((struct102 *)arg0);
     }
   }
   else if (arg2 == 0x2D)
@@ -315,7 +315,7 @@ s32 func_15046EF0(f32 *, s32, s32, u8 *);
 #endif
 s32 func_1514672C(f32 *);
 s32 func_15159C2C(u8 *, u8 *);
-s32 func_151D8E20();
+s32 impact_current_kind();
 
 u8 func_15159B04(u8 *arg0, u8 *arg1)
 {
@@ -343,7 +343,7 @@ u8 func_15159B04(u8 *arg0, u8 *arg1)
         v[1] = *((f32 *) (arg0 + 0x80));
         if (arg0[0x9D] == flag)
         {
-          func_151DBCBC(func_151D8E20(), (*((f32 *) (arg0 + 0xA8))) * 0.2f, 0xFF, (s32) (arg0 + 0x84), v, arg0[0xC], arg0[1]);
+          impact_dust_particle_spawn(impact_current_kind(), (*((f32 *) (arg0 + 0xA8))) * 0.2f, 0xFF, (s32) (arg0 + 0x84), v, arg0[0xC], arg0[1]);
         }
         flag = 0;
       }
@@ -361,7 +361,7 @@ u8 func_15159B04(u8 *arg0, u8 *arg1)
 /*
  * orbit_object_step: per-frame motion of an object on two oscillators (record at obj + 0xA8). Advances the byte
  * phases +0xAC / +0xAD by the signed speeds +0xAE / +0xAF times the frame step D_800BE9E4; obj +0x38 / +0x3C =
- * base +0xA8 + amplitude +0xB0 / +0xB4 times sin(phase - 0x40) (func_151423D8 = byte-angle sine; both use the base
+ * base +0xA8 + amplitude +0xB0 / +0xB4 times sin(phase - 0x40) (angle_byte_cos = byte-angle sine; both use the base
  * +0xA8, as the asm). While obj +0x5C > 0 it is clamped to the limit +0xB8, and a second pair of phases +0xC0 /
  * +0xC1 (unsigned speeds +0xC2 / +0xC3) gives obj +0x4C / +0x54 = +0xC4 / +0xC8 * sin(phase - 0x40) * +0x5C * +0xBC.
  * Returns 0 when flag 0x2000 of +0x68 is set and +0xCC < obj +0x50 + obj +0x44, else 1.
@@ -373,8 +373,8 @@ s32 func_15159C2C(u8 *obj, u8 *arg1) {
 
     obj[0xAC] += (s8) obj[0xAE] * D_800BE9E4;
     obj[0xAD] += (s8) obj[0xAF] * D_800BE9E4;
-    s0 = func_151423D8((obj[0xAC] - 0x40) & 0xFF);
-    s1 = func_151423D8((rec[5] - 0x40) & 0xFF);
+    s0 = angle_byte_cos((obj[0xAC] - 0x40) & 0xFF);
+    s1 = angle_byte_cos((rec[5] - 0x40) & 0xFF);
     *(f32 *) (obj + 0x38) = *(f32 *) (rec + 0) + *(f32 *) (rec + 8) * s0;
     *(f32 *) (obj + 0x3C) = *(f32 *) (rec + 0) + *(f32 *) (rec + 0xC) * s1;
     if (*(f32 *) (obj + 0x5C) > 0.0f) {
@@ -384,8 +384,8 @@ s32 func_15159C2C(u8 *obj, u8 *arg1) {
         k = *(f32 *) (obj + 0x5C) * *(f32 *) (rec + 0x14);
         rec[0x18] += rec[0x1A] * D_800BE9E4;
         rec[0x19] += rec[0x1B] * D_800BE9E4;
-        s0 = func_151423D8((rec[0x18] - 0x40) & 0xFF);
-        s1 = func_151423D8((rec[0x19] - 0x40) & 0xFF);
+        s0 = angle_byte_cos((rec[0x18] - 0x40) & 0xFF);
+        s1 = angle_byte_cos((rec[0x19] - 0x40) & 0xFF);
         *(f32 *) (obj + 0x4C) = *(f32 *) (rec + 0x1C) * s0 * k;
         *(f32 *) (obj + 0x54) = *(f32 *) (rec + 0x20) * s1 * k;
     }
@@ -714,8 +714,8 @@ s32 func_1515A68C(u8 *arg0, s32 arg1) {
     p = arg0 + 0xA8;
     p[4] += *(s8 *)(p + 6) * D_800BE9E4;
     p[5] += *(s8 *)(p + 7) * D_800BE9E4;
-    s = func_151423D8(p[4] - 0x40);
-    c = func_151423D8(p[5] - 0x40);
+    s = angle_byte_cos(p[4] - 0x40);
+    c = angle_byte_cos(p[5] - 0x40);
     *(f32 *)(arg0 + 0x38) = *(f32 *)(p + 8) * s + *(f32 *)(p + 0);
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(p + 0xC) * c + *(f32 *)(p + 0);
     if (D_800BE9E4 && D_800BE9E4 && D_800BE9E4) { // fakematch: permuter; orders the p[0x20] / D_800BE9A4 loads
@@ -908,16 +908,16 @@ s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A7A8.s")
 #endif
 typedef struct { f32 unk0; u8 unk4; u8 unk5; s8 unk6; s8 unk7; f32 unk8; f32 unkC; u8 unk10; u8 unk11; u8 unk12; u8 unk13; f32 unk14; f32 unk18; f32 unk1C; } SubAB7C;
-f32 func_151423D8(u8);
+f32 angle_byte_cos(u8);
 s32 func_1515AB7C(u8 *arg0, s32 arg1) {
     SubAB7C *p;
     s32 i;
 
     p = (SubAB7C *)(arg0 + 0xA8);
-    *(f32 *)(arg0 + 0x38) = (func_151423D8(p->unk4 - 0x40) * p->unk8) + p->unk0;
-    *(f32 *)(arg0 + 0x3C) = (func_151423D8(p->unk5 - 0x40) * p->unkC) + p->unk0;
-    *(f32 *)(arg0 + 0x4C) = func_151423D8(p->unk10 - 0x40) * p->unk14;
-    *(f32 *)(arg0 + 0x54) = func_151423D8(p->unk11 - 0x40) * p->unk18;
+    *(f32 *)(arg0 + 0x38) = (angle_byte_cos(p->unk4 - 0x40) * p->unk8) + p->unk0;
+    *(f32 *)(arg0 + 0x3C) = (angle_byte_cos(p->unk5 - 0x40) * p->unkC) + p->unk0;
+    *(f32 *)(arg0 + 0x4C) = angle_byte_cos(p->unk10 - 0x40) * p->unk14;
+    *(f32 *)(arg0 + 0x54) = angle_byte_cos(p->unk11 - 0x40) * p->unk18;
     p->unk4 += p->unk6 * D_800BE9E4;
     p->unk5 += p->unk7 * D_800BE9E4;
     p->unk10 += p->unk12 * D_800BE9E4;
@@ -968,7 +968,7 @@ u8 func_1515ACFC(u8 *arg0, s32 arg1) {
     }
 block_9:
     if ((sp.u4B == 0) && (func_150ADA68() < 0.2f) && ((*(u8 *)((u8 *)arg0 + 0x9D)) == 3)) {
-        func_151DBCBC(func_151D8E20() & 0xFF, *sp34 * 0.2f, (s16) (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), &sp.u3C, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        impact_dust_particle_spawn(impact_current_kind() & 0xFF, *sp34 * 0.2f, (s16) (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), &sp.u3C, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     }
     return sp.u4B;
 }

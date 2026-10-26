@@ -1,9 +1,9 @@
 # P246 func_150C1BC0 (emit_point_debris) mutants: sed % setup names
 s/13U - 0x3F/13U - 0x3E/ % base
 s/13U - 0x3F/12U - 0x3F/ % base
-s/sp = func_151423D8(pitch \& 0xFF)/sp = func_151423D8(pitch \& 0x7F)/ % base neg
+s/sp = angle_byte_cos(pitch \& 0xFF)/sp = angle_byte_cos(pitch \& 0x7F)/ % base neg
 s/(pitch - 0x40) \& 0xFF/(pitch + 0x40) \& 0xFF/ % base
-s/sa = func_151423D8(a \& 0xFF)/sa = func_151423D8(a \& 0x7F)/ % neg
+s/sa = angle_byte_cos(a \& 0xFF)/sa = angle_byte_cos(a \& 0x7F)/ % neg
 s/(a - 0x40) \& 0xFF/(a - 0x3F) \& 0xFF/ % base
 s/17.4f + 25.5f/17.4f + 25.0f/ % base
 s/17.4f + 25.5f/17.5f + 25.5f/ % base

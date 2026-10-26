@@ -284,7 +284,7 @@ void func_151937A4(struct102 *arg0, u8 *arg1, u8 arg2) {
     } else if (arg2 == 0) {
         temp_v1 = *(s32 *)(arg1 + 0);
         if (temp_v1 == *(s32 *)(temp_v0 + 0) || *(u8 *)(temp_v0 + 4) == *(u8 *)(arg1 + 4)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -316,7 +316,7 @@ void func_15193850(u8 *arg0, s32 *arg1, u8 arg2)
     new_var = arg1[0]; // fakematch: new_var pins the load order
     if (((*((s32 *) v)) == new_var) || ((v[4] ^ 0) == ((u8 *) arg1)[4])) // fakematch: ^ 0 operand order
     {
-      func_1516972C(arg0);
+      node_destroy(arg0);
     }
   }
 }

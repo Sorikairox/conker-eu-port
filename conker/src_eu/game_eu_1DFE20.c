@@ -107,11 +107,11 @@ void func_151B27DC(u8 *arg0) {
         struct102 *p = ((struct102 **)(base + 0x10))[i];
 
         if (p != NULL) {
-            func_1516972C(p);
+            node_destroy(p);
         }
     }
     if (*(struct102 **)(base + 0x1C) != NULL) {
-        func_1516972C(*(struct102 **)(base + 0x1C));
+        node_destroy(*(struct102 **)(base + 0x1C));
     }
 }
 
@@ -415,7 +415,7 @@ void func_151B2F00(struct_eu_1DFE20_d *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(u8 *, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
 s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
@@ -490,7 +490,7 @@ u8 *func_151B2F24(u8 *arg0, u8 *arg1, s16 arg2) {
         sp.uB2 = 1;
         sp.uA8 = &D_800DBFF0[arg2].unk2F8;
         temp_v1 = ((u8 *)&D_800A4EA8);
-        temp_v0 = func_15142FBC(func_1513F4E4(func_15142CF0(func_15142C10(func_15142E24(func_15142B7C(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
+        temp_v0 = func_15142FBC(gfx_set_combine_mode(func_15142CF0(func_15142C10(func_15142E24(func_15142B7C(var_s0, 0x200005, 0x60600), &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &sp.uB2, 3), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &sp.uB2), 0x2B, &sp.uB2), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x2C)) | (*(s32 *)((u8 *)temp_v1 + 0x28)), &sp.uB2);
         temp_f0 = sp.u74 - sp.u80;
         temp_f14 = ((temp_f0 * 0.5f) + sp.u80) - (*(f32 *)((u8 *)sp.uA8 + 0));
         temp_f2 = sp.u78 - sp.u84;
@@ -563,7 +563,7 @@ block_11:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B2F24.s")
 #endif
 void func_151B3474(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 void func_151B34B4(u8 *arg0, s32 *arg1, u8 arg2)
@@ -628,6 +628,6 @@ void func_151B35F0(s32 arg0, s32 arg1, u8 arg2) {
     s32 temp_a2;
 
     temp_a2 = arg0 + 0x150;
-    func_15169850(arg1, arg2, temp_a2, arg0 + 0x154, arg0);
-    func_15169850(arg1, arg2, temp_a2 + 0x14, temp_a2 + 0x18, arg0);
+    node_handle_link_message(arg1, arg2, temp_a2, arg0 + 0x154, arg0);
+    node_handle_link_message(arg1, arg2, temp_a2 + 0x14, temp_a2 + 0x18, arg0);
 }

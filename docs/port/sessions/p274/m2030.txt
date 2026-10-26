@@ -1,4 +1,4 @@
-\#^    obj = func_15167A68(0xB, 0, 0x100, 1, 0xFF, 1);$#s/0xFF, 1/0xFF, 0/
+\#^    obj = node_alloc(0xB, 0, 0x100, 1, 0xFF, 1);$#s/0xFF, 1/0xFF, 0/
 \#^    if (obj == NULL) {$#s/==/!=/
 \#^    \*(s16 \*) (obj + 0x90) = kind;$#s/0x90/0x92/
 \#^    \*(f32 \*) (obj + 0x98) = y0;$#s/y0/z0/

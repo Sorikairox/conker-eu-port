@@ -4,11 +4,13 @@
 #include "variables.h"
 
 
-void func_15103800(void) {
+/* was func_15103800 */
+void sfx_cooldown_clear(void) {
     bzero(D_800D9AB0, 8); // bzero
 }
 
-void func_15103828(void) {
+/* was func_15103828 */
+void sfx_cooldown_tick(void) {
     u16 temp_v1;
     s32 i;
 
@@ -51,13 +53,14 @@ typedef struct {
 #ifdef NON_MATCHING
 // object_sound_follow_cam: P253. func_1000FA64 callback (s32 (SfxEnt *, s32 *pos, u32 *vol, s32 *pan, s32 *pitch,
 // s32 *slot, u16 *sound), called from the sound update in init_EB00.c; non-zero = free the slot) of the sounds
-// func_15103C14 starts for an object with a camera. The slot follows the object's position. With a timer (low half of
+// object_sound_play_cooldown starts for an object with a camera. The slot follows the object's position. With a timer (low half of
 // state, signed): a sound the update is about to start is queued instead (high half) and sound 0x5B0 is started
 // (volume 25000, 100, 0x78); otherwise the timer counts down by D_800BE9E4 and at 0 the queued sound is handed back
 // (*sound, slot sound, *vol = slot volume, *pos = 1, state cleared). Without a timer: *vol = slot volume, *pos = 1;
 // with no voice yet the slot ends (sound 0x5B1 started, returns 1); else the object's voice (+0x8C) is replaced by
 // this slot's voice (the old one stopped with func_100111C8) and flag 0x80 is cleared.
-s32 func_15103910(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
+/* was func_15103910 */
+s32 object_sound_follow_cam(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
     u8 *obj = e->obj;
     s32 state = e->state;
     s16 timer = state;
@@ -101,18 +104,19 @@ s32 func_15103910(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s3
 }
 
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103910.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/object_sound_follow_cam.s")
 #endif
 
 #ifdef NON_MATCHING
-// object_sound_delayed: P253. func_1000FA64 callback (same signature as func_15103910) of the sounds func_15103C14
+// object_sound_delayed: P253. func_1000FA64 callback (same signature as object_sound_follow_cam) of the sounds object_sound_play_cooldown
 // starts for an object without a camera (state = flag 0x8000 from its arg4 | 0x10). The slot follows the object's
 // position. With a timer (state & 0x7FFF): a sound the update is about to start is queued (high half) and sound 0x5B0
 // is started (volume -25000); otherwise the timer counts down by D_800BE9E4 and once it would reach 0 the queued
 // sound is handed back (*sound, slot sound; the timer bits cleared). Without a timer: with no voice yet the slot ends
 // (sound 0x5B1, returns 1); else, unless flag 0x8000 is set, func_1000F85C(voice, -0x8000, 2) once, the state is
 // cleared and flag 0x80 of the slot is cleared.
-s32 func_15103AA0(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
+/* was func_15103AA0 */
+s32 object_sound_delayed(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
     u8 *obj = e->obj;
     s32 state = e->state;
     s32 timer = state & 0x7FFF;
@@ -153,11 +157,12 @@ s32 func_15103AA0(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s3
     return 0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103AA0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/object_sound_delayed.s")
 #endif
 #ifdef NON_MATCHING
 
-void func_15103C14(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4) {
+/* was func_15103C14 */
+void object_sound_play_cooldown(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4) {
     s32 sp48;
     u16 *sp40;
     s32 var_s1;
@@ -184,14 +189,14 @@ void func_15103C14(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4) {
                 var_s1 += 1;
             }
             if (sp48 != 0) {
-                func_1000FA64(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7530, 0x7FFFU, 0x7FFE, (s32) &func_15103910, (u8 *)0x10, (s32) temp_v0_2, 0x100, 0);
+                func_1000FA64(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7530, 0x7FFFU, 0x7FFE, (s32) &object_sound_follow_cam, (u8 *)0x10, (s32) temp_v0_2, 0x100, 0);
             } else {
-                func_1000FA64(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7FBC, 0x7FFFU, 0x7FFE, (s32) &func_15103AA0, (u8 *) ((arg4 << 0xF) | 0x10), (s32) temp_v0_2, 0x100, 0);
+                func_1000FA64(var_s1 & 0xFFFF, (s16) (s32) temp_v0_2->x_position, (s16) (s32) temp_v0_2->y_position, (s16) (s32) temp_v0_2->z_position, 0x7FBC, 0x7FFFU, 0x7FFE, (s32) &object_sound_delayed, (u8 *) ((arg4 << 0xF) | 0x10), (s32) temp_v0_2, 0x100, 0);
             }
             *sp40 = 0x1F4;
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103C14.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/object_sound_play_cooldown.s")
 #endif

@@ -43,7 +43,7 @@ s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, u8 *);
 s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, u8 *);
-s32 func_1513F4E4(s32, s32, u8 *);
+s32 gfx_set_combine_mode(s32, s32, u8 *);
 s32 func_15142FBC(s32, s32, s32, u8 *);
 f32 func_15143E64(f32 *);
 f32 sinf(f32);
@@ -109,7 +109,7 @@ s32 func_151B58D8(s32 gfx, u8 *obj, s16 player) {
         gfx = func_15142E24(gfx, &D_80091318, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-        gfx = func_1513F4E4(gfx, 0x2E, &flag);
+        gfx = gfx_set_combine_mode(gfx, 0x2E, &flag);
         gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[5 * 2 + 1] | D_800A4EA8[5 * 2], &flag);
         dir[0] = pb[0] - pa[0];
         dir[1] = pb[1] - pa[1];
@@ -199,6 +199,6 @@ void func_151B604C(u8 *arg0, u8 *arg1, u8 arg2)
   else if (arg2 == 0)
   {
     s32 k = *(s32 *)arg1;
-    if ((k == *(s32 *)(v + 0x580)) || (k == *(s32 *)(v + 0x588)) || (v[0x584] == arg1[4]) || (v[0x58C] == arg1[4])) { func_1516972C((struct102 *)arg0); }
+    if ((k == *(s32 *)(v + 0x580)) || (k == *(s32 *)(v + 0x588)) || (v[0x584] == arg1[4]) || (v[0x58C] == arg1[4])) { node_destroy((struct102 *)arg0); }
   }
 }

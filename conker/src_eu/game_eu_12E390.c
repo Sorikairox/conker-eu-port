@@ -13,10 +13,10 @@ void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 #ifdef NON_MATCHING
 /* P153 */
 s32 func_151308E4(s32 tmpl, u8 arg1, s32 size, u8 arg3, s32 arg4);
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 
-/* spawn block of func_1513D4B8 / func_151407D0 (0x48 bytes, the func_150113E0 layout) */
+/* spawn block of effect3d_spawn / particle_emitter_spawn (0x48 bytes, the func_150113E0 layout) */
 typedef struct {
     u8 kind;          /* 0x00 */
     u8 sub;           /* 0x01 */
@@ -129,10 +129,10 @@ typedef struct {
 } Frame0B80;
 
 // object_burst_effect_spawn: builds the compound effect of func_15102C3C on obj: a main record (kind 0x59,
-// func_1513D4B8 with the 0x94-byte state: obj, pos, dir, kind, the obj slot, sizes arg8..argB, a sound handle from
+// effect3d_spawn with the 0x94-byte state: obj, pos, dir, kind, the obj slot, sizes arg8..argB, a sound handle from
 // func_10010F30 when obj +0x318 is set), and under it (stored in the state at +0x28 .. +0x34) a second record
-// (kind 3), a light (func_151602C0), a spark particle (kind 0x2B, random angles / spin), a particle emitter
-// (func_151407D0) and a glow particle (kind 0x15). life -1 means 300 ticks and clears the "timed" flag bit 1 of
+// (kind 3), a light (light_create_with_ctrl), a spark particle (kind 0x2B, random angles / spin), a particle emitter
+// (particle_emitter_spawn) and a glow particle (kind 0x15). life -1 means 300 ticks and clears the "timed" flag bit 1 of
 // every block. rgb = colour of every part. Returns the main record (0 when it could not be created).
 s32 func_15100B80(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8 b, f32 arg8, f32 arg9, f32 argA,
                   f32 argB, u8 argC, u8 argD, s32 argE) {
@@ -219,7 +219,7 @@ s32 func_15100B80(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8
     f.mainSpawn.u44[1] = 0xFF;
     f.mainSpawn.u44[2] = 0;
     f.mainSpawn.u44[3] = 6;
-    rec = (u8 *) func_1513D4B8((s32) &f.mainSpawn, (s32) &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, 0x94, argD, argE);
+    rec = (u8 *) effect3d_spawn((s32) &f.mainSpawn, (s32) &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, 0x94, argD, argE);
     if (rec == NULL) {
         return 0;
     }
@@ -256,7 +256,7 @@ s32 func_15100B80(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8
     f.rec2Spawn.u44[2] = 0;
     f.rec2Spawn.u44[3] = 6;
     *(u8 **) (state + 0x28) =
-        (u8 *) func_1513D4B8((s32) &f.rec2Spawn, (s32) &D_800A4AA0, 0, 0, 0, 0x13, 0, 0x18, argD, argE);
+        (u8 *) effect3d_spawn((s32) &f.rec2Spawn, (s32) &D_800A4AA0, 0, 0, 0, 0x13, 0, 0x18, argD, argE);
     if (*(u8 **) (state + 0x28) != NULL) {
         memcpy((s32) (*(u8 **) (state + 0x28) + 0x110), (s32) &f.rec2Pay, 0x18);
     }
@@ -270,7 +270,7 @@ s32 func_15100B80(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8
     f.light.unk1 = -1;
     f.light.unk4 = 7;
     f.light.unk2 = life;
-    *(struct225 **) (state + 0x2C) = func_151602C0(&f.light, &f.lightArg, 5, r, g, b, 0xFF, 0, 4, argD, argE);
+    *(struct225 **) (state + 0x2C) = light_create_with_ctrl(&f.light, &f.lightArg, 5, r, g, b, 0xFF, 0, 4, argD, argE);
     if (*(struct225 **) (state + 0x2C) != NULL) {
         memcpy((s32) (*(u8 **) (state + 0x2C) + 0x18), (s32) &f.lightPay, 4);
     }
@@ -378,7 +378,7 @@ s32 func_15100B80(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8
     f.emit.u14[0] = 0.5f;
     f.emit.u14[1] = 0.3f;
     f.emit.range[2] = 0.0f;
-    *(u8 **) (state + 0x30) = func_151407D0(&f.emit, 0x68, &f.emitSpawn, 0, 0, 0, 0, 0, argD, argE);
+    *(u8 **) (state + 0x30) = particle_emitter_spawn(&f.emit, 0x68, &f.emitSpawn, 0, 0, 0, 0, 0, argD, argE);
     if (*(u8 **) (state + 0x30) != NULL) {
         memcpy((s32) (*(u8 **) (state + 0x30) + 0x170), (s32) &f.emitPay, 8);
     }
@@ -438,9 +438,9 @@ s32 func_15100B80(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8
 #endif
 
 #ifdef NON_MATCHING
-/* obj_fx_kill_all: P238: handler in the kind table at D_8008A29C (default func_1513CA6C): stops the object's sound
+/* obj_fx_kill_all: P238: handler in the kind table at D_8008A29C (default effect3d_retire): stops the object's sound
  * (u16 +0x1A0, func_100111C8) when set, ends each of its effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that
- * order; func_1516972C) that is set, then runs the default func_1513CA6C. The pointers are not cleared. */
+ * order; node_destroy) that is set, then runs the default effect3d_retire. The pointers are not cleared. */
 void func_15101610(struct210 *arg0) {
     u8 *obj = (u8 *) arg0;
     u8 *fx = obj + 0x110;
@@ -449,50 +449,50 @@ void func_15101610(struct210 *arg0) {
         func_100111C8(*(u16 *) (obj + 0x1A0));
     }
     if (*(struct102 **) (obj + 0x138) != NULL) {
-        func_1516972C(*(struct102 **) (obj + 0x138));
+        node_destroy(*(struct102 **) (obj + 0x138));
     }
     if (*(struct102 **) (fx + 0x2C) != NULL) {
-        func_1516972C(*(struct102 **) (fx + 0x2C));
+        node_destroy(*(struct102 **) (fx + 0x2C));
     }
     if (*(struct102 **) (fx + 0x24) != NULL) {
-        func_1516972C(*(struct102 **) (fx + 0x24));
+        node_destroy(*(struct102 **) (fx + 0x24));
     }
     if (*(struct102 **) (fx + 0x30) != NULL) {
-        func_1516972C(*(struct102 **) (fx + 0x30));
+        node_destroy(*(struct102 **) (fx + 0x30));
     }
     if (*(struct102 **) (fx + 0x34) != NULL) {
-        func_1516972C(*(struct102 **) (fx + 0x34));
+        node_destroy(*(struct102 **) (fx + 0x34));
     }
-    func_1513CA6C(arg0);
+    effect3d_retire(arg0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_15101610.s")
 #endif
 
 #ifdef NON_MATCHING
-/* obj_fx_stop_all: P238: handler in the kind table at D_8008A2D0 (default func_1513CAA0): func_1516979C on each of
+/* obj_fx_stop_all: P238: handler in the kind table at D_8008A2D0 (default effect3d_free): node_delete on each of
  * the object's effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that order) that is set, then the default
- * func_1513CAA0. No sound stop here (unlike obj_fx_kill_all). */
+ * effect3d_free. No sound stop here (unlike obj_fx_kill_all). */
 void func_151016C8(struct210 *arg0) {
     u8 *obj = (u8 *) arg0;
     u8 *fx = obj + 0x110;
 
     if (*(struct102 **) (obj + 0x138) != NULL) {
-        func_1516979C(*(struct102 **) (obj + 0x138));
+        node_delete(*(struct102 **) (obj + 0x138));
     }
     if (*(struct102 **) (fx + 0x2C) != NULL) {
-        func_1516979C(*(struct102 **) (fx + 0x2C));
+        node_delete(*(struct102 **) (fx + 0x2C));
     }
     if (*(struct102 **) (fx + 0x24) != NULL) {
-        func_1516979C(*(struct102 **) (fx + 0x24));
+        node_delete(*(struct102 **) (fx + 0x24));
     }
     if (*(struct102 **) (fx + 0x30) != NULL) {
-        func_1516979C(*(struct102 **) (fx + 0x30));
+        node_delete(*(struct102 **) (fx + 0x30));
     }
     if (*(struct102 **) (fx + 0x34) != NULL) {
-        func_1516979C(*(struct102 **) (fx + 0x34));
+        node_delete(*(struct102 **) (fx + 0x34));
     }
-    func_1513CAA0(arg0);
+    effect3d_free(arg0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_151016C8.s")
@@ -501,25 +501,25 @@ void func_151016C8(struct210 *arg0) {
 void func_15101768(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x124) + 0x110;
     *(s32 *)(p + 0x28) = 0;
-    func_1513CA6C(arg0);
+    effect3d_retire(arg0);
 }
 
 void func_15101790(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x124) + 0x110;
     *(s32 *)(p + 0x28) = 0;
-    func_1513CAA0(arg0);
+    effect3d_free(arg0);
 }
 
 void func_151017B8(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x18) + 0x110;
     *(s32 *)(p + 0x2C) = 0;
-    func_151617C4(arg0);
+    light_ctrl_retire(arg0);
 }
 
 void func_151017E0(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x18) + 0x110;
     *(s32 *)(p + 0x2C) = 0;
-    func_151617E4(arg0);
+    light_ctrl_free(arg0);
 }
 
 void func_15101808(struct210 *arg0) {
@@ -537,13 +537,13 @@ void func_15101830(struct210 *arg0) {
 void func_15101858(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x170) + 0x110;
     *(s32 *)(p + 0x30) = 0;
-    func_151411A4(arg0);
+    effect_free_buffers_retire(arg0);
 }
 
 void func_15101880(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x170) + 0x110;
     *(s32 *)(p + 0x30) = 0;
-    func_151411C4(arg0);
+    effect_free_buffers_delete(arg0);
 }
 
 void func_151018A8(struct210 *arg0) {
@@ -1162,7 +1162,7 @@ void func_151027E8(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_151403A8(&tmp, 0x1A);
+    fx_lists_broadcast_a(&tmp, 0x1A);
 }
 
 s32 func_15102D9C(u8 *arg0, s16 arg1) {

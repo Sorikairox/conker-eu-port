@@ -65,14 +65,14 @@ void func_1516A1E0(u8 *obj) {
                 func_15171E60(*(f32 *) (obj + 0x90), (*(f32 *) (obj + 0x94) - obj[0xE9]) + 15.0f,
                               *(f32 *) (obj + 0x98), 30.0f, 0x28, 0.0030517578f, 0, 0xA, obj[0xC], obj[1]);
                 func_1518CF74(obj[0xEA]);
-                func_1516972C((struct102 *) obj);
+                node_destroy((struct102 *) obj);
                 return;
             case 4:
                 func_15171770(3, 0xB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98),
                               *(f32 *) (obj + 0xAC) * *(f32 *) (obj + 0xDC), 0.5f, D_800A70A0, 40.0f, 2, 0x3C, -0.5f,
                               obj[0xC], obj[1]);
                 func_1518CF74(obj[0xEA]);
-                func_1516972C((struct102 *) obj);
+                node_destroy((struct102 *) obj);
                 return;
             case 3:
                 func_15171770(2, 0xCB, *(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), 6.0f,
@@ -80,7 +80,7 @@ void func_1516A1E0(u8 *obj) {
                 func_15170F24(*(f32 *) (obj + 0x90), *(f32 *) (obj + 0x94) + 10.0f, *(f32 *) (obj + 0x98), 4,
                               *(f32 *) (obj + 0xAC) * 200.0f, obj[0xC], obj[1]);
                 func_1518CF74(obj[0xEA]);
-                func_1516972C((struct102 *) obj);
+                node_destroy((struct102 *) obj);
                 return;
             case 6:
                 *(f32 *) (obj + 0xB0) = 0.0f;
@@ -95,7 +95,7 @@ void func_1516A1E0(u8 *obj) {
                 return;
             case 8:
                 func_1518CF74(obj[0xEA]);
-                func_1516972C((struct102 *) obj);
+                node_destroy((struct102 *) obj);
                 return;
             default:
                 *(f32 *) (obj + 0xA8) *= *(f32 *) (obj + 0xD8);
@@ -140,7 +140,7 @@ void func_1516A1E0(u8 *obj) {
             return;
         }
         func_1518CF74(obj[0xEA]);
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
     }
 }
 #else
@@ -200,7 +200,7 @@ void func_1516A964(u8 *arg0) {
             sp.u3A = temp_v1;
             sp.u3C = temp_v1;
             sp.u41 = temp_v0_2;
-            func_15167AD8(&sp.u2C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+            node_spawn_sprite_quad(&sp.u2C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
         }
     } else {
         (*(s16 *)((u8 *)arg0 + 0x26)) = (s16) (s32) ((f32) (*(s16 *)((u8 *)arg0 + 0x26)) * D_800A70A8);

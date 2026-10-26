@@ -6,7 +6,7 @@
 void func_150FE290(s32 arg0) {
     struct127 *p;
 
-    func_15103828();
+    sfx_cooldown_tick();
     if (D_800C35EA == 1) {
         p = D_800CC2D0;
         do {

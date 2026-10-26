@@ -3,7 +3,7 @@
 \#^    gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, \&flag/0xFE, \&flag/ %
 \#^    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xF2, 0,/0xF2, 1,/ %
 \#^    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, 0xFF, \&flag/0xFF, 0, \&flag/ %
-\#^    gdl = func_1513F4E4(gdl, 0x21, &flag);$#s/0x21/0x20/ %
+\#^    gdl = gfx_set_combine_mode(gdl, 0x21, &flag);$#s/0x21/0x20/ %
 \#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/\[29\] | /[27] | / %
 \#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
 \#^    tex = func_1510D66C(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %

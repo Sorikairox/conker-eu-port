@@ -20,7 +20,7 @@ u8 *func_1510DEF0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         sp28 = 0x13A;
     }
     sp20 = temp_t0;
-    temp_v0 = func_15167A68(0x4B, 0, sp28, 1, 0xFFU, 1U);
+    temp_v0 = node_alloc(0x4B, 0, sp28, 1, 0xFFU, 1U);
     if (temp_v0 != NULL) {
         var_a0 = 0;
         var_v1 = temp_v0;

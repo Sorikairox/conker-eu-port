@@ -16,7 +16,8 @@ extern struct17 D_800D9E70;
 // segment D_800A1F50 -> D_800A1F5C (0.75 x, clamped to 0..1); the two button groups pick a side offset of -900 / +900
 // (distance 220) or none (294); func_1509BFB0 gets (offset, -20, 6728 t - 5530); the angle +0x37C eases towards the
 // D_800D9E70 heading - 180 (func_15049978) and +0x39C is it in radians. Otherwise the flags are cleared.
-void func_150F6B00(struct108 *arg0) {
+/* was func_150F6B00 */
+void camera_segment_track(struct108 *arg0) {
     struct17 toObj;
     struct17 axis;
     struct17 dir;
@@ -55,10 +56,10 @@ void func_150F6B00(struct108 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_123FB0/func_150F6B00.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_123FB0/camera_segment_track.s")
 #endif
 // NON-MATCHING: 90% there
-// void func_150F6B00(struct108 *arg0) {
+// void camera_segment_track(struct108 *arg0) {
 //     struct190 tmp;
 //
 //     f32 phi_f2;

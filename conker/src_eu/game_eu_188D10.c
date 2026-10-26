@@ -47,8 +47,8 @@ void func_1515B500(s16 idx) {
     yaw = *(f32 *) ((u8 *) D_800DBFF0 + idx * 0x9A0 + 0x380) * 0.7111111f;
     angle = (u32) func_150ADA20() % 41 + yaw - 20;
     dist = func_150ADA68() * 1903.0f + 107.0f;
-    c = func_151423D8((u8) angle);
-    s = func_151423D8((u8) (angle - 0x40));
+    c = angle_byte_cos((u8) angle);
+    s = angle_byte_cos((u8) (angle - 0x40));
     rec[0] = pos[0] - dist * s;
     rec[2] = pos[2] - dist * c;
     q.pos[0] = rec[0];
@@ -243,20 +243,20 @@ void func_1515BB64(s16 arg0) {
 void func_1515BB9C(u8 *arg0, s16 *arg1, u8 arg2) {
     if (arg2 == 0xB) {
         if (*(s16 *)(arg0 + 0x70) == *arg1) {
-            func_1516972C((struct102 *)arg0);
+            node_destroy((struct102 *)arg0);
         }
     }
 }
 
 #ifdef NON_MATCHING
-u8 func_151D8E20(void);
+u8 impact_current_kind(void);
 s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
 extern u8 (*D_800900A4[])(void);
 
 // smoke_cloud_burst: spawns 10 drifting smoke sprites (func_151559FC list 2, 0x18 / 0xFF / 1) tagged with id (the
 // sprite's +0x70 gets the 0x18-byte block {id, speed (105..210) * 0.001, spin 0..3008 * 0.001, size, size 2
 // ((94..395) * 0.01), ...}; size = (489..2068) * 0.01. Each starts at (-100..100, -100..48), with the texture byte of
-// the current kind's D_800900A4 handler (func_151D8E20), life 50..100, alpha 100..200 and random flip flags 2 / 4.
+// the current kind's D_800900A4 handler (impact_current_kind), life 50..100, alpha 100..200 and random flip flags 2 / 4.
 // The first func_150ADA20 call's result is not used.
 void func_1515BBE4(s16 id) {
     struct {
@@ -332,7 +332,7 @@ void func_1515BBE4(s16 id) {
         blk.size2 = (func_150ADA68() * 301.0f + 94.0f) * 0.01f;
         spr.x = func_150ADA68() * 200.0f + -100.0f;
         spr.y = func_150ADA68() * 148.0f + -100.0f;
-        spr.tex = D_800900A4[func_151D8E20()]();
+        spr.tex = D_800900A4[impact_current_kind()]();
         spr.life = (u32) func_150ADA20() % 51 + 50;
         spr.colour[3] = (u32) func_150ADA20() % 101 + 100;
         if (func_150ADA20() & 1) {

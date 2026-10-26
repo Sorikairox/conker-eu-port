@@ -1,7 +1,7 @@
 extern s32 (*D_80088B00[])(u8 *); /* motion handlers (func_150C6088, func_150C60D4) (index obj +0x30, -1 = none); 0 = remove the object */
 
 /* object_motion_step: for an active object (flag word +0x10 bit 0), runs its motion handler D_80088B00[+0x30] (if
- * any); when the handler returns 0 the object is removed (func_1516972C). Otherwise, if the offset position +0x18 -
+ * any); when the handler returns 0 the object is removed (node_destroy). Otherwise, if the offset position +0x18 -
  * +0x24 (f32[3] each) changed across the handler, its length (func_15143E64) is stored in +0xC0. Table record word
  * 0x8008C680 (update slot), like its neighbours `void (struct102 *)`. */
 void func_150C5A68(struct102 *obj) {
@@ -30,6 +30,6 @@ void func_150C5A68(struct102 *obj) {
         }
     }
     if (remove) {
-        func_1516972C(obj);
+        node_destroy(obj);
     }
 }

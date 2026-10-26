@@ -29,7 +29,7 @@
 \#^    x\.u38 = #s/12960/12000/
 \#^    x\.u38 = #s/15241/15240/
 \#^    x\.u38 = #s/0\.0001f/0.001f/
-\#^    rec = (u8 \*) func_1513D524#s/0x13, 0x1E/0x13, 0x1F/
-\#^    rec = (u8 \*) func_1513D524#s/0, 0x11, 0, 0x40/0, 0x11, 1, 0x40/
-\#^    rec = (u8 \*) func_1513D524#s/room, group/group, room/
+\#^    rec = (u8 \*) effect3d_spawn_default#s/0x13, 0x1E/0x13, 0x1F/
+\#^    rec = (u8 \*) effect3d_spawn_default#s/0, 0x11, 0, 0x40/0, 0x11, 1, 0x40/
+\#^    rec = (u8 \*) effect3d_spawn_default#s/room, group/group, room/
 \#^        memcpy(rec + 0x110#s/0x110/0x10C/

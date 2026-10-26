@@ -10,7 +10,7 @@ s/        item = func_151149AC(0xFA - i);/        item = func_151149AC(0xFA + i)
 s/            func_15195750(D_800CC2D0);/            ;/ % mid
 s/            func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);/            func_10010154(0x627, D_800CC2D0, 0x7FFF, 0x2BC, 0xC8);/ % mid
 s/    item = func_151149AC(0xFB);/    item = func_151149AC(0xFC);/ % last
-s/        func_15136C3C(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);/        func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);/ % last
+s/        object_hit_effects(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);/        object_hit_effects(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);/ % last
 s/        func_15145A50(D_800CC2D0);/        ;/ % last
 s/        func_1507CD64(D_800CC2D0, 6);/        func_1507CD64(D_800CC2D0, 5);/ % last
 s/        func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);/        func_10010154(0x628, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);/ % last

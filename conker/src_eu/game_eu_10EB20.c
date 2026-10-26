@@ -17,13 +17,13 @@ void func_150E1310(struct108 *arg0) {
             func_1509BFB0(0, 0x4044, 1);
         }
         if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
-            if (func_15123934(arg0, 8, 0, 0, 0) != 0) {
+            if (camera_push_mode(arg0, 8, 0, 0, 0) != 0) {
                 temp_t1 = arg0->unk84 | 0x300000;
                 arg0->unk84 = temp_t1;
                 arg0->unk84 = temp_t1 & ~4;
                 arg0->unk1B4 = 1;
                 arg0->unk1E0 = 3;
-                func_15124B18(arg0);
+                camera_apply_zoom_level(arg0);
             }
             arg0->unk348 = 125.0f;
             arg0->unk34C = 125.0f;
@@ -34,7 +34,7 @@ void func_150E1310(struct108 *arg0) {
         }
         goto block_16;
     }
-    if ((arg0->unk2C == 8) && (arg0->unk6C8 == 0) && (func_151239CC(arg0, 0) != 0)) {
+    if ((arg0->unk2C == 8) && (arg0->unk6C8 == 0) && (camera_pop_mode(arg0, 0) != 0)) {
         arg0->unk34C = 110.0f;
         arg0->unk348 = 110.0f;
         arg0->unk374 = 300.0f;

@@ -58,7 +58,7 @@ void func_150CF650(u8 *arg0) {
                 temp_f20 = func_150ADA68();
                 temp_s1 = func_150ADA20();
                 temp_s0_4 = func_150ADA20();
-                func_151D9014(&sp.uC8, &sp.uBC, 5U, (temp_f20 * 0.286f) + -0.78700006f, (s16) (((u32) temp_s1 % 21U) + 0x1E), (u8) (((u32) temp_s0_4 % 156U) + 0x64), (func_150ADA68() * 50.0f) + 48.0f, 1U, 1.0f, 1.0f, 0U, (s32) &sp.uDC, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                impact_dust_cloud_spawn(&sp.uC8, &sp.uBC, 5U, (temp_f20 * 0.286f) + -0.78700006f, (s16) (((u32) temp_s1 % 21U) + 0x1E), (u8) (((u32) temp_s0_4 % 156U) + 0x64), (func_150ADA68() * 50.0f) + 48.0f, 1U, 1.0f, 1.0f, 0U, (s32) &sp.uDC, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f);
         }
@@ -72,7 +72,7 @@ void func_150CF994(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 t = *(s32 *)arg1;
         if (t == *(s32 *)v || v[4] == arg1[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {

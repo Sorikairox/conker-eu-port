@@ -443,7 +443,7 @@ extern void (*D_8008A8D8[74])(struct260*, s32, u8);
 extern s32 (*D_8008A670[])(s32, struct260*, s16);
 #ifdef NON_MATCHING
 /* P234: EU D_8008B490; every handler takes the struct225 (the asm keeps a0 = the object at the jalr) and the
-   dispatcher func_151603FC tests the result (0 = destroy) */
+   dispatcher light_ctrl_update tests the result (0 = destroy) */
 extern s32  (*D_8008B0F0[])(struct225 *);
 #else
 extern s32  (*D_8008B0F0[])(void);

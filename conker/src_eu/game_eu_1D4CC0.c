@@ -34,10 +34,10 @@ typedef struct {
     s16 u58;
 } Spray74B0;
 // debris_spray_spawn: spawns spray->count debris pieces (func_15132FBC, 0x10 extra bytes at +0x170) around
-// spray->pos, each in a random direction (yaw / pitch byte angles from the ranges, func_151423D8 = sin) at
+// spray->pos, each in a random direction (yaw / pitch byte angles from the ranges, angle_byte_cos = sin) at
 // 0..radius; velocity by `mode`: 0 horizontal along the yaw with a separate vertical speed, 1 along the direction,
 // 2 spray->dir, 3 spray->dir times a random speed. Random size (x30 for the model scale), spin and two rotation
-// speeds. Each piece gets a shadow / trail (func_15134908 kind 4, size x15, 0.358) whose record is kept at its
+// speeds. Each piece gets a shadow / trail (point_emitter_spawn kind 4, size x15, 0.358) whose record is kept at its
 // extra +4. Returns 0 (the asm leaves v0 unset; callers ignore it).
 s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
     Spray74B0 *s = arg0;
@@ -138,10 +138,10 @@ s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
     while (n-- != 0) {
         yaw = func_150ADA20() % (u32)(s->yawRange + 1) + s->yawMin;
         pitch = func_150ADA20() % (u32)(s->pitchRange + 1) + s->pitchMin;
-        sy = func_151423D8(yaw - 0x40);
-        cy = func_151423D8(yaw);
-        sp_ = func_151423D8(pitch - 0x40);
-        cp = func_151423D8(pitch);
+        sy = angle_byte_cos(yaw - 0x40);
+        cy = angle_byte_cos(yaw);
+        sp_ = angle_byte_cos(pitch - 0x40);
+        cp = angle_byte_cos(pitch);
         r = func_150ADA68() * s->radius;
         h = r * cp;
         sp.pos[0] = s->pos[0] + h * sy;
@@ -192,7 +192,7 @@ s32 func_151A74B0(void *arg0, s32 mode, u8 arg2, s32 arg3) {
             trail.uA3 = 1;
             trail.u9C = 0.358f;
             *(u8 **)(p + 0x170 + 4) = NULL;
-            t = (u8 *)func_15134908((struct_eu_EF410 *)&trail, 4, arg2, arg3);
+            t = (u8 *)point_emitter_spawn((struct_eu_EF410 *)&trail, 4, arg2, arg3);
             *(u8 **)(p + 0x170 + 4) = t;
             if (t != NULL) {
                 memcpy(t + 0x40, &size, 4);
@@ -211,7 +211,7 @@ s32 func_151A799C(u8 *arg0) {
     temp_v0 = arg0 + 0x170;
     if (*(s16 *)(arg0 + 0x64) < 0x20) {
         if (*(struct102 **)(temp_v0 + 4) != NULL) {
-            func_1516972C(*(struct102 **)(temp_v0 + 4));
+            node_destroy(*(struct102 **)(temp_v0 + 4));
             *(struct102 **)(temp_v0 + 4) = NULL;
         }
     }
@@ -236,7 +236,7 @@ s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
   *((f32 *) (arg0 + 0x3C)) = (*((f32 *) (arg0 + 0x10))) + arg4;
   if ((*((s32 *) (arg0 + 0x174))) != 0)
   {
-    func_1516972C(*((struct102 **) (p + 4)));
+    node_destroy(*((struct102 **) (p + 4)));
     *((struct102 **) (p + 4)) = 0;
   }
   if ((*((f32 *) p)) < (*((f32 *) (arg0 + 0x48))))
@@ -374,7 +374,7 @@ void func_151A7EB8(u8 *arg0) {
 
     temp_v0 = arg0 + 0x170;
     if (*(s32 *)(arg0 + 0x174) != 0) {
-        func_1516972C(*(struct102 **)(temp_v0 + 4));
+        node_destroy(*(struct102 **)(temp_v0 + 4));
         *(struct102 **)(temp_v0 + 4) = NULL;
     }
 }

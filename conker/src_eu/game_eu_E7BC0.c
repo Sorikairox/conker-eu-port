@@ -42,7 +42,7 @@ typedef struct {
         s16 u6A;              /* 0x6A */
         f32 u6C[2];           /* 0x6C */
     } ring;
-    struct {                  /* spE4: drop spawn block, func_1513C650 argument 0 (0x28 bytes) */
+    struct {                  /* spE4: drop spawn block, sprite_fx_spawn_cam_at argument 0 (0x28 bytes) */
         s32 kindFlags;        /* 0x00: kind 0, flags 0x9F01 */
         s16 life;             /* 0x04 */
         u8 u6;                /* 0x06 */
@@ -64,7 +64,7 @@ typedef struct {
 
 // water_splash_spawn: P153: splash where obj (pos +0x14) meets the water between it and (x, z): when neither
 // func_150A3538 test (2, 1) holds at the object's position, casts a ray from 80 units above the object towards
-// (x, z) (func_150ACEA0); on a hit whose surface passes func_15145C90 it spawns a drop record (func_1513C650,
+// (x, z) (func_150ACEA0); on a hit whose surface passes func_15145C90 it spawns a drop record (sprite_fx_spawn_cam_at,
 // random life 100..150, alpha 155..255, random size 40..60 and flips) and always a ring (func_1515176C) at the hit
 // point. The original first checksums the code range func_151E86A4..func_151E870C (anti-tamper: sets
 // D_800843F0[0] = 0xFF unless the sum of ~words is 0x38424614); the port's code is not N64 code, so that check
@@ -116,7 +116,7 @@ void func_150BA3B0(u8 *obj, f32 x, f32 z, u8 arg3, s32 arg4) {
         size1 = func_150ADA68();
         alpha = func_150ADA20();
         flip = func_150ADA20();
-        func_1513C650((s32) &f.drop, 0, 0, (s32) f.hit, f.pos[0], f.pos[1], f.pos[2], size0 * 20.0f + 40.0f,
+        sprite_fx_spawn_cam_at((s32) &f.drop, 0, 0, (s32) f.hit, f.pos[0], f.pos[1], f.pos[2], size0 * 20.0f + 40.0f,
                       size1 * 20.0f + 40.0f, alpha & 0xFF, (func_150ADA20() & 1) + (flip & 1) * 2, 3, 0xFF, 0, arg3,
                       arg4);
     }

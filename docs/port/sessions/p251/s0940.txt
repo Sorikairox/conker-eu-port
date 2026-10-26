@@ -1,4 +1,4 @@
-# P251 setups for func_15190940 (return value of func_15163F50 = EU jal 151644C0). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
+# P251 setups for func_15190940 (return value of light_follow_obj_pos = EU jal 151644C0). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
 ret0 ! ! ! 151644C0=0 ! ! ! ! 
 ret1 ! ! ! 151644C0=1 ! ! ! ! 
 retp ! ! ! 151644C0=80451234 ! ! ! ! 

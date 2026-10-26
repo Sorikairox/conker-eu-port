@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_151D2AB0(s32 arg0);
+void attach_fx_asset_acquire(s32 arg0);
 
 struct260 *func_150B58B0(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct260 *temp_v0;
@@ -24,7 +24,7 @@ struct260 *func_150B58B0(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     temp_v0 = func_15149130((arg1 == -1) ? 300 : arg1, -1, 0x24, -1, (arg1 == -1) ? 0 : 1, 0x23, 0x10, arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
-        func_151D2AB0(6);
+        attach_fx_asset_acquire(6);
     }
     return temp_v0;
 }
@@ -86,7 +86,7 @@ void func_150B5988(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5988.s")
 #endif
 void func_150B5CA4(void *arg0) {
-    func_151D2B4C(6);
+    attach_fx_asset_release(6);
 }
 
 void func_150B5CC8(void *arg0) {
@@ -104,7 +104,7 @@ void func_150B5D20(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 t = *(s32 *)arg1;
         if (t == *(s32 *)v || v[4] == arg1[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {

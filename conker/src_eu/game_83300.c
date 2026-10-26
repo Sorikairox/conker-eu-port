@@ -21,7 +21,7 @@ void func_1504AF10(struct127 *, s32, s32);
 void func_1503E550(s32 arg0);
 void func_10004074(s32 arg0);
 s32 func_1514D880(u8 *arg0);
-void func_151695F0(u8 *arg0, u8 arg1);
+void node_broadcast_obj_all(u8 *arg0, u8 arg1);
 s32 func_150306D4(u8 *arg0);
 void func_15189040(s32 arg0);
 extern u8 *D_800D252C;
@@ -2640,7 +2640,7 @@ void func_1505A770(struct127 *rec) {
 #ifdef NON_MATCHING
 void func_15055C88(struct127 *);
 s32 func_1507CD64(struct127 *, s32);
-void func_1513783C(struct127 *, s32, s32);
+void object_break_effects_floor(struct127 *, s32, s32);
 extern u8 D_800CC69C;
 
 void func_1505A9AC(struct127 *arg0, f32 arg1) {
@@ -2744,7 +2744,7 @@ void func_1505A9AC(struct127 *arg0, f32 arg1) {
             arg0->unk100 &= 0xFD;
             if ((((u32) arg0->unk184 >> 0xC) & 0xF) == 1) {
                 if (D_800BE9F0 == 0x14) {
-                    func_1513783C(arg0, 0xFF, 1);
+                    object_break_effects_floor(arg0, 0xFF, 1);
                     func_1507CD64(arg0, 8);
                     return;
                 }
@@ -2796,7 +2796,7 @@ void func_1505A9AC(struct127 *arg0, f32 arg1) {
                                         sp58 = 0x30;
                                         sp54 = var_t1;
                                         sp50 = 1.3f;
-                                        func_1513783C(arg0, 0xFF, 1);
+                                        object_break_effects_floor(arg0, 0xFF, 1);
                                         var_a3 = 0;
                                         var_t0 = 0x30;
                                         var_f12 = 1.3f;
@@ -3220,7 +3220,7 @@ typedef struct {
 /* `base_tbl` is the attacker's own table, `cur_tbl` the one in effect (func_1505C1E4 may redirect it into
  * D_8009A6D8). Sets the knock-back (angle from the attacker, speeds, gravity), takes `damage & mask` health,
  * makes a ridden player drop off (and the carrier let go of it), runs the descriptor's handler (not for kind
- * 0x27), reports the hit (func_151E67A0 in multiplayer, two func_15169070 events), plays the sound and sets the
+ * 0x27), reports the hit (func_151E67A0 in multiplayer, two node_broadcast_range events), plays the sound and sets the
  * hit state of `obj` (stun 0xFE, func_1505E7CC / func_1505E874 reaction, flags in unk10B). Returns the base
  * entry's byte 0x22 (unused by the callers). */
 u8 func_1505B9C4(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 idx, s32 slot, u8 mask) {
@@ -3331,10 +3331,10 @@ u8 func_1505B9C4(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 
     }
     ev.obj = self;
     ev.uid = self->unique_id;
-    func_15169070(0, 0x68, (s32)&ev, 2);
+    node_broadcast_range(0, 0x68, (s32)&ev, 2);
     ev.obj = obj;
     ev.uid = obj->unique_id;
-    func_15169070(0, 0x68, (s32)&ev, 2);
+    node_broadcast_range(0, 0x68, (s32)&ev, 2);
 
     if (base->sound != 0) {
         D_800D1580 = base->sound;
@@ -5672,7 +5672,7 @@ void func_15060F28(struct127 *obj, s32 mode) {
     s32 i;
 
     func_1514D880(o);
-    func_151695F0(o, 0);
+    node_broadcast_obj_all(o, 0);
     if (o[5] != 2 && o[5] != 3) {
         func_150849C0(obj);
         func_150626EC(obj, mode);
@@ -5717,7 +5717,7 @@ void func_15060F28(struct127 *obj, s32 mode) {
         func_10004074(*(s32 *)(o + 0x1D8));
     }
     if (*(s32 *)(o + 0x2D4) != 0) {
-        func_1516972C(*(struct102 **)(o + 0x2D4));
+        node_destroy(*(struct102 **)(o + 0x2D4));
     }
     /* per-player handles: only the first one is tested */
     if (*(s32 *)(o + 0x304) != 0) {

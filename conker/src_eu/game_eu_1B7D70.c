@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_151407D0(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 particle_emitter_spawn(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(s32, s32, s32);
 
 s32 func_1518A560(s32 arg0, u8 *arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5, u8 arg6) {
@@ -12,7 +12,7 @@ s32 func_1518A560(s32 arg0, u8 *arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5, u8 a
     s32 temp_v0;
 
     (*(s8 *)((u8 *)arg1 + 0x58)) = 0xB;
-    temp_v0 = func_151407D0(arg1, 0x80, arg0, arg3 & 0xFF, (s32) arg4, (s32) arg5, (s32) arg6, -1, 0xFF, 1);
+    temp_v0 = particle_emitter_spawn(arg1, 0x80, arg0, arg3 & 0xFF, (s32) arg4, (s32) arg5, (s32) arg6, -1, 0xFF, 1);
     if (temp_v0 != 0) {
         sp34 = temp_v0;
         memcpy(temp_v0 + 0x170, arg2, 0x20);

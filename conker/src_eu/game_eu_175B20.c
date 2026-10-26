@@ -101,7 +101,7 @@ void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
 s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
 f32 sqrtf(f32);
 extern s32 D_80091914[];
@@ -179,7 +179,7 @@ s32 func_151485AC(u8 *obj, s32 gfx, s16 arg2) {
     gfx = func_15142B7C(gfx, *(s32 *)(rec + 0x2C), *(s32 *)(rec + 0x30));
     gfx = func_15142C10(gfx, r1, g1, b1, a1, &flag);
     gfx = func_15142CF0(gfx, 0, 0, r0, g0, b0, a0, &flag);
-    gfx = func_1513F4E4(gfx, rec[0x3B], &flag);
+    gfx = gfx_set_combine_mode(gfx, rec[0x3B], &flag);
     gfx = (s32)func_15142FBC(gfx, *(s32 *)(rec + 0x28) | 0x80000 | D_800D30BC | 0x2C00 | *(s32 *)(rec + 0x3C) | *(s32 *)(rec + 0x40),
                              D_800A4EA8[*(s32 *)(rec + 0x34) * 2 + 1] | D_800A4EA8[*(s32 *)(rec + 0x34) * 2], &flag);
 
@@ -373,8 +373,8 @@ s32 func_15149064(u8 *arg0) {
 s32 func_15046F70(f32 *, s32, f32, u8 *);
 s32 func_1518CAEC(u8 *, s32, s32, s32, f32);
 s32 func_1518CC0C(u8 *, s32, s32, s32, f32, s32);
-s32 func_151DA938(u8 *, s32, s32, s32, f32, s32);
-s32 func_151DAA88(void *, s32, s32, s32, f32, s32);
+s32 streak_on_land_debris(u8 *, s32, s32, s32, f32, s32);
+s32 streak_on_land_burst(void *, s32, s32, s32, f32, s32);
 extern s32 (*D_8008A7D0[])(u8 *, s32, s32, s32, f32, s32);
 extern s32 (*D_8008A7F0[])(u8 *, s32, s32, s32, f32, s32);
 
@@ -498,7 +498,7 @@ s32 func_15149468(u8 **arg0, s32 arg1, s32 arg2, s32 arg3) {
 /*
  * trail_spawn_directed: spawns one trail particle (func_15148310, kind 0, handler pair 1 / 0) of type n at
  * (x, y, z) with sprite `sprite` and tint tint + 3. Its velocity has length speed along the byte angles pitch /
- * yaw (func_151423D8 = byte-angle sine): (speed sin(pitch) sin(yaw - 0x40), -speed sin(pitch - 0x40),
+ * yaw (angle_byte_cos = byte-angle sine): (speed sin(pitch) sin(yaw - 0x40), -speed sin(pitch - 0x40),
  * speed sin(pitch) sin(yaw)); motion block speed slot = drag, scale = scale, flags 8 (0x28 for type 0xA),
  * 0xFF / 0xFF; fixed render block (0, 1, 0x160600, mode 3 / 0x10 / 0x80 / 0x20, 0, 9). flag goes to argD.
  * The asm leaves some block bytes unwritten (spawn +0x14 / +0x18, motion floor +0x14 and timers +0x1C / +0x1E,
@@ -534,10 +534,10 @@ void func_1514948C(u8 n, f32 x, f32 y, f32 z, s32 tint, s32 yaw, s32 pitch, f32 
         u8 tint;
         s32 owner;
     } sb;
-    f32 sp = func_151423D8((u8) pitch);
-    f32 cp = func_151423D8((pitch - 0x40) & 0xFF);
-    f32 sy = func_151423D8((u8) yaw);
-    f32 cy = func_151423D8((yaw - 0x40) & 0xFF);
+    f32 sp = angle_byte_cos((u8) pitch);
+    f32 cp = angle_byte_cos((pitch - 0x40) & 0xFF);
+    f32 sy = angle_byte_cos((u8) yaw);
+    f32 cy = angle_byte_cos((yaw - 0x40) & 0xFF);
     f32 h;
 
     sb.count = 1;

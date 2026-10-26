@@ -23,7 +23,7 @@ s/func_1509FAD4(id \& 0xFFF, args\[2\], args\[3\] \& 0xFFF, args\[4\], args\[5\]
 s/                h = 0;/                h = 1;/ % c2_m7
 s/h = func_1509FBC8(id, args\[3\] \& 0xFFF, args\[2\], args\[4\], args\[5\]);/h = func_1509FBC8(id, args[3] \& 0xFFF, args[2], args[5], args[5]);/ % c3
 s/h = func_1509FBC8(id, args\[3\] \& 0xFFF, args\[2\], args\[4\], args\[5\]);/h = func_1509FBC8(id, args[2] \& 0xFFF, args[2], args[4], args[5]);/ % c3
-s/func_15103C14(id, args\[3\] \& 0xFFF, args\[2\], args\[4\], args\[5\]);/func_15103C14(id, args[3], args[2], args[4], args[5]);/ % c4
+s/object_sound_play_cooldown(id, args\[3\] \& 0xFFF, args\[2\], args\[4\], args\[5\]);/object_sound_play_cooldown(id, args[3], args[2], args[4], args[5]);/ % c4
 s/                return 0x7000;/                return 0x7001;/ % c4
 s/^                return 0;/                return 7;/ % c5 cneg
 s/        switch ((u32) args\[1\]) {/        switch (args[1] \& 7) {/ % c9

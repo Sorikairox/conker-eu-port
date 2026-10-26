@@ -1,4 +1,4 @@
-# P253 func_15103AA0 (object_sound_delayed) mutants: sed % setup names (the NM block holds only this function)
+# P253 object_sound_delayed (object_sound_delayed) mutants: sed % setup names (the NM block holds only this function)
 s/e->x = (s32) \*(f32 \*) (obj + 0x14);/e->x = (s32) *(f32 *) (obj + 0x18);/ % q
 s/s32 timer = state & 0x7FFF;/s32 timer = state \& 0xFFFF;/ % cnt flagfire
 s/(\*sound << 16) | (state & 0xFFFF);/(*sound << 16) | (state \& 0x7FFF);/ % q

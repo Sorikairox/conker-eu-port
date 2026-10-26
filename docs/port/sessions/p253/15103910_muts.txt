@@ -1,4 +1,4 @@
-# P253 func_15103910 (object_sound_follow_cam) mutants: sed % setup names (the NM block holds only this function)
+# P253 object_sound_follow_cam (object_sound_follow_cam) mutants: sed % setup names (the NM block holds only this function)
 s/e->y = (s32) \*(f32 \*) (obj + 0x18);/e->y = (s32) *(f32 *) (obj + 0x1C);/ % q
 s/(\*sound << 16) | (state & 0xFFFF);/(*sound << 16) | (state \& 0xFFF);/ % q
 s/func_10010344(0x5B0, (struct127 \*) obj, 25000, 100, 0x78);/func_10010344(0x5B0, (struct127 *) obj, 25000, 100, 0x77);/ % q

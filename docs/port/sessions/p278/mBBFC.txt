@@ -1,4 +1,4 @@
-\#^    func_1513B968(obj, part);#s/part/0/
+\#^    mesh_effect_load_identity(obj, part);#s/part/0/
 \#^    rec = #s/0xF8/0xF4/
 \#^    scaleS = sinf(rec\[3\])#s/rec\[3\]/rec[2]/
 \#^    scaleS = #s/D_800A4E54 + D_800A4E58/D_800A4E58 + D_800A4E54/

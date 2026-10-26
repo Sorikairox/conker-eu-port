@@ -10,7 +10,7 @@ R=${CONKER_ROOT:-$HOME/conker}; C=${CONKERDEV:-conkerdev}; SD=/tmp/difftest_slot
 export DIFFTEST_SLOTDIR=$SD DIFFTEST_TIMEOUT=60
 pass=0; fail=0
 ck() { if [ "$1" = 1 ]; then echo "ok   $2"; pass=$((pass+1)); else echo "FAIL $2"; fail=$((fail+1)); fi; }
-job() { $R/tools/port/difftest.sh func_15103800 --self --trials 4 2>&1; }   # a small matched function (selftest case)
+job() { $R/tools/port/difftest.sh sfx_cooldown_clear --self --trials 4 2>&1; }   # a small matched function (selftest case)
 dx() { docker exec $C bash -c "$1"; }
 dx "rm -rf $SD; mkdir -p $SD/slot1 $SD/slot2; echo 1 > $SD/slot1/pid; echo 1 > $SD/slot2/pid"   # PID 1 is always alive
 

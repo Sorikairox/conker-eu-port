@@ -109,16 +109,16 @@ void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    func_151602C0(sp48, sp3C, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 #ifdef NON_MATCHING
 s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
-s32 func_15137C64(s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32, s32);
+s32 impact_setup_segment(s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 void func_15143794(s16, s16, f32, void *);
 void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_151DA6F8(s32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_151DC034(s32 *, f32, s32, s16, s32, s32, s32);
+s32 impact_spark_spawn(s32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 impact_glow_spawn(s32 *, f32, s32, s16, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 
 void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7) {
@@ -210,10 +210,10 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
     s32 var_s2_3;
     u32 temp_hi;
 
-    if (func_15137C64(&sp.u18C, &sp.u180, &sp.u174, &sp.u168, &sp.u15C, arg0, arg1, arg2) != 0) {
+    if (impact_setup_segment(&sp.u18C, &sp.u180, &sp.u174, &sp.u168, &sp.u15C, arg0, arg1, arg2) != 0) {
         temp_f22 = func_150ADA68();
         temp_s1 = func_150ADA20();
-        func_151DC034(&sp.u18C, (temp_f22 * 24.0f) + 168.0f, (((u32) temp_s1 % 101U) + 0x9B) & 0xFF, (s16) ((func_150ADA20() & 7) + 0xF), 1, (s32) arg6, arg7);
+        impact_glow_spawn(&sp.u18C, (temp_f22 * 24.0f) + 168.0f, (((u32) temp_s1 % 101U) + 0x9B) & 0xFF, (s16) ((func_150ADA20() & 7) + 0xF), 1, (s32) arg6, arg7);
         if (arg4 != 0) {
             temp_v1 = (func_150ADA20() % 3U) + 5;
             var_s2 = temp_v1;
@@ -229,7 +229,7 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
                     temp_s1_2 = func_150ADA20();
                     temp_f22_2 = func_150ADA68();
                     func_150ADA20();
-                    func_151DA6F8(&sp.u18C, &sp.u144, (temp_f20_2 * 0.162f) + 0.193f, (s16) (((u32) temp_s0 % 9U) + 0x12), ((u32) temp_s1_2 % 156U) + 0x64, (temp_f22_2 * 4.0f) + 4.0f, 3, 0, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, (s32) arg6, arg7);
+                    impact_spark_spawn(&sp.u18C, &sp.u144, (temp_f20_2 * 0.162f) + 0.193f, (s16) (((u32) temp_s0 % 9U) + 0x12), ((u32) temp_s1_2 % 156U) + 0x64, (temp_f22_2 * 4.0f) + 4.0f, 3, 0, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, (s32) arg6, arg7);
                     var_s2 -= 1;
                 } while (var_s2 != 0);
             }
@@ -245,7 +245,7 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
                     temp_f20_3 = func_150ADA68();
                     temp_s1_3 = func_150ADA20();
                     temp_s0_2 = func_150ADA20();
-                    func_151D9014(&sp.u180, &sp.u130, 1U, (temp_f20_3 * 0.68200004f) + -0.41200003f, (s16) (((u32) temp_s1_3 % 11U) + 5), (u8) (((u32) temp_s0_2 % 156U) + 0x64), (func_150ADA68() * 60.0f) + 80.0f, 0U, 1.0f, 1.0f, 1U, 0, 1U, 0U, (u8) (s32) arg6, arg7);
+                    impact_dust_cloud_spawn(&sp.u180, &sp.u130, 1U, (temp_f20_3 * 0.68200004f) + -0.41200003f, (s16) (((u32) temp_s1_3 % 11U) + 5), (u8) (((u32) temp_s0_2 % 156U) + 0x64), (func_150ADA68() * 60.0f) + 80.0f, 0U, 1.0f, 1.0f, 1U, 0, 1U, 0U, (u8) (s32) arg6, arg7);
                     var_s2_2 -= 1;
                 } while (var_s2_2 != 0);
             }
@@ -321,7 +321,7 @@ void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C5D2C.s")
 #endif
-void func_15137F30(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
+void bone_emitter_spark_params(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
 void func_151C6424(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
     f32 sp6C[3];
     f32 sp60[3];
@@ -331,8 +331,8 @@ void func_151C6424(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
     u8 sp4D;
     f32 sp48;
 
-    func_15137F30(arg0, arg1, arg2, arg3, arg4, arg5, sp6C, sp60, sp54, &sp50, &sp4E, &sp4D, &sp48);
-    func_151D9014(sp6C, sp54, 1, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5[0xC], arg5[1]);
+    bone_emitter_spark_params(arg0, arg1, arg2, arg3, arg4, arg5, sp6C, sp60, sp54, &sp50, &sp4E, &sp4D, &sp48);
+    impact_dust_cloud_spawn(sp6C, sp54, 1, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5[0xC], arg5[1]);
 }
 
 #ifdef NON_MATCHING

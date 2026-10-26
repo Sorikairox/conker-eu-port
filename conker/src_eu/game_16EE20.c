@@ -3,24 +3,28 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_15141CC0(u32 arg0);
+s32 interaction_mode_for_level(u32 arg0);
 #endif
 
 
-void func_15141970(struct37 *arg0) {
+/* was func_15141970 */
+void interact_fx_detach(struct37 *arg0) {
     func_1514EDF0(arg0, arg0->unk2C);
 }
 
-void func_15141990(void *arg0) {
-    func_15141970(arg0);
+/* was func_15141990 */
+void interact_fx_destroy(void *arg0) {
+    interact_fx_detach(arg0);
 }
 
-void func_151419B0(void *arg0) {
-    func_15141970(arg0);
+/* was func_151419B0 */
+void interact_fx_delete(void *arg0) {
+    interact_fx_detach(arg0);
 }
 
 #ifdef NON_MATCHING
-void func_151419D0(struct102 *arg0, u8 *arg1, s32 arg2) {
+/* was func_151419D0 */
+void interact_fx_handle_message(struct102 *arg0, u8 *arg1, s32 arg2) {
     s32 temp_a0;
     s32 temp_t6;
     s32 temp_v1;
@@ -31,7 +35,7 @@ void func_151419D0(struct102 *arg0, u8 *arg1, s32 arg2) {
     if (temp_t6 == 0) {
         temp_v0 = ((struct102 *)((u8 *)arg0 + 0x28));
         if (((*(s32 *)((u8 *)arg1 + 0)) == (*(s32 *)((u8 *)temp_v0 + 4))) || ((*(u8 *)((u8 *)temp_v0 + 8)) == (*(u8 *)((u8 *)arg1 + 4)))) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         temp_v0_2 = &arg0->unk28;
@@ -51,10 +55,10 @@ void func_151419D0(struct102 *arg0, u8 *arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151419D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/interact_fx_handle_message.s")
 #endif
 // NON-MATCHING: one operand swap in the last compare (bnel a0,t2 vs t2,a0)
-// void func_151419D0(struct_eu_151419D0 *arg0, struct_eu_151419D0_msg *arg1, u8 arg2) {
+// void interact_fx_handle_message(struct_eu_151419D0 *arg0, struct_eu_151419D0_msg *arg1, u8 arg2) {
 //     struct_eu_151419D0_sub *sub = &arg0->unk28;
 //     s32 id;
 //     s32 cur;
@@ -62,7 +66,7 @@ void func_151419D0(struct102 *arg0, u8 *arg1, s32 arg2) {
 //     if (arg2 == 0) {
 //         id = arg1->unk0;
 //         if ((id == sub->unk4) || (sub->unk8 == *(u8 *)&arg1->unk4)) {
-//             func_1516972C((struct102 *)arg0);
+//             node_destroy((struct102 *)arg0);
 //         }
 //     } else if (arg2 == 0x2D) {
 //         cur = sub->unk4;
@@ -78,9 +82,10 @@ void func_151419D0(struct102 *arg0, u8 *arg1, s32 arg2) {
 // }
 #ifdef NON_MATCHING
 u32 func_1510FE4C(s32);
-s32 func_15141C0C(struct127 *);
+s32 obj_interaction_category(struct127 *);
 
-void func_15141A7C(struct127 *arg0, s32 arg1) {
+/* was func_15141A7C */
+void obj_interaction_update(struct127 *arg0, s32 arg1) {
     struct_eu_link *sp3C;
     s32 temp_v0;
     s32 temp_v0_2;
@@ -90,14 +95,14 @@ void func_15141A7C(struct127 *arg0, s32 arg1) {
     struct_eu_link *temp_t8;
 
     if (D_800BE616 == 0) {
-        temp_v0 = func_15141C0C(arg0);
+        temp_v0 = obj_interaction_category(arg0);
         if (D_8008A084[temp_v0] != 0) {
-            temp_v0_2 = ((s32 (*)(s32, struct127 *)) D_8008A084[temp_v0])(func_15141CC0(func_1510FE4C(arg0->unk184)), arg0);
+            temp_v0_2 = ((s32 (*)(s32, struct127 *)) D_8008A084[temp_v0])(interaction_mode_for_level(func_1510FE4C(arg0->unk184)), arg0);
             if (temp_v0_2 != -1) {
                 temp_v1 = &D_8008A0B4[temp_v0_2];
                 if (temp_v1->unk0 != 0) {
                     if (temp_v1->unk4 > 0) {
-                        func_15141E38(arg0, temp_v0_2);
+                        obj_interaction_attach_timed(arg0, temp_v0_2);
                     } else {
                         /* P317: the entries are `void (obj, s32, s32)`; the asm leaves the index in a3, no entry reads it */
                         ((void (*)(struct127 *, s32, s32)) D_8008A0B4[temp_v0_2].unk0)(arg0, arg1, 0);
@@ -120,13 +125,14 @@ void func_15141A7C(struct127 *arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141A7C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/obj_interaction_update.s")
 #endif
 // requires jump table
 #ifdef NON_MATCHING
-/* Category of object `obj` for the interaction tables D_8008A084 / D_8008A0B4 (func_15141A7C), from its type id
+/* Category of object `obj` for the interaction tables D_8008A084 / D_8008A0B4 (obj_interaction_update), from its type id
  * (+0x04). Jump tables jtbl_800A55F8 (ids 121..165) and D_eu_800A56AC (ids 0..88); anything else is 11. */
-s32 func_15141C0C(struct127 *obj) {
+/* was func_15141C0C */
+s32 obj_interaction_category(struct127 *obj) {
     switch (obj->id) {
         case 0:
         case 1:
@@ -163,9 +169,10 @@ s32 func_15141C0C(struct127 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141C0C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/obj_interaction_category.s")
 #endif
-s32 func_15141CC0(u32 arg0) {
+/* was func_15141CC0 */
+s32 interaction_mode_for_level(u32 arg0) {
     if (D_800BE9F0 == 0x2F) {
         return 6;
     }
@@ -206,13 +213,14 @@ s32 func_15141CC0(u32 arg0) {
     }
 }
 
-void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
+/* was func_15141DA4 */
+void obj_interaction_start_timed(void *arg0, s32 arg1, s32 arg2) {
     if ((arg1 < 12) && (arg1 >= 0) &&
         (arg2 < 20) && (arg2 >= 0) &&
         (D_800BE616 == 0) &&
         (D_8008A084[arg1] != 0) && (arg2 != -1)) {
         if ((D_8008A0B4[arg2].unk0 != 0) && (D_8008A0B4[arg2].unk4 > 0)) {
-            func_15141E38(arg0, arg2);
+            obj_interaction_attach_timed(arg0, arg2);
         }
     }
 }
@@ -220,7 +228,8 @@ void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
 #ifdef NON_MATCHING
 s32 memcpy(u8 *, s32 *, s32);
 
-void func_15141E38(struct127 *arg0, s32 arg1) {
+/* was func_15141E38 */
+void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
     struct_eu_link *sp58;
     struct { s32 id; struct127 *owner; u8 uid; } rec;   /* sp40: 0xC bytes copied to the new object +0x28 */
     struct260 *temp_v0_2;
@@ -255,10 +264,10 @@ void func_15141E38(struct127 *arg0, s32 arg1) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141E38.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/obj_interaction_attach_timed.s")
 #endif
 // NON-MATCHING: stack layout (sp40 should be at 0x40, list cursor at 0x58) and loop temp
-// void func_15141E38(struct127 *arg0, s32 arg1) {
+// void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //     struct_eu_link *sp58;
 //     struct_eu_link *temp;
 //     struct {
@@ -306,7 +315,8 @@ typedef struct {
     s16 u22;
     s16 u24;
 } Spawn41F78;
-void func_15141F78(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8 arg5) {
+/* was func_15141F78 */
+void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8 arg5) {
     Spawn41F78 sp;
     f32 f;
     s32 v;
@@ -336,12 +346,12 @@ void func_15141F78(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8 arg5) {
     } else {
         v = 0;
     }
-    func_1513C650((s32)&sp, 0, 0, (s32)(arg1 + 4), *(f32 *)(arg4 + 0), *(f32 *)(arg1 + 0), *(f32 *)(arg4 + 8), f, f, arg3, v, 3, 1, 0, 0xFF, 1);
+    sprite_fx_spawn_cam_at((s32)&sp, 0, 0, (s32)(arg1 + 4), *(f32 *)(arg4 + 0), *(f32 *)(arg1 + 0), *(f32 *)(arg4 + 8), f, f, arg3, v, 3, 1, 0, 0xFF, 1);
 }
 // NON-MATCHING: need to determine arguments
-// void func_1513C650(s32, s32, s32, u16, s32, s32, s32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
-// s32 func_1513C650(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
-// void func_15141F78(u8 arg0, struct157 *arg1, f32 arg2, s32 arg3, struct157 *arg4, u8 arg5) {
+// void sprite_fx_spawn_cam_at(s32, s32, s32, u16, s32, s32, s32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
+// s32 sprite_fx_spawn_cam_at(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
+// void fx_spawn_impact_particle(u8 arg0, struct157 *arg1, f32 arg2, s32 arg3, struct157 *arg4, u8 arg5) {
 //     struct157 tmp;
 //     f32 temp_f2;
 //     s32 phi_v0;
@@ -372,10 +382,11 @@ void func_15141F78(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8 arg5) {
 //     } else {
 //         phi_v0 = 0;
 //     }
-//     func_1513C650(&tmp, 0, 0, arg1->unk4, arg4->unk0, arg1->unk0, arg4->unk8, temp_f2, temp_f2, arg3, phi_v0, 3, 1, 0, 0xFF, 1);
+//     sprite_fx_spawn_cam_at(&tmp, 0, 0, arg1->unk4, arg4->unk0, arg1->unk0, arg4->unk8, temp_f2, temp_f2, arg3, phi_v0, 3, 1, 0, 0xFF, 1);
 // }
 
-s32 func_151420F8(struct127 *arg0) {
+/* was func_151420F8 */
+s32 obj_query_table6(struct127 *arg0) {
     struct_eu_words6 sp18 = D_800A55E0;
 
     if (func_150A2FCC(arg0 - D_800CC2D0, 6, &sp18, arg0) == -1) {
@@ -383,7 +394,8 @@ s32 func_151420F8(struct127 *arg0) {
     }
     return 1;
 }
-void func_15142180(u8 arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
+/* was func_15142180 */
+void fx_spawn_impact_burst(u8 arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
     struct_eu_15154488 sp24;
 
     sp24.unk8 = *arg1;
@@ -413,19 +425,23 @@ void func_15142180(u8 arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
     func_15154488(&sp24, &sp24.unk8, 0, 0xFF, 1);
 }
 
-s32 func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, char *arg4, s32 arg5) {
+/* was func_151422C0 */
+s32 debug_tweak_int_mid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, char *arg4, s32 arg5) {
     return (arg3 + arg2) >> 1;
 }
 
-s32 func_151422DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/* was func_151422DC */
+s32 debug_tweak_int(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
     return arg4;
 }
 
-s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* was func_151422F8 */
+s32 debug_tweak_value(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-void func_15142314(Mtx *arg0, s32 arg1, struct17 *arg2) {
+/* was func_15142314 */
+void mtx_get_translation(Mtx *arg0, s32 arg1, struct17 *arg2) {
     if (D_800C42B0 != 0) {
         s16 *m = ((s16 (*)[32])arg0)[arg1];
 
@@ -442,7 +458,8 @@ void func_15142314(Mtx *arg0, s32 arg1, struct17 *arg2) {
 }
 extern f32 D_8009A5E0[];
 
-f32 func_151423D8(u8 arg0) {
+/* was func_151423D8 */
+f32 angle_byte_cos(u8 arg0) {
     s32 idx;
     u8 q;
 
@@ -457,7 +474,8 @@ f32 func_151423D8(u8 arg0) {
     }
     return -D_8009A5E0[idx];
 }
-struct127 *func_15142444(u8 arg0, struct127 *arg1) {
+/* was func_15142444 */
+struct127 *obj_resolve_with_model(u8 arg0, struct127 *arg1) {
     struct127 *temp_v0;
 
     if (arg0 == 0xFF) {
@@ -478,7 +496,8 @@ struct127 *func_15142444(u8 arg0, struct127 *arg1) {
     }
     return NULL;
 }
-void func_151424F4(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 sx, f32 sy, f32 sz, f32 tx, f32 ty, f32 tz) {
+/* was func_151424F4 */
+void mtx_rot_scale_trans_l(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 sx, f32 sy, f32 sz, f32 tx, f32 ty, f32 tz) {
     f32 mf[4][4];
 
     func_150A8050(mf, rx, ry, rz);
@@ -501,7 +520,8 @@ void func_151424F4(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 sx, f32 s
 // (x1, y1, z1): row 2 is the unit direction, row 0 the horizontal side vector (dir.z, 0, -dir.x) normalised, row 1
 // the up vector dir x side normalised; every row is scaled per column by (sx, sy, sz), rows 0 / 2 also by `scale`
 // and row 1 by `up_scale`. No result (P210: void, as game_eu_E66D0's prototype since port P209).
-void func_15142600(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 sz, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
+/* was func_15142600 */
+void mtx_look_along_scaled(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 sz, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
                   f32 z1) {
     f32 mf[4][4];
     f32 dx, dy, dz, inv, fx, fy, fz, rx, rz, ux, uy, uz;
@@ -540,9 +560,10 @@ void func_15142600(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 sz, f32 
     guMtxF2L(mf, m);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142600.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/mtx_look_along_scaled.s")
 #endif
-void func_15142838(Mtx *m, f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 ty, f32 tz) {
+/* was func_15142838 */
+void mtx_rot_scale2_trans_l(Mtx *m, f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 ty, f32 tz) {
     f32 mf[4][4];
 
     func_150A8050(mf, rx, ry, rz);
@@ -560,7 +581,8 @@ void func_15142838(Mtx *m, f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 t
     mf[2][2] *= sx;
     guMtxF2L(mf, m);
 }
-void func_15142914(f32 mf[4][4], f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 ty, f32 tz) {
+/* was func_15142914 */
+void mtxf_rot_scale2_trans(f32 mf[4][4], f32 sx, f32 sy, f32 rx, f32 ry, f32 rz, f32 tx, f32 ty, f32 tz) {
     func_150A8050(mf, rx, ry, rz);
     mf[3][0] = tx;
     mf[3][1] = ty;

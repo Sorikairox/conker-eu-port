@@ -8,11 +8,11 @@ void func_15011C70(void) {
     D_800D9AA0[0] = 0;
     D_800D9AA0[1] = 0;
     D_800D9AA0[2] = 0;
-    func_15103800();
+    sfx_cooldown_clear();
 }
 
 void func_15011CA0(void) {
-    func_15103800();
+    sfx_cooldown_clear();
 }
 
 void func_15011CC0(void) {

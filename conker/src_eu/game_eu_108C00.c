@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-// limb_trail_effect_spawn: spawns a type 0x17 effect record (func_1513D524) along the limb `idx` of obj's skeleton
+// limb_trail_effect_spawn: spawns a type 0x17 effect record (effect3d_spawn_default) along the limb `idx` of obj's skeleton
 // (obj + 0x1D4, 0x40-byte matrices): the two limb points D_80088CB0[idx] / D_80088CBC[idx] are transformed by the
 // limb's matrix (func_15143134), their scaled difference gives the direction; nothing is spawned when its XZ length
 // is below D_800A0FB0. The record gets the start point and the normalised XZ direction, and its fields 0x110..0x138
@@ -92,7 +92,7 @@ void func_150DB3F0(u8 *obj, s32 idx, u8 group, s32 arg3) {
     spec.dir[1] = 0.0f;
     spec.dir[0] = dir[2] * inv;
     spec.dir[2] = dir[0] * inv;
-    rec = (u8 *) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);
+    rec = (u8 *) effect3d_spawn_default((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);
     if (rec != NULL) {
         *(f32 *) (rec + 0x110) = dir[0];
         *(f32 *) (rec + 0x114) = dir[1];
@@ -221,7 +221,7 @@ u8 *func_150DB858(u8 *arg0, s16 arg1) {
 #endif
 #ifdef NON_MATCHING
 // anim_event_effect_spawn: animation event 0x32 (func_150268BC): when all five pointers are set and span != 0, spawns
-// a type 0x17 effect record (func_1513D524 with flags 0x401, 0x243A, colour 0xC8 x4, lifetime span, group arg6 and
+// a type 0x17 effect record (effect3d_spawn_default with flags 0x401, 0x243A, colour 0xC8 x4, lifetime span, group arg6 and
 // arg7) and links it to its sources: +0x110 = a0, +0x114 = a1, +0x118 = a2, +0x11C = a4, +0x120 = a3 (P195).
 typedef struct {
     /* 0x00 */ u8 type;
@@ -258,7 +258,7 @@ void func_150DBA98(u8 *a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, s16 span, u8 arg6, s3
     spec.rgba[2] = 0xC8;
     spec.rgba[3] = 0xC8;
     spec.flags = 0x401;
-    rec = (u8 *) func_1513D524((s32) &spec, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
+    rec = (u8 *) effect3d_spawn_default((s32) &spec, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
     if (rec != NULL) {
         *(u8 **) (rec + 0x110) = a0;
         *(u8 **) (rec + 0x114) = a1;
@@ -320,11 +320,11 @@ u8 *func_150DBC94(u8 *arg0, s16 arg1) {
         }
         temp_f10 = (s32) (*(*(f32 **)((u8 *)arg0 + 0x114)) * 0.7111111f);
         sp.u48 = temp_f10;
-        sp.u44 = func_151423D8(temp_f10 & 0xFF);
+        sp.u44 = angle_byte_cos(temp_f10 & 0xFF);
         temp_v1 = arg0 + 0x110;
         temp_f2 = *(*(f32 **)((u8 *)temp_v1 + 8));
         temp_f12 = temp_f2 * sp.u44;
-        temp_f14 = -temp_f2 * func_151423D8((temp_f10 - 0x40) & 0xFF);
+        temp_f14 = -temp_f2 * angle_byte_cos((temp_f10 - 0x40) & 0xFF);
         (*(s16 *)((u8 *)sp.u54 + 0)) = (s16) (s32) ((*(f32 *)((u8 *)((*(u8 **)((u8 *)temp_v1 + 0))) + 0)) + temp_f12);
         (*(s16 *)((u8 *)sp.u54 + 2)) = (s16) (s32) (*(*(f32 **)((u8 *)temp_v1 + 0xC)) + (*(f32 *)((u8 *)((*(u8 **)((u8 *)temp_v1 + 0))) + 4)));
         (*(s16 *)((u8 *)sp.u54 + 4)) = (s16) (s32) ((*(f32 *)((u8 *)((*(u8 **)((u8 *)temp_v1 + 0))) + 8)) + temp_f14);

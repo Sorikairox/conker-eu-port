@@ -204,7 +204,7 @@ void __wrap_func_15084814(unsigned char *obj, int j) {
 }
 
 /* P113 DIAGNOSTIC: checkpoints of the ?p113watch write watch (pc_sched.c) around the calls of func_15019130 between its
- * func_10004250 and func_151670C0, to find the stale writer after the LogoScreen scene end (pass-through wraps). */
+ * func_10004250 and node_lists_run_update, to find the stale writer after the LogoScreen scene end (pass-through wraps). */
 void p113_watch(const char *where);
 #define P113W0(f) void __real_##f(void); void __wrap_##f(void) { p113_watch(#f " in"); __real_##f(); p113_watch(#f " out"); }
 #define P113W1(f) void __real_##f(int); void __wrap_##f(int a) { p113_watch(#f " in"); __real_##f(a); p113_watch(#f " out"); }
@@ -279,7 +279,7 @@ void __wrap_func_1502457C(int a, int b) {
 P113W1(func_1501ECA4)
 P113W1(func_15020F6C)
 P113W1(func_1501E364)
-P113W0(func_15122AE0)
+P113W0(camera_update_all)
 P113W0(func_1504ADD0)
 P113W1(func_151101B4)
 P113W2(func_15174F68)

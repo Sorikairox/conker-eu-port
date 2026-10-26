@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-s32 func_15134DAC(void *, s32, u8 *, s16);
+s32 bone_emitter_spawn(void *, s32, u8 *, s16);
 
 float sqrtf(float);
 #pragma intrinsic(sqrtf)
@@ -99,7 +99,7 @@ void func_150EB090(u8 *arg0) {
                     h2.unk0 = h.t.pos.x;
                     h2.unk4 = p->u20;
                     h2.unk8 = h.t.pos.z;
-                    obj = func_151602C0((Header *)&h, &h2, p->u3F, p->u3C, p->u3D, p->u3E, 0xFF, 0, 0x40, arg0[0xC], arg0[1]);
+                    obj = light_create_with_ctrl((Header *)&h, &h2, p->u3F, p->u3C, p->u3D, p->u3E, 0xFF, 0, 0x40, arg0[0xC], arg0[1]);
                     if (obj != NULL) {
                         memcpy((u8 *)obj + 0x18, &h.t, 0x40);
                     }

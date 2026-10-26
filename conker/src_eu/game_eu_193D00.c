@@ -9,7 +9,7 @@ void func_151664F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 {
   s32 i;
   u8 *temp_v0;
-  temp_v0 = func_15167A68(4, arg8, 0xA8, 1, (u8) ((s32) arg7), 1U);
+  temp_v0 = node_alloc(4, arg8, 0xA8, 1, (u8) ((s32) arg7), 1U);
   if (temp_v0 != 0)
   {
     if (arg0 == (-1))
@@ -63,7 +63,7 @@ void func_15166688(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 {
   u32 i;
   u8 *temp_v0;
-  temp_v0 = func_15167A68(4, arg9, 0xA8, 1, (u8) ((s32) arg8), 1U);
+  temp_v0 = node_alloc(4, arg9, 0xA8, 1, (u8) ((s32) arg8), 1U);
   if (temp_v0 != 0)
   {
     *((s8 *) (((u8 *) temp_v0) + 0x95)) = 2;
@@ -100,7 +100,7 @@ void func_15166774(struct102 *arg0) {
     temp_v0 = *(u8 *)((u8 *)arg0 + 0x92);
     temp_v0 -= D_800BE9E4;
     if (temp_v0 <= 0) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
         return;
     }
     *(u8 *)((u8 *)arg0 + 0x92) = temp_v0;
@@ -330,7 +330,7 @@ u8 *func_15095380(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 
 /* layer_pre_scroll_texture: P238: `pre` callback of render layer 4 (D_8008B848 + 0xE4, RenderLayer +0x14; called as
- * pre(gdl, layer, list, arg2) by func_151674F8, the other arguments are unused). Advances the s16 scroll D_800DD270 by
+ * pre(gdl, layer, list, arg2) by node_render_layers_draw, the other arguments are unused). Advances the s16 scroll D_800DD270 by
  * 0x80 (back to 0 once it reaches 0x500), records texture D_800907A4 / the old scroll / 1 in D_800DD658 / 650 / 654,
  * emits the texture through func_15095380(gdl, D_800DD658, D_800DD650, D_800DD660, 0, 0, 0, 1, 3) and returns the
  * render mode set by func_15142FBC(gdl, D_800D30BC | 0x82CA0, render modes 3 (D_800A4EA8 words 7 | 6), &1). */

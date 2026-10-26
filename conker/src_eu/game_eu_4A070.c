@@ -311,7 +311,7 @@ extern u8 D_800844A0[][3];       /* RGB rows */
 void func_15023464(void);
 s32 func_15023C60(u32, s32, s32, u8 **, s32, s32, s32, s32, s32, s32, s32);
 void func_1517F3B0(s32, s32, s32, s32, s8, s32);
-void func_15169040(s32, u8);
+void node_broadcast_all(s32, u8);
 void func_1502348C(void);
 void func_15023684(s32);
 void func_1501EA84(s32);
@@ -1028,7 +1028,7 @@ void func_1501E7A8(s32 arg0)
 }
 
 #ifdef NON_MATCHING
-/* End of cutscene slot `slot` (skipped != 0: cut short, event 0xF, else 0x10 to func_15169040 with the scene
+/* End of cutscene slot `slot` (skipped != 0: cut short, event 0xF, else 0x10 to node_broadcast_all with the scene
  * number): position back to the start D_800C40AE, scene marked as seen (func_1501D2C4), slot unloaded,
  * per-scene teardown (func_1501E7A8, func_1502348C, func_15023684, func_1501EA84, func_1501E5AC), view reset
  * (func_1510B8AC with the game camera's +0x19C / +0x1A0). A queued follow-up scene (D_800C39E2 = scene + 1,
@@ -1047,7 +1047,7 @@ void func_1501E888(s32 skipped, s32 slot) {
         return;
     }
     scene = (&D_800C3A08)[slot];
-    func_15169040((s32)&scene, skipped ? 0xF : 0x10);
+    node_broadcast_all((s32)&scene, skipped ? 0xF : 0x10);
     D_800C39D8[slot] = -100;
     (&D_800C39D0)[slot] = D_800C40AE;
     func_1501D2C4(D_800BE9F0, (&D_800C3A08)[slot]);

@@ -175,11 +175,11 @@ void p88_watch_init(void) {
 /* P105: the P97 TEMPORARY guard (__wrap_func_1501FD34 / __wrap_func_1501FF10 skipped the P92 path C while its
  * producer func_15020920 was an asm stub) was removed: port-b P96 converted func_15020920 (segment cubic). */
 
-/* P110: the P105 TEMPORARY guard __wrap_func_151DA6F8 (skipped the P100 C particle spawner while its trail
+/* P110: the P105 TEMPORARY guard __wrap_impact_spark_spawn (skipped the P100 C particle spawner while its trail
  * handlers were asm stubs) was removed: port-b P108 converted the trail chain func_15148428 / func_151485AC /
  * func_15148E34 / func_15149114 / func_15149350. */
 
-/* P110 DIAGNOSTIC ?p110part=1 (node PORT_P110PART=1): counts the particle spawner func_151DA6F8 (P100 C) and the trail
+/* P110 DIAGNOSTIC ?p110part=1 (node PORT_P110PART=1): counts the particle spawner impact_spark_spawn (P100 C) and the trail
  * step / draw handlers func_15148428 / func_151485AC (P108 C); logs the first 3 calls of each and every 500th.
  * Pure pass-through. */
 static int fp110 = -1; static unsigned np110[3];
@@ -188,12 +188,12 @@ static void p110log(int k, const char *n, void *r) {
     if (flag(&fp110, "p110part") && (c <= 3 || c % 500 == 0))
         port_log("[p110] %s call %u frame %u ret %p\n", n, c, port_frame_count, r);
 }
-void *__real_func_151DA6F8(void *pos, void *vel, float scale, int sprite, int alpha, float speed, int tint, int fade,
+void *__real_impact_spark_spawn(void *pos, void *vel, float scale, int sprite, int alpha, float speed, int tint, int fade,
                            float sx, float sy, int a10, int a11, int a12, int a13, int a14, int a15, int a16, int a17);
-void *__wrap_func_151DA6F8(void *pos, void *vel, float scale, int sprite, int alpha, float speed, int tint, int fade,
+void *__wrap_impact_spark_spawn(void *pos, void *vel, float scale, int sprite, int alpha, float speed, int tint, int fade,
                            float sx, float sy, int a10, int a11, int a12, int a13, int a14, int a15, int a16, int a17) {
-    void *r = __real_func_151DA6F8(pos, vel, scale, sprite, alpha, speed, tint, fade, sx, sy, a10, a11, a12, a13, a14, a15, a16, a17);
-    p110log(0, "func_151DA6F8 (spawn)", r);
+    void *r = __real_impact_spark_spawn(pos, vel, scale, sprite, alpha, speed, tint, fade, sx, sy, a10, a11, a12, a13, a14, a15, a16, a17);
+    p110log(0, "impact_spark_spawn (spawn)", r);
     return r;
 }
 int __real_func_15148428(void *obj);
@@ -201,19 +201,19 @@ int __wrap_func_15148428(void *obj) { int r = __real_func_15148428(obj); p110log
 int __real_func_151485AC(void *obj, int gfx, int a2);
 int __wrap_func_151485AC(void *obj, int gfx, int a2) { int r = __real_func_151485AC(obj, gfx, a2); p110log(2, "func_151485AC (trail draw)", (void *)(long)r); return r; }
 
-/* P97 DIAGNOSTIC ?p97camh=N: first N calls (every 20th frame) of func_15124C38 (camera target height, P92 C): the
+/* P97 DIAGNOSTIC ?p97camh=N: first N calls (every 20th frame) of camera_update_target_height (camera target height, P92 C): the
  * eased height +0x2C0 before / after, the holder's (+0x3D0) y +0x18, floor +0x180, height above floor +0x28, model
  * height +0xCC, the target's (+0x3D4) +0x114, camera flags +0x2C / +0x84 / +0x5F0, states +0x23C / +0x23E.
- * DIAGNOSTIC ?p97nocamh=1: func_15124C38 does nothing when out == NULL (the pre-P92 stub behaviour). */
+ * DIAGNOSTIC ?p97nocamh=1: camera_update_target_height does nothing when out == NULL (the pre-P92 stub behaviour). */
 static int fcamh = -1, fnocamh = -1, ncamh = 0;
 static float F(const unsigned char *p) { return *(const float *)p; }
 static int H(const unsigned char *p) { return *(const short *)((uintptr_t)p ^ 2); }
-void __real_func_15124C38(unsigned char *cam, float *out);
-void __wrap_func_15124C38(unsigned char *cam, float *out) {
+void __real_camera_update_target_height(unsigned char *cam, float *out);
+void __wrap_camera_update_target_height(unsigned char *cam, float *out) {
     float before = F(cam + 0x2C0);
     unsigned char *hold = *(unsigned char **)(cam + 0x3D0), *pl = *(unsigned char **)(cam + 0x3D4);
     if (out == 0 && flag(&fnocamh, "p97nocamh")) return;
-    __real_func_15124C38(cam, out);
+    __real_camera_update_target_height(cam, out);
     if (flag(&fcamh, "p97camh") && ncamh < fcamh && port_frame_count % 20 == 0) {
         ncamh++;
         port_log("[p97camh] frame %u out %d h %.1f -> %.1f | hold y %.1f floor %.1f above %.1f cc %d | pl %d 114 %d | 2C %08X 84 %08X 5F0 %08X 23C %u 23E %u 102 %u\n",

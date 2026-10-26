@@ -82,7 +82,7 @@ s/                func_151307F0((s32)\&smoke, 1, 0, 0, 0xFF, 1);/               
 s/    st->sparkAcc += (0.33600003f + func_150ADA68() \* 0.126f)/    st->sparkAcc += (0.336f + func_150ADA68() * 0.126f)/
 s/            func_15143794(((u32)r1 \(.\) 9U) + angle - 4, (r2 \& 7) - 0x10/            func_15143794(((u32)r1 \1 9U) + angle - 3, (r2 \& 7) - 0x10/
 s/            speed = func_150ADA68() \* 6.0f + 4.0f;/            speed = func_150ADA68() * 6.0f + 6.0f;/
-s/            func_151DB5D0(8, (u8 \*)pos, (u8 \*)vel, size \* 200.0f + 200.0f, 1.025439f, 0.938816f,/            func_151DB5D0(8, (u8 *)pos, (u8 *)vel, size * 200.0f + 200.0f, 0.938816f, 1.025439f,/
+s/            impact_tinted_particle_spawn(8, (u8 \*)pos, (u8 \*)vel, size \* 200.0f + 200.0f, 1.025439f, 0.938816f,/            impact_tinted_particle_spawn(8, (u8 *)pos, (u8 *)vel, size * 200.0f + 200.0f, 0.938816f, 1.025439f,/
 s/                          spread \* 0.20700002f + -0.16900001f, ((u32)r1 \(.\) 21U) + 0x23, ((u32)r2 \(.\) 121U) + 100, 0x32,/                          spread * 0.20700002f + -0.16900001f, ((u32)r2 \1 21U) + 0x23, ((u32)r1 \2 121U) + 100, 0x32,/
 s/                          5, 0, 0xFF, 1);/                          5, 1, 0xFF, 1);/
 s/            pos\[2\] += st->z;/            pos[2] += st->x;/

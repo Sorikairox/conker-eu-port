@@ -2,7 +2,7 @@
 """stubcalls.py (P107): which still-stub (asm) functions does each C function of the browser port reach?
 
 Why: a correct C conversion still breaks the port when it feeds or dispatches to code that is still a stub
-(P72 / P92: inputs from a stubbed producer; P100 / P105: the new C particle spawner func_151DA6F8 dispatched to
+(P72 / P92: inputs from a stubbed producer; P100 / P105: the new C particle spawner impact_spark_spawn dispatched to
 the asm-stub type handlers func_15148428 / func_151485AC through D_8008A5A0 / D_8008A644 -> null-zone writes,
 trap). orchestrator rule since P97: before committing a frame-path function, list the stubs it calls directly
 or through tables. This script makes that list.

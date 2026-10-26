@@ -413,7 +413,7 @@ void func_150BFF7C(u8 *p) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15136C3C(u8 *, s32, s32, s32, s32, s32, s32, s32);
+s32 object_hit_effects(u8 *, s32, s32, s32, s32, s32, s32, s32);
 void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* func_15153BA4 effect request (0x6C bytes; fields named by offset) */
@@ -455,7 +455,7 @@ typedef struct {
     /* 0x68 */ f32 u68;
 } PuffRequest;
 
-/* object_land_puff: func_1507D754 callee: func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1), then one func_15153BA4
+/* object_land_puff: func_1507D754 callee: object_hit_effects(obj, 0, 0, 1, 0, 0, 0xFF, 1), then one func_15153BA4
  * effect (constant request: model 0x11 / 7, colours 4E 54 7B FF / A4 A1 C8 9B / 64 FF, flags 0x40040E07) 35 above
  * the point 70 over the object's floor height (+0x180) at its x / z. */
 void func_150C04E0(u8 *obj) {
@@ -465,7 +465,7 @@ void func_150C04E0(u8 *obj) {
     pos[0] = *(f32 *) (obj + 0x14);
     pos[1] = *(f32 *) (obj + 0x180) + 70.0f;
     pos[2] = *(f32 *) (obj + 0x1C);
-    func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1);
+    object_hit_effects(obj, 0, 0, 1, 0, 0, 0xFF, 1);
     req.u00 = 0x11;
     req.u02 = 7;
     req.u04 = 0x6C;

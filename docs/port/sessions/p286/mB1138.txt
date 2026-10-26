@@ -14,7 +14,7 @@
 /\*(f32 \*) (rec + 0x114) = 0.0f;/s/0.0f/1.0f/
 /\*(f32 \*) (rec + 0x110) = /s/- \*(f32 \*) (rec + 0x40)/- *(f32 *) (rec + 0x44)/
 /\*(f32 \*) (rec + 0x118) = /s/D_800BEDC8/D_800BE9A4/
-/func_1513F680(slot->rec, 0x10, 0x1B, 0, 0x10);/s/0x1B/0x1C/
+/effect3d_set_handlers(slot->rec, 0x10, 0x1B, 0, 0x10);/s/0x1B/0x1C/
 /\*(s32 \*) (slot->rec + 0x58) |= 1;/s/|= 1/|= 2/
 /^                        s->count--;/s/--/++/
 /^                        isFree = 0;/s/0/1/
@@ -45,8 +45,8 @@
 /m.spin = (func_150ADA68() \* 506.0f + -703.0f) \* 0.001f;/s/-703.0f/-702.0f/
 /func_15143134(pt->ofs, t.pos,/s/t.pos/t.scale/
 /t.prev\[1\] = \*(s32 \*) &t.pos\[1\];/s/pos\[1\]/pos[0]/
-/free->rec = (u8 \*) func_1513D524(/s/0x11, 0, 0, 0x10, 2, 0x28/0x11, 0, 0, 0x10, 2, 0x20/
-/free->rec = (u8 \*) func_1513D524(/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/free->rec = (u8 \*) effect3d_spawn_default(/s/0x11, 0, 0, 0x10, 2, 0x28/0x11, 0, 0, 0x10, 2, 0x20/
+/free->rec = (u8 \*) effect3d_spawn_default(/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /memcpy(free->rec + 0x110, &m, 0x28);/s/0x110/0x10C/
 /free->timer = (u32) func_150ADA20()/s/+ 20/+ 21/
 /^                            nfree--;/d

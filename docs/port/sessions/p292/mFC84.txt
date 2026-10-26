@@ -38,10 +38,10 @@
 \#^    height = #s/>> 8/>> 7/
 \#^    height = #s/? -10 : 10/? 10 : -10/
 \#^    height = #s/arg1 == 1/arg1 == 2/
-\#^    p = (u8 \*) func_1513D668(#s/0, 0x16/0, 0x15/
-\#^    p = (u8 \*) func_1513D668(#s/500.0f, 500.0f/500.0f, 50.0f/
-\#^    p = (u8 \*) func_1513D668(#s/&ground\[1\]/\&ground[0]/
-\#^    p = (u8 \*) func_1513D668(#s/1, 8,$/1, 9,/
+\#^    p = (u8 \*) effect3d_spawn_oriented_simple(#s/0, 0x16/0, 0x15/
+\#^    p = (u8 \*) effect3d_spawn_oriented_simple(#s/500.0f, 500.0f/500.0f, 50.0f/
+\#^    p = (u8 \*) effect3d_spawn_oriented_simple(#s/&ground\[1\]/\&ground[0]/
+\#^    p = (u8 \*) effect3d_spawn_oriented_simple(#s/1, 8,$/1, 9,/
 \#^                             0xFF, 0);#s/0xFF/0xFE/
 \#^        memcpy(p + 0x128#s/0x128/0x12C/
 \#^    ringLife = #s/11U/10U/

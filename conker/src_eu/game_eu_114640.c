@@ -225,8 +225,8 @@ void func_150E752C(f32 *out, u8 *obj)
     u8 *p;
     r = (func_150ADA68() * 100.0f) + 80.0f;
     ang = (unsigned char) (func_150ADA20() & 0xFF);
-    s = func_151423D8(ang - 0x40);
-    c = func_151423D8(ang);
+    s = angle_byte_cos(ang - 0x40);
+    c = angle_byte_cos(ang);
     p = *((u8 **) (((u8 *) m) + 0x10));
     out[0] = (((*((f32 *) (p + 0x38))) * (-80.0f)) + (*((f32 *) (obj + 0x14)))) + (s * r);
     out[1] = (((*((f32 *) (p + 0x3C))) * (-80.0f)) + (*((f32 *) (obj + 0x18)))) + 100.0f;
@@ -676,7 +676,7 @@ void func_150E856C(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg5, u8 
     }
     sp48 = func_150ADA20();
     sp4C = func_150ADA20();
-    func_1513C650((s32) &sp.u5C, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp48 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp4C & 1)), sp58, sp54, 0, (u8) (s32) argA, argB);
+    sprite_fx_spawn_cam_at((s32) &sp.u5C, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp48 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp4C & 1)), sp58, sp54, 0, (u8) (s32) argA, argB);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E856C.s")
@@ -958,7 +958,7 @@ void func_150E8EB0() {
     E8EB0_S s;
 
     v = D_80088E20;
-    func_15169260(&v, 2, 0, 0x1B);
+    node_broadcast_types(&v, 2, 0, 0x1B);
     func_1516547C(0, D_800BEE0B, 0, 0xFF, 1);
     s.a = 1;
     s.b = func_150ADA20() % 21U + 20;
@@ -1377,7 +1377,7 @@ s32 func_150E9C9C(u8 *arg0) {
             s.u17 = 7;
             s.u22 = 0x14;
             s.u24 = 0xC;
-            func_1513C73C((s32)&s, 0, 0, (s32)(p + 8), *(f32 *)(arg0 + 0x38), *(f32 *)p + 5.0f, *(f32 *)(arg0 + 0x40), f, f, func_150ADA20() & 0xFF, 0, 0, arg0[0xC], arg0[1]);
+            sprite_fx_spawn_cam((s32)&s, 0, 0, (s32)(p + 8), *(f32 *)(arg0 + 0x38), *(f32 *)p + 5.0f, *(f32 *)(arg0 + 0x40), f, f, func_150ADA20() & 0xFF, 0, 0, arg0[0xC], arg0[1]);
         }
         return 0;
     }

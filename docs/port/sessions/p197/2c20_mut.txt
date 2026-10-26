@@ -24,7 +24,7 @@ s/sparks.u3C\[1\] = 7;/sparks.u3C[1] = 6;/
 s/sparks.u55 = 0xA0;/sparks.u55 = 0xA1;/
 s/sparks.u24\[9\] = 0;/sparks.u24[9] = 1;/
 s/sparks.u3C\[3\] = 5;/sparks.u3C[3] = 4;/
-s/c = func_151423D8((u8) (p->angle - 0x40));/c = func_151423D8((u8) (p->angle + 0x40));/
+s/c = angle_byte_cos((u8) (p->angle - 0x40));/c = angle_byte_cos((u8) (p->angle + 0x40));/
 s/at\[0\] = p->pos\[0\] - 150.0f \* c;/at[0] = p->pos[0] + 150.0f * c;/
 s/at\[2\] = p->pos\[2\] - 150.0f \* s;/at[2] = p->pos[2] - 150.0f * c;/
 s/jet.vel\[2\] = 10.0f \* s;/jet.vel[2] = 10.0f * c;/

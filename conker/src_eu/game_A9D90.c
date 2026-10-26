@@ -145,7 +145,7 @@ void func_1507CD0C(struct127 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15169040(s32 arg0, u8 arg1);
+void node_broadcast_all(s32 arg0, u8 arg1);
 void func_1504BAF0(struct127 *);
 u8 *func_150E7F14(s16 count, f32 scale, u8 arg2, s32 arg3);
 extern u16 D_8009015C;
@@ -199,7 +199,7 @@ s32 func_1507CD64(struct127 *obj, s32 kind) {
     }
     msg.obj = obj;
     msg.uid = obj->unique_id;
-    func_15169040((s32)&msg, 3);
+    node_broadcast_all((s32)&msg, 3);
 
     D_800D1CC9 = 0;
     if (((u8 *)obj->unk31C)[0x1AC] != 0) {
@@ -556,7 +556,7 @@ void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2);
 void func_15145A50(struct127 *arg0);
 u8 *func_151149AC(u8 id);
 struct127 *func_1507515C(struct127 *owner, struct127 *unused1, s32 unused2);
-s32 func_15136C3C(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
+s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
 void func_150B8020(u8 *obj, u8 owner, s32 arg2);
 void func_150BC968(u8 *obj);
 void func_150BC03C(u8 *obj);
@@ -617,7 +617,7 @@ s32 func_1507D754(struct127 *arg0) {
                 }
                 item = func_1507515C(arg0, NULL, 0);
                 if (item != NULL && D_800C35EA != 1) {
-                    func_15136C3C((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
+                    object_hit_effects((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
                 }
             }
             if (rec != NULL) {

@@ -1,6 +1,6 @@
 /* P268 DIAGNOSTIC ?p268nodes=1: validates the render-node lists D_800DD280[2][104] (game_1944C0: u8 list index +0,
- * u8 group +1, prev +4, next +8) before and after the per-frame node update (func_151670C0) and before the node draw
- * (func_151674F8). The first broken link is logged with the node bytes and the JS stack, once per phase. */
+ * u8 group +1, prev +4, next +8) before and after the per-frame node update (node_lists_run_update) and before the node draw
+ * (node_render_layers_draw). The first broken link is logged with the node bytes and the JS stack, once per phase. */
 #include <stdint.h>
 #include <string.h>
 #include "../ultra/pc_mem.h"
@@ -54,17 +54,17 @@ static int check(const char *where) {
     return 0;
 }
 
-/* The update loop of func_151670C0 (game_1944C0), re-done here with a list check after every handler call, so the
+/* The update loop of node_lists_run_update (game_1944C0), re-done here with a list check after every handler call, so the
  * first handler that breaks a list is named (its type j and node). Same order and cursor protocol as the game C. */
 extern unsigned char D_8008B4A8_[] __asm__("D_8008B4A8");
 extern unsigned char D_800DD5C8_[] __asm__("D_800DD5C8");
 extern signed char D_800DD5C0_ __asm__("D_800DD5C0");
 #define D_800DD5C0 (*(signed char *)((uintptr_t)&D_800DD5C0_ ^ 3))   /* vbe: game bytes live at address ^ 3 */
-void __real_func_151670C0(void);
-void __wrap_func_151670C0(void) {
+void __real_node_lists_run_update(void);
+void __wrap_node_lists_run_update(void) {
     int i, j;
     if (on < 0) on = port_flag("p268nodes");
-    if (!on) { __real_func_151670C0(); return; }
+    if (!on) { __real_node_lists_run_update(); return; }
     check("before update");
     for (i = 0; i < 2; i++)
         for (j = 0; j < 101; j++) {
@@ -106,11 +106,11 @@ void __wrap_func_151670C0(void) {
             D_800DD5C0--;
         }
 }
-void *__real_func_151674F8(void *gdl, int group, short a2, int list);
-void *__wrap_func_151674F8(void *gdl, int group, short a2, int list) {
+void *__real_node_render_layers_draw(void *gdl, int group, short a2, int list);
+void *__wrap_node_render_layers_draw(void *gdl, int group, short a2, int list) {
     if (on < 0) on = port_flag("p268nodes");
     if (on) check("before draw");
-    return __real_func_151674F8(gdl, group, a2, list);
+    return __real_node_render_layers_draw(gdl, group, a2, list);
 }
 
 /* P269 DIAGNOSTIC (?p268nodes=2): the three behaviours of the type-77 trail nodes of func_151D7DE0 (game_eu_204F70),

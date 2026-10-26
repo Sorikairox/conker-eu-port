@@ -206,7 +206,7 @@ s32 func_1514FC58(u8 *arg0);
 f32 *func_1514FD78(f32 *arg0, f32 arg1, f32 *arg2);
 
 // path_particles_spawn: P153: when the path / curve `path` is usable (func_1514FC58) spawns def +0xC + random
-// [0, def +0xE] particles (func_151D9014) along it: each at a random point (func_1514FD78 at def +0x10 + random *
+// [0, def +0xE] particles (impact_dust_cloud_spawn) along it: each at a random point (func_1514FD78 at def +0x10 + random *
 // +0x14) with sprite def +0x31, size +0x1C + random * +0x20, life +0x18 + random [0, +0x1A], alpha +0x24 + random
 // [0, +0x25], speed +0x28 + random * +0x2C, flag 1 below chance +0x34, scale 1.4 x 1.4, owner / owner arg,
 // +0x38, flag 2 below chance +0x3C. The asm returns nothing; the callers' prototypes say s32 (game_eu_1FB080): 0.
@@ -232,7 +232,7 @@ s32 func_151504B4(f32 *path, u8 *def, s32 owner, s32 arg3, s32 arg4) {
         speed = func_150ADA68();
         chance1 = func_150ADA68();
         chance2 = func_150ADA68();
-        func_151D9014(def, pos, def[0x31], size * *(f32 *) (def + 0x20) + *(f32 *) (def + 0x1C),
+        impact_dust_cloud_spawn(def, pos, def[0x31], size * *(f32 *) (def + 0x20) + *(f32 *) (def + 0x1C),
                       (u32) rLife % (u32) (*(s16 *) (def + 0x1A) + 1) + *(s16 *) (def + 0x18),
                       (u32) rAlpha % (u32) (def[0x25] + 1) + def[0x24],
                       speed * *(f32 *) (def + 0x2C) + *(f32 *) (def + 0x28),
@@ -272,7 +272,7 @@ typedef struct {
     u8 pad39[3];
     f32 chanceD;   /* +0x3C */
 } Def06E8;
-// particle_spray_spawn: spawns countMin + rand(countRange + 1) particles of def (func_151D9014), each with a random
+// particle_spray_spawn: spawns countMin + rand(countRange + 1) particles of def (impact_dust_cloud_spawn), each with a random
 // direction (yaw / pitch ranges `angles` = {yaw base, yaw range, pitch base, pitch range}) and speed turned into a
 // velocity by func_15143794, and random size, life, alpha, spin and two chance flags from def; scale 1.4.
 // Returns 0 (the asm leaves v0 unset; the callers ignore it).
@@ -300,7 +300,7 @@ s32 func_151506E8(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
         spin = func_150ADA68();
         c7 = func_150ADA68();
         cD = func_150ADA68();
-        func_151D9014(d, vel, d->kind, size * d->sizeRange + d->sizeMin, r1 % (u32)(d->lifeRange + 1) + d->lifeMin,
+        impact_dust_cloud_spawn(d, vel, d->kind, size * d->sizeRange + d->sizeMin, r1 % (u32)(d->lifeRange + 1) + d->lifeMin,
                       r2 % (u32)(d->alphaRange + 1) + d->alphaMin, spin * d->spinRange + d->spinMin, c7 < d->chance7,
                       1.4f, 1.4f, 1, arg2, d->b38, cD < d->chanceD, arg3, arg4);
         n--;
@@ -631,7 +631,7 @@ void func_1515128C(u8 *arg0, u8 arg1, s32 arg2) {
                 hit, &spA0[0], &spA0[1], &spA0[2], &sp9C, &sp98, 0, 0.0f) != 0) {
             if (func_15145C90(sp98) != 0) {
                 if (sp9C < *(f32 *)(arg0 + 0x1C)) {
-                    func_151D9B8C(*(u8 *)(arg0 + 0x2C), *(f32 *)(arg0 + 0x20) + *(f32 *)(arg0 + 0x24) * func_150ADA68(),
+                    impact_debris_spawn(*(u8 *)(arg0 + 0x2C), *(f32 *)(arg0 + 0x20) + *(f32 *)(arg0 + 0x24) * func_150ADA68(),
                         (func_150ADA20() % 156U) + 100, (s32)hit, (struct17 *)spA0,
                         *(s16 *)(arg0 + 0x28) + (func_150ADA20() % (u32)(*(s16 *)(arg0 + 0x2A) + 1)),
                         1, 1, 1, arg1, arg2);
@@ -804,7 +804,7 @@ void func_1515176C(u8 *arg0, s32 arg1, s32 arg2) {
                 temp_f20_3 = (*(f32 *)((u8 *)arg0 + 0x70));
                 sp.uAC = (func_150ADA68() * (2.0f * temp_f20_3)) - temp_f20_3;
                 temp_s1_2 = func_150ADA20();
-                temp_v0 = func_1513D2F0(&sp.uB0, (s32) ((u8 *)&D_800A4AA0), 0x19U, 0U, 0U, 0x17U, (u8) ((func_150ADA20() & 1) + ((temp_s1_2 & 1) * 2)), (*(s32 *)((u8 *)arg0 + 0x60)), (*(s32 *)((u8 *)arg0 + 0x64)), 0x20, (u8) (arg1 & 0xFF), arg2);
+                temp_v0 = effect3d_spawn_full(&sp.uB0, (s32) ((u8 *)&D_800A4AA0), 0x19U, 0U, 0U, 0x17U, (u8) ((func_150ADA20() & 1) + ((temp_s1_2 & 1) * 2)), (*(s32 *)((u8 *)arg0 + 0x60)), (*(s32 *)((u8 *)arg0 + 0x64)), 0x20, (u8) (arg1 & 0xFF), arg2);
                 if (temp_v0 != NULL) {
     s32 pad;
                     memcpy(temp_v0 + 0x110, &sp.u90, 0x20);
@@ -967,10 +967,10 @@ void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2) {
         do {
             temp_s1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x2A)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x28));
             temp_s2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x2E)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x2C));
-            temp_f28 = func_151423D8(temp_s2 & 0xFF);
-            temp_f22 = func_151423D8((temp_s2 - 0x40) & 0xFF);
-            temp_f24 = func_151423D8(temp_s1 & 0xFF);
-            temp_f26 = func_151423D8((temp_s1 - 0x40) & 0xFF);
+            temp_f28 = angle_byte_cos(temp_s2 & 0xFF);
+            temp_f22 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
+            temp_f24 = angle_byte_cos(temp_s1 & 0xFF);
+            temp_f26 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
             temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x20))) + (*(f32 *)((u8 *)arg0 + 0x1C));
             sp.uD7 = (func_150ADA20() % (u32) ((*(u8 *)((u8 *)arg0 + 0x56)) + 1)) + (*(u8 *)((u8 *)arg0 + 0x55));
             sp.uF1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x32)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x30));
@@ -1429,15 +1429,15 @@ void func_1515302C(u8 *arg0) {
 
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, void *);
-void *func_1515C2F0(s32 *, s32, void *, s32, u8, s32);
+void *streak_spawn(s32 *, s32, void *, s32, u8, s32);
 
 // base + rand % (extra + 1) (func_150ADA20, unsigned remainder)
 #define RAND_SPREAD(base, extra) ((u32) func_150ADA20() % (u32) ((extra) + 1) + (base))
 
-// particle_burst_from_spec: spawns base + rand % (extra + 1) particles (func_1515C2F0) at the spec's point; each
+// particle_burst_from_spec: spawns base + rand % (extra + 1) particles (streak_spawn) at the spec's point; each
 // one gets random life / flag byte, two random scalars, a random direction (func_15143794: two s16 angles and a
 // length, each base + random) and two random 4-byte colours; the rest of the 0x3C-byte particle block is copied
-// from the spec once. arg1 / arg2 go to func_1515C2F0 (owner byte, extra word). The result is unused by all callers.
+// from the spec once. arg1 / arg2 go to streak_spawn (owner byte, extra word). The result is unused by all callers.
 s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
     typedef struct {
         s32 countBase;      /* 0x00 */
@@ -1494,12 +1494,12 @@ s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
         f32 u34;            /* 0x34 */
         s8 u38;             /* 0x38 */
         s8 u39;             /* 0x39 */
-    } part;                 /* 0x3C bytes, copied by func_1515C2F0 */
+    } part;                 /* 0x3C bytes, copied by streak_spawn */
     struct {
         s32 pos[3];         /* 0x00 */
         s16 life;           /* 0x0C */
         u16 u0E;            /* 0x0E */
-        s32 u10;            /* 0x10, func_1515C2F0 also sets 10 */
+        s32 u10;            /* 0x10, streak_spawn also sets 10 */
         u8 pad14;
         u8 flag;            /* 0x15 */
     } spawn;
@@ -1547,7 +1547,7 @@ s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
             part.colB[i] = RAND_SPREAD(sp->colBBase[i], sp->colBExtra[i]);
         }
         part.u1F = RAND_SPREAD(sp->u55Base, sp->u55Extra);
-        func_1515C2F0(spawn.pos, 0, &part, 0, arg1, arg2);
+        streak_spawn(spawn.pos, 0, &part, 0, arg1, arg2);
     }
     return 0;
 }
@@ -1623,10 +1623,10 @@ void func_151534E0(u8 *arg0, s32 arg1) {
         do {
             temp_s1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x2A)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x28));
             temp_s2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x2E)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x2C));
-            temp_f22 = func_151423D8(temp_s2 & 0xFF);
-            temp_f24 = func_151423D8((temp_s2 - 0x40) & 0xFF);
-            temp_f26 = func_151423D8(temp_s1 & 0xFF);
-            temp_f28 = func_151423D8((temp_s1 - 0x40) & 0xFF);
+            temp_f22 = angle_byte_cos(temp_s2 & 0xFF);
+            temp_f24 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
+            temp_f26 = angle_byte_cos(temp_s1 & 0xFF);
+            temp_f28 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
             temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x20))) + (*(f32 *)((u8 *)arg0 + 0x1C));
             sp.u101 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x32)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x30));
             sp.uF8 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x36)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x34));
@@ -1645,7 +1645,7 @@ void func_151534E0(u8 *arg0, s32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151534E0.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15167D84(s32 *, s32, s32, s32, s32, s32);
+s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 
 void func_15153808(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
@@ -1713,10 +1713,10 @@ void func_15153808(u8 *arg0, s32 arg1, s32 arg2) {
         do {
             temp_s1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x12)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x10));
             temp_s2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x16)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x14));
-            temp_f28 = func_151423D8(temp_s2 & 0xFF);
-            temp_f22 = func_151423D8((temp_s2 - 0x40) & 0xFF);
-            temp_f24 = func_151423D8(temp_s1 & 0xFF);
-            temp_f26 = func_151423D8((temp_s1 - 0x40) & 0xFF);
+            temp_f28 = angle_byte_cos(temp_s2 & 0xFF);
+            temp_f22 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
+            temp_f24 = angle_byte_cos(temp_s1 & 0xFF);
+            temp_f26 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
             temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x1C))) + (*(f32 *)((u8 *)arg0 + 0x18));
             temp_f0 = temp_f20 * temp_f28;
             sp.uB0 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x22)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x20));
@@ -1727,7 +1727,7 @@ void func_15153808(u8 *arg0, s32 arg1, s32 arg2) {
             sp.uB2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x2C)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x2A));
             sp.uAC = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x32)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x30));
             sp.uAE = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x36)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x34));
-            func_15167D84(&sp.u88, 0, 0, -1, arg1 & 0xFF, arg2);
+            node_spawn_sprite(&sp.u88, 0, 0, -1, arg1 & 0xFF, arg2);
             var_s3 -= 1;
         } while (var_s3 != 0);
     }
@@ -1824,10 +1824,10 @@ void func_15153BA4(u8 *req, s32 tag, s32 owner, s32 ownerArg) {
     for (; count != 0; count--) {
         yaw = (u32) func_150ADA20() % (u32) (*(s16 *)(req + 0x48) + 1) + *(s16 *)(req + 0x44);
         pitch = (u32) func_150ADA20() % (u32) (*(s16 *)(req + 0x4A) + 1) + *(s16 *)(req + 0x46);
-        sinPitch = func_151423D8(pitch);
-        cosPitch = func_151423D8(pitch - 0x40);
-        sinYaw = func_151423D8(yaw);
-        cosYaw = func_151423D8(yaw - 0x40);
+        sinPitch = angle_byte_cos(pitch);
+        cosPitch = angle_byte_cos(pitch - 0x40);
+        sinYaw = angle_byte_cos(yaw);
+        cosYaw = angle_byte_cos(yaw - 0x40);
         speed = func_150ADA68() * *(f32 *)(req + 0x50) + *(f32 *)(req + 0x4C);
         p.life = (u32) func_150ADA20() % (u32) (*(s16 *)(req + 0x12) + 1) + *(s16 *)(req + 0x10);
         p.u10 = (u32) func_150ADA20() % (u32) (*(s32 *)(req + 0x18) + 1) + *(s32 *)(req + 0x14);
@@ -1896,10 +1896,10 @@ void func_15153F24(u8 *arg0, u8 arg1) {
     while (n != 0) {
         a = *(s16 *)(arg0 + 0x10) + (func_150ADA20() % (u32)(*(s16 *)(arg0 + 0x14) + 1));
         b = *(s16 *)(arg0 + 0x12) + (func_150ADA20() % (u32)(*(s16 *)(arg0 + 0x16) + 1));
-        sb = func_151423D8(b);
-        cb = func_151423D8(b - 0x40);
-        sa = func_151423D8(a);
-        ca = func_151423D8(a - 0x40);
+        sb = angle_byte_cos(b);
+        cb = angle_byte_cos(b - 0x40);
+        sa = angle_byte_cos(a);
+        ca = angle_byte_cos(a - 0x40);
         sp.vel[0] = 10.0f * sb * ca;
         sp.vel[1] = -10.0f * cb;
         sp.vel[2] = 10.0f * sb * sa;
@@ -1921,7 +1921,7 @@ void func_151541F4(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     func_1515423C(sp24, arg1, arg2, arg3, arg4);
 }
 
-s32 func_151DA6F8(struct17 *, s32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 impact_spark_spawn(struct17 *, s32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 void func_1515423C(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     s32 n;
@@ -1932,7 +1932,7 @@ void func_1515423C(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
         n = *(s16 *)((u8 *)arg1 + 0x24) + (n % (u32)(*(s16 *)((u8 *)arg1 + 0x26) + 1));
         while (n != 0) {
             func_1514FD78((f32 *)arg0, *(f32 *)((u8 *)arg1 + 0x1C) + *(f32 *)((u8 *)arg1 + 0x20) * func_150ADA68(), spA8);
-            func_151DA6F8((struct17 *)arg1, (s32 *)spA8,
+            impact_spark_spawn((struct17 *)arg1, (s32 *)spA8,
                 *(f32 *)((u8 *)arg1 + 0x14) + *(f32 *)((u8 *)arg1 + 0x18) * func_150ADA68(),
                 *(s16 *)((u8 *)arg1 + 0x2C) + (func_150ADA20() % (u32)(*(s16 *)((u8 *)arg1 + 0x2E) + 1)),
                 *(s16 *)((u8 *)arg1 + 0x30) + (func_150ADA20() % (u32)(*(s16 *)((u8 *)arg1 + 0x32) + 1)),
@@ -1947,7 +1947,7 @@ void func_1515423C(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
 }
 
 void func_15143794(s16, s16, f32, void *);
-s32 func_151DA6F8(struct17 *, s32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 impact_spark_spawn(struct17 *, s32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4) {
     s32 n;
@@ -1958,7 +1958,7 @@ void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, 
         func_15143794(arg0->unk0 + (func_150ADA20() % (u32)(arg0->unk2 + 1)),
             arg0->unk4 + (func_150ADA20() % (u32)(arg0->unk6 + 1)),
             *(f32 *)((u8 *)arg1 + 0x1C) + *(f32 *)((u8 *)arg1 + 0x20) * func_150ADA68(), spA8);
-        func_151DA6F8(arg1, spA8,
+        impact_spark_spawn(arg1, spA8,
             *(f32 *)((u8 *)arg1 + 0x14) + *(f32 *)((u8 *)arg1 + 0x18) * func_150ADA68(),
             *(s16 *)((u8 *)arg1 + 0x2C) + (func_150ADA20() % (u32)(*(s16 *)((u8 *)arg1 + 0x2E) + 1)),
             *(s16 *)((u8 *)arg1 + 0x30) + (func_150ADA20() % (u32)(*(s16 *)((u8 *)arg1 + 0x32) + 1)),

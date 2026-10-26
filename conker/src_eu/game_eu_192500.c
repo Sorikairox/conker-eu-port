@@ -13,7 +13,7 @@ u8 *func_15164CF0(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     if (obj != NULL && obj->unk31C != NULL && obj->unk31C->unk198 != 0) {
         return NULL;
     }
-    p = func_15167A68(0x39, arg3, arg1 + 0x68, 1, arg2, 1);
+    p = node_alloc(0x39, arg3, arg1 + 0x68, 1, arg2, 1);
     if (p == NULL) {
         return NULL;
     }
@@ -47,7 +47,7 @@ extern f32 D_800A6F00; // 6 consecutive limits (all pi)
 // The amplitude scale is 1 or the +0x12 callback of D_8008B734 (+0x10 & 4). Each channel i with a speed (+0x30 + 4i)
 // advances its phase (+0x48 + 4i, wrapped by func_15144B68), records the half-cycle in +0x60 + i (phase < pi), stops
 // itself at a half-cycle change when +0x10 & 2, and adds sin(phase) * amplitude (+0x18 + 4i) * scale to float i of
-// target record +0x16 of D_800DD210 (0x18 bytes each). When every speed is 0 the record is freed (func_1516972C).
+// target record +0x16 of D_800DD210 (0x18 bytes each). When every speed is 0 the record is freed (node_destroy).
 void func_15164E0C(u8 *arg0) {
     u8 prev[6];
     f32 scale;
@@ -92,7 +92,7 @@ void func_15164E0C(u8 *arg0) {
     }
     if (*(f32 *) (arg0 + 0x30) == 0.0f && *(f32 *) (arg0 + 0x34) == 0.0f && *(f32 *) (arg0 + 0x38) == 0.0f
         && *(f32 *) (arg0 + 0x3C) == 0.0f && *(f32 *) (arg0 + 0x40) == 0.0f && *(f32 *) (arg0 + 0x44) == 0.0f) {
-        func_1516972C((struct102 *) arg0);
+        node_destroy((struct102 *) arg0);
     }
 }
 #else

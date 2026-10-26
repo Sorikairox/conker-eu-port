@@ -306,7 +306,7 @@ u16 func_1509F9C8(s32, s32, u16, s32, u32);
 u16 func_1509FA88(s32, s32, s32);
 void func_1509FAD4(u16, s32, s32, s16, s32, s32);
 u16 func_1509FBC8(s32, s32, u16, s32, s32);
-void func_15103C14(s32, s32, u32, s32, s32);
+void object_sound_play_cooldown(s32, s32, u32, s32, s32);
 extern s32 D_800D3C60;           /* sound mode */
 /* event_sound_command: handler 7 of the event VM's native table D_800887C0 (id = the command word without its
  * table nibble, args = the VM stack). In sound mode 1 (D_800D3C60) every command just plays sound id (volume
@@ -314,7 +314,7 @@ extern s32 D_800D3C60;           /* sound mode */
  * (0x2000 random pick from the range id..args[2] on object args[4], returns the remaining mask; 0x3000 / 0x4000
  * positional variants func_1509F95C / func_1509F9C8, the latter returns its handle unpacked; other kinds
  * func_1509FA88), 1 = plain sound with the volume / pan arguments by mode (args[3] from mode 4, args[4] from mode
- * 5), 2 = object sound func_1509FAD4 (forced with args[6] from mode 7), 3 = func_1509FBC8, 4 = func_15103C14
+ * 5), 2 = object sound func_1509FAD4 (forced with args[6] from mode 7), 3 = func_1509FBC8, 4 = object_sound_play_cooldown
  * (returns 0x7000). A sound handle h is returned as (h << 16) | 0x7000, 0 stays 0. */
 s32 func_1509F4D0(s32 id, s32 *args, s32 *operand) {
     s32 h;
@@ -366,7 +366,7 @@ s32 func_1509F4D0(s32 id, s32 *args, s32 *operand) {
                 h = func_1509FBC8(id, args[3] & 0xFFF, args[2], args[4], args[5]);
                 break;
             case 4:
-                func_15103C14(id, args[3] & 0xFFF, args[2], args[4], args[5]);
+                object_sound_play_cooldown(id, args[3] & 0xFFF, args[2], args[4], args[5]);
                 return 0x7000;
             default:
                 return 0;

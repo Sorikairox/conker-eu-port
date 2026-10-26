@@ -9,7 +9,7 @@ extern u8 D_800A4EA8[];
 #ifdef NON_MATCHING
 /* P155 */
 s32 memcpy(void *, void *, s32);
-// path_record_create: allocates a path record (func_15167A68 kind 0x2D, 0x80 bytes + `extra` + 24 bytes per point
+// path_record_create: allocates a path record (node_alloc kind 0x2D, 0x80 bytes + `extra` + 24 bytes per point
 // of def's count at +2), copies the 0x50-byte definition to +0x10, points +0x64 at the point array (+0x80) and +0x60
 // past it, zeroes the first point and +0x68 / +0x6C..+0x7B, sets the last point to (0, 0, 1) and +0x7C to
 // count * 64 + 0x140. Returns the record or NULL.
@@ -18,7 +18,7 @@ u8 *func_151A7F00(u8 *def, s32 extra, u8 arg2, s32 arg3) {
     f32 *pt;
     s16 n = *(s16 *)(def + 2);
 
-    rec = func_15167A68(0x2D, arg3, n * 24 + extra + 0x80, 1, arg2, 1);
+    rec = node_alloc(0x2D, arg3, n * 24 + extra + 0x80, 1, arg2, 1);
     if (rec == NULL) {
         return NULL;
     }
@@ -52,7 +52,7 @@ void func_151A88F0(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth);
 // While alive, the +0x68 timer counts down; at 0 the points are re-jittered (func_151A88F0 over [0, count - 1],
 // amplitude +0x20, depth 100) and the timer restarts at +0x14 + rand * +0x18. Flag 2 then maps every point (stride
 // 0x18: local x, y, z at +0, world at +0xC) from the local frame (x: side axis from func_151450B4 * +0x58 scale, y: +0x48 up, z: end +0x3C - start +0x30)
-// to the world, based at the start point. Finished records are freed (func_1516972C).
+// to the world, based at the start point. Finished records are freed (node_destroy).
 void func_151A8040(u8 *obj) {
     struct17 fwd;
     struct17 up;
@@ -104,7 +104,7 @@ void func_151A8040(u8 *obj) {
         }
     }
     if (done) {
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
     }
 }
 #else
@@ -112,7 +112,7 @@ void func_151A8040(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, u8, u8, u8, s32, s8 *);
 s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -183,7 +183,7 @@ u8 *func_151A831C(u8 *arg0, u8 *arg1, s16 arg2) {
             temp_v1 = ((u8 *)&D_800A4EA8);
             temp_t0 = (*(u8 **)((u8 *)arg1 + 0x64));
             temp_lo = sp.u84 * 0x18;
-            var_s0 = func_15142FBC(func_1513F4E4(func_15142C10(func_15142B7C(func_15142E24(var_s0, &D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &sp.u87, 3), 0x200005, 0x1F0600), (*(u8 *)((u8 *)arg1 + 0x24)), (*(u8 *)((u8 *)arg1 + 0x25)), (*(u8 *)((u8 *)arg1 + 0x26)), (s32) (*(u8 *)((u8 *)arg1 + 0x27)), &sp.u87), 0x19, &sp.u87), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u87);
+            var_s0 = func_15142FBC(gfx_set_combine_mode(func_15142C10(func_15142B7C(func_15142E24(var_s0, &D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &sp.u87, 3), 0x200005, 0x1F0600), (*(u8 *)((u8 *)arg1 + 0x24)), (*(u8 *)((u8 *)arg1 + 0x25)), (*(u8 *)((u8 *)arg1 + 0x26)), (s32) (*(u8 *)((u8 *)arg1 + 0x27)), &sp.u87), 0x19, &sp.u87), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u87);
             sp.uB4 = (*(f32 *)((u8 *)temp_t0 + 0xC)) - (*(f32 *)((u8 *)((temp_t0 + temp_lo)) + 0xC));
             temp_t0_2 = (*(u8 **)((u8 *)arg1 + 0x64));
             sp.uB8 = (*(f32 *)((u8 *)temp_t0_2 + 0x10)) - (*(f32 *)((u8 *)((temp_t0_2 + temp_lo)) + 0x10));
@@ -331,7 +331,7 @@ void func_151A8B34(u8 *arg0) {
         fn(new_var);
     }
     func_151A8B10(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_151A8B84(u8 *arg0) {
@@ -344,7 +344,7 @@ void func_151A8B84(u8 *arg0) {
         fn(new_var);
     }
     func_151A8B10(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 // File-scope .rodata table (0x170 bytes); func_151A8BD4 reads its first word (79.75f).
@@ -559,7 +559,7 @@ void func_151A9028(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         new_var = *(s32 *)(arg1 + 0);
         if ((new_var == *(s32 *)(temp_v0 + 0)) || (*(u8 *)(arg1 + 4) == *(u8 *)(temp_v0 + 4))) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (temp_t6 == 0x2D) {
         temp_a0 = *(s32 *)(arg1 + 0);
@@ -843,7 +843,7 @@ void func_151A975C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     sp.u10[4] = 0;
     sp.u10[5] = 0xFF;
     sp.u18 = 0x3B0002;
-    func_1513C650((s32)&sp, 1, 0, (s32)(arg0 + 0x58), *(f32 *)(arg1 + 0), *(f32 *)(arg1 + 4), *(f32 *)(arg1 + 8), f, f, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 3, 0xFF, 0, arg0[0xC], arg0[1]);
+    sprite_fx_spawn_cam_at((s32)&sp, 1, 0, (s32)(arg0 + 0x58), *(f32 *)(arg1 + 0), *(f32 *)(arg1 + 4), *(f32 *)(arg1 + 8), f, f, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 3, 0xFF, 0, arg0[0xC], arg0[1]);
 }
 
 void func_151A98CC(u8 *arg0, s32 arg1, u8 arg2)
@@ -863,11 +863,11 @@ void func_151A98CC(u8 *arg0, s32 arg1, u8 arg2)
 
 #ifdef NON_MATCHING
 /* P155 */
-s32 func_1516284C(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 typedef struct {
     f32 f0;    /* spawn record +0x08 */
     f32 f4;    /* spawn record +0x0C */
-    u8 b8;     /* sound / emitter parameters for func_1516284C */
+    u8 b8;     /* sound / emitter parameters for light_create_flicker_preset */
     u8 b9;
     u8 bA;
     u8 bB;
@@ -880,7 +880,7 @@ extern Kind9940 D_8008FD4C[];
 // `life`, -1 = untimed 300) at `pos` (f32[3]) or, without pos, attached to `owner` (s16 position at +0); the
 // 0x2C-byte kind data goes behind the record (+0x80), with flag bits 0x08 / 0x10 of `flags` as its +0x28 bits 1 / 2.
 // flags bit 1 marks the record (bit 4), bit 2 (bit 8); bit 4 also starts the kind's sound / emitter
-// (func_1516284C) at pos or the owner position.
+// (light_create_flicker_preset) at pos or the owner position.
 void func_151A9940(u8 flags, u8 kind, void *owner, s32 pos, f32 arg4, f32 arg5, s16 life, u8 arg7, s32 arg8) {
     struct {
         u8 flags;
@@ -954,7 +954,7 @@ void func_151A9940(u8 flags, u8 kind, void *owner, s32 pos, f32 arg4, f32 arg5, 
             at[1] = ((s16 *)owner)[1];
             at[2] = ((s16 *)owner)[2];
         }
-        func_1516284C(&snd, at, k->b8, k->b9, k->bA, 0xFF, 0, 0, k->bC, 0xFF, 1);
+        light_create_flicker_preset(&snd, at, k->b8, k->b9, k->bA, 0xFF, 0, 0, k->bC, 0xFF, 1);
     }
 }
 #else

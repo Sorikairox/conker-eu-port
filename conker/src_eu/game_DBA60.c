@@ -10,25 +10,25 @@ s32 func_1509BE40(s32, s32, ...);
 void func_150AE5B0(struct108 *arg0) {
     if ((D_800D2E4C->unk4 & 0x80) == 0) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
-            if (func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 8) != 0) {
+            if (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 8) != 0) {
                 arg0->unk84 |= 0x1000000;
-                func_151254F4(arg0, D_800CC335 - 1);
+                camera_set_followed_obj(arg0, D_800CC335 - 1);
             }
-        } else if (func_151239CC(arg0, 8) != 0) {
-            func_151254F4(arg0, 0);
+        } else if (camera_pop_mode(arg0, 8) != 0) {
+            camera_set_followed_obj(arg0, 0);
         }
     }
     arg0->unk84 &= -0x4001;
     if ((D_800D2E4C->unk1 & 4) == 0) {
         if (func_1509BE40(1, 0x2000, 0x95, func_1509BE40(0, 0x2014, 0xB7) | 0x2000) != 0) {
             arg0->unk84 |= 0x1000000;
-            if (((arg0->unk2C & 1) != 0) && (func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 0) != 0)) {
+            if (((arg0->unk2C & 1) != 0) && (camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 0) != 0)) {
                 arg0->unk1B4 = 3;
                 arg0->unk84 &= -5;
-                func_15124B18(arg0);
+                camera_apply_zoom_level(arg0);
             }
-        } else if (func_151239CC(arg0, 0) != 0) {
-            func_15124B18(arg0);
+        } else if (camera_pop_mode(arg0, 0) != 0) {
+            camera_apply_zoom_level(arg0);
             arg0->unk84 &= 0xFEFFFFFF;
         }
     }
@@ -41,9 +41,9 @@ void func_150AE5B0(struct108 *arg0) {
 
 
 #ifdef NON_MATCHING
-void func_15142314(void *, s32, void *);
+void mtx_get_translation(void *, s32, void *);
 u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
-s32 func_15167D84(s32 *, s32, s32, s32, s32, s32);
+s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CEB4;
 
 void func_150AE790(u8 *arg0) {
@@ -133,7 +133,7 @@ void func_150AE790(u8 *arg0) {
         if ((*(s32 *)((u8 *)temp_v0 + 0)) != 0) {
             temp_v1 = (*(s32 *)((u8 *)temp_v0 + 0x1D4));
             if ((temp_v1 != 0) && ((*(u8 *)((u8 *)temp_s0 + 4)) == (*(u8 *)((u8 *)temp_v0 + 0x3B)))) {
-                func_15142314(temp_v1, (*(u8 *)((u8 *)temp_s0 + 5)), &sp.u148);
+                mtx_get_translation(temp_v1, (*(u8 *)((u8 *)temp_s0 + 5)), &sp.u148);
                 sp.u158 = 1;
                 sp.u156 = 1;
                 sp.u141 = 0;
@@ -155,10 +155,10 @@ void func_150AE790(u8 *arg0) {
                     do {
                         temp_s0_2 = func_150ADA20() & 0xFF;
                         temp_s1 = (func_150ADA20() % 51U) & 0xFF;
-                        temp_f24 = func_151423D8(temp_s0_2 & 0xFF);
-                        temp_f26 = func_151423D8((temp_s0_2 - 0x40) & 0xFF);
-                        temp_f28 = func_151423D8(temp_s1 & 0xFF);
-                        temp_f22 = func_151423D8((temp_s1 - 0x40) & 0xFF);
+                        temp_f24 = angle_byte_cos(temp_s0_2 & 0xFF);
+                        temp_f26 = angle_byte_cos((temp_s0_2 - 0x40) & 0xFF);
+                        temp_f28 = angle_byte_cos(temp_s1 & 0xFF);
+                        temp_f22 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
                         temp_f6 = func_150ADA68() * 0.5f;
                         sp.u15D = 4;
                         temp_f20 = temp_f6 + 18.8f;
@@ -206,7 +206,7 @@ void func_150AE790(u8 *arg0) {
                 sp.uC4 = (s16) (s32) sp.u148;
                 sp.uC6 = (s16) (s32) sp.u14C;
                 sp.uC8 = (s16) (s32) sp.u150;
-                func_15167D84(&sp.uB4, 0, 0, -1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                node_spawn_sprite(&sp.uB4, 0, 0, -1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
         }
     }
@@ -342,7 +342,7 @@ void func_150AEDF8(u8 *arg0, s32 *arg1, u8 arg2)
     new_var = arg1[0];
     if (((*((s32 *) v)) == new_var) || ((v[4] ^ 0) == ((u8 *) arg1)[4]))
     {
-      func_1516972C(arg0);
+      node_destroy(arg0);
     }
   }
 }
@@ -372,7 +372,7 @@ void func_150AEDF8(u8 *arg0, s32 *arg1, u8 arg2)
 //         temp_v0 = arg0->unk28;
 //         if (temp_t6 == 0) {
 //             if ((arg1->unk0 == temp_v0->unk0) || ((temp_v0->unk4 == (u8) arg1->unk4))) {
-//                 func_1516972C(arg0, temp_t6, arg0);
+//                 node_destroy(arg0, temp_t6, arg0);
 //             }
 //         }
 //     }

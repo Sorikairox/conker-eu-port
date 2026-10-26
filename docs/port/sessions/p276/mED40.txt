@@ -26,9 +26,9 @@
 \#^    t.u54 = 1;$#s/1/2/
 \#^    t.u56 = 0xFF;$#s/0xFF/0xFE/
 \#^    t.scale\[1\] = 1.0f;$#s/1.0f/2.0f/
-\#^    e = func_1513D2F0(&t, (s32) &D_800A4AA0, 0x28#s/0x26, 0, 3/0x26, 0, 2/
-\#^    e = func_1513D2F0(&t, (s32) &D_800A4AA0, 0x28#s/0xFF, 0x28/0xFF, 0x27/
-\#^    e = func_1513D2F0(&t, (s32) &D_800A4AA0, 0x28#s/p\[1\]/p[2]/
+\#^    e = effect3d_spawn_full(&t, (s32) &D_800A4AA0, 0x28#s/0x26, 0, 3/0x26, 0, 2/
+\#^    e = effect3d_spawn_full(&t, (s32) &D_800A4AA0, 0x28#s/0xFF, 0x28/0xFF, 0x27/
+\#^    e = effect3d_spawn_full(&t, (s32) &D_800A4AA0, 0x28#s/p\[1\]/p[2]/
 \#^        memcpy(e + 0x110, &rec, 0x28);$#s/0x110/0x114/
 \#^    \*timer = (u32) func_150ADA20()#s/ 201 + 200/ 201 + 201/
 \#^    t.u1 = 0;$#s/0/1/

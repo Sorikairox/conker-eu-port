@@ -128,7 +128,7 @@ extern s32 D_800898C0;
 void func_1512A390(struct108 *);
 void func_1512DAD0(struct108 *, s32, void *);
 s32 func_15084000(s32);
-void func_151254F4(struct108 *, s32);
+void camera_set_followed_obj(struct108 *, s32);
 s32 func_15096DB0(s32);
 extern s32 D_800DC450;
 
@@ -164,10 +164,10 @@ s32 func_15097188(s32 id, s32 op, u8 *cmd) {
         CAM_F(cam, 0x2AC) = (f32) a[4];
         return 0;
     case 4:
-        func_15123934(cam, a[2], a[3], a[4], 0x11);
+        camera_push_mode(cam, a[2], a[3], a[4], 0x11);
         return 1;
     case 5:
-        func_151239CC(cam, 0x11);
+        camera_pop_mode(cam, 0x11);
         return 1;
     case 6: /* set / clear flags */
         if (a[2] != 0) {
@@ -266,10 +266,10 @@ s32 func_15097188(s32 id, s32 op, u8 *cmd) {
         }
         return 0;
     case 18:
-        func_151254F4(cam, func_15084000(a[2] & 0xFFF));
+        camera_set_followed_obj(cam, func_15084000(a[2] & 0xFFF));
         return 0;
     case 19:
-        func_15124770(cam, func_15084000(a[2] & 0xFFF));
+        camera_set_second_target(cam, func_15084000(a[2] & 0xFFF));
         return 0;
     case 20: /* 16.16 speeds */
         cam->unk1A4 = (f32) a[2] * (1.0f / 65536.0f);
@@ -306,7 +306,7 @@ s32 func_15097188(s32 id, s32 op, u8 *cmd) {
         D_800D2DB0 = cam->pad3A4;
         return 0;
     case 26:
-        func_1512868C(cam);
+        camera_init_controller(cam);
         return 0;
     case 27:
         D_800898C0 = a[2] - 1;

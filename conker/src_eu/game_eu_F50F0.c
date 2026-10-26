@@ -6,7 +6,7 @@
 #ifdef NON_MATCHING
 extern f32 D_800A0880;
 extern f32 D_800A0884;
-void func_151616D0(u8, u8, s32);
+void light_ctrl_broadcast(u8, u8, s32);
 
 s32 func_150C78E0(u8 *arg0, u8 *arg1) {
     f32 temp_f0;
@@ -20,7 +20,7 @@ s32 func_150C78E0(u8 *arg0, u8 *arg1) {
     if (temp_v1 == 0) {
         (*(u8 *)((u8 *)arg0 + 0x13)) = 0xCU;
         if ((*(s32 *)((u8 *)arg1 + 0x2E4)) != 0) {
-            func_151616D0(0x11, 0x41, 0);
+            light_ctrl_broadcast(0x11, 0x41, 0);
             (*(s32 *)((u8 *)arg1 + 0x2E4)) = 0;
         }
     } else {
@@ -54,13 +54,13 @@ s32 func_150C78E0(u8 *arg0, u8 *arg1) {
             }
             (*(u8 *)((u8 *)arg0 + 0x13)) = 2U;
             if ((*(s32 *)((u8 *)arg1 + 0x2E4)) != 1) {
-                func_151616D0(0x11, 0x40, 0);
+                light_ctrl_broadcast(0x11, 0x40, 0);
                 (*(s32 *)((u8 *)arg1 + 0x2E4)) = 1;
             }
         } else {
             (*(u8 *)((u8 *)arg0 + 0x13)) = 0xCU;
             if ((*(s32 *)((u8 *)arg1 + 0x2E4)) != 0) {
-                func_151616D0(0x11, 0x41, 0);
+                light_ctrl_broadcast(0x11, 0x41, 0);
                 (*(s32 *)((u8 *)arg1 + 0x2E4)) = 0;
             }
         }

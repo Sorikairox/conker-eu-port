@@ -16,4 +16,4 @@ s/func_151B9C40(obj\[0x14\], obj\[0x15\], x, y, z, -0x50/func_151B9C40(obj[0x15]
 s/    if (t < 0) {/    if (t <= 0) {/ % die
 s/    t = \*(s16 \*) (obj + 0x2A) - D_800BE9E4;/    t = (s16) (*(s16 *) (obj + 0x2A) - D_800BE9E4);/ % bigstep negstep
 s/        \*(s16 \*) (obj + 0x2A) = t;/        ;/ % noanchor
-s/        func_1516972C((struct102 \*) obj);/        ;/ % die
+s/        node_destroy((struct102 \*) obj);/        ;/ % die

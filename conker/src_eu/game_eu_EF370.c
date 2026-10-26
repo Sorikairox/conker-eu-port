@@ -19,7 +19,7 @@ s32 func_150C1B60(f32 x, f32 y, f32 z, s32 tag) {
 #endif
 
 #ifdef NON_MATCHING
-f32 func_151423D8(u8);
+f32 angle_byte_cos(u8);
 u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                   s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 
@@ -27,7 +27,7 @@ u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
  * s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, as the game_eu_EF6D0 emitters): spawns one
  * kind-5 particle (func_15148310) at (x, y, z) flying out along the byte angle a with a random pitch of -63..-51
  * (rand % 13 - 63) and speed 25.5..42.9 (17.4 * rand + 25.5): velocity (v sin(p) sin(a - 0x40), -v sin(p - 0x40),
- * v sin(p) sin(a)) (func_151423D8 = byte-angle sine); sprite 0x5A..0x99, tint 5..13, motion speed 24.7..44.9, scale
+ * v sin(p) sin(a)) (angle_byte_cos = byte-angle sine); sprite 0x5A..0x99, tint 5..13, motion speed 24.7..44.9, scale
  * 0.4..0.6, flags 0x28, kind 0xA; owner byte argB. The asm leaves the spawn block's -1 / owner words and the motion
  * block's floor / timers unset (stack garbage), and so does this C. Always returns 1 (go on). */
 s32 func_150C1BC0(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
@@ -84,10 +84,10 @@ s32 func_150C1BC0(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     n = 1;
     do {
         pitch = (u32) func_150ADA20() % 13U - 0x3F;
-        sp = func_151423D8(pitch & 0xFF);
-        cp = func_151423D8((pitch - 0x40) & 0xFF);
-        sa = func_151423D8(a & 0xFF);
-        ca = func_151423D8((a - 0x40) & 0xFF);
+        sp = angle_byte_cos(pitch & 0xFF);
+        cp = angle_byte_cos((pitch - 0x40) & 0xFF);
+        sa = angle_byte_cos(a & 0xFF);
+        ca = angle_byte_cos((a - 0x40) & 0xFF);
         v = func_150ADA68() * 17.4f + 25.5f;
         sb.tint = (u32) func_150ADA20() % 9U + 5;
         sb.sprite = (func_150ADA20() & 0x3F) + 0x5A;

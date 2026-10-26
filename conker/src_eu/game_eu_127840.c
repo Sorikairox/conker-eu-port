@@ -34,7 +34,7 @@ Gfx *func_150FA030(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, 
 #endif
 
 #ifdef NON_MATCHING
-/* func_1513D2F0's particle spec and func_151407D0's spawn block (0x58 bytes). */
+/* effect3d_spawn_full's particle spec and particle_emitter_spawn's spawn block (0x58 bytes). */
 typedef struct {
     /* 0x00 */ u8 texture;
     /* 0x01 */ u8 u01;
@@ -58,7 +58,7 @@ typedef struct {
     /* 0x4D */ u8 pad4D[0xB];
 } PartSpecF9BB0;
 
-/* func_151407D0's emitter block (filled up to 0x5A; the call passes size 0x78). */
+/* particle_emitter_spawn's emitter block (filled up to 0x5A; the call passes size 0x78). */
 typedef struct {
     /* 0x00 */ f32 u00;
     /* 0x04 */ f32 u04;
@@ -123,10 +123,10 @@ typedef struct {
 } GroupF9BB0;
 
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
-void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
+void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
-s32 func_15160A58(u8 *, u8, void *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
+s32 light_create_obj_joint(u8 *, u8, void *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
 s32 func_150ADA20(void);
 void *memcpy(void *, const void *, size_t);
 extern s32 D_800A4AA0;
@@ -146,17 +146,17 @@ extern f32 D_800A215C;
 extern f32 D_800A2160;
 
 // object_aura_spawn: creates a group object (func_15149130 kind 0x46, 0x18-byte block {obj, obj+0x3B}) and, when it
-// exists, two particles (func_1513D2F0 texture 0x5F, D_800A4AA0 list, random blend 1 / 3) and two emitters
-// (func_151407D0 texture 0x60, 0x2A) around `obj`, each told its index, the object, its room byte and the group
+// exists, two particles (effect3d_spawn_full texture 0x5F, D_800A4AA0 list, random blend 1 / 3) and two emitters
+// (particle_emitter_spawn texture 0x60, 0x2A) around `obj`, each told its index, the object, its room byte and the group
 // (particles at +0x110 also get the mid height (obj +0x14C + +0x150) / 2); the group records them at +0x30 / +0x38.
-// Always then calls func_151D8E18 {1, 0x46, 8, 1, -1} and func_15160A58 (D_800A2090, 3, 0x46, 0x28).
+// Always then calls func_151D8E18 {1, 0x46, 8, 1, -1} and light_create_obj_joint (D_800A2090, 3, 0x46, 0x28).
 // `alpha` / `owner` are passed to every spawner.
 void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
     structEU_151D8E18 shake;
     EmitExtraF9BB0 ee;
     PartSpecF9BB0 spawn;
     struct {
-        EmitF9BB0 emit; /* func_151407D0 reads 0x78 bytes: on into spec */
+        EmitF9BB0 emit; /* particle_emitter_spawn reads 0x78 bytes: on into spec */
         PartSpecF9BB0 spec;
         PartExtraF9BB0 extra; /* kept next to spec as in the asm frame */
     } fr;
@@ -226,7 +226,7 @@ void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
         fr.spec.u47 = 7;
         fr.spec.u48 = 0;
         for (fr.extra.index = 0; fr.extra.index < 2; fr.extra.index++) {
-            g->part[fr.extra.index] = func_1513D2F0(&fr.spec, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
+            g->part[fr.extra.index] = effect3d_spawn_full(&fr.spec, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
                                               ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, 0x5C,
                                               alpha, owner);
             if (g->part[fr.extra.index] != NULL) {
@@ -297,7 +297,7 @@ void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
         spawn.u48 = 0;
         spawn.u4C = 0xFF;
         for (ee.index = 0; ee.index < 2; ee.index++) {
-            g->emit[ee.index] = func_151407D0(&fr.emit, 0x78, &spawn, 0, 0x2A, 0, 0, -1, alpha, owner);
+            g->emit[ee.index] = particle_emitter_spawn(&fr.emit, 0x78, &spawn, 0, 0x2A, 0, 0, -1, alpha, owner);
             if (g->emit[ee.index] != NULL) {
                 memcpy(g->emit[ee.index] + 0x170, &ee, 0x18);
             }
@@ -309,7 +309,7 @@ void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
     shake.unk4 = 8;
     shake.unk6 = -1;
     func_151D8E18(&shake, 0, alpha, owner);
-    func_15160A58(obj, 1, &D_800A2090, 3, 0x46, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, alpha, owner);
+    light_create_obj_joint(obj, 1, &D_800A2090, 3, 0x46, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, alpha, owner);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150F9BB0.s")
@@ -458,7 +458,7 @@ typedef struct {
     /* 0x44 */ f32 u44;
 } RingSpecFA520;
 
-/* func_151307F0's particle request (same layout as game_2062D0's func_151D9014 request). */
+/* func_151307F0's particle request (same layout as game_2062D0's impact_dust_cloud_spawn request). */
 typedef struct {
     /* 0x00 */ s32 handlers;
     /* 0x04 */ s32 u04;
@@ -715,7 +715,7 @@ void func_150FB06C(u8 *arg0) {
 
 void func_150FB264(struct102 *arg0, s32 arg1, u8 arg2) {
     if ((arg2 == 0x4E) || (arg2 == 0x4F)) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 

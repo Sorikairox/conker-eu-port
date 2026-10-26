@@ -33,7 +33,7 @@ typedef struct {
     u8 b;
 } Ba4b0;
 extern s8 D_800E0FFE[];
-u8 *func_1513B5E0(Sa4b0 *, s32, s32, u8, s32);
+u8 *mesh_effect_spawn(Sa4b0 *, s32, s32, u8, s32);
 u8 *func_151BA4B0(u8 *arg0, u8 arg1, s32 arg2)
 {
   u8 *ret;
@@ -86,7 +86,7 @@ u8 *func_151BA4B0(u8 *arg0, u8 arg1, s32 arg2)
   s.u1C = 0x80;
   s.u20 = 0x20;
   s.u38 = 2;
-  ret = func_1513B5E0(&s, 1, 8, arg1, arg2);
+  ret = mesh_effect_spawn(&s, 1, 8, arg1, arg2);
   if (ret != 0)
   {
     memcpy((ret + (*((s32 *) (ret + 0x50)))) + ((0, 0xF8)), &b, 8); // fakematch: comma expression (permuter) gives addu a0,v0,t9
@@ -98,9 +98,9 @@ u8 *func_151BA4B0(u8 *arg0, u8 arg1, s32 arg2)
 extern u8 D_800DA130[];
 extern u8 *D_800CCA08;
 
-// object_screen_uv_project: D_80089FC8 kind-3 handler (s32 (u8 *, s32), called by func_1513B83C; same scheme as
+// object_screen_uv_project: D_80089FC8 kind-3 handler (s32 (u8 *, s32), called by mesh_effect_draw; same scheme as
 // sky_dome_project_uv) of a 20-vertex record rec attached to an object (rec + +0x50 + 0xF8 = {obj, obj id}) for
-// player view `slot`: releases the record (func_1516972C) when the object is gone or replaced; returns 0 (not
+// player view `slot`: releases the record (node_destroy) when the object is gone or replaced; returns 0 (not
 // drawn) when the object has no matrix, is hidden ((+0x74 & 0xF) == 0xF) or is the object this view looks from
 // (+0x318 / +0x31C rider check when D_800BE616, else D_800CCA08 / D_800CCA0C). Otherwise copies the object's
 // matrix (+0x1D4 + 0x40, fixed point when D_800C42B0), with its fourth column set to (0, 0, 0, 1), into this frame's Mtx (rec +0x78 +
@@ -126,7 +126,7 @@ s32 func_151BA634(u8 *rec, s32 slot) {
     p = rec + *(s32 *) (rec + 0x50) + 0xF8;
     obj = *(u8 **) p;
     if (*(s32 *) obj == 0 || p[4] != obj[0x3B]) {
-        func_1516972C((struct102 *) rec);
+        node_destroy((struct102 *) rec);
     }
     mtx = *(u8 **) (obj + 0x1D4);
     if (mtx == NULL) {
@@ -196,7 +196,7 @@ void func_151BAA18(u8 *arg0, s32 arg1, u8 arg2)
   {
     if ((t == ((s32 *)arg1)[0]) || (((u8 *) t)[0x3B] == ((u8 *) arg1)[4]))
     {
-      func_1516972C((struct102 *)arg0);
+      node_destroy((struct102 *)arg0);
     }
   }
   else
@@ -970,7 +970,7 @@ void func_151BC494(u8 *arg0, u8 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    func_151602C0(sp48, sp3C, (func_150ADA20() % 21U) + 0x1E, 0xFF, 0x61, 0x36, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 21U) + 0x1E, 0xFF, 0x61, 0x36, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 #ifdef NON_MATCHING
@@ -989,18 +989,18 @@ void func_151BC56C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     func_150E856C((sp3C * 75.0f) + 75.0f, ((sp40 % 56U) + 0xC8) & 0xFF, arg0, arg1, (func_150ADA20() % 205U) + 0x12B, 1, 1, 0, 0, 0, (s32) arg2, 0);
 }
 
-struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF);
+struct225 *light_create_obj_beam(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF);
 extern struct17 D_800AAB40;
 extern struct17 D_800AAB4C;
 
 void func_151BC624(struct127 *arg0) {
     if (arg0 != NULL) {
-        func_15160CDC(arg0, 1, &D_800AAB40, &D_800AAB4C, 0.017699f, 2, 300, 255, 255, 255, 255, 1, 0, 0, 255, 1);
+        light_create_obj_beam(arg0, 1, &D_800AAB40, &D_800AAB4C, 0.017699f, 2, 300, 255, 255, 255, 255, 1, 0, 0, 255, 1);
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_15163414(s8 *, u8 *, u8 *, u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 light_create_track_ptrs(s8 *, u8 *, u8 *, u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern f32 D_800DCE54;
 
 void func_151BC6B4(u8 *arg0, u8 arg1, s32 arg2) {
@@ -1066,7 +1066,7 @@ void func_151BC6B4(u8 *arg0, u8 arg1, s32 arg2) {
         sp.uB8 = arg0;
         sp.uCC = 15.0f;
         sp.uBC = (*(u8 *)((u8 *)arg0 + 0x3B));
-        temp_v0 = func_15134908((struct_eu_EF410 *) &sp.uC0, 8, arg1, arg2);
+        temp_v0 = point_emitter_spawn((struct_eu_EF410 *) &sp.uC0, 8, arg1, arg2);
         if (temp_v0 != 0) {
             memcpy(temp_v0 + 0x40, &sp.uB8, 8);
         }
@@ -1100,7 +1100,7 @@ void func_151BC6B4(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u70 = (*(u8 *)((u8 *)arg0 + 0x3B));
     sp.u62 = 0x12C;
     sp.u64 = 0x1F;
-    temp_v0_3 = func_15163414(&sp.u60, sp5C, sp58, sp54, 0, 0, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, (s32) arg1, arg2);
+    temp_v0_3 = light_create_track_ptrs(&sp.u60, sp5C, sp58, sp54, 0, 0, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, (s32) arg1, arg2);
     if (temp_v0_3 != 0) {
         memcpy(temp_v0_3 + 0x28, &sp.u6C, 8);
     }
@@ -1153,7 +1153,7 @@ void func_151BCB54(void *arg0, void *arg1, u8 arg2) {
     cur = *(s32 *)((u8 *)arg0 + 0x40);
     if (arg2 == 0) {
         if (cur == (*(s32 *)((u8 *)arg1 + 0)) || ((*(u8 *)((u8 *)arg1 + 4)) == (*(u8 *)((u8 *)arg0 + 0x44)))) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         temp_v0 = (u8 *)arg0 + 0x40;
@@ -1330,7 +1330,7 @@ s32 func_151BCD44(u8 *arg0) {
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 Gfx *func_15142E24(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2);
+Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 u8 *func_15142FBC(Gfx *, s32, s32, u8 *);
 f32 sqrtf(f32);
@@ -1394,7 +1394,7 @@ s32 func_151BD040(u8 *obj, s32 gfx, s16 arg2) {
     flag = 1;
     g = func_15142E24((Gfx *) gfx, (s32) D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
     g = func_15142C10(g, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-    g = func_1513F4E4(g, 0x4E, &flag);
+    g = gfx_set_combine_mode(g, 0x4E, &flag);
     g = func_15142B7C(g, 0x200005, 0x1F0600);
     g = (Gfx *) func_15142FBC(g, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6], &flag);
 
@@ -1583,7 +1583,7 @@ typedef struct {
     s8 u38;
     s8 u39;
 } Sd8a8;
-s32 func_15134DAC(Sd8a8 *, s32, ...);
+s32 bone_emitter_spawn(Sd8a8 *, s32, ...);
 void func_151BD8A8(u8 *arg0, s32 arg1, s32 arg2)
 {
   Sd8a8 s;
@@ -1612,14 +1612,14 @@ void func_151BD8A8(u8 *arg0, s32 arg1, s32 arg2)
     s.u1C = -24.0f;
     s.u20 = -182.0f;
     s.u34 = 0.30061f;
-    v = func_15134DAC(&s, 2);
+    v = bone_emitter_spawn(&s, 2);
     if (v != 0)
     {
       memcpy((void *) (v + 0x80), &z, 2);
     }
     s.uC = -s.uC;
     s.u18 = -s.u18;
-    v = func_15134DAC(&s, 2);
+    v = bone_emitter_spawn(&s, 2);
     if (v != 0)
     {
       memcpy((void *) (v + 0x80), &z, 2);
@@ -1797,7 +1797,7 @@ void func_151BDDA4(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-/* func_1513D2F0's particle spec and func_151407D0's spawn block (0x58 bytes). */
+/* effect3d_spawn_full's particle spec and particle_emitter_spawn's spawn block (0x58 bytes). */
 typedef struct {
     /* 0x00 */ u8 texture;
     /* 0x01 */ u8 u01;
@@ -1821,7 +1821,7 @@ typedef struct {
     /* 0x4D */ u8 pad4D[0xB];
 } PartSpecBDDD8;
 
-/* func_151407D0's emitter block (filled up to 0x5A; the call passes size 0x78). */
+/* particle_emitter_spawn's emitter block (filled up to 0x5A; the call passes size 0x78). */
 typedef struct {
     /* 0x00 */ f32 u00;
     /* 0x04 */ f32 u04;
@@ -1886,21 +1886,21 @@ typedef struct {
 } GroupBDDD8;
 
 struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
-void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
+void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 func_150ADA20(void);
 extern s32 D_800A4AA0;
 
-// object_aura_burst_spawn: the func_150F9BB0 (object_aura_spawn) effect without its func_151D8E18 / func_15160A58 calls: creates
+// object_aura_burst_spawn: the func_150F9BB0 (object_aura_spawn) effect without its func_151D8E18 / light_create_obj_joint calls: creates
 // a group object (func_15149130 kind 300, flag 0, 0x18-byte block {obj, obj+0x3B}) and, when it exists, two particles
-// (func_1513D2F0 texture 0x5F, D_800A4AA0 list, random blend 1 / 3; +0x110 gets index, object, room, group, mid height
-// (obj +0x14C + +0x150) / 2 and this function's constants) and two emitters (func_151407D0 texture 0x60, 0x2A; +0x170
+// (effect3d_spawn_full texture 0x5F, D_800A4AA0 list, random blend 1 / 3; +0x110 gets index, object, room, group, mid height
+// (obj +0x14C + +0x150) / 2 and this function's constants) and two emitters (particle_emitter_spawn texture 0x60, 0x2A; +0x170
 // gets index, object, room, group); the group records them at +0x30 / +0x38. `alpha` / `owner` go to every spawner.
 s32 func_151BDDD8(u8 *obj, u8 alpha, s32 owner) {
     EmitExtraBDDD8 ee;
     PartSpecBDDD8 spawn;
     struct {
-        EmitBDDD8 emit; /* func_151407D0 reads 0x78 bytes: on into spec */
+        EmitBDDD8 emit; /* particle_emitter_spawn reads 0x78 bytes: on into spec */
         PartSpecBDDD8 spec;
         PartExtraBDDD8 extra; /* kept next to spec as in the asm frame */
     } fr;
@@ -1970,7 +1970,7 @@ s32 func_151BDDD8(u8 *obj, u8 alpha, s32 owner) {
         fr.spec.u47 = 7;
         fr.spec.u48 = 0;
         for (fr.extra.index = 0; fr.extra.index < 2; fr.extra.index++) {
-            g->part[fr.extra.index] = func_1513D2F0(&fr.spec, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
+            g->part[fr.extra.index] = effect3d_spawn_full(&fr.spec, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
                                               ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, 0x5C,
                                               alpha, owner);
             if (g->part[fr.extra.index] != NULL) {
@@ -2041,7 +2041,7 @@ s32 func_151BDDD8(u8 *obj, u8 alpha, s32 owner) {
         spawn.u48 = 0;
         spawn.u4C = 0xFF;
         for (ee.index = 0; ee.index < 2; ee.index++) {
-            g->emit[ee.index] = func_151407D0(&fr.emit, 0x78, &spawn, 0, 0x2A, 0, 0, -1, alpha, owner);
+            g->emit[ee.index] = particle_emitter_spawn(&fr.emit, 0x78, &spawn, 0, 0x2A, 0, 0, -1, alpha, owner);
             if (g->emit[ee.index] != NULL) {
                 memcpy(g->emit[ee.index] + 0x170, (u8 *)&ee, 0x18);
             }
@@ -2159,8 +2159,8 @@ typedef struct {
     s32 a;
     u8 b;
 } K_E65C;
-void func_1516972C(struct102 *arg0);
-s32 func_15169850(s32, u8, s32, s32, s32);
+void node_destroy(struct102 *arg0);
+s32 node_handle_link_message(s32, u8, s32, s32, s32);
 void func_151BE65C(struct102 *arg0, K_E65C *arg1, u8 arg2) {
     s32 t;
     K_E65C *p;
@@ -2174,21 +2174,21 @@ void func_151BE65C(struct102 *arg0, K_E65C *arg1, u8 arg2) {
         if (1) { // fakematch: empty block keeps the first compare in its own basic block
         }
         if (t || (*pa1)->b == p->b) {
-            func_1516972C(*pa0);
+            node_destroy(*pa0);
         }
     } else {
         p = (K_E65C *)((u8 *)*pa0 + 0x28);
-        func_15169850((s32)*pa1, *pa2, (s32)p, (s32)p + 4, (s32)*pa0);
+        node_handle_link_message((s32)*pa1, *pa2, (s32)p, (s32)p + 4, (s32)*pa0);
     }
 }
 
 void func_151BE6E8(u8 *arg0)
 {
   u8 *v = arg0 + 0x28; // fakematch: v defined first so IDO keeps it as a separate pointer (not folded into offsets)
-  if (*(s32 *)(arg0 + 0x30) != 0) { func_1516972C(*(struct102 **)(arg0 + 0x30)); }
-  if (*(struct102 **)(v + 0xC)) { func_1516972C(*(struct102 **)(v + 0xC)); } // fakematch: pointer-typed test gives one load (s32 test double-loads like line above)
-  if (*(struct102 **)(v + 0x10)) { func_1516972C(*(struct102 **)(v + 0x10)); }
-  if (*(struct102 **)(v + 0x14)) { func_1516972C(*(struct102 **)(v + 0x14)); }
+  if (*(s32 *)(arg0 + 0x30) != 0) { node_destroy(*(struct102 **)(arg0 + 0x30)); }
+  if (*(struct102 **)(v + 0xC)) { node_destroy(*(struct102 **)(v + 0xC)); } // fakematch: pointer-typed test gives one load (s32 test double-loads like line above)
+  if (*(struct102 **)(v + 0x10)) { node_destroy(*(struct102 **)(v + 0x10)); }
+  if (*(struct102 **)(v + 0x14)) { node_destroy(*(struct102 **)(v + 0x14)); }
 }
 
 void func_151BE768(struct260 * arg0) {
@@ -2232,7 +2232,7 @@ s32 func_151BE7C0(u8 *arg0) {
     return 1;
 }
 
-s32 func_1513FAB4(s32, s32, f32 *, s16);
+s32 beam_quad_build_cam(s32, s32, f32 *, s16);
 
 s32 func_151BEA68(struct102 *arg0, s16 arg1) {
     u8 *temp_v0;
@@ -2241,7 +2241,7 @@ s32 func_151BEA68(struct102 *arg0, s16 arg1) {
 
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0x110));
     if (((*(u8 *)((u8 *)arg0 + 0x114)) != (*(u8 *)((u8 *)temp_v0 + 0x3B))) || (temp_v0_2 = (u8 *)arg0 + 0x110, ((*(s32 *)((u8 *)temp_v0 + 0)) == 0))) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
         return 0;
     }
     if (!((*(u8 *)((u8 *)temp_v0_2 + 0x58)) & 1)) {
@@ -2249,7 +2249,7 @@ s32 func_151BEA68(struct102 *arg0, s16 arg1) {
     }
     sp20[0] = (*(f32 *)((u8 *)temp_v0_2 + 0x54)) * (*(f32 *)((u8 *)temp_v0_2 + 0x40));
     sp20[1] = (*(f32 *)((u8 *)temp_v0_2 + 0x54)) * (*(f32 *)((u8 *)temp_v0_2 + 0x44));
-    return func_1513FAB4(arg0, 0, sp20, arg1);
+    return beam_quad_build_cam(arg0, 0, sp20, arg1);
 }
 
 void func_151BEB08(struct102 *arg0, u8 *arg1, u8 arg2) {
@@ -2270,13 +2270,13 @@ void func_151BEB08(struct102 *arg0, u8 *arg1, u8 arg2) {
     } else if (arg2 == 0) {
         temp_v1 = *(s32 *)(arg1 + 0);
         if (temp_v1 == *(s32 *)(temp_v0 + 0) || *(u8 *)(temp_v0 + 4) == *(u8 *)(arg1 + 4)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
 
 void func_151BEBB4(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)(arg0 + 0x110), (s32)(arg0 + 0x114), (s32)arg0);
+    node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x110), (s32)(arg0 + 0x114), (s32)arg0);
 }
 
 void func_151BEBF4(u8 *arg0) {
@@ -2292,12 +2292,12 @@ void func_151BEBF4(u8 *arg0) {
 
 void func_151BEC24(struct210 * arg0) {
     func_151BEBF4(arg0);
-    func_1513CA6C(arg0);
+    effect3d_retire(arg0);
 }
 
 void func_151BEC50(struct210 * arg0) {
     func_151BEBF4(arg0);
-    func_1513CAA0(arg0);
+    effect3d_free(arg0);
 }
 
 typedef struct { s32 a[4]; } V4_151BEC7C;
@@ -2318,7 +2318,7 @@ s32 func_151BEC7C(u8 *arg0) {
 }
 
 void func_151BED38(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)(arg0 + 0x180), (s32)(arg0 + 0x184), (s32)arg0);
+    node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x180), (s32)(arg0 + 0x184), (s32)arg0);
 }
 
 void func_151BED78(u8 *arg0) {
@@ -2334,10 +2334,10 @@ void func_151BED78(u8 *arg0) {
 
 void func_151BEDA8(struct210 * arg0) {
     func_151BED78(arg0);
-    func_151411A4(arg0);
+    effect_free_buffers_retire(arg0);
 }
 
 void func_151BEDD4(struct210 * arg0) {
     func_151BED78(arg0);
-    func_151411C4(arg0);
+    effect_free_buffers_delete(arg0);
 }

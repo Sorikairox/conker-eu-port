@@ -3,7 +3,7 @@ s32 memcpy(s32, s32, s32);
 extern s32 D_800DD608;
 extern s32 D_800DD618;
 
-u8 *func_151DAE28(u8 *arg0, s16 arg1) {
+u8 *impact_splash_ring_verts(u8 *arg0, s16 arg1) {
     u8 *temp_v0;
     s32 temp_t0;
     s32 temp_f8;

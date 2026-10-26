@@ -31,7 +31,7 @@
 \#^    header.unk1 = 7;$#s/7/6/
 \#^    header.unk2 = 300;$#s/300/301/
 \#^    header.unk4 = 0x12;$#s/0x12/0x11/
-\#^    obj = func_1516037C(&header, arg0#s/arg2, arg3/arg3, arg2/
+\#^    obj = light_ctrl_alloc(&header, arg0#s/arg2, arg3/arg3, arg2/
 \#^    memcpy(obj + 0x18, &link#s/0x18/0x1C/
 \#^    emit.range\[1\] = #s/43.3f/30.2f/
 \#^    emit.range\[2\] = #s/30.2f/43.3f/

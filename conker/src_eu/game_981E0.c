@@ -2480,7 +2480,7 @@ void func_15070224(s32 arg0) {
     header2.unk0 = D_800D154C->x_position;
     header2.unk4 = D_800D154C->y_position;
     header2.unk8 = D_800D154C->z_position;
-    func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    light_create_with_ctrl(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 #ifdef NON_MATCHING
 void func_1506CE6C(void); // P259: reads D_800D154C itself (the asm ignores a0 / a1)
@@ -2823,7 +2823,7 @@ void func_15070D24(s32 arg0) {
         header2.unk0 = pos[0];
         header2.unk4 = pos[1];
         header2.unk8 = pos[2];
-        func_151602C0(&header, &header2, (func_150ADA20() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+        light_create_with_ctrl(&header, &header2, (func_150ADA20() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
     }
 }
 void func_151D58E4(s32 arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
@@ -2852,7 +2852,7 @@ void func_15070F60(u8 arg0) {
         header2.unk0 = pos[0];
         header2.unk4 = pos[1];
         header2.unk8 = pos[2];
-        func_151602C0(&header, &header2, (func_150ADA20() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+        light_create_with_ctrl(&header, &header2, (func_150ADA20() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
         func_151D5404((struct17 *)pos, 506.0f, 1013.0f, 0.0009871668880805373f, 0xF, 0x14, 0xFF, 0);
         func_151D58E4((s32)pos, 506.0f, 1013.0f, 0.0009871668880805373f, 5, 0xFF, 0);
     }
@@ -2971,7 +2971,7 @@ void func_15071764(s32 arg0) {
     if (sp34 != NULL) {
         func_150F0BEC(sp34);
         func_150F10D4(sp34);
-        func_15161E24(sp34, 1, 2, 300, 70, 255, 130, 0, 255, 1);
+        light_create_obj_follow(sp34, 1, 2, 300, 70, 255, 130, 0, 255, 1);
     }
 }
 
@@ -3056,10 +3056,10 @@ void func_15071A64(s32 arg0) {
         (D_800CC2D0[0].stunned != 0) && (D_800CC2D0[0].health > 0)) {
         func_1504715C(sp28, D_800D154C);
         func_15143134(D_80099F7C, sp4C, (u8 *)D_800D154C->unk1D4 + 0x3C0);
-        func_151DC484(sp4C, sp28, 0, 0xFF, 1);
+        impact_blast_spawn_small(sp4C, sp28, 0, 0xFF, 1);
     }
 }
-void func_151DC260(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
+void impact_blast_spawn_large(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_15152700(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7);
 extern f32 D_80099F88[3][3];
 extern u8 D_80099FAC[];
@@ -3092,9 +3092,9 @@ void func_15071B18(s32 arg0) {
         func_1504715C(m, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
-                func_151DC260(&pos, m, 0, 0xFF, 1);
+                impact_blast_spawn_large(&pos, m, 0, 0xFF, 1);
             } else {
-                func_151DC484(&pos, m, 0, 0xFF, 1);
+                impact_blast_spawn_small(&pos, m, 0, 0xFF, 1);
             }
         }
         if (func_150ADA20() & 1) {
@@ -3148,7 +3148,7 @@ void func_15071D78(void) {
 }
 
 void func_15071DC8(void) {
-    func_15141A7C(D_800D154C, D_800D1580);
+    obj_interaction_update(D_800D154C, D_800D1580);
 }
 
 void func_15071DF4(void) {

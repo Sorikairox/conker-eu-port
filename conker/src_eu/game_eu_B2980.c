@@ -11,7 +11,7 @@ void func_15005818(u8 *arg0, u8 *arg1, f32 *arg2);
 void func_1505D6F0(u8 *arg0, s32 arg1);
 f32 func_1506AD30(struct127 *arg0, f32 arg1, s32 arg2);
 s32 func_1507C7C0(struct127 *, u16 *, u16 *, u16 *);
-void func_15169040(s32 arg0, u8 arg1);
+void node_broadcast_all(s32 arg0, u8 arg1);
 #endif
 
 typedef struct {
@@ -294,7 +294,7 @@ void func_150858A0(void *arg0, s32 arg1, s32 arg2) {
     }
     msg.rec = rec;
     msg.b = rec[0x3B];
-    func_15169040((s32)&msg, 4);
+    node_broadcast_all((s32)&msg, 4);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150858A0.s")

@@ -286,7 +286,7 @@ s32 func_151D75B0(u8 *rec) {
 
 void func_151D767C(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *temp = *(u8 **)(arg0 + 0x48);
-    func_15169850(arg1, arg2, temp, temp + 4, arg0);
+    node_handle_link_message(arg1, arg2, temp, temp + 4, arg0);
 }
 
 extern s32 D_80083AD0;

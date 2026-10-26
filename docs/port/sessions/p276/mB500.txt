@@ -4,7 +4,7 @@
 \#^    yaw = \*(f32 \*)#s/0.7111111f/0.75f/
 \#^    dist = func_150ADA68() \* 1903.0f + 107.0f;$#s/1903/1904/
 \#^    dist = func_150ADA68() \* 1903.0f + 107.0f;$#s/107/108/
-\#^    s = func_151423D8((u8) (angle - 0x40));$#s/0x40/0x41/
+\#^    s = angle_byte_cos((u8) (angle - 0x40));$#s/0x40/0x41/
 \#^    rec\[0\] = pos\[0\] - dist \* s;$#s/\* s/* c/
 \#^    rec\[2\] = pos\[2\] - dist \* c;$#s/- dist/+ dist/
 \#^    q.u24 = 0;$#s/= 0/= 1/

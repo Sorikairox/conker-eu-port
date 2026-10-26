@@ -15,7 +15,7 @@ extern f32 D_80096860;
 void func_150E8854(void);
 void func_1510F800(s32);
 s32 func_15132FBC(f32 *, s32, s32, s32, s32, s32);
-u8 *func_1513B5E0(s8 *, s32, s32, s32, s32);
+u8 *mesh_effect_spawn(s8 *, s32, s32, s32, s32);
 s32 memcpy(u8 *, f32 *, s32);
 extern s32 D_80096800;
 extern u8 D_80096848;
@@ -253,7 +253,7 @@ void func_15010A60(void) {
             memcpy(temp_v0 + 0x170, &sp.uD0, 0x18);
         }
         if (*var_s2 != 0) {
-            temp_v0_2 = func_1513B5E0(&sp.u114, 0, 0x2C, 0xFF, 1);
+            temp_v0_2 = mesh_effect_spawn(&sp.u114, 0, 0x2C, 0xFF, 1);
             if (temp_v0_2 != NULL) {
                 memcpy(temp_v0_2 + (*(s32 *)((u8 *)temp_v0_2 + 0x50)) + 0xF8, &sp.uE8, 0x2C);
             }
@@ -265,7 +265,7 @@ void func_15010A60(void) {
             sp.uC2 = 0x12C;
             sp.uC4 = 0;
             sp.uBC = (s32) (*(f32 *)((u8 *)var_s1 + 8));
-            temp_v0_3 = func_151602C0((Header *) &sp.uC0, (Header2 *) &sp.uB4, 0xC, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 4, 0xFFU, 1);
+            temp_v0_3 = light_create_with_ctrl((Header *) &sp.uC0, (Header2 *) &sp.uB4, 0xC, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 4, 0xFFU, 1);
             if (temp_v0_3 != NULL) {
                 memcpy(((struct225 *)((u8 *)temp_v0_3 + 0x18)), (f32 *) &sp.uB0, 4);
             }

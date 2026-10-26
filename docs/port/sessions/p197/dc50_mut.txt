@@ -55,11 +55,11 @@ s/tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58/tpl->kind, tpl->b3A, 0, tpl->b3A, b,
 s/memcpy(rec + 0x110, (u8 \*\*) \&blk, 0x58);/memcpy(rec + 0x110, (u8 **) \&blk, 0x54);/
 s/|= 0x40000000;/|= 0x20000000;/
 s/                                    case 1: \/\* sphere \*\//                                    case 3:/
-s/cb = func_151423D8((u8) (c - 0x40));/cb = func_151423D8((u8) (c + 0x40));/
+s/cb = angle_byte_cos((u8) (c - 0x40));/cb = angle_byte_cos((u8) (c + 0x40));/
 s/head->off\[0\] = r \* sb \* ca;/head->off[0] = r * sb * sa;/
 s/head->off\[1\] = -r \* cb;/head->off[1] = r * cb;/
 s/head->off\[1\] = func_150ADA68() \* cfg->height;/head->off[1] = func_150ADA68() * cfg->radius;/
-s/head->off\[2\] = -func_151423D8((u8) (a - 0x40)) \* r;/head->off[2] = func_151423D8((u8) (a - 0x40)) * r;/
+s/head->off\[2\] = -angle_byte_cos((u8) (a - 0x40)) \* r;/head->off[2] = angle_byte_cos((u8) (a - 0x40)) * r;/
 s/e->pos\[2\] + head->off\[2\];/e->pos[2] + head->off[1];/
 s/idx = head - e->slots;/idx = head - e->slots + 1;/
 s/                                obj = head->obj;/                                obj = rec + 4;/

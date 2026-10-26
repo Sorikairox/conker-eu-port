@@ -14,7 +14,7 @@ void func_15019F20(void);
 #endif
 
 
-void* func_151674F8(void *arg0, s32 arg1, s16 arg2, s32 arg3);
+void* node_render_layers_draw(void *arg0, s32 arg1, s16 arg2, s32 arg3);
 
 
 void func_150186D0(void) {
@@ -56,7 +56,7 @@ extern s32 D_800BEFC4;
 extern u8 D_800BEEE2;
 extern Vp D_800D9FB0[][2];
 void func_10004074(s32);
-void func_151412BC(void);
+void effect_sample_zbuffer_cells(void);
 void func_1510B930(void);
 void func_1517D534(void);
 void func_151E5928(void);
@@ -92,7 +92,7 @@ s32 func_1501878C(void) {
         case 2:
             func_1517E71C();
             if (D_800DCE20 != 0) {
-                func_151412BC();
+                effect_sample_zbuffer_cells();
             }
             D_800BEEC8--;
             if (D_800BEA35 == 0 || D_800BEEC8 != 0) {
@@ -135,7 +135,7 @@ s32 func_1501878C(void) {
 
     GDL = func_1501A680(GDL);
     func_1515DC0C();
-    func_15167310();
+    node_lists_run_view_update();
     for (i = 0; i <= D_80082FA0; i++) {
         D_80082FA4 = D_800BEA50[i];
         func_15018F80(D_80082FA4);
@@ -187,7 +187,7 @@ s32 func_1501878C(void) {
     func_1502E764();
     func_15189688(0);
     func_15084E80();
-    func_15125628();
+    camera_tick_timers();
     gDPFullSync(GDL++);
     gSPEndDisplayList(GDL++);
     func_10004674();
@@ -247,8 +247,8 @@ void *func_15018E88(void *arg0, s16 arg1) {
     if (D_800BE616 == 0) {
         func_1517D7B0(&arg0, 1);
     }
-    arg0 = func_151674F8(arg0, 0, arg1, 0);
-    arg0 = func_151674F8(arg0, 0, arg1, 1);
+    arg0 = node_render_layers_draw(arg0, 0, arg1, 0);
+    arg0 = node_render_layers_draw(arg0, 0, arg1, 1);
     return func_15174AA4(arg0, D_800BE9F0, arg1);
 }
 #else
@@ -256,16 +256,16 @@ void func_15018E88(void *arg0, s16 arg1) {
     if (D_800BE616 == 0) {
         func_1517D7B0(&arg0, 1);
     }
-    arg0 = func_151674F8(arg0, 0, arg1, 0);
-    arg0 = func_151674F8(arg0, 0, arg1, 1);
+    arg0 = node_render_layers_draw(arg0, 0, arg1, 0);
+    arg0 = node_render_layers_draw(arg0, 0, arg1, 1);
     func_15174AA4(arg0, D_800BE9F0, arg1);
 }
 #endif
 
 void *func_15018F08(void *arg0, s16 arg1) {
     arg0 = func_15174B48(arg0, D_800BE9F0, arg1);
-    arg0 = func_151674F8(arg0, 1, arg1, 0);
-    arg0 = func_151674F8(arg0, 1, arg1, 1);
+    arg0 = node_render_layers_draw(arg0, 1, arg1, 0);
+    arg0 = node_render_layers_draw(arg0, 1, arg1, 1);
 
     func_1517D7B0(&arg0, 2);
 
@@ -289,7 +289,7 @@ void func_1501905C(void) {
     *D_800BE728 = func_1501BBB8();
     func_15019F20();
     if ((D_800BEAC1 != 0) && (D_800BEAC0 == 0)) {
-        func_15169040(0, 0x47);
+        node_broadcast_all(0, 0x47);
     }
     func_1501C1B0();
     func_1501BB20();
@@ -341,11 +341,11 @@ void func_15114208(void);
 void func_151143D4(s32 arg0);
 void func_15114708(void);
 void func_1511FC20(s32 arg0);
-void func_15122AE0(void);
+void camera_update_all(void);
 void func_1515DC38(void);
-void func_1516706C(void);
-void func_151670C0(void);
-void func_151671E8(void);
+void node_run_global_hooks(void);
+void node_lists_run_update(void);
+void node_lists_run_update2(void);
 void func_15173E34(s32 arg0);
 void func_15174F68(s32 arg0, s32 arg1);
 void func_15178004(void);
@@ -386,7 +386,7 @@ s32 func_15019130(void) {
     if (D_800D27C9 != 0) {
         func_15088130();
     }
-    func_15122AE0();
+    camera_update_all();
     func_1504ADD0();
     func_1510F800(0);
     for (i = 0; i <= D_80082FA0; i++) {
@@ -402,8 +402,8 @@ s32 func_15019130(void) {
     func_1511FC20(D_800BE9C0);
     func_151890E4(0);
     if (D_800BEAC0 == 0) {
-        func_1516706C();
-        func_151671E8();
+        node_run_global_hooks();
+        node_lists_run_update2();
     }
     func_1502C1D4();
     if (D_800BE616 == 0) {
@@ -419,7 +419,7 @@ s32 func_15019130(void) {
     }
     if (D_800BEAC0 == 0) {
         func_15184298();
-        func_151670C0();
+        node_lists_run_update();
         func_15178004();
     }
     if (D_800BEAC0 == 0) {
@@ -444,7 +444,7 @@ s32 func_15019130(void) {
 #endif
 void func_15019414(void) {
     if (D_800BEAC0 == 0) {
-        func_15167010();
+        node_types_run_frame_hooks();
     }
     func_1517ABB0();
     if (D_800BE616 == 0) {
@@ -548,8 +548,8 @@ Gfx *func_150195A0(Gfx *arg0, s16 arg1) {
     if (D_800BE575 == 2) {
         gdl = (Gfx *)func_151D6D28((u8 *)gdl);
     }
-    gdl = func_151674F8(gdl, 6, player, 0);
-    gdl = func_151674F8(gdl, 6, player, 1);
+    gdl = node_render_layers_draw(gdl, 6, player, 0);
+    gdl = node_render_layers_draw(gdl, 6, player, 1);
     gdl = func_15186D04(gdl, player);
     gdl = (Gfx *)func_1501A490((s32)gdl, player, 0, 0, 0, 0);
     gdl = func_1502BDC0(gdl, 1, player);
@@ -569,8 +569,8 @@ Gfx *func_150195A0(Gfx *arg0, s16 arg1) {
     gdl = func_15189270(gdl, 0, player);
     gdl = func_15189270(gdl, 1, player);
     gdl = func_1502BDC0(gdl, 2, player);
-    gdl = func_151674F8(gdl, 2, player, 0);
-    gdl = func_151674F8(gdl, 2, player, 1);
+    gdl = node_render_layers_draw(gdl, 2, player, 0);
+    gdl = node_render_layers_draw(gdl, 2, player, 1);
     return gdl;
 }
 #else
@@ -636,7 +636,7 @@ Gfx *func_150198FC(u8 *arg0) {
     if ((D_800BEAC0 == 0) && (D_800BEAC1 == 0)) {
         var_s0_4 = func_1508FD38(temp_v0);
     }
-    return (Gfx *)func_15096D44(func_151674F8(func_151674F8(var_s0_4, 3, 0, 0), 3, 0, 1));
+    return (Gfx *)func_15096D44(node_render_layers_draw(node_render_layers_draw(var_s0_4, 3, 0, 0), 3, 0, 1));
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150198FC.s")
@@ -656,8 +656,8 @@ Gfx *func_15019BB8(Gfx *gdl, s32 arg1) {
     if ((D_800D18A0 & (1 << arg1)) || (D_800D1CC2 & (1 << arg1))) {
         gdl = func_1507DB6C(gdl, arg1);
     }
-    gdl = func_151674F8(gdl, 4, (s16)arg1, 0);
-    return func_151674F8(gdl, 4, (s16)arg1, 1);
+    gdl = node_render_layers_draw(gdl, 4, (s16)arg1, 0);
+    return node_render_layers_draw(gdl, 4, (s16)arg1, 1);
 }
 // NON-MATCHING: need to figure out what is going on
 // void func_15019BB8(struct14 *arg0, s32 arg1) {
@@ -677,8 +677,8 @@ Gfx *func_15019BB8(Gfx *gdl, s32 arg1) {
 //     if (((D_800D18A0 & (1 << arg1)) != 0) || ( ((D_800D18A2 & (1 << arg1)) != 0))) {
 //         temp_v0 = func_1507DB6C(temp_v0, arg1);
 //     }
-//     temp_v0 = func_151674F8(temp_v0, 4, sp2A, 0);
-//     func_151674F8(temp_v0, 4, sp2A, 1);
+//     temp_v0 = node_render_layers_draw(temp_v0, 4, sp2A, 0);
+//     node_render_layers_draw(temp_v0, 4, sp2A, 1);
 // }
 
 #ifdef NON_MATCHING
@@ -704,8 +704,8 @@ Gfx *func_15019CC8(Gfx *arg0, s32 arg1) {
     if (D_800BE9F0 == 0x1D) {
         gdl = func_1502BDC0(gdl, 6, player);
     }
-    gdl = func_151674F8(gdl, 5, 0, 0);
-    gdl = func_151674F8(gdl, 5, 0, 1);
+    gdl = node_render_layers_draw(gdl, 5, 0, 0);
+    gdl = node_render_layers_draw(gdl, 5, 0, 1);
     gdl[0].words.w0 = 0xDA380007;
     gdl[0].words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 64 + 0x100;
     gdl[1].words.w0 = 0xDA380005;

@@ -197,7 +197,7 @@ void func_150ECFE8(u8 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 ar
 }
 
 void func_150ED0CC(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);

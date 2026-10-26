@@ -1510,7 +1510,7 @@ void func_15114208(void) {
                 *(void **)((u8 *)e + 0x94) = func_1510DEF0(1, e, 0, 1, 0);
             }
         } else if (*(struct102 **)((u8 *)e + 0x94) != NULL) {
-            func_1516972C(*(struct102 **)((u8 *)e + 0x94));
+            node_destroy(*(struct102 **)((u8 *)e + 0x94));
             *(struct102 **)((u8 *)e + 0x94) = NULL;
         }
     }
@@ -1857,7 +1857,7 @@ void func_15115114(u32 arg0) {
     if (arg0 < D_800DC320) {
         p = (struct131 *)((u8 *)D_800DBEF4 + j);
         if (*(struct102 **)((u8 *)p + 0x94) != NULL) {
-            func_1516972C(*(struct102 **)((u8 *)p + 0x94));
+            node_destroy(*(struct102 **)((u8 *)p + 0x94));
             *(struct102 **)((u8 *)D_800DBEF4 + arg0 * 0xA0 + 0x94) = NULL;
             p = (struct131 *)((u8 *)D_800DBEF4 + arg0 * 0xA0);
         }

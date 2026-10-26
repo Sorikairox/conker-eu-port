@@ -21,17 +21,17 @@ void func_151220D0(u8 *arg0) {
 #ifdef NON_MATCHING
 void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_1512A390(struct108 *arg0);
-void func_15123A54(u8 *);
+void camera_update_eye_orbit(u8 *);
 void func_1512E6B0(u8 *);
 float sqrtf(float);
 
 // camera_follow_target_update: camera p (struct108). With the mode flag (*(+0x36C) bit 2) set, or without a target
 // (+0x614) or with the target straight above, it only runs func_15122EF0. Else the extra yaw +0x5DC decays by 8%,
-// +0x6C4 = 0, func_15125330 runs, and the yaw from the camera (+0x2BC / +0x2C4) to the target (heading from
+// +0x6C4 = 0, camera_calc_yaw runs, and the yaw from the camera (+0x2BC / +0x2C4) to the target (heading from
 // func_15048C30 of -dx / dist, in degrees, plus +0x5DC) wrapped into [0, 360] becomes the yaw +0x37C: directly with
 // +0x23C (rate +0x630 = 0), else eased (func_15049978: 3 / 6 with +0x84 bit 30 or 26, else 1.5 / 2; frame step
-// +0x7B4); +0x39C = yaw in radians. Skipped while +0x698 is set. Then func_1512A390 / func_15123A54 /
-// func_1512E6B0, and with +0x84 bit 30 another func_15123A54 + func_1512E6B0 with +0x190 = 30.
+// +0x7B4); +0x39C = yaw in radians. Skipped while +0x698 is set. Then func_1512A390 / camera_update_eye_orbit /
+// func_1512E6B0, and with +0x84 bit 30 another camera_update_eye_orbit + func_1512E6B0 with +0x190 = 30.
 void func_151226E0(struct108 *arg0) {
     u8 *p = (u8 *) arg0;
     f32 *target;
@@ -47,7 +47,7 @@ void func_151226E0(struct108 *arg0) {
     }
     *(f32 *) (p + 0x5DC) = *(f32 *) (p + 0x5DC) - *(f32 *) (p + 0x5DC) * 0.08f; /* D_800A3840 */
     *(f32 *) (p + 0x6C4) = 0.0f;
-    func_15125330(arg0);
+    camera_calc_yaw(arg0);
     target = *(f32 **) (p + 0x614);
     if (target == NULL) {
         func_15122EF0(p);
@@ -88,10 +88,10 @@ void func_151226E0(struct108 *arg0) {
         *(f32 *) (p + 0x39C) = *(f32 *) (p + 0x37C) * 0.0174532924f; /* D_800A384C */
     }
     func_1512A390(arg0);
-    func_15123A54(p);
+    camera_update_eye_orbit(p);
     func_1512E6B0(p);
     if (*(s32 *) (p + 0x84) & 0x40000000) {
-        func_15123A54(p);
+        camera_update_eye_orbit(p);
         *(f32 *) (p + 0x190) = 30.0f;
         func_1512E6B0(p);
     }

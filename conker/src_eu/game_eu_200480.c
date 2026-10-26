@@ -6,7 +6,7 @@
 void func_151D2C70(s16 arg0) {
     u8 *temp_v0;
 
-    temp_v0 = func_15167A68(0x3C, 1, 0x18, 0, 0xFFU, 1U);
+    temp_v0 = node_alloc(0x3C, 1, 0x18, 0, 0xFFU, 1U);
     (*(s16 *)((u8 *)temp_v0 + 0x14)) = 0;
     (*(s16 *)((u8 *)temp_v0 + 0x12)) = 0;
     (*(s16 *)((u8 *)temp_v0 + 0xE)) = 0;
@@ -51,7 +51,7 @@ void func_151D2D0C(Obj2D0C *arg0) {
         arg0->x12 -= 0x100;
     }
     if (arg0->xE >= 0x12D || arg0->xE < 0) {
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
     }
 }
 

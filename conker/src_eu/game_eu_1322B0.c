@@ -17,7 +17,7 @@ void func_15104AA0(struct108 *arg0) {
     if ((temp_a1->xz_velocity < 50.0f) && (arg0->unk3E8 == 0)) {
         temp_f0 = arg0->unk374;
         if ((0.5f * temp_f0) < ((*(f32 *)((u8 *)arg0 + 0x370)) - temp_f0)) {
-            func_15128774(arg0, temp_a1);
+            camera_snap_to_object(arg0, temp_a1);
         }
     }
 }

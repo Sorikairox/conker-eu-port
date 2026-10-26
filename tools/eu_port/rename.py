@@ -132,6 +132,16 @@ def comment_site(texts, old, new):
     return None
 
 
+_CMT = re.compile(r'/\*.*?\*/|//[^\n]*', re.S)
+
+
+def code_only(path, text):
+    """text without comments (C / headers / asm-processor) or '#' note lines (tsv, txt, Makefile, yaml)"""
+    if path.endswith(('.c', '.h', '.inc', '.cpp')):
+        return _CMT.sub(' ', text)
+    return re.sub(r'(^|\s)#[^\n]*', ' ', text)
+
+
 def plan(rows, only):
     files = scope_files()
     texts = {p: read(p) for p in files}
@@ -151,7 +161,9 @@ def plan(rows, only):
         ours = re.search(r'^// was %s:' % re.escape(old), symtxt, re.M) or (
             map_addr([new]) is not None and map_addr([new]) == map_addr([old]))
         if not ours:
-            used = [p for p, t in texts.items() if word(new).search(t)]
+            # only code counts: comments (naming proposals, notes that mention the same function) and '#' note lines
+            # are not a use of the name
+            used = [p for p, t in texts.items() if word(new).search(t) and word(new).search(code_only(p, t))]
             if used:
                 sys.exit('%s: new name %s is already used in %s' % (old, new, ', '.join(used[:5])))
         for p in files:

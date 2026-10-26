@@ -262,7 +262,7 @@ void func_150E047C(u8 *arg0) {
         sp.u9C = (s32) (*(f32 *)((u8 *)sp.uA8 + 0x1C));
         sp.uA2 = (func_150ADA20() % 11U) + 5;
         sp.uA4 = 0;
-        func_151602C0((Header *) &sp.uA0, (Header2 *) &sp.u94, (func_150ADA20() % 121U) + 0x32, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        light_create_with_ctrl((Header *) &sp.uA0, (Header2 *) &sp.u94, (func_150ADA20() % 121U) + 0x32, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         (*(s16 *)((u8 *)sp78 + 6)) = (s16) ((func_150ADA20() % 81U) + 0x45);
     }
     (*(s16 *)((u8 *)sp78 + 8)) = (s16) ((*(s16 *)((u8 *)sp78 + 8)) - D_800BE9E4);
@@ -298,13 +298,13 @@ void func_150E0840(u8 *arg0, s32 arg1, u8 arg2) {
 void func_150E0880(void) {
     if (D_80088D20 == 0) {
         func_1515F170(6, 0);
-        func_1513BAE8();
+        water_effect_spawn();
         D_80088D20 = 1;
     }
 }
 
 typedef struct { f32 x, y, z; } VecE08C8;
-u8 *func_1513418C(void *, s32, u8, s32);
+u8 *emitter_trail_spawn(void *, s32, u8, s32);
 
 void func_150E08C8(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
@@ -338,7 +338,7 @@ void func_150E08C8(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u2D = 0;
     sp.u20 = 10.900001f;
     sp.u24 = 0.23121f;
-    func_1513418C(&sp, 0, arg1, arg2);
+    emitter_trail_spawn(&sp, 0, arg1, arg2);
 }
 
 void func_15143794(s16, s16, f32, void *);

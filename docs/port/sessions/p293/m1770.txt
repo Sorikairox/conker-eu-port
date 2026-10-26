@@ -29,5 +29,5 @@ s#        t\.scale\[1\] = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \
 s#        scale2 = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        scale2 = (u32) (func_150ADA20() \& 0xFFFF) * 1.5258789e-05f + scaleMin;#
 s#        t\.u54\[5\] = (u32) ((t\.scale\[0\] + t\.scale\[1\] + scale2) \* D_800A739C_c\[0\] + 20\.0f);#        t.u54[5] = (u32) ((t.scale[0] + t.scale[1] + scale2) * D_800A739C_c[0] + 21.0f);#
 s#        t\.scale\[2\] = scale2;#        t.scale[2] = t.scale[1];#
-s#        func_15168BE4((u8 \*) \&t, kind, owner);#        func_15168BE4((u8 *) \&t, kind, id);#
+s#        node_spawn_model_fx((u8 \*) \&t, kind, owner);#        node_spawn_model_fx((u8 *) \&t, kind, id);#
 s#        t\.u54\[5\] = (u32) ((t\.scale\[0\] + t\.scale\[1\] + scale2) \* D_800A739C_c\[0\] + 20\.0f);#        t.u54[5] = (s32) ((t.scale[0] + scale2) * D_800A739C_c[0] + 20.0f);#

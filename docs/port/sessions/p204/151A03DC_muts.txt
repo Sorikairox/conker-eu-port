@@ -21,7 +21,7 @@ s/\&flag, 0x3E);/\&flag, 0x3F);/
 s/func_15142B7C(gfx, 1, 0x160600)/func_15142B7C(gfx, 1, 0x160601)/
 s/rec\[0x2A\], rec\[0x2B\], rec\[0x2C\]/rec[0x2B], rec[0x2A], rec[0x2C]/
 s/0, 0, 0xFF, 0xFF, 0xFF, 0, \&flag/0, 0, 0xFF, 0xFF, 0xFE, 0, \&flag/
-s/func_1513F4E4(gfx, 7,/func_1513F4E4(gfx, 6,/
+s/gfx_set_combine_mode(gfx, 7,/gfx_set_combine_mode(gfx, 6,/
 s/0x80000 | 0x2CA0/0x80000 | 0x2C00/
 s/0x5049D8/0x5049D9/
 s/if (\*(u16 \*) (t + 0x1E) \& 2) {/if (*(u16 *) (t + 0x1E) \& 4) {/

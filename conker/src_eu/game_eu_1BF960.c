@@ -294,12 +294,12 @@ extern f32 D_800A84F0;
 extern f32 D_800A84F4;
 extern f32 D_800A84F8;
 void func_151436B4(f32, f32, f32, struct17 *);
-u8 *func_151DA6F8(u8 *, u8 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
+u8 *impact_spark_spawn(u8 *, u8 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
 
 // water_drop_splash_update: update handler 14 of the particle tick func_1513095C for drops spawned by func_151925AC.
 // The extra block at +0xA8 (scale f32, ..., water level f32 at +0x10, splash ring H12 at +0x14, type at +0x26) stays
 // unused while the drop is above the water. On the first tick its y (+0x44) is below the water level it spawns a
-// splash ring (func_151D9B8C) at (x, level + 2, z) and one spray droplet (func_151DA6F8) with a random direction,
+// splash ring (impact_debris_spawn) at (x, level + 2, z) and one spray droplet (impact_spark_spawn) with a random direction,
 // and returns 0 (the drop dies); otherwise returns 1 (keep alive).
 s32 func_151928C8(u8 *arg0, s32 arg1) {
     u8 *ext = arg0 + 0xA8;
@@ -318,7 +318,7 @@ s32 func_151928C8(u8 *arg0, s32 arg1) {
         pos.unk0 = *(f32 *)(arg0 + 0x40);
         pos.unk4 = *(f32 *)(ext + 0x10) + 2.0f;
         pos.unk8 = *(f32 *)(arg0 + 0x48);
-        func_151D9B8C(ext[0x26], *(f32 *)ext * D_800A84DC, arg0[0x2B], (s32)(ext + 0x14), &pos, 0x64, 0, 1, 0,
+        impact_debris_spawn(ext[0x26], *(f32 *)ext * D_800A84DC, arg0[0x2B], (s32)(ext + 0x14), &pos, 0x64, 0, 1, 0,
                       arg0[0xC], arg0[0x1]);
         r0 = func_150ADA68();
         r1 = func_150ADA68();
@@ -328,7 +328,7 @@ s32 func_151928C8(u8 *arg0, s32 arg1) {
         r3 = func_150ADA68();
         sprite = func_150ADA20();
         tint = func_150ADA20();
-        func_151DA6F8((u8 *)&pos, (u8 *)&vel, r3 * D_800A84F4 + D_800A84F4, (s16)(sprite % 21 + 0x23), arg0[0x2B],
+        impact_spark_spawn((u8 *)&pos, (u8 *)&vel, r3 * D_800A84F4 + D_800A84F4, (s16)(sprite % 21 + 0x23), arg0[0x2B],
                       *(f32 *)ext * D_800A84F8, tint % 7 + 5, 0, 1.0f, 1.0f, 1, ext[0x26], 0, 0x10, 0xF, 0, arg0[0xC],
                       arg0[0x1]);
     }
@@ -410,5 +410,5 @@ struct260 *func_151925C4(u8 *obj, s16 life, u8 arg2, s32 arg3) {
 #endif
 
 void func_15192CEC(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }

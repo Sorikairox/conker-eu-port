@@ -383,7 +383,7 @@ s32 func_150AE83C(s32 arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15142914(s32, f32, f32, f32, f32, f32, f32, f32, f32);
+void mtxf_rot_scale2_trans(s32, f32, f32, f32, f32, f32, f32, f32, f32);
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 s32 memcpy(s32, s32, s32);
 extern s32 D_800DD608;
@@ -429,7 +429,7 @@ u8 *func_150AE84C(u8 *arg0, s16 arg1) {
         }
         temp_v0_2 = (*(u8 **)((u8 *)arg0 + 0x160));
         sp3C = arg1 * 4;
-        func_15142914((f32 (*)[4]) &sp.u44[0], (*(s32 *)((u8 *)temp_v0_2 + 0x18)), (*(s32 *)((u8 *)temp_v0_2 + 0x1C)), (*(s32 *)((u8 *)temp_v0_2 + 0x20)), (*(f32 *)((u8 *)temp_v0_2 + 0x24)), (*(f32 *)((u8 *)temp_v0_2 + 0x28)), (*(f32 *)((u8 *)temp_v0_2 + 0x38)), (*(f32 *)((u8 *)temp_v0_2 + 0x3C)), (*(f32 *)((u8 *)temp_v0_2 + 0x40)));
+        mtxf_rot_scale2_trans((f32 (*)[4]) &sp.u44[0], (*(s32 *)((u8 *)temp_v0_2 + 0x18)), (*(s32 *)((u8 *)temp_v0_2 + 0x1C)), (*(s32 *)((u8 *)temp_v0_2 + 0x20)), (*(f32 *)((u8 *)temp_v0_2 + 0x24)), (*(f32 *)((u8 *)temp_v0_2 + 0x28)), (*(f32 *)((u8 *)temp_v0_2 + 0x38)), (*(f32 *)((u8 *)temp_v0_2 + 0x3C)), (*(f32 *)((u8 *)temp_v0_2 + 0x40)));
         func_150A7E40((f32 (*)[4]) &sp.u44[0], (*(f32 *)((u8 *)arg0 + 0x34)), (*(f32 *)((u8 *)arg0 + 0x38)), (*(f32 *)((u8 *)arg0 + 0x3C)), &sp.u8C, &sp.u90, &sp.u94);
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x2C));
         (*(s16 *)((u8 *)sp.uA4 + 6)) = 0;

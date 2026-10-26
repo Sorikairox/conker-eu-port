@@ -17,7 +17,7 @@ s32 func_15095380(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 f32 func_15048A40(u8);
 f32 func_150489B0(u8);
 extern u8 *D_8008CDEC[];
-extern f32 D_800DD600[2]; /* camera yaw: [0] sin, [1] cos (func_15168118's caller in game_1944C0.c) */
+extern f32 D_800DD600[2]; /* camera yaw: [0] sin, [1] cos (node_billboard_draw's caller in game_1944C0.c) */
 extern s32 D_800DD5E4;    /* last sprite texture: the hand asm keeps it in the upper half (lh / sh) */
 extern s32 D_800DD5E8;    /* last sprite frame: upper half, as D_800DD5E4 */
 extern s16 D_800DD5EC;    /* last sprite other-mode (1 / 2 / 3) */

@@ -45,7 +45,7 @@ s8 func_150C6C3C(u8 *arg0) {
     return ret;
 }
 
-s32 func_1513F6C0(u8 *, s32, s32);
+s32 sprite_fx_set_handlers(u8 *, s32, s32);
 s32 func_150C6D2C(u8 *arg0)
 {
   u8 *p;
@@ -55,7 +55,7 @@ s32 func_150C6D2C(u8 *arg0)
   *((s32 *) (p + 0x14)) = 0;
   *((s32 *) (arg0 + 0xB0)) = 0;
   *((s32 *) (arg0 + 0x18)) = (*((s32 *) (arg0 + 0x18))) | 2;
-  func_1513F6C0(arg0, 0, 0);
+  sprite_fx_set_handlers(arg0, 0, 0);
   return 0;
 }
 
@@ -96,7 +96,7 @@ void func_150C6D70(u8 *arg0)
 
 #ifdef NON_MATCHING
 s32 func_15045AF0(f32 *, s32, f32, u8 *);
-s32 func_1513418C(s32 *, s32, s32, s32);
+s32 emitter_trail_spawn(s32 *, s32, s32, s32);
 s32 memcpy(s32, u8 **, s32);
 
 s32 func_150C6DC4(s32 arg0, u8 *arg1, s32 arg2) {
@@ -154,7 +154,7 @@ s32 func_150C6DC4(s32 arg0, u8 *arg1, s32 arg2) {
     sp.u48 = (*(u8 *)((u8 *)arg0 + 0x3B));
     sp.u60 = 80.0f;
     sp.u64 = 0.60497f;
-    temp_v0 = func_1513418C(&sp.u40, 0xC, 0xFF, 0);
+    temp_v0 = emitter_trail_spawn(&sp.u40, 0xC, 0xFF, 0);
     if (temp_v0 != 0) {
         memcpy(temp_v0 + 0x58, &sp.u34, 0xC);
     }
@@ -299,39 +299,39 @@ s32 func_150C721C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151346EC(u8 *);
-s32 func_1513470C(u8 *);
+s32 object_list_move_1(u8 *);
+s32 object_list_free(u8 *);
 
-/* D_80089E40 table entries 6 / 16 (s32 (*)(obj), see func_151342BC): clear the data's word +0x70, then return
- * func_151346EC / func_1513470C's result (the asm tail value). */
+/* D_80089E40 table entries 6 / 16 (s32 (*)(obj), see emitter_trail_update): clear the data's word +0x70, then return
+ * object_list_move_1 / object_list_free's result (the asm tail value). */
 s32 func_150C7240(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
-    return func_151346EC(arg0);
+    return object_list_move_1(arg0);
 }
 
 s32 func_150C7268(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
-    return func_1513470C(arg0);
+    return object_list_free(arg0);
 }
 #else
 void func_150C7240(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
-    func_151346EC(arg0);
+    object_list_move_1(arg0);
 }
 
 void func_150C7268(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
-    func_1513470C(arg0);
+    object_list_free(arg0);
 }
 #endif
 
 #ifdef NON_MATCHING
 s32 func_15045AF0(f32 *, s32, f32, u8 *);
-u8 func_151D8E20(void);
+u8 impact_current_kind(void);
 extern s32 D_80088B80;
 extern s32 D_800AB7F4;
 
@@ -399,7 +399,7 @@ s32 func_150C7290(u8 *arg0) {
     sp.uAC = sp.uC8;
     sp.uB4 = sp.uD0;
     if (func_15045AF0(&sp.uAC, 0, sp.uCC - 200.0f, arg0 + 0x34) != 0) {
-        sp5F = func_151D8E20();
+        sp5F = impact_current_kind();
         sp.uB0 = (*(f32 *)((u8 *)arg0 + 0x34));
         temp_f10 = func_150ADA68() * 100.0f;
         sp.u68 = 1;
@@ -429,7 +429,7 @@ s32 func_150C7290(u8 *arg0) {
         sp.u98 = (*(u8 *)((u8 *)temp_v0_2 + 2));
         sp50 = func_150ADA20();
         sp54 = func_150ADA20();
-        temp_v0_3 = func_1513C73C((s32) &sp.u84, 9U, 3U, (s32) (arg0 + 0x38), sp.uAC, sp.uB0, sp.uB4, sp60, sp60, (u8) (sp50 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp54 & 1)), 0x20, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        temp_v0_3 = sprite_fx_spawn_cam((s32) &sp.u84, 9U, 3U, (s32) (arg0 + 0x38), sp.uAC, sp.uB0, sp.uB4, sp60, sp60, (u8) (sp50 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp54 & 1)), 0x20, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         sp.uD4 = temp_v0_3;
         if (temp_v0_3 != NULL) {
             memcpy(&temp_v0_3->unkA4[3], &sp.u64, 0x20);

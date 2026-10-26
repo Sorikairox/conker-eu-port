@@ -353,7 +353,7 @@ s32 func_151CE144(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142E24(u8 *, struct_eu_80090F10 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
@@ -411,7 +411,7 @@ u8 *func_151CE3D0(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.uB3 = 1;
             temp_v0 = *(s32 *) ((u8 *) &D_800AB2C0 + (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x98))) + 0x4C)) * 4);
             temp_v1 = ((u8 *)&D_800A4EA8);
-            var_s3 = func_15142FBC(func_15142B7C(func_1513F4E4(func_15142E24(var_s3, &D_80090F10[temp_v0], 0, 0, 0, 0, temp_v0, 0, 0, &sp.uB3, 3), 0x4E, &sp.uB3), 0x200005, 0x1F0600), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.uB3);
+            var_s3 = func_15142FBC(func_15142B7C(gfx_set_combine_mode(func_15142E24(var_s3, &D_80090F10[temp_v0], 0, 0, 0, 0, temp_v0, 0, 0, &sp.uB3, 3), 0x4E, &sp.uB3), 0x200005, 0x1F0600), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.uB3);
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 2) {
                 var_s2 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
                 if (var_s2 < 0) {
@@ -710,7 +710,7 @@ void func_151CEC80(u8 *arg0) {
             if (func_150455FC(&sp.uC0, sp.uA0, temp_s0 + 0x10) != 0) {
                 sp.uC4 = (*(f32 *)((u8 *)temp_s0 + 0x10));
                 sp.uE8 = (func_150ADA20() % 101U) + 0x9B;
-                func_1513D2F0(&sp.uA4, (s32) ((u8 *)&D_800A4AA0), 0x1CU, 0U, 0U, 0x22U, 0U, 0, 0, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                effect3d_spawn_full(&sp.uA4, (s32) ((u8 *)&D_800A4AA0), 0x1CU, 0U, 0U, 0x22U, 0U, 0, 0, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             }
             (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 8)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s0 + 8)) > 1.0f);
@@ -1134,7 +1134,7 @@ u8 *func_151CF930(u8 *rope, u8 *gdl, s16 slot) {
     flag = 1;
     gdl = (u8 *) func_15142C10((Gfx *) gdl, 0xED, 0xD2, 0x85, 200, &flag);
     gdl = (u8 *) func_15142B7C((s32) gdl, 0x200005, 0x1F0600);
-    gdl = (u8 *) func_1513F4E4((s32) gdl, 0x54, (s8 *) &flag);
+    gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x54, (s8 *) &flag);
     gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
                         *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 0x8), (s8 *) &flag);
     cur = (s8) rope[0x2E] - 1;
@@ -1217,7 +1217,7 @@ void func_151CFDF4(u8 *arg0, s32 arg1, u8 arg2) {
     temp_t7 = (*(s32 **)((u8 *)arg0 + 0x98));
     sp24 = temp_t7;
     if (*temp_t7 != 0) {
-        func_15169850(arg1, arg2, (s32) temp_t7, (s32) temp_t7 + 4, (s32) arg0);
+        node_handle_link_message(arg1, arg2, (s32) temp_t7, (s32) temp_t7 + 4, (s32) arg0);
     }
 }
 
@@ -1506,7 +1506,7 @@ void func_151D06D8(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-/* file-scope prototypes above: func_15142E24 / func_1513F4E4 / func_15142B7C / func_15142FBC (s32 display lists),
+/* file-scope prototypes above: func_15142E24 / gfx_set_combine_mode / func_15142B7C / func_15142FBC (s32 display lists),
    func_151D6310, func_15143E64, D_800D30BC, D_800A4EA8 (u8[]) */
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 f32 sqrtf(f32);
@@ -1587,7 +1587,7 @@ Gfx *func_151D06FC(Gfx *gfx, u8 *obj, s16 slot) {
     cam = func_15144B34(slot);
     gfx = (Gfx *) func_15142B7C((s32) gfx, 0x200005, 0x60600);
     gfx = (Gfx *) func_15142E24((u8 *) gfx, (struct_eu_80090F10 *) D_80091504, 0, 0, 0, 0, 0x7F, 0, 0, (s8 *) &flag, 3);
-    gfx = (Gfx *) func_1513F4E4((s32) gfx, 0x3B, (s8 *) &flag);
+    gfx = (Gfx *) gfx_set_combine_mode((s32) gfx, 0x3B, (s8 *) &flag);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, obj[0x34], &flag);
     gfx = (Gfx *) func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
                                 (s8 *) &flag);
@@ -1675,7 +1675,7 @@ void func_151D0EA0(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0 || arg2 == 24) {
         s32 t = *(s32 *)arg1;
         if (t == *(s32 *)v || v[4] == arg1[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {
@@ -1947,7 +1947,7 @@ void func_151D09A8(u8 *arg0, s32 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D09A8.s")
 #endif
-void func_151D1488(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0xA8) != 0) { func_1516972C(*(struct102 **)(p + 0xA8)); } }
+void func_151D1488(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0xA8) != 0) { node_destroy(*(struct102 **)(p + 0xA8)); } }
 
 void func_151D14B8(void *arg0) {
     func_151D1488(arg0);
@@ -2099,7 +2099,7 @@ void func_151D16E8(u8 *self) {
 #endif
 
 void func_151D18D8(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 void func_151D1918(void *arg0) {
@@ -2460,7 +2460,7 @@ s32 func_151D2248(u8 *arg0, s32 dl, s16 slot) {
     }
     flag = 1;
     gfx = (u32 *) func_15142FBC(
-        func_1513F4E4(func_15142B7C(func_15142E24((u8 *) dl, &D_80090F10[0xBC], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),
+        gfx_set_combine_mode(func_15142B7C(func_15142E24((u8 *) dl, &D_80090F10[0xBC], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),
                                     0x220005, 0x1D0600),
                       0x4C, &flag),
         D_800D30BC | 0x80000 | 0x2CA0, *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 8), &flag);

@@ -1,0 +1,249 @@
+old	new	confidence	description
+func_151407D0	particle_emitter_spawn	high	Spawns an effect (particle) record via func_1513D524, copies the emitter block to rec+0x110 and counts it in D_800DCE20.
+func_151408A4	effect_flare_update	high	Per-player light-flare update: projects source, tests viewport and z-buffer occlusion, fades intensity, builds the camera-facing quad.
+func_151411A4	effect_free_buffers_retire	med	Frees the effect's per-player vertex buffers and moves its node to the retired list (func_1513CA6C).
+func_151411C4	effect_free_buffers_delete	med	Frees the effect's per-player vertex buffers, unlinks and frees its node (func_1513CAA0).
+func_151411E4	effect_destroy_retire	med	Effect destructor: detaches its linked object node, decrements D_800DCE20, calls the type's D_8008A33C handler.
+func_15141250	effect_destroy_delete	med	Effect destructor (delete variant): detaches its linked node, decrements D_800DCE20, calls the type's D_8008A384 handler.
+func_151412BC	effect_sample_zbuffer_cells	med	For every flagged effect node, reads each player's screen cell value from the D_800BEDE4 grid (0x7FFF when off-grid) into +0x15C.
+func_1514143C	effect_sync_link_pos	high	Copies the effect's position (+0x34..+0x3C) into its linked object node (+0x154) when it has one.
+func_15141478	effect_flicker_update	med	Random flicker: on timer expiry picks a new random target scale, then eases the effect scale (+0x158) toward it.
+func_15141564	effect_pulse_sine_update	med	Sine pulse: sets the effect scale (+0x158) to base + amp*sin(phase) and advances the phase by the frame time.
+func_151415D4	effect_pulse_envelope_update	med	Piecewise envelope pulse (hold, ramp up, hold, ramp down) of the effect scale +0x158, looping with the period.
+func_151416E8	effect_handle_message	high	Effect message handler: forwards to the type handler D_8008A3CC, then 0x22 frees, 0x24/0x25 set state +0x169 to -1/2.
+func_151417C4	effect_broadcast_message	med	Broadcasts message code arg1 with id byte arg0 to the node types 0x1C and 0x56 (func_15169260).
+func_15141818	effect_check_false	low	Stub callback that always returns 0.
+func_1514182C	effect_set_orbit_pos	med	Places the effect on a rotated offset around a centre point (rotation matrix) and sets its axis point 500 units outward.
+func_15141928	effect_orbit_update	med	Per-frame update calling effect_set_orbit_pos with the parameters stored at +0x170.
+func_15167010	node_types_run_frame_hooks	high	Calls the per-frame hook (+0x18) of every one of the 101 node type records in D_8008B848 that has one.
+func_1516706C	node_run_global_hooks	med	Calls each of the 3 global hook functions in D_8008CF04 that is set.
+func_151670C0	node_lists_run_update	high	For both node rows and all 101 types with an update handler (field 0), calls it on every node (unlink-safe walk).
+func_151671E8	node_lists_run_update2	med	For both node rows and all 101 types with a second handler (field +4), calls it on every node (unlink-safe walk).
+func_15167310	node_lists_run_view_update	med	Caches sin/cos of each player's camera yaw, then calls each type's +0x0C handler on every node.
+func_151674F8	node_render_layers_draw	high	Draws the render layers of a group: per layer pre DL/callback, each node's draw callback, post DL/callback, with DL overflow cut.
+func_15167A68	node_alloc	high	Allocates a node of given size, sets its row and owner byte (+0xC) and links it into the list of type arg0.
+func_15167AD8	node_spawn_sprite_quad	med	Allocates a type 3 node and copies 0x18 bytes of sprite quad data to +0x10, alpha 0xFF.
+func_15167B44	node_sprite_quad_update	med	Type 3 node update: runs its callback, fades alpha, advances the animation frame and frees the node at the end.
+func_15167C58	node_sprite_quad_draw	high	Render-layer 3 draw callback: draws the node's textured screen quad.
+func_15167D84	node_spawn_sprite	med	Allocates a sprite node (type 5, or 0x42 when arg1 set) and copies 0x38 bytes of sprite data to +0x10.
+func_15167E0C	node_sprite_update	high	Sprite node update: lifetime and fade, behaviour callback, fixed-point motion, frame animation (wrap/bounce/end), frees when done.
+func_15168118	node_billboard_draw	high	Draws a camera-facing sprite node for a player view with size scaled by facing angle and render mode by texture kind.
+func_1516865C	sprite_vtx_quads_init	high	Fills the two 4-vertex quads of a sprite record with colour and texture coordinates (with flip flags).
+func_15168800	node_spawn_vtx_sprite	med	Allocates a type 0xE node and copies 0xA8 bytes of vertex sprite data to +0x10.
+func_15168870	node_vtx_sprite_update	med	Type 0xE node update: advances animation frame (bounce/end/wrap), runs behaviour callback, frees when ended.
+func_15168A2C	node_move_to_list0	med	Moves a node into type list 0 (inactive list).
+func_15168A4C	node_list_insert	high	Inserts a node at the head of the D_800DD280 list for type arg1 in its row and sets its type.
+func_15168A9C	node_list_unlink	high	Unlinks a node from its D_800DD280 type list (doubly-linked).
+func_15168B10	node_set_type	high	Moves a node from its current type list to the list of type arg1.
+func_15168B44	node_fade_delay_update	med	Counts down a delay in the low half of +0x14, then fades alpha +0x3F by the high half; sets lifetime 0 when gone.
+func_15168BAC	node_run_end_callback	low	Calls the D_8008CDC0 handler indexed by byte +0xE4 when non-zero.
+func_15168BE4	node_spawn_model_fx	med	When the source has a display list, allocates a type 0x10 node and copies 0x60 bytes of it to +0x90.
+func_15168C4C	node_model_fx_draw	med	Draws a model effect node: builds its matrix, sets prim alpha, tile scroll and render mode, then calls its display list.
+func_15168E34	gfx_addr_add_offset	high	Adds an offset to a display list address word unless it is segmented (bits 0x0F000000 set).
+func_15168E54	gfx_dl_relocate	high	Walks a display list to G_ENDDL and relocates the addresses of vertex / movemem commands by an offset.
+func_15168F08	gfx_dl_rebase	high	Walks a display list to G_ENDDL and rebases vertex / movemem addresses to 24 bits plus a new base.
+func_15168F84	render_group_layer_range	high	Returns the first / end render layer (node type) index of a render group.
+func_15169040	node_broadcast_all	high	Sends a message to every node of all 0x68 types (node_broadcast_range).
+func_15169070	node_broadcast_range	high	Sends a message (owner-free check plus type handler +0x1C) to every node of types in [arg0, arg1).
+func_15169260	node_broadcast_types	high	Sends a message to every node of each type id listed in an array.
+func_1516944C	node_broadcast_type	high	Sends a message to every node of one type (clamped to 0x67).
+func_151695F0	node_broadcast_obj_all	med	Builds a message {object, byte +0x3B} and broadcasts it to all node types.
+func_1516962C	node_broadcast_obj_type	med	Builds a message {object, byte +0x3B} and broadcasts it to one node type.
+func_15169668	render_layer_pre_set_flag	low	Render-layer pre callback that sets D_800D31CB and returns the display list unchanged.
+func_1516968C	node_free_if_owner_msg	high	On message codes 15/16, frees the node when the message id matches its owner byte (+0xC).
+func_151696DC	node_walk_skip_node	high	Fixes the saved walk cursors D_800DD5C8 that point at a node about to be removed.
+func_1516972C	node_destroy	high	Destroys a node: fixes walk cursors and calls its type destroy handler, else moves it to the retired list.
+func_1516979C	node_delete	med	Deletes a node: fixes walk cursors and calls its type delete handler, else unlinks and frees it.
+func_15169804	node_retire	med	Moves a node to type list 1 (retired list).
+func_15169824	node_unlink_free	high	Unlinks a node from its type list and frees its memory.
+func_15169850	node_handle_link_message	low	Message helper: code 0 destroys a node when a link matches; code 0x2D swaps a matching link to its other end.
+func_15141970	interact_fx_detach	med	Detaches an interaction effect record from its owner object's attachment list (owner at +0x2C).
+func_15141990	interact_fx_destroy	med	Destroy handler of an interaction effect record: detaches it from its owner.
+func_151419B0	interact_fx_delete	med	Delete handler of an interaction effect record: detaches it from its owner.
+func_151419D0	interact_fx_handle_message	med	Interaction effect message handler: code 0 destroys it when its link matches; code 0x2D retargets the link.
+func_15141A7C	obj_interaction_update	med	Runs the object's interaction hook for its category, starts the chosen handler or timed effect, then runs attached effects.
+func_15141C0C	obj_interaction_category	high	Returns the interaction table category (0..11) of an object from its type id.
+func_15141CC0	interaction_mode_for_level	med	Maps a surface/class code and the current level (D_800BE9F0) to an interaction mode index.
+func_15141DA4	obj_interaction_start_timed	med	Validates category / entry indices and starts the timed interaction effect for entry arg2 on the object.
+func_15141E38	obj_interaction_attach_timed	med	Resets the timer of the object's attached effect for an entry, or creates and attaches a new one (type 0x1A link).
+func_15141F78	fx_spawn_impact_particle	med	Spawns a randomised impact particle of a kind at a hit position, sized by strength (func_1513C650).
+func_151420F8	obj_query_table6	low	Returns 1 when func_150A2FCC finds a match for the object in its table 6, else 0.
+func_15142180	fx_spawn_impact_burst	med	Spawns a burst effect (func_15154488) at a position with sizes scaled by two factors.
+func_151422C0	debug_tweak_int_mid	med	Debug tweak stub: returns the midpoint of the min/max range (named-value editor removed in release).
+func_151422DC	debug_tweak_int	med	Debug tweak stub: returns the default value argument (name, min, max, default, file, line).
+func_151422F8	debug_tweak_value	med	Debug tweak stub: returns its fifth argument (the default value).
+func_15142314	mtx_get_translation	high	Reads the translation of matrix arg1 of an array (fixed-point Mtx or float, by D_800C42B0) into a vector.
+func_151423D8	angle_byte_cos	med	Cosine of a byte angle (256 = full turn) from the quarter-wave table D_8009A5E0.
+func_15142444	obj_resolve_with_model	med	Finds the object with unique id arg0 (0xFF = the given one) and returns it only if it has a model (+0x1D4).
+func_151424F4	mtx_rot_scale_trans_l	med	Builds a fixed-point matrix from angles, per-axis scale times row factors, and translation.
+func_15142600	mtx_look_along_scaled	high	Builds a fixed-point matrix placing a model at one point facing another, with per-axis and row scales.
+func_15142838	mtx_rot_scale2_trans_l	high	Builds a fixed-point matrix from angles, scale sx (rows 0/2) / sy (row 1), and translation.
+func_15142914	mtxf_rot_scale2_trans	high	Builds a float matrix from angles, scale sx (rows 0/2) / sy (row 1), and translation.
+func_1515C2F0	streak_spawn	med	Spawns a streak (ribbon trail) particle record (func_15147FF0, kind 10) and copies its 0x3C-byte parameter block.
+func_1515C388	streak_update_points	high	Moves each point of the streak ring by velocity and gravity, runs the motion handler, stores the oldest point.
+func_1515C534	streak_update_fade	med	Runs the streak's second handler, clamps the tail alpha by remaining time and shrinks its width per frame.
+func_1515C6F4	streak_draw	high	Draws the streak ribbon: two camera-facing vertices per point, alpha fading to the tail, two triangles per segment.
+func_1515CF9C	streak_push_point	high	Streak motion handler: appends the current position as a new ring point, or stops the handler when the ring is full.
+func_1515D030	streak_pop_point	high	Streak motion handler: drops the newest ring point while at least 3 remain; returns 0 when done.
+func_1515D088	fx_source_emitter_spawn	med	Creates a timed emitter node (300 ticks) for a source of kind 0/1 with a zero spawn accumulator.
+func_1515D130	fx_source_emitter_update	med	Accumulates the kind's spawn rate (D_800A6880) and spawns particles at random offsets around the source position.
+func_151927C0	sprite_node_init_fade	low	Sets a sprite node to lifetime 300 and fade step 10, packing half of byte +0x14 into both halves of word +0x14.
+func_151D2AB0	attach_fx_asset_acquire	med	Increments the reference count of attach-effect asset arg0 and loads it (D_800AB140 entry) on first use.
+func_151D2B4C	attach_fx_asset_release	med	Decrements the reference count of attach-effect asset arg0 and frees it when it reaches zero.
+func_151D2BA4	attach_fx_spawn	med	Allocates a type 0x3D attached-effect node, copies 0x24 bytes of parameters and its position, links it to its controller.
+func_151D2C40	attach_fx_update	high	Attached effect update: dies with its parent, follows the parent's model joint, runs timer end and per-frame callbacks.
+func_151D2DAC	attach_fx_detach	med	Unlinks an attached-effect node from its controller's child list.
+func_151D2DCC	attach_fx_destroy	med	Destroy handler of an attached effect: detaches it, destroys its linked node (+0x2C) and retires it.
+func_151D2E14	attach_fx_delete	med	Delete handler of an attached effect: detaches it, deletes its linked node (+0x2C) and frees it.
+func_151D2E5C	attach_fx_handle_message	med	Attached effect message handler: code 0 destroys it when the owner matches; code 0x2D retargets the owner link.
+func_151D2F00	attach_ctrl_spawn	med	Allocates a type 0x3E attach-effect controller node, copies 0x10 bytes of parameters and clears its child list.
+func_151D2F90	attach_ctrl_update	high	Controller update: dies with its owner, tracks owner model visibility (show/hide callbacks), timer and per-frame callbacks.
+func_151D3130	attach_ctrl_cleanup	high	Runs the controller's end callback, ends and destroys all child effects, detaches it from its owner.
+func_151D31F4	attach_ctrl_destroy	med	Destroy handler of an attach-effect controller: cleans up and retires the node.
+func_151D3220	attach_ctrl_delete	med	Delete handler of an attach-effect controller: cleans up and frees the node.
+func_151D324C	attach_ctrl_handle_message	med	Controller message handler: owner-match destroy (code 0), owner retarget (0x2D), then the kind's D_80090004 handler.
+func_151D3308	attach_fx_link_to_ctrl	high	Inserts an attached effect at the head of its controller's child list and increments the child count.
+func_151D3354	attach_fx_unlink_from_ctrl	high	Removes an attached effect from its controller's doubly-linked child list and decrements the child count.
+func_151D33B8	attach_ctrl_destroy_children	high	Destroys every child effect of a controller until its child count is zero.
+func_151D33FC	attach_ctrl_free_if_owner	med	Destroys the controller node when a message's object or unique id matches its owner.
+func_151D343C	attach_ctrl_broadcast	high	Broadcasts a message to every node of type 0x3E (attach-effect controllers).
+func_151602C0	light_create_with_ctrl	high	Creates a dynamic light (func_1515D5F8) and its type 53 controller node, marking the light as owned (flag 2).
+func_1516037C	light_ctrl_alloc	high	Allocates a type 53 light controller node for an existing light, copying its 6-byte header (behaviour, timer, kind).
+func_151603FC	light_ctrl_update	high	Light controller update: counts down its timer (flag 1), runs its behaviour D_8008B0F0, destroys it when either ends.
+func_151604A0	light_ctrl_handle_message	med	Light controller message handler: on/off (0x17/0x18), zap sound (0x1C), switch behaviour (0x1F), destroy (0x22), else kind handler.
+func_15160600	light_beh_tweak_intensity	low	Light behaviour: sets the light intensity from a debug tweak value (stub returns 255).
+func_1516065C	light_beh_sine_pulse	med	Light behaviour: sine-pulses the light intensity with the parameters at +0x18.
+func_15160684	light_beh_flicker	med	Light behaviour: random flicker of the light intensity with the parameters at +0x18.
+func_151606A8	light_beh_rotated_offset	low	Light behaviour: places the light at a fixed offset rotated by the angles and origin it points to.
+func_151607A4	light_beh_lightning	med	Light behaviour: random lightning, 1..5 quick flashes started by a small per-frame chance, intensity +0x1C.
+func_15160954	light_lightning_start_flash	med	Starts one lightning flash with random speed and delay, optionally playing a zap sound at the light.
+func_15160A58	light_create_obj_joint	med	Creates a light attached to an object's model joint (behaviour 5, kind 0x10) with joint offset and callback.
+func_15160B74	light_beh_follow_joint	med	Light behaviour: follows the attached object's joint (or position), ends when the object is gone, runs its sub-callback.
+func_15160CDC	light_create_obj_beam	med	Creates a beam light attached to an object joint (behaviour 6, kind 0x11) with offset, ray end, scale and flags.
+func_15160E30	light_beh_beam_raycast	high	Light behaviour: casts a ray along the attached beam and moves the light to the hit point with distance-based intensity.
+func_15161238	obj_is_live_other	med	Returns 1 when the object is active, has a valid id and is not the second object, else 0.
+func_1516127C	light_spawn_pulse_a	med	Spawns a light controller with a sine intensity pulse (50 +- 40, random phase) for 300 ticks.
+func_15161334	light_spawn_flicker_a	med	Spawns a light controller with a random flicker (range 20..50, ease 0.2489) for 300 ticks.
+func_15161408	light_spawn_kind8	low	Spawns a light controller of kind 8 / behaviour 3 for an object looked up by func_151149AC(249).
+func_15161494	light_spawn_pulse_b	med	Spawns a light controller with a sine intensity pulse (127 +- 100) for 300 ticks.
+func_15161540	light_spawn_pulse_c	med	Spawns a light controller with a sine intensity pulse (28 +- 27, random phase) for 300 ticks.
+func_151615F8	light_spawn_lightning	med	Spawns a lightning light controller (behaviour 4) with intensity preset D_800A66C0[arg2] (0..8).
+func_151616D0	light_ctrl_broadcast	high	Broadcasts a message {id, value} to every light controller node (type 53).
+func_15161714	light_obj_destroy_a	low	Destroy handler: detaches the light controller from its owner object and retires it.
+func_15161740	light_obj_delete_a	low	Delete handler: detaches the light controller from its owner object and frees it.
+func_1516176C	light_obj_destroy_b	low	Destroy handler (second kind): detaches the light controller from its owner object and retires it.
+func_15161798	light_obj_delete_b	low	Delete handler (second kind): detaches the light controller from its owner object and frees it.
+func_151617C4	light_ctrl_retire	med	Moves a light controller node to the retired list.
+func_151617E4	light_ctrl_free	med	Unlinks and frees a light controller node.
+func_15161804	light_ctrl_destroy	high	Destroys a light controller: frees its owned light, then calls the kind's destroy handler D_8008B208.
+func_15161860	light_ctrl_delete	high	Deletes a light controller: frees its owned light, then calls the kind's delete handler D_8008B2B0.
+func_151618BC	light_play_zap_sfx	low	Plays a random one of 10 sounds (D_800A6AC4) at a position with volume and distance range.
+func_151619A0	light_create_scripted	med	Creates a light (behaviour 9, kind 20) driven by entry arg0 of the D_800C3958 light table.
+func_15161A68	light_beh_scripted	med	Light behaviour: copies position, colour and intensity (clamped 0..255) from its D_800C3958 entry when enabled.
+func_15161E24	light_create_obj_follow	med	Creates a light at an object's position (behaviour 10, kind 21) that follows that object.
+func_15161F2C	light_beh_follow_obj	med	Light behaviour: follows its object's position (light_follow_obj_pos); ends when the object is gone.
+func_15161F4C	light_follow_handle_message	med	Message handler for object-following lights: owner destroy / retarget, then the D_8008B6F8 kind handler.
+func_15162034	light_spawn_flicker_b	med	Spawns a light controller with a random flicker (range 15..45) for 300 ticks.
+func_15162110	ambient_pulse_spawn	med	Creates a timed node (300 ticks) that sine-pulses the ambient light colour.
+func_151621B8	ambient_pulse_update	med	Sets the ambient colour (func_1515D4D4) to base + amp * sin(phase) per channel and advances the phase.
+func_151623F4	light_spawn_colour_pulse	med	Spawns a light controller that sine-pulses the light colour between presets (0..2).
+func_15162510	light_beh_colour_pulse	high	Light behaviour: sets the light RGB to base + amp * sin(phase) per channel and advances the phase.
+func_15162740	light_spawn_flicker_preset	med	Spawns a light controller with flicker preset arg1 (0..23) and the given header.
+func_1516284C	light_create_flicker_preset	med	Creates a light plus controller with flicker preset arg8 (0..23).
+func_1516295C	light_spawn_envelope	med	Spawns a light controller with an intensity envelope preset (0..4) and per-phase callbacks.
+func_15162B28	light_beh_envelope	high	Light behaviour: looping intensity envelope (low, ramp up, high, ramp down) with a callback on each phase change.
+func_15162EF8	light_env_phase_on	low	Envelope phase callback: sets flag 1 on the linked object and sends message 36.
+func_15162F50	light_env_phase_off	low	Envelope phase callback: clears flag 1 on the linked object and sends message 37.
+func_15162FAC	light_spawn_burst_flash	low	Spawns a light controller with random burst flashes (presets 0..2).
+func_151630F4	light_beh_burst_flash	med	Light behaviour: decaying intensity with random bursts of flashes at random intervals, each with a sound.
+func_15163414	light_create_track_ptrs	med	Creates a light plus controller that tracks a position given by three float pointers.
+func_15163504	light_beh_track_ptrs	med	Light behaviour: copies the position from its three float pointers, then runs its sub-callback.
+func_151635A8	light_track_handle_message	low	Message handler of pointer-tracking lights: forwards to the D_8008B710 kind handler.
+func_15163604	light_spawn_pulse_preset	med	Spawns a light controller with a sine pulse preset (0..13), random phase.
+func_15163704	light_beh_pulse_once	med	Light behaviour: sine-pulses the intensity and ends after half a period.
+func_1516381C	light_ctrl_spawn_static	med	Spawns a light controller with no behaviour, kind arg1, for 300 ticks.
+func_1516387C	light_ctrl_spawn	med	Spawns a light controller with the given flags, behaviour, timer, kind and payload size.
+func_151638E0	light_beh_level_track	low	Light behaviour: intensity = base + amp * a value read for entry pl->unk0 (func_15188580).
+func_151639D0	light_msg_off_on	med	Message handler: 0x27 turns the light off, 0x28 turns it on.
+func_15163A18	light_msg_on_off	med	Message handler: 0x27 turns the light on, 0x28 turns it off.
+func_15163A60	light_create_obj_pulse	med	Creates a pulsing light at the position of object arg0 (func_151149AC), behaviour 17.
+func_15163B98	light_beh_obj_pulse	low	Light behaviour: sine pulse until the linked object's +0x6E becomes 1.
+func_15163BE8	light_create_joint_pulse	med	Creates a joint-attached light with sine pulse preset 6.
+func_15163CD0	light_beh_joint_pulse	med	Light behaviour: sine-pulses the intensity with the parameters at +0x30.
+func_15163CF8	light_sine_intensity_step	high	Sets the light intensity to base + amp * sin(phase) and advances the phase by the frame time.
+func_15163DEC	light_flicker_intensity_step	high	Random flicker step: picks a new random target on timer expiry and eases the light intensity toward it.
+func_15163F50	light_follow_obj_pos	high	Copies the linked object's position to the light; returns 0 when the object is gone or reused.
+func_15163FEC	light_obj_handle_message_a	med	Light message handler: owner destroy (0), retarget (0x2D), else the D_8008B714 kind handler.
+func_151640C0	light_on_owner_removed	med	On message 0x29, destroys the light controller when the removed object is its owner.
+func_15164134	light_obj_handle_message_b	med	Light message handler: owner destroy (0), retarget (0x2D), else the D_8008B71C kind handler.
+func_15164208	light_spawn_flash	med	Spawns a decaying flash light controller (behaviour 20, kind 39) with id arg1.
+func_1516429C	light_beh_flash_decay	high	Light behaviour: sets the intensity and decays it by 70 percent per frame.
+func_1516434C	light_flash_handle_message	med	On message 0x33 with matching id, retriggers the flash with a new intensity and colour.
+func_151643A8	light_msg_set_flag	low	Message handler: 64 sets bit 0 of the light's +0x3C flags, 65 clears it.
+func_151643F8	light_beh_transform_pos	low	Light behaviour: sets the light position from a point transformed through func_15145CD0.
+func_1516441C	light_set_transformed_pos	low	Transforms a point through matrix entry arg1[3] (func_15145CD0) and moves the light there.
+func_151644A8	light_beh_orbit	med	Light behaviour: orbits the light around a centre with angles scaled from a target vector.
+func_151644F4	light_set_orbit_pos	med	Places the light at a rotated offset around a centre point (rotation matrix).
+func_151645C4	level_set_lights_mode	med	Sets D_800DCDD0 and switches per-level lighting (ambient colour, sky / fog settings) on or off.
+func_151D8E20	impact_current_kind	med	Returns the current impact surface kind D_800E0A10 (10 in level 0 until a condition flag is set).
+func_151D8E6C	impact_puff_tex_kind0	med	Puff texture selector (D_80090070 entry, assumed kind 0): random one of 3 from D_800AB340.
+func_151D8EB0	impact_puff_tex_kind1	med	Puff texture selector (D_80090070 entry, assumed kind 1): always 117.
+func_151D8EBC	impact_puff_tex_kind2	med	Puff texture selector (D_80090070 entry, assumed kind 2): always 29.
+func_151D8EC8	impact_puff_tex_kind3	med	Puff texture selector (D_80090070 entry, assumed kind 3): randomly 17 or 147.
+func_151D8EFC	impact_puff_tex_kind4	med	Puff texture selector (D_80090070 entry, assumed kind 4): randomly 90 or 91.
+func_151D8F30	impact_puff_tex_kind5	med	Puff texture selector (D_80090070 entry, assumed kind 5): random one of 5 from D_800AB344.
+func_151D8F7C	impact_puff_tex_kind6	med	Puff texture selector (D_80090070 entry, assumed kind 6): randomly 102 or 103.
+func_151D8FB0	impact_puff_tex_kind7	med	Puff texture selector (D_80090070 entry, assumed kind 7): always 149.
+func_151D8FBC	impact_puff_tex_kind8	med	Puff texture selector (D_80090070 entry, assumed kind 8): always 159.
+func_151D8FC8	impact_puff_tex_kind9	med	Puff texture selector (D_80090070 entry, assumed kind 9): always 179.
+func_151D8FD4	impact_puff_tex_kind10	med	Puff texture selector (D_80090070 entry, assumed kind 10): always 117.
+func_151D8FE0	impact_puff_tex_kind11	med	Puff texture selector (D_80090070 entry, assumed kind 11): random one of 4 from D_800AB34C.
+func_151D9014	impact_dust_cloud_spawn	med	Spawns a wobbling dust cloud particle of a surface kind (texture from D_80090070) with size, life, growth and spin.
+func_151D93F4	impact_dust_cloud_update	med	Dust cloud update: size wobble, then ground check; returns 0 when either ends it.
+func_151D9450	impact_dust_cloud_wobble	med	Wobbles the dust cloud's width and height with two byte-angle oscillators (unless flag 1).
+func_151D9534	impact_dust_cloud_ground	med	Dust cloud ground check: bounces with damping on the floor, or on landing spawns burst / debris / ring effects.
+func_151D97A8	impact_debris_tex_kind0	med	Debris sprite selector (D_800900A4 entry, assumed kind 0): random one of 7 from D_800AB350.
+func_151D9820	impact_debris_tex_kind1	med	Debris sprite selector (D_800900A4 entry, assumed kind 1): random one of 3 from D_800AB36C.
+func_151D9878	impact_debris_tex_kind2	med	Debris sprite selector (D_800900A4 entry, assumed kind 2): random one of 3 from D_800AB378.
+func_151D98D0	impact_debris_tex_kind3	med	Debris sprite selector (D_800900A4 entry, assumed kind 3): random one of 2 from D_800AB384.
+func_151D9918	impact_debris_tex_kind4	med	Debris sprite selector (D_800900A4 entry, assumed kind 4): random one of 2 from D_800AB38C.
+func_151D9960	impact_debris_tex_kind5	med	Debris sprite selector (D_800900A4 entry, assumed kind 5): random one of 5 from D_800AB394.
+func_151D99C8	impact_debris_tex_kind6	med	Debris sprite selector (D_800900A4 entry, assumed kind 6): random one of 3 from D_800AB3A8.
+func_151D9A20	impact_debris_tex_kind7	med	Debris sprite selector (D_800900A4 entry, assumed kind 7): random one of 2 from D_800AB3B4.
+func_151D9A68	impact_debris_tex_kind8	med	Debris sprite selector (D_800900A4 entry, assumed kind 8): random one of 3 from D_800AB3BC.
+func_151D9AC0	impact_debris_tex_kind9	med	Debris sprite selector (D_800900A4 entry, assumed kind 9): the single entry of D_800AB3C8.
+func_151D9ADC	impact_debris_tex_kind10	med	Debris sprite selector (D_800900A4 entry, assumed kind 10): random one of 3 from D_800AB3CC.
+func_151D9B34	impact_debris_tex_kind11	med	Debris sprite selector (D_800900A4 entry, assumed kind 11): random one of 4 from D_800AB3D8.
+func_151D9B8C	impact_debris_spawn	med	Spawns a debris particle of a surface kind (func_1513C650) and, for upward-facing surfaces, a timed ground-mark node.
+func_151D9EB0	impact_cloud_emitter_update	med	Emitter update: on timer expiry spawns a dust cloud at its position and restarts the timer randomly (30..140).
+func_151D9FC0	impact_spawn_burst	med	Spawns the surface dust burst and, except for kinds 2 and 5, a smoke puff at a position.
+func_151DA08C	impact_smoke_puff_spawn	high	Spawns a smoke puff effect record of a surface kind at a position with size and life, plus its wobble parameters.
+func_151DA368	impact_smoke_puff_update	med	Smoke puff update: wobbles its size and periodically emits tinted sub-particles around its position.
+func_151DA6A8	impact_puff_scale_decay	low	When flag 1 is set, multiplies the value at +0x138 by the factor at +0x13C once per elapsed tick.
+func_151DA6F8	impact_spark_spawn	med	Spawns a spark / debris sprite particle (func_15148310) with velocity, scale, alpha and per-kind flags.
+func_151DA938	streak_on_land_debris	med	Streak landing handler: at the oldest point on the ground spawns debris or a splash ring at random.
+func_151DAA88	streak_on_land_burst	med	Streak landing handler: spawns an impact burst at the oldest point on the ground.
+func_151DAB58	impact_splash_ring_spawn	high	Spawns a flat growing splash ring of a surface kind at a position with size and alpha.
+func_151DADA0	impact_splash_ring_update	med	Splash ring update: advances its oscillator and sets the ring's x / y scale from it.
+func_151DAE28	impact_splash_ring_verts	med	Builds the 4 flat vertices of a splash ring for a player view, rotated by the cached camera sin/cos.
+func_151DB004	impact_tint_red	med	Particle tint init (D_800900D8 entry): random red primary / environment colours.
+func_151DB068	impact_tint_yellow	med	Particle tint init (D_800900D8 entry): random yellow (equal red and green) colours.
+func_151DB0CC	impact_tint_red_green_a	med	Particle tint init (D_800900D8 entry): independent random red and green colours.
+func_151DB15C	impact_tint_red_green_b	med	Particle tint init (D_800900D8 entry): independent random red and green colours (same as variant a).
+func_151DB1EC	impact_tint_red_green_c	med	Particle tint init (D_800900D8 entry): independent random red and green colours (same as variant a).
+func_151DB27C	impact_tint_white	med	Particle tint init (D_800900D8 entry): white primary and pale grey environment colours.
+func_151DB2A8	impact_tint_green_fixed	med	Particle tint init (D_800900D8 entry): fixed green colours (0, 200, 0).
+func_151DB2CC	impact_tint_green	med	Particle tint init (D_800900D8 entry): random green colours.
+func_151DB330	impact_tint_brown	med	Particle tint init (D_800900D8 entry): random brown / earth colours.
+func_151DB3D8	impact_tint_cyan	med	Particle tint init (D_800900D8 entry): random cyan (equal green and blue) colours.
+func_151DB43C	impact_tint_magenta	med	Particle tint init (D_800900D8 entry): random magenta (red and blue) colours.
+func_151DB4CC	impact_tint_bright	med	Particle tint init (D_800900D8 entry): random near-white colours (200..255 per channel).
+func_151DB5D0	impact_tinted_particle_spawn	med	Spawns a tinted particle (colour from the kind's D_800900D8 init) with velocity, life and optional random spin.
+func_151DB97C	impact_tinted_particle_update	med	Tinted particle update: optional scale step and, with flag 1, rotation angles advanced by per-axis speeds.
+func_151DBAA8	impact_spawn_debris_burst	low	Spawns a burst effect preset (func_15154488) at a position.
+func_151DBBD4	impact_spawn_debris_up	med	Spawns a random debris particle of the given kind 5 units above a position.
+func_151DBCBC	impact_dust_particle_spawn	med	Spawns a dust particle tinted by the kind's D_800AB7F4 colour, attached to an object or free.
+func_151DBE80	impact_flat_fx_spawn	low	Spawns a flat effect record (func_1513D668 class 0xB / 0x11) tinted by the kind's D_800AB7F4 colour.
+func_151DC034	impact_glow_spawn	high	Spawns a still glow particle of a type (sprite D_800AB700) at a position with size, alpha and life.
+func_151DC260	impact_blast_spawn_large	low	Spawns a large two-part blast: a burst preset (func_15154488) and a shock effect (func_151506E8).
+func_151DC484	impact_blast_spawn_small	low	Spawns a small two-part blast: a burst preset (func_15154488) and a shock effect (func_151506E8).

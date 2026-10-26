@@ -74,7 +74,7 @@ extern f32 D_800969E8;
 extern u8 D_80083228[6];
 void func_1510F800(s32);
 u8 *func_151149AC(u8);
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 
 /* the record func_150130B4 reads (D_80082EA0 start handlers get the level record) */
@@ -224,20 +224,20 @@ s32 func_150130B4(Rec150130B4 *rec) {
         case 3:
         case 4:
             b.emit.u54[4] = D_80096960[type];
-            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
         case 5:
         case 6:
         case 7:
             b.emit.u54[4] = D_80096930[type - 5]; /* the asm indexes a stack copy of the table */
-            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
         case 8:
             tail.t8[0] = D_800969E0;
             tail.t8[1] = D_800969E4;
             tail.t8[2] = 0.0f;
             tail.t8[3] = D_800969E8;
-            e = func_151407D0(&b.emit, 0x70, &b.spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
+            e = particle_emitter_spawn(&b.emit, 0x70, &b.spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
             if (e != NULL) {
                 memcpy(e + 0x170, tail.t8, 0x10);
             }
@@ -247,7 +247,7 @@ s32 func_150130B4(Rec150130B4 *rec) {
         case 11:
         case 12:
             b.emit.u54[4] = D_80096950[type];
-            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
         case 13:
         case 14:
@@ -265,7 +265,7 @@ s32 func_150130B4(Rec150130B4 *rec) {
             tail.t13.pos[1] = *(s16 *) (tail.t13.obj + 0x12);
             tail.t13.pos[2] = *(s16 *) (tail.t13.obj + 0x14);
             b.emit.u54[4] = 0;
-            e = func_151407D0(&b.emit, 0x78, &b.spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
+            e = particle_emitter_spawn(&b.emit, 0x78, &b.spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
             if (e != NULL) {
                 memcpy(e + 0x170, &tail.t13, 0x18);
             }
@@ -273,10 +273,10 @@ s32 func_150130B4(Rec150130B4 *rec) {
         case 19:
             b.emit.u54[4] = 0x11;
             b.spawn.u40 = flags & ~2;
-            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
         default:
-            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            particle_emitter_spawn(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
             break;
     }
     return 1;
@@ -307,7 +307,7 @@ s32 func_1501370C(struct16 *arg0) {
 
 s32 func_1501374C(struct16 *arg0) {
     arg0->unk16 |= 4;
-    func_1515D088(arg0);
+    fx_source_emitter_spawn(arg0);
     return 1;
 }
 
@@ -967,9 +967,9 @@ extern u8 D_800A0D08[]; /* 6 rgb triples */
 // record_light_ring_start: start handler (s32, returns 1) of a level record: marks it started (+0x16 |= 4) and
 // builds a 0x48-byte block for a new func_15149130 object (type 0x12C, 0x2E, kind 0x29; +0x28): the position, three
 // random angles ((u16) (func_150ADA20() * osGetCount()) scaled by D_80096A48 / 4C / 58 and 360), three sizes from the
-// record's u16 halves (* D_80096A50 * D_80096A54), six lights (func_151602C0 at the record position, colour
+// record's u16 halves (* D_80096A50 * D_80096A54), six lights (light_create_with_ctrl at the record position, colour
 // D_800A0D08[i], red in level 0x40), a fourth value (* D_80096A5C * D_80096A60), the record and a 1 byte. When
-// no object is free the lights are freed again (func_1516972C).
+// no object is free the lights are freed again (node_destroy).
 s32 func_15014B60(Rec15014B60 *rec) {
     struct {
         f32 pos[3];         /* 0x00 */
@@ -1027,7 +1027,7 @@ s32 func_15014B60(Rec15014B60 *rec) {
             g = D_800A0D08[i * 3 + 1];
             b = D_800A0D08[i * 3 + 2];
         }
-        blk.light[i] = func_151602C0((Header *) &req, (Header2 *) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);
+        blk.light[i] = light_create_with_ctrl((Header *) &req, (Header2 *) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);
     }
     e = (u8 *) func_15149130(0x12C, -1, 0x2E, -1, 0, 0x29, (struct37 *) 0x48, 0xFF, 0);
     if (e != NULL) {
@@ -1036,7 +1036,7 @@ s32 func_15014B60(Rec15014B60 *rec) {
     }
     for (i = 0; i < 6; i++) {
         if (blk.light[i] != NULL) {
-            func_1516972C((struct102 *) blk.light[i]);
+            node_destroy((struct102 *) blk.light[i]);
         }
     }
     return 1;

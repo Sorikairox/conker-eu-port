@@ -23,9 +23,9 @@
 \#^        py = #s/(u8) //  % c3
 \#^        t.life = #s/& 7/\& 3/ % c3
 \#^        t.pos\[1\] = py;$#s/py/pz/ % c3
-\#^        rec = func_15167A68(0x3B#s/0x4C/0x48/ % c3
+\#^        rec = node_alloc(0x3B#s/0x4C/0x48/ % c3
 \#^        rec\[0x48\] = 0xFF;$#s/0xFF/0/ % c3
 \#^        bcopy(&t, rec + 0x10, 0x38);$#s/0x10/0x14/ % c3
 \#^    for (i = 0; i < count; i++) {$#s/i < count/i < count - 1/ % c3
-\#^    rec = func_15167A68(0x3A, 0, 0x38, 0, (u8) flag, 1);$#s/(u8) flag/(u8) arg2/ % c3
+\#^    rec = node_alloc(0x3A, 0, 0x38, 0, (u8) flag, 1);$#s/(u8) flag/(u8) arg2/ % c3
 \#^        t.u0C = 0;$#d % c3

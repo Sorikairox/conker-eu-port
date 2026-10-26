@@ -39,23 +39,23 @@ s/        if (func_15046F70(probe, 0, \*(f32 \*) (obj + 0x18) - 500.0f, floor) =
 s/ || ((u8 \*) floor)\[0x1D\] == 3) {/ || ((u8 *) floor)[0x1C] == 3) {/
 s/        piece\[1\] = floor\[0\] + 10.0f;/        piece[1] = floor[0] + 11.0f;/
 s/        if (func_150ADA20() \& 1) {/        if (func_150ADA20() \& 2) {/
-s/            func_151D9B8C(0, size \* 4.5f + 15.0f/            func_151D9B8C(0, size * 4.5f + 16.0f/
-s/            func_151D9B8C(0, size \* 4.5f/            func_151D9B8C(0, shade * 4.5f/
-s/            func_151D9B8C(0, size \* 4.5f + 15.0f, (u32) (shade \* 100.0f + 155.0f)/            func_151D9B8C(0, size * 4.5f + 15.0f, (u32) (shade * 100.0f + 154.0f)/
+s/            impact_debris_spawn(0, size \* 4.5f + 15.0f/            impact_debris_spawn(0, size * 4.5f + 16.0f/
+s/            impact_debris_spawn(0, size \* 4.5f/            impact_debris_spawn(0, shade * 4.5f/
+s/            impact_debris_spawn(0, size \* 4.5f + 15.0f, (u32) (shade \* 100.0f + 155.0f)/            impact_debris_spawn(0, size * 4.5f + 15.0f, (u32) (shade * 100.0f + 154.0f)/
 s/(s32) \&floor\[1\], (struct17 \*) piece,/(s32) \&floor[2], (struct17 *) piece,/
 s/                          100, 0, 1, 0, room, owner);/                          100, 0, 1, 0, 0xFF, owner);/
 s/                          100, 0, 1, 0, room, owner);/                          99, 0, 1, 0, room, owner);/
 s/                          100, 0, 1, 0, room, owner);/                          100, 0, 1, 0, room, 0);/
-s/            func_151DAB58(0, size \* 5.9f + 6.1f/            func_151DAB58(0, size * 5.9f + 6.0f/
-s/            func_151DAB58(0, size \* 5.9f/            func_151DAB58(0, size * 6.0f/
+s/            impact_splash_ring_spawn(0, size \* 5.9f + 6.1f/            impact_splash_ring_spawn(0, size * 5.9f + 6.0f/
+s/            impact_splash_ring_spawn(0, size \* 5.9f/            impact_splash_ring_spawn(0, size * 6.0f/
 s/155.0f), piece, 1, room, owner);/155.0f), piece, 0, room, owner);/
 s/155.0f), piece, 1, room, owner);/155.0f), piece, 1, 0, owner);/
 s/    under\[1\] = base\[1\] + 100.0f;/    under[1] = base[1] + 101.0f;/
 s/    under\[0\] = base\[0\];/    under[0] = base[2];/
 s/    if (func_15046F70(under, 0, base\[1\] - 500.0f, floor) == 0/    if (func_15046F70(under, 0, base[1] - 501.0f, floor) == 0/
 s/    base\[1\] = floor\[0\] + 10.0f;/    base[1] = floor[0] + 9.0f;/
-s/    func_15136698((size \* 30.0f + 90.0f) \* 0.001f/    func_15136698((size * 31.0f + 90.0f) * 0.001f/
-s/    func_15136698((size \* 30.0f + 90.0f) \* 0.001f/    func_15136698((size * 30.0f + 90.0f) * 0.002f/
+s/    fx_splash_spawn((size \* 30.0f + 90.0f) \* 0.001f/    fx_splash_spawn((size * 31.0f + 90.0f) * 0.001f/
+s/    fx_splash_spawn((size \* 30.0f + 90.0f) \* 0.001f/    fx_splash_spawn((size * 30.0f + 90.0f) * 0.002f/
 s/(shade \* 103.0f + 103.0f) \* 1e-05f/(shade * 103.0f + 104.0f) * 1e-05f/
 s/(shade \* 103.0f + 103.0f) \* 1e-05f/(shade * 103.0f + 103.0f) * 2e-05f/
 s/ + 0x9B, b/ + 0x9C, b/

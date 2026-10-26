@@ -453,9 +453,9 @@ RAM_ALIAS = {'D_89810': 'D_80089810'}
 # plain function and n64mem.py relocates D_8009018C[0] to its table slot - P131.)
 FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690',
                 'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
-                # P26: callbacks handed to func_1000FA64 / stored in D_800E0D64 / func_16001830.
+                # P26: callbacks handed to func_1000FA64 / stored in D_800E0D64 / debug_cont_get_read_data.
                 # func_1000EC24 (P26) dropped in P29: port P28 declares it as a function under NON_MATCHING.
-                'func_15103AA0', 'func_15103910', 'func_150DE8AC', 'func_160036F0']
+                'object_sound_delayed', 'object_sound_follow_cam', 'func_150DE8AC', 'debug_cont_pad_buf']
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
 ALIAS_REF = re.compile(r'@(' + '|'.join(RAM_ALIAS) + r')\b(?![.\w])')
 EXT_DECL = re.compile(r'^@([\w.$-]+) = external (?:dso_local )?global [^\n]*$', re.M)

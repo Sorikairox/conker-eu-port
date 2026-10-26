@@ -1,4 +1,4 @@
-# P241 func_eu_151D8FD4 (rumble_effect_update): fx 80450000 (+0xE flags, +0x10 s16 life, +0x12 strength, +0x13 player mask, +0x14 s8 handler, +0x16 last strength); EU D_800BE9E4 = 800BEE04; func_1516972C = jal 15169C9C; D_80090060[0] = func_151D9190 (jalr, ROMDATA)
+# P241 func_eu_151D8FD4 (rumble_effect_update): fx 80450000 (+0xE flags, +0x10 s16 life, +0x12 strength, +0x13 player mask, +0x14 s8 handler, +0x16 last strength); EU D_800BE9E4 = 800BEE04; node_destroy = jal 15169C9C; D_80090060[0] = func_151D9190 (jalr, ROMDATA)
 tick ! 0=80450000 ! 8045000C=00000100,80450010=00050303,80450014=FF000300,800BEE04=00000002 ! ! ! ! ! !
 expire ! 0=80450000 ! 8045000C=00000100,80450010=0001050A,80450014=00000200,800BEE04=00000002 ! ! ! ! ! !
 edge ! 0=80450000 ! 8045000C=00000100,80450010=00020101,80450014=FF000100,800BEE04=00000002 ! ! ! ! ! !

@@ -7,7 +7,7 @@ f32 func_150ADA68(void);
 // fire_embers_spawn: the ember burst of a fire at `pos` (room `room`, owner `owner`): an ember emitter
 // (func_151530A8, type 5 / 7, 4 parameters from D_800AAE24, sizes 15 / 30, colour block, handlers 0x200005 /
 // 0x60600), one glow sprite (func_151307F0: texture 0x2B of set 0x4403, 6..12 frames, half size 106..302, fade from
-// 3 at rate 0x55, random flip flags 0x40 / 0x80) and a light flash (func_151602C0: 6..12 frames, type 5 or 6) at the
+// 3 at rate 0x55, random flip flags 0x40 / 0x80) and a light flash (light_create_with_ctrl: 6..12 frames, type 5 or 6) at the
 // truncated position.
 void func_151C384C(void *arg0, u8 room, s32 owner) {
     f32 *pos = arg0;
@@ -187,5 +187,5 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
     at.unk0 = pos[0];
     at.unk4 = pos[1];
     at.unk8 = pos[2];
-    func_151602C0(&flash, &at, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);
+    light_create_with_ctrl(&flash, &at, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);
 }

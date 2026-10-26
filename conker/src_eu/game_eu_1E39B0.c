@@ -8,7 +8,7 @@ typedef struct { f32 x, y, z; } V3_61A0;
 s32 func_15132FBC(void *, s32, s32, s32, u8, s32);
 void *memcpy(void *, const void *, size_t);
 
-// ripple_spawn_flat: P234. One of the two ripple models func_1513783C picks at random (the other is
+// ripple_spawn_flat: P234. One of the two ripple models object_break_effects_floor picks at random (the other is
 // func_151B65C0, same arguments): fills a 0x80-byte particle request on the stack (start at `pos`, velocity `vel` or
 // 0 (flag 0x20), normal `dir`, accel `acc` or 0 (flag 0x40), size scale (x 24.7) / end size / alpha / life (0x12C, or
 // `life` + 0x100 >> shift with flag 0x80), flag 1 for `additive`) and spawns it through func_15132FBC (kind 3, alpha

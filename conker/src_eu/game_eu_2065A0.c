@@ -61,7 +61,7 @@ loop_10:
         goto loop_10;
     }
 block_15:
-    temp_v0 = func_15167A68(0x3F, arg3, arg1 + 0x18, 1, (u8) (s32) arg2, 1U);
+    temp_v0 = node_alloc(0x3F, arg3, arg1 + 0x18, 1, (u8) (s32) arg2, 1U);
     if (temp_v0 == NULL) {
         return 0;
     }
@@ -85,7 +85,7 @@ block_15:
 /* P241: readable C for func_eu_151D8FD4 (game_eu_2065A0, 64 insns). */
 // rumble_effect_update: update of the kind-0x3F effect made by func_151D8E18 (rumble for the players in the mask
 // +0x13, strength +0x12 0..8). With flag +0xE bit 0 the s16 life +0x10 counts down by D_800BE9E4 and the effect ends
-// (func_1516972C, after the rest) once it is negative. Runs the D_80090060 handler of index +0x14 (-1 = none); when
+// (node_destroy, after the rest) once it is negative. Runs the D_80090060 handler of index +0x14 (-1 = none); when
 // the strength changed since the last frame (+0x16), restarts the rumble of every player in the mask
 // (func_1501C15C, func_1501BFF0) and remembers the new strength. func_1501BFF0 is declared in the func_151D8E18 block above.
 extern void (*D_80090060[])(u8 *);
@@ -113,7 +113,7 @@ void func_eu_151D8FD4(u8 *fx) {
         fx[0x16] = fx[0x12];
     }
     if (done) {
-        func_1516972C((struct102 *) fx);
+        node_destroy((struct102 *) fx);
     }
 }
 #else
@@ -132,12 +132,12 @@ void func_151D90D4(u8 *arg0) {
 
 void func_151D9138(void *arg0) {
     func_151D90D4(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_151D9164(void *arg0) {
     func_151D90D4(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_151D9190(u8 *arg0) {
@@ -171,14 +171,14 @@ void func_151D91B0(u8 *arg0, f32 *arg1) {
 
 void func_151D930C(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x58) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     } else if (arg2 == 0x47) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 
 void func_151D9364(s32 arg0, u8 arg1) {
-    func_15169260(&D_800AB6E0, 1, arg0, arg1);
+    node_broadcast_types(&D_800AB6E0, 1, arg0, arg1);
 }
 
 extern s8 D_eu_800E0E30;

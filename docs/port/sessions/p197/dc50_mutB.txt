@@ -23,9 +23,9 @@ s/spawn.b45 = 255;/spawn.b45 = 0;/
 s/(u32) (nfree + 1);/(u32) (nfree + 2);/
 s/tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58/tpl->kind, tpl->b3A, 0, tpl->b3A, b, 0x58/
 s/|= 0x40000000;/|= 0x20000000;/
-s/cb = func_151423D8((u8) (c - 0x40));/cb = func_151423D8((u8) (c + 0x40));/
+s/cb = angle_byte_cos((u8) (c - 0x40));/cb = angle_byte_cos((u8) (c + 0x40));/
 s/head->off\[1\] = -r \* cb;/head->off[1] = r * cb;/
-s/head->off\[2\] = -func_151423D8((u8) (a - 0x40)) \* r;/head->off[2] = func_151423D8((u8) (a - 0x40)) * r;/
+s/head->off\[2\] = -angle_byte_cos((u8) (a - 0x40)) \* r;/head->off[2] = angle_byte_cos((u8) (a - 0x40)) * r;/
 s/idx = head - e->slots;/idx = head - e->slots + 1;/
 s/(u32) (cfg->range + 1) + cfg->base;/(u32) (cfg->range + 1) + cfg->range;/
 s/                                e->live++;/                                e->live += 2;/

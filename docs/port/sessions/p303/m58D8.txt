@@ -13,7 +13,7 @@
 67s/func_15142B7C(gfx, 0x200005, 0x60600);/func_15142B7C(gfx, 0x200004, 0x60600);/ % mid
 68s/0, 0, 0, 0, 0x56, 0, 0, \&flag, 3);/0, 0, 0, 0, 0x55, 0, 0, \&flag, 3);/ % mid
 70s/gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, \&flag);/gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0, 0xFF, \&flag);/ % mid
-71s/gfx = func_1513F4E4(gfx, 0x2E, \&flag);/gfx = func_1513F4E4(gfx, 0x2F, \&flag);/ % mid
+71s/gfx = gfx_set_combine_mode(gfx, 0x2E, \&flag);/gfx = gfx_set_combine_mode(gfx, 0x2F, \&flag);/ % mid
 72s/D_800A4EA8\[5 \* 2 + 1\] | D_800A4EA8\[5 \* 2\],/D_800A4EA8[5 * 2 + 1],/ % mid
 74s/dir\[1\] = pb\[1\] - pa\[1\];/dir[1] = pb[1] - pa[0];/ % mid
 78s/my = dir\[1\] \* 0\.5f + pa\[1\] - cam\[1\];/my = dir[1] * 0.25f + pa[1] - cam[1];/ % close mid

@@ -8,7 +8,7 @@
 \#^    gfx = func_15142C10(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x59\]/obj[0x58]/
 \#^    gfx = func_15142C10(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x5B\]/obj[0x5A]/
 \#^    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);#s/0x1F0600/0x1F0601/
-\#^    gfx = func_1513F4E4(gfx, 0x44, &flag);#s/0x44/0x45/
+\#^    gfx = gfx_set_combine_mode(gfx, 0x44, &flag);#s/0x44/0x45/
 \#^    gfx = func_15142FBC(gfx#s/0x2CA0/0x2CA1/
 \#^    gfx = func_15142FBC(gfx#s/D_800A4EA8\[3\]/D_800A4EA8[1]/
 \#^    dx = pts\[3\] - pts\[0\];#s/pts\[3\]/pts[4]/

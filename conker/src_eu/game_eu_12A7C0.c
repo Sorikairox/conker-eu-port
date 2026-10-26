@@ -172,14 +172,14 @@ f32 func_150FD49C(u8 *obj) {
 #endif
 
 void func_150FD530(s32 arg0) {
-    func_15103828();
+    sfx_cooldown_tick();
 }
 
 #ifdef NON_MATCHING
 s32 func_15046F70(u8 *, u16, f32, u8 *);
 void func_1504715C(void *, u8 *);
 s32 func_1505D024(struct127 *, s32, u16, s32);
-s32 func_1516284C(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 light_create_flicker_preset(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(u8 *, struct127 **, s32);
 
 void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
@@ -363,7 +363,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u186 = 0xFF;
         sp.u164 = 1.0f;
         sp.u16C = 1.0f;
-        temp_v0 = func_1513D2F0(&sp.u130, (s32) ((u8 *)&D_800A22BC), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
+        temp_v0 = effect3d_spawn_full(&sp.u130, (s32) ((u8 *)&D_800A22BC), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
         temp_s0 = temp_v0 + 0x110;
         if (temp_v0 != NULL) {
             memcpy(temp_s0, &sp.uD4, 0x5C);
@@ -374,7 +374,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
             sp.uB8 = (s32) sp.u198;
             sp.uBC = (s32) sp.u19C;
             sp.uC0 = (s32) sp.u1A0;
-            (*(s32 *)((u8 *)temp_s0 + 0x24)) = func_1516284C(&sp.uC4, &sp.uB8, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, (s32) arg1, arg2);
+            (*(s32 *)((u8 *)temp_s0 + 0x24)) = light_create_flicker_preset(&sp.uC4, &sp.uB8, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, (s32) arg1, arg2);
             if (sp.u197 != 0) {
                 temp_t4 = ((u8 *)&D_800A4AA0);
                 sp.u60 = 3;
@@ -408,7 +408,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
                 sp.uB0 = 0;
                 sp.uB4 = 1;
                 sp.uB6 = 0xFF;
-                (*(s32 *)((u8 *)temp_s0 + 0x28)) = func_1513D594((s32) &sp.u60, (s32) ((u8 *)&D_800A4AA0), 0U, 0U, 0U, 0U, 0, 50.0f, 50.0f, 0, (s32) &sp.u1A8, 0, 0, 0U, 0, (u8) (s32) arg1, arg2);
+                (*(s32 *)((u8 *)temp_s0 + 0x28)) = effect3d_spawn_oriented((s32) &sp.u60, (s32) ((u8 *)&D_800A4AA0), 0U, 0U, 0U, 0U, 0, 50.0f, 50.0f, 0, (s32) &sp.u1A8, 0, 0, 0U, 0, (u8) (s32) arg1, arg2);
             }
         }
     }
@@ -573,7 +573,7 @@ void func_150FE08C(u8 *arg0, u8 *arg1, u8 arg2)
 }
 
 u8 *func_150FE120(u8 *arg0, s16 arg1) {
-    u8 *v = (u8 *)func_1513EDE4((s32)arg0, arg1);
+    u8 *v = (u8 *)sprite_quad_build_screen_b((s32)arg0, arg1);
     if (v != NULL) {
         *(s16 *)(v + 0x8) = *(f32 *)(arg0 + 0x124);
         *(s16 *)(v + 0x18) = *(f32 *)(arg0 + 0x128);
@@ -587,18 +587,18 @@ void func_150FE1AC(u8 *arg0)
 {
   u8 *v = arg0 + 0x110; // fakematch: v defined first so IDO keeps it as a separate pointer (not folded)
   
-  if (*(s32 *)(arg0 + 0x134) != 0) { func_1516972C(*(struct102 **)(arg0 + 0x134)); }
-  if (*(struct102 **)(v + 0x28)) { func_1516972C(*(struct102 **)(v + 0x28)); } // fakematch: pointer-typed test gives one load (s32 test double-loads like line above)
+  if (*(s32 *)(arg0 + 0x134) != 0) { node_destroy(*(struct102 **)(arg0 + 0x134)); }
+  if (*(struct102 **)(v + 0x28)) { node_destroy(*(struct102 **)(v + 0x28)); } // fakematch: pointer-typed test gives one load (s32 test double-loads like line above)
   if (*(u16 *)(v + 0x54) != 0) { func_100111C8(*(u16 *)(v + 0x54)); }
   if (*(u16 *)(v + 0x56) != 0) func_100111C8(*(u16 *)(v + 0x56));
 }
 
 void func_150FE22C(void *arg0) {
     func_150FE1AC(arg0);
-    func_1513CA6C(arg0);
+    effect3d_retire(arg0);
 }
 
 void func_150FE258(void *arg0) {
     func_150FE1AC(arg0);
-    func_1513CAA0(arg0);
+    effect3d_free(arg0);
 }

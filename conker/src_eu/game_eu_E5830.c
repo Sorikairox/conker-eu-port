@@ -3,8 +3,8 @@
 #include "variables.h"
 
 #ifdef NON_MATCHING
-void func_15142314(Mtx *arg0, s32 arg1, struct17 *arg2);
-f32 func_151423D8(u8 arg0);
+void mtx_get_translation(Mtx *arg0, s32 arg1, struct17 *arg2);
+f32 angle_byte_cos(u8 arg0);
 void func_15143134(void *arg0, void *arg1, void *arg2);
 void func_1515C7B4(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 void func_1504715C(void *out, u8 *obj);
@@ -108,9 +108,9 @@ void func_150B8020(u8 *obj, u8 owner, s32 arg2) {
     }
     model = *(Mtx **)(obj + 0x1D4);
     if (model != NULL) {
-        func_15142314(model, 4, (struct17 *)emit[0]);
-        func_15142314(*(Mtx **)(obj + 0x1D4), 5, (struct17 *)emit[1]);
-        func_15142314(*(Mtx **)(obj + 0x1D4), 0, (struct17 *)base);
+        mtx_get_translation(model, 4, (struct17 *)emit[0]);
+        mtx_get_translation(*(Mtx **)(obj + 0x1D4), 5, (struct17 *)emit[1]);
+        mtx_get_translation(*(Mtx **)(obj + 0x1D4), 0, (struct17 *)base);
     } else {
         base[0] = *(f32 *)(obj + 0x14);
         base[1] = *(f32 *)(obj + 0x18);
@@ -122,8 +122,8 @@ void func_150B8020(u8 *obj, u8 owner, s32 arg2) {
         emit[1][1] = base[1] + 130.0f;
         emit[1][2] = base[2];
     }
-    driftX = func_151423D8(*(u16 *)(obj + 0x76) >> 8);
-    driftZ = func_151423D8((*(u16 *)(obj + 0x76) >> 8) + 0x40);
+    driftX = angle_byte_cos(*(u16 *)(obj + 0x76) >> 8);
+    driftZ = angle_byte_cos((*(u16 *)(obj + 0x76) >> 8) + 0x40);
     driftX *= *(f32 *)(obj + 0x3C);
     driftZ *= *(f32 *)(obj + 0x3C);
 
@@ -206,10 +206,10 @@ void func_150B8020(u8 *obj, u8 owner, s32 arg2) {
         speed = func_150ADA68() * 30.0f * *(f32 *)(obj + 0x150) + 10.0f;
         a = func_150ADA20() & 0x7F;
         b = -0x20 - (func_150ADA20() & 0x1F);
-        sinA = func_151423D8(a);
-        cosA = func_151423D8(a - 0x40);
-        sinB = func_151423D8(b);
-        cosB = func_151423D8(b - 0x40);
+        sinA = angle_byte_cos(a);
+        cosA = angle_byte_cos(a - 0x40);
+        sinB = angle_byte_cos(b);
+        cosB = angle_byte_cos(b - 0x40);
         chunk.pos[0] = emit[i][0];
         chunk.pos[1] = emit[i][1];
         chunk.pos[2] = emit[i][2];

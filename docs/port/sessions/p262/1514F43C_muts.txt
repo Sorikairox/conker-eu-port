@@ -1,5 +1,5 @@
 # P262 func_1514F43C (character_fire_effect_start) mutants: sed % setup names
-s/func_15160A58(obj, 1, (s32 \*)sLightPos, 2,/func_15160A58(obj, 2, (s32 *)sLightPos, 2,/ % base
+s/light_create_obj_joint(obj, 1, (s32 \*)sLightPos, 2,/light_create_obj_joint(obj, 2, (s32 *)sLightPos, 2,/ % base
 s/0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3,/0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 2,/ % base
 s/0x12C, 2, 0xFF, 0, 0,/0x12C, 3, 0xFF, 0, 0,/ % base
 s/^                  0x19);/                  0x18);/ % base

@@ -4,7 +4,7 @@ s/if (v == NULL) {/if (v != NULL) {/ %
 s/if (!(flags \& 2)) {/if (!(flags \& 1)) {/ %
 s/v + 0x10, x, y, z, size, arg7, radius,/v + 0x10, x, z, y, size, arg7, radius,/ %
 s/\[v\[0x58\]\] + 6)) == 0) {/[v[0x58]] + 8)) == 0) {/ %
-s/func_1516972C((struct102 \*) v);/;/ %
+s/node_destroy((struct102 \*) v);/;/ %
 s/r = radius;/r = (u16) radius;/ %
 s/h = (s32) y;/h = (s32) x;/ %
 s/\*(s16 \*) (v + 0x32) = h;/;/ %

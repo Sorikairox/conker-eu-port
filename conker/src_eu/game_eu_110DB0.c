@@ -13,7 +13,7 @@ s32 func_150E35A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     s8 var_a1;
     u8 *temp_v0;
 
-    temp_v0 = func_15167A68(0x27, 0, 0x80, 1, 0xFFU, 1U);
+    temp_v0 = node_alloc(0x27, 0, 0x80, 1, 0xFFU, 1U);
     if (temp_v0 == NULL) {
         return 0;
     }
@@ -153,7 +153,7 @@ void func_150E3A94(struct102 *arg0) {
         *(u16 *)((u8 *)arg0 + 0x4A) = 0;
         func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, (s16)(s32)*(f32 *)((u8 *)arg0 + 0x28), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x2C), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x30), 0x3E8, 0x1770);
     }
-    func_1516972C(arg0);
+    node_destroy(arg0);
 }
 
 void func_150E3B5C(s32 arg0) {

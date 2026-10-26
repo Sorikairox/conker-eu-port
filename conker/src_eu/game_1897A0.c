@@ -4,7 +4,8 @@
 #include "variables.h"
 
 
-void *func_1515C2F0(s32 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5) {
+/* was func_1515C2F0 */
+void *streak_spawn(s32 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5) {
     u8 *temp_v0;
 
     arg0[4] = 10;
@@ -20,13 +21,14 @@ void *func_1515C2F0(s32 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5
 /* P175 */
 extern s32 (*D_8008B420[])(u8 *, u8 *); /* motion handlers; D_8008B424 = the same table shifted by one */
 
-// particle_streak_step: per-frame step of a streak particle (kind 8 of D_8008A5A0, created by func_1515C2F0).
+// particle_streak_step: per-frame step of a streak particle (kind 8 of D_8008A5A0, created by streak_spawn).
 /* The points (obj +0x94, 0x10 bytes: x, y, z, vy) form a ring of +0x25 entries from the oldest +0x2D to the head
  * +0x2E (exclusive), count +0x2C. Each live point moves by the record's velocity (rec = obj +0x98: vx +4, vz +0xC)
  * and falls by the gravity rec +0x10 into its vy, all scaled by the frame time D_800BE9A4. Then the motion handler
  * rec +0x38 (D_8008B420, -1 = none) runs with (obj, rec); the oldest point is stored in obj +0x54 (0 when the ring
  * is empty). Returns 0 when the handler ends the particle, else 1. */
-s32 func_1515C388(u8 *obj) {
+/* was func_1515C388 */
+s32 streak_update_points(u8 *obj) {
     u8 *rec = *(u8 **) (obj + 0x98);
     u8 *pts = *(u8 **) (obj + 0x94);
     u8 done = 0;
@@ -67,11 +69,12 @@ s32 func_1515C388(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C388.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/streak_update_points.s")
 #endif
 extern s32 (*D_8008B424[])(u8 *, u8 *);
 
-s32 func_1515C534(u8 *arg0) {
+/* was func_1515C534 */
+s32 streak_update_fade(u8 *arg0) {
     u8 *b;
     s32 i;
     u8 done;
@@ -109,7 +112,7 @@ void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
 void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
 s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
@@ -166,7 +169,8 @@ extern s32 D_800A4EA8[];  /* render mode pairs (2 words each) */
  * rec +0x21, geometry mode rec +0x24 / +0x28, the env / prim colours from rec +0x15..+0x1F (func_151441A4 /
  * func_151442FC), render mode 0x80000 | 0x2CA0 | D_800D30BC (| 0x100000 with rec +0x14 flag 1) with the
  * D_800A4EA8 entry rec +0x20. Returns the display list end; draws nothing with fewer than 2 points. */
-s32 func_1515C6F4(u8 *obj, s32 gfx, s16 arg2) {
+/* was func_1515C6F4 */
+s32 streak_draw(u8 *obj, s32 gfx, s16 arg2) {
     u8 *rec;
     u8 *pts;
     f32 *cam;
@@ -206,7 +210,7 @@ s32 func_1515C6F4(u8 *obj, s32 gfx, s16 arg2) {
     func_151442FC(&r1, &g1, &b1, &a1, rec[0x1B], rec[0x1C], rec[0x1D], rec[0x1E], rec[0x17], rec[0x18], rec[0x19],
                   rec[0x1A], rec[0x1F], rec[0x16]);
     gfx = func_15142E24(gfx, D_80091228, 0, 0, 0, 0, 0x42, 0, 0, &flag, 0x3E);
-    gfx = func_1513F4E4(gfx, rec[0x21], &flag);
+    gfx = gfx_set_combine_mode(gfx, rec[0x21], &flag);
     gfx = func_15142B7C(gfx, *(s32 *) (rec + 0x24), *(s32 *) (rec + 0x28));
     gfx = func_15142CF0(gfx, 0, 0, r0, g0, b0, a0, &flag);
     gfx = func_15142C10(gfx, r1, g1, b1, a1, &flag);
@@ -277,10 +281,11 @@ s32 func_1515C6F4(u8 *obj, s32 gfx, s16 arg2) {
 #undef STREAK_VTX
 #undef STREAK_NORMAL
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C6F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/streak_draw.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1515CF9C(u8 *arg0, u8 *arg1) {
+/* was func_1515CF9C */
+s32 streak_push_point(u8 *arg0, u8 *arg1) {
     s32 temp_v1;
     s8 temp_v0;
     u8 *temp_t1;
@@ -304,9 +309,9 @@ s32 func_1515CF9C(u8 *arg0, u8 *arg1) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515CF9C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/streak_push_point.s")
 #endif
-// s32 func_1515CF9C(void *arg0, void *arg1) {
+// s32 streak_push_point(void *arg0, void *arg1) {
 //     s32 temp_v1;
 //     s8 temp_v0;
 //     void *temp_t1;
@@ -330,7 +335,8 @@ s32 func_1515CF9C(u8 *arg0, u8 *arg1) {
 //     return 1;
 // }
 
-s32 func_1515D030(struct_eu_1897A0 *arg0, s32 arg1) {
+/* was func_1515D030 */
+s32 streak_pop_point(struct_eu_1897A0 *arg0, s32 arg1) {
     s32 ret = 1;
 
     if (arg0->unk2C >= 3) {
@@ -345,7 +351,8 @@ s32 func_1515D030(struct_eu_1897A0 *arg0, s32 arg1) {
     return ret;
 }
 
-struct260 *func_1515D088(s32 *arg0) {
+/* was func_1515D088 */
+struct260 *fx_source_emitter_spawn(s32 *arg0) {
     struct260 *temp_v0;
     struct {
         s32 *unk0;
@@ -371,7 +378,8 @@ struct260 *func_1515D088(s32 *arg0) {
 void func_15143794(s16, s16, f32, void *);
 s32 func_151530A8(s32 *, u8, s32);
 
-void func_1515D130(u8 *arg0) {
+/* was func_1515D130 */
+void fx_source_emitter_update(u8 *arg0) {
     struct {
         s32 u5C;
         s32 u60;
@@ -497,5 +505,5 @@ void func_1515D130(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515D130.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/fx_source_emitter_update.s")
 #endif

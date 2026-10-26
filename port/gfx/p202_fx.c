@@ -2,7 +2,7 @@
  *  - func_1518D1C0 character_effect_attach (cross-TU calls only: game_eu_17A800 character spawn handlers, game_eu_51190
  *    event tracks, game_eu_1C1A20 impacts, game_981E0): frame, owner, owner id (+0x3B), position, type, time, clear,
  *    view, returned record. First N calls in detail, then every 64th.
- *  - func_1513D524 (particle spawn, all callers): count per 500 frames, to see whether effects spawn anything. */
+ *  - effect3d_spawn_default (particle spawn, all callers): count per 500 frames, to see whether effects spawn anything. */
 #include <stdint.h>
 #include "../ultra/pc_mem.h"
 
@@ -29,15 +29,15 @@ void *__wrap_func_1518D1C0(void *obj, short type, short time, unsigned char clea
     return r;
 }
 
-void *__real_func_1513D524(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
-void *__wrap_func_1513D524(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8) {
+void *__real_effect3d_spawn_default(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+void *__wrap_effect3d_spawn_default(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8) {
     static unsigned n, nok, last;
-    void *r = __real_func_1513D524(a0, a1, a2, a3, a4, a5, a6, a7, a8);
+    void *r = __real_effect3d_spawn_default(a0, a1, a2, a3, a4, a5, a6, a7, a8);
     if (!on()) return r;
     n++; if (r) nok++;
     if (port_frame_count / 500 != last) {
         last = port_frame_count / 500;
-        port_log("[p202fx] spawn func_1513D524: %u calls, %u records by frame %u\n", n, nok, port_frame_count);
+        port_log("[p202fx] spawn effect3d_spawn_default: %u calls, %u records by frame %u\n", n, nok, port_frame_count);
     }
     return r;
 }

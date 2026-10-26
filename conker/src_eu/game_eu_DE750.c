@@ -60,7 +60,7 @@ void func_150B1138(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 void func_150B11C0(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 #ifdef NON_MATCHING
@@ -136,7 +136,7 @@ void func_150B1200(u8 *fx) {
         n2 = func_150ADA20();
         r2 = func_150ADA68();
         r3 = func_150ADA68();
-        func_151D9014(pos, vel, 5, r * 0.178f + -0.44200003f, n1 % 21 + 0x14, n2 % 101 + 0x9B, r2 * 50.0f + 80.0f,
+        impact_dust_cloud_spawn(pos, vel, 5, r * 0.178f + -0.44200003f, n1 % 21 + 0x14, n2 % 101 + 0x9B, r2 * 50.0f + 80.0f,
                       r3 < 0.044000003f, 1.4f, 1.4f, 1, 0, 1, 0, fx[0xC], fx[1]);
         *(f32 *) (fx + 0x30) -= 1.0f;
     } while (*(f32 *) (fx + 0x30) > 1.0f);

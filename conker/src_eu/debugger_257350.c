@@ -5,8 +5,8 @@
 #include <stdarg.h>
 #include "libc/stdlib.h"
 
-s32 func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2); // proutSprintf
-s32 func_16001BB4(void *prout, char *buf, const char *fmt, va_list args); // _Printf
+s32 debug_sprintf_put(u8 *arg0, u8 *arg1, u32 arg2); // proutSprintf
+s32 debug_printf_core(void *prout, char *buf, const char *fmt, va_list args); // _Printf
 
 // libultra xstdio.h
 typedef struct {
@@ -39,7 +39,8 @@ extern u8 D_16003CCC[]; // "0123456789ABCDEF"
 
 
 // whats wrong with bcopy?
-u8* func_16001AD0(u8 *arg0, u8 *arg1, u32 arg2) {
+/* was func_16001AD0 */
+u8* debug_memcpy(u8 *arg0, u8 *arg1, u32 arg2) {
     u8 *tmp0 = arg0;
     u8 *tmp1 = arg1;
 
@@ -52,7 +53,8 @@ u8* func_16001AD0(u8 *arg0, u8 *arg1, u32 arg2) {
 }
 
 // strlen
-s32 func_16001B00(u8 *arg0) {
+/* was func_16001B00 */
+s32 debug_strlen(u8 *arg0) {
     u8 *p = arg0;
     s32 len = 0;
     while (*p != 0) {
@@ -63,20 +65,22 @@ s32 func_16001B00(u8 *arg0) {
 }
 
 // sprintf
-s32 func_16001B34(char *buf, const char *fmt, ...) {
+/* was func_16001B34 */
+s32 debug_sprintf(char *buf, const char *fmt, ...) {
     s32 ret;
     va_list args;
 
     va_start(args, fmt);
-    ret = func_16001BB4(func_16001B8C, buf, fmt, args);
+    ret = debug_printf_core(debug_sprintf_put, buf, fmt, args);
     if (ret >= 0) {
         buf[ret] = 0;
     }
     return ret;
 }
 
-s32 func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2) {
-    return func_16001AD0(arg0, arg1, arg2) + arg2;
+/* was func_16001B8C */
+s32 debug_sprintf_put(u8 *arg0, u8 *arg1, u32 arg2) {
+    return debug_memcpy(arg0, arg1, arg2) + arg2;
 }
 
 // libultra libc xprintf.c _Printf (old version: (c = *s++) > 0 scan, as GoldenEye)
@@ -109,10 +113,11 @@ extern char D_16003C94[33]; // zeroes
 extern const char D_16004800[]; // "hlL"
 extern const char D_16004804[6]; // fchar
 extern const u32 D_1600480C[6]; // fbit
-void func_160021FC(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
+void debug_printf_put_arg(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 char *strchr(const char *, s32);
 
-s32 func_16001BB4(void *prout, char *arg, const char *fmt, va_list args)
+/* was func_16001BB4 */
+s32 debug_printf_core(void *prout, char *arg, const char *fmt, va_list args)
 {
 #define char unsigned char
 	_Pft x;
@@ -173,7 +178,7 @@ s32 func_16001BB4(void *prout, char *arg, const char *fmt, va_list args)
 			++s;
 		}
 
-		func_160021FC(&x, &args, *s, ac);
+		debug_printf_put_arg(&x, &args, *s, ac);
 
 		x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
 
@@ -200,12 +205,13 @@ s32 func_16001BB4(void *prout, char *arg, const char *fmt, va_list args)
 }
 #undef char
 // uses jump table
-void func_160033A8(_Pft *args, u8 type);
-void func_1600288C(_Pft *px, u8 code);
+void debug_printf_litob(_Pft *args, u8 type);
+void debug_printf_ldtob(_Pft *px, u8 code);
 #define char unsigned char
 
 // rodata_inject: late_align8 0x25ADA0
-void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
+/* was func_160021FC */
+void debug_printf_put_arg(_Pft *x, va_list *args, char type, char *buff)
 {
 	x->n0 = x->nz0 = x->n1 = x->nz1 = x->n2 = x->nz2 = 0;
 
@@ -237,7 +243,7 @@ void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
 
 		x->s = (char *)&buff[x->n0];
 
-		func_160033A8(x, type);
+		debug_printf_litob(x, type);
 		break;
 	case 'x':
 	case 'X':
@@ -266,7 +272,7 @@ void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
 		}
 
 		x->s = (char *)&buff[x->n0];
-		func_160033A8(x, type);
+		debug_printf_litob(x, type);
 		break;
 	case 'e':
 	case 'f':
@@ -284,7 +290,7 @@ void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
 		}
 
 		x->s = (char *)&buff[x->n0];
-		func_1600288C(x, type);
+		debug_printf_ldtob(x, type);
 		break;
 	case 'n':
 		if (x->qual == 'h') {
@@ -300,11 +306,11 @@ void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
 	case 'p':
 		x->v.ll = (long)va_arg(*args, void *);
 		x->s = (char *)&buff[x->n0];
-		func_160033A8(x, 'x');
+		debug_printf_litob(x, 'x');
 		break;
 	case 's':
 		x->s = va_arg(*args, char *);
-		x->n1 = func_16001B00(x->s);
+		x->n1 = debug_strlen(x->s);
 
 		if (x->prec >= 0 && x->n1 > x->prec) {
 			x->n1 = x->prec;
@@ -322,18 +328,19 @@ void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
 #undef char
 // contains delay slot
 #ifdef NON_MATCHING
-/* P281: readable C for func_1600288C (compiled C, 296 insns): the debugger's _Ldtob; its rodata_inject tables are
+/* P281: readable C for debug_printf_ldtob (compiled C, 296 insns): the debugger's _Ldtob; its rodata_inject tables are
    referenced by symbol (P129 practice), the late_rodata 1e8 is a literal (exact). */
 extern const f64 D_16004828[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
 extern u8 D_16004870[];          /* "NaN" */
 extern u8 D_16004874[];          /* "Inf" */
-s16 func_16002D2C(s16 *pex, f64 *px);
-void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
+s16 debug_printf_ldunscale(s16 *pex, f64 *px);
+void debug_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 // debug_format_double_digits (the debugger's copy of libc _Ldtob, same code as func_10001550): converts the double in px->v for printf conversion `code` (e f g E G): default
 // precision 6 (1 for %g with precision 0), "NaN" / "Inf" copied as is, otherwise scales the value by powers of ten
 // to 8-digit groups, generates up to 19 digits, drops leading zeros, rounds to the significant digit count and hands
-// the digits to func_16002DE4 (_Genld).
-void func_1600288C(_Pft *px, u8 code) {
+// the digits to debug_printf_genld (_Genld).
+/* was func_1600288C */
+void debug_printf_ldtob(_Pft *px, u8 code) {
     u8 buf[0x20];
     u8 *p;
     f64 val;
@@ -357,10 +364,10 @@ void func_1600288C(_Pft *px, u8 code) {
     } else if (px->prec == 0 && (code == 'g' || code == 'G')) {
         px->prec = 1;
     }
-    err = func_16002D2C(&xexp, &px->v.ld);
+    err = debug_printf_ldunscale(&xexp, &px->v.ld);
     if (err > 0) {
         px->n1 = 3;
-        func_16001AD0((u8 *) px->s, (err == 2) ? D_16004870 : D_16004874, 3); /* memcpy */
+        debug_memcpy((u8 *) px->s, (err == 2) ? D_16004870 : D_16004874, 3); /* memcpy */
         return;
     }
     if (err == 0) {
@@ -434,13 +441,14 @@ void func_1600288C(_Pft *px, u8 code) {
             }
         }
     }
-    func_16002DE4(px, code, p, nsig, xexp);
+    debug_printf_genld(px, code, p, nsig, xexp);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/func_1600288C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/debug_printf_ldtob.s")
 #endif
 // _Ldunscale
-s16 func_16002D2C(s16 *pex, f64 *px) {
+/* was func_16002D2C */
+s16 debug_printf_ldunscale(s16 *pex, f64 *px) {
     u16 *ps = (u16 *)px;
     s16 xchar = (ps[0] & 0x7FF0) >> 4;
 
@@ -459,7 +467,8 @@ s16 func_16002D2C(s16 *pex, f64 *px) {
     }
 }
 // _Genld
-void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
+/* was func_16002DE4 */
+void debug_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     const u8 point = '.';
 
     if (nsig <= 0) {
@@ -489,10 +498,10 @@ void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
             if (px->prec < nsig) {
                 nsig = px->prec;
             }
-            func_16001AD0(&px->s[px->n1], p, px->n2 = nsig);
+            debug_memcpy(&px->s[px->n1], p, px->n2 = nsig);
             px->nz2 = px->prec - nsig;
         } else if (nsig < xexp) {
-            func_16001AD0(&px->s[px->n1], p, nsig);
+            debug_memcpy(&px->s[px->n1], p, nsig);
             px->n1 += nsig;
             px->nz1 = xexp - nsig;
             if (0 < px->prec || px->flags & FLAGS_HASH) {
@@ -501,7 +510,7 @@ void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
             }
             px->nz2 = px->prec;
         } else {
-            func_16001AD0(&px->s[px->n1], p, xexp);
+            debug_memcpy(&px->s[px->n1], p, xexp);
             px->n1 += xexp;
             nsig -= xexp;
             if (0 < px->prec || px->flags & FLAGS_HASH) {
@@ -510,7 +519,7 @@ void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
             if (px->prec < nsig) {
                 nsig = px->prec;
             }
-            func_16001AD0(&px->s[px->n1], p + xexp, nsig);
+            debug_memcpy(&px->s[px->n1], p + xexp, nsig);
             px->n1 += nsig;
             px->nz1 = px->prec - nsig;
         }
@@ -532,7 +541,7 @@ void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
             if (px->prec < --nsig) {
                 nsig = px->prec;
             }
-            func_16001AD0(&px->s[px->n1], p, nsig);
+            debug_memcpy(&px->s[px->n1], p, nsig);
             px->n1 += nsig;
             px->nz1 = px->prec - nsig;
         }
@@ -563,7 +572,8 @@ void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     }
 }
 // _Litob
-void func_160033A8(_Pft *args, u8 type) {
+/* was func_160033A8 */
+void debug_printf_litob(_Pft *args, u8 type) {
     char buff[0x18];
     const u8 *digs;
     s32 base;
@@ -587,7 +597,7 @@ void func_160033A8(_Pft *args, u8 type) {
         buff[--i] = digs[qr.rem];
     }
     args->n1 = 0x18 - i;
-    func_16001AD0(args->s, buff + i, args->n1);
+    debug_memcpy(args->s, buff + i, args->n1);
     if (args->n1 < args->prec) {
         args->nz0 = args->prec - args->n1;
     }

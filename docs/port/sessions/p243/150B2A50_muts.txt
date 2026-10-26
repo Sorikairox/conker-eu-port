@@ -1,9 +1,9 @@
 # P243 func_150B2A50 (emit_point_spark) mutants: sed % setup names
-s/func_151423D8((a - 0x40) \& 0xFF)/func_151423D8((a - 0x3F) \& 0xFF)/ % base
-s/sa = func_151423D8(a \& 0xFF)/sa = func_151423D8((a + 1) \& 0xFF)/ % base
+s/angle_byte_cos((a - 0x40) \& 0xFF)/angle_byte_cos((a - 0x3F) \& 0xFF)/ % base
+s/sa = angle_byte_cos(a \& 0xFF)/sa = angle_byte_cos((a + 1) \& 0xFF)/ % base
 s/ 21U - 30/ 21U - 29/ % base neg
 s/ 21U - 30/ 20U - 30/ % base neg
-s/func_151423D8((pitch - 0x40) \& 0xFF)/func_151423D8((pitch - 0x41) \& 0xFF)/ % base
+s/angle_byte_cos((pitch - 0x40) \& 0xFF)/angle_byte_cos((pitch - 0x41) \& 0xFF)/ % base
 s/spd = 10.0f \*/spd = 11.0f */ % base
 s/sp.vel\[0\] = spd \* ca;/sp.vel[0] = spd * sa;/ % base
 s/sp.vel\[1\] = -10.0f \* cp;/sp.vel[1] = 10.0f * cp;/ % base

@@ -6,7 +6,7 @@ s/    obj\[0x328\] = 0;/    obj[0x328] = 1;/ % norider
 s/    if (rider == NULL) {/    if (rider != NULL) {/ % p0
 s/    k = (rider\[0x23D\] == 3) ? 1 : 0;/    k = (rider[0x23D] == 2) ? 1 : 0;/ % p3
 s/    k = (rider\[0x23D\] == 3) ? 1 : 0;/    k = 0;/ % p3
-s/    func_151254F4((struct108 \*) rider, k);/    func_151254F4((struct108 *) rider, 0);/ % p3
+s/    camera_set_followed_obj((struct108 \*) rider, k);/    camera_set_followed_obj((struct108 *) rider, 0);/ % p3
 s/    (\*(u8 \*\*) (obj + 0x31C))\[0x78\] = 0x29;/    (*(u8 **) (obj + 0x31C))[0x78] = 0x28;/ % p0
 s/    D_800BE748\[k \* 3\] \&= ~0x10;/    D_800BE748[k * 2] \&= ~0x10;/ % p3
 s/    D_800BE748\[k \* 3\] \&= ~0x10;/    D_800BE748[k * 3] \&= ~0x20;/ % p0

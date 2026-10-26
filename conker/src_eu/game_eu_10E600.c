@@ -21,13 +21,13 @@ s32 func_151D5AC4(u8 *pos, u8 arg1, s32 arg2);
 void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2);
 void func_150E892C(f32 *arg0, s16 arg1, u8 arg2, s32 arg3);
 s32 func_15154728(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 arg5, s32 arg6);
-s32 func_15136C3C(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
+s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
 s32 func_151D4684(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4, s32 sound1, s32 sound2, s32 flags);
 /* object_explode: big explosion at an object (obj NULL: nothing). Two explosion sounds (0x2BB / 0x2BA, not when
  * D_800C35EA == 1); probes the ground below (from 100 above to 200 below the blast point, 20 above the object) and,
  * when found, leaves a scorch decal there (func_150E856C); shock wave / flash / smoke / sparks effects
  * (func_151D5404, func_151D58E4, func_151D5AC4, func_151D45A4), debris at the ground point (or the blast point),
- * a light (func_15154728), the object's hit effects (func_15136C3C) and the blast damage (func_151D4684, sounds
+ * a light (func_15154728), the object's hit effects (object_hit_effects) and the blast damage (func_151D4684, sounds
  * 0x16 / 0x15). `owner` / `arg2` are passed through to the effects. */
 void func_150E0DF0(u8 *obj, u8 owner, s32 arg2) {
     HitInfo_150E0DF0 hit;
@@ -72,7 +72,7 @@ void func_150E0DF0(u8 *obj, u8 owner, s32 arg2) {
     r = func_150ADA68();
     a = func_150ADA20();
     func_15154728(pos, r * 4.0f + 12.0f, 1.6409999132156372f, (f32) (a % 56U + 200), 0.0f, owner, arg2);
-    func_15136C3C(obj, 1, 1, 1, 1, 0, owner, arg2);
+    object_hit_effects(obj, 1, 1, 1, 1, 0, owner, arg2);
     func_151D4684(pos, NULL, (struct127 *) obj, (struct127 *) obj, 0, 0x16, 0x15, 0);
 }
 #else

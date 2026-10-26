@@ -10,7 +10,7 @@ void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
     u8 *var_s1;
     s32 temp;
 
-    temp_v0 = func_15167A68(0xD, arg5, 0xE0, 1, (u8) (s32) arg4, 1U);
+    temp_v0 = node_alloc(0xD, arg5, 0xE0, 1, (u8) (s32) arg4, 1U);
     if (temp_v0 != NULL) {
         (*(s8 *)((u8 *)temp_v0 + 0xD0)) = 0xA;
         (*(s16 *)((u8 *)temp_v0 + 0xD2)) = (s16) arg0;
@@ -38,12 +38,12 @@ void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
 
 #ifdef NON_MATCHING
 extern s32 D_8008CDEC;
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
+void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
 // spark_burst_tick: per-frame countdown of a spark burst object (obj+0xD0). At 5 it emits one particle record per
 // joint matrix (3 matrices at obj+0x10, 0x40 apart): the point (-400, 10, 0) in that matrix (func_150A7E40) becomes the
 // record position, with a random 0x55..0xD4 value, size obj+0xD8 * 4000 and the owner bytes obj+0xC / obj+1
-// (func_15167D84). At 0 the object is freed (func_1516972C).
+// (node_spawn_sprite). At 0 the object is freed (node_destroy).
 void func_eu_151670C0(u8 *obj) {
     struct {
         s32 u00;
@@ -106,10 +106,10 @@ void func_eu_151670C0(u8 *obj) {
             rec.pos[0] = (s32) x;
             rec.pos[1] = (s32) y;
             rec.pos[2] = (s32) z;
-            func_15167D84(&rec, 0, 0, -1, obj[0xC], obj[1]);
+            node_spawn_sprite(&rec, 0, 0, -1, obj[0xC], obj[1]);
         }
     } else if (obj[0xD0] == 0) {
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
     }
 }
 #else

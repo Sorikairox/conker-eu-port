@@ -10,10 +10,10 @@ s/style = 5;/style = 6;/ % s5_93
 s/if (alt)/if (!alt)/ % s1_05 s1_05alt
 s/pos\[1\] = D_800CC2C4/pos[1] = D_800CC2C8/ % s0_00 fire06
 s/pos\[0\] = D_800CC2C0/pos[0] = D_800CC2C4/ % s0_00 fire06
-s/func_151DC484(pos, mtx/func_151DC484(pos, pos/ % s0_00alt
-s/func_151DC260(pos, mtx, style, view/func_151DC260(pos, mtx, style, 0xFF/ % s0_view
-s/func_151DC484(pos, mtx, style, view, group)/func_151DC484(pos, mtx, style, view, 1)/ % s0_00alt
-s/func_151DC260(pos, mtx, style, view, group)/func_151DC260(pos, mtx, style, view, 1)/ % s0_view
+s/impact_blast_spawn_small(pos, mtx/impact_blast_spawn_small(pos, pos/ % s0_00alt
+s/impact_blast_spawn_large(pos, mtx, style, view/impact_blast_spawn_large(pos, mtx, style, 0xFF/ % s0_view
+s/impact_blast_spawn_small(pos, mtx, style, view, group)/impact_blast_spawn_small(pos, mtx, style, view, 1)/ % s0_00alt
+s/impact_blast_spawn_large(pos, mtx, style, view, group)/impact_blast_spawn_large(pos, mtx, style, view, 1)/ % s0_view
 s/ case 0xB6:// % s0_B6
 s/ case 0xB1:// % s1_B1
 s/ case 0x8E:// % fire8E

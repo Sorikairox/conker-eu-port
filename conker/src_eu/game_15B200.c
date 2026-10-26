@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-void func_1512DD50(u8 *arg0) {
+/* was func_1512DD50 */
+void camera_orbit_point_init(u8 *arg0) {
     struct {
         f32 u20;
         f32 u24;
@@ -61,9 +62,9 @@ void func_1512DD50(u8 *arg0) {
     (*(s8 *)((u8 *)temp_v0 + 0)) = (s8) (*(s32 *)((u8 *)temp_v1 + 0x1C));
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/func_1512DD50.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/camera_orbit_point_init.s")
 #endif
-// void func_1512DD50(struct108 *arg0) {
+// void camera_orbit_point_init(struct108 *arg0) {
 //     s32 pad;
 //     struct17 tmp;
 //
@@ -114,7 +115,8 @@ float sqrtf(float);
 // / (-dx, -dz) for modes 0..3 (the asm leaves them unset for other modes). With +0x23C set the camera position
 // +0x2F8 jumps to the point and the rates +0x898 / +0x89C become 40; else the rates ease to 10 (func_150498A0,
 // 0.6, 1.4, frame step +0x7B4) and the position eases towards the point (velocity +0x3C0).
-void func_1512DEA4(struct108 *arg0) {
+/* was func_1512DEA4 */
+void camera_orbit_point_update(struct108 *arg0) {
     u8 *p = (u8 *) arg0;
     f32 *c = (f32 *) (p + 0x870); /* c[4] = +0x880 ... */
     f32 dx, dy, dz;
@@ -165,5 +167,5 @@ void func_1512DEA4(struct108 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/func_1512DEA4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/camera_orbit_point_update.s")
 #endif

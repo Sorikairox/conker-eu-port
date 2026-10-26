@@ -9,17 +9,17 @@ typedef struct {
     u8 hit;         /* +0x59: what was hit (0 = nothing, 1 = world, >= 2 = an object) */
     u8 pad5A[2];
 } Ray_60E30;
-/* data at +0x18 (func_15160CDC): object, its unique id, attach point, offset (+8), ray end (+0x14), scale (+0x20),
+/* data at +0x18 (light_create_obj_beam): object, its unique id, attach point, offset (+8), ray end (+0x14), scale (+0x20),
  * flags (+0x24: 1 = cast, 2 = poke kind 0x9E). */
 
-/* light_beam_update: P237. D_8008B0F0 handler for the beam lights of func_15160CDC. Ends the light (0) when its
+/* light_beam_update: P237. D_8008B0F0 handler for the beam lights of light_create_obj_beam. Ends the light (0) when its
  * object is gone or was reused (unique id). Without attach matrices (+0x1D4), without flag 1, or for a hidden
  * object (+0x74 & 0xF == 0xF), the light sits at the object position (light +0xE / +0x10 / +0x12) with brightness
  * +0x2F = 0 and +9 = 1. Else the offset and end points go through attach matrix `point` (func_15145EA4), and when
  * the direction between them is not degenerate (func_15145128) a ray is cast from the start along it
  * (func_15081A90): no hit = as above; a hit moves the light to the hit point with brightness
  * clamp(scale * t, 0, 255) and +9 = 0, and with flag 2 a hit object of kind 0x9E gets +0x2E4 = 1. Returns 1. */
-s32 func_15160E30(struct225 *arg0) {
+s32 light_beh_beam_raycast(struct225 *arg0) {
     u8 *obj = *(u8 **) ((u8 *) arg0 + 0x18);
     u8 *s = (u8 *) arg0 + 0x18;
     f32 *src[2];

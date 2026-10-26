@@ -6,9 +6,9 @@
 \#^    func_151D6310((s32 \*) (arg0 + 0x84), slot, (arg0\[0x25\] << 5) + 0xA0, (s32 \*) &vtx, NULL);$#s/slot,/0,/
 \#^    if (vtx == NULL) {$#s/==/!=/
 \#^    flag = 1;$#s/1/2/
-\#^        func_1513F4E4(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0xBC\],/0xBB],/
-\#^        func_1513F4E4(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0, 0xBC, 0, 0/0, 0xBB, 0, 0/
-\#^        func_1513F4E4(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/&flag, 3)/\&flag, 2)/
+\#^        gfx_set_combine_mode(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0xBC\],/0xBB],/
+\#^        gfx_set_combine_mode(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0, 0xBC, 0, 0/0, 0xBB, 0, 0/
+\#^        gfx_set_combine_mode(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/&flag, 3)/\&flag, 2)/
 \#^                                    0x220005, 0x1D0600),$#s/0x1D0600/0x1D0601/
 \#^                      0x4C, &flag),$#s/0x4C/0x4E/
 \#^        D_800D30BC | 0x80000 | 0x2CA0, \*(s32 \*) (D_800A4EA8 + 0xC) | \*(s32 \*) (D_800A4EA8 + 8), &flag);$#s/0x2CA0/0x2CA1/

@@ -8,16 +8,17 @@
 // mesh_effect_spawn: spawns an animated mesh effect record (P195). The 0x3C-byte spawn block p (copied to rec + 0x10) names
 // a model by its +0x30 / +0x34 words (func_1502B6BC, kind 2 lookup); the model header starts with its display list
 // pointer, followed at +0x28 by the vertex block (size = dl - header - 0x28). The record (kind 0x54 when arg1 != 0,
-// else 0x38; func_15167A68 with group arg4 and priority arg3) gets D_80082FA0 + 1 double-buffered vertex copies at
+// else 0x38; node_alloc with group arg4 and priority arg3) gets D_80082FA0 + 1 double-buffered vertex copies at
 // +0xF8 (+0x58[i] / +0x68[i] point at the two halves), +0x4C = header, +0x50 = the copies' size, +0x54 = the display
 // list, which is registered with func_1510D3E0 (age 0x3E). arg2 extra bytes follow the copies. Returns NULL when the
-// pool is full. Callers: func_15010A60 (ambient fires), func_15108850, func_1513BAE8, game_eu_1E7CC0.
+// pool is full. Callers: func_15010A60 (ambient fires), func_15108850, water_effect_spawn, game_eu_1E7CC0.
 s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
 s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
-void *func_15167A68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
+void *node_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
 void *memcpy(void *, const void *, s32);
 
-struct102 *func_1513B5E0(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+/* was func_1513B5E0 */
+struct102 *mesh_effect_spawn(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     s32 found;
     s32 count;
     u8 *hdr;
@@ -30,7 +31,7 @@ struct102 *func_1513B5E0(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     hdr = (u8 *) func_1502B6BC(&found, 0, &count, 2, *(s32 *) ((u8 *) p + 0x30), *(s32 *) ((u8 *) p + 0x34));
     size = *(s32 *) hdr - (s32) hdr - 0x28;
     total = size * 2 * (D_80082FA0 + 1);
-    rec = func_15167A68(arg1 ? 0x54 : 0x38, arg4, arg2 + total + 0xF8, 2, arg3, 1);
+    rec = node_alloc(arg1 ? 0x54 : 0x38, arg4, arg2 + total + 0xF8, 2, arg3, 1);
     if (rec == NULL) {
         return NULL;
     }
@@ -50,9 +51,10 @@ struct102 *func_1513B5E0(void *p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     return (struct102 *) rec;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513B5E0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/mesh_effect_spawn.s")
 #endif
-void func_1513B798(u8 *arg0) {
+/* was func_1513B798 */
+void mesh_effect_update(u8 *arg0) {
     s32 pad;
     u8 ret = 0;
 
@@ -66,11 +68,11 @@ void func_1513B798(u8 *arg0) {
         ret = 1;
     }
     if (ret) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 // NON-MATCHING: only the stack slot of done differs (0x1B vs 0x1F)
-// void func_1513B798(struct_eu_168A90 *arg0) {
+// void mesh_effect_update(struct_eu_168A90 *arg0) {
 //     u8 done;
 //
 //     done = FALSE;
@@ -88,13 +90,14 @@ void func_1513B798(u8 *arg0) {
 //         }
 //     }
 //     if (done) {
-//         func_1516972C(arg0);
+//         node_destroy(arg0);
 //     }
 // }
 #ifdef NON_MATCHING
 extern s32 D_80089FC8;
 
-u8 *func_1513B83C(u8 *arg0, u8 *arg1, s16 arg2) {
+/* was func_1513B83C */
+u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     s16 var_a2;
     s32 temp_v0_2;
     s8 temp_v0;
@@ -126,46 +129,52 @@ u8 *func_1513B83C(u8 *arg0, u8 *arg1, s16 arg2) {
     return temp_a3 + 8;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513B83C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/mesh_effect_draw.s")
 #endif
-s32 func_1513B968(s32 arg0, s32 arg1) {
+/* was func_1513B968 */
+s32 mesh_effect_load_identity(s32 arg0, s32 arg1) {
     // FIXME: &arg0->unk_120[D_800BE9C0]
     func_150A7B80(arg0 + 120 + (D_800BE9C0 << 6));
     return 1;
 }
 
-void func_1513B9A8(struct132 *arg0) {
+/* was func_1513B9A8 */
+void mesh_effect_retire(struct132 *arg0) {
     func_100043B4(arg0->unk4C, 4);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
-void func_1513B9DC(struct132 *arg0) {
+/* was func_1513B9DC */
+void mesh_effect_free(struct132 *arg0) {
     func_100043B4(arg0->unk4C, 4);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 #ifdef NON_MATCHING
 // object_mode_dispatch_a: runs the D_80089C44 handler picked by the object's +0x48 byte on the object. The asm leaves
-// the object in a0 at the jalr; every entry (func_1513B9A8 x4) is void (struct132 *), so no result is passed on.
-void func_1513BA10(struct132 *arg0) {
+// the object in a0 at the jalr; every entry (mesh_effect_retire x4) is void (struct132 *), so no result is passed on.
+/* was func_1513BA10 */
+void object_mode_dispatch_a(struct132 *arg0) {
     ((void (*)(struct132 *)) D_80089C44[arg0->unk48])(arg0);
 }
 
-// object_mode_dispatch_b: as func_1513BA10 with the table D_80089C54 (func_1513B9DC x4).
-void func_1513BA44(struct132 *arg0) {
+// object_mode_dispatch_b: as object_mode_dispatch_a with the table D_80089C54 (mesh_effect_free x4).
+/* was func_1513BA44 */
+void object_mode_dispatch_b(struct132 *arg0) {
     ((void (*)(struct132 *)) D_80089C54[arg0->unk48])(arg0);
 }
 #else
-void func_1513BA10(struct132 *arg0) {
+void object_mode_dispatch_a(struct132 *arg0) {
     D_80089C44[arg0->unk48]();
 }
 
-void func_1513BA44(struct132 *arg0) {
+void object_mode_dispatch_b(struct132 *arg0) {
     D_80089C54[arg0->unk48]();
 }
 #endif
 
-void func_1513BA78(u8 *arg0, s32 arg1, u8 arg2) {
+/* was func_1513BA78 */
+void mesh_effect_on_msg(u8 *arg0, s32 arg1, u8 arg2) {
     switch (arg0[0x48]) {
     case 1:
         func_151095E4(arg0, arg1, arg2);
@@ -176,7 +185,8 @@ void func_1513BA78(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_1513BAD4(s32 arg0, s32 arg1) {
+/* was func_1513BAD4 */
+s32 mesh_effect_handler_false(s32 arg0, s32 arg1) {
     return 0;
 }
 
@@ -191,10 +201,11 @@ typedef struct {
     s8 b38; s8 pad39[3];
 } BAE8Params;
 #ifndef NON_MATCHING /* NM: defined above as (void *, u8, s32, u8, s32) */
-struct102 *func_1513B5E0(BAE8Params *, s32, s32, s32, s32);
+struct102 *mesh_effect_spawn(BAE8Params *, s32, s32, s32, s32);
 #endif
 void *memcpy(void *, const void *, s32);
-struct102 *func_1513BAE8(void) {
+/* was func_1513BAE8 */
+struct102 *water_effect_spawn(void) {
     struct102 *p;
     BAE8Params s;
     f32 f[5];
@@ -220,10 +231,10 @@ struct102 *func_1513BAE8(void) {
     s.w1C = 0x80;
     s.w20 = 0x20;
     s.b38 = 3;
-    p = func_1513B5E0(&s, 1, 0x14, 0xFF, 1);
+    p = mesh_effect_spawn(&s, 1, 0x14, 0xFF, 1);
     if (p != NULL) {
         if (*(s32 *)((u8 *)p + 0x50) != 0x1180) {
-            func_1516972C(p);
+            node_destroy(p);
         } else {
             memcpy(&((BAE8Obj *)p)->data[((BAE8Obj *)p)->off], f, 0x14);
         }
@@ -239,13 +250,14 @@ extern f32 D_800A4E58;          // 2.854f
 extern f32 D_800A4E5C;          // 1.994f
 extern f32 D_800A4E60;          // 8.328f
 
-// water_texcoords_update: object-type handler (table D_80089FC8 + 0x14). Calls func_1513B968 first, then rewrites the
+// water_texcoords_update: object-type handler (table D_80089FC8 + 0x14). Calls mesh_effect_load_identity first, then rewrites the
 // texture coordinates of the nine vertex groups of the object's current vertex buffer (obj + 0x58 + D_800BE9C0 * 16
 // + part * 4) so each group's texture faces the player camera point (func_15144B34(part)) seen from its centre
 // D_800A4DA0[k]: s = horizontal offset along the camera direction * (sin(rec + 0xC) * 1.21 + 2.854) - scroll u,
 // t = height * (sin(rec + 0x10) * 1.994 + 8.328) - scroll v, where rec = obj + obj[0x50] + 0xF8 holds the scroll
 // (+0 / +4, taken mod 1024) and the two wave phases. Returns 1.
-s32 func_1513BBFC(s32 obj, s16 part) {
+/* was func_1513BBFC */
+s32 water_texcoords_update(s32 obj, s16 part) {
     f32 *rec;
     f32 *cam;
     f32 scaleS;
@@ -261,7 +273,7 @@ s32 func_1513BBFC(s32 obj, s16 part) {
     s32 k;
     s32 n;
 
-    func_1513B968(obj, part);
+    mesh_effect_load_identity(obj, part);
     rec = (f32 *) (obj + *(s32 *) (obj + 0x50) + 0xF8);
     scaleS = sinf(rec[3]) * D_800A4E54 + D_800A4E58;
     scaleT = sinf(rec[4]) * D_800A4E5C + D_800A4E60;
@@ -289,7 +301,7 @@ s32 func_1513BBFC(s32 obj, s16 part) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513BBFC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/water_texcoords_update.s")
 #endif
 extern f32 D_800A4E64; // 0.037f (file does not own .rodata)
 extern f32 D_800A4E68; // 1.9f
@@ -304,7 +316,8 @@ typedef struct {
     f32 e;
 } Wave1513BEB0;
 
-s32 func_1513BEB0(u8 *arg0) {
+/* was func_1513BEB0 */
+s32 water_wave_update(u8 *arg0) {
     f32 f;
     Wave1513BEB0 *w = (Wave1513BEB0 *)(arg0 + *(s32 *)(arg0 + 0x50) + (0, 0xF8)); // fakematch: comma keeps addu a0,t6 order
 

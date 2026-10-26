@@ -16,7 +16,7 @@ u8 *func_150C5870(s32 arg0, s32 arg1) {
     } sp;
     u8 *temp_v0;
 
-    temp_v0 = func_15167A68(0x46, 0, arg1 + 0xC8, 1, 0xFFU, 1U);
+    temp_v0 = node_alloc(0x46, 0, arg1 + 0xC8, 1, 0xFFU, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -34,11 +34,11 @@ u8 *func_150C5870(s32 arg0, s32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3080/func_150C5870.s")
 #endif
 void func_150C5930(struct102 *arg0) {
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_150C5950(struct102 *arg0) {
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 extern void (*D_80088B58[2])(void);
@@ -79,7 +79,7 @@ void func_150C5A3C(struct102 *arg0) {
 extern s32 (*D_80088B00[])(u8 *); /* motion handlers (func_150C6088, func_150C60D4) (index obj +0x30, -1 = none); 0 = remove the object */
 
 /* object_motion_step: for an active object (flag word +0x10 bit 0), runs its motion handler D_80088B00[+0x30] (if
- * any); when the handler returns 0 the object is removed (func_1516972C). Otherwise, if the offset position +0x18 -
+ * any); when the handler returns 0 the object is removed (node_destroy). Otherwise, if the offset position +0x18 -
  * +0x24 (f32[3] each) changed across the handler, its length (func_15143E64) is stored in +0xC0. Table record word
  * 0x8008C680 (update slot), like its neighbours `void (struct102 *)`. */
 void func_150C5A68(struct102 *obj) {
@@ -108,7 +108,7 @@ void func_150C5A68(struct102 *obj) {
         }
     }
     if (remove) {
-        func_1516972C(obj);
+        node_destroy(obj);
     }
 }
 #else
@@ -120,7 +120,7 @@ Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
 s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 s32 func_15142B7C(s32, s32, s32);
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
 extern s32 D_80091198[];
 float sqrtf(float);
@@ -164,11 +164,11 @@ u8 *func_150C5BA4(u8 *gdl, u8 *obj, s16 view) {
                                    D_800D9F98[view * 3 + 2], 0xFF, &flag);
         gdl = (u8 *) func_15142CF0((s32) gdl, 0xF2, 0, D_800D9F88[view * 3], D_800D9F88[view * 3 + 1],
                                    D_800D9F88[view * 3 + 2], 0xFF, (s8 *) &flag);
-        gdl = (u8 *) func_1513F4E4((s32) gdl, 0x1E, (s8 *) &flag);
+        gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x1E, (s8 *) &flag);
     } else {
         gdl = (u8 *) func_15142C10((Gfx *) gdl, 0, 0, 0, 0, &flag);
         gdl = (u8 *) func_15142CF0((s32) gdl, 0, 0, 0, 0, 0, 0, (s8 *) &flag);
-        gdl = (u8 *) func_1513F4E4((s32) gdl, 0x13, (s8 *) &flag);
+        gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x13, (s8 *) &flag);
     }
     gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
                         *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 0x8), (s8 *) &flag);
@@ -288,7 +288,7 @@ void func_150C620C(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *v = arg0 + 0xC8;
     if (arg2 == 0) {
         if ((*(s32 *)v == arg1[0]) || (v[4] == ((u8 *)arg1)[4])) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         v = arg0 + 0xC8;

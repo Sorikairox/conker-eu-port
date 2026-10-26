@@ -166,7 +166,7 @@ s32 memcpy(u8 *, u8 *, s32);
 f32 sinf(f32);
 f32 cosf(f32);
 
-// ring_effect_create: P197: creates a kind-0x31 record (func_15167A68, view `view`, group arg3) for the 0x30-byte
+// ring_effect_create: P197: creates a kind-0x31 record (node_alloc, view `view`, group arg3) for the 0x30-byte
 // spec `spec` (copied to +0x10; spec +0x14 = n points) with `extra` more bytes: a table of n (sin, cos) pairs at
 // +0x368 (+0x360 points at it) for angles 0, 2pi/n, ... (step at +0x48), then areas at +0x54 (+0x368 + 8n),
 // +0x58 (+0x3B8 + 0x58n) and +0x364 (+0x408 + 0xA8n); +0x40 / +0x44 / +0x50 = 0, s16 +0x4C = s16 +0x28.
@@ -176,7 +176,7 @@ u8 *func_150C8DD0(u8 *spec, s32 extra, s32 view, s32 arg3) {
     s32 i;
     f32 a;
 
-    rec = (u8 *) func_15167A68(0x31, arg3, extra + *(s32 *) (spec + 0x14) * 0xA8 + 0x408, 1, view & 0xFF, 1);
+    rec = (u8 *) node_alloc(0x31, arg3, extra + *(s32 *) (spec + 0x14) * 0xA8 + 0x408, 1, view & 0xFF, 1);
     if (rec == NULL) {
         return NULL;
     }
@@ -209,9 +209,9 @@ extern s32 (*D_80088C04[])(u8 *);                        /* = D_80088C00 + 1: [0
 extern f32 D_800A08FC; /* 2 pi */
 extern f32 D_800A0900; /* max squared horizontal distance of a spawn point: 10894295 (3300.6^2) */
 extern f32 D_800A0904; /* 256 / 360: degrees -> angle byte */
-f32 func_151423D8(u8);
+f32 angle_byte_cos(u8);
 s32 func_150ADA20(void);
-void func_1516972C(struct102 *arg0);
+void node_destroy(struct102 *arg0);
 
 // ring_effect_update: per frame for a ring effect node: counts the life timer (+0x28, flag +0x1C & 1) down, grows
 // the radius +0x44 by +0x20 per second, sets the fade value +0x40 (+0x2C per tick after +0x2A, +0x34 per tick before
@@ -243,8 +243,8 @@ void func_150C8F68(u8 *node) {
             while (1.0f < *(f32 *)(node + 0x50)) {
                 s32 view = (s32)(*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) * D_800A0904);
                 s32 a = (u32)func_150ADA20() % 81 + view - 0x28;
-                f32 s = func_151423D8((u8)(a - 0x40));
-                f32 c = func_151423D8((u8)a);
+                f32 s = angle_byte_cos((u8)(a - 0x40));
+                f32 c = angle_byte_cos((u8)a);
                 f32 pos[3]; /* sp74 */
                 pos[0] = *(f32 *)(node + 0x10) + s * *(f32 *)(node + 0x44);
                 pos[1] = *(f32 *)(node + 0x14);
@@ -266,7 +266,7 @@ void func_150C8F68(u8 *node) {
         }
     }
     if (dead) {
-        func_1516972C((struct102 *)node);
+        node_destroy((struct102 *)node);
     }
 }
 #else
@@ -288,7 +288,7 @@ Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2);
+Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
 void func_150CD2A0(f32, f32 *, f32 *, f32 *);
 
 #define RING_DL(a, b) (gdl->words.w0 = (a), gdl->words.w1 = (b), gdl++)
@@ -316,7 +316,7 @@ Gfx *func_150C92B8(Gfx *gdl, u8 *node, s16 arg2) {
     gdl = func_15142B7C(gdl, 0x200205, 0x70400);
     gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-    gdl = func_1513F4E4(gdl, 0x21, &flag);
+    gdl = gfx_set_combine_mode(gdl, 0x21, &flag);
     gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8[29] | D_800A4EA8[28], &flag);
     tex = func_1510D66C(*D_80091234, &size, 3, 0);
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -660,7 +660,7 @@ s32 func_150CA57C(u8 *arg0) {
 // y - 300, HitInfo started by func_1504715C) gives y, else the floor height obj +0x180. Rumbles the current
 // player's pad (func_1512D748(view, 7, 1)), takes the ground colour at the position (func_150CD2A0, three floats
 // -> bytes), shakes the camera (func_151D5404) and creates a 13-point dust ring (func_150C8DD0, view 0xFF, group 1).
-// On real ground it also throws four dust puffs (func_1513C5B0 kinds 0x51..0x54) at the corners of a square of
+// On real ground it also throws four dust puffs (sprite_fx_spawn_quad kinds 0x51..0x54) at the corners of a square of
 // half-size (rand * 96 + 352) / 2 turned by the character's yaw (obj +0x7A), then func_150CAE30 and a debris spray
 // func_1514CBE8 in the ground colour. The N64 code also sums the code words func_15194210..func_151942B0 and on a
 // mismatch (anti-tamper) clears the matrix count D_800C3E7C; the port has no MIPS code there, so the
@@ -762,8 +762,8 @@ s32 func_150CA150(u8 *obj) {
     }
 
     angle = -0x40 - (*(u16 *) (obj + 0x7A) >> 8);
-    s = func_151423D8(angle);
-    c = func_151423D8((u8) (angle - 0x40));
+    s = angle_byte_cos(angle);
+    c = angle_byte_cos((u8) (angle - 0x40));
     size = (func_150ADA68() * 96.0f + 352.0f) * 0.5f;
     puff.w0 = 0x701;
     func_150ADA20();
@@ -788,18 +788,18 @@ s32 func_150CA150(u8 *obj) {
     ps = size * s;
     pc = size * c;
     puff.kind = 0x51;
-    func_1513C5B0((s32) &puff, (s32) col, 0xC, 0, (ps + pos[0]) - pc, pos[1] + 10.0f, (ps + pos[2]) + pc, size, size,
+    sprite_fx_spawn_quad((s32) &puff, (s32) col, 0xC, 0, (ps + pos[0]) - pc, pos[1] + 10.0f, (ps + pos[2]) + pc, size, size,
                   angle, 0, 0, 0xFF, 0);
     nc = (-1.0f * size) * c;
     ns = (-1.0f * size) * s;
     puff.kind = 0x52;
-    func_1513C5B0((s32) &puff, (s32) col, 0xC, 0, (ps + pos[0]) - nc, pos[1] + 10.0f, (ns + pos[2]) + pc, size, size,
+    sprite_fx_spawn_quad((s32) &puff, (s32) col, 0xC, 0, (ps + pos[0]) - nc, pos[1] + 10.0f, (ns + pos[2]) + pc, size, size,
                   angle, 0, 0, 0xFF, 0);
     puff.kind = 0x53;
-    func_1513C5B0((s32) &puff, (s32) col, 0xC, 0, (ns + pos[0]) - pc, pos[1] + 10.0f, (ps + pos[2]) + nc, size, size,
+    sprite_fx_spawn_quad((s32) &puff, (s32) col, 0xC, 0, (ns + pos[0]) - pc, pos[1] + 10.0f, (ps + pos[2]) + nc, size, size,
                   angle, 0, 0, 0xFF, 0);
     puff.kind = 0x54;
-    func_1513C5B0((s32) &puff, (s32) col, 0xC, 0, (ns + pos[0]) - nc, pos[1] + 10.0f, (ns + pos[2]) + nc, size, size,
+    sprite_fx_spawn_quad((s32) &puff, (s32) col, 0xC, 0, (ns + pos[0]) - nc, pos[1] + 10.0f, (ns + pos[2]) + nc, size, size,
                   angle, 0, 0, 0xFF, 0);
     func_150CAE30((u8 *) pos);
     i = func_150ADA20() % 21U + 0xA;

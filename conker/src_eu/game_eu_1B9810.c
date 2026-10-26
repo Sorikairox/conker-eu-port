@@ -85,7 +85,7 @@ void func_1518C164(u8 *arg0) {
                 new_var = (u8 *)node;
                 *(u8 **)(new_var + 0x24) = arg0;
                 if ((arg0 != NULL) || (arg0[0x3B] == *((u8 *)node + 0x28))) {
-                    func_1516972C((struct102 *)node);
+                    node_destroy((struct102 *)node);
                 }
                 node = D_800DD5C8[D_800DD5C0];
             }
@@ -99,7 +99,7 @@ s32 memcpy(u8 *, s32, s32);
 u8 *func_1518C240(s32 arg0, u8 arg1, s32 arg2) {
     u8 *temp_v0;
 
-    temp_v0 = func_15167A68(0x1F, arg2, 0x44, 1, (u8) (s32) arg1, 1U);
+    temp_v0 = node_alloc(0x1F, arg2, 0x44, 1, (u8) (s32) arg1, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -166,8 +166,8 @@ void func_1518C2D0(u8 *arg0) {
         if ((temp_v1 != NULL) && ((*(s32 *)((u8 *)temp_v1 + 0)) != 0) && ((*(s32 *)((u8 *)temp_v1 + 0x1D4)) != 0) && ((*(u8 *)((u8 *)arg0 + 0x28)) == (*(u8 *)((u8 *)temp_v1 + 0x3B)))) {
             if (temp_t9 < 0) {
                 temp_hi = func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x22)) + 1);
-                temp_f22 = func_151423D8(temp_hi & 0xFF);
-                temp_f24 = func_151423D8((temp_hi - 0x40) & 0xFF);
+                temp_f22 = angle_byte_cos(temp_hi & 0xFF);
+                temp_f24 = angle_byte_cos((temp_hi - 0x40) & 0xFF);
                 temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x14))) + (*(f32 *)((u8 *)arg0 + 0x10));
                 (*(s32 *)((u8 *)temp_s2 + 0x2C)) = (s32) ((func_150ADA20() % 23U) + 5);
                 sp.uB8 = 0;
@@ -385,8 +385,8 @@ typedef struct {
     s8 uA2;
     u8 padA3[5];
 } SpawnCAEC;
-s32 func_1516865C(SpawnCAEC *, s32, s32, s32, s32);
-s32 func_15168800(SpawnCAEC *, u8, u8);
+s32 sprite_vtx_quads_init(SpawnCAEC *, s32, s32, s32, s32);
+s32 node_spawn_vtx_sprite(SpawnCAEC *, u8, u8);
 
 s32 func_1518CAEC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     SpawnCAEC sp;
@@ -407,8 +407,8 @@ s32 func_1518CAEC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     sp.u98 = 0xC;
     sp.uA1 = 0;
     sp.u96 = arg2;
-    func_1516865C(&sp, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&sp, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+    sprite_vtx_quads_init(&sp, 0xFF, 0xFF, 0xFF, 0xFF);
+    node_spawn_vtx_sprite(&sp, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
     *(s8 *)(obj + 0x20) = 4;
     return 1;
 }
@@ -448,14 +448,14 @@ s32 func_1518CC0C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp.u50.uA1 = 0;
     sp.u50.u94 = temp_t4;
     sp.u50.u96 = (s16) temp_f10;
-    func_1516865C(&sp.u50, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&sp.u50, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+    sprite_vtx_quads_init(&sp.u50, 0xFF, 0xFF, 0xFF, 0xFF);
+    node_spawn_vtx_sprite(&sp.u50, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
     (*(s8 *)((u8 *)sp.u4C + 0x20)) = 4;
     sp.u3C = arg4;
     sp.u38 = *(s32 *)(sp.u48 + ((*(s8 *)((u8 *)arg0 + 0x2D)) * 0x14));
     sp.u40 = (*(f32 *)((u8 *)((sp.u48 + ((*(s8 *)((u8 *)arg0 + 0x2D)) * 0x14))) + 8));
-    sp.u47 = func_151D8E20(0x14);
-    func_151DBCBC(sp.u47, (func_150ADA68() * 40.0f) + 100.0f, 0xFF, arg5, &sp.u38, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    sp.u47 = impact_current_kind(0x14);
+    impact_dust_particle_spawn(sp.u47, (func_150ADA68() * 40.0f) + 100.0f, 0xFF, arg5, &sp.u38, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 1;
 }
 #else
@@ -475,7 +475,7 @@ void func_1518CDC0(struct102 *arg0, u8 *arg1, u8 arg2) {
     } else if (arg2 == 0) {
         id = *(s32 *)(arg1 + 0);
         if ((id == (*(s32 *)((u8 *)arg0 + 0x24))) || (arg0->unk28 == *(u8 *)(arg1 + 4))) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }

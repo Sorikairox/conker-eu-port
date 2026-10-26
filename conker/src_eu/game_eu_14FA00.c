@@ -7,7 +7,7 @@
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_1512A390(struct108 *arg0);
-void func_15123A54(struct108 *arg0);
+void camera_update_eye_orbit(struct108 *arg0);
 void func_1512E6B0(u8 *arg0);
 extern u8 D_800BE616;
 extern u8 D_800BEE2C;
@@ -21,7 +21,7 @@ extern f32 D_800A3824;
 #define CAM_F32(off) (*(f32 *) (cam + (off)))
 
 // camera_follow_update: per-frame yaw update of a player camera (arg0; +0x3D0 = the followed player object, +0x3D4
-// its character record), then the position / collision / shake steps (func_1512A390, func_15123A54, func_1512E6B0).
+// its character record), then the position / collision / shake steps (func_1512A390, camera_update_eye_orbit, func_1512E6B0).
 // Locked cameras (+0x5F0 & 0x10 with pad bit 0x10 held, *+0x36C) and +0x698 skip the yaw part. In multiplayer (or
 // camera modes +0x23E 9 / 0x3B) with ctl +0x1B3 set: the yaw +0x37C eases (func_15049978) toward the player's facing
 // - 180, with the multiplayer gains +0x96C / +0x970 easing to 5 / 8 (func_150498A0). Else the target yaw is the
@@ -105,7 +105,7 @@ void func_151221F0(struct108 *arg0, f32 arg1) {
         CAM_F32(0x39C) = CAM_F32(0x37C) * D_800A3824;
     }
     func_1512A390(arg0);
-    func_15123A54(arg0);
+    camera_update_eye_orbit(arg0);
     func_1512E6B0(cam);
 }
 #undef CAM_F32

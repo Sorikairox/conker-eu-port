@@ -69,7 +69,7 @@ u8 *func_151B89B0(u8 *arg0) {
     blk.u50 = 0;
     blk.u54 = 0x32;
     blk.u56 = 5;
-    temp_v0 = func_1513D2F0(&blk, (s32)D_800AA870, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, arg0[0xC], arg0[1]);
+    temp_v0 = effect3d_spawn_full(&blk, (s32)D_800AA870, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, arg0[0xC], arg0[1]);
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 0x110, &tmp, 4);
     }
@@ -94,11 +94,11 @@ s32 func_151B8B5C(u8 *arg0)
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 s32 func_151B8BEC(s32 arg0, s16 arg1) {
-    return func_1513FA70(arg0, arg1);
+    return beam_quad_build_b(arg0, arg1);
 }
 #else
 void func_151B8BEC(s32 arg0, s16 arg1) {
-    func_1513FA70(arg0, arg1);
+    beam_quad_build_b(arg0, arg1);
 }
 #endif
 
@@ -118,7 +118,7 @@ s32 func_151B8C18(u8 *arg0, u8 arg1, s32 arg2) {
     sp18.unk16 = 0;
     sp18.unk17 = 3;
     sp18.unk18 = 0;
-    return func_15134908(&sp18, 0, arg1, arg2);
+    return point_emitter_spawn(&sp18, 0, arg1, arg2);
 }
 
 void func_15143794(s16, s16, f32, void *);

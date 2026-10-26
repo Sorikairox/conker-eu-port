@@ -5,19 +5,19 @@
 
 #ifdef NON_MATCHING
 s32 func_1509BE40(s32, s32, ...);
-void func_15123070(u8 *);
+void camera_calc_relative_yaw(u8 *);
 
 void func_15108560(struct108 *arg0) {
     s32 temp_t9;
 
     if (func_150859AC((s16) arg0->unk3D0->unk127, 1) == 9) {
-        func_151239CC(arg0, 2);
-        if (func_15123934(arg0, 8, 0, arg0->unk134, 3) != 0) {
+        camera_pop_mode(arg0, 2);
+        if (camera_push_mode(arg0, 8, 0, arg0->unk134, 3) != 0) {
             arg0->unk73C = 0;
             temp_t9 = arg0->unk84 | 0x01300000;
             arg0->unk84 = temp_t9;
             arg0->unk84 = temp_t9 & ~4;
-            func_15123070(arg0);
+            camera_calc_relative_yaw(arg0);
         }
         arg0->unk5F0 |= 0x800;
         arg0->unk348 = 150.0f;

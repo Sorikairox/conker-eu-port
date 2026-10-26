@@ -437,9 +437,9 @@ s32 func_16000A5C(void) {
 
 // called from func_10007DAC
 #ifdef NON_MATCHING
-s32 func_16001700(void);
-void func_16001830(void *);
-s32 func_16003650();
+s32 debug_cont_read(void);
+void debug_cont_get_read_data(void *);
+s32 debug_dump_tlb();
 extern s32 D_16003894;
 extern s32 D_16003898;
 extern s32 D_160038AC;
@@ -453,7 +453,7 @@ extern s32 D_16003B08;
 extern u8 *D_8002C130;
 extern s32 D_8003CC88;
 void func_150ADC50(void); /* code (asm/D5E90.s), compared by address below */
-extern s32 func_160036F0;
+extern s32 debug_cont_pad_buf;
 
 s32 func_16000B14(OSThread *arg0) {
     s32 sp40;
@@ -484,7 +484,7 @@ s32 func_16000B14(OSThread *arg0) {
         D_8002AAE8[1] = 0x80350000;
         return 0;
     }
-    func_16003650();
+    debug_dump_tlb();
     (*(s32 *)((u8 *)(&D_160038AC) + 0x3C)) = (s32) (*(s32 *)((u8 *)(&D_8003CC88) + 0));
     (*(s32 *)((u8 *)(&D_1600392C) + 0x3C)) = (s32) (*(s32 *)((u8 *)(&D_8003CC88) + 4));
     D_160039E8 = (*(s32 *)((u8 *)(&D_8003CC88) + 8));
@@ -568,22 +568,22 @@ s32 func_16000B14(OSThread *arg0) {
 loop_47:
         var_s3 = 0;
         D_16003898 = D_16003894;
-        func_16001700();
-        func_16001830(&func_160036F0);
+        debug_cont_read();
+        debug_cont_get_read_data(&debug_cont_pad_buf);
         if (sp40 != 0) {
             D_16003898 = D_16003894;
         }
-        D_16003894 = (s32) (*(u16 *)((u8 *)(&func_160036F0) + 0));
-        if ((*(s8 *)((u8 *)(&func_160036F0) + 2)) >= 0x33) {
-            D_16003894 = (*(u16 *)((u8 *)(&func_160036F0) + 0)) | 0x20000;
+        D_16003894 = (s32) (*(u16 *)((u8 *)(&debug_cont_pad_buf) + 0));
+        if ((*(s8 *)((u8 *)(&debug_cont_pad_buf) + 2)) >= 0x33) {
+            D_16003894 = (*(u16 *)((u8 *)(&debug_cont_pad_buf) + 0)) | 0x20000;
         }
-        if ((*(s8 *)((u8 *)(&func_160036F0) + 2)) < -0x32) {
+        if ((*(s8 *)((u8 *)(&debug_cont_pad_buf) + 2)) < -0x32) {
             D_16003894 |= 0x10000;
         }
-        if ((*(s8 *)((u8 *)(&func_160036F0) + 3)) >= 0x33) {
+        if ((*(s8 *)((u8 *)(&debug_cont_pad_buf) + 3)) >= 0x33) {
             D_16003894 |= 0x40000;
         }
-        if ((*(s8 *)((u8 *)(&func_160036F0) + 3)) < -0x32) {
+        if ((*(s8 *)((u8 *)(&debug_cont_pad_buf) + 3)) < -0x32) {
             D_16003894 |= 0x80000;
         }
         D_16003890 = (D_16003894 ^ D_16003898) & D_16003894;
@@ -611,7 +611,7 @@ loop_47:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000B14.s")
 #endif
-s32 func_16001B34(u8 *, u8 *, u8 *, u8 *, f64);
+s32 debug_sprintf(u8 *, u8 *, u8 *, u8 *, f64);
 void func_16000F8C(s32 arg0, f32 arg1)
 {
   f32 sp54;
@@ -630,7 +630,7 @@ void func_16000F8C(s32 arg0, f32 arg1)
       func_160012B0(arg0, D_160047D0);
       return;
     }
-    func_16001B34(sp28, D_160047D4, D_160047DC, D_160047E0, (f64) arg1);
+    debug_sprintf(sp28, D_160047D4, D_160047DC, D_160047E0, (f64) arg1);
     func_160012B0(arg0, sp28);
   }
 }
@@ -650,7 +650,7 @@ void func_16000F8C(s32 arg0, f32 arg1)
 //                 return;
 //             }
 //         }
-//         func_16001B34(&arg0, &tmp.unk0, &D_160047D4, &D_160047DC, &D_160047E0); // , (f64) arg1
+//         debug_sprintf(&arg0, &tmp.unk0, &D_160047D4, &D_160047DC, &D_160047E0); // , (f64) arg1
 //         func_160012B0(arg0, &tmp.unk0);
 //     }
 // }
@@ -714,7 +714,7 @@ void func_16001044(s32 cell, s32 kind, s32 value) {
                 func_160012B0(cell, D_160047E4);
                 return;
             }
-            func_16001B34(buf, D_160047E8, D_160047F0, D_160047F4, *(f32 *) &value); /* sprintf */
+            debug_sprintf(buf, D_160047E8, D_160047F0, D_160047F4, *(f32 *) &value); /* sprintf */
             func_160012B0(cell, buf);
             break;
     }

@@ -3,7 +3,7 @@ s#    if (owner != NULL \&\& \*(s32 \*) (owner + 0x1D4) == 0) {#    if (*(s32 *)
 s#    func_151D6310((s32 \*) (rope + 0x84), slot, (rope\[0x25\] << 5) + 0xA0, (s32 \*) \&vtx, NULL);#    func_151D6310((s32 *) (rope + 0x84), slot, (rope[0x25] << 4) + 0xA0, (s32 *) \&vtx, NULL);#
 s#    gdl = (u8 \*) func_15142C10((Gfx \*) gdl, 0xED, 0xD2, 0x85, 200, \&flag);#    gdl = (u8 *) func_15142C10((Gfx *) gdl, 0xED, 0xD2, 0x85, 201, \&flag);#
 s#    gdl = (u8 \*) func_15142B7C((s32) gdl, 0x200005, 0x1F0600);#    gdl = (u8 *) func_15142B7C((s32) gdl, 0x200005, 0x1F0601);#
-s#    gdl = (u8 \*) func_1513F4E4((s32) gdl, 0x54, (s8 \*) \&flag);#    gdl = (u8 *) func_1513F4E4((s32) gdl, 0x55, (s8 *) \&flag);#
+s#    gdl = (u8 \*) gfx_set_combine_mode((s32) gdl, 0x54, (s8 \*) \&flag);#    gdl = (u8 *) gfx_set_combine_mode((s32) gdl, 0x55, (s8 *) \&flag);#
 s#    gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,#    gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x2CA0,#
 s#                        \*(s32 \*) (D_800A4EA8 + 0xC) | \*(s32 \*) (D_800A4EA8 + 0x8), (s8 \*) \&flag);#                        *(s32 *) (D_800A4EA8 + 0xC), (s8 *) \&flag);#
 s#    cur = (s8) rope\[0x2E\] - 1;#    cur = (s8) rope[0x2E] - 2;#

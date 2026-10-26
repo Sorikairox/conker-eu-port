@@ -13,4 +13,4 @@ s/            if (fx\[0x13\] \& (1 << i)) {/            if (fx[0x13] \& (2 << i)
 s/                func_1501C15C(i);/                func_1501C15C(i + 1);/ % expire
 s/                func_1501BFF0(i, fx\[0x12\]);/                func_1501BFF0(i, fx[0x16]);/ % expire
 s/        fx\[0x16\] = fx\[0x12\];/        fx[0x16] = fx[0x13];/ % expire
-s/        func_1516972C((struct102 \*) fx);/        func_1516972C((struct102 *) (fx + 4));/ % expire
+s/        node_destroy((struct102 \*) fx);/        node_destroy((struct102 *) (fx + 4));/ % expire

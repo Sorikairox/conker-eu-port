@@ -282,7 +282,7 @@ s32 func_1509D49C(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
 #ifdef NON_MATCHING
 extern u8 D_8009F4A0;            /* the one-entry effect table of command 0x18 */
 extern s8 D_800D9D40;
-void func_151616D0(u8, u8, s32);
+void light_ctrl_broadcast(u8, u8, s32);
 void func_1000E7A0(u32, s32);
 s32 func_15046F70(void *, u16, f32, void *);
 struct260 *func_150B58B0(u8 *, s16, u8, s32);
@@ -305,9 +305,9 @@ void func_150FB2F8(void);
 void func_150FCFB0(void);
 void func_150FD554(struct127 *, u8, s32);
 void func_151086A0(struct127 *, u8, s32);
-s32 func_15136C3C(u8 *, u8, u8, u8, u8, u8, u8, s32);
+s32 object_hit_effects(u8 *, u8, u8, u8, u8, u8, u8, s32);
 void func_15155D6C(s32, s32, f32);
-struct225 *func_15163A60(u8, u8, s32);
+struct225 *light_create_obj_pulse(u8, u8, s32);
 void func_1517946C(s32);
 s32 func_1518FA8C(s32, u8, s16, s8, s8, s8, u8, s32, u8, s32);
 void func_151C0434(u8 *, f32 *, f32 *, u8, u8, s32);
@@ -318,7 +318,7 @@ void func_151D2C70(s16);
  * nibble, args = the operands, args[1] mostly an object id resolved with func_1505EEF4 & 0xFFF). Starts effects /
  * spawns: 0 func_150B58B0, 1 func_150BF47C (returns 1), 2 sets D_800D9D40, 3 func_1517946C, 4 / 5 / 6 spawn through
  * func_150E3788 / func_150E3850 (at an object) / func_150E3994 (at the player) and return the handle as
- * (h << 6) | 0xE004, 7 func_150DF240 at a point (args[1] == 999) or func_150E8728, 0x10 / 0x16 func_151616D0
+ * (h << 6) | 0xE004, 7 func_150DF240 at a point (args[1] == 999) or func_150E8728, 0x10 / 0x16 light_ctrl_broadcast
  * pairs, 0x18 func_1518FA8C on character args[1], 0x21 func_151C0648 50 above an object, 0x22 func_151C0434 at the
  * ground below (args[1], args[2]) found by func_15046F70, 0x24 func_1514F18C (0x1B), others single calls. Returns 0
  * unless noted. */
@@ -387,7 +387,7 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         break;
     case 0x10:
         func_1000E7A0(0x10, 0);
-        func_151616D0(0x16, 0x1F, 0);
+        light_ctrl_broadcast(0x16, 0x1F, 0);
         break;
     case 0x12:
         func_151CD90C(args[1]);
@@ -399,11 +399,11 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         func_150E15E0((u8) args[1], 0xFF, 1);
         break;
     case 0x16:
-        func_151616D0(0x23, 0x27, 0);
-        func_151616D0(0x24, 0x27, 0);
+        light_ctrl_broadcast(0x23, 0x27, 0);
+        light_ctrl_broadcast(0x24, 0x27, 0);
         break;
     case 0x17:
-        func_15163A60((u8) args[1], 0xFF, 1);
+        light_create_obj_pulse((u8) args[1], 0xFF, 1);
         break;
     case 0x18:
         tbl[0] = D_8009F4A0;
@@ -442,7 +442,7 @@ s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
         }
         break;
     case 0x23:
-        func_15136C3C((u8 *) func_1505EEF4(args[1] & 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);
+        object_hit_effects((u8 *) func_1505EEF4(args[1] & 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);
         break;
     case 0x24:
         obj = func_1505EEF4(args[1] & 0xFFF);
@@ -501,7 +501,7 @@ void func_150E3B5C(s32);
 s32 func_150EBE44(s32);
 void func_150F7330(u8 *);
 void func_150F9CA0(u8);
-void func_151616D0(u8, u8, s32);
+void light_ctrl_broadcast(u8, u8, s32);
 void func_151CD944(s32);
 void func_151D2CC8(s16);
 extern s8 D_800D9D40;
@@ -518,7 +518,7 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
         func_150F9CA0((*(u8 *)((u8 *)arg1 + 7)));
         return;
     case 38:
-        func_151616D0(0x29, 0x18, 0);
+        light_ctrl_broadcast(0x29, 0x18, 0);
         return;
     case 36:
         temp_v0 = func_1505EEF4((*(s32 *)((u8 *)arg1 + 4)) & 0xFFF);
@@ -529,7 +529,7 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
     default:
         return;
     case 26:
-        func_151616D0(0x26, 0x18, 0);
+        light_ctrl_broadcast(0x26, 0x18, 0);
         return;
     case 18:
         func_151CD944((*(s32 *)((u8 *)arg1 + 4)));
@@ -559,11 +559,11 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
         func_151D2CC8((*(s16 *)((u8 *)arg1 + 6)));
         return;
     case 21:
-        func_151616D0(0x20, 0x18, 0);
+        light_ctrl_broadcast(0x20, 0x18, 0);
         return;
     case 22:
-        func_151616D0(0x23, 0x28, 0);
-        func_151616D0(0x24, 0x28, 0);
+        light_ctrl_broadcast(0x23, 0x28, 0);
+        light_ctrl_broadcast(0x24, 0x28, 0);
         break;
     }
 }
@@ -601,16 +601,16 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
         return 0;
     case 0x32:
         if (arg1 == 2) {
-            func_151403A8(0, 0x53U);
+            fx_lists_broadcast_a(0, 0x53U);
             return 0;
         }
         if (arg1 == 3) {
-            func_151403A8(0, 0x54U);
+            fx_lists_broadcast_a(0, 0x54U);
             return 0;
         }
         break;
     case 0x2D:
-        func_151645C4((arg1 == 6) & 0xFF);
+        level_set_lights_mode((arg1 == 6) & 0xFF);
         return 0;
     case 0x28:
         if (arg1 == 2) {
@@ -627,7 +627,7 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
     case 0x1F:
         if (arg1 == 5) {
             sp.u38 = (s8) (*(s32 *)((u8 *)arg2 + 8));
-            func_151403A8((s32) &sp.u38, 0x36U);
+            fx_lists_broadcast_a((s32) &sp.u38, 0x36U);
         }
         /* fallthrough */
     case 0x1E:
@@ -644,7 +644,7 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
             sp.u31 = (s8) (*(s32 *)((u8 *)arg2 + 0x10));
             sp.u32 = (s8) (*(s32 *)((u8 *)arg2 + 0x14));
             sp.u33 = (s8) (*(s32 *)((u8 *)arg2 + 0x18));
-            func_1516944C(0x35, (s32) &sp.u2C, 0x33U);
+            node_broadcast_type(0x35, (s32) &sp.u2C, 0x33U);
             return 0;
         }
         break;
@@ -683,7 +683,7 @@ s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
                 var_a1 = 0x18;
             }
         }
-        func_151616D0(var_a0, var_a1, 0);
+        light_ctrl_broadcast(var_a0, var_a1, 0);
         return 0;
     case 0x11:
         func_150DF1A8((*(u8 *)((u8 *)arg2 + 0xB)), (arg1 == 3) & 0xFF);

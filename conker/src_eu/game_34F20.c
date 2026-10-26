@@ -29,7 +29,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 #ifdef NON_MATCHING
 // Level loader (hand C from the asm, P13). Runs once per level change: picks the music/ambience id for the
 // level (func_100014C4), resets the per-level systems, allocates the two DL buffers (func_15015E30), arms the
-// controller-read timer (func_1501BB20), initialises every player (func_15125690), every live object
+// controller-read timer (func_1501BB20), initialises every player (camera_raise_timer), every live object
 // (func_150A16A4) and commits the level id (D_800BE9F4 = D_800BE9F0).
 extern s32 D_8003E724;
 extern u8 D_800BEA39;
@@ -66,7 +66,7 @@ void func_15016370(void);
 void func_15016500(void);
 void func_1501748C(s16 arg0);
 void func_15085710(s16, s16, s32);
-void func_15125690(struct108 *arg0, s32 arg1);
+void camera_raise_timer(struct108 *arg0, s32 arg1);
 void func_10003ACC(s32 arg0, s32 arg1, s32 arg2);
 void func_150000B0(void);
 s32 func_150006E0(s32);
@@ -238,7 +238,7 @@ void func_15007B3C(void) {
     func_150006E0(D_800BE9F0);
     func_1510B5F0(0);
     for (i = 0; i <= D_80082FA0; i++) {
-        func_15125690((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), 1);
+        camera_raise_timer((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), 1);
     }
     func_1500E70C(D_800BE9F0);
     func_15016380(D_800BE9F0);

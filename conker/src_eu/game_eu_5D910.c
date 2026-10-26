@@ -6,7 +6,7 @@ void func_15031D40(u8 *arg0, u8 *arg1);
 f32 *allocate_memory(s32, s32, s32, s32);
 s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 s32 func_1510D3E0(s32, s32, s32, s32, s32 *);
-void func_15168E54(s32, s32 *);
+void gfx_dl_relocate(s32, s32 *);
 void func_100043B4(s32 *arg0, u32 arg1);
 void func_10004074(s32);
 void func_15031F04(u8 *);
@@ -37,7 +37,7 @@ s32 func_15030600(u8 *, s32, s32);
  * func_1518C900; func_1518CF74 releases both). Header words: +0 the display-list offset table (+4 >> 2 entries),
  * +8, +0xC (>> 4), +0x10, the data from +0x18. First use: func_1502B6BC(0, 0, 0, 2, 9, idx) (none: return 1),
  * each table entry is relocated by the header address, func_1510D3E0 resolves its segments
- * (&D_800DFDE8[idx] keeps the list), func_15168E54 patches its addresses; the header is kept in D_800E0578[idx].
+ * (&D_800DFDE8[idx] keeps the list), gfx_dl_relocate patches its addresses; the header is kept in D_800E0578[idx].
  * The count D_800DFC00[idx] is not saturated here. Returns 0 once loaded.
  */
 s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC) {
@@ -55,7 +55,7 @@ s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out
         for (i = 0; i < *count; i++) {
             (*dls)[i] += (s32) hdr;
             func_1510D3E0((*dls)[i], 0, 1, 0x3E, &D_800DFDE8[idx]);
-            func_15168E54((*dls)[i], hdr);
+            gfx_dl_relocate((*dls)[i], hdr);
         }
         D_800E0578[idx] = hdr;
     } else {
@@ -993,7 +993,7 @@ u8 *func_15031CBC(s32 arg0, u8 *arg1) {
 s32 func_150D3870(u8 *, s32, s32);
 void func_150D5950(u8 *, u8, s32);
 void func_15100734(u8 *);
-s32 func_15163BE8(u8 *, s32, s32);
+s32 light_create_joint_pulse(u8 *, s32, s32);
 s32 func_151BDDD8(u8 *, s32, s32);
 void func_151D7A60(u8 *, u8, s8, u8, s32);
 extern s32 D_800905D8;
@@ -1042,7 +1042,7 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
         func_151BDDD8(arg1, 0xFF, 1);
         break;
     case 0x49:
-        func_15163BE8(arg1, 0xFF, 1);
+        light_create_joint_pulse(arg1, 0xFF, 1);
         break;
     case 0x5A:
         other = *(u8 **)(arg1 + 0x31C);
@@ -1065,7 +1065,7 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
 #ifdef NON_MATCHING
 struct127 *func_15083E90(u8);
 void func_15100700(u8 *);
-void func_151616D0(u8, u8, s32);
+void light_ctrl_broadcast(u8, u8, s32);
 void func_151482D4(s32, u8);
 void func_151494E0(s32, u8);
 void func_151BDDA4(u8 *);
@@ -1131,7 +1131,7 @@ void func_15031F04(u8 *rec) {
         case 0x49:
             msg.obj = obj;
             msg.id = obj[0x3B];
-            func_151616D0(0x10, 0x29, (s32) &msg);
+            light_ctrl_broadcast(0x10, 0x29, (s32) &msg);
             break;
         case 0x5D:
             msg.obj = obj;

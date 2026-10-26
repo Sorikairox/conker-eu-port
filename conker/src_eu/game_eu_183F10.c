@@ -28,7 +28,7 @@ s32 func_15156700(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     } else {
         var_a0 = 0x2C;
     }
-    temp_v0 = func_15167A68(var_a0, arg4, arg2 + 0x98, 1, (u8) (s32) arg3, 1U);
+    temp_v0 = node_alloc(var_a0, arg4, arg2 + 0x98, 1, (u8) (s32) arg3, 1U);
     if (temp_v0 == NULL) {
         return 0;
     }
@@ -112,12 +112,12 @@ void func_15156928(struct102 *arg0p) {
         }
     }
     if (done) {
-        func_1516972C(arg0p);
+        node_destroy(arg0p);
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
@@ -200,7 +200,7 @@ u8 *func_15156A68(s32 arg0, u8 *arg1, s16 arg2) {
     temp_f12 = (*(f32 *)((u8 *)arg1 + 0x14));
     temp_f2 = (*(f32 *)((u8 *)arg1 + 0x10));
     temp_f14 = (*(f32 *)((u8 *)arg1 + 0x28));
-    temp_s1_2 = func_15142FBC(func_1513F4E4(func_15142CF0(func_15142C10(func_15142B7C(arg0, var_v1 | 5 | 0x200000, 0x1F0600), 0, 0, 0, (s32) (*(u8 *)((u8 *)arg1 + 0x4C)), &sp.u67), 0, 0, 0, 0, 0, 0, &sp.u67), sp.u5A, &sp.u67), 0x82CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u67);
+    temp_s1_2 = func_15142FBC(gfx_set_combine_mode(func_15142CF0(func_15142C10(func_15142B7C(arg0, var_v1 | 5 | 0x200000, 0x1F0600), 0, 0, 0, (s32) (*(u8 *)((u8 *)arg1 + 0x4C)), &sp.u67), 0, 0, 0, 0, 0, 0, &sp.u67), sp.u5A, &sp.u67), 0x82CA0, (*(s32 *)((u8 *)temp_v1_2 + 4)) | (*(s32 *)((u8 *)temp_v1_2 + 0)), &sp.u67);
     temp_f16 = temp_f2 - temp_f14;
     sp.u8C = temp_f12 - (*(f32 *)((u8 *)arg1 + 0x2C));
     temp_f0 = (*(f32 *)((u8 *)arg1 + 0x18));
@@ -392,7 +392,7 @@ void func_15156E68(u8 *arg0, u8 arg1) {
 #ifdef NON_MATCHING
 // spark_point_flash_update: P256: counts the emitter `obj`'s timer (s16 +0x2C) down by the frame step D_800BE9E4;
 // when it runs out, picks a random point of the table D_800DCE60 (3 groups x 10 points of x, y, z, w); a point with
-// a zero coordinate spawns nothing, else func_15157294(point, room obj[0xC]) and a light flash (func_151602C0:
+// a zero coordinate spawns nothing, else func_15157294(point, room obj[0xC]) and a light flash (light_create_with_ctrl:
 // type 3, 5..15 frames, at the truncated point, radius 100..255, white, room obj[0xC], owner obj[1]). The timer then
 // restarts at min +0x28 + rand % (range +0x2A + 1) (unsigned).
 extern f32 D_800DCE60[][10][4];
@@ -419,7 +419,7 @@ void func_151570C4(u8 *obj) {
         at.unk0 = pt[0];
         at.unk4 = pt[1];
         at.unk8 = pt[2];
-        func_151602C0(&flash, &at, func_150ADA20() % 156U + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, obj[0xC], obj[1]);
+        light_create_with_ctrl(&flash, &at, func_150ADA20() % 156U + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, obj[0xC], obj[1]);
     }
     timer = (s16 *)(obj + 0x28);
     timer[2] = func_150ADA20() % (u32) (timer[1] + 1) + timer[0];
@@ -564,12 +564,12 @@ void func_15157504(s32 arg0) {
 
 void func_15157528(struct102 *arg0) {
     func_15157504(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_15157554(struct102 *arg0) {
     func_15157504(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 #ifdef NON_MATCHING
@@ -595,7 +595,7 @@ u8 *func_15157580(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8
     } else if (arg0[0] & 0x10) {
         type = 0x4C;
     }
-    obj = func_15167A68(type, arg7, arg5 + 0x120, 1, arg6, 1);
+    obj = node_alloc(type, arg7, arg5 + 0x120, 1, arg6, 1);
     if (obj == NULL) {
         return NULL;
     }
@@ -639,12 +639,12 @@ void func_151577B8(struct102 *arg0) {
     func_15157734(arg0);
     func_1518CF74(*(s32 *)((u8 *)arg0 + 0x18));
     func_1503FAA8(*(s32 *)((u8 *)arg0 + 0x68));
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_151577FC(struct102 *arg0) {
     func_15157734(arg0);
     func_1518CF74(*(s32 *)((u8 *)arg0 + 0x18));
     func_1503FAA8(*(s32 *)((u8 *)arg0 + 0x68));
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }

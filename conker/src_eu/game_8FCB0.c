@@ -22,7 +22,7 @@ void func_150341B4(s32, s32);
 // what is tied to the slot rather than the object: each object's index fields (+0x127 / +0x13F = index, unique_id =
 // index + 1) and its +0x144 pointer (kept in the slot); `b` gets the camera record D_800DBFF0[index of b] (whose
 // +0x3D4 takes b's +0x31C, and that record's byte +0x197 is cleared), `a` none; func_150341B4 swaps the unique ids;
-// both objects' +0x2D4 handles are released (func_1516972C); other live objects' +0x65 links (unique id) to either
+// both objects' +0x2D4 handles are released (node_destroy); other live objects' +0x65 links (unique id) to either
 // slot are swapped; when b's +0x13C names a carrier (>= 100), that object's +0x13D = 100 + b's index; then
 // func_150615DC(b) / func_150627D4(b).
 void func_15062800(struct127 *a, struct127 *b) {
@@ -55,11 +55,11 @@ void func_15062800(struct127 *a, struct127 *b) {
     *((u8 *) b->unk31C + 0x197) = 0;
     func_150341B4(b->unique_id, a->unique_id);
     if (b->unk2D4 != NULL) {
-        func_1516972C((struct102 *) b->unk2D4);
+        node_destroy((struct102 *) b->unk2D4);
         b->unk2D4 = NULL;
     }
     if (a->unk2D4 != NULL) {
-        func_1516972C((struct102 *) a->unk2D4);
+        node_destroy((struct102 *) a->unk2D4);
         a->unk2D4 = NULL;
     }
     func_150615DC(b);

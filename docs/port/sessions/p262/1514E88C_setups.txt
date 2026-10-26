@@ -1,3 +1,3 @@
-# P262 func_1514E88C (object_glow_attach): obj 80410000 (unique_id +0x3B); EU jal func_1518A560 1518A560 (ARGMEM 0:88 / 1:88 / 2:32 knob), func_1514F18C 1514F18C, func_15160A58 15160FC8 (ARGMEM 2:12)
+# P262 func_1514E88C (object_glow_attach): obj 80410000 (unique_id +0x3B); EU jal func_1518A560 1518A560 (ARGMEM 0:88 / 1:88 / 2:32 knob), func_1514F18C 1514F18C, light_create_obj_joint 15160FC8 (ARGMEM 2:12)
 base ! 0=80410000 ! 80410038=000000C3 ! 1518A560=80420000 ! ! ! !
 id0 ! 0=80410000 ! 80410038=FFFFFF00 ! 1518A560=0 ! ! ! !

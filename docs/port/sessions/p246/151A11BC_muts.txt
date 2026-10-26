@@ -1,9 +1,9 @@
 # P246 func_151A11BC (emit_point_blob) mutants: sed % setup names
 s/15U - 0x3F/15U - 0x3E/ % c0
 s/15U - 0x3F/14U - 0x3F/ % c1
-s/sp = func_151423D8(pitch \& 0xFF)/sp = func_151423D8(pitch \& 0x7F)/ % c0 c1
+s/sp = angle_byte_cos(pitch \& 0xFF)/sp = angle_byte_cos(pitch \& 0x7F)/ % c0 c1
 s/(pitch - 0x40) \& 0xFF/(pitch + 0x40) \& 0xFF/ % c0
-s/sa = func_151423D8(a \& 0xFF)/sa = func_151423D8(a \& 0x7F)/ % c1
+s/sa = angle_byte_cos(a \& 0xFF)/sa = angle_byte_cos(a \& 0x7F)/ % c1
 s/(a - 0x40) \& 0xFF/(a - 0x3F) \& 0xFF/ % c0
 s/503.0f + 801.0f/503.0f + 800.0f/ % c0
 s/503.0f + 801.0f/504.0f + 801.0f/ % c0

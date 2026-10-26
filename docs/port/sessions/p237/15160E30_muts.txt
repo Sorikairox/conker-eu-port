@@ -1,4 +1,4 @@
-# P237 func_15160E30 (light_beam_update) mutants: sed % setup names
+# P237 light_beh_beam_raycast (light_beam_update) mutants: sed % setup names
 s/    if (\*(s32 \*) obj == 0) {/    if (*(s32 *) obj == 1) {/ % dead
 s/    if (s\[4\] != obj\[0x3B\]) {/    if (s[5] != obj[0x3B]) {/ % uid_pt
 s/    if (\*(u8 \*\*) (obj + 0x1D4) != NULL \&\& (s\[0x24\] \& 1) \&\& (obj\[0x74\] \& 0xF) != 0xF) {/    if (*(u8 **) (obj + 0x1D4) != NULL \&\& (obj[0x74] \& 0xF) != 0xF) {/ % noflag

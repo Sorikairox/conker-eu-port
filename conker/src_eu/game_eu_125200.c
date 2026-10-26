@@ -188,7 +188,7 @@ typedef struct {
     /* 0x5A */ u8 pad5A[2];
 } Hit7E34;
 
-/* func_1513D2F0 trail puff record (0x58 bytes) */
+/* effect3d_spawn_full trail puff record (0x58 bytes) */
 typedef struct {
     /* 0x00 */ u8 u00;
     /* 0x01 */ u8 u01;
@@ -228,7 +228,7 @@ typedef struct {
 // !(d +0x70 & 4), d +0xB0): on 2+ hits applies func_151D535C (flags 0x1A, d +0x38) and, with d +0x70 & 1, explodes
 // (func_150F850C) and dies. Then moves by the velocity +0x44 * dt; when not dead counts the life down (at 0 dies,
 // exploding with d +0x70 & 1 at the position). Trail: d +0x8C += distance, d +0x90 += dt; every 70 units of d +0x8C
-// one func_1513D2F0 smoke puff at d +0x98 (stepped by d +0xA4, d +0x90 by d +0x94), its +0x110 extra from d
+// one effect3d_spawn_full smoke puff at d +0x98 (stepped by d +0xA4, d +0x90 by d +0x94), its +0x110 extra from d
 // +0x74..+0x88 and (27 - d +0x90) * 6.48 alpha.
 s32 func_150F7E34(u8 *obj) {
     Puff7E34 rec;
@@ -320,7 +320,7 @@ s32 func_150F7E34(u8 *obj) {
             rec.pos[1] = *(f32 *) (d + 0x9C);
             rec.pos[2] = *(f32 *) (d + 0xA0);
             rec.u44[0] = (u32) (extra.u18 * D_800A1FA0_c[0]);
-            puff = func_1513D2F0(&rec, (s32) &D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj[0xC], obj[1]);
+            puff = effect3d_spawn_full(&rec, (s32) &D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj[0xC], obj[1]);
             if (puff != NULL) {
                 memcpy((s32) (puff + 0x110), (s32 *) &extra, 0x2C);
             }
@@ -360,11 +360,11 @@ s32 func_150F83A0(u8 *arg0)
 /* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 u8 * func_150F84D8(u8 *arg0, s16 arg1) {
-    return (u8 *) func_15140410(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
+    return (u8 *) sprite_quad_build_axes(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
 }
 #else
 void func_150F84D8(u8 *arg0, s16 arg1) {
-    func_15140410(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
+    sprite_quad_build_axes(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
 }
 #endif
 
@@ -601,7 +601,7 @@ s32 func_150F873C(u8 *arg0) {
                 (*(s32 *)((u8 *)(&sp.uE0) + 4)) = (s32) (*(s32 *)((u8 *)temp_s5 + 4));
                 (*(s32 *)((u8 *)(&sp.uE0) + 8)) = (s32) (*(s32 *)((u8 *)temp_s5 + 8));
                 sp.u108 = (s8) (u32) (sp.uB0 * 6.4814816f);
-                temp_v0_2 = func_1513D2F0(&sp.uC4, (s32) ((u8 *)&D_800A4AA0), 0x24U, 0U, 0U, 0x21U, 0U, 0, 0, 0x2C, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_v0_2 = effect3d_spawn_full(&sp.uC4, (s32) ((u8 *)&D_800A4AA0), 0x24U, 0U, 0U, 0x21U, 0U, 0, 0, 0x2C, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0_2 != NULL) {
                     memcpy(temp_v0_2 + 0x110, &sp.u98, 0x2C);
                 }

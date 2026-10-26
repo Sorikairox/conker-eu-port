@@ -12,7 +12,7 @@ void func_1500E5C0(void);
 void func_15012370(void);
 void func_15012760(void);
 void func_15012FE0(void);
-void func_151645C4(u8);
+void level_set_lights_mode(u8);
 void func_15173850(s32);
 void func_15179420(void);
 void func_15187820(s32);
@@ -60,7 +60,7 @@ void func_1500E470(s32 arg0) {
     func_15187820(arg0);
     func_15179420();
     func_15012FE0();
-    func_151645C4(((D_800D2E4C->unk4 & 0x80) == 0) & 0xFF);
+    level_set_lights_mode(((D_800D2E4C->unk4 & 0x80) == 0) & 0xFF);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_3B920/func_1500E470.s")
@@ -106,5 +106,5 @@ void func_1500E470(s32 arg0) {
 //
 //     if (0) {};
 //     tmp = (D_800D2E4C->unk4 & 128) == 0;
-//     func_151645C4(tmp);
+//     level_set_lights_mode(tmp);
 // }

@@ -63,7 +63,7 @@ def word_at(a):
     return None
 tables = []   # (va, [fn...] up to the next named address, [fn...] to the end of the raw run)
 # P162: raw runs of function words; a table starts at the run start and at every named address inside it. A single
-# named entry counts (D_80089EB8: one word, then D_80089EBC, but func_151349D0 indexes D_80089EB8 by a byte).
+# named entry counts (D_80089EB8: one word, then D_80089EBC, but point_emitter_update indexes D_80089EB8 by a byte).
 def flush(run):
     starts = [k for k, (a0, _) in enumerate(run) if k == 0 or a0 in named]
     for n, k in enumerate(starts):

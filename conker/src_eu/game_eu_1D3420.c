@@ -120,8 +120,8 @@ void func_151A5C10(u8 *arg0) {
                     break;
                 case 2:
                     temp_t3 = (u32) ((*(f32 *)((u8 *)temp_v0 + 0x10)) * 0.7111111f) & 0xFF;
-                    temp_f22 = func_151423D8((temp_t3 - 0x40) & 0xFF);
-                    temp_f24 = func_151423D8(temp_t3 & 0xFF);
+                    temp_f22 = angle_byte_cos((temp_t3 - 0x40) & 0xFF);
+                    temp_f24 = angle_byte_cos(temp_t3 & 0xFF);
                     temp_v0_3 = (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s0 + 0))) + 6));
                     temp_f26 = (func_150ADA68() * (2.0f * (f32) temp_v0_3)) + (f32) -temp_v0_3;
                     temp_v0_4 = (*(u8 **)((u8 *)temp_s0 + 0));
@@ -137,8 +137,8 @@ void func_151A5C10(u8 *arg0) {
                     break;
                 case 0:
                     temp_v0_6 = func_150ADA20();
-                    temp_f22_2 = func_151423D8((temp_v0_6 - 0x40) & 0xFF);
-                    temp_f24_2 = func_151423D8(temp_v0_6 & 0xFF & 0xFF);
+                    temp_f22_2 = angle_byte_cos((temp_v0_6 - 0x40) & 0xFF);
+                    temp_f24_2 = angle_byte_cos(temp_v0_6 & 0xFF & 0xFF);
                     temp_v0_7 = (*(u8 **)((u8 *)temp_s0 + 0));
                     temp_f2_2 = func_150ADA68() * (f32) (*(s16 *)((u8 *)temp_v0_7 + 6));
                     sp.uBC = (f32) (*(s16 *)((u8 *)temp_v0_7 + 0)) + (temp_f2_2 * temp_f24_2);
@@ -150,8 +150,8 @@ void func_151A5C10(u8 *arg0) {
                     break;
                 case 1:
                     temp_v0_9 = func_150ADA20();
-                    temp_f22_3 = func_151423D8((temp_v0_9 - 0x40) & 0xFF);
-                    temp_f24_3 = func_151423D8(temp_v0_9 & 0xFF & 0xFF);
+                    temp_f22_3 = angle_byte_cos((temp_v0_9 - 0x40) & 0xFF);
+                    temp_f24_3 = angle_byte_cos(temp_v0_9 & 0xFF & 0xFF);
                     temp_v0_10 = (*(u8 **)((u8 *)temp_s0 + 0));
                     temp_f2_3 = func_150ADA68() * (f32) (*(s16 *)((u8 *)temp_v0_10 + 6));
                     sp.uBC = (f32) (*(s16 *)((u8 *)temp_v0_10 + 0)) + (temp_f2_3 * temp_f24_3);
@@ -316,7 +316,7 @@ struct210 *func_151A6308(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg
     } else {
         var_v0 = 0;
     }
-    return func_1513C650((s32) &sp.u5C, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp48 & 0xFF), (u8) (((temp_t0 & 1) * 2) + (sp4C & 1)), var_v1, var_v0, 0, (u8) (s32) arg7, arg8);
+    return sprite_fx_spawn_cam_at((s32) &sp.u5C, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp48 & 0xFF), (u8) (((temp_t0 & 1) * 2) + (sp4C & 1)), var_v1, var_v0, 0, (u8) (s32) arg7, arg8);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6308.s")
@@ -365,7 +365,7 @@ loop_3:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6520.s")
 #endif
-s32 func_1516284C(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, s32);
 extern f32 D_800A9178;
 extern f32 D_800A917C;
@@ -453,7 +453,7 @@ void func_151A6618(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
     blk.u47 = 0;
     blk.u48 = arg1;
     blk.u4C = 0xFF;
-    temp_v0 = func_1513D2F0(&blk, (s32)&D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, 0x1C, arg4, arg5);
+    temp_v0 = effect3d_spawn_full(&blk, (s32)&D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, 0x1C, arg4, arg5);
     if (temp_v0 != NULL) {
         dst = temp_v0 + 0x110;
         memcpy(dst, &tmp, 0x1C);
@@ -468,7 +468,7 @@ void func_151A6618(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
             b2.u1 = 2;
             b2.u2 = 0x12C;
             b2.u4 = 6;
-            *(s32 *)(dst + 0x10) = func_1516284C(&b2, pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 0xE, arg4, arg5);
+            *(s32 *)(dst + 0x10) = light_create_flicker_preset(&b2, pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 0xE, arg4, arg5);
         }
     }
     if (arg2 != 0) {
@@ -615,7 +615,7 @@ s32 func_151A6BB0(u8 *fx) {
     mv[1] += mv[2] * D_800BE9A4;
     mv[1] = func_15144528(mv[1], 2048.0f, 0.0f);
     fx[0x124] += fx[0x125] * D_800BE9E4;
-    fx[0x126] = (u32)(func_151423D8(fx[0x124] - 0x40) * 63.0f + 192.0f);
+    fx[0x126] = (u32)(angle_byte_cos(fx[0x124] - 0x40) * 63.0f + 192.0f);
     if (func_151464B8(*(s32 *)(fx + 0x60)) != 0) {
         return 1;
     }
@@ -683,18 +683,18 @@ void func_151A7068(u8 *arg0) {
     func_1000FD38(func_1000EF40, (*(u8 **)((u8 *)arg0 + 0x110)), 0, arg0);
     temp_a0 = (*(struct102 **)((u8 *)arg0 + 0x120));
     if (temp_a0 != NULL) {
-        func_1516972C(temp_a0);
+        node_destroy(temp_a0);
     }
 }
 
 void func_151A70C0(struct210 * arg0) {
     func_151A7068(arg0);
-    func_1513CA6C(arg0);
+    effect3d_retire(arg0);
 }
 
 void func_151A70EC(struct210 * arg0) {
     func_151A7068(arg0);
-    func_1513CAA0(arg0);
+    effect3d_free(arg0);
 }
 
 u8 *func_151A7188(s32);

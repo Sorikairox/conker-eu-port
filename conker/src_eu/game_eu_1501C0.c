@@ -6,7 +6,7 @@ void func_15048F90(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 f32 func_15048FC8(struct17 *arg0);
 f32 func_15048A70(f32 arg0, f32 arg1);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-void func_15123A54(u8 *);
+void camera_update_eye_orbit(u8 *);
 void func_1512A390(u8 *);
 void func_1512E6B0(u8 *);
 #endif
@@ -17,7 +17,7 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 f32 sinf(f32);
 f32 cosf(f32);
-void func_15123070(u8 *arg0);
+void camera_calc_relative_yaw(u8 *arg0);
 void func_150491EC(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 extern f32 D_80089860;  /* last yaw (degrees) */
 extern f32 D_800A3850;  /* pi / 180 */
@@ -76,7 +76,7 @@ void func_151229B0(u8 *cam) {
         D_80089860 = yaw;
     }
     yaw *= D_800A385C;
-    func_15123070(cam);
+    camera_calc_relative_yaw(cam);
     if (**(u16 **) (cam + 0x36C) & 0x10) {
         dist = 150.0f;
     } else {
@@ -147,7 +147,7 @@ void func_151229B0(u8 *cam) {
 /* P41: camera mode 1 (follow). Unless 0xDC == 4: turn yaw 0x37C by the angle between eye->0x2C8 and eye->at
  * (func_15048A70 of the two headings) times the eased rate 0x8DC (toward 0x8D4: 0 when 0x298 is clear, 0.75 for
  * flag 0x100000 of 0x84 or 180 < 0x390 < 270, else 0.5); 0x39C = 0x37C in radians. Then the eye orbit
- * func_15123A54, func_1512E6B0 and func_1512A390. */
+ * camera_update_eye_orbit, func_1512E6B0 and func_1512A390. */
 void func_15122EF0(u8 *arg0) {
     struct17 sp44;
     struct17 sp38;
@@ -174,7 +174,7 @@ void func_15122EF0(u8 *arg0) {
         *(f32 *)(arg0 + 0x37C) = *(f32 *)(arg0 + 0x37C) + func_15048A70(a, b) * *(f32 *)(arg0 + 0x8DC);
         *(f32 *)(arg0 + 0x39C) = *(f32 *)(arg0 + 0x37C) * 0.017453292f;
     }
-    func_15123A54(arg0);
+    camera_update_eye_orbit(arg0);
     func_1512E6B0(arg0);
     func_1512A390(arg0);
 }

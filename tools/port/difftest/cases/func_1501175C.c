@@ -3,8 +3,8 @@ typedef struct {
     u8 *obj;        /* 0x00 */
     u8 room;        /* 0x04 obj +0x3B */
     u8 pad5[3];
-    void *glow;     /* 0x08 func_1513D2F0 result */
-    void *smoke;    /* 0x0C func_151602C0 result */
+    void *glow;     /* 0x08 effect3d_spawn_full result */
+    void *smoke;    /* 0x0C light_create_with_ctrl result */
 } Link175C;         /* 0x10, copied to the type 0x12C object +0x28 */
 
 typedef struct {
@@ -28,7 +28,7 @@ typedef struct {
     u8 u47;         /* 0x47 */
     s32 u48;        /* 0x48 */
     u8 pad4C[0xC];
-} Glow175C;         /* func_1513D2F0 template */
+} Glow175C;         /* effect3d_spawn_full template */
 
 typedef struct {
     u8 *obj;        /* 0x00 */
@@ -72,8 +72,8 @@ typedef struct {
 } Vec175C;
 
 // object_glow_attach: spawns a type 0x12C object (func_15149130) linked to obj (record at +0x28: obj, room, glow,
-// smoke), a glow (func_1513D2F0 with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
-// light constants, the new object and the mid height of obj +0x14C / +0x150) and a func_151602C0 effect, storing both
+// smoke), a glow (effect3d_spawn_full with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
+// light constants, the new object and the mid height of obj +0x14C / +0x150) and a light_create_with_ctrl effect, storing both
 // at +0x30 / +0x34 of the new object.
 void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     Link175C link;
@@ -143,7 +143,7 @@ void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     g.u47 = 7;
     g.u48 = 0;
     v = (func_150ADA20() & 1) ? 2 : 0;
-    e = func_1513D2F0(&g, (s32) &D_800A4AA0, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
+    e = effect3d_spawn_full(&g, (s32) &D_800A4AA0, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
     l->glow = e;
     if (e != NULL) {
         memcpy((u8 *) e + 0x110, &tail, 0x5C);
@@ -155,5 +155,5 @@ void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     h2.w[0] = 0;
     h2.w[1] = 0;
     h2.w[2] = 0;
-    l->smoke = func_151602C0((Header *) &h, (Header2 *) &h2, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, arg1, arg2);
+    l->smoke = light_create_with_ctrl((Header *) &h, (Header2 *) &h2, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, arg1, arg2);
 }

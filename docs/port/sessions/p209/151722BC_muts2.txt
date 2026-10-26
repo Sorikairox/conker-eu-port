@@ -1,1 +1,1 @@
-s/func_1516972C((struct102 \*) v);/;/ %
+s/node_destroy((struct102 \*) v);/;/ %

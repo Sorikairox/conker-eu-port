@@ -12,7 +12,7 @@ s32 func_1518C900(s32);
 struct_eu_node *func_15155CF0(s32 arg0, s32 arg1)
 {
   struct_eu_node *temp_v0;
-  temp_v0 = func_15167A68(0x50, 0, 0xA0, 1, (u8) arg1, 1U);
+  temp_v0 = node_alloc(0x50, 0, 0xA0, 1, (u8) arg1, 1U);
   if (temp_v0 == 0)
   {
     return temp_v0;
@@ -206,7 +206,7 @@ void func_15156468(struct102 *arg0)
   if (((!arg0) && (!arg0)) && (!arg0)) // fakematch: dead test from the permuter
   {
   }
-  func_15169804(p);
+  node_retire(p);
   func_1518CF74(0xA6);
 }
 
@@ -249,7 +249,7 @@ void func_15156598(u8 *arg0, struct127 **arg1, u8 arg2) {
         s32 a;
         a = arg1[0] - D_800CC2D0;
         if ((a >= 0) && (a < 25) && (a == arg0[0x10])) {
-            func_1516972C((struct102 *)arg0);
+            node_destroy((struct102 *)arg0);
         }
     } else if (arg2 == 0x2D) {
         s32 a;

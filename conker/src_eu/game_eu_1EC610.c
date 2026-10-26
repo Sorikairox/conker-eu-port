@@ -750,14 +750,14 @@ void func_151C00DC(u8 *arg0) {
     s32 i;
     new_var = arg0 + 0x28;
     if (*(s32 *)new_var != 0) {
-        func_1516972C((struct102 *)*(s32 *)new_var);
+        node_destroy((struct102 *)*(s32 *)new_var);
     }
     v = arg0 + 0x28;
     i = 0;
     do {
         temp_a0 = *(struct102 **)((v + 4) + (i * 4));
         if (temp_a0 != 0) {
-            func_1516972C(temp_a0);
+            node_destroy(temp_a0);
         }
         i = (i + 1) & 0xFF;
     } while (i < 2);
@@ -775,6 +775,6 @@ void func_151C0180(struct260 * arg0) {
 
 void func_151C01AC(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x57) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }

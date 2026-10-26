@@ -180,7 +180,7 @@ void func_150D2E34(u8 *arg0) {
                 sp.uC8 = ((func_150ADA68() * 80.0f) + 50.0f) * 0.001f;
                 sp.uCC = ((func_150ADA68() * 80.0f) + 50.0f) * 0.001f;
                 sp.u120 = (s8) (u32) (sp.uD4 * sp.uD0);
-                temp_v0 = func_1513D2F0(&sp.uDC, (s32) ((u8 *)&D_800A4AA0), 0U, 0x26U, 0U, 0x1FU, 0U, 0, 0, 0x30, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                temp_v0 = effect3d_spawn_full(&sp.uDC, (s32) ((u8 *)&D_800A4AA0), 0U, 0x26U, 0U, 0x1FU, 0U, 0, 0, 0x30, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 if (temp_v0 != NULL) {
                     memcpy(temp_v0 + 0x110, &sp.uA8, 0x30);
                 }

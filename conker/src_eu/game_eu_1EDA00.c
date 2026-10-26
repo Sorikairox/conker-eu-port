@@ -309,7 +309,7 @@ void func_151C09C8(u8 *arg0, u8 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    func_151602C0(sp48, sp3C, (func_150ADA20() % 121U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 121U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 void func_151C0AA8(u8 *arg0, u8 arg1, s32 arg2) {
@@ -545,7 +545,7 @@ s32 func_151C0698(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 arg4
         B(hdr, 1) = 0xFF;
         SH(hdr, 2) = 0x12C;
         B(hdr, 4) = 0;
-        W(p, 0x80) = (s32)func_151602C0((Header *)hdr, (Header2 *)hpos, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+        W(p, 0x80) = (s32)light_create_with_ctrl((Header *)hdr, (Header2 *)hpos, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
         W(p, 0x84) = func_151B8EB8(particle);
         r = func_150ADA20();
         H(p, 0x90) = func_1000FA64((u32)r % 3 + 0x2EE, (s16)(s32)pos[0], (s16)(s32)pos[1], (s16)(s32)pos[2], 0x7530,
@@ -559,10 +559,10 @@ s32 func_151C0698(struct127 *obj, struct127 *target, s32 *arg2, u8 arg3, u8 arg4
     } else {
         /* the payload's handles are still 0 here: never taken */
         if (W(payload, 0x80) != 0) {
-            func_1516972C((struct102 *)W(payload, 0x80));
+            node_destroy((struct102 *)W(payload, 0x80));
         }
         if (W(payload, 0x84) != 0) {
-            func_1516972C((struct102 *)W(payload, 0x84));
+            node_destroy((struct102 *)W(payload, 0x84));
         }
     }
 
@@ -747,13 +747,13 @@ void func_151C1B20(void * arg0_p) {
 
     temp_t7 = (*(struct102 **)((u8 *)arg0 + 0x1F0));
     if (temp_t7 != NULL) {
-        func_1516972C(temp_t7);
+        node_destroy(temp_t7);
     }
     temp_a0 = (*(struct102 **)((u8 *)arg0 + 0x1F4));
     temp_a1 = arg0 + 0x170;
     if (temp_a0 != NULL) {
         sp1C = temp_a1;
-        func_1516972C(temp_a0);
+        node_destroy(temp_a0);
     }
     temp_v1 = (*(s32 *)((u8 *)temp_a1 + 0x88));
     if (temp_v1 != 0) {
@@ -761,7 +761,7 @@ void func_151C1B20(void * arg0_p) {
     }
     temp_a0_2 = (*(struct102 **)((u8 *)temp_a1 + 0x8C));
     if (temp_a0_2 != NULL) {
-        func_1516972C(temp_a0_2);
+        node_destroy(temp_a0_2);
     }
     func_1000FD38(func_151C16BC, arg0, 0);
 }
@@ -849,7 +849,7 @@ void func_151C1E10(u8 *arg0, u8 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    func_151602C0(sp48, sp3C, (func_150ADA20() % 11U) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 11U) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 s32 func_151C0894();

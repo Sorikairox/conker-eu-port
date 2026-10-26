@@ -209,7 +209,7 @@ void func_150D5E7C(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0 || arg2 == 0x2F || arg2 == 3) {
         s32 t = *(s32 *)arg1;
         if (t == *(s32 *)v || v[4] == arg1[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {
@@ -233,7 +233,7 @@ void func_150D5F5C(struct260 *arg0) {
 #ifdef NON_MATCHING
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32 *, f32);
 s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
-s32 func_15134070(struct127 *);
+s32 obj_get_hit_kind(struct127 *);
 void func_15143874(s16, f32, f32 *, f32 *);
 f32 func_15144A74(f32 *, f32 *);
 s32 func_15144E80(s16 *, f32 *, f32 *, f32 *);
@@ -303,7 +303,7 @@ void func_150D5F7C(struct127 *arg0, s32 arg1, s32 arg2) {
     dir[0] = arg0->x_position - arg0->old_x_position;
     dir[1] = arg0->y_position - arg0->old_y_position;
     dir[2] = arg0->z_position - arg0->old_z_position;
-    type = func_15134070(arg0);
+    type = obj_get_hit_kind(arg0);
     if (type == 0x63) {
         return;
     }
@@ -845,7 +845,7 @@ end:        ;
         if (arg2 == 0) {
             s32 t = *(s32 *)arg1;
             if (t == *(s32 *)v || v[4] == arg1[4]) {
-                func_1516972C(arg0);
+                node_destroy(arg0);
             }
         }
     }
@@ -902,7 +902,7 @@ end:        ;
         if (arg2 == 0) {
             s32 t = *(s32 *)arg1;
             if (t == *(s32 *)v || v[4] == arg1[4]) {
-                func_1516972C(arg0);
+                node_destroy(arg0);
             }
         }
     }

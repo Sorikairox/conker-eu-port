@@ -9,7 +9,7 @@ extern u8 D_800A5860[];
 
 u8 *func_1519EEE0(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     u8 *temp_v0;
-    temp_v0 = func_15167A68(0x26, arg6, 0x2C, 1, (u8) (s32) arg5, 1U);
+    temp_v0 = node_alloc(0x26, arg6, 0x2C, 1, (u8) (s32) arg5, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -37,7 +37,7 @@ void func_1519EF74(struct102 *arg0) {
                 var_v0 = *(s32 *)((u8 *)arg0 + 0x24);
                 *(s32 *)(var_v0 + 0x30) = 0;
             }
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -275,7 +275,7 @@ void func_1519F2F4(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     blk.u50 = 0;
     blk.u54 = 1;
     blk.u56 = 0xFF;
-    temp_v0 = func_1513D2F0(&blk, (s32)&D_800A4AA0, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
+    temp_v0 = effect3d_spawn_full(&blk, (s32)&D_800A4AA0, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 0x110, &tmp, 4);
     }

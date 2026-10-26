@@ -30,7 +30,7 @@ typedef struct {
     /* 0x18 */ f32 u18;
 } Data3870;
 
-/* func_151407D0's particle spec (0x58 bytes; PartSpec layout of game_eu_1E7CC0) */
+/* particle_emitter_spawn's particle spec (0x58 bytes; PartSpec layout of game_eu_1E7CC0) */
 typedef struct {
     /* 0x00 */ u8 texture;
     /* 0x01 */ u8 u01;
@@ -54,7 +54,7 @@ typedef struct {
     /* 0x4D */ u8 pad4D[0xB];
 } Spec3870;
 
-/* func_151407D0's emitter block (filled up to 0x5A; the calls pass 0x60 / 0x68) */
+/* particle_emitter_spawn's emitter block (filled up to 0x5A; the calls pass 0x60 / 0x68) */
 typedef struct {
     /* 0x00 */ f32 u00;
     /* 0x04 */ f32 u04;
@@ -83,7 +83,7 @@ typedef struct {
 
 u8 *func_15031C4C(struct127 *, s32, s32);
 s32 func_150D4FF0(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3);
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 memcpy(u8 *, u8 *, s32);
 s32 func_150D5634(u8 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound);
 extern u8 D_800A0D90[]; /* 4 s32 texture ids (0x60..0x63) */
@@ -100,7 +100,7 @@ extern f32 D_800A0DD0;
 // set when it found them; else (0, 0, 0) and (0, 500, 0)); func_15147FF0 (0x20, 0x14) creates the object, whose data
 // (+0x98) gets {obj, room, 1, handle, emitters, 20, 20}. Starts the looping sounds 0x5B3 (sound level < 5), 0x5B4 and
 // 0x5BC (level < 7 or obj +0x318 set) at the object's position with callback func_150D5634, and two emitters
-// (func_151407D0: texture 0x15 set 0x5503, and a random texture of D_800A0D90 set 0x2203 with +0x170 = {0, 1.0}),
+// (particle_emitter_spawn: texture 0x15 set 0x5503, and a random texture of D_800A0D90 set 0x2203 with +0x170 = {0, 1.0}),
 // stored in the data. kind (u8) and owner go to every spawn. Returns 0 (the asm leaves a leftover v0; the callers,
 // func_15031D40 (asm) and game_eu_5D910's C, do not read it).
 s32 func_150D3870(struct127 *obj, u8 kind, s32 owner) {
@@ -219,7 +219,7 @@ s32 func_150D3870(struct127 *obj, u8 kind, s32 owner) {
     spec1.u47 = 6;
     spec1.u48 = 0;
     spec1.u4C = 0xFF;
-    data->emit[0] = func_151407D0(&emit1, 0x60, &spec1, 0, 0, 0, 0, -1, kind, owner);
+    data->emit[0] = particle_emitter_spawn(&emit1, 0x60, &spec1, 0, 0, 0, 0, -1, kind, owner);
 
     extra.u00 = 0;
     extra.u04 = 1.0f;
@@ -280,7 +280,7 @@ s32 func_150D3870(struct127 *obj, u8 kind, s32 owner) {
     spec2.u47 = 7;
     spec2.u48 = 0;
     spec2.u4C = 0xFF;
-    data->emit[1] = func_151407D0(&emit2, 0x68, &spec2, 0, 0x27, 0, 0, -1, kind, owner);
+    data->emit[1] = particle_emitter_spawn(&emit2, 0x68, &spec2, 0, 0x27, 0, 0, -1, kind, owner);
     if (data->emit[1] != NULL) {
         memcpy(data->emit[1] + 0x170, (u8 *) &extra, sizeof(EmitExtra3870));
     }
@@ -598,7 +598,7 @@ s32 func_150D44E4(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D44E4.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
 s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
@@ -722,7 +722,7 @@ u8 *func_150D4810(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.uEB = 1;
             sp.u118 = temp_v0;
             temp_v1_2 = ((u8 *)&D_800A4EA8);
-            var_s0 = func_15142FBC(func_1513F4E4(func_15142B7C(func_15142C10(func_15142E24(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.uEB, 0x3E), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uEB), 0x200005, 0x1F0600), 0x55, &sp.uEB), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 0x1C)) | (*(s32 *)((u8 *)temp_v1_2 + 0x18)), &sp.uEB);
+            var_s0 = func_15142FBC(gfx_set_combine_mode(func_15142B7C(func_15142C10(func_15142E24(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.uEB, 0x3E), 0xFF, 0xFF, 0xFF, 0xFF, &sp.uEB), 0x200005, 0x1F0600), 0x55, &sp.uEB), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1_2 + 0x1C)) | (*(s32 *)((u8 *)temp_v1_2 + 0x18)), &sp.uEB);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
             if (var_a0 < 0) {
                 var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
@@ -864,7 +864,7 @@ u8 *func_15031C4C(struct127 *, s32, s32);
 
 // object_fire_message: message handler of the func_150D3870 effect object (D_8008A760 handler table). data = +0x98
 // ({owner object, its room byte, effect handle, ...}). Messages 0, 0x2E and 3: when the message names the owner
-// (msg +0 == owner, or msg +4 byte == room) the effect object removes itself (func_1516972C). Message 0x2D (object
+// (msg +0 == owner, or msg +4 byte == room) the effect object removes itself (node_destroy). Message 0x2D (object
 // replaced, msg = {old, new, ..., room of old (+8), room of new (+9)}): when the owner is msg +0, it moves to msg +4
 // (room +9), when it is msg +4 it moves to msg +0 (room +8); either way it takes a new effect handle for the new
 // owner (func_15031C4C 0x79, 0x7A when the owner's id is 0x48).
@@ -874,7 +874,7 @@ void func_150D4ED0(u8 *obj, u8 *msg, u8 event) {
 
     if (event == 0 || event == 0x2E || event == 3) {
         if (*(struct127 **) msg == *(struct127 **) data || data[4] == msg[4]) {
-            func_1516972C((struct102 *) obj);
+            node_destroy((struct102 *) obj);
         }
     } else if (event == 0x2D) {
         if (*(struct127 **) msg == *(struct127 **) data) {
@@ -958,11 +958,11 @@ void func_150D513C(u8 *arg0) {
     func_1000FD38((s32) &func_150D5634, (s32) temp_s0, 0x5BC);
     temp_a0 = (*(struct102 **)((u8 *)temp_s0 + 0xC));
     if (temp_a0 != NULL) {
-        func_1516972C(temp_a0);
+        node_destroy(temp_a0);
     }
     temp_a0_2 = (*(struct102 **)((u8 *)temp_s0 + 0x10));
     if (temp_a0_2 != NULL) {
-        func_1516972C(temp_a0_2);
+        node_destroy(temp_a0_2);
     }
 }
 #else

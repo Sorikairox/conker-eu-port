@@ -5,15 +5,15 @@
 
 #ifdef NON_MATCHING
 s32 func_1509BE40(s32, s32, ...);
-s32 func_151239CC(struct108 *arg0, s32 arg1);
-void func_151254F4(struct108 *, s32);
+s32 camera_pop_mode(struct108 *arg0, s32 arg1);
+void camera_set_followed_obj(struct108 *, s32);
 extern s32 D_80088E30;
 
 // player_mode_flags_update: player state handler (D_80089A10 table). When event flags 0x2006/0xB7 -> 0xBC and
 // 0x2000/0xBB are both set, sets flags 0x405D..0x4061 and (unless state +0x2C is 0x100 or +0x6C8 is busy) enters the
-// mode: func_15123934(.., 8, 0, 0, 3) success sets +0x84 bits 0x1100004 (clears 2), +0x674 = 0, anim
-// func_151254F4(+0x3D0->0x65 - 1), +0x5F0 |= 0x10; then speeds +0x348 / +0x34C = 320, +0x374 = 550 (D_800A1850),
-// +0x190 = 180, D_80088E30 = 1, flag 0x405C cleared. Otherwise leaves it (func_151239CC(.., 3): +0x190 = 0, anim
+// mode: camera_push_mode(.., 8, 0, 0, 3) success sets +0x84 bits 0x1100004 (clears 2), +0x674 = 0, anim
+// camera_set_followed_obj(+0x3D0->0x65 - 1), +0x5F0 |= 0x10; then speeds +0x348 / +0x34C = 320, +0x374 = 550 (D_800A1850),
+// +0x190 = 180, D_80088E30 = 1, flag 0x405C cleared. Otherwise leaves it (camera_pop_mode(.., 3): +0x190 = 0, anim
 // +0x23D, +0x5F0 &= ~0x10, +0x674 = 0, D_80088E30 = 0), sets 0x405C, clears 0x405D..0x4061 and mirrors event
 // 0x4040 / 6 / 0x9000 into +0x84 bit 0x80.
 void func_150EB740(u8 *obj) {
@@ -33,11 +33,11 @@ void func_150EB740(u8 *obj) {
         if (*(s32 *) (obj + 0x2C) == 0x100 || *(s32 *) (obj + 0x6C8) != 0) {
             return;
         }
-        if (func_15123934((struct108 *) obj, 8, 0, 0, 3) != 0) {
+        if (camera_push_mode((struct108 *) obj, 8, 0, 0, 3) != 0) {
             *(s32 *) (obj + 0x84) |= 0x1100004;
             *(s32 *) (obj + 0x84) &= ~2;
             *(f32 *) (obj + 0x674) = 0.0f;
-            func_151254F4((struct108 *) obj, (*(u8 **) (obj + 0x3D0))[0x65] - 1);
+            camera_set_followed_obj((struct108 *) obj, (*(u8 **) (obj + 0x3D0))[0x65] - 1);
             *(s32 *) (obj + 0x5F0) |= 0x10;
         }
         *(s32 *) (obj + 0x134) = 0;
@@ -49,9 +49,9 @@ void func_150EB740(u8 *obj) {
         func_1509BFB0(0, 0x405C, 0);
         return;
     }
-    if (func_151239CC((struct108 *) obj, 3) != 0) {
+    if (camera_pop_mode((struct108 *) obj, 3) != 0) {
         *(f32 *) (obj + 0x190) = 0.0f;
-        func_151254F4((struct108 *) obj, obj[0x23D]);
+        camera_set_followed_obj((struct108 *) obj, obj[0x23D]);
         *(s32 *) (obj + 0x5F0) &= ~0x10;
         *(f32 *) (obj + 0x674) = 0.0f;
         D_80088E30 = 0;

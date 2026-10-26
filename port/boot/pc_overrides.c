@@ -94,7 +94,7 @@ void port_frame_probe(unsigned task) {
  *   CAMREC D_800BE628: camera records (0x180 per player); +0x100 + buf * 0x40 = projection Mtx, written by
  *         func_1510BB78 (guPerspectiveF + guMtxF2L) from asm func_1510B6A8 / func_1510B9D8 or the request
  *         queue D_800D9F18 drained by func_1510BA9C.
- *   CAM   D_800DBFF0: struct108 camera-controller records (0x9A0 each, func_15122AE0 / func_15122C5C). */
+ *   CAM   D_800DBFF0: struct108 camera-controller records (0x9A0 each, camera_update_all / camera_update_controller). */
 struct PendingF2_ { float x, y; };
 extern unsigned D_800DC6D0[2], D_800DBFF0, D_800DDD64;
 extern int D_800BE628, D_80082FA0, D_800D2DB4, D_80041C30[3];
@@ -170,6 +170,6 @@ void port_cam_probe(unsigned task) {
 /* P88: the TEMPORARY PC func_151DDF6C (P84, settings clamp) was removed: the port branch converted it in P85
  * (game_eu_20B730.c, NON_MATCHING, void (void)). */
 
-/* P205: the P199 --wrap of func_1513472C / func_1513477C (dropped object argument of the D_80089AAC / D_80089AD4
+/* P205: the P199 --wrap of object_state_dispatch_a / object_state_dispatch_b (dropped object argument of the D_80089AAC / D_80089AD4
  * handlers) was removed: port P200 made the NON_MATCHING game C (game_161520.c) pass the object and return the
  * handler's result. ?p199nowrap is gone with it. */

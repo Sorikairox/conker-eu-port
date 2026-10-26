@@ -57,7 +57,7 @@ void func_15132740(u8 *arg0) {
         if (arg0[0x76] != 0) {
             D_80089D1C[arg0[0x76]](arg0);
         }
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
     }
 }
 
@@ -121,12 +121,12 @@ void func_151329B4(Obj29B4 *arg0) {
 
 void func_15132AE0(struct102 * arg0) {
     func_151329B4(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_15132B0C(struct102 * arg0) {
     func_151329B4(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_15132B38(u8 *arg0) {
@@ -179,7 +179,7 @@ u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8
     }
     kind = (*(s32 *)(req + 0x50) & 0x4000) ? 0x48 : 0x19;
     heap = (*(s32 *)(req + 0x50) & 0x400000) ? 2 : 1;
-    p = func_15167A68(kind, owner, extraSize + 0x170, 1, arg5, heap);
+    p = node_alloc(kind, owner, extraSize + 0x170, 1, arg5, heap);
     if (p == NULL) {
         return 0;
     }
@@ -188,12 +188,12 @@ u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8
     if (*users == 0) {
         ref = (ParticleModelRef *)allocate_memory(0x10, 1, 2, (*(s32 *)(req + 0x50) & 0x400000) ? 2 : 1);
         if (ref == NULL) {
-            func_15168A9C((struct_eu_node *)p);
+            node_list_unlink((struct_eu_node *)p);
             func_10004074(p);
             return 0;
         }
         if (!func_15133C18(*(u16 *)(req + 0x56), ref, p)) {
-            func_15168A9C((struct_eu_node *)p);
+            node_list_unlink((struct_eu_node *)p);
             func_10004074(p);
             func_10004074(ref);
             return 0;
@@ -227,7 +227,7 @@ u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8
             }
         }
         if (n <= 0) {
-            func_15168A9C((struct_eu_node *)p);
+            node_list_unlink((struct_eu_node *)p);
             func_10004074(p);
             return 0;
         }
@@ -320,7 +320,7 @@ void func_15132FF8(Unk15132FF8 *arg0) {
     }
     r = D_80089D2C[arg0->unk78](&arg0->mtx[D_800BE9C0], arg0);
     if (r == -1) {
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
         return;
     }
     if (r == 0) {
@@ -590,7 +590,7 @@ s32 func_1513384C(u8 *arg0)
   if (arg0[0x149] < 0x80)
   {
     f32 s;
-    s = func_151423D8(arg0[0x149] - 0x40);
+    s = angle_byte_cos(arg0[0x149] - 0x40);
     s = ((1.0f - (*((f32 *) (arg0 + 0x144)))) * (1.0f - (*((f32 *) (arg0 + 0x14))))) * s;
     if (arg0[0x148] & 8)
     {
@@ -603,8 +603,8 @@ s32 func_1513384C(u8 *arg0)
     {
       f32 sn;
       f32 d;
-      sn = func_151423D8(((s8) arg0[0x14A]) - 0x40);
-      cs = func_151423D8((u8) arg0[0x14A]);
+      sn = angle_byte_cos(((s8) arg0[0x14A]) - 0x40);
+      cs = angle_byte_cos((u8) arg0[0x14A]);
       *((f32 *) (arg0 + 0x2C)) *= 1.0f - s;
       *((f32 *) (arg0 + 0x30)) *= 1.0f + s;
       *((f32 *) (arg0 + 0x34)) *= 1.0f - s;
@@ -623,15 +623,15 @@ s32 func_1513384C(u8 *arg0)
 }
 
 #ifdef NON_MATCHING
-s32 func_151424F4(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
+s32 mtx_rot_scale_trans_l(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
 #else
-s32 func_151424F4(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+s32 mtx_rot_scale_trans_l(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 #endif
 s32 func_15133A80(s32 arg0, u8 *arg1) {
 #ifdef NON_MATCHING
-    func_151424F4(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
+    mtx_rot_scale_trans_l(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
 #else
-    func_151424F4(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
+    mtx_rot_scale_trans_l(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
 #endif
     return 1;
 }
@@ -668,7 +668,7 @@ void func_15133AF8(u8 *arg0, u8 *arg1, u8 arg2)
 extern s32 D_800A3C60[];             /* model file per particle model id (ROM table) */
 s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
 s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
-void func_15168E54(s8 *arg0, s32 arg1);
+void gfx_dl_relocate(s8 *arg0, s32 arg1);
 
 // particle_model_load: loads the model file of particle model id modelId into ref->model, resolves its display
 // list (D_800DCA70[modelId]) and registers it; returns 0 when the file is missing. The particle is unused.
@@ -681,7 +681,7 @@ s32 func_15133C18(s32 modelId, ParticleModelRef *ref, void *particle) {
         return 0;
     }
     func_1510D3E0((Gfx *)*ref->model, 0, 1, 0x3E, (s16 **)&D_800DCA70[modelId] /* resolved segment list per model id */);
-    func_15168E54((s8 *)*ref->model, (s32)ref->model);
+    gfx_dl_relocate((s8 *)*ref->model, (s32)ref->model);
     return 1;
 }
 #else
@@ -689,15 +689,15 @@ s32 func_15133C18(s32 modelId, ParticleModelRef *ref, void *particle) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15142838(s32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
+s32 mtx_rot_scale2_trans_l(s32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
 #else
-s32 func_15142838(s32, s32, s32, s32, f32, f32, f32, f32, f32);
+s32 mtx_rot_scale2_trans_l(s32, s32, s32, s32, f32, f32, f32, f32, f32);
 #endif
 s32 func_15133CD0(s32 arg0, u8 *arg1) {
 #ifdef NON_MATCHING
-    func_15142838(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
+    mtx_rot_scale2_trans_l(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
 #else
-    func_15142838(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
+    mtx_rot_scale2_trans_l(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
 #endif
     return 1;
 }
@@ -867,14 +867,14 @@ void func_15134358(struct102 *arg0, s32 *arg1, u8 arg2) {
     if (arg2 == 0) {
         id = arg1[0];
         if (id == *(s32 *)((u8 *)arg0 + 0x7C) || ((u8 *)arg1)[4] == *((u8 *)arg0 + 0x80)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
 
 void func_151343AC(s32 arg0, u8 arg1) {
     struct_eu_s32x2 sp18 = D_800A3C40;
-    func_15169260(&sp18, 2, arg0, arg1);
+    node_broadcast_types(&sp18, 2, arg0, arg1);
 }
 
 void func_151343F4(s32 arg0, u8 *arg1, s32 arg2) {

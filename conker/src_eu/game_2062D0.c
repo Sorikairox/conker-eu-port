@@ -5,33 +5,38 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, s32, s32);
 extern u8 D_800AB7C8[];
-void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
-void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-u8 func_151D9534(u8 *arg0, u8 *arg1);
+void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
+void impact_spawn_burst(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+u8 impact_dust_cloud_ground(u8 *arg0, u8 *arg1);
 #endif
 
 
-u8 func_151D8E20(void) {
+/* was func_151D8E20 */
+u8 impact_current_kind(void) {
     if ((D_800BE9F0 == 0) && (func_150A29C8(0, 0x1C) == 0)) {
         return 10;
     }
     return D_800E0A10;
 }
 
-u8 func_151D8E6C(void) {
+/* was func_151D8E6C */
+u8 impact_puff_tex_kind0(void) {
     u8 tmp[3] = D_800AB340;
     return tmp[(func_150ADA20() % 3U)];
 }
 
-u8 func_151D8EB0(void) {
+/* was func_151D8EB0 */
+u8 impact_puff_tex_kind1(void) {
     return 117;
 }
 
-u8 func_151D8EBC(void) {
+/* was func_151D8EBC */
+u8 impact_puff_tex_kind2(void) {
     return 29;
 }
 
-u8 func_151D8EC8(void) {
+/* was func_151D8EC8 */
+u8 impact_puff_tex_kind3(void) {
     s32 tmp;
 
     if (func_150ADA20() & 1) {
@@ -42,7 +47,8 @@ u8 func_151D8EC8(void) {
     return tmp;
 }
 
-u8 func_151D8EFC(void) {
+/* was func_151D8EFC */
+u8 impact_puff_tex_kind4(void) {
     s32 tmp;
 
     if (func_150ADA20() & 1) {
@@ -53,12 +59,14 @@ u8 func_151D8EFC(void) {
     return tmp;
 }
 
-u8 func_151D8F30(void) {
+/* was func_151D8F30 */
+u8 impact_puff_tex_kind5(void) {
     u8 tmp[5] = D_800AB344;
     return tmp[func_150ADA20() % 5U];
 }
 
-u8 func_151D8F7C(void) {
+/* was func_151D8F7C */
+u8 impact_puff_tex_kind6(void) {
     s32 tmp;
 
     if ((func_150ADA20() & 1) != 0) {
@@ -69,29 +77,34 @@ u8 func_151D8F7C(void) {
     return tmp;
 }
 
-u8 func_151D8FB0(void) {
+/* was func_151D8FB0 */
+u8 impact_puff_tex_kind7(void) {
     return 149;
 }
 
-u8 func_151D8FBC(void) {
+/* was func_151D8FBC */
+u8 impact_puff_tex_kind8(void) {
     return 159;
 }
 
-u8 func_151D8FC8(void) {
+/* was func_151D8FC8 */
+u8 impact_puff_tex_kind9(void) {
     return 179;
 }
 
-u8 func_151D8FD4(void) {
+/* was func_151D8FD4 */
+u8 impact_puff_tex_kind10(void) {
     return 117;
 }
 
-u8 func_151D8FE0(void) {
+/* was func_151D8FE0 */
+u8 impact_puff_tex_kind11(void) {
     u8 tmp[4] = D_800AB34C;
     return tmp[func_150ADA20() & 3];
 }
 
 // big struct definition
-// void func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
+// void impact_dust_cloud_spawn(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
 #ifdef NON_MATCHING
 /* P170 */
 s32 func_150ADA20(void);
@@ -108,7 +121,8 @@ s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 // flip flags 0x40 / 0x80. On success the effect's +0xA8 gets the 0x1C-byte motion block (size, random phases and
 // rates, growth (0.2..0.45) x size, `growX` / `growY`, kind, bit 0 unless `noFade`, bit 1 with `spin`). Returns the
 // effect (0 when none).
-s32 func_151D9014(void *pos, f32 *vel, u8 kind, f32 arg3, s16 life, u8 alpha, f32 size, u8 additive, f32 growX,
+/* was func_151D9014 */
+s32 impact_dust_cloud_spawn(void *pos, f32 *vel, u8 kind, f32 arg3, s16 life, u8 alpha, f32 size, u8 additive, f32 growX,
                   f32 growY, u8 lit, s32 group, u8 noFade, u8 spin, u8 room, s32 owner) {
     struct {
         f32 size;       /* +0x00 */
@@ -239,14 +253,15 @@ s32 func_151D9014(void *pos, f32 *vel, u8 kind, f32 arg3, s16 life, u8 alpha, f3
     return fx;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9014.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_dust_cloud_spawn.s")
 #endif
 
-s32 func_151D93F4(void *arg0, void *arg1) {
+/* was func_151D93F4 */
+s32 impact_dust_cloud_update(void *arg0, void *arg1) {
     s32 res;
 
-    if (func_151D9450(arg0, arg1) != 0) {
-        if (func_151D9534(arg0, arg1) != 0) {
+    if (impact_dust_cloud_wobble(arg0, arg1) != 0) {
+        if (impact_dust_cloud_ground(arg0, arg1) != 0) {
             res = 1;
         } else {
             res = 0;
@@ -257,7 +272,8 @@ s32 func_151D93F4(void *arg0, void *arg1) {
     return res;
 }
 
-s32 func_151D9450(struct_eu_2062D0_d *arg0, s32 arg1) {
+/* was func_151D9450 */
+s32 impact_dust_cloud_wobble(struct_eu_2062D0_d *arg0, s32 arg1) {
     struct_eu_2062D0_d_sub *sub = &arg0->unkA8;
 
     if (arg0->unkC1 & 1) {
@@ -265,15 +281,16 @@ s32 func_151D9450(struct_eu_2062D0_d *arg0, s32 arg1) {
     }
     sub->unk4 += sub->unk6 * D_800BE9E4;
     sub->unk5 += sub->unk7 * D_800BE9E4;
-    arg0->unk38 = func_151423D8(sub->unk4 - 0x40) * sub->unk8 + sub->unk0;
-    arg0->unk3C = func_151423D8(sub->unk5 - 0x40) * sub->unkC + sub->unk0;
+    arg0->unk38 = angle_byte_cos(sub->unk4 - 0x40) * sub->unk8 + sub->unk0;
+    arg0->unk3C = angle_byte_cos(sub->unk5 - 0x40) * sub->unkC + sub->unk0;
     return 1;
 }
 #ifdef NON_MATCHING
 s32 func_15046F70(f32 *, s32, f32, u8 *);
 s32 func_1514672C(f32 *);
 
-u8 func_151D9534(u8 *arg0, u8 *arg1) {
+/* was func_151D9534 */
+u8 impact_dust_cloud_ground(u8 *arg0, u8 *arg1) {
     struct {
         f32 u50;
         f32 u54;
@@ -314,15 +331,15 @@ u8 func_151D9534(u8 *arg0, u8 *arg1) {
                 temp_v0 = arg0 + 0xA8;
                 temp_f0 = ((*(f32 *)((u8 *)arg0 + 0x38)) + (*(f32 *)((u8 *)arg0 + 0x3C))) * 0.5f;
                 if ((*(u8 *)((u8 *)arg0 + 0x9D)) == 3) {
-                    func_151D9FC0((*(u8 *)((u8 *)temp_v0 + 0x18)), (*(f32 *)((u8 *)temp_v0 + 0x14)) * temp_f0, (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), (s32) &sp.u50, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                    impact_spawn_burst((*(u8 *)((u8 *)temp_v0 + 0x18)), (*(f32 *)((u8 *)temp_v0 + 0x14)) * temp_f0, (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), (s32) &sp.u50, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 } else {
                     sp48 = temp_f0;
                     if (func_150ADA20() & 1) {
                         temp_v0_2 = arg0 + 0xA8;
-                        func_151D9B8C((*(u8 *)((u8 *)temp_v0_2 + 0x18)), temp_f0 * 0.09f * (*(f32 *)((u8 *)temp_v0_2 + 0x10)), (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), (struct17 *) &sp.u50, 0x64, 0U, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                        impact_debris_spawn((*(u8 *)((u8 *)temp_v0_2 + 0x18)), temp_f0 * 0.09f * (*(f32 *)((u8 *)temp_v0_2 + 0x10)), (*(u8 *)((u8 *)arg0 + 0x2B)), (s32) (arg0 + 0x84), (struct17 *) &sp.u50, 0x64, 0U, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                     } else {
                         temp_v0_3 = arg0 + 0xA8;
-                        func_151DAB58((*(u8 *)((u8 *)temp_v0_3 + 0x18)), temp_f0 * 0.025f * (*(f32 *)((u8 *)temp_v0_3 + 0x10)), (*(u8 *)((u8 *)arg0 + 0x2B)), &sp.u50, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                        impact_splash_ring_spawn((*(u8 *)((u8 *)temp_v0_3 + 0x18)), temp_f0 * 0.025f * (*(f32 *)((u8 *)temp_v0_3 + 0x10)), (*(u8 *)((u8 *)arg0 + 0x2B)), &sp.u50, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                     }
                 }
             }
@@ -333,64 +350,76 @@ block_12:
     return sp.u5F;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9534.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_dust_cloud_ground.s")
 #endif
-u8 func_151D97A8(void) {
+/* was func_151D97A8 */
+u8 impact_debris_tex_kind0(void) {
     s32 tmp[7] = D_800AB350;
     return tmp[func_150ADA20() % 7U];
 }
 
-u8 func_151D9820(void) {
+/* was func_151D9820 */
+u8 impact_debris_tex_kind1(void) {
     s32 tmp[3] = D_800AB36C;
     return tmp[func_150ADA20() % 3U];
 }
 
-u8 func_151D9878(void) {
+/* was func_151D9878 */
+u8 impact_debris_tex_kind2(void) {
     s32 tmp[3] = D_800AB378;
     return tmp[func_150ADA20() % 3U];
 }
 
-u8 func_151D98D0(void) {
+/* was func_151D98D0 */
+u8 impact_debris_tex_kind3(void) {
     s32 tmp[2] = D_800AB384;
     return tmp[func_150ADA20() & 1];
 }
 
-u8 func_151D9918(void) {
+/* was func_151D9918 */
+u8 impact_debris_tex_kind4(void) {
     s32 tmp[2] = D_800AB38C;
     return tmp[func_150ADA20() & 1];
 }
 
-u8 func_151D9960(void) {
+/* was func_151D9960 */
+u8 impact_debris_tex_kind5(void) {
     s32 tmp[5] = D_800AB394;
     return tmp[func_150ADA20() % 5U];
 }
 
-u8 func_151D99C8(void) {
+/* was func_151D99C8 */
+u8 impact_debris_tex_kind6(void) {
     s32 tmp[3] = D_800AB3A8;
     return tmp[func_150ADA20() % 3U];
 }
 
-u8 func_151D9A20(void) {
+/* was func_151D9A20 */
+u8 impact_debris_tex_kind7(void) {
     s32 tmp[2] = D_800AB3B4;
     return tmp[func_150ADA20() & 1];
 }
 
-u8 func_151D9A68(void) {
+/* was func_151D9A68 */
+u8 impact_debris_tex_kind8(void) {
     s32 tmp[3] = D_800AB3BC;
     return tmp[func_150ADA20() % 3U];
 }
 
-u8 func_151D9AC0(void) {
+/* was func_151D9AC0 */
+u8 impact_debris_tex_kind9(void) {
     s32 tmp[1] = D_800AB3C8;
     return tmp[0];
 }
 
-u8 func_151D9ADC(void) {
+/* was func_151D9ADC */
+u8 impact_debris_tex_kind10(void) {
     s32 tmp[3] = D_800AB3CC;
     return tmp[func_150ADA20() % 3U];
 }
 
-u8 func_151D9B34(void) {
+/* was func_151D9B34 */
+u8 impact_debris_tex_kind11(void) {
     s32 tmp[4] = D_800AB3D8;
     return tmp[func_150ADA20() & 3];
 }
@@ -402,7 +431,8 @@ s32 func_15145128(s32 *, s32 *, s32, s32);
 extern s32 D_800900A4;
 extern s32 D_800AB710;
 
-s32 func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA) {
+/* was func_151D9B8C */
+s32 impact_debris_spawn(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA) {
     struct {
         s16 u60;
         u8 pad62[0x2];
@@ -511,7 +541,7 @@ s32 func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5
     } else {
         var_v0_4 = 0;
     }
-    var_v0 = func_1513C650((s32) &sp.uB0, 0U, 0U, arg3, arg4->unk0, arg4->unk4, arg4->unk8, arg1, arg1, (u8) (sp4C & 0xFF), (u8) (((temp_t1 & 1) * 2) + (sp50 & 1)), var_v1_3, var_v0_4, 0, (u8) (s32) arg9, argA);
+    var_v0 = sprite_fx_spawn_cam_at((s32) &sp.uB0, 0U, 0U, arg3, arg4->unk0, arg4->unk4, arg4->unk8, arg1, arg1, (u8) (sp4C & 0xFF), (u8) (((temp_t1 & 1) * 2) + (sp50 & 1)), var_v1_3, var_v0_4, 0, (u8) (s32) arg9, argA);
     if ((var_v0 != NULL) && (arg8 != 0)) {
         var_v0 = func_15144E80(arg3, &sp.uA0, &sp.u94, &sp.u88);
         if (var_v0 != NULL) {
@@ -549,22 +579,24 @@ s32 func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5
     return (s32) var_v0;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9B8C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_debris_spawn.s")
 #endif
-void func_151D9EB0(struct_eu_2062D0_e *arg0) {
+/* was func_151D9EB0 */
+void impact_cloud_emitter_update(struct_eu_2062D0_e *arg0) {
     struct_eu_2062D0_e_sub *sub = &arg0->unk28;
 
     sub->unk0 -= D_800BE9E4;
     if (sub->unk0 < 0) {
-        func_151D9014(sub->unk8, (f32 *)D_800A5860, sub->unk16, func_150ADA68() * D_800AB844 + D_800AB848, (u32)func_150ADA20() % 41 + 0x23, sub->unk14, sub->unk4, 0, 1.0f, 1.0f, sub->unk15, 0, 1, 0, arg0->unkC, arg0->unk1);
+        impact_dust_cloud_spawn(sub->unk8, (f32 *)D_800A5860, sub->unk16, func_150ADA68() * D_800AB844 + D_800AB848, (u32)func_150ADA20() % 41 + 0x23, sub->unk14, sub->unk4, 0, 1.0f, 1.0f, sub->unk15, 0, 1, 0, arg0->unkC, arg0->unk1);
         sub->unk0 = (u32)func_150ADA20() % 111 + 30;
     }
 }
 
-void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    func_151DBCBC(arg0, arg1 * 0.5f, arg2, arg3, arg4, arg5, arg6);
+/* was func_151D9FC0 */
+void impact_spawn_burst(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
+    impact_dust_particle_spawn(arg0, arg1 * 0.5f, arg2, arg3, arg4, arg5, arg6);
     if ((arg0 != 5) && (arg0 != 2)) {
-        func_151DA08C(arg0, arg1 * D_800AB46C, 1.0099999904632568f, arg2, 100, arg3, arg4, arg5, arg6);
+        impact_smoke_puff_spawn(arg0, arg1 * D_800AB46C, 1.0099999904632568f, arg2, 100, arg3, arg4, arg5, arg6);
     }
 }
 
@@ -614,10 +646,11 @@ typedef struct {
     s16 fade;         /* 0x56: 255 / life (1 if life >= 256), 255 with the default life */
 } Blk58_151DA08C;
 
-// smoke_puff_spawn: spawns one effect record of kind `kind` (func_1513D668 class 0xE / 0x13) at *pos with size
+// smoke_puff_spawn: spawns one effect record of kind `kind` (effect3d_spawn_oriented_simple class 0xE / 0x13) at *pos with size
 // `scale` and life `life` (-1: 300 frames, full alpha), then copies a 0x1C-byte parameter block (random speeds,
 // the kind) into the record at +0x128. arg7 / arg8 are unused. Returns the record (0 if none).
-s32 func_151DA08C(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32 arg5, void *pos, s32 arg7, s32 arg8) {
+/* was func_151DA08C */
+s32 impact_smoke_puff_spawn(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32 arg5, void *pos, s32 arg7, s32 arg8) {
     u8 (**handlers)(void) = (u8 (**)(void))&D_800900A4;
     Rec1C_151DA08C rec;
     Blk58_151DA08C blk;
@@ -676,7 +709,7 @@ s32 func_151DA08C(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32 arg5, voi
     ra = func_150ADA20();
     rb = func_150ADA20();
     rc = func_150ADA20();
-    p = (u8 *)func_1513D668((s32)&blk, 0, 0xE, 0x13, 0, (rb & 1) + (ra & 1), rc & 0xFF, 500.0f, 500.0f, 0, arg5, 0,
+    p = (u8 *)effect3d_spawn_oriented_simple((s32)&blk, 0, 0xE, 0x13, 0, (rb & 1) + (ra & 1), rc & 0xFF, 500.0f, 500.0f, 0, arg5, 0,
                             0x1C, 0xFF, 0);
     if (p != NULL) {
         memcpy(p + 0x128, &rec, 0x1C);
@@ -684,12 +717,13 @@ s32 func_151DA08C(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32 arg5, voi
     return (s32)p;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA08C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_smoke_puff_spawn.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151DB5D0(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
+s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
 
-s32 func_151DA368(u8 *arg0) {
+/* was func_151DA368 */
+s32 impact_smoke_puff_update(u8 *arg0) {
     struct {
         f32 uB8;
         f32 uBC;
@@ -713,8 +747,8 @@ s32 func_151DA368(u8 *arg0) {
     (*(u8 *)((u8 *)arg0 + 0x128)) = temp_a0;
     (*(u8 *)((u8 *)arg0 + 0x129)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x129)) + ((*(s8 *)((u8 *)arg0 + 0x12B)) * D_800BE9E4));
     temp_s2 = arg0 + 0x128;
-    (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((func_151423D8((temp_a0 - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 4))) + (*(f32 *)((u8 *)temp_s2 + 0x10)));
-    (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((func_151423D8(((*(u8 *)((u8 *)temp_s2 + 1)) - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 8))) + (*(f32 *)((u8 *)temp_s2 + 0x10)));
+    (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((angle_byte_cos((temp_a0 - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 4))) + (*(f32 *)((u8 *)temp_s2 + 0x10)));
+    (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((angle_byte_cos(((*(u8 *)((u8 *)temp_s2 + 1)) - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 8))) + (*(f32 *)((u8 *)temp_s2 + 0x10)));
     (*(f32 *)((u8 *)temp_s2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0xC)) + ((0.15f + (func_150ADA68() * 0.1f)) * D_800BE9A4));
     temp_f2 = ((*(f32 *)((u8 *)arg0 + 0x2C)) + (*(f32 *)((u8 *)arg0 + 0x30))) * 0.5f;
     if ((*(f32 *)((u8 *)temp_s2 + 0xC)) > 1.0f) {
@@ -723,8 +757,8 @@ s32 func_151DA368(u8 *arg0) {
         do {
             temp_s0 = func_150ADA20() & 0xFF;
             temp_f20 = func_150ADA68() * sp98;
-            temp_f22 = func_151423D8((temp_s0 - 0x40) & 0xFF);
-            sp.uC4 = (*(f32 *)((u8 *)arg0 + 0x34)) + (func_151423D8(temp_s0 & 0xFF) * temp_f20);
+            temp_f22 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
+            sp.uC4 = (*(f32 *)((u8 *)arg0 + 0x34)) + (angle_byte_cos(temp_s0 & 0xFF) * temp_f20);
             sp.uC8 = (*(f32 *)((u8 *)arg0 + 0x38)) + -3.5f;
             sp.uCC = (*(f32 *)((u8 *)arg0 + 0x3C)) + (temp_f22 * temp_f20);
             sp.uB8 = 0.0f;
@@ -732,17 +766,18 @@ s32 func_151DA368(u8 *arg0) {
             sp.uC0 = 0.0f;
             temp_s0_2 = (func_150ADA20() % 51U) + 0x96;
             temp_f20_2 = func_150ADA68();
-            func_151DB5D0((*(u8 *)((u8 *)temp_s2 + 0x18)), &sp.uC4, &sp.uB8, sp94, ((temp_f20_2 * 154.0f) + 10106.0f) * 0.0001f, 1.0f, ((func_150ADA68() * 25.0f) + -50.0f) * 0.001f, (s32) temp_s0_2, 0x9B, (s32) temp_s0_2, 0xFF / temp_s0_2, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            impact_tinted_particle_spawn((*(u8 *)((u8 *)temp_s2 + 0x18)), &sp.uC4, &sp.uB8, sp94, ((temp_f20_2 * 154.0f) + 10106.0f) * 0.0001f, 1.0f, ((func_150ADA68() * 25.0f) + -50.0f) * 0.001f, (s32) temp_s0_2, 0x9B, (s32) temp_s0_2, 0xFF / temp_s0_2, 1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             (*(f32 *)((u8 *)temp_s2 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0xC)) - 1.0f);
         } while ((*(f32 *)((u8 *)temp_s2 + 0xC)) > 1.0f);
     }
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA368.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_smoke_puff_update.s")
 #endif
 // TODO when we know what arg0 is...
-s32 func_151DA6A8(struct_eu_2062D0 *arg0) {
+/* was func_151DA6A8 */
+s32 impact_puff_scale_decay(struct_eu_2062D0 *arg0) {
     s32 i;
     struct_eu_2062D0_sub *p;
 
@@ -767,7 +802,8 @@ extern u8 D_800AB7E4[];
  *   per-type tables D_800AB7E4 / D_800AB710, 3 when `fade`), D_800AB7D4[type], 0xFF, alpha, two s16 timers;
  * - fixed render block (0x1E bytes, constants).
  * On success the object's extra data (+0x98) gets (sx, sy, type) at +0x48. Returns the particle or NULL. */
-u8 *func_151DA6F8(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, s32 tint, u8 fade, f32 sx, f32 sy,
+/* was func_151DA6F8 */
+u8 *impact_spark_spawn(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, s32 tint, u8 fade, f32 sx, f32 sy,
                   u8 bright, u8 type, s32 argC, s16 t0, s16 t1, s32 owner, u8 arg10, s32 arg11) {
     struct {
         s32 render[3];      /* sp54: words 0, 0x220005, 0x50600 */
@@ -867,12 +903,13 @@ u8 *func_151DA6F8(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, 
     return p;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA6F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_spark_spawn.s")
 #endif
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
 extern f32 D_800AB87C;
-void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
-s32 func_151DA938(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5)
+void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
+/* was func_151DA938 */
+s32 streak_on_land_debris(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5)
 {
   u8 *tbl;
   u8 *obj;
@@ -888,17 +925,18 @@ s32 func_151DA938(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5)
   if (func_150ADA20() & 1)
   {
     p = obj + pad;
-    func_151D9B8C(*((u8 *) (p + 8)), (*((f32 *) p)) * ((*((f32 *) (obj + 0))) * 3.0f), *((u8 *) (obj + 0x1B)), arg5, (struct17 *) pos, 0x64, 0, 1, 0, *((u8 *) (arg0 + 0xC)), *((u8 *) (arg0 + 1)));
+    impact_debris_spawn(*((u8 *) (p + 8)), (*((f32 *) p)) * ((*((f32 *) (obj + 0))) * 3.0f), *((u8 *) (obj + 0x1B)), arg5, (struct17 *) pos, 0x64, 0, 1, 0, *((u8 *) (arg0 + 0xC)), *((u8 *) (arg0 + 1)));
   }
   else
   {
     p = obj + pad;
-    func_151DAB58(*((u8 *) (p + 8)), (*((f32 *) p)) * ((*((f32 *) (obj + 0))) * D_800AB87C), *((u8 *) (obj + 0x1B)), pos, 1, *((u8 *) (arg0 + 0xC)), *((u8 *) (arg0 + 1)));
+    impact_splash_ring_spawn(*((u8 *) (p + 8)), (*((f32 *) p)) * ((*((f32 *) (obj + 0))) * D_800AB87C), *((u8 *) (obj + 0x1B)), pos, 1, *((u8 *) (arg0 + 0xC)), *((u8 *) (arg0 + 1)));
   }
   *((s8 *) (obj + 0x20)) = 4;
   return 1;
 }
-s32 func_151DAA88(struct_eu_2062D0_c *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+/* was func_151DAA88 */
+s32 streak_on_land_burst(struct_eu_2062D0_c *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     struct_eu_2062D0_c_sub *sub = arg0->unk98;
     struct_eu_2062D0_pt *pts = arg0->unk94;
     struct17 sp34;
@@ -906,7 +944,7 @@ s32 func_151DAA88(struct_eu_2062D0_c *arg0, s32 arg1, s32 arg2, s32 arg3, f32 ar
     sp34.unk0 = pts[arg0->unk2D].unk0;
     sp34.unk4 = arg4;
     sp34.unk8 = pts[arg0->unk2D].unk8;
-    func_151D9FC0(sub->unk50, sub->unk0 * 11.0f * sub->unk4C, sub->unk1B, arg5, &sp34, arg0->unkC, arg0->unk1);
+    impact_spawn_burst(sub->unk50, sub->unk0 * 11.0f * sub->unk4C, sub->unk1B, arg5, &sp34, arg0->unkC, arg0->unk1);
     sub->unk20 = 4;
     return 1;
 }
@@ -919,11 +957,12 @@ extern f32 D_800AB884;
 extern f32 D_800AB888;
 extern f32 D_800AB88C;
 // splash_ring_spawn: spawns a flat ring effect of kind `type` (texture from D_80090070[type](), life 100) at `pos`
-// with half size `size`, alpha `alpha`, through func_1513D2F0 (update handler 0x14, draw 0xE, fade from life 0x20
+// with half size `size`, alpha `alpha`, through effect3d_spawn_full (update handler 0x14, draw 0xE, fade from life 0x20
 // at rate 7; flag 0x40000000 when D_800AB710[type]). `lit` picks the light texture set (0x3B vs 0x22 in the high
 // byte of +0x1A) and lit vertex colours. On success the effect's +0x110 gets {0, 6..8 random, growth speeds
 // (random ranges from D_800AB880..D_800AB88C)}.
-void func_151DAB58(u8 type, f32 size, u8 alpha, f32 *pos, u8 lit, u8 room, s32 owner) {
+/* was func_151DAB58 */
+void impact_splash_ring_spawn(u8 type, f32 size, u8 alpha, f32 *pos, u8 lit, u8 room, s32 owner) {
     struct {
         u8 texture;     /* -> effect +0x18 */
         u8 u1;
@@ -991,21 +1030,22 @@ void func_151DAB58(u8 type, f32 size, u8 alpha, f32 *pos, u8 lit, u8 room, s32 o
     req.u50 = 0;
     req.fadeStart = 0x20;
     req.fadeRate = 7;
-    fx = func_1513D2F0(&req, (s32)&D_800A4AA0, 0, 0x14, 0, 0xE, (func_150ADA20() & 1) | 2, lit ? 3 : 0,
+    fx = effect3d_spawn_full(&req, (s32)&D_800A4AA0, 0, 0x14, 0, 0xE, (func_150ADA20() & 1) | 2, lit ? 3 : 0,
                        lit ? 0xFF : 0, 0xC, room, owner);
     if (fx != NULL) {
         memcpy(fx + 0x110, &extra, 0xC);
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DAB58.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_splash_ring_spawn.s")
 #endif
-s32 func_151DADA0(struct_eu_2062D0_b *arg0) {
+/* was func_151DADA0 */
+s32 impact_splash_ring_update(struct_eu_2062D0_b *arg0) {
     struct_eu_2062D0_b_sub *sub = &arg0->unk110;
     f32 f0;
 
     sub->unk0 += sub->unk1 * D_800BE9E4;
-    f0 = func_151423D8(sub->unk0 - 0x40);
+    f0 = angle_byte_cos(sub->unk0 - 0x40);
     arg0->unk4C = sub->unk4 * f0 + 1.0f;
     arg0->unk50 = D_800AB890 - sub->unk8 * f0;
     return 1;
@@ -1016,7 +1056,8 @@ s32 memcpy(s32, s32, s32);
 extern s32 D_800DD608;
 extern s32 D_800DD618;
 
-u8 *func_151DAE28(u8 *arg0, s16 arg1) {
+/* was func_151DAE28 */
+u8 *impact_splash_ring_verts(u8 *arg0, s16 arg1) {
     struct {
         u8 u37;
         u8 pad38[0x10];
@@ -1080,9 +1121,10 @@ u8 *func_151DAE28(u8 *arg0, s16 arg1) {
     return NULL;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DAE28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_splash_ring_verts.s")
 #endif
-void func_151DB004(struct218 *arg0) {
+/* was func_151DB004 */
+void impact_tint_red(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk15 = 0;
     arg0->unk16 = 0;
@@ -1091,14 +1133,16 @@ void func_151DB004(struct218 *arg0) {
     arg0->unk1A = 0;
 }
 
-void func_151DB068(struct218 *arg0) {
+/* was func_151DB068 */
+void impact_tint_yellow(struct218 *arg0) {
     arg0->unk14 = arg0->unk15 = (func_150ADA20() % 0x38U) + 100;
     arg0->unk16 = 0;
     arg0->unk18 = arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
     arg0->unk1A = 0;
 }
 
-void func_151DB0CC(struct218 *arg0) {
+/* was func_151DB0CC */
+void impact_tint_red_green_a(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk16 = 0;
@@ -1107,7 +1151,8 @@ void func_151DB0CC(struct218 *arg0) {
     arg0->unk1A = 0;
 }
 
-void func_151DB15C(struct218 *arg0) {
+/* was func_151DB15C */
+void impact_tint_red_green_b(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk16 = 0;
@@ -1116,7 +1161,8 @@ void func_151DB15C(struct218 *arg0) {
     arg0->unk1A = 0;
 }
 
-void func_151DB1EC(struct218 *arg0) {
+/* was func_151DB1EC */
+void impact_tint_red_green_c(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk16 = 0;
@@ -1125,7 +1171,8 @@ void func_151DB1EC(struct218 *arg0) {
     arg0->unk1A = 0;
 }
 
-void func_151DB27C(struct218 *arg0) {
+/* was func_151DB27C */
+void impact_tint_white(struct218 *arg0) {
     arg0->unk14 = 0xFF;
     arg0->unk15 = 0xFF;
     arg0->unk16 = 0xFF;
@@ -1134,7 +1181,8 @@ void func_151DB27C(struct218 *arg0) {
     arg0->unk1A = 0xC8;
 }
 
-void func_151DB2A8(struct218 *arg0) {
+/* was func_151DB2A8 */
+void impact_tint_green_fixed(struct218 *arg0) {
     arg0->unk14 = 0;
     arg0->unk15 = 200;
     arg0->unk16 = 0;
@@ -1143,7 +1191,8 @@ void func_151DB2A8(struct218 *arg0) {
     arg0->unk1A = 0;
 }
 
-void func_151DB2CC(struct218 *arg0) {
+/* was func_151DB2CC */
+void impact_tint_green(struct218 *arg0) {
     arg0->unk14 = 0;
     arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk16 = 0;
@@ -1152,7 +1201,8 @@ void func_151DB2CC(struct218 *arg0) {
     arg0->unk1A = 0;
 }
 
-void func_151DB330(struct218 *arg0) {
+/* was func_151DB330 */
+void impact_tint_brown(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 0x15U) + 95;
     arg0->unk15 = (func_150ADA20() % 0x15U) + 95;
     arg0->unk16 = (func_150ADA20() % 0xBU) + 45;
@@ -1161,14 +1211,16 @@ void func_151DB330(struct218 *arg0) {
     arg0->unk1A = (func_150ADA20() % 0xBU) + 25;
 }
 
-void func_151DB3D8(struct218 *arg0) {
+/* was func_151DB3D8 */
+void impact_tint_cyan(struct218 *arg0) {
     arg0->unk14 = 0;
     arg0->unk15 = arg0->unk16 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk18 = 0;
     arg0->unk19 = arg0->unk1A = (func_150ADA20() % 0x2EU) + 180;
 }
 
-void func_151DB43C(struct218 *arg0) {
+/* was func_151DB43C */
+void impact_tint_magenta(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
     arg0->unk15 = 0;
     arg0->unk16 = (func_150ADA20() % 0x38U) + 80;
@@ -1177,7 +1229,8 @@ void func_151DB43C(struct218 *arg0) {
     arg0->unk1A = (func_150ADA20() % 0x2EU) + 180;
 }
 
-void func_151DB4CC(struct218 *arg0) {
+/* was func_151DB4CC */
+void impact_tint_bright(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 56U) + 200;
     arg0->unk15 = (func_150ADA20() % 56U) + 200;
     arg0->unk16 = (func_150ADA20() % 56U) + 200;
@@ -1190,7 +1243,8 @@ void func_151DB4CC(struct218 *arg0) {
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern s32 D_800900D8;
 
-s32 func_151DB5D0(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD) {
+/* was func_151DB5D0 */
+s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD) {
     struct {
         s8 u30;
         u8 pad31[0x3];
@@ -1365,7 +1419,7 @@ s32 func_151DB5D0(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DB5D0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_tinted_particle_spawn.s")
 #endif
 typedef struct { u8 fl; u8 pad1[3]; s32 unk4; u8 a[3]; u8 d[3]; u8 padE[2]; f32 s[3]; } S97C;
 #ifdef NON_MATCHING
@@ -1373,7 +1427,8 @@ s32 func_15131E88(u8 *, f32); /* P95: f32 (float bits were passed as an int) */
 #else
 s32 func_15131E88(u8 *, s32);
 #endif
-s32 func_151DB97C(u8 *arg0, s32 arg1) {
+/* was func_151DB97C */
+s32 impact_tinted_particle_update(u8 *arg0, s32 arg1) {
     S97C *p;
     f32 z;
     f32 y;
@@ -1390,9 +1445,9 @@ s32 func_151DB97C(u8 *arg0, s32 arg1) {
         p->a[0] += p->d[0] * D_800BE9E4;
         p->a[1] += p->d[1] * D_800BE9E4;
         p->a[2] += p->d[2] * D_800BE9E4;
-        x = func_151423D8(p->a[0] - 0x40);
-        y = func_151423D8(p->a[1] - 0x40);
-        z = func_151423D8(p->a[2] - 0x40);
+        x = angle_byte_cos(p->a[0] - 0x40);
+        y = angle_byte_cos(p->a[1] - 0x40);
+        z = angle_byte_cos(p->a[2] - 0x40);
         *(f32 *)(arg0 + 0x4C) = p->s[0] * x;
         *(f32 *)(arg0 + 0x50) = p->s[1] * y;
         *(f32 *)(arg0 + 0x54) = p->s[2] * z;
@@ -1405,7 +1460,8 @@ extern f32 D_800AB8A4;
 extern f32 D_800AB8A8;
 extern f32 D_800AB8AC;
 
-void func_151DBAA8(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+/* was func_151DBAA8 */
+void impact_spawn_debris_burst(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct_eu_15154488 s;
 
     s.unk8 = *arg0;
@@ -1435,7 +1491,8 @@ void func_151DBAA8(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     func_15154488(&s, &s.unk8, 0, arg3, arg4);
 }
 
-void func_151DBBD4(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4) {
+/* was func_151DBBD4 */
+void impact_spawn_debris_up(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4) {
     struct17 tmp;
     struct217 tmp2;
 
@@ -1447,13 +1504,14 @@ void func_151DBBD4(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4) {
     tmp2.unk0 = func_150ADA68();
     tmp2.unk4 = func_150ADA20();
 
-    func_151D9B8C(tmp2.unkF, (tmp2.unk0 * 25.0f) + 10.0f, ((tmp2.unk4 % 0x38U) + 200), arg1 + 4, &tmp, (func_150ADA20() % 0x97U) + 150, 0, 1, 0, arg3, arg4);
+    impact_debris_spawn(tmp2.unkF, (tmp2.unk0 * 25.0f) + 10.0f, ((tmp2.unk4 % 0x38U) + 200), arg1 + 4, &tmp, (func_150ADA20() % 0x97U) + 150, 0, 1, 0, arg3, arg4);
 }
 
 #ifdef NON_MATCHING
 extern s32 D_800AB7F4;
 
-void func_151DBCBC(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void * arg4_p, u8 arg5, s32 arg6) {
+/* was func_151DBCBC */
+void impact_dust_particle_spawn(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void * arg4_p, u8 arg5, s32 arg6) {
     u8 * arg4 = (u8 *) arg4_p;
     struct {
         s32 u50;
@@ -1504,18 +1562,19 @@ void func_151DBCBC(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void * arg4_p, u8 arg5
     if (arg3 != 0) {
         sp44 = func_150ADA20();
         sp48 = func_150ADA20();
-        func_1513C73C((s32) &sp.u50, 0U, 0U, arg3, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, (u8) (sp44 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp48 & 1)), 0, (u8) (s32) arg5, arg6);
+        sprite_fx_spawn_cam((s32) &sp.u50, 0U, 0U, arg3, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, (u8) (sp44 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp48 & 1)), 0, (u8) (s32) arg5, arg6);
         return;
     }
-    func_1513C5B0((s32) &sp.u50, 0, 0U, 0U, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, 0U, 0U, 0, (u8) (s32) arg5, arg6);
+    sprite_fx_spawn_quad((s32) &sp.u50, 0, 0U, 0U, (*(f32 *)((u8 *)arg4 + 0)), (*(f32 *)((u8 *)arg4 + 4)), (*(f32 *)((u8 *)arg4 + 8)), arg1, arg1, 0U, 0U, 0, (u8) (s32) arg5, arg6);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DBCBC.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_dust_particle_spawn.s")
 #endif
 #ifdef NON_MATCHING
 extern s32 D_800AB7F4;
 
-void func_151DBE80(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u8 arg6, u8 arg7, u8 arg8, s32 arg9) {
+/* was func_151DBE80 */
+void impact_flat_fx_spawn(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u8 arg6, u8 arg7, u8 arg8, s32 arg9) {
     struct {
         s8 u58;
         s8 u59;
@@ -1594,10 +1653,10 @@ void func_151DBE80(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u
     sp.u9C = arg6;
     sp4C = func_150ADA20();
     sp50 = func_150ADA20();
-    func_1513D668((s32) &sp.u58, 0, 0xBU, 0x11U, 0U, (u8) ((sp50 & 1) + (sp4C & 1)), (s16) (func_150ADA20() & 0xFF), arg1, arg1, 0, arg5, 0U, 0, (u8) (s32) arg8, arg9);
+    effect3d_spawn_oriented_simple((s32) &sp.u58, 0, 0xBU, 0x11U, 0U, (u8) ((sp50 & 1) + (sp4C & 1)), (s16) (func_150ADA20() & 0xFF), arg1, arg1, 0, arg5, 0U, 0, (u8) (s32) arg8, arg9);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DBE80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_flat_fx_spawn.s")
 #endif
 #ifdef NON_MATCHING
 /* P153 */
@@ -1636,7 +1695,8 @@ typedef struct {
 // glow_particle_spawn: P153: spawns a glow particle (func_151307F0) at pos with size, alpha and life for glow
 // `type` (sprite D_800AB700[type], flag 0x800000 when D_800AB710[type]); random flip bits 0x80 / 0x40, still
 // (velocity D_800A5860). Returns func_151307F0's record.
-s32 func_151DC034(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, s32 arg6) {
+/* was func_151DC034 */
+s32 impact_glow_spawn(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, s32 arg6) {
     GlowTmplC034 t;
     s32 bit80;
     s32 bit40;
@@ -1692,7 +1752,7 @@ s32 func_151DC034(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, s32 
     return func_151307F0((s32) &t, 1, 0, 0, arg5, arg6);
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DC034.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_glow_spawn.s")
 #endif
 extern f32 D_800AB8B0;
 extern f32 D_800AB8B4;
@@ -1724,7 +1784,8 @@ typedef struct {
 
 s32 func_151506E8(S06E8 *, struct17 *, s32, u8, s32);
 
-void func_151DC260(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+/* was func_151DC260 */
+void impact_blast_spawn_large(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct_eu_15154488 s;
     S06E8 t;
 
@@ -1788,7 +1849,8 @@ extern f32 D_800AB8D4;
 
 
 
-void func_151DC484(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4) {
+/* was func_151DC484 */
+void impact_blast_spawn_small(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct_eu_15154488 s;
     S06E8 t;
 
@@ -1901,7 +1963,7 @@ void func_151DC484(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4) {
 //     s32 unkA0; // spB4
 // } struct218;
 //
-// void func_151DC484(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+// void impact_blast_spawn_small(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
 //     struct218 tmp2;
 //     struct217 tmp;
 //

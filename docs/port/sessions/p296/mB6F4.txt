@@ -27,8 +27,8 @@
 \#^    part.u44\[3\] = 6;#s/6;/7;/
 \#^    height = #s/-8 : 8/8 : -8/
 \#^    height = #s/>> 8/>> 7/
-\#^    p = (u8 \*) func_1513D668(#s/0x17/0x16/
-\#^    p = (u8 \*) func_1513D668(#s/(s32) &ground\[1\]/(s32) \&ground[0]/
+\#^    p = (u8 \*) effect3d_spawn_oriented_simple(#s/0x17/0x16/
+\#^    p = (u8 \*) effect3d_spawn_oriented_simple(#s/(s32) &ground\[1\]/(s32) \&ground[0]/
 \#^    if (p != NULL) {#s/!=/==/
 \#^        memcpy(p + 0x128, &tail, 8);#s/0x128/0x124/
 \#^        if (func_1518B140(D_800D9D00, (s32) p, 2) == 0) {#s/p, 2)/p, 1)/

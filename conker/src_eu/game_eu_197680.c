@@ -6,7 +6,7 @@
 u8 *func_15169E70(u8 *arg0, s32 arg1) {
     u8 *temp_v0;
 
-    temp_v0 = func_15167A68(0x5E, 0, 0x4C, 0, (u8) arg1, 1U);
+    temp_v0 = node_alloc(0x5E, 0, 0x4C, 0, (u8) arg1, 1U);
     if (temp_v0 != NULL) {
         bcopy(arg0, temp_v0 + 0x10, 0x3C);
     }
@@ -47,7 +47,7 @@ void func_15169EF8(u8 *arg0) {
     if (t != 0) {
         t -= D_800BE9E4;
         if (t <= 0) {
-            func_1516972C((struct102 *)arg0);
+            node_destroy((struct102 *)arg0);
         } else {
             *(s16 *)(arg0 + 0x24) = t;
         }
@@ -56,7 +56,7 @@ void func_15169EF8(u8 *arg0) {
 
 #ifdef NON_MATCHING
 /* P142 */
-Gfx *func_1513F4E4(Gfx *gfx, u8 combineId, u8 *needSync);
+Gfx *gfx_set_combine_mode(Gfx *gfx, u8 combineId, u8 *needSync);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeL, s32 modeH, u8 *needSync);
 Gfx *func_15095380(Gfx *gfx, s32 tex, s32 tmem, s32 tile, s32 cm, s32 age, s32 sfrac, s32 uls, s32 ult);
 u32 *func_150966AC(u32 *gfx, void *img, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 w, s32 h, s32 flags, s32 sOff, s32 xAdd, s32 frame);
@@ -81,7 +81,7 @@ Gfx *func_15169FB8(Gfx *gfx, u8 *fx, s32 arg2) {
         return gfx;
     }
     needSync = 1;
-    gfx = func_1513F4E4(gfx, fx[0x47], &needSync);
+    gfx = gfx_set_combine_mode(gfx, fx[0x47], &needSync);
     // gDPSetPrimColor(0, 1, r, g, b, a)
     gfx->words.w0 = 0xFA000100;
     gfx->words.w1 = (fx[0x42] << 24) | (fx[0x43] << 16) | (fx[0x44] << 8) | fx[0x45];

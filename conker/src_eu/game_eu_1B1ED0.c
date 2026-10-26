@@ -1283,12 +1283,12 @@ void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f
     struct102 *temp_v0;
     u8 *temp_t0;
 
-    temp_v0 = func_15167A68(6, 0, 0xB0, 1, 0xFFU, 1U);
+    temp_v0 = node_alloc(6, 0, 0xB0, 1, 0xFFU, 1U);
     if (temp_v0 != NULL) {
         temp_v0_2 = allocate_memory(0x780, 1, 2, 1);
         (*(s32 *)((u8 *)temp_v0 + 0xA4)) = temp_v0_2;
         if (temp_v0_2 == 0) {
-            func_1516972C(temp_v0);
+            node_destroy(temp_v0);
             return;
         }
         (*(f32 *)((u8 *)temp_v0 + 0x90)) = arg0;
@@ -1389,7 +1389,7 @@ void func_15187EE8(struct102 *arg0) {
     temp_v0 = (*(s16 *)((u8 *)arg0 + 0xA8));
     if (temp_v0 < 0) {
         func_10004074((*(s32 *)((u8 *)arg0 + 0xA4)), arg0);
-        func_1516972C(arg0);
+        node_destroy(arg0);
         return;
     }
     (*(s16 *)((u8 *)arg0 + 0xA8)) = (s16) (temp_v0 + D_800BE9E4);

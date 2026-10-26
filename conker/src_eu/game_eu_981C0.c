@@ -123,7 +123,7 @@ void func_1506AC24(struct127 *arg0, s32 arg1) {
     header.unk4 = 5;
     data.unk4 = 80.0f;
     data.unkC = D_80099DE8;
-    temp_v0 = func_151602C0(&header, &header2, 0, 0xFF, 0xFF, 0x5A, 0xFF, 0, sizeof(data), 0xFF, 1);
+    temp_v0 = light_create_with_ctrl(&header, &header2, 0, 0xFF, 0xFF, 0x5A, 0xFF, 0, sizeof(data), 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &data, sizeof(data));
     }
@@ -170,11 +170,11 @@ void func_1506AE08(u8 *arg0, u8 *arg1) {
 
 #ifdef NON_MATCHING
 extern s32 D_800CC680;   /* bit mask of the players to affect */
-void func_15137610(u8 *, f32 *, f32 *, f32 *, s32, s32);
+void object_impact_effects(u8 *, f32 *, f32 *, f32 *, s32, s32);
 #endif
 
 #ifdef NON_MATCHING
-// players_effect_at_point: for every player whose bit is set in D_800CC680, func_15137610(player, D_800D1980,
+// players_effect_at_point: for every player whose bit is set in D_800CC680, object_impact_effects(player, D_800D1980,
 // D_eu_800D1990, NULL, 0xFF, 1) (the point / vector func_1506B04C fills in).
 // P184: handler 10 of func_1506B04C's D_800864B0 table, so it takes the dispatch arguments (unused).
 void func_1506AEA0(u8 *obj, void *arg) {
@@ -183,7 +183,7 @@ void func_1506AEA0(u8 *obj, void *arg) {
 
     while (mask != 0) {
         if (mask & 1) {
-            func_15137610(player, (f32 *) D_800D1980, (f32 *) D_eu_800D1990, NULL, 0xFF, 1);
+            object_impact_effects(player, (f32 *) D_800D1980, (f32 *) D_eu_800D1990, NULL, 0xFF, 1);
         }
         mask >>= 1;
         player += 0x32C;

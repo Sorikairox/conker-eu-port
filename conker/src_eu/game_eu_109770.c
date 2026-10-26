@@ -461,7 +461,7 @@ typedef struct {
     f32 uD4; s16 uD8; s16 uDA; f32 uDC; f32 uE0; s16 uE4; s16 uE6; s16 uE8; s16 uEA; s16 uEC; s16 uEE; f32 uF0;
     u8 *anim2; s32 uF8; s8 uFC; f32 u100; f32 u104; f32 u108; f32 u10C; f32 u110; u8 u114; s16 u116; s16 u118;
 } FountainFx;
-/* Particle record for func_15167D84 (0x38 bytes; fields the fountain code never sets stay as they are). */
+/* Particle record for node_spawn_sprite (0x38 bytes; fields the fountain code never sets stay as they are). */
 typedef struct {
     u8 *tex;                /* 0x00 */
     u8 pad04[8];
@@ -482,11 +482,11 @@ typedef struct {
     s16 u34;                /* 0x34 */
     u8 pad36[2];
 } FountainDrop;
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
+void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 #endif
 
 #ifdef NON_MATCHING
-/* Splash ring record for func_1513C5B0 (fields not set stay as they are). */
+/* Splash ring record for sprite_fx_spawn_quad (fields not set stay as they are). */
 typedef struct {
     s32 u00;                /* 0x00 1 */
     s16 u04;                /* 0x04 0x64 */
@@ -498,14 +498,14 @@ typedef struct {
     s32 u18;                /* 0x18 0x30001 */
 } FountainSplash;
 extern f32 D_800A10C0;
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
-u8 *func_151DA6F8(f32 *, f32 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
+void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
+u8 *impact_spark_spawn(f32 *, f32 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
 
 // fountain_step: step handler 4 of D_8008A5A0 (`s32 (u8 *)`, func_15147FF0's per-frame step) for the effect of
 // func_150DC2F0. Moves the water points of the ring obj +0x94 (see func_150DD420) from the newest back to the oldest:
 // vy (+0xC) gains d +0x18 per second, y follows. A point that drops below the water level d +0x24 lands: it makes
-// sprites (func_151DA6F8, counter d +0xA0 / rate +0x9C; half alpha and tint 7 when d +0x41 is 0x18), drops
-// (func_15167D84, counter +0xD0 / rate +0xCC) and splash rings (func_1513C5B0, counter +0x108 / rate +0x104) around
+// sprites (impact_spark_spawn, counter d +0xA0 / rate +0x9C; half alpha and tint 7 when d +0x41 is 0x18), drops
+// (node_spawn_sprite, counter +0xD0 / rate +0xCC) and splash rings (sprite_fx_spawn_quad, counter +0x108 / rate +0x104) around
 // it, and becomes the oldest point (older ones are dropped, y clamped to the level). The oldest four points then fade
 // in (alpha 0 / 0x3F / 0x7F / 0xBE). When d +0x116 is a sound id it is replayed (func_10010F30, id + rand % 10)
 // whenever the countdown +0x114 runs out. obj +0x54..+0x5C gets the oldest point (0 when the ring is empty).
@@ -538,11 +538,11 @@ s32 func_150DCAD8(u8 *obj) {
                 while (1.0f < d->uA0) {
                     speed = func_150ADA68() * d->uB0 + d->uAC;
                     a = func_150ADA20();
-                    sinA = func_151423D8(a);
-                    cosA = func_151423D8(a - 0x40);
+                    sinA = angle_byte_cos(a);
+                    cosA = angle_byte_cos(a - 0x40);
                     b = (u32) func_150ADA20() % (d->uAA + 1) + d->uA8;
-                    sinB = func_151423D8(b);
-                    cosB = func_151423D8(b - 0x40);
+                    sinB = angle_byte_cos(b);
+                    cosB = angle_byte_cos(b - 0x40);
                     r = func_150ADA68() * d->uA4;
                     pos[0] = *(f32 *) (pt + 0x0) + r * cosA;
                     pos[1] = d->u24;
@@ -556,7 +556,7 @@ s32 func_150DCAD8(u8 *obj) {
                     speed2 = func_150ADA68();
                     t = func_150ADA20();
                     tint = (d->u41 == 0x18) ? 7 : 2;
-                    func_151DA6F8(pos, vel, scale * d->uC0 + d->uBC, d->uC4, alpha, speed2 * d->uB8 + d->uB4,
+                    impact_spark_spawn(pos, vel, scale * d->uC0 + d->uBC, d->uC4, alpha, speed2 * d->uB8 + d->uB4,
                                   (u32) t % (d->uC8 + 1) + d->uC6, 1, D_800A10C0, D_800A10C0, 1, tint, 0, 0x10, 0xF,
                                   0, obj[0xC], obj[1]);
                     d->uA0 -= 1.0f;
@@ -585,11 +585,11 @@ s32 func_150DCAD8(u8 *obj) {
                     do {
                         speed = func_150ADA68() * d->uE0 + d->uDC;
                         a = func_150ADA20();
-                        sinA = func_151423D8(a);
-                        cosA = func_151423D8(a - 0x40);
+                        sinA = angle_byte_cos(a);
+                        cosA = angle_byte_cos(a - 0x40);
                         b = (u32) func_150ADA20() % (d->uDA + 1) + d->uD8;
-                        sinB = func_151423D8(b);
-                        cosB = func_151423D8(b - 0x40);
+                        sinB = angle_byte_cos(b);
+                        cosB = angle_byte_cos(b - 0x40);
                         r = func_150ADA68() * d->uD4;
                         drop.x = (s32) (*(f32 *) (pt + 0x0) + r * cosA);
                         h = speed * sinB;
@@ -600,7 +600,7 @@ s32 func_150DCAD8(u8 *obj) {
                         drop.gravity = (u32) func_150ADA20() % (d->uE8 + 1) + d->uE6;
                         drop.u2A = (u32) func_150ADA20() % (d->uEC + 1) + d->uEA;
                         drop.size1 = drop.size0 = (s32) (func_150ADA68() * d->uF0 + d->uEE);
-                        if (func_15167D84(&drop, 0, 0, -1, obj[0xC], obj[1]) == NULL) {
+                        if (node_spawn_sprite(&drop, 0, 0, -1, obj[0xC], obj[1]) == NULL) {
                             more = 0;
                         }
                         d->uD0 -= 1.0f;
@@ -630,7 +630,7 @@ s32 func_150DCAD8(u8 *obj) {
                         r2 = func_150ADA20();
                         r1 = func_150ADA20();
                         r0 = func_150ADA20();
-                        if (func_1513C5B0((s32) &ring, 0, 5, 0, *(f32 *) (pt + 0x0), d->u100, *(f32 *) (pt + 0x8),
+                        if (sprite_fx_spawn_quad((s32) &ring, 0, 5, 0, *(f32 *) (pt + 0x0), d->u100, *(f32 *) (pt + 0x8),
                                           size, size, r2, (r0 & 1) + (r1 & 1), 0, 0xFF, 0) == NULL) {
                             more = 0;
                         }
@@ -705,14 +705,14 @@ s32 func_150DCAD8(u8 *obj) {
 
 #ifdef NON_MATCHING
 extern f32 D_800A10C4;
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
+void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 
 // fountain_emit: emitter handler 4 of D_8008A5DC (`s32 (u8 *)`, func_15147FF0's per-frame step) for the effect of
 // func_150DC2F0. The data d = obj +0x98 swings the emitter around obj +0x10 / +0x18 (angles +0x04 / +0x0C advance
 // by a random step per frame, radii +0x00 / +0x08) and moves it there in +0x20 steps (+0x20 grows by rate +0x1C;
 // nothing happens until it passes 0.99999). Each step adds a point to the ring obj +0x94 (0x18 bytes: x, y, z, vy,
 // width, s16 alpha, byte; newest at obj +0x2E, oldest +0x2D, count +0x2C, ring size +0x25) and, while the drop
-// counter +0x68 (rate +0x64) passes 1, sprays drops (func_15167D84) until the pool is full. Once the lifetime +0x118
+// counter +0x68 (rate +0x64) passes 1, sprays drops (node_spawn_sprite) until the pool is full. Once the lifetime +0x118
 // runs out the newest four points fade (alpha 0 / 0x3F / 0x7F / 0xBE), obj +0x30 is cleared (no more emitting) and
 // flag 2 of obj +0x1E dropped. Always returns 1.
 s32 func_150DD420(u8 *obj) {
@@ -734,8 +734,8 @@ s32 func_150DD420(u8 *obj) {
         step = dt * inv;
         x = d->pos[0];
         z = d->pos[1];
-        dx = func_151423D8(d->u04 - 0x40) * d->u00 + *(f32 *) (obj + 0x10) - d->pos[0];
-        dz = func_151423D8(d->u0C - 0x40) * d->u08 + *(f32 *) (obj + 0x18) - d->pos[1];
+        dx = angle_byte_cos(d->u04 - 0x40) * d->u00 + *(f32 *) (obj + 0x10) - d->pos[0];
+        dz = angle_byte_cos(d->u0C - 0x40) * d->u08 + *(f32 *) (obj + 0x18) - d->pos[1];
         if (1.0f < d->u20) {
             sdx = dx * inv;
             sdz = dz * inv;
@@ -763,11 +763,11 @@ s32 func_150DD420(u8 *obj) {
                     do {
                         speed = func_150ADA68() * d->u78 + d->u74;
                         a = func_150ADA20();
-                        sinA = func_151423D8(a);
-                        cosA = func_151423D8(a - 0x40);
+                        sinA = angle_byte_cos(a);
+                        cosA = angle_byte_cos(a - 0x40);
                         b = (u32) func_150ADA20() % (d->u72 + 1) + d->u70;
-                        sinB = func_151423D8(b);
-                        cosB = func_151423D8(b - 0x40);
+                        sinB = angle_byte_cos(b);
+                        cosB = angle_byte_cos(b - 0x40);
                         drop.x = (s32) (*(f32 *) (obj + 0x10) + d->u6C * cosA);
                         drop.z = (s32) (*(f32 *) (obj + 0x18) + d->u6C * sinA);
                         h = speed * sinB;
@@ -777,7 +777,7 @@ s32 func_150DD420(u8 *obj) {
                         drop.gravity = (s32) (func_150ADA68() * d->u80 + d->u7E);
                         drop.u2A = (u32) func_150ADA20() % (d->u86 + 1) + d->u84;
                         drop.size1 = drop.size0 = (s32) (func_150ADA68() * d->u8C + d->u88);
-                        if (func_15167D84(&drop, 0, 0, -1, obj[0xC], obj[1]) == NULL) {
+                        if (node_spawn_sprite(&drop, 0, 0, -1, obj[0xC], obj[1]) == NULL) {
                             more = 0;
                         }
                         d->u68 -= 1.0f;
@@ -792,7 +792,7 @@ s32 func_150DD420(u8 *obj) {
                 *(f32 *) (pt + 0x8) = z;
                 *(f32 *) (pt + 0xC) = d->u38;
                 d->u34 += (u32) func_150ADA20() % (d->u36 + 1);
-                *(f32 *) (pt + 0x10) = func_151423D8(d->u34 - 0x40) * d->u30 + d->u2C;
+                *(f32 *) (pt + 0x10) = angle_byte_cos(d->u34 - 0x40) * d->u30 + d->u2C;
                 *(s16 *) (pt + 0x14) = d->u29;
                 pt[0x16] = d->u40;
                 d->u40 = d->u40 + d->u3C + (u32) func_150ADA20() % (d->u3E + 1);
@@ -866,7 +866,7 @@ void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 s32 func_15142E24(s32, struct_eu_80090F10 *, s32, s32, s32, s32, s32, u8, s32, s8 *, s32);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
 
 /* One strip vertex at (px, py, pz): texture s / t (swapped when d +0x60 is 2), white, alpha `alpha`. */
@@ -929,7 +929,7 @@ s32 func_150DDBC0(u8 *obj, s32 gfx, s16 view) {
     }
     gfx = func_15142E24(gfx, &D_80090F10[d->u41], 0, 0, 0, 0, d->u41, 0, 0, &flag, 3);
     gfx = func_15142C10(gfx, d->u28, d->u28, d->u28, 0xFF, &flag);
-    gfx = func_1513F4E4(gfx, comb, &flag);
+    gfx = gfx_set_combine_mode(gfx, comb, &flag);
     gfx = func_15142B7C(gfx, 1, 0x160600);
     gfx = (s32) func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[mode * 2 + 1] | D_800A4EA8[mode * 2],
                               &flag);
@@ -1024,7 +1024,7 @@ void func_150DE450(u8 *arg0) {
         case 0xFC: *((s8 *)o + 0x28) = 2; break;
         case 0xFD: *((s8 *)o + 0x28) = 4; break;
         case 0xFE: *((s8 *)o + 0x28) = 3; break;
-        default: func_1516972C((struct102 *) o); break;
+        default: node_destroy((struct102 *) o); break;
         }
     }
 }
@@ -1084,7 +1084,7 @@ s32 func_150DE52C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp.u78 = 0x30002;
     r50 = func_150ADA20();
     r54 = func_150ADA20();
-    func_1513C73C((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((func_150ADA20() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    sprite_fx_spawn_cam((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((func_150ADA20() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 1;
 }
 
@@ -1139,7 +1139,7 @@ s32 func_150DE6AC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp.u78 = 0x30002;
     r50 = func_150ADA20();
     r54 = func_150ADA20();
-    func_1513C73C((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((func_150ADA20() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    sprite_fx_spawn_cam((s32) &sp.u60, 5U, 0U, arg5, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][0], arg4, ((f32 (*)[5])sp.u88)[*(s8 *)(arg0 + 0x2D)][2], size, size, (u8) (r50 & 0xFF), (u8) ((func_150ADA20() & 1) + (r54 & 1)), 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 1;
 }
 

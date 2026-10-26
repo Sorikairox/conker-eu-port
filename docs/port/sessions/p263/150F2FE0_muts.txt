@@ -9,7 +9,7 @@ s/\] \& 1) {/] \& 2) {/ % hit1
 s/            if (D_800CC82C != 0) {/            if (D_800CC82C == 0) {/ % hit0 hit1
 s/(D_800CC82C - 100) \* 0x32C)/(D_800CC82C - 101) * 0x32C)/ % hit0
 s/            D_800CC8BA = 0;/            ;/ % hit0
-s/func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);/func_15136C3C(D_800CC2D0, 0, 1, 1, 1, 0, 0xFF, 1);/ % hit0
+s/object_hit_effects(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);/object_hit_effects(D_800CC2D0, 0, 1, 1, 1, 0, 0xFF, 1);/ % hit0
 s/func_10010630(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);/func_10010630(0x627, D_800CC2D0, 0x6D60, 0x3E8, 0x1F4);/ % hit0
 s/func_15145A50(D_800CC2D0);/;/ % hit0
 s/func_1507CD64(D_800CC2D0, 6);/func_1507CD64(D_800CC2D0, 5);/ % hit0

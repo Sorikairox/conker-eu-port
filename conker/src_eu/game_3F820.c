@@ -63,7 +63,7 @@ extern PipeSprayPoint D_800DCE60[3][10];
 static const u8 sPipeAngles[3] = { 0x94, 0xEA, 0x3F };
 // pipe_spray_points_init: P259: for each of the three pipes, casts 10 rays (func_150ACEA0) from (0, 300, 0) in
 // random directions around the pipe's back-facing angle (yaw = angle - 0x80 + -6..6, pitch -10..5, length 10, angle
-// units of 256 per turn via func_151423D8) and stores the hits, pulled 3% toward the origin, in D_800DCE60[pipe][i]
+// units of 256 per turn via angle_byte_cos) and stores the hits, pulled 3% toward the origin, in D_800DCE60[pipe][i]
 // ((0, 0, 0) when nothing is hit); then spawns effect 300 (func_151491F4) with the 6-byte parameter block
 // {20, 50, 0} at +0x28.
 void func_150124A0(void) {
@@ -91,10 +91,10 @@ void func_150124A0(void) {
         for (i = 0; i < 10; i++, pt++) {
             yaw = (u32) func_150ADA20() % 13 + sPipeAngles[pipe] - 0x86;
             pitch = (func_150ADA20() & 0xF) - 10;
-            yaw_c = func_151423D8(yaw - 0x40);
-            yaw_s = func_151423D8(yaw);
-            pitch_c = func_151423D8(pitch - 0x40);
-            r = 10.0f * func_151423D8(pitch);
+            yaw_c = angle_byte_cos(yaw - 0x40);
+            yaw_s = angle_byte_cos(yaw);
+            pitch_c = angle_byte_cos(pitch - 0x40);
+            r = 10.0f * angle_byte_cos(pitch);
             if (func_150ACEA0(0.0f, 300.0f, 0.0f, r * yaw_c, -10.0f * pitch_c, r * yaw_s, 0, NULL, &hx, &hy, &hz,
                               NULL, 0, 0, 0.0f) == 0) {
                 pt->x = 0.0f;

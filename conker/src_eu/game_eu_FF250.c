@@ -29,7 +29,7 @@ void func_150D1A40(struct108 *arg0) {
             }
             temp_f2_2 = var_f0 * 0.005882353f;
             sp34 = temp_f2_2;
-            if (func_15123934(arg0, 8, 0, arg0->unk134, 3) != 0) {
+            if (camera_push_mode(arg0, 8, 0, arg0->unk134, 3) != 0) {
                 temp_t2 = arg0->unk84 | 0x01300080;
                 arg0->unk84 = temp_t2;
                 arg0->unk84 = temp_t2 & ~6;
@@ -64,7 +64,7 @@ void func_150D1A40(struct108 *arg0) {
                 arg0->unk1A4 = arg0->unk1A4;
                 arg0->unk1A8 = arg0->unk1A8;
             }
-        } else if (func_151239CC(arg0, 3) != 0) {
+        } else if (camera_pop_mode(arg0, 3) != 0) {
             arg0->unk1A8 = 0.0f;
             arg0->unk1A4 = 0.0f;
             arg0->unk190 = 0.0f;

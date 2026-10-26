@@ -20,7 +20,7 @@ void func_15147CB0(u8 *arg0) {
         }
     }
     if (arg0[0x2F] >= 15) {
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
         return;
     }
     if (arg0[0x2F] != 0 && !done) {
@@ -29,7 +29,7 @@ void func_15147CB0(u8 *arg0) {
         }
     }
     if (arg0[0x30] >= 18) {
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
         return;
     }
     if (arg0[0x30] != 0 && !done) {
@@ -40,7 +40,7 @@ void func_15147CB0(u8 *arg0) {
     if (*(u16 *)(arg0 + 0x1E) & 0x10) {
         w = *(s8 *)(arg0 + 0x24);
         if (w < -1 || w >= 8) {
-            func_1516972C((struct102 *)arg0);
+            node_destroy((struct102 *)arg0);
             return;
         }
         if (w != -1 && !done) {
@@ -50,7 +50,7 @@ void func_15147CB0(u8 *arg0) {
         }
     }
     if (done) {
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
     }
 }
 
@@ -61,13 +61,13 @@ void func_15147E40(u8 *arg0) {
 void func_15147E64(void *arg0) {
     func_15147E40(arg0);
     func_15147ECC(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_15147E98(void *arg0) {
     func_15147E40(arg0);
     func_15147ECC(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_15147ECC(u8 *arg0) {
@@ -138,7 +138,7 @@ void * func_15147FF0(void * arg0_p, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
     if ((*(u16 *)((u8 *)arg0 + 0xE)) & 0x40) {
         var_v0 = 0x4D;
     }
-    temp_v0 = func_15167A68(var_v0, argA, arg1 + ((*(u8 *)((u8 *)arg0 + 0x15)) * arg2) + 0xA0, 1, (u8) (s32) arg9, 1U);
+    temp_v0 = node_alloc(var_v0, argA, arg1 + ((*(u8 *)((u8 *)arg0 + 0x15)) * arg2) + 0xA0, 1, (u8) (s32) arg9, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -196,7 +196,7 @@ s32 func_151481BC(s32 arg0, u8 *arg1, s16 arg2) {
 
     arg0 = func_151462C8(arg0, arg1 + 0x34, 0, 0, 0, arg2, arg1 + 0x54, 2, (*(u16 *)(arg1 + 0x1E) & 0x20) ? *(s32 *)(arg1 + 0x28) : 0);
     if (arg1[0x31] >= 0x13) {
-        func_1516972C((struct102 *)arg1);
+        node_destroy((struct102 *)arg1);
         return arg0;
     }
     if (arg1[0x31] != 0) {
@@ -214,5 +214,5 @@ void func_1514828C(u8 *arg0, s32 arg1, u8 arg2) {
 }
 
 void func_151482D4(s32 arg0, u8 arg1) {
-    func_15169260(D_800A5B40, 2, arg0, arg1);
+    node_broadcast_types(D_800A5B40, 2, arg0, arg1);
 }

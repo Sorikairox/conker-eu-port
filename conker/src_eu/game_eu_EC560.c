@@ -18,10 +18,10 @@ void func_150BED50(struct108 *arg0) {
     if ((sp28 != 0) && (temp_v0 != -1)) {
         func_1509BFB0(0, 0x400E, 1);
         if (arg0->unk2C != 8) {
-            func_1512868C(arg0);
+            camera_init_controller(arg0);
         }
-        if (func_15123934(arg0, 8, 0, arg0->unk134, 3) != 0) {
-            func_151254F4(arg0, D_800CC335 - 1);
+        if (camera_push_mode(arg0, 8, 0, arg0->unk134, 3) != 0) {
+            camera_set_followed_obj(arg0, D_800CC335 - 1);
             temp_t0 = arg0->unk84 | 0x01000200;
             arg0->unk84 = temp_t0;
             arg0->unk73C = 0;
@@ -32,12 +32,12 @@ void func_150BED50(struct108 *arg0) {
         arg0->unk34C = D_800A0480;
         arg0->unk374 = D_800A0484;
         arg0->unk190 = 0.0f;
-        func_15123070(arg0);
+        camera_calc_relative_yaw(arg0);
         return;
     }
-    if (func_151239CC(arg0, 3) != 0) {
+    if (camera_pop_mode(arg0, 3) != 0) {
     s32 pad;
-        func_151254F4(arg0, 0);
+        camera_set_followed_obj(arg0, 0);
         arg0->unk674 = 0.0f;
         func_1509BFB0(0, 0x400E, 0);
     }

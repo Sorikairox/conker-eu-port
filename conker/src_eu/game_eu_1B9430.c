@@ -115,10 +115,10 @@ void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
             temp_s0 = func_150ADA20() & 0xFF;
             temp_s1 = (-0x10 - (func_150ADA20() & 0x1F)) & 0xFF;
             temp_f26 = (func_150ADA68() * 10.0f) + 5.0f;
-            temp_f20 = func_151423D8((temp_s0 - 0x40) & 0xFF);
-            temp_f22 = func_151423D8(temp_s0 & 0xFF);
-            temp_f28 = func_151423D8((temp_s1 - 0x40) & 0xFF);
-            temp_f30 = func_151423D8(temp_s1 & 0xFF);
+            temp_f20 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
+            temp_f22 = angle_byte_cos(temp_s0 & 0xFF);
+            temp_f28 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
+            temp_f30 = angle_byte_cos(temp_s1 & 0xFF);
             temp_f2 = func_150ADA68() * 20.0f;
             sp.uF8 = arg1;
             temp_f12 = temp_f26 * temp_f30;

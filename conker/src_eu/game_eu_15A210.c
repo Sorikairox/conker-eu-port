@@ -11,8 +11,8 @@ void func_150491EC(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 f32 func_15048FC8(struct17 *arg0);
 f32 func_150484A0(f32 arg0, f32 arg1);
 void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
-void func_1512523C(struct108 *arg0);
-void func_15125594(struct108 *arg0);
+void camera_calc_pitch(struct108 *arg0);
+void camera_sync_angles(struct108 *arg0);
 void func_150A82D0(Mtx *m, f32 rx, f32 ry, f32 rz);
 void func_1512D5E0(u8 *arg0);
 void func_1512D8D8(s32 arg0);
@@ -31,7 +31,7 @@ extern s32 D_800DC6B0[];         /* camera shake tables (func_1512D7A8): 6 float
 #define CAM_REC() (*(u8 **)(p + 0x3D0))
 #define CAM_MTX() ((Mtx *)((u8 *)D_800DC6D0[D_800BE9C0] + p[0x23D] * 0x40))
 
-/* Gameplay view matrix of one camera controller (func_15122AE0's in-game branch): ease the orbit distances
+/* Gameplay view matrix of one camera controller (camera_update_all's in-game branch): ease the orbit distances
  * (0x194 / 0x18C toward 0x198 / 0x190), pick eye (0x2F8) / target (0x2BC) (offset by the orbit around the
  * yaw 0x3A0 unless the object (0x3D4) has its own view, +0x197), look-at matrix into D_800DC6D0[buffer][player]
  * with the LookAt D_800D9FB0[buffer], then post-rotations: shake (0x854..0x868, decayed by 0.08 or driven by
@@ -95,8 +95,8 @@ void func_1512C490(struct108 *arg0) {
         at[0] = CAM_F(0x2BC);
         at[1] = CAM_F(0x2C0);
         at[2] = CAM_F(0x2C4);
-        func_1512523C(arg0);
-        func_15125594(arg0);
+        camera_calc_pitch(arg0);
+        camera_sync_angles(arg0);
     } else {
         dist = CAM_F(0x194);
         height = CAM_F(0x18C);
@@ -116,8 +116,8 @@ void func_1512C490(struct108 *arg0) {
         CAM_F(0x2BC) = at[0];
         CAM_F(0x2C0) = at[1];
         CAM_F(0x2C4) = at[2];
-        func_1512523C(arg0);
-        func_15125594(arg0);
+        camera_calc_pitch(arg0);
+        camera_sync_angles(arg0);
     }
     func_150491EC((struct17 *)eye, (struct17 *)at, (struct17 *)dir);
     obj = CAM_OBJ();

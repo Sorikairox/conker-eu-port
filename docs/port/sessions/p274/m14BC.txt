@@ -22,5 +22,5 @@
 \#^        t\.vel\[2\] = pc->vel\[2\];$#s/pc->vel\[2\]/pc->offset[2]/
 \#^        t\.u28 = func_150ADA68() \* 4\.0f - 2\.0f;$#s/- 2\.0f/- 1.0f/
 \#^        t\.u2C = func_150ADA68() \* 10\.0f - 5\.0f;$#s/10\.0f/4.0f/
-\#^        func_15168BE4((u8 \*) &t, kind, arg2);$#s/kind, arg2/kind, 0/
+\#^        node_spawn_model_fx((u8 \*) &t, kind, arg2);$#s/kind, arg2/kind, 0/
 \#^    obj\[0x6E\] = 1;$#s/1;/2;/

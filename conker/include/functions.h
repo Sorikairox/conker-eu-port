@@ -724,11 +724,11 @@ void func_150F51E8(s32 arg0);
 void func_150FCA00(struct108 *arg0);
 
 void func_15100330(s32 arg0);
-void func_15103800(void);
-void func_15103828(void);
-void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2);
-void func_15105548(struct207 *arg0, s32 *arg1, u8 arg2);
-void func_15105848(struct207 *arg0, s32 arg1, u8 arg2);
+void sfx_cooldown_clear(void);
+void sfx_cooldown_tick(void);
+void fx_free_on_msg_4b(struct102 *arg0, s32 arg1, u8 arg2);
+void fx_quad_bolts_on_msg(struct207 *arg0, s32 *arg1, u8 arg2);
+void fx_sparks_on_msg(struct207 *arg0, s32 arg1, u8 arg2);
 void func_1511FC20(s32 arg0);
 #ifdef NON_MATCHING
 /* P183: debug position hooks, the arguments their only caller (func_15113D54) passes: gdl in a0, three f32 in
@@ -739,86 +739,86 @@ Gfx *func_1511FC44(Gfx *gdl, f32 x, f32 y, f32 z, s32 player);
 s32  func_1511FC2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32  func_1511FC44(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 #endif
-void func_15122AE0(void);
-void func_15124B18(struct108 *arg0);
-void func_15123508(struct108 *arg0);
-void func_15124770(struct108 *arg0, s32 arg1);
-void func_15124AB4(struct108 *arg0);
-void func_1512523C(struct108 *arg0);
-void func_15125330(struct108 *arg0);
-void func_15125394(struct108 *arg0);
-s32  func_151253CC(struct108 *arg0);
-void func_15125594(struct108 *arg0);
-void func_15125608(struct108 *arg0);
-void func_15125690(struct108 *arg0, s32 arg1);
-void func_15126138(struct108 *arg0);
-void func_15127FEC(struct108 *arg0, s32 arg1, s32 arg2);
-void func_15128680(struct108 *arg0);
-void func_1512868C(struct108 *arg0);
-void func_15128774(struct108 *arg0, struct127 *arg1);
+void camera_update_all(void);
+void camera_apply_zoom_level(struct108 *arg0);
+void camera_read_side_input(struct108 *arg0);
+void camera_set_second_target(struct108 *arg0, s32 arg1);
+void camera_calc_view_dir(struct108 *arg0);
+void camera_calc_pitch(struct108 *arg0);
+void camera_calc_yaw(struct108 *arg0);
+void camera_update_mode_index(struct108 *arg0);
+s32  camera_update_locked_mode(struct108 *arg0);
+void camera_sync_angles(struct108 *arg0);
+void camera_reset_rates(struct108 *arg0);
+void camera_raise_timer(struct108 *arg0, s32 arg1);
+void camera_update_follow(struct108 *arg0);
+void camera_start_transition(struct108 *arg0, s32 arg1, s32 arg2);
+void camera_noop(struct108 *arg0);
+void camera_init_controller(struct108 *arg0);
+void camera_snap_to_object(struct108 *arg0, struct127 *arg1);
 void func_1512D380(s32 arg0);
-s32  func_1513416C(struct102 *arg0);
+s32  fx_fade_alpha_by_life(struct102 *arg0);
 
-struct210 *func_1513C4EC(s32 arg0, s32 arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
-struct210 *func_1513C5B0(s32 arg0, s32 arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
-struct210 *func_1513C650(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
-struct210 *func_1513C73C(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
-struct210 *func_1513C804(s32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
-void func_1513C8D4(struct210 *arg0);
-void func_1513C900(struct210 *arg0);
-void func_1513C92C(struct210 *arg0);
-void func_1513C9B0(struct210 *arg0);
-void func_1513C9FC(struct210 *arg0);
-void func_1513CA48(struct210 *arg0);
-void func_1513CA6C(struct210 *arg0);
-void func_1513CAA0(struct210 *arg0);
-void func_1513CAD4(struct210 *arg0);
-void func_1513CB58(struct210 *arg0);
-void func_1513CBA4(struct210 *arg0);
+struct210 *sprite_fx_spawn_at(s32 arg0, s32 arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
+struct210 *sprite_fx_spawn_quad(s32 arg0, s32 arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
+struct210 *sprite_fx_spawn_cam_at(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
+struct210 *sprite_fx_spawn_cam(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
+struct210 *sprite_fx_spawn_cam_ex(s32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
+void sprite_fx_retire(struct210 *arg0);
+void sprite_fx_free(struct210 *arg0);
+void sprite_fx_free_buffers(struct210 *arg0);
+void sprite_fx_dispatch_a(struct210 *arg0);
+void sprite_fx_dispatch_b(struct210 *arg0);
+void effect3d_release_slot(struct210 *arg0);
+void effect3d_retire(struct210 *arg0);
+void effect3d_free(struct210 *arg0);
+void effect3d_free_buffers(struct210 *arg0);
+void effect3d_dispatch_a(struct210 *arg0);
+void effect3d_dispatch_b(struct210 *arg0);
 #ifdef NON_MATCHING
-struct210 *func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+struct210 *effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 #else
-void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+void effect3d_spawn(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 #endif
 #ifdef NON_MATCHING
-/* P128/P131: the NM definition (game_169510.c) returns func_1513D2F0's record (the asm leaves it in v0) */
-struct210 *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+/* P128/P131: the NM definition (game_169510.c) returns effect3d_spawn_full's record (the asm leaves it in v0) */
+struct210 *effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 #else
-void func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+void effect3d_spawn_default(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 #endif
-s32  func_1513D594(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, u8 argD, s32 argE, u8 argF, s32 arg10);
+s32  effect3d_spawn_oriented(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, u8 argD, s32 argE, u8 argF, s32 arg10);
 #ifdef NON_MATCHING
-struct210 *func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
+struct210 *effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 #else
-void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
+void effect3d_spawn_oriented_simple(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 #endif
-void func_1513E070(s32 arg0, s32 arg1, s32 arg2);
-void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2);
-void func_1513E134(void);
-void func_1513E2A4(void);
+void effect3d_msg_stub(s32 arg0, s32 arg1, s32 arg2);
+void effect3d_on_msg_owner(struct210 *arg0, struct212 *arg1, u8 arg2);
+void sprite_quad_stub_a(void);
+void sprite_quad_stub_b(void);
 #ifdef NON_MATCHING /* P224: D_8008A1BC entries return the callee's v0 */
-s32 func_1513EDB4(s32 arg0, s16 arg1);
+s32 sprite_quad_build_screen_a(s32 arg0, s16 arg1);
 #else
-void func_1513EDB4(s32 arg0, s16 arg1);
+void sprite_quad_build_screen_a(s32 arg0, s16 arg1);
 #endif
-s32 func_1513EDE4(s32 arg0, s16 arg1);
+s32 sprite_quad_build_screen_b(s32 arg0, s16 arg1);
 #ifdef NON_MATCHING
-u8 *func_1513F4B0(struct210 *arg0, s16 arg1);
+u8 *sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1);
 #else
-void func_1513F4B0(struct210 *arg0, s16 arg1);
+void sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1);
 #endif
-void func_151403A8(s32 arg0, u8 arg1);
-void func_151403DC(s32 arg0, u8 arg1);
-void func_151411A4(struct210 *arg0);
-void func_151411C4(struct210 *arg0);
-s32  func_15141818(s32 arg0, s32 arg1);
-void func_15141970(struct37 *arg0);
-void func_15141990(void *arg0);
-void func_151419B0(void *arg0);
-void func_15141DA4(void *arg0, s32 arg1, s32 arg2);
-s32  func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, char *arg4, s32 arg5);
-s32  func_151422DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-s32  func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void fx_lists_broadcast_a(s32 arg0, u8 arg1);
+void fx_lists_broadcast_b(s32 arg0, u8 arg1);
+void effect_free_buffers_retire(struct210 *arg0);
+void effect_free_buffers_delete(struct210 *arg0);
+s32  effect_check_false(s32 arg0, s32 arg1);
+void interact_fx_detach(struct37 *arg0);
+void interact_fx_destroy(void *arg0);
+void interact_fx_delete(void *arg0);
+void obj_interaction_start_timed(void *arg0, s32 arg1, s32 arg2);
+s32  debug_tweak_int_mid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, char *arg4, s32 arg5);
+s32  debug_tweak_int(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+s32  debug_tweak_value(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32  func_15143E08(struct127 *arg0);
 s32  func_15144C2C(s16 arg0);
 f32  func_15144C8C(f32 arg0, f32 arg1);
@@ -840,24 +840,24 @@ s32  func_15149490(s32 arg0, struct260 *arg1, s16 arg2);
 void func_151494E0(s32 arg0, u8 arg1);
 void func_15149514(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_15165F70(void);
-void func_1516972C(struct102 *arg0);
-void func_1516979C(struct102 *arg0);
-void func_15169804(struct102 *arg0);
-void func_15169824(struct102 *arg0);
+void node_destroy(struct102 *arg0);
+void node_delete(struct102 *arg0);
+void node_retire(struct102 *arg0);
+void node_unlink_free(struct102 *arg0);
 void func_1519EF70(struct127 *arg0, s32 arg1, s32 arg2);
 
-void func_151DB004(struct218 *arg0);
-void func_151DB068(struct218 *arg0);
-void func_151DB0CC(struct218 *arg0);
-void func_151DB15C(struct218 *arg0);
-void func_151DB1EC(struct218 *arg0);
-void func_151DB27C(struct218 *arg0);
-void func_151DB2A8(struct218 *arg0);
-void func_151DB2CC(struct218 *arg0);
-void func_151DB330(struct218 *arg0);
-void func_151DB3D8(struct218 *arg0);
-void func_151DB43C(struct218 *arg0);
-void func_151DBBD4(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4);
+void impact_tint_red(struct218 *arg0);
+void impact_tint_yellow(struct218 *arg0);
+void impact_tint_red_green_a(struct218 *arg0);
+void impact_tint_red_green_b(struct218 *arg0);
+void impact_tint_red_green_c(struct218 *arg0);
+void impact_tint_white(struct218 *arg0);
+void impact_tint_green_fixed(struct218 *arg0);
+void impact_tint_green(struct218 *arg0);
+void impact_tint_brown(struct218 *arg0);
+void impact_tint_cyan(struct218 *arg0);
+void impact_tint_magenta(struct218 *arg0);
+void impact_spawn_debris_up(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4);
 void func_151F0080(f32 arg0[4][4], s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_151F00E0(f32 arg0[4][4], f32 arg1[4][4], f32 arg2[4][4]);
 
@@ -873,13 +873,13 @@ void func_16000424(struct118 *arg0);
 void func_160012B0(s32 arg0, u8 *arg1);
 void func_16001338(u8 arg0, u8 arg1, u8 arg2);
 s32  func_160016F4(s32 arg0);
-s32  func_16001984();
-s32  func_160019A8(s32 direction, void *dramAddr);
-void func_16001A64(void);
-s32  func_16001A6C(f32 arg0);
-void func_16001AB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-u8*  func_16001AD0(u8 *arg0, u8 *arg1, u32 arg2);
-s32  func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2);
+s32  debug_si_device_busy();
+s32  debug_si_raw_start_dma(s32 direction, void *dramAddr);
+void debug_stub(void);
+s32  debug_float_is_denorm_or_nan(f32 arg0);
+void debug_stub_4args(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+u8*  debug_memcpy(u8 *arg0, u8 *arg1, u32 arg2);
+s32  debug_sprintf_put(u8 *arg0, u8 *arg1, u32 arg2);
 
 
 /* non-matching */
@@ -1136,16 +1136,16 @@ void func_1510B32C(s32 arg0, f32 arg1, f32 arg2, f32 arg3);
 void func_1510B958(s32 arg0);
 s32  func_1510B9D0(s32 arg0, s16 arg1);
 s32  func_1510FD20(s32 arg0, s32 arg1);
-s32  func_15123934(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32  func_151239CC(struct108 *arg0, s32 arg1);
-void func_15127EB8(struct108 *arg0);
+s32  camera_push_mode(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32  camera_pop_mode(struct108 *arg0, s32 arg1);
+void camera_exit_aim_mode(struct108 *arg0);
 s32 func_1512D748(struct108*, s32, s32);
-struct210 *func_1513C350(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA);
-void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
-s32  func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6);
-void  func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6);
-s32 func_1513E2AC(s32, s32, s32, f32, f32, f32, f32, f32, u8);
-f32  func_151423D8(u8);
+struct210 *sprite_fx_spawn(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA);
+void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+s32  effect3d_build_axes(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6);
+void  sprite_quad_place(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6);
+s32 sprite_quad_place_cam(s32, s32, s32, f32, f32, f32, f32, f32, u8);
+f32  angle_byte_cos(u8);
 f32  func_15144598(struct_eu_15144598 *arg0);
 f32  func_1514462C(struct_eu_15144598 *arg0);
 f32  func_15144B68(f32 arg0);
@@ -1156,9 +1156,9 @@ s32 func_1514D3B0(s32, s16, u8, u8);   /* the s32 version changes the C callers'
 #endif
 s32  func_1515D6D0(s32 arg0, s32 arg1);
 void func_1515D4D4(s32, s32, s32, u8);
-void func_15169260(void *, s32, s32, u8);
-void func_1516944C(s32, s32, u8);
-s32 func_15169850(s32, u8, s32, s32, s32);
+void node_broadcast_types(void *, s32, s32, u8);
+void node_broadcast_type(s32, s32, u8);
+s32 node_handle_link_message(s32, u8, s32, s32, s32);
 void func_15174690(s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_15177410(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16 arg6, f32 arg7, s8 arg8, s8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 s32  func_1517EFAC(s32 arg0);
@@ -1168,22 +1168,22 @@ void *func_15195AA8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, u8 arg3);
 void func_151D5404(struct17*, f32, f32, f32, s16, s16, s32, s32);
 void func_151D5714(struct127*, f32*, f32*, u8, f32, u8, s32);
-s32 func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
-s32 func_151DA08C(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void *arg6, s32 arg7, s32 arg8);
-void func_151DBCBC(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void *arg4, u8 arg5, s32 arg6);
+s32 impact_debris_spawn(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
+s32 impact_smoke_puff_spawn(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void *arg6, s32 arg7, s32 arg8);
+void impact_dust_particle_spawn(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void *arg4, u8 arg5, s32 arg6);
 void func_151EF954(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 s32 func_151F3C4C(s32, void *, s32, s32);
 void func_151FA130(void);
 void func_1019EA88(void);
 
 /* EU: new decompilation */
-void func_15168B10(s32 arg0, s32 arg1);
-void func_15169070(s32 arg0, s32 arg1, s32 arg2, u8 arg3);
+void node_set_type(s32 arg0, s32 arg1);
+void node_broadcast_range(s32 arg0, s32 arg1, s32 arg2, u8 arg3);
 void func_151BCB54(void *arg0, void *arg1, u8 arg2);
-void func_1513A5E0(s32 arg0, u8 arg1, s32 arg2);
+void impact_burst(s32 arg0, u8 arg1, s32 arg2);
 void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5);
 void func_1517E6A4(f32 *arg0, structEU_16DC80 *arg1);
-void func_1514182C(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
+void effect_set_orbit_pos(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
 void func_151095E4(u8 *arg0, s32 arg1, u8 arg2);
 void func_151BAA18(u8 *arg0, s32 arg1, u8 arg2);
 #ifdef NON_MATCHING
@@ -1194,8 +1194,8 @@ void func_150AB278(struct_eu_bytes24 arg0);
 void func_160006CC(struct118 *arg0);
 void func_16000590(struct118 *arg0);
 s32  func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
-void func_15168A4C(struct_eu_node *arg0, s32 arg1);
-void func_15168A9C(struct_eu_node *arg0);
+void node_list_insert(struct_eu_node *arg0, s32 arg1);
+void node_list_unlink(struct_eu_node *arg0);
 s32  func_150A2FCC(); // 3 params (u32, s32, s32 *); the caller in game_16EE20 passes a 4th
 s32 func_150027F8(Gfx *arg0);
 u16  func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
@@ -1205,29 +1205,29 @@ void func_1506D584(void);
 s32 func_1506D584(void);
 #endif
 void func_151043C0(struct127 *arg0, struct127 *arg1, f32 *arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
-void *func_15167A68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
+void *node_alloc(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
 s32  func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 arg4, s32 arg5, f32 *arg6, f32 *arg7);
 void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 void func_151B6150(struct127 *arg0, struct127 *arg1);
 s32  func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
+struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
 s32  func_151044F4(void);
 void func_150FF604(struct127 *arg0, u8 arg1, s32 arg2);
 void func_150FF2B0(struct127 *arg0, u8 arg1, s32 arg2);
 void func_150FEDE0(struct127 *arg0, u8 arg1, s32 arg2);
-s32 func_15134908(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3);
+s32 point_emitter_spawn(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3);
 void *func_15147FF0(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA);
 void func_15143134(void *arg0, void *arg1, void *arg2);
 void func_151C384C(void *arg0, u8 arg1, s32 arg2);
-void func_151DC484(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
+void impact_blast_spawn_small(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
 void func_15056A00(struct127 *arg0, s32 arg1, u8 arg2);
 void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1);
 s32 func_1514F250(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2);
 s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2);
-void func_15141E38(struct127 *arg0, s32 arg1);
-s32 func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
+void obj_interaction_attach_timed(struct127 *arg0, s32 arg1);
+s32 impact_dust_cloud_spawn(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
 s32  func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
 #ifdef NON_MATCHING
 s32 func_151BEE00(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98: asm reloads a1 with lwc1 */
@@ -1243,11 +1243,11 @@ f32 *func_15144B34(s32 arg0);
 s32 func_151DD4A0(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes); // osEepromLongWrite
 s32 func_151DD950(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes); // osEepromLongRead
 s32 func_151DDA90(OSMesgQueue *mq, u8 address, u8 *buffer); // osEepromWrite
-s32 func_151D9450(struct_eu_2062D0_d *arg0, s32 arg1);
+s32 impact_dust_cloud_wobble(struct_eu_2062D0_d *arg0, s32 arg1);
 struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *arg0);
 void func_1514C9E0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
 void func_15001A08(void);
-void func_151D2B4C(s32 arg0);
+void attach_fx_asset_release(s32 arg0);
 void func_150B1138(u8 *arg0, u8 arg1, s32 arg2);
 void func_1519D320(s32 arg0, f32 arg1, s32 arg2);
 f32  func_15117858(f32 *arg0, f32 arg1);

@@ -28,13 +28,13 @@
 \#^    g.u47 = 7;$#s/7/6/ % all
 \#^    g.u48 = 0;$#d % all
 \#^    v = (func_150ADA20() & 1) ? 2 : 0;$#s/2 : 0/1 : 0/ % all
-\#^    e = func_1513D2F0(&g#s/0x1D/0x1E/ % all
-\#^    e = func_1513D2F0(&g#s/0x5C, arg1/0x5C, 0/ % all
+\#^    e = effect3d_spawn_full(&g#s/0x1D/0x1E/ % all
+\#^    e = effect3d_spawn_full(&g#s/0x5C, arg1/0x5C, 0/ % all
 \#^    l->glow = e;$#d % noglow
 \#^        memcpy((u8 \*) e + 0x110, &tail, 0x5C);$#s/0x110/0x10C/ % all
 \#^    h.u1 = -1;$#s/-1/1/ % all
 \#^    h.u4 = 0;$#d % all
 \#^    h2.w\[2\] = 0;$#d % all
-\#^    l->smoke = func_151602C0(#s/0x28/0x29/ % all
-\#^    l->smoke = func_151602C0(#s/, 1, 0, arg1/, 0, 0, arg1/ % all
+\#^    l->smoke = light_create_with_ctrl(#s/0x28/0x29/ % all
+\#^    l->smoke = light_create_with_ctrl(#s/, 1, 0, arg1/, 0, 0, arg1/ % all
 \#^    l->smoke = #s/l->smoke/l->glow/ % all

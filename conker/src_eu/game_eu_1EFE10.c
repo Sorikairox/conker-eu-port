@@ -277,7 +277,7 @@ block_27:
     sp.u18A = 0;
     sp.u18B = 0;
     sp.u190 = arg16;
-    temp_v0 = func_1513D2F0(&sp.u144, (s32) ((u8 *)&D_800A4AA0), 0x16U, 0U, 0U, 0x14U, 0U, 0, 0, arg18 + 0xB0, (u8) (s32) arg19, arg1A);
+    temp_v0 = effect3d_spawn_full(&sp.u144, (s32) ((u8 *)&D_800A4AA0), 0x16U, 0U, 0U, 0x14U, 0U, 0, 0, arg18 + 0xB0, (u8) (s32) arg19, arg1A);
     sp.u19C = temp_v0;
     if (temp_v0 != NULL) {
         temp_a0 = temp_v0 + 0x110;
@@ -293,7 +293,7 @@ block_27:
             sp67 = 1;
         }
         if (sp67 != 0) {
-            func_1516972C((struct102 *) sp.u19C);
+            node_destroy((struct102 *) sp.u19C);
             return NULL;
         }
         goto block_47;
@@ -674,7 +674,7 @@ void func_151C34F8(u8 *arg0) {
         sp.uC8 = (s32) (*(f32 *)((u8 *)temp_v1 + 0x30));
         sp.uCC = (s32) (*(f32 *)((u8 *)temp_v1 + 0x34));
         sp.uD0 = (s32) (*(f32 *)((u8 *)temp_v1 + 0x38));
-        func_151602C0((Header *) &sp.uD4, (Header2 *) &sp.uC8, (func_150ADA20() % 9U) + 0xC, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+        light_create_with_ctrl((Header *) &sp.uD4, (Header2 *) &sp.uC8, (func_150ADA20() % 9U) + 0xC, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         sp.u54 = 5 >> D_800DCE50;
         sp.u58 = 4 >> D_800DCE50;
         (*(s32 *)((u8 *)(&sp.u5C) + 0)) = (s32) (*(s32 *)((u8 *)sp44 + 0));
@@ -745,7 +745,7 @@ f32 func_150ADA68(void);
 // fire_embers_spawn: the ember burst of a fire at `pos` (room `room`, owner `owner`): an ember emitter
 // (func_151530A8, type 5 / 7, 4 parameters from D_800AAE24, sizes 15 / 30, colour block, handlers 0x200005 /
 // 0x60600), one glow sprite (func_151307F0: texture 0x2B of set 0x4403, 6..12 frames, half size 106..302, fade from
-// 3 at rate 0x55, random flip flags 0x40 / 0x80) and a light flash (func_151602C0: 6..12 frames, type 5 or 6) at the
+// 3 at rate 0x55, random flip flags 0x40 / 0x80) and a light flash (light_create_with_ctrl: 6..12 frames, type 5 or 6) at the
 // truncated position.
 void func_151C384C(void *arg0, u8 room, s32 owner) {
     f32 *pos = arg0;
@@ -925,7 +925,7 @@ void func_151C384C(void *arg0, u8 room, s32 owner) {
     at.unk0 = pos[0];
     at.unk4 = pos[1];
     at.unk8 = pos[2];
-    func_151602C0(&flash, &at, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);
+    light_create_with_ctrl(&flash, &at, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, room, owner);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C384C.s")
@@ -1158,7 +1158,7 @@ void func_151C3C88(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u48 = (s32) (*(f32 *)((u8 *)arg0 + 0));
     sp.u4C = (s32) (*(f32 *)((u8 *)arg0 + 4));
     sp.u50 = (s32) (*(f32 *)((u8 *)arg0 + 8));
-    func_151602C0((Header *) &sp.u54, (Header2 *) &sp.u48, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) arg1, arg2);
+    light_create_with_ctrl((Header *) &sp.u54, (Header2 *) &sp.u48, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C3C88.s")
@@ -1179,9 +1179,9 @@ void func_15153BA4(u8 *req, s32 tag, s32 room, s32 owner);
 
 // impact_effects_spawn: the impact effects at object `obj`'s position (+0x140), chosen by level (D_800BE9F0) and the
 // object's surface bits (+0x198 & 0x1F) as one of 6 surface types: each of 4 effects is spawned when a random number
-// is below its chance: a spark burst (func_1513C650, scale 15..30), a smoke puff (func_1513D2F0, moving along
+// is below its chance: a spark burst (sprite_fx_spawn_cam_at, scale 15..30), a smoke puff (effect3d_spawn_full, moving along
 // +0x140 - +0x170), a debris spray (func_15153BA4, two per-surface colours, `debrisTag`) and a light flash
-// (func_151602C0, one of 2 colours). Unknown surfaces (type 0) only keep the flash chance.
+// (light_create_with_ctrl, one of 2 colours). Unknown surfaces (type 0) only keep the flash chance.
 void func_151C40BC(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debrisChance, f32 flashChance, u8 sparkTag,
                    u8 debrisTag, u8 smokeTag) {
     u8 *obj = (u8 *) arg0;
@@ -1316,7 +1316,7 @@ void func_151C40BC(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debrisChance,
         spark.u22 = 0x20;
         spark.u24 = 7;
         spark.tag = sparkTag;
-        func_1513C650((s32) &spark, 0, 0, (s32) (obj + 0x17C), pos[0], pos[1], pos[2], s, s, func_150ADA20() & 0xFF,
+        sprite_fx_spawn_cam_at((s32) &spark, 0, 0, (s32) (obj + 0x17C), pos[0], pos[1], pos[2], s, s, func_150ADA20() & 0xFF,
                       0, 0, 0, 0, obj[0xC], obj[1]);
     }
 
@@ -1351,7 +1351,7 @@ void func_151C40BC(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debrisChance,
         smoke.u54 = 8;
         smoke.u56 = 0x1F;
         smoke.tag = smokeTag;
-        func_1513D2F0(&smoke, (s32) &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, obj[0xC], obj[1]);
+        effect3d_spawn_full(&smoke, (s32) &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, obj[0xC], obj[1]);
     }
 
     if (func_150ADA68() < debrisChance) {
@@ -1411,7 +1411,7 @@ void func_151C40BC(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debrisChance,
         at.unk4 = pos[1];
         at.unk8 = pos[2];
         i = func_150ADA20() & 1;
-        func_151602C0(&flash, &at, func_150ADA20() % 6U + 10, D_800AAE08[i][0], D_800AAE08[i][1], D_800AAE08[i][2],
+        light_create_with_ctrl(&flash, &at, func_150ADA20() % 6U + 10, D_800AAE08[i][0], D_800AAE08[i][1], D_800AAE08[i][2],
                       0xFF, 0, 0, obj[0xC], obj[1]);
     }
 }

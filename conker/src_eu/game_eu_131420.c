@@ -7,7 +7,7 @@ extern u8 D_800A2720[];
 
 
 void func_15103C10(s32 arg0) {
-    func_15103828();
+    sfx_cooldown_tick();
 }
 
 #ifdef NON_MATCHING

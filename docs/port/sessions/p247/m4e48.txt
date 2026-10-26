@@ -8,7 +8,7 @@
 \#^            bone = mtx + e->bone \* 0x40;$#s/0x40/0x30/
 \#^            if (e->timer < -e->period) {$#s/< -e->period/<= -e->period/
 \#^                e->timer = e->restart;$#s/e->restart/e->period/
-\#^                func_15135424((s32) bone, (s32) e->offsetA, (s32) e->offsetB, (s32) e->posA, (s32) e->posB);$#s/(s32) e->posA, (s32) e->posB/(s32) e->posB, (s32) e->posA/
+\#^                bone_emitter_send_pair((s32) bone, (s32) e->offsetA, (s32) e->offsetB, (s32) e->posA, (s32) e->posB);$#s/(s32) e->posA, (s32) e->posB/(s32) e->posB, (s32) e->posA/
 \#^                if (e->startFn != -1 && D_80089EBC\[e->startFn\](e) == 0) {$#s/== 0)/!= 0)/
 \#^                if (e->startFn != -1 && D_80089EBC\[e->startFn\](e) == 0) {$#s/startFn != -1/startFn != 0/
 \#^                    e->timer = -1;$#s/-1/0/
@@ -21,7 +21,7 @@
 \#^                    phaseStep = phase \* inv;$#s/phase \*/e->phase */
 \#^                    curA\[1\] = e->posA\[1\];$#s/posA\[1\]/posA[0]/
 \#^                    curB\[2\] = e->posB\[2\];$#s/posB\[2\]/posA[2]/
-\#^                    func_15135424((s32) bone, (s32) e->offsetA, (s32) e->offsetB, (s32) newA, (s32) newB);$#s/(s32) e->offsetA, (s32) e->offsetB/(s32) e->offsetB, (s32) e->offsetA/
+\#^                    bone_emitter_send_pair((s32) bone, (s32) e->offsetA, (s32) e->offsetB, (s32) newA, (s32) newB);$#s/(s32) e->offsetA, (s32) e->offsetB/(s32) e->offsetB, (s32) e->offsetA/
 \#^                    dA\[1\] = newA\[1\] - e->posA\[1\];$#s/newA\[1\]/newB[1]/
 \#^                    dB\[0\] = newB\[0\] - e->posB\[0\];$#s/e->posB\[0\]/e->posA[0]/
 \#^                    dB\[2\] = newB\[2\] - e->posB\[2\];$#s/- e->posB\[2\]/+ e->posB[2]/

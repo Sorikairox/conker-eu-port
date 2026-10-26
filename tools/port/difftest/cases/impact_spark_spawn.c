@@ -10,7 +10,7 @@ extern u8 D_800AB7E4[];
  *   per-type tables D_800AB7E4 / D_800AB710, 3 when `fade`), D_800AB7D4[type], 0xFF, alpha, two s16 timers;
  * - fixed render block (0x1E bytes, constants).
  * On success the object's extra data (+0x98) gets (sx, sy, type) at +0x48. Returns the particle or NULL. */
-u8 *func_151DA6F8(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, s32 tint, u8 fade, f32 sx, f32 sy,
+u8 *impact_spark_spawn(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, s32 tint, u8 fade, f32 sx, f32 sy,
                   u8 bright, u8 type, s32 argC, s16 t0, s16 t1, s32 owner, u8 arg10, s32 arg11) {
     struct {
         s32 render[3];      /* sp54: words 0, 0x220005, 0x50600 */
@@ -110,5 +110,5 @@ u8 *func_151DA6F8(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, 
     return p;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA6F8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/impact_spark_spawn.s")
 #endif

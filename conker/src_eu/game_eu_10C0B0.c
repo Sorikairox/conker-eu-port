@@ -125,7 +125,7 @@ s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 s32 memcpy(u8 *, void *, s32);
 
 // beam_link_fire: timer handler of a link effect p (timer s16 at p+0x28, two objects at p+0x2C / p+0x30). When the
-// timer runs out (minus D_800BE9E4) it fires a bolt (func_1513D2F0 template, kind 0xBE or 0xBF at random, size 706,
+// timer runs out (minus D_800BE9E4) it fires a bolt (effect3d_spawn_full template, kind 0xBE or 0xBF at random, size 706,
 // at the first object's position) towards the second object at speed 25..55 (x0.18 for kind 0xBF); the bolt's +0x110
 // gets {velocity, travel time = distance / speed, the flat side vector (-z, 0, x) and flat direction (x, 0, z) of the
 // normalised horizontal offset}. The timer restarts at 200..400.
@@ -229,7 +229,7 @@ void func_150DED40(u8 *p) {
     t.scale[0] = 1.0f;
     t.scale[1] = 1.0f;
     t.scale[2] = 1.0f;
-    e = func_1513D2F0(&t, (s32) &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, p[0xC], p[1]);
+    e = effect3d_spawn_full(&t, (s32) &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, p[0xC], p[1]);
     if (e != NULL) {
         memcpy(e + 0x110, &rec, 0x28);
     }
@@ -250,12 +250,12 @@ s32 func_150DF04C(u8 *arg0) {
     return 1;
 }
 
-s32 func_15140410(s32, s32, s32, s16);
+s32 sprite_quad_build_axes(s32, s32, s32, s16);
 s32 func_150DF0D8(s32 arg0, s16 arg1) {
     if (D_800DBFF0[D_80082FA0].unk388 < 5.0f) {
         return 0;
     }
-    return func_15140410(arg0, arg0 + 0x120, arg0 + 0x12C, arg1);
+    return sprite_quad_build_axes(arg0, arg0 + 0x120, arg0 + 0x12C, arg1);
 }
 
 void func_150DF1A8(u8 arg0, s32 arg1);
@@ -272,6 +272,6 @@ extern u8 D_800A10DB[];
 extern u8 D_800A10FB[];
 void func_150DF1A8(u8 arg0, s32 arg1) {
     s32 i = arg0 * 4;
-    func_151616D0(D_800A10DB[i], 0x22, 0);
-    func_151417C4(D_800A10FB[i], 0x22);
+    light_ctrl_broadcast(D_800A10DB[i], 0x22, 0);
+    effect_broadcast_message(D_800A10FB[i], 0x22);
 }

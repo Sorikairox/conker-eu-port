@@ -53,14 +53,14 @@ void func_15160104(u8 *arg0, s32 arg1) {
     func_1505D024(arg0, 0x6002D, *(u16 *)(arg0 + 0x7A), -1);
 }
 
-u8 *func_15105C24(s32);
+u8 *scene_node_find_type2e(s32);
 
 void func_15160134(u8 *arg0, s32 arg1) {
     s32 pad; // fakematch: unused local moves v to sp18
     struct127 *v = NULL;
     u8 *t;
     s32 a3;
-    t = func_15105C24(arg1);
+    t = scene_node_find_type2e(arg1);
     if (t != NULL) {
         v = *(struct127 **)(t + 0x98);
     }
@@ -78,7 +78,7 @@ void func_151601A4(s32 arg0, s32 arg1) {
 
 s32 func_1507CD64(struct127 *, s32);
 s32 func_150ADE40(s16, s16, s32, s32);
-s32 func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_151601D0(struct127 *arg0, u8 *arg1) {
     s32 pad[2]; // fakematch: frame
     f32 scale;
@@ -92,7 +92,7 @@ void func_151601D0(struct127 *arg0, u8 *arg1) {
             }
         }
         func_1505D024(arg0, 0x2F, 0, -1);
-        func_15136C3C(arg0, 1, 1, 1, 1, 0, 0xFF, 1);
+        object_hit_effects(arg0, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(arg0);
         func_1507CD64(arg0, 6);
     }

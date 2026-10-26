@@ -15,7 +15,7 @@ s32 func_150ADE40(s32, s32, s32, s32);
 s32 func_1510FE58(s32 x, s32 y, s32 z, s32 *tri);
 extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
 
-// leaf_burst_spawn: spawns up to `count` falling leaves (func_15167A68 list 0xA, type 3) around (x, y, z) facing away
+// leaf_burst_spawn: spawns up to `count` falling leaves (node_alloc list 0xA, type 3) around (x, y, z) facing away
 // from player `player`'s camera position (+0x2F8): position jittered by -63..64 in x / z, life 10..24, yaw = the
 // direction +-15 degrees, speed jitter 0.01 * (-128..127), fall -1, size `base` + rand * `scale`, one of the two
 // D_800DE2B8 models. Only the first leaf starts sound 0xA2. With `ground` & 1 each leaf records the floor below it
@@ -42,7 +42,7 @@ void func_15175160(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 player, f32 bas
     yaw = (s32)func_15048FC8((struct17 *)&d);
 
     for (i = 0; i < count; i++) {
-        p = func_15167A68(0xA, 0, 0xF8, 1, 0xFF, 1);
+        p = node_alloc(0xA, 0, 0xF8, 1, 0xFF, 1);
         if (p == NULL) {
             break;
         }
@@ -103,9 +103,9 @@ void func_1510F800(s32 arg0);
 s32 func_150A3F50(s32 x, s32 z);
 extern s32 D_800D3720; /* floor candidates (16 bytes: +0 height in 24.8) left by func_150A3F50 */
 
-// leaf_drop_spawn: spawns up to `count` leaves of model row 7 (func_15167A68 list 0x13) in a `width` square around
+// leaf_drop_spawn: spawns up to `count` leaves of model row 7 (node_alloc list 0x13) in a `width` square around
 // (x, z) at height y: life 4..6, spin / tilt jitter, size `base` + rand * `scale`. Each leaf takes the lowest floor
-// below it (func_150A3F50; none -> the leaf is freed with func_1516979C). mode 0 (after func_1510F800(0)) puts the
+// below it (func_150A3F50; none -> the leaf is freed with node_delete). mode 0 (after func_1510F800(0)) puts the
 // leaf 10 above that floor in state 1; otherwise it falls from 300..427 above it in state 4 (+0x91 = 2).
 // `player` is not used.
 void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 player, s32 mode, f32 base, f32 scale) {
@@ -122,7 +122,7 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
         func_1510F800(0);
     }
     for (i = 0; i < count; i++) {
-        p = func_15167A68(0x13, 0, 0xF8, 1, 0xFF, 1);
+        p = node_alloc(0x13, 0, 0xF8, 1, 0xFF, 1);
         if (p == NULL) {
             break;
         }
@@ -147,7 +147,7 @@ void func_15175514(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 width, s32 play
 
         n = func_150A3F50(px, pz);
         if (n == 0) {
-            func_1516979C((struct102 *)p);
+            node_delete((struct102 *)p);
             continue;
         }
         floorY = (&D_800D3720)[0];
@@ -190,7 +190,7 @@ s32 func_1510FE58(s32 x, s32 y, s32 z, s32 *tri);
 s32 func_150ADA20(void);
 extern s32 D_800DC26C; /* triangle table: 12 bytes per triangle */
 
-// leaf_field_spawn: spawns up to `count` leaf / debris particles (func_15167A68 list `list` + rand % `listRand`)
+// leaf_field_spawn: spawns up to `count` leaf / debris particles (node_alloc list `list` + rand % `listRand`)
 // in a ring around (x, z): each axis offset is rand % (rMax - rMin) pushed out by rMin (away from 0), so |offset| is
 // in rMin .. rMax - 1. Height: the floor below the point (func_1510FE58, +0xC8) when `mode` is 0, else
 // y + rand % yRange (y when yRange is 0). flags (stored at +0x92): 0x40 = nothing when yRange <= 0; 0x10000 = yaw
@@ -234,7 +234,7 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
         if (listRand != 0) {
             off = (u32)func_150ADA20() % (u32)listRand;
         }
-        p = func_15167A68(list + off, 0, 0xF8, 1, 0xFF, 1);
+        p = node_alloc(list + off, 0, 0xF8, 1, 0xFF, 1);
         if (p == NULL) {
             return;
         }
@@ -329,7 +329,7 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
 #endif
 
 #ifdef NON_MATCHING
-/* ambient flyer object (the func_15167A68 particles of func_15175900 / game_eu_1B1010) */
+/* ambient flyer object (the node_alloc particles of func_15175900 / game_eu_1B1010) */
 typedef struct {
     u8 kind;            /* 0x00: 0x13 = chirping kind */
     u8 pad1[0x8F];
@@ -411,7 +411,7 @@ static const f32 sFlyerCircleFloor[1] = { -3100.0f };   /* D_800A7584 */
 static const f32 sFlyerDegToRad[1] = { 0.0174532924f }; /* D_800A7588 */
 
 // ambient_flyer_update: per-frame update of an ambient flyer (bird / bat; render-layer field 0 of layers 10 / 20 /
-// 68 / 69, also called by func_15176DCC / func_151770F4). Removed (func_1516972C) when its type row is off. Types 8
+// 68 / 69, also called by func_15176DCC / func_151770F4). Removed (node_destroy) when its type row is off. Types 8
 // and 9 on level 6 during D_800C3A08 == 0xF scatter after 60 frames of D_800C39D0: they start circling (flag 0x200)
 // round (-3478, 3858), the radius shrinking to 60 while they sink, and vanish below -3100 or when the event ends.
 // Otherwise: fade in / fade out (alpha +0xF0, `fading` once the slot is gone and flag 8 is set), keep the looping
@@ -441,14 +441,14 @@ void func_15175EC8(u8 *arg0) {
 
     row = (FlyerModels *)((u8 *)D_800DDE80 + f->type * 0x14);
     if (row->enabled == 0 || D_800DDF78[f->type] == 0) {
-        func_1516972C((struct102 *)f);
+        node_destroy((struct102 *)f);
         return;
     }
     alpha = f->alpha;
     if ((f->type == 8 || f->type == 9) && D_800BE9F0 == 6 && D_800C35EA != 0 && D_800C3A08 == 0xF) {
         f->flags &= 0xFFF7;
         if (D_800C35EA == 0 || D_800C3A08 != 0xF) {
-            func_1516972C((struct102 *)f);
+            node_destroy((struct102 *)f);
             return;
         }
         if (D_800C39D0 >= 60 && !(f->flags & 0x200)) {
@@ -473,7 +473,7 @@ void func_15175EC8(u8 *arg0) {
         }
     } else {
         if (alpha == 0) {
-            func_1516972C((struct102 *)f);
+            node_destroy((struct102 *)f);
             return;
         }
         alpha -= D_800BE9E4 * 4;
@@ -664,7 +664,7 @@ void func_15175EC8(u8 *arg0) {
         f->z = f->rollVel * s + sFlyerCircleZ[0];
         f->y -= 100.0f / ((f->rollVel - 60.0f) + 4.0f);
         if (f->y < sFlyerCircleFloor[0] || D_800C35EA == 0 || D_800C3A08 != 0xF) {
-            func_1516972C((struct102 *)f);
+            node_destroy((struct102 *)f);
             return;
         }
     } else {
@@ -692,7 +692,7 @@ void func_15175EC8(u8 *arg0) {
         && (D_800D2138 != 1
             || func_1510B460(D_800DA070, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0)
                    != 0)) {
-        func_1516972C((struct102 *)f);
+        node_destroy((struct102 *)f);
     }
 }
 #else
@@ -769,7 +769,7 @@ void func_15176DCC(u8 *arg0) {
             return;
         }
     } else {
-        func_1516972C((struct102 *) arg0);
+        node_destroy((struct102 *) arg0);
     }
 }
 #else
@@ -782,7 +782,7 @@ void func_151770F4(u8 *arg0) {
     s32 v;
 
     if (((Row20 *)D_800DDE80)[arg0[0xED]].x0 == 0 || D_800DDF78[arg0[0xED]] == 0) {
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
         return;
     }
     v = arg0[0xF0];
@@ -798,7 +798,7 @@ void func_151770F4(u8 *arg0) {
         }
     } else {
         if (v == 0) {
-            func_1516972C((struct102 *)arg0);
+            node_destroy((struct102 *)arg0);
             return;
         }
         v -= D_800BE9E4 * 4;
@@ -825,7 +825,7 @@ void func_151770F4(u8 *arg0) {
             break;
         case 4:
             if (*(f32 *)(arg0 + 0x9C) < *(f32 *)(arg0 + 0xC8)) {
-                func_1516972C((struct102 *)arg0);
+                node_destroy((struct102 *)arg0);
                 return;
             }
             break;

@@ -121,13 +121,13 @@ void func_150F2C20(struct108 *arg0) {
     if ((temp_v0->unk102 != 0) && (temp_v0->stunned == 0)) {
         func_150F2F14((s32) arg0, 1);
         if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
-            if (func_15123934(arg0, 0x80, 0, 0, 3) != 0) {
+            if (camera_push_mode(arg0, 0x80, 0, 0, 3) != 0) {
                 temp_t2 = arg0->unk84 | 0x300400;
                 arg0->unk84 = temp_t2;
                 arg0->unk84 = temp_t2 & ~6;
                 arg0->unk1B4 = 1;
                 arg0->unk1E0 = 3;
-                func_15124B18(arg0);
+                camera_apply_zoom_level(arg0);
             }
             arg0->unk348 = 29.0f;
             arg0->unk34C = 29.0f;
@@ -136,7 +136,7 @@ void func_150F2C20(struct108 *arg0) {
             if (arg0->unk3E8 == 0) {
                 temp_f0 = arg0->unk374;
                 if ((0.5f * temp_f0) < ((*(f32 *)((u8 *)arg0 + 0x370)) - temp_f0)) {
-                    func_15128774(arg0, arg0->unk3D0);
+                    camera_snap_to_object(arg0, arg0->unk3D0);
                 }
             }
         }
@@ -145,7 +145,7 @@ void func_150F2C20(struct108 *arg0) {
         if (arg0->unk23E == 0x3B) {
             func_150F2F14((s32) arg0, 1);
             if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
-                if (func_15123934(arg0, 8, 0, 0, 3) != 0) {
+                if (camera_push_mode(arg0, 8, 0, 0, 3) != 0) {
                     temp_t4 = arg0->unk84 | 0x300000;
                     arg0->unk84 = temp_t4;
                     arg0->unk84 = temp_t4 & ~4;
@@ -161,11 +161,11 @@ void func_150F2C20(struct108 *arg0) {
         } else {
             temp_v0_2 = arg0->unk2C;
             if (((temp_v0_2 == 8) || (temp_v0_2 == 0x80)) && (arg0->unk6C8 == 0)) {
-                func_151239CC(arg0, 3);
+                camera_pop_mode(arg0, 3);
             }
             if (arg0->unk1B4 == 1) {
                 arg0->unk1B4 = 2;
-                func_15124B18(arg0);
+                camera_apply_zoom_level(arg0);
             }
             func_150F2F14((s32) arg0, 0);
         }

@@ -86,9 +86,9 @@ void func_150BB760(u8 *arg0) {
     if ((arg0 != NULL) && ((*(s32 *)((u8 *)arg0 + 0)) != 0) && ((*(s32 *)((u8 *)arg0 + 0x1D4)) != 0)) {
         sp78 = (f32) (*(s16 *)((u8 *)arg0 + 0xE4));
         sp74 = (f32) (*(s16 *)((u8 *)arg0 + 0xE6));
-        sp70 = func_151423D8(((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8) & 0xFF);
+        sp70 = angle_byte_cos(((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8) & 0xFF);
         temp_f2 = (*(f32 *)((u8 *)arg0 + 0x3C));
-        temp_f6 = temp_f2 * func_151423D8((((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8) + 0x40) & 0xFF);
+        temp_f6 = temp_f2 * angle_byte_cos((((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8) + 0x40) & 0xFF);
         sp68 = temp_f2 * sp70 * 0.5f;
         sp.uD2 = 1;
         sp.uCC = 0x29E9;
@@ -116,15 +116,15 @@ void func_150BB760(u8 *arg0) {
         sp.uEC = (*(u8 *)((u8 *)arg0 + 0x3B));
         temp_v0 = func_150ADA20();
         sp63 = temp_v0;
-        sp5C = func_151423D8(temp_v0 & 0xFF);
-        sp58 = func_151423D8((sp63 - 0x40) & 0xFF);
+        sp5C = angle_byte_cos(temp_v0 & 0xFF);
+        sp58 = angle_byte_cos((sp63 - 0x40) & 0xFF);
         temp_f2_2 = func_150ADA68() * sp78;
         sp50 = sp5C * temp_f2_2;
         sp4C = -sp58 * temp_f2_2;
         temp_t8 = (((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8) - (func_150ADA20() & 0x3F)) - 0x20;
         sp4B = temp_t8;
-        sp44 = func_151423D8(temp_t8 & 0xFF);
-        sp40 = func_151423D8((sp4B - 0x40) & 0xFF);
+        sp44 = angle_byte_cos(temp_t8 & 0xFF);
+        sp40 = angle_byte_cos((sp4B - 0x40) & 0xFF);
         temp_f2_3 = (func_150ADA68() * 5.0f) + 3.0f;
         temp_f10 = sp40 * temp_f2_3;
         sp38 = temp_f10;
@@ -189,12 +189,12 @@ typedef struct {
     /* 0x78 */ s32 u78;
 } ImpactChunk;
 
-u8 *func_151DA6F8(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, s32 tint, u8 fade, f32 sx, f32 sy,
+u8 *impact_spark_spawn(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, s32 tint, u8 fade, f32 sx, f32 sy,
                   u8 bright, u8 type, s32 argC, s16 t0, s16 t1, s32 owner, u8 arg10, s32 arg11);
 
-/* func_1516865C / func_15168800 sprite record (0xA8 bytes; only the fields set here are named) */
+/* sprite_vtx_quads_init / node_spawn_vtx_sprite sprite record (0xA8 bytes; only the fields set here are named) */
 typedef struct {
-    /* 0x00 */ u8  vtx[0x80];       /* two quads, filled by func_1516865C */
+    /* 0x00 */ u8  vtx[0x80];       /* two quads, filled by sprite_vtx_quads_init */
     /* 0x80 */ s32 alpha;
     /* 0x84 */ u8  pad84[4];
     /* 0x88 */ s16 u88;
@@ -213,13 +213,13 @@ typedef struct {
     /* 0xA3 */ u8  padA3[5];
 } ImpactShadow;
 
-s32 func_1516865C(u8 *rec, s32 r, s32 g, s32 b, s32 a);
-void *func_15168800(void *rec, u8 arg1, s32 arg2);
+s32 sprite_vtx_quads_init(u8 *rec, s32 r, s32 g, s32 b, s32 a);
+void *node_spawn_vtx_sprite(void *rec, u8 arg1, s32 arg2);
 
 /* object_impact_debris: landing / crash effect of a type-0x20 object (func_1507D754 when its y speed (+0x20) is
  * not below -20): a sprite (texture 0x2E) at its position, 60 above the floor height +0x180, sized from +0xE4 /
  * +0xE6 (alpha 255, or fading with +0x184 when +0x1D4 is set); 6..9 debris chunks (sprite 1, life 120) and 10..13
- * sparks (func_151DA6F8) thrown up and carried along by half the object's speed (+0x3C, heading +0x76); two dust
+ * sparks (impact_spark_spawn) thrown up and carried along by half the object's speed (+0x3C, heading +0x76); two dust
  * chunks (sprite 0) sized from +0x14C / +0x150; and sound 0x6590 at the object's position. The asm returns 1 for an
  * object of another type, else a scratch value; the only caller ignores it. */
 void func_150BC03C(u8 *obj) {
@@ -263,8 +263,8 @@ void func_150BC03C(u8 *obj) {
     width = *(s16 *) (obj + 0xE6);
     n = (func_150ADA20() & 3) + 6;
     m = (func_150ADA20() & 3) + 10;
-    s = func_151423D8((*(u16 *) (obj + 0x76) >> 8) & 0xFF);
-    c = func_151423D8(((*(u16 *) (obj + 0x76) >> 8) + 0x40) & 0xFF);
+    s = angle_byte_cos((*(u16 *) (obj + 0x76) >> 8) & 0xFF);
+    c = angle_byte_cos(((*(u16 *) (obj + 0x76) >> 8) + 0x40) & 0xFF);
     ox = *(f32 *) (obj + 0x3C) * s * 0.5f;
     oz = *(f32 *) (obj + 0x3C) * c * 0.5f;
 
@@ -286,8 +286,8 @@ void func_150BC03C(u8 *obj) {
     shadow.uA1 = 0;
     shadow.uA2 = -1;
     shadow.alpha = alpha;
-    func_1516865C((u8 *) &shadow, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&shadow, 0xFF, 0);
+    sprite_vtx_quads_init((u8 *) &shadow, 0xFF, 0xFF, 0xFF, 0xFF);
+    node_spawn_vtx_sprite(&shadow, 0xFF, 0);
 
     /* debris chunks */
     chunk.sprite = 1;
@@ -317,15 +317,15 @@ void func_150BC03C(u8 *obj) {
     chunk.gravity = -1.5f;
     for (; n > 0; n--) {
         a = func_150ADA20() & 0xFF;
-        s = func_151423D8(a);
-        c = func_151423D8((a - 0x40) & 0xFF);
+        s = angle_byte_cos(a);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
         r = func_150ADA68() * height;
         dx = s * r;
         dz = -c * r;
 
         a = func_150ADA20() & 0xFF;
-        s = func_151423D8(a);
-        c = func_151423D8((a - 0x40) & 0xFF);
+        s = angle_byte_cos(a);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
         r = func_150ADA68() * 4.0f + 2.0f;
         vx = c * r;
         vz = s * r;
@@ -354,8 +354,8 @@ void func_150BC03C(u8 *obj) {
         r = func_150ADA68() * height;
         r2 = func_150ADA68() * 7.0f + 7.0f;
         a = func_150ADA20() & 0xFF;
-        s = func_151423D8(a);
-        c = func_151423D8((a - 0x40) & 0xFF);
+        s = angle_byte_cos(a);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
         pos[0] = *(f32 *) (obj + 0x14) + s * r;
         pos[1] = func_150ADA68() * width + *(f32 *) (obj + 0x18) + 5.0f;
         vel[0] = c * r2 + ox;
@@ -366,7 +366,7 @@ void func_150BC03C(u8 *obj) {
         b = func_150ADA20();
         r = func_150ADA68();
         rnd = func_150ADA20();
-        func_151DA6F8((u8 *) pos, (u8 *) vel, 1.6f, (a & 7) + 0x19, (b & 0x7F) + 0x80, r * 0.2f * height + 13.0f,
+        impact_spark_spawn((u8 *) pos, (u8 *) vel, 1.6f, (a & 7) + 0x19, (b & 0x7F) + 0x80, r * 0.2f * height + 13.0f,
                       (rnd & 3) + 2, 0, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
     }
 
@@ -409,10 +409,10 @@ void func_150BC03C(u8 *obj) {
         r = func_150ADA68() * 30.0f * *(f32 *) (obj + 0x150) + 10.0f;
         yaw = func_150ADA20() & 0x7F;
         pitch = -0x20 - (func_150ADA20() & 0x1F);
-        s = func_151423D8(yaw & 0xFF);
-        c = func_151423D8((yaw - 0x40) & 0xFF);
-        ps = func_151423D8(pitch & 0xFF);
-        pc = func_151423D8((pitch - 0x40) & 0xFF);
+        s = angle_byte_cos(yaw & 0xFF);
+        c = angle_byte_cos((yaw - 0x40) & 0xFF);
+        ps = angle_byte_cos(pitch & 0xFF);
+        pc = angle_byte_cos((pitch - 0x40) & 0xFF);
         chunk.vel[0] = r * ps * c + ox;
         chunk.vel[1] = -r * pc;
         chunk.vel[2] = r * ps * s + oz;
@@ -430,7 +430,7 @@ void func_150BC03C(u8 *obj) {
 #ifdef NON_MATCHING
 /* object_impact_debris_hard: hard landing / crash effect of a type-0x20 object (func_1507D754 when its y speed
  * (+0x20) is below -20): 6..9 debris chunks (sprite 1) thrown out within the object's height (+0xE4) around its
- * position, upward speed 0.05 * the y speed, stop at the first failed spawn; 2..5 sparks (func_151DA6F8, sprites
+ * position, upward speed 0.05 * the y speed, stop at the first failed spawn; 2..5 sparks (impact_spark_spawn, sprites
  * 0x19..0x20); then 0..2 dust chunks (sprite 0) sized from +0x14C, rotated like the object (+0xB8 / +0x40 / +0xC4).
  * The asm returns 1 for an object of another type, else a scratch value; the only caller ignores it. */
 void func_150BC968(u8 *obj) {
@@ -495,15 +495,15 @@ void func_150BC968(u8 *obj) {
     ok = TRUE;
     while (n != 0) {
         a = func_150ADA20() & 0xFF;
-        s = func_151423D8(a);
-        c = func_151423D8((a - 0x40) & 0xFF);
+        s = angle_byte_cos(a);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
         r = func_150ADA68() * height;
         dx = s * r;
         dz = -c * r;
 
         a = func_150ADA20() & 0xFF;
-        s = func_151423D8(a);
-        c = func_151423D8((a - 0x40) & 0xFF);
+        s = angle_byte_cos(a);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
         r = func_150ADA68() * 4.0f + 4.0f;
         vx = c * r;
         vz = s * r;
@@ -540,8 +540,8 @@ void func_150BC968(u8 *obj) {
     do {
         r = func_150ADA68() * 7.0f + 7.0f;
         a = func_150ADA20() & 0xFF;
-        s = func_151423D8(a);
-        c = func_151423D8((a - 0x40) & 0xFF);
+        s = angle_byte_cos(a);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
         pos[0] = *(f32 *) (obj + 0x14);
         pos[1] = func_150ADA68() * 5.0f + *(f32 *) (obj + 0x18);
         pos[2] = *(f32 *) (obj + 0x1C);
@@ -552,7 +552,7 @@ void func_150BC968(u8 *obj) {
         b = func_150ADA20();
         r = func_150ADA68();
         rnd = func_150ADA20();
-        func_151DA6F8((u8 *) pos, (u8 *) vel, 1.6f, (a & 7) + 0x19, (b & 0x7F) + 0x80, r * 0.2f * height + 5.0f,
+        impact_spark_spawn((u8 *) pos, (u8 *) vel, 1.6f, (a & 7) + 0x19, (b & 0x7F) + 0x80, r * 0.2f * height + 5.0f,
                       (rnd & 1) + 2, 0, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
         n--;
     } while (n != 0);
@@ -602,10 +602,10 @@ void func_150BC968(u8 *obj) {
         r = func_150ADA68() * 5.0f + 8.0f;
         yaw = func_150ADA20() & 0x7F;
         pitch = 0x20 - (func_150ADA20() & 0x3F);
-        s = func_151423D8(yaw & 0xFF);
-        c = func_151423D8((yaw - 0x40) & 0xFF);
-        dx = func_151423D8(pitch & 0xFF);
-        dz = func_151423D8((pitch - 0x40) & 0xFF);
+        s = angle_byte_cos(yaw & 0xFF);
+        c = angle_byte_cos((yaw - 0x40) & 0xFF);
+        dx = angle_byte_cos(pitch & 0xFF);
+        dz = angle_byte_cos((pitch - 0x40) & 0xFF);
         chunk.vel[0] = r * dx * c;
         chunk.vel[1] = -r * dz;
         chunk.vel[2] = r * dx * s;
@@ -721,8 +721,8 @@ void func_150BCBBC(u8 *arg0) {
         if (var_s2 != 0) {
 loop_6:
             temp_v0 = func_150ADA20();
-            temp_f20 = func_151423D8(temp_v0 & 0xFF);
-            temp_f22 = func_151423D8(((temp_v0 & 0xFF) - 0x40) & 0xFF);
+            temp_f20 = angle_byte_cos(temp_v0 & 0xFF);
+            temp_f22 = angle_byte_cos(((temp_v0 & 0xFF) - 0x40) & 0xFF);
             temp_f2 = func_150ADA68() * sp.u12C;
             sp90 = temp_f20 * temp_f2;
             sp8C = -temp_f22 * temp_f2;
@@ -733,8 +733,8 @@ loop_6:
             } else {
                 var_s0 = (((8 - (func_150ADA20() & 0xF)) + ((s32) (*(u16 *)((u8 *)arg0 + 0x76)) >> 8)) - 0x80) & 0xFF;
             }
-            temp_f20_2 = func_151423D8(var_s0 & 0xFF);
-            temp_f22_2 = func_151423D8((var_s0 - 0x40) & 0xFF);
+            temp_f20_2 = angle_byte_cos(var_s0 & 0xFF);
+            temp_f22_2 = angle_byte_cos((var_s0 - 0x40) & 0xFF);
             temp_f4 = func_150ADA68() * 5.0f;
             sp.uAC = temp_f26;
             sp.uB0 = temp_f28;

@@ -7,10 +7,10 @@
 s32 func_15086268(f32, f32, f32, s32, s32);
 f32 func_150ADDE0(f32 *, f32 *);
 void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
-void func_151254F4(struct108 *, s32);
-void func_15124C38(struct108 *, f32 *);
+void camera_set_followed_obj(struct108 *, s32);
+void camera_update_target_height(struct108 *, f32 *);
 void func_15128D50(struct108 *, f32 *, f32 *);
-void func_1512DD50(u8 *);
+void camera_orbit_point_init(u8 *);
 void func_1512E6B0(u8 *);
 struct127 *func_1505EEF4(s32);
 void func_15130370(struct108 *, s32);
@@ -52,11 +52,11 @@ extern u8 *D_800DC454;   /* the record of the current fixed position */
  *  7: follow the camera node graph (D_800D2778, 16-byte nodes, links at +9..+13): the eye (+0x2F8/2FC/300) is
  *     moved toward the closest point of the node's links (eased with func_150498A0 at rates +0x908 / +0x90C unless
  *     +0x23C snaps); flags from the argument (+0x920): 0x10 keeps x/z, 8 keeps the height (cam +0x2FC);
- *  5: fixed position record D_800DC450[A] (argument 5 / 0x11: jump there once, func_15128774);
+ *  5: fixed position record D_800DC450[A] (argument 5 / 0x11: jump there once, camera_snap_to_object);
  *  0xB: store A / B / argument as floats in state +0x24..+0x2C;
- *  0xA / 0xE: look at object func_1505EEF4(func_15083E0C(A low byte)) (target +0x618, 0xE via func_151254F4);
- *  0xF: func_1512DD50; 3: look at the request point; 2 / 1 / 0: keep distance A from the target, pushing the eye
- *     out along the heading +0x39C; 0xD: func_15123934 only.
+ *  0xA / 0xE: look at object func_1505EEF4(func_15083E0C(A low byte)) (target +0x618, 0xE via camera_set_followed_obj);
+ *  0xF: camera_orbit_point_init; 3: look at the request point; 2 / 1 / 0: keep distance A from the target, pushing the eye
+ *     out along the heading +0x39C; 0xD: camera_push_mode only.
  * Any other mode (or an inactive / pending request) settles: the state point (+0x18 / +0x20) blends into the
  * target +0x2A4 / +0x2AC (+0x10 += 0.015 up to 1), and a finished request (+0x6C8 == 1) is reset to mode 0xD. */
 void func_1512EE50(struct108 *arg0) {
@@ -92,7 +92,7 @@ void func_1512EE50(struct108 *arg0) {
     if (ES16(0x73C) != 0) {
         return;
     }
-    func_151239CC(arg0, 0xD);
+    camera_pop_mode(arg0, 0xD);
     req = p + 0x6FC;
     st = p + 0x6CC;
     if (ES32(0x2C) & 0x40000) {
@@ -102,16 +102,16 @@ void func_1512EE50(struct108 *arg0) {
         p[0x92C] = 0;
         ST_PENDING = 0;
         ST_ID = RQ_ID;
-        func_151239CC(arg0, 0xC);
-        func_151239CC(arg0, 0xD);
-        func_151239CC(arg0, 2);
-        func_151239CC(arg0, 7);
+        camera_pop_mode(arg0, 0xC);
+        camera_pop_mode(arg0, 0xD);
+        camera_pop_mode(arg0, 2);
+        camera_pop_mode(arg0, 7);
     }
     if (RQ_MODE != 4 && (*(u8 **)(p + 0x3D4))[0x120] != 0 && p[0x92C] == 0) {
         ST_PENDING = 1;
     }
     if (ST_PENDING != 0) {
-        func_151239CC(arg0, 0xC);
+        camera_pop_mode(arg0, 0xC);
     }
     if (ES16(0x6CC) != 0 && ST_PENDING == 0 && ST_EASING == 0) {
         ST_MODE = RQ_MODE;
@@ -158,7 +158,7 @@ void func_1512EE50(struct108 *arg0) {
                     }
                 }
             }
-            if (func_15123934(arg0, ES32(0x2C), 0, ES32(0x134), 0xC) != 0) {
+            if (camera_push_mode(arg0, ES32(0x2C), 0, ES32(0x134), 0xC) != 0) {
                 ES32(0x6C8) = 1;
                 ES32(0x84) &= 0x7FFFFFF9;
                 EU16(0x920) = RQ_ARG;
@@ -220,7 +220,7 @@ void func_1512EE50(struct108 *arg0) {
                     func_150498A0((f32 *)(p + 0x2FC), best[1], (f32 *)(p + 0x8FC), EF(0x908), EF(0x90C), EF(0x7B4));
                 }
             }
-            func_15125594(arg0);
+            camera_sync_angles(arg0);
             EF(0x924) = RQ_A;
             EF(0x928) = RQ_B;
             EF(0x374) = EF(0x924);
@@ -232,7 +232,7 @@ void func_1512EE50(struct108 *arg0) {
             return;
         }
         if (mode == 5) {
-            if (func_15123934(arg0, 0x40, 0, 0, 0xC) != 0) {
+            if (camera_push_mode(arg0, 0x40, 0, 0, 0xC) != 0) {
                 ES32(0x84) = (ES32(0x84) & ~0xE) | 0x200;
                 EF(0x27C) = EF(0x2F8);
                 EF(0x280) = EF(0x2FC);
@@ -250,7 +250,7 @@ void func_1512EE50(struct108 *arg0) {
                     EF(0x2F8) = EF(0x27C) = EF(0x288);
                     EF(0x2FC) = EF(0x280) = EF(0x28C);
                     EF(0x300) = EF(0x284) = EF(0x290);
-                    func_15128774(arg0, *(struct127 **)(p + 0x3D0));
+                    camera_snap_to_object(arg0, *(struct127 **)(p + 0x3D0));
                     p[0x23C] = 1;
                 }
             } else {
@@ -276,9 +276,9 @@ void func_1512EE50(struct108 *arg0) {
             if (obj == NULL) {
                 return;
             }
-            if (func_15123934(arg0, 0x400, 0, ES32(0x134), 2) != 0) {
+            if (camera_push_mode(arg0, 0x400, 0, ES32(0x134), 2) != 0) {
                 if (RQ_MODE == 0xE) {
-                    func_151254F4(arg0, (obj - (u8 *)D_800CC2D0) / 0x32C);
+                    camera_set_followed_obj(arg0, (obj - (u8 *)D_800CC2D0) / 0x32C);
                 }
                 ES32(0x84) &= ~8;
                 ES32(0x628) = 0;
@@ -316,15 +316,15 @@ void func_1512EE50(struct108 *arg0) {
             return;
         }
         if (mode == 0xF) {
-            if (func_15123934(arg0, 0x800000, 0, ES32(0x134), 2) != 0) {
+            if (camera_push_mode(arg0, 0x800000, 0, ES32(0x134), 2) != 0) {
                 ES32(0x134) = 0;
                 ES32(0x84) = (ES32(0x84) | 0x200) & ~8;
-                func_1512DD50(p);
+                camera_orbit_point_init(p);
             }
             return;
         }
         if (mode == 3) {
-            if (func_15123934(arg0, 0x400, 0, ES32(0x134), 2) != 0) {
+            if (camera_push_mode(arg0, 0x400, 0, ES32(0x134), 2) != 0) {
                 ES32(0x628) = 0;
                 *(u8 **)(p + 0x614) = p + 0x618;
                 ES32(0x84) |= 8;
@@ -342,7 +342,7 @@ void func_1512EE50(struct108 *arg0) {
             return;
         }
         if (mode == 2) {
-            if (func_15123934(arg0, 0x2000, 0, ES32(0x134), 2) != 0) {
+            if (camera_push_mode(arg0, 0x2000, 0, ES32(0x134), 2) != 0) {
                 EF(0x374) = RQ_A;
                 EF(0x34C) = RQ_B;
                 RQ_SAVED = RQ_B;
@@ -370,7 +370,7 @@ void func_1512EE50(struct108 *arg0) {
             dz = EF(0x300) - (f32)RQ_Z;
             dist = sqrtf(dx * dx + dz * dz);
             if (ES32(0x6C8) == 0 || mode == 0) {
-                if (func_15123934(arg0, ES32(0x2C), 0, ES32(0x134), 2) != 0) {
+                if (camera_push_mode(arg0, ES32(0x2C), 0, ES32(0x134), 2) != 0) {
                     ES32(0x6C8) = 1;
                     EF(0x374) = RQ_A;
                     EF(0x34C) = RQ_B;
@@ -402,13 +402,13 @@ void func_1512EE50(struct108 *arg0) {
             }
             if (RQ_MODE != 0) {
                 func_1512E6B0(p);
-                func_15124C38(arg0, NULL);
+                camera_update_target_height(arg0, NULL);
                 ST_BLEND = 0.0f;
             }
             return;
         }
         if (mode == 0xD) {
-            func_15123934(arg0, ES32(0x2C), 0, ES32(0x134), 2);
+            camera_push_mode(arg0, ES32(0x2C), 0, ES32(0x134), 2);
             return;
         }
     }
@@ -427,7 +427,7 @@ void func_1512EE50(struct108 *arg0) {
     }
     if (ES32(0x2C) == 0x40) {
         ES16(0x272) = -1;
-        func_151239CC(arg0, 0xC);
+        camera_pop_mode(arg0, 0xC);
     }
     if (ES32(0x6C8) == 1) {
         if (ST_MODE == 0) {
@@ -436,7 +436,7 @@ void func_1512EE50(struct108 *arg0) {
         }
         if (ST_MODE == 0xE) {
             EF(0x670) = 0.01f;
-            func_151254F4(arg0, p[0x23D]);
+            camera_set_followed_obj(arg0, p[0x23D]);
         }
     }
     if (p[0x23C] != 0) {
@@ -482,11 +482,11 @@ void func_1512EE50(struct108 *arg0) {
         EF(0x384) = EF(0x37C);
         EF(0x924) = 0.0f;
         EF(0x928) = 0.0f;
-        func_151239CC(arg0, 1);
-        func_151239CC(arg0, 0xC);
-        func_151239CC(arg0, 0xD);
-        func_151239CC(arg0, 2);
-        func_151239CC(arg0, 7);
+        camera_pop_mode(arg0, 1);
+        camera_pop_mode(arg0, 0xC);
+        camera_pop_mode(arg0, 0xD);
+        camera_pop_mode(arg0, 2);
+        camera_pop_mode(arg0, 7);
     }
 }
 #undef EF
@@ -521,95 +521,95 @@ void func_15130370(struct108 *arg0, s32 arg1) {
 
     switch (arg1) {
     case 1:
-        func_15123934(arg0, arg0->unk2C, 0, 0, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, 0, 7);
         return;
     case 2:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 &= ~8;
         return;
     case 3:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x10000000;
         return;
     case 8:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x80;
         return;
     case 9:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         temp_t9 = arg0->unk84 & ~8;
         arg0->unk84 = temp_t9;
         arg0->unk84 = temp_t9 | 0x80;
         return;
     case 11:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x4000;
         return;
     case 12:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x8000;
         return;
     case 13:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x20000;
         return;
     case 16:
-        func_15123934(arg0, 8, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, 8, 0, arg0->unk134, 7);
         return;
     case 14:
-        func_15123934(arg0, 2, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, 2, 0, arg0->unk134, 7);
         return;
     case 18:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x100000;
         return;
     case 19:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x400000;
         return;
     case 21:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk190 = 0.0f;
         return;
     case 22:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x800;
         arg0->unk190 = -30.0f;
         return;
     case 25:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x40;
         return;
     case 23:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x01000000;
         return;
     case 24:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x80000000;
         return;
     case 26:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x10;
         return;
     case 27:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         arg0->unk84 |= 0x20;
         return;
     case 28:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         temp_t0 = arg0->unk84 | 0x10;
         arg0->unk84 = temp_t0;
         arg0->unk84 = temp_t0 & ~8;
         return;
     case 29:
-        func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 7);
+        camera_push_mode(arg0, arg0->unk2C, 0, arg0->unk134, 7);
         temp_t5 = arg0->unk84 | 0x01000010;
         arg0->unk84 = temp_t5;
         arg0->unk84 = temp_t5 & ~8;
         return;
     case 30:
-        func_15128774(arg0, arg0->unk3D0);
+        camera_snap_to_object(arg0, arg0->unk3D0);
         /* fallthrough */
     default:
         return;

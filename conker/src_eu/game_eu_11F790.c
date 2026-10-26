@@ -21,8 +21,8 @@ void func_150F0820(void *arg0);
 void func_150F0898(void *arg0);
 void func_150F0900(void *arg0);
 void func_150F0968(void *arg0);
-void func_151617C4(void *arg0);
-void func_151617E4(void *arg0);
+void light_ctrl_retire(void *arg0);
+void light_ctrl_free(void *arg0);
 
 #ifdef NON_MATCHING
 extern u16 D_80088EA0[3];

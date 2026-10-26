@@ -8,7 +8,7 @@ extern u8 D_800A2800[];
 
 #ifdef NON_MATCHING
 void func_150E892C(void *, s16, u8, s32);
-s32 func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800A2804;
 
 void func_151086A0(struct127 *arg0, u8 arg1, s32 arg2) {
@@ -64,7 +64,7 @@ void func_151086A0(struct127 *arg0, u8 arg1, s32 arg2) {
     sp.u5C = 0.344f;
     sp.u6C = 26.411001f;
     func_15152700(&sp.u34, ((u8 *)&D_800A2800), &D_800A2804, 1, 40.0f, 0U, (u8) (s32) arg1, arg2);
-    func_15136C3C(arg0, 1, 1, 1, 0, 0, (s32) arg1, arg2);
+    object_hit_effects(arg0, 1, 1, 1, 0, 0, (s32) arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_135EB0/func_151086A0.s")

@@ -24,9 +24,9 @@
 \#^    spec.dir\[1\] = 0.0f;$#d
 \#^    spec.dir\[0\] = dir\[2\] \* inv;$#s/dir\[2\]/dir[0]/
 \#^    spec.dir\[2\] = dir\[0\] \* inv;$#s/inv/scale/
-\#^    rec = (u8 \*) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/0x2C/0x2D/
-\#^    rec = (u8 \*) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/9, 0, 0, 7/9, 0, 0, 8/
-\#^    rec = (u8 \*) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/group, arg3/arg3, group/
+\#^    rec = (u8 \*) effect3d_spawn_default((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/0x2C/0x2D/
+\#^    rec = (u8 \*) effect3d_spawn_default((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/9, 0, 0, 7/9, 0, 0, 8/
+\#^    rec = (u8 \*) effect3d_spawn_default((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/group, arg3/arg3, group/
 \#^    if (rec != NULL) {$#s/!= NULL/== NULL/
 \#^        \*(f32 \*) (rec + 0x114) = dir\[1\];$#s/dir\[1\]/dir[2]/
 \#^        \*(f32 \*) (rec + 0x11C) = D_80088CD4\[idx\];$#s/D_80088CD4/D_80088CD8/

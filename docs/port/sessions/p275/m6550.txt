@@ -26,9 +26,9 @@
 \#^            r\.side = -1\.0f;$#s/-1/-2/
 \#^    bit2 = (func_150ADA20() & 1) ? 2 : 0;$#s/? 2/? 4/
 \#^    bit1 = (func_150ADA20() & 1) ? 1 : 0;$#s/: 0/: 2/
-\#^    o = func_1513D524((s32) &q, 0xF, 0x15, 0, 0xF, bit1 | bit2, 0x30, room, owner);$#s/0x15/0x16/
-\#^    o = func_1513D524#s/room, owner/room, 0/
-\#^    o = func_1513D524#s/0x30, room/0x20, room/
+\#^    o = effect3d_spawn_default((s32) &q, 0xF, 0x15, 0, 0xF, bit1 | bit2, 0x30, room, owner);$#s/0x15/0x16/
+\#^    o = effect3d_spawn_default#s/room, owner/room, 0/
+\#^    o = effect3d_spawn_default#s/0x30, room/0x20, room/
 \#^    if (o != NULL) {$#s/!=/==/
 \#^        memcpy((s32) o + 0x110, (s32) &r, 0x30);$#s/0x110/0x100/
 \#^    return (s32) o;$#s/o;/o + 1;/

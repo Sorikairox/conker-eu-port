@@ -410,7 +410,7 @@ s32 func_1519D9C4(u8 *obj) {
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
 Gfx *func_15142E24(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
-Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2);
+Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 u8 *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800D30BC;
@@ -512,7 +512,7 @@ s32 func_1519DF64(u8 *obj, s32 gfx, s16 slot) {
 
     g = func_15142E24((Gfx *) gfx, (s32) D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
     g = func_15142C10(g, rec[0x40], rec[0x40], rec[0x40], 0xFF, &flag);
-    g = func_1513F4E4(g, 6, &flag);
+    g = gfx_set_combine_mode(g, 6, &flag);
     g = func_15142B7C(g, 1, 0x160600);
     g = (Gfx *) func_15142FBC(g, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
@@ -732,7 +732,7 @@ void func_1519EAE0(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *v = arg0 + 0x28;
     if (arg2 == 0) {
         if ((*(s32 *)v == arg1[0]) || (v[4] == ((u8 *)arg1)[4])) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         v = arg0 + 0x28;
@@ -750,7 +750,7 @@ void func_1519EAE0(u8 *arg0, s32 *arg1, u8 arg2) {
 
 void func_1519EB8C(struct102 *arg0, s32 arg1, u8 arg2) {
     if ((arg2 == 0) || (arg2 == 9)) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 
@@ -837,7 +837,7 @@ void func_1519ED88(u8 *arg0, s32 *arg1, u8 arg2)
   u8 *v = arg0 + 0x28;
   if (arg2 == 0) {
     if (*(s32 *)v == arg1[0] || v[4] == ((u8 *)arg1)[4]) {
-      func_1516972C((struct102 *)arg0);
+      node_destroy((struct102 *)arg0);
       {
         s32 t; // fakematch: block-local declaration = basic-block boundary (unfilled b delay slot, s69)
         D_800E0D50 = 0;

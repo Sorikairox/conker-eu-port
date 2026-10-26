@@ -7,10 +7,10 @@ s32 func_151AD0E8(u8 *, u8 *);
 
 #ifdef NON_MATCHING
 /* P155 */
-u8 func_151D8E20(void);
+u8 impact_current_kind(void);
 void func_1514CBE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9,
                    s32 argA, u8 argB);
-void func_151DBE80(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u8 arg6, u8 arg7, u8 arg8, s32 arg9);
+void impact_flat_fx_spawn(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u8 arg6, u8 arg7, u8 arg8, s32 arg9);
 typedef struct {
     f32 size;         /* 0x0 */
     s16 count;        /* 0x4 */
@@ -28,8 +28,8 @@ extern FlashDefAC3F0 D_800A963C[];  /* flash */
 
 // debris_burst_spawn: P153: the debris of a broken object of `kind` at pos (src = the owner): per D_800A9400[kind]
 // a chunk burst (func_1514CBE8 type 0xB, def D_800A9420) and a dust burst (type 0xC, D_800A9538) with count
-// +4 + random [0, +6], each with the owner block {src, arg4, light} (light = func_151D8E20()), and when src +0x1C
-// bit 0 is set a flash (func_151DBE80, D_800A963C, 150) at pos, src + 4.
+// +4 + random [0, +6], each with the owner block {src, arg4, light} (light = impact_current_kind()), and when src +0x1C
+// bit 0 is set a flash (impact_flat_fx_spawn, D_800A963C, 150) at pos, src + 4.
 void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
     struct {
         u8 *src;
@@ -41,7 +41,7 @@ void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
     FlashDefAC3F0 *fl;
     u8 light;
 
-    light = func_151D8E20();
+    light = impact_current_kind();
     if (src == NULL) {
         return;
     }
@@ -64,7 +64,7 @@ void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
     }
     if (def[4] != -1 && (src[0x1C] & 1)) {
         fl = &D_800A963C[def[4]];
-        func_151DBE80(light, fl->u0, fl->u8, fl->u4, (u8 *) pos, (s32) (src + 4), 0x96, 0, arg3, arg4);
+        impact_flat_fx_spawn(light, fl->u0, fl->u8, fl->u4, (u8 *) pos, (s32) (src + 4), 0x96, 0, arg3, arg4);
     }
 }
 #else
@@ -140,8 +140,8 @@ s32 func_151AC628(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     s32 trailA, trailB;
     s16 pitch;
 
-    sinA = func_151423D8(a & 0xFF);
-    cosA = func_151423D8((a - 0x40) & 0xFF);
+    sinA = angle_byte_cos(a & 0xFF);
+    cosA = angle_byte_cos((a - 0x40) & 0xFF);
     style.w[0] = 0;
     style.w[1] = 1;
     style.w[2] = 0x160600;
@@ -171,8 +171,8 @@ s32 func_151AC628(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     }
     shape.col[2] = (u32) func_150ADA20() % (u32) (def->colRange + 1) + def->colBase;
     pitch = (u32) func_150ADA20() % (u32) (def->pitchRange + 1) + def->pitchBase;
-    sinP = func_151423D8(pitch & 0xFF);
-    cosP = func_151423D8((pitch - 0x40) & 0xFF);
+    sinP = angle_byte_cos(pitch & 0xFF);
+    cosP = angle_byte_cos((pitch - 0x40) & 0xFF);
     speed = func_150ADA68() * def->speedRange + def->speedBase;
     hv = speed * sinP;
     shape.vel[0] = hv * cosA;
@@ -204,8 +204,8 @@ s32 func_151AC97C(u8 *arg0) {
 }
 
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
-u8 func_151D8E20(void);
-void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
+u8 impact_current_kind(void);
+void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
 s32 func_151AC9B8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     u8 *tbl;
     u8 *obj;
@@ -217,11 +217,11 @@ s32 func_151AC9B8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     pos[0] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].x;
     pos[1] = arg4;
     pos[2] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].z;
-    id = func_151D8E20();
+    id = impact_current_kind();
     if (func_150ADA20() & 1) {
-        func_151D9B8C(id, *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), arg5, (struct17 *)pos, func_150ADA20() % 41U + 0x50, 1, 1, 0, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+        impact_debris_spawn(id, *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), arg5, (struct17 *)pos, func_150ADA20() % 41U + 0x50, 1, 1, 0, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
     } else {
-        func_151DAB58(id, *(f32 *)(obj + 0) * 1.5f, *(u8 *)(obj + 0x1B), pos, 1, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+        impact_splash_ring_spawn(id, *(f32 *)(obj + 0) * 1.5f, *(u8 *)(obj + 0x1B), pos, 1, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
     }
     *(s8 *)(obj + 0x20) = 4;
     return 1;
@@ -236,7 +236,7 @@ s32 func_151ACB00(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     sp34[0] = tab[*(s8 *)(arg0 + 0x2D)][0];
     sp34[1] = arg4;
     sp34[2] = tab[*(s8 *)(arg0 + 0x2D)][2];
-    func_151DBCBC(func_151D8E20(), *(f32 *)(sp44 + 0) * 7.0f, *(u8 *)(sp44 + 0x1B), arg5, sp34, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+    impact_dust_particle_spawn(impact_current_kind(), *(f32 *)(sp44 + 0) * 7.0f, *(u8 *)(sp44 + 0x1B), arg5, sp34, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
     *(s8 *)(sp44 + 0x20) = 4;
     return 1;
 }
@@ -272,7 +272,7 @@ typedef struct {
 extern DustDefACBCC D_800A9560[];
 
 // debris_dust_emit: P191: D_8008ADA0 handler 0xC (the dust bursts of debris_burst_spawn func_151AC3F0): spawns one
-// dust particle (particle_spawn func_151D9014, kind = the owner's light) at (x, y, z) with the definition
+// dust particle (particle_spawn impact_dust_cloud_spawn, kind = the owner's light) at (x, y, z) with the definition
 // D_800A9560[D_800A9400[kind][3]]: velocity from func_15143794(yaw = a, random pitch, random speed); random value,
 // life, alpha and size from the def ranges; additive with probability additiveChance; grow 1.0 / 1.0, lit, group =
 // the owner's src word, no fade, room argB, owner = the owner's arg. Returns 1 (keep emitting).
@@ -297,7 +297,7 @@ s32 func_151ACBCC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     rAlpha = func_150ADA20();
     fSize = func_150ADA68();
     fAdd = func_150ADA68();
-    func_151D9014(pos, vel, owner->light, fVal * def->valRange + def->valBase,
+    impact_dust_cloud_spawn(pos, vel, owner->light, fVal * def->valRange + def->valBase,
                   (u32) rLife % (u32) (def->lifeRange + 1) + def->lifeBase,
                   (u32) rAlpha % (u32) (def->alphaRange + 1) + def->alphaBase, fSize * def->sizeRange + def->sizeBase,
                   fAdd < def->additiveChance, 1.0f, 1.0f, 1, owner->src, 1, 0, argB & 0xFF, owner->arg);
@@ -374,12 +374,12 @@ u8 *func_151AD010(u8 *arg0, f32 arg1, s32 arg2) {
     if (arg0 == NULL) {
         return NULL;
     }
-    temp_v0 = func_15167A68(0x30, 0, arg2 + 0x30, 1, 0xFFU, 1U);
+    temp_v0 = node_alloc(0x30, 0, arg2 + 0x30, 1, 0xFFU, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
     if (func_151AD0E8(arg0, temp_v0 + 0x18) == 0) {
-        func_1516979C((struct102 *)temp_v0);
+        node_delete((struct102 *)temp_v0);
         return NULL;
     }
     *(u8 **)(temp_v0 + 0x1C) = arg0;
@@ -416,14 +416,14 @@ void func_151AD110(u8 *arg0) {
 }
 
 void func_151AD144(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)(arg0 + 0x1C), (s32)(arg0 + 0x20), (s32)arg0);
+    node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x1C), (s32)(arg0 + 0x20), (s32)arg0);
 }
 
 #ifdef NON_MATCHING
 /* P183 */
 void *allocate_memory(s32, s32, s32, s32);
 
-// light_column_create: P183: creates the light-column effect (func_15167A68 kind 0x4E in level 0x2C, else 0x2F;
+// light_column_create: P183: creates the light-column effect (node_alloc kind 0x4E in level 0x2C, else 0x2F;
 // layer arg1 + 0x58) from the 0x24-byte zone record arg0 (copied to +0x10: point +0x14..+0x1C, bottom y +0x24,
 // +0x2C scale -> +0x34 = 1 / scale). +0x38 = 20 points (0x18 bytes) up the column from y = bottom to the top
 // (+0x18) in 19 steps at the point's x / z, +0x3C = step height, +0x48 = 2 x 20 quads of 4 Vtx (texture 0x37 in
@@ -442,7 +442,7 @@ s32 func_151ACBD4(s8 *arg0, s32 arg1) {
     u8 r, g, b;
     struct_eu_80090F10 *tex;
 
-    e = func_15167A68((D_800BE9F0 == 0x2C) ? 0x4E : 0x2F, 0, arg1 + 0x58, 1, 0xFF, 1);
+    e = node_alloc((D_800BE9F0 == 0x2C) ? 0x4E : 0x2F, 0, arg1 + 0x58, 1, 0xFF, 1);
     if (e == NULL) {
         return 0;
     }
@@ -927,7 +927,7 @@ loop_2:
 #ifdef NON_MATCHING
 /* P153 */
 s32 func_15143E08(struct127 *arg0);
-f32 func_151423D8(u8);
+f32 angle_byte_cos(u8);
 // path_ride_place: P153: places the rider obj (arg0 + 0x1C) on its path (record +0x31C, path +0x9C): the rider's
 // progress (+0xA0) picks a segment of the path points (+0x38, 24 bytes each, count +0x42, 140 units kept free at
 // the end as in func_151AE694); the record's +0xAE gets the segment index, and obj's position becomes the point
@@ -954,8 +954,8 @@ void func_151AE958(u8 *arg0) {
     obj = *(u8 **) (arg0 + 0x1C);
     path = *(u8 **) (*(u8 **) (obj + 0x31C) + 0x9C);
     yaw = func_15143E08((struct127 *) obj) - 0x80;
-    sinYaw = func_151423D8((yaw - 0x40) & 0xFF);
-    cosYaw = func_151423D8(yaw);
+    sinYaw = angle_byte_cos((yaw - 0x40) & 0xFF);
+    cosYaw = angle_byte_cos(yaw);
     rec = *(u8 **) (obj + 0x31C);
     oldY = *(f32 *) (obj + 0x18);
     oldX = *(f32 *) (obj + 0x14);

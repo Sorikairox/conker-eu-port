@@ -84,7 +84,7 @@ void func_150F8B20(s32 arg0, u8 *arg1, s32 arg2) {
     header2.unk0 = pos[0];
     header2.unk4 = pos[1];
     header2.unk8 = pos[2];
-    func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 0x5A, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    light_create_with_ctrl(&header, &header2, (func_150ADA20() % 31U) + 0x5A, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     sp.u3C = 8;
     sp.u40 = 0xC;
     *(V3i *) &sp.u44 = *(V3i *) pos;
@@ -183,7 +183,7 @@ void func_15143874(s16 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 void func_15143794(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3);
 u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner);
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-s32 func_151DB5D0(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
+s32 impact_tinted_particle_spawn(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
 
 /* func_150F8DFC's object from +0x28 on (the fire state) */
 typedef struct {
@@ -212,7 +212,7 @@ typedef struct {
 // accumulators grow by (base + randf * spread) * D_800BE9A4 * count and spawn one batch per whole unit at a random
 // point on the ring (angle (rng % 126 - 220) mirrored by flags bit 0, `radius`, around x / z, height 30..180):
 // embers (func_151C384C), 5..11 flame particles (func_15132BBC), 7..19 smoke sprites (func_151307F0, random
-// flips) and sparks (func_151DB5D0).
+// flips) and sparks (impact_tinted_particle_spawn).
 void func_150F8EAC(u8 *arg0) {
     FireState *st = (FireState *)(arg0 + 0x28);
     structEU_151D8E18 burst;
@@ -491,7 +491,7 @@ void func_150F8EAC(u8 *arg0) {
             spread = func_150ADA68();
             r1 = func_150ADA20();
             r2 = func_150ADA20();
-            func_151DB5D0(8, (u8 *)pos, (u8 *)vel, size * 200.0f + 200.0f, 1.025439f, 0.938816f,
+            impact_tinted_particle_spawn(8, (u8 *)pos, (u8 *)vel, size * 200.0f + 200.0f, 1.025439f, 0.938816f,
                           spread * 0.20700002f + -0.16900001f, ((u32)r1 % 21U) + 0x23, ((u32)r2 % 121U) + 100, 0x32,
                           5, 0, 0xFF, 1);
             st->sparkAcc -= 1.0f;

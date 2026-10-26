@@ -7,7 +7,7 @@ void func_15143874(s16, f32, f32 *, f32 *);
 
 
 void func_15143794(s16, s16, f32, void *);
-s32 func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 impact_spark_spawn(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 s32 func_151B0600(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s16 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     f32 v[3];
@@ -19,19 +19,19 @@ s32 func_151B0600(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     v[2] = arg4;
     r = func_150ADA68();
     func_15143794(arg9, arg8, (r * 5.3f) + 4.4f, sp68);
-    func_151DA6F8(v, sp68, (func_150ADA68() * (f32)0) + 0.68f, (func_150ADA20() % 20U) + 0x1F, (func_150ADA20() % 101U) + 0x9B, (func_150ADA68() * 2.33f) + 6.7f, (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, argE, 1); // fakematch: (f32)0 keeps the rand * 0 multiply (0.0f folds it)
+    impact_spark_spawn(v, sp68, (func_150ADA68() * (f32)0) + 0.68f, (func_150ADA20() % 20U) + 0x1F, (func_150ADA20() % 101U) + 0x9B, (func_150ADA68() * 2.33f) + 6.7f, (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, argE, 1); // fakematch: (f32)0 keeps the rand * 0 multiply (0.0f folds it)
     return 1;
 }
 
 #ifdef NON_MATCHING
 /* P153 */
 void func_1504715C(void *, u8 *);
-s32 func_15134070(struct127 *);
+s32 obj_get_hit_kind(struct127 *);
 extern f32 D_800AA500[3]; /* (0, -12, 96): offset of the effect from the model node */
 
 // object_hit_flash_spawn: P153: spawns the hit flash (func_15154488 parameter block) on obj's model node
 // (obj +0x1D4, +0x180) for the target's class: 4 without a target or for target types 0x53 / 0xA5, else
-// func_15134070(target); nothing for class 0x63, a class mode (D_800A43B8[class] byte 0xE) of 2, obj without a
+// obj_get_hit_kind(target); nothing for class 0x63, a class mode (D_800A43B8[class] byte 0xE) of 2, obj without a
 // model, or obj +0x74 low nibble 0xF. Angle: (u8) ((+0x7A >> 8) + 0x40) - 0x68; +0x3C set for class mode 1.
 // The asm leaves v0 unset; the callers (func_15194794, game_981E0) declare an int result and ignore it: 0 here.
 s32 func_151B01B8(u8 *obj, u8 *target) {
@@ -50,7 +50,7 @@ s32 func_151B01B8(u8 *obj, u8 *target) {
         if (target[4] == 0x53 || target[4] == 0xA5) {
             class = 4;
         } else {
-            class = func_15134070((struct127 *) target);
+            class = obj_get_hit_kind((struct127 *) target);
         }
     }
     if (class == 0x63) {
@@ -100,8 +100,8 @@ s32 func_151B01B8(u8 *obj, u8 *target) {
 s32 func_15046C6C(f32 *, s32, f32, f32 *);
 s32 func_15046F70(f32 *, s32, f32, f32 *);
 void func_1504715C(void *, u8 *);
-s32 func_15136698(f32, f32, s32, s32, s32, s32 *, f32 *, s32, s32, s32, s32);
-void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
+s32 fx_splash_spawn(f32, f32, s32, s32, s32, s32 *, f32 *, s32, s32, s32, s32);
+void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
 
 void func_151B03B8(struct127 *arg0, s32 arg1, s32 arg2) {
     struct {
@@ -229,10 +229,10 @@ loop_3:
                 sp.uCC = sp.uE0 + 10.0f;
                 if (func_150ADA20() & 1) {
                     temp_f20 = func_150ADA68();
-                    func_151D9B8C(0U, (temp_f20 * 4.5f) + 15.0f, (u32) ((func_150ADA68() * 100.0f) + 155.0f) & 0xFF, (s32) &sp.uE4, (struct17 *) &sp.uC8, 0x64, 0U, 1U, 0U, (u8) temp_s4, arg2);
+                    impact_debris_spawn(0U, (temp_f20 * 4.5f) + 15.0f, (u32) ((func_150ADA68() * 100.0f) + 155.0f) & 0xFF, (s32) &sp.uE4, (struct17 *) &sp.uC8, 0x64, 0U, 1U, 0U, (u8) temp_s4, arg2);
                 } else {
                     temp_f20_2 = func_150ADA68();
-                    func_151DAB58(0, (temp_f20_2 * 5.9f) + 6.1f, (u32) ((func_150ADA68() * 100.0f) + 155.0f) & 0xFF, &sp.uC8, 1, temp_s4, arg2);
+                    impact_splash_ring_spawn(0, (temp_f20_2 * 5.9f) + 6.1f, (u32) ((func_150ADA68() * 100.0f) + 155.0f) & 0xFF, &sp.uC8, 1, temp_s4, arg2);
                 }
                 var_s1 -= 1;
                 if (var_s1 == 0) {
@@ -259,7 +259,7 @@ block_9:
                 temp_f22 = func_150ADA68();
                 temp_s0_2 = func_150ADA20();
                 temp_s1 = func_150ADA20();
-                func_15136698(((temp_f20_3 * 40.0f) + 120.0f) * 0.001f, ((temp_f22 * 123.0f) + 123.0f) * 0.00001f, (((u32) temp_s0_2 % 101U) + 0x9B) & 0xFF, (((u32) temp_s1 % 101U) + 0x64) & 0xFF, (func_150ADA20() % 56U) + 0x46, &sp.u9C, &sp.uBC, 0, 1, temp_s4, arg2);
+                fx_splash_spawn(((temp_f20_3 * 40.0f) + 120.0f) * 0.001f, ((temp_f22 * 123.0f) + 123.0f) * 0.00001f, (((u32) temp_s0_2 % 101U) + 0x9B) & 0xFF, (((u32) temp_s1 % 101U) + 0x64) & 0xFF, (func_150ADA20() % 56U) + 0x46, &sp.u9C, &sp.uBC, 0, 1, temp_s4, arg2);
             }
         }
     }
@@ -270,10 +270,10 @@ block_9:
 #ifdef NON_MATCHING
 /* P150 */
 s32 memcpy(s32, f32 *, s32);
-s32 func_15134070(struct127 *);
+s32 obj_get_hit_kind(struct127 *);
 extern u8 D_800A43C6[];
 // object_link_effect_spawn: spawns a type 0x13 effect tied to obj (func_151491F4, 0x98-byte state copied to +0x28)
-// for the target's class: 4 without a target or for target types 0x53 / 0xA5, else func_15134070(target);
+// for the target's class: 4 without a target or for target types 0x53 / 0xA5, else obj_get_hit_kind(target);
 // class 0x63 or a class mode (D_800A43C6[class * 16]) of 2 spawns nothing. The state is {obj, obj[0x3B], zeros,
 // 0.0f, mode == 1}. life = span, or 300 (not fixed) when span is -1. Returns the effect or 0. The type 0x13
 // effects of obj are first cleared through func_151494E0({obj, obj[0x3B]}, 0x13).
@@ -302,7 +302,7 @@ s32 func_151B09BC(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
     if (target == NULL || target[4] == 0x53 || target[4] == 0xA5) {
         class = 4;
     } else {
-        class = func_15134070((struct127 *)target);
+        class = obj_get_hit_kind((struct127 *)target);
     }
     if (class == 0x63) {
         return 0;
@@ -339,7 +339,7 @@ s32 func_151B09BC(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
 #endif
 
 #ifdef NON_MATCHING
-void func_1513F680(u8 *, u8, u8, u8, u8);
+void effect3d_set_handlers(u8 *, u8, u8, u8, u8);
 void func_151B1EC8(u8 *arg0);
 
 /* bone-attached point: bone index (64-byte matrices at the character's +0x1D4) and offset */
@@ -353,7 +353,7 @@ extern BonePt1138 D_800AA5BC[]; /* the same for character kind 0x36 */
 extern u8 D_800AB6F0[];
 
 typedef struct SparkSlot1138 {
-    /* 0x00 */ u8 *rec;    /* the spark (func_1513D524 record) */
+    /* 0x00 */ u8 *rec;    /* the spark (effect3d_spawn_default record) */
     /* 0x04 */ s32 timer;  /* frames until it is let go */
     /* 0x08 */ struct SparkSlot1138 *next;
 } SparkSlot1138;
@@ -369,7 +369,7 @@ typedef struct {
     /* 0x94 */ u8 kind;
 } SparkSet1138;
 
-/* func_1513D524's template */
+/* effect3d_spawn_default's template */
 typedef struct {
     /* 0x00 */ u8 sprite;
     /* 0x01 */ u8 pad1;
@@ -410,8 +410,8 @@ typedef struct {
 // character_sparks_update: keeps up to 11 sparks attached to bone points (D_800AA50C, D_800AA5BC for character kind
 // 0x36) of the target character. Each frame every attached spark is moved to its point (old position kept at
 // +0x40) and its timer counts down by D_800BE9E4; at < 0 it is let go (velocity (pos - old) * D_800BEDC8 in x / z,
-// func_1513F680(rec, 0x10, 0x1B, 0, 0x10), flag 1 at +0x58). New sparks (sprite D_800AB6F0[kind], life 52..102,
-// timer 20..50) are spawned with func_1513D524 at random free points while accum (+ random 0..0.307 *
+// effect3d_set_handlers(rec, 0x10, 0x1B, 0, 0x10), flag 1 at +0x58). New sparks (sprite D_800AB6F0[kind], life 52..102,
+// timer 20..50) are spawned with effect3d_spawn_default at random free points while accum (+ random 0..0.307 *
 // D_800BE9A4 per frame) is above 1. Without a skeleton (+0x1D4) or with (+0x74 & 0xF) == 0xF all sparks are
 // released (func_151B1EC8); when the target is gone or changed the object is ended (+0xE = -1).
 void func_151B1138(u8 *obj) {
@@ -460,7 +460,7 @@ void func_151B1138(u8 *obj) {
                         *(f32 *) (rec + 0x114) = 0.0f;
                         *(f32 *) (rec + 0x110) = (*(f32 *) (rec + 0x34) - *(f32 *) (rec + 0x40)) * D_800BEDC8;
                         *(f32 *) (rec + 0x118) = (*(f32 *) (rec + 0x3C) - *(f32 *) (rec + 0x48)) * D_800BEDC8;
-                        func_1513F680(slot->rec, 0x10, 0x1B, 0, 0x10);
+                        effect3d_set_handlers(slot->rec, 0x10, 0x1B, 0, 0x10);
                         *(s32 *) (slot->rec + 0x58) |= 1;
                         slot->rec = NULL;
                         s->count--;
@@ -523,7 +523,7 @@ void func_151B1138(u8 *obj) {
                         t.prev[1] = *(s32 *) &t.pos[1];
                         t.prev[2] = *(s32 *) &t.pos[2];
                         func_150ADA20(); /* RNG advance, result unused */
-                        free->rec = (u8 *) func_1513D524((s32) &t, 0x11, 0, 0, 0x10, 2, 0x28, obj[0xC], obj[1]);
+                        free->rec = (u8 *) effect3d_spawn_default((s32) &t, 0x11, 0, 0, 0x10, 2, 0x28, obj[0xC], obj[1]);
                         if (free->rec != NULL) {
                             memcpy(free->rec + 0x110, &m, 0x28);
                             free->timer = (u32) func_150ADA20() % 31 + 20;
@@ -556,7 +556,7 @@ extern f32 D_800AA6D8;
 // position +0x34 moves by the mean speed, the trail point +0x40 moves with it and then eases back towards the
 // position (factor D_800AA6D0). With floor check (+0x134) a floor probe (func_15046F70, from the previous height
 // minus the half height +0x30) that hits ends the sprite (0) and spawns a splash at the floor + 5: either
-// func_151D9B8C (scale D_800AA6D4) or the ring func_151DAB58 (scale D_800AA6D8), of type +0x135, sized by the mean
+// impact_debris_spawn (scale D_800AA6D4) or the ring impact_splash_ring_spawn (scale D_800AA6D8), of type +0x135, sized by the mean
 // of +0x124 + +0x12C / 2 and +0x128 + +0x130 / 2. Returns 1 while it keeps falling.
 s32 func_151B173C(u8 *fx) {
     f32 *mv = (f32 *)(fx + 0x110);
@@ -602,10 +602,10 @@ s32 func_151B173C(u8 *fx) {
             hit[2] = probe[2];
             size = ((mv[5] + mv[7] * 0.5f) + (mv[6] + mv[8] * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(fx[0x135], size * D_800AA6D4, fx[0x5C], (s32)(fx + 0x7C), (struct17 *)hit, 100, 0, 1, 0,
+                impact_debris_spawn(fx[0x135], size * D_800AA6D4, fx[0x5C], (s32)(fx + 0x7C), (struct17 *)hit, 100, 0, 1, 0,
                               fx[0xC], fx[1]);
             } else {
-                func_151DAB58(fx[0x135], size * D_800AA6D8, fx[0x5C], hit, 1, fx[0xC], fx[1]);
+                impact_splash_ring_spawn(fx[0x135], size * D_800AA6D8, fx[0x5C], hit, 1, fx[0xC], fx[1]);
             }
             ret = 0;
         }
@@ -739,8 +739,8 @@ s32 func_151B1DD8(u8 *arg0) {
     arg0[0x120] += (s8)arg0[0x122] * D_800BE9E4;
     arg0[0x121] += (s8)arg0[0x123] * D_800BE9E4;
     p = arg0 + 0x110;
-    s = func_151423D8((u8)(arg0[0x120] - 0x40));
-    c = func_151423D8((u8)(p[0x11] - 0x40));
+    s = angle_byte_cos((u8)(arg0[0x120] - 0x40));
+    c = angle_byte_cos((u8)(p[0x11] - 0x40));
     *(f32 *)(arg0 + 0x2C) += ((*(f32 *)(p + 0x14) + (*(f32 *)(p + 0x1C) * s)) - *(f32 *)(arg0 + 0x2C)) * 0.5f;
     *(f32 *)(arg0 + 0x30) += ((*(f32 *)(p + 0x18) + (*(f32 *)(p + 0x20) * c)) - *(f32 *)(arg0 + 0x30)) * 0.5f;
     return 1;
@@ -759,7 +759,7 @@ void func_151B1EC8(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0xB8)) = 0.0f;
     do {
         if ((*(s32 *)((u8 *)var_s2 + 0xC)) != 0) {
-            func_1516972C((*(struct102 **)((u8 *)var_s0 + 0)));
+            node_destroy((*(struct102 **)((u8 *)var_s0 + 0)));
         }
         (*(struct102 **)((u8 *)var_s0 + 0)) = NULL;
         (*(s32 *)((u8 *)var_s0 + 4)) = 0;
@@ -778,7 +778,7 @@ void func_151B1F54(struct102 *arg0, u8 *arg1, u8 arg2) {
     cur = *(s32 *)((u8 *)arg0 + 0x28);
     if ((arg2 == 0) || (arg2 == 0x13)) {
         if (cur == (*(s32 *)((u8 *)arg1 + 0)) || ((*(u8 *)((u8 *)arg0 + 0x2C)) == (*(u8 *)((u8 *)arg1 + 4)))) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         temp_v0 = (u8 *)arg0 + 0x28;
@@ -974,7 +974,7 @@ void func_151B255C(struct102 *arg0, u8 *arg1, u8 arg2) {
     } else if (arg2 == 0) {
         temp_v1 = *(s32 *)(arg1 + 0);
         if (temp_v1 == *(s32 *)(temp_v0 + 0) || *(u8 *)(temp_v0 + 4) == *(u8 *)(arg1 + 4)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }

@@ -49,7 +49,7 @@ typedef struct {
 // func_15145EA4 places the muzzle point / direction points from the hand bone (obj+0x1D4, 64-byte bones; character
 // 0x23 has its own tables). Aimed shots project onto the shooter's aim line (unk31C 0x13C point, 0x130 direction).
 // func_151C284C spawns the tracer (kind 5 in levels 0x34 / 0x26, else 4; hidden from the shooter's own camera); unless
-// obj+0x74's low nibble is 0xF a 1-in-8 spark (func_151602C0) and a 1-in-2 shell (func_151030B8) follow; aimed shots
+// obj+0x74's low nibble is 0xF a 1-in-8 spark (light_create_with_ctrl) and a 1-in-2 shell (func_151030B8) follow; aimed shots
 // with a camera also get the screen flash (func_151559FC) and func_15155C9C event 0x37.
 void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner) {
     struct127 *owner;
@@ -173,7 +173,7 @@ void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner
             ipos[1] = pos[1];
             ipos[2] = pos[2];
             spark.b4 = 0;
-            func_151602C0((Header *)&spark, (Header2 *)ipos, (u32)func_150ADA20() % 31 + 0x46, 0xFF, 0xFF, 0xFF, 0xFF,
+            light_create_with_ctrl((Header *)&spark, (Header2 *)ipos, (u32)func_150ADA20() % 31 + 0x46, 0xFF, 0xFF, 0xFF, 0xFF,
                           0, 0, (u8)fxflag, fxowner);
         }
         if ((func_150ADA20() & 1) == 0) {
@@ -403,10 +403,10 @@ void func_150FCD98(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 t = *(s32 *)arg1;
         if (t == (new_var = *(s32 *)v) || arg1[4] == v[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         } else if (*(s32 *)(v + 0x18) != 0) {
             if (t == *(s32 *)(v + 0x18) || arg1[4] == v[0x1C]) {
-                func_1516972C(arg0);
+                node_destroy(arg0);
             }
         }
     } else if (arg2 == 0x2D) {
@@ -442,7 +442,7 @@ s32 func_150FCEB0(u8 *arg0, s32 arg1, s32 arg2) {
 
 void func_150FCEF4(u8 *arg0) {
     if (*(s32 *)(arg0 + 0x38) != 0) {
-        func_1516972C(*(struct102 **)(arg0 + 0x38));
+        node_destroy(*(struct102 **)(arg0 + 0x38));
     }
 }
 

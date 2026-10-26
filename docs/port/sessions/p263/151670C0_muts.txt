@@ -16,8 +16,8 @@ s/func_150A7E40(mf, -400.0f, 10.0f, 0.0f, \&x, \&y, \&z);/func_150A7E40(mf, 400.
 s/func_150A7E40(mf, -400.0f, 10.0f, 0.0f, \&x, \&y, \&z);/func_150A7E40(mf, -400.0f, 10.0f, 0.0f, \&z, \&y, \&x);/ % emit
 s/rec.u0E = (func_150ADA20() \& 0x7F) + 0x55;/rec.u0E = (func_150ADA20() \& 0xFF) + 0x55;/ % emit
 s/            rec.pos\[1\] = (s32) y;/            rec.pos[1] = (s32) x;/ % emit
-s/func_15167D84(\&rec, 0, 0, -1, obj\[0xC\], obj\[1\]);/func_15167D84(\&rec, 0, 0, -1, obj[1], obj[0xC]);/ % emit
-s/func_15167D84(\&rec, 0, 0, -1,/func_15167D84(\&rec, 0, 1, -1,/ % emit
+s/node_spawn_sprite(\&rec, 0, 0, -1, obj\[0xC\], obj\[1\]);/node_spawn_sprite(\&rec, 0, 0, -1, obj[1], obj[0xC]);/ % emit
+s/node_spawn_sprite(\&rec, 0, 0, -1,/node_spawn_sprite(\&rec, 0, 1, -1,/ % emit
 s/    } else if (obj\[0xD0\] == 0) {/    } else if (obj[0xD0] == 1) {/ % free idle
-s/        func_1516972C((struct102 \*) obj);/        ;/ % free
+s/        node_destroy((struct102 \*) obj);/        ;/ % free
 s/        u8 pad1C\[3\];/        u8 pad1C[1];/ % emit

@@ -34,6 +34,6 @@ s/spark.u98 = 0x2A00;/spark.u98 = 0x2A01;/
 s/spark.u94 = 1;/spark.u94 = 2;/
 s/spark.uA4 = 0xFF;/spark.uA4 = 0xFE;/
 s/0xB4, 0xB4, 0xB4, 0xFF)/0xB4, 0xB4, 0xB4, 0xFE)/
-s/func_15168800(&spark, 0xFF, 0)/func_15168800(\&spark, 0xFF, 1)/
+s/node_spawn_vtx_sprite(&spark, 0xFF, 0)/node_spawn_vtx_sprite(\&spark, 0xFF, 1)/
 s/if (k->sparkKind != 0)/if (k->sparkKind == 0)/
 s/bzero(&spark, sizeof(spark));/bzero(\&spark, 0x10);/

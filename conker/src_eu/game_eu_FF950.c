@@ -94,7 +94,7 @@ void func_150D247C(struct102 *arg0, u8 *arg1, s32 arg2) {
             return;
         }
         if (temp_t6 == 0x4F) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -109,7 +109,7 @@ void func_150D2564(u8 *arg0) {
         struct102 *p = ((struct102 **)(base + 0x24))[i];
 
         if (p != NULL) {
-            func_1516972C(p);
+            node_destroy(p);
         }
     }
 }

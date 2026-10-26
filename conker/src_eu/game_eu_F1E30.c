@@ -212,7 +212,7 @@ typedef struct {
 // func_15031C4C / func_1514654C by the +0x2DC * +0x2D8 quarter, fallback owner + (0, 800, 0); else bone
 // D_800A0744[third] of +0x1D4 by the +0x2E4 / +0x2E8 third), moves the glow there, then emits smoke puffs
 // (func_151C3C88, (0.129 + 0.117 * random) * D_800BE9A4 per frame, skipped in mode 2 when func_150A29C8 says no) and
-// sparks (func_151D9014, (0.13 + 0.2 * random) * D_800BE9A4 per frame, blown against the owner's func_1515C668 vector).
+// sparks (impact_dust_cloud_spawn, (0.13 + 0.2 * random) * D_800BE9A4 per frame, blown against the owner's func_1515C668 vector).
 void func_150C49A4(u8 *self) {
     f32 basis[12];
     f32 off[3];
@@ -321,7 +321,7 @@ void func_150C49A4(u8 *self) {
         r2 = func_150ADA20();
         b = func_150ADA68();
         c = func_150ADA68();
-        func_151D9014(pos, vel, 0xC, a * D_800A07A8_c[0] + D_800A07AC_c[0], (u32) r1 % 41 + 0x3C, (u32) r2 % 56 + 0xC8,
+        impact_dust_cloud_spawn(pos, vel, 0xC, a * D_800A07A8_c[0] + D_800A07AC_c[0], (u32) r1 % 41 + 0x3C, (u32) r2 % 56 + 0xC8,
                       b * 160.0f + 121.0f, c < D_800A07B0_c[0], 1.0f, 1.0f, 0, (s32) basis, 1, 1,
                       self[0xC], self[1]);
         rec->sparks -= 1.0f;
@@ -331,7 +331,7 @@ void func_150C49A4(u8 *self) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/func_150C49A4.s")
 #endif
 
-void func_150C4FD8(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x34) != 0) { func_1516972C(*(struct102 **)(p + 0x34)); } }
+void func_150C4FD8(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x34) != 0) { node_destroy(*(struct102 **)(p + 0x34)); } }
 
 void func_150C5008(struct260 *arg0) {
     func_150C4FD8(arg0);

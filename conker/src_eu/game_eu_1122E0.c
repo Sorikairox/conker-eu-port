@@ -5,7 +5,7 @@
 #ifdef NON_MATCHING
 /* Impact effect kinds read by func_150E4AD0 (its .s owns this rodata; the NM link drops it). */
 typedef struct {
-    u16 sparkKind; /* +0 spark record kind for func_1516865C, 0 = none */
+    u16 sparkKind; /* +0 spark record kind for sprite_vtx_quads_init, 0 = none */
     u16 debris;    /* +2 debris effect id (func_151722BC / func_15172474), 0 = none, 0x13 = special burst */
     u8 smokePct;   /* +4 chance (percent) of a smoke puff when size != 0 */
     u8 subEffect;  /* +5 func_150E5384 effect, 0 = none */
@@ -50,8 +50,8 @@ s32 func_151EFDD0(void);
 s32 func_151722BC(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 void func_15172474(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC);
 void func_150E5384(f32, f32, f32, s32, s32, s32 *, s32);
-s32 func_1516865C(void *, s32, s32, s32, s32);
-void *func_15168800(void *, u8, s32);
+s32 sprite_vtx_quads_init(void *, s32, s32, s32, s32);
+void *node_spawn_vtx_sprite(void *, u8, s32);
 extern u8 D_800D9D83[]; /* byte +3 of the 28-byte records at D_800D9D80 */
 
 // impact_effect_spawn: spawns the effects of an impact of kind `kind` (index into D_800A1440, flag 0x8000 passed on
@@ -114,8 +114,8 @@ s32 func_150E4AD0(f32 x, f32 y, f32 z, s32 size, s32 kind, s32 *tri, s32 slot) {
         spark.u92 = 1;
         spark.u94 = 1;
         spark.uA4 = 0xFF;
-        func_1516865C(&spark, 0xB4, 0xB4, 0xB4, 0xFF);
-        func_15168800(&spark, 0xFF, 0);
+        sprite_vtx_quads_init(&spark, 0xB4, 0xB4, 0xB4, 0xFF);
+        node_spawn_vtx_sprite(&spark, 0xFF, 0);
     }
     return 0;
 }
@@ -251,7 +251,7 @@ void func_150E523C(E523S *arg0) {
 }
 
 #ifdef NON_MATCHING
-/* Dust particle record for func_15167D84 (0x38 bytes, cleared first). */
+/* Dust particle record for node_spawn_sprite (0x38 bytes, cleared first). */
 typedef struct {
     u8 *tex;        /* +0x00 texture / animation */
     u8 pad04[8];
@@ -277,7 +277,7 @@ extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last func_1504935
 void func_150440A0(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy,
                    f32 upz);
 f32 func_150489B0(u8);
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
+void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 void func_150E5AD8(f32, f32, f32, f32, f32, f32, s32);
 extern u8 D_80091C2C[], D_80091C50[], D_80091C5C[], D_800908D0[];
 extern u8 D_800D9D80[]; /* 28-byte records; +0x10..+0x18 a direction (f32 x3) */
@@ -288,7 +288,7 @@ extern u8 D_800D9D80[]; /* 28-byte records; +0x10..+0x18 a direction (f32 x3) */
 // (func_15049350 plane; nothing at all for a degenerate one): a lookat matrix on the normal turns the cone, and
 // record `slot` of D_800D9D80 gets the normal's direction at +0x10. A flat (|ny| >= 0.9) or missing triangle, or
 // slot 0xFF, sprays upwards, and the record's byte +3 is cleared. size 0 / 2 spray 12 particles (2: random speed
-// scale, double speed, stronger gravity), size 1 one; it stops when func_15167D84 has no free record. Kinds 4 / 5 /
+// scale, double speed, stronger gravity), size 1 one; it stops when node_spawn_sprite has no free record. Kinds 4 / 5 /
 // 9 then add a smoke puff (func_150E5AD8) one time in five. The asm passes size as an 8th argument, which
 // func_150E5AD8 does not take. Callers ignore v0 (v0use).
 void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) {
@@ -410,7 +410,7 @@ void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) 
         rec.u2A = 10;
         rec.size0 = (s32) (func_150ADA68() * sizeRange + sizeBase);
         rec.size1 = (s32) (func_150ADA68() * sizeRange + sizeBase);
-        if (func_15167D84(&rec, 0, 0, -1, 0xFF, 0) == NULL) {
+        if (node_spawn_sprite(&rec, 0, 0, -1, 0xFF, 0) == NULL) {
             more = 0;
         }
     }

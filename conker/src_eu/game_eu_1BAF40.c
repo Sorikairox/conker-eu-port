@@ -57,7 +57,7 @@ typedef struct {
 u8 *func_1518E934(u8 **arg0, u8 arg1);
 // character_effect_attach: attaches effect `type` (1..18: fire, smoke, impacts, ...) to obj: a kind-0x21 effect record
 /* (func_1518E934, for view `view`) holding obj, obj's id byte +0x3B, a duration, a flag byte, a direction byte and the
- * effect number. With `clear`, first frees (func_1516972C) every kind-0x21 record of both groups that belongs to obj
+ * effect number. With `clear`, first frees (node_destroy) every kind-0x21 record of both groups that belongs to obj
  * or to obj's id (the list walk keeps the next pointer in D_800DD5C8[depth] like the other list walks).
  * Types 13, 14, 15, 16 and 18 take `time` as the duration (13, 15, 16: flag 0 for time 999 = endless); types 10..12
  * set the flag from obj +0x1CA. Returns the record, NULL for no obj, an unknown type or no record.
@@ -86,7 +86,7 @@ u8 *func_1518D1C0(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char
             while (node != NULL) {
                 D_800DD5C8[D_800DD5C0] = node->next;
                 if (*(u8 **)((u8 *)node + 0x18) == obj || obj[0x3B] == ((u8 *)node)[0x1C]) {
-                    func_1516972C((struct102 *)node);
+                    node_destroy((struct102 *)node);
                 }
                 node = D_800DD5C8[D_800DD5C0];
             }
@@ -127,7 +127,7 @@ u8 *func_1518D1C0(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char
 /* character_effect_update: P197: update handler of the kind-0x21 character effect records that func_1518D1C0
  * (character_effect_attach) creates through func_1518E934 (fire, smoke, impacts ... on a model). See below. */
 void func_15143134(void *arg0, void *arg1, void *arg2);
-void func_1513F680(u8 *, u8, u8, u8, u8);
+void effect3d_set_handlers(u8 *, u8, u8, u8, u8);
 void func_1518E878(u8 *);
 s32 memcpy(u8 *, u8 **, s32);
 
@@ -145,8 +145,8 @@ typedef struct {
     s16 s28, s2A;       /* +0x28 */
     f32 f2C, f30;       /* +0x2C */
     s16 life, range;    /* +0x34 life after release: life + rand % (range + 1) */
-    u8 kind, b39, b3A;  /* +0x38 func_1513D524 arguments */
-    u8 end[4];          /* +0x3B func_1513F680 arguments at release */
+    u8 kind, b39, b3A;  /* +0x38 effect3d_spawn_default arguments */
+    u8 end[4];          /* +0x3B effect3d_set_handlers arguments at release */
     u8 init;            /* +0x3F D_8008D9C0 index (spawn record initialiser) */
 } CharFxTpl;
 
@@ -241,17 +241,17 @@ extern s32 (*D_8008D9C8[])(u8 *);
 
 /* character_effect_update: per-frame handler (object type entry at D_8008BEFC) of a kind-0x21 character effect e
  * (func_1518D1C0 / func_1518E934), a particle emitter tied to the owner model e->owner. When e is not running it only
- * frees its particles (func_1518E878, mode 1). It removes itself (func_1516972C) when the owner is gone or has
+ * frees its particles (func_1518E878, mode 1). It removes itself (node_destroy) when the owner is gone or has
  * another id, or when its time (e +0x1E, bit 0 of e +0x20) runs out (then the D_8008D9C8[onEnd] handler decides).
  * When the owner is hidden for this view (owner +0x74 bit D_80082FA4) the particles are freed. Otherwise the row of
  * D_8008D980[effect] for the owner's variant (+0x1C8) is picked: with matrices (+0x1D4) and a visible model
  * (+0x74 & 0xF != 0xF) the row whose id list holds owner +0x84 (else the default row), mode 4; without, the hidden
  * row (mode 2) at the owner position + yoff. A row / mode change restarts the effect (accumulator = max).
  * Live particles follow their model point (func_15143134) or the effect position + their offset; when their hold
- * time is over they are let go: velocity from the last move * D_800BEDC8 (x / z clamped to +-10), func_1513F680
+ * time is over they are let go: velocity from the last move * D_800BEDC8 (x / z clamped to +-10), effect3d_set_handlers
  * with the template's end arguments, a life time. The accumulator gains rate per frame; for every whole unit a free
  * slot is picked at random and a particle record is spawned (D_8008D9C0[tpl->init] fills the spawn block,
- * func_1513D524, the 0x58-byte motion block to +0x110) at a model point or at the effect position + a random
+ * effect3d_spawn_default, the 0x58-byte motion block to +0x110) at a model point or at the effect position + a random
  * sphere (shape 1) / ring (shape 2) offset. */
 void func_1518DC50(u8 *arg0) {
     CharFx *e = (CharFx *) arg0;
@@ -376,7 +376,7 @@ void func_1518DC50(u8 *arg0) {
                             m->vel[2] = -10.0f;
                         }
                         m->vel[1] = 0.0f;
-                        func_1513F680(slot->obj, m->tpl->end[0], m->tpl->end[1], m->tpl->end[2], m->tpl->end[3]);
+                        effect3d_set_handlers(slot->obj, m->tpl->end[0], m->tpl->end[1], m->tpl->end[2], m->tpl->end[3]);
                         k = func_150ADA20();
                         *(s16 *) (slot->obj + 0x1C) = (u32) k % (u32) (m->tpl->range + 1) + m->tpl->life;
                         *(s32 *) (slot->obj + 0x58) |= 1;
@@ -453,7 +453,7 @@ void func_1518DC50(u8 *arg0) {
                             }
                             D_8008D9C0[tpl->init]((u8 *) &spawn, &b, &spawn.b10, &spawn.b11, &spawn.b12, &spawn.b13,
                                                   &spawn.flags);
-                            rec = (u8 *) func_1513D524((s32) &spawn, tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58, 255, 0);
+                            rec = (u8 *) effect3d_spawn_default((s32) &spawn, tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58, 255, 0);
                             head->obj = rec;
                             if (rec != NULL) {
                                 memcpy(rec + 0x110, (u8 **) &blk, 0x58);
@@ -464,10 +464,10 @@ void func_1518DC50(u8 *arg0) {
                                         a = func_150ADA20();
                                         c = func_150ADA20();
                                         r = func_150ADA68() * cfg->radius;
-                                        cb = func_151423D8((u8) (c - 0x40));
-                                        sb = func_151423D8(c);
-                                        ca = func_151423D8((u8) (a - 0x40));
-                                        sa = func_151423D8(a);
+                                        cb = angle_byte_cos((u8) (c - 0x40));
+                                        sb = angle_byte_cos(c);
+                                        ca = angle_byte_cos((u8) (a - 0x40));
+                                        sa = angle_byte_cos(a);
                                         head->off[0] = r * sb * ca;
                                         head->off[1] = -r * cb;
                                         head->off[2] = r * sb * sa;
@@ -475,9 +475,9 @@ void func_1518DC50(u8 *arg0) {
                                     case 2: /* ring */
                                         a = func_150ADA20();
                                         r = func_150ADA68() * cfg->radius;
-                                        head->off[0] = func_151423D8(a) * r;
+                                        head->off[0] = angle_byte_cos(a) * r;
                                         head->off[1] = func_150ADA68() * cfg->height;
-                                        head->off[2] = -func_151423D8((u8) (a - 0x40)) * r;
+                                        head->off[2] = -angle_byte_cos((u8) (a - 0x40)) * r;
                                         break;
                                     }
                                     *(f32 *) (head->obj + 0x34) = e->pos[0] + head->off[0];
@@ -514,7 +514,7 @@ void func_1518DC50(u8 *arg0) {
         }
     }
     if (kill) {
-        func_1516972C((struct102 *) arg0);
+        node_destroy((struct102 *) arg0);
     }
 }
 #else
@@ -543,7 +543,7 @@ void func_1518E878(u8 *arg0) {
     *(f32 *)(arg0 + 0x24) = 0.0f;
     for (i = 0; i < 100; i++) {
         if (*var_s0 != NULL) {
-            func_1516972C(*var_s0);
+            node_destroy(*var_s0);
         }
         var_s0 = (struct102 **)((u8 *)var_s0 + 0x18);
     }
@@ -566,7 +566,7 @@ u8 *func_1518E934(u8 **arg0, u8 arg1) {
     if ((*(u8 *)((u8 *)(*arg0) + 4)) == 0x96) {
         return NULL;
     }
-    temp_v0 = func_15167A68(0x21, 1, 0x9EC, 1, (u8) (s32) arg1, 1U);
+    temp_v0 = node_alloc(0x21, 1, 0x9EC, 1, (u8) (s32) arg1, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -594,12 +594,12 @@ void func_1518EA10(struct_eu_1BAAA0 *arg0) {
 
 void func_1518EA3C(void *arg0) {
     func_1518EA10(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_1518EA68(void *arg0) {
     func_1518EA10(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_1518EA94(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, s16 *arg6) {
@@ -963,7 +963,7 @@ s32 func_1518F8F4(u8 *arg0) {
 void func_1518F9CC(s32 arg0, u8 arg1) {
     const s32 sp1C[1] = {0x21};
 
-    func_15169260(sp1C, 1, arg0, arg1);
+    node_broadcast_types(sp1C, 1, arg0, arg1);
 }
 
 void func_1518FA0C(u8 *arg0, u8 *arg1, u8 arg2) {
@@ -971,14 +971,14 @@ void func_1518FA0C(u8 *arg0, u8 *arg1, u8 arg2) {
     s32 v1;
     u8 a0;
     u8 a1;
-    func_15169850(arg1, arg2, arg0 + 0x18, arg0 + 0x1C, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x18, arg0 + 0x1C, arg0);
     if (arg2 == 0x49) {
         v0 = *(s32 *)(arg0 + 0x18);
         v1 = *(s32 *)arg1;
         a0 = arg0[0x1C];
         a1 = arg1[4];
         if (v0 == v1 || a0 == a1) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -999,8 +999,8 @@ s32 func_1518FA8C(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg
     return func_1518FB40(arg0, D_8008D9D0[sp33] + arg1 * 0x50, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
-void *func_151D2F00(void *arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_151D2AB0(s32);
+void *attach_ctrl_spawn(void *arg0, s32 arg1, u8 arg2, s32 arg3);
+void attach_fx_asset_acquire(s32);
 struct225 *func_1519078C(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5);
 s32 func_1518E808(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
@@ -1060,7 +1060,7 @@ s32 func_1518FB40(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 ar
     head.unkB = 0;
     head.unkC = 0;
     head.unkD = 1;
-    temp_v0 = func_151D2F00(&head, arg7 + 0x60, arg8, arg9);
+    temp_v0 = attach_ctrl_spawn(&head, arg7 + 0x60, arg8, arg9);
     if (temp_v0 != NULL) {
         d = (DataFB40 *)(temp_v0 + 0x30);
         memcpy(d, &data, 0x5C);
@@ -1069,7 +1069,7 @@ s32 func_1518FB40(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 ar
         } else {
             *(struct225 **)((u8 *)d + 0x54) = NULL;
         }
-        func_151D2AB0(*(s32 *)((u8 *)d + 0x48));
+        attach_fx_asset_acquire(*(s32 *)((u8 *)d + 0x48));
         func_1000FA64(0x4D, *(f32 *)((u8 *)arg0 + 0x14), *(f32 *)((u8 *)arg0 + 0x18), *(f32 *)((u8 *)arg0 + 0x1C), 15000, 2000, 800, (s32)func_1518E808, temp_v0, arg0, 0, 0);
     }
     return (s32)temp_v0;
@@ -1159,12 +1159,12 @@ void func_1518FE0C(s32 arg0)
 #ifdef NON_MATCHING
 u8 *func_1514BE54(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9,
                   u8 argA, s32 argB, u8 argC, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11);
-void *func_151D2BA4(void *arg0, void *arg1, s32 arg2, u8 arg3, s32 arg4);
+void *attach_fx_spawn(void *arg0, void *arg1, s32 arg2, u8 arg3, s32 arg4);
 
 // bone_sparks_emit: while the emitter's counter (self + 0x30) is above 1, emits one spark per unit (if the live
 // count +0x20 is below the limit +0x5C): a random attachment point of set +0x78 (D_800E0990 / D_800E0968: 16-byte
 // entries, bone index + offset) is transformed by the owner's (+0x10) bone matrix, a particle (kind 0x13 / 0x14) is
-// spawned there and a follower (func_151D2BA4) ties it to the bone. Owners without matrices or hidden (nibble 0xF)
+// spawned there and a follower (attach_fx_spawn) ties it to the bone. Owners without matrices or hidden (nibble 0xF)
 // only drain the counter.
 void func_1518FE50(s32 arg0) {
     u8 *self = (u8 *)arg0;
@@ -1224,7 +1224,7 @@ void func_1518FE50(s32 arg0) {
                 rec.u1A = 0;
                 rec.emitter = self;
                 rec.particle = part;
-                func_151D2BA4(&rec, at, 0, self[0xC], self[1]);
+                attach_fx_spawn(&rec, at, 0, self[0xC], self[1]);
             }
         }
         *count -= 1.0f;
@@ -1253,7 +1253,7 @@ s32 func_151901B4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
 #ifdef NON_MATCHING
 // effect_node_launch: P219. Entry 0 of the effect-node handler table D_8008FFE8, called by game_1FFF60's C
 // (node, &pos) and (child, &child->unk34). node +0x2C = the particle, node +0x30 = its config (NULL: the particle is freed
-// with func_1516972C). Otherwise the particle gets velocity (target - node pos +0x34) * cfg +0x60 (+0x148..+0x150),
+// with node_destroy). Otherwise the particle gets velocity (target - node pos +0x34) * cfg +0x60 (+0x148..+0x150),
 // +0x154 = random f32 * cfg +0x68 + cfg +0x64, +0x158 = cfg +0x6C, +0x6C / +0x6E = cfg s16 +0x70 / +0x72,
 // +0x1C = random % (cfg s16 +0x76 + 1) + cfg s16 +0x74, +0x70 = 0x21 when cfg +0x7C bit 0 else 0x20, +0x71 = 0x24,
 // +0x58 |= 0x08000001.
@@ -1269,7 +1269,7 @@ s32 func_151901F4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) {
     s32 r;
 
     if (cfg == NULL) {
-        func_1516972C((struct102 *)p);
+        node_destroy((struct102 *)p);
         return 0;
     }
     *(f32 *)(p + 0x148) = (target->x - *(f32 *)(node + 0x34)) * *(f32 *)(cfg + 0x60);
@@ -1581,7 +1581,7 @@ struct225 *func_1519078C(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg
     header2.unk0 = *(f32 *)(arg1 + 0x14);
     header2.unk4 = *(f32 *)(arg1 + 0x18);
     header2.unk8 = *(f32 *)(arg1 + 0x1C);
-    temp_v0 = func_151602C0(&header, &header2, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
+    temp_v0 = light_create_with_ctrl(&header, &header2, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, 8);
         memcpy((u8 *)temp_v0 + 0x20, f, 0x20);
@@ -1591,19 +1591,19 @@ struct225 *func_1519078C(s32 arg0, u8 *arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg
 }
 
 #ifdef NON_MATCHING
-void func_15163DEC(u8 *arg0, u8 *arg1);
-s32 func_15163F50(u8 *arg0, u8 *arg1);
+void light_flicker_intensity_step(u8 *arg0, u8 *arg1);
+s32 light_follow_obj_pos(u8 *arg0, u8 *arg1);
 
-// light_effect_update_18: handler 18 of D_8008B490 (P251): the dispatcher func_151603FC tests the result, which is
-// func_15163F50's v0 left in place by the matched void C; s32 here (as func_15161F2C), one signature for wasm
+// light_effect_update_18: handler 18 of D_8008B490 (P251): the dispatcher light_ctrl_update tests the result, which is
+// light_follow_obj_pos's v0 left in place by the matched void C; s32 here (as light_beh_follow_obj), one signature for wasm
 s32 func_15190940(u8 *arg0) {
-    func_15163DEC(arg0, arg0 + 0x20);
-    return func_15163F50(arg0, arg0 + 0x18);
+    light_flicker_intensity_step(arg0, arg0 + 0x20);
+    return light_follow_obj_pos(arg0, arg0 + 0x18);
 }
 #else
 void func_15190940(u8 *arg0) {
-    func_15163DEC(arg0, arg0 + 0x20);
-    func_15163F50(arg0, arg0 + 0x18);
+    light_flicker_intensity_step(arg0, arg0 + 0x20);
+    light_follow_obj_pos(arg0, arg0 + 0x18);
 }
 #endif
 
@@ -1619,7 +1619,7 @@ void func_15190970(u8 *arg0, u8 *arg1, u8 arg2) {
         temp_a2 = arg0[0x1C];
         temp_a3 = arg1[4];
         if ((temp_v0 == temp_v1) || (temp_a2 == temp_a3)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -1632,25 +1632,25 @@ void func_151909C4(struct_eu_1BAAA0 *arg0) {
 
 void func_151909D4(void *arg0) {
     func_151909C4(arg0);
-    func_151617C4(arg0);
+    light_ctrl_retire(arg0);
 }
 
 void func_15190A00(void *arg0) {
     func_151909C4(arg0);
-    func_151617E4(arg0);
+    light_ctrl_free(arg0);
 }
 
 #ifdef NON_MATCHING
 // effect_node_release: P213: release handler of an effect node (entry of the D_8008FC60 handler table, void (u8 *),
-/* dispatched by func_15199EF0): frees the attached record +0x84 (func_1516972C), then func_1000FD38(func_1518E808,
- * node, word +0x10) (func_1518E808 is the node's func_1000FA64 callback) and func_151D2B4C(word +0x78). */
+/* dispatched by func_15199EF0): frees the attached record +0x84 (node_destroy), then func_1000FD38(func_1518E808,
+ * node, word +0x10) (func_1518E808 is the node's func_1000FA64 callback) and attach_fx_asset_release(word +0x78). */
 void func_1000FD38(s32, s32, s32);
 void func_15190A2C(u8 *node) {
     if (*(u8 **)(node + 0x84) != NULL) {
-        func_1516972C(*(struct102 **)(node + 0x84));
+        node_destroy(*(struct102 **)(node + 0x84));
     }
     func_1000FD38((s32)func_1518E808, (s32)node, *(s32 *)(node + 0x10));
-    func_151D2B4C(*(s32 *)(node + 0x30 + 0x48));
+    attach_fx_asset_release(*(s32 *)(node + 0x30 + 0x48));
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_15190A2C.s")
@@ -1664,15 +1664,15 @@ void func_15190A88(u8 *arg0) {
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
-    func_1516944C(0x3E, (s32)&tmp, 0x2A);
+    node_broadcast_type(0x3E, (s32)&tmp, 0x2A);
 }
 
-void func_151D33FC(u8 *, s32, u8);
+void attach_ctrl_free_if_owner(u8 *, s32, u8);
 extern void (*D_8008DA24[])(u8 *, s32, u8);
 void func_15190AC0(u8 *arg0, s32 arg1, u8 arg2) {
     void (*f)(u8 *, s32, u8);
     if (arg2 == 0x2A) {
-        func_151D33FC(arg0, arg1, arg2);
+        attach_ctrl_free_if_owner(arg0, arg1, arg2);
     }
     f = D_8008DA24[arg0[0x8A]];
     if (f != NULL) {
@@ -1758,14 +1758,14 @@ void func_1519072C(u8 *arg0)
   {
     sp1C = (s32) sp20;
     ((u8 *) sp20)[4] = arg0[0x3B];
-    func_151D343C(sp1C, 0x2A);
+    attach_ctrl_broadcast(sp1C, 0x2A);
   }
   func_1518F9CC(0xFFFFFFFFFFFFFFFF & sp1C, 0x49);
 }
 
 typedef struct { u8 *p; u8 b; } S190770;
 s32 func_151920FC(void *, s32);
-u8 func_151D8E20();
+u8 impact_current_kind();
 
 u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3) {
     u8 *obj;
@@ -1775,7 +1775,7 @@ u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3) {
     s.p = *arg0;
     s.b = (*arg0)[0x3B];
     func_151920FC(&s, 0xE);
-    obj = func_15167A68(0x20, arg3, arg1 + 0x300, 1, arg2, 1);
+    obj = node_alloc(0x20, arg3, arg1 + 0x300, 1, arg2, 1);
     if (obj == NULL) {
         return NULL;
     }
@@ -1786,6 +1786,6 @@ u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3) {
     *(s32 *)(obj + 0x20) = 0;
     *(f32 *)(obj + 0x1C) = 0.0f;
     bzero(q, 0x2D0);
-    *(s8 *)(obj + 0x2C) = func_151D8E20();
+    *(s8 *)(obj + 0x2C) = impact_current_kind();
     return obj;
 }

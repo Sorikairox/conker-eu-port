@@ -21,9 +21,9 @@ typedef struct {
     s8 u51;
 } Spawn5280;
 extern u8 D_800A43C6[];
-s32 func_15134070(u8 *);
-void func_1516962C(s32, u8 *, u8);
-u8 *func_1513418C(void *, s32, u8, s32);
+s32 obj_get_hit_kind(u8 *);
+void node_broadcast_obj_type(s32, u8 *, u8);
+u8 *emitter_trail_spawn(void *, s32, u8, s32);
 
 u8 *func_151B5280(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *ret;
@@ -34,14 +34,14 @@ u8 *func_151B5280(u8 *arg0, u8 arg1, s32 arg2) {
     if (arg0 == NULL) {
         return 0;
     }
-    id = func_15134070(arg0);
+    id = obj_get_hit_kind(arg0);
     if (id == 0x63) {
         return 0;
     }
     if (D_800A43C6[id * 16] == 2) {
         return 0;
     }
-    func_1516962C(0x28, arg0, 0x16);
+    node_broadcast_obj_type(0x28, arg0, 0x16);
     sp.u24 = 0;
     sp.u28 = 0;
     sp.u2C = arg0[0x3B];
@@ -62,7 +62,7 @@ u8 *func_151B5280(u8 *arg0, u8 arg1, s32 arg2) {
     } else {
         flag[0] = 0;
     }
-    ret = func_1513418C(&sp, 1, arg1, arg2);
+    ret = emitter_trail_spawn(&sp, 1, arg1, arg2);
     if (ret != NULL) {
         memcpy(ret + 0x58, flag, 1);
     }
@@ -86,7 +86,7 @@ s32 func_151B5454(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5) {
     v[0] = -arg1 * 0.20500001f;
     v[1] = -arg2 * 0.20500001f;
     v[2] = -arg3 * 0.20500001f;
-    return func_151D9014(arg0, v, arg4, func_150ADA68() * 0.497f + -1.0f, func_150ADA20() % 31U + 0x14, func_150ADA20() % 101U + 0x9B, func_150ADA68() * 152.0f + 109.0f, func_150ADA20() & 1, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
+    return impact_dust_cloud_spawn(arg0, v, arg4, func_150ADA68() * 0.497f + -1.0f, func_150ADA20() % 31U + 0x14, func_150ADA20() % 101U + 0x9B, func_150ADA68() * 152.0f + 109.0f, func_150ADA20() & 1, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
 }
 
 u8 *func_151B5590(u8 *arg0, u8 arg1, s32 arg2) {
@@ -111,7 +111,7 @@ u8 *func_151B5590(u8 *arg0, u8 arg1, s32 arg2) {
     sp.u4F = 9;
     sp.u50 = -1;
     sp.u51 = 8;
-    return func_1513418C(&sp, 0, arg1, arg2);
+    return emitter_trail_spawn(&sp, 0, arg1, arg2);
 }
 
 s32 func_151B56A4(f32 *, f32, f32, f32, u8);
@@ -139,5 +139,5 @@ s32 func_151B56A4(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4) {
     } else {
         flag = 0;
     }
-    return func_151D9014(arg0, v, 0, func_150ADA68() * 0.126f + -0.702f, (func_150ADA20() & 0xF) + 0xA, func_150ADA20() % 45U + 0x89, func_150ADA68() * 202.0f + 142.0f, flag, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
+    return impact_dust_cloud_spawn(arg0, v, 0, func_150ADA68() * 0.126f + -0.702f, (func_150ADA20() & 0xF) + 0xA, func_150ADA20() % 45U + 0x89, func_150ADA68() * 202.0f + 142.0f, flag, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
 }

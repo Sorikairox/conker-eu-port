@@ -214,7 +214,7 @@ void func_150AFC70(s32 arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 s32 func_151559FC(f32 *, s32, s32, s32, s32, s32, s32);
-u8 func_151D8E6C(void);
+u8 impact_puff_tex_kind0(void);
 
 void func_150AFCA4(u8 *arg0) {
     struct {
@@ -356,7 +356,7 @@ void func_150AFCA4(u8 *arg0) {
         temp_f2 = (2.0f * func_150ADA68()) + 1.0f;
         sp.u48 = temp_f2;
         sp.u4C = temp_f2;
-        sp.u50 = func_151D8E6C();
+        sp.u50 = impact_puff_tex_kind0();
         temp_t5 = (func_150ADA20() % 7U) + 5;
         sp.u52 = temp_t5;
         temp_v1_2 = (*(s16 *)((u8 *)arg0 + 0xE));
@@ -426,7 +426,7 @@ void func_150B0290(void) {
     while (node != NULL) {
         D_800DD5C8[D_800DD5C0] = node->next;
         if (D_800C3E78 == ((u8 *)node)[0x3F]) {
-            func_1516972C((struct102 *)node);
+            node_destroy((struct102 *)node);
         }
         node = D_800DD5C8[D_800DD5C0];
     }
@@ -604,7 +604,7 @@ void func_150B0574(f32 *from, f32 *to, u8 alpha, s32 arg3) {
 
 void func_150B07A0(struct102 **arg0) {
     if (*(s32 *)&arg0[0x170 / 4] != 0) {
-        func_1516972C(arg0[0x170 / 4]);
+        node_destroy(arg0[0x170 / 4]);
     }
 }
 

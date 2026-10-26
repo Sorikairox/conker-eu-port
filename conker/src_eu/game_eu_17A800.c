@@ -13,7 +13,7 @@ void func_1501175C(u8 *, u8, s32);
 
 s32 func_1514F2AC(u8 *, s32, u8 **);
 
-u8 *func_15160A58(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+u8 *light_create_obj_joint(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void *func_1518A560(void *, void *, void *, s32, s32, s32, s32);
 
@@ -146,7 +146,7 @@ s32 func_1514D6CC(struct127 *arg0) {
     do {
         e = func_15156544(idx);
         if (e != NULL) {
-            func_1516972C(e);
+            node_destroy(e);
         }
     } while (e != NULL);
     if (idx == 0 && D_800BE616 == 0) {
@@ -193,7 +193,7 @@ s32 func_1514D880(u8 *arg0) {
             if (-1 != *(s16 *)(D_8008AF88[*(s16 *)((u8 *)p + 0x1C)] + 2)) {
                 D_8008AEF8[*(s16 *)(D_8008AF88[*(s16 *)((u8 *)p + 0x1C)] + 2)](*(s32 *)((u8 *)p + 0x10));
             }
-            func_1516972C(p);
+            node_destroy(p);
             p = next;
         } while (next != NULL);
     }
@@ -445,7 +445,7 @@ void func_1514DBBC(struct127 *arg0) {
     c.u40 = -140.0f;
     b.uEC = 1.0f;
     func_1514F18C(func_1518A560(&a, &b, &c, 2, 0, 0, 0), arg0, 0xA);
-    func_15160A58(arg0, 5, (s32 *)&c, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 5, (s32 *)&c, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
 void func_1514DEDC(s32 arg0) {
@@ -534,7 +534,7 @@ void func_1514E108(struct127 *arg0) {   /* P76: callback; a0 passes through */
 }
 
 void func_1514E128(struct127 *arg0) {
-    func_15160A58(arg0, 2, (s32 *)D_800A5C80, 2, 0x12C, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 2, (s32 *)D_800A5C80, 2, 0x12C, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 void func_1514E1A8(struct127 *arg0) {
@@ -621,17 +621,17 @@ extern u8 D_800A5C8C[];
 extern u8 D_800A5C98[];
 extern u8 D_800A5CA4[];
 extern f32 D_800A61E4;
-s32 func_15160CDC(struct127 *, s32, s32 *, s32 *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 light_create_obj_beam(struct127 *, s32, s32 *, s32 *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void func_1514E404(struct127 *arg0) {
     s32 temp_v0;
 
-    func_15160CDC(arg0, 0xC, D_800A5C8C, D_800A5C98, D_800A61E4, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
+    light_create_obj_beam(arg0, 0xC, D_800A5C8C, D_800A5C98, D_800A61E4, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     temp_v0 = func_15083568(arg0, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
         (*(s32 *)((u8 *)temp_v0 + 0x38)) = 0x7D0;
     }
-    func_1514F18C(func_15160A58(arg0, 0, D_800A5CA4, 2, 0x12C, 0xB, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), arg0, 0x19);
+    func_1514F18C(light_create_obj_joint(arg0, 0, D_800A5CA4, 2, 0x12C, 0xB, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), arg0, 0x19);
 }
 
 void func_1514E540(u8 *arg0) {
@@ -855,7 +855,7 @@ void func_1514E704(struct127 *arg0) {
 // object_glow_attach: handler (table EU 8008AE1C) that builds a sprite effect (func_1518A560 with the same
 // three records as func_1514DBBC: render block a, size / fade block b, attachment c = {obj, its id, joint 0xC, mode
 // 2, offset (0, 100, 0) .. (0, 600, 0)}), attaches it to the object in slot 7 (func_1514F18C), then adds a light
-// (func_15160A58: joint 0xC, offset (0, 0, 150), then 300, 40, 255, 181, 0, 255, 0, 2, 0, 0, 255, 1).
+// (light_create_obj_joint: joint 0xC, offset (0, 0, 150), then 300, 40, 255, 181, 0, 255, 0, 2, 0, 0, 255, 1).
 void func_1514E88C(struct127 *obj) {
     struct {
         f32 u2C;
@@ -960,7 +960,7 @@ void func_1514E88C(struct127 *obj) {
     light[0] = 0.0f;
     light[1] = 0.0f;
     light[2] = 150.0f;
-    func_15160A58(obj, 0xC, (s32 *)light, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
+    light_create_obj_joint(obj, 0xC, (s32 *)light, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E88C.s")
@@ -1012,12 +1012,12 @@ void func_1514ED94(s32 arg0) {
 }
 
 void func_1514EDA0(struct102 *arg0) {
-    func_1516972C(arg0);
+    node_destroy(arg0);
 }
 
 void func_1514EDC0(struct102 *arg0) {
     func_1518E878(arg0);
-    func_1516972C(arg0);
+    node_destroy(arg0);
 }
 
 void func_1514EDEC(s32 arg0) {   /* P76: callback; a0 passes through */
@@ -1160,7 +1160,7 @@ u8 *func_1514F114(s32 arg0, s16 arg1, s32 arg2)
   int new_var2;
   u8 *new_var;
   u8 *temp_v0;
-  temp_v0 = func_15167A68(0x24, 1, arg2 + 0x20, 1, 0xFFU, 1U);
+  temp_v0 = node_alloc(0x24, 1, arg2 + 0x20, 1, 0xFFU, 1U);
   if ((temp_v0 == 0) ^ 0)
   {
     return 0;
@@ -1196,7 +1196,7 @@ s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2) {
             if (idx != -1) {
                 D_8008AEF8[idx](arg0);
             } else {
-                func_1516972C((struct102 *)arg0);
+                node_destroy((struct102 *)arg0);
             }
         }
     }
@@ -1253,7 +1253,7 @@ s32 func_1514F2FC(u8 *arg0, u8 *arg1) {
         *(u8 **)(*(u8 **)(arg0 + 0x18) + 0x14) = *(u8 **)(arg0 + 0x14);
     }
     sp1C = *(s32 *)(arg0 + 0x10);
-    func_1516972C(arg0);
+    node_destroy(arg0);
     return sp1C;
 }
 
@@ -1291,7 +1291,7 @@ void func_1514F3E0(u8 *arg0) {
 
 #ifdef NON_MATCHING
 // character_fire_effect_start: handler (table EU 8008AE80): adds a light at (0, 90, 0) on joint 1 of the object
-// (func_15160A58: 300, 2, 255, 0, 0, 255, 0, 3, 0, 0, 255, 1) attached in slot 0x19 (func_1514F18C), then a sprite
+// (light_create_obj_joint: 300, 2, 255, 0, 0, 255, 0, 3, 0, 0, 255, 1) attached in slot 0x19 (func_1514F18C), then a sprite
 // effect (func_1518A560) with render block kind 0x69 / 3 / 0x4403, size 95 / 65, fade 0.15 / 0.7 / 0.4, attached to
 // joint 1 from (0, 70, 0) to (0, 120, 0) (mode 3).
 void func_1514F43C(struct127 *obj) {
@@ -1361,7 +1361,7 @@ void func_1514F43C(struct127 *obj) {
         s16 u56;
     } a;
 
-    func_1514F18C(func_15160A58(obj, 1, (s32 *)sLightPos, 2, 0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1), obj,
+    func_1514F18C(light_create_obj_joint(obj, 1, (s32 *)sLightPos, 2, 0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1), obj,
                   0x19);
     a.u00 = 0x69;
     a.u40 = 0x4ED200A;
@@ -1456,8 +1456,8 @@ int func_1514F704(struct127 *arg0) { // int: callers use the implicit declaratio
     }
     func_151BD8A8(arg0, 0xFF, 1);
     func_151BA4B0(arg0, 0xFF, 1);
-    func_15160A58(arg0, 1, (s32 *)D_800A5D38, 2, 0x12C, 0xC, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
-    r = func_15160A58(arg0, 1, (s32 *)D_800A5D44, 2, 0x12C, 0xF, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 1, (s32 *)D_800A5D38, 2, 0x12C, 0xC, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
+    r = light_create_obj_joint(arg0, 1, (s32 *)D_800A5D44, 2, 0x12C, 0xF, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
     if (r != NULL) {
         func_1514F18C(r, arg0, 0x19);
     }
@@ -1468,7 +1468,7 @@ void func_1514F878(struct127 *arg0) {
     V3_1514F878 sp48;
     sp54 = D_800A5D50;
     sp48 = D_800A5D5C;
-    func_15160CDC(arg0, 5, &sp54, &sp48, D_800A6238, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
+    light_create_obj_beam(arg0, 5, &sp54, &sp48, D_800A6238, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
 void func_1514F93C(u8 *arg0) {

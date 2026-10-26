@@ -35,7 +35,7 @@ s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
         type = 0x2B;
         break;
     }
-    obj = func_15167A68(type, arg5, arg3 + 0xA8, 1, arg4, 1);
+    obj = node_alloc(type, arg5, arg3 + 0xA8, 1, arg4, 1);
     if (obj == NULL) {
         return 0;
     }
@@ -175,7 +175,7 @@ void func_1513095C(u8 *arg0) {
         if (h != -1) {
             D_80089BA0[h](arg0);
         }
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
     }
 }
 #else
@@ -191,7 +191,7 @@ s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
 void func_151318EC(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_);
 void func_15131BBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1515EDF8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7);
-Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2);
+Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 Gfx *func_15142CF0(s32, s32, s32, s16, s32, s32, s32, u8 *);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
@@ -367,7 +367,7 @@ Gfx *func_1513100C(Gfx *gfx, u8 *p, s16 view) {
         func_15131BBC((s32)&prim[0], (s32)&prim[1], (s32)&prim[2], (s32)&prim[3], (s32)&env[0], (s32)&env[1],
                       (s32)&env[2], (s32)&env[3], (s32)p);
     }
-    gfx = func_1513F4E4(gfx, blend, &sync);
+    gfx = gfx_set_combine_mode(gfx, blend, &sync);
     gfx = func_15142B7C(gfx, *(s32 *)(p + 0x10), *(s32 *)(p + 0x14) | 0x10000 | 0x100000);
     gfx = func_15142CF0((s32)gfx, 0, 0, prim[0], prim[1], prim[2], prim[3], &sync);
     gfx = func_15142C10(gfx, env[0], env[1], env[2], env[3], &sync);
@@ -557,11 +557,11 @@ s32 func_15131C7C(struct_eu_15E000 *arg0, s32 arg1) {
 }
 
 void func_15131CAC(struct102 *arg0) {
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_15131CCC(struct102 *arg0) {
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_15131CEC(u8 *arg0) {
@@ -579,8 +579,8 @@ s32 func_15131D84(s32 arg0, s32 arg1) {
 }
 
 void func_15131D98(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
-    (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0)) * func_151423D8((*(u8 *)((u8 *)arg2 + 0)) - 0x40));
-    (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) ((*(f32 *)((u8 *)arg1 + 4)) * func_151423D8((*(u8 *)((u8 *)arg2 + 1)) - 0x40));
+    (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0)) * angle_byte_cos((*(u8 *)((u8 *)arg2 + 0)) - 0x40));
+    (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) ((*(f32 *)((u8 *)arg1 + 4)) * angle_byte_cos((*(u8 *)((u8 *)arg2 + 1)) - 0x40));
     (*(u8 *)((u8 *)arg2 + 0)) = (u8) (((*(u8 *)((u8 *)arg3 + 0)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 0)));
     (*(u8 *)((u8 *)arg2 + 1)) = (u8) (((*(u8 *)((u8 *)arg3 + 1)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 1)));
 }
@@ -706,16 +706,16 @@ void func_151321F4(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, f32 *arg4, f32 *arg5)
   temp_a0 = (*((u8 *) (((u8 *) arg0) + 0)) = temp_a0);  // fakematch: chained store assignment pins temp_a0 to a0
   *((u8 *) (((u8 *) arg0) + 1)) = (u8) (((*((s8 *) (((u8 *) arg1) + 1))) * D_800BE9E4) + (*((u8 *) (((u8 *) arg0) + 1))));
   temp_a0 = temp_a0 - 0x40;
-  r = func_151423D8(temp_a0);
+  r = angle_byte_cos(temp_a0);
   *arg4 = ((*((f32 *) (((u8 *) arg3) + 0))) * (0, r)) + arg2;  // fakematch: comma flips mul.s operand order
-  r = func_151423D8((*((u8 *) (((u8 *) arg0) + 1))) - 0x40);
+  r = angle_byte_cos((*((u8 *) (((u8 *) arg0) + 1))) - 0x40);
   *arg5 = ((*((f32 *) (((u8 *) arg3) + 4))) * (0, r)) + arg2;  // fakematch: comma flips mul.s operand order
 }
 
 void func_151322BC(s32 arg0, u8 arg1) {
     const s32 sp1C[3] = {0x2B, 0x47, 0x52};
 
-    func_15169260(sp1C, 0x3, arg0, arg1);
+    node_broadcast_types(sp1C, 0x3, arg0, arg1);
 }
 
 s32 func_1513230C(u8 *arg0, s32 arg1) {

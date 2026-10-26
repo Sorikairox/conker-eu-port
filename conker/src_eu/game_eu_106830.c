@@ -585,7 +585,7 @@ f32 sqrtf(f32);
 void func_151D6310(void *, s16, s32, void *, u8 *);
 Gfx *func_15142E24(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern u8 D_800915E8[];
 extern s32 D_800A4EA8[];
@@ -625,7 +625,7 @@ Gfx *func_150DA1FC(u8 *obj, Gfx *gfx, s16 id) {
     flag = 1;
     gfx = func_15142E24(gfx, D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
-    gfx = func_1513F4E4(gfx, 0x4E, &flag);
+    gfx = gfx_set_combine_mode(gfx, 0x4E, &flag);
     gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6], &flag);
 
     if (*(u16 *)(obj + 0x1E) & 2) {
@@ -797,7 +797,7 @@ dummy_label: ; // fakematch: permuter artifact (unused label)
     } else if (arg2 == 0) {
         s32 t = *(s32 *)arg1;
         if (t == *(s32 *)v || arg1[4] == v[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {
@@ -866,7 +866,7 @@ static const f32 hitfx_smoke_rand[1] = { 0.104f };        /* D_800A0FAC */
 // >= 2, kind 0x33 / 0x3A) emits spark particles (func_151307F0 with a 0x66-byte spec at the hit point, random size,
 // life, flip bits 0x80 / 0x40 and alpha; the 16-byte random tail goes to particle+0xA8). Any other hit emits debris
 // (func_1515423C, pushed back along -dir, for objects; func_151541F4 with the surface record hit+0x44 for the world)
-// from a func_150475B0 frame. A world hit (count 1) also puffs smoke (func_151D9B8C kind 3).
+// from a func_150475B0 frame. A world hit (count 1) also puffs smoke (impact_debris_spawn kind 3).
 void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
     u8 *data = *(u8 **)(obj + 0x98);
     struct {
@@ -1054,7 +1054,7 @@ void func_150DABFC(u8 *obj, TrailHit *hit, f32 *dir) {
                 f = func_150ADA68();
                 r1 = func_150ADA20();
                 r2 = func_150ADA20();
-                func_151D9B8C(3, f * 30.0f + 15.0f, (u32)r1 % 101 + 100, (s32)&hit->surf, (struct17 *)hit->pos,
+                impact_debris_spawn(3, f * 30.0f + 15.0f, (u32)r1 % 101 + 100, (s32)&hit->surf, (struct17 *)hit->pos,
                               (u32)r2 % 81 + 60, 1, 1, 1, *(u8 *)(obj + 0xC), *(u8 *)(obj + 1));
                 *(f32 *)(data + 0x40) -= 1.0f;
             } while (1.0f < *(f32 *)(data + 0x40));

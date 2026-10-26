@@ -127,12 +127,12 @@ void func_150BE40C(u8 *arg0) {
 void func_150BE650(struct102 *arg0, u8 **arg1, u8 arg2) {
     if (arg2 == 0x21) {
         if (*(u8 **)((u8 *)arg0 + 0x28) == *arg1) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0) {
         u8 *p = *arg1;
         if (*(u8 **)((u8 *)arg0 + 0x28) == *(u8 **)(p + 0x318)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }

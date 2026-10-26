@@ -10,13 +10,13 @@ float sqrtf(float);
 f32 func_150484A0(f32, f32);
 extern u8 *D_8008CDEC[];
 
-// beam_effect_spawn: allocates a line / beam effect object (func_15167A68(0xB, 0, 0x100, 1, 0xFF, 1)) from
+// beam_effect_spawn: allocates a line / beam effect object (node_alloc(0xB, 0, 0x100, 1, 0xFF, 1)) from
 // (x0, y0, z0) to (x1, y1, z1): start +0x94, end +0xB0, yaw +0xA4 / pitch +0xA0 of the direction (func_150484A0),
 // widths +0xA8 / +0xAC / +0xBC / +0xC0, texture D_8008CDEC[tex] (+0xD8) with two 4-vertex quads at +0x10 whose
 // s / t span the texture size. mode (+0xD0) 0 = plain (+0xD6 = 1, +0xE0 = -1); otherwise it follows `target`
-// (+0xDC, freed again with func_1516979C when NULL) with the extra parameters +0xD2 .. +0xF8. Returns the asm's
+// (+0xDC, freed again with node_delete when NULL) with the extra parameters +0xD2 .. +0xF8. Returns the asm's
 // leftover v0: 0 when the allocation fails, else obj + 0x80 (the quad loop pointer; no caller uses it); 0 on the
-// func_1516979C path (the asm passes on that void call's v0).
+// node_delete path (the asm passes on that void call's v0).
 s32 func_150E2030(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 w0, f32 w1, f32 w2, f32 w3,
                   s32 kind, s32 tex, s32 mode, s32 d2, s32 d4, struct127 *target, s32 da, s32 e2, s32 e0, s32 fc,
                   s32 fe, f32 e4, f32 e8, f32 ec, f32 f0, f32 f4, f32 f8) {
@@ -26,7 +26,7 @@ s32 func_150E2030(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 
     s32 i, s, t;
     u8 *img;
 
-    obj = func_15167A68(0xB, 0, 0x100, 1, 0xFF, 1);
+    obj = node_alloc(0xB, 0, 0x100, 1, 0xFF, 1);
     if (obj == NULL) {
         return 0;
     }
@@ -59,7 +59,7 @@ s32 func_150E2030(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 
         *(s16 *) (obj + 0xD6) = 1;
         *(s16 *) (obj + 0xE0) = -1;
     } else if (target == NULL) {
-        func_1516979C((struct102 *) obj);
+        node_delete((struct102 *) obj);
         return 0;
     } else {
         *(s16 *) (obj + 0xD2) = d2;
@@ -164,7 +164,7 @@ void func_150E2294(u8 *obj) {
     target = *(u8 **) (obj + 0xDC);
     if (*(s16 *) (obj + 0x90) < 0 || (target != NULL && *(s16 *) (obj + 0xE0) != -1 &&
                                       *(s16 *) (obj + 0xE0) != *(u16 *) (target + 0x84))) {
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
         return;
     }
     if (*(s8 *) (obj + 0xD0) != 0) {
@@ -187,7 +187,7 @@ void func_150E2294(u8 *obj) {
             target = *(u8 **) (obj + 0xDC);
             *(s16 *) (obj + 0xD6) = *(s16 *) (obj + 0xD2);
             if (target == NULL || *(u8 **) (target + 0x1D4) == NULL || obj[0xDA] != target[0x3B]) {
-                func_1516972C((struct102 *) obj);
+                node_destroy((struct102 *) obj);
                 return;
             }
             mtx = *(u8 **) (target + 0x1D4) + obj[0xE2] * 0x40;
@@ -343,7 +343,7 @@ void func_150E2294(u8 *obj) {
         if (obj[0xFC] != 0) {
             func_150E4AD0(endX, *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), 1, obj[0xFC], 0, 0xFF);
         }
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
         return;
     }
     if (d < *(f32 *) (obj + 0xC0)) {

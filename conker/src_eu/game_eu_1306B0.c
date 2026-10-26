@@ -98,7 +98,7 @@ block_7:
     }
     sp4C = func_150ADA20();
     sp50 = func_150ADA20();
-    return func_1513C650((s32) &sp.u64, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp4C & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp50 & 1)), sp60, sp5C, 0, (u8) (s32) arg8, arg9);
+    return sprite_fx_spawn_cam_at((s32) &sp.u64, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp4C & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp50 & 1)), sp60, sp5C, 0, (u8) (s32) arg8, arg9);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_15102EA0.s")
@@ -117,7 +117,7 @@ typedef struct {
     f32 point0[3];     /* 0x18 */
     f32 point1[3];     /* 0x24 */
 } EmitterAttach;
-/* the emitter record passed to func_1513D2F0 */
+/* the emitter record passed to effect3d_spawn_full */
 typedef struct {
     u8 kind;           /* 0x00 0x5F */
     u8 sub;            /* 0x01 5 */
@@ -138,7 +138,7 @@ typedef struct {
     s32 unk48;         /* 0x48 (not set) */
     u8 unk4C;          /* 0x4C */
 } EmitterSpawn;
-// attached_particle_spawn: P259: spawns particle emitter 0x29 of D_800A4AA0 (func_1513D2F0, render layer 1 or 3
+// attached_particle_spawn: P259: spawns particle emitter 0x29 of D_800A4AA0 (effect3d_spawn_full, render layer 1 or 3
 // at random) attached to `owner`'s matrix `matrix` (joint `joint`, -1 = none): kind 0x5F / 5, flags 0x2203,
 // `count` particles at `pos` toward `dir`, range from `range`, alpha `alpha`; copies the attachment block (owner,
 // its unique id, matrix offset, joint, zero points D_800A5860) to the emitter's +0x110, then starts the matching
@@ -193,7 +193,7 @@ void *func_151030B8(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *range, s16 co
     spawn.vel[2] = 0.0f;
     spawn.alpha = alpha;
     spawn.unk4C = arg9;
-    emitter = func_1513D2F0(&spawn, (s32) &D_800A4AA0, 0x29, 0, 0, 0x16, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0,
+    emitter = effect3d_spawn_full(&spawn, (s32) &D_800A4AA0, 0x29, 0, 0, 0x16, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0,
                             argA + 0x30, argC, argD);
     if (emitter != NULL) {
         memcpy((s32) emitter + 0x110, (u8 *) &att, sizeof(att));
@@ -206,7 +206,7 @@ void *func_151030B8(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *range, s16 co
 #endif
 
 void func_151032D0(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
 #ifdef NON_MATCHING

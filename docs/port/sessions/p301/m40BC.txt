@@ -29,9 +29,9 @@
 /spark.blend = /s/6 : 7/6 : 8/
 /spark.u22 = 0x20;/s/0x20/0x21/
 /spark.tag = sparkTag;/s/sparkTag/debrisTag/
-/func_1513C650((s32) &spark/s/func_150ADA20() & 0xFF,/func_150ADA20() \& 0x7F,/
-/func_1513C650((s32) &spark/s/obj + 0x17C/obj + 0x178/
-/func_1513C650((s32) &spark/s/pos\[1\], pos\[2\], s, s/pos[1], pos[2], s, 1.0f/
+/sprite_fx_spawn_cam_at((s32) &spark/s/func_150ADA20() & 0xFF,/func_150ADA20() \& 0x7F,/
+/sprite_fx_spawn_cam_at((s32) &spark/s/obj + 0x17C/obj + 0x178/
+/sprite_fx_spawn_cam_at((s32) &spark/s/pos\[1\], pos\[2\], s, s/pos[1], pos[2], s, 1.0f/
 /0, 0, 0, 0, obj\[0xC\], obj\[1\]);/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /if (func_150ADA68() < smokeChance) {/s/</<=/
 /smoke.texture = D_800AADC8\[type\];/s/D_800AADC8/D_800AADB0/
@@ -49,10 +49,10 @@
 /smoke.u47 = 7;/s/7/6/
 /smoke.u56 = 0x1F;/s/0x1F/0x1E/
 /smoke.tag = smokeTag;/s/smokeTag/sparkTag/
-/func_1513D2F0(&smoke/s/0x22, 0, 0, 0x1C, 2/0x21, 0, 0, 0x1C, 2/
-/func_1513D2F0(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1D, 2/
-/func_1513D2F0(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1C, 3/
-/func_1513D2F0(&smoke/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/effect3d_spawn_full(&smoke/s/0x22, 0, 0, 0x1C, 2/0x21, 0, 0, 0x1C, 2/
+/effect3d_spawn_full(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1D, 2/
+/effect3d_spawn_full(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1C, 3/
+/effect3d_spawn_full(&smoke/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /if (func_150ADA68() < debrisChance) {/s/</<=/
 /debris.colorA\[1\] = /s/\[type\]\[1\]/[type][2]/
 /debris.colorB\[0\] = /s/D_800AADF4/D_800AADE0/
@@ -77,7 +77,7 @@
 /flash.unk1 = -1;/s/-1/1/
 /at.unk4 = pos\[1\];/s/pos\[1\]/pos[0]/
 /i = func_150ADA20() & 1;/s/& 1/\& 0/
-/func_151602C0(&flash/s/+ 10,/+ 11,/
-/func_151602C0(&flash/s/D_800AAE08\[i\]\[0\]/D_800AAE08[i][1]/
+/light_create_with_ctrl(&flash/s/+ 10,/+ 11,/
+/light_create_with_ctrl(&flash/s/D_800AAE08\[i\]\[0\]/D_800AAE08[i][1]/
 /0xFF, 0, 0, obj\[0xC\], obj\[1\]);/s/0xFF, 0, 0/0xFE, 0, 0/
 /0xFF, 0, 0, obj\[0xC\], obj\[1\]);/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/

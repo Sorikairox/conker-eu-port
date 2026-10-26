@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15167D84(s32 *, s32, s32, s32, s32, s32);
+s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CDEC;
 
 void func_15174690(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8) {
@@ -95,7 +95,7 @@ void func_15174690(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
         sp.u66 = (s16) arg4;
         sp.u54 = (s16) (s32) var_f22;
         sp.u60 = (s16) arg6;
-        func_15167D84(&sp.u40, 0, 0, -1, (s32) arg7, arg8);
+        node_spawn_sprite(&sp.u40, 0, 0, -1, (s32) arg7, arg8);
     }
 }
 #else

@@ -91,13 +91,13 @@ void *func_151A5580(s32, s32, s32, s32, s32, s32, u8, s32);
 #endif
 
 #ifdef NON_MATCHING
-// hud_box_reset: removes the old box object D_800D9CB4 (func_1516972C), creates a new one (func_151A5580(0, 0, 0xFF,
+// hud_box_reset: removes the old box object D_800D9CB4 (node_destroy), creates a new one (func_151A5580(0, 0, 0xFF,
 // 0, 0, D_800BEE08, 0, 0)), sets state D_800D9CB0 = 3 and clears the 10 words D_800D9CB8.
 void func_150B7170(void) {
     s32 i;
 
     if (D_800D9CB4 != 0) {
-        func_1516972C((struct102 *) D_800D9CB4);
+        node_destroy((struct102 *) D_800D9CB4);
     }
     D_800D9CB4 = (s32) func_151A5580(0, 0, 0xFF, 0, 0, D_800BEE08, 0, 0);
     D_800D9CB0 = 3;
@@ -134,12 +134,12 @@ s32 func_150B7258(void) {
     struct102 **p;
 
     if (*(struct102 **)&D_800D9CB4 != NULL) {
-        func_1516972C(*(struct102 **)&D_800D9CB4);
+        node_destroy(*(struct102 **)&D_800D9CB4);
         *(struct102 **)&D_800D9CB4 = NULL;
     }
     p = (struct102 **)D_800D9CB8; do { // fakematch: same-line `do` sets the s0/s1 addiu order
         if (*p != NULL) {
-            func_1516972C(*p);
+            node_destroy(*p);
             *p = NULL;
         }
         p++;
@@ -411,7 +411,7 @@ void func_150B7964(void) {
     sp.unk28 = 0x51;
     sp.unk2A = 0x51;
     if (*(struct102 **)D_800D9CB8 != NULL) {
-        func_1516972C(*(struct102 **)D_800D9CB8);
+        node_destroy(*(struct102 **)D_800D9CB8);
     }
     *D_800D9CB8 = (s32)func_15169ED8(&sp);
     D_800D9CB0 = 3;
@@ -448,7 +448,7 @@ void func_150B7A40(void) {
     } sp;
 
     if (*(struct102 **)D_800D9CB8 != NULL) {
-        func_1516972C(*(struct102 **)D_800D9CB8);
+        node_destroy(*(struct102 **)D_800D9CB8);
         *D_800D9CB8 = 0;
     }
     sp.unk18 = 0x4D;
@@ -474,7 +474,7 @@ void func_150B7A40(void) {
     sp.unk1C = 60.0f;
     sp.unk20 = 60.0f;
     if (((struct102 **)D_800D9CB8)[3] != NULL) {
-        func_1516972C(((struct102 **)D_800D9CB8)[3]);
+        node_destroy(((struct102 **)D_800D9CB8)[3]);
     }
     D_800D9CB8[3] = (s32)func_15169ED8(&sp);
     D_800D9CB0 = 3;
@@ -493,7 +493,7 @@ void func_150B7B6C(void) {
 #ifdef NON_MATCHING
 extern s32 D_80091C98;
 
-// hud_counter_box_open: replaces HUD box slot `slot` of D_800D9CB8 (the old one is removed with func_1516972C) by a
+// hud_counter_box_open: replaces HUD box slot `slot` of D_800D9CB8 (the old one is removed with node_destroy) by a
 // new type-6 box effect (func_15169ED8) using the D_80091C98 graphics, `width` wide and 170 high (0x51 / 0x51
 // offsets, 0x58 / 0x40 size, colour 0xFF / 0 / 0 / 0xFF, flags 7 / 0x15 / 1).
 void func_150B7B9C(s32 width, s32 slot) {
@@ -524,7 +524,7 @@ void func_150B7B9C(s32 width, s32 slot) {
     sp.u2A = 0x51;
     sp.u20 = 170.0f;
     if (*box != 0) {
-        func_1516972C((struct102 *)*box);
+        node_destroy((struct102 *)*box);
     }
     *box = (s32)func_15169ED8(&sp);
 }
@@ -566,7 +566,7 @@ void func_150B7C88(void) {
     } sp;
 
     if (((struct102 **)D_800D9CB8)[1] != NULL) {
-        func_1516972C(((struct102 **)D_800D9CB8)[1]);
+        node_destroy(((struct102 **)D_800D9CB8)[1]);
         D_800D9CB8[1] = 0;
     }
     sp.unk1C = 60.0f;
@@ -593,7 +593,7 @@ void func_150B7C88(void) {
     sp.unk28 = 0x1000;
     sp.unk2A = 0x1000;
     if (((struct102 **)D_800D9CB8)[4] != NULL) {
-        func_1516972C(((struct102 **)D_800D9CB8)[4]);
+        node_destroy(((struct102 **)D_800D9CB8)[4]);
     }
     D_800D9CB8[4] = (s32)func_15169ED8(&sp);
     sp.unk24 = 0;
@@ -606,7 +606,7 @@ void func_150B7C88(void) {
     sp.unk0 = &D_80091C98;
     sp.unk38 = 1;
     if (((struct102 **)D_800D9CB8)[8] != NULL) {
-        func_1516972C(((struct102 **)D_800D9CB8)[8]);
+        node_destroy(((struct102 **)D_800D9CB8)[8]);
     }
     D_800D9CB8[8] = (s32)func_15169ED8(&sp);
     D_800D9CB0 = 3;
@@ -625,7 +625,7 @@ s32 func_150B7DFC(void) {
     EffectTemplateE48B0 t;
 
     if (D_800D9CB8[2] != 0) {
-        func_1516972C((struct102 *) D_800D9CB8[2]);
+        node_destroy((struct102 *) D_800D9CB8[2]);
         D_800D9CB8[2] = 0;
     }
     t.u31 = 3;
@@ -655,7 +655,7 @@ s32 func_150B7DFC(void) {
     t.u1C = 230.0f;
     t.uC = (s32) t.u20;
     if (D_800D9CB8[5] != 0) {
-        func_1516972C((struct102 *) D_800D9CB8[5]);
+        node_destroy((struct102 *) D_800D9CB8[5]);
     }
     D_800D9CB8[5] = (s32) func_15169ED8(&t);
     t.u16 = 0x100;
@@ -664,7 +664,7 @@ s32 func_150B7DFC(void) {
     t.u20 = 170.0f;
     t.uC = (s32) t.u20;
     if (D_800D9CB8[6] != 0) {
-        func_1516972C((struct102 *) D_800D9CB8[5]);
+        node_destroy((struct102 *) D_800D9CB8[5]);
     }
     D_800D9CB8[6] = (s32) func_15169ED8(&t);
     t.u16 = 0x200;
@@ -673,7 +673,7 @@ s32 func_150B7DFC(void) {
     t.u20 = 190.0f;
     t.uC = (s32) t.u20;
     if (D_800D9CB8[7] != 0) {
-        func_1516972C((struct102 *) D_800D9CB8[5]);
+        node_destroy((struct102 *) D_800D9CB8[5]);
     }
     D_800D9CB8[7] = (s32) func_15169ED8(&t);
     t.u14 = 0;
@@ -688,7 +688,7 @@ s32 func_150B7DFC(void) {
     t.u1C = 230.0f;
     t.u20 = 170.0f;
     if (D_800D9CB8[9] != 0) {
-        func_1516972C((struct102 *) D_800D9CB8[9]);
+        node_destroy((struct102 *) D_800D9CB8[9]);
     }
     D_800D9CB8[9] = (s32) func_15169ED8(&t);
     D_800D9CB0 = 3;

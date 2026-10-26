@@ -71,7 +71,7 @@ s32 func_151C7750(u8 *rec) {
 #ifdef NON_MATCHING
 /* P175 */
 void func_1510F800(s32);
-s32 func_1516284C(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 light_create_flicker_preset(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
 void func_151C9748(u8 **out, f32 *pos, u8 *tri, f32 *dir, s32 ground, u8 alt, u8 noshadow, u8 arg7, s32 arg8);
 u8 *func_151C957C(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 noshadow, u8 arg8, s32 arg9);
@@ -85,7 +85,7 @@ typedef struct {
     f32 phase[2];    /* 0x18: random 0..2pi */
     f32 rate[2];     /* 0x20: random 0.05..0.13 */
     u8 *owner2;      /* 0x28: arg5 */
-    s32 sound;       /* 0x2C: func_1516284C handle or 0 */
+    s32 sound;       /* 0x2C: light_create_flicker_preset handle or 0 */
     u8 pad30[4];     /* 0x30: never written */
     u8 *glowA;       /* 0x34: written in the record after the copy */
     u8 *glowB;       /* 0x38 */
@@ -108,7 +108,7 @@ typedef struct {
     f32 u9C;         /* 0x9C: arg20 */
 } BeamEmit;
 
-/* The beam record's spawn block (func_1513D4B8 argument 0, 0x58 bytes, as func_151407D0's). */
+/* The beam record's spawn block (effect3d_spawn argument 0, 0x58 bytes, as particle_emitter_spawn's). */
 typedef struct {
     u8 kind;         /* 0x00 = 0x59 */
     u8 u01;          /* 0x01 = 6 */
@@ -129,8 +129,8 @@ typedef struct {
 
 // beam_create: builds a beam between two geometry hits (func_151C7750, record_beam_start). Needs a ground id at
 /* both ends (func_1510FD20). Spawns the three end pieces at each end (func_151C9748, base oriented by the hit
- * triangle; if any of the six fails, all are freed and nothing is built), an optional hum (arg9: func_1516284C at
- * the middle) and the beam record (func_1513D4B8, kind 0x59, colour r / g / b) whose +0x110 gets the emitter block
+ * triangle; if any of the six fails, all are freed and nothing is built), an optional hum (arg9: light_create_flicker_preset at
+ * the middle) and the beam record (effect3d_spawn, kind 0x59, colour r / g / b) whose +0x110 gets the emitter block
  * (BeamEmit: random sizes / phases / rates, pieces, triangles, args 10..12, option bits). With arg16 and a valid
  * direction (func_15145128) a glow record (func_151C957C) runs 500 units inwards from 20 units inside each end.
  * Unless arg21 (repeat) the owner's +0x14 is set to 1 (one-shot). With the hum, func_1000FA64 attaches the
@@ -215,12 +215,12 @@ u8 *func_151C7B1C(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5,
         e.pieceB[1] == NULL || e.pieceB[2] == NULL) {
         for (i = 0; i < 3; i++) {
             if (e.pieceA[i] != NULL) {
-                func_1516972C((struct102 *) e.pieceA[i]);
+                node_destroy((struct102 *) e.pieceA[i]);
             }
         }
         for (i = 0; i < 3; i++) {
             if (e.pieceB[i] != NULL) {
-                func_1516972C((struct102 *) e.pieceB[i]);
+                node_destroy((struct102 *) e.pieceB[i]);
             }
         }
         return NULL;
@@ -236,7 +236,7 @@ u8 *func_151C7B1C(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5,
         snd.u1 = 2;
         snd.life = 300;
         snd.u4 = 0;
-        e.sound = func_1516284C(&snd, mid, r, g, b, 0xFF, 0, 0, 0x10, arg22, arg23);
+        e.sound = light_create_flicker_preset(&snd, mid, r, g, b, 0xFF, 0, 0, 0x10, arg22, arg23);
     } else {
         e.sound = 0;
     }
@@ -263,7 +263,7 @@ u8 *func_151C7B1C(f32 *hitA, u8 *triA, f32 *hitB, u8 *triB, u8 *owner, u8 *arg5,
     spawn.u44[1] = 0xFF;
     spawn.u44[2] = 0;
     spawn.u44[3] = 6;
-    rec = (u8 *) func_1513D4B8((s32) &spawn, (s32) &D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg22, arg23);
+    rec = (u8 *) effect3d_spawn((s32) &spawn, (s32) &D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg22, arg23);
     if (rec == NULL) {
         return NULL;
     }
@@ -539,7 +539,7 @@ void func_151C8C24(u8 *arg0, s32 arg1) {
     if (arg0 != NULL) {
         sp18[0] = (s32)arg0;
         sp18[1] = arg1;
-        func_151403A8(sp18, 0x20);
+        fx_lists_broadcast_a(sp18, 0x20);
     }
 }
 
@@ -656,9 +656,9 @@ extern s32 D_800AB010[]; /* hit-sound flags by beam piece kind: 0x17, 0x18 */
 // beam_hit_effects: the effects when the beam `rec` is broken (by obj, from the 0x20 / 0x3A messages of
 /* func_151C8C5C; obj NULL for the scripted break). At each end (+0x34 with the surface record +0x16A and the
  * direction +0x4C; +0x40 with +0x17C and the reversed direction): a spark spray (func_1515016C, the block below),
- * a flash (func_151602C0 kind 3) and a scorch mark (func_150E856C). With obj: the screen effect preset 2 for obj's
+ * a flash (light_create_with_ctrl kind 3) and a scorch mark (func_150E856C). With obj: the screen effect preset 2 for obj's
  * view (func_1516547C), a rumble (func_151D8E18) and obj's hit reaction (func_1505D024, flags D_800AB010 by the
- * piece kind at +0x1A4). Then the two sounds (0x2F5 at end A, 0x2F6 at end B) and func_1516972C(rec).
+ * piece kind at +0x1A4). Then the two sounds (0x2F5 at end A, 0x2F6 at end B) and node_destroy(rec).
  * (The mark positions are the end points: the asm saves v0 = rec + 0x34 / + 0x40 in the delay slot of the
  * func_1515016C calls, before the call.) */
 void func_151C8F4C(u8 *obj, u8 *rec) {
@@ -755,12 +755,12 @@ void func_151C8F4C(u8 *obj, u8 *rec) {
     flash.u1 = -1;
     flash.size = (func_150ADA20() % 9U) + 0x11;
     flash.u4 = 0;
-    func_151602C0((Header *)&flash, (Header2 *)at, (func_150ADA20() % 9U) + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, rec[0xC],
+    light_create_with_ctrl((Header *)&flash, (Header2 *)at, (func_150ADA20() % 9U) + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, rec[0xC],
                   rec[1]);
     at[0] = *(f32 *)(rec + 0x40);
     at[1] = *(f32 *)(rec + 0x44);
     at[2] = *(f32 *)(rec + 0x48);
-    func_151602C0((Header *)&flash, (Header2 *)at, (func_150ADA20() % 9U) + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, rec[0xC],
+    light_create_with_ctrl((Header *)&flash, (Header2 *)at, (func_150ADA20() % 9U) + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, rec[0xC],
                   rec[1]);
 
     r = func_150ADA68();
@@ -786,7 +786,7 @@ void func_151C8F4C(u8 *obj, u8 *rec) {
                   *(f32 *)(rec + 0x3C), 0x7D0, 0x898);
     func_1000FA64(0x2F6, *(f32 *)(rec + 0x40), *(f32 *)(rec + 0x44), *(f32 *)(rec + 0x48), 0x7FFF, 0x898, 0x7D0,
                   (s32)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C((struct102 *)rec);
+    node_destroy((struct102 *)rec);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C8F4C.s")
@@ -794,11 +794,11 @@ void func_151C8F4C(u8 *obj, u8 *rec) {
 
 #ifdef NON_MATCHING
 /* P175 */
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 s32 memcpy(s32, u8 *, s32);
 
-// beam_glow_spawn: one glow of a beam (func_151C7B1C): a particle emitter (func_151407D0, kind 0x15, emitter size
+// beam_glow_spawn: one glow of a beam (func_151C7B1C): a particle emitter (particle_emitter_spawn, kind 0x15, emitter size
 /* 0x64) from `from` to `to` in colour r / g / b with the ground id, shadow flag 0x1000000 when `noshadow`; the
  * beam record is stored at the new record's +0x170. Returns the glow record or NULL. */
 u8 *func_151C957C(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 noshadow, u8 arg8, s32 arg9) {
@@ -876,7 +876,7 @@ u8 *func_151C957C(u8 *rec, f32 *from, f32 *to, u8 r, u8 g, u8 b, s32 ground, u8 
     emit.u54[4] = 0;
     spawn.ground = ground;
     emit.u20 = 0.000001f;
-    glow = func_151407D0(&emit, 0x64, &spawn, 0, 0, 0, 0, 1, arg8, arg9);
+    glow = particle_emitter_spawn(&emit, 0x64, &spawn, 0, 0, 0, 0, 1, arg8, arg9);
     if (glow != NULL) {
         memcpy((s32) (glow + 0x170), (u8 *) &rec, 4);
     }
@@ -1022,37 +1022,37 @@ void func_151C9A84(struct210 *arg0) {
 
     p = (u8 *)*pa + 0x110;
     if (*(s32 *)((u8 *)*pa + 0x13C) != 0) {
-        func_1516972C(*(struct102 **)(p + 0x2C));
+        node_destroy(*(struct102 **)(p + 0x2C));
         func_1000FD38(func_151C8D5C, p, 0);
     }
     p = (u8 *)*pa;
     a = *(struct102 **)(p + 0x144);
     p += 0x110;
     if (a != NULL) {
-        func_1516972C(a);
+        node_destroy(a);
     }
     if (*(struct102 **)(p + 0x38) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x38));
+        node_destroy(*(struct102 **)(p + 0x38));
     }
     if (*(struct102 **)(p + 0x3C) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x3C));
+        node_destroy(*(struct102 **)(p + 0x3C));
     }
     if (*(struct102 **)(p + 0x40) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x40));
+        node_destroy(*(struct102 **)(p + 0x40));
     }
     if (*(struct102 **)(p + 0x44) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x44));
+        node_destroy(*(struct102 **)(p + 0x44));
     }
     if (*(struct102 **)(p + 0x48) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x48));
+        node_destroy(*(struct102 **)(p + 0x48));
     }
     if (*(struct102 **)(p + 0x4C) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x4C));
+        node_destroy(*(struct102 **)(p + 0x4C));
     }
     if (*(struct102 **)(p + 0x50) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x50));
+        node_destroy(*(struct102 **)(p + 0x50));
     }
-    func_1513CA6C(arg0);
+    effect3d_retire(arg0);
 }
 
 void func_151C9B88(struct210 *arg0) {
@@ -1062,37 +1062,37 @@ void func_151C9B88(struct210 *arg0) {
 
     p = (u8 *)*pa + 0x110;
     if (*(s32 *)((u8 *)*pa + 0x13C) != 0) {
-        func_1516972C(*(struct102 **)(p + 0x2C));
+        node_destroy(*(struct102 **)(p + 0x2C));
         func_1000FD38(func_151C8D5C, p, 0);
     }
     p = (u8 *)*pa;
     a = *(struct102 **)(p + 0x144);
     p += 0x110;
     if (a != NULL) {
-        func_1516972C(a);
+        node_destroy(a);
     }
     if (*(struct102 **)(p + 0x38) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x38));
+        node_destroy(*(struct102 **)(p + 0x38));
     }
     if (*(struct102 **)(p + 0x3C) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x3C));
+        node_destroy(*(struct102 **)(p + 0x3C));
     }
     if (*(struct102 **)(p + 0x40) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x40));
+        node_destroy(*(struct102 **)(p + 0x40));
     }
     if (*(struct102 **)(p + 0x44) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x44));
+        node_destroy(*(struct102 **)(p + 0x44));
     }
     if (*(struct102 **)(p + 0x48) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x48));
+        node_destroy(*(struct102 **)(p + 0x48));
     }
     if (*(struct102 **)(p + 0x4C) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x4C));
+        node_destroy(*(struct102 **)(p + 0x4C));
     }
     if (*(struct102 **)(p + 0x50) != NULL) {
-        func_1516972C(*(struct102 **)(p + 0x50));
+        node_destroy(*(struct102 **)(p + 0x50));
     }
-    func_1513CAA0(arg0);
+    effect3d_free(arg0);
 }
 
 s32 func_151C9C8C(u8 *arg0, s32 arg1) {
@@ -1108,7 +1108,7 @@ void func_151C9CBC(s32 arg0, s32 arg1) {
     s32 tmp[2];
     tmp[0] = arg1;
     *(u8 *)(tmp + 1) = arg0;
-    func_151403A8(tmp, 0x3A);
+    fx_lists_broadcast_a(tmp, 0x3A);
 }
 
 s32 func_1504715C(s32 *, struct127 *);
@@ -1124,13 +1124,13 @@ s32 func_151D5AC4(struct17 *, u8, s32);
 void func_151D45A4(struct17 *, u8, s32);
 void func_150E892C(struct17 *, s16, u8, s32);
 s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
-s32 func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 void func_151CA070(struct127 *arg0, u8 arg1, s32 arg2);
 
 // object_explode: the big explosion at an object (135 units above its position +0x14/+0x18/+0x1C). On the ground
 // (+0x2D8 == 0) a scorch mark (func_150E856C) where a ray 200 units down hits a floor with flag 1, and the debris
-// burst func_15136C3C; then the blast effects func_151D5404 / func_151D58E4 / func_151D5AC4 / func_151D45A4, the
+// burst object_hit_effects; then the blast effects func_151D5404 / func_151D58E4 / func_151D5AC4 / func_151D45A4, the
 // sparks func_150E892C (at the scorch point when there is one), the flash func_15154728, the sound 0x60D, and in
 // the air the extra burst func_151CA070. Nothing for a NULL object.
 void func_151C9740(struct127 *obj, u8 arg1, s32 arg2) {
@@ -1175,7 +1175,7 @@ void func_151C9740(struct127 *obj, u8 arg1, s32 arg2) {
     r = func_150ADA68();
     func_15154728((f32 *) &pos, r + r + 8.0f, 2.4641099f, (u32) func_150ADA20() % 56 + 200, 0.0f, arg1, arg2);
     if (!inAir) {
-        func_15136C3C(obj, 0, 0, 1, 0, 0, arg1, arg2);
+        object_hit_effects(obj, 0, 0, 1, 0, 0, arg1, arg2);
     }
     func_10010F88(0x60D, 0x7D00, 0, 0, 0, (s32) pos.unk0, (s32) pos.unk4, (s32) pos.unk8, 500, 1000);
     if (inAir) {

@@ -491,13 +491,13 @@ void func_151CB07C(struct102 *arg0, u8 **arg1, u8 arg2) {
 
     if (arg2 == 0x21) {
         if (*(s32 *)((u8 *)arg0 + 0x70) == (s32)arg1[0]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     dummy_label: ; // fakematch: empty label after the first arm makes IDO fill the b delay slot like the original
     } else if (arg2 == 0) {
         v = arg1[0];
         if (*(s32 *)((u8 *)arg0 + 0x70) == *(s32 *)(v + 0x318)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
     f = D_8008FFB0[*(u8 *)((u8 *)arg0 + 0x7D)];
@@ -869,12 +869,12 @@ void func_151CB6C0(u8 *arg0, u16 *fb) {
 void func_151CBA4C(struct102 *arg0, u8 **arg1, u8 arg2) {
     if (arg2 == 0x21) {
         if (*(u8 **)((u8 *)arg0 + 0x18) == *arg1) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0) {
         u8 *p = *arg1;
         if (*(u8 **)((u8 *)arg0 + 0x18) == *(u8 **)(p + 0x318)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -1076,12 +1076,12 @@ s32 func_151CBF20(u8 *arg0) {
 void func_151CC11C(struct102 *arg0, u8 **arg1, u8 arg2) {
     if (arg2 == 0x21) {
         if (*(u8 **)((u8 *)arg0 + 0x20) == *arg1) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0) {
         u8 *p = *arg1;
         if (*(u8 **)((u8 *)arg0 + 0x20) == *(u8 **)(p + 0x318)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }

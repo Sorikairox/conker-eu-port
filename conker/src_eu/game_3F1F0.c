@@ -5,7 +5,7 @@
 
 
 void func_15011D40(void) {
-    func_15103800();
+    sfx_cooldown_clear();
 }
 
 // doesnt look like fun

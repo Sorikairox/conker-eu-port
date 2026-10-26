@@ -18,8 +18,8 @@
 \#^            g = 0;$#s/0/1/
 \#^            g = D_800A0D08\[i \* 3 + 1\];$#s/+ 1/+ 2/
 \#^            b = D_800A0D08\[i \* 3 + 2\];$#s/+ 2/+ 1/
-\#^        blk.light\[i\] = func_151602C0((Header \*) &req, (Header2 \*) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);$#s/ipos, 5/ipos, 4/
-\#^        blk.light\[i\] = func_151602C0((Header \*) &req, (Header2 \*) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);$#s/0xFF, 0, 0, 0xFF, 0)/0xFF, 0, 0, 0xFE, 0)/
+\#^        blk.light\[i\] = light_create_with_ctrl((Header \*) &req, (Header2 \*) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);$#s/ipos, 5/ipos, 4/
+\#^        blk.light\[i\] = light_create_with_ctrl((Header \*) &req, (Header2 \*) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);$#s/0xFF, 0, 0, 0xFF, 0)/0xFF, 0, 0, 0xFE, 0)/
 \#^    for (i = 0; i < 6; i++) {$#s/< 6/< 5/
 \#^    e = (u8 \*) func_15149130(0x12C, -1, 0x2E, -1, 0, 0x29#s/0x29/0x28/
 \#^        memcpy(e + 0x28, &blk, 0x48);$#s/0x28/0x2C/

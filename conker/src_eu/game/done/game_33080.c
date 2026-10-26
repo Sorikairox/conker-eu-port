@@ -10,6 +10,6 @@ void func_15005BD0(struct108 *arg0) {
     arg0->unk84 &= -5;
     arg0->unk1B4 = 1;
     arg0->unk1E0 = 3;
-    func_15124B18(arg0);
+    camera_apply_zoom_level(arg0);
     arg0->unk134 = 0;
 }

@@ -490,8 +490,8 @@ void func_1501C710(s32 arg0, u16 *arg1, s32 arg2, s32 arg3, s32 arg4);
 u8 *func_151149AC(u8 id);
 void func_151494E0(s32, u8);
 void func_1515F170(s32 arg0, u8 arg1);
-void func_151645C4(u8 arg0);
-void func_151616D0(u8 arg0, u8 arg1, s32 arg2);
+void level_set_lights_mode(u8 arg0);
+void light_ctrl_broadcast(u8 arg0, u8 arg1, s32 arg2);
 void func_151CD90C(s32 arg0);
 void func_150B696C(u8 arg0);
 void func_151C9CBC(s32 arg0, s32 arg1);
@@ -501,7 +501,7 @@ void func_150E0880(void);
 void func_150FB2A8(void);
 void func_150F58C0(s32 arg0);
 void func_150FAFC0(u8 arg0, s32 arg1);
-void func_15169040(s32 arg0, u8 arg1);
+void node_broadcast_all(s32 arg0, u8 arg1);
 void func_151CD944(s32 arg0);
 void func_15190A88(u8 *arg0);
 void func_1518F9CC(s32 arg0, u8 arg1);
@@ -866,10 +866,10 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             }
             break;
         case 4:
-            func_151645C4(ev->b5);
+            level_set_lights_mode(ev->b5);
             break;
         case 5:
-            func_151616D0(0x28, 0x17, 0);
+            light_ctrl_broadcast(0x28, 0x17, 0);
             break;
         case 6:
             func_151CD90C(ev->b5);
@@ -908,10 +908,10 @@ s32 func_15024910(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             func_150FAFC0(0xFF, 1);
             break;
         case 16:
-            func_15169040(0, 0x4E);
+            node_broadcast_all(0, 0x4E);
             break;
         case 17:
-            func_15169040(0, 0x4F);
+            node_broadcast_all(0, 0x4F);
             break;
         case 18:
             func_151CD944(ev->b5);
@@ -1350,7 +1350,7 @@ void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
                    u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30);
 void func_151BA1A0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
                    s16 argA, s16 argB, s16 argC, s32 argD, u8 argE, s32 argF);
-void func_15167AD8(void *arg0, u8 arg1, s32 arg2);
+void node_spawn_sprite_quad(void *arg0, u8 arg1, s32 arg2);
 void func_150E3334(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
                    s16 argA, s16 argB, u16 argC, u8 argD);
 void func_1516ECE8(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
@@ -1361,13 +1361,13 @@ void func_150BA4C0(u8 *arg0, u8 arg1, s32 arg2);
 void func_151A3940(u8 *arg0, u8 arg1);
 void func_151664F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8);
 void func_150B2974(u8 *arg0, s32 arg1, s32 arg2);
-void func_15136A50(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
+void point_emitter_spawn_preset(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5);
 s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
 void func_150D0148(f32 arg0);
 void func_151494E0(s32, u8);
 struct260 *func_1510A454(u8 *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7);
 struct260 *func_1510A8C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
-struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
+struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
 void func_1510957C(s32 arg0, s32 arg1, u8 arg2);
 void func_151A9940(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
 u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3);
@@ -1383,7 +1383,7 @@ void func_1519F2F4(u8 *arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
 s32 func_15046F70(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
 f32 func_150ADA68(void);
 s32 func_150ADA20(void);
-s32 func_15136698(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9,
+s32 fx_splash_spawn(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9,
                   s32 argA);
 void func_150E38C0(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3);
 s32 func_151D8E18(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3);
@@ -1391,14 +1391,14 @@ struct260 *func_151B57F0(s16 arg0, u8 arg1, s32 arg2);
 struct260 *func_151932B8(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
 s32 *func_151905AC(u8 *arg0, s32 *arg1);
 s32 func_1518FA8C(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-s32 func_15134908(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3);
+s32 point_emitter_spawn(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3);
 s32 func_150EA560(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
 void func_150EAA80(u8 *arg0, s16 arg1, u8 arg2, u8 arg3);
 void func_150C7520(u8 *arg0, s16 arg1, s32 arg2, s32 arg3);
 u8 *func_1519EEE0(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 void func_1516F868(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void func_1516F730(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_15136404(struct127 *arg0, f32 arg1, u8 arg2, s32 arg3);
+void fx_ground_splats_around(struct127 *arg0, f32 arg1, u8 arg2, s32 arg3);
 void func_1504715C(void *out, u8 *obj);
 void func_150CAE30(u8 *arg0);
 void func_1510965C(void);
@@ -1421,11 +1421,11 @@ void func_1519EFE8(f32 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4);
 s32 func_15107C80(u8 *, s16, s16, s16, s32, f32, f32, s32, s32, s8 *, s32, s32);
 s32 func_15132454(u8 *arg0, f32 arg1, u8 arg2, s32 arg3);
 void func_1507DE4C(struct127 *arg0);
-void func_15138C80(struct127 *arg0, s32 arg1, s32 arg2);
+void object_hit_effect(struct127 *arg0, s32 arg1, s32 arg2);
 void func_15193660(u8 *arg0, u8 arg1, s32 arg2);
 void func_151A0A10(u8 *arg0, s16 arg1, u8 arg2, s32 arg3);
 void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
-void func_151DBAA8(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
+void impact_spawn_debris_burst(struct17 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_150C2290(s32 arg0);
 void func_150C2424(u8 arg0);
@@ -1454,14 +1454,14 @@ struct260 *func_151925C4(u8 *obj, s16 span, u8 flag, s32);
 void func_150FB398(s16 span, u8 flag, s32);
 s32 func_151B09BC(u8 *obj, s32, s16 span, u8 flag, s32);
 u8 *func_1518D1C0(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);
-void func_151356D4(f32 *offset, f32, f32, f32, s32, s32, s32, s32 span, s32, s32, s32 flag, s32);
+void blood_splash_spawn(f32 *offset, f32, f32, f32, s32, s32, s32, s32 span, s32, s32, s32 flag, s32);
 void func_150DBA98(u8 *pos, u8 *, u8 *, u8 *, u8 *, s32 span, s32 flag, s32);
 s32 func_1514DA28(s16, s16);
 s32 func_1514654C(u8 *obj, u8 *att, s32, f32 **, u8 **, s32);
 void func_151CFFFC(u8 *obj, u8 flag, s32);
 void func_151C62D0(u8 *obj, u8 b5, s32, u8 *att, s32 kind, s32 flag, s32);
 void func_150E0DF0(u8 *obj, u8 flag, s32);
-s32 func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+s32 object_hit_effects(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_150F1C5C(u8 *obj, u8, u8, u8 flag, s32);
 void func_15171100(void *pos, s32, s32, s32, s32 flag, s32);
 s32 func_151A74B0(void *spray, s32, u8 flag, s32);
@@ -1627,7 +1627,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         s.unk12 = -10;
         s.unk14 = 0;
         s.z = pos[2];
-        func_15167AD8(&s, (u8) flag, 1);
+        node_spawn_sprite_quad(&s, (u8) flag, 1);
         break;
     }
     case 0x19:
@@ -1716,7 +1716,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         break;
     case 0x21:
         if (ev->b4 == 0) {
-            func_15136A50((s32) data, (s32) (data + 4), (s32) (data + 8), SPAN(ev, &next), flag, 0);
+            point_emitter_spawn_preset((s32) data, (s32) (data + 4), (s32) (data + 8), SPAN(ev, &next), flag, 0);
         }
         break;
     case 0x60:
@@ -1754,7 +1754,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             func_1510A8C4((u8 *) obj, span, (u8) flag, 1);
             break;
         case 6:
-            func_151619A0(track, span, (u8) flag, 1);
+            light_create_scripted(track, span, (u8) flag, 1);
             break;
         case 7:
             func_1510957C(track, span, (u8) flag);
@@ -1879,7 +1879,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             if (found) {
                 ra = func_150ADA68();
                 rb = func_150ADA68();
-                func_15136698(ra * 0.020000001f + 0.09f, rb * 0.00043999997f + 0.00087999995f,
+                fx_splash_spawn(ra * 0.020000001f + 0.09f, rb * 0.00043999997f + 0.00087999995f,
                               (u32) func_150ADA20() % 101 + 0x9B, 0xFF, span, (s32) hit.pos, (struct17 *) p,
                               ev->w6 == 0, 1, flag, 1);
             }
@@ -1955,7 +1955,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             s.unk17 = 2;
             s.unkC = 2.0f;
             s.unk10 = 1.0f;
-            func_15134908(&s, 0, (u8) flag, 0);
+            point_emitter_spawn(&s, 0, (u8) flag, 0);
         }
         break;
     case 0x50:
@@ -1980,7 +1980,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             rb = func_150ADA68();
             rc = func_150ADA68();
             rd = func_150ADA20();
-            func_151356D4(offset, ra * 20.0f + 10.0f, (rb * 65.0f + 35.0f) * 0.001f, (rc * 160.0f + 200.0f) * 0.001f,
+            blood_splash_spawn(offset, ra * 20.0f + 10.0f, (rb * 65.0f + 35.0f) * 0.001f, (rc * 160.0f + 200.0f) * 0.001f,
                           rd % 101 + 100, 0xFF, (u32) func_150ADA20() % 3 + 4, span, 4, 0x40, flag, 1);
         }
         break;
@@ -2032,7 +2032,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         break;
     case 0x52:
         if (obj != NULL) {
-            func_15136404(obj, 90.0f, (u8) flag, 1);
+            fx_ground_splats_around(obj, 90.0f, (u8) flag, 1);
         }
         break;
     case 0x5F:
@@ -2130,7 +2130,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             break;
         }
         case 9:
-            func_15136C3C(obj, 1, 1, 1, 1, 0, flag, 1);
+            object_hit_effects(obj, 1, 1, 1, 1, 0, flag, 1);
             break;
         case 10:   /* random offset from one of three bones */
             if (O_PTR(obj, 0x1D4) != NULL) {
@@ -2241,7 +2241,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         case 21:
             if (obj != NULL) {
                 func_1507DE4C(obj);
-                func_15138C80(obj, (u8) flag, 0);
+                object_hit_effect(obj, (u8) flag, 0);
             }
             break;
         case 22:
@@ -2355,7 +2355,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         if (kind >= 13) {
             kind = 0;
         }
-        func_151DBAA8((struct17 *) p, ev->b4 != 0 ? ev->b4 : 10, kind, (u8) flag, 0);
+        impact_spawn_debris_burst((struct17 *) p, ev->b4 != 0 ? ev->b4 : 10, kind, (u8) flag, 0);
         break;
     }
     case 0x10: {
@@ -2460,7 +2460,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
         p[0] = pos[0];
         p[1] = pos[1];
         p[2] = pos[2];
-        func_151DBAA8((struct17 *) p, ev->b4 != 0 ? ev->b4 : 10, 6, (u8) flag, 0);
+        impact_spawn_debris_burst((struct17 *) p, ev->b4 != 0 ? ev->b4 : 10, 6, (u8) flag, 0);
         break;
     }
     default:

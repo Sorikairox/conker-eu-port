@@ -7,9 +7,9 @@ void func_15171E60(f32 x, f32 y, f32 z, f32 r, s32 base, f32 scale, s32 colour, 
 
 #ifdef NON_MATCHING
 s32 func_1518C900(s32);
-void func_15168BE4(u8 *arg0, u8 arg1, s32 arg2);
+void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2);
 
-/* func_15168BE4's debris template (the same layout as Debris714BC below) */
+/* node_spawn_model_fx's debris template (the same layout as Debris714BC below) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 vel[3];
@@ -32,7 +32,7 @@ typedef struct {
 extern f32 D_800A7270[6][3]; /* piece offsets */
 extern u8 D_800A7360[6];     /* piece ids when flags & 2 */
 
-// crate_break_pieces: breaks the object into 6 func_15168BE4 debris pieces at the object position (+0x10 / +0x12 /
+// crate_break_pieces: breaks the object into 6 node_spawn_model_fx debris pieces at the object position (+0x10 / +0x12 /
 // +0x14) plus the D_800A7270 offsets. Piece id: D_800A7360[i] if flags & 2, else id + i if flags & 1, else id;
 // model func_1518C900(id). Spin = offset * 0.08 (+7 on |y|) plus random (rand >> 16) / 16384, u24 / u28 / u2C random
 // (rand >> 16) * 1.25 / 16384, scale 1, life 60. Then a ring of 10 sparks (func_15171E60) 80 below the object, and
@@ -88,7 +88,7 @@ void func_15171100(u8 *obj, s32 id, s32 arg2, s32 flags, s32 kind, s32 owner) {
         t.u24 = (func_150ADA20() >> 16) * 0.0000762939453125f;
         t.u28 = (func_150ADA20() >> 16) * 0.0000762939453125f;
         t.u2C = (func_150ADA20() >> 16) * 0.0000762939453125f;
-        func_15168BE4((u8 *) &t, kind, owner);
+        node_spawn_model_fx((u8 *) &t, kind, owner);
     }
     func_15171E60(x, y - 80.0f, z, 70.0f, 500, 0.00457763671875f, 0, 10, kind, owner);
     obj[0x6E] = 1;
@@ -110,7 +110,7 @@ void func_15171434(s32 arg0, u8 arg1, s32 arg2) {
 
 #ifdef NON_MATCHING
 s32 func_1518C900(s32);
-void func_15168BE4(u8 *arg0, u8 arg1, s32 arg2);
+void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2);
 
 /* D_800A72B8: the 6 pieces (model id, offset, velocity) */
 typedef struct {
@@ -121,7 +121,7 @@ typedef struct {
 } Piece714BC;
 extern Piece714BC D_800A72B8[6];
 
-/* func_15168BE4's debris template */
+/* node_spawn_model_fx's debris template */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 vel[3];
@@ -141,10 +141,10 @@ typedef struct {
     /* 0x5D */ u8 u5D;
 } Debris714BC;
 
-// barrel_break_pieces: breaks the object into the 6 pieces of D_800A72B8 (func_15168BE4 debris, model
+// barrel_break_pieces: breaks the object into the 6 pieces of D_800A72B8 (node_spawn_model_fx debris, model
 // func_1518C900(id)) at the object position (+0x10 / +0x12 / +0x14) plus each piece offset, with the piece velocity,
 // spin from the offset (x, |y|, z times 0.09 / 0.23 / 0.09), u24 = vel x * 0.1, random u28 -2..2 / u2C -5..5,
-// scale 2, life 60; then sets +0x6E to 1. kind / arg2 go to func_15168BE4.
+// scale 2, life 60; then sets +0x6E to 1. kind / arg2 go to node_spawn_model_fx.
 void func_151714BC(u8 *obj, u8 kind, s32 arg2) {
     Debris714BC t;
     Piece714BC *pc = D_800A72B8;
@@ -188,7 +188,7 @@ void func_151714BC(u8 *obj, u8 kind, s32 arg2) {
         t.vel[2] = pc->vel[2];
         t.u28 = func_150ADA68() * 4.0f - 2.0f;
         t.u2C = func_150ADA68() * 10.0f - 5.0f;
-        func_15168BE4((u8 *) &t, kind, arg2);
+        node_spawn_model_fx((u8 *) &t, kind, arg2);
     }
     obj[0x6E] = 1;
 }
@@ -205,7 +205,7 @@ void func_15171734(u8 *arg0) {
 
 #ifdef NON_MATCHING
 s32 func_1518C900(s32);
-void func_15168BE4(u8 *arg0, u8 arg1, s32 arg2);
+void node_spawn_model_fx(u8 *arg0, u8 arg1, s32 arg2);
 
 /* rodata copies (NM link drops the asm rodata) */
 static const f32 D_800A7390_c[1] = { -0.2f };        /* 0xBE4CCCCD */
@@ -213,7 +213,7 @@ static const f32 D_800A7394_c[1] = { 6.1035157e-06f }; /* 0x36CCCCCD */
 static const f32 D_800A7398_c[1] = { 0.8f };         /* 0x3F4CCCCD */
 static const f32 D_800A739C_c[1] = { 6.666667f };    /* 0x40D55556 */
 
-/* func_15168BE4's debris template (the same layout as Debris714BC above) */
+/* node_spawn_model_fx's debris template (the same layout as Debris714BC above) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 vel[3];
@@ -233,7 +233,7 @@ typedef struct {
     /* 0x5D */ u8 u5D;
 } Debris71770;
 
-// debris_cloud_spawn: spawns count func_15168BE4 debris pieces of model func_1518C900(id) scattered around
+// debris_cloud_spawn: spawns count node_spawn_model_fx debris pieces of model func_1518C900(id) scattered around
 // (x, y, z) by +-spread/2 (random (rand >> 16) * spread / 65536 per axis), no velocity, random spin
 // (x / z: (rand >> 16) * 15 / 65536, y: (rand & 0xFFFF) * spinY * 6.1e-6 + spinY * 0.8), random u24 / u28 / u2C
 // ((rand >> 16) * 10 / 65536) and a random scale per axis between scaleMin and scaleMax; u54[5] = scale sum * 6.67
@@ -283,7 +283,7 @@ void func_15171770(s32 count, s32 id, f32 x, f32 y, f32 z, f32 spinY, f32 scaleM
         scale2 = (u32) (func_150ADA20() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
         t.u54[5] = (u32) ((t.scale[0] + t.scale[1] + scale2) * D_800A739C_c[0] + 20.0f);
         t.scale[2] = scale2;
-        func_15168BE4((u8 *) &t, kind, owner);
+        node_spawn_model_fx((u8 *) &t, kind, owner);
     }
 }
 #else

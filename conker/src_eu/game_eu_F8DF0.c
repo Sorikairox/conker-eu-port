@@ -133,12 +133,12 @@ void func_150CB6F4(u8 *obj, s32 arg1, s32 arg2) {
     part.u44[2] = 0;
     part.u44[3] = 6;
     height = (*(u16 *) (obj + 0x7A) >> 8) - ((arg1 == 1) ? -8 : 8);
-    p = (u8 *) func_1513D668((s32) &part, (s32) verts, 0, 0x17, 0, 0, height, 500.0f, 500.0f, 0, (s32) &ground[1], 1, 8,
+    p = (u8 *) effect3d_spawn_oriented_simple((s32) &part, (s32) verts, 0, 0x17, 0, 0, height, 500.0f, 500.0f, 0, (s32) &ground[1], 1, 8,
                              0xFF, 0);
     if (p != NULL) {
         memcpy(p + 0x128, &tail, 8);
         if (func_1518B140(D_800D9D00, (s32) p, 2) == 0) {
-            func_1516972C((struct102 *) p);
+            node_destroy((struct102 *) p);
         }
     }
     ringLife = (func_150ADA20() & 0xF) + 0xA;

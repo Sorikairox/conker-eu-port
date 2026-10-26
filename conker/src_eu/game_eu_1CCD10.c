@@ -43,10 +43,10 @@ s32 func_1519F500(u8 *arg0, u8 arg1, u8 *arg2) {
         sp3C = var_a3;
         temp_v0_2 = func_15143E08(var_a3);
         sp1F = temp_v0_2;
-        sp2C = func_151423D8(temp_v0_2 & 0xFF);
+        sp2C = angle_byte_cos(temp_v0_2 & 0xFF);
         var_a3 = sp3C;
         var_f18 = sp2C;
-        sp28 = func_151423D8((sp1F - 0x40) & 0xFF);
+        sp28 = angle_byte_cos((sp1F - 0x40) & 0xFF);
         var_f16 = var_a3->x_position;
     }
     if (arg1 == 6) {
@@ -100,7 +100,7 @@ void func_1519F6D8(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-u8 func_151D8E20(void);
+u8 impact_current_kind(void);
 s32 memcpy(s32, u8 **, s32);
 extern s32 D_800AB7F4;
 
@@ -158,7 +158,7 @@ s32 func_1519F738(u8 *arg0, u8 arg1) {
 
     temp_v1 = (*(u8 **)((u8 *)arg0 + 0x18));
     sp.uB4 = temp_v1;
-    temp_v0 = func_151D8E20();
+    temp_v0 = impact_current_kind();
     sp.uA6 = 0x42;
     sp.uA4 = 0x12C;
     sp.uAD = 0xA;
@@ -233,11 +233,11 @@ void func_1519F970(u8 *arg0) {
     }
     if (*(u8 **)(v + 4) != NULL) {
         func_151A0E98(*(u8 **)(v + 4));
-        func_1516972C(*(struct102 **)(v + 4));
+        node_destroy(*(struct102 **)(v + 4));
     }
     if (*(u8 **)(v + 0xC) != NULL) {
         func_151A0E98(*(u8 **)(v + 0xC));
-        func_1516972C(*(struct102 **)(v + 0xC));
+        node_destroy(*(struct102 **)(v + 0xC));
     }
 }
 
@@ -568,7 +568,7 @@ s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern u8 D_800911BC[];
 extern s32 D_800D30BC;
@@ -683,7 +683,7 @@ s32 func_151A03DC(u8 *t, s32 gfxArg, s16 slot) {
     gfx = func_15142B7C(gfx, 1, 0x160600);
     gfx = func_15142C10(gfx, rec[0x2A], rec[0x2B], rec[0x2C], 0xFF, &flag);
     gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &flag);
-    gfx = func_1513F4E4(gfx, 7, &flag);
+    gfx = gfx_set_combine_mode(gfx, 7, &flag);
     gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     /* first cross-section: the live foot position or the newest point; q = the next point towards the tail */
@@ -942,7 +942,7 @@ void func_151A0F5C(u8 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         if (((s32)v == *(s32 *)arg1) || (v[0x3B] == arg1[4])) {
             func_151A0E98(arg0);
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }

@@ -586,11 +586,11 @@ void func_150EDCC8(struct127 *o) {
 /* P241: readable C for func_150EF204 (game_eu_11AF60, 73 insns). */
 // rider_dismount_enter: entry 2 of the state table D_80086440 (`void (u8 *)`, like its neighbour func_150EF328):
 // puts the object in state 3 (+5; +0xE4 = 0, +0x125 = 0xFF, +0x328 = 0). When it carries a rider (+0x318), resets
-// the rider onto object slot k (func_151254F4; k = 1 for player 3, else 0), sets byte +0x78 of the object's part
+// the rider onto object slot k (camera_set_followed_obj; k = 1 for player 3, else 0), sets byte +0x78 of the object's part
 // +0x31C to 0x29, clears bit 0x10 of D_800BE748 entry k (6-byte entries), marks the rider's player bit in
 // D_800CC2D0[k] +0x2FC and, if D_800CC2D0[k] +0x10A was set, calls func_1517F9F8(0xFF, 0, 0, 180, 20, player)
 // and clears it.
-void func_151254F4(struct108 *, s32);
+void camera_set_followed_obj(struct108 *, s32);
 void func_1517F9F8(s32, s32, s32, s32, s32, s32);
 void func_150EF204(u8 *obj) {
     u8 *rider;
@@ -606,7 +606,7 @@ void func_150EF204(u8 *obj) {
         return;
     }
     k = (rider[0x23D] == 3) ? 1 : 0;
-    func_151254F4((struct108 *) rider, k);
+    camera_set_followed_obj((struct108 *) rider, k);
     (*(u8 **) (obj + 0x31C))[0x78] = 0x29;
     D_800BE748[k * 3] &= ~0x10;
     slot = (u8 *) &D_800CC2D0[k];

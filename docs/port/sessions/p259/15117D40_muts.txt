@@ -5,7 +5,7 @@ s/(temp_v1 == 0x800B) \&\& (D_800BE9F0 == 0xC)/(D_800BE9F0 == 0xC)/ % lvCkind4
 /D_800BE9F0 == 0xA)/,/var_a2 = 1;/s/var_a1 = 0x14;/var_a1 = 0x15;/ % s3lvA s2def
 /D_800BE9F0 == 0x34/,/var_t1 = 6;/s/var_t1 = 6;/var_t1 = 3;/ % s2lv34hit s2lv34edge s2lv34past
 /D_800BE9F0 == 0x34/,/var_t1 = 6;/s/var_a1 = 0xA;/var_a1 = 0xB;/ % s2lv34hit s2lv34edge s2lv34past
-s/var_t0 = func_15104A80;/var_t0 = NULL;/ % s2lv34hit
+s/var_t0 = prop_owner_effects_clear;/var_t0 = NULL;/ % s2lv34hit
 s/var_t0(arg0);/var_t0(NULL);/ % s2lv34hit
 s/var_a1 = 0xF;/var_a1 = 0xE;/ % s2kind4 s2kind4miss lvCkind4
 s/(temp_v1 == 4)/(temp_v1 == 5)/ % s2kind4 lvCkind4

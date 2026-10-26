@@ -56,7 +56,7 @@ s/    if (kind != 0x27) {$/    if (kind != 0x26) {/
 s/\&D_800CC2D0\[self->unk124 - 1\] : self, obj, kind/\&D_800CC2D0[self->unk124] : self, obj, kind/
 s/: self, obj, kind);/: obj, obj, kind);/
 s/ev.uid = self->unique_id;/ev.uid = obj->unique_id;/
-s/func_15169070(0, 0x68, (s32)\&ev, 2);/func_15169070(0, 0x69, (s32)\&ev, 2);/
+s/node_broadcast_range(0, 0x68, (s32)\&ev, 2);/node_broadcast_range(0, 0x69, (s32)\&ev, 2);/
 s/    if (base->sound != 0) {/    if (cur->sound != 0) {/
 s/D_800D1580 = base->sound;/D_800D1580 = cur->sound;/
 s/func_10010630(D_800D1582, obj, 0x6D60, 0x12C, 0x708);/func_10010630(D_800D1582, obj, 0x6D60, 0x12C, 0x700);/

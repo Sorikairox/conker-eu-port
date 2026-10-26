@@ -8,7 +8,7 @@ void func_15189E70(void *arg0, u8 arg1) {
     u8 *p;
     s32 flag;
 
-    p = func_15167A68(0x1A, 1, 0x78, 1, 0xFF, 1);
+    p = node_alloc(0x1A, 1, 0x78, 1, 0xFF, 1);
     if (p != NULL) {
         memcpy(p + 0x10, arg0, 0x50);
         func_1510F800(0);
@@ -126,10 +126,10 @@ void func_15189F70(u8 *p) {
         yaw = *(s16 *)(p + 0x10) - func_150ADA20() % (u32)(*(s16 *)(p + 0x12) * 2 + 1) + *(s16 *)(p + 0x12);
         pitch = func_150ADA20() % (u32)(*(s16 *)(p + 0x16) + 1) + *(s16 *)(p + 0x14);
         speed = func_150ADA68() * *(f32 *)(p + 0x34) + *(f32 *)(p + 0x30);
-        sinYaw = func_151423D8(yaw);
-        cosYaw = func_151423D8(yaw - 0x40);
-        sinPitch = func_151423D8(pitch);
-        cosPitch = func_151423D8(pitch - 0x40);
+        sinYaw = angle_byte_cos(yaw);
+        cosYaw = angle_byte_cos(yaw - 0x40);
+        sinPitch = angle_byte_cos(pitch);
+        cosPitch = angle_byte_cos(pitch - 0x40);
         horiz = speed * sinPitch;
         spec.dir[0] = horiz * cosYaw;
         spec.dir[1] = -speed * cosPitch;
@@ -150,7 +150,7 @@ void func_15189F70(u8 *p) {
 #endif
 
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
-u8 func_151D8E20(void);
+u8 impact_current_kind(void);
 extern f64 D_800A7788;
 extern f32 D_800A7790;
 
@@ -167,7 +167,7 @@ s32 func_1518A42C(u8 *arg0) {
             pos[0] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].x;
             pos[1] = *(f32 *)(obj + 0x48);
             pos[2] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].z;
-            func_151DBCBC(func_151D8E20(), *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), 0, pos, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+            impact_dust_particle_spawn(impact_current_kind(), *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), 0, pos, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
         }
         *(s8 *)(obj + 0x20) = 4;
         *(f32 *)(obj + 0x48) = D_800A7790;

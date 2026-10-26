@@ -1,5 +1,5 @@
-# P239 setups for func_151D33B8 (effect_node_children_free; test variant d_33b8v.c). node 0x80450000; first child = node + 0x20 so the
-# func_1516972C stub's OUTA (a0: word 0) clears the count +0x20 (one free). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
+# P239 setups for attach_ctrl_destroy_children (effect_node_children_free; test variant d_33b8v.c). node 0x80450000; first child = node + 0x20 so the
+# node_destroy stub's OUTA (a0: word 0) clears the count +0x20 (one free). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5
 one ! 0=80450000,1=80412300 ! 80450020=00030000,80450024=80450020 ! ! ! 15169C9C=0:00000000 ! !
 zero ! 0=80450000,1=80412300 ! 80450020=00000000,80450024=80450020 ! ! ! 15169C9C=0:00000000 ! !
 neg ! 0=80450000,1=80412300 ! 80450020=FFFF0000,80450024=80450020 ! ! ! 15169C9C=0:00000000 ! !

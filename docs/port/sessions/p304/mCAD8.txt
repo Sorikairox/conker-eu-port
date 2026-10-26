@@ -5,7 +5,7 @@ s/            \*(f32 \*) (pt + 0x4) += \*(f32 \*) (pt + 0xC) \* D_800BE9A4;/    
 s/            if (\*(f32 \*) (pt + 0x4) < d->u24) {/            if (*(f32 *) (pt + 0x4) <= d->u18) {/ % hit none
 s/                d->uA0 += d->u9C;/                d->uA0 = d->u9C;/ % hit
 s/                    speed = func_150ADA68() \* d->uB0 + d->uAC;/                    speed = func_150ADA68() * d->uAC + d->uB0;/ % hit
-s/                    cosA = func_151423D8(a - 0x40);/                    cosA = func_151423D8(a + 0x40);/ % hit
+s/                    cosA = angle_byte_cos(a - 0x40);/                    cosA = angle_byte_cos(a + 0x40);/ % hit
 s/(d->uAA + 1) + d->uA8;/(d->uAA + 1) + d->uAA;/ % hit
 s/                    r = func_150ADA68() \* d->uA4;/                    r = func_150ADA68() * d->uB4;/ % hit
 s/                    pos\[1\] = d->u24;/                    pos[1] = d->u18;/ % hit
@@ -14,7 +14,7 @@ s/                    vel\[1\] = -speed \* cosB;/                    vel[1] = sp
 s/                    vel\[2\] = h \* sinA;/                    vel[2] = h * sinB;/ % hit
 s/                    alpha = (d->u41 == 0x18) ? 0x7D : 0xFF;/                    alpha = (d->u41 == 0x18) ? 0x7E : 0xFF;/ % hit18
 s/                    tint = (d->u41 == 0x18) ? 7 : 2;/                    tint = (d->u41 == 0x18) ? 7 : 3;/ % hit
-s/                    func_151DA6F8(pos, vel, scale \* d->uC0 + d->uBC, d->uC4, alpha, speed2 \* d->uB8 + d->uB4,/                    func_151DA6F8(pos, vel, scale * d->uBC + d->uC0, d->uC4, alpha, speed2 * d->uB8 + d->uB4,/ % hit
+s/                    impact_spark_spawn(pos, vel, scale \* d->uC0 + d->uBC, d->uC4, alpha, speed2 \* d->uB8 + d->uB4,/                    impact_spark_spawn(pos, vel, scale * d->uBC + d->uC0, d->uC4, alpha, speed2 * d->uB8 + d->uB4,/ % hit
 s/(d->uC8 + 1) + d->uC6, 1, D_800A10C0, D_800A10C0, 1, tint, 0, 0x10, 0xF,/(d->uC8 + 1) + d->uC6, 1, D_800A10C0, 1.0f, 1, tint, 0, 0x10, 0xF,/ % hit
 s/                                  0, obj\[0xC\], obj\[1\]);/                                  0, obj[1], obj[0xC]);/ % hit
 s/                    d->uA0 -= 1.0f;/                    d->uA0 -= 0.5f;/ % hit hitmany
@@ -41,7 +41,7 @@ s/                    ring.u18 = 0x30001;/                    ring.u18 = 0x30000
 s/                        size = func_150ADA68() \* d->u110 + d->u10C;/                        size = func_150ADA68() * d->u10C + d->u110;/ % hit
 s/                        ring.u06 = (func_150ADA20() \& 1) ? 0x1E : 0x1D;/                        ring.u06 = (func_150ADA20() \& 1) ? 0x1D : 0x1E;/ % hit hitmany
 s/                        r1 = func_150ADA20();/                        r1 = 0;/ % hit hitmany
-s/                        if (func_1513C5B0((s32) \&ring, 0, 5, 0, \*(f32 \*) (pt + 0x0), d->u100, \*(f32 \*) (pt + 0x8),/                        if (func_1513C5B0((s32) \&ring, 0, 5, 0, *(f32 *) (pt + 0x0), d->u24, *(f32 *) (pt + 0x8),/ % hit
+s/                        if (sprite_fx_spawn_quad((s32) \&ring, 0, 5, 0, \*(f32 \*) (pt + 0x0), d->u100, \*(f32 \*) (pt + 0x8),/                        if (sprite_fx_spawn_quad((s32) \&ring, 0, 5, 0, *(f32 *) (pt + 0x0), d->u24, *(f32 *) (pt + 0x8),/ % hit
 s/                                          size, size, r2, (r0 \& 1) + (r1 \& 1), 0, 0xFF, 0) == NULL) {/                                          size, size, r2, (r0 \& 1) + (r1 \& 1), 0, 0xFF, 1) == NULL) {/ % hit
 s/                    } while (1.0f < d->u108 \&\& more);/                    } while (1.0f < d->u108);/ % hitfull hitpart
 s/                while (i != \*(s8 \*) (obj + 0x2D)) {/                if (i != *(s8 *) (obj + 0x2D)) {/ % hit hitmany

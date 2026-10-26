@@ -1,10 +1,10 @@
 /if (res == 0) {/s/== 0/== 3/
 /if (res == 2) {/s/== 2/== 1/
 /^        splash = 0;/s/0;/1;/
-/func_151DC034(&a.x, r \* 192.0f + 192.0f/s/+ 192.0f/+ 190.0f/
-/func_151DC034(&a.x/s/101 + 155/101 + 154/
-/func_151DC034(&a.x/s/(y & 7) + 15/(y \& 3) + 15/
-/func_151DC034(&a.x/s/type, kind/kind, type/
+/impact_glow_spawn(&a.x, r \* 192.0f + 192.0f/s/+ 192.0f/+ 190.0f/
+/impact_glow_spawn(&a.x/s/101 + 155/101 + 154/
+/impact_glow_spawn(&a.x/s/(y & 7) + 15/(y \& 3) + 15/
+/impact_glow_spawn(&a.x/s/type, kind/kind, type/
 /for (n = (func_150ADA20() & 3) + 4; n > 0; n--) {/s/+ 4/+ 3/
 /r = func_150ADA68() \* 0.0929f + 0.0643f;/s/0.0643f/0.0644f/
 /func_15143874(x & 0xFF, func_150ADA68() \* 50.0f/s/50.0f/49.0f/
@@ -12,17 +12,17 @@
 /vel\[1\] = /s/up.y/up.x/
 /vel\[2\] = /s/dir.z \* 100.0f/dir.z * 99.0f/
 /vel\[2\] = /s/) \* r;/) * r2;/
-/func_151DB5D0(type, (struct17 \*) &b/s/&b/\&a/
-/func_151DB5D0(type, (struct17 \*) &b/s/r2 \* 80.0f + 120.0f/r2 * 80.0f + 121.0f/
-/func_151DB5D0(type, (struct17 \*) &b/s/1.033618f/1.0336f/
+/impact_tinted_particle_spawn(type, (struct17 \*) &b/s/&b/\&a/
+/impact_tinted_particle_spawn(type, (struct17 \*) &b/s/r2 \* 80.0f + 120.0f/r2 * 80.0f + 121.0f/
+/impact_tinted_particle_spawn(type, (struct17 \*) &b/s/1.033618f/1.0336f/
 /(u32) x . 31 + 30, (u32) y . 156 + 100, 0x2E, 5, 0, kind, owner/s/0x2E, 5/0x2E, 6/
 /(u32) x . 31 + 30, (u32) y . 156 + 100, 0x2E, 5, 0, kind, owner/s/+ 30,/+ 31,/
 /^    if (sparks) {/s/sparks/!sparks/
 /for (m = (func_150ADA20() & 3) + 4; m != 0; m--) {/s/+ 4/+ 5/
 /func_150ADA68() \* 2.0f + 6.0f, &sc2\[0\]/s/6.0f/7.0f/
 /v\[1\] = side.y \* sc2\[0\] + up.y \* sc2\[1\];/s/up.y/up.z/
-/func_151DA6F8((struct17 \*) &a, v, 0.0f/s/. 6 + 8/ \& 7 + 8/
-/func_151DA6F8((struct17 \*) &a, v, 0.0f/s/1.9f/2.0f/
+/impact_spark_spawn((struct17 \*) &a, v, 0.0f/s/. 6 + 8/ \& 7 + 8/
+/impact_spark_spawn((struct17 \*) &a, v, 0.0f/s/1.9f/2.0f/
 /(u32) y . 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner/s/0x10, 0xF/0xF, 0x10/
 /(u32) y . 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner/s/1.0f, 1.0f, 1/1.0f, 2.0f, 1/
 /if (!splash || !D_800BE616) {/s/!D_800BE616/D_800BE616/
@@ -34,6 +34,6 @@
 /&dist, &obj, 0, 0.0f) != 0/s/0.0f) != 0/1.0f) != 0/
 /&& func_15145C90(obj) != 0 && dist < 1999.0f) {/s/1999.0f/1000.0f/
 /&& func_15145C90(obj) != 0 && dist < 1999.0f) {/s/!= 0 \&\&/== 0 \&\&/
-/func_151D9B8C(type, r \* 16.0f + 25.0f/s/25.0f/26.0f/
-/func_151D9B8C(type, r \* 16.0f + 25.0f/s/(s32) surf, &hit/(s32) \&hit, \&hit/
+/impact_debris_spawn(type, r \* 16.0f + 25.0f/s/25.0f/26.0f/
+/impact_debris_spawn(type, r \* 16.0f + 25.0f/s/(s32) surf, &hit/(s32) \&hit, \&hit/
 /(u32) y . 101 + 100, 1, 1, 1,/s/1, 1, 1,/1, 1, 0,/

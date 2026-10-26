@@ -15,7 +15,7 @@ s/0, 4, 0, &flag, 3);/0, 4, 0, \&flag, 2);/ % base bigneg
 s/0x100, 0x100, 0, 4,/0x100, 0x80, 0, 4,/ % base bigneg
 s/rec->u51, rec->u51, rec->u51, 0xFF/rec->u51, rec->u51, rec->u50, 0xFF/ % base bigneg
 s/0x160600/0x160601/ % base bigneg
-s/func_1513F4E4(gfx, 0xB/func_1513F4E4(gfx, 0xA/ % base bigneg
+s/gfx_set_combine_mode(gfx, 0xB/gfx_set_combine_mode(gfx, 0xA/ % base bigneg
 s/D_800D30BC | 0x80000 | 0x2CA0/D_800D30BC | 0x2CA0/ % base bigneg
 s/0x5049D8/0x5049D9/ % base bigneg
 s/gfx = func_15142C10(gfx,/gfx = func_15142C10((Gfx *) gfxArg,/ % base bigneg

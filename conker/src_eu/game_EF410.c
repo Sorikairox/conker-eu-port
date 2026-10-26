@@ -515,7 +515,7 @@ void func_150C2804(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5) {
     sp1C.unk17 = 6;
     sp1C.unk18 = 3;
     sp1C.unk19 = -1;
-    func_15134908(&sp1C, 0, arg4, arg5);
+    point_emitter_spawn(&sp1C, 0, arg4, arg5);
 }
 extern f32 D_800A0658, D_800A065C, D_800A0660; // C2898 keeps these as externs: literals add 8 frame bytes (s105)
 void func_150C2898(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, struct_eu_2062D0_c *arg6) {
@@ -537,7 +537,7 @@ void func_150C2898(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     sp4C = func_150ADA68();
     sp50 = func_150ADA20();
     sp54 = func_150ADA20();
-    func_151D9014(sp6C, sp60, 6, (sp4C * D_800A065C) + D_800A0660, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (func_150ADA68() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
+    impact_dust_cloud_spawn(sp6C, sp60, 6, (sp4C * D_800A065C) + D_800A0660, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (func_150ADA68() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
 }
 extern f32 D_800A0670, D_800A0674, D_800A0678, D_800A067C, D_800A0680, D_800A0684, D_800A0688, D_800A068C;
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
@@ -581,8 +581,8 @@ void func_150C29F0(u8 *arg0)
   f32 s;
   f32 m;
   r = func_150ADA20() & 0xFF;
-  c = func_151423D8(r - 0x40);
- do { s = func_151423D8(r); p = (f32 *) (arg0 + 0x28); m = p[2] * func_150ADA68(); sp.u5C = 0x6231; sp.u5E = 0x1A4D; } while (0); // fakematch: same-line do-while (permuter) orders the two sh stores
+  c = angle_byte_cos(r - 0x40);
+ do { s = angle_byte_cos(r); p = (f32 *) (arg0 + 0x28); m = p[2] * func_150ADA68(); sp.u5C = 0x6231; sp.u5E = 0x1A4D; } while (0); // fakematch: same-line do-while (permuter) orders the two sh stores
   sp.u62 = 0;
   sp.u63 = 0;
   sp.u64 = 0;
@@ -1108,5 +1108,5 @@ void func_150C3D5C(struct127 *arg0) {
     header2.unk0 = arg0->x_position;
     header2.unk4 = arg0->y_position;
     header2.unk8 = arg0->z_position;
-    func_151602C0(&header, &header2, (func_150ADA20() % 52U) + 0x28, 0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
+    light_create_with_ctrl(&header, &header2, (func_150ADA20() % 52U) + 0x28, 0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

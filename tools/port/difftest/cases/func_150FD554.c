@@ -1,7 +1,7 @@
 s32 func_15046F70(u8 *, u16, f32, u8 *);
 void func_1504715C(void *, u8 *);
 s32 func_1505D024(struct127 *, s32, u16, s32);
-s32 func_1516284C(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 light_create_flicker_preset(s8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 memcpy(u8 *, struct127 **, s32);
 
 void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
@@ -185,7 +185,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u186 = 0xFF;
         sp.u164 = 1.0f;
         sp.u16C = 1.0f;
-        temp_v0 = func_1513D2F0(&sp.u130, (s32) ((u8 *)&D_800A22BC), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
+        temp_v0 = effect3d_spawn_full(&sp.u130, (s32) ((u8 *)&D_800A22BC), 0U, 0x2BU, 0U, 0x24U, 0U, 0, 0, 0x5C, (u8) (s32) arg1, arg2);
         temp_s0 = temp_v0 + 0x110;
         if (temp_v0 != NULL) {
             memcpy(temp_s0, &sp.uD4, 0x5C);
@@ -196,7 +196,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
             sp.uB8 = (s32) sp.u198;
             sp.uBC = (s32) sp.u19C;
             sp.uC0 = (s32) sp.u1A0;
-            (*(s32 *)((u8 *)temp_s0 + 0x24)) = func_1516284C(&sp.uC4, &sp.uB8, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, (s32) arg1, arg2);
+            (*(s32 *)((u8 *)temp_s0 + 0x24)) = light_create_flicker_preset(&sp.uC4, &sp.uB8, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, (s32) arg1, arg2);
             if (sp.u197 != 0) {
                 temp_t4 = ((u8 *)&D_800A4AA0);
                 sp.u60 = 3;
@@ -230,7 +230,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
                 sp.uB0 = 0;
                 sp.uB4 = 1;
                 sp.uB6 = 0xFF;
-                (*(s32 *)((u8 *)temp_s0 + 0x28)) = func_1513D594((s32) &sp.u60, (s32) ((u8 *)&D_800A4AA0), 0U, 0U, 0U, 0U, 0, 50.0f, 50.0f, 0, (s32) &sp.u1A8, 0, 0, 0U, 0, (u8) (s32) arg1, arg2);
+                (*(s32 *)((u8 *)temp_s0 + 0x28)) = effect3d_spawn_oriented((s32) &sp.u60, (s32) ((u8 *)&D_800A4AA0), 0U, 0U, 0U, 0U, 0, 50.0f, 50.0f, 0, (s32) &sp.u1A8, 0, 0, 0U, 0, (u8) (s32) arg1, arg2);
             }
         }
     }

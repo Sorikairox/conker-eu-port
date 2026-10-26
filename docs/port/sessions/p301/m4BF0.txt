@@ -19,7 +19,7 @@
 /gfx = (u8 \*) func_15142E24(gfx, &D_800915E8/s/&flag, 3/\&flag, 2/
 /gfx = (u8 \*) func_15142B7C((s32) gfx, 1, 0x160600);/s/1, 0x160600/0, 0x160600/
 /gfx = (u8 \*) func_15142B7C((s32) gfx, 1, 0x160600);/s/0x160600/0x160601/
-/gfx = (u8 \*) func_1513F4E4((s32) gfx, 0x4D, &flag);/s/0x4D/0x4E/
+/gfx = (u8 \*) gfx_set_combine_mode((s32) gfx, 0x4D, &flag);/s/0x4D/0x4E/
 /gfx = func_15142C10(gfx, style\[0x24\]/s/style\[0x24\], 0xFF/style[0x24], 0xFE/
 /gfx = func_15142C10(gfx, style\[0x24\]/s/style\[0x24\], style\[0x24\], style\[0x24\]/style[0x24], style[0x25], style[0x24]/
 /gfx = func_15142FBC((s32) gfx, D_800D30BC/s/0x2CA0/0x2CA1/

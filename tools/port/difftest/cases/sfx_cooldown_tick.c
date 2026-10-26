@@ -1,7 +1,7 @@
 #ifdef NON_MATCHING
 // P225 selftest case: a nested #if inside a NON_MATCHING block (nm_resolve used to take the nested #else / #endif
 // as the NM block's own and dropped the rest; DIFFTEST_NMNEST_OLD=1 = old). The difftest build has no PORT.
-void func_15103828(void) {
+void sfx_cooldown_tick(void) {
     s32 i;
 
     for (i = 0; i < 4; i++)
@@ -21,5 +21,5 @@ void func_15103828(void) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103828.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/sfx_cooldown_tick.s")
 #endif

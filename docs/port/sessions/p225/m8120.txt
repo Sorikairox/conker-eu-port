@@ -40,4 +40,4 @@
 65s/, 0)/, 1)/ %
 62s/spec.sound = // %
 37s/return (s32)info;/return 0;/ %
-65s/return (s32)func_15134DAC/return 1 + (s32)func_15134DAC/ %
+65s/return (s32)bone_emitter_spawn/return 1 + (s32)bone_emitter_spawn/ %

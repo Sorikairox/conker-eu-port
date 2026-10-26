@@ -26,7 +26,7 @@ void func_1518AF80(u8 *arg0) {
             if (k != 0) {
                 ((void (**)(s32))&D_8008D960)[k](*(s32 *)((u8 *)a2 + 0x10));
             }
-            func_1516972C(a2);
+            node_destroy(a2);
             *(s32 *)(arg0 + 0x1C) = *(s32 *)(arg0 + 0x1C) - 1;
             return;
         }
@@ -39,7 +39,7 @@ void func_1518AF80(u8 *arg0) {
 u8 *func_1518AADC(s32 arg0, s16 arg1, u8 arg2)
 {
   u8 *t;
-  t = func_15167A68(0x1D, 0, 0x28, 1, 0xFFU, 1U);
+  t = node_alloc(0x1D, 0, 0x28, 1, 0xFFU, 1U);
   if (t == 0)
   {
     return 0;
@@ -57,7 +57,7 @@ u8 *func_1518AADC(s32 arg0, s16 arg1, u8 arg2)
 u8 *func_1518B0D0(s32 arg0, u8 arg1)
 {
   u8 *temp_v0;
-  temp_v0 = func_15167A68(0x1E, 0, 0x20, 1, 0xFFU, 1U);
+  temp_v0 = node_alloc(0x1E, 0, 0x20, 1, 0xFFU, 1U);
   if (temp_v0 == 0)
   {
     return 0;
@@ -108,7 +108,7 @@ s32 func_1518B140(u8 *arg0, s32 arg1, u8 arg2) {
         if (k != 0) {
             ((void (**)(s32))&D_8008D960)[k](*(s32 *)(a1 + 0x10));
         }
-        func_1516972C(a1);
+        node_destroy(a1);
     }
     return 1;
 }

@@ -25,7 +25,7 @@ void func_150DFDA0(struct108 *arg0) {
     }
     if (arg0->unk374 == 750.0f) {
         arg0->unk1B4 = 3;
-        func_15124B18(arg0);
+        camera_apply_zoom_level(arg0);
     }
 }
 #else

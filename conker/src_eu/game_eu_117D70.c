@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-s32 func_15134DAC(void *, s32, u8 *, s16);
+s32 bone_emitter_spawn(void *, s32, u8 *, s16);
 s32 func_150EA560(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     struct {
         u8 u2C;
@@ -58,7 +58,7 @@ s32 func_150EA560(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     sp.u60 = 0.5f;
     t.u20 = 0.2f;
     t.u24 = 0.060000002f;
-    obj = func_15134DAC(&sp, 0x10, arg0, arg1);
+    obj = bone_emitter_spawn(&sp, 0x10, arg0, arg1);
     if (obj != 0) {
         memcpy(obj + 0x80, &t, 0x10);
     }
@@ -201,7 +201,7 @@ f32 func_150EAA10(u8 *arg0) {
     f32 r;
 
     q = &arg0;
-    r = func_151423D8((((u32) (*(u32 *)((u8 *)arg0 + 0x80)) >> 0x10) - 0x40));
+    r = angle_byte_cos((((u32) (*(u32 *)((u8 *)arg0 + 0x80)) >> 0x10) - 0x40));
     p = *q;
     r = (*(f32 *)((u8 *)p + 0x88)) + ((*(f32 *)((u8 *)p + 0x8C)) * (0, r)); // fakematch: (0, x) comma flips commutative operand order
     p += 0x80;
@@ -226,7 +226,7 @@ typedef struct {
     s8 u6C;
     u8 u6D;
 } sp_EAA80;
-u8 *func_1513418C(void *, s32, u8, s32);
+u8 *emitter_trail_spawn(void *, s32, u8, s32);
 void func_150EAA80(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     sp_EAA80 sp;
     s32 v;
@@ -255,7 +255,7 @@ void func_150EAA80(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     sp.u6B = 7;
     sp.u6C = -1;
     sp.u6D = 6;
-    func_1513418C(&sp, 0, 0xFF, 0);
+    emitter_trail_spawn(&sp, 0, 0xFF, 0);
 }
 
 s32 func_1513092C(void *, s32, s32);

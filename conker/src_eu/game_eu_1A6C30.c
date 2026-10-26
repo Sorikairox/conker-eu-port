@@ -32,7 +32,7 @@ void func_1517946C(s32 arg0) {
         if ((s32 *)D_800DD870 != NULL) {
             for (i = 0; i < 300; i++) {
                 if (((s32 **)D_800DD870)[i] != NULL) {
-                    func_1516972C((struct102 *)((s32 **)D_800DD870)[i]);
+                    node_destroy((struct102 *)((s32 **)D_800DD870)[i]);
                     ((s32 **)D_800DD870)[i] = NULL;
                 }
             }
@@ -234,8 +234,8 @@ typedef struct {
     s8 uA2;
     u8 padA3[5];
 } Spawn9B70;
-s32 func_1516865C(Spawn9B70 *, s32, s32, s32, s32);
-s32 func_15168800(Spawn9B70 *, u8, u8);
+s32 sprite_vtx_quads_init(Spawn9B70 *, s32, s32, s32, s32);
+s32 node_spawn_vtx_sprite(Spawn9B70 *, u8, u8);
 void func_15179B70(s32 arg0, s32 arg1) {
     s32 x2;
     s32 y2;
@@ -252,7 +252,7 @@ void func_15179B70(s32 arg0, s32 arg1) {
     sp.u8A = 0x33;
     sp.uA2 = 1;
     sp.u98 = 0;
-    func_1516865C(&sp, 0xFF, 0xFF, 0xFF, 0x50);
+    sprite_vtx_quads_init(&sp, 0xFF, 0xFF, 0xFF, 0x50);
     if (r) {} // fakematch: empty test of the not yet set r moves D_800DBFF0 to v0 (permuter)
     x = D_800DBFF0->unk2F8;
     y = D_800DBFF0->unk2FC;
@@ -276,7 +276,7 @@ void func_15179B70(s32 arg0, s32 arg1) {
     sp.uA1 = r + 0xA;
     sp.u80 = arg1;
     sp.u84 = D_800DD866;
-    v = func_15168800(&sp, 0xFF, 0);
+    v = node_spawn_vtx_sprite(&sp, 0xFF, 0);
     if (v != 0) {
         ((s32 *)D_800DD870)[D_800DD866] = v;
         D_800DD866++;
@@ -352,7 +352,7 @@ block_18:
     if ((temp_v0_3 & 2) && (var_a3 != 0)) {
         D_800DD866 -= 1;
         *(s32 *)(D_800DD870 + ((*(s16 *)((u8 *)arg0 + 0x94)) * 4)) = 0;
-        func_1516972C(arg0);
+        node_destroy(arg0);
         return;
     }
     if (temp_v0_3 & 1) {
@@ -411,7 +411,7 @@ s32 func_150ADA20(void);
 /* rain_spawn_splashes: count times, picks a random point in the 500 x 500 square from the rain centre
  * D_800DD868 (s16 x +0, z +4), finds the ground height there (func_1510FE58 from height 10000; -10000 = no ground)
  * and spawns a splash sprite (texture 0x12, flags 0x9804, size 0x19, 0x80 at +0x8A) on it. The spawn record is one
- * stack struct (func_15168800 copies 0xA8 bytes of it). */
+ * stack struct (node_spawn_vtx_sprite copies 0xA8 bytes of it). */
 void func_1517A084(s32 count) {
     Spawn9B70 sp;
     s32 cx;
@@ -440,8 +440,8 @@ void func_1517A084(s32 count) {
             sp.uA0 = 0x12;
             sp.u98 = 0x9804;
             sp.uA1 = 0;
-            func_1516865C(&sp, 0xFF, 0xFF, 0xFF, 0xFF);
-            func_15168800(&sp, 0xFF, 0);
+            sprite_vtx_quads_init(&sp, 0xFF, 0xFF, 0xFF, 0xFF);
+            node_spawn_vtx_sprite(&sp, 0xFF, 0);
         }
     }
 }

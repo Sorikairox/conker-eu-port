@@ -36,7 +36,7 @@ s32 func_1500F240(f32 arg0, f32 arg1, f32 arg2) {
     sp.u5C = 0;
     sp.u5D = 0xFF;
     sp.u60 = 0x30001;
-    return func_1513C5B0((s32) &sp.u48, 0, 0U, 0U, arg0, arg1, arg2, 110.0f, 110.0f, 0U, 0U, 0, 0xFFU, 0);
+    return sprite_fx_spawn_quad((s32) &sp.u48, 0, 0U, 0U, arg0, arg1, arg2, 110.0f, 110.0f, 0U, 0U, 0, 0xFFU, 0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3CA50/func_1500F240.s")

@@ -11,7 +11,7 @@ u8 *func_151B3660(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     f32 temp_f0;
     u8 *sp24;
 
-    temp_v0 = func_15167A68(0x33, arg4, arg2 + 0x150, 1, (u8) (s32) arg3, 1U);
+    temp_v0 = node_alloc(0x33, arg4, arg2 + 0x150, 1, (u8) (s32) arg3, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -58,7 +58,7 @@ void func_151B3734(Obj_151B3734 *arg0) {
         }
     }
     if (done) {
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
     }
 }
 
@@ -67,7 +67,7 @@ void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
 s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 s32 func_15142FBC(s32, s32, s32, s8 *);
 /* rope style getters (by obj +0x2E): geometry mode set / clear, prim colour, env colour, combine, render mode,
@@ -162,7 +162,7 @@ s32 func_151B3878(s32 gfx, u8 *obj, s16 id) {
     gfx = func_15142B7C(gfx, geoSet, geoClr);
     gfx = func_15142C10(gfx, primR, primG, primB, primA, &flag);
     gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &flag);
-    gfx = func_1513F4E4(gfx, tex, &flag);
+    gfx = gfx_set_combine_mode(gfx, tex, &flag);
     gfx = func_15142E24(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
     gfx = func_15142FBC(gfx, rmode | 0x80000 | D_800D30BC | 0x2CA0,
                         D_800A4EA8[rmodePair * 2 + 1] | D_800A4EA8[rmodePair * 2], &flag);
@@ -835,10 +835,10 @@ void func_151B51CC(void *arg0);
 
 void func_151B521C(void *arg0) {
     func_151B51CC(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_151B5248(void *arg0) {
     func_151B51CC(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }

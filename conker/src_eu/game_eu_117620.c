@@ -165,7 +165,7 @@ s32 func_150E9E10(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
     h2.unk0 = ((f32 *)arg0)[0];
     h2.unk4 = ((f32 *)arg0)[1];
     h2.unk8 = ((f32 *)arg0)[2];
-    func_151602C0(&hdr, &h2, (func_150ADA20() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+    light_create_with_ctrl(&hdr, &h2, (func_150ADA20() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
 void func_15143794(s16, s16, f32, void *);

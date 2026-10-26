@@ -34,7 +34,7 @@ void func_150B2974(u8 *arg0, s32 arg1, s32 arg2) {
 // emit_point_spark: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
 // s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`): queues one func_15156700 particle (the S_3f24 record of
 // game_eu_17D3C0) at (x, y, z) flying out along the byte angle a with a random pitch of -30..-10 (rand % 21 - 30):
-// velocity (10 sin(p) sin(a - 0x40), -10 sin(p - 0x40), 10 sin(p) sin(a)) (func_151423D8 = byte-angle sine), random
+// velocity (10 sin(p) sin(a - 0x40), -10 sin(p - 0x40), 10 sin(p) sin(a)) (angle_byte_cos = byte-angle sine), random
 // sizes 0.859 * r + 3.608 / 0.309 * r + 2.371 / 1.39 * r + 3.21 (rodata D_8009FCD0..E4), two palette-8 colour
 // triples (func_151429E0) with alpha 0xFF, 9, life 18..24 (rand % 7 + 18), 0x1601, -1, 8, 0x1F; owner byte argB.
 // Always returns 1 (go on).
@@ -51,7 +51,7 @@ typedef struct {
     s16 h;
     s16 i;
 } Spark2A50;
-f32 func_151423D8(u8);
+f32 angle_byte_cos(u8);
 void func_151429E0(u8, u8 *, u8 *, u8 *);
 s32 func_15156700(Spark2A50 *, u8, s32, u8, s32);
 
@@ -61,11 +61,11 @@ s32 func_150B2A50(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     f32 ca, sa, cp, spd;
     s16 pitch;
 
-    ca = func_151423D8((a - 0x40) & 0xFF);
-    sa = func_151423D8(a & 0xFF);
+    ca = angle_byte_cos((a - 0x40) & 0xFF);
+    sa = angle_byte_cos(a & 0xFF);
     pitch = (u32) func_150ADA20() % 21U - 30;
-    cp = func_151423D8((pitch - 0x40) & 0xFF);
-    spd = 10.0f * func_151423D8(pitch & 0xFF);
+    cp = angle_byte_cos((pitch - 0x40) & 0xFF);
+    spd = 10.0f * angle_byte_cos(pitch & 0xFF);
     sp.pos[0] = x;
     sp.pos[1] = y;
     sp.pos[2] = z;

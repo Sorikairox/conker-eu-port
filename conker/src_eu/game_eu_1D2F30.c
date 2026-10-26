@@ -154,5 +154,5 @@ void func_151A5B84(u8 *arg0, s32 arg1, u8 arg2) {
 void func_151A5BCC(s32 arg0, u8 arg1) {
     const s32 sp1C[1] = {0x5A};
 
-    func_15169260(sp1C, 1, arg0, arg1);
+    node_broadcast_types(sp1C, 1, arg0, arg1);
 }

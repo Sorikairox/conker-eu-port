@@ -8,84 +8,85 @@
 
 s32 func_151149AC(u8);
 
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
-struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
-void func_151603FC(struct225 *arg0);
-s32  func_15160600(struct225 *arg0);
-s32  func_1516065C(struct225 *arg0);
-s32  func_15160684(struct225 *arg0);
-s32  func_151607A4(struct225 *arg0);
-void func_15160954(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4);
-s32  func_15161238(struct127 *arg0, struct127 *arg1);
-struct225 *func_1516127C(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161334(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161408(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161494(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161540(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_151615F8(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
-void func_151616D0(u8 arg0, u8 arg1, s32 arg2);
-void func_15161714(struct225 *arg0);
-void func_15161740(struct225 *arg0);
-void func_1516176C(struct225 *arg0);
-void func_15161798(struct225 *arg0);
-void func_151617C4(struct225 *arg0);
-void func_151617E4(struct225 *arg0);
-void func_15161804(struct225 *arg0);
-void func_15161860(struct225 *arg0);
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6);
-struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
-s32  func_15161A68(struct225 *arg0);
-struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
+struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
+struct225 *light_ctrl_alloc(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
+void light_ctrl_update(struct225 *arg0);
+s32  light_beh_tweak_intensity(struct225 *arg0);
+s32  light_beh_sine_pulse(struct225 *arg0);
+s32  light_beh_flicker(struct225 *arg0);
+s32  light_beh_lightning(struct225 *arg0);
+void light_lightning_start_flash(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4);
+s32  obj_is_live_other(struct127 *arg0, struct127 *arg1);
+struct225 *light_spawn_pulse_a(s32 arg0, u8 arg1, s32 arg2);
+struct225 *light_spawn_flicker_a(s32 arg0, u8 arg1, s32 arg2);
+struct225 *light_spawn_kind8(s32 arg0, u8 arg1, s32 arg2);
+struct225 *light_spawn_pulse_b(s32 arg0, u8 arg1, s32 arg2);
+struct225 *light_spawn_pulse_c(s32 arg0, u8 arg1, s32 arg2);
+struct225 *light_spawn_lightning(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
+void light_ctrl_broadcast(u8 arg0, u8 arg1, s32 arg2);
+void light_obj_destroy_a(struct225 *arg0);
+void light_obj_delete_a(struct225 *arg0);
+void light_obj_destroy_b(struct225 *arg0);
+void light_obj_delete_b(struct225 *arg0);
+void light_ctrl_retire(struct225 *arg0);
+void light_ctrl_free(struct225 *arg0);
+void light_ctrl_destroy(struct225 *arg0);
+void light_ctrl_delete(struct225 *arg0);
+void light_play_zap_sfx(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6);
+struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
+s32  light_beh_scripted(struct225 *arg0);
+struct225 *light_create_obj_follow(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
 #ifdef NON_MATCHING
-s32 func_15161F2C(struct225 *arg0);
+s32 light_beh_follow_obj(struct225 *arg0);
 #else
-void func_15161F2C(struct225 *arg0);
+void light_beh_follow_obj(struct225 *arg0);
 #endif
-struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2);
-void func_15162110(s32 arg0);
-struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
-struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 size, u8 arg8, u8 arg9, s32 argA);
+struct225 *light_spawn_flicker_b(s32 arg0, u8 arg1, s32 arg2);
+void ambient_pulse_spawn(s32 arg0);
+struct225 *light_spawn_flicker_preset(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
+struct225 *light_create_flicker_preset(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 size, u8 arg8, u8 arg9, s32 argA);
 #ifdef NON_MATCHING
-void func_15162EF8(struct239 *arg0, s32 phase);
+void light_env_phase_on(struct239 *arg0, s32 phase);
 #else
-void func_15162EF8(struct239 *arg0);
+void light_env_phase_on(struct239 *arg0);
 #endif
 #ifdef NON_MATCHING
-void func_15162F50(struct239 *arg0, s32 phase);
+void light_env_phase_off(struct239 *arg0, s32 phase);
 #else
-void func_15162F50(struct239 *arg0);
+void light_env_phase_off(struct239 *arg0);
 #endif
-struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
-struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
-struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-s32  func_15163704(struct225 *arg0);
-void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
-struct225 *func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-s32  func_151639D0(struct225 *arg0, s32 arg1, u8 arg2);
-void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2);
-struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2);
-s32  func_15163B98(struct230 *arg0);
-struct225 *func_15163BE8(s32 arg0, u8 arg1, s32 arg2);
-s32  func_15163CD0(struct225 *arg0);
-void func_15163CF8(struct227 *arg0, struct225 *arg1);
-void func_15163DEC(struct225 *arg0, struct228 *arg1);
-s32  func_15163F50(struct225 *arg0, struct225 *arg1);
-struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
-s32  func_1516429C(struct237 *arg0);
-void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2);
-s32  func_151643F8(struct225 *arg0);
-void func_1516441C(struct225 *arg0, s32 *arg1);
-void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4);
-s32  func_151644A8(struct242 *arg0);
+struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
+struct225 *light_create_track_ptrs(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
+struct225 *light_spawn_pulse_preset(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+s32  light_beh_pulse_once(struct225 *arg0);
+void light_ctrl_spawn_static(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
+struct225 *light_ctrl_spawn(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+s32  light_msg_off_on(struct225 *arg0, s32 arg1, u8 arg2);
+void light_msg_on_off(struct225 *arg0, s32 arg1, u8 arg2);
+struct225 *light_create_obj_pulse(u8 arg0, u8 arg1, s32 arg2);
+s32  light_beh_obj_pulse(struct230 *arg0);
+struct225 *light_create_joint_pulse(s32 arg0, u8 arg1, s32 arg2);
+s32  light_beh_joint_pulse(struct225 *arg0);
+void light_sine_intensity_step(struct227 *arg0, struct225 *arg1);
+void light_flicker_intensity_step(struct225 *arg0, struct228 *arg1);
+s32  light_follow_obj_pos(struct225 *arg0, struct225 *arg1);
+struct225 *light_spawn_flash(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
+s32  light_beh_flash_decay(struct237 *arg0);
+void light_msg_set_flag(struct225 *arg0, s32 arg1, u8 arg2);
+s32  light_beh_transform_pos(struct225 *arg0);
+void light_set_transformed_pos(struct225 *arg0, s32 *arg1);
+void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4);
+s32  light_beh_orbit(struct242 *arg0);
 
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA) {
+/* was func_151602C0 */
+struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA) {
     struct225 *ret;
     struct226 *sp30;
 
     ret = NULL;
     sp30 = func_1515D5F8(header2->unk0, header2->unk4, header2->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
     if (sp30 != 0) {
-        ret = func_1516037C(header, sp30, offset, arg9, argA);
+        ret = light_ctrl_alloc(header, sp30, offset, arg9, argA);
         if (ret != 0) {
             ret->unkE |= 2;
         } else {
@@ -95,8 +96,9 @@ struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s
     return ret;
 }
 
-struct225 *func_1516037C(Header *header, struct226 *arg1, s32 offset, u8 arg3, s32 arg4) {
-    struct225 *ret = func_15167A68(53, arg4, offset + 24, 1, arg3, 1);
+/* was func_1516037C */
+struct225 *light_ctrl_alloc(Header *header, struct226 *arg1, s32 offset, u8 arg3, s32 arg4) {
+    struct225 *ret = node_alloc(53, arg4, offset + 24, 1, arg3, 1);
     if (ret == 0) {
         return NULL;
     }
@@ -108,8 +110,9 @@ struct225 *func_1516037C(Header *header, struct226 *arg1, s32 offset, u8 arg3, s
 #ifdef NON_MATCHING
 // light_effect_update: P234 (port fix). Counts the effect's life down (+0x10, flag 1 of +0xE) and runs its handler
 // D_8008B0F0[+0xF] with the effect (the asm keeps a0 = the effect at the jalr; the matched C passed nothing, so the
-// port handlers got NULL: Total War null+0x24 writes); a 0 result or an expired life frees it (func_1516972C).
-void func_151603FC(struct225 *arg0) {
+// port handlers got NULL: Total War null+0x24 writes); a 0 result or an expired life frees it (node_destroy).
+/* was func_151603FC */
+void light_ctrl_update(struct225 *arg0) {
     s32 pad;
     u8 ret = 0;
 
@@ -123,11 +126,11 @@ void func_151603FC(struct225 *arg0) {
         ret = 1;
     }
     if (ret) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 #else
-void func_151603FC(struct225 *arg0) {
+void light_ctrl_update(struct225 *arg0) {
     s32 pad;
     u8 ret = 0;
 
@@ -141,7 +144,7 @@ void func_151603FC(struct225 *arg0) {
         ret = 1;
     }
     if (ret) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 #endif
@@ -149,7 +152,8 @@ void func_151603FC(struct225 *arg0) {
 // requires jump table
 extern s32 (*D_8008B4F0[])(struct225 *);
 
-void func_151604A0(struct225 *arg0, u8 *arg1, u8 arg2) {
+/* was func_151604A0 */
+void light_ctrl_handle_message(struct225 *arg0, u8 *arg1, u8 arg2) {
     s32 pad[2]; // fakematch: frame is 8 bytes larger than the locals need
     struct17 tmp;
 
@@ -173,14 +177,14 @@ void func_151604A0(struct225 *arg0, u8 *arg1, u8 arg2) {
                 tmp.unk0 = arg0->unk14->unkE;
                 tmp.unk4 = arg0->unk14->unk10;
                 tmp.unk8 = arg0->unk14->unk12;
-                func_151618BC(16000, 0, 0, 0, &tmp, 500, 1000);
+                light_play_zap_sfx(16000, 0, 0, 0, &tmp, 500, 1000);
                 break;
             case 0x1F:
                 arg0->unkF = 0xB;
                 arg0->unk14->unk9 = 0;
                 break;
             case 0x22:
-                func_1516972C((struct102 *)arg0);
+                node_destroy((struct102 *)arg0);
                 break;
             }
         }
@@ -193,22 +197,26 @@ void func_151604A0(struct225 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-s32 func_15160600(struct225 *arg0) {
-    arg0->unk14->unk2F = func_151422DC(0, &D_800A6690, 0, 0xFF, 0xFF, &D_800A6698, 575);
+/* was func_15160600 */
+s32 light_beh_tweak_intensity(struct225 *arg0) {
+    arg0->unk14->unk2F = debug_tweak_int(0, &D_800A6690, 0, 0xFF, 0xFF, &D_800A6698, 575);
     return 1;
 }
 
-s32 func_1516065C(struct225 *arg0) {
-    func_15163CF8(&arg0->unk18, arg0);
+/* was func_1516065C */
+s32 light_beh_sine_pulse(struct225 *arg0) {
+    light_sine_intensity_step(&arg0->unk18, arg0);
     return 1;
 }
 
-s32 func_15160684(struct225 *arg0) {
-    func_15163DEC(arg0, &arg0->unk18);
+/* was func_15160684 */
+s32 light_beh_flicker(struct225 *arg0) {
+    light_flicker_intensity_step(arg0, &arg0->unk18);
     return 1;
 }
 
-s32 func_151606A8(struct225 *arg0) {
+/* was func_151606A8 */
+s32 light_beh_rotated_offset(struct225 *arg0) {
     struct227 **pp = &arg0->unk18;
     s32 pad[1];
     f32 mtx[4][4];
@@ -227,7 +235,8 @@ s32 func_151606A8(struct225 *arg0) {
     return 1;
 }
 
-s32 func_151607A4(struct225 *arg0) {
+/* was func_151607A4 */
+s32 light_beh_lightning(struct225 *arg0) {
     struct227 *temp_a1 = &arg0->unk18;
     if (arg0->unk28 != 0) {
         if (temp_a1->unkC < 0.0f) {
@@ -236,7 +245,7 @@ s32 func_151607A4(struct225 *arg0) {
                 temp_a1->unk4 = temp_a1->unk0;
                 temp_a1->unk10 -= 1;
                 if (temp_a1->unk10 != 0) {
-                    func_15160954(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
+                    light_lightning_start_flash(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
                 }
             }
         } else {
@@ -244,13 +253,14 @@ s32 func_151607A4(struct225 *arg0) {
         }
     } else if (func_150ADA68() < 0.0050000004f) {
         temp_a1->unk10 = (func_150ADA20() % 5U) + 1;
-        func_15160954(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
+        light_lightning_start_flash(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
     }
     arg0->unk14->unk2F = arg0->unk1C;
     return 1;
 }
 
-void func_15160954(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4) {
+/* was func_15160954 */
+void light_lightning_start_flash(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4) {
     s32 pad0;
     struct17 tmp;
     s32 pad1;
@@ -264,11 +274,12 @@ void func_15160954(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4) 
     tmp.unk8 = arg4->unk14->unk12;
 
     if (arg4->unk2A != 0) {
-        func_151618BC(25000, 0, 0, 0, &tmp, 500, 1500);
+        light_play_zap_sfx(25000, 0, 0, 0, &tmp, 500, 1500);
     }
 }
 
-struct225 *func_15160A58(struct127 *arg0, u8 arg1, struct17 *arg2, u8 arg3, s16 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 argB, s32 argC, u8 argD, u8 argE, s32 argF) {
+/* was func_15160A58 */
+struct225 *light_create_obj_joint(struct127 *arg0, u8 arg1, struct17 *arg2, u8 arg3, s16 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 argB, s32 argC, u8 argD, u8 argE, s32 argF) {
     struct225 *temp_v0;
     Header header;
     struct {
@@ -297,7 +308,7 @@ struct225 *func_15160A58(struct127 *arg0, u8 arg1, struct17 *arg2, u8 arg3, s16 
     header2.unk8 = 0;
     data.unk14 = argB;
     data.unk15 = argD;
-    temp_v0 = func_151602C0(&header, &header2, arg5, arg6, arg7, arg8, 0xFF, 0, argC + 0x18, argE, argF);
+    temp_v0 = light_create_with_ctrl(&header, &header2, arg5, arg6, arg7, arg8, 0xFF, 0, argC + 0x18, argE, argF);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &data, sizeof(data));
     }
@@ -318,7 +329,8 @@ extern u8 (*D_8008B598[])(struct225 *);
 
 typedef struct { f32 x, y, z; } V3_60B74;
 
-u8 func_15160B74(struct225 *arg0) {
+/* was func_15160B74 */
+u8 light_beh_follow_joint(struct225 *arg0) {
     u8 ret;
     u8 *obj;
     u8 *s;
@@ -351,7 +363,8 @@ u8 func_15160B74(struct225 *arg0) {
 }
 
 // another struct definition
-struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF) {
+/* was func_15160CDC */
+struct225 *light_create_obj_beam(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF) {
     struct225 *temp_v0;
     Header header;
     struct {
@@ -388,14 +401,14 @@ struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg
     header2.unk0 = 0;
     header2.unk4 = 0;
     header2.unk8 = 0;
-    temp_v0 = func_151602C0(&header, &header2, arg7, arg8, arg9, argA, 0xFF, 0, sizeof(data), argE, argF);
+    temp_v0 = light_create_with_ctrl(&header, &header2, arg7, arg8, arg9, argA, 0xFF, 0, sizeof(data), argE, argF);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &data, sizeof(data));
     }
     return temp_v0;
 }
 
-// similar to func_15160B74
+// similar to light_beh_follow_joint
 #ifdef NON_MATCHING
 void func_15145EA4(f32 **, f32 **, void *, s32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
@@ -408,17 +421,18 @@ typedef struct {
     u8 hit;         /* +0x59: what was hit (0 = nothing, 1 = world, >= 2 = an object) */
     u8 pad5A[2];
 } Ray_60E30;
-/* data at +0x18 (func_15160CDC): object, its unique id, attach point, offset (+8), ray end (+0x14), scale (+0x20),
+/* data at +0x18 (light_create_obj_beam): object, its unique id, attach point, offset (+8), ray end (+0x14), scale (+0x20),
  * flags (+0x24: 1 = cast, 2 = poke kind 0x9E). */
 
-/* light_beam_update: P237. D_8008B0F0 handler for the beam lights of func_15160CDC. Ends the light (0) when its
+/* light_beam_update: P237. D_8008B0F0 handler for the beam lights of light_create_obj_beam. Ends the light (0) when its
  * object is gone or was reused (unique id). Without attach matrices (+0x1D4), without flag 1, or for a hidden
  * object (+0x74 & 0xF == 0xF), the light sits at the object position (light +0xE / +0x10 / +0x12) with brightness
  * +0x2F = 0 and +9 = 1. Else the offset and end points go through attach matrix `point` (func_15145EA4), and when
  * the direction between them is not degenerate (func_15145128) a ray is cast from the start along it
  * (func_15081A90): no hit = as above; a hit moves the light to the hit point with brightness
  * clamp(scale * t, 0, 255) and +9 = 0, and with flag 2 a hit object of kind 0x9E gets +0x2E4 = 1. Returns 1. */
-s32 func_15160E30(struct225 *arg0) {
+/* was func_15160E30 */
+s32 light_beh_beam_raycast(struct225 *arg0) {
     u8 *obj = *(u8 **) ((u8 *) arg0 + 0x18);
     u8 *s = (u8 *) arg0 + 0x18;
     f32 *src[2];
@@ -475,10 +489,11 @@ s32 func_15160E30(struct225 *arg0) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160E30.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_beh_beam_raycast.s")
 #endif
 
-s32 func_15161238(struct127 *arg0, struct127 *arg1) {
+/* was func_15161238 */
+s32 obj_is_live_other(struct127 *arg0, struct127 *arg1) {
     if (arg0->interaction_state == 0) {
         return 0;
     }
@@ -491,7 +506,8 @@ s32 func_15161238(struct127 *arg0, struct127 *arg1) {
     return 1;
 }
 
-struct225 *func_1516127C(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_1516127C */
+struct225 *light_spawn_pulse_a(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     Header header;
     f32 src[4];
@@ -507,14 +523,15 @@ struct225 *func_1516127C(s32 arg0, u8 arg1, s32 arg2) {
 
     src[3] = 0.1021f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg1, arg2);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(src), arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, sizeof(src));
     }
     return temp_v0;
 }
 
-struct225 *func_15161334(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_15161334 */
+struct225 *light_spawn_flicker_a(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     Header header;
     f32 tmp1[8];
@@ -534,14 +551,15 @@ struct225 *func_15161334(s32 arg0, u8 arg1, s32 arg2) {
     tmp1[6] = 0.2489f;
     tmp1[7] = 127.0f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp1), arg1, arg2);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(tmp1), arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &tmp1, sizeof(tmp1));
     }
     return temp_v0;
 }
 
-struct225 *func_15161408(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_15161408 */
+struct225 *light_spawn_kind8(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     Header header;
     s32 tmp;
@@ -553,7 +571,7 @@ struct225 *func_15161408(s32 arg0, u8 arg1, s32 arg2) {
     header.unk2 = 300;
     header.unk4 = 8;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp), arg1, arg2);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(tmp), arg1, arg2);
 
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
@@ -561,7 +579,8 @@ struct225 *func_15161408(s32 arg0, u8 arg1, s32 arg2) {
     return temp_v0;
 }
 
-struct225 *func_15161494(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_15161494 */
+struct225 *light_spawn_pulse_b(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     Header header;
     f32 tmp[4];
@@ -576,14 +595,15 @@ struct225 *func_15161494(s32 arg0, u8 arg1, s32 arg2) {
     tmp[2] = 0.0f;
     tmp[3] = 0.08f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp), arg1, arg2);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(tmp), arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
     }
     return temp_v0;
 }
 
-struct225 *func_15161540(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_15161540 */
+struct225 *light_spawn_pulse_c(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     Header header;
     f32 tmp[4];
@@ -598,14 +618,15 @@ struct225 *func_15161540(s32 arg0, u8 arg1, s32 arg2) {
     header.unk2 = 300;
     header.unk4 = 5;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp), arg1, arg2);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(tmp), arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
     }
     return temp_v0;
 }
 
-struct225 *func_151615F8(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
+/* was func_151615F8 */
+struct225 *light_spawn_lightning(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
     struct225 *temp_v0;
     Header header;
     struct232 tmp1;
@@ -631,58 +652,67 @@ struct225 *func_151615F8(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5)
     header.unk2 = 300;
     header.unk4 = arg3;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp1), arg4, arg5);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(tmp1), arg4, arg5);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &tmp1, sizeof(tmp1));
     }
     return temp_v0;
 }
 
-void func_151616D0(u8 arg0, u8 arg1, s32 arg2) {
+/* was func_151616D0 */
+void light_ctrl_broadcast(u8 arg0, u8 arg1, s32 arg2) {
     struct234 tmp;
 
     tmp.unk0 = arg0;
     tmp.unk4 = arg2;
 
-    func_1516944C(53, &tmp, arg1);
+    node_broadcast_type(53, &tmp, arg1);
 }
 
-void func_15161714(struct225 *arg0) {
+/* was func_15161714 */
+void light_obj_destroy_a(struct225 *arg0) {
     func_1514EDF0(arg0, arg0->unk18);
-    func_151617C4(arg0);
+    light_ctrl_retire(arg0);
 }
 
-void func_15161740(struct225 *arg0) {
+/* was func_15161740 */
+void light_obj_delete_a(struct225 *arg0) {
     func_1514EDF0(arg0, arg0->unk18);
-    func_151617E4(arg0);
+    light_ctrl_free(arg0);
 }
 
-void func_1516176C(struct225 *arg0) {
+/* was func_1516176C */
+void light_obj_destroy_b(struct225 *arg0) {
     func_1514EDF0(arg0, arg0->unk18);
-    func_151617C4(arg0);
+    light_ctrl_retire(arg0);
 }
 
-void func_15161798(struct225 *arg0) {
+/* was func_15161798 */
+void light_obj_delete_b(struct225 *arg0) {
     func_1514EDF0(arg0, arg0->unk18);
-    func_151617E4(arg0);
+    light_ctrl_free(arg0);
 }
 
-void func_151617C4(struct225 *arg0) {
-    func_15169804(arg0);
+/* was func_151617C4 */
+void light_ctrl_retire(struct225 *arg0) {
+    node_retire(arg0);
 }
 
-void func_151617E4(struct225 *arg0) {
-    func_15169824(arg0);
+/* was func_151617E4 */
+void light_ctrl_free(struct225 *arg0) {
+    node_unlink_free(arg0);
 }
 
-void func_15161804(struct225 *arg0) {
+/* was func_15161804 */
+void light_ctrl_destroy(struct225 *arg0) {
     if ((arg0->unkE & 2) != 0) {
         func_1515F10C(arg0->unk14, arg0);
     }
     D_8008B208[arg0->unk12](arg0);
 }
 
-void func_15161860(struct225 *arg0) {
+/* was func_15161860 */
+void light_ctrl_delete(struct225 *arg0) {
     if ((arg0->unkE & 2) != 0) {
         func_1515F10C(arg0->unk14, arg0);
     }
@@ -695,13 +725,15 @@ typedef struct {
 
 extern struct_eu_151618BC D_800A6AC4;
 
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6) {
+/* was func_151618BC */
+void light_play_zap_sfx(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6) {
     struct_eu_151618BC tbl = D_800A6AC4;
 
     func_10010F88(tbl.unk0[(u32)func_150ADA20() % 10], arg0, arg1, arg2, arg3, arg4[0], arg4[1], arg4[2], arg5, arg6);
 }
 
-struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3) {
+/* was func_151619A0 */
+struct225 *light_create_scripted(s32 arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct225 *temp_v0;
     Header header;
     s32 tmp;
@@ -718,14 +750,15 @@ struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3) {
     header2.unk4 = 0;
     header2.unk8 = 0;
 
-    temp_v0 = func_151602C0(&header, &header2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, sizeof(tmp), arg2, arg3);
+    temp_v0 = light_create_with_ctrl(&header, &header2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, sizeof(tmp), arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
     }
     return temp_v0;
 }
 
-s32 func_15161A68(struct225 *arg0) {
+/* was func_15161A68 */
+s32 light_beh_scripted(struct225 *arg0) {
     struct233 **tmp = &D_800C3958; // fakematch?
 
     if (D_800C35EA == 1) {
@@ -791,7 +824,8 @@ s32 func_15161A68(struct225 *arg0) {
     return 1;
 }
 
-struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
+/* was func_15161E24 */
+struct225 *light_create_obj_follow(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
     struct225 *temp_v0;
     Header header;
     struct244 tmp;
@@ -814,7 +848,7 @@ struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, 
     header2.unk4 = arg0->y_position;
     header2.unk8 = arg0->z_position;
 
-    temp_v0 = func_151602C0(&header, &header2, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(tmp), arg8, arg9);
+    temp_v0 = light_create_with_ctrl(&header, &header2, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(tmp), arg8, arg9);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
     }
@@ -822,25 +856,27 @@ struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, 
 }
 
 #ifdef NON_MATCHING
-// handler 10 of D_8008B0F0 (P234): the dispatcher func_151603FC tests the result, which is func_15163F50's v0 left in
+// handler 10 of D_8008B0F0 (P234): the dispatcher light_ctrl_update tests the result, which is light_follow_obj_pos's v0 left in
 // place by the matched void C; s32 here, one signature for wasm
-s32 func_15161F2C(struct225 *arg0) {
-    return func_15163F50(arg0, &arg0->unk18);
+/* was func_15161F2C */
+s32 light_beh_follow_obj(struct225 *arg0) {
+    return light_follow_obj_pos(arg0, &arg0->unk18);
 }
 #else
-void func_15161F2C(struct225 *arg0) {
-    func_15163F50(arg0, &arg0->unk18);
+void light_beh_follow_obj(struct225 *arg0) {
+    light_follow_obj_pos(arg0, &arg0->unk18);
 }
 #endif
 
 extern void (*D_8008B6F8[])(u8 *, u8 *, u8);
-void func_15161F4C(u8 *arg0, u8 *arg1, u8 arg2)
+/* was func_15161F4C */
+void light_follow_handle_message(u8 *arg0, u8 *arg1, u8 arg2)
 {
   u8 *v = arg0 + 0x18;
   if (arg2 == 0)
   {
     s32 blk_t; // fakematch: block-local declaration = basic-block boundary (s69)
-    if ((*(s32 *)v == *(s32 *)arg1) || (v[4] == arg1[4])) { func_1516972C((struct102 *)arg0); }
+    if ((*(s32 *)v == *(s32 *)arg1) || (v[4] == arg1[4])) { node_destroy((struct102 *)arg0); }
   }
   else if (arg2 == 0x2D)
   {
@@ -850,7 +886,8 @@ void func_15161F4C(u8 *arg0, u8 *arg1, u8 arg2)
   if (D_8008B6F8[arg0[0x1D]] != NULL) { D_8008B6F8[arg0[0x1D]](arg0, arg1, arg2); }
 }
 
-struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_15162034 */
+struct225 *light_spawn_flicker_b(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     Header header;
     f32 src[8];
@@ -870,14 +907,15 @@ struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2) {
     src[6] = 0.2489f;
     src[7] = 127.0f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg1, arg2);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(src), arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, sizeof(src));
     }
     return temp_v0;
 }
 
-void func_15162110(s32 arg0) {
+/* was func_15162110 */
+void ambient_pulse_spawn(s32 arg0) {
     struct236 *temp_v0;
     f32 src[8];
 
@@ -896,7 +934,8 @@ void func_15162110(s32 arg0) {
     }
 }
 
-void func_151621B8(u8 *volatile arg0) { // fakematch: volatile gives the arg0 home reload (s101 recipe)
+/* was func_151621B8 */
+void ambient_pulse_update(u8 *volatile arg0) { // fakematch: volatile gives the arg0 home reload (s101 recipe)
     s32 pad; // fakematch: frame slot
     f32 s;
     f32 *p;
@@ -908,7 +947,7 @@ void func_151621B8(u8 *volatile arg0) { // fakematch: volatile gives the arg0 ho
     p[6] = func_15144B68(p[6]);
 }
 // NON-MATCHING: not quite right here
-// struct235 *func_151621B8(struct236 *arg0) {
+// struct235 *ambient_pulse_update(struct236 *arg0) {
 //     struct235 *temp_v0;
 //     f32 temp_f0;
 //     u8 temp_a0;
@@ -931,7 +970,8 @@ void func_151621B8(u8 *volatile arg0) { // fakematch: volatile gives the arg0 ho
 // }
 
 // help.
-struct225 *func_151623F4(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s8 arg4, s16 arg5, u8 arg6, s32 arg7) {
+/* was func_151623F4 */
+struct225 *light_spawn_colour_pulse(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s8 arg4, s16 arg5, u8 arg6, s32 arg7) {
     struct {
         struct17 unk0;
         struct17 unkC;
@@ -952,13 +992,14 @@ struct225 *func_151623F4(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s8 arg4, s16 arg5,
     header.unk1 = arg4;
     header.unk2 = arg5;
     header.unk4 = arg2;
-    temp_v0 = func_1516037C(&header, arg0, sizeof(data), arg6, arg7);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(data), arg6, arg7);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &data, sizeof(data));
     }
     return temp_v0;
 }
-s32 func_15162510(u8 *arg0) {
+/* was func_15162510 */
+s32 light_beh_colour_pulse(u8 *arg0) {
     f32 s;
     f32 *p;
 
@@ -971,7 +1012,7 @@ s32 func_15162510(u8 *arg0) {
     p[6] = func_15144B68(p[6]);
     return 1;
 }
-// s32 func_15162510(struct237 *arg0) {
+// s32 light_beh_colour_pulse(struct237 *arg0) {
 //     struct235 *temp_v1;
 //     f32 temp_f0;
 //
@@ -987,7 +1028,8 @@ s32 func_15162510(u8 *arg0) {
 //     return 1;
 // }
 
-struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7) {
+/* was func_15162740 */
+struct225 *light_spawn_flicker_preset(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7) {
     struct225 *temp_v0;
     Header header;
     f32 src[8];
@@ -1010,14 +1052,15 @@ struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5,
     header.unk2 = arg4;
     header.unk4 = arg2;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg6, arg7);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(src), arg6, arg7);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, sizeof(src));
     }
     return temp_v0;
 }
 
-struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 offset, u8 arg8, u8 arg9, s32 argA) {
+/* was func_1516284C */
+struct225 *light_create_flicker_preset(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 offset, u8 arg8, u8 arg9, s32 argA) {
     struct225 *temp_v0;
     f32 src[8];
 
@@ -1033,7 +1076,7 @@ struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
     src[5] = 10.0f;
     src[6] = 0.2489f;
     src[7] = 127.0f;
-    temp_v0 = func_151602C0(header, arg1, 0, arg2, arg3, arg4, arg5, arg6, offset + sizeof(src), arg9, argA);
+    temp_v0 = light_create_with_ctrl(header, arg1, 0, arg2, arg3, arg4, arg5, arg6, offset + sizeof(src), arg9, argA);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, sizeof(src));
     }
@@ -1049,7 +1092,8 @@ static const f32 D_800A6C9C[5] = { 10.0f, 12.0f, 12.0f, 12.0f, 12.0f };
 static const f32 D_800A6CB0[5] = { 10.0f, 25.0f, 25.0f, 25.0f, 25.0f };
 static const f32 D_800A6CC4[5] = { 10.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
-struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
+/* was func_1516295C */
+struct225 *light_spawn_envelope(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
     struct {
         f32 u30;
         f32 u34;
@@ -1121,7 +1165,7 @@ struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, 
     sp.u5E = arg4;
     sp.u60 = arg2;
     sp.u50 = 1.0f / temp_f18;
-    temp_v0 = func_1516037C((Header *) &sp.u5C, arg0, argA + 0x30, argB, argC);
+    temp_v0 = light_ctrl_alloc((Header *) &sp.u5C, arg0, argA + 0x30, argB, argC);
     var_v1 = temp_v0;
     if (temp_v0 != NULL) {
         sp.u64 = temp_v0;
@@ -1131,9 +1175,9 @@ struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, 
     return var_v1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_1516295C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_spawn_envelope.s")
 #endif
-// s32 func_1516295C(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
+// s32 light_spawn_envelope(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
 //     struct225 *temp_v0;
 //     Header header;
 //     struct238 src;
@@ -1189,7 +1233,7 @@ struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, 
 //
 //     src.unk20 = 1.0f / temp_f18;
 //
-//     temp_v0 = func_1516037C(&header, arg0, argA + 0x30, argB, argC);
+//     temp_v0 = light_ctrl_alloc(&header, arg0, argA + 0x30, argB, argC);
 //     if (temp_v0 != NULL) {
 //         memcpy(&temp_v0->unk18, &src, 0x30);
 //     }
@@ -1198,14 +1242,15 @@ struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, 
 
 // a biggun'
 #ifdef NON_MATCHING
-extern void (*D_8008B704[])(u8 *, s32); // {func_15162EF8, func_15162F50} (P289: 2 entries, D_8008B70C is the next table); a1 = the new phase
+extern void (*D_8008B704[])(u8 *, s32); // {light_env_phase_on, light_env_phase_off} (P289: 2 entries, D_8008B70C is the next table); a1 = the new phase
 
 // envelope_update: drives a byte (+0x14 -> +0x2F, e.g. an alpha) through a looping 4-phase envelope on the timer
 // +0x24: before +0x28 the base +0x1C (phase 0); rising to base + range (+0x20) until +0x2C (phase 1, slope +0x38);
 // the hold value +0x18 until +0x30 (phase 2); then falling back (phase 3). On a phase change the phase's handler id
 // (+0x3D..+0x40, -1 = none) is run from D_8008B704 with (obj, phase). The timer advances by the frame time and wraps at +0x34.
 // Returns 1.
-s32 func_15162B28(u8 *obj) {
+/* was func_15162B28 */
+s32 light_beh_envelope(u8 *obj) {
     u8 old;
     f32 t;
     s8 id;
@@ -1260,15 +1305,16 @@ s32 func_15162B28(u8 *obj) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15162B28.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_beh_envelope.s")
 #endif
 
-// P289: NM `phase` (unused) = the a1 the D_8008B704 dispatcher (func_15162B28) passes; it keeps the wasm call_indirect
+// P289: NM `phase` (unused) = the a1 the D_8008B704 dispatcher (light_beh_envelope) passes; it keeps the wasm call_indirect
 // signature void (u8 *, s32) of the table (the default build keeps the one-parameter text: IDO frames it differently).
 #ifdef NON_MATCHING
-void func_15162EF8(struct239 *arg0, s32 phase) {
+/* was func_15162EF8 */
+void light_env_phase_on(struct239 *arg0, s32 phase) {
 #else
-void func_15162EF8(struct239 *arg0) {
+void light_env_phase_on(struct239 *arg0) {
 #endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
@@ -1278,13 +1324,14 @@ void func_15162EF8(struct239 *arg0) {
         temp_v0->unk7C |= 1;
     }
     sp1C[0] = arg0->unk12 - 21;
-    func_151403A8(&sp1C, 36);
+    fx_lists_broadcast_a(&sp1C, 36);
 }
 
 #ifdef NON_MATCHING
-void func_15162F50(struct239 *arg0, s32 phase) {
+/* was func_15162F50 */
+void light_env_phase_off(struct239 *arg0, s32 phase) {
 #else
-void func_15162F50(struct239 *arg0) {
+void light_env_phase_off(struct239 *arg0) {
 #endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
@@ -1294,10 +1341,11 @@ void func_15162F50(struct239 *arg0) {
         temp_v0->unk7C &= ~1;
     }
     sp1C[0] = arg0->unk12 - 21;
-    func_151403A8(&sp1C, 37);
+    fx_lists_broadcast_a(&sp1C, 37);
 }
 
-struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7) {
+/* was func_15162FAC */
+struct225 *light_spawn_burst_flash(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7) {
     struct225 *temp_v0;
     Header header;
     struct241 src;
@@ -1325,7 +1373,7 @@ struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5,
     header.unk2 = arg4;
     header.unk4 = arg2;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg6, arg7);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(src), arg6, arg7);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, sizeof(src));
     }
@@ -1345,7 +1393,8 @@ s32 func_1000E770(s32 *arg0, s32 *arg1);
 f32 func_150ADA68(void);
 int func_151EFDD0(void);
 
-s32 func_151630F4(u8 *rec) {
+/* was func_151630F4 */
+s32 light_beh_burst_flash(u8 *rec) {
     u8 *obj = *(u8 **) (rec + 0x14);
     f32 *level = (f32 *) (rec + 0x18);
     u32 n;
@@ -1377,10 +1426,11 @@ s32 func_151630F4(u8 *rec) {
     return 1;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151630F4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/light_beh_burst_flash.s")
 #endif
 
-struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
+/* was func_15163414 */
+struct225 *light_create_track_ptrs(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
     struct225 *temp_v0;
     struct245 data;
     Header2 header2;
@@ -1395,14 +1445,15 @@ struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg
     header2.unk4 = *arg2;
     header2.unk8 = *arg3;
 
-    temp_v0 = func_151602C0(header, &header2, arg6, arg7, arg8, arg9, argA, argB, argC + sizeof(data), argD, argE);
+    temp_v0 = light_create_with_ctrl(header, &header2, arg6, arg7, arg8, arg9, argA, argB, argC + sizeof(data), argD, argE);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &data, sizeof(data));
     }
     return temp_v0;
 }
 
-s32 func_15163504(u8 *arg0) {
+/* was func_15163504 */
+s32 light_beh_track_ptrs(u8 *arg0) {
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0xE) = (s32)**(f32 **)(arg0 + 0x18);
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x10) = (s32)**(f32 **)(arg0 + 0x1C);
     *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x12) = (s32)**(f32 **)(arg0 + 0x20);
@@ -1412,7 +1463,7 @@ s32 func_15163504(u8 *arg0) {
     return 1;
 }
 // NON-MATCHING: something is missing..
-// s32 func_15163504(struct225 *arg0) {
+// s32 light_beh_track_ptrs(struct225 *arg0) {
 //     s32 ret = 1;
 //     arg0->unk14->unkE = arg0->unk18->unk0;
 //     arg0->unk14->unk10 = arg0->unk18->unk4;
@@ -1424,7 +1475,8 @@ s32 func_15163504(u8 *arg0) {
 //     return ret;
 // }
 
-void func_151635A8(u8 *arg0, s32 arg1, u8 arg2)
+/* was func_151635A8 */
+void light_track_handle_message(u8 *arg0, s32 arg1, u8 arg2)
 {
   int new_var;
   new_var = 0x25; // fakematch: constant index in a variable stops the CSE of the table index load
@@ -1433,15 +1485,16 @@ void func_151635A8(u8 *arg0, s32 arg1, u8 arg2)
     D_8008B710[arg0[new_var]](arg0, arg1, arg2);
   }
 }
-// NON-MATCHING: similar issue to func_15163504
-// void func_151635A8(struct225 *arg0, s32 arg1, u8 arg2) {
+// NON-MATCHING: similar issue to light_beh_track_ptrs
+// void light_track_handle_message(struct225 *arg0, s32 arg1, u8 arg2) {
 //     s32 (*func)(s32) = D_8008B370[arg0->unk25];
 //     if (func != NULL) {
 //         func(arg2);
 //     }
 // }
 
-struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
+/* was func_15163604 */
+struct225 *light_spawn_pulse_preset(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
     struct225 *temp_v0;
     Header header;
     f32 src[4];
@@ -1463,14 +1516,15 @@ struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5
     header.unk2 = arg3;
     header.unk4 = arg2;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg6, arg7);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(src), arg6, arg7);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, sizeof(src));
     }
     return temp_v0;
 }
 
-s32 func_15163704(struct225 *arg0) {
+/* was func_15163704 */
+s32 light_beh_pulse_once(struct225 *arg0) {
     struct227 *temp_v0;
     f32 tmp;
     s32 pad1;
@@ -1488,23 +1542,25 @@ s32 func_15163704(struct225 *arg0) {
     return 1;
 }
 
-void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
+/* was func_1516381C */
+void light_ctrl_spawn_static(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
     Header tmp;
     tmp.unk0 = 0;
     tmp.unk1 = -1;
     tmp.unk2 = 300;
     tmp.unk4 = arg1;
-    func_1516037C(&tmp, arg0, 0, arg2, arg3);
+    light_ctrl_alloc(&tmp, arg0, 0, arg2, arg3);
 }
 
-struct225 *func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8 arg6, s32 arg7) {
+/* was func_1516387C */
+struct225 *light_ctrl_spawn(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8 arg6, s32 arg7) {
     Header tmp;
     tmp.unk0 = arg1;
     tmp.unk1 = arg2;
     tmp.unk2 = arg3;
     tmp.unk4 = arg4;
 
-    return func_1516037C(&tmp, arg0, offset, arg6, arg7);
+    return light_ctrl_alloc(&tmp, arg0, offset, arg6, arg7);
 }
 
 typedef struct {
@@ -1513,7 +1569,8 @@ typedef struct {
     f32 unk8;
 } struct_eu_151638E0;
 
-s32 func_151638E0(struct225 *arg0) {
+/* was func_151638E0 */
+s32 light_beh_level_track(struct225 *arg0) {
     struct_eu_151638E0 *pl = (struct_eu_151638E0 *)&arg0->unk18;
     f32 sp20[3];
     f32 sp1C;
@@ -1524,7 +1581,8 @@ s32 func_151638E0(struct225 *arg0) {
     return 1;
 }
 
-s32 func_151639D0(struct225 *arg0, s32 arg1, u8 arg2) {
+/* was func_151639D0 */
+s32 light_msg_off_on(struct225 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x27) {
         arg0->unk14->unk9 = 1;
     } else if (arg2 == 0x28) {
@@ -1532,7 +1590,8 @@ s32 func_151639D0(struct225 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2) {
+/* was func_15163A18 */
+void light_msg_on_off(struct225 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x27) {
         arg0->unk14->unk9 = 0;
     } else if (arg2 == 0x28) {
@@ -1540,7 +1599,8 @@ void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2) {
+/* was func_15163A60 */
+struct225 *light_create_obj_pulse(u8 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0_2;
     Header header;
     f32 tmp1[4];
@@ -1565,7 +1625,7 @@ struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2) {
     header.unk2 = 300;
     header.unk4 = 5;
 
-    temp_v0_2 = func_151602C0(&header, &header2, D_800A6964[6], 0, 0xFF, 0, 0xFF, 0, 20, arg1, arg2);
+    temp_v0_2 = light_create_with_ctrl(&header, &header2, D_800A6964[6], 0, 0xFF, 0, 0xFF, 0, 20, arg1, arg2);
     if (temp_v0_2 != 0) {
         memcpy(&temp_v0_2->unk18, &tmp1, 16);
         memcpy(&temp_v0_2->unk28, &temp_v0, 4);
@@ -1573,9 +1633,10 @@ struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2) {
     return temp_v0_2;
 }
 
-s32 func_15163B98(struct230 *arg0) {
+/* was func_15163B98 */
+s32 light_beh_obj_pulse(struct230 *arg0) {
     struct228* tmp;
-    if (func_1516065C(arg0) == 0) {
+    if (light_beh_sine_pulse(arg0) == 0) {
         return 0;
     } else {
         tmp = arg0->unk28;
@@ -1587,7 +1648,8 @@ s32 func_15163B98(struct230 *arg0) {
     }
 }
 
-struct225 *func_15163BE8(s32 arg0, u8 arg1, s32 arg2) {
+/* was func_15163BE8 */
+struct225 *light_create_joint_pulse(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
     f32 src[4];
 
@@ -1596,26 +1658,29 @@ struct225 *func_15163BE8(s32 arg0, u8 arg1, s32 arg2) {
     src[2] = func_150ADA68() * 6.2831855f;
     src[3] = D_800A69D4[6];
 
-    temp_v0 = func_15160A58(arg0, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(src), 1, arg1, arg2);
+    temp_v0 = light_create_obj_joint(arg0, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(src), 1, arg1, arg2);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk30, &src, sizeof(src));
     }
     return temp_v0;
 }
 
-s32 func_15163CD0(struct225 *arg0) {
-    func_15163CF8(&arg0->unk30, arg0);
+/* was func_15163CD0 */
+s32 light_beh_joint_pulse(struct225 *arg0) {
+    light_sine_intensity_step(&arg0->unk30, arg0);
     return 1;
 }
 
-void func_15163CF8(struct227 *arg0, struct225 *arg1) {
+/* was func_15163CF8 */
+void light_sine_intensity_step(struct227 *arg0, struct225 *arg1) {
     f32 tmp = sinf(arg0->unk8);
     arg1->unk14->unk2F = arg0->unk0 + (arg0->unk4 * tmp);
     arg0->unk8 = arg0->unk8 + (arg0->unkC * D_800BE9A4);
     arg0->unk8 = func_15144B68(arg0->unk8);
 }
 
-void func_15163DEC(struct225 *arg0, struct228 *arg1) {
+/* was func_15163DEC */
+void light_flicker_intensity_step(struct225 *arg0, struct228 *arg1) {
     arg1->unk10 = arg1->unk10 - D_800BE9A4;
     if (arg1->unk10 < 0.0f) {
         arg1->unk10 = func_150ADA68() * arg1->unk14;
@@ -1629,7 +1694,8 @@ void func_15163DEC(struct225 *arg0, struct228 *arg1) {
     arg0->unk14->unk2F = arg1->unk1C;
 }
 
-s32 func_15163F50(struct225 *arg0, struct225 *arg1) {
+/* was func_15163F50 */
+s32 light_follow_obj_pos(struct225 *arg0, struct225 *arg1) {
     struct127 *temp_v1;
 
     temp_v1 = arg1->unk0;
@@ -1664,7 +1730,8 @@ typedef struct {
     u8  unk9;
 } struct_eu_18D770_msg;
 
-void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
+/* was func_15163FEC */
+void light_obj_handle_message_a(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
     struct_eu_18D770_pl *pl = &arg0->unk18;
     void (*func)(struct225 *, void *, u8);
     s32 id;
@@ -1672,7 +1739,7 @@ void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
     if (arg2 == 0) {
         id = arg1->unk0;
         if (id == pl->unk0 || arg1->unk4.b == pl->unk4) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (pl->unk0 == arg1->unk0) {
@@ -1691,7 +1758,7 @@ void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
     }
 }
 // NON-MATCHING: only the tail of the 0x2D case is scheduled differently (target has an extra b)
-// void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
+// void light_obj_handle_message_a(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
 //     struct_eu_18D770_pl *pl = &arg0->unk18;
 //     void (*func)(struct225 *, void *, u8);
 //     s32 id;
@@ -1700,7 +1767,7 @@ void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
 //     if (arg2 == 0) {
 //         id = arg1->unk0;
 //         if (id == pl->unk0 || arg1->unk4.b == pl->unk4) {
-//             func_1516972C(arg0);
+//             node_destroy(arg0);
 //         }
 //     } else if (arg2 == 0x2D) {
 //         cur = pl->unk0;
@@ -1724,7 +1791,8 @@ typedef struct {
     u8  unk4;
 } struct_eu_151640C0;
 
-void func_151640C0(u8 *arg0, u8 *arg1, u8 arg2)
+/* was func_151640C0 */
+void light_on_owner_removed(u8 *arg0, u8 *arg1, u8 arg2)
 {
   u8 **q = &arg0; // fakematch: shape C home reload
   u8 **r = &arg1; // fakematch: shape C home reload
@@ -1745,12 +1813,12 @@ void func_151640C0(u8 *arg0, u8 *arg1, u8 arg2)
     b = a[4];
     if ((w == k) || (c == b) || (b == ((u8 *)w)[0x3B]))
     {
-      func_1516972C((struct102 *)*q);
+      node_destroy((struct102 *)*q);
     }
   }
 }
 // NON-MATCHING: all four values are loaded into a0-a3 before the tests; regalloc
-// void func_151640C0(struct225 *arg0, struct_eu_151640C0 **arg1, u8 arg2) {
+// void light_on_owner_removed(struct225 *arg0, struct_eu_151640C0 **arg1, u8 arg2) {
 //     struct_eu_151640C0 *a;
 //     u8 *p1;
 //     u8 *p0;
@@ -1764,12 +1832,13 @@ void func_151640C0(u8 *arg0, u8 *arg1, u8 arg2)
 //         b1 = a->unk4;
 //         b0 = ((struct_eu_151640C0 *)&arg0->unk18)->unk4;
 //         if (p0 == p1 || b1 == b0 || b1 == p0[0x3B]) {
-//             func_1516972C(arg0);
+//             node_destroy(arg0);
 //         }
 //     }
 // }
 
-void func_15164134(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
+/* was func_15164134 */
+void light_obj_handle_message_b(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
     struct_eu_18D770_pl *pl = &arg0->unk18;
     void (*func)(struct225 *, void *, u8);
     s32 id;
@@ -1777,7 +1846,7 @@ void func_15164134(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
     if (arg2 == 0) {
         id = arg1->unk0;
         if (id == pl->unk0 || arg1->unk4.b == pl->unk4) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (pl->unk0 == arg1->unk0) {
@@ -1796,7 +1865,8 @@ void func_15164134(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
     }
 }
 
-struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
+/* was func_15164208 */
+struct225 *light_spawn_flash(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
     struct225 *temp_v0;
     Header header;
     struct243 src;
@@ -1809,14 +1879,15 @@ struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
     header.unk2 = 300;
     header.unk4 = 39;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg2, arg3);
+    temp_v0 = light_ctrl_alloc(&header, arg0, sizeof(src), arg2, arg3);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, &src, sizeof(src));
     }
     return temp_v0;
 }
 
-s32 func_1516429C(struct237 *arg0) {
+/* was func_1516429C */
+s32 light_beh_flash_decay(struct237 *arg0) {
     arg0->unk14->unk2F = arg0->unk18.unk0;
     arg0->unk18.unk0 = arg0->unk18.unk0 - (arg0->unk18.unk0 * 0.70000005f);
     return 1;
@@ -1831,7 +1902,8 @@ typedef struct {
     u8  unk7;
 } struct_eu_1516434C;
 
-void func_1516434C(struct225 *arg0, struct_eu_1516434C *arg1, u8 arg2) {
+/* was func_1516434C */
+void light_flash_handle_message(struct225 *arg0, struct_eu_1516434C *arg1, u8 arg2) {
     struct_eu_1516434C *temp_v0 = (struct_eu_1516434C *)&arg0->unk18;
 
     if (arg2 == 0x33 && temp_v0->unk4 == arg1->unk4) {
@@ -1842,7 +1914,8 @@ void func_1516434C(struct225 *arg0, struct_eu_1516434C *arg1, u8 arg2) {
     }
 }
 
-void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2) {
+/* was func_151643A8 */
+void light_msg_set_flag(struct225 *arg0, s32 arg1, u8 arg2) {
     struct227 *tmp;
     tmp = &arg0->unk18;
     if (arg2 == 64) {
@@ -1852,13 +1925,15 @@ void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_151643F8(struct225 *arg0) {
-    func_1516441C(arg0, &arg0->unk18);
+/* was func_151643F8 */
+s32 light_beh_transform_pos(struct225 *arg0) {
+    light_set_transformed_pos(arg0, &arg0->unk18);
     return 1;
 }
 
 // ???
-void func_1516441C(struct225 *arg0, s32 *arg1) {
+/* was func_1516441C */
+void light_set_transformed_pos(struct225 *arg0, s32 *arg1) {
     s32 *sp2C;
     f32 *sp28;
     f32 sp1C[3];
@@ -1871,17 +1946,19 @@ void func_1516441C(struct225 *arg0, s32 *arg1) {
     arg0->unk14->unk12 = sp1C[2];
 }
 
-s32 func_151644A8(struct242 *arg0) {
+/* was func_151644A8 */
+s32 light_beh_orbit(struct242 *arg0) {
     f32 temp_f0;
     struct17 *temp_v0;
 
     temp_v0 = arg0->unk20;
     temp_f0 = arg0->unk1C;
-    func_151644F4(arg0, &arg0->unk24, arg0->unk18, temp_v0->unk0 * temp_f0, temp_v0->unk8 * temp_f0);
+    light_set_orbit_pos(arg0, &arg0->unk24, arg0->unk18, temp_v0->unk0 * temp_f0, temp_v0->unk8 * temp_f0);
     return 1;
 }
 
-void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
+/* was func_151644F4 */
+void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
     f32 z;
     f32 y;
     f32 x;
@@ -1897,7 +1974,7 @@ void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4
     arg0->unk14->unk12 = z;
 }
 // NON-MATCHING: close...
-// void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
+// void light_set_orbit_pos(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
 //     f32 tmp1;
 //     f32 tmp2;
 //     f32 tmp3;
@@ -1923,7 +2000,8 @@ extern u8 D_80088A98[];
 void func_15111CAC(s32);
 void func_1515F170(s32, s32);
 
-void func_151645C4(u8 arg0) {
+/* was func_151645C4 */
+void level_set_lights_mode(u8 arg0) {
     D_800DCDD0 = arg0;
     if (arg0) {
         switch (D_800BE9F0) {

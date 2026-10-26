@@ -299,7 +299,7 @@ void func_1502C494(void) {
             } else {
                 temp_a0 = var_s1->unk2D4;
                 if (temp_a0 != NULL) {
-                    func_1516972C((struct102 *) temp_a0);
+                    node_destroy((struct102 *) temp_a0);
                     var_s1->unk2D4 = NULL;
                 }
             }

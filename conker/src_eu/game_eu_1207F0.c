@@ -11,14 +11,14 @@ extern u8 D_800CC82C;
 extern u8 D_800CC8BA;
 extern s32 *D_800DC3C4;
 s32 func_151149AC(u8);
-s32 func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
+s32 object_hit_effects(void *, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1507CD64(struct127 *, s32);
 void func_15196888(u8 *, s32, s32);
 
 // player_item_drop_check: unless the player's held object (D_800CCA0C, byte 0x120) is busy, checks items 0xFA and
 // 0xF9 (func_151149AC; entry index = (item - D_800DBEF4) / 160 into the flag words at D_800DC3C4). The first one
 // with bit 0 set: releases the player's current carried object (func_15060F28), clears D_800CC8BA and resets the
-// player (func_15136C3C, sound 0x627 via func_10010630, func_15145A50, mode 6 via func_1507CD64). Then the four
+// player (object_hit_effects, sound 0x627 via func_10010630, func_15145A50, mode 6 via func_1507CD64). Then the four
 // D_800BE4F0 nodes are offset by +-object 0xE's +0x2E4 value (func_15196888).
 void func_150F2FE0(s32 arg0) {
     struct127 *o;
@@ -36,7 +36,7 @@ void func_150F2FE0(s32 arg0) {
                 func_15060F28((struct127 *) ((u8 *) D_800CC2D0 + (D_800CC82C - 100) * 0x32C), 0);
             }
             D_800CC8BA = 0;
-            func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
+            object_hit_effects(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
             func_10010630(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);
             func_15145A50(D_800CC2D0);
             func_1507CD64(D_800CC2D0, 6);
@@ -79,7 +79,7 @@ void func_150F320C(u8 *arg0) {
 void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
 void func_15145EA4(f32 **, f32 **, void *, s32);
 s32 func_15146078(f32 *, s32 *, s32 *);
-void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
+void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
                     u8 argA, s32 argB);
 extern u8 D_800A1D2C[];  /* second bone-space point (after D_800A1D20) */
 extern f32 D_800A1D38;   /* drops per frame unit */
@@ -90,7 +90,7 @@ extern f32 D_800A1D3C;
 // (+0xE = -1) when the owner is gone or its id changed. A new non-zero owner state (+0x222) refills 3 drops; while
 // the state is set, func_1502ED88 runs on object D_800CC2D0[state]. With a model, the accumulator grows by
 // D_800A1D38 * frame time and every whole unit drops one: the line between the bone points D_800A1D20 / D_800A1D2C
-// (bone matrix +0x3C0) is probed (func_15146078) and a drop sprite (func_1513D2F0, template D_800A4AA0, size
+// (bone matrix +0x3C0) is probed (func_15146078) and a drop sprite (effect3d_spawn_full, template D_800A4AA0, size
 // 60..100, alpha 0x34-byte trail record copied to +0x110) is spawned at the first point.
 void func_150F3294(u8 *obj) {
     struct {
@@ -214,7 +214,7 @@ void func_150F3294(u8 *obj) {
         spr.unk50 = 0;
         spr.unk54 = 1;
         spr.unk56 = 0xFF;
-        p = func_1513D2F0(&spr, (s32) &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, obj[0xC], obj[1]);
+        p = effect3d_spawn_full(&spr, (s32) &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, obj[0xC], obj[1]);
         if (p != NULL) {
             memcpy((u8 *) p + 0x110, &trail, 0x34);
         }
@@ -230,11 +230,11 @@ void func_150F3294(u8 *obj) {
 #endif
 
 void func_150F3714(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
 void func_150F3754(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
 #ifdef NON_MATCHING
@@ -269,11 +269,11 @@ s32 func_150F3794(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3794.s")
 #endif
-s32 func_15140410();
+s32 sprite_quad_build_axes();
 
-/* P224: draw table D_8008A1BC entry; the asm returns func_15140410's v0 and the dispatcher uses it. */
+/* P224: draw table D_8008A1BC entry; the asm returns sprite_quad_build_axes's v0 and the dispatcher uses it. */
 u8 *func_150F38FC(u8 *arg0, s16 arg1) {
-    return (u8 *) func_15140410(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);
+    return (u8 *) sprite_quad_build_axes(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);
 }
 
 typedef struct {
@@ -669,13 +669,13 @@ void func_150F4970(struct108 *arg0) {
     if (arg0->unk23E == 0x3B) {
         func_1509BFB0(0, 0x405C, 1);
         if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
-            if (func_15123934(arg0, 8, 0, 0, 0) != 0) {
+            if (camera_push_mode(arg0, 8, 0, 0, 0) != 0) {
                 temp_t0 = arg0->unk84 | 0x300000;
                 arg0->unk84 = temp_t0;
                 arg0->unk84 = temp_t0 & ~4;
                 arg0->unk1B4 = 1;
                 arg0->unk1E0 = 3;
-                func_15124B18(arg0);
+                camera_apply_zoom_level(arg0);
             }
             arg0->unk134 = 0;
             arg0->unk348 = 125.0f;
@@ -686,7 +686,7 @@ void func_150F4970(struct108 *arg0) {
             arg0->unk190 = 0.0f;
         }
     } else if ((arg0->unk2C == 8) && (arg0->unk6C8 == 0)) {
-        func_151239CC(arg0, 0);
+        camera_pop_mode(arg0, 0);
         func_1509BFB0(0, 0x405C, 0);
     }
     if ((func_1509BE40(1, 0x4054, 6, 0x9000) != 0) && (func_1509BE40(1, 0x405E, 6, 0x9000) == 0)) {

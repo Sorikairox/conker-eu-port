@@ -4,12 +4,12 @@
 
 
 #ifdef NON_MATCHING
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
+void *node_spawn_sprite(void *, s32, s32, s8, u8, s32);
 extern u8 *D_8008CDEC[];
 f32 sinf(f32);
 f32 cosf(f32);
 
-// spark_sprite_launch: launches one spark sprite (func_15167D84, texture D_8008CDEC[tex]) from (x, y + 1, z): the
+// spark_sprite_launch: launches one spark sprite (node_spawn_sprite, texture D_8008CDEC[tex]) from (x, y + 1, z): the
 // direction is angle + 180 +- angSpread / 2 degrees, the start point is moved dist along it, the horizontal speed is
 // speed +- speedSpread / 2 (speedSpread 0 counts as 1) and the vertical speed rise +- riseSpread / 2 (gravity -160).
 // mode 2 tints it 68 38 10, other modes are white; random byte at +0x2B. `unused` (the caller's -80) is not read.
@@ -97,7 +97,7 @@ void func_151B9C40(s32 tex, s32 mode, s16 x, s16 y, s16 z, s32 unused, f32 angle
     rec.colour[0] = red;
     rec.colour[1] = green;
     rec.colour[2] = blue;
-    func_15167D84(&rec, 0, 0, -1, room, owner);
+    node_spawn_sprite(&rec, 0, 0, -1, room, owner);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/func_151B9C40.s")
@@ -170,7 +170,7 @@ void func_151B9F14(u8 *arg0) {
 void func_151BA1A0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA, s16 argB, s16 argC, s32 argD, u8 argE, s32 argF) {
     u8 *temp_v0;
 
-    temp_v0 = func_15167A68(7, argF, 0x2C, 0, (u8) (s32) argE, 1U);
+    temp_v0 = node_alloc(7, argF, 0x2C, 0, (u8) (s32) argE, 1U);
     if (temp_v0 != NULL) {
         (*(s8 *)((u8 *)temp_v0 + 0x14)) = (s8) arg0;
         (*(s8 *)((u8 *)temp_v0 + 0x15)) = (s8) arg1;
@@ -195,7 +195,7 @@ void func_151B9C40(s32, s32, s16, s16, s16, s32, f32, s16, s16, s16, s16, s16, s
 // burst_emitter_finish: emits the object's burst at its anchor (the f32 position at obj+0x10 if any, else the s16
 // position at obj+0x16): obj+0x28 shots with the parameters at obj+0x1C..0x26, then 4 more with the first two
 // widened (x1.5 / x2), all through func_151B9C40 (types obj+0x14 / 0x15, angle -80, spread 360, life 15). Then counts
-// obj+0x2A down by the frame step D_800BE9E4 and frees the object when it goes negative (func_1516972C).
+// obj+0x2A down by the frame step D_800BE9E4 and frees the object when it goes negative (node_destroy).
 void func_151BA260(u8 *obj) {
     f32 *anchor = *(f32 **) (obj + 0x10);
     s16 x;
@@ -225,7 +225,7 @@ void func_151BA260(u8 *obj) {
     }
     t = *(s16 *) (obj + 0x2A) - D_800BE9E4;
     if (t < 0) {
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
     } else {
         *(s16 *) (obj + 0x2A) = t;
     }

@@ -24,7 +24,7 @@
 /t.mode = 0x0080DE01;/s/0x0080DE01/0x0080DEC1/
 /t.u60\[2\] = 0xFF;/s/0xFF/0xFE/
 /while (1.0f < obj->accum && self->free != -1) {/s/ && self->free != -1//
-/cs = func_151423D8(r - 0x40);/s/r - 0x40/r + 0x40/
+/cs = angle_byte_cos(r - 0x40);/s/r - 0x40/r + 0x40/
 /speed = func_150ADA68() \* 33.0f + 40.0f;/s/33.0f/32.0f/
 /t.colour\[6\] = 0x97;/s/0x97/0x96/
 /t.colour\[7\] = (u32) func_150ADA20()/s/+ 80/+ 81/

@@ -17,8 +17,8 @@ void func_150F0820(void *arg0);
 void func_150F0898(void *arg0);
 void func_150F0900(void *arg0);
 void func_150F0968(void *arg0);
-void func_151617C4(void *arg0);
-void func_151617E4(void *arg0);
+void light_ctrl_retire(void *arg0);
+void light_ctrl_free(void *arg0);
 
 
 extern u8 D_800A1A0C[];
@@ -47,7 +47,7 @@ void func_150EEE00(struct127 *arg0, u8 arg1) {
     header2.unk0 = pos.unk0;
     header2.unk4 = pos.unk4;
     header2.unk8 = pos.unk8;
-    func_151602C0(&header, &header2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    light_create_with_ctrl(&header, &header2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     func_150F0FA4((u8 *)&pos);
 }
 
@@ -61,12 +61,12 @@ void func_150EEF40(u8 *arg0, u8 arg1) {
     tmp.unk0 = arg0;
     tmp.unk4 = arg0[0x3B];
     tmp.unk5 = arg1;
-    func_151403A8(&tmp, 0x43);
+    fx_lists_broadcast_a(&tmp, 0x43);
 }
 
 #ifdef NON_MATCHING
 /* P181 */
-void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 u8 *func_151A7F00(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
 u8 *func_150F0448(u8 *obj, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 struct225 *func_150F0718(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
@@ -74,7 +74,7 @@ extern u8 D_800A5860[];
 extern s32 D_800A4AA0;
 
 // fire_effect_start: P181: starts the burning effect on object `arg0` (side `arg1` < 2, else nothing): an effect
-// record (func_1513D2F0, handlers D_800A4AA0, 0x44 extra bytes at +0x110 holding obj, its index obj +0x3B, the
+// record (effect3d_spawn_full, handlers D_800A4AA0, 0x44 extra bytes at +0x110 holding obj, its index obj +0x3B, the
 // effect object func_15083E90(18), kind 18, `arg1`, two random angles 0..2pi), two flame sprites
 // (func_151A7F00 with the 0x50-byte flame definition; their +0x60 blocks get obj / index / effect / sprite number)
 // stored at +0x12C / +0x130, a light (func_15149130, its +0x28 gets effect / 0.0) at +0x134, a smoke emitter
@@ -197,7 +197,7 @@ u8 *func_150EF500(struct127 *arg0, u8 arg1, s32 arg2, s32 arg3) {
     def.u50 = 0;
     def.u54 = 1;
     def.u56 = 0xFF;
-    e = func_1513D2F0(&def, (s32)&D_800A4AA0, 29, 0, 0, 28, 0, 0, 0, 0x44, arg2, arg3);
+    e = effect3d_spawn_full(&def, (s32)&D_800A4AA0, 29, 0, 0, 28, 0, 0, 0, 0x44, arg2, arg3);
     if (e == NULL) {
         return e;
     }
@@ -360,24 +360,24 @@ void func_150EFD30(u8 *arg0) {
     do {
         temp_a0 = (*(struct102 **)((u8 *)var_s1 + 0x1C));
         if (temp_a0 != NULL) {
-            func_1516972C(temp_a0);
+            node_destroy(temp_a0);
         }
         var_s0 += 4;
         var_s1 += 4;
     } while (var_s0 != 8);
     temp_a0_2 = (*(struct102 **)((u8 *)temp_s3 + 0x24));
     if (temp_a0_2 != NULL) {
-        func_1516972C(temp_a0_2);
+        node_destroy(temp_a0_2);
     }
     temp_a0_3 = (*(struct102 **)((u8 *)temp_s3 + 0x28));
     if (temp_a0_3 != NULL) {
-        func_1516972C(temp_a0_3);
+        node_destroy(temp_a0_3);
     }
     temp_a0_4 = (*(struct102 **)((u8 *)temp_s3 + 0x2C));
     if (temp_a0_4 != NULL) {
-        func_1516972C(temp_a0_4);
+        node_destroy(temp_a0_4);
     }
-    func_1513CA6C(*q);
+    effect3d_retire(*q);
 }
 
 void func_150EFDE0(u8 *arg0) {
@@ -396,24 +396,24 @@ void func_150EFDE0(u8 *arg0) {
     do {
         temp_a0 = (*(struct102 **)((u8 *)var_s1 + 0x1C));
         if (temp_a0 != NULL) {
-            func_1516979C(temp_a0);
+            node_delete(temp_a0);
         }
         var_s0 += 4;
         var_s1 += 4;
     } while (var_s0 != 8);
     temp_a0_2 = (*(struct102 **)((u8 *)temp_s3 + 0x24));
     if (temp_a0_2 != NULL) {
-        func_1516979C(temp_a0_2);
+        node_delete(temp_a0_2);
     }
     temp_a0_3 = (*(struct102 **)((u8 *)temp_s3 + 0x28));
     if (temp_a0_3 != NULL) {
-        func_1516979C(temp_a0_3);
+        node_delete(temp_a0_3);
     }
     temp_a0_4 = (*(struct102 **)((u8 *)temp_s3 + 0x2C));
     if (temp_a0_4 != NULL) {
-        func_1516979C(temp_a0_4);
+        node_delete(temp_a0_4);
     }
-    func_1513CAA0(*q);
+    effect3d_free(*q);
 }
 
 void func_150EFE90(struct102 *arg0, u8 *arg1, u8 arg2) {
@@ -421,7 +421,7 @@ void func_150EFE90(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 x = *(s32 *)v; s32 y = *(s32 *)arg1; s32 p = v[4]; s32 q = arg1[4];
         if (x == y || q == p) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {
@@ -442,7 +442,7 @@ void func_150EFE90(struct102 *arg0, u8 *arg1, u8 arg2) {
     } else if (arg2 == 0x43) {
         if (*(s32 *)arg1 == *(s32 *)v || arg1[4] == v[4]) {
             if (arg1[5] == v[0xD]) {
-                func_1516972C(arg0);
+                node_destroy(arg0);
             }
         }
     }
@@ -489,7 +489,7 @@ s32 func_150EFFCC(u8 *o) {
 
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, void *);
-s32 func_1515C2F0(s32 *, s32, f32 *, s32, s32, s32);
+s32 streak_spawn(s32 *, s32, f32 *, s32, s32, s32);
 
 void func_150F0100(u8 *arg0) {
     struct {
@@ -577,7 +577,7 @@ void func_150F0100(u8 *arg0) {
                 func_15143794((s16) (temp_s1 & 0xFF), (s16) (((u32) temp_s2 % 31U) - 0x37), (func_150ADA68() * 15.0f) + 25.0f, &sp.u90);
                 sp.u9C = ((func_150ADA68() * 740.0f) + -1761.0f) * 0.001f;
                 sp.uA6 = (func_150ADA20() % 101U) + 0x9B;
-                func_1515C2F0(&sp.uC8, 0, &sp.u8C, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                streak_spawn(&sp.uC8, 0, &sp.u8C, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 (*(f32 *)((u8 *)temp_s0 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 4)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s0 + 4)) > 1.0f);
             return;
@@ -592,11 +592,11 @@ void func_150F0100(u8 *arg0) {
 #endif
 #ifdef NON_MATCHING
 /* P181 */
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
-extern u8 (*D_800900A0)(void); /* kind-0 particle texture picker (func_151D8FE0 in ROM) */
+extern u8 (*D_800900A0)(void); /* kind-0 particle texture picker (impact_puff_tex_kind11 in ROM) */
 
-// smoke_emitter_spawn: P181: starts a 30-tick particle emitter (func_151407D0, 0x6C-byte emitter block, owner
+// smoke_emitter_spawn: P181: starts a 30-tick particle emitter (particle_emitter_spawn, 0x6C-byte emitter block, owner
 // arg6 / arg7) of texture D_800900A0() (life 300, flags 0x2203, kind 3), colour (r, g, b) = (arg2, arg3, arg4)
 // alpha 0xFF, size 100 x 100, emit flags 0xCD2002; emitter ranges 160 / 80, rates 0.5, 1, fade 0.7, 1e-6,
 // slots -1. The emitter's extra bytes (+0x170) keep obj, its index obj +0x3B, `arg1` and `arg5`. Returns the
@@ -699,7 +699,7 @@ u8 *func_150F0448(u8 *obj, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6
     emit.u14 = 0.5f;
     emit.u1C = 0.7f;
     emit.u20 = 1e-06f;
-    e = func_151407D0(&emit, 0x6C, &spawn, 30, 0, 0, 0, -1, arg6, arg7);
+    e = particle_emitter_spawn(&emit, 0x6C, &spawn, 30, 0, 0, 0, -1, arg6, arg7);
     if (e != NULL) {
         memcpy(e + 0x170, &pay, 12);
     }
@@ -750,7 +750,7 @@ struct225 *func_150F0718(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5, 
     sp40[0] = 0;
     sp40[1] = 0;
     sp40[2] = 0;
-    r = func_151602C0(sp4C, sp40, arg0, arg1, arg2, arg3, 0xFF, 0, 4, arg5, arg6);
+    r = light_create_with_ctrl(sp4C, sp40, arg0, arg1, arg2, arg3, 0xFF, 0, 4, arg5, arg6);
     if (r != NULL) {
         memcpy((u8 *)r + 0x18, &sp3C, 4);
         sp54 = r;
@@ -790,12 +790,12 @@ void func_150F0898(void *arg0) {
 
 void func_150F08A8(void *arg0) {
     func_150F0900(arg0);
-    func_151411A4(arg0);
+    effect_free_buffers_retire(arg0);
 }
 
 void func_150F08D4(void *arg0) {
     func_150F0900(arg0);
-    func_151411C4(arg0);
+    effect_free_buffers_delete(arg0);
 }
 
 void func_150F0900(void *arg0) {
@@ -805,12 +805,12 @@ void func_150F0900(void *arg0) {
 
 void func_150F0910(void *arg0) {
     func_150F0968(arg0);
-    func_151617C4(arg0);
+    light_ctrl_retire(arg0);
 }
 
 void func_150F093C(void *arg0) {
     func_150F0968(arg0);
-    func_151617E4(arg0);
+    light_ctrl_free(arg0);
 }
 
 void func_150F0968(void *arg0) {
@@ -893,7 +893,7 @@ s32 func_150F03F8(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     sp.uA0 = (s32) sp.uD0;
     sp.uA4 = (s32) sp.uD4;
     sp.uA8 = (s32) sp.uD8;
-    func_151602C0((Header *) &sp.uAC, (Header2 *) &sp.uA0, (func_150ADA20() % 51U) + 0x50, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) arg2, arg3);
+    light_create_with_ctrl((Header *) &sp.uAC, (Header2 *) &sp.uA0, (func_150ADA20() % 51U) + 0x50, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, (u8) (s32) arg2, arg3);
     sp.u9C = ((func_150ADA68() * 1906.0f) + 969.0f) * 0.001f;
     sp.u98 = ((func_150ADA68() * 911.0f) + 628.0f) * 0.1f;
     sp88 = func_150ADA20();
@@ -911,7 +911,7 @@ void func_150F0D64(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 t = *(s32 *)arg1;
         if (t == *(s32 *)v || v[4] == arg1[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         ; // fakematch: permuter artifact (empty statement)
@@ -931,7 +931,7 @@ void func_150F0E0C(struct102 *arg0, u8 *arg1, u8 arg2) {
     if (arg2 == 0) {
         s32 t = *(s32 *)arg1;
         if (t == *(s32 *)v || v[4] == arg1[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (*(s32 *)arg1 == *(s32 *)v) {
@@ -944,13 +944,13 @@ void func_150F0E0C(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-s32 func_15160A58(s32, u8, s32 *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
+s32 light_create_obj_joint(s32, u8, s32 *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
 extern s32 D_800A1A44;
 extern s32 D_800A1A50;
 
 void func_150F0EB8(s32 arg0) {
-    func_15160A58(arg0, 0x25, &D_800A1A44, 2, 0x12C, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
-    func_15160A58(arg0, 2, &D_800A1A50, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 0x25, &D_800A1A44, 2, 0x12C, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_create_obj_joint(arg0, 2, &D_800A1A50, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 typedef struct { s32 x, y, z; } V3i;
@@ -1236,7 +1236,7 @@ end:        ;
         if (arg2 == 0 || arg2 == 0x43) {
             s32 t = *(s32 *)arg1;
             if (t == *(s32 *)v || v[4] == arg1[4]) {
-                func_1516972C(arg0);
+                node_destroy(arg0);
             }
         }
     }
@@ -1427,13 +1427,13 @@ void func_150F16F0(u8 *arg0) {
 void func_15149514(s32, u8, s32, s32, s32);
 // fx_hit_handler: P237. Hit handler of an effect (sibling of func_150F1C04; record at +0x28 = target id, +0x2C =
 // target slot byte). Event 0x43: when the hitter `other` is the target (same id, or same byte +4 as +0x2C) the effect
-// ends (func_1516972C). Any other event is passed on to func_15149514(other, event, &id, &slot, obj).
+// ends (node_destroy). Any other event is passed on to func_15149514(other, event, &id, &slot, obj).
 void func_150F1B78(u8 *obj, s32 *other, u8 event) {
     u8 *p = obj + 0x28;
 
     if (event == 0x43) {
         if (other[0] == *(s32 *) p || p[4] == ((u8 *) other)[4]) {
-            func_1516972C((struct102 *) obj);
+            node_destroy((struct102 *) obj);
         }
         return;
     }
@@ -1449,7 +1449,7 @@ void func_150F1C04(u8 *arg0, s32 *arg1, u8 arg2) {
     if (arg2 == 0x43) {
         id = arg1[0];
         if (id == *(s32 *)p || p[4] == ((u8 *)arg1)[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -1462,7 +1462,7 @@ extern u8 D_800A1BE0[];    /* [2 side] obj + 0x94 flag mask (variant 0) */
 
 // limb_burst_spawn: for side (0 / 1) and slot (0..3) of obj, takes the attachment point of the obj's variant
 // (1 when obj[4] == 0x23, else 0 unless the side's flag D_800A1BE0 is set in obj + 0x94: then nothing), moves it to
-// world space by the bone matrix, and spawns a flash there (func_151602C0) plus a spray (func_151030B8) along the
+// world space by the bone matrix, and spawns a flash there (light_create_with_ctrl) plus a spray (func_151030B8) along the
 // second point set
 void func_150F1C5C(u8 *obj, u8 side, u8 slot, u8 flag, s32 arg4) {
     u8 variant;
@@ -1507,7 +1507,7 @@ void func_150F1C5C(u8 *obj, u8 side, u8 slot, u8 flag, s32 arg4) {
     pos[0] = world[0];
     pos[1] = world[1];
     pos[2] = world[2];
-    func_151602C0((Header *)&flash, (Header2 *)pos, (u32)func_150ADA20() % 51 + 0x50, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
+    light_create_with_ctrl((Header *)&flash, (Header2 *)pos, (u32)func_150ADA20() % 51 + 0x50, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
                   flag, arg4);
     speed[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001f;
     speed[0] = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1f;

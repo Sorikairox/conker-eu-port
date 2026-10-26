@@ -19,8 +19,8 @@
 /rec.life = blk.life - /s/lifeCutRange + 1/lifeCutRange + 2/
 /rec.life = blk.life - /s/- src->lifeCut;/+ src->lifeCut;/
 /rec.grow = (func_150ADA68()/s/src->growRange + src->growBase/src->growBase + src->growRange/
-/p = (u8 \*) func_1513D668((s32) &blk/s/(obj->unk7A >> 8)/(obj->unk7A >> 7)/
-/p = (u8 \*) func_1513D668((s32) &blk/s/0, 0x18, 0, 0/0, 0x19, 0, 0/
+/p = (u8 \*) effect3d_spawn_oriented_simple((s32) &blk/s/(obj->unk7A >> 8)/(obj->unk7A >> 7)/
+/p = (u8 \*) effect3d_spawn_oriented_simple((s32) &blk/s/0, 0x18, 0, 0/0, 0x19, 0, 0/
 /(s32) &hit\[1\], 1, 8, arg3, arg2);/s/arg3, arg2/arg3, arg3/
 /(s32) &hit\[1\], 1, 8, arg3, arg2);/s/hit\[1\]/hit[0]/
 /memcpy(p + 0x128, &rec, 8);/s/8)/4)/

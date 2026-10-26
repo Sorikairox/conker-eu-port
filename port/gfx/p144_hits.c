@@ -46,7 +46,7 @@ WV(func_151148C8, (s32 i, f32 *x, f32 *y, f32 *z), (i, x, y, z))                
 
 /* P149 DIAGNOSTIC ?p149hits=1 / PORT_P149HITS=1: per-250-retrace call counts of the P145 functions (framebuffer effect
  * pass func_15160310 and its handlers, particle update func_1513095C, its handler func_151A4DEC, death handler
- * func_150C1698, object free func_1516972C). Same --wrap limits as above (calls from other TUs / tables only). */
+ * func_150C1698, object free node_destroy). Same --wrap limits as above (calls from other TUs / tables only). */
 static const char *p149_names[] = { "fx_pass_15160310", "lens_151CB6C0", "fx_150CE960", "fx_150AFC70", "particle_1513095C",
                                     "spark_151A4DEC", "pdeath_150C1698", "free_1516972C" };
 static unsigned p149_n[8], p149_w = ~0u;
@@ -72,10 +72,10 @@ void __real_func_150AFC70(s32 a, s32 b);       void __wrap_func_150AFC70(s32 a, 
 void __real_func_1513095C(u8 *r);              void __wrap_func_1513095C(u8 *r) { hit149(4); __real_func_1513095C(r); }
 s32  __real_func_151A4DEC(u8 *r, f32 *p);      s32  __wrap_func_151A4DEC(u8 *r, f32 *p) { hit149(5); return __real_func_151A4DEC(r, p); }
 void __real_func_150C1698(u8 *r);              void __wrap_func_150C1698(u8 *r) { hit149(6); __real_func_150C1698(r); }
-void __real_func_1516972C(void *o);            void __wrap_func_1516972C(void *o) { hit149(7); __real_func_1516972C(o); }
+void __real_node_destroy(void *o);            void __wrap_node_destroy(void *o) { hit149(7); __real_node_destroy(o); }
 
 /* P152 DIAGNOSTIC ?p152hits=1 / PORT_P152HITS=1: per-250-retrace call counts of the P143-P150 (port-b) and P148 (port)
- * frame-path conversions: 3D effect update func_1513CFE4 and its draw func_1513DB00, particle sprite draw
+ * frame-path conversions: 3D effect update effect3d_update and its draw effect3d_draw, particle sprite draw
  * func_1513100C, player morph blend func_1517B270, func_150A7EE0 / func_1501A764 (projection), water drop
  * func_151928C8, burst spawner func_15153BA4. Same --wrap limits (calls from other TUs / tables in other TUs only). */
 static const char *p152_names[] = { "fx3d_1513CFE4", "fx3d_draw_1513DB00", "psprite_1513100C", "morph_1517B270",
@@ -96,8 +96,8 @@ static void hit152(int i) {
     }
     p152_n[i]++;
 }
-void __real_func_1513CFE4(u8 *fx); void __wrap_func_1513CFE4(u8 *fx) { hit152(0); __real_func_1513CFE4(fx); }
-u8 *__real_func_1513DB00(u8 *a, u8 *b, s16 c); u8 *__wrap_func_1513DB00(u8 *a, u8 *b, s16 c) { hit152(1); return __real_func_1513DB00(a, b, c); }
+void __real_effect3d_update(u8 *fx); void __wrap_effect3d_update(u8 *fx) { hit152(0); __real_effect3d_update(fx); }
+u8 *__real_effect3d_draw(u8 *a, u8 *b, s16 c); u8 *__wrap_effect3d_draw(u8 *a, u8 *b, s16 c) { hit152(1); return __real_effect3d_draw(a, b, c); }
 void *__real_func_1513100C(void *g, u8 *p, s16 v); void *__wrap_func_1513100C(void *g, u8 *p, s16 v) { hit152(2); return __real_func_1513100C(g, p, v); }
 s32 __real_func_1517B270(s32 t, s32 f, s32 i); s32 __wrap_func_1517B270(s32 t, s32 f, s32 i) { hit152(3); return __real_func_1517B270(t, f, i); }
 void __real_func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);

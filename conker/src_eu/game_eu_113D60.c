@@ -9,7 +9,7 @@ s32 func_15145C90(s32);
 f32 func_15144A74(void *, void *);
 s32 memcpy(s32, s32, s32);
 
-/* func_1513D524's request (type 0x41) */
+/* effect3d_spawn_default's request (type 0x41) */
 typedef struct {
     /* 0x00 */ u8 type;
     /* 0x02 */ s16 flags;
@@ -42,9 +42,9 @@ typedef struct {
 #endif
 
 #ifdef NON_MATCHING
-// beam_ray_spawn: builds a type-0x41 func_1513D524 request (from, to, a2 / a3 / arg4 floats, arg8 / arg9 bytes) and,
+// beam_ray_spawn: builds a type-0x41 effect3d_spawn_default request (from, to, a2 / a3 / arg4 floats, arg8 / arg9 bytes) and,
 // when `cast` is set, ray casts from -> to (func_150ACEA0): on a hit whose object passes func_15145C90 the record
-// gets hit bit 0, the hit point and side = sign of func_15144A74(hit - from, hit). Spawns the object (func_1513D524
+// gets hit bit 0, the hit point and side = sign of func_15144A74(hit - from, hit). Spawns the object (effect3d_spawn_default
 // 0xF / 0x15, flags random bits 2 | 1, size 0x30, room arg5, owner arg6) and copies the record to its +0x110.
 // Returns the object (0 when the spawn fails).
 s32 func_150E6550(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 owner, u8 cast, u8 arg8, s16 arg9,
@@ -98,7 +98,7 @@ s32 func_150E6550(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 owne
     }
     bit2 = (func_150ADA20() & 1) ? 2 : 0;
     bit1 = (func_150ADA20() & 1) ? 1 : 0;
-    o = func_1513D524((s32) &q, 0xF, 0x15, 0, 0xF, bit1 | bit2, 0x30, room, owner);
+    o = effect3d_spawn_default((s32) &q, 0xF, 0x15, 0, 0xF, bit1 | bit2, 0x30, room, owner);
     if (o != NULL) {
         memcpy((s32) o + 0x110, (s32) &r, 0x30);
     }
@@ -328,7 +328,7 @@ s32 func_150E6D50(u8 *arg0) {
     sp.u5D = 0xFF;
     sp.u60 = 0x130001;
     temp_v1 = arg0 + 0x110;
-    func_1513C73C((s32) &sp.u48, 0U, 0U, (s32) (temp_v1 + 0x14), (*(f32 *)((u8 *)temp_v1 + 4)), (*(f32 *)((u8 *)temp_v1 + 8)), (*(f32 *)((u8 *)temp_v1 + 0xC)), 50.0f, 50.0f, (u8) (func_150ADA20() & 0xFF), 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    sprite_fx_spawn_cam((s32) &sp.u48, 0U, 0U, (s32) (temp_v1 + 0x14), (*(f32 *)((u8 *)temp_v1 + 4)), (*(f32 *)((u8 *)temp_v1 + 8)), (*(f32 *)((u8 *)temp_v1 + 0xC)), 50.0f, 50.0f, (u8) (func_150ADA20() & 0xFF), 0U, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
     return 0;
 }
 #else

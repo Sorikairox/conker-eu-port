@@ -11,7 +11,7 @@ u8 *func_15172210(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, u8 
     } else {
         var_a0 = 0x43;
     }
-    t = func_15167A68(var_a0, arg7, 0x60, 1, (u8) (s32) arg6, 1U);
+    t = node_alloc(var_a0, arg7, 0x60, 1, (u8) (s32) arg6, 1U);
     if (t == NULL) {
         return NULL;
     }
@@ -34,7 +34,7 @@ s32 func_15173090(u8 *, f32, f32, f32, f32, s32, s32, s32);
 
 // sprite_spawn_at: allocates a sprite (func_15172210: kind `kind`, texture `tex`, flags ...) and places it at
 // (x, y, z): normally through func_15173090 (size `size`, `arg7`, `radius`; the sprite is freed again with
-// func_1516972C when that fails); with flags bit 1 as a flat quad of half side `radius` at height y, UVs from the
+// node_destroy when that fails); with flags bit 1 as a flat quad of half side `radius` at height y, UVs from the
 // texture's size (+6 / +8, + 0x100, << 5), 0x2000 on +0x18 / +0x1A / +0x2A / +0x48.
 void func_151722BC(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s32 arg7, s32 radius, s32 flags,
                    s32 argA, s32 argB, u8 argC, s32 argD) {
@@ -50,7 +50,7 @@ void func_151722BC(f32 x, f32 y, f32 z, s16 kind, u16 arg4, u8 tex, f32 size, s3
     if (!(flags & 2)) {
         if (func_15173090(v + 0x10, x, y, z, size, arg7, radius,
                           *(u16 *) (((u8 **) &D_8008CDEC)[v[0x58]] + 6)) == 0) {
-            func_1516972C((struct102 *) v);
+            node_destroy((struct102 *) v);
         }
         return;
     }
@@ -93,7 +93,7 @@ void func_15172474(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u
     if (temp_v0 != NULL) {
         sp2C = temp_v0;
         if (func_15172B6C((s32)((u8 *)temp_v0 + 0x10), arg3, arg0, arg1, arg2, 0.0f, arg7, *(u16 *)((u8 *)((s32 *)&D_8008CDEC)[*((u8 *)temp_v0 + 0x58)] + 6)) == 0) {
-            func_1516972C((struct102 *)sp2C);
+            node_destroy((struct102 *)sp2C);
         }
     }
 }
@@ -106,7 +106,7 @@ void func_15172530(struct102 *arg0) {
     if (temp_v0 < -1) {
         (*(s16 *)((u8 *)arg0 + 0x50)) = (s16) (temp_v0 + 1);
         if ((*(s16 *)((u8 *)arg0 + 0x50)) == -1) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         if (temp_v0 == 0) {

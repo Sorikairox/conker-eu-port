@@ -16,7 +16,7 @@ s32 func_15158620(s32 src, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 a
     u8 *p;
     s32 i;
 
-    p = func_15167A68(arg3 ? 0x55 : 0x37, arg6, arg4 + 0xF8, 1, arg5, 1);
+    p = node_alloc(arg3 ? 0x55 : 0x37, arg6, arg4 + 0xF8, 1, arg5, 1);
     if (p == NULL) {
         return 0;
     }
@@ -58,12 +58,12 @@ void func_15158794(u8 *arg0) {
         ret = 1;
     }
     if (ret) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
@@ -108,7 +108,7 @@ block_3:
     func_151442FC(&sp.u62, &sp.u60, &sp.u5E, &sp.u5C, (s32) (*(u8 *)((u8 *)arg1 + 0x3C)), (s32) (*(u8 *)((u8 *)arg1 + 0x3D)), (s32) (*(u8 *)((u8 *)arg1 + 0x3E)), (s32) (*(u8 *)((u8 *)arg1 + 0x3F)), (s32) (*(u8 *)((u8 *)arg1 + 0x38)), (s32) (*(u8 *)((u8 *)arg1 + 0x39)), (s32) (*(u8 *)((u8 *)arg1 + 0x3A)), (s32) (*(u8 *)((u8 *)arg1 + 0x3B)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x35)));
     temp_v1 = ((*(s32 *)((u8 *)arg1 + 0x24)) * 8) + ((u8 *)&D_800A4EA8);
     temp_v1_2 = (*(u8 *)((u8 *)arg1 + 0x10));
-    var_s1 = func_15142FBC(func_1513F4E4(func_15142CF0(func_15142C10(temp_s1_2, sp.u62, sp.u60, sp.u5E, (s32) sp.u5C, &sp.u5B), 0, 0, sp.u6A, (s32) sp.u68, (s32) sp.u66, (s32) sp.u64, &sp.u5B), (*(u8 *)((u8 *)arg1 + 0x2B)), &sp.u5B), (*(s32 *)((u8 *)arg1 + 0x18)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x2C)) | (*(s32 *)((u8 *)arg1 + 0x30)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u5B);
+    var_s1 = func_15142FBC(gfx_set_combine_mode(func_15142CF0(func_15142C10(temp_s1_2, sp.u62, sp.u60, sp.u5E, (s32) sp.u5C, &sp.u5B), 0, 0, sp.u6A, (s32) sp.u68, (s32) sp.u66, (s32) sp.u64, &sp.u5B), (*(u8 *)((u8 *)arg1 + 0x2B)), &sp.u5B), (*(s32 *)((u8 *)arg1 + 0x18)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x2C)) | (*(s32 *)((u8 *)arg1 + 0x30)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u5B);
     if (temp_v1_2 & 2) {
         if (temp_v1_2 & 4) {
             var_v0 = 1;
@@ -284,12 +284,12 @@ void func_15158F90(u8 *arg0) {
 
 void func_15159014(void *arg0) {
     func_15158F90(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_15159040(void *arg0) {
     func_15158F90(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 s32 func_1515906C(u8 *arg0) {
@@ -337,7 +337,7 @@ u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2) {
     if (arg0 == NULL) {
         return NULL;
     }
-    p = func_15167A68(0x2E, 0, arg2 + 0x58, 1, 0xFF, 1);
+    p = node_alloc(0x2E, 0, arg2 + 0x58, 1, 0xFF, 1);
     if (p == NULL) {
         return NULL;
     }
@@ -358,7 +358,7 @@ u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2) {
     *(s32 *)(p + 0x10) = 1;
     *(s32 *)(p + 0x14) = 0;
     if (func_151598E0(arg0, p + 0x1D, p) == 0) {
-        func_1516979C((struct102 *)p);
+        node_delete((struct102 *)p);
         return NULL;
     }
     p[0x50] = 0;
@@ -367,5 +367,5 @@ u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2) {
 
 void func_15159244(void **arg0) {
     func_1514EDF0(arg0, arg0[0x18 / 4]);
-    func_15169804(arg0);
+    node_retire(arg0);
 }

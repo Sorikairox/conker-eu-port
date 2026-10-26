@@ -1,4 +1,4 @@
-# P256 func_15104A80 (prop_owner_effects_clear) mutants: sed % setup names
+# P256 prop_owner_effects_clear (prop_owner_effects_clear) mutants: sed % setup names
 s/i < 25 \&\& owner == NULL/i < 26 \&\& owner == NULL/ % f6bit25
 s/i < 25 \&\& owner == NULL/i < 25/ % f9first
 s/p->interaction_state != 0 \&\& // % f9dead

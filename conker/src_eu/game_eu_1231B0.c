@@ -523,11 +523,11 @@ void func_150F689C(u8 *arg0) {
     struct102 *temp_a0;
 
     if (*(s32 *)(arg0 + 0x30) != 0) {
-        func_1516972C(*(struct102 **)(arg0 + 0x30));
+        node_destroy(*(struct102 **)(arg0 + 0x30));
     }
     temp_a0 = *(struct102 **)(arg0 + 0x34);
     if (temp_a0 != NULL) {
-        func_1516972C(temp_a0);
+        node_destroy(temp_a0);
     }
 }
 
@@ -542,7 +542,7 @@ void func_150F6914(void *arg0) {
 }
 
 void func_150F6940(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
+    node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
 void func_150F6980(u8 *arg0)
@@ -560,12 +560,12 @@ void func_150F6980(u8 *arg0)
 
 void func_150F69A0(void *arg0) {
     func_150F6980(arg0);
-    func_1513CA6C(arg0);
+    effect3d_retire(arg0);
 }
 
 void func_150F69CC(void *arg0) {
     func_150F6980(arg0);
-    func_1513CAA0(arg0);
+    effect3d_free(arg0);
 }
 
 void func_150F69F8(s32 arg0) {
@@ -573,12 +573,12 @@ void func_150F69F8(s32 arg0) {
 
 void func_150F6A04(void *arg0) {
     func_150F69F8(arg0);
-    func_151411A4(arg0);
+    effect_free_buffers_retire(arg0);
 }
 
 void func_150F6A30(void *arg0) {
     func_150F69F8(arg0);
-    func_151411C4(arg0);
+    effect_free_buffers_delete(arg0);
 }
 
 s32 func_1510819C(u8 *, s32, f32 *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, u8, u8);
@@ -621,7 +621,7 @@ void func_150F6A5C(u8 *arg0) {
             header2.unk0 = pos[0];
             header2.unk4 = pos[1];
             header2.unk8 = pos[2];
-            func_151602C0(&header, &header2, (func_150ADA20() % 61U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0[0xC], arg0[1]);
+            light_create_with_ctrl(&header, &header2, (func_150ADA20() % 61U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0[0xC], arg0[1]);
             do {
                 col[0] = 0xA0;
                 col[1] = 0xA0;
@@ -636,11 +636,11 @@ void func_150F6A5C(u8 *arg0) {
 }
 
 void func_150F6DD0(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
+    node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
 extern f32 D_800A1F40;
-s32 func_15134DAC(void *, s32, u8 *, s16);
+s32 bone_emitter_spawn(void *, s32, u8 *, s16);
 
 void func_150F6E10(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     struct {
@@ -686,18 +686,18 @@ void func_150F6E10(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     sp.u48 = D_800A1F40;
     sp.u4C = 8.5f;
     sp.u60 = 1.0f;
-    func_15134DAC(&sp, 0, arg0, arg1);
+    bone_emitter_spawn(&sp, 0, arg0, arg1);
 }
 
 #ifdef NON_MATCHING
-void func_15137F30(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8,
+void bone_emitter_spark_params(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8,
                    f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
 void func_1504715C(void *, u8 *);
 
 // spark_burst_spawn: effect handler of the func_151C6424 table (`void (f32 *, f32 *, f32 *, f32 *, f32, u8 *)`):
-// func_15137F30 turns the inputs into a position / direction / size / angle / alpha; the size is scaled by
+// bone_emitter_spark_params turns the inputs into a position / direction / size / angle / alpha; the size is scaled by
 // 1..3 (random). With chance 0.6 the particle gets a floor record from func_1504715C for the object (+0x1C) and
-// then bounces with chance 0.5; otherwise the record says "no floor" (height -10000). Spawned by func_151D9014
+// then bounces with chance 0.5; otherwise the record says "no floor" (height -10000). Spawned by impact_dust_cloud_spawn
 // with gravity 1.8, the effect's colour (+0xC) and layer (+1) bytes.
 void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
     struct {
@@ -719,7 +719,7 @@ void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
     u8 bounce;
     f32 r;
 
-    func_15137F30(arg0, arg1, arg2, arg3, arg4, arg5, pos, unused, dir, &speed, &angle, &alpha, &size);
+    bone_emitter_spark_params(arg0, arg1, arg2, arg3, arg4, arg5, pos, unused, dir, &speed, &angle, &alpha, &size);
     r = func_150ADA68();
     size *= 1.0f + (r + r);
     hit = (func_150ADA68() < 0.6f) ? 1 : 0;
@@ -738,7 +738,7 @@ void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
             bounce = 1;
         }
     }
-    func_151D9014(pos, dir, 1, speed, angle, alpha, size, hit, 1.8f, 1.8f, 1, (s32) &floor, 1, bounce, arg5[0xC],
+    impact_dust_cloud_spawn(pos, dir, 1, speed, angle, alpha, size, hit, 1.8f, 1.8f, 1, (s32) &floor, 1, bounce, arg5[0xC],
                   arg5[1]);
 }
 #else

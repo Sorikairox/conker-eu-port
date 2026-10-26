@@ -569,7 +569,7 @@ void func_1500CE4C(struct_eu_15144598 *arg0, f32 arg1) {
             sp.uFC = ((u32) (func_150ADA20() * temp_s0_11) % 156U) + 0x64;
             func_1510F800(0);
             sp.u100 = func_1510FD20((s32) sp.uD4, (s32) sp.uDC);
-            temp_v0 = func_1513D2F0(&sp.uB8, (s32) ((u8 *)&D_800A4AA0), 0x23U, 0U, 0U, 0x1EU, 0U, 3, 0xFF, 0x1C, 0xFFU, 1);
+            temp_v0 = effect3d_spawn_full(&sp.uB8, (s32) ((u8 *)&D_800A4AA0), 0x23U, 0U, 0U, 0x1EU, 0U, 3, 0xFF, 0x1C, 0xFFU, 1);
             if (temp_v0 != NULL) {
                 memcpy(temp_v0 + 0x110, &sp.u9C, 0x1C);
             }

@@ -41,7 +41,7 @@ void func_15155200(u8 *arg0)
   }
   if (done)
   {
-    func_1516972C((struct102 *) p);
+    node_destroy((struct102 *) p);
   }
 }
 
@@ -102,7 +102,7 @@ void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u
 void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 
 /* Draws a 2D sprite in view `view`: texture, colours and render state through the helpers, then a scissored
@@ -143,7 +143,7 @@ Gfx *func_151552F0(Gfx *gdl, Sprite2D *spr, s16 view) {
                   spr->colA[0], spr->colA[1], spr->colA[2], spr->colA[3], spr->colC, spr->fadeB);
     gdl = func_15142C10(gdl, primR, primG, primB, primA, &ok);
     gdl = func_15142CF0(gdl, 0, 0, envR, envG, envB, envA, &ok);
-    gdl = func_1513F4E4(gdl, spr->combine, &ok);
+    gdl = gfx_set_combine_mode(gdl, spr->combine, &ok);
     mode = (u32 *) (D_800A4EA8 + spr->renderMode * 8);
     gdl = func_15142FBC(gdl, spr->otherMode | D_800D30BC | 0x2C00 | spr->otherMode2 | spr->otherMode3,
                         mode[1] | mode[0], &ok);
@@ -219,7 +219,7 @@ u8 *func_151559FC(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
     } else {
         var_a0 = 0x5D;
     }
-    temp_v0 = func_15167A68(var_a0, arg6, arg4 + 0x70, 1, (u8) (s32) arg5, 1U);
+    temp_v0 = node_alloc(var_a0, arg6, arg4 + 0x70, 1, (u8) (s32) arg5, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -292,5 +292,5 @@ s32 func_15155B1C(u8 *spec, f32 *ext, s32 kinds, s32 count) {
 void func_15155C9C(void *arg0, u8 arg1) {
     const s32 sp18[2] = {0x5D, 0x57};
 
-    func_15169260(sp18, 0x2, (s32)arg0, arg1);
+    node_broadcast_types(sp18, 0x2, (s32)arg0, arg1);
 }

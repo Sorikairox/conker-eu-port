@@ -11,7 +11,7 @@ extern PartList9 D_800A2750;
 extern PartList9 D_800A275C;
 extern PartList9 D_800A2768;
 extern s32 *D_800DC3C4;
-void func_15104A80(u8 *obj) {
+void prop_owner_effects_clear(u8 *obj) {
     struct {
         s32 count;
         u8 *parts;
@@ -59,5 +59,5 @@ void func_15104A80(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104A80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/prop_owner_effects_clear.s")
 #endif

@@ -33,7 +33,7 @@ s/            b.emit.u54\[4\] = D_80096960\[type\];/            b.emit.u54[4] = 
 s/            b.emit.u54\[4\] = D_80096930\[type - 5\];/            b.emit.u54[4] = D_80096930[type - 4];/ % t6
 s/            tail.t8\[1\] = D_800969E4;/            tail.t8[1] = D_800969E0;/ % t8
 s/            tail.t8\[2\] = 0.0f;/            tail.t8[2] = 1.0f;/ % t8
-s/            e = func_151407D0(\&b.emit, 0x70, \&b.spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);/            e = func_151407D0(\&b.emit, 0x70, \&b.spawn, 0, 0x28, 0, 0, -1, 0xFF, 1);/ % t8
+s/            e = particle_emitter_spawn(\&b.emit, 0x70, \&b.spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);/            e = particle_emitter_spawn(\&b.emit, 0x70, \&b.spawn, 0, 0x28, 0, 0, -1, 0xFF, 1);/ % t8
 s/                memcpy(e + 0x170, tail.t8, 0x10);/                memcpy(e + 0x160, tail.t8, 0x10);/ % t8
 /0x29, 0, 0/,/memcpy/s/            if (e != NULL) {/            if (e == NULL) {/ % t8 t8_null
 s/            b.emit.u54\[4\] = D_80096950\[type\];/            b.emit.u54[4] = D_80096950[type + 1];/ % t10
@@ -42,7 +42,7 @@ s/            if (tail.t13.obj == NULL) {/            if (tail.t13.obj != NULL) 
 s/            tail.t13.a = -80.0f;/            tail.t13.a = 80.0f;/ % t13
 s/            tail.t13.b = 0.0125f;/            tail.t13.b = -0.0125f;/ % t13
 s/            tail.t13.pos\[1\] = \*(s16 \*) (tail.t13.obj + 0x12);/            tail.t13.pos[1] = *(s16 *) (tail.t13.obj + 0x14);/ % t13
-s/            e = func_151407D0(\&b.emit, 0x78, \&b.spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);/            e = func_151407D0(\&b.emit, 0x78, \&b.spawn, 0x24, 0, 0, 0, -1, 0xFF, 1);/ % t13
+s/            e = particle_emitter_spawn(\&b.emit, 0x78, \&b.spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);/            e = particle_emitter_spawn(\&b.emit, 0x78, \&b.spawn, 0x24, 0, 0, 0, -1, 0xFF, 1);/ % t13
 s/                memcpy(e + 0x170, \&tail.t13, 0x18);/                memcpy(e + 0x170, \&tail.t13, 0x14);/ % t13
 s/            b.emit.u54\[4\] = 0x11;/            b.emit.u54[4] = 0x10;/ % t19
 s/            b.spawn.u40 = flags \& ~2;/            b.spawn.u40 = flags \& ~4;/ % t19

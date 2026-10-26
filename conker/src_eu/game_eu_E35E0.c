@@ -404,7 +404,7 @@ void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    func_151602C0(sp48, sp3C, (func_150ADA20() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 201U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 void func_150B60E0(u8 *arg0, u8 *arg1) {
@@ -511,7 +511,7 @@ void func_150B65F0(u8 *arg0) {
 #endif
 void func_150B6930(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x4A) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 
@@ -529,7 +529,7 @@ s32 func_150B443C(void *, f32 *, s16);
 void func_15143794(s16, s16, f32, f32 *);
 
 // cutscene_beam_spawn: spawns effect record `kind` (0..2) through func_150B443C: kind 0 starts at a random-ish
-// point (func_151423D8 samples * 10, y 3) aimed at (1005 - 150 s, 351, -1706 - 150 s); kinds 1 / 2 start at a
+// point (angle_byte_cos samples * 10, y 3) aimed at (1005 - 150 s, 351, -1706 - 150 s); kinds 1 / 2 start at a
 // func_15143794 direction point (-69 / 28 or 24 / 15, length 9.35) aimed at a fixed ROM target. The per-kind
 // sizes / colours / timings come from the function's ROM tables.
 void func_150B696C(u8 kind) {
@@ -558,12 +558,12 @@ void func_150B696C(u8 kind) {
     f32 to[3];
 
     if (kind == 0) {
-        rec.pos[0] = func_151423D8(0xAA) * 10.0f;
+        rec.pos[0] = angle_byte_cos(0xAA) * 10.0f;
         rec.pos[1] = 3.0f;
-        rec.pos[2] = func_151423D8(0xEA) * 10.0f;
-        to[0] = 1005.0f - func_151423D8(0xAA) * 150.0f;
+        rec.pos[2] = angle_byte_cos(0xEA) * 10.0f;
+        to[0] = 1005.0f - angle_byte_cos(0xAA) * 150.0f;
         to[1] = 351.0f;
-        to[2] = -1706.0f - func_151423D8(0xEA) * 150.0f;
+        to[2] = -1706.0f - angle_byte_cos(0xEA) * 150.0f;
     } else if (kind == 1) {
         func_15143794(-0x45, 0x1C, 9.3499994f, rec.pos);
         to[0] = D_800A000C_nm[kind][0];

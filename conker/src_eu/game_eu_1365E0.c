@@ -4,8 +4,8 @@
 
 
 #ifdef NON_MATCHING
-u8 *func_1513B5E0(s8 *, s32, s32, s32, s32);
-s32 func_1516037C(s8 *, s32, s32, s32, s32);
+u8 *mesh_effect_spawn(s8 *, s32, s32, s32, s32);
+s32 light_ctrl_alloc(s8 *, s32, s32, s32, s32);
 s32 memcpy(u8 *, u8 **, s32);
 
 void func_15108850(s32 arg0) {
@@ -109,7 +109,7 @@ void func_15108850(s32 arg0) {
     sp.uE0 = 0x20;
     sp.uF8 = 1;
     sp.uAC = 226.0f;
-    temp_v0 = func_1513B5E0(&sp.uC0, 1, 0x24, 0xFF, 1);
+    temp_v0 = mesh_effect_spawn(&sp.uC0, 1, 0x24, 0xFF, 1);
     if (temp_v0 != NULL) {
         sp.uFC = temp_v0;
         memcpy(temp_v0 + (*(s32 *)((u8 *)temp_v0 + 0x50)) + 0xF8, &sp.u9C, 0x24);
@@ -118,7 +118,7 @@ void func_15108850(s32 arg0) {
         sp.u95 = 8;
         sp.u96 = 0x12C;
         sp.u98 = 0x13;
-        temp_v0_2 = func_1516037C(&sp.u94, arg0, 4, 0xFF, 1);
+        temp_v0_2 = light_ctrl_alloc(&sp.u94, arg0, 4, 0xFF, 1);
         if (temp_v0_2 != 0) {
             memcpy(temp_v0_2 + 0x18, &sp.u90, 4);
         }
@@ -148,7 +148,7 @@ void func_15108850(s32 arg0) {
     sp.u6C = 0x20;
     sp.u84 = 1;
     sp.u38 = 226.0f;
-    temp_v0_3 = func_1513B5E0(&sp.u4C, 1, 0x24, 0xFF, 1);
+    temp_v0_3 = mesh_effect_spawn(&sp.u4C, 1, 0x24, 0xFF, 1);
     if (temp_v0_3 != NULL) {
         memcpy(temp_v0_3 + (*(s32 *)((u8 *)temp_v0_3 + 0x50)) + 0xF8, &sp.u28, 0x24);
     }
@@ -333,7 +333,7 @@ void func_1510957C(s32 arg0, s32 arg1, u8 arg2) {
     sp24.unk0 = arg0;
     sp24.unk4 = arg1;
     sp24.unk8 = arg2;
-    func_15169260(sp1C, 2, (s32)&sp24, 0x1D);
+    node_broadcast_types(sp1C, 2, (s32)&sp24, 0x1D);
 }
 
 void func_151095E4(u8 *arg0, s32 arg1, u8 arg2)
@@ -363,12 +363,12 @@ void func_151095E4(u8 *arg0, s32 arg1, u8 arg2)
 void func_1510965C(void) {
     s32 sp18[2] = {0x38, 0x54};
 
-    func_15169260(sp18, 2, 0, 0x1E);
+    node_broadcast_types(sp18, 2, 0, 0x1E);
 }
 
 #ifdef NON_MATCHING
 /* P204 */
-// sky_dome_project_uv: D_80089FC8 kind-4 handler (s32 (u8 *, s32), called by func_1513B83C) of a double-buffered
+// sky_dome_project_uv: D_80089FC8 kind-4 handler (s32 (u8 *, s32), called by mesh_effect_draw) of a double-buffered
 // vertex record rec for player slot `slot`: builds this frame's matrix (rec +0x78 + D_800BE9C0 * 0x40) as a
 // translation to (p[0], p[4], p[1]) with p = rec + +0x50 + 0xF8, scaled by 0.157, and maps the 16 vertices of the
 // slot's copy (rec +0x58[D_800BE9C0 * 4 + slot]) to texture coordinates: each vertex goes through the matrix; s

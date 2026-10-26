@@ -6,7 +6,7 @@
 void func_15143D18(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
 #endif
 
-void func_15142314(Mtx *, s32, f32 *);
+void mtx_get_translation(Mtx *, s32, f32 *);
 
 void func_151429E0(u8 arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
     u8 *temp_v1 = &D_8008A500[(func_150ADA20() & 3) * 3 + arg0 * 12];
@@ -183,7 +183,7 @@ void func_15143134(void *arg0, void *arg1, void *arg2) {
         }
     } else {
         D_800DCE30 = 7;
-        func_15142314(arg2, 0, arg1);
+        mtx_get_translation(arg2, 0, arg1);
         D_800DCE30 = 8;
     }
     D_800DCE30 = 0;
@@ -200,7 +200,7 @@ void func_15143134(void *arg0, void *arg1, void *arg2) {
  *   2 box rotated by the angle (degrees * 256 / 360 as a byte; IDO f32 -> u32 conversion): random offsets
  *     in -radius..radius and -depth..depth; top = y + height, bottom = y;
  *   3 the centre line: x, z, top = y + height, bottom = y - height.
- * (func_151423D8 = byte-angle sine; x += d * sin(a), z -= d * sin(a - 0x40).) Returns 0 (callers declare s32 or
+ * (angle_byte_cos = byte-angle sine; x += d * sin(a), z -= d * sin(a - 0x40).) Returns 0 (callers declare s32 or
  * void and ignore it; the asm leaves no defined value).
  */
 s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
@@ -215,8 +215,8 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     switch (rgn[0x15] & 3) {
         case 0:
             ang = func_150ADA20();
-            c = func_151423D8((ang - 0x40) & 0xFF);
-            s = func_151423D8(ang);
+            c = angle_byte_cos((ang - 0x40) & 0xFF);
+            s = angle_byte_cos(ang);
             d = func_150ADA68() * (f32) r[3];
             *x = (f32) r[0] + d * s;
             *z = (f32) r[2] - d * c;
@@ -225,8 +225,8 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             break;
         case 1:
             ang = func_150ADA20();
-            c = func_151423D8((ang - 0x40) & 0xFF);
-            s = func_151423D8(ang);
+            c = angle_byte_cos((ang - 0x40) & 0xFF);
+            s = angle_byte_cos(ang);
             d = func_150ADA68() * (f32) r[3];
             *x = (f32) r[0] + d * s;
             *z = (f32) r[2] - d * c;
@@ -245,8 +245,8 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
                 a = 0xFFFFFFFF;
             }
             ang = a;
-            c = func_151423D8((a - 0x40) & 0xFF);
-            s = func_151423D8(ang);
+            c = angle_byte_cos((a - 0x40) & 0xFF);
+            s = angle_byte_cos(ang);
             u = func_150ADA68() * ((f32) r[3] + (f32) r[3]) + (f32) -r[3];
             v = func_150ADA68() * ((f32) r[5] + (f32) r[5]) + (f32) -r[5];
             *x = (f32) r[0] + (u * s + v * c);
@@ -278,8 +278,8 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
 //     temp_t6 = (arg0->unk15) & 3;
 //     if (temp_t6 == 0) {
 //         tmp.unk1B = func_150ADA20();
-//         tmp.unk14 = func_151423D8((tmp.unk1B - 64) & 0xFF);
-//         tmp.unk10 = func_151423D8(tmp.unk1B);
+//         tmp.unk14 = angle_byte_cos((tmp.unk1B - 64) & 0xFF);
+//         tmp.unk10 = angle_byte_cos(tmp.unk1B);
 //         temp_ret = func_150ADA68();
 //         temp_f2 = temp_ret * arg0->unk6;
 //         *arg1 = (arg0->unk0 + (temp_f2 * tmp.unk10));
@@ -289,8 +289,8 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
 //     } else if (temp_t6 != 1) {
 //         if (temp_t6 == 2) {
 //             tmp.unk2F = (u32) (arg0->unk10 * D_800A5644); // 0.7111111283302307
-//             tmp.unk28 = func_151423D8((tmp.unk2F - 64));
-//             tmp.unk24 = func_151423D8(tmp.unk2F);
+//             tmp.unk28 = angle_byte_cos((tmp.unk2F - 64));
+//             tmp.unk24 = angle_byte_cos(tmp.unk2F);
 //             tmp.unk20 = (func_150ADA68() * (2.0f * (f32) arg0->unk6)) + (f32) -(s32) arg0->unk6;
 //             temp_f2 = (func_150ADA68() * (2.0f * (f32) arg0->unkA)) + (f32) -(s32) arg0->unkA;
 //             temp_f6 = temp_f2 * tmp.unk24;
@@ -306,8 +306,8 @@ s32 func_151432BC(u8 *rgn, f32 *x, f32 *z, f32 *top, f32 *bottom) {
 //         }
 //     } else {
 //         tmp.unkB = func_150ADA20();
-//         tmp.unk4 = func_151423D8((tmp.unkB - 64));
-//         tmp.unk0 = func_151423D8(tmp.unkB);
+//         tmp.unk4 = angle_byte_cos((tmp.unkB - 64));
+//         tmp.unk0 = angle_byte_cos(tmp.unkB);
 //         temp_ret = func_150ADA68();
 //         temp_f2 = temp_ret * (f32) arg0->unk6;
 //         *arg1 = (arg0->unk0 + (temp_f2 * tmp.unk0));
@@ -347,10 +347,10 @@ void func_15143794(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3) {
     f32 temp_f0;
     f32 temp_f2;
 
-    sp24 = func_151423D8(arg0);
-    sp20 = func_151423D8(arg0 - 0x40);
-    sp1C = func_151423D8(arg1);
-    temp_f0 = func_151423D8(arg1 - 0x40);
+    sp24 = angle_byte_cos(arg0);
+    sp20 = angle_byte_cos(arg0 - 0x40);
+    sp1C = angle_byte_cos(arg1);
+    temp_f0 = angle_byte_cos(arg1 - 0x40);
     temp_f2 = arg2 * sp1C;
     arg3->unk0 = temp_f2 * sp20;
     arg3->unk4 = -arg2 * temp_f0;
@@ -360,8 +360,8 @@ void func_15143834(s16 arg0, s16 arg1, f32 arg2, struct17 *arg3) {
     func_15143794(arg0, arg1, arg2, arg3);
 }
 void func_15143874(s16 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
-    f32 sp1C = func_151423D8(arg0);
-    f32 s = func_151423D8(arg0 - 0x40);
+    f32 sp1C = angle_byte_cos(arg0);
+    f32 s = angle_byte_cos(arg0 - 0x40);
     *arg2 = arg1 * s;
     *arg3 = arg1 * sp1C;
 }
@@ -964,10 +964,10 @@ block_7:
         sp48 = func_150ADA68() * temp_f2;
         temp_v0 = func_150ADA20();
         sp47 = temp_v0;
-        sp58 = func_151423D8((temp_v0 - 0x40) & 0xFF) * sp48;
+        sp58 = angle_byte_cos((temp_v0 - 0x40) & 0xFF) * sp48;
         temp_f16_2 = func_150ADA68() * sp90;
         sp5C = temp_f16_2;
-        temp_f2_3 = func_151423D8(temp_v0) * sp48;
+        temp_f2_3 = angle_byte_cos(temp_v0) * sp48;
         temp_f12_2 = (temp_f16_2 * sp88) + (temp_f2_3 * sp84);
         sp54 = temp_f12_2;
         (*(f32 *)((u8 *)arg1 + 0)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 0)) + ((sp58 * sp7C) + (temp_f12_2 * sp80)));
@@ -1601,7 +1601,7 @@ void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
                     o = *q;
                     func_150A7E40(mtx, v[0], v[1], v[2], o, o + 1, o + 2);
                 } else {
-                    func_15142314(arg2, 0, *q);
+                    mtx_get_translation(arg2, 0, *q);
                 }
                 arg3--;
                 p++;
@@ -1618,7 +1618,7 @@ void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
                     o = *q;
                     func_150A7E40((f32 (*)[4]) arg2, v[0], v[1], v[2], o, o + 1, o + 2);
                 } else {
-                    func_15142314(arg2, 0, *q);
+                    mtx_get_translation(arg2, 0, *q);
                 }
                 arg3--;
                 p++;
@@ -1777,7 +1777,7 @@ void func_15146508(struct127 *arg0, struct127 *arg1) {
     tmp.unk4 = arg1;
     tmp.unk8 = arg0->unique_id;
     tmp.unk9 = arg1->unique_id;
-    func_15169040(&tmp, 45, arg0, arg1);
+    node_broadcast_all(&tmp, 45, arg0, arg1);
 }
 
 #ifdef NON_MATCHING

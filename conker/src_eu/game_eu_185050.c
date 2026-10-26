@@ -59,12 +59,12 @@ void func_15157840(u8 *arg0)
   }
   if (done)
   {
-    func_1516972C((struct102 *) arg0);
+    node_destroy((struct102 *) arg0);
   }
 }
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
@@ -128,7 +128,7 @@ s32 *func_15157990(s32 *arg0, u8 *arg1, s16 arg2) {
         func_151441A4(&sp.u80, &sp.u7E, &sp.u7C, &sp.u7A, (s32) (*(u8 *)((u8 *)arg1 + 0x40)), (s32) (*(u8 *)((u8 *)arg1 + 0x41)), (s32) (*(u8 *)((u8 *)arg1 + 0x42)), (s32) (*(u8 *)((u8 *)arg1 + 0x43)), (s32) (*(u8 *)((u8 *)arg1 + 0x44)), (s32) (*(u8 *)((u8 *)arg1 + 0x45)), (s32) (*(u8 *)((u8 *)arg1 + 0x46)), (s32) (*(u8 *)((u8 *)arg1 + 0x47)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x3C)));
         func_151442FC(&sp.u78, &sp.u76, &sp.u74, &sp.u72, (s32) (*(u8 *)((u8 *)arg1 + 0x40)), (s32) (*(u8 *)((u8 *)arg1 + 0x41)), (s32) (*(u8 *)((u8 *)arg1 + 0x42)), (s32) (*(u8 *)((u8 *)arg1 + 0x43)), (s32) (*(u8 *)((u8 *)arg1 + 0x44)), (s32) (*(u8 *)((u8 *)arg1 + 0x45)), (s32) (*(u8 *)((u8 *)arg1 + 0x46)), (s32) (*(u8 *)((u8 *)arg1 + 0x47)), 0xFF, (s32) (*(s8 *)((u8 *)arg1 + 0x3D)));
         temp_v1 = ((*(s32 *)((u8 *)arg1 + 0x2C)) * 8) + ((u8 *)&D_800A4EA8);
-        var_v0 = func_15142FBC(func_1513F4E4(func_15142CF0(func_15142C10(temp_s1, sp.u78, sp.u76, sp.u74, (s32) sp.u72, &sp.u83), 0, 0, sp.u80, (s32) sp.u7E, (s32) sp.u7C, (s32) sp.u7A, &sp.u83), (*(u8 *)((u8 *)arg1 + 0x33)), &sp.u83), (*(s32 *)((u8 *)arg1 + 0x20)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x34)) | (*(s32 *)((u8 *)arg1 + 0x38)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u83);
+        var_v0 = func_15142FBC(gfx_set_combine_mode(func_15142CF0(func_15142C10(temp_s1, sp.u78, sp.u76, sp.u74, (s32) sp.u72, &sp.u83), 0, 0, sp.u80, (s32) sp.u7E, (s32) sp.u7C, (s32) sp.u7A, &sp.u83), (*(u8 *)((u8 *)arg1 + 0x33)), &sp.u83), (*(s32 *)((u8 *)arg1 + 0x20)) | 0x80000 | 0x2C00 | (*(s32 *)((u8 *)arg1 + 0x34)) | (*(s32 *)((u8 *)arg1 + 0x38)), (*(s32 *)((u8 *)temp_v1 + 4)) | (*(s32 *)((u8 *)temp_v1 + 0)), &sp.u83);
         temp_v1_2 = (*(u8 *)((u8 *)arg1 + 0x10));
         if (temp_v1_2 & 2) {
             if (temp_v1_2 & 4) {
@@ -270,7 +270,7 @@ s32 func_15158018(u8 *arg0) {
 }
 
 void func_151582F8(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x4C, arg0 + 0x50, arg0);
+    node_handle_link_message(arg1, arg2, arg0 + 0x4C, arg0 + 0x50, arg0);
 }
 
 s32 func_15158338(s32 arg0) {
@@ -312,5 +312,5 @@ Gfx *func_15158558(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 void func_151585E8(s32 arg0, u8 arg1) {
-    func_15169260(D_800A6440, 3, arg0, arg1);
+    node_broadcast_types(D_800A6440, 3, arg0, arg1);
 }

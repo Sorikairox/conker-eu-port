@@ -1,15 +1,15 @@
 # P238 func_15101610 mutants: sed % setup names
-s/func_1516972C(\*(struct102 \*\*) (obj + 0x138));/;/ % all
+s/node_destroy(\*(struct102 \*\*) (obj + 0x138));/;/ % all
 s/(\*(struct102 \*\*) (obj + 0x138) != NULL)/(*(struct102 **) (obj + 0x13C) != NULL)/ % alt2
 s/(fx + 0x2C) != NULL/(fx + 0x28) != NULL/ % alt
-s/func_1516972C(\*(struct102 \*\*) (fx + 0x2C));/func_1516972C(*(struct102 **) (fx + 0x28));/ % all
+s/node_destroy(\*(struct102 \*\*) (fx + 0x2C));/node_destroy(*(struct102 **) (fx + 0x28));/ % all
 s/(fx + 0x24) != NULL/(fx + 0x24) == NULL/ % all
-s/func_1516972C(\*(struct102 \*\*) (fx + 0x24));/func_1516972C(*(struct102 **) (fx + 0x2C));/ % all
+s/node_destroy(\*(struct102 \*\*) (fx + 0x24));/node_destroy(*(struct102 **) (fx + 0x2C));/ % all
 s/(fx + 0x30) != NULL/(fx + 0x34) != NULL/ % alt
-s/func_1516972C(\*(struct102 \*\*) (fx + 0x30));/;/ % all
+s/node_destroy(\*(struct102 \*\*) (fx + 0x30));/;/ % all
 s/(fx + 0x34) != NULL/(fx + 0x30) != NULL/ % alt2
-s/func_1516972C(\*(struct102 \*\*) (fx + 0x34));/;/ % all
-s/    func_1513CA6C(arg0);/    func_1513CA6C((struct210 *) fx);/ % none
+s/node_destroy(\*(struct102 \*\*) (fx + 0x34));/;/ % all
+s/    effect3d_retire(arg0);/    effect3d_retire((struct210 *) fx);/ % none
 s/u8 \*fx = obj + 0x110;/u8 *fx = obj + 0x114;/ % all
 s/    if (\*(u16 \*) (obj + 0x1A0) != 0) {/    if (*(u16 *) (obj + 0x1A2) != 0) {/ % all
 s/func_100111C8(\*(u16 \*) (obj + 0x1A0));/func_100111C8(*(u16 *) (obj + 0x1A2));/ % alt2

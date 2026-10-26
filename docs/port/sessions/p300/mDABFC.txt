@@ -51,7 +51,7 @@ s/                wallfx.range = 300.0f;/                wallfx.range = 301.0f;/
 s/func_151541F4((u8 \*)&wallfx, (s32)&debris, (s32)frame, \*(u8 \*)(obj + 0xC), \*(u8 \*)(obj + 1));/func_151541F4((u8 *)\&wallfx, (s32)\&debris, (s32)frame, *(u8 *)(obj + 0xC), *(u8 *)(obj + 2));/
 s/    if (hit->count == 1) {/    if (hit->count != 2) {/
 s/(hitfx_smoke_rate\[0\] + func_150ADA68() \* hitfx_smoke_rand\[0\])/(hitfx_smoke_rate[0] + func_150ADA68() * hitfx_smoke_rate[0])/
-/func_151D9B8C(3, f/s/ + 100, (s32)/ + 101, (s32)/
+/impact_debris_spawn(3, f/s/ + 100, (s32)/ + 101, (s32)/
 s/(s32)&hit->surf, (struct17 \*)hit->pos,/(s32)\&hit->surf, (struct17 *)\&hit->dist,/
 /(u32)r2 /s/ + 60, 1, 1, 1,/ + 61, 1, 1, 1,/
 s/                \*(f32 \*)(data + 0x40) -= 1.0f;/                *(f32 *)(data + 0x40) -= 2.0f;/

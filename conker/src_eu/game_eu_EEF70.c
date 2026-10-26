@@ -84,7 +84,7 @@ void func_150C1260(u8 *arg0, s32 arg1) {
                 sp.u128 = 0x11;
                 break;
             }
-            func_15142314(temp_v1, sp.u128, &sp.u12C);
+            mtx_get_translation(temp_v1, sp.u128, &sp.u12C);
             temp_f0 = sp.u124 * 80.0f;
             sp80 = temp_f0;
             func_1514C860(sp.u12C, (*(f32 *)((u8 *)arg0 + 0x180)), sp.u134, temp_f0, 0, 0x10, 0x10, 0, 0, temp_f0 * 4.0f, 0, 0xFF);
@@ -119,8 +119,8 @@ void func_150C1260(u8 *arg0, s32 arg1) {
                 do {
                     temp_s0 = func_150ADA20() & 0xFF;
                     temp_f20 = ((func_150ADA68() * 0.9f) + 0.1f) * 18.0f * sp.u124;
-                    temp_f22 = func_151423D8((temp_s0 - 0x40) & 0xFF);
-                    temp_f24 = func_151423D8(temp_s0 & 0xFF);
+                    temp_f22 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
+                    temp_f24 = angle_byte_cos(temp_s0 & 0xFF);
                     sp.uFC = (func_150ADA20() & 0x1F) + 0xF;
                     sp.uD0 = (sp80 * temp_f22) + sp.u12C;
                     sp.uE0 = temp_f20;

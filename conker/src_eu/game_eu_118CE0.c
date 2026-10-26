@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
+void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
 #endif
 
 
 s32 func_15046F70(f32 *, s32, f32, s32);
 s32 func_1504715C(s32, struct127 *);
-s32 func_15142314(s32, s32, f32 *, u8);
+s32 mtx_get_translation(s32, s32, f32 *, u8);
 s32 func_150EB4D0(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     f32 sp2C[3];
     s32 var_a1;
@@ -17,7 +17,7 @@ s32 func_150EB4D0(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
         return 0;
     }
     var_a1 = (arg3 == 1) ? 0x21 : 0x1D;
-    func_15142314(*(s32 *)(arg1 + 0x1D4), var_a1, arg0, arg3);
+    mtx_get_translation(*(s32 *)(arg1 + 0x1D4), var_a1, arg0, arg3);
     if (arg2 == 0) {
         return 1;
     }
@@ -28,12 +28,12 @@ s32 func_150EB4D0(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     return func_15046F70(sp2C, 0, arg0[1] - 50.0f, arg2);
 }
 
-s32 func_151420F8(s32);
+s32 obj_query_table6(s32);
 
 s32 func_150EB5B0(s32 arg0, s32 arg1) {
     if (arg0 == 1) {
         if (D_800BE9F0 == 4) {
-            if (func_151420F8(arg1) != 0) {
+            if (obj_query_table6(arg1) != 0) {
                 return 6;
             }
             return 3;
@@ -59,7 +59,7 @@ void func_150EB610(u8 *arg0, u8 arg1, s32 arg2) {
     if (*(s32 *)(arg0 + 0x1D4) != 0) {
         id = arg1;
         if (func_150EB4D0(&sp.u4C, arg0, (s32) &sp.u28, arg1) != 0) {
-            func_15141F78(0xA, &sp.u28, (f32)arg2 * D_800A1840,
+            fx_spawn_impact_particle(0xA, &sp.u28, (f32)arg2 * D_800A1840,
                           (u8)(u32)(*(f32 *)(arg0 + 0x40) * D_800A1844), &sp.u4C, id);
         }
     }

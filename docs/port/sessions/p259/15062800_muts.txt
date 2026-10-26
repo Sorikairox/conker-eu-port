@@ -18,7 +18,7 @@ s/b->unk31C + 0x197) = 0;/a->unk31C + 0x197) = 0;/ % base
 s/func_150341B4(b->unique_id, a->unique_id);/func_150341B4(a->unique_id, b->unique_id);/ % base
 s/        b->unk2D4 = NULL;/        ;/ % base
 s/if (b->unk2D4 != NULL) {/if (a->unk2D4 != NULL) {/ % base a2d4
-s/func_1516972C((struct102 \*) a->unk2D4);/func_1516972C((struct102 *) b->unk2D4);/ % both2d4 a2d4
+s/node_destroy((struct102 \*) a->unk2D4);/node_destroy((struct102 *) b->unk2D4);/ % both2d4 a2d4
 s/        a->unk2D4 = NULL;/        ;/ % both2d4
 s/func_150615DC(b);/func_150615DC(a);/ % base
 s/for (i = 0; i < 25; i++) {/for (i = 0; i < 24; i++) {/ % base

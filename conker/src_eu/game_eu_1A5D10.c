@@ -50,7 +50,7 @@ void func_15177F90(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s
     s32 pz;
     s32 py;
 
-    rec = func_15167A68(0x3A, 0, 0x38, 0, (u8) flag, 1);
+    rec = node_alloc(0x3A, 0, 0x38, 0, (u8) flag, 1);
     if (rec == NULL) {
         return;
     }
@@ -103,7 +103,7 @@ void func_15177F90(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s
         t.pos[0] = px;
         t.pos[1] = py;
         t.pos[2] = pz;
-        rec = func_15167A68(0x3B, 0, 0x4C, 0, (u8) flag, 1);
+        rec = node_alloc(0x3B, 0, 0x4C, 0, (u8) flag, 1);
         if (rec == NULL) {
             return;
         }
@@ -244,14 +244,14 @@ void func_151787D8(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15168118(s32 gdl, u8 *obj, s16 player);
+s32 node_billboard_draw(s32 gdl, u8 *obj, s16 player);
 
-/* P186: the asm leaves arg1 / arg2 in a1 / a2 at the jal and func_15168118 reads them (object, player view):
+/* P186: the asm leaves arg1 / arg2 in a1 / a2 at the jal and node_billboard_draw reads them (object, player view):
  * pass them (dropped-arguments lesson). */
 s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
     u8 *p = *(u8 **)(arg1 + 0x14);
     if (p[0x36] & (1 << arg2)) {
-        return func_15168118(arg0, arg1, arg2);
+        return node_billboard_draw(arg0, arg1, arg2);
     }
     return arg0;
 }
@@ -259,7 +259,7 @@ s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
 s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
     u8 *p = *(u8 **)(arg1 + 0x14);
     if (p[0x36] & (1 << arg2)) {
-        return func_15168118(arg0);
+        return node_billboard_draw(arg0);
     }
     return arg0;
 }
@@ -436,11 +436,11 @@ s32 func_15179314(u8 *arg0) {
     while (p != NULL) {
         next = *(u8 **)(p + 8);
         if (*(u8 **)(p + 0x14) == arg0) {
-            func_1516972C(p);
+            node_destroy(p);
         }
         p = next;
     }
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 s32 func_15179314(u8 *);

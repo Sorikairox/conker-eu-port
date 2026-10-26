@@ -26,7 +26,7 @@ s/(u8 \*) \&ring, 0, 0xFF, 1)/(u8 *) \&ring, 0, 0xFE, 1)/
 s/if (!found) {/if (found) {/
 s/angle = -0x40 - /angle = 0x40 - /
 s/(obj + 0x7A) >> 8)/(obj + 0x7A) >> 7)/
-s/func_151423D8((u8) (angle - 0x40))/func_151423D8((u8) (angle + 0x40))/
+s/angle_byte_cos((u8) (angle - 0x40))/angle_byte_cos((u8) (angle + 0x40))/
 s/\* 96.0f + 352.0f) \* 0.5f/* 96.0f + 352.0f) * 0.25f/
 s/puff.w0 = 0x701;/puff.w0 = 0x700;/
 s/    func_150ADA20();/    ;/

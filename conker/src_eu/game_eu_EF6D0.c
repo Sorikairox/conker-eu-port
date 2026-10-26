@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-void func_15142314(void *, s32, void *);
+void mtx_get_translation(void *, s32, void *);
 
 s32 func_150C1EC0(s32 arg0, u8 *arg1, s32 arg2) {
     s32 sp1C;
@@ -19,7 +19,7 @@ s32 func_150C1EC0(s32 arg0, u8 *arg1, s32 arg2) {
         sp1C = 0x15;
         break;
     }
-    func_15142314((*(s32 *)((u8 *)arg1 + 0x1D4)), sp1C, arg0);
+    mtx_get_translation((*(s32 *)((u8 *)arg1 + 0x1D4)), sp1C, arg0);
     return 1;
 }
 #else
@@ -137,8 +137,8 @@ void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
             do {
                 temp_s0 = func_150ADA20() & 0xFF;
                 temp_f20 = ((func_150ADA68() * 0.9f) + 0.1f) * 9.0f * sp.u120;
-                temp_f22 = func_151423D8((temp_s0 - 0x40) & 0xFF);
-                temp_f24 = func_151423D8(temp_s0 & 0xFF);
+                temp_f22 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
+                temp_f24 = angle_byte_cos(temp_s0 & 0xFF);
                 sp.uF8 = (func_150ADA20() & 0xF) + 0x1E;
                 sp.uCC = (sp7C * temp_f22) + sp.u124;
                 sp.uD0 = (*(f32 *)((u8 *)arg0 + 0x180)) + 2.0f;

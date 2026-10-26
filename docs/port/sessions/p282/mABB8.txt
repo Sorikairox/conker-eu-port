@@ -13,7 +13,7 @@
 /func_15132FBC(&spark, 3, 0xFF, 1, kind, owner)/s/0xFF, 1/0xFF, 2/
 /memcpy(p + 0x170/s/0x170/0x171/
 /(obj->unk74 & 0xF) == 0xF/s/== 0xF)/== 0xE)/
-/func_1513A5E0((s32) pos, kind, owner)/s/kind, owner/kind, 0/
+/impact_burst((s32) pos, kind, owner)/s/kind, owner/kind, 0/
 /smoke.u04 = 0.64900005f/s/0.64900005f/0.649f/
 /smoke.pos\[1\] = trans\[1\]/s/trans\[1\]/trans[2]/
 /smoke.scl\[1\] = 0.0f/s/0.0f/1.0f/

@@ -41,7 +41,7 @@ typedef struct {
     f32 f6C;            /* 0x6C 1000000.0 */
 } ArcEndSpec;
 
-// bolt_arc_spawn: creates a lightning arc object (type 0x40, func_15167A68 layer `layer` / `arg3`) from the 0x50-byte
+// bolt_arc_spawn: creates a lightning arc object (type 0x40, node_alloc layer `layer` / `arg3`) from the 0x50-byte
 // arc spec `spec` (copied to +0x10; +0x38 = segment count n, +0x40 width, +0x44 / +0x46 life base / random range,
 // +0x48 colour). The object's data area (+0x60) follows its 0x88-byte header, n * 0x34 + (n + 2) * 0xC bytes in and
 // `extra` more bytes are reserved for the caller. Sets the step 1 / (n + 1) (+0x64) and the life (+0x68), builds the
@@ -55,7 +55,7 @@ u8 *func_15106260(s16 *spec, s32 extra, u8 layer, s32 arg3) {
     s32 flags;
     u8 i;
 
-    obj = func_15167A68(0x40, arg3, n * 0x34 + (n + 2) * 0xC + extra + 0x88, 1, layer, 1);
+    obj = node_alloc(0x40, arg3, n * 0x34 + (n + 2) * 0xC + extra + 0x88, 1, layer, 1);
     if (obj == NULL) {
         return NULL;
     }
@@ -142,13 +142,13 @@ void func_1510660C(struct102 *arg0) {
     if (temp_v0 != -1) {
         temp_v1 = *(s32 *)((u8 *)&D_80088FB0 + (temp_v0 * 4));
         if ((temp_v1 != NULL) && (temp_v1(arg0, &sp2B) == 0)) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
     if (arg0->unk12 & 1) {
         arg0->unk10 -= D_800BE9E4;
         if (arg0->unk10 < 0) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
     if (sp2B != 0) {
@@ -323,7 +323,7 @@ void func_15106B90(struct102 *arg0)
 #ifdef NON_MATCHING
 void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
 s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
-s32 func_1513F4E4(s32, u8, s8 *);
+s32 gfx_set_combine_mode(s32, u8, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
 s32 func_15142FBC(s32, s32, s32, s8 *);
@@ -376,7 +376,7 @@ s32 func_15106D38(s32 gfx, u8 *obj, s16 id) {
     gfx = func_15142E24(gfx, D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gfx = func_15142C10(gfx, obj[0x58], obj[0x59], obj[0x5A], obj[0x5B], &flag);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x44, &flag);
+    gfx = gfx_set_combine_mode(gfx, 0x44, &flag);
     gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[3] | D_800A4EA8[2], &flag);
 
     /* first point: side normal of the first segment */
@@ -465,23 +465,23 @@ void func_151073F8(u8 *arg0)
   }
   a = *(struct102 **)(arg0 + 0x6C);
   if (a != NULL) {
-    func_1516972C(a);
+    node_destroy(a);
   }
   b = *(struct102 **)(arg0 + 0x70);
   if (b != NULL) {
-    func_1516972C(b);
+    node_destroy(b);
   }
   func_151D5E30(arg0 + 0x74);
 }
 
 void func_15107478(struct102 *arg0) {
     func_151073F8(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_151074A4(struct102 * arg0) {
     func_151073F8(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_151074D0(u8 *arg0, s32 arg1, u8 arg2) {
@@ -688,7 +688,7 @@ void func_15107B84(s32 ***arg0) {
     temp_v1[2] = 0;
 }
 
-void func_15107B9C(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x30) != 0) { func_1516972C(*(struct102 **)(p + 0x30)); } }
+void func_15107B9C(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x30) != 0) { node_destroy(*(struct102 **)(p + 0x30)); } }
 
 void func_15107BCC(struct260 * arg0) {
     func_15107B9C(arg0);
@@ -797,7 +797,7 @@ s32 func_15107C80(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 segments, f32 j
 void func_15107E64(u8 *arg0, s32 arg1, u8 arg2) {
     s32 temp_a2 = *(s32 *)(arg0 + 0x60);
 
-    func_15169850(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);
+    node_handle_link_message(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);
 }
 
 #ifdef NON_MATCHING
@@ -1005,5 +1005,5 @@ void func_151084D4(u8 *arg0, u8 arg1, void *arg2, void *arg3) {
 void func_15108518(u8 *arg0, s32 arg1, u8 arg2) {
     s32 temp_a2 = *(s32 *)(arg0 + 0x60);
 
-    func_15169850(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);
+    node_handle_link_message(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);
 }

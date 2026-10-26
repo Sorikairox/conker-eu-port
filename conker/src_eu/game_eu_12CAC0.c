@@ -280,7 +280,7 @@ void func_150FF9F4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
         } else {
             var_v0 = 0;
         }
-        func_1513D2F0(&sp.u84, (s32) &D_800A4AA0, 0U, 0U, 0U, 0x1BU, (u8) (var_v0 + 1), 0, 0, 0, arg2, arg3);
+        effect3d_spawn_full(&sp.u84, (s32) &D_800A4AA0, 0U, 0U, 0U, 0x1BU, (u8) (var_v0 + 1), 0, 0, 0, arg2, arg3);
     }
 }
 

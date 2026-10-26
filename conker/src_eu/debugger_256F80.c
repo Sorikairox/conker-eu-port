@@ -10,18 +10,19 @@ extern u8 D_80042DE0; // __osContLastCmd
 extern u8 D_80042DE1;
 
 
-void func_160018BC(void);
-s32 func_160019A8(s32 direction, void *dramAddr);
+void debug_cont_pack_read_data(void);
+s32 debug_si_raw_start_dma(s32 direction, void *dramAddr);
 
 // reads the controllers (osContStartReadData + wait)
-s32 func_16001700(void) {
+/* was func_16001700 */
+s32 debug_cont_read(void) {
     s32 ret;
     s32 i;
     u32 end;
 
     if (D_80042DE0 != CONT_CMD_READ_BUTTON) {
-        func_160018BC();
-        func_160019A8(OS_WRITE, &D_80042DA0);
+        debug_cont_pack_read_data();
+        debug_si_raw_start_dma(OS_WRITE, &D_80042DA0);
         i = 0;
         end = osGetCount() + 200000;
         while (osGetCount() < end) {
@@ -33,7 +34,7 @@ s32 func_16001700(void) {
         D_80042DA0.ramarray[i] = CONT_CMD_NOP;
     }
     D_80042DA0.pifstatus = 0;
-    ret = func_160019A8(OS_READ, &D_80042DA0);
+    ret = debug_si_raw_start_dma(OS_READ, &D_80042DA0);
     D_80042DE0 = CONT_CMD_READ_BUTTON;
     i = 0;
     end = osGetCount() + 800000;
@@ -44,7 +45,8 @@ s32 func_16001700(void) {
     return ret;
 }
 // osContGetReadData
-void func_16001830(OSContPad *data) {
+/* was func_16001830 */
+void debug_cont_get_read_data(OSContPad *data) {
     u8 *ptr;
     __OSContReadFormat readformat;
     s32 i;
@@ -61,7 +63,8 @@ void func_16001830(OSContPad *data) {
     }
 }
 // __osPackReadData
-void func_160018BC(void) {
+/* was func_160018BC */
+void debug_cont_pack_read_data(void) {
     u8 *ptr;
     __OSContReadFormat readformat;
     s32 i;
@@ -86,7 +89,8 @@ void func_160018BC(void) {
 }
 
 // another __osSiDeviceBusy function
-s32 func_16001984()
+/* was func_16001984 */
+s32 debug_si_device_busy()
 {
     register u32 stat = IO_READ(SI_STATUS_REG);
     if (stat & (SI_STATUS_DMA_BUSY | SI_STATUS_RD_BUSY))
@@ -95,11 +99,12 @@ s32 func_16001984()
 }
 
 // very similar to __osSiRawStartDma
-s32 func_160019A8(s32 direction, void *dramAddr) {
+/* was func_160019A8 */
+s32 debug_si_raw_start_dma(s32 direction, void *dramAddr) {
     if ((s32)dramAddr & 3) { // what is this checking?
         return -1;
     }
-    if (func_16001984()) {
+    if (debug_si_device_busy()) {
         return -1;
     }
 
@@ -121,10 +126,12 @@ s32 func_160019A8(s32 direction, void *dramAddr) {
     return 0;
 }
 
-void func_16001A64(void) {
+/* was func_16001A64 */
+void debug_stub(void) {
 }
 
-s32 func_16001A6C(f32 arg0) {
+/* was func_16001A6C */
+s32 debug_float_is_denorm_or_nan(f32 arg0) {
     s32 tmp = *(s32*) &arg0;
 
     if ((tmp * 2) == 0) {

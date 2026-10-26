@@ -46,4 +46,4 @@
 \#^    rec.u2B = r;$#s/r;/0;/
 \#^    rec.u2E = 0;$#s/0;/0xFF;/
 \#^    rec.u34 = 0;$#s/0;/1;/
-\#^    func_15167D84(&rec, 0, 0, -1, 0xFF, 0);$#s/0xFF/0xFE/
+\#^    node_spawn_sprite(&rec, 0, 0, -1, 0xFF, 0);$#s/0xFF/0xFE/

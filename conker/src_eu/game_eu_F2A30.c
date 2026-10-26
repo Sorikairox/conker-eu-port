@@ -194,7 +194,7 @@ void func_150C572C(void) {
 
     for (i = 0; i < 4; i++) {
         if (D_800D9CF0[i] != 0) {
-            func_1516972C(D_800D9CF0[i]);
+            node_destroy(D_800D9CF0[i]);
         }
         D_800D9CF0[i] = 0;
     }

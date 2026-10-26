@@ -8,14 +8,14 @@
 // sky_segments_flicker: level update handler (D_8008D0A4 entry 10, `void (s32)`; does nothing for a non-zero
 // argument): advances the sky animation frame D_800DD835 and toggles each of the 5 sky segment variants
 // D_800BE500[i] with chance 35 / 1000 (70 / 1000 while it is on). A segment that turns on gets command 0x18 for
-// its id (D_80088F60 = 9..13, func_151616D0), one that turns off gets 0x1C then 0x17. func_150ADA20 is the random
+// its id (D_80088F60 = 9..13, light_ctrl_broadcast), one that turns off gets 0x1C then 0x17. func_150ADA20 is the random
 // number generator.
 typedef struct {
     u8 id[5];
 } SkyIds_151008C0;
 extern SkyIds_151008C0 D_80088F60;
 extern u8 D_800DD835;
-void func_151616D0(u8, u8, s32);
+void light_ctrl_broadcast(u8, u8, s32);
 void func_151008C0(s32 arg0) {
     SkyIds_151008C0 ids = D_80088F60;
     s32 i;
@@ -30,10 +30,10 @@ void func_151008C0(s32 arg0) {
         if ((u32) func_150ADA20() % 1000 < chance) {
             D_800BE500[i] ^= 1;
             if (D_800BE500[i] != 0) {
-                func_151616D0(ids.id[i], 0x18, 0);
+                light_ctrl_broadcast(ids.id[i], 0x18, 0);
             } else {
-                func_151616D0(ids.id[i], 0x1C, 0);
-                func_151616D0(ids.id[i], 0x17, 0);
+                light_ctrl_broadcast(ids.id[i], 0x1C, 0);
+                light_ctrl_broadcast(ids.id[i], 0x17, 0);
             }
         }
     }

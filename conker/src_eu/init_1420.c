@@ -236,7 +236,7 @@ s16 func_100019F0(s16 *arg0, struct05 *arg1) {
 extern u8 D_8002C2C0[]; // "0"
 void *memcpy(void *, const void *, size_t);
 
-// libultra libc xldtob.c _Genld (same source as debugger func_16002DE4)
+// libultra libc xldtob.c _Genld (same source as debugger debug_printf_genld)
 void func_10001AA8(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     const u8 point = '.';
 

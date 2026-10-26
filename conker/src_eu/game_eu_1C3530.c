@@ -952,7 +952,7 @@ void func_151D6310(void *, s16, s32, void *, u8 *);
 s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *gfx_set_combine_mode(Gfx *, u8, u8 *);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 f32 sqrtf(f32);
 extern s32 D_800D30BC;
@@ -1078,7 +1078,7 @@ s32 func_151976B8(u8 *e, s32 gfxArg, s16 slot) {
     gfx = (Gfx *) func_15142E24((s32) gfx, (s32) &tex, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
     gfx = func_15142C10(gfx, rec->u51, rec->u51, rec->u51, 0xFF, &flag);
     gfx = func_15142B7C(gfx, 1, 0x160600);
-    gfx = func_1513F4E4(gfx, 0xB, &flag);
+    gfx = gfx_set_combine_mode(gfx, 0xB, &flag);
     gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     if (*(u16 *) (e + 0x1E) & 2) {
@@ -1157,7 +1157,7 @@ f32 func_15197F68(s32 arg0) {
 }
 
 f32 func_15197F7C(s32 arg0) {
-    return (f32) func_151422C0(0xA, (s32) "power", 1, 0x1F4, "../Effects/CharacterFlameThrower/characterflamethrower.c", 0x8CC) * 0.01f;
+    return (f32) debug_tweak_int_mid(0xA, (s32) "power", 1, 0x1F4, "../Effects/CharacterFlameThrower/characterflamethrower.c", 0x8CC) * 0.01f;
 }
 
 f32 func_15197FD8(s32 arg0) {
@@ -1397,8 +1397,8 @@ extern SmokeKind8680 D_800A8AF0[];
 // trail_smoke_spawn: spawns smoke puffs along a trail segment. obj +0x94 = ring of +0x25 points (0x24 bytes:
 // position, velocity +0xC, scale +0x18, done flag +0x21), +0x98 = the owner (accumulator +0x70, rate +0x6C, kind
 // +0x69 into D_800A8AF0). Marks point idx done, adds the rate to the accumulator and, unless the next point is the
-// head (+0x2E), spawns one puff per whole unit (func_1513D524 type 0x13 / 0x14 at random, 0x5C-byte record) between
-// point idx and the next one, both moved by a random direction (func_151423D8 sin / cos) of length 0.8 x the next
+// head (+0x2E), spawns one puff per whole unit (effect3d_spawn_default type 0x13 / 0x14 at random, 0x5C-byte record) between
+// point idx and the next one, both moved by a random direction (angle_byte_cos sin / cos) of length 0.8 x the next
 // point's scale, with a random life from the kind. The last two parameters are unused.
 void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
     SmokeRec8680 rec;
@@ -1483,10 +1483,10 @@ void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
     do {
         a = func_150ADA20();
         b = func_150ADA20();
-        sa = func_151423D8(a - 0x40);
-        ca = func_151423D8(a);
-        sb = func_151423D8(b - 0x40);
-        cb = func_151423D8(b);
+        sa = angle_byte_cos(a - 0x40);
+        ca = angle_byte_cos(a);
+        sb = angle_byte_cos(b - 0x40);
+        cb = angle_byte_cos(b);
         r = *(f32 *) (next + 0x18) * 0.8f;
         hdr.life = (u32) func_150ADA20() % (u32) (kind->life_range + 1) + kind->life_min;
         h = r * cb;
@@ -1499,7 +1499,7 @@ void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
         hdr.p1[0] = *(f32 *) (cur + 0) + dx;
         hdr.p1[1] = *(f32 *) (cur + 4) + dy;
         hdr.p1[2] = *(f32 *) (cur + 8) + dz;
-        fx = (u8 *) func_1513D524((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);
+        fx = (u8 *) effect3d_spawn_default((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);
         if (fx != NULL) {
             memcpy(fx + 0x110, &rec, 0x5C);
         }
@@ -1626,7 +1626,7 @@ extern u8 D_8008FC40[3];
 // t from D_8008FC40, it walks each list (safe iteration through D_800DD5C8[++D_800DD5C0]) and, from the path's head
 // point +0x2E back to the current point +0x2D (ring of +0x25 points of 0x24 bytes at +0x94, radius f32 +0x18), hits
 // the node when its position (+0x98 / +0x9C / +0xA0) is within radius^2 + 900 of a point: sound func_1518403C(5),
-// func_15168B10(node, 0x18), state +0xED = 5, +0x94 = D_800DDE80[27], s16 +0x92 = 9, +0xB8 = +0xA8 = 40, +0xB4 = 0,
+// node_set_type(node, 0x18), state +0xED = 5, +0x94 = D_800DDE80[27], s16 +0x92 = 9, +0xB8 = +0xA8 = 40, +0xB4 = 0,
 // +0xC8 = func_1510FE58 at the node's position (then +0x91 = 4). As in the asm, the walk index is set once per list,
 // so only the first node of each list sees the points (later nodes start at +0x2D). Returns 1.
 s32 func_15198EEC(u8 *arg0) {
@@ -1681,7 +1681,7 @@ s32 func_15198EEC(u8 *arg0) {
                 dz = pt[2] - nz;
                 if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
                     func_1518403C(5);
-                    func_15168B10((s32) node, 0x18);
+                    node_set_type((s32) node, 0x18);
                     n[0xED] = 5;
                     *(s32 *) (n + 0x94) = D_800DDE80[27];
                     *(s16 *) (n + 0x92) = 9;
@@ -1817,11 +1817,11 @@ void func_151992F8(u8 *arg0, u8 *arg1) {
         temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 8))) + (*(f32 *)((u8 *)temp_s0 + 4));
         temp_s1 = func_150ADA20() & 0xFF;
         temp_s2 = func_150ADA20() & 0xFF;
-        temp_f22 = func_151423D8((temp_s1 - 0x40) & 0xFF);
-        temp_f24 = func_151423D8(temp_s1 & 0xFF);
-        temp_f26 = func_151423D8((temp_s2 - 0x40) & 0xFF);
+        temp_f22 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
+        temp_f24 = angle_byte_cos(temp_s1 & 0xFF);
+        temp_f26 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
         temp_f2 = (*(f32 *)((u8 *)temp_s0 + 0));
-        temp_f12 = temp_f2 * func_151423D8(temp_s2 & 0xFF);
+        temp_f12 = temp_f2 * angle_byte_cos(temp_s2 & 0xFF);
         temp_f28 = (*(f32 *)((u8 *)arg1 + 0)) + (temp_f12 * temp_f22);
         temp_f30 = (*(f32 *)((u8 *)arg1 + 4)) - (temp_f2 * temp_f26);
         spBC = (*(f32 *)((u8 *)arg1 + 8)) + (temp_f12 * temp_f24);
@@ -1840,12 +1840,12 @@ void func_151992F8(u8 *arg0, u8 *arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151992F8.s")
 #endif
 #ifdef NON_MATCHING
-void *func_15167D84(void *, s32, s32, s32, s32, s32);
+void *node_spawn_sprite(void *, s32, s32, s32, s32, s32);
 extern s32 D_800908C4;
 extern u8 D_800A8B50[]; /* 0x18-byte burst descriptors: f32 radius, speed base, speed range; s16 pairs (base, range) */
 
 // spray_particles_burst: while the owner's counter (+0x88 of arg0's data) is above 1, spawns one particle per unit
-// (func_15167D84, the 0x38-byte template below, P124: one struct instead of m2c's 26 separate locals): random
+// (node_spawn_sprite, the 0x38-byte template below, P124: one struct instead of m2c's 26 separate locals): random
 // direction on a sphere of the descriptor's radius around arg1, velocity = offset from arg0's position times a
 // random speed, random life / size / scale from the descriptor (D_800A8B50[data[0x80]]).
 void func_1519961C(u8 *arg0, u8 *arg1) {
@@ -1920,11 +1920,11 @@ void func_1519961C(u8 *arg0, u8 *arg1) {
         speed = func_150ADA68() * *(f32 *)(desc + 8) + *(f32 *)(desc + 4);
         a = func_150ADA20() & 0xFF;
         b = func_150ADA20() & 0xFF;
-        sinA = func_151423D8((a - 0x40) & 0xFF);
-        cosA = func_151423D8(a);
-        sinB = func_151423D8((b - 0x40) & 0xFF);
+        sinA = angle_byte_cos((a - 0x40) & 0xFF);
+        cosA = angle_byte_cos(a);
+        sinB = angle_byte_cos((b - 0x40) & 0xFF);
         radius = *(f32 *)(desc + 0);
-        ring = radius * func_151423D8(b);
+        ring = radius * angle_byte_cos(b);
         t.u16 = ((*(f32 *)(arg1 + 0) + ring * sinA) - *(f32 *)(arg0 + 0x10)) * speed;
         t.u20 = ((*(f32 *)(arg1 + 4) - radius * sinB) - *(f32 *)(arg0 + 0x14)) * speed;
         t.u18 = ((*(f32 *)(arg1 + 8) + ring * cosA) - *(f32 *)(arg0 + 0x18)) * speed;
@@ -1933,7 +1933,7 @@ void func_1519961C(u8 *arg0, u8 *arg1) {
         v = func_150ADA20() % (u32) (*(s16 *)(desc + 0x16) + 1) + *(s16 *)(desc + 0x14);
         t.u26 = v;
         t.u24 = v;
-        func_15167D84(&t, 0, 0, -1, arg0[0xC], arg0[1]);
+        node_spawn_sprite(&t, 0, 0, -1, arg0[0xC], arg0[1]);
         *(f32 *)(data + 0x88) -= 1.0f;
     } while (*(f32 *)(data + 0x88) > 1.0f);
 }
@@ -2135,7 +2135,7 @@ void func_15199DDC(struct102 *arg0, s32 *arg1, u8 arg2) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x98);
     if (arg2 == 0 || arg2 == 2 || arg2 == 0x26) {
         if (*(s32 *)p == arg1[0] || p[4] == ((u8 *)arg1)[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else if (arg2 == 0x2D) {
         if (arg1[0] == *(s32 *)p) {
@@ -2175,7 +2175,7 @@ void func_15199EF0(void *arg0) {
     }
     t = *(u8 **)(v + 0x148);
     if (t != NULL) {
-        func_1516972C(t);
+        node_destroy(t);
     }
 }
 
@@ -2644,7 +2644,7 @@ void func_15143794(s16, s16, f32, void *);
 void func_1508B20C(f32, f32, f32, f32);
 f32 func_150ADA68(void);
 s32 func_150ADA20(void);
-void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+void *effect3d_spawn_full(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 extern s32 (*D_8008FC48[])(u8 *); /* func_1519CEB8 / func_1519CEE0 / func_1519CF08: all take the trail object only */
 
 /* One point of a trail ring (obj +0x94, obj +0x25 entries). */
@@ -2667,7 +2667,7 @@ typedef struct {
     /* 0x28 */ s16 u28, u2A;
 } TrailSparkMotion;
 
-/* func_1513D2F0 spec (stack +0x134). */
+/* effect3d_spawn_full spec (stack +0x134). */
 typedef struct {
     /* 0x00 */ u8 kind;
     /* 0x01 */ u8 u01;
@@ -2703,7 +2703,7 @@ typedef struct {
 //    distance from the head * state +0x44, wrapped to -16384..16383 (func_15144528).
 // 5. With 3+ points (unless state +0x150 bits 0x20 and 0x10 are both set) and the trail at full length, spark
 //    credit (+0x134) grows by (+0x4C + rand * +0x50) * tail width * frame time; per whole unit one spark
-//    (func_1513D2F0 kind 0x13 / 0x14, motion block at +0x110) starts at the point state +0x84 of the way from the
+//    (effect3d_spawn_full kind 0x13 / 0x14, motion block at +0x110) starts at the point state +0x84 of the way from the
 //    head (interpolated between the two points around it), jittered by func_15143794.
 // 6. State +0x35 (if not -1) picks a D_8008FC48 handler (called with obj only: all three handlers take one
 //    argument; the asm leaves a stale a1 there). 7. Flag 2: func_1508B20C at the midpoint of newest end and tail with
@@ -2933,7 +2933,7 @@ s32 func_1519AF14(u8 *obj) {
                 spec.p1[1] = spec.p0[1] + seg.unk4;
                 spec.p1[2] = spec.p0[2] + seg.unk8;
                 spec.frame = (u32)func_150ADA20() % (u32)(st[0x89] + 1) + st[0x88];
-                spark = func_1513D2F0(&spec, (s32)&D_800A4AA0, 0x1F, 0x22, 0, 0x1A, (func_150ADA20() & 1) | 2, 0, 0,
+                spark = effect3d_spawn_full(&spec, (s32)&D_800A4AA0, 0x1F, 0x22, 0, 0x1A, (func_150ADA20() & 1) | 2, 0, 0,
                                       0x2C, obj[0xC], obj[1]);
                 if (spark != NULL) {
                     memcpy(spark + 0x110, &mot, 0x2C);
@@ -3097,7 +3097,7 @@ s32 func_1519BA28(u8 *e, s32 gfxArg, s16 slot) {
     flag = 1;
     gfx = (Gfx *) func_15142E24((s32) gfx, (s32) D_80091414, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x4C, &flag);
+    gfx = gfx_set_combine_mode(gfx, 0x4C, &flag);
     gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6], &flag);
 
     if (*(u16 *) (e + 0x1E) & 2) {
@@ -3270,7 +3270,7 @@ void func_1519C5DC(u8 *arg0) {
     }
 }
 
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
+struct225 *light_create_with_ctrl(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 void *memcpy(void *, const void *, s32);
 
 struct225 *func_1519C60C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7) {
@@ -3296,7 +3296,7 @@ struct225 *func_1519C60C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5
     header2.unk0 = arg1[0];
     header2.unk4 = arg1[1];
     header2.unk8 = arg1[2];
-    temp_v0 = func_151602C0(&header, &header2, arg2, arg3, arg4, arg5, 0xFF, 0, 0x24, arg6, arg7);
+    temp_v0 = light_create_with_ctrl(&header, &header2, arg2, arg3, arg4, arg5, 0xFF, 0, 0x24, arg6, arg7);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk18, data, sizeof(data));
         memcpy((u8 *)temp_v0 + 0x38, &tmp, sizeof(tmp));
@@ -3306,12 +3306,12 @@ struct225 *func_1519C60C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5
 
 void func_1519C770(void *arg0) {
     func_1519C7C8(arg0);
-    func_151617C4(arg0);
+    light_ctrl_retire(arg0);
 }
 
 void func_1519C79C(void *arg0) {
     func_1519C7C8(arg0);
-    func_151617E4(arg0);
+    light_ctrl_free(arg0);
 }
 
 void func_1519C7C8(u8 *arg0) {

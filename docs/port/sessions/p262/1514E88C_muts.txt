@@ -24,6 +24,6 @@ s/\&c, 2, 3, 0, 0), obj, 7);/\&c, 2, 0, 0, 0), obj, 7);/ % base
 s/\&c, 2, 3, 0, 0), obj, 7);/\&c, 2, 3, 0, 0), obj, 9);/ % base
 s/light\[2\] = 150.0f;/light[2] = 15.0f;/ % base
 s/light\[0\] = 0.0f;/;/ % base
-s/func_15160A58(obj, 0xC,/func_15160A58(obj, 5,/ % base
+s/light_create_obj_joint(obj, 0xC,/light_create_obj_joint(obj, 5,/ % base
 s/0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2,/0x12C, 0x28, 0xFF, 0xB4, 0, 0xFF, 0, 2,/ % base
 s/0xFF, 0, 2, 0, 0, 0xFF, 1);/0xFF, 0, 1, 0, 0, 0xFF, 1);/ % base

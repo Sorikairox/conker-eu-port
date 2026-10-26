@@ -30,7 +30,7 @@
 \#^    rec.vel\[1\] = (s32) (spd \* cs);$#s/spd/d/
 \#^    rec.colour\[3\] = 0xFF;$#s/0xFF/0xFE/
 \#^    rec.u34 = 0;$#s/0/1/
-\#^    func_15167D84(&rec, 0, 0, -1, room, owner);$#s/-1/0/
-\#^    func_15167D84(&rec, 0, 0, -1, room, owner);$#s/owner)/room)/
+\#^    node_spawn_sprite(&rec, 0, 0, -1, room, owner);$#s/-1/0/
+\#^    node_spawn_sprite(&rec, 0, 0, -1, room, owner);$#s/owner)/room)/
 \#^    r = (u32) func_150ADA20()#s/speedSpread >> 1/speedSpread >> 2/
 \#^    angle += (f32) (s32)#{s/(u32) func_150ADA20()/(s32) func_150ADA20()/;s/(u32) angSpread/angSpread/;}

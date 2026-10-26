@@ -5,7 +5,7 @@ s/ case 0x9D: case 0x9F:/ case 0x9D:/
 s/        case 0xA0: case 0xB0: case 0xB1: case 0xB2: case 0xB4:/        case 0xA0: case 0xB0: case 0xB1: case 0xB2: case 0xB4: case 0xB3:/
 s/        case 0xA0: case 0xB0: case 0xB1: case 0xB2: case 0xB4:/        case 0xA0: case 0xB0: case 0xB1: case 0xB2:/
 s/ case 0x74: case 0x75: case 0x7A:/ case 0x74: case 0x75: case 0x7B:/
-s/            func_15136C3C((s32) obj, 1, 1, 1, 1, 0, 0xFF, 1);\n            func_15145A50((struct127 \*) obj);\n            func_1507CD64/X/
+s/            object_hit_effects((s32) obj, 1, 1, 1, 1, 0, 0xFF, 1);\n            func_15145A50((struct127 \*) obj);\n            func_1507CD64/X/
 s/            func_1507CD64((struct127 \*) obj, 6);/            func_1507CD64((struct127 *) obj, 5);/
 s/            if (model != NULL \&\& model\[0x19B\] != 0) {/            if (model != NULL) {/
 s/                func_15063F14((struct127 \*) obj, 0);/                func_15063F14((struct127 *) obj, 1);/

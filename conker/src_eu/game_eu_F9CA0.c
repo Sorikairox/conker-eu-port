@@ -65,7 +65,7 @@ typedef struct {
     u8 u46;             /* +0x46 0 */
     u8 u47;             /* +0x47 6 */
     u8 pad48[0x10];     /* +0x48 not set */
-} GroundPuffBlk;        /* 0x58 bytes, func_1513D668's spec */
+} GroundPuffBlk;        /* 0x58 bytes, effect3d_spawn_oriented_simple's spec */
 
 typedef struct {
     s16 life;           /* +0x00 */
@@ -92,7 +92,7 @@ typedef struct {
 // ground_puff_spawn: a dust puff where the character's bone point `which` (0..2 of D_800A0A10: bone 0x1B, offset
 // / kind / size ranges per entry) meets the floor. Nothing without the object or its matrices (+0x1D4), or when no
 // floor lies within 200 above / 2000 below the point (func_15046F70). The floor colour (func_150CD2A0 at z) tints a
-// func_1513D668 puff (class 0x18, facing obj +0x7A >> 8 plus the entry's yaw, arg2 / arg3 passed on) whose record
+// effect3d_spawn_oriented_simple puff (class 0x18, facing obj +0x7A >> 8 plus the entry's yaw, arg2 / arg3 passed on) whose record
 // gets a life / growth tail at +0x128, then two debris sprays (func_1514CBE8 kinds 0x11 and 0x12, the second in the
 // floor colour), a 12-point ring (func_150C8DD0) and func_151D5404 at the point. arg3 = alpha for the sprays.
 void func_150CBF80(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
@@ -158,7 +158,7 @@ void func_150CBF80(struct127 *obj, u8 which, s32 arg2, u8 arg3) {
     blk.u47 = 6;
     rec.life = blk.life - (u32) func_150ADA20() % (src->lifeCutRange + 1) - src->lifeCut;
     rec.grow = (func_150ADA68() * src->growRange + src->growBase) * blk.size[0];
-    p = (u8 *) func_1513D668((s32) &blk, (s32) col, 0, 0x18, 0, 0, (obj->unk7A >> 8) + src->yaw, 500.0f, 500.0f, 0,
+    p = (u8 *) effect3d_spawn_oriented_simple((s32) &blk, (s32) col, 0, 0x18, 0, 0, (obj->unk7A >> 8) + src->yaw, 500.0f, 500.0f, 0,
                              (s32) &hit[1], 1, 8, arg3, arg2);
     if (p != NULL) {
         memcpy(p + 0x128, &rec, 8);

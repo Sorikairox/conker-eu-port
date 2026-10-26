@@ -25,7 +25,7 @@ typedef struct {            /* func_15132FBC's particle spec (0x76 bytes; same l
     u8 b70, pad71;          /* 0x70 */
     s16 h72, h74;           /* 0x72 */
 } DripParticle;
-typedef struct {            /* func_151407D0's spawn block (0x58 bytes, game_3E890's layout) */
+typedef struct {            /* particle_emitter_spawn's spawn block (0x58 bytes, game_3E890's layout) */
     u8 b0;                  /* 0x00 */
     u8 kind;                /* 0x01 */
     u16 flags;              /* 0x02 */
@@ -44,7 +44,7 @@ typedef struct {            /* func_151407D0's spawn block (0x58 bytes, game_3E8
     u8 u4C;                 /* 0x4C */
     u8 pad4D[0xB];
 } DripSpawn;
-typedef struct {            /* func_151407D0's emitter block (0x60 bytes) */
+typedef struct {            /* particle_emitter_spawn's emitter block (0x60 bytes) */
     f32 range[4];           /* 0x00 */
     f32 u10;                /* 0x10 */
     f32 u14[4];             /* 0x14 */
@@ -55,14 +55,14 @@ typedef struct {            /* func_151407D0's emitter block (0x60 bytes) */
     u8 u54[6];              /* 0x54 */
     u8 pad5A[6];
 } DripEmit;
-typedef struct {            /* copied to the func_1516037C object's +0x18 (0xC bytes) */
+typedef struct {            /* copied to the light_ctrl_alloc object's +0x18 (0xC bytes) */
     u8 *particle;
-    s32 emitter;            /* the func_151407D0 result, stored afterwards */
+    s32 emitter;            /* the particle_emitter_spawn result, stored afterwards */
     f32 invScale;
 } DripLink;
 u8 *func_15132FBC(DripParticle *spec, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-u8 *func_1516037C(Header *header, s32 arg1, s32 size, u8 arg3, s32 arg4);
-s32 func_151407D0(DripEmit *emit, s32 emitSize, DripSpawn *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+u8 *light_ctrl_alloc(Header *header, s32 arg1, s32 size, u8 arg3, s32 arg4);
+s32 particle_emitter_spawn(DripEmit *emit, s32 emitSize, DripSpawn *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 void func_1510F800(s32);
 void *memcpy(void *, const void *, s32);
@@ -74,8 +74,8 @@ static const f32 sDripScale[6] = { 1.0f, 1.0f, 2.0f, 2.0f, 2.0f, 2.0f }; /* D_80
 
 // level_drip_spawn: spawns drip `which` (0..5) of a level at its fixed place (D_800AA8C0, size D_800AA908): a
 // swinging particle (func_15132FBC, kind 0x22, 9-float swing block at +0x170, flag 0x400 when func_1510FD20 finds
-// the place in water), a link object (func_1516037C, type 7) holding the particle and 1 / size, and a falling
-// emitter (func_151407D0) from the place to 500 below whose handle goes into the link.
+// the place in water), a link object (light_ctrl_alloc, type 7) holding the particle and 1 / size, and a falling
+// emitter (particle_emitter_spawn) from the place to 500 below whose handle goes into the link.
 void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     DripParticle part;
     DripSpawn spawn;
@@ -139,7 +139,7 @@ void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     header.unk1 = 7;
     header.unk2 = 300;
     header.unk4 = 0x12;
-    obj = func_1516037C(&header, arg0, sizeof(link), arg2, arg3);
+    obj = light_ctrl_alloc(&header, arg0, sizeof(link), arg2, arg3);
     if (obj == NULL) {
         return;
     }
@@ -182,7 +182,7 @@ void func_151B8DB0(s32 arg0, u8 which, u8 arg2, u8 arg3) {
     spawn.u44[3] = 6;
     spawn.u48 = water;
     spawn.u4C = 0xFF;
-    ((DripLink *)(obj + 0x18))->emitter = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, arg2, arg3);
+    ((DripLink *)(obj + 0x18))->emitter = particle_emitter_spawn(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, arg2, arg3);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6B70/func_151B8DB0.s")

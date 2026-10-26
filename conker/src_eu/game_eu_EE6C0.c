@@ -6,17 +6,17 @@ void func_150C0F48(void *);
 
 
 void func_150C0EB0(u8 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)(arg0 + 0x20), (s32)(arg0 + 0x24), (s32)arg0);
+    node_handle_link_message(arg1, arg2, (s32)(arg0 + 0x20), (s32)(arg0 + 0x24), (s32)arg0);
 }
 
 void func_150C0EF0(void *arg0) {
     func_150C0F48(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_150C0F1C(void *arg0) {
     func_150C0F48(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 void func_150C0F48(void *arg0) {
@@ -26,7 +26,7 @@ void func_150C0F48(void *arg0) {
     if (var_s0 != -1) {
         do {
             temp_s2 = var_s0 * 8;
-            func_1516972C(*(void **)((*(u8 **)((u8 *)arg0 + 0x40)) + temp_s2));
+            node_destroy(*(void **)((*(u8 **)((u8 *)arg0 + 0x40)) + temp_s2));
             var_s0 = (*(s16 *)((u8 *)(*(u8 **)((u8 *)arg0 + 0x40)) + temp_s2 + 4));
         } while (var_s0 != -1);
     }
@@ -57,7 +57,7 @@ u8 *func_150C0FC0(u8 *arg0, u8 arg1, s32 arg2) {
         goto block_5;
     }
 block_5:
-    temp_v0 = func_15167A68(0x25, arg2, sp28, 1, (u8) (s32) arg1, 1U);
+    temp_v0 = node_alloc(0x25, arg2, sp28, 1, (u8) (s32) arg1, 1U);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -158,7 +158,7 @@ typedef struct {
 } SprTmpl1138;
 
 // smoke_trail_update: update handler of a smoke trail. It follows its target object (x, +0x180 y, z), or with flag 2
-// the point obj->src (65 lower), and dies (func_1516972C) when the target is gone (word 0 == 0) or became another
+// the point obj->src (65 lower), and dies (node_destroy) when the target is gone (word 0 == 0) or became another
 // object (id +0x3B != targetId), or with flag 1 when the timer runs out. The puffs on the used slot list are moved to
 // the current position. When the position changed, and (flag 4) the target is in state 0x1D / 0x1E, and its +0x3C
 // speed is not below 3, the trail adds rate * D_800BE9A4 to accum and spawns one blue-grey smoke puff (sprite 0x6C,
@@ -235,8 +235,8 @@ void func_150C1138(Trail1138 *obj) {
                 while (1.0f < obj->accum && self->free != -1) {
                     slot = obj->free;
                     r = func_150ADA20();
-                    cs = func_151423D8(r - 0x40);
-                    sn = func_151423D8(r);
+                    cs = angle_byte_cos(r - 0x40);
+                    sn = angle_byte_cos(r);
                     speed = func_150ADA68() * 33.0f + 40.0f;
                     t.colour[4] = 0x52;
                     t.colour[5] = 0x6B;
@@ -282,7 +282,7 @@ void func_150C1138(Trail1138 *obj) {
         }
     }
     if (kill) {
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
     }
 }
 #else

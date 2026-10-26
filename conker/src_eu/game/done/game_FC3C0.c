@@ -9,6 +9,6 @@ void func_150CEF10(struct108 *arg0) {
     if (arg0->unk1B4 == 3) {
         arg0->unk1E0 = 5;
         arg0->unk1B4 = 2;
-        func_15124B18(arg0);
+        camera_apply_zoom_level(arg0);
     }
 }

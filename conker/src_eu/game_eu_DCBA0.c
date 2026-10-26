@@ -70,10 +70,10 @@ void func_150AEEB0(struct127 *arg0, u8 arg1) {
 loop_2:
         temp_s0 = func_150ADA20() & 0xFF;
         temp_v1 = -0x28 - (func_150ADA20() % 21U);
-        temp_f28 = func_151423D8(temp_v1 & 0xFF);
-        temp_f26 = func_151423D8(((temp_v1 & 0xFF) - 0x40) & 0xFF);
-        temp_f20 = func_151423D8(temp_s0 & 0xFF);
-        temp_f22 = func_151423D8((temp_s0 - 0x40) & 0xFF);
+        temp_f28 = angle_byte_cos(temp_v1 & 0xFF);
+        temp_f26 = angle_byte_cos(((temp_v1 & 0xFF) - 0x40) & 0xFF);
+        temp_f20 = angle_byte_cos(temp_s0 & 0xFF);
+        temp_f22 = angle_byte_cos((temp_s0 - 0x40) & 0xFF);
         temp_f24 = (func_150ADA68() * 5.0f) + 10.0f;
         sp.u104 = arg0->x_position + (100.0f * temp_f22);
         sp.u108 = (func_150ADA68() * 15.0f) + arg0->y_position;

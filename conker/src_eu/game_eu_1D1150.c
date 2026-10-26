@@ -26,7 +26,7 @@ typedef struct {
     u8 pad2F;
 } S3940;
 s32 func_151A3AB4();
-s32 func_15160A58(u8 *, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 light_create_obj_joint(u8 *, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_151A4B40(u8 *, u8);
 void func_151A4F4C(u8 *arg0, u8 arg1);
 void func_151A3940(u8 *arg0, u8 arg1) {
@@ -59,7 +59,7 @@ void func_151A3940(u8 *arg0, u8 arg1) {
     v[0] = 0.0f;
     v[1] = 0.0f;
     v[2] = 0.0f;
-    func_15160A58(arg0, 1, v, 2, 0x12C, 0x50, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+    light_create_obj_joint(arg0, 1, v, 2, 0x12C, 0x50, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
 }
 
 typedef struct { f32 x, y, z; } V33AB4;
@@ -305,7 +305,7 @@ s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, u8 *, s32);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142C10(s32, s32, s32, s32, s32, u8 *);
 s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, u8 *);
-s32 func_1513F4E4(s32, s32, u8 *);
+s32 gfx_set_combine_mode(s32, s32, u8 *);
 s32 func_15142FBC(s32, s32, s32, u8 *);
 extern s32 D_80091084;
 extern s32 D_800D30BC;
@@ -400,7 +400,7 @@ s32 func_151A4194(u8 *obj, s32 gfx, s16 player) {
     gfx = func_15142B7C(gfx, 1, 0x160600);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &flag);
-    gfx = func_1513F4E4(gfx, 6, &flag);
+    gfx = gfx_set_combine_mode(gfx, 6, &flag);
     gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
     if (*(u16 *) (obj + 0x1E) & 2) {
@@ -525,8 +525,8 @@ s32 func_151A4194(u8 *obj, s32 gfx, s16 player) {
 #endif
 
 #ifdef NON_MATCHING
-struct102 *func_1513418C(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
-/* effect spec for func_1513418C (0x30 bytes) */
+struct102 *emitter_trail_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
+/* effect spec for emitter_trail_spawn (0x30 bytes) */
 typedef struct {
     /* 0x00 */ s32 u0;
     /* 0x04 */ s32 u4;
@@ -546,7 +546,7 @@ typedef struct {
     /* 0x2E */ u8 pad2E[2];
 } S4B40;
 /*
- * obj_attached_effect_start: P190. Starts a func_1513418C effect attached to obj (id obj[0x3B], offset 0, 14.7,
+ * obj_attached_effect_start: P190. Starts a emitter_trail_spawn effect attached to obj (id obj[0x3B], offset 0, 14.7,
  * 3.0, 100, 10, 1, -1, 0) with arg1 as its byte argument; nothing for a NULL obj.
  */
 void func_151A4B40(u8 *obj, u8 arg1) {
@@ -568,7 +568,7 @@ void func_151A4B40(u8 *obj, u8 arg1) {
         s.u2B = 1;
         s.u2C = -1;
         s.u2D = 0;
-        func_1513418C((u8 *)&s, 0, arg1, 0);
+        emitter_trail_spawn((u8 *)&s, 0, arg1, 0);
     }
 }
 #else
@@ -916,7 +916,7 @@ void func_151A5338(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *v = arg0 + 0x28;
     if (arg2 == 0) {
         if ((*(s32 *)v == arg1[0]) || (v[4] == ((u8 *)arg1)[4])) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         v = arg0 + 0x28;
@@ -994,12 +994,12 @@ void func_151A547C(u8 *arg0) {
 void func_151A552C(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *temp_v0 = (u8 *)arg0 + 0x28;
     if ((arg2 == 0) && ((*(s32 *)temp_v0 == *(s32 *)arg1) || (temp_v0[4] == arg1[4]))) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 
 void *func_151A5580(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    u8 *temp_v0 = func_15167A68(0x5A, 0, arg7 + 0x20, 0, 0xFF, 1);
+    u8 *temp_v0 = node_alloc(0x5A, 0, arg7 + 0x20, 0, 0xFF, 1);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -1022,7 +1022,7 @@ void func_151A5620(u8 *arg0) {
     if (v0 != 0) {
         v0 = v0 - D_800BE9E4;
         if (v0 <= 0) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
             return;
         }
         *(s32 *)(arg0 + 0x10) = v0;

@@ -313,11 +313,11 @@ typedef struct {
 // with on level 0xE kind 5 also the probe func_150EBA04 5 units around the point; returns 1.
 // Object hits (types 2 / 3, target h->target): kinds 5 / 9 / 10 call func_1506B04C(obj, 3); a target that is
 // invulnerable (+0x125 / +0x104) and already reacting (+0x1CA) is skipped (return 2). Type 2: target type 0x94 gets
-// func_150B5C38 / func_150B6C34 and no blood (func_15137610). Type 3: with sub 10 (head shot) and no earlier head shot
-// (controller +0x1AD) the target dies (func_1507DE4C, its sounds 0x2E3.. / func_15138C80 / sound 0xAA, effect 0x20 /
+// func_150B5C38 / func_150B6C34 and no blood (object_impact_effects). Type 3: with sub 10 (head shot) and no earlier head shot
+// (controller +0x1AD) the target dies (func_1507DE4C, its sounds 0x2E3.. / object_hit_effect / sound 0xAA, effect 0x20 /
 // 0x3D) or, for kinds 2 / 11 / 12 / 18, only plays sound 0x107; targets 0x9F / 0xA0 (unless D_800BE616) farther than
 // 1000 call func_1508220C instead. Kinds 2 / 18 / 12 / 11 start the reaction func_150335C8 (0x2A / 0x22 / 0x6B / 0x6D)
-// while +0x1CA < 2. Then the blood / sparks func_15137610, kind 13 func_150D7630, and when the target was already
+// while +0x1CA < 2. Then the blood / sparks object_impact_effects, kind 13 func_150D7630, and when the target was already
 // reacting, func_1505D024(target, effect | 0x80000, (direction - 90) as a u16 angle, shooter player index). Returns 2.
 s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
     Hit15082278 *h = (Hit15082278 *) hit;
@@ -416,7 +416,7 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
                 if (target[4] == 0x80 && h->u5A == 0 && h->f18 < h->pos[1] - 5.5f) {
                     func_15060A9C((func_150ADA20() & 7) + 0x2E3, (struct127 *) target);
                 }
-                func_15138C80((struct127 *) target, 0xFF, 1);
+                object_hit_effect((struct127 *) target, 0xFF, 1);
                 effect = 0x20;
                 if ((target[4] == 0x9F || target[4] == 0xA0) && *(s32 *) (target + 0x2EC) != 0) {
                     effect = 0x3D;
@@ -452,7 +452,7 @@ s32 func_15082278(u8 *obj, u8 *hit, s32 kind) {
         }
     }
     if (blood) {
-        func_15137610(h->target, h->pos, h->v20, h->dir, 0xFF, 1);
+        object_impact_effects(h->target, h->pos, h->v20, h->dir, 0xFF, 1);
     }
     if (kind == 13) {
         func_150D7630((u8 *) h->pos, 0xFF, 1);

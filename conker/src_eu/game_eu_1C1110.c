@@ -5,7 +5,7 @@
 
 #ifdef NON_MATCHING
 extern f32 D_800A8590;
-s32 func_1516865C(s32 *, s32, s32, s32, s32);
+s32 sprite_vtx_quads_init(s32 *, s32, s32, s32, s32);
 
 void func_15193900(u8 *arg0) {
     struct {
@@ -51,8 +51,8 @@ void func_15193900(u8 *arg0) {
     sp.uC0 = 0x4880;
     sp.uCC = 0x80;
     sp.uCB = (*(u8 *)((u8 *)temp_v0 + 8));
-    func_1516865C(&sp.u28, 0xFF, 0xFF, 0xFF, 0x80);
-    func_15168800(&sp.u28, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+    sprite_vtx_quads_init(&sp.u28, 0xFF, 0xFF, 0xFF, 0x80);
+    node_spawn_vtx_sprite(&sp.u28, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
     (*(s16 *)((u8 *)arg0 + 0xE)) = (s16) ((func_150ADA20() & 0x7F) + 0x64);
 }
 #else
@@ -79,7 +79,7 @@ void func_15193A24(u8 *arg0) {
             sp38[0] = (f32) (*(s16 *)((u8 *)arg0 + 0x9C));
             sp38[1] = (f32) (*(s16 *)((u8 *)arg0 + 0xA6));
             sp38[2] = (f32) (*(s16 *)((u8 *)arg0 + 0xA0));
-            func_151DBCBC(5U, 30.0f, 0xFF, 0, sp38, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            impact_dust_particle_spawn(5U, 30.0f, 0xFF, 0, sp38, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         }
         (*(s16 *)((u8 *)arg0 + 0x98)) = -1;
     }

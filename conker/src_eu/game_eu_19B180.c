@@ -30,7 +30,7 @@ void func_1516DA58(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
     } else {
         var_a0 = 0x12;
     }
-    temp_v0 = func_15167A68(var_a0, arg1E, 0x34, 0, (u8) (s32) arg1D, 1U);
+    temp_v0 = node_alloc(var_a0, arg1E, 0x34, 0, (u8) (s32) arg1D, 1U);
     if (temp_v0 != NULL) {
         (*(s16 *)((u8 *)temp_v0 + 0xE)) = arg0;
         (*(s16 *)((u8 *)temp_v0 + 0x10)) = arg1;
@@ -86,7 +86,7 @@ void func_1516DBE8(u8 *arg0) {
         if (*(u8 **)(arg0 + 0x30) != NULL) {
             *(s16 *)(*(u8 **)(arg0 + 0x30) + 4) = 0;
         }
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
     } else {
         s32 t;
         v = *(s16 *)(arg0 + 0x10) << 8;
@@ -203,7 +203,7 @@ void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
     } else {
         var_a0 = 0x11;
     }
-    temp_v0 = func_15167A68(var_a0, arg30, 0x4C, 0, arg2F, 1);
+    temp_v0 = node_alloc(var_a0, arg30, 0x4C, 0, arg2F, 1);
     if (temp_v0 != NULL) {
         *(s16 *)(temp_v0 + 0xE) = arg0;
         *(s16 *)(temp_v0 + 0x10) = arg1;
@@ -307,7 +307,7 @@ s32 func_151705A4(s32 flags, f32 *vx, f32 *vy, f32 *vz);
 // (flags 0x10 / 0x20), or (object +0x3F) at two points of D_800A7210 moved by the object's matrix +0x1D4[+0x47],
 // whose difference (minus the object's movement) is its velocity. Flag 8 gives a random direction
 // (func_151705A4), +0x3D / +0x3E scatter the start, then func_1516DA58 spawns it. Velocities are passed as
-// hi / lo bytes in the colour args. Finally the timer +0x20 runs down and the emitter is freed (func_1516972C).
+// hi / lo bytes in the colour args. Finally the timer +0x20 runs down and the emitter is freed (node_destroy).
 void func_1516E100(u8 *arg0) {
     ParticleEmitter *e = (ParticleEmitter *) arg0;
     s32 notKind11;
@@ -496,7 +496,7 @@ void func_1516E100(u8 *arg0) {
         if (left > 0) {
             e->timer = left;
         } else {
-            func_1516972C((struct102 *) e);
+            node_destroy((struct102 *) e);
         }
     }
 }

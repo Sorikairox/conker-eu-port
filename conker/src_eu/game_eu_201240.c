@@ -333,7 +333,7 @@ void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    func_151602C0(sp48, sp3C, (func_150ADA20() % 13U) + 0x14, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 13U) + 0x14, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
@@ -347,7 +347,7 @@ void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
     sp3C[0] = *(f32 *)(arg0 + 0);
     sp3C[1] = *(f32 *)(arg0 + 4);
     sp3C[2] = *(f32 *)(arg0 + 8);
-    func_151602C0(sp48, sp3C, (func_150ADA20() % 24U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFFU, 0U, 0, arg1, arg2);
+    light_create_with_ctrl(sp48, sp3C, (func_150ADA20() % 24U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFFU, 0U, 0, arg1, arg2);
 }
 
 #ifdef NON_MATCHING
@@ -701,7 +701,7 @@ void func_151D51E8(struct102 *arg0, u8 *arg1, u8 arg2)
   u8 *p = (u8 *)arg0 + 0x28;
   if (arg2 == 0x3C) {
     if (*(s32 *)p == *(s32 *)arg1 || p[4] == arg1[4]) {
-      func_1516972C(arg0);
+      node_destroy(arg0);
     }
   } else if (arg2 == 4) {
     if (*(s32 *)p == *(s32 *)arg1 || p[4] == arg1[4]) {
@@ -753,16 +753,16 @@ void func_151D5308(s32 arg0) {
 #ifdef NON_MATCHING
 /* P179 */
 void func_151C2600(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3, f32 arg4);
-void func_15137610(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5);
+void object_impact_effects(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5);
 void func_1507DE4C(struct127 *arg0);
-void func_15138C80(struct127 *arg0, s32 arg1, s32 arg2);
+void object_hit_effect(struct127 *arg0, s32 arg1, s32 arg2);
 s32 func_1505D024(struct127 *, s32, u16, s32);
 
 // object_take_hit: P179: a hit on `obj` by `attacker` (or NULL) at `pos` / `pos2`, direction `dir`, hit record `rec`
 /* (or NULL). Body kinds that react with a spark (the list below) get func_151C2600 (attacker, pos, dir, 9, rec +4
  * or 0). A kind-0xA / type-3 hit record (rec +0x58 / +0x59) wears down the shield count obj +0x1CA: at 3 or more it
- * loses one, else it is cleared, func_1507DE4C / func_15138C80 (obj, 0xFF, 1) run and the message flags become
- * 0x100020 (else `flags` | 0x60000). Then func_15137610 (obj, pos, pos2, dir, arg7, arg8); and only if the count
+ * loses one, else it is cleared, func_1507DE4C / object_hit_effect (obj, 0xFF, 1) run and the message flags become
+ * 0x100020 (else `flags` | 0x60000). Then object_impact_effects (obj, pos, pos2, dir, arg7, arg8); and only if the count
  * was non-zero on entry, the message func_1505D024(obj, flags | 0x80000, (dir angle - 0x4000) | 1, attacker index
  * or -1). The angle is func_150484A0(dir x, dir z) x 65536 / 2pi converted as IDO's float -> unsigned (negative ->
  * 0xFFFF). */
@@ -791,11 +791,11 @@ void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags
         } else {
             obj[0x1CA] = 0;
             func_1507DE4C((struct127 *) obj);
-            func_15138C80((struct127 *) obj, 0xFF, 1);
+            object_hit_effect((struct127 *) obj, 0xFF, 1);
             flags = 0x100020;
         }
     }
-    func_15137610(obj, (f32 *) pos, pos2, dir, arg7, arg8);
+    object_impact_effects(obj, (f32 *) pos, pos2, dir, arg7, arg8);
     if (untouched != 0) {
         return;
     }

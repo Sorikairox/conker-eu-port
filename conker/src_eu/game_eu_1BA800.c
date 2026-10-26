@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15167D84(s32 *, s32, s32, s32, s32, s32);
+s32 node_spawn_sprite(s32 *, s32, s32, s32, s32, s32);
 extern s32 D_8008CDEC;
 
 void func_1518CFF0(u8 *arg0, s32 arg1) {
@@ -86,7 +86,7 @@ void func_1518CFF0(u8 *arg0, s32 arg1) {
     sp.u4A = 0;
     sp.u38 = 0;
     sp.u5B = (*(u8 *)((u8 *)arg0 + 0x31));
-    func_15167D84(&sp.u30, 0, 0, -1, 0xFF, 1);
+    node_spawn_sprite(&sp.u30, 0, 0, -1, 0xFF, 1);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BA800/func_1518CFF0.s")

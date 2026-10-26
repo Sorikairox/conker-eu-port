@@ -59,12 +59,12 @@ typedef struct {
 
 void func_15190DB0(void *arg0) {
     func_15191970(arg0);
-    func_15169804(arg0);
+    node_retire(arg0);
 }
 
 void func_15190DDC(void *arg0) {
     func_15191970(arg0);
-    func_15169824(arg0);
+    node_unlink_free(arg0);
 }
 
 /* P188: moved up from func_15191970 (also used by the NON_MATCHING func_15190E08) */
@@ -76,7 +76,7 @@ extern Rng14 D_800AA120[];
 /* P188: the 3-argument prototype (functions.h) again here, so that difftest takes its arity from it: the asm leaves
  * cfg->points in a3 at the call, func_15143134 (matching C, 3 parameters) never reads a3 */
 void func_15143134(void *arg0, void *arg1, void *arg2);
-void func_1513F680(u8 *, s32, s32, s32, s32);
+void effect3d_set_handlers(u8 *, s32, s32, s32, s32);
 s32 memcpy(s32, f32 *, s32);
 void func_1504715C(void *, u8 *);
 extern f32 D_800A83F4;
@@ -103,13 +103,13 @@ extern DripCfg D_8008FE10[];
 
 /* drip_emitter_update: P186: update handler (D_8008B848 entry +0) of a drip emitter e (rain drops hanging off an
  * owner model e +0x10, config D_8008FE10[e[0x1A]], slots e +0x24, live count e +0x20, accumulator f32 e +0x1C).
- * Kills itself (func_1516972C) when its timer s16 e +0x16 runs out (flag e[0x18] & 1), the owner is gone or has
+ * Kills itself (node_destroy) when its timer s16 e +0x16 runs out (flag e[0x18] & 1), the owner is gone or has
  * another id (e[0x14] vs owner[0x3B]), or the owner has no matrices (+0x1D4; then it first starts the ending
  * effect func_151491F4 with e +0x10..+0x1B copied to its +0x28). Hanging drops follow their point on the owner
  * (func_15143134 with the owner matrix), and once their timer is over they fall (velocity from the last move *
- * D_800BEDC8, func_1513F680, life from D_800AA120). The accumulator gains rate * dt; for every whole unit a free slot
+ * D_800BEDC8, effect3d_set_handlers, life from D_800AA120). The accumulator gains rate * dt; for every whole unit a free slot
  * is picked at random and, when the point is below the owner's +0x118 height limit, a drop object is created
- * (func_1513D524 with a 0x60-byte motion block at +0x110) and given a hang time. */
+ * (effect3d_spawn_default with a 0x60-byte motion block at +0x110) and given a hang time. */
 void func_15190E08(u8 *e) {
     struct {
         f32 vel[3];     /* +0x00 */
@@ -194,7 +194,7 @@ void func_15190E08(u8 *e) {
                         *(f32 *) (obj + 0x110) = (*(f32 *) (obj + 0x34) - *(f32 *) (obj + 0x40)) * D_800BEDC8;
                         *(f32 *) (obj + 0x118) = (*(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x48)) * D_800BEDC8;
                         r = &D_800AA120[obj[0x130]];
-                        func_1513F680(obj, 13, 18, 0, 13);
+                        effect3d_set_handlers(obj, 13, 18, 0, 13);
                         *(s16 *) (obj + 0x1C) = (u32) func_150ADA20() % (u32) (r->range + 1) + r->base;
                         *(s32 *) (obj + 0x58) |= 1;
                         slot->obj = NULL;
@@ -272,7 +272,7 @@ void func_15190E08(u8 *e) {
                         if (*(f32 *) (*(u8 **) (e + 0x10) + 0x118) <
                             spawn.pos[1] - *(f32 *) &blk.rng[1] - *(f32 *) &blk.rng[3]) {
                             func_150ADA20();
-                            drop = (u8 *) func_1513D524((s32) &spawn, 12, 0, 0, 13, D_800AB7E4[e[0x2C]] ? 0 : 2, 96, 255, 0);
+                            drop = (u8 *) effect3d_spawn_default((s32) &spawn, 12, 0, 0, 13, D_800AB7E4[e[0x2C]] ? 0 : 2, 96, 255, 0);
                             head->obj = drop;
                             if (drop != NULL) {
                                 memcpy((s32) (drop + 0x110), (f32 *) &blk, 0x60);
@@ -290,7 +290,7 @@ void func_15190E08(u8 *e) {
         }
     }
     if (kill) {
-        func_1516972C((struct102 *) e);
+        node_destroy((struct102 *) e);
     }
 }
 #else
@@ -306,8 +306,8 @@ s32 func_1519150C(u8 *arg0) {
     arg0[0x131] += (s8)arg0[0x133] * D_800BE9E4;
     arg0[0x132] += (s8)arg0[0x134] * D_800BE9E4;
     p = arg0 + 0x110;
-    s = func_151423D8((u8)(arg0[0x131] - 0x40));
-    c = func_151423D8((u8)(p[0x22] - 0x40));
+    s = angle_byte_cos((u8)(arg0[0x131] - 0x40));
+    c = angle_byte_cos((u8)(p[0x22] - 0x40));
     *(f32 *)(arg0 + 0x2C) += ((*(f32 *)(p + 0x28) + (*(f32 *)(p + 0x30) * s)) - *(f32 *)(arg0 + 0x2C)) * 0.5f;
     *(f32 *)(arg0 + 0x30) += ((*(f32 *)(p + 0x2C) + (*(f32 *)(p + 0x34) * c)) - *(f32 *)(arg0 + 0x30)) * 0.5f;
     return 1;
@@ -415,7 +415,7 @@ u8 *func_151915FC(u8 *arg0, s16 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_151915FC.s")
 #endif
-void func_1513F680(u8 *, s32, s32, s32, s32);
+void effect3d_set_handlers(u8 *, s32, s32, s32, s32);
 void func_15191970(u8 *arg0) {
     s32 i;
     u8 **p;
@@ -432,7 +432,7 @@ void func_15191970(u8 *arg0) {
             *(f32 *)(q + 4) = 0.0f;
             *(f32 *)(q + 8) = 0.0f;
             r = &D_800AA120[*(u8 *)(q + 0x20)];
-            func_1513F680(*p, 0xD, 0x12, 0, 0xD);
+            effect3d_set_handlers(*p, 0xD, 0x12, 0, 0xD);
             *(s16 *)(*p + 0x1C) = func_150ADA20() % (u32)(r->range + 1) + r->base;
             *(s32 *)(*p + 0x58) |= 1;
         }
@@ -444,16 +444,16 @@ void func_15191970(u8 *arg0) {
 /* P143 */
 s32 func_1514672C(u8 *);
 s32 func_15046F70(f32 *, s32, f32, f32 *);
-void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
-void func_151DBCBC(u8, f32, s16, s32, void *, u8, s32);
+void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
+void impact_dust_particle_spawn(u8, f32, s16, s32, void *, u8, s32);
 extern f32 D_800A83FC;
 extern f32 D_800A8400;
 // drop_fall_update: update handler (D_8008A058 slot 13) of a falling drop / debris sprite. Motion block at +0x110:
 // velocity x/y/z, gravity +0x11C, drag +0x120 (x / z speeds times drag * dt each frame), trail easing +0x128 (the
 // trail point +0x40 follows the position +0x34). Ends (0) when func_1514672C rejects the new position (out of the
 // level); a floor probe (func_15046F70, floor y to +0x148) that hits also ends it and spawns a splash at the floor,
-// sized by width +0x2C * height +0x30: kind +0x165 == 3 -> func_151DBCBC (0.25), else randomly func_151D9B8C
-// (D_800A83FC, life 80..120) or the ring func_151DAB58 (D_800A8400), of type +0x16C, owner data +0x14C.
+// sized by width +0x2C * height +0x30: kind +0x165 == 3 -> impact_dust_particle_spawn (0.25), else randomly impact_debris_spawn
+// (D_800A83FC, life 80..120) or the ring impact_splash_ring_spawn (D_800A8400), of type +0x16C, owner data +0x14C.
 s32 func_15191A90(u8 *fx) {
     f32 *mv = (f32 *)(fx + 0x110);
     f32 probe[3];
@@ -495,14 +495,14 @@ s32 func_15191A90(u8 *fx) {
     if (func_15046F70(probe, 0, *(f32 *)(fx + 0x38) - *(f32 *)(fx + 0x30), (f32 *)(fx + 0x148)) != 0) {
         probe[1] = *(f32 *)(fx + 0x148);
         if (fx[0x165] == 3) {
-            func_151DBCBC(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * 0.25f, fx[0x5C], (s32)(fx + 0x14C),
+            impact_dust_particle_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * 0.25f, fx[0x5C], (s32)(fx + 0x14C),
                           probe, fx[0xC], fx[1]);
         } else if (func_150ADA20() & 1) {
-            func_151D9B8C(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A83FC, fx[0x5C],
+            impact_debris_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A83FC, fx[0x5C],
                           (s32)(fx + 0x14C), (struct17 *)probe, (func_150ADA20() % 41U) + 0x50, 1, 1, 0, fx[0xC],
                           fx[1]);
         } else {
-            func_151DAB58(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A8400, fx[0x5C], probe, 1,
+            impact_splash_ring_spawn(fx[0x16C], *(f32 *)(fx + 0x2C) * *(f32 *)(fx + 0x30) * D_800A8400, fx[0x5C], probe, 1,
                           fx[0xC], fx[1]);
         }
         ret = 0;
@@ -531,7 +531,7 @@ u8 *func_15190770(u8 **, s32, u8, s32);
 
 /* owner_effect_watch: P238: entry 13 of D_8008A4E8 (EU 0x8008A888, `void (u8 *)` handlers) for an effect e whose
  * 12-byte spawn record (owner pointer, id byte +4, s16 life +6, flags +8) sits at e +0x28. It kills itself
- * (func_1516972C) when the owner is gone (owner word 0 is 0) or has another id (e[0x2C] vs owner[0x3B]). When the
+ * (node_destroy) when the owner is gone (owner word 0 is 0) or has another id (e[0x2C] vs owner[0x3B]). When the
  * owner's +0x1D4 is set it first re-spawns the record through func_15190770(e + 0x28, 0, e[0xC], e[1]) (life = s16
  * e +0xE with flag bit 0 when e[0xD] bit 0 is set, else 300) and then kills itself. Otherwise nothing happens. */
 void func_15191E2C(u8 *e) {
@@ -553,7 +553,7 @@ void func_15191E2C(u8 *e) {
         func_15190770((u8 **) rec, 0, e[0xC], e[1]);
     }
     if (done) {
-        func_1516972C((struct102 *) e);
+        node_destroy((struct102 *) e);
     }
 }
 #else
@@ -569,14 +569,14 @@ void func_15191EF0(struct102 *arg0, u8 *arg1, u8 arg2) {
         }
     } else if ((arg2 == 0xC) || (arg2 == 0x50) || (arg2 == 0xE)) {
         if (((*(s32 *)((u8 *)arg0 + 0x10)) == (*(s32 *)((u8 *)arg1 + 0))) || (arg0->unk14 == (*(u8 *)((u8 *)arg1 + 4)))) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         if (arg2 == 0x4E) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
             return;
         }
-        func_15169850((s32) arg1, arg2, (s32) &arg0->unk10, (s32) &arg0->unk14, (s32) arg0);
+        node_handle_link_message((s32) arg1, arg2, (s32) &arg0->unk10, (s32) &arg0->unk14, (s32) arg0);
     }
 }
 #else
@@ -591,11 +591,11 @@ void func_15191FF4(struct102 *arg0, u8 *arg1, u8 arg2) {
     if ((arg2 == 0xC) || (arg2 == 0xE) || (arg2 == 0x50)) {
         temp_a2 = &arg0->unk28;
         if (((*(s32 *)((u8 *)temp_a2 + 0)) == (*(s32 *)((u8 *)arg1 + 0))) || ((*(u8 *)((u8 *)temp_a2 + 4)) == (*(u8 *)((u8 *)arg1 + 4)))) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     } else {
         if (arg2 == 0x4E) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
             return;
         }
         if (arg2 == 0xD) {
@@ -606,7 +606,7 @@ void func_15191FF4(struct102 *arg0, u8 *arg1, u8 arg2) {
             }
         } else {
             temp_a2_3 = &arg0->unk28;
-            func_15169850((s32) arg1, arg2, (s32) temp_a2_3, (s32) (temp_a2_3 + 4), (s32) arg0);
+            node_handle_link_message((s32) arg1, arg2, (s32) temp_a2_3, (s32) (temp_a2_3 + 4), (s32) arg0);
         }
     }
 }
@@ -620,5 +620,5 @@ void func_151920FC(s32 arg0, u8 arg1) {
 
     sp1C = D_800A83F0;
     func_151494E0(arg0, arg1);
-    func_15169260(&sp1C, 1, arg0, arg1);
+    node_broadcast_types(&sp1C, 1, arg0, arg1);
 }

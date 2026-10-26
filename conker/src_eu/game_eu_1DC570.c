@@ -31,7 +31,7 @@ s32 func_151AED60(u8 *arg0, f32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     if (arg0 == NULL) {
         return 0;
     }
-    func_1516962C(0x28, arg0, 0x11);
+    node_broadcast_obj_type(0x28, arg0, 0x11);
     sp.u24 = 0;
     sp.u28 = 0;
     sp.u2C = arg0[0x3B];
@@ -54,7 +54,7 @@ s32 func_151AED60(u8 *arg0, f32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     sp.u4F = 6;
     sp.u50 = -1;
     sp.u51 = 5;
-    return func_1513418C(&sp, 0, arg3, arg4);
+    return emitter_trail_spawn(&sp, 0, arg3, arg4);
 }
 
 void func_151AF064(); // K&R: the ref passes the flag unmasked (definition is K&R too)
@@ -88,10 +88,10 @@ void func_151AEF34(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5) {
     v[0] = -arg1 * 0.10300001f;
     v[1] = -arg2 * 0.10300001f;
     v[2] = -arg3 * 0.10300001f;
-    func_151D9014(arg0, v, 0, (func_150ADA68() * 0.60200006f) + -1.0450001f, ((u32)func_150ADA20() % 31) + 0x3C, ((u32)func_150ADA20() % 101) + 0x9B, (func_150ADA68() * 219.0f) + 77.0f, arg4, 1.0f, 1.0f, 0, 0, 1, 0, arg5, 1);
+    impact_dust_cloud_spawn(arg0, v, 0, (func_150ADA68() * 0.60200006f) + -1.0450001f, ((u32)func_150ADA20() % 31) + 0x3C, ((u32)func_150ADA20() % 101) + 0x9B, (func_150ADA68() * 219.0f) + 77.0f, arg4, 1.0f, 1.0f, 0, 0, 1, 0, arg5, 1);
 }
 
-s32 func_151DA6F8(s32, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 impact_spark_spawn(s32, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void func_151AF064(arg0, arg1, arg2)
     s32 arg0;
@@ -113,10 +113,10 @@ void func_151AF064(arg0, arg1, arg2)
   f32 sp5C;
   sp87 = func_150ADA20();
   sp86 = ((func_150ADA20() & 0x7F) & 0xFFFF) - 0x3F;
-  sp7C = func_151423D8(sp87);
-  sp78 = func_151423D8(sp87 - 0x40);
-  sp74 = func_151423D8(sp86);
-  sp70 = func_151423D8(sp86 - 0x40);
+  sp7C = angle_byte_cos(sp87);
+  sp78 = angle_byte_cos(sp87 - 0x40);
+  sp74 = angle_byte_cos(sp86);
+  sp70 = angle_byte_cos(sp86 - 0x40);
   temp_f2 = ((func_150ADA68() * 80.0f) + 20.0f) * 0.1f;
   temp_f12 = temp_f2 * sp74;
   sp88[0] = temp_f12 * sp78;
@@ -127,7 +127,7 @@ void func_151AF064(arg0, arg1, arg2)
   sp60 = func_150ADA20();
   sp64 = func_150ADA20();
   sp68 = func_150ADA68();
-  func_151DA6F8(arg0, sp88, (sp5C * 0.40600002f) + 0.21000001f, (s16) ((((u32) sp60) % 41U) + 0x3C), (((u32) sp64) % 101U) + 0x9B, (sp68 * 4.0f) + 3.1000001f, (func_150ADA20() % 5U) + 3, (s32) arg1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, (s32) arg2, 1);
+  impact_spark_spawn(arg0, sp88, (sp5C * 0.40600002f) + 0.21000001f, (s16) ((((u32) sp60) % 41U) + 0x3C), (((u32) sp64) % 101U) + 0x9B, (sp68 * 4.0f) + 3.1000001f, (func_150ADA20() % 5U) + 3, (s32) arg1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, (s32) arg2, 1);
 }
 
 #ifdef NON_MATCHING
@@ -135,15 +135,15 @@ void func_1504715C(void *, u8 *);
 void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
 void func_15143874(s16, f32, f32 *, f32 *);
 s32 func_15046F70(f32 *, s32, f32, f32 *);
-s32 func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
-void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
-s32 func_15136698(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
+s32 impact_debris_spawn(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
+void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
+s32 fx_splash_spawn(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
 
 // ground_burst_spawn: spawns a burst effect at obj's position (+0x14): the func_15154488 cloud (sizes 5.08 / 3.02,
 // alpha 0.807 / 0.701, speeds 18 / 11.8), then 7..12 debris pieces in a ring of radius 90..149 at a random angle,
 // each dropped onto the floor below (func_15046F70 from 100 above down to 500 below; stops on no floor or floor type
-// 3): odd random -> func_151D9B8C (size 15..19.5, alpha 155..255, on the floor normal), even -> func_151DAB58 (size
-// 6.1..12), and finally one func_15136698 splash on the floor under obj (scale (90..120) / 1000, colour 155..255 /
+// 3): odd random -> impact_debris_spawn (size 15..19.5, alpha 155..255, on the floor normal), even -> impact_splash_ring_spawn (size
+// 6.1..12), and finally one fx_splash_spawn splash on the floor under obj (scale (90..120) / 1000, colour 155..255 /
 // 100..200, life 70..125). room / owner are passed to every spawn.
 void func_151AECA0(u8 *obj, u8 room, s32 owner) {
     f32 floor[9];          // floor probe: height, normal (+4), type byte +0x1D
@@ -208,12 +208,12 @@ void func_151AECA0(u8 *obj, u8 room, s32 owner) {
         if (func_150ADA20() & 1) {
             size = func_150ADA68();
             shade = func_150ADA68();
-            func_151D9B8C(0, size * 4.5f + 15.0f, (u32) (shade * 100.0f + 155.0f), (s32) &floor[1], (struct17 *) piece,
+            impact_debris_spawn(0, size * 4.5f + 15.0f, (u32) (shade * 100.0f + 155.0f), (s32) &floor[1], (struct17 *) piece,
                           100, 0, 1, 0, room, owner);
         } else {
             size = func_150ADA68();
             shade = func_150ADA68();
-            func_151DAB58(0, size * 5.9f + 6.1f, (u32) (shade * 100.0f + 155.0f), piece, 1, room, owner);
+            impact_splash_ring_spawn(0, size * 5.9f + 6.1f, (u32) (shade * 100.0f + 155.0f), piece, 1, room, owner);
         }
     }
     base[0] = *(f32 *) (obj + 0x14);
@@ -231,7 +231,7 @@ void func_151AECA0(u8 *obj, u8 room, s32 owner) {
     a = func_150ADA20();
     b = func_150ADA20();
     c = func_150ADA20();
-    func_15136698((size * 30.0f + 90.0f) * 0.001f, (shade * 103.0f + 103.0f) * 1e-05f, a % 101 + 0x9B, b % 101 + 100,
+    fx_splash_spawn((size * 30.0f + 90.0f) * 0.001f, (shade * 103.0f + 103.0f) * 1e-05f, a % 101 + 0x9B, b % 101 + 100,
                   c % 0x38 + 0x46, (s32) &floor[1], (struct17 *) base, 0, 1, room, owner);
 }
 #else
@@ -239,15 +239,15 @@ void func_151AECA0(u8 *obj, u8 room, s32 owner) {
 #endif
 
 #ifdef NON_MATCHING
-// obj_steam_puff_spawn: plays sound 0x16 on the object (func_1516962C) and spawns a 9.8 / 0.143 effect of type 1
-// attached to it (func_1513418C: life 0x140, flags 6 / 10 / -1 / 9) with arg1 / arg2 passed through; NULL object: 0.
+// obj_steam_puff_spawn: plays sound 0x16 on the object (node_broadcast_obj_type) and spawns a 9.8 / 0.143 effect of type 1
+// attached to it (emitter_trail_spawn: life 0x140, flags 6 / 10 / -1 / 9) with arg1 / arg2 passed through; NULL object: 0.
 s32 func_151AF820(u8 *obj, u8 arg1, s32 arg2) {
     SpawnAED60 sp;
 
     if (obj == NULL) {
         return 0;
     }
-    func_1516962C(0x28, obj, 0x16);
+    node_broadcast_obj_type(0x28, obj, 0x16);
     sp.u24 = 0;
     sp.u28 = 0;
     sp.u2C = obj[0x3B];
@@ -263,7 +263,7 @@ s32 func_151AF820(u8 *obj, u8 arg1, s32 arg2) {
     sp.u4F = 10;
     sp.u50 = -1;
     sp.u51 = 9;
-    return func_1513418C(&sp, 0, arg1, arg2);
+    return emitter_trail_spawn(&sp, 0, arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC570/func_151AF820.s")
@@ -301,5 +301,5 @@ s32 func_151AF938(void *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4) {
     rf = func_150ADA68();
     r1 = func_150ADA20();
     r2 = func_150ADA20();
-    return func_151D9014(arg0, v, 0, (rf * 0.126f) + -0.702f, (r1 & 0xF) + 0xA, ((u32)r2 % 45) + 0x89, (func_150ADA68() * 202.0f) + 142.0f, flag, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
+    return impact_dust_cloud_spawn(arg0, v, 0, (rf * 0.126f) + -0.702f, (r1 & 0xF) + 0xA, ((u32)r2 % 45) + 0x89, (func_150ADA68() * 202.0f) + 142.0f, flag, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
 }

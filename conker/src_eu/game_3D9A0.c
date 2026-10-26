@@ -22,7 +22,7 @@ void func_15010538(struct127 *arg0) {
     struct175 tmp;
     struct37 *temp_v0;
 
-    func_15161E24(arg0, 2, 2, 300, 30, 100, 200, 255, 255, 1);
+    light_create_obj_follow(arg0, 2, 2, 300, 30, 100, 200, 255, 255, 1);
 // FAKEMATCH but works...
 dummy_label_927029:
     tmp.unk0 = arg0;

@@ -2729,7 +2729,7 @@ typedef struct {
     s32 unk30;
 } struct225;
 
-// only used by func_15163B98 ?
+// only used by light_beh_obj_pulse ?
 typedef struct {
     u8 pad0[0x28];
     struct228 *unk28;
@@ -3294,7 +3294,7 @@ typedef struct {
     u8  pad12[2];
     s16 unk14;
 } struct_eu_168A90;
-// callback object handled by func_151419D0 (game_16EE20)
+// callback object handled by interact_fx_handle_message (game_16EE20)
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -3306,7 +3306,7 @@ typedef struct {
     struct_eu_151419D0_sub unk28;
 } struct_eu_151419D0;
 
-// message passed to func_151419D0; for type 0 the byte at 4 is compared
+// message passed to interact_fx_handle_message; for type 0 the byte at 4 is compared
 typedef struct {
     s32 unk0;
     s32 unk4;

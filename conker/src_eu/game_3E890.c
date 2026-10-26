@@ -85,7 +85,7 @@ f32 D_8009650C = 5.8676557540893555;
 /* P127: the stack blocks of func_150113E0, one struct so the layout is the N64 one (sp38 / sp54 / spAC) */
 typedef struct {
     f32 tail[7];            /* 0x00 (sp38): copied to the emitter's +0x170 */
-    struct {                /* 0x1C (sp54): spawn block, func_151407D0 argument 2 (0x58 bytes) */
+    struct {                /* 0x1C (sp54): spawn block, particle_emitter_spawn argument 2 (0x58 bytes) */
         u8 kind;            /* 0x00 */
         u8 pad1;
         u16 flags;          /* 0x02 */
@@ -102,7 +102,7 @@ typedef struct {
         u8 u44[4];          /* 0x44 */
         u8 pad48[0x10];
     } spawn;
-    struct {                /* 0x74 (spAC): emitter block, func_151407D0 argument 0 (0x7C bytes) */
+    struct {                /* 0x74 (spAC): emitter block, particle_emitter_spawn argument 0 (0x7C bytes) */
         f32 range[4];       /* 0x00 */
         f32 u10;            /* 0x10 */
         f32 u14[4];         /* 0x14 */
@@ -113,11 +113,11 @@ typedef struct {
         u8 pad59[0x23];
     } emit;
 } Fire150113E0;
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 
 // level_fire_emitters_create: P127: level start (new game, level 0x18): creates four particle emitters
-// (func_151407D0, flags 0x20) with one spawn block whose from / to positions change per emitter ((+-520, 72,
+// (particle_emitter_spawn, flags 0x20) with one spawn block whose from / to positions change per emitter ((+-520, 72,
 // 2337 / 2220), (-710 / -584, 70, 926), (506, 47, -339 / -208)); each new emitter gets the 7-float tail at +0x170.
 void func_150113E0(void) {
     Fire150113E0 b;
@@ -170,7 +170,7 @@ void func_150113E0(void) {
     b.emit.u14[1] = 0.35f;
     b.emit.u14[2] = 0.35f;
     b.emit.u14[3] = 0.000001f;
-    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    e = particle_emitter_spawn(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
     if (e != NULL) {
         memcpy(e + 0x170, b.tail, 0x1C);
     }
@@ -181,7 +181,7 @@ void func_150113E0(void) {
     b.spawn.pos1[1] = 72.0f;
     b.spawn.pos0[2] = 2337.0f;
     b.spawn.pos1[2] = 2220.0f;
-    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    e = particle_emitter_spawn(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
     if (e != NULL) {
         memcpy(e + 0x170, b.tail, 0x1C);
     }
@@ -192,7 +192,7 @@ void func_150113E0(void) {
     b.spawn.pos1[2] = 926.0f;
     b.spawn.pos0[0] = -710.0f;
     b.spawn.pos1[0] = -584.0f;
-    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    e = particle_emitter_spawn(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
     if (e != NULL) {
         memcpy(e + 0x170, b.tail, 0x1C);
     }
@@ -203,7 +203,7 @@ void func_150113E0(void) {
     b.spawn.pos1[1] = 47.0f;
     b.spawn.pos0[2] = -339.0f;
     b.spawn.pos1[2] = -208.0f;
-    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    e = particle_emitter_spawn(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
     if (e != NULL) {
         memcpy(e + 0x170, b.tail, 0x1C);
     }
@@ -218,8 +218,8 @@ typedef struct {
     u8 *obj;        /* 0x00 */
     u8 room;        /* 0x04 obj +0x3B */
     u8 pad5[3];
-    void *glow;     /* 0x08 func_1513D2F0 result */
-    void *smoke;    /* 0x0C func_151602C0 result */
+    void *glow;     /* 0x08 effect3d_spawn_full result */
+    void *smoke;    /* 0x0C light_create_with_ctrl result */
 } Link175C;         /* 0x10, copied to the type 0x12C object +0x28 */
 
 typedef struct {
@@ -243,7 +243,7 @@ typedef struct {
     u8 u47;         /* 0x47 */
     s32 u48;        /* 0x48 */
     u8 pad4C[0xC];
-} Glow175C;         /* func_1513D2F0 template */
+} Glow175C;         /* effect3d_spawn_full template */
 
 typedef struct {
     u8 *obj;        /* 0x00 */
@@ -287,8 +287,8 @@ typedef struct {
 } Vec175C;
 
 // object_glow_attach: spawns a type 0x12C object (func_15149130) linked to obj (record at +0x28: obj, room, glow,
-// smoke), a glow (func_1513D2F0 with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
-// light constants, the new object and the mid height of obj +0x14C / +0x150) and a func_151602C0 effect, storing both
+// smoke), a glow (effect3d_spawn_full with the D_800A4AA0 model, variant 1 or 3 at random; its +0x110 tail holds obj, the
+// light constants, the new object and the mid height of obj +0x14C / +0x150) and a light_create_with_ctrl effect, storing both
 // at +0x30 / +0x34 of the new object.
 void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     Link175C link;
@@ -358,7 +358,7 @@ void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     g.u47 = 7;
     g.u48 = 0;
     v = (func_150ADA20() & 1) ? 2 : 0;
-    e = func_1513D2F0(&g, (s32) &D_800A4AA0, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
+    e = effect3d_spawn_full(&g, (s32) &D_800A4AA0, 0, 0x25, 0, 0x1D, v + 1, 0, 0, 0x5C, arg1, arg2);
     l->glow = e;
     if (e != NULL) {
         memcpy((u8 *) e + 0x110, &tail, 0x5C);
@@ -370,7 +370,7 @@ void func_1501175C(u8 *obj, u8 arg1, s32 arg2) {
     h2.w[0] = 0;
     h2.w[1] = 0;
     h2.w[2] = 0;
-    l->smoke = func_151602C0((Header *) &h, (Header2 *) &h2, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, arg1, arg2);
+    l->smoke = light_create_with_ctrl((Header *) &h, (Header2 *) &h2, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, arg1, arg2);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/func_1501175C.s")

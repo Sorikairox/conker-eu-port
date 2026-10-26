@@ -1131,11 +1131,11 @@ void func_15117D18(f32 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void func_15104A80(u8 *);
+void prop_owner_effects_clear(u8 *);
 
 void func_15117D40(u8 *arg0) {
     s32 sp1C;
-    void (*var_t0)(u8 *); // P256: only func_15104A80 (prop_owner_effects_clear), called with the object in a0
+    void (*var_t0)(u8 *); // P256: only prop_owner_effects_clear (prop_owner_effects_clear), called with the object in a0
     s16 temp_v0_2;
     s16 temp_v0_3;
     s32 var_a1;
@@ -1166,7 +1166,7 @@ void func_15117D40(u8 *arg0) {
         var_a1 = 0xA;
         var_a2 = 1;
         var_t1 = 6;
-        var_t0 = func_15104A80;
+        var_t0 = prop_owner_effects_clear;
     } else if (temp_v1 == 4) {
         var_a1 = 0xF;
     }
@@ -4507,7 +4507,7 @@ void func_1511F4C8(u8 *arg0) {
         if ((*(s16 *)((u8 *)var_s0 + 0x1C)) <= 0) {
             temp_a0 = &D_800DBFF0[(*(s32 *)((u8 *)arg0 + 0x84))];
             sp34 = temp_a0;
-            func_151239CC(temp_a0, 0xA);
+            camera_pop_mode(temp_a0, 0xA);
         }
     }
     temp_v0_4 = (*(s32 *)((u8 *)arg0 + 0x80));
@@ -4538,7 +4538,7 @@ void func_1511F4C8(u8 *arg0) {
             var_a0 = &D_800DBFF0[temp_v0_5];
             if (var_a0->unk2C != 0x400000) {
                 sp34 = var_a0;
-                func_15123934(var_a0, 0x400000, 0, var_a0->unk134, 0xA);
+                camera_push_mode(var_a0, 0x400000, 0, var_a0->unk134, 0xA);
             }
             var_a0->unk2BC = (f32) (*(s16 *)((u8 *)arg0 + 0x10));
             var_a0->unk2C0 = (f32) (*(s16 *)((u8 *)arg0 + 0x12));
@@ -4564,7 +4564,7 @@ void func_1511F4C8(u8 *arg0) {
             (*(s32 *)((u8 *)arg0 + 0x80)) = 0;
             (*(s8 *)((u8 *)arg0 + 0x6E)) = 1;
             if (D_80082FA0 >= (*(s32 *)((u8 *)arg0 + 0x84))) {
-                func_151239CC(var_a0, 0xA);
+                camera_pop_mode(var_a0, 0xA);
             }
         }
     }

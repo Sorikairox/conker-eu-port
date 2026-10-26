@@ -5,7 +5,7 @@
 
 s32 func_15046F70(f32 *, s32, f32, s32);
 s32 func_1504715C(s32, struct127 *);
-s32 func_15142314(s32, s32, f32 *, u8);
+s32 mtx_get_translation(s32, s32, f32 *, u8);
 
 s32 func_15146E00(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
     f32 sp2C[3];
@@ -15,7 +15,7 @@ s32 func_15146E00(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
         return 0;
     }
     var_a1 = (arg3 == 1) ? 0x13 : 0x17;
-    func_15142314(*(s32 *)(arg1 + 0x1D4), var_a1, arg0, arg3);
+    mtx_get_translation(*(s32 *)(arg1 + 0x1D4), var_a1, arg0, arg3);
     if (arg2 == 0) {
         return 1;
     }
@@ -27,11 +27,11 @@ s32 func_15146E00(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151420F8(struct127 *);
+s32 obj_query_table6(struct127 *);
 s32 func_150A2FCC(u32, s32, s32 *);
 
-/* Interaction hook (D_8008A084 table, called by func_15141A7C with the mode from func_15141CC0 and the object):
- * maps mode 0..8 to an entry of D_8008A0B4, -1 = none. Mode 1 in level 4 (D_800BE9F0) asks func_151420F8; mode 6
+/* Interaction hook (D_8008A084 table, called by obj_interaction_update with the mode from interaction_mode_for_level and the object):
+ * maps mode 0..8 to an entry of D_8008A0B4, -1 = none. Mode 1 in level 4 (D_800BE9F0) asks obj_query_table6; mode 6
  * looks the object up with the five ids 0x401D..0x4021 (D_800A5AB0) through func_150A2FCC. */
 s32 func_15146EE0(s32 mode, struct127 *obj) {
     s32 ids[5];
@@ -41,7 +41,7 @@ s32 func_15146EE0(s32 mode, struct127 *obj) {
             return 0;
         case 1:
             if (D_800BE9F0 == 4) {
-                if (func_151420F8(obj) != 0) {
+                if (obj_query_table6(obj) != 0) {
                     return 6;
                 }
                 return 3;
@@ -139,8 +139,8 @@ void func_15147148(s32 arg0, s32 arg1, s32 arg2) {
     func_15147168(arg0, arg1, arg2, 1);
 }
 
-void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
-void func_15142180(u8, f32 *, s32, f32, f32);
+void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
+void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
 int func_15147168(arg0, arg1, arg2, arg3)
     u8 *arg0;
     int arg1;
@@ -155,9 +155,9 @@ int func_15147168(arg0, arg1, arg2, arg3)
         {
         }
         if (func_15146E00(sp4C, arg0, (s32)sp28, arg1) != 0) {
-            func_15141F78(arg3 ? 0xC : 0xB, sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
+            fx_spawn_impact_particle(arg3 ? 0xC : 0xB, sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
             if (arg2 >= 0x73) {
-                func_15142180(2, sp4C, sp28[6], 1.0f, 1.0f);
+                fx_spawn_impact_burst(2, sp4C, sp28[6], 1.0f, 1.0f);
             }
         }
     }
@@ -166,10 +166,10 @@ int func_15147168(arg0, arg1, arg2, arg3)
 #ifdef NON_MATCHING
 /* P243: readable C for func_151472D0 (game_eu_174610, 73 insns). */
 // object_effect10_spawn: for an object with a model (+0x1D4), func_15146E00 finds the point `id` of obj (position into
-// pt, a record into rec); when found, spawns effect kind 10 through func_15141F78 with size arg2 * (1 / 85) and the
+// pt, a record into rec); when found, spawns effect kind 10 through fx_spawn_impact_particle with size arg2 * (1 / 85) and the
 // byte (u32) (obj+0x40 scale * 0.7111111) (late rodata D_800A5B08 / D_800A5B0C), the point and the id. Twin of
 // func_150EB610 (game_eu_118CE0, which uses func_150EB4D0). No caller in the decomp (no jal, no data word): void, as
-// the twin; the asm returns no defined value. (func_15141F78: the declaration above func_15147168's caller block.)
+// the twin; the asm returns no defined value. (fx_spawn_impact_particle: the declaration above func_15147168's caller block.)
 
 void func_151472D0(u8 *obj, u8 id, s32 arg2) {
     struct {
@@ -179,7 +179,7 @@ void func_151472D0(u8 *obj, u8 id, s32 arg2) {
 
     if (*(s32 *)(obj + 0x1D4) != 0) {
         if (func_15146E00(sp.pt, obj, (s32) sp.rec, id) != 0) {
-            func_15141F78(10, sp.rec, (f32) arg2 * 0.011764706f, (u8) (u32) (*(f32 *)(obj + 0x40) * 0.7111111f), sp.pt,
+            fx_spawn_impact_particle(10, sp.rec, (f32) arg2 * 0.011764706f, (u8) (u32) (*(f32 *)(obj + 0x40) * 0.7111111f), sp.pt,
                           id);
         }
     }
@@ -189,15 +189,15 @@ void func_151472D0(u8 *obj, u8 id, s32 arg2) {
 #endif
 
 #ifdef NON_MATCHING
-u8 func_151D8E20(void);
-void func_15142180(u8, f32 *, s32, f32, f32);
-void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
+u8 impact_current_kind(void);
+void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
+void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
 
 // object_splash_spawn: effect handler of the same table as func_151472D0 (entry {0x50, fn}, `void (u8 *obj, u8 id,
 // s32 strength)`). For an object with a model (+0x1D4), func_15146E00 finds point `id` and probes the surface below
-// it (rec[0] = surface height, f32). Takes an effect slot (func_151D8E20); strength >= 0x47 also spawns the
-// func_15142180 effect at the point (rec[6]). Then, at (pt x, surface, pt z), one of two random effects: a ring
-// func_151D9B8C (size 10..20, alpha 100..200, life 80..120) or a burst func_151DAB58 (size 5..13, alpha 100..200).
+// it (rec[0] = surface height, f32). Takes an effect slot (impact_current_kind); strength >= 0x47 also spawns the
+// fx_spawn_impact_burst effect at the point (rec[6]). Then, at (pt x, surface, pt z), one of two random effects: a ring
+// impact_debris_spawn (size 10..20, alpha 100..200, life 80..120) or a burst impact_splash_ring_spawn (size 5..13, alpha 100..200).
 void func_151473F4(u8 *obj, u8 id, s32 strength) {
     struct {
         s32 rec[9];
@@ -211,9 +211,9 @@ void func_151473F4(u8 *obj, u8 id, s32 strength) {
 
     if (*(s32 *) (obj + 0x1D4) != 0) {
         if (func_15146E00(sp.pt, obj, (s32) sp.rec, id) != 0) {
-            slot = func_151D8E20();
+            slot = impact_current_kind();
             if (strength >= 0x47) {
-                func_15142180(slot, sp.pt, sp.rec[6], 1.0f, 1.0f);
+                fx_spawn_impact_burst(slot, sp.pt, sp.rec[6], 1.0f, 1.0f);
             }
             pos[0] = sp.pt[0];
             pos[1] = *(f32 *) &sp.rec[0];
@@ -222,12 +222,12 @@ void func_151473F4(u8 *obj, u8 id, s32 strength) {
                 r = func_150ADA68();
                 a = func_150ADA20();
                 b = func_150ADA20();
-                func_151D9B8C(slot, r * 10.0f + 10.0f, a % 101 + 100, (s32) &sp.rec[1], (struct17 *) pos,
+                impact_debris_spawn(slot, r * 10.0f + 10.0f, a % 101 + 100, (s32) &sp.rec[1], (struct17 *) pos,
                               b % 41 + 80, 1, 1, 0, 0xFF, 1);
             } else {
                 r = func_150ADA68();
                 a = func_150ADA20();
-                func_151DAB58(slot, r * 8.0f + 5.0f, a % 101 + 100, pos, 1, 0xFF, 1);
+                impact_splash_ring_spawn(slot, r * 8.0f + 5.0f, a % 101 + 100, pos, 1, 0xFF, 1);
             }
         }
     }
@@ -347,8 +347,8 @@ s32 func_1514766C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
 }
 
 extern u8 (*D_800900A4)(void);
-void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
-void func_15142180(u8, f32 *, s32, f32, f32);
+void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
+void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
 void func_15147888(u8 *arg0, int arg1, s32 arg2) {
     f32 sp4C[3];
     s32 sp28[9];
@@ -359,15 +359,15 @@ void func_15147888(u8 *arg0, int arg1, s32 arg2) {
         }
         if (func_15146E00(sp4C, arg0, (s32)sp28, arg1) != 0) {
             if (arg2 >= 0x73) {
-                func_15142180(0, sp4C, sp28[6], 1.0f, 1.0f);
+                fx_spawn_impact_burst(0, sp4C, sp28[6], 1.0f, 1.0f);
             }
-            func_15141F78(D_800900A4(), sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
+            fx_spawn_impact_particle(D_800900A4(), sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
         }
     }
 }
 
-void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
-void func_15142180(u8, f32 *, s32, f32, f32);
+void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
+void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
 extern u8 (*D_800900BC)(void);
 void func_151479E8(u8 *arg0, int arg1, s32 arg2)
 {
@@ -380,10 +380,10 @@ void func_151479E8(u8 *arg0, int arg1, s32 arg2)
     }
     if (func_15146E00(sp4C, arg0, (s32) sp28, arg1) != 0)
     {
-      func_15141F78(D_800900BC(), sp28, arg2 * 0.0076923077f, (u8) ((*((f32 *) (arg0 + 0x40))) * 0.7111111f), sp4C, arg1);
+      fx_spawn_impact_particle(D_800900BC(), sp28, arg2 * 0.0076923077f, (u8) ((*((f32 *) (arg0 + 0x40))) * 0.7111111f), sp4C, arg1);
       if (arg2 >= 0x73)
       {
-        func_15142180(6, sp4C, sp28[6], 1.0f, 1.0f);
+        fx_spawn_impact_burst(6, sp4C, sp28[6], 1.0f, 1.0f);
       }
     }
   }
@@ -395,18 +395,18 @@ extern f32 D_800A5B2C;
 extern f32 D_800A5B30;
 // impact_effect_c: P250. Effect table handler (u8 *obj, kind, level) like its table neighbour func_151479E8 (records
 // {handler, 0x82} at ELF file offset 0x24A4D4): when the object has a model (+0x1D4) and func_15146E00 finds the
-// effect point (pos + hit record), spawns the effect whose id D_800900D0() returns (func_15141F78: strength level *
-// D_800A5B2C, size +0x40 * D_800A5B30 as a byte) and, for level >= 0x73, effect 0xB (func_15142180) with the hit
+// effect point (pos + hit record), spawns the effect whose id D_800900D0() returns (fx_spawn_impact_particle: strength level *
+// D_800A5B2C, size +0x40 * D_800A5B30 as a byte) and, for level >= 0x73, effect 0xB (fx_spawn_impact_burst) with the hit
 // record's word 6.
 void func_15147B48(u8 *obj, s32 kind, s32 level) {
     f32 pos[3];
     s32 hit[9];
 
     if (*(s32 *) (obj + 0x1D4) != 0 && func_15146E00(pos, obj, (s32) hit, (u8) kind) != 0) {
-        func_15141F78(D_800900D0(), hit, (f32) level * D_800A5B2C, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A5B30),
+        fx_spawn_impact_particle(D_800900D0(), hit, (f32) level * D_800A5B2C, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A5B30),
                       pos, (u8) kind);
         if (level >= 0x73) {
-            func_15142180(0xB, pos, hit[6], 1.0f, 1.0f);
+            fx_spawn_impact_burst(0xB, pos, hit[6], 1.0f, 1.0f);
         }
     }
 }

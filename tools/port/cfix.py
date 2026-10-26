@@ -633,7 +633,7 @@ def fix_fptab(code, err=None, func=None, src=None):
 
 
 # ---------------------------------------------------------------- P18: table lint
-# difftest cannot see a wrong table (P17 func_1516295C: its values only reached a callee's stack struct). A body
+# difftest cannot see a wrong table (P17 light_spawn_envelope: its values only reached a callee's stack struct). A body
 # that defines its own array (static / const / initialized local) must hold the ROM's values and size, and must not
 # be indexed past its declared size.
 _TSZ = {'s8': 1, 'u8': 1, 'char': 1, 's16': 2, 'u16': 2, 's32': 4, 'u32': 4, 'f32': 4, 'int': 4, 'float': 4,

@@ -2007,7 +2007,7 @@ void func_15062800(struct127 *, struct127 *);
 // copies j's rail slots (+0x9C, +0x39C, +0x3DC, +0xEB0 with its back link +0xF70, +0x16C0) to i, swaps the two
 // objects (func_15062800), on level 0x3F re-points the D_800D3268 record's racer entry of the object's carrier
 // (unk13C >= 100) at the moved object, then resets object i (+0x125 = 0x5A, unk31C state byte 0x84, 0x1AA kept from
-// before the swap, 0x1AF = 0x40), refreshes its camera (func_15128774) and counts D_80090134. Returns 0 (asm too).
+// before the swap, 0x1AF = 0x40), refreshes its camera (camera_snap_to_object) and counts D_80090134. Returns 0 (asm too).
 s32 func_1508ECF8(s32 i, s32 j) {
     s32 mask;
     s32 jbit;
@@ -2072,7 +2072,7 @@ s32 func_1508ECF8(s32 i, s32 j) {
     obj->immune = 0x5A;
     obj->unk31C->unk1AA = saved1AA;
     *((u8 *) obj->unk31C + 0x1AF) = 0x40;
-    func_15128774(obj->camera, obj);
+    camera_snap_to_object(obj->camera, obj);
     D_80090134++;
     return 0;
 }

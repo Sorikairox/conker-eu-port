@@ -529,7 +529,7 @@ def _nocomment(tu):
 _HDR = None
 def hdr_protos():
     """P93: include/functions.h. Callees declared only there had an unknown arity, so their stack arguments came from
-    the call-site stores (sp+0x10..0x3C only): arguments 16+ of e.g. func_1513D594 (17) were never compared. Only
+    the call-site stores (sp+0x10..0x3C only): arguments 16+ of e.g. effect3d_spawn_oriented (17) were never compared. Only
     prototypes with more than 16 arguments are taken from it (shorter ones keep the call-site rule)."""
     global _HDR
     if _HDR is None:
@@ -857,7 +857,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
     _a, _v = _p.split('=')
     _n, _l = _v.split(':')
     # P100: N may be 'N+OFF' (hex OFF): compare LEN bytes from aN + OFF (skips padding a struct argument leaves
-    # uninitialised, e.g. func_151DA6F8's spawn block: bytes 0x16-0x17 are stack garbage in both builds).
+    # uninitialised, e.g. impact_spark_spawn's spawn block: bytes 0x16-0x17 are stack garbage in both builds).
     # P256: 'N*OFF' (hex OFF) dereferences: compare LEN bytes at the pointer stored at aN + OFF (e.g. a list that a
     # stack key struct points to; the pointer itself is a stack address that differs between the builds).
     _d = '*' in _n
@@ -925,7 +925,7 @@ JALRTGT_OLD = os.environ.get('DIFFTEST_JALRTGT_OLD') == '1'   # P215: old jalr t
 # P221: a jalr / jr to an unaligned target, or one no stub can be written at (outside kseg0/kseg1 RAM), ends the run
 # as a fault 'jalr to bad target 0x...' (an address error on N64 too): when both sides do it at the same target the
 # trial is inconclusive, as for any common fault. Before P221 stub_at refused such targets and both sides ran on into
-# garbage, then into their own code at different addresses (P218: func_151416E8 / func_151D9014 random DIFFERs from
+# garbage, then into their own code at different addresses (P218: effect_handle_message / impact_dust_cloud_spawn random DIFFERs from
 # random handler tables). DIFFTEST_BADJALR_OLD=1 = old behaviour.
 BADJALR_OLD = os.environ.get('DIFFTEST_BADJALR_OLD') == '1'
 JALRSKIP = {int(x) for x in filter(None, os.environ.get('DIFFTEST_JALRSKIP', '').split(','))}   # P215: scratch arg GPRs at jalrs (see compare)
@@ -1350,7 +1350,7 @@ class Run:
                 mu.reg_write(UC_MIPS_REG_V0, _r >> 32); mu.reg_write(UC_MIPS_REG_V1, _r & 0xFFFFFFFF)
         mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
         # P281: libc ldiv is pure too: write the real {quot, rem} of a1 / a2 (C truncation) through the hidden result
-        # pointer a0, so digit loops (_Ldtob func_10001550 / func_1600288C) produce real digits. DIFFTEST_LDIV_OLD=1 = old.
+        # pointer a0, so digit loops (_Ldtob func_10001550 / debug_printf_ldtob) produce real digits. DIFFTEST_LDIV_OLD=1 = old.
         if name == 'ldiv' and not LDIV_OLD and regs[2] != 0:
             _x = regs[1] - (1 << 32) if regs[1] >> 31 else regs[1]; _y = regs[2] - (1 << 32) if regs[2] >> 31 else regs[2]
             _q = _tdiv(_x, _y); _rm = _x - _q * _y
@@ -1528,14 +1528,14 @@ def compare(R, C, rk, arity):
         # P211: an indirect call (jalr) also compares every arg register that EITHER side wrote since entry, whatever
         # the target's prototype says (table targets' prototypes are often wrong: `void (*)(void)` handlers that
         # read a0). Before P211 only the reference's writes since the previous call counted, and only for unknown
-        # targets: a candidate that set the pass-through a0 to 0 in an earlier block (func_1513472C `arg0 = 0` in
+        # targets: a candidate that set the pass-through a0 to 0 in an earlier block (object_state_dispatch_a `arg0 = 0` in
         # the `idx >= 10` branch) compared equal. Registers neither side wrote hold the same entry value on both
         # sides. DIFFTEST_JALRARG_OLD=1 = old behaviour.
         indw = set()
         if a.get('ind') and not JALRARG_OLD:
             indw = a.get('awr_all', set()) | b.get('awr_all', set())
             # P211 jalr GPR compare. P215: this line was lost in the P214 edit below (indw computed, never used), so
-            # jalr a0-a3 were compared only up to the target's arity: selftest func_1513472C `arg0 = 0` gave EQUIV.
+            # jalr a0-a3 were compared only up to the target's arity: selftest object_state_dispatch_a `arg0 = 0` gave EQUIV.
             cnt = max(cnt, max(indw, default=-1) + 1)
         # P214: DIFFTEST_JALARG_WIDE=1 (opt-in): a direct call (jal) of a function with no known prototype also compares
         # every arg GPR / FPR either side wrote since the previous call. Not the default: IDO keeps locals and
@@ -1891,7 +1891,7 @@ REF_JAL = set()  # P259
 
 def knob_notes(called, ntrials):
     """P93: DIFFTEST_RET / RETF / OUTW / OUTA / OUTB / ARGMEM keys whose callee the reference never called (a US
-    address instead of the decoded EU jal target, e.g. func_1513D2F0 is jal 0x1513D860, or an unreached call)."""
+    address instead of the decoded EU jal target, e.g. effect3d_spawn_full is jal 0x1513D860, or an unreached call)."""
     un = []
     for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM)):
         un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called] if ntrials else []

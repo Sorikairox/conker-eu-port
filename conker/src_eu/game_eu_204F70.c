@@ -137,14 +137,14 @@ void func_151D7A60(u8 *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
 
 #ifdef NON_MATCHING
 // linked_obj_event_3d: event handler of an object whose link record sits at +0x40 ({ s32 id, u8 key }): event 0x3D removes the
-// object (func_1516972C) when the event's record matches by id or by key; any other event goes to the common
+// object (node_destroy) when the event's record matches by id or by key; any other event goes to the common
 // handler func_15149514.
 void func_151D7AE8(struct102 *obj, u8 *ev, u8 type) {
     u8 *link = (u8 *) obj + 0x40;
 
     if (type == 0x3D) {
         if (*(s32 *) link == *(s32 *) ev || link[4] == ev[4]) {
-            func_1516972C(obj);
+            node_destroy(obj);
         }
     } else {
         func_15149514((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
@@ -532,7 +532,7 @@ s32 func_151D8280(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
@@ -596,7 +596,7 @@ u8 *func_151D8674(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.uA7 = 1;
             temp_v1 = ((u8 *)&D_800A4EA8);
             var_t0 = sp.uA8;
-            var_s2 = func_15142FBC(func_1513F4E4(func_15142B7C(func_15142E24(var_s2, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &sp.uA7, 0x3E), 0x200005, 0x1F0600), 0x4C, &sp.uA7), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0xC)) | (*(s32 *)((u8 *)temp_v1 + 8)), &sp.uA7);
+            var_s2 = func_15142FBC(gfx_set_combine_mode(func_15142B7C(func_15142E24(var_s2, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &sp.uA7, 0x3E), 0x200005, 0x1F0600), 0x4C, &sp.uA7), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0xC)) | (*(s32 *)((u8 *)temp_v1 + 8)), &sp.uA7);
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 2) {
                 var_s3 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
                 if (var_s3 < 0) {

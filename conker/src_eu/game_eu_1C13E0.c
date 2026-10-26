@@ -54,7 +54,7 @@ void func_15193660(u8 *arg0, u8 arg1, s32 arg2) {
     if ((arg0 != NULL) && ((*(s32 *)((u8 *)arg0 + 0)) != 0)) {
         temp_v0 = (*(s32 *)((u8 *)arg0 + 0x1D4));
         if (temp_v0 != 0) {
-            func_15142314(temp_v0, 0xA, &sp.u28);
+            mtx_get_translation(temp_v0, 0xA, &sp.u28);
             sp.u20 = 8;
             sp.u3C = 12.403001f;
             sp.u24 = 7;
@@ -122,7 +122,7 @@ typedef struct {
     s8 u38;
     s8 u39;
 } SpA3C;
-s32 func_15134DAC(SpA3C *, s32, ...);
+s32 bone_emitter_spawn(SpA3C *, s32, ...);
 extern f32 D_800A85C4;
 
 void func_151937F4(u8 *arg0, s32 arg1, s32 arg2) {
@@ -148,7 +148,7 @@ void func_151937F4(u8 *arg0, s32 arg1, s32 arg2) {
         s.u34 = D_800A85C4;
         s.u38 = 4;
         s.u39 = -1;
-        func_15134DAC(&s, 0, arg0);
+        bone_emitter_spawn(&s, 0, arg0);
     }
 }
 

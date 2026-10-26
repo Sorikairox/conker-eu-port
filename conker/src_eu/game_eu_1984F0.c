@@ -38,7 +38,7 @@ typedef struct {
     u8 pad28[4];
     void (*callback)(s32, s32, s32); /* +0x2C */
 } TextAD20;
-// text_box_open: opens a text box (func_15167A68 kind 0x51, 0x74 bytes) for descriptor `text`, or, without it, for
+// text_box_open: opens a text box (node_alloc kind 0x51, 0x74 bytes) for descriptor `text`, or, without it, for
 // string id `id` (< 0x100: table D_800DD684, else D_800DD688[id - 0x100]); +0xD = source 0 / 1 / 2 (2 = caller
 // descriptor, whose lines are then counted). Stores player / arg2 / callback in the descriptor, measures every line
 // (func_15042BC4) for the box size +0x38 / +0x3C (plus half / one line height of 18, 25 for the large font, scaled by
@@ -53,7 +53,7 @@ s32 func_1516AD20(s32 id, s32 player, s32 arg2, void (*callback)(s32, s32, s32),
     s32 unused;
     f32 line;
 
-    box = func_15167A68(0x51, 0, 0x74, 0, arg5, 2);
+    box = node_alloc(0x51, 0, 0x74, 0, arg5, 2);
     if (box == NULL) {
         return 0;
     }
@@ -150,7 +150,7 @@ void func_1516AFE0(u8 *box) {
     skip = t->flags & 0x400;
     if (((u8 *) t)[0x2B] != 0 && D_800C35EA != 1) {
         ((u8 *) t)[8] = 0;
-        func_1516972C((struct102 *) box);
+        node_destroy((struct102 *) box);
         return;
     }
     TB_F32(box, 0x40) = TB_F32(box, 0x5C);
@@ -362,7 +362,7 @@ void func_1516AFE0(u8 *box) {
             D_800CC8D3[TB_T(box)->player * 0x32C] = 0;
             *(s16 *) (pl + 0x6CC) = 0;
             ((u8 *) TB_T(box))[8] = 0;
-            func_1516972C((struct102 *) box); /* the box is freed; func_1516D1C8 below still runs on it, as on N64 */
+            node_destroy((struct102 *) box); /* the box is freed; func_1516D1C8 below still runs on it, as on N64 */
         }
         break;
     }
@@ -851,7 +851,7 @@ void func_1516D63C(u8 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
 void func_1516D850(u8 *arg0) {
     if ((arg0 != NULL) && (arg0[0] == 0x51)) {
         (*(u8 **)(arg0 + 0x10))[8] = 0;
-        func_1516972C((struct102 *)arg0);
+        node_destroy((struct102 *)arg0);
         arg0[0x15] = 0;
     }
 }

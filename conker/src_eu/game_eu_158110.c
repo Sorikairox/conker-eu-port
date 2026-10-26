@@ -15,18 +15,18 @@ typedef struct {
 s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
 s32 func_150A44A4(f32, f32, s32, u8 *, f32 *);
 void func_1510EE3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE);
-void func_151236D0(struct108 *); /* P68: void, v0 is undefined in the asm */
-s32 func_15125490(struct108 *arg0);
-void func_1512523C(struct108 *arg0);
-void func_15128774(struct108 *arg0, struct127 *arg1);
+void camera_update_state_flags(struct108 *); /* P68: void, v0 is undefined in the asm */
+s32 camera_target_deep_in_water(struct108 *arg0);
+void camera_calc_pitch(struct108 *arg0);
+void camera_snap_to_object(struct108 *arg0, struct127 *arg1);
 void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
 
 /* P43: camera eye base / floor height of the followed object (+0x3D0). Floor (+0x35C, triangle +0x648) from
  * func_150A44A4 or the collision query func_1510EE3C (also when the floor is lost: +0x84 |= 0x800000, 10000.0), water
- * level +0x360 (from +0x364), ceiling check func_15128774; then +0x354 (eye base) = floor, raised to +0x360 when the
+ * level +0x360 (from +0x364), ceiling check camera_snap_to_object; then +0x354 (eye base) = floor, raised to +0x360 when the
  * object is between water and eye, to the object's y (+0x180) when that differs by more than +0x928 (mode +0x92C),
  * or to +0x2A8; +0x348 = eye height (+0x730 with +0x6C8, else +0x34C); +0x360 + 50 in water (+0xAD == 1) unless
- * func_15125490 (flag 0x4000); flag 0x40 of +0x5F0: swim bob (+0x8C4 / +0x8CC eased by func_150498A0, +0x8D0
+ * camera_target_deep_in_water (flag 0x4000); flag 0x40 of +0x5F0: swim bob (+0x8C4 / +0x8CC eased by func_150498A0, +0x8D0
  * direction, +0x848 latch, flag 0x10000000); eye y (+0x2FC) >= floor + 40 outside mode 0x100.
  * The asm's early test `(+0x84 == 0) & 0x40` is always false; the mode-0x80 branch after the 0x80 test is dead. */
 #define A390_F(o) (*(f32 *)(p + (o)))
@@ -76,11 +76,11 @@ void func_1512A390(struct108 *arg0) {
     if (A390_F(0x364) != -10000.0f) {
         A390_F(0x360) = A390_F(0x364);
     }
-    func_151236D0(arg0);
+    camera_update_state_flags(arg0);
     if (!(*(s32 *)(p + 0x84) & 0x10)) {
         t = *(u8 **)(p + 0x3D0);
         if (t[0x102] == 0 && D_800C3671 == 0 && p[0x92C] == 0 && *(f32 *)(t + 0x17C) < A390_F(0x35C)) {
-            func_15128774(arg0, (struct127 *)t);
+            camera_snap_to_object(arg0, (struct127 *)t);
         }
     }
     if (A390_F(0x35C) == -10000.0f) {
@@ -157,7 +157,7 @@ void func_1512A390(struct108 *arg0) {
             if (A390_F(0x2FC) < f) {
                 A390_F(0x2FC) = f;
             }
-            func_1512523C(arg0);
+            camera_calc_pitch(arg0);
             return;
         }
         if (*(s32 *)(p + 0x6C8) != 0 && *(s16 *)(p + 0x730) != 0) {
@@ -170,7 +170,7 @@ void func_1512A390(struct108 *arg0) {
     }
     f = A390_F(0x35C);
     A390_F(0x354) = f + (A390_F(0x354) - f);
-    if (!(*(s32 *)(p + 0x84) & 0x4000) || func_15125490(arg0) == 0) {
+    if (!(*(s32 *)(p + 0x84) & 0x4000) || camera_target_deep_in_water(arg0) == 0) {
         if ((*(u8 **)(p + 0x3D0))[0xAD] == 1 && *(s32 *)(p + 0x2C) != 0x80 && A390_F(0x360) != -10000.0f) {
             A390_F(0x354) = A390_F(0x360) + 50.0f;
         }
@@ -629,7 +629,7 @@ s32 func_1512BCA0(u8 *cam, f32 *turn, f32 *unused) {
  * call and restored after it. The probe's final position is the new eye (y not in mode 0x100);
  * +0x3E8 = no collision, +0x26C eases to 1.0 (0.1 per frame) or drops to 0.005 on a hit. After a hit the
  * eye is kept 40 above the floor below it (func_1510EE3C), except in level 0x1B and mode 0x100.
- * Always ends with func_151236D0 (state flags). The asm leaves v0 undefined: void under NM. */
+ * Always ends with camera_update_state_flags (state flags). The asm leaves v0 undefined: void under NM. */
 extern u8 D_800894C0[];
 extern u8 D_800CC1F2;
 extern u8 D_800CC1F3;
@@ -654,7 +654,7 @@ void func_1512C080(struct108 *arg0) {
     if ((C080_W(0x84) & 0x40000) || target[0x95] != 0 || C080_W(0x2C) == 0x40 || (C080_W(0x84) & 0x80) ||
         (C080_W(0x84) & 0x200)) {
         p[0x3E8] = 1;
-        func_151236D0(arg0);
+        camera_update_state_flags(arg0);
         return;
     }
     savedSlide = D_800894C0[2];
@@ -761,13 +761,13 @@ void func_1512C080(struct108 *arg0) {
             C080_F(0x2FC) = floorY + 40.0f;
         }
     }
-    func_151236D0(arg0);
+    camera_update_state_flags(arg0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512C080.s")
 #endif
 
-void func_15123A54(u8 *);
+void camera_update_eye_orbit(u8 *);
 s32 func_1512C6C0(u8 *);
 
 void func_1512C5D8(u8 *arg0) {
@@ -791,7 +791,7 @@ void func_1512C5D8(u8 *arg0) {
         if (temp_f0 < 42.0f) {
             (*(f32 *)((u8 *)arg0 + 0x384)) = (*(f32 *)((u8 *)arg0 + 0x37C)) - 45.0f * var_f14;
             (*(f32 *)((u8 *)arg0 + 0x5CC)) = 0.0f;
-            func_15123A54(arg0);
+            camera_update_eye_orbit(arg0);
             (*(s32 *)((u8 *)arg0 + 0x240)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x240)) | 2);
         }
     }

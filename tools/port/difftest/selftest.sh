@@ -39,27 +39,27 @@ chk() { # expect func file sed-expr
        out=$($R/tools/port/difftest.sh $f $T/$f.mut.c --trials ${TRIALS:-32}); fi
   case "$out" in $exp*) pass=$((pass+1)); echo "ok   [$exp] ${ex:-self}  $out";; *) fail=$((fail+1)); echo "FAIL [want $exp] ${ex:-self}  $out";; esac
 }
-chk EQUIV  func_15103800 src_eu/game_130CB0.c
-chk EQUIV  func_15103828 src_eu/game_130CB0.c
-chk EQUIV  func_15141564 src_eu/game_16DC80.c
-chk EQUIV  func_15141928 src_eu/game_16DC80.c
-chk EQUIV  func_15123934 src_eu/game_14FF90.c
-chk DIFFER func_15103800 src_eu/game_130CB0.c 's/D_800D9AB0, 8/D_800D9AB0, 6/'
+chk EQUIV  sfx_cooldown_clear src_eu/game_130CB0.c
+chk EQUIV  sfx_cooldown_tick src_eu/game_130CB0.c
+chk EQUIV  effect_pulse_sine_update src_eu/game_16DC80.c
+chk EQUIV  effect_orbit_update src_eu/game_16DC80.c
+chk EQUIV  camera_push_mode src_eu/game_14FF90.c
+chk DIFFER sfx_cooldown_clear src_eu/game_130CB0.c 's/D_800D9AB0, 8/D_800D9AB0, 6/'
 # note: 's/> D_800BE9E4/>= D_800BE9E4/' is a semantically equivalent mutation (x-=x gives 0 too); difftest says EQUIV
-chk EQUIV  func_15103828 src_eu/game_130CB0.c 's/D_800D9AB0\[i\] > D_800BE9E4/D_800D9AB0[i] >= D_800BE9E4/'
-chk DIFFER func_15103828 src_eu/game_130CB0.c 's/D_800D9AB0\[i\] = 0;/D_800D9AB0[i] = 1;/'
-chk DIFFER func_15103828 src_eu/game_130CB0.c 's/i < 4;/i < 3;/'
-chk DIFFER func_15141564 src_eu/game_16DC80.c 's/temp->unkC \* D_800BE9A4/temp->unk4 * D_800BE9A4/'
-chk DIFFER func_15141564 src_eu/game_16DC80.c 's/return 1;/return 2;/'
-chk DIFFER func_15141928 src_eu/game_16DC80.c 's/temp_v0\[0\], temp_v0\[2\]/temp_v0[2], temp_v0[0]/'
-chk DIFFER func_15123934 src_eu/game_14FF90.c 's/STK->unk2C\[0\] = arg1;/STK->unk2C[0] = arg2;/'
+chk EQUIV  sfx_cooldown_tick src_eu/game_130CB0.c 's/D_800D9AB0\[i\] > D_800BE9E4/D_800D9AB0[i] >= D_800BE9E4/'
+chk DIFFER sfx_cooldown_tick src_eu/game_130CB0.c 's/D_800D9AB0\[i\] = 0;/D_800D9AB0[i] = 1;/'
+chk DIFFER sfx_cooldown_tick src_eu/game_130CB0.c 's/i < 4;/i < 3;/'
+chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/temp->unkC \* D_800BE9A4/temp->unk4 * D_800BE9A4/'
+chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/return 1;/return 2;/'
+chk DIFFER effect_orbit_update src_eu/game_16DC80.c 's/temp_v0\[0\], temp_v0\[2\]/temp_v0[2], temp_v0[0]/'
+chk DIFFER camera_push_mode src_eu/game_14FF90.c 's/STK->unk2C\[0\] = arg1;/STK->unk2C[0] = arg2;/'
 # P5: MIPS III sd/ld in the reference (emulated by a code hook)
 chkc EQUIV  func_150A7D00
 chkc DIFFER func_150A7D00 's/mtx\[15\] = 1;/mtx[15] = 2;/'
 chkc DIFFER func_150A7D00 's/i < 16;/i < 15;/'
 # P5: branch right after a stubbed call whose delay slot is an FPU store (was UC_ERR_EXCEPTION at 0)
-chkc EQUIV  func_151DAE28
-chkc DIFFER func_151DAE28 's/arg1, 0x40, \&sp4C/arg1, 0x41, \&sp4C/'
+chkc EQUIV  impact_splash_ring_verts
+chkc DIFFER impact_splash_ring_verts 's/arg1, 0x40, \&sp4C/arg1, 0x41, \&sp4C/'
 # P5: daddiu (64-bit add feeding an sd)
 chkc EQUIV  func_150ADACC
 chkc DIFFER func_150ADACC 's/(s64)arg0 + 1/(s64)arg0 + 2/'
@@ -114,7 +114,7 @@ M33='s/O_F32(r, 0x18) \* 0.1f + 1.0f, scale/O_F32(r, 0x1C) * 0.1f + 1.0f, scale/
 chkce "EQUIV*POKE unread: 800C395C"  func_150268BC "$S33"   # (the mutant below survives P90's TR=4 with the US address)
 chkce DIFFER func_150268BC "${S33/800C395C=/800C3D7C=}" "$M33"
 # P93: a callee declared only in include/functions.h had an unknown arity: stack args 16+ (sp+0x40..) were never compared
-# (func_150FD554 -> func_1513D594, 17 args). Prototypes with > 16 args are now taken from functions.h.
+# (func_150FD554 -> effect3d_spawn_oriented, 17 args). Prototypes with > 16 args are now taken from functions.h.
 FD554="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450004=000000FF DIFFTEST_RET=15046F70=1,1513D860=80460000"
 chkce EQUIV  func_150FD554 "$FD554"
 chkce DIFFER func_150FD554 "$FD554" 's/0U, 0, (u8) (s32) arg1, arg2);/0U, 0, (u8) (s32) arg1, arg2 + 1);/'
@@ -130,14 +130,14 @@ S7E3CC="DIFFTEST_EXACT=* DIFFTEST_POKE=800DE150=1,800DC420=80480000,800DD8A8=0,8
 chkce EQUIV  func_1517E3CC "$S7E3CC DIFFTEST_OUTB=1517C11C=@800DDECC:01/@800DDEFC:01/@800DDF5C:01/@800DDFAC:01"
 chkce DIFFER func_1517E3CC "$S7E3CC DIFFTEST_OUTB=1517C11C=@800DDECC:01/@800DDEFC:01/@800DDF5C:01/@800DDFAC:01" 's/ \&\& voices\[i \* 0x10 + 0xC\] == 0) {/) {/'
 chkce EQUIV  func_1517E3CC "$S7E3CC" 's/ \&\& voices\[i \* 0x10 + 0xC\] == 0) {/) {/'
-# P100: DIFFTEST_ARGMEM "N+OFF:LEN" (bytes from aN + OFF): func_151DA6F8's spawn block has 2 uninitialised pad bytes
+# P100: DIFFTEST_ARGMEM "N+OFF:LEN" (bytes from aN + OFF): impact_spark_spawn's spawn block has 2 uninitialised pad bytes
 # at +0x16, so the owner word at +0x18 is compared from an offset.
 SDA6F8="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80460000,1=80460010,2=3F400000,3=5,4=C8,5=40A00000,6=1234,7=0,8=3F800000,9=40000000,10=0,11=2,12=77,13=FFF0,14=12,15=80490000,16=1,17=9  DIFFTEST_POKE=80460000=1,80460004=2,80460008=3,80460010=41200000,80460014=C1200000,80460018=3F000000,80470098=80480000  DIFFTEST_RET=15148310=80470000"
-chkce EQUIV  func_151DA6F8 "$SDA6F8 DIFFTEST_ARGMEM=15148310=0+18:4"
-chkce DIFFER func_151DA6F8 "$SDA6F8 DIFFTEST_ARGMEM=15148310=0+18:4" 's/sb.owner = owner;/sb.owner = argC;/'
+chkce EQUIV  impact_spark_spawn "$SDA6F8 DIFFTEST_ARGMEM=15148310=0+18:4"
+chkce DIFFER impact_spark_spawn "$SDA6F8 DIFFTEST_ARGMEM=15148310=0+18:4" 's/sb.owner = owner;/sb.owner = argC;/'
 # P100: a callee declared only in a header (sinf: include/libc/math.h): the call statement `sinf(temp->unk8)` was
 # read as an int-parameter prototype, so f12 was never compared (port-b P96: a `rad = ang` mutant survived).
-chk DIFFER func_15141564 src_eu/game_16DC80.c 's/sinf(temp->unk8)/sinf(temp->unk4)/'
+chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/sinf(temp->unk8)/sinf(temp->unk4)/'
 # P112: an indirect call whose argument register is set in an earlier block (event native 6: lw a1 before the branch
 # to the shared jalr tail) - a1 was not compared, the P106 args[1] -> args[0] mutant survived. Now every arg register
 # the reference wrote since the previous call counts for a jalr of an unknown function.
@@ -192,9 +192,9 @@ TRIALS=4 chkce EQUIV  func_15087204 "$S87204 DIFFTEST_ARGF_OLD=1" 's/           
 # `idx >= 10` branch, a branch before the jalr block) compared equal. Now every arg register / f12-f15 either side wrote
 # since entry is compared at a jalr. Table entry 0 poked to an unknown target (0x80450000). DIFFTEST_JALRARG_OLD=1 = old.
 S472C="DIFFTEST_ARG=0=80490000 DIFFTEST_POKE=8049003C=000F0000,80089E4C=80450000"
-chkce EQUIV  func_1513472C "$S472C"
-chkce DIFFER func_1513472C "$S472C" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
-chkce EQUIV  func_1513472C "$S472C DIFFTEST_JALRARG_OLD=1" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
+chkce EQUIV  object_state_dispatch_a "$S472C"
+chkce DIFFER object_state_dispatch_a "$S472C" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
+chkce EQUIV  object_state_dispatch_a "$S472C DIFFTEST_JALRARG_OLD=1" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
 # P211: DIFFTEST_STKFILL=WORD fills the harness stack (zeros before): func_151C384C builds an emitter request on its
 # stack; dropping `req.angle[1] = 0.0f` compared equal because the unwritten slot read 0 anyway. With the fill the
 # request bytes (ARGMEM on func_151530A8) differ. No fill = old behaviour.
@@ -216,7 +216,7 @@ TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630"
 TRIALS=4 chkce DIFFER func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630" "$M68DC"
 TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630 DIFFTEST_JALARG_OLD=1" "$M68DC"
 # P215: (1) P214 lost the `cnt = max(cnt, ...indw...)` line of the P211 jalr compare (indw computed, never used): the
-# func_1513472C `arg0 = 0` case above gave EQUIV (82 / 83 at the end of P214). (2) at a jalr the target register is not
+# object_state_dispatch_a `arg0 = 0` case above gave EQUIV (82 / 83 at the end of P214). (2) at a jalr the target register is not
 # an argument: func_1506B04C does `lw a2, D_800864B0(a2); jalr a2` (a2 = the handler address in the reference, `arg`
 # in the candidate) and keeps a scratch copy of `arg` in a3 (`or a3, a2, zero`; it passes it in a1). The target
 # register is skipped (DIFFTEST_JALRTGT_OLD=1 = old); DIFFTEST_JALRSKIP=3 drops the scratch a3 (all 15 handlers take 2 args).
@@ -235,11 +235,11 @@ TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C" 's/(s32) "%d"/(s32) "%x"/'
 TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C DIFFTEST_TUPEEK_OLD=1"
 # P221: a jalr to an unaligned / unstubbable target ends the trial as a common fault (inconclusive) on both sides
 # (DIFFTEST_BADJALR_OLD=1 = old: stub_at refused it silently and both sides ran into garbage, then into their own code:
-# func_151416E8 trial 24 handler 0x1167216A from a random D_8008A3CC). Different / one-sided bad targets still DIFFER.
-TRIALS=32 chkce EQUIV  func_151416E8 ""
-TRIALS=32 chkce DIFFER func_151416E8 "DIFFTEST_BADJALR_OLD=1"
-TRIALS=32 chkce DIFFER func_151416E8 "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
-TRIALS=32 chkce DIFFER func_151416E8 "" 's/(rec, msg, c);/(rec, msg, code);/'
+# effect_handle_message trial 24 handler 0x1167216A from a random D_8008A3CC). Different / one-sided bad targets still DIFFER.
+TRIALS=32 chkce EQUIV  effect_handle_message ""
+TRIALS=32 chkce DIFFER effect_handle_message "DIFFTEST_BADJALR_OLD=1"
+TRIALS=32 chkce DIFFER effect_handle_message "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
+TRIALS=32 chkce DIFFER effect_handle_message "" 's/(rec, msg, c);/(rec, msg, code);/'
 # P234: a callee declared only in a header the TU includes (func_150ADA20 / func_150ADA68 in functions.h) has a known
 # prototype: IDO's scratch f12 left right before `jal func_150ADA20` is not an argument (P232 func_15109DC8 first run
 # was a false DIFFER; the case is the P232 block without its local declarations). DIFFTEST_INCHDR_OLD=1 = old.
@@ -253,23 +253,23 @@ TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/scale = (func_150ADA68() \* D_80
 S60E30="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15146414=0:8,15145698=0:12 DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450014=80460000,80450018=80470000,8045001C=07030000,80450038=42C80000,8045003C=03000000,80470000=00000001,80470014=42F73333,80470038=00000007,80470074=03000000,804701D4=80480000 DIFFTEST_RET=15145698=1 DIFFTEST_OUTA=15081A90=7:80490000;3F000000;C29B6666;4284CCCD;44BB8666;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;10000"
 P60E30="DIFFTEST_OUTP=15146414=1.0:41200000;41A00000;41F00000/1.1:42200000;C1200000;42480000"
 M60E30='s/        dir\[0\] = dir\[0\] - start\[0\];/        dir[0] = start[0] - dir[0];/'
-TRIALS=4 chkce EQUIV  func_15160E30 "$S60E30 $P60E30"
-TRIALS=4 chkce DIFFER func_15160E30 "$S60E30 $P60E30" "$M60E30"
-TRIALS=4 chkce EQUIV  func_15160E30 "$S60E30" "$M60E30"
+TRIALS=4 chkce EQUIV  light_beh_beam_raycast "$S60E30 $P60E30"
+TRIALS=4 chkce DIFFER light_beh_beam_raycast "$S60E30 $P60E30" "$M60E30"
+TRIALS=4 chkce EQUIV  light_beh_beam_raycast "$S60E30" "$M60E30"
 # P225: (1) nm_resolve passes #if blocks nested inside an NM block through (DIFFTEST_NMNEST_OLD=1 = old: the nested #else /
 # #endif closed the NM block -> CERR, P222 1BAF40). The case has `#ifdef PORT` (dropped: no PORT in difftest)
 # / `#else` (kept) inside its NM block. (2) DIFFTEST_STKFILL with a non-hex value is an ERROR line (was a traceback with
 # no result line, P222).
-TRIALS=8 chkce EQUIV  func_15103828 ""
-TRIALS=8 chkce CERR   func_15103828 "DIFFTEST_NMNEST_OLD=1"
-TRIALS=8 chkce DIFFER func_15103828 "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
-TRIALS=8 chkce EQUIV  func_15103828 "" 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/'
-TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_STKFILL=WORD"
-TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_STKFILL=A5A5A5A5"
+TRIALS=8 chkce EQUIV  sfx_cooldown_tick ""
+TRIALS=8 chkce CERR   sfx_cooldown_tick "DIFFTEST_NMNEST_OLD=1"
+TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
+TRIALS=8 chkce EQUIV  sfx_cooldown_tick "" 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/'
+TRIALS=8 chkce ERROR  sfx_cooldown_tick "DIFFTEST_STKFILL=WORD"
+TRIALS=8 chkce EQUIV  sfx_cooldown_tick "DIFFTEST_STKFILL=A5A5A5A5"
 # P229: a DIFFTEST_ARG item with a non-decimal index (`A=7`) is an ERROR line (was a traceback, empty result, P225);
 # a valid decimal index with a hex value still runs.
-TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_ARG=A=7"
-TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_ARG=0=7"
+TRIALS=8 chkce ERROR  sfx_cooldown_tick "DIFFTEST_ARG=A=7"
+TRIALS=8 chkce EQUIV  sfx_cooldown_tick "DIFFTEST_ARG=0=7"
 # P243: a matched-C reference is its own ELF symbol size, not len(candidate): a longer candidate that jals the next
 # function (func_150305E0 -> func_15030600) used to make the reference span the callee, leave `jal func_15030600`
 # unstubbed and run into the real callee (hang until DIFFTEST_TIMEOUT). Now the candidate moves to CAND_ALT and the
@@ -295,11 +295,11 @@ chkce EQUIV  func_150C5A68 "$S5A68"
 chkce DIFFER func_150C5A68 "$S5A68 DIFFTEST_JALRFPR_OLD=1"
 chkce DIFFER func_150C5A68 "$S5A68" 's/D_80088B00\[\*(s8 \*) (o + 0x30)\](o) == 0/D_80088B00[*(s8 *) (o + 0x30)](o + 4) == 0/'
 TRIALS=1 chkce KNOBERROR func_150C5A68 "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150C6088=1:2"
-# P256: DIFFTEST_ARGMEM "N*OFF:LEN" compares LEN bytes at the pointer stored at aN + OFF (func_15104A80's key holds a
+# P256: DIFFTEST_ARGMEM "N*OFF:LEN" compares LEN bytes at the pointer stored at aN + OFF (prop_owner_effects_clear's key holds a
 # stack copy of a 9-byte part list; the pointer itself differs between the builds, so only the deref sees a swapped list).
 S4A80="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=804100A0 DIFFTEST_POKE=800DC324=80410000,800DC3C4=80420000,80420004=0000000C,80410110=0000F800,800CCD48=00000000,800CD074=00000001 DIFFTEST_ARGMEM=15149A50=0:4,15149A50=0+8:4,15149A50=0*4:9"
-chkce EQUIV  func_15104A80 "$S4A80"
-chkce DIFFER func_15104A80 "$S4A80" 's/parts = D_800A275C;/parts = D_800A2768;/'
+chkce EQUIV  prop_owner_effects_clear "$S4A80"
+chkce DIFFER prop_owner_effects_clear "$S4A80" 's/parts = D_800A275C;/parts = D_800A2768;/'
 # P259: knob keys that are no jal / j target of the reference are flagged statically ("[knob not a jal target of the
 # reference ...]"), also when no trial reaches the call (P256 keyed ARGMEM on func_151494E0's US address 151494E0; its
 # EU jal target is 15149A50, and the compare silently did nothing). chkcn: want yes|no, func, env, substring.
@@ -310,10 +310,10 @@ chkcn() {
   if [ $has = $want ]; then pass=$((pass+1)); echo "ok   [$want: $pat] env case  $(echo "$out" | cut -c1-200)"
   else fail=$((fail+1)); echo "FAIL [want $want: $pat] env case  $out"; fi
 }
-chkcn yes func_15104A80 "$S4A80 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target of the reference (EU address? jalr-only callee?): ARGMEM 151494E0"
-chkcn yes func_15104A80 "$S4A80 DIFFTEST_RET=151494E0=1" "RET 151494E0"
-chkcn no  func_15104A80 "$S4A80" "not a jal target"
-chkcn no  func_15104A80 "$S4A80 DIFFTEST_JALKEY_OLD=1 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target"
+chkcn yes prop_owner_effects_clear "$S4A80 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target of the reference (EU address? jalr-only callee?): ARGMEM 151494E0"
+chkcn yes prop_owner_effects_clear "$S4A80 DIFFTEST_RET=151494E0=1" "RET 151494E0"
+chkcn no  prop_owner_effects_clear "$S4A80" "not a jal target"
+chkcn no  prop_owner_effects_clear "$S4A80 DIFFTEST_JALKEY_OLD=1 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target"
 # P281: DIFFTEST_STOPCALL=ADDR=N ends a trial at the N-th call of a stub (endless thread loops: func_100052A0 spins in
 # `while (1) {}` after osWritebackDCacheAll 100252A0). Without it every trial times out (UNSURE). A candidate that never
 # makes the stop call times out alone (DIFFER). DIFFTEST_RETV1 sets the low word of osGetTime (100252D0): the busy wait
@@ -354,9 +354,9 @@ TRIALS=1 chkce DIFFER func_1518D290 "$SD290" 's/(func_150ADA68() \* 202.0f/(func
 # chkce sed mutant does with $T/FUNC.mut.c). After the P256 Docker restart the container kept the old size, so the
 # selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares
 # md5s (ERROR "stale container view" if it still differs). The rewritten file must be the DIFFER mutant, not CERR.
-F28=$T/func_15103828.mut.c
-sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/func_15103828.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
-TRIALS=8 chkce DIFFER func_15103828 "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
+F28=$T/sfx_cooldown_tick.mut.c
+sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/sfx_cooldown_tick.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
+TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
 # P280: DIFFTEST_ARGMEM "N:LEN@K" compares only at the K-th call to ADDR. func_1501175C memcpys a 0x10 link record,
 # then a 0x5C tail: LEN 92 on every call compares stack bytes past the link record (layout-dependent, DIFFER as is);
 # with @0 / @1 the case is EQUIV and a one-ulp change of a tail constant DIFFERs.

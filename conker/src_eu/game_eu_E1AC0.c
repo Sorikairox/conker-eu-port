@@ -182,7 +182,7 @@ s32 func_150B4774(u8 *arg0) {
     temp_s3 = (*(s32 *)((u8 *)arg0 + 0x94));
     temp_a0 = (*(u8 *)((u8 *)temp_s2 + 0x50)) + ((func_150ADA20() % (u32) ((*(u8 *)((u8 *)temp_s2 + 0x10)) + 1)) * D_800BE9E4);
     (*(u8 *)((u8 *)temp_s2 + 0x50)) = temp_a0;
-    (*(f32 *)((u8 *)temp_s2 + 0x4C)) = (f32) ((func_151423D8((temp_a0 - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 0x18))) + (*(f32 *)((u8 *)temp_s2 + 0x14)));
+    (*(f32 *)((u8 *)temp_s2 + 0x4C)) = (f32) ((angle_byte_cos((temp_a0 - 0x40) & 0xFF) * (*(f32 *)((u8 *)temp_s2 + 0x18))) + (*(f32 *)((u8 *)temp_s2 + 0x14)));
     (*(f32 *)((u8 *)temp_s2 + 0x44)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 0x44)) + ((*(f32 *)((u8 *)temp_s2 + 0x20)) * D_800BE9A4));
     temp_f16 = (*(f32 *)((u8 *)temp_s2 + 0x44));
     if (temp_f16 > 1.0f) {
@@ -261,7 +261,7 @@ s32 func_150B4774(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B4774.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
@@ -360,7 +360,7 @@ u8 *func_150B4BF0(u8 *trail, u8 *gfx, s16 arg2) {
 
     gfx = (u8 *) func_15142E24(gfx, &D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = (u8 *) func_15142B7C((s32) gfx, 1, 0x160600);
-    gfx = (u8 *) func_1513F4E4((s32) gfx, 0x4D, &flag);
+    gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4D, &flag);
     gfx = func_15142C10(gfx, style[0x24], style[0x24], style[0x24], 0xFF, &flag);
     gfx = func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
 
@@ -600,11 +600,11 @@ void func_150B5568(u8 *arg0) {
         temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 8))) + (*(f32 *)((u8 *)temp_s0 + 4));
         temp_s1 = func_150ADA20() & 0xFF;
         temp_s2 = func_150ADA20() & 0xFF;
-        temp_f22 = func_151423D8((temp_s1 - 0x40) & 0xFF);
-        temp_f24 = func_151423D8(temp_s1 & 0xFF);
-        temp_f26 = func_151423D8((temp_s2 - 0x40) & 0xFF);
+        temp_f22 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
+        temp_f24 = angle_byte_cos(temp_s1 & 0xFF);
+        temp_f26 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
         temp_f2 = (*(f32 *)((u8 *)temp_s0 + 0));
-        temp_f12 = temp_f2 * func_151423D8(temp_s2 & 0xFF);
+        temp_f12 = temp_f2 * angle_byte_cos(temp_s2 & 0xFF);
         temp_f28 = (*(f32 *)((u8 *)temp_s3 + 0)) + (temp_f12 * temp_f22);
         temp_f30 = (*(f32 *)((u8 *)temp_s3 + 4)) - (temp_f2 * temp_f26);
         spB4 = (*(f32 *)((u8 *)temp_s3 + 8)) + (temp_f12 * temp_f24);

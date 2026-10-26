@@ -10,8 +10,8 @@
 /t.u22 = 0;/s/0;/1;/
 /t.u2A = 0;/s/0;/1;/
 /t.u24 = 0x7D0;/s/0x7D0/0x7D1/
-/sin1 = func_151423D8(r1 - 0x40);/s/r1 - 0x40/r1 + 0x40/
-/sin2 = func_151423D8(r2 - 0x40);/s/r2 - 0x40/r2/
+/sin1 = angle_byte_cos(r1 - 0x40);/s/r1 - 0x40/r1 + 0x40/
+/sin2 = angle_byte_cos(r2 - 0x40);/s/r2 - 0x40/r2/
 /dist = func_150ADA68() \* e->spread;/s/e->spread/e->accum/
 /horiz = dist \* cos2;/s/cos2/sin2/
 /tx = e->pos\[0\] + horiz \* sin1;/s/horiz/dist/
@@ -43,8 +43,8 @@
 /f.velFrac\[0\] = (s32) (v \* 256.0f) & 0xFF;/s/& 0xFF/\& 0x7F/
 /v = (ty - e->pos\[1\]) \* inv;/s/ty/tz/
 /f.vel\[2\] = (s32) v;/s/v;/(v + 1.0f);/
-/func_15167D84((s32 \*\*) &t, 0, 0x22, -1, obj\[0xC\], obj\[1\])/s/0x22/0x20/
-/func_15167D84((s32 \*\*) &t, 0, 0x22, -1, obj\[0xC\], obj\[1\])/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/node_spawn_sprite((s32 \*\*) &t, 0, 0x22, -1, obj\[0xC\], obj\[1\])/s/0x22/0x20/
+/node_spawn_sprite((s32 \*\*) &t, 0, 0x22, -1, obj\[0xC\], obj\[1\])/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
 /memcpy(rec + 0x50, &f, 0x22);/s/0x50/0x4C/
 /memcpy(rec + 0x50, &f, 0x22);/s/0x22/0x20/
 /^        e->accum -= 1.0f;/s/1.0f/0.5f/

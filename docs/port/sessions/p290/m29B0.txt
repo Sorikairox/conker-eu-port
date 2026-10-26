@@ -16,7 +16,7 @@ s/if (fabsf(prev - yaw) < 10.0f) {/if (fabsf(prev - yaw) < 5.0f) {/
 s/        yaw = prev;/        ;/
 s/        D_80089860 = yaw;/        ;/
 s/    yaw \*= D_800A385C;/    yaw *= D_800A3850 * 2;/
-s/    func_15123070(cam);/    ;/
+s/    camera_calc_relative_yaw(cam);/    ;/
 s/(cam + 0x36C) & 0x10) {/(cam + 0x36C) \& 0x20) {/
 s/dist = 150.0f;/dist = 160.0f;/
 s/        dist = CAMF(0x374);/        dist = CAMF(0x370);/

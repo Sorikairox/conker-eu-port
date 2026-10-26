@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_151058B4(u8 *arg0);
+void fx_sparks_emit(u8 *arg0);
 void func_1000FD38(s32, s32, s32);
 #endif
 
@@ -20,7 +20,8 @@ extern PartList9 D_800A2750;
 extern PartList9 D_800A275C;
 extern PartList9 D_800A2768;
 extern s32 *D_800DC3C4;
-void func_15104A80(u8 *obj) {
+/* was func_15104A80 */
+void prop_owner_effects_clear(u8 *obj) {
     struct {
         s32 count;
         u8 *parts;
@@ -68,7 +69,7 @@ void func_15104A80(u8 *obj) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104A80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/prop_owner_effects_clear.s")
 #endif
 
 #ifdef NON_MATCHING
@@ -77,7 +78,8 @@ s32 func_15106260(s16 *, s32, u8, u8);
 void func_15143874(s16, f32, f32 *, f32 *);
 s32 func_151464B8(s32);
 
-void func_15104C44(u8 *arg0) {
+/* was func_15104C44 */
+void fx_ground_arcs_update(u8 *arg0) {
     struct {
         f32 u70;
         f32 u74;
@@ -175,12 +177,13 @@ void func_15104C44(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104C44.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_ground_arcs_update.s")
 #endif
 #ifdef NON_MATCHING
 void func_1000FD38(s32, s32, s32);
 
-void func_15104FF8(s32 arg0, s32 arg1, s32 arg2) {
+/* was func_15104FF8 */
+void fx_ground_arcs_on_msg(s32 arg0, s32 arg1, s32 arg2) {
     u8 *sp40;
     s32 (*sp3C)(struct57 *, struct57 *, s32 *, s32, s32, s32, u16 *);
     u8 *temp_v0;
@@ -201,13 +204,14 @@ void func_15104FF8(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104FF8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_ground_arcs_on_msg.s")
 #endif
 #ifdef NON_MATCHING
 s32 func_15107518(f32 *, f32 *, s32, f32 *, f32, s32, s32, s32);
 s32 func_151464B8(s32);
 
-void func_151050B0(u8 *arg0) {
+/* was func_151050B0 */
+void fx_quad_bolts_update(u8 *arg0) {
     struct {
         f32 u84;
         f32 u88;
@@ -307,15 +311,17 @@ void func_151050B0(u8 *arg0) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_151050B0.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_quad_bolts_update.s")
 #endif
-void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2) {
+/* was func_1510550C */
+void fx_free_on_msg_4b(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x4B) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 
-void func_15105548(struct207 *arg0, s32 *arg1, u8 arg2) {
+/* was func_15105548 */
+void fx_quad_bolts_on_msg(struct207 *arg0, s32 *arg1, u8 arg2) {
     struct206 *temp_v0 = &arg0->unk28;
     if ((arg2 == 0x38) && (temp_v0->unk0->unk14 == 1)) {
         temp_v0->unk70 = *arg1;
@@ -334,7 +340,8 @@ struct210 *func_15102EA0(f32, u8, s32, u8 *, s16, u8, u8, s32, u8, s32);
 // surface type 9 (flags & 0x1F) it adds embers (func_151C384C) with chance 0.4 and stops. Otherwise embers with
 // chance 0.1, and with chance 0.4 an animated impact flash (func_151522DC, one keyframe {0x85, 0.1}) at the point
 // facing back along the normal.
-void func_1510558C(u8 *p) {
+/* was func_1510558C */
+void impact_debris_burst(u8 *p) {
     struct {
         s32 u0;
         s32 u4;
@@ -402,15 +409,16 @@ void func_1510558C(u8 *p) {
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_1510558C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/impact_debris_burst.s")
 #endif
 
-void func_15105848(struct207 *arg0, s32 arg1, u8 arg2) {
+/* was func_15105848 */
+void fx_sparks_on_msg(struct207 *arg0, s32 arg1, u8 arg2) {
     struct206 *temp_v0;
 
     if (arg2 == 0x38) {
         temp_v0 = &arg0->unk28;
-        func_151058B4(arg0);
+        fx_sparks_emit(arg0);
         temp_v0->unkC |= 1;
     } else {
         temp_v0 = &arg0->unk28;
@@ -424,9 +432,10 @@ void func_15105848(struct207 *arg0, s32 arg1, u8 arg2) {
 s32 func_151432BC(u8 *, s32 *, s32 *, s32 *, s32 *);
 void func_15143794(s16, s16, f32, void *);
 s32 func_151464B8(s32);
-s32 func_1515C2F0(s32 *, s32, f32 *, s32, s32, s32);
+s32 streak_spawn(s32 *, s32, f32 *, s32, s32, s32);
 
-void func_151058B4(u8 *arg0) {
+/* was func_151058B4 */
+void fx_sparks_emit(u8 *arg0) {
     struct {
         s32 u88;
         s32 u8C;
@@ -514,16 +523,16 @@ void func_151058B4(u8 *arg0) {
                 temp_s1 = func_150ADA20();
                 func_15143794((s16) (temp_s0 & 0xFF), (s16) (((u32) temp_s1 % 22U) - 0x36), (func_150ADA68() * 20.0f) + 30.0f, &sp.u94);
                 sp.uA0 = (func_150ADA68() * 1.4860001f) + -3.048f;
-                func_1515C2F0(&sp.uCC, 0, &sp.u90, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                streak_spawn(&sp.uCC, 0, &sp.u90, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
                 var_f20 -= 1.0f;
             } while (var_f20 > 1.0f);
         }
     }
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_151058B4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/fx_sparks_emit.s")
 #endif
-// void func_151058B4(void *arg0) {
+// void fx_sparks_emit(void *arg0) {
 //     s8 spE1;
 //     s8 spE0;
 //     ?32 spDC;
@@ -612,7 +621,7 @@ void func_151058B4(u8 *arg0) {
 //             temp_s1 = func_150ADA20();
 //             func_15143794((s16) (temp_s0 & 0xFF), (s16) ((temp_s1 % 0x16U) - 0x36), (func_150ADA68() * 20.0f) + 30.0f, &sp94);
 //             spA0 = (func_150ADA68() * *(void *)0x800A23FC) + *(void *)0x800A2400;
-//             func_1515C2F0(&spCC, 0, &sp90, 0, (?32) arg0->unkC, (?32) arg0->unk1);
+//             streak_spawn(&spCC, 0, &sp90, 0, (?32) arg0->unkC, (?32) arg0->unk1);
 //             temp_f20_2 = phi_f20 - 1.0f;
 //             phi_f20 = temp_f20_2;
 //             if (temp_f20_2 > 1.0f) {
@@ -622,13 +631,15 @@ void func_151058B4(u8 *arg0) {
 //     }
 // }
 
-void func_15105BC8(struct204 *arg0) {
+/* was func_15105BC8 */
+void fx_shake_if_active(struct204 *arg0) {
     if ((arg0->unk34 & 1) != 0) {
         func_1508B20C(arg0->unk28->unk0, arg0->unk28->unk2, arg0->unk28->unk4, 500.0f);
     }
 }
 
-struct_eu_node *func_15105C24(s32 arg0) {
+/* was func_15105C24 */
+struct_eu_node *scene_node_find_type2e(s32 arg0) {
     u8 i;
     u8 j;
     struct_eu_node *p;
@@ -645,7 +656,7 @@ struct_eu_node *func_15105C24(s32 arg0) {
     }
     return NULL;
 }
-// void *func_15105C24(s32 arg0) {
+// void *scene_node_find_type2e(s32 arg0) {
 //     s32 temp_t4;
 //     s32 temp_t5;
 //     void *temp_a0;

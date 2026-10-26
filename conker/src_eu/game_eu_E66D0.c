@@ -14,7 +14,7 @@ static const f32 D_800A0180_c[1] = { 0.001f }; /* 0x3A83126F */
 static const f32 D_800A0184_c[1] = { 1e-05f }; /* 0x3727C5AC */
 static const f32 D_800A0188_c[1] = { 0.661f }; /* 0x3F29374C */
 
-/* func_1513D594 record (0x58 bytes) */
+/* effect3d_spawn_oriented record (0x58 bytes) */
 typedef struct {
     /* 0x00 */ u8 u00;
     /* 0x01 */ u8 u01;
@@ -75,7 +75,7 @@ typedef struct {
 // projectile_bounce_update: handler (D_80089CD4 table: obj, x, y, z, w, ext; returns keep). +0x3C = +0x10 + w.
 // Speed +0x140 <= 15: stops (+0x72 / +0x78 = 1, low byte of +0x60 cleared), turns the velocity (0, 0, 200) by
 // func_150A8050(+0x20, +0x24, +0x28) into +0x20..+0x28 and adds +0x38..+0x40 (keep). Speed > 30: breaks: a
-// func_1513D594 flash record at (x, w, z) (random size, gets an 8-byte random spin at +0x128 of the new record), a
+// effect3d_spawn_oriented flash record at (x, w, z) (random size, gets an 8-byte random spin at +0x128 of the new record), a
 // func_15151FA8 burst, a random break sound (D_80088AD4) at +0x38..+0x40; returns 0. Otherwise bounces: scales
 // +0x44..+0x58 by +0x14 (flipping +0x48) and plays D_80088ADC (keep).
 s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
@@ -136,7 +136,7 @@ s32 func_150B8EC0(u8 *obj, f32 x, f32 y, f32 z, f32 w, u8 *ext) {
         r0 = func_150ADA20();
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        rec = (u8 *) func_1513D594((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF, 500.0f,
+        rec = (u8 *) effect3d_spawn_oriented((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF, 500.0f,
                                    500.0f, 0, (s32) ext, *(s32 *) (obj + 0x14C), *(s32 *) (obj + 0x168), 0, 8,
                                    obj[0xC], obj[1]);
         if (rec != NULL) {
@@ -271,7 +271,7 @@ typedef struct {
 // - |+0x48|. Up to 6: bounces off the wall: stops x / z (+0x44 / +0x4C), keeps +0x48 (scaled by +0x14 if upwards),
 // moves to the hit point (hit +0x14..+0x1C), scales +0x50..+0x58 by +0x14 and plays D_80088ADC (keep). Faster: breaks;
 // unless func_150A3538 rejects the hit point, ray casts back from (x, y, z) along the last move (func_150ACEA0) and at
-// the hit spawns a func_1513D594 flash (if func_15145C90 accepts the surface; random 8-byte spin at +0x128) and a
+// the hit spawns a effect3d_spawn_oriented flash (if func_15145C90 accepts the surface; random 8-byte spin at +0x128) and a
 // func_15151BE0 debris burst against the move; always plays a random break sound D_80088AD4; returns 0.
 s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
     Burst9424 b;
@@ -344,7 +344,7 @@ s32 func_150B9424(u8 *obj, u8 *hit, f32 x, f32 y, f32 z) {
                 r0 = func_150ADA20();
                 r1 = func_150ADA20();
                 r2 = func_150ADA20();
-                rec = (u8 *) func_1513D594((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF,
+                rec = (u8 *) effect3d_spawn_oriented((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF,
                                            500.0f, 500.0f, 0, (s32) &surf, *(s32 *) (obj + 0x14C),
                                            *(s32 *) (obj + 0x168), 0, 8, obj[0xC], obj[1]);
                 if (rec != NULL) {
@@ -463,7 +463,7 @@ static const f32 D_800A01C8_c[1] = { 0.70500004f }; /* 0x3F347AE2 */
 static const f32 D_800A01CC_c[1] = { 0.31f };     /* 0x3E9EB852 */
 static const f32 D_800A01D0_c[1] = { 0.2f };      /* 0x3E4CCCCD */
 
-/* func_1513D594 record (0x58 bytes; as Rec8EC0A) */
+/* effect3d_spawn_oriented record (0x58 bytes; as Rec8EC0A) */
 typedef struct {
     /* 0x00 */ u8 u00;
     /* 0x01 */ u8 u01;
@@ -528,8 +528,8 @@ typedef struct {
 // thrown_object_land_check: per-frame check of a thrown / falling object (+0x38..+0x40 position, +0x10 radius)
 // against the current holder D_80088730 (refreshed with func_15083E90(1) when gone or not in room 1). Inside
 // radius^2 + 2500: if the holder's +0x3C is above 15, half the time it is knocked away (flags on +0x60 / +0x71..+0x78,
-// velocity 1.3 * +0x3C * the sin / cos (func_151423D8) of the holder's heading +0x76, up 10..25, timer 300; returns
-// 1). Otherwise it lands: a func_1513D594 dust record on the ground below (func_15046F70, ground height kept at
+// velocity 1.3 * +0x3C * the sin / cos (angle_byte_cos) of the holder's heading +0x76, up 10..25, timer 300; returns
+// 1). Otherwise it lands: a effect3d_spawn_oriented dust record on the ground below (func_15046F70, ground height kept at
 // +0x110; random 8-byte spin at +0x128 of the record), a func_15151FA8 burst and the D_80088AE0 sound; returns 0.
 // Out of range it eases +0x20..+0x28 by 0.2 towards D_80088724 (the second holder D_80088720's position + 50 up)
 // and returns 1.
@@ -557,8 +557,8 @@ s32 func_150B9B1C(u8 *obj) {
         dz = *(f32 *) (obj + 0x40) - *(f32 *) (h + 0x1C);
         if (dx * dx + dy * dy + dz * dz < *(f32 *) (obj + 0x10) * *(f32 *) (obj + 0x10) + D_800A01B0_c[0]) {
             if (15.0f < *(f32 *) (h + 0x3C) && (func_150ADA20() & 1)) {
-                s = func_151423D8(*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8);
-                c = func_151423D8((*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8) + 0x40);
+                s = angle_byte_cos(*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8);
+                c = angle_byte_cos((*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8) + 0x40);
                 obj[0x71] = 1;
                 *(s32 *) (obj + 0x60) |= 0x7D;
                 obj[0x73] = 1;
@@ -611,7 +611,7 @@ s32 func_150B9B1C(u8 *obj) {
                 r0 = func_150ADA20();
                 r1 = func_150ADA20();
                 r2 = func_150ADA20();
-                rec = (u8 *) func_1513D594((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF,
+                rec = (u8 *) effect3d_spawn_oriented((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF,
                                            500.0f, 500.0f, 0, (s32) (obj + 0x114), *(s32 *) (obj + 0x14C),
                                            *(s32 *) (obj + 0x168), 0, 8, obj[0xC], obj[1]);
                 if (rec != NULL) {
@@ -689,15 +689,15 @@ s32 func_150B9B1C(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING /* P209: void, the caller ignores v0 */
-void func_15142600(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+void mtx_look_along_scaled(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 #else
-s32 func_15142600(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+s32 mtx_look_along_scaled(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 #endif
 s32 func_150BA1F4(s32 arg0, u8 *arg1) {
 #ifdef NON_MATCHING
-    func_15142600(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
+    mtx_look_along_scaled(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
 #else
-    func_15142600(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
+    mtx_look_along_scaled(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
 #endif
     return 1;
 }
@@ -725,6 +725,6 @@ void func_150BA26C(u8 *arg0) {
         a = func_150ADA20();
         b = func_150ADA20();
         c = func_150ADA20();
-        func_1513C4EC((s32)&s, 0, 2, 0, *(s16 *)(arg0 + 0x9C), *(s16 *)(arg0 + 0xA6) + 2, *(s16 *)(arg0 + 0xA0), *(s16 *)(arg0 + 0xA2), *(s16 *)(arg0 + 0xA2), a & 0xFF, (u8)((b & 1) + (c & 1) * (a = 2)) /* fakematch: permuter, reuses a's register */, 3, 0xFF, 0, arg0[0xC], arg0[1]);
+        sprite_fx_spawn_at((s32)&s, 0, 2, 0, *(s16 *)(arg0 + 0x9C), *(s16 *)(arg0 + 0xA6) + 2, *(s16 *)(arg0 + 0xA0), *(s16 *)(arg0 + 0xA2), *(s16 *)(arg0 + 0xA2), a & 0xFF, (u8)((b & 1) + (c & 1) * (a = 2)) /* fakematch: permuter, reuses a's register */, 3, 0xFF, 0, arg0[0xC], arg0[1]);
     }
 }

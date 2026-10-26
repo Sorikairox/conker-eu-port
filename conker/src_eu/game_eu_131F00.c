@@ -6,7 +6,7 @@
 void func_151046F0(s32 arg0, s32 arg1, s32 arg2) {
     u8 *temp_v0;
 
-    temp_v0 = func_15167A68(0x64, 0, 0x20, 0, 0xFFU, 1U);
+    temp_v0 = node_alloc(0x64, 0, 0x20, 0, 0xFFU, 1U);
     if (temp_v0 != NULL) {
         (*(s16 *)((u8 *)temp_v0 + 0x18)) = 0xC;
         (*(s8 *)((u8 *)temp_v0 + 0x1A)) = 0;
@@ -62,7 +62,7 @@ block_11:
             func_10010F30(0x5B2, 0x7FFFU, 0U, 0, 0U);
             func_10010F30(0x5B2, 0x7FFFU, 0x7FU, -0x64, 0U);
             func_151D6CA0(0xD2, 2);
-            func_151254F4((*(u8 **)((u8 *)sp30 + 0x318)), (*(u8 *)((u8 *)sp34 + 0x13F)));
+            camera_set_followed_obj((*(u8 **)((u8 *)sp30 + 0x318)), (*(u8 *)((u8 *)sp34 + 0x13F)));
             (*(f32 *)((u8 *)((*(u8 **)((u8 *)sp30 + 0x318))) + 0x674)) = 0.0f;
             return;
         }
@@ -86,14 +86,14 @@ block_11:
         D_800BEE2C = 0;
         sp28 = (*(u8 **)((u8 *)arg0 + 0x10));
         func_1000E2F4(0, arg0);
-        func_151254F4((*(u8 **)((u8 *)sp28 + 0x318)), (*(u8 *)((u8 *)sp28 + 0x13F)));
+        camera_set_followed_obj((*(u8 **)((u8 *)sp28 + 0x318)), (*(u8 *)((u8 *)sp28 + 0x13F)));
         (*(f32 *)((u8 *)((*(u8 **)((u8 *)sp28 + 0x318))) + 0x674)) = 0.0f;
         arg0->pad1A[0] = 3;
         return;
     case 3:
         temp_v0_5 = arg0->pad1A[1] - (D_800BEA08 * 0xA);
         if (temp_v0_5 <= 0) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
             func_151D6CA0(0, 0);
             return;
         }

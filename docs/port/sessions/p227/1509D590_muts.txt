@@ -18,12 +18,12 @@ s/func_150DF240(pos, 0xFF, 1);/func_150DF240(pos, 0xFF, 0);/ % c07_999
 s/func_150E8728(args\[1\] \& 0xFF, 0xFF, 1);/func_150E8728(args[1] \& 0xFFF, 0xFF, 1);/ % c07_other
 s/    case 0x0F:/    case 0x0E:/ % c0F
 s/func_1000E7A0(0x10, 0);/func_1000E7A0(0x11, 0);/ % c10
-s/func_151616D0(0x16, 0x1F, 0);/func_151616D0(0x16, 0x1E, 0);/ % c10
+s/light_ctrl_broadcast(0x16, 0x1F, 0);/light_ctrl_broadcast(0x16, 0x1E, 0);/ % c10
 s/func_151CD90C(args\[1\]);/func_151CD90C(args[1] \& 0xFFF);/ % c12
 s/func_151D2C70((s16) args\[1\]);/func_151D2C70((s8) args[1]);/ % c13
 s/func_150E15E0((u8) args\[1\], 0xFF, 1);/func_150E15E0((u8) args[2], 0xFF, 1);/ % c14
-s/func_151616D0(0x24, 0x27, 0);/func_151616D0(0x24, 0x28, 0);/ % c16
-s/func_15163A60((u8) args\[1\], 0xFF, 1);/func_15163A60((u8) args[1], 0x7F, 1);/ % c17
+s/light_ctrl_broadcast(0x24, 0x27, 0);/light_ctrl_broadcast(0x24, 0x28, 0);/ % c16
+s/light_create_obj_pulse((u8) args\[1\], 0xFF, 1);/light_create_obj_pulse((u8) args[1], 0x7F, 1);/ % c17
 s/tbl\[0\] = D_8009F4A0;/tbl[0] = D_8009F4A0 + 1;/ % c18
 s/func_15083E90((u8) args\[1\]), tbl\[args\[2\]\], (s16) args\[3\], -1, -1, -1,/func_15083E90((u8) args[1]), tbl[args[2]], (s16) args[3], -1, 0, -1,/ % c18
 s/(s16) args\[3\], -1, -1, -1, 0, 0, 0xFF, 1)/(s16) args[2], -1, -1, -1, 0, 0, 0xFF, 1)/ % c18
@@ -42,7 +42,7 @@ s/            pos\[1\] = ground;/            pos[1] = -ground;/ % c22_hit
 s/dir\[1\] = -1.0f;/dir[1] = 1.0f;/ % c22_hit
 s/ground = -10000.0f;/ground = -1000.0f;/ % c22_hit
 s/func_151C0434((u8 \*) \&hit, pos, dir, 1, 0xFF, 1);/func_151C0434((u8 *) \&hit, pos, dir, 0, 0xFF, 1);/ % c22_hit
-s/func_15136C3C((u8 \*) func_1505EEF4(args\[1\] \& 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);/func_15136C3C((u8 *) func_1505EEF4(args[1] \& 0xFFF), 1, 1, 0, 1, 0, 0xFF, 1);/ % c23
+s/object_hit_effects((u8 \*) func_1505EEF4(args\[1\] \& 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);/object_hit_effects((u8 *) func_1505EEF4(args[1] \& 0xFFF), 1, 1, 0, 1, 0, 0xFF, 1);/ % c23
 s/func_1514F18C(func_150F7364(obj), obj, 0x1B);/func_1514F18C(func_150F7364(obj), obj, 0x1A);/ % c24
 s/func_15155D6C(args\[1\] \& 0xFFF, 0x78, (f32) args\[2\]);/func_15155D6C(args[1] \& 0xFFF, 0x78, (f32) args[3]);/ % c25
 s/func_150FD554(obj, 0xFF, 1);/func_150FD554(obj, 0xFF, 2);/ % c2A

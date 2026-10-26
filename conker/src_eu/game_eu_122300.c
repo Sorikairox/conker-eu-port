@@ -253,7 +253,7 @@ void func_150F527C(u8 *arg0, s32 arg1, u8 arg2) {
         arg0[0x71] = 0;
         v[0x24] |= 5;
     } else if (arg2 == 0x4F) {
-        func_1516972C(arg0);
+        node_destroy(arg0);
     }
 }
 

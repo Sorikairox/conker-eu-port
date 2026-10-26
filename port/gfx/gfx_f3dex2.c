@@ -1914,8 +1914,8 @@ void port_camwatch(const char *where) {
     if (cw_flag < 0) cw_flag = port_flag("camwatch");
     if (!cw_flag) return;
     { /* first hit of the camera-path stubs: who calls them */
-        static const char *const who[] = {"func_1504CB98", "func_151247C0", "func_15123A54", "func_151283B8", "func_15124C38",
-                                          "func_15128030", "func_15126378"};
+        static const char *const who[] = {"func_1504CB98", "camera_update_target", "camera_update_eye_orbit", "camera_dispatch_mode", "camera_update_target_height",
+                                          "camera_update_transition", "camera_update_aim_mode"};
         static unsigned seen;
         for (i = 0; i < (int)(sizeof who / sizeof who[0]); i++)
             if (!(seen & (1u << i)) && !strcmp(where, who[i])) {

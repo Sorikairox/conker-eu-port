@@ -229,7 +229,7 @@ s32 func_151B6B84(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B6B84.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
@@ -287,7 +287,7 @@ u8 *func_151B6ED8(u8 *trail, u8 *gfx, s16 arg2) {
     flag = 1;
     gfx = (u8 *) func_15142E24(gfx, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-    gfx = (u8 *) func_1513F4E4((s32) gfx, 0x4E, &flag);
+    gfx = (u8 *) gfx_set_combine_mode((s32) gfx, 0x4E, &flag);
     gfx = (u8 *) func_15142B7C((s32) gfx, 0x200005, 0x1F0600);
     gfx = func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
                         &flag);
@@ -635,7 +635,7 @@ u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4) {
         data->data = (u8 *) data + 0x10;
         memcpy(data->data, src, size);
         if (D_8008FF30[type](obj, obj + 0x10) == 0) {
-            func_1516972C((struct102 *) obj);
+            node_destroy((struct102 *) obj);
             return NULL;
         }
         p.unk8 = 0x1303;
@@ -865,7 +865,7 @@ s32 func_151B7F48(u8 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_1513F4E4(s32, s32, s8 *);
+s32 gfx_set_combine_mode(s32, s32, s8 *);
 s32 func_15142B7C(s32, s32, s32);
 s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
@@ -950,7 +950,7 @@ u8 *func_151B81E8(u8 *arg0, u8 *arg1, s16 arg2) {
             sp.uC4 = temp_v0;
             temp_v1 = ((u8 *)&D_800A4EA8);
             var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
-            var_s0 = func_15142FBC(func_1513F4E4(func_15142B7C(func_15142E24(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.u97, 3), 0x200005, 0x1F0600), 0x56, &sp.u97), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u97);
+            var_s0 = func_15142FBC(gfx_set_combine_mode(func_15142B7C(func_15142E24(var_s0, &D_800914B0, 0, 0, 0, 0, 0x78, 0, 0, &sp.u97, 3), 0x200005, 0x1F0600), 0x56, &sp.u97), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.u97);
             if (var_a0 < 0) {
                 var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
             }
@@ -1094,7 +1094,7 @@ void func_151B88C8(u8 *arg0, s32 *arg1, u8 arg2) {
     if (arg2 == 0) {
         id = arg1[0];
         if (id == *(s32 *)p || p[4] == ((u8 *)arg1)[4]) {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }
@@ -1104,7 +1104,7 @@ void func_151B8920(u8 *arg0) {
     struct102 *temp_a1 = *temp_v0;
 
     if (temp_a1 != NULL) {
-        func_1516972C(temp_a1);
+        node_destroy(temp_a1);
     }
 }
 

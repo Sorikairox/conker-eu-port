@@ -55,7 +55,7 @@ void func_1517A320(u8 i) {
 #ifdef NON_MATCHING
 /* P139 */
 /*
- * drift_object_spawn: creates an object of the given type (func_15167A68(type, 0, 0xB8, 1, 0xFF, 1)) and sets it up:
+ * drift_object_spawn: creates an object of the given type (node_alloc(type, 0, 0xB8, 1, 0xFF, 1)) and sets it up:
  * position (x, y, z) at +0x90/+0x92/+0x94, s16 velocity +0xA0 / +0xA2 / +0xA4 = (random in -spread/2..,
  * (s8) tilt, random), +0x96..+0x9A cleared, random byte spins +0x9C..+0x9E (each rand % jitter - jitter / 2),
  * scale +0xA8 = (140 + rand & 0x7F) * 0.01, +0xA6 = arg5, +0x9F = colour, +0xAC = mode, +0xAE = arg9, +0xB2 = 0,
@@ -64,7 +64,7 @@ void func_1517A320(u8 i) {
  */
 void func_1517A550(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, u8 spread, u8 jitter, u8 arg9,
                    s32 type) {
-    u8 *obj = func_15167A68(type, 0, 0xB8, 1, 0xFF, 1);
+    u8 *obj = node_alloc(type, 0, 0xB8, 1, 0xFF, 1);
 
     if (obj == NULL) {
         return;
@@ -103,7 +103,7 @@ void func_1517A550(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, 
 // Moves the screen position +0x90 / +0x92 / +0x94 by the velocity +0xA0 / -+0xA2 / +0xA4 and the rotation
 // +0x96..+0x9A by the s8 spins +0x9C..+0x9E; mode 5 (+0xAC) adds gravity (+0xA2 += 1). While the life +0xA6 is
 // below the mode value, the x / z velocities lose a random part (rand % +0xAE) towards zero. The life runs down by the
-// frame step D_800BE9E4; once out, alpha +0xB3 fades by 4 per step. Freed (func_1516972C) at alpha 0, or when the
+// frame step D_800BE9E4; once out, alpha +0xB3 fades by 4 per step. Freed (node_destroy) at alpha 0, or when the
 // frame counter +0xB2 is non-zero and its low and high nibbles are equal.
 void func_1517A75C(u8 *obj) {
     s32 vy = *(s16 *) (obj + 0xA2);
@@ -156,7 +156,7 @@ void func_1517A75C(u8 *obj) {
     alpha = obj[0xB3];
     *(u16 *) (obj + 0xA6) = v;
     if (alpha == 0 || (obj[0xB2] != 0 && (obj[0xB2] & 0xF) == (obj[0xB2] >> 4))) {
-        func_1516972C((struct102 *) obj);
+        node_destroy((struct102 *) obj);
     }
 }
 #else
@@ -240,7 +240,7 @@ void func_1517ABB4(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4)
   n = arg0;
   if (n != 0)
   {
-    obj = func_15167A68(9, 0, 0xB8, 1, 0xFF, 1);
+    obj = node_alloc(9, 0, 0xB8, 1, 0xFF, 1);
     if (obj)
     {
       func_1510EDAC(0, 0, &d, 0, 0, 0, arg2, arg3, arg4, arg3, 0, 0);
@@ -298,7 +298,7 @@ void func_1517ADBC(struct102 *arg0) {
             *(u16 *)((u8 *)arg0 + 0xA6) = t;
             *(s8 *)((u8 *)arg0 + 0xB3) = (t * 256) / 60;
         } else {
-            func_1516972C(arg0);
+            node_destroy(arg0);
         }
     }
 }

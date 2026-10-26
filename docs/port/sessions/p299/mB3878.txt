@@ -13,7 +13,7 @@
 \#gfx = func_15142C10(gfx#s/primG, primB/primB, primG/
 \#gfx = func_15142CF0(gfx#s/0, 0, envR/0, 1, envR/
 \#gfx = func_15142CF0(gfx#s/envA, &flag/primA, \&flag/
-\#gfx = func_1513F4E4(gfx, tex#s/tex/rmodePair/
+\#gfx = gfx_set_combine_mode(gfx, tex#s/tex/rmodePair/
 \#gfx = func_15142E24(gfx#s/0x36/0x37/
 \#gfx = func_15142E24(gfx#s/&flag, 3)/\&flag, 2)/
 \#gfx = func_15142FBC(gfx#s/| 0x80000 |/| 0x40000 |/

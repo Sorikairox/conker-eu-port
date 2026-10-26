@@ -67,17 +67,17 @@ void func_151A10A8(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-f32 func_151423D8(u8);
-s32 func_15167D84(s32 **, s32, s32, s32, s32, s32);
+f32 angle_byte_cos(u8);
+s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern u8 D_8008FC70[];          /* grey level per colour index (arg8) */
 extern u8 D_80091C2C[];          /* sprite set of colour index 1 */
 extern u8 D_80091C50[];          /* sprite set of colour index 0 */
 
 /* emit_point_blob: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
  * s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, as the game_eu_EF6D0 emitters): queues one
- * func_15167D84 sprite particle at (x, y, z) (s16) flying out along the byte angle a with a random pitch of -63..-49
+ * node_spawn_sprite sprite particle at (x, y, z) (s16) flying out along the byte angle a with a random pitch of -63..-49
  * (rand % 15 - 63) and speed 801..1304 (503 * rand + 801): s16 velocity (v sin(p) sin(a - 0x40), -v sin(p - 0x40),
- * v sin(p) sin(a)) (func_151423D8 = byte-angle sine); -130..-90 (rand % 41 - 130), two sizes 250..700 (rand % 451 +
+ * v sin(p) sin(a)) (angle_byte_cos = byte-angle sine); -130..-90 (rand % 41 - 130), two sizes 250..700 (rand % 451 +
  * 250), 200, 6..8 (rand % 3 + 6), grey D_8008FC70[arg8] with alpha 0xFF, sprite set D_80091C50 / D_80091C2C for
  * arg8 0 / 1 (other values leave the word unset, as the asm), owner byte argB. The three bytes at +0x1C take the
  * low byte of (s32) (x * 256) as in the asm. Words the asm never writes stay unset. Always returns 1 (go on). */
@@ -113,10 +113,10 @@ s32 func_151A11BC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
     u8 g, xb;
 
     pitch = (u32) func_150ADA20() % 15U - 0x3F;
-    sp = func_151423D8(pitch & 0xFF);
-    cp = func_151423D8((pitch - 0x40) & 0xFF);
-    sa = func_151423D8(a & 0xFF);
-    ca = func_151423D8((a - 0x40) & 0xFF);
+    sp = angle_byte_cos(pitch & 0xFF);
+    cp = angle_byte_cos((pitch - 0x40) & 0xFF);
+    sa = angle_byte_cos(a & 0xFF);
+    ca = angle_byte_cos((a - 0x40) & 0xFF);
     v = func_150ADA68() * 503.0f + 801.0f;
     h = v * sp;
     rec.vx = (s32) (h * ca);
@@ -152,7 +152,7 @@ s32 func_151A11BC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
         rec.sprites = D_80091C2C;
     }
     rec.h28 = 0xC8;
-    func_15167D84((s32 **) &rec, 0, 0, -1, argB & 0xFF, 1);
+    node_spawn_sprite((s32 **) &rec, 0, 0, -1, argB & 0xFF, 1);
     return 1;
 }
 #else
@@ -194,7 +194,7 @@ void func_151A177C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s
 }
 
 #ifdef NON_MATCHING
-s32 func_15167D84(s32 **, s32, s32, s32, s32, s32);
+s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern s32 D_800910E4;
 
 /* spark emitter parameters at +0x28 of the object */
@@ -209,7 +209,7 @@ typedef struct {
     /* 0x1E */ s16 fadeRange;
 } Emit1794;
 
-/* func_15167D84's sprite template (as func_151A1F48's) */
+/* node_spawn_sprite's sprite template (as func_151A1F48's) */
 typedef struct {
     /* 0x00 */ s32 *sprites;
     /* 0x04 */ s32 mode;
@@ -253,9 +253,9 @@ typedef struct {
 } Fade1794;
 
 // spark_burst_emitter_update: adds rate * D_800BE9A4 to the emitter's accum and spawns one spark sprite
-// (func_15167D84, sprites D_800910E4, room / owner from +0xC / +0x1) per whole unit. Each spark starts at the
+// (node_spawn_sprite, sprites D_800910E4, room / owner from +0xC / +0x1) per whole unit. Each spark starts at the
 // emitter position and flies in half its fade time to a random point of the sphere of radius spread (two random
-// angles through func_151423D8); life lifeMin + 0..lifeRange, fade value fadeMin + 0..fadeRange, random flags 4 / 8
+// angles through angle_byte_cos); life lifeMin + 0..lifeRange, fade value fadeMin + 0..fadeRange, random flags 4 / 8
 // (they accumulate over the batch). The fade program (Fade1794) is copied to the record's +0x50.
 void func_151A1794(u8 *obj) {
     Emit1794 *e = (Emit1794 *) (obj + 0x28);
@@ -307,10 +307,10 @@ void func_151A1794(u8 *obj) {
     do {
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        sin1 = func_151423D8(r1 - 0x40);
-        cos1 = func_151423D8(r1);
-        sin2 = func_151423D8(r2 - 0x40);
-        cos2 = func_151423D8(r2);
+        sin1 = angle_byte_cos(r1 - 0x40);
+        cos1 = angle_byte_cos(r1);
+        sin2 = angle_byte_cos(r2 - 0x40);
+        cos2 = angle_byte_cos(r2);
         dist = func_150ADA68() * e->spread;
         horiz = dist * cos2;
         tx = e->pos[0] + horiz * sin1;
@@ -360,7 +360,7 @@ void func_151A1794(u8 *obj) {
         f.vel[2] = (s32) v;
         f.velFrac[2] = (s32) (v * 256.0f) & 0xFF;
 
-        rec = (u8 *) func_15167D84((s32 **) &t, 0, 0x22, -1, obj[0xC], obj[1]);
+        rec = (u8 *) node_spawn_sprite((s32 **) &t, 0, 0x22, -1, obj[0xC], obj[1]);
         if (rec != NULL) {
             memcpy(rec + 0x50, &f, 0x22);
         }
@@ -445,7 +445,7 @@ void func_151A1E8C(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15167D84(s32 **, s32, s32, s32, s32, s32);
+s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern s32 D_800910E4;
 
 void func_151A1F48(u8 *arg0) {
@@ -536,10 +536,10 @@ void func_151A1F48(u8 *arg0) {
         do {
             temp_s1 = func_150ADA20() & 0xFF;
             temp_s2 = func_150ADA20() & 0xFF;
-            temp_f20 = func_151423D8((temp_s1 - 0x40) & 0xFF);
-            temp_f22 = func_151423D8(temp_s1 & 0xFF);
-            temp_f24 = func_151423D8((temp_s2 - 0x40) & 0xFF);
-            temp_f26 = func_151423D8(temp_s2 & 0xFF);
+            temp_f20 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
+            temp_f22 = angle_byte_cos(temp_s1 & 0xFF);
+            temp_f24 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
+            temp_f26 = angle_byte_cos(temp_s2 & 0xFF);
             temp_f2 = func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0xC));
             temp_f12 = temp_f2 * temp_f26;
             temp_f28 = (*(f32 *)((u8 *)temp_s0 + 0)) + (temp_f12 * temp_f20);
@@ -574,7 +574,7 @@ void func_151A1F48(u8 *arg0) {
             sp.uD0 = (s8) (s32) (temp_f28 * 256.0f);
             sp.uD2 = (s8) (s32) (temp_f30 * 256.0f);
             sp.uD1 = (s8) (s32) (sp80 * 256.0f);
-            temp_v0 = func_15167D84(&sp.uB4, 0, 0x14, -1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = node_spawn_sprite(&sp.uB4, 0, 0x14, -1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0x50, &sp.uA0, 0x14);
             }
@@ -654,7 +654,7 @@ void func_151A2498(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15167D84(s32 **, s32, s32, s32, s32, s32);
+s32 node_spawn_sprite(s32 **, s32, s32, s32, s32, s32);
 extern s32 D_800910E4;
 
 void func_151A2564(u8 *arg0) {
@@ -748,10 +748,10 @@ void func_151A2564(u8 *arg0) {
         do {
             temp_s1 = func_150ADA20() & 0xFF;
             temp_s2 = func_150ADA20() & 0xFF;
-            temp_f20 = func_151423D8((temp_s1 - 0x40) & 0xFF);
-            temp_f22 = func_151423D8(temp_s1 & 0xFF);
-            temp_f24 = func_151423D8((temp_s2 - 0x40) & 0xFF);
-            temp_f26 = func_151423D8(temp_s2 & 0xFF);
+            temp_f20 = angle_byte_cos((temp_s1 - 0x40) & 0xFF);
+            temp_f22 = angle_byte_cos(temp_s1 & 0xFF);
+            temp_f24 = angle_byte_cos((temp_s2 - 0x40) & 0xFF);
+            temp_f26 = angle_byte_cos(temp_s2 & 0xFF);
             temp_f2 = func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 0xC));
             temp_f12 = temp_f2 * temp_f26;
             temp_f28 = (*(f32 *)((u8 *)temp_s0 + 0)) + (temp_f12 * temp_f20);
@@ -789,7 +789,7 @@ void func_151A2564(u8 *arg0) {
             sp.uE0 = (s8) (s32) (temp_f28 * 256.0f);
             sp.uE2 = (s8) (s32) (temp_f30 * 256.0f);
             sp.uE1 = (s8) (s32) (sp88 * 256.0f);
-            temp_v0 = func_15167D84(&sp.uC4, 0, 0x1C, -1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            temp_v0 = node_spawn_sprite(&sp.uC4, 0, 0x1C, -1, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
             if (temp_v0 != 0) {
                 memcpy(temp_v0 + 0x50, &sp.uA8, 0x1C);
             }

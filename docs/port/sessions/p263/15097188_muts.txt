@@ -4,8 +4,8 @@ s/id \* 0x9A0)/id * 0x9A4)/ % op2
 /case 2:/,/case 3:/s/cam->unk358 = cam->unk2FC;/;/ % op2
 /case 2:/,/case 3:/s/cam->unk2FC = (f32) a\[3\];/cam->unk2FC = (f32) a[4];/ % op2
 /case 3:/,/case 4:/s/CAM_F(cam, 0x2AC) = (f32) a\[4\];/CAM_F(cam, 0x2AC) = (f32) a[3];/ % op3
-s/func_15123934(cam, a\[2\], a\[3\], a\[4\], 0x11);/func_15123934(cam, a[2], a[4], a[3], 0x11);/ % op4
-s/func_151239CC(cam, 0x11);/func_151239CC(cam, 0x10);/ % op5
+s/camera_push_mode(cam, a\[2\], a\[3\], a\[4\], 0x11);/camera_push_mode(cam, a[2], a[4], a[3], 0x11);/ % op4
+s/camera_pop_mode(cam, 0x11);/camera_pop_mode(cam, 0x10);/ % op5
 s/cam->unk84 \&= ~a\[3\];/cam->unk84 \&= a[3];/ % op6off
 s/if (a\[2\] != 0) {/if (a[2] == 0) {/ % op6on op6off
 s/cam->unk1B4 = a\[3\];/cam->unk1B4 = a[2];/ % op7
@@ -30,8 +30,8 @@ s/            cam->unk194 = (f32) a\[3\];/            cam->unk194 = (f32) a[2];/
 s/        cam->unk190 = (f32) a\[2\];/        cam->unk190 = (f32) a[3];/ % op16m4
 s/if ((D_800D3C60 == 5 \&\& a\[4\] != 0) || /if ((D_800D3C60 == 5) || / % op17d op17e
 s/id \* 0x68) == 5) {/id * 0x68) == 4) {/ % op17b op17c
-s/func_151254F4(cam, func_15084000(a\[2\] \& 0xFFF));/func_151254F4(cam, func_15084000(a[2] \& 0x1FFF));/ % op18
-s/func_15124770(cam, func_15084000(a\[2\] \& 0xFFF));/func_15124770(cam, func_15084000(a[2]));/ % op19
+s/camera_set_followed_obj(cam, func_15084000(a\[2\] \& 0xFFF));/camera_set_followed_obj(cam, func_15084000(a[2] \& 0x1FFF));/ % op18
+s/camera_set_second_target(cam, func_15084000(a\[2\] \& 0xFFF));/camera_set_second_target(cam, func_15084000(a[2]));/ % op19
 s/cam->unk1A8 = (f32) a\[3\] \* (1.0f \/ 65536.0f);/cam->unk1A8 = (f32) a[3] * (1.0f \/ 32768.0f);/ % op20m5
 s/            cam->unk1A0 = cam->unk1A8;/            cam->unk1A0 = cam->unk1A4;/ % op20m5
 s/\*(s16 \*) (mk + 4) = a\[5\];/*(s16 *) (mk + 4) = a[4];/ % op21
@@ -40,5 +40,5 @@ s/CAM_F(cam, 0x7C0) = /CAM_F(cam, 0x7C4) = / % op23
 s/CAM_F(cam, 0x790) = (f32) a\[3\];/CAM_F(cam, 0x790) = (f32) a[4];/ % op24m5
 s/CAM_B(cam, 0x78C) = 0;/;/ % op24m4
 s/D_800D2DB0 = cam->pad3A4;/D_800D2DB0 = cam->unk1A4;/ % op25
-s/func_1512868C(cam);/;/ % op26
+s/camera_init_controller(cam);/;/ % op26
 s/D_800898C0 = a\[2\] - 1;/D_800898C0 = a[2];/ % op27

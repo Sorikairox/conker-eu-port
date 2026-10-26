@@ -1367,7 +1367,7 @@ void func_150D5F7C(struct127 *, s32, s32);
 void func_150D7CA0(struct127 *, s32);            
 void func_1510EE3C(s32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32); // P47: args 12/13 are f32 bits 
 void func_15121A00(struct127 *, struct49 *);     
-s32 func_151279A0(struct127 *, struct49 *);     
+s32 player_aim_look(struct127 *, struct49 *);     
 void func_151AE814(u8 *);
 extern u16 D_8009952C[];
 extern u8 D_800B89C4[];
@@ -1672,7 +1672,7 @@ void func_1504CB98(struct127 *arg0) {
         D_800CC288 = (s32) arg0->unk31C->unk8C;
         sp190 = (s32) (u16) arg0->unk31C->unk8A;
         if (arg0->camera == NULL) {
-            func_151279A0(arg0, D_800CC6A4);
+            player_aim_look(arg0, D_800CC6A4);
             func_15121A00(arg0, D_800CC6A4);
         }
         func_1504C854(arg0);

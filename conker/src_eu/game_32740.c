@@ -4,7 +4,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
-void func_15123070(struct108 *arg0);
+void camera_calc_relative_yaw(struct108 *arg0);
 void func_1512DAD0(struct108 *arg0, s32 arg1, void *arg2);
 extern f32 D_80095DA0;
 extern f32 D_800C3A20[];
@@ -83,15 +83,15 @@ void func_15005290(s32 arg0, s32 arg1) {
 // }
 
 #ifdef NON_MATCHING
-s32 func_151239CC(struct108 *arg0, s32 arg1);
-void func_15124B18(struct108 *arg0);
-void func_15124AB4(struct108 *arg0);
-void func_15125394(struct108 *arg0);
+s32 camera_pop_mode(struct108 *arg0, s32 arg1);
+void camera_apply_zoom_level(struct108 *arg0);
+void camera_calc_view_dir(struct108 *arg0);
+void camera_update_mode_index(struct108 *arg0);
 void func_15005A60(struct108 *arg0, s32 arg1);
 void func_1512DBDC(struct108 *arg0);
 void func_15129E30(struct108 *arg0, s32 arg1);
 void func_1512DC60(struct108 *arg0);
-void func_15125924(struct108 *arg0);
+void camera_update_underwater_mode(struct108 *arg0);
 void func_150858A0(void *arg0, s32 arg1, s32 arg2);
 extern s32 D_800898C0;
 extern s32 D_800898C4[];
@@ -102,7 +102,7 @@ extern s32 D_800898D4[];
 #define CAM_F(o) (*(f32 *)(p + (o)))
 
 /* Initialise one per-player camera controller (0x9A0 bytes, D_800DBFF0[player]): clear it, reset the 21 camera
- * slots (func_151239CC, 999 timers), link it with the player's object record D_800CC2D0[player] (0x32C each,
+ * slots (camera_pop_mode, 999 timers), link it with the player's object record D_800CC2D0[player] (0x32C each,
  * record +0x318 = controller, controller +0x3D0 = record, +0x3D4 = record +0x31C), mode arg2 (func_15129E30 /
  * func_15005A60), then the default distances / limits. */
 void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
@@ -114,7 +114,7 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     p[0x23D] = arg1;
     p[0x23C] = 1;
     for (i = 0; i < 0x15; i++) {
-        func_151239CC(arg0, i);
+        camera_pop_mode(arg0, i);
         CAM_H(0x1B6 + i * 2) = 999;
     }
     CAM_F(0x5D4) = ((f32)D_800BE624 * 60.0f) / 216.0f;
@@ -134,7 +134,7 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     CAM_H(0x1B4) = 3;
     CAM_F(0x5CC) = 1.0f;
     CAM_F(0x3A8) = 0.0f;
-    func_15124B18(arg0);
+    camera_apply_zoom_level(arg0);
     CAM_H(0x272) = -1;
     CAM_H(0x5FA) = 1;
     p[0x3E8] = 1;
@@ -144,8 +144,8 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     CAM_F(0x2B8) = CAM_F(0x2AC);
     CAM_W(0x5F0) |= 0x80000000;
     CAM_F(0x384) = 999.0f; /* D_80095D90 */
-    func_15124AB4(arg0);
-    func_15125394(arg0);
+    camera_calc_view_dir(arg0);
+    camera_update_mode_index(arg0);
     CAM_H(0x5FC) = 10;
     CAM_F(0x26C) = 1.0f;
     func_1512DBDC(arg0);
@@ -163,7 +163,7 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
     CAM_F(0x3E0) = CAM_F(0x3A0);
     *(f32 *)(*(u8 **)(p + 0x3D4) + 0x18C) = 999.0f;
     func_1512DC60(arg0);
-    func_15125924(arg0);
+    camera_update_underwater_mode(arg0);
     CAM_F(0x674) = 1.0f;
     func_150858A0(*(void **)(p + 0x3D0), arg3, 0);
     func_15005A60(arg0, arg2);
@@ -208,7 +208,7 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //
 //     for (phi_s0 = 0; phi_s0 < 0x15; phi_s0++)
 //     {
-//         func_151239CC(arg0, phi_s0);
+//         camera_pop_mode(arg0, phi_s0);
 //         arg0->unk1B6[phi_s0] = 999;
 //     }
 //     temp_v0 = arg0->unk23D;
@@ -229,7 +229,7 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     arg0->unk1B4 = (u16)3;
 //     arg0->unk5CC = 1.0f;
 //     arg0->unk3A8 = 0.0f;
-//     func_15124B18(arg0);
+//     camera_apply_zoom_level(arg0);
 //     arg0->unk272 = (u16)-1;
 //     arg0->unk5FA = (s16) 1;
 //     arg0->unk3E8 = (u8)1;
@@ -245,8 +245,8 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     arg0->unk2B8 = (f32) arg0->unk2AC;
 //     arg0->unk5F0 = (s32) (arg0->unk5F0 | 0x80000000);
 //     arg0->unk384 = (f32) D_800959E0;
-//     func_15124AB4(arg0);
-//     func_15125394(arg0);
+//     camera_calc_view_dir(arg0);
+//     camera_update_mode_index(arg0);
 //     arg0->unk5FC = (u16)0xA;
 //     arg0->unk26C = 1.0f;
 //     func_1512D66C(arg0);
@@ -266,7 +266,7 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     arg0->unk3E0 = (f32) arg0->unk3A0;
 //     arg0->unk3D4->unk18C = temp_f2;
 //     func_1512D6F0(arg0);
-//     func_15125924(arg0);
+//     camera_update_underwater_mode(arg0);
 //     arg0->unk674 = 1.0f;
 //     func_15085430(arg0->unk3D0, arg3, 0);
 //     func_15005A60(arg0, arg2);
@@ -334,10 +334,10 @@ void func_15005818(struct108 *arg0, u8 *arg1, f32 *arg2) {
     *(s32 *)(p + 0x2EC) = *(s32 *)(p + 0x2F8);
     *(s32 *)(p + 0x2F0) = *(s32 *)(p + 0x2FC);
     *(s32 *)(p + 0x2F4) = *(s32 *)(p + 0x300);
-    func_15124B18(arg0);
-    func_15125330(arg0);
-    func_1512523C(arg0);
-    func_15123070(arg0);
+    camera_apply_zoom_level(arg0);
+    camera_calc_yaw(arg0);
+    camera_calc_pitch(arg0);
+    camera_calc_relative_yaw(arg0);
     *(s32 *)(p + 0x5F0) |= 4;
     if (D_800BE9F0 != 0x21 && D_800C35EA != 1) {
         func_1512DAD0(arg0, 5, NULL);
@@ -400,10 +400,10 @@ void func_15005818(struct108 *arg0, u8 *arg1, f32 *arg2) {
 //     arg0->unk2EC = (s32) temp_v1->unk0;
 //     arg0->unk2F0 = (s32) temp_v1->unk4;
 //     arg0->unk2F4 = (s32) temp_v1->unk8;
-//     func_15124B18(temp_f12, temp_f14, arg0, temp_a1);
-//     func_15125330(arg0);
-//     func_1512523C(arg0);
-//     func_15123070(arg0);
+//     camera_apply_zoom_level(temp_f12, temp_f14, arg0, temp_a1);
+//     camera_calc_yaw(arg0);
+//     camera_calc_pitch(arg0);
+//     camera_calc_relative_yaw(arg0);
 //     arg0->unk5F0 = (s32) (arg0->unk5F0 | 4);
 //     if ((D_800BE9F0 != 0x21) && (D_800C35EA != 1)) {
 //         func_1512D560(arg0, 5, 0);

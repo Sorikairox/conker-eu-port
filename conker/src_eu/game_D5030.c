@@ -7,7 +7,7 @@
 #ifdef NON_MATCHING
 /* mtx_set_identity: writes the fixed-point identity into the Mtx m (64 bytes: the 16 integer halves, then the 16
  * fraction halves, row-major as s16); only the diagonal integer halves (0, 5, 10, 15) are 1. Used for the matrix of
- * disabled world records (func_15113798) and by func_1513B968 (game_168A90.c). */
+ * disabled world records (func_15113798) and by mesh_effect_load_identity (game_168A90.c). */
 void func_150A7B80(Mtx *m) {
     s16 *h = (s16 *) m;
     s32 i;

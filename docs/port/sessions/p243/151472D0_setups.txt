@@ -1,4 +1,4 @@
-# P243 func_151472D0 (object_effect10_spawn): obj 80450000 (+0x1D4 model, +0x40 scale f32); func_15146E00 = jal 15146E00 (RET found, OUTA pt / rec), func_15141F78 = jal 151424E8 (ARGMEM pt 12 bytes in the registry)
+# P243 func_151472D0 (object_effect10_spawn): obj 80450000 (+0x1D4 model, +0x40 scale f32); func_15146E00 = jal 15146E00 (RET found, OUTA pt / rec), fx_spawn_impact_particle = jal 151424E8 (ARGMEM pt 12 bytes in the registry)
 hit ! 0=80450000,1=1234,2=55 ! 804501D4=80460000,80450040=40400000 ! 15146E00=1 ! ! 15146E00=0:3F800000;40000000;40400000/2:11;22;33 ! !
 big ! 0=80450000,1=7F,2=FFFFFF00 ! 804501D4=1,80450040=43000000 ! 15146E00=1 ! ! 15146E00=0:3F800000;40000000;40400000/2:11;22;33 ! !
 miss ! 0=80450000,1=1234,2=55 ! 804501D4=80460000,80450040=40400000 ! 15146E00=0 ! ! ! !

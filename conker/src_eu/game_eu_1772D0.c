@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-void func_1513F680(u8 *, u8, u8, u8, u8);
+void effect3d_set_handlers(u8 *, u8, u8, u8, u8);
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
 #endif
 
@@ -14,7 +14,7 @@ s32 func_1510FD20(s32, s32);
 s32 func_150ADA20(void);
 
 /* P128: the two stack blocks of func_15149AC0. Spark15149AC0Wave is copied into the new record at +0x110 (0x50 bytes,
- * three wave channels read by func_15149DA8); Spark15149AC0Params is the spawn parameter block that func_1513D2F0
+ * three wave channels read by func_15149DA8); Spark15149AC0Params is the spawn parameter block that effect3d_spawn_full
  * copies into the record at +0x18 (0x58 bytes: the last 0xC bytes are never written, as in the asm). */
 typedef struct {
     f32 a0;    /* +00 rec[0xC] */
@@ -66,13 +66,13 @@ typedef struct {
     u8 u45;        /* +45 rec[0x2D] */
     u8 pad46[2];
     s32 ground;    /* +48 func_1510FD20 result or 0 */
-    u8 tail[0xC];  /* +4C never written (func_1513D2F0 copies 0x58 bytes) */
+    u8 tail[0xC];  /* +4C never written (effect3d_spawn_full copies 0x58 bytes) */
 } Spark15149AC0Params; /* size 0x58 */
 
 // spark_spawn_from_desc: spawns a menu spark/sprite record from the 0x48-byte descriptor desc (position +0, three wave
 // channels +0xC..+0x44, colour +0x26, flags +0x2A, sizes +0x2C/+0x2D/+0x2E/+0x2F, extra +0x30): builds the spawn
 // parameter block (kind 0x13/0x71 by kind_sel, random 0x13/0x14 otherwise; ground lookup when area != 0), creates
-// the record through func_1513D524 (texture desc[0x2E], 0xE, desc[0x2F], layer, random | 2, desc[0x30] + 0x50, u4,
+// the record through effect3d_spawn_default (texture desc[0x2E], 0xE, desc[0x2F], layer, random | 2, desc[0x30] + 0x50, u4,
 // owner) and copies the wave block to record + 0x110. Returns the record (0 when none was free).
 s32 func_15149AC0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     u8 *desc = (u8 *) arg0;
@@ -148,7 +148,7 @@ s32 func_15149AC0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     p.u14 = 0.0f;
     p.u18 = 0.0f;
 
-    rec = func_1513D524((s32) &p, desc[0x2E], 0xE, desc[0x2F], layer, (func_150ADA20() & 1) | 2,
+    rec = effect3d_spawn_default((s32) &p, desc[0x2E], 0xE, desc[0x2F], layer, (func_150ADA20() & 1) | 2,
                         *(s32 *) (desc + 0x30) + 0x50, u4, arg5);
     if (rec != NULL) {
         memcpy((u8 *) rec + 0x110, &w, sizeof(w));
@@ -203,7 +203,7 @@ s32 func_15149DA8(u8 *arg0) {
     temp_v0 = (*(s32 *)((u8 *)arg0 + 0x24));
     (*(s32 *)((u8 *)arg0 + 0x24)) = (s32) (temp_v0 + (s32) (((f32) (*(s32 *)((u8 *)temp_s0_2 + 0x34)) - (f32) temp_v0) * (*(f32 *)((u8 *)temp_s0_2 + 0x3C))));
     if ((*(s16 *)((u8 *)arg0 + 0x1C)) < 5) {
-        func_1513F680(arg0, (*(u8 *)((u8 *)arg0 + 0x70)), (*(u8 *)((u8 *)temp_s0_2 + 0x48)), (*(u8 *)((u8 *)arg0 + 0x72)), (u8) (s32) (*(u8 *)((u8 *)arg0 + 0x73)));
+        effect3d_set_handlers(arg0, (*(u8 *)((u8 *)arg0 + 0x70)), (*(u8 *)((u8 *)temp_s0_2 + 0x48)), (*(u8 *)((u8 *)arg0 + 0x72)), (u8) (s32) (*(u8 *)((u8 *)arg0 + 0x73)));
         (*(s16 *)((u8 *)arg0 + 0x1C)) = 0x12C;
         (*(s32 *)((u8 *)arg0 + 0x58)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x58)) & ~1);
     }
@@ -248,10 +248,10 @@ s32 func_1514A004(u8 *arg0) {
         }
     }
     if (var_v1 != 0) {
-        func_1513F680(arg0, (*(u8 *)((u8 *)arg0 + 0x70)), 0xDU, (*(u8 *)((u8 *)arg0 + 0x72)), (u8) (s32) (*(u8 *)((u8 *)arg0 + 0x73)));
+        effect3d_set_handlers(arg0, (*(u8 *)((u8 *)arg0 + 0x70)), 0xDU, (*(u8 *)((u8 *)arg0 + 0x72)), (u8) (s32) (*(u8 *)((u8 *)arg0 + 0x73)));
     }
     if ((*(s16 *)((u8 *)arg0 + 0x1C)) < 5) {
-        func_1513F680(arg0, (*(u8 *)((u8 *)arg0 + 0x70)), (*(u8 *)((u8 *)arg0 + 0x158)), (*(u8 *)((u8 *)arg0 + 0x72)), (u8) (s32) (*(u8 *)((u8 *)arg0 + 0x73)));
+        effect3d_set_handlers(arg0, (*(u8 *)((u8 *)arg0 + 0x70)), (*(u8 *)((u8 *)arg0 + 0x158)), (*(u8 *)((u8 *)arg0 + 0x72)), (u8) (s32) (*(u8 *)((u8 *)arg0 + 0x73)));
         (*(s16 *)((u8 *)arg0 + 0x1C)) = 0x64;
         (*(s32 *)((u8 *)arg0 + 0x58)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x58)) & ~1);
     }
@@ -431,7 +431,7 @@ s32 func_1514A70C(u8 *arg0) {
     return 1;
 }
 
-void func_1513F680(u8 *, u8, u8, u8, u8);
+void effect3d_set_handlers(u8 *, u8, u8, u8, u8);
 s32 func_1514A8F0(u8 *arg0) {
     u8 *p;
     s32 done;
@@ -455,7 +455,7 @@ s32 func_1514A8F0(u8 *arg0) {
         }
     }
     if (done) {
-        func_1513F680(arg0, arg0[0x70], 4, arg0[0x72], arg0[0x73]);
+        effect3d_set_handlers(arg0, arg0[0x70], 4, arg0[0x72], arg0[0x73]);
     }
     return 1;
 }
@@ -761,8 +761,8 @@ void func_1514B0CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, f32 arg5, f
         sp.uCC = 0.7f;
         do {
             temp_v0 = func_150ADA20();
-            temp_f24 = func_151423D8((temp_v0 - 0x40) & 0xFF);
-            temp_f26 = func_151423D8(temp_v0 & 0xFF & 0xFF);
+            temp_f24 = angle_byte_cos((temp_v0 - 0x40) & 0xFF);
+            temp_f26 = angle_byte_cos(temp_v0 & 0xFF & 0xFF);
             temp_f20 = func_150ADA68() * arg3;
             temp_f22 = (func_150ADA68() * arg6) + arg5;
             temp_f0 = func_150ADA68();
@@ -966,8 +966,8 @@ s32 func_150ADA20(void);
 // lava_splash_effect: P183: when the point `pos` has ground within +-200 units below/above it (func_15046F70 with
 // `owner`), spawns the lava impact effects there: a 10-particle burst from spec A (func_151530A8, owner byte
 // arg2, extra arg3), a spark burst from spec B (func_151534E0, alpha 0x9B + rand 0..100), the third burst
-// func_1514B5A4 (pos, arg2, arg3), and one 0x38-type particle 10 units above pos (func_1513D668, size 100 x 100,
-// random colour / frame bits, link owner + 4). The asm returns the stale func_1513D668 v0 (callers ignore it);
+// func_1514B5A4 (pos, arg2, arg3), and one 0x38-type particle 10 units above pos (effect3d_spawn_oriented_simple, size 100 x 100,
+// random colour / frame bits, link owner + 4). The asm returns the stale effect3d_spawn_oriented_simple v0 (callers ignore it);
 // kept s32 for the callers' prototype (returns 0).
 s32 func_1514B8D4(f32 *pos, u8 *owner, u8 arg2, s32 arg3) {
     struct {
@@ -1163,7 +1163,7 @@ s32 func_1514B8D4(f32 *pos, u8 *owner, u8 arg2, s32 arg3) {
     r6 = func_150ADA20();
     r7 = func_150ADA20();
     r8 = func_150ADA20();
-    func_1513D668((s32) &part, 0, 0x12, 0x1D, 0, (r7 & 1) + (r6 & 1), r8 & 0xFF, 100.0f, 100.0f, 0, (s32) (owner + 4),
+    effect3d_spawn_oriented_simple((s32) &part, 0, 0x12, 0x1D, 0, (r7 & 1) + (r6 & 1), r8 & 0xFF, 100.0f, 100.0f, 0, (s32) (owner + 4),
                   0, 0, arg2, arg3);
     return 0;
 }
@@ -1339,7 +1339,7 @@ u8 *func_1514BE54(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32
     } else {
         var_v0_2 = 0;
     }
-    temp_v0 = func_1513D2F0(&sp.u9C, (s32) ((u8 *)&D_800A4AA0), arg8, arg9, (u8) (s32) argA, 0x1CU, (u8) (var_v0_2 | 2), 0, 0, argF + 0x50, (u8) (s32) arg10, arg11);
+    temp_v0 = effect3d_spawn_full(&sp.u9C, (s32) ((u8 *)&D_800A4AA0), arg8, arg9, (u8) (s32) argA, 0x1CU, (u8) (var_v0_2 | 2), 0, 0, argF + 0x50, (u8) (s32) arg10, arg11);
     var_v1 = temp_v0;
     if (temp_v0 != NULL) {
         sp.uF4 = temp_v0;
@@ -1557,7 +1557,7 @@ extern s32 D_8008ADA0;
  * spawn_ring_emit: emits count (s16) points on a circle of radius r around (x, y, z) in the x/z plane, starting at
  * the byte angle angle0 and stepping by the signed byte step (wrapping at 256). Each point goes to the spawn
  * handler kind of D_8008ADA0 as (1, i, x + r * sin(a - 0x40), y, z + r * sin(a), x, y, z, a, angle0, r, arg8,
- * arg9, argA, argB) (func_151423D8 = byte-angle sine); the walk stops early when a handler returns 0, a missing
+ * arg9, argA, argB) (angle_byte_cos = byte-angle sine); the walk stops early when a handler returns 0, a missing
  * handler skips the point. Returns 0 (callers declare s32 and ignore it; the asm leaves no defined value).
  */
 s32 func_1514C860(f32 x, f32 y, f32 z, f32 r, u8 angle0, s8 step, s16 count, u8 kind, s32 arg8, f32 arg9, s32 argA,
@@ -1568,8 +1568,8 @@ s32 func_1514C860(f32 x, f32 y, f32 z, f32 r, u8 angle0, s8 step, s16 count, u8 
     s16 i;
 
     for (i = 0; i < count; i++) {
-        c = func_151423D8((a - 0x40) & 0xFF);
-        s = func_151423D8(a & 0xFF);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
+        s = angle_byte_cos(a & 0xFF);
         handler = ((void **) &D_8008ADA0)[kind];
         if (handler != NULL && handler(1, i, x + r * c, y, z + r * s, x, y, z, a, angle0, r, arg8, arg9, argA, argB) == 0) {
             break;
@@ -1653,9 +1653,9 @@ void func_1514CBE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s
 loop_5:
         temp_a0 = (func_150ADA20() % (u32) var_v0) + var_v1;
         temp_s0 = temp_a0 & 0xFF;
-        temp_f20 = func_151423D8((temp_a0 - 0x40) & 0xFF);
+        temp_f20 = angle_byte_cos((temp_a0 - 0x40) & 0xFF);
         temp_v0 = *(((s32 *)((u8 *)&D_8008ADA0 + (arg7 * 4))));
-        temp_f2 = (arg3 * func_151423D8(temp_s0 & 0xFF)) + arg2;
+        temp_f2 = (arg3 * angle_byte_cos(temp_s0 & 0xFF)) + arg2;
         if (temp_v0 != NULL) {
             if (temp_v0(2, var_s1, (arg3 * temp_f20) + arg0, arg1, temp_f2, arg0, arg1, arg2, temp_s0, (s32) arg4, arg3, arg8, arg9, argA, (s32) argB) != 0) {
                 goto block_9;
@@ -1682,14 +1682,14 @@ extern s32 D_8008ADA0;
  * spawn_arc_emit: emits count random points on a vertical circle of radius r around (x, y, z) whose plane faces
  * the byte angle yaw: each point takes a random byte angle a in [min(a0, a1), max(a0, a1)] and goes to the spawn
  * handler kind of D_8008ADA0 as (3, i, x + r * sin(yaw - 0x40) * sin(a), y - r * sin(a - 0x40),
- * z + r * sin(yaw) * sin(a), x, y, z, a & 0xFF, yaw, r, arg9, argA, argB, argC) (mode 3 = arc; func_151423D8 =
+ * z + r * sin(yaw) * sin(a), x, y, z, a & 0xFF, yaw, r, arg9, argA, argB, argC) (mode 3 = arc; angle_byte_cos =
  * byte-angle sine). The walk stops when a handler returns 0; a missing handler skips the point.
  */
 void func_1514CDC8(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 count, u8 kind, s32 arg9, f32 argA,
                    s32 argB, u8 argC) {
     s32 (*handler)(s32, s16, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, f32, s32, s32);
-    f32 cosYaw = func_151423D8((yaw - 0x40) & 0xFF);
-    f32 sinYaw = func_151423D8(yaw & 0xFF);
+    f32 cosYaw = angle_byte_cos((yaw - 0x40) & 0xFF);
+    f32 sinYaw = angle_byte_cos(yaw & 0xFF);
     f32 rc;
     f32 rs;
     f32 c, s;
@@ -1716,8 +1716,8 @@ void func_1514CDC8(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 coun
     do {
         a = (u32) func_150ADA20() % (u32) n + lo;
         b = a & 0xFF;
-        c = func_151423D8((a - 0x40) & 0xFF);
-        s = func_151423D8(b);
+        c = angle_byte_cos((a - 0x40) & 0xFF);
+        s = angle_byte_cos(b);
         handler = ((void **) &D_8008ADA0)[kind];
         px = rc * s + x;
         pz = rs * s + z;

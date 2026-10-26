@@ -177,7 +177,7 @@ void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f
 void func_15049978(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_15121E34(u8 *arg0);
-void func_15123A54(u8 *arg0);
+void camera_update_eye_orbit(u8 *arg0);
 void func_1512E6B0(u8 *arg0);
 void func_151CA484(u8 *arg0);
 
@@ -187,7 +187,7 @@ void func_151CA484(u8 *arg0);
 // close enough or not following), 2 = free orbit from the stick (yaw / pitch with per-mode pitch limits, riding
 // modes take the yaw from the vehicle), 3 = returning to the default view (timer +0x84A, until the yaw is within
 // 0.05 degrees). Then the sideways look offset (aim modes) is eased in and added to the camera, and the view is
-// rebuilt (func_150491EC, func_15123A54, func_1512E6B0, func_15125594).
+// rebuilt (func_150491EC, camera_update_eye_orbit, func_1512E6B0, camera_sync_angles).
 void func_151206C8(u8 *arg0) {
     CameraState *cam = (CameraState *) (arg0 + 0x740);
     s32 mode;
@@ -538,9 +538,9 @@ void func_151206C8(u8 *arg0) {
     *(f32 *) (view + 0x144) = *(f32 *) (view + 0x144) + cam->offZ;
     view = PPTR(0x3D4);
     func_150491EC((struct17 *) (view + 0x13C), (struct17 *) (view + 0x148), (struct17 *) (view + 0x130));
-    func_15123A54(arg0);
+    camera_update_eye_orbit(arg0);
     func_1512E6B0(arg0);
-    func_15125594((struct108 *) arg0);
+    camera_sync_angles((struct108 *) arg0);
 }
 #undef PF32
 #undef PS32

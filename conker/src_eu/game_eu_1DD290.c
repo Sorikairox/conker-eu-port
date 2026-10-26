@@ -38,7 +38,7 @@ const Unk800AA1D0 D_800AA1D0[27] = {
     { 37, { 0.0f, 47.0f, -46.0f }, { 0.0f, 47.0f, -73.0f } },
 };
 
-s32 func_15135DD0(struct17 *, struct17 *, f32, u8, s32);
+s32 beam_impact_effects(struct17 *, struct17 *, f32, u8, s32);
 
 void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     struct17 a;
@@ -52,6 +52,6 @@ void func_151AFA80(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
         m = base; m += e[0] << 6;
         func_15143134(e + 4, &a, m);
         func_15143134(e + 0x10, &b, m);
-        func_15135DD0(&a, &b, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, arg2, arg3);
+        beam_impact_effects(&a, &b, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, arg2, arg3);
     }
 }

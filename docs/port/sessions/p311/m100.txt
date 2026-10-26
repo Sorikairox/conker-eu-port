@@ -77,5 +77,5 @@ s#e->parm2\[5\], parmA#e->parm2[4], parmA# % base
 s#e->countdown = n;#e->countdown = n + 1;# % base
 s#if (e->timer != 0xFFFF) {#if (e->timer != 0xFFFE) {# % timerinf
 s#if (left > 0) {#if (left >= 0) {# % timer0
-s#func_1516972C((struct102 \*) e);#func_1516972C(NULL);# % timerneg
+s#node_destroy((struct102 \*) e);#node_destroy(NULL);# % timerneg
 s#e->timer = left;#e->timer = left - 1;# % base
