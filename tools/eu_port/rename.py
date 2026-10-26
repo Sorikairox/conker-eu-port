@@ -169,6 +169,26 @@ def code_only(path, text):
     return re.sub(r'(^|\s)#[^\n]*', ' ', text)
 
 
+_STR = re.compile(r'"(?:[^"\\\n]|\\.)*"')
+
+
+def sub_line(rx, line, new, keep_strings):
+    """rename on one line; for a global (keep_strings) not inside string literals (log texts such as
+    port_log("... D_X %d") stay as they are, so the wasm stays byte-identical), except a literal that is exactly the
+    name (an asm label: __asm__("D_X"))"""
+    rep = lambda m: m.group(1) + new
+    if not keep_strings or '"' not in line:
+        return rx.sub(rep, line)
+    out, pos = [], 0
+    for m in _STR.finditer(line):
+        out.append(rx.sub(rep, line[pos:m.start()]))
+        s = m.group(0)
+        out.append(rx.sub(rep, s) if rx.fullmatch(s[1:-1]) else s)
+        pos = m.end()
+    out.append(rx.sub(rep, line[pos:]))
+    return ''.join(out)
+
+
 def plan(rows, only):
     files = scope_files()
     texts = {p: read(p) for p in files}
@@ -211,7 +231,7 @@ def plan(rows, only):
                 out = []
                 for i, line in enumerate(t.split('\n'), 1):
                     if rx.search(line):
-                        nl = rx.sub(lambda m: m.group(1) + new, line)
+                        nl = sub_line(rx, line, new, old.startswith('D_') and p.endswith(('.c', '.h')))
                         out.append(nl)
                         hits += 1
                         report.append('%s:%d: %s\n    -> %s' % (p, i, line.strip()[:150], nl.strip()[:150]))
