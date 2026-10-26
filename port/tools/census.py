@@ -11,10 +11,16 @@ Outputs (port/build/census/):
   summary.txt   per-category counts of errors (strict + build) and of the relaxed warnings
   files.tsv     file, strict_errors, build_errors, build_ok
   diag/<file>.strict.txt, diag/<file>.build.txt   raw diagnostics
+  cache.json, dep/<file>.d   (P327) content keys of each TU and its headers (port/tools/depkey.py)
+
+--incremental (P327; what `make -C port` / port/web/run.sh build runs): a TU whose source, headers, flags and census
+tools are unchanged since the last census keeps its results (diag files, object, srcfix copy) and is not compiled;
+files.tsv and summary.txt are rewritten only when their content changes, so make rebuilds nothing downstream for a
+no-op. A plain run (port/web/run.sh census) still recompiles everything.
 """
 import os, re, subprocess, sys, collections, concurrent.futures as cf
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import srcfix
+import srcfix, depkey
 
 ROOT = os.getcwd()
 SRC = 'conker/src_eu'
@@ -55,12 +61,39 @@ def norm(msg):
     return msg[:110]
 
 
-def compile_one(path):
+TOOLS_KEY = ' '.join(BASE + PORT_RELAX) + depkey.file_hash(__file__) + depkey.file_hash(srcfix.__file__)
+
+
+def cache_hit(path, ent):
+    """P327: result of the last census for this TU if nothing it depends on changed, else None"""
     rel = os.path.relpath(path, SRC)
     tag = rel.replace('/', '__')
-    obj = f'{OBJ}/{tag}.o'
+    if not ent or ent.get('key') != depkey.key([TOOLS_KEY], [path] + ent.get('deps', [])):
+        return None
+    if not os.path.exists(f'{OBJ}/{tag}.o') or (ent['srcfix'] and not os.path.exists(srcfix.path_for(rel))):
+        return None
     res = {}
-    for mode, extra, out in (('strict', [], '/dev/null'), ('build', PORT_RELAX, obj)):
+    try:
+        for mode in ('strict', 'build'):
+            res[mode] = (ent[mode], open(f'{CEN}/diag/{tag}.{mode}.txt').read())
+    except OSError:
+        return None
+    if ent['srcfix']:
+        res['srcfix'] = True
+    return res
+
+
+def compile_one(path, ent=None):
+    rel = os.path.relpath(path, SRC)
+    tag = rel.replace('/', '__')
+    if ent is not None:
+        res = cache_hit(path, ent)
+        if res is not None:
+            return rel, res, ent
+    obj = f'{OBJ}/{tag}.o'
+    dep = f'{CEN}/dep/{tag}.d'
+    res = {}
+    for mode, extra, out in (('strict', [], '/dev/null'), ('build', PORT_RELAX + ['-MD', '-MF', dep], obj)):
         p = subprocess.run(BASE + extra + [path, '-o', out], capture_output=True, text=True)
         res[mode] = (p.returncode, p.stderr)
         with open(f'{CEN}/diag/{tag}.{mode}.txt', 'w') as f:
@@ -81,17 +114,27 @@ def compile_one(path):
                 res['build'] = (0, res['build'][1])
             else:
                 os.remove(fx)
-    return rel, res
+    deps = [d for d in (depkey.parse_depfile(dep) or []) if d != path]
+    if res['build'][0] and not os.path.exists(fixed):
+        deps = None  # failed build: the depfile may be incomplete, never cache
+    ent = None if deps is None else {'key': depkey.key([TOOLS_KEY], [path] + deps), 'deps': deps,
+                                     'strict': res['strict'][0], 'build': res['build'][0],
+                                     'srcfix': bool(res.get('srcfix'))}
+    return rel, res, ent
 
 
 def main():
     os.makedirs(OBJ, exist_ok=True)
     os.makedirs(f'{CEN}/diag', exist_ok=True)
+    os.makedirs(f'{CEN}/dep', exist_ok=True)
+    incremental = '--incremental' in sys.argv
     files = []
     for d, _, fs in os.walk(SRC):
         files += [os.path.join(d, f) for f in fs if f.endswith('.c')]
     files.sort()
-    only = sys.argv[1:]
+    only = [a for a in sys.argv[1:] if a != '--incremental']
+    cache = (depkey.load(f'{CEN}/cache.json') or {}) if incremental else {}
+    newcache, ncompiled = {}, 0
     if only:
         files = [f for f in files if any(o in f for o in only)]
     errs = {m: collections.Counter() for m in ('strict', 'build')}
@@ -99,7 +142,11 @@ def main():
     warns = collections.Counter(); warnfiles = collections.defaultdict(set)
     rows = []; fixedl = []
     with cf.ThreadPoolExecutor(os.cpu_count() or 4) as ex:
-        for rel, res in ex.map(compile_one, files):
+        for rel, res, ent in ex.map(lambda f: compile_one(f, cache.get(os.path.relpath(f, SRC), {}) if incremental else None), files):
+            if ent is not cache.get(rel):
+                ncompiled += 1
+            if ent:
+                newcache[rel] = ent
             row = [rel]
             for mode in ('strict', 'build'):
                 rc, err = res[mode]
@@ -120,12 +167,15 @@ def main():
             if res.get('srcfix'):
                 fixedl.append(rel)
             rows.append(row)
-    with open(f'{CEN}/files.tsv', 'w') as f:
-        f.write('file\tstrict_errors\tbuild_errors\tbuild\n')
-        for r in rows:
-            f.write('\t'.join(map(str, r)) + '\n')
+    depkey.write_if_changed(f'{CEN}/files.tsv', 'file\tstrict_errors\tbuild_errors\tbuild\n' +
+                            ''.join('\t'.join(map(str, r)) + '\n' for r in rows))
+    if not only:
+        depkey.save(f'{CEN}/cache.json', newcache)
+    else:  # a partial census keeps the other entries
+        depkey.save(f'{CEN}/cache.json', {**(depkey.load(f'{CEN}/cache.json') or {}), **newcache})
     nfail = {m: sum(1 for r in rows if r[1 if m == 'strict' else 2]) for m in ('strict', 'build')}
-    with open(f'{CEN}/summary.txt', 'w') as f:
+    import io
+    with io.StringIO() as f:
         f.write(f'TUs: {len(rows)}\n')
         f.write(f"strict (clang defaults, -std=gnu89): {nfail['strict']} TUs with errors, "
                 f"{sum(errs['strict'].values())} errors\n")
@@ -140,7 +190,13 @@ def main():
         f.write('== tracked warnings in build mode (count / files) ==\n')
         for k, v in warns.most_common():
             f.write(f'{v:6d} {len(warnfiles[k]):4d}  -W{k}\n')
-    print(open(f'{CEN}/summary.txt').read())
+        summary = f.getvalue()
+    depkey.write_if_changed(f'{CEN}/summary.txt', summary)
+    if incremental:
+        print(f'census --incremental: {ncompiled} of {len(rows)} TUs compiled, '
+              f"{sum(1 for r in rows if r[3] == 'FAIL')} FAIL")
+    else:
+        print(summary)
 
 
 if __name__ == '__main__':

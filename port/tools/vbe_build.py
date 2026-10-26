@@ -2,10 +2,17 @@
     C --(-O0 IR, no optnone)--> .ll --vbe.py--> .v.ll --(-O1)--> port/build/vobj/<tag>.o
 Inputs: the TUs that the census compiled ("ok" in port/build/census/files.tsv, minus
 port/exclude.txt) plus the PC-side game TUs given on the command line (port/boot/*.c).
-Writes port/build/vbe_report.txt (transform counts). Runs inside the conker-emsdk container."""
+Writes port/build/vbe_report.txt (transform counts). Runs inside the conker-emsdk container.
+
+P327, incremental: phase 1 (C -> .ll) is redone only when the key of the TU changes (flags + contents of the source
+and of every header in its clang -MD depfile, port/tools/depkey.py; before P327 it compared mtimes of the .c and
+port_prefix.h only, so header edits were missed). Phase 2 (canonical signatures) is skipped when no .ll changed and
+the TU list is the same. Phase 3 (vbe.py + -O1) is redone only when the .ll key, the signature table or the vbe
+tools change. When anything was rebuilt (or the report changed) it creates port/build/vbe.dirty; the Makefile then
+touches vbe.stamp, so a no-op build relinks nothing."""
 import json, os, subprocess, sys, collections, concurrent.futures as cf
 sys.path.insert(0, os.path.dirname(__file__))
-import census, srcfix
+import census, srcfix, depkey
 
 OUT = 'port/build'
 LL, VOBJ = f'{OUT}/ll', f'{OUT}/vobj'
@@ -16,14 +23,22 @@ def tag_of(path):
         'port__' + os.path.basename(path)[:-2]
 
 
+LL_FLAGS = ['-Wno-everything', '-S', '-emit-llvm', '-O0', '-Xclang', '-disable-O0-optnone']
+
+
+def ll_key(src, deps):
+    return depkey.key([' '.join(census.BASE + census.PORT_RELAX + LL_FLAGS), src], [src] + deps)
+
+
 def to_ll(path):
-    """phase 1: C -> -O0 IR (incremental)"""
+    """phase 1: C -> -O0 IR (incremental, P327: content key of the source and its headers)"""
     tag = tag_of(path)
-    ll = f'{LL}/{tag}.ll'
+    ll, kf = f'{LL}/{tag}.ll', f'{LL}/{tag}.key'
     fx = srcfix.path_for(os.path.relpath(path, census.SRC)) if path.startswith(census.SRC) else path
-    if os.path.exists(ll) and os.path.getmtime(ll) > max(os.path.getmtime(path), os.path.getmtime('port/ultra/port_prefix.h'),
-                                                         os.path.getmtime(fx) if os.path.exists(fx) else 0):  # P19: prefix too
-        return tag, 0, ''
+    src = fx if path.startswith(census.SRC) and os.path.exists(fx) else path
+    old = depkey.load(kf)
+    if old and os.path.exists(ll) and old.get('key') == ll_key(src, old.get('deps', [])):
+        return tag, 0, '', False
     base = [a for a in census.BASE if a not in ('-c', '-O1')]
     src = path
     if path.startswith(census.SRC):  # P23: census left a patched copy (port/tools/srcfix.py)
@@ -31,22 +46,40 @@ def to_ll(path):
         if os.path.exists(fx):
             src = fx
             base = base + ['-iquote', os.path.dirname(path)]
-    p = subprocess.run(base + census.PORT_RELAX + ['-Wno-everything', '-S', '-emit-llvm', '-O0', '-Xclang',
-                       '-disable-O0-optnone', src, '-o', ll], capture_output=True, text=True)
-    return tag, p.returncode and 1, p.stderr[-2000:]
+    if os.path.exists(kf):
+        os.remove(kf)
+    dep = f'{LL}/{tag}.d'
+    p = subprocess.run(base + census.PORT_RELAX + LL_FLAGS + ['-MD', '-MF', dep, src, '-o', ll],
+                       capture_output=True, text=True)
+    if p.returncode == 0:
+        deps = [d for d in depkey.parse_depfile(dep) or [] if d != src]
+        depkey.save(kf, {'key': ll_key(src, deps), 'deps': deps})
+    return tag, p.returncode and 1, p.stderr[-2000:], True
 
 
-def build_one(tag):
-    """phase 3: vbe rewrite (+ signature normalisation) and -O1 compile"""
+TOOLS = ['port/tools/vbe.py', 'port/tools/sigs.py', 'port/tools/icall.py']
+O1_FLAGS = ['-c', '-O1', '-g0', '-Wno-everything']
+
+
+def build_one(tag, sig_hash=''):
+    """phase 3: vbe rewrite (+ signature normalisation) and -O1 compile (P327: skipped when its key is unchanged)"""
     ll, vll, obj = f'{LL}/{tag}.ll', f'{LL}/{tag}.v.ll', f'{VOBJ}/{tag}.o'
+    kf = f'{VOBJ}/{tag}.key'
+    k = depkey.key([(depkey.load(f'{LL}/{tag}.key') or {}).get('key', 'none'), sig_hash, ' '.join(O1_FLAGS)], TOOLS)
+    old = depkey.load(kf)
+    if old and old.get('key') == k and os.path.exists(obj) and os.path.exists(vll + '.isig'):
+        return tag, 0, old['stats'], False
+    if os.path.exists(kf):
+        os.remove(kf)
     p = subprocess.run([sys.executable, 'port/tools/vbe.py', ll, vll, SIGDB], capture_output=True, text=True)
     if p.returncode:
-        return tag, 2, p.stderr[-2000:]
+        return tag, 2, p.stderr[-2000:], True
     stats = p.stdout.strip()
-    q = subprocess.run(['emcc', '-c', '-O1', '-g0', '-Wno-everything', vll, '-o', obj], capture_output=True, text=True)
+    q = subprocess.run(['emcc'] + O1_FLAGS + [vll, '-o', obj], capture_output=True, text=True)
     if q.returncode:
-        return tag, 3, q.stderr[-2000:]
-    return tag, 0, stats
+        return tag, 3, q.stderr[-2000:], True
+    depkey.save(kf, {'key': k, 'stats': stats})
+    return tag, 0, stats, True
 
 
 SIGDB = f'{OUT}/sigdb.json'
@@ -63,31 +96,44 @@ def main():
     files += sys.argv[1:]
     tot, fails = collections.Counter(), []
     import sigs
+    state_f = f'{OUT}/vbe_state.json'
+    state = depkey.load(state_f) or {}
+    nll = nobj = 0
     with cf.ThreadPoolExecutor(os.cpu_count() or 4) as pool:
         tags = []
-        for tag, rc, msg in pool.map(to_ll, files):
+        for tag, rc, msg, rebuilt in pool.map(to_ll, files):
+            nll += rebuilt
             (fails.append((tag, rc, msg)) if rc else tags.append(tag))
-        defs, sites = {}, collections.defaultdict(collections.Counter)
-        for tag in tags:  # phase 2: one canonical signature per function
-            sigs.scan(open(f'{LL}/{tag}.ll').read(), defs, sites)
-        can = sigs.canonical(defs, sites)
-        json.dump(can, open(SIGDB, 'w'))
-        tot['mismatched_functions'] = sum(1 for f, c in sites.items() if len(c) > 1 or
-                                          (f in defs and json.dumps(list(defs[f])) not in c))
-        for tag, rc, msg in pool.map(build_one, tags):
+        if nll == 0 and not fails and state.get('tags') == tags and os.path.exists(SIGDB):
+            tot['mismatched_functions'] = state['mismatched_functions']  # P327: same .ll set, same signatures
+        else:
+            defs, sites = {}, collections.defaultdict(collections.Counter)
+            for tag in tags:  # phase 2: one canonical signature per function
+                sigs.scan(open(f'{LL}/{tag}.ll').read(), defs, sites)
+            can = sigs.canonical(defs, sites)
+            depkey.write_if_changed(SIGDB, json.dumps(can))
+            tot['mismatched_functions'] = sum(1 for f, c in sites.items() if len(c) > 1 or
+                                              (f in defs and json.dumps(list(defs[f])) not in c))
+            depkey.save(state_f, {'tags': tags, 'mismatched_functions': tot['mismatched_functions']})
+        depkey._memo.pop(SIGDB, None)
+        sig_hash = depkey.file_hash(SIGDB)
+        for tag, rc, msg, rebuilt in pool.map(lambda t: build_one(t, sig_hash), tags):
+            nobj += rebuilt
             if rc:
                 fails.append((tag, rc, msg))
                 continue
             for kv in msg.split()[1:]:
                 k, v = kv.split('=')
                 tot[k] += int(v)
-    with open(f'{OUT}/vbe_report.txt', 'w') as f:
-        f.write(f'vbe TUs: {len(files) - len(fails)} ok, {len(fails)} failed\n')
-        f.write('(call_fixed = call sites rewritten to the canonical signature, port/tools/sigs.py)\n')
-        f.write('transforms: ' + ' '.join(f'{k}={v}' for k, v in tot.most_common()) + '\n')
-        for tag, rc, msg in fails:
-            f.write(f'--- {tag} (stage {rc})\n{msg}\n')
-    print(open(f'{OUT}/vbe_report.txt').read()[:3000])
+    rep = (f'vbe TUs: {len(files) - len(fails)} ok, {len(fails)} failed\n'
+           '(call_fixed = call sites rewritten to the canonical signature, port/tools/sigs.py)\n'
+           'transforms: ' + ' '.join(f'{k}={v}' for k, v in tot.most_common()) + '\n' +
+           ''.join(f'--- {tag} (stage {rc})\n{msg}\n' for tag, rc, msg in fails))
+    changed = depkey.write_if_changed(f'{OUT}/vbe_report.txt', rep)
+    if nll or nobj or changed or fails or not os.path.exists(f'{OUT}/vbe.stamp'):
+        open(f'{OUT}/vbe.dirty', 'w').close()
+    print(f'vbe_build: {nll} .ll and {nobj} objects rebuilt of {len(files)} TUs')
+    print(rep[:3000])
     if fails:
         sys.exit(1)
 

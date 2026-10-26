@@ -23,6 +23,8 @@ LINK_COMMON := -sUSE_SDL=2 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VE
 
 ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_pif.c ultra/pc_video.c ultra/pc_mem.c ultra/pc_icall.c ultra/pc_gu.c ultra/pc_libc.c ultra/pc_tables.c
 ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
+# P327: -MMD depfiles so a header edit (e.g. port_options.h, included by pc_os.c) rebuilds the PC-side objects using it
+ULTRA_CFLAGS += -MMD -MP
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/sessions/P6.md)
 GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c gfx/p69_checks.c gfx/p75_checks.c gfx/p81_checks.c gfx/p84_checks.c gfx/p103_boot.c gfx/p144_hits.c gfx/p165_hits.c gfx/p171_tb.c gfx/p174_ev.c gfx/p202_fx.c gfx/p205_obj.c gfx/p326_probe.c gfx/p223_hit.c gfx/p268_nodes.c
 GFX_OBJ := $(patsubst gfx/%.c,$(B)/gfx/%.o,$(GFX_SRC))
@@ -75,11 +77,17 @@ BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_ov
 BOOT_OBJS := $(patsubst %.c,$(B)/vobj/port__%.o,$(notdir $(BOOT_SRC)))
 STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o $(B)/stubs/icall_tab.o
 
-$(B)/vbe.stamp: $(B)/census/files.tsv exclude.txt tools/vbe.py tools/vbe_build.py tools/sigs.py tools/icall.py $(BOOT_SRC) ultra/pc_mem.h $(GEN)/memtest_expect.h $(GEN)/gutest_expect.h
+# P327 incremental build: the census (--incremental) and vbe_build.py run on every make but only recompile the TUs
+# whose source or included headers changed (content keys, port/tools/depkey.py). files.tsv and vbe.stamp keep their
+# mtime when nothing changed (make re-reads mtimes after a recipe), so a no-op build relinks nothing. Before P327 a
+# game-C edit needed `run.sh census` (or deleting vbe.stamp) and header edits were missed by the .ll cache.
+FORCE:
+.PHONY: FORCE
+$(B)/vbe.stamp: $(B)/census/files.tsv exclude.txt $(GEN)/memtest_expect.h $(GEN)/gutest_expect.h FORCE
 	cd .. && python3 port/tools/vbe_build.py $(addprefix port/,$(BOOT_SRC))
 	# P233: D_<small hex> link symbols in NM C must be in vbe.py ROM_ABS / RAM_ALIAS (else zero data stubs)
 	cd .. && CONKER_ROOT=$$(pwd) python3 port/tools/romabs_check.py --quiet
-	@touch $@
+	@if [ -e $(B)/vbe.dirty ] || [ ! -e $@ ]; then touch $@; rm -f $(B)/vbe.dirty; fi
 
 $(GEN)/memtest_expect.h: tools/n64mem.py
 	cd .. && python3 port/tools/n64mem.py port/$(GEN)
@@ -98,8 +106,9 @@ $(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.
 $(GEN)/icall_tab.c: $(B)/vbe.stamp $(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/icall_gen.py tools/icall.py
 	cd .. && python3 port/tools/icall_gen.py port/$@ $(addprefix port/,$(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ))
 
-$(B)/census/files.tsv:
-	cd .. && python3 port/tools/census.py
+$(B)/census/files.tsv: FORCE
+	@mkdir -p $(@D)
+	cd .. && python3 port/tools/census.py --incremental
 
 game: $(WEB)/conker.js
 $(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS)
@@ -121,3 +130,6 @@ clean:
 
 print-objs:
 	@echo $(GAME_OBJS)
+
+# P327: header dependencies of the PC-side objects (-MMD); at the end so they never become the default goal
+-include $(wildcard $(B)/ultra/*.d $(B)/gfx/*.d $(B)/audio/*.d $(B)/*.d)
