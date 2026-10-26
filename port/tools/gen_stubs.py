@@ -41,14 +41,10 @@ def asm_only():
 
 
 def addresses():
-    addr = {}
-    for f in ('conker/undefined_syms_auto.txt', 'conker/undefined_funcs_auto.txt',
-              'conker/undefined_syms.eu.txt', 'conker/symbol_addrs.eu.txt'):
-        for line in open(f):
-            m = re.match(r'\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+|\d+)', line)
-            if m:
-                addr[m[1]] = int(m[2], 0)
-    return addr
+    """name -> link value (address, or the number of an absolute symbol). P328: from the frozen port symbol table
+    (port/symbols/symbols.tsv, rows with a link position) instead of the matching build's undefined_*_auto.txt +
+    undefined_syms.eu.txt + symbol_addrs.eu.txt (same names, values and order)."""
+    return n64mem.portsyms.link_addresses()
 
 
 def lib_defined(libdir):

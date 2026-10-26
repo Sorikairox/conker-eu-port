@@ -10,9 +10,10 @@ usage: difftest.py FUNC [cand.c] [--self] [--trials N] [--seed S] [--max-insns N
   --self      candidate = the function as it is already written in src_eu (for already-matched
               functions: proves the harness on known-good code)
 
-Reference = the original bytes (the .s of a GLOBAL_ASM function, or conker.eu.bin at the
-function's EU address for a C function). Candidate = the C compiled with IDO, with the flags of
-the function's file, in a standalone TU built like m2c/screen.py (all other GLOBAL_ASM pragmas
+Reference = the original bytes: the ROM image (port/symbols/romimage.py, unpacked from baserom.eu.z64) at the
+function's EU address, for its size in the frozen symbol table port/symbols/symbols.tsv (P328; before: the .s of a
+GLOBAL_ASM function or conker.eu.bin). Candidate = the C compiled with IDO, with the flags of
+the function's file (frozen in port/symbols/ido_cc.tsv since P328), in a standalone TU built like m2c/screen.py (all other GLOBAL_ASM pragmas
 dropped), then relocated so that every symbol has its real EU address.
 
 Both run in Unicorn (MIPS32 BE) with the same inputs:
@@ -42,6 +43,11 @@ from unicorn import Uc, UcError, UC_ARCH_MIPS, UC_MODE_MIPS32, UC_MODE_BIG_ENDIA
 from unicorn.mips_const import *
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# P328: symbols, segments, reference code and IDO flags from port/symbols (frozen from the matching build) and the ROM
+sys.path.insert(0, os.path.join(HERE, '..', '..', '..', 'port', 'symbols'))
+import symbols as portsyms, romimage
+ROMFILE = os.environ.get('DIFFTEST_ROM') or os.path.join(HERE, '..', '..', '..', 'baserom.eu.z64')
+REF_S_OLD = os.environ.get('DIFFTEST_REF_S_OLD') == '1'   # P328: 1 = reference of GLOBAL_ASM functions from asm/nonmatchings .s
 PRAG = re.compile(r'#pragma GLOBAL_ASM\("([^"]*)/(\w+)\.s"\)')
 WORD_RE = re.compile(r"/\*\s+([0-9A-F]+)\s+([0-9A-F]+)\s+([0-9A-F]{8})\s+\*/\s*(.*)")
 PAGE = 0x1000
@@ -122,13 +128,7 @@ _SYMS = None
 def symtab():
     global _SYMS
     if _SYMS is None:
-        _SYMS = {}
-        for f in ('undefined_syms_auto.txt', 'undefined_funcs_auto.txt', 'undefined_syms.eu.txt',
-                  'undefined_funcs.eu.txt', 'symbol_addrs.eu.txt'):
-            if os.path.exists(f):
-                for l in open(f):
-                    m = re.match(r'\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)', l)
-                    if m: _SYMS.setdefault(m.group(1), int(m.group(2), 16))
+        _SYMS = dict(portsyms.link_addresses())   # P328: frozen table (was the 5 linker symbol files)
     return _SYMS
 
 _RENAMED = None
@@ -178,50 +178,47 @@ def addr2name(a):
 ALIASPROTO_OLD = os.environ.get('DIFFTEST_ALIASPROTO_OLD') == '1'
 _ADDRNAMES = None
 def addr_names(a):
-    """P243: every function name at address a (symbol files + build/conker.eu.elf), plus func_<ADDR>"""
+    """P243: every function name at address a (link values + ELF function symbols, frozen in port/symbols), plus func_<ADDR>"""
     global _ADDRNAMES
     if _ADDRNAMES is None:
         _ADDRNAMES = {}
         for n, v in symtab().items():
             if not n.startswith(('D_', 'jtbl_')): _ADDRNAMES.setdefault(v & 0xFFFFFFFF, []).append(n)
-        try:
-            with open('build/conker.eu.elf', 'rb') as fh:
-                for sy in ELFFile(fh).get_section_by_name('.symtab').iter_symbols():
-                    if sy['st_info']['type'] == 'STT_FUNC' and sy.name:
-                        l = _ADDRNAMES.setdefault(sy['st_value'], [])
-                        if sy.name not in l: l.append(sy.name)
-        except Exception:
-            pass
+        for nm, val, size, typ, bind, shndx, sec in portsyms.elf_symbols():
+            if typ == 2 and nm:
+                l = _ADDRNAMES.setdefault(val, [])
+                if nm not in l: l.append(nm)
     out = list(_ADDRNAMES.get(a & 0xFFFFFFFF, []))
     if 'func_%08X' % a not in out: out.append('func_%08X' % a)
     return out
 
-def segments():
-    sys.path.insert(0, os.path.join(os.getcwd(), '../tools/eu_port'))
-    import datarefs
-    return datarefs.segments()
+_RAW = None
+def rom_image():
+    """P328: the extracted image (header|boot|init|inflated game|debugger) unpacked from the user's ROM
+    (port/symbols/romimage.py; byte-identical to the matching build's conker.eu.bin)"""
+    global _RAW
+    if _RAW is None: _RAW = romimage.image(open(ROMFILE, 'rb').read())
+    return _RAW
 
 _IMG = None
 def image():
-    """[(vram, bytes, kind)] kind in code/rodata/data, from conker.eu.bin + the EU yaml"""
+    """[(vram, bytes, kind)] kind in code/rodata/data, from the ROM image + port/symbols/segments.tsv"""
     global _IMG
     if _IMG is None:
-        rom = open('conker.eu.bin', 'rb').read()
+        rom = rom_image()
         _IMG = []
-        for nm, sg in segments().items():
-            if 'vram' not in sg or sg.get('end') is None or nm in ('header', 'boot'): continue
-            st, en, vr = sg['start'], sg['end'], sg['vram']
+        for nm, st, en, vr, ro in portsyms.segments():
             if not nm.endswith('_data'):
                 _IMG.append((vr, rom[st:en], 'code')); continue
-            ro = next((r for r, t, _ in sg['subs'] if t and 'rodata' in t), en)
+            ro = en if ro is None else ro
             _IMG.append((vr, rom[st:ro], 'data'))
             _IMG.append((vr + ro - st, rom[ro:en], 'rodata'))
     return _IMG
 
 def vram2rom(v):
-    for nm, sg in segments().items():
-        if 'vram' in sg and sg.get('end') is not None and sg['vram'] <= v < sg['vram'] + sg['end'] - sg['start']:
-            return v - sg['vram'] + sg['start']
+    for nm, st, en, vr, ro in portsyms.segments():
+        if vr <= v < vr + en - st:
+            return v - vr + st
     return None
 
 
@@ -229,19 +226,11 @@ def vram2rom(v):
 REFSZ_OLD = os.environ.get('DIFFTEST_REFSZ_OLD') == '1'
 _MSIZE = None
 def matched_size(vram, func):
-    """P243: size in bytes of the matched C function at vram (build/conker.eu.elf STT_FUNC st_size; else the distance to
+    """P243: size in bytes of the matched C function at vram (STT_FUNC st_size, frozen in port/symbols; else the distance to
     the next known function symbol), or None"""
     global _MSIZE
     if _MSIZE is None:
-        _MSIZE = {}
-        try:
-            with open('build/conker.eu.elf', 'rb') as fh:
-                st = ELFFile(fh).get_section_by_name('.symtab')
-                for s in st.iter_symbols():
-                    if s['st_info']['type'] == 'STT_FUNC' and s['st_size']:
-                        _MSIZE.setdefault(s['st_value'], s['st_size'])
-        except Exception:
-            pass
+        _MSIZE = portsyms.func_sizes()
     if vram in _MSIZE: return _MSIZE[vram]
     nx = [a for n, a in symtab().items() if n.startswith('func_') and a > vram]
     return (min(nx) - vram) if nx else None
@@ -254,6 +243,20 @@ def find_file(func):
         if re.search(r'^[A-Za-z_][^\n;#/]*\b%s\s*\([^;]*?\)\s*\{' % func, src, re.M):
             return p, None, src
     return None, None, None
+
+def ref_from_rom(func):
+    """P328: reference words of a GLOBAL_ASM function: the ROM image at its address for its symbol size (frozen table),
+    trimmed like ref_from_s (trailing zero words dropped, the final branch keeps its delay slot). Equal to the .s
+    words for all 1891 GLOBAL_ASM functions at the P328 split."""
+    vram = symaddr(func)
+    if vram is None: raise RuntimeError('no EU address for ' + func)
+    z = portsyms.func_sizes().get(vram)
+    if not z: raise RuntimeError('no size for %s in port/symbols/symbols.tsv' % func)
+    raw, rom = rom_image(), vram2rom(vram)
+    words = [struct.unpack_from('>I', raw, rom + 4 * k)[0] for k in range(z // 4)]
+    while words and words[-1] == 0: words.pop()
+    if words and is_branch(words[-1]): words.append(0)
+    return vram, words
 
 def ref_from_s(spath):
     words, vram = [], None
@@ -273,7 +276,15 @@ def cc_cmd(p):
     if p not in _CC: _CC[p] = _cc_cmd(p)
     return _CC[p]
 
+_IDOCC = None
 def _cc_cmd(p):
+    global _IDOCC
+    if _IDOCC is None:   # P328: per-TU IDO command frozen from `make -n` (port/symbols/ido_cc.tsv)
+        _IDOCC = {}
+        for l in open(os.path.join(portsyms.HERE, 'ido_cc.tsv')):
+            if not l.startswith('#') and '\t' in l:
+                k, v = l.rstrip('\n').split('\t', 1); _IDOCC[k] = shlex.split(v)
+    if p in _IDOCC and os.environ.get('DIFFTEST_CC_MAKE') != '1': return list(_IDOCC[p])
     r = subprocess.run(['make', '-n', '-B', 'VERSION=eu', 'build/' + p + '.o'], capture_output=True, text=True).stdout
     for l in r.split('\n'):
         if '/cc ' in l and ' -c ' in l:
@@ -1751,7 +1762,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         return dict(func=func, result='ERROR', line='ERROR %s: not found in src_eu' % func)
     try:
         if spath:
-            vram, rwords = ref_from_s(spath)
+            vram, rwords = ref_from_s(spath) if REF_S_OLD else ref_from_rom(func)
         else:
             vram = symaddr(func)
             if vram is None: raise RuntimeError('no EU address for ' + func)
@@ -1760,11 +1771,11 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if sp is None: raise RuntimeError('--self: %s is not C in %s' % (func, p))
             code = src[sp[0]:sp[1]]
         tu = build_tu(func, p, src, code)
-        opath = compile_tu(func, p, tu, tmp or os.environ.get('DIFFTEST_TMP', 'build/difftest'))
+        opath = compile_tu(func, p, tu, tmp or os.environ.get('DIFFTEST_TMP', '../port/build/difftest'))
         cwords, cdata = link_candidate(opath, func, vram)
         cwords = strip_pad(cwords)
         if not spath:   # C function: reference = ROM bytes, same length as the matched object
-            rom = vram2rom(vram); raw = open('conker.eu.bin', 'rb').read()
+            rom = vram2rom(vram); raw = rom_image()
             n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN') or '0') // 4 or len(cwords)
             if not self_mode and not os.environ.get('DIFFTEST_REFLEN') and not REFSZ_OLD:
                 # P243: the reference is the matched function's own bytes (ELF symbol size), not len(cwords) words:

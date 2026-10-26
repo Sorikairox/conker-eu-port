@@ -23,9 +23,9 @@ def expectations(regs):
     """port_icall_check(): for each ROM table entry whose target has a known signature, the
     registry must give that signature for the relocated pointer (relocation + registration chain)."""
     import json, re, struct
-    import elf32, n64mem
+    import n64mem
     from icall import wsig
-    syms = elf32.symbols(n64mem.ELF)
+    syms = n64mem.portsyms.elf_symbols()   # P328: frozen table (was the matching ELF)
     fstart = {}
     for nm, val, size, typ, bind, shndx, sec in syms:
         if typ == 2 and val and re.match(r'[A-Za-z_]\w*$', nm) and not nm.startswith(('L', 'jtbl')):

@@ -2,7 +2,7 @@
 # Harness self-test: matched functions must be EQUIV with --self; mutated copies must be DIFFER.
 # usage: tools/port/difftest/selftest.sh   (after eval "$(tools/eu_port/wt.sh env <name>)")
 . "$(dirname "${BASH_SOURCE[0]}")/../portguard.sh"  # wrong-checkout guard (P7)
-R=${CONKER_ROOT:-$HOME/conker}; T=$R/conker/build/difftest_self; mkdir -p $T
+R=${CONKER_ROOT:-$HOME/conker}; T=$R/port/build/difftest_self; mkdir -p $T
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 ext() { python3 - "$R/conker/$1" "$2" <<'PY'
 import sys,re

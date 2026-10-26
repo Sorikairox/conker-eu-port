@@ -13,8 +13,9 @@ Sources of "referenced from NM C":
   - port/build/ll/*.c.ll (the clang IR before vbe.py, i.e. the real NON_MATCHING preprocessed build): `@D_x = external`
   - plus a source scan of conker/src_eu/**/*.c that skips `#ifndef NON_MATCHING` / `#else` of `#ifdef NON_MATCHING`
     regions and GLOBAL_ASM lines (catches new C before the next port build).
-Link values: conker/undefined_syms_auto.txt, undefined_syms.eu.txt, symbol_addrs.eu.txt, undefined_funcs_auto.txt
-(the same files gen_stubs.py reads), else the name itself for D_<8 hex>.
+Link values: the frozen port symbol table port/symbols/symbols.tsv (P328; before: conker/undefined_syms_auto.txt,
+undefined_syms.eu.txt, symbol_addrs.eu.txt, undefined_funcs_auto.txt), the same values gen_stubs.py uses, else the
+name itself for D_<8 hex>.
 
 Symbols at or above 0x10000000 (TLB-mapped segments) are real data handled by n64mem.py and are not listed.
 An alias-shaped symbol that is really a number (D_2D810, a ROM offset that collides with a RAM symbol) is listed in
@@ -41,16 +42,10 @@ RAM_ALIAS = getattr(vbe, 'RAM_ALIAS', {})
 
 
 def addresses():
-    addr = {}
-    for f in ('conker/undefined_syms_auto.txt', 'conker/undefined_funcs_auto.txt',
-              'conker/undefined_syms.eu.txt', 'conker/symbol_addrs.eu.txt'):
-        if not os.path.exists(f):
-            continue
-        for line in open(f, errors='replace'):
-            m = re.match(r'\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+|\d+)', line)
-            if m:
-                addr[m[1]] = int(m[2], 0)
-    return addr
+    """P328: link values from the frozen port symbol table (port/symbols/symbols.tsv), as gen_stubs.py"""
+    sys.path.insert(0, 'port/symbols')
+    import symbols
+    return symbols.link_addresses()
 
 
 # Values at or above 0x10000000 are TLB-mapped segment addresses (init 0x10xxxxxx, game 0x15xxxxxx, debugger

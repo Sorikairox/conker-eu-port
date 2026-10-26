@@ -77,6 +77,8 @@ BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_ov
 BOOT_OBJS := $(patsubst %.c,$(B)/vobj/port__%.o,$(notdir $(BOOT_SRC)))
 STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o $(B)/stubs/icall_tab.o
 
+# P328: names and addresses come from the frozen table symbols/symbols.tsv (n64mem.py, gen_stubs.py, icall_gen.py,
+# romabs_check.py); nothing here reads the byte-matching build (conker/build, conker/asm, *_auto.txt) any more.
 # P327 incremental build: the census (--incremental) and vbe_build.py run on every make but only recompile the TUs
 # whose source or included headers changed (content keys, port/tools/depkey.py). files.tsv and vbe.stamp keep their
 # mtime when nothing changed (make re-reads mtimes after a recipe), so a no-op build relinks nothing. Before P327 a
@@ -99,11 +101,11 @@ $(B)/stubs/n64mem_labels.o: $(GEN)/n64mem_labels.s
 	@mkdir -p $(@D)
 	emcc -c $< -o $@
 
-$(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/gen_stubs.py tools/n64mem.py
+$(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/gen_stubs.py tools/n64mem.py symbols/symbols.tsv
 	cd .. && python3 port/tools/gen_stubs.py port/$(GEN) $(LIBDIR) $(addprefix port/,$(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ))
 
 # indirect calls: signature table of the non-vbe objects + mismatch dispatcher (tools/icall.py)
-$(GEN)/icall_tab.c: $(B)/vbe.stamp $(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/icall_gen.py tools/icall.py
+$(GEN)/icall_tab.c: $(B)/vbe.stamp $(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/icall_gen.py tools/icall.py symbols/symbols.tsv
 	cd .. && python3 port/tools/icall_gen.py port/$@ $(addprefix port/,$(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ))
 
 $(B)/census/files.tsv: FORCE

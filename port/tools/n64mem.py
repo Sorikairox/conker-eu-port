@@ -13,10 +13,12 @@ Build time (this file):
 Run time (port/ultra/pc_mem.c): copy the segments from the user's ROM into the mirrors in
 word-swapped layout, then rewrite every relocation word with port_n64_to_wasm().
 """
-import bisect, collections, os, re, struct, zlib
-import elf32
+import bisect, collections, os, re, struct, sys, zlib
+# P328: names / addresses come from the frozen port symbol table (port/symbols/symbols.tsv), no longer from the
+# byte-matching build's conker/build/conker.eu.elf (whose symbol table it reproduces; see port/symbols/symbols.py)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'symbols'))
+import symbols as portsyms
 
-ELF = 'conker/build/conker.eu.elf'
 ROM = os.environ.get('CONKER_ROM', 'baserom.eu.z64')
 # (name, vram, size, rom offset, rzip?)  -- EU ROM; see conker.eu.yaml / conker/conker.eu.yaml
 SEGS = [('init_data', 0x80029400, 0x4410, 0x29400, False),
@@ -86,7 +88,7 @@ def generate(outdir, defined_f, defined_d, stubbed, undef_data, addr):
     stubbed: name -> sig of generated function stubs; undef_data: data names needing storage;
     addr: N64 symbol -> address. Returns {name: sig} of extra stubs needed for data-referenced
     functions with neither C body nor stub, and the set of data names placed in the mirrors."""
-    syms = elf32.symbols(ELF)
+    syms = portsyms.elf_symbols()
     fstart = {}
     for nm, val, size, typ, bind, shndx, sec in syms:
         if typ == 2 and val and re.match(r'[A-Za-z_]\w*$', nm) and not nm.startswith(('L', 'jtbl')):
