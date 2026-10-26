@@ -52,6 +52,9 @@ extern f32 D_800D2848;
 extern s32 D_800D2858;
 extern s32 D_800D2864;
 
+/* hud_health_update: per frame, moves the HUD health pieces (chocolate) towards the player's health D_800CC8BA.
+ * A change starts the 240-frame show timer D_800D2864; the HUD slides in, adds / drops pieces (sound 0x1A6),
+ * then slides out when the timer ends. Also animates falling pieces and the piece scale-in. */
 /* was func_1508F0D4 */
 void hud_health_update(void) {
     s32 sp40;
@@ -133,6 +136,15 @@ void hud_health_update(void) {
             } while (var_v0 != D_800CC8BA);
         }
     }
+#ifdef PORT
+    /* P325 option "Health always visible" (Options panel, off by default). D_800D2864 is the show timer:
+     * a health change above sets it to 240 frames, the HUD slides in while it runs and slides back out
+     * (towards D_8009E084) once it reaches 0. Keeping it at 1 holds the pieces on screen; turning the option
+     * off lets it run out, so the HUD hides again on the next frames. Off = the N64 code path unchanged. */
+    if (port_option(PORT_OPT_HEALTH_ALWAYS) && D_800D2864 == 0) {
+        D_800D2864 = 1;
+    }
+#endif
     if (D_800D2864 != 0) {
         var_a3 = 0;
         temp_f0 = (f32) D_8009E08A;

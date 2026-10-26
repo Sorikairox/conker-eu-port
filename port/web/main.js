@@ -58,6 +58,8 @@ const OPTIONS = [
     help: 'The half-tilt key latches: one press walks (half stick), the next press runs again. Applies to every stick input of pad 1.' },
   { key: 'skipintro', label: 'Skip intro', def: false, game: 1,
     help: 'Start straight at the title menu: no boot logos, legal pages or intro. Takes effect at the next start.' },
+  { key: 'healthhud', label: 'Health always visible', def: false, game: 2,
+    help: 'The chocolate (health) pieces stay on screen during play. Off: as on the N64, they slide in only when your health changes.' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
