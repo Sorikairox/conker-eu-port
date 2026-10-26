@@ -23,11 +23,13 @@ from the same C. **Not** N64Recomp / static recompilation, and not the existing 
 ### Branches / worktrees / containers
 | branch | worktree | container | role |
 |---|---|---|---|
-| `eu` | `~/conker` | `conkerdev` | matching decomp (paused); this file, progress logs |
-| `eu-wt-a` | `~/conker-wt/a` | `conkerdev-a` | old matching slot (idle, merged) |
-| `port` | `~/conker-wt/port` | `conkerdev-port` | asm→C conversion, slot 1 |
-| `port-b` | `~/conker-wt/portb` | `conkerdev-portb` | asm→C conversion, slot 2 (parallel, disjoint files) |
-| `port-web` | `~/conker-wt/web` | `conkerdev-web` + `conker-emsdk` image | browser build (`port/`), runtime checks |
+| `port-web` | `~/conker-wt/web` | `conkerdev-web` + `conker-emsdk` image | **integration branch: always holds the latest of everything** (game C, browser build, docs, logs) |
+| `eu` | `~/conker` | `conkerdev` | kept equal to port-web (backup_push.sh fast-forwards it); play.sh / backup_push.sh run from here |
+
+Rule (user, 2026-10-26): port-web must always have the latest code. Commit session work on port-web (or merge it
+into port-web before the session ends). backup_push.sh fast-forwards eu to port-web and warns about any branch with
+commits port-web lacks. The WIP branches eu-wt-a, port, port-b, port-c..f and port-web-b were fully merged on
+2026-10-26 and are to be deleted. New parallel slots: `wt.sh new <name>` from port-web, then merge back the same day.
 
 Mac mini worker `sorikairo@192.168.0.71` (container `conkerdev`) runs `remote_perm.sh` jobs.
 Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
