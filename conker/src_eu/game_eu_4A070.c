@@ -576,7 +576,7 @@ void cutscene_scene_load(s32 level, s32 scene, s32 slot, s32 callback, s32 callb
     cutscene_claim_records(slot);
     cutscene_actor_pass(slot);
     cutscene_apply_cameras(slot);
-    D_800DBFF4[0] = 4;
+    g_camera_timers[0] = 4;
     cutscene_scan_start_events(slot);
 }
 
@@ -682,7 +682,7 @@ void music_restart_type13_songs(void);
  * mp3_voice_is_playing, remove object 0's attachment 0 (obj_find_child_nth / obj_remove), run cutscene_start(slot) once and
  * again while D_800C40B9 was set before the call and no level change is pending (D_800C35C4); screen colour
  * screen_fade_start(0, 0, 0, 0x19, 0, 0) unless D_800C39C9, D_800C40AA == 1 or D_800C40AD; clear +0xA4 of every live
- * object (D_800CC2D0, 25), D_800C3663 = 0, music_restart_type13_songs, D_800DBFF4[0] = 4, D_800C3A92 = 1. */
+ * object (D_800CC2D0, 25), D_800C3663 = 0, music_restart_type13_songs, g_camera_timers[0] = 4, D_800C3A92 = 1. */
 /* was func_1501DF70 */
 void cutscene_end_skip(s32 slot) {
     struct127 *p;
@@ -710,7 +710,7 @@ void cutscene_end_skip(s32 slot) {
     }
     D_800C3663 = 0;
     music_restart_type13_songs();
-    D_800DBFF4[0] = 4;
+    g_camera_timers[0] = 4;
     D_800C3A92 = 1;
 }
 /* P96: cutscene_can_skip */

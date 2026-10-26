@@ -170,6 +170,6 @@ void port_cam_probe(unsigned task) {
 /* P88: the TEMPORARY PC settings_clamp_to_range (P84, settings clamp) was removed: the port branch converted it in P85
  * (game_eu_20B730.c, NON_MATCHING, void (void)). */
 
-/* P205: the P199 --wrap of object_state_dispatch_a / object_state_dispatch_b (dropped object argument of the D_80089AAC / D_80089AD4
+/* P205: the P199 --wrap of object_state_dispatch_a / object_state_dispatch_b (dropped object argument of the g_object_state_fns_a / g_object_state_fns_b
  * handlers) was removed: port P200 made the NON_MATCHING game C (game_161520.c) pass the object and return the
  * handler's result. ?p199nowrap is gone with it. */

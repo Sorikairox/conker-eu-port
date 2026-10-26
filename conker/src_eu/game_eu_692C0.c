@@ -164,13 +164,13 @@ void tail_update_conker(s32 arg0) {
         return;
     }
 
-    /* reset: requested while the joints were missing, or by D_800DBFF4 / +0x2FD */
+    /* reset: requested while the joints were missing, or by g_camera_timers / +0x2FD */
     reset = 0;
     if (D_800C4000 & (1 << arg0)) {
         D_800C4000 &= ~(1 << arg0);
         reset = 1;
     }
-    if (*(s32 *) D_800DBFF4 != 0 || OBJ_U8(obj, 0x2FD) != 0) {
+    if (*(s32 *) g_camera_timers != 0 || OBJ_U8(obj, 0x2FD) != 0) {
         reset = 1;
     }
     if (reset) {

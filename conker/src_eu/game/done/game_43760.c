@@ -7,19 +7,19 @@
 void records_table_reset(void) {
 
     bzero(&D_800CC2D0, 20300);
-    D_80086000 = 0;
+    g_obj_table_reset_word = 0;
 
     if (D_800D2138 == 2) {
-        D_800CC26E = 2;
+        g_records_game_mode = 2;
     } else if (D_800D2138 == 3) {
-        D_800CC26E = 3;
+        g_records_game_mode = 3;
     } else if (D_800D2138 == 4) {
-        D_800CC26E = 4;
+        g_records_game_mode = 4;
     } else {
-        D_800CC26E = 0;
+        g_records_game_mode = 0;
     }
     D_800CC2B0 = 0;
     bzero(&D_800CC298, 24);
-    D_800CC2A2 = 1;
+    g_records_flag_2a2 = 1;
     D_800D18D0 = 0;
 }

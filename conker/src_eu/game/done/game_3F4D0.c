@@ -10,8 +10,8 @@ void level_ground_emitter_spawn7(s32 arg0, s32 arg1) {
 
     tmp.unk0 = 7;
     tmp.unk4 = arg0;
-    tmp.unk8 = D_80096530;
-    tmp.unkC = D_80096534;
+    tmp.unk8 = g_ground_emitter7_param_8;
+    tmp.unkC = g_ground_emitter7_param_c;
     tmp.unk10 = 0.0f;
     tmp.unk14 = 0.0f;
     tmp.unk18 = 0.0f;

@@ -421,7 +421,7 @@ void obj_angle_point_effect(u8 *, s16, s16, u8, s32);
 void cam_shake_all_players(u8 *, f32, f32, f32, u8, u8, s32);
 void fx_scorch_decal_spawn(f32, u8, s32, u8 *, s16, u8, u8, u8, u8, u8, u8, s32);
 void fx_debris_emitter_spawn(f32 *, s16, u8, s32);
-// bound_cloud_update: update handler (D_8008A100 slot 43) of a cloud effect that can be bound to an object. The
+// bound_cloud_update: update handler (g_effect3d_update2_fns slot 43) of a cloud effect that can be bound to an object. The
 // state block at +0x110 holds the object (+0x110, valid while its +0 is set and its id +0x3B equals +0x114), the
 // peak alpha scale (+0x118), the remaining life (+0x11C), a pulse phase (+0x120), two wobble phases (+0x12C,
 // +0x130) with their outputs (+0x124, +0x128), a linked effect (+0x138), a spawn accumulator (+0x13C), a height

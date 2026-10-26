@@ -1,22 +1,22 @@
 \#^    mesh_effect_load_identity(obj, part);#s/part/0/
 \#^    rec = #s/0xF8/0xF4/
 \#^    scaleS = sinf(rec\[3\])#s/rec\[3\]/rec[2]/
-\#^    scaleS = #s/D_800A4E54 + D_800A4E58/D_800A4E58 + D_800A4E54/
-\#^    scaleT = sinf(rec\[4\])#s/D_800A4E60/D_800A4E58/
+\#^    scaleS = #s/g_water_s_scale_amp + g_water_s_scale_base/g_water_s_scale_base + g_water_s_scale_amp/
+\#^    scaleT = sinf(rec\[4\])#s/g_water_t_scale_base/g_water_s_scale_base/
 \#^    cam = camera_get_pos(part);#s/part/0/
 \#^    scrollS = #s/1024\.0f;/1000.0f;/
 \#^    scrollS = #s/(s32)/(u16)/
 \#^    scrollT = rec\[1\]#s/rec\[1\] - /rec[0] - /
 \#^    for (k = 0; k < 9; k++) {#s/9/8/
-\#^        dx = D_800A4DA0\[k\]\[0\] - cam\[0\];#s/cam\[0\]/cam[1]/
-\#^        dz = D_800A4DA0\[k\]\[2\] - cam\[2\];#s/\[k\]\[2\]/[k][1]/
+\#^        dx = g_water_proj_centres\[k\]\[0\] - cam\[0\];#s/cam\[0\]/cam[1]/
+\#^        dz = g_water_proj_centres\[k\]\[2\] - cam\[2\];#s/\[k\]\[2\]/[k][1]/
 \#^        if (dx == 0\.0f && dz == 0\.0f) {#s/&&/||/
 \#^            dirX = 1\.0f;#s/1\.0f/0.0f/
 \#^            dirZ = 0\.0f;#s/0\.0f/1.0f/
 \#^            inv = 1\.0f / sqrtf#s/1\.0f/2.0f/
 \#^            dirX = dz \* inv;#s/dz/dx/
 \#^            dirZ = -dx \* inv;#s/-dx/dx/
-\#^        for (n = D_800A4E0C#s/n < D_800A4E0C\[k\]\[0\] + /n < /
+\#^        for (n = g_water_proj_vtx_ranges#s/n < g_water_proj_vtx_ranges\[k\]\[0\] + /n < /
 \#^            v = (Vtx_t \*) #s/D_800BE9C0 \* 16/D_800BE9C0 * 8/
 \#^            v = (Vtx_t \*) #s/part \* 4/part * 8/
 \#^            v = (Vtx_t \*) #s/n \* 16/n * 12/

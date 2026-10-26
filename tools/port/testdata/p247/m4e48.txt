@@ -9,11 +9,11 @@
 \#^            if (e->timer < -e->period) {$#s/< -e->period/<= -e->period/
 \#^                e->timer = e->restart;$#s/e->restart/e->period/
 \#^                bone_emitter_send_pair((s32) bone, (s32) e->offsetA, (s32) e->offsetB, (s32) e->posA, (s32) e->posB);$#s/(s32) e->posA, (s32) e->posB/(s32) e->posB, (s32) e->posA/
-\#^                if (e->startFn != -1 && D_80089EBC\[e->startFn\](e) == 0) {$#s/== 0)/!= 0)/
-\#^                if (e->startFn != -1 && D_80089EBC\[e->startFn\](e) == 0) {$#s/startFn != -1/startFn != 0/
+\#^                if (e->startFn != -1 && g_bone_emitter_start_fns\[e->startFn\](e) == 0) {$#s/== 0)/!= 0)/
+\#^                if (e->startFn != -1 && g_bone_emitter_start_fns\[e->startFn\](e) == 0) {$#s/startFn != -1/startFn != 0/
 \#^                    e->timer = -1;$#s/-1/0/
 \#^            if (e->timer > 0) {$#s/> 0/>= 0/
-\#^                    e->rateScale = D_80089EFC\[e->rateFn\](e);$#s/e->rateScale =/e->phase =/
+\#^                    e->rateScale = g_bone_emitter_rate_fns\[e->rateFn\](e);$#s/e->rateScale =/e->phase =/
 \#^                e->count += e->rate \* D_800BE9A4;$#s/e->rate/e->rateScale/
 \#^                if (e->count > 1\.0f) {$#s/> 1\.0f/>= 1.0f/
 \#^                    inv = 1\.0f / e->count;$#s/1\.0f \//2.0f \//
@@ -29,8 +29,8 @@
 \#^                    velB\[1\] = dB\[1\] \* D_800BEDC8;$#s/dB\[1\]/dA[1]/
 \#^                    stepA\[0\] = dA\[0\] \* inv;$#s/inv/phaseStep/
 \#^                    stepB\[2\] = dB\[2\] \* inv;$#s/dB\[2\]/dB[1]/
-\#^                            D_80089ED8\[e->emitFn\](curA, curB, velA, velB, phase, e);$#s/velA, velB/velB, velA/
-\#^                            D_80089ED8\[e->emitFn\](curA, curB, velA, velB, phase, e);$#s/phase, e)/phaseStep, e)/
+\#^                            g_bone_emitter_emit_fns\[e->emitFn\](curA, curB, velA, velB, phase, e);$#s/velA, velB/velB, velA/
+\#^                            g_bone_emitter_emit_fns\[e->emitFn\](curA, curB, velA, velB, phase, e);$#s/phase, e)/phaseStep, e)/
 \#^                        if (e->emitFn != -1) {$#s/!= -1/!= 0/
 \#^                        curA\[0\] += stepA\[0\];$#s/+=/-=/
 \#^                        curB\[1\] += stepB\[1\];$#s/stepB\[1\]/stepA[1]/
@@ -40,7 +40,7 @@
 \#^                    e->posA\[2\] = curA\[2\];$#s/curA\[2\]/curB[2]/
 \#^                    e->posB\[0\] = curB\[0\];$#s/e->posB\[0\] =/e->posA[0] =/
 \#^                    e->phase = phase;$#s/= phase/= phaseStep/
-\#^        if (e->tickFn != -1 && D_80089F0C\[e->tickFn\](e) == 0) {$#s/== 0)/!= 0)/
+\#^        if (e->tickFn != -1 && g_bone_emitter_tick_fns\[e->tickFn\](e) == 0) {$#s/== 0)/!= 0)/
 \#^        if (e->flags & 2) {$#s/& 2/\& 1/
 \#^            e->life -= D_800BE9E4;$#s/-=/+=/
 \#^            if (e->life < 0) {$#s/< 0/<= 0/

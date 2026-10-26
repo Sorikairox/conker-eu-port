@@ -562,7 +562,7 @@ extern f32 D_800A9180;
 extern f32 D_800A9184;
 extern f32 D_800A9188;
 extern f32 D_800A918C;
-// bubble_emitter_update: update handler (D_8008A100 slot 40) of a particle emitter effect. Optional sound / light
+// bubble_emitter_update: update handler (g_effect3d_update2_fns slot 40) of a particle emitter effect. Optional sound / light
 // probe (rail_event_add, radius 500) when +0x127 is set; +0x114 angle advances by +0x118 * dt (wrapped by
 // wrap_float_range to 2048); the pulse phase byte +0x124 advances by +0x125 per tick and sets the brightness +0x126
 // (192 + 63 * sin). Unless player_mask_hides_all(+0x60) says the emitter is off, the spawn accumulator +0x128 grows by

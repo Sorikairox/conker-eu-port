@@ -775,7 +775,7 @@ void effect3d_msg_stub(s32 arg0, s32 arg1, s32 arg2);
 void effect3d_on_msg_owner(struct210 *arg0, struct212 *arg1, u8 arg2);
 void sprite_quad_stub_a(void);
 void sprite_quad_stub_b(void);
-/* P224: D_8008A1BC entries return the callee's v0 */
+/* P224: g_effect3d_draw_fns entries return the callee's v0 */
 s32 sprite_quad_build_screen_a(s32 arg0, s16 arg1);
 s32 sprite_quad_build_screen_b(s32 arg0, s16 arg1);
 u8 *sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1);

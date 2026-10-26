@@ -329,6 +329,7 @@ void face_anim_play_body(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 void face_anim_start(struct127 *, u8, u8, u16, s32);
+/* was func_1507EE9C */
 void face_anim_reset_default(arg0)
 u8 *arg0;
 {

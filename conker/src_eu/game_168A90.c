@@ -60,7 +60,7 @@ void mesh_effect_update(u8 *arg0) {
             ret = 1;
         }
     }
-    if ((ret == 0) && (*(s8 *)(arg0 + 0x11) != -1) && (D_80089FB8[*(s8 *)(arg0 + 0x11)](arg0) == 0)) {
+    if ((ret == 0) && (*(s8 *)(arg0 + 0x11) != -1) && (g_mesh_effect_tick_fns[*(s8 *)(arg0 + 0x11)](arg0) == 0)) {
         ret = 1;
     }
     if (ret) {
@@ -80,7 +80,7 @@ void mesh_effect_update(u8 *arg0) {
 //     }
 //     if (!done) {
 //         if (arg0->unk11 != -1) {
-//             if (D_80089FB8[arg0->unk11](arg0) == 0) {
+//             if (g_mesh_effect_tick_fns[arg0->unk11](arg0) == 0) {
 //                 done = TRUE;
 //             }
 //         }
@@ -89,7 +89,7 @@ void mesh_effect_update(u8 *arg0) {
 //         node_destroy(arg0);
 //     }
 // }
-extern s32 D_80089FC8;
+extern s32 g_mesh_effect_draw_fns; /* was D_80089FC8 */
 
 /* was func_1513B83C */
 u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
@@ -107,7 +107,7 @@ u8 *mesh_effect_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     if (temp_v0 != -1) {
         arg2 = var_a2;
         // P250: the handlers (sky_dome_project_uv, object_screen_uv_project) are s32 (u8 *, s32); a2 / a3 are only leftovers in the asm
-        temp_v0_2 = ((s32 (**)(u8 *, s32)) &D_80089FC8)[temp_v0](arg1, var_a2);
+        temp_v0_2 = ((s32 (**)(u8 *, s32)) &g_mesh_effect_draw_fns)[temp_v0](arg1, var_a2);
         var_a2 = arg2;
         if (temp_v0_2 == 0) {
             return arg0;
@@ -142,17 +142,17 @@ void mesh_effect_free(struct132 *arg0) {
     node_unlink_free(arg0);
 }
 
-// object_mode_dispatch_a: runs the D_80089C44 handler picked by the object's +0x48 byte on the object. The asm leaves
+// object_mode_dispatch_a: runs the g_object_mode_fns_a handler picked by the object's +0x48 byte on the object. The asm leaves
 // the object in a0 at the jalr; every entry (mesh_effect_retire x4) is void (struct132 *), so no result is passed on.
 /* was func_1513BA10 */
 void object_mode_dispatch_a(struct132 *arg0) {
-    ((void (*)(struct132 *)) D_80089C44[arg0->unk48])(arg0);
+    ((void (*)(struct132 *)) g_object_mode_fns_a[arg0->unk48])(arg0);
 }
 
-// object_mode_dispatch_b: as object_mode_dispatch_a with the table D_80089C54 (mesh_effect_free x4).
+// object_mode_dispatch_b: as object_mode_dispatch_a with the table g_object_mode_fns_b (mesh_effect_free x4).
 /* was func_1513BA44 */
 void object_mode_dispatch_b(struct132 *arg0) {
-    ((void (*)(struct132 *)) D_80089C54[arg0->unk48])(arg0);
+    ((void (*)(struct132 *)) g_object_mode_fns_b[arg0->unk48])(arg0);
 }
 
 /* was func_1513BA78 */
@@ -221,17 +221,17 @@ struct102 *water_effect_spawn(void) {
     return p;
 }
 float sqrtf(float);
-extern f32 D_800A4DA0[9][3];    // the nine texture-projection centres
-extern s32 D_800A4E0C[9][2];    // their vertex ranges { first, count }
-extern f32 D_800A4E54;          // 1.21f
-extern f32 D_800A4E58;          // 2.854f
-extern f32 D_800A4E5C;          // 1.994f
-extern f32 D_800A4E60;          // 8.328f
+extern f32 g_water_proj_centres[9][3];    // the nine texture-projection centres /* was D_800A4DA0 */
+extern s32 g_water_proj_vtx_ranges[9][2];    // their vertex ranges { first, count } /* was D_800A4E0C */
+extern f32 g_water_s_scale_amp;          // 1.21f /* was D_800A4E54 */
+extern f32 g_water_s_scale_base;          // 2.854f /* was D_800A4E58 */
+extern f32 g_water_t_scale_amp;          // 1.994f /* was D_800A4E5C */
+extern f32 g_water_t_scale_base;          // 8.328f /* was D_800A4E60 */
 
-// water_texcoords_update: object-type handler (table D_80089FC8 + 0x14). Calls mesh_effect_load_identity first, then rewrites the
+// water_texcoords_update: object-type handler (table g_mesh_effect_draw_fns + 0x14). Calls mesh_effect_load_identity first, then rewrites the
 // texture coordinates of the nine vertex groups of the object's current vertex buffer (obj + 0x58 + D_800BE9C0 * 16
 // + part * 4) so each group's texture faces the player camera point (camera_get_pos(part)) seen from its centre
-// D_800A4DA0[k]: s = horizontal offset along the camera direction * (sin(rec + 0xC) * 1.21 + 2.854) - scroll u,
+// g_water_proj_centres[k]: s = horizontal offset along the camera direction * (sin(rec + 0xC) * 1.21 + 2.854) - scroll u,
 // t = height * (sin(rec + 0x10) * 1.994 + 8.328) - scroll v, where rec = obj + obj[0x50] + 0xF8 holds the scroll
 // (+0 / +4, taken mod 1024) and the two wave phases. Returns 1.
 /* was func_1513BBFC */
@@ -253,14 +253,14 @@ s32 water_texcoords_update(s32 obj, s16 part) {
 
     mesh_effect_load_identity(obj, part);
     rec = (f32 *) (obj + *(s32 *) (obj + 0x50) + 0xF8);
-    scaleS = sinf(rec[3]) * D_800A4E54 + D_800A4E58;
-    scaleT = sinf(rec[4]) * D_800A4E5C + D_800A4E60;
+    scaleS = sinf(rec[3]) * g_water_s_scale_amp + g_water_s_scale_base;
+    scaleT = sinf(rec[4]) * g_water_t_scale_amp + g_water_t_scale_base;
     cam = camera_get_pos(part);
     scrollS = rec[0] - (f32) (s32) (rec[0] * (1.0f / 1024.0f)) * 1024.0f;
     scrollT = rec[1] - (f32) (s32) (rec[1] * (1.0f / 1024.0f)) * 1024.0f;
     for (k = 0; k < 9; k++) {
-        dx = D_800A4DA0[k][0] - cam[0];
-        dz = D_800A4DA0[k][2] - cam[2];
+        dx = g_water_proj_centres[k][0] - cam[0];
+        dz = g_water_proj_centres[k][2] - cam[2];
         if (dx == 0.0f && dz == 0.0f) {
             dirX = 1.0f;
             dirZ = 0.0f;
@@ -269,20 +269,20 @@ s32 water_texcoords_update(s32 obj, s16 part) {
             dirX = dz * inv;
             dirZ = -dx * inv;
         }
-        for (n = D_800A4E0C[k][0]; n < D_800A4E0C[k][0] + D_800A4E0C[k][1]; n++) {
+        for (n = g_water_proj_vtx_ranges[k][0]; n < g_water_proj_vtx_ranges[k][0] + g_water_proj_vtx_ranges[k][1]; n++) {
             v = (Vtx_t *) (*(u8 **) (obj + 0x58 + D_800BE9C0 * 16 + part * 4) + n * 16);
-            v->tc[0] = (s32) ((((f32) v->ob[0] - D_800A4DA0[k][0]) * dirX + ((f32) v->ob[2] - D_800A4DA0[k][2]) * dirZ) *
+            v->tc[0] = (s32) ((((f32) v->ob[0] - g_water_proj_centres[k][0]) * dirX + ((f32) v->ob[2] - g_water_proj_centres[k][2]) * dirZ) *
                                   scaleS - scrollS);
-            v->tc[1] = (s32) (((f32) v->ob[1] - D_800A4DA0[k][1]) * scaleT - scrollT);
+            v->tc[1] = (s32) (((f32) v->ob[1] - g_water_proj_centres[k][1]) * scaleT - scrollT);
         }
     }
     return 1;
 }
-extern f32 D_800A4E64; // 0.037f (file does not own .rodata)
-extern f32 D_800A4E68; // 1.9f
-extern f32 D_800A4E6C; // 77.3f
-extern f32 D_800A4E70; // 0.019f
-extern f32 D_800A4E74; // 0.01f
+extern f32 g_water_wave_rate_c; // 0.037f (file does not own .rodata) /* was D_800A4E64 */
+extern f32 g_water_wave_rate_a; // 1.9f /* was D_800A4E68 */
+extern f32 g_water_wave_amp_b; // 77.3f /* was D_800A4E6C */
+extern f32 g_water_wave_rate_d; // 0.019f /* was D_800A4E70 */
+extern f32 g_water_wave_rate_e; // 0.01f /* was D_800A4E74 */
 typedef struct {
     f32 a;
     f32 b;
@@ -296,13 +296,13 @@ s32 water_wave_update(u8 *arg0) {
     f32 f;
     Wave1513BEB0 *w = (Wave1513BEB0 *)(arg0 + *(s32 *)(arg0 + 0x50) + (0, 0xF8)); // fakematch: comma keeps addu a0,t6 order
 
-    w->c += D_800A4E64 * D_800BE9A4;
+    w->c += g_water_wave_rate_c * D_800BE9A4;
     f = wrap_angle_rad(w->c);
     w->c = f;
-    w->a += D_800A4E68 * D_800BE9A4;
-    w->b = sinf(f) * D_800A4E6C;
-    w->d += D_800A4E70 * D_800BE9A4;
-    w->e += D_800A4E74 * D_800BE9A4;
+    w->a += g_water_wave_rate_a * D_800BE9A4;
+    w->b = sinf(f) * g_water_wave_amp_b;
+    w->d += g_water_wave_rate_d * D_800BE9A4;
+    w->e += g_water_wave_rate_e * D_800BE9A4;
     w->d = wrap_angle_rad(w->d);
     w->e = wrap_angle_rad(w->e);
     while (w->a > 4096.0f) {

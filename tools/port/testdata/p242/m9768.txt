@@ -48,8 +48,8 @@
 162s/0x1039E9/0x1039E8/
 150s/0;/1;/
 168s/!(\*mask \& bit)/(*mask \& bit)/
-169s/D_800A45B8/D_800A45A8/
-170s/D_800A45C8\[i\]/D_800A45C8[0]/
+169s/g_hit_sparks_smoke_ids/g_hit_sparks_spark_ids/
+170s/g_hit_sparks_smoke_pts\[i\]/g_hit_sparks_smoke_pts[0]/
 170s/smoke\.at/smoke.vel/
 173s/84/83/
 173s/6\.12f/6.0f/

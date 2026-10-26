@@ -1,6 +1,6 @@
-s/cell < D_160038A0 \* 32/cell < D_160038A0 * 16/
+s/cell < g_dbg_first_text_row \* 32/cell < g_dbg_first_text_row * 16/
 s/cell >= 0x341/cell >= 0x340/
-s/cell < D_160038A0 \* 32/cell <= D_160038A0 * 32/
+s/cell < g_dbg_first_text_row \* 32/cell <= g_dbg_first_text_row * 32/
 s/            pos += 0x70;/            pos += 0x60;/
 s/for (i = 0; i < 8; i++) {/for (i = 0; i < 7; i++) {/
 s/c = value \& 0xF;/c = value \& 0x7;/
@@ -11,18 +11,18 @@ s/pos -= 0x10;/pos -= 0x8;/
 s/pos = debugger_draw_char((s16 \*) pos, '-');/pos = debugger_draw_char((s16 *) pos, '+');/
 s/value = -value;/value = value;/
 s/if (value < 0) {/if (value <= 0) {/
-s/p >= D_16003B50; p--/p > D_16003B50; p--/
-s/p = \&D_16003B50\[9\]/p = \&D_16003B50[8]/
+s/p >= g_dbg_pow10_table; p--/p > g_dbg_pow10_table; p--/
+s/p = \&g_dbg_pow10_table\[9\]/p = \&g_dbg_pow10_table[8]/
 s/value = value . \*p;/value = value - *p;/
-s/if (digit > 0 || started || p == D_16003B50) {/if (digit > 0 || p == D_16003B50) {/
-s/if (digit > 0 || started || p == D_16003B50) {/if (digit > 0 || started) {/
+s/if (digit > 0 || started || p == g_dbg_pow10_table) {/if (digit > 0 || p == g_dbg_pow10_table) {/
+s/if (digit > 0 || started || p == g_dbg_pow10_table) {/if (digit > 0 || started) {/
 s/(u8) (digit + '0')/(u8) (digit + 'a')/
 s/(value \& 0x7F800000) >> 23/(value \& 0x7F000000) >> 23/
 s/exp >= 0xFF/exp > 0xFF/
 s/(value << 9) != 0/(value << 8) != 0/
 s/exp <= 0 ||/exp < 0 ||/
-s/D_160047E8, D_160047F0, D_160047F4/D_160047E8, D_160047F4, D_160047F0/
+s/g_dbg_str_number_float_fmt, g_dbg_str_empty_a, g_dbg_str_empty_b/g_dbg_str_number_float_fmt, g_dbg_str_empty_b, g_dbg_str_empty_a/
 s/debugger_print_string(cell, buf);/debugger_print_string(cell + 1, buf);/
-s/debugger_print_string(cell, D_160047E4);/debugger_print_string(cell, D_160047E8);/
+s/debugger_print_string(cell, g_dbg_str_nan);/debugger_print_string(cell, g_dbg_str_number_float_fmt);/
 s/        case 1:/        case 3:/
 s/digit = value \/ \*p;/digit = value \/ p[1];/

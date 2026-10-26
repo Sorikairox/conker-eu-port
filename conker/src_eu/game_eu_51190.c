@@ -693,7 +693,7 @@ s32 scene_event_run_a(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
     case 3: /* switch the camera track: only to a track of ref kind 1 */
         if (ev->id < D_800C3A5A[player] && D_800C3A10[player][ev->id].kind == 1 && ev->id != D_800C3A18) {
             D_800C3A18 = ev->id;
-            D_800DBFF4[0] = 4;
+            g_camera_timers[0] = 4;
             SA_S32(D_800DBFF0, 0x5F0) |= 4;
         }
         return 1;

@@ -523,7 +523,7 @@ typedef struct {
 // velocity 1.3 * +0x3C * the sin / cos (angle_byte_cos) of the holder's heading +0x76, up 10..25, timer 300; returns
 // 1). Otherwise it lands: a effect3d_spawn_oriented dust record on the ground below (collision_floor_probe, ground height kept at
 // +0x110; random 8-byte spin at +0x128 of the record), a emit_sparks_by_angles burst and the D_80088AE0 sound; returns 0.
-// Out of range it eases +0x20..+0x28 by 0.2 towards D_80088724 (the second holder D_80088720's position + 50 up)
+// Out of range it eases +0x20..+0x28 by 0.2 towards g_holder_target_pos (the second holder D_80088720's position + 50 up)
 // and returns 1.
 /* was func_150B9B1C */
 s32 thrown_object_land_check(u8 *obj) {
@@ -666,7 +666,7 @@ s32 thrown_object_land_check(u8 *obj) {
         D_80088720 = obj_find_by_setup_id(1);
         h = (u8 *) D_80088720;
     }
-    tgt = (f32 *) &D_80088724;
+    tgt = (f32 *) &g_holder_target_pos;
     if (h != NULL) {
         tgt[0] = *(f32 *) (h + 0x14);
         tgt[1] = *(f32 *) (h + 0x18) + 50.0f;

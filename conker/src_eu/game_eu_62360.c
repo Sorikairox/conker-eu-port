@@ -330,7 +330,7 @@ void reflect_queue_object(s32 mode, s32 idx, f32 a, f32 b, f32 c, f32 d, f32 f, 
         return;
     }
     nmtx = model_joint_mtx_count(obj->id);
-    if ((u32) (D_800C3E7C << 6) < (u32) (D_800C42A8 + (nmtx << 6) - D_800C42AC)) {
+    if ((u32) (g_matrix_arena_count << 6) < (u32) (D_800C42A8 + (nmtx << 6) - D_800C42AC)) {
         return;   /* the matrix arena is full */
     }
     if (D_800C35EA == 1) {

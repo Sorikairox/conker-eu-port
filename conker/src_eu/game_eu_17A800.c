@@ -227,6 +227,7 @@ s32 char_fx_send_event(s32 obj, s16 state, s32 arg2, s32 arg3) {
     return handled;
 }
 
+/* was func_1514DA28 */
 s32 char_fx_slot_derives(arg0, arg1)
 s16 arg0;
 s16 arg1;

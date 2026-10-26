@@ -109,7 +109,7 @@ f32 math_atan2f(f32, f32);
  * Light: unless D_800DE464, the nearest enabled light of the list D_800DCD78 whose integer distance
  * (approx_dist3_int) is above prev_dist and below 5000; with none, 0 is returned when prev_dist != 0, else the default
  * direction D_800DE440 (scaled by D_800DE46C) from the object is used with distance 1. The slot's light position
- * D_800DE3E0[slot] snaps to it (detail >= 2 or *D_800DBFF4) or moves 0.3 of the way. The light is pushed out to at
+ * D_800DE3E0[slot] snaps to it (detail >= 2 or *g_camera_timers) or moves 0.3 of the way. The light is pushed out to at
  * least 200 units and to a minimum height (10, or 0.57735 * the horizontal distance when D_800DE470); beyond
  * 5000 * scale nothing is cast. A look-at matrix from the light to the object (D_800DF528[slot]) projects the 8 box
  * corners; their largest |x / z|, |y / z| (>= 0.01, else nothing) give the projection scale D_800D3AA0 and the
@@ -188,7 +188,7 @@ f32 shadow_light_projection(s32 obj, s32 slot, f32 sx, f32 sy, f32 sz, f32 prev_
     }
 
     lit = D_800DE3E0[slot];
-    if (*(s32 *) D_800DBFF4 != 0 || D_800DE468 >= 2) {
+    if (*(s32 *) g_camera_timers != 0 || D_800DE468 >= 2) {
         lit[0] = target[0];
         lit[1] = target[1];
         lit[2] = target[2];

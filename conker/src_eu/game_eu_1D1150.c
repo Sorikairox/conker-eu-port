@@ -80,6 +80,7 @@ typedef struct {
 
 s32 ribbon_trail_bone_pos(u8 *arg0, u8 *arg1);
 
+/* was func_151A3AB4 */
 s32 ribbon_trail_spawn(arg0, arg1) u8 *arg0; u8 arg1; {
     SA3AB4 a;
     SB3AB4 b;

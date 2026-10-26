@@ -32,6 +32,7 @@ void screen_fade_start(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s8 arg4, s32 arg5
 }
 
 extern u8 D_800DE1F0[];
+/* was func_1517F470 */
 s32 screen_fade_alpha(arg0)
 s32 arg0;
 {

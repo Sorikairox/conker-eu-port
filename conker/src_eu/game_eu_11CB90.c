@@ -259,7 +259,7 @@ s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s3
 s32 vec3_normalize_len(f32 *, f32 *, f32 *, f32 *);
 void obj_tint_set_flash(u8 *, s32, s32, s32, s32, s32, s32);
 s32 obj_send_hit(struct127 *, s32, u16, s32);
-// tether_beam_update: update handler (D_8008A058 slot 29) of a beam from a bone of a source object (+0x110, id
+// tether_beam_update: update handler (g_effect3d_update_fns slot 29) of a beam from a bone of a source object (+0x110, id
 // +0x114; gone when +0x3B differs, +0 is clear or +4 is 0xFF) to a target object (+0x118, id +0x11C). Ends (0)
 // when either object is gone or the source's +0x94 flags hit the beam kind's mask D_800A1A0C[+0x11D]. The start
 // is the kind's bone point (D_800A19C0 / bone D_800A1A08) of the source skeleton, the end the target position;

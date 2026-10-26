@@ -16,7 +16,7 @@ void ambient_fx_spawn_type4(s32 arg0) {
     tmp.unk10 = 50.0f;
     tmp.unk14 = 50.0f;
     tmp.unk18 = 0.0f;
-    tmp.unk1C = D_80096540;
+    tmp.unk1C = g_ambient_fx4_param_1c;
 
     temp_v0 = effect_node_create(300, -1, 30, -1, 0, 65, 32, 255, 1);
     if (temp_v0 != NULL) {

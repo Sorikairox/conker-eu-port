@@ -1,5 +1,5 @@
-73s/D_80089F40/D_80089F48/
-74s/D_80089F44/0/
+73s/g_blood_splash_kinds/g_blood_spark_kinds/
+74s/g_blood_splash_u00/0/
 75s/life;/span;/
 76s/100\.0f +/90.0f +/
 76s/+ 100\.0f/+ 90.0f/
@@ -73,7 +73,7 @@
 142s/scale \* mid/mid/
 143s/n > 1\.0f/n > 2.0f/
 143s/n -= 1\.0f/n -= 0.5f/
-144s/D_80089F48/D_80089F40/
+144s/g_blood_spark_kinds/g_blood_splash_kinds/
 146s/0x40/0x80/
 147s/(a)/(a + 1)/
 148s/300\.0f/200.0f/

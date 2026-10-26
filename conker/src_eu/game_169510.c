@@ -19,10 +19,10 @@ s32 light_alloc_lookat_buf(void);
 s32 light_alloc_light_buf(s32);
 
 
-extern s32 (*D_8008A010[])(u8 *);
-extern s32 (*D_8008A048[])(u8 *);
+extern s32 (*g_sprite_fx_update_fns[])(u8 *); /* was D_8008A010 */
+extern s32 (*g_sprite_fx_end_fns[])(u8 *); /* was D_8008A048 */
 /* Per-frame update of a sprite effect (struct210): +0x10 bit 0 active; +0x18 flags; +0x1C life (s16, counts down
- * by D_800BE9E4 when flags & 1); +0x80 / +0x81 update / end handler index (D_8008A010 / D_8008A048, 0 = none);
+ * by D_800BE9E4 when flags & 1); +0x80 / +0x81 update / end handler index (g_sprite_fx_update_fns / g_sprite_fx_end_fns, 0 = none);
  * +0x3A fade start, +0x3C fade rate: alpha +0x28 (flags & 0x8000) or +0x2D (flags & 0x10000) follows life * rate;
  * +0x20 frame position (16.16) advanced by speed +0x24, wrapped at the frame count of texture +0x1E
  * (D_80090F10 entry byte 4): flags 2 / 8 end at the top / bottom, 0x40 / 0x80 clamp, 4 ping-pong, else wrap.
@@ -47,7 +47,7 @@ void sprite_fx_update(u8 *p) {
             done = 1;
         }
     }
-    if ((p[0x80] != 0) && (D_8008A010[p[0x80]](p) == 0)) {
+    if ((p[0x80] != 0) && (g_sprite_fx_update_fns[p[0x80]](p) == 0)) {
         done = 1;
     }
     flags = *(s32 *)(p + 0x18);
@@ -73,7 +73,7 @@ void sprite_fx_update(u8 *p) {
     if (!done && ((speed = *(s32 *)(p + 0x24)) != 0)) {
         pos = *(s32 *)(p + 0x20) + speed * D_800BE9E4;
         *(s32 *)(p + 0x20) = pos;
-        top = (D_80090F14[p[0x1E]][0] << 16) - 1;
+        top = (g_sprite_anim_table[p[0x1E]][0] << 16) - 1;
         if (top < pos) {
             flags = *(s32 *)(p + 0x18);
             if (flags & 2) {
@@ -109,7 +109,7 @@ void sprite_fx_update(u8 *p) {
         }
     }
     if (done) {
-        if ((p[0x81] == 0) || (D_8008A048[p[0x81]](p) != 0)) {
+        if ((p[0x81] == 0) || (g_sprite_fx_end_fns[p[0x81]](p) != 0)) {
             node_destroy((struct102 *)p);
         }
     }
@@ -268,7 +268,7 @@ void sprite_fx_dispatch_a(struct210 *arg0) {
         idx = 0;
     }
     /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
-    ((void (*)(struct210 *))D_80089EE8[idx])(arg0);
+    ((void (*)(struct210 *))g_sprite_fx_fns_a[idx])(arg0);
 }
 
 /* was func_1513C9FC */
@@ -280,7 +280,7 @@ void sprite_fx_dispatch_b(struct210 *arg0) {
         idx = 0;
     }
     /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
-    ((void (*)(struct210 *))D_80089EF0[idx])(arg0);
+    ((void (*)(struct210 *))g_sprite_fx_fns_b[idx])(arg0);
 }
 
 /* was func_1513CA48 */
@@ -326,7 +326,7 @@ void effect3d_dispatch_a(struct210 *arg0) {
         idx = 0;
     }
     /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
-    ((void (*)(struct210 *))D_80089EF8[idx])(arg0);
+    ((void (*)(struct210 *))g_effect3d_fns_a[idx])(arg0);
 }
 
 /* was func_1513CBA4 */
@@ -338,7 +338,7 @@ void effect3d_dispatch_b(struct210 *arg0) {
         idx = 0;
     }
     /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
-    ((void (*)(struct210 *))D_80089F2C[idx])(arg0);
+    ((void (*)(struct210 *))g_effect3d_fns_b[idx])(arg0);
 }
 
 Gfx *gfx_geometry_mode_cached(Gfx *gfx, s32 set, s32 clear);
@@ -458,7 +458,7 @@ u8 *sprite_fx_draw(u8 *arg0, u8 *arg1, s16 arg2) {
 }
 /* was func_1513CF9C */
 void sprite_fx_on_msg(s32 arg0, s32 arg1, u8 arg2) {
-    D_80089F60[0](arg0, arg1, arg2);
+    g_sprite_fx_msg_fns[0](arg0, arg1, arg2);
 }
 
 /* was func_1513CFD0 */
@@ -466,16 +466,16 @@ void sprite_fx_msg_stub(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 /* P143 draft, inserted P146 */
-extern s32 (*D_8008A058[])(u8 *);
-extern s32 (*D_8008A100[])(u8 *);
-extern s32 (*D_8008A1B0[])(u8 *);
+extern s32 (*g_effect3d_update_fns[])(u8 *); /* was D_8008A058 */
+extern s32 (*g_effect3d_update2_fns[])(u8 *); /* was D_8008A100 */
+extern s32 (*g_effect3d_remove_fns[])(u8 *); /* was D_8008A1B0 */
 // effect3d_update: per-frame update of a 3D sprite effect (sibling of sprite_fx_update): +0x10 bit 0 active;
 // +0x58 flags; +0x1C life (s16, counts down by D_800BE9E4 when flags & 1); +0x70 / +0x71 update handlers
-// (D_8008A058 / D_8008A100, 0 = none; returning 0 ends the effect); while alive, flags 0x08000000 / 0x10000000 fade
+// (g_effect3d_update_fns / g_effect3d_update2_fns, 0 = none; returning 0 ends the effect); while alive, flags 0x08000000 / 0x10000000 fade
 // alpha +0x5C / +0x2B to life * rate +0x6E below life +0x6C (only ever lowering it, compared against +0x5C);
 // +0x20 frame position (16.16) advanced by speed +0x24 and wrapped at the frame count of texture +0x18
-// (D_80090F14): flags 0x800 / 0x1000 end at the top / bottom, 0x400 ping-pong, else wrap. When it ends, the end
-// handler +0x72 (D_8008A1B0, 2 slots) may veto the removal (nonzero), else node_destroy frees it.
+// (g_sprite_anim_table): flags 0x800 / 0x1000 end at the top / bottom, 0x400 ping-pong, else wrap. When it ends, the end
+// handler +0x72 (g_effect3d_remove_fns, 2 slots) may veto the removal (nonzero), else node_destroy frees it.
 /* was func_1513CFE4 */
 void effect3d_update(u8 *fx) {
     s8 done;
@@ -496,10 +496,10 @@ void effect3d_update(u8 *fx) {
             done = 1;
         }
     }
-    if ((fx[0x70] != 0) && (D_8008A058[fx[0x70]](fx) == 0)) {
+    if ((fx[0x70] != 0) && (g_effect3d_update_fns[fx[0x70]](fx) == 0)) {
         done = 1;
     }
-    if ((fx[0x71] != 0) && (D_8008A100[fx[0x71]](fx) == 0)) {
+    if ((fx[0x71] != 0) && (g_effect3d_update2_fns[fx[0x71]](fx) == 0)) {
         done = 1;
     }
     flags = *(s32 *)(fx + 0x58);
@@ -525,7 +525,7 @@ void effect3d_update(u8 *fx) {
     if (!done && ((speed = *(s32 *)(fx + 0x24)) != 0)) {
         pos = *(s32 *)(fx + 0x20) + speed * D_800BE9E4;
         *(s32 *)(fx + 0x20) = pos;
-        top = (D_80090F14[fx[0x18]][0] << 16) - 1;
+        top = (g_sprite_anim_table[fx[0x18]][0] << 16) - 1;
         if (top < pos) {
             flags = *(s32 *)(fx + 0x58);
             if (flags & 0x800) {
@@ -555,7 +555,7 @@ void effect3d_update(u8 *fx) {
         }
     }
     if (done) {
-        if ((fx[0x72] == 0) || (D_8008A1B0[fx[0x72]](fx) == 0)) {
+        if ((fx[0x72] == 0) || (g_effect3d_remove_fns[fx[0x72]](fx) == 0)) {
             node_destroy((struct102 *)fx);
         }
     }
@@ -938,7 +938,7 @@ s32 gfx_load_texture_cached(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s3
 u8 *gfx_other_mode_cached(Gfx *, s32, s32, u8 *);
 void fx_calc_color_mode_a(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void fx_calc_color_mode_b(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
-extern s32 D_8008A1BC;
+extern s32 g_effect3d_draw_fns; /* was D_8008A1BC */
 extern s32 D_800D30BC;
 
 /* was func_1513DB00 */
@@ -1013,7 +1013,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
                 }
             } else {
                 arg2 = temp_a2;
-                temp_v0_4 = ((s32 (*)()) *(s32 *)((u8 *)&D_8008A1BC + ((*(u8 *)((u8 *)arg1 + 0x73)) * 4)))(arg1, temp_a2, temp_a2);
+                temp_v0_4 = ((s32 (*)()) *(s32 *)((u8 *)&g_effect3d_draw_fns + ((*(u8 *)((u8 *)arg1 + 0x73)) * 4)))(arg1, temp_a2, temp_a2);
                 sp6C = temp_v0_4;
                 if (temp_v0_4 == 0) {
                     temp_v0_5 = arg1 + (arg2 * 4);
@@ -1094,7 +1094,7 @@ u8 *effect3d_draw(u8 *arg0, u8 *arg1, s16 arg2) {
     return arg0;
 }
 // jump table
-extern s32 (*D_8008A304[])(u8 *, s32, u8);
+extern s32 (*g_effect3d_msg_fns[])(u8 *, s32, u8); /* was D_8008A304 */
 
 /* was func_1513DF9C */
 void effect3d_on_msg(u8 *arg0, s32 arg1, u8 arg2) {
@@ -1119,7 +1119,7 @@ void effect3d_on_msg(u8 *arg0, s32 arg1, u8 arg2) {
         default: idx = 0; break;
         }
     }
-    D_8008A304[idx](arg0, arg1, arg2);
+    g_effect3d_msg_fns[idx](arg0, arg1, arg2);
 }
 
 /* was func_1513E070 */
@@ -1364,7 +1364,7 @@ void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite effect's quad for display list slot `slot`: rotation from the angles +0x40/+0x44/+0x48, matrix rows scaled
 // by +0x4C/+0x50/+0x54, translated to +0x34/+0x38/+0x3C. vtx_slot_buffer_get hands out the slot's vertex buffer (pointer
 // table at +0x100); when it is new, both halves (0x40 bytes each) are first filled from the template at +0xC0.
-// Returns the written vertices, or NULL when no buffer is available. (Draw-table D_8008A1BC entry.)
+// Returns the written vertices, or NULL when no buffer is available. (Draw-table g_effect3d_draw_fns entry.)
 /* was func_1513E83C */
 u8 *sprite_quad_build_scaled(u8 *fx, s16 slot) {
     f32 corner[4][3];
@@ -1526,7 +1526,7 @@ u8 *sprite_quad_build_screen(u8 *arg0, u8 arg1, s16 arg2) {
     }
     return NULL;
 }
-/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+/* P224: entry of draw table g_effect3d_draw_fns, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513EDB4 */
 s32 sprite_quad_build_screen_a(s32 arg0, s16 arg1) {
@@ -1544,7 +1544,7 @@ void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // effect's quad for display list slot `slot`, rotated by the angles +0x40/+0x44/+0x48 and translated to
 // +0x34/+0x38/+0x3C (no scale; sprite_quad_build_scaled is the scaled variant). New vertex buffers from vtx_slot_buffer_get are first
 // filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL when there is no buffer.
-// (Draw-table D_8008A1BC entry.)
+// (Draw-table g_effect3d_draw_fns entry.)
 /* was func_1513EE14 */
 u8 *sprite_quad_build_rot(u8 *fx, s16 slot) {
     f32 mtx[4][4];
@@ -1703,14 +1703,14 @@ u8 *sprite_quad_build_screen_rot(u8 *arg0, s16 arg1) {
     }
     return NULL;
 }
-/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+/* P224: entry of draw table g_effect3d_draw_fns, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513F4B0 */
 u8 * sprite_quad_build_axes_entry(struct210 *arg0, s16 arg1) {
     return sprite_quad_build_axes(arg0, &arg0->unk110, &arg0->unk11C, arg1);
 }
 
-// emits gDPSetCombineLERP for combine mode arg1 (table D_800A4F88), preceded by a pipe sync if *arg2 == 1
+// emits gDPSetCombineLERP for combine mode arg1 (table g_combine_mode_table), preceded by a pipe sync if *arg2 == 1
 /* was func_1513F4E4 */
 Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2) {
     s32 mode = fx_layer_to_prim_depth(arg1, 0);
@@ -1720,7 +1720,7 @@ Gfx *gfx_set_combine_mode(Gfx *arg0, u8 arg1, u8 *arg2) {
             gDPPipeSync(arg0++);
             *arg2 = 0;
         }
-#define CC(i) D_800A4F88[arg1][i]
+#define CC(i) g_combine_mode_table[arg1][i]
         // fakematch: w0 and w1 on one line (statement scheduling)
         { Gfx *_g = (Gfx *)(arg0++); _g->words.w0 = _SHIFTL(G_SETCOMBINE, 24, 8) | _SHIFTL(GCCc0w0(CC(0), CC(2), CC(4), CC(6)) | GCCc1w0(CC(8), CC(10)), 0, 24); _g->words.w1 = (unsigned int)(GCCc0w1(CC(1), CC(3), CC(5), CC(7)) | GCCc1w1(CC(9), CC(12), CC(14), CC(11), CC(13), CC(15))); }
 #undef CC
@@ -1844,7 +1844,7 @@ block_5:
 }
 u8 *beam_quad_build_cam(u8 *fx, u8 flip, f32 *scale, s16 slot);
 
-/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+/* P224: entry of draw table g_effect3d_draw_fns, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513FA2C */
 u8 * beam_quad_build_a(s32 arg0, s16 arg1) {
@@ -1855,7 +1855,7 @@ u8 * beam_quad_build_a(s32 arg0, s16 arg1) {
     return beam_quad_build_cam((u8 *) arg0, 0, sp18, arg1);
 }
 
-/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+/* P224: entry of draw table g_effect3d_draw_fns, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_1513FA70 */
 u8 * beam_quad_build_b(s32 arg0, s16 arg1) {
@@ -2005,7 +2005,7 @@ void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
 // sprite_quad_build_flat: same result as sprite_quad_build_rot (corner quad +-0x2C / +-0x30 rotated by +0x40/+0x44/+0x48,
 // translated to +0x34/+0x38/+0x3C, no scale), written as a loop over corners kept in place. New vertex buffers from
 // vtx_slot_buffer_get are first filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL
-// when there is no buffer. (Draw-table D_8008A1BC entry.)
+// when there is no buffer. (Draw-table g_effect3d_draw_fns entry.)
 /* was func_15140190 */
 u8 *sprite_quad_build_flat(u8 *fx, s16 slot) {
     f32 corner[4][3];
@@ -2053,12 +2053,12 @@ u8 *sprite_quad_build_flat(u8 *fx, s16 slot) {
 
 /* was func_151403A8 */
 void fx_lists_broadcast_a(s32 arg0, u8 arg1) {
-    node_broadcast_types(&D_800A5168, 4, arg0, arg1);
+    node_broadcast_types(&g_fx_broadcast_types_a, 4, arg0, arg1);
 }
 
 /* was func_151403DC */
 void fx_lists_broadcast_b(s32 arg0, u8 arg1) {
-    node_broadcast_types(&D_800A5178, 3, arg0, arg1);
+    node_broadcast_types(&g_fx_broadcast_types_b, 3, arg0, arg1);
 }
 
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);

@@ -17,7 +17,7 @@ void texscroll_set_speed(u8 *, s32, s32);
 // 0xF9 (world_record_find; entry index = (item - D_800DBEF4) / 160 into the flag words at D_800DC3C4). The first one
 // with bit 0 set: releases the player's current carried object (obj_remove), clears D_800CC8BA and resets the
 // player (object_hit_effects, sound 0x627 via actor_sound_play_untracked, obj_set_destroyed, mode 6 via player_hit_reaction). Then the four
-// D_800BE4F0 nodes are offset by +-object 0xE's +0x2E4 value (texscroll_set_speed).
+// g_level_scroll_handles nodes are offset by +-object 0xE's +0x2E4 value (texscroll_set_speed).
 /* was func_150F2FE0 */
 void player_item_drop_check(s32 arg0) {
     struct127 *o;
@@ -44,10 +44,10 @@ void player_item_drop_check(s32 arg0) {
     }
     o = obj_find_by_setup_id(0xE);
     off = (o != NULL) ? *(s32 *) ((u8 *) o + 0x2E4) : 0;
-    texscroll_set_speed(((u8 **) D_800BE4F0)[0], off, 0);
-    texscroll_set_speed(((u8 **) D_800BE4F0)[1], 0, -off);
-    texscroll_set_speed(((u8 **) D_800BE4F0)[2], off, 0);
-    texscroll_set_speed(((u8 **) D_800BE4F0)[3], -off, 0);
+    texscroll_set_speed(((u8 **) g_level_scroll_handles)[0], off, 0);
+    texscroll_set_speed(((u8 **) g_level_scroll_handles)[1], 0, -off);
+    texscroll_set_speed(((u8 **) g_level_scroll_handles)[2], off, 0);
+    texscroll_set_speed(((u8 **) g_level_scroll_handles)[3], -off, 0);
 }
 
 /* was func_150F320C */
@@ -264,7 +264,7 @@ s32 drip_sprite_update(u8 *arg0) {
 }
 s32 sprite_quad_build_axes();
 
-/* P224: draw table D_8008A1BC entry; the asm returns sprite_quad_build_axes's v0 and the dispatcher uses it. */
+/* P224: draw table g_effect3d_draw_fns entry; the asm returns sprite_quad_build_axes's v0 and the dispatcher uses it. */
 /* was func_150F38FC */
 u8 *drip_sprite_draw(u8 *arg0, s16 arg1) {
     return (u8 *) sprite_quad_build_axes(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);

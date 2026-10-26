@@ -9,6 +9,7 @@ extern f32 D_8009A3E0[];
 extern f32 D_8009A5E0[];
 extern u8 D_8009A7E0[];
 extern u8 D_8009A9E0[];
+/* was func_150489B0 */
 f32 math_cos_u8(arg0)
 u8 arg0;
 {

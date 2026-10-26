@@ -1,5 +1,5 @@
 #ifdef NON_MATCHING
-/* func_15147FF0 spawn request (0x18 bytes) */
+/* fxrec_spawn spawn request (0x18 bytes) */
 typedef struct {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ s16 u0C;
@@ -10,7 +10,7 @@ typedef struct {
     /* 0x16 */ u8 pad16[2];
 } Spawn3870;
 
-/* 0x1C bytes copied to the new object's data (+0x98); func_150D513C releases the sounds and the two emitters */
+/* 0x1C bytes copied to the new object's data (+0x98); object_fire_cleanup releases the sounds and the two emitters */
 typedef struct {
     /* 0x00 */ struct127 *obj;
     /* 0x04 */ u8 room;
@@ -21,7 +21,7 @@ typedef struct {
     /* 0x18 */ f32 u18;
 } Data3870;
 
-/* func_151407D0's particle spec (0x58 bytes; PartSpec layout of game_eu_1E7CC0) */
+/* particle_emitter_spawn's particle spec (0x58 bytes; PartSpec layout of game_eu_1E7CC0) */
 typedef struct {
     /* 0x00 */ u8 texture;
     /* 0x01 */ u8 u01;
@@ -45,7 +45,7 @@ typedef struct {
     /* 0x4D */ u8 pad4D[0xB];
 } Spec3870;
 
-/* func_151407D0's emitter block (filled up to 0x5A; the calls pass 0x60 / 0x68) */
+/* particle_emitter_spawn's emitter block (filled up to 0x5A; the calls pass 0x60 / 0x68) */
 typedef struct {
     /* 0x00 */ f32 u00;
     /* 0x04 */ f32 u04;
@@ -72,11 +72,11 @@ typedef struct {
     /* 0x04 */ f32 u04;
 } EmitExtra3870;
 
-u8 *func_15031C4C(struct127 *, s32, s32);
-s32 func_150D4FF0(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3);
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
+u8 *attachment_find_by_slot(struct127 *, s32, s32);
+s32 object_get_beam_ends(u8 *arg0, u8 *arg1, struct127 *arg2, s32 arg3);
+u8 *particle_emitter_spawn(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8, s32 arg9);
 s32 memcpy(u8 *, u8 *, s32);
-extern s32 func_150D5634;
+extern s32 rocket_sound_update;
 extern u8 D_800A0D90[]; /* 4 s32 texture ids (0x60..0x63) */
 extern f32 D_800A0DB8;
 extern f32 D_800A0DBC;
@@ -86,15 +86,15 @@ extern f32 D_800A0DC8;
 extern f32 D_800A0DCC;
 extern f32 D_800A0DD0;
 
-// object_fire_spawn: creates the burning-effect object for `obj` (func_15031D40): takes effect handle 0x79 (0x7A when
-// obj->id is 0x48) with func_15031C4C (none: return); the effect position and direction come from func_150D4FF0 (flag 4
-// set when it found them; else (0, 0, 0) and (0, 500, 0)); func_15147FF0 (0x20, 0x14) creates the object, whose data
+// object_fire_spawn: creates the burning-effect object for `obj` (attachment_apply_kind_effects): takes effect handle 0x79 (0x7A when
+// obj->id is 0x48) with attachment_find_by_slot (none: return); the effect position and direction come from object_get_beam_ends (flag 4
+// set when it found them; else (0, 0, 0) and (0, 500, 0)); fxrec_spawn (0x20, 0x14) creates the object, whose data
 // (+0x98) gets {obj, room, 1, handle, emitters, 20, 20}. Starts the looping sounds 0x5B3 (sound level < 5), 0x5B4 and
-// 0x5BC (level < 7 or obj +0x318 set) at the object's position with callback func_150D5634, and two emitters
-// (func_151407D0: texture 0x15 set 0x5503, and a random texture of D_800A0D90 set 0x2203 with +0x170 = {0, 1.0}),
+// 0x5BC (level < 7 or obj +0x318 set) at the object's position with callback rocket_sound_update, and two emitters
+// (particle_emitter_spawn: texture 0x15 set 0x5503, and a random texture of D_800A0D90 set 0x2203 with +0x170 = {0, 1.0}),
 // stored in the data. kind (u8) and owner go to every spawn. Returns 0 (the asm leaves a leftover v0; the callers,
-// func_15031D40 (asm) and game_eu_5D910's C, do not read it).
-void func_150D3870(struct127 *obj, u8 kind, s32 owner) {
+// attachment_apply_kind_effects (asm) and game_eu_5D910's C, do not read it).
+void object_fire_spawn(struct127 *obj, u8 kind, s32 owner) {
     EmitExtra3870 extra;
     Spec3870 spec2;
     Emit3870 emit2;
@@ -121,12 +121,12 @@ void func_150D3870(struct127 *obj, u8 kind, s32 owner) {
     blk.obj = obj;
     blk.room = obj->unique_id;
     snd = (obj->id == 0x48) ? 0x7A : 0x79;
-    handle = func_15031C4C(obj, snd, 0);
+    handle = attachment_find_by_slot(obj, snd, 0);
     if (handle == NULL) {
         return;
     }
     blk.handle = handle;
-    if (func_150D4FF0((u8 *) spawn.pos, (u8 *) dir, obj, (s32) handle) != 0) {
+    if (object_get_beam_ends((u8 *) spawn.pos, (u8 *) dir, obj, (s32) handle) != 0) {
         spawn.flags |= 4;
     } else {
         spawn.pos[0] = 0.0f;
@@ -136,21 +136,21 @@ void func_150D3870(struct127 *obj, u8 kind, s32 owner) {
         dir[2] = 0.0f;
         dir[1] = 500.0f;
     }
-    newobj = func_15147FF0(&spawn, 0x20, 0x14, 0, 13, 13, 0, 0, 0, kind, owner);
+    newobj = fxrec_spawn(&spawn, 0x20, 0x14, 0, 13, 13, 0, 0, 0, kind, owner);
     if (newobj == NULL) {
         return;
     }
     data = *(Data3870 **) (newobj + 0x98);
     memcpy((u8 *) data, (u8 *) &blk, sizeof(Data3870));
     if (D_8008FD8C < 5) {
-        func_1000FA64(0x5B3, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
-                      (s32) &func_150D5634, data, 0x5B3, 12, 0);
+        sfx_emitter_start(0x5B3, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
+                      (s32) &rocket_sound_update, data, 0x5B3, 12, 0);
     }
-    func_1000FA64(0x5B4, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
-                  (s32) &func_150D5634, data, 0x5B4, 12, 0);
+    sfx_emitter_start(0x5B4, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
+                  (s32) &rocket_sound_update, data, 0x5B4, 12, 0);
     if (D_8008FD8C < 7 || *(s32 *) ((u8 *) obj + 0x318) != 0) {
-        func_1000FA64(0x5BC, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
-                      (s32) &func_150D5634, data, 0x5BC, 12, 0);
+        sfx_emitter_start(0x5BC, data->obj->x_position, data->obj->y_position, data->obj->z_position, 1000, 1000, 200,
+                      (s32) &rocket_sound_update, data, 0x5BC, 12, 0);
     }
 
     emit1.u00 = 200.0f;
@@ -210,7 +210,7 @@ void func_150D3870(struct127 *obj, u8 kind, s32 owner) {
     spec1.u47 = 6;
     spec1.u48 = 0;
     spec1.u4C = 0xFF;
-    data->emit[0] = func_151407D0(&emit1, 0x60, &spec1, 0, 0, 0, 0, -1, kind, owner);
+    data->emit[0] = particle_emitter_spawn(&emit1, 0x60, &spec1, 0, 0, 0, 0, -1, kind, owner);
 
     extra.u00 = 0;
     extra.u04 = 1.0f;
@@ -243,7 +243,7 @@ void func_150D3870(struct127 *obj, u8 kind, s32 owner) {
     emit2.u54[3] = 0;
     emit2.u58 = 0;
     emit2.u59 = -1;
-    spec2.texture = ((s32 *) D_800A0D90)[func_150ADA20() & 3];
+    spec2.texture = ((s32 *) D_800A0D90)[random_int() & 3];
     spec2.u01 = 3;
     spec2.texSet = 0x2203;
     spec2.life = 300;
@@ -271,12 +271,12 @@ void func_150D3870(struct127 *obj, u8 kind, s32 owner) {
     spec2.u47 = 7;
     spec2.u48 = 0;
     spec2.u4C = 0xFF;
-    data->emit[1] = func_151407D0(&emit2, 0x68, &spec2, 0, 0x27, 0, 0, -1, kind, owner);
+    data->emit[1] = particle_emitter_spawn(&emit2, 0x68, &spec2, 0, 0x27, 0, 0, -1, kind, owner);
     if (data->emit[1] != NULL) {
         memcpy(data->emit[1] + 0x170, (u8 *) &extra, sizeof(EmitExtra3870));
     }
     return;
 }
 #else
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D3870.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/object_fire_spawn.s")
 #endif

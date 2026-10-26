@@ -32,10 +32,10 @@ typedef struct {
 #define FLAGS_MINUS 4
 #define FLAGS_HASH 8
 
-extern u8 D_16004878[]; // "0"
+extern u8 g_dbg_printf_str_zero[]; // "0" /* was D_16004878 */
 
-extern u8 D_16003CB8[]; // "0123456789abcdef"
-extern u8 D_16003CCC[]; // "0123456789ABCDEF"
+extern u8 g_dbg_printf_hex_lower[]; // "0123456789abcdef" /* was D_16003CB8 */
+extern u8 g_dbg_printf_hex_upper[]; // "0123456789ABCDEF" /* was D_16003CCC */
 
 
 // whats wrong with bcopy?
@@ -92,7 +92,7 @@ s32 debug_sprintf_put(u8 *arg0, u8 *arg1, u32 arg2) {
 		if (dst < 999) \
 			dst = dst * 10 + *src - '0'; \
 	}
-#define MAX_PAD (sizeof(D_16003C70) - 1)
+#define MAX_PAD (sizeof(g_dbg_printf_spaces) - 1)
 #define PAD(s, n) \
 	if (0 < (n)) { \
 		int i, j = (n); \
@@ -108,11 +108,11 @@ s32 debug_sprintf_put(u8 *arg0, u8 *arg1, u32 arg2) {
 		else \
 			return x.nchar; \
 	}
-extern char D_16003C70[33]; // spaces
-extern char D_16003C94[33]; // zeroes
-extern const char D_16004800[]; // "hlL"
-extern const char D_16004804[6]; // fchar
-extern const u32 D_1600480C[6]; // fbit
+extern char g_dbg_printf_spaces[33]; // spaces /* was D_16003C70 */
+extern char g_dbg_printf_zeroes[33]; // zeroes /* was D_16003C94 */
+extern const char g_dbg_printf_qualifiers[]; // "hlL" /* was D_16004800 */
+extern const char g_dbg_printf_flag_chars[6]; // fchar /* was D_16004804 */
+extern const u32 g_dbg_printf_flag_bits[6]; // fbit /* was D_1600480C */
 void debug_printf_put_arg(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 char *strchr(const char *, s32);
 
@@ -145,8 +145,8 @@ s32 debug_printf_core(void *prout, char *arg, const char *fmt, va_list args)
 
 		fmt = ++s;
 
-		for (x.flags = 0; (t = strchr(D_16004804, *s)) != NULL; s++) {
-			x.flags |= D_1600480C[t - D_16004804];
+		for (x.flags = 0; (t = strchr(g_dbg_printf_flag_chars, *s)) != NULL; s++) {
+			x.flags |= g_dbg_printf_flag_bits[t - g_dbg_printf_flag_chars];
 		}
 
 		if (*s == '*') {
@@ -171,7 +171,7 @@ s32 debug_printf_core(void *prout, char *arg, const char *fmt, va_list args)
 			ATOI(x.prec, s);
 		}
 
-		x.qual = strchr(D_16004800, *s) ? *s++ : '\0';
+		x.qual = strchr(g_dbg_printf_qualifiers, *s) ? *s++ : '\0';
 
 		if (x.qual == 'l' && *s == 'l') {
 			x.qual = 'L';
@@ -183,18 +183,18 @@ s32 debug_printf_core(void *prout, char *arg, const char *fmt, va_list args)
 		x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
 
 		if (!(x.flags & FLAGS_MINUS)) {
-			PAD(D_16003C70, x.width);
+			PAD(g_dbg_printf_spaces, x.width);
 		}
 
 		PUT(ac, x.n0);
-		PAD(D_16003C94, x.nz0);
+		PAD(g_dbg_printf_zeroes, x.nz0);
 		PUT(x.s, x.n1);
-		PAD(D_16003C94, x.nz1);
+		PAD(g_dbg_printf_zeroes, x.nz1);
 		PUT(x.s + x.n1, x.n2);
-		PAD(D_16003C94, x.nz2);
+		PAD(g_dbg_printf_zeroes, x.nz2);
 
 		if (x.flags & FLAGS_MINUS) {
-			PAD(D_16003C70, x.width);
+			PAD(g_dbg_printf_spaces, x.width);
 		}
 
 		fmt = s + 1;
@@ -329,9 +329,9 @@ void debug_printf_put_arg(_Pft *x, va_list *args, char type, char *buff)
 // contains delay slot
 /* P281: readable C for debug_printf_ldtob (compiled C, 296 insns): the debugger's _Ldtob; its rodata_inject tables are
    referenced by symbol (P129 practice), the late_rodata 1e8 is a literal (exact). */
-extern const f64 D_16004828[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
-extern u8 D_16004870[];          /* "NaN" */
-extern u8 D_16004874[];          /* "Inf" */
+extern const f64 g_dbg_printf_pow10_f64[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256; was D_16004828 */
+extern u8 g_dbg_printf_str_nan[];          /* "NaN"; was D_16004870 */
+extern u8 g_dbg_printf_str_inf[];          /* "Inf"; was D_16004874 */
 s16 debug_printf_ldunscale(s16 *pex, f64 *px);
 void debug_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 // debug_format_double_digits (the debugger's copy of libc _Ldtob, same code as init_printf_ldtob): converts the double in px->v for printf conversion `code` (e f g E G): default
@@ -366,7 +366,7 @@ void debug_printf_ldtob(_Pft *px, u8 code) {
     err = debug_printf_ldunscale(&xexp, &px->v.ld);
     if (err > 0) {
         px->n1 = 3;
-        debug_memcpy((u8 *) px->s, (err == 2) ? D_16004870 : D_16004874, 3); /* memcpy */
+        debug_memcpy((u8 *) px->s, (err == 2) ? g_dbg_printf_str_nan : g_dbg_printf_str_inf, 3); /* memcpy */
         return;
     }
     if (err == 0) {
@@ -382,7 +382,7 @@ void debug_printf_ldtob(_Pft *px, u8 code) {
             xexp = -n;
             for (i = 0; n > 0; n >>= 1, i++) {
                 if (n & 1) {
-                    val *= D_16004828[i];
+                    val *= g_dbg_printf_pow10_f64[i];
                 }
             }
         } else if (xexp > 0) {
@@ -390,7 +390,7 @@ void debug_printf_ldtob(_Pft *px, u8 code) {
             xexp &= ~3;
             for (n = xexp, i = 0; n > 0; n >>= 1, i++) {
                 if (n & 1) {
-                    factor *= D_16004828[i];
+                    factor *= g_dbg_printf_pow10_f64[i];
                 }
             }
             val /= factor;
@@ -468,7 +468,7 @@ void debug_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     const u8 point = '.';
 
     if (nsig <= 0) {
-        p = D_16004878;
+        p = g_dbg_printf_str_zero;
         nsig = 1;
     }
     if (code == 'f' || ((code == 'g' || code == 'G') && (-4 <= xexp) && (xexp < px->prec))) {
@@ -576,7 +576,7 @@ void debug_printf_litob(_Pft *args, u8 type) {
     s32 i;
     unsigned long long ullval;
 
-    digs = (type == 'X') ? D_16003CCC : D_16003CB8;
+    digs = (type == 'X') ? g_dbg_printf_hex_upper : g_dbg_printf_hex_lower;
     base = (type == 'o') ? 8 : ((type != 'x' && type != 'X') ? 10 : 16);
     i = 0x18;
     ullval = args->v.ll;

@@ -1,2 +1,2 @@
-s/^s32 func_150E4AD0(/void func_150E4AD0(/
+s/^s32 impact_effect_spawn(/void impact_effect_spawn(/
 s/^    return 0;$/    return;/

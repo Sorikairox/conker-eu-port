@@ -19,6 +19,6 @@ void level_sfx_cooldown_reset(void) {
 
 /* was func_15011CC0 */
 void level_obj_init_scroll_e4(void) {
-    level_dl_add_texture_scroll(D_800B0E00[0], D_800902E4, 0, -1, 0, 0, 0, 4);
-    level_dl_add_texture_scroll(D_800B0E00[1], D_800902E4, 0, -1, 0, 1, 0, 4);
+    level_dl_add_texture_scroll(D_800B0E00[0], g_tex_scroll_id_02e4, 0, -1, 0, 0, 0, 4);
+    level_dl_add_texture_scroll(D_800B0E00[1], g_tex_scroll_id_02e4, 0, -1, 0, 1, 0, 4);
 }

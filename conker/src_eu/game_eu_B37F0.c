@@ -1219,6 +1219,7 @@ struct127 *rail_find_ahead(s32 player, s32 dir, f32 *t, s32 *alt) {
 }
 
 // K&R: cpu_player_slot_release calls this without the argument.
+/* was func_150889D8 */
 s32 rail_record_index_of(arg0)
     struct127 *arg0;
 {

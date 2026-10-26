@@ -218,6 +218,7 @@ s32 debris_piece_update(u8 *arg0) {
 
 void spark_spawn_burst(f32, f32, f32, f32, s16, f32, f32, f32, f32, s16, s16, u8);
 /* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); arg3 is the f32 the asm passes on */
+/* was func_151A79EC */
 s32 debris_piece_on_ground(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5)
 {
   u8 *p;

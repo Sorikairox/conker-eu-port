@@ -2,23 +2,23 @@ diff --git a/conker/src_eu/debugger_257350.c b/conker/src_eu/debugger_257350.c
 index 75e644f2..01aafe63 100644
 --- a/conker/src_eu/debugger_257350.c
 +++ b/conker/src_eu/debugger_257350.c
-@@ -321,7 +321,124 @@ void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
+@@ -321,7 +321,124 @@ void debug_printf_put_arg(_Pft *x, va_list *args, char type, char *buff)
  
  #undef char
  // contains delay slot
 +#ifdef NON_MATCHING
-+/* P281: readable C for func_1600288C (compiled C, 296 insns): the debugger's _Ldtob; its rodata_inject tables are
++/* P281: readable C for debug_printf_ldtob (compiled C, 296 insns): the debugger's _Ldtob; its rodata_inject tables are
 +   referenced by symbol (P129 practice), the late_rodata 1e8 is a literal (exact). */
-+extern const f64 D_16004828[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
-+extern u8 D_16004870[];          /* "NaN" */
-+extern u8 D_16004874[];          /* "Inf" */
-+s16 func_16002D2C(s16 *pex, f64 *px);
-+void func_16002DE4(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
-+// debug_format_double_digits (the debugger's copy of libc _Ldtob, same code as func_10001550): converts the double in px->v for printf conversion `code` (e f g E G): default
++extern const f64 g_dbg_printf_pow10_f64[];   /* powers of ten 1e1, 1e2, 1e4, 1e8, ..., 1e256 */
++extern u8 g_dbg_printf_str_nan[];          /* "NaN" */
++extern u8 g_dbg_printf_str_inf[];          /* "Inf" */
++s16 debug_printf_ldunscale(s16 *pex, f64 *px);
++void debug_printf_genld(_Pft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
++// debug_format_double_digits (the debugger's copy of libc _Ldtob, same code as init_printf_ldtob): converts the double in px->v for printf conversion `code` (e f g E G): default
 +// precision 6 (1 for %g with precision 0), "NaN" / "Inf" copied as is, otherwise scales the value by powers of ten
 +// to 8-digit groups, generates up to 19 digits, drops leading zeros, rounds to the significant digit count and hands
-+// the digits to func_16002DE4 (_Genld).
-+void func_1600288C(_Pft *px, u8 code) {
++// the digits to debug_printf_genld (_Genld).
++void debug_printf_ldtob(_Pft *px, u8 code) {
 +    u8 buf[0x20];
 +    u8 *p;
 +    f64 val;
@@ -42,10 +42,10 @@ index 75e644f2..01aafe63 100644
 +    } else if (px->prec == 0 && (code == 'g' || code == 'G')) {
 +        px->prec = 1;
 +    }
-+    err = func_16002D2C(&xexp, &px->v.ld);
++    err = debug_printf_ldunscale(&xexp, &px->v.ld);
 +    if (err > 0) {
 +        px->n1 = 3;
-+        func_16001AD0((u8 *) px->s, (err == 2) ? D_16004870 : D_16004874, 3); /* memcpy */
++        debug_memcpy((u8 *) px->s, (err == 2) ? g_dbg_printf_str_nan : g_dbg_printf_str_inf, 3); /* memcpy */
 +        return;
 +    }
 +    if (err == 0) {
@@ -61,7 +61,7 @@ index 75e644f2..01aafe63 100644
 +            xexp = -n;
 +            for (i = 0; n > 0; n >>= 1, i++) {
 +                if (n & 1) {
-+                    val *= D_16004828[i];
++                    val *= g_dbg_printf_pow10_f64[i];
 +                }
 +            }
 +        } else if (xexp > 0) {
@@ -69,7 +69,7 @@ index 75e644f2..01aafe63 100644
 +            xexp &= ~3;
 +            for (n = xexp, i = 0; n > 0; n >>= 1, i++) {
 +                if (n & 1) {
-+                    factor *= D_16004828[i];
++                    factor *= g_dbg_printf_pow10_f64[i];
 +                }
 +            }
 +            val /= factor;
@@ -119,11 +119,11 @@ index 75e644f2..01aafe63 100644
 +            }
 +        }
 +    }
-+    func_16002DE4(px, code, p, nsig, xexp);
++    debug_printf_genld(px, code, p, nsig, xexp);
 +}
 +#else
- #pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/func_1600288C.s")
+ #pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/debug_printf_ldtob.s")
 +#endif
  // _Ldunscale
- s16 func_16002D2C(s16 *pex, f64 *px) {
+ s16 debug_printf_ldunscale(s16 *pex, f64 *px) {
      u16 *ps = (u16 *)px;

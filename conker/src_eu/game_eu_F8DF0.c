@@ -47,7 +47,7 @@ static const f32 sDiveScaleB[1] = { 0.001f };      /* 0x3A83126F */
 /* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
 #define DIVE_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
 
-// object_water_entry_splash: D_8008A0B4 handler (sibling of object_ground_splash): when obj has a model (+0x1D4) and
+// object_water_entry_splash: g_interaction_handlers handler (sibling of object_ground_splash): when obj has a model (+0x1D4) and
 // obj_fx_point_water_entry finds its effect point (pos) and the surface under it for mode arg1 (1 / 2), sends event 7 to the
 // current player record, starts a ripple (rumble_all_players_at) unless obj flag 0x2000 (+0xF4) is set, spawns a type 0x4C
 // (mode 1) / 0x4B splash particle tinted by ground_colour_by_depth's colour of pos z (registered with timed_queue_push, else

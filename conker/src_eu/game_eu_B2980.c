@@ -65,7 +65,7 @@ block_6:
     }
     goto loop_1;
 }
-/* Level start point lookup. Entries of D_800D212C are 0x18 bytes: s16 x/y/z +0, u8 +6 / +7 (angle), f32 x3 +8,
+/* Level start point lookup. Entries of g_start_points are 0x18 bytes: s16 x/y/z +0, u8 +6 / +7 (angle), f32 x3 +8,
  * u8 +0x14, s8 +0x15, s8 +0x16 (alias index). arg0 = player (0xFF: none), arg1 = start index (-1: the player's
  * saved one at rec+0x31C->+0x11B). Multiplayer (D_800BE616 && D_800D18A8) picks the start farthest from the
  * others. Returns 1 when there is no start table, else 0. arg9 is unused. */
@@ -98,7 +98,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     if (!(idx < D_800D2128) || idx < 0) {
         idx = 0;
     }
-    tab = (u8 *)D_800D212C;
+    tab = (u8 *)g_start_points;
     if (tab == NULL) {
         return 1;
     }
@@ -137,7 +137,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
                 if (team == o[0x128]) {
                     continue;
                 }
-                e = (u8 *)D_800D212C + s * 0x18;
+                e = (u8 *)g_start_points + s * 0x18;
                 dx = *(f32 *)(o + 0x14) - (f32)*(s16 *)(e + 0);
                 dz = *(f32 *)(o + 0x1C) - (f32)*(s16 *)(e + 4);
                 q = dx * dx + dz * dz;
@@ -158,7 +158,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
         ctl = *(u8 **)(rec + 0x31C);
         ctl[0x1B0] = idx;
         arg2 = 0;
-        tab = (u8 *)D_800D212C;
+        tab = (u8 *)g_start_points;
     }
     v1 = idx;
     if (arg2 != 0 && (c = *(s8 *)(tab + idx * 0x18 + 0x16)) != 0) {
@@ -180,7 +180,7 @@ s32 level_start_point_get(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8
     } else if (arg2 != 0 && *(s8 *)(tab + idx * 0x18 + 0x16) == 0) {
         D_800DDE38 = 2;
     }
-    e = (u8 *)D_800D212C + v1 * 0x18;
+    e = (u8 *)g_start_points + v1 * 0x18;
     arg4[0] = *(f32 *)(e + 8);
     arg4[1] = *(f32 *)(e + 0xC);
     arg4[2] = *(f32 *)(e + 0x10);

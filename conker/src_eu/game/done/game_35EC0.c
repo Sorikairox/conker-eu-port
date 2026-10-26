@@ -7,9 +7,9 @@
 /* was func_15008A10 */
 void obj_holder_refs_init(void) {
     D_80088720 = obj_find_by_setup_id(1);
-    D_80088724.x = 0.0f;
-    D_80088724.y = 0.0f;
-    D_80088724.z = 0.0f;
+    g_holder_target_pos.x = 0.0f;
+    g_holder_target_pos.y = 0.0f;
+    g_holder_target_pos.z = 0.0f;
     D_80088730 = obj_find_by_setup_id(1);
 }
 
@@ -30,33 +30,33 @@ void view_zoom_state_reset(void) {
     D_800DDDD8 = 0.0f;
 
     D_800DDE3C = 0;
-    D_800DDDAD = 0;
-    D_800DDE2C = 0;
-    D_800DDDB4 = 0;
-    D_800DDE1D = 0;
-    D_800DDE21 = 0;
-    D_800DDDCC = 0.0f;
-    D_800DDDDC = 0.0f;
+    g_screen_fade_dir_p1 = 0;
+    g_screen_fade_duration_p1 = 0;
+    g_screen_fade_timer_p1 = 0;
+    g_hud_lens_mode_p1 = 0;
+    g_hud_lens_scripted_p1 = 0;
+    g_hud_lens_zoom_p1 = 0.0f;
+    g_hud_lens_zoom_rate_p1 = 0.0f;
 
-    D_800DDE3D = 0;
-    D_800DDDAE = 0;
-    D_800DDE30 = 0;
-    D_800DDDB8 = 0;
-    D_800DDE1E = 0;
-    D_800DDE22 = 0;
-    D_800DDDD0 = 0.0f;
-    D_800DDDE0 = 0.0f;
+    g_hud_lens_state_p1 = 0;
+    g_screen_fade_dir_p2 = 0;
+    g_screen_fade_duration_p2 = 0;
+    g_screen_fade_timer_p2 = 0;
+    g_hud_lens_mode_p2 = 0;
+    g_hud_lens_scripted_p2 = 0;
+    g_hud_lens_zoom_p2 = 0.0f;
+    g_hud_lens_zoom_rate_p2 = 0.0f;
 
-    D_800DDE3E = 0;
-    D_800DDDAF = 0;
-    D_800DDE34 = 0;
-    D_800DDDBC = 0;
-    D_800DDE1F = 0;
-    D_800DDE23 = 0;
-    D_800DDDD4 = 0.0f;
-    D_800DDDE4 = 0.0f;
+    g_hud_lens_state_p2 = 0;
+    g_screen_fade_dir_p3 = 0;
+    g_screen_fade_duration_p3 = 0;
+    g_screen_fade_timer_p3 = 0;
+    g_hud_lens_mode_p3 = 0;
+    g_hud_lens_scripted_p3 = 0;
+    g_hud_lens_zoom_p3 = 0.0f;
+    g_hud_lens_zoom_rate_p3 = 0.0f;
 
-    D_800DDE3F = 0;
+    g_hud_lens_state_p3 = 0;
     D_800DDE18 = 0;
     D_800DDE38 = 0;
 }

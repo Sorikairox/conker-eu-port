@@ -361,7 +361,7 @@ void swing_lamp_post_toggle(void) {
 }
 
 /* P204 */
-// sky_dome_project_uv: D_80089FC8 kind-4 handler (s32 (u8 *, s32), called by mesh_effect_draw) of a double-buffered
+// sky_dome_project_uv: g_mesh_effect_draw_fns kind-4 handler (s32 (u8 *, s32), called by mesh_effect_draw) of a double-buffered
 // vertex record rec for player slot `slot`: builds this frame's matrix (rec +0x78 + D_800BE9C0 * 0x40) as a
 // translation to (p[0], p[4], p[1]) with p = rec + +0x50 + 0xF8, scaled by 0.157, and maps the 16 vertices of the
 // slot's copy (rec +0x58[D_800BE9C0 * 4 + slot]) to texture coordinates: each vertex goes through the matrix; s

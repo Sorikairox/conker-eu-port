@@ -4,10 +4,10 @@ index 7a199168..06f02ce8 100644
 +++ b/conker/src_eu/init_eu_5DA0.c
 @@ -5,7 +5,41 @@
  
- #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10005DA0.s")
+ #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/boot_map_init_segment.s")
  
 +#ifdef NON_MATCHING
-+/* P281: readable C for func_10005B04 (Rare hand asm, 55 insns, with the private entry func_10005E2C = the retry
++/* P281: readable C for tlb_area_init (Rare hand asm, 55 insns, with the private entry func_10005E2C = the retry
 +   label). The two COP0 writes (Context = 0, Wired = 2: two wired TLB entries) have no C form; the port has no TLB
 +   and its platform layer does the boot setup (tools/port/platform_replaced.tsv). */
 +extern s16 D_8003C218;           /* size of the code / TLB area in 4 KB pages */
@@ -18,7 +18,7 @@ index 7a199168..06f02ce8 100644
 +// tlb_area_init: reserves `pages` 4 KB pages (falling back to the previous page count, and retrying it for as long
 +// as that fails), keeps the area's physical address in D_8003BE74 and allocates its page bitmap (one bit per page,
 +// D_8003BE70 .. D_8003C21C).
-+void func_10005B04(s32 pages) {
++void tlb_area_init(s32 pages) {
 +    s16 prev;
 +    s32 area;
 +
@@ -28,7 +28,7 @@ index 7a199168..06f02ce8 100644
 +    prev = D_8003C218;
 +    while (TRUE) {
 +        D_8003C218 = pages;
-+        area = func_10003C6C(pages << 12, 0xFF, 4, 1, 2);
++        area = heap_alloc_tagged(pages << 12, 0xFF, 4, 1, 2);
 +        if (area != 0) {
 +            break;
 +        }
@@ -39,7 +39,7 @@ index 7a199168..06f02ce8 100644
 +    D_8003C21C = (u8 *) D_8003BE70 + ((D_8003C218 + 7) >> 3) - 1;
 +}
 +#else
- #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10005B04.s")
+ #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/tlb_area_init.s")
 +#endif
  
  #ifdef NON_MATCHING

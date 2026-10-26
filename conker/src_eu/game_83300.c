@@ -5764,9 +5764,9 @@ void obj_fade_reset(struct127 *arg0) {
 /* Fade / visibility command for an object (struct127). Commands >= 8 work on player p's visibility:
  * 8 = hide (bit p of +0x0F set, target 0), 10 = hide at once (bit p + 4 set), others = show (bit p cleared,
  * target 0xFF); a pending "at once" bit p + 4 sets the byte +0x0B + p and is cleared; the byte also jumps to the
- * target when +0x2FD or D_800DBFF4[p] is set. Commands < 8 start an alpha fade (+0x0A mode, +0x07 alpha,
+ * target when +0x2FD or g_camera_timers[p] is set. Commands < 8 start an alpha fade (+0x0A mode, +0x07 alpha,
  * +0x08 target, +0x09 step) unless a fade of a higher mode runs: 4 = fade in from 0, 5 / 6 = fade out (then
- * removal, obj_fade_update), 2 = fade to a2 by a3, 1 = set alpha a2 and stop. With D_800DBFF4 set the alpha
+ * removal, obj_fade_update), 2 = fade to a2 by a3, 1 = set alpha a2 and stop. With g_camera_timers set the alpha
  * jumps to the target. */
 /* was func_1506160C */
 void obj_fade_command(struct127 *obj, u8 cmd, u8 a2, u8 a3, u8 p) {
@@ -5792,7 +5792,7 @@ void obj_fade_command(struct127 *obj, u8 cmd, u8 a2, u8 a3, u8 p) {
             }
             o[0xF] &= ~(bit << 4);
         }
-        if (o[0x2FD] != 0 || D_800DBFF4[p] != 0) {
+        if (o[0x2FD] != 0 || g_camera_timers[p] != 0) {
             o[0xB + p] = target;
         }
         return;
@@ -5828,12 +5828,12 @@ void obj_fade_command(struct127 *obj, u8 cmd, u8 a2, u8 a3, u8 p) {
             o[8] = a2;
             break;
     }
-    if (*(s32 *)D_800DBFF4 != 0) {
+    if (*(s32 *)g_camera_timers != 0) {
         o[7] = o[8];
     }
 }
 /* Per-frame fades of an object (struct127): per player i (0..D_80082FA0) the visibility byte +0x0B + i moves by
- * 50 towards 0 when bit i of +0x0F is set, else towards 0xFF (jumps there when D_800DBFF4[i] is set). With a
+ * 50 towards 0 when bit i of +0x0F is set, else towards 0xFF (jumps there when g_camera_timers[i] is set). With a
  * fade mode (+0x0A) the alpha +0x07 steps by +0x09 towards +0x08; on arrival mode 6 / 5 calls
  * obj_remove(obj, 1 / 2), any other mode ends (+0x0A = 0). */
 /* was func_150617BC */
@@ -5850,7 +5850,7 @@ void obj_fade_update(struct127 *obj) {
         v = o[0xB + i];
         if (o[0xF] & bit) {
             if (v > 0) {
-                if (D_800DBFF4[i] != 0) {
+                if (g_camera_timers[i] != 0) {
                     v = 0;
                 } else {
                     v -= 50;
@@ -5861,7 +5861,7 @@ void obj_fade_update(struct127 *obj) {
                 o[0xB + i] = v;
             }
         } else if (v < 0xFF) {
-            if (D_800DBFF4[i] != 0) {
+            if (g_camera_timers[i] != 0) {
                 v = 0xFF;
             } else {
                 v += 50;

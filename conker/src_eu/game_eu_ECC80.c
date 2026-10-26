@@ -194,7 +194,7 @@ s32 texture_anim_start_for(u8 *, s32, s32, s32, s32, s32, s32);
 s32 setup_entry_try_spawn(s32, s32);
 
 // door_lift_update: per-frame update of the object driven by object 0x14's animation (skipped while D_800C35EA is 1
-// and D_800C3A08 is not). Runs scenery_door_swing_angle_update, starts its looping sound D_800902B8 once (handle at +0x124), and takes
+// and D_800C3A08 is not). Runs scenery_door_swing_angle_update, starts its looping sound g_tex_scroll_id_02b8 once (handle at +0x124), and takes
 // the animation progress `ratio` = frame (+8) / (length (+0x18) - 2) of object 0x14's +0x2D0 (0 without the object).
 // +0xA8 (a sway offset) is cleared, then by mode (+0x73 & 3): 2: sway -10 sin(ratio * pi * 4/3) up to ratio 0.75,
 // spawning object 0x14 when missing, and its state +0x232 set to 2 (+0x218 = 0); 3: obj_remove(obj, 0) once the
@@ -214,7 +214,7 @@ void door_lift_update(u8 *p) {
     }
     scenery_door_swing_angle_update(p);
     if (*(s32 *) (p + 0x124) == 0) {
-        *(s32 *) (p + 0x124) = texture_anim_start_for(p, D_800902B8, 1, -1, 0, 0, -8);
+        *(s32 *) (p + 0x124) = texture_anim_start_for(p, g_tex_scroll_id_02b8, 1, -1, 0, 0, -8);
     }
     obj = (u8 *) obj_find_by_setup_id(0x14);
     mode = p[0x73] & 3;

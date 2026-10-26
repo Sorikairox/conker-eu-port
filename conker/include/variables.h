@@ -356,7 +356,7 @@ extern s32  D_80044B20; // 253952 bytes, bunch of structs?
 
 /* 80080000 */
 extern s32  D_80082B20;
-extern void (*D_80082B40[])(struct108 *);
+extern void (*g_camera_level_hook_fns[])(struct108 *); /* was D_80082B40 */
 extern u8   D_80082BB4;
 extern u8   D_80082BC0;
 extern u8   D_80082BE0[4];
@@ -388,11 +388,11 @@ extern f32 D_80085EB0;
 extern f32 D_80085EB4;
 extern f32 D_80085EB8;
 extern f32 D_80085EBC;
-extern u16 D_80085EC0[];
-extern u16 D_80085F3C[];
-extern u16 D_80085FBC[];
+extern u16 g_acos_table_coarse[]; /* was D_80085EC0 */
+extern u16 g_acos_table_fine[]; /* was D_80085F3C */
+extern u16 g_acos_table_finest[]; /* was D_80085FBC */
 
-extern s32 D_80086000;
+extern s32 g_obj_table_reset_word; /* was D_80086000 */
 extern void (*D_80086004[])(s32);
 extern void (*D_8008600C[])(s32);
 extern void (*D_80086014[])(s32);
@@ -412,9 +412,9 @@ extern u64 D_800885B0;
 extern struct127 *D_80088720;
 extern struct127 *D_80088730;
 extern s32 D_80088750;
-extern vertex D_80088724;
+extern vertex g_holder_target_pos; /* was D_80088724 */
 extern u8  D_80088980;
-extern u8  D_80088B40;
+extern u8  g_storm_thunder_flag; /* was D_80088B40 */
 extern void (*D_80088B60[2])(void);
 extern u8  D_80088B90;
 extern u8  D_80088BB0;
@@ -423,24 +423,24 @@ extern s32 D_80089520;
 extern s32 D_80089524[]; // struct arrays?
 extern s32 D_80089534[];
 extern s16 D_80089550;
-extern void (*D_80089AAC[10])(void);
-extern void (*D_80089AD4[10])(void);
-extern void (*D_80089C44[])(void);
-extern void (*D_80089C54[])(void);
-extern void (*D_80089EE8[])(void);
-extern void (*D_80089EF0[])(void);
-extern void (*D_80089EF8[])(void);
-extern void (*D_80089F2C[])(void);
-extern void (*D_80089F60[])(s32, s32, u8);
+extern void (*g_object_state_fns_a[10])(void); /* was D_80089AAC */
+extern void (*g_object_state_fns_b[10])(void); /* was D_80089AD4 */
+extern void (*g_object_mode_fns_a[])(void); /* was D_80089C44 */
+extern void (*g_object_mode_fns_b[])(void); /* was D_80089C54 */
+extern void (*g_sprite_fx_fns_a[])(void); /* was D_80089EE8 */
+extern void (*g_sprite_fx_fns_b[])(void); /* was D_80089EF0 */
+extern void (*g_effect3d_fns_a[])(void); /* was D_80089EF8 */
+extern void (*g_effect3d_fns_b[])(void); /* was D_80089F2C */
+extern void (*g_sprite_fx_msg_fns[])(s32, s32, u8); /* was D_80089F60 */
 extern s32 D_8008A074[2];
-extern struct32 D_8008A0B4[];
-extern s32  D_8008A084[];
-extern void (*D_8008A4E8[])(struct260*);
-extern void (*D_8008A4C0[])(struct260*);
-extern void (*D_8008A688[])(struct260*);
-extern void (*D_8008A7B0[])(struct260*);
-extern void (*D_8008A8D8[74])(struct260*, s32, u8);
-extern s32 (*D_8008A670[])(s32, struct260*, s16);
+extern struct32 g_interaction_handlers[]; /* was D_8008A0B4 */
+extern s32  g_interaction_hook_fns[]; /* was D_8008A084 */
+extern void (*g_effect_node_update_fns_b[])(struct260*); /* was D_8008A4E8 */
+extern void (*g_effect_node_update_fns_a[])(struct260*); /* was D_8008A4C0 */
+extern void (*g_effect_node_call_a_fns[])(struct260*); /* was D_8008A688 */
+extern void (*g_effect_node_call_b_fns[])(struct260*); /* was D_8008A7B0 */
+extern void (*g_effect_node_msg_fns[74])(struct260*, s32, u8); /* was D_8008A8D8 */
+extern s32 (*g_effect_node_draw_fns[])(s32, struct260*, s16); /* was D_8008A670 */
 /* P234: EU D_8008B490; every handler takes the struct225 (the asm keeps a0 = the object at the jalr) and the
    dispatcher light_ctrl_update tests the result (0 = destroy) */
 extern s32  (*D_8008B0F0[])(struct225 *);
@@ -467,14 +467,14 @@ extern s8   D_8008FDA8;
 extern u16  D_8008FDBC;
 
 /* 8009 */
-extern s32 D_800902B8;
-extern s32 D_800902E4;
+extern s32 g_tex_scroll_id_02b8; /* was D_800902B8 */
+extern s32 g_tex_scroll_id_02e4; /* was D_800902E4 */
 extern s32 D_800902E8;
-extern s32 D_800902EC;
-extern s32 D_80090310;
-extern s32 D_80090314;
-extern s32 D_80090318;
-extern s32 D_8009031C;
+extern s32 g_tex_scroll_id_02ec; /* was D_800902EC */
+extern s32 g_tex_scroll_id_0310; /* was D_80090310 */
+extern s32 g_tex_scroll_id_0314; /* was D_80090314 */
+extern s32 g_tex_scroll_id_0318; /* was D_80090318 */
+extern s32 g_tex_scroll_id_031c; /* was D_8009031C */
 extern s32 D_80090320;
 
 extern s32 jtbl_80091A30[];
@@ -537,24 +537,24 @@ extern s32 D_80096210;
 extern f32 D_80096214;
 extern f32 D_80096218;
 extern f32 D_8009621C;
-extern f32 D_80096220;
-extern f32 D_80096224;
-extern f32 D_80096228;
-extern f32 D_8009622C;
-extern f32 D_80096230;
-extern f32 D_80096234;
-extern f32 D_80096238;
-extern f32 D_8009623C;
-extern f32 D_80096240;
-extern f32 D_80096244;
+extern f32 g_scroll_fx_pt0_x; /* was D_80096220 */
+extern f32 g_scroll_fx_pt0_y; /* was D_80096224 */
+extern f32 g_scroll_fx_pt0_z; /* was D_80096228 */
+extern f32 g_scroll_fx_pt1_x; /* was D_8009622C */
+extern f32 g_scroll_fx_pt1_y; /* was D_80096230 */
+extern f32 g_scroll_fx_pt1_z; /* was D_80096234 */
+extern f32 g_scroll_fx_pt2_y; /* was D_80096238 */
+extern f32 g_scroll_fx_pt3_x; /* was D_8009623C */
+extern f32 g_scroll_fx_pt3_y; /* was D_80096240 */
+extern f32 g_scroll_fx_pt3_z; /* was D_80096244 */
 
 extern f32 *D_800963A0;
 extern struct180 *D_80096430; // 6 x s32?
 
-extern f32 D_80096530;
-extern f32 D_80096534;
+extern f32 g_ground_emitter7_param_8; /* was D_80096530 */
+extern f32 g_ground_emitter7_param_c; /* was D_80096534 */
 
-extern f32 D_80096540;
+extern f32 g_ambient_fx4_param_1c; /* was D_80096540 */
 
 extern f32 D_80096560;
 extern f32 D_80096570;
@@ -684,11 +684,11 @@ extern f32 D_800A2154;
 // extern struct201 D_800A2CD0[];
 extern u8  D_800A2CD0[][3];
 
-extern u8 D_800A3FB4[]; // "power"
-extern u8 D_800A3FBC[]; // "../Effects/Blood/blood.c"
+extern u8 g_str_blood_power[]; // "power" /* was D_800A3FB4 */
+extern u8 g_str_blood_c_path[]; // "../Effects/Blood/blood.c" /* was D_800A3FBC */
 extern s32 D_800A4AA0; //?
-extern f32 D_800A5168;
-extern f32 D_800A5178;
+extern f32 g_fx_broadcast_types_a; /* was D_800A5168 */
+extern f32 g_fx_broadcast_types_b; /* was D_800A5178 */
 extern f32 D_800A45B4;
 extern f32 D_800A5644;
 extern f32 D_800A56A8;
@@ -816,7 +816,7 @@ extern s32 D_800B87A0[];
 extern u8  D_800BC448[];
 
 extern s32 D_800BE4A0; // struct/array of size 0x3c
-extern struct14 *D_800BE4F0;
+extern struct14 *g_level_scroll_handles; /* was D_800BE4F0 */
 extern s32 D_800BE4E0;
 extern u8  D_800BE500[5]; // might be a struct?
 extern s32 D_800BE570;
@@ -930,9 +930,9 @@ extern u8  D_800C3C90;
 extern s32 D_800C3C94;
 extern struct163 D_800C3CA0[3];
 extern u8  D_800C3E78;
-extern u16 D_800C3E7C;
+extern u16 g_matrix_arena_count; /* was D_800C3E7C */
 extern s32 D_800C3E80;
-extern s32 D_800C3E84;
+extern s32 g_matrix_arena_b; /* was D_800C3E84 */
 extern s32 D_800C3EE0;
 extern struct222* D_800C3FC0;
 extern s32 D_800C3FC4;
@@ -984,13 +984,13 @@ extern s32 D_800CC250;
 
 extern s16 D_800CC264;
 extern s32 D_800CC268;
-extern u8  D_800CC26E;
+extern u8  g_records_game_mode; /* was D_800CC26E */
 extern u8  D_800CC27C;
 extern s32 D_800CC280;
 extern s32 D_800CC284; //pointer to 6 u8s
 extern s32 D_800CC288;
 extern s32 D_800CC298; // 0x18 length
-extern u8  D_800CC2A2;
+extern u8  g_records_flag_2a2; /* was D_800CC2A2 */
 
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;
@@ -1081,7 +1081,7 @@ extern s16 D_800D2110[];
 extern s32 D_800D2120;
 extern s32 D_800D2124;
 extern s32 D_800D2128;
-extern struct187 *D_800D212C;
+extern struct187 *g_start_points; /* was D_800D212C */
 extern u16 D_800D2132;
 extern s32 D_800D2138;
 
@@ -1143,7 +1143,7 @@ extern f32 D_800D3670;
 extern s16 D_800D3674;
 extern s32 D_800D3858;
 
-extern s32 D_800D98E0;
+extern s32 g_level_timed_queue; /* was D_800D98E0 */
 extern u8  D_800D987C;
 extern u8  D_800D9890;
 
@@ -1163,7 +1163,7 @@ extern struct134 *D_800D9A24;
 extern s32 D_800D9A40;
 extern s32 D_800D9A50;
 extern struct134 *D_800D9AA0[]; // length 3?
-extern u16 D_800D9AB0[4];
+extern u16 g_sfx_cooldowns[4]; /* was D_800D9AB0 */
 extern struct17 D_800D9AC0[];
 extern u8 D_800D9AF0;
 extern struct200 D_800D9AF8[];
@@ -1231,7 +1231,7 @@ extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
 extern struct108 *D_800DBFF0;
-extern u8  D_800DBFF4[];
+extern u8  g_camera_timers[]; /* was D_800DBFF4 */
 extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;
 extern u8  D_800DBFF7;
@@ -1287,9 +1287,9 @@ extern f32  D_800DD1E8[];
 extern u8   D_800DD2C0;
 extern u8   D_800DD2D0;
 extern u8   D_800DD2A0;
-extern u8   D_800DD2A1;
-extern u8   D_800DD2A2;
-extern u8   D_800DD2A3;
+extern u8   g_particle_cooldown_p1; /* was D_800DD2A1 */
+extern u8   g_particle_cooldown_p2; /* was D_800DD2A2 */
+extern u8   g_particle_cooldown_p3; /* was D_800DD2A3 */
 
 extern u8   D_800DD404;
 extern u8   D_800DD405;
@@ -1308,44 +1308,44 @@ extern s32  D_800DDD10[];
 extern s32  D_800DDD0C;
 extern u8   D_800DDD1C;
 extern s32  D_800DDD20;
-extern u8   D_800DDD61;
+extern u8   g_flare_state_byte; /* was D_800DDD61 */
 extern s32  D_800DDD64;
 
 extern u8   D_800DDDAC;
-extern u8   D_800DDDAD;
-extern u8   D_800DDDAE;
-extern u8   D_800DDDAF;
+extern u8   g_screen_fade_dir_p1; /* was D_800DDDAD */
+extern u8   g_screen_fade_dir_p2; /* was D_800DDDAE */
+extern u8   g_screen_fade_dir_p3; /* was D_800DDDAF */
 extern s32  D_800DDDB0;
-extern s32  D_800DDDB4;
-extern s32  D_800DDDB8;
-extern s32  D_800DDDBC;
+extern s32  g_screen_fade_timer_p1; /* was D_800DDDB4 */
+extern s32  g_screen_fade_timer_p2; /* was D_800DDDB8 */
+extern s32  g_screen_fade_timer_p3; /* was D_800DDDBC */
 extern f32  D_800DDDC8;
-extern f32  D_800DDDCC;
-extern f32  D_800DDDD0;
-extern f32  D_800DDDD4;
+extern f32  g_hud_lens_zoom_p1; /* was D_800DDDCC */
+extern f32  g_hud_lens_zoom_p2; /* was D_800DDDD0 */
+extern f32  g_hud_lens_zoom_p3; /* was D_800DDDD4 */
 extern f32  D_800DDDD8;
-extern f32  D_800DDDDC;
-extern f32  D_800DDDE0;
-extern f32  D_800DDDE4;
+extern f32  g_hud_lens_zoom_rate_p1; /* was D_800DDDDC */
+extern f32  g_hud_lens_zoom_rate_p2; /* was D_800DDDE0 */
+extern f32  g_hud_lens_zoom_rate_p3; /* was D_800DDDE4 */
 extern u16  D_800DDE08;
 extern s32  D_800DDE18;
 extern u8   D_800DDE1C;
-extern u8   D_800DDE1D;
-extern u8   D_800DDE1E;
-extern u8   D_800DDE1F;
+extern u8   g_hud_lens_mode_p1; /* was D_800DDE1D */
+extern u8   g_hud_lens_mode_p2; /* was D_800DDE1E */
+extern u8   g_hud_lens_mode_p3; /* was D_800DDE1F */
 extern u8   D_800DDE20;
-extern u8   D_800DDE21;
-extern u8   D_800DDE22;
-extern u8   D_800DDE23;
-extern s32  D_800DDE2C;
+extern u8   g_hud_lens_scripted_p1; /* was D_800DDE21 */
+extern u8   g_hud_lens_scripted_p2; /* was D_800DDE22 */
+extern u8   g_hud_lens_scripted_p3; /* was D_800DDE23 */
+extern s32  g_screen_fade_duration_p1; /* was D_800DDE2C */
 extern s32  D_800DDE28;
-extern s32  D_800DDE30;
-extern s32  D_800DDE34;
+extern s32  g_screen_fade_duration_p2; /* was D_800DDE30 */
+extern s32  g_screen_fade_duration_p3; /* was D_800DDE34 */
 extern u8   D_800DDE38;
 extern u8   D_800DDE3C;
-extern u8   D_800DDE3D;
-extern u8   D_800DDE3E;
-extern u8   D_800DDE3F;
+extern u8   g_hud_lens_state_p1; /* was D_800DDE3D */
+extern u8   g_hud_lens_state_p2; /* was D_800DDE3E */
+extern u8   g_hud_lens_state_p3; /* was D_800DDE3F */
 extern u8   D_800DDE40;
 extern u8   D_800DDE50;
 extern s32  D_800DDE80[55]; // 220 bytes?
@@ -1379,44 +1379,44 @@ extern s32  *D_800E9D10; // probably not struct54
 /* debugger variables */
 
 extern s32  D_16001B8C; // a struct
-extern s8   D_160036F3; // control stick Y-axis ?
-extern s32  D_16003848[];
-extern u8   D_16003888;
-extern u16  D_1600388C;
-extern s32  D_160038A0;
-extern u8   D_160038A4;
-extern s32  D_160038A8;
-extern s32  D_16003890;
-extern s32  D_16003AF0;
-extern u8   D_16003AF4;
-extern s8   D_16003B1C;
-extern s32  D_16003B20[]; // array containing 0x20 structs?
-extern s8   D_16003B28;
-extern s32  D_16003B4C;
-extern struct118 *D_1600389C; // array or struct?
+extern s8   g_dbg_stick_y; // control stick Y-axis ? /* was D_160036F3 */
+extern s32  g_dbg_exc_cause_names[]; /* was D_16003848 */
+extern u8   g_dbg_fb_index; /* was D_16003888 */
+extern u16  g_dbg_draw_color; /* was D_1600388C */
+extern s32  g_dbg_first_text_row; /* was D_160038A0 */
+extern u8   g_dbg_is_lockup; /* was D_160038A4 */
+extern s32  g_dbg_fb_width; /* was D_160038A8 */
+extern s32  g_dbg_buttons_pressed; /* was D_16003890 */
+extern s32  g_dbg_fault_not_retryable; /* was D_16003AF0 */
+extern u8   g_dbg_page; /* was D_16003AF4 */
+extern s8   g_dbg_menu_cursor; /* was D_16003B1C */
+extern s32  g_dbg_menu_item_strs[]; // array containing 0x20 structs? /* was D_16003B20 */
+extern s8   g_dbg_regs_subpage; /* was D_16003B28 */
+extern s32  g_dbg_stack_scroll; /* was D_16003B4C */
+extern struct118 *g_dbg_fault_thread; // array or struct? /* was D_1600389C */
 
-extern u8   D_160046AC[]; // data
-extern u8   D_160046D0[];
-extern u8   D_160046DC[];
-extern u8   D_160046E8[];
-extern u8   D_160046F4[];
-extern u8   D_16004700[];
-extern u8   D_16004708[];
-extern u8   D_16004710[];
-extern u8   D_1600471C[];
-extern u8   D_16004728[];
-extern u8   D_1600472C[];
-extern u8   D_16004734[];
-extern u8   D_16004738[];
-extern u8   D_16004740[];
-extern u8   D_16004748[];
-extern u8   D_160047B0[];
-extern u8   D_160047BC[];
-extern u8   D_160047C0[];
-extern u8   D_160047D0[];
-extern u8   D_160047D4[];
-extern u8   D_160047DC[];
-extern u8   D_160047E0[];
+extern u8   g_dbg_str_title[]; // data /* was D_160046AC */
+extern u8   g_dbg_str_main_menu[]; /* was D_160046D0 */
+extern u8   g_dbg_str_menu_continue[]; /* was D_160046DC */
+extern u8   g_dbg_str_menu_no_retry[]; /* was D_160046E8 */
+extern u8   g_dbg_str_retry_code[]; /* was D_160046F4 */
+extern u8   g_dbg_str_version[]; /* was D_16004700 */
+extern u8   g_dbg_str_built[]; /* was D_16004708 */
+extern u8   g_dbg_str_build_date[]; /* was D_16004710 */
+extern u8   g_dbg_str_build_time[]; /* was D_1600471C */
+extern u8   g_dbg_str_pc[]; /* was D_16004728 */
+extern u8   g_dbg_str_cause[]; /* was D_1600472C */
+extern u8   g_dbg_str_sr[]; /* was D_16004734 */
+extern u8   g_dbg_str_badvaddr[]; /* was D_16004738 */
+extern u8   g_dbg_str_thread[]; /* was D_16004740 */
+extern u8   g_dbg_str_lockup_now[]; /* was D_16004748 */
+extern u8   g_dbg_str_stack_title[]; /* was D_160047B0 */
+extern u8   g_dbg_str_stack_addr_sep[]; /* was D_160047BC */
+extern u8   g_dbg_str_stack_val_sep[]; /* was D_160047C0 */
+extern u8   g_dbg_str_float_bad[]; /* was D_160047D0 */
+extern u8   g_dbg_str_float_fmt[]; /* was D_160047D4 */
+extern u8   g_dbg_str_float_arg_a[]; /* was D_160047DC */
+extern u8   g_dbg_str_float_arg_b[]; /* was D_160047E0 */
 
 /* EU: new decompilation (splat names, EU addresses) */
 
@@ -1435,10 +1435,10 @@ extern s16 *D_800D2530;
 extern s8   D_800DD5C0;
 extern struct_eu_node *D_800DD5C8[];
 extern void (*D_8008CF04[3])(void);
-extern void (*D_8008A33C[])(structEU_16DC80 *);
-extern void (*D_8008A384[])(structEU_16DC80 *);
+extern void (*g_effect_retire_fns[])(structEU_16DC80 *); /* was D_8008A33C */
+extern void (*g_effect_delete_fns[])(structEU_16DC80 *); /* was D_8008A384 */
 extern structEU_8008A414 D_8008A414;
-extern s32  D_800DCE20;
+extern s32  g_particle_emitter_count; /* was D_800DCE20 */
 extern void (*D_8008CF10[])(void);
 extern u16  D_800C52F0[];
 extern s32  D_800DC320;
@@ -1456,12 +1456,12 @@ extern f32  D_80099430;
 extern s32  D_800DD648;
 extern s32  D_800DD64C;
 extern u8   D_8008A500[];
-extern u8   D_160047A4[];
-extern u8   D_160047AC[];
-extern s32  D_16003B30[];
+extern u8   g_dbg_str_fpcsr[]; /* was D_160047A4 */
+extern u8   g_dbg_str_fpr_prefix[]; /* was D_160047AC */
+extern s32  g_dbg_fpcsr_flag_names[]; /* was D_16003B30 */
 extern u8   D_800CC82F[];
 extern u8   D_AB2240[]; // asset offsets table (EU address of US D_00AB1950)
-extern struct_eu_words6 D_800A55E0;
+extern struct_eu_words6 g_trigger_query_words6; /* was D_800A55E0 */
 extern s32  D_800DD62C;
 extern s32  D_800DD630;
 extern f32  D_800A5A74;
@@ -1512,16 +1512,16 @@ extern f32  D_8009A4B0;
 extern f32  D_8009A4B4;
 extern f32  D_8009A4B8;
 extern f32  D_8009A4BC;
-extern void (*D_80089F10[])(void *);
-extern void (*D_80089F28[])(void *);
+extern void (*g_bone_emitter_stop_fns_a[])(void *); /* was D_80089F10 */
+extern void (*g_bone_emitter_stop_fns_b[])(void *); /* was D_80089F28 */
 extern f32  D_8009A498;
-extern u8   D_800A43B8[][16];
+extern u8   g_hit_kind_info[][16]; /* was D_800A43B8 */
 extern f32  D_800A4990;
-extern s32 (*D_80089FB8[])(struct_eu_168A90 *);
+extern s32 (*g_mesh_effect_tick_fns[])(struct_eu_168A90 *); /* was D_80089FB8 */
 extern f32  D_800A3900;
 extern f32  D_80099460; // ln(2)?
 extern f32  D_80099464;
-extern u8   D_80090F14[][12];
+extern u8   g_sprite_anim_table[][12]; /* was D_80090F14 */
 extern s8   D_800994F0[];
 extern f32  D_80099588;
 extern f32  D_80096A2C;
@@ -1556,13 +1556,13 @@ extern f32  D_800A4D30;
 extern f32  D_800A4D34;
 extern f32  D_800A4D38;
 extern f32  D_800A4D3C;
-extern u8   D_800A4640[];
-extern u8   D_800A4644[];
+extern u8   g_impact_small_tex_ids[]; /* was D_800A4640 */
+extern u8   g_impact_small_tex_scales[]; /* was D_800A4644 */
 extern f32  D_800A06E0;
 extern f32  D_800A06E4;
-extern f32  D_800A4A04;
-extern f32  D_800A4A08;
-extern f32  D_800A4A0C;
+extern f32  g_spark_emit_speed_scale; /* was D_800A4A04 */
+extern f32  g_spark_dust_size_scale; /* was D_800A4A08 */
+extern f32  g_spark_dust_size_bias; /* was D_800A4A0C */
 extern struct17 D_eu_800A6AEC[];
 extern struct17 D_eu_800A6B10[];
 extern f32  D_800A6B34[];
@@ -1574,7 +1574,7 @@ extern s8   D_800BE7F8[];
 extern struct54 *D_80040A44; // D_800406A0.unk4 (list head) in EU
 extern struct54 *D_80040A50; // D_800406A0.unk10 (free list) in EU
 extern s16  D_800DD5EE;
-extern u8   D_800A4F88[][16];
+extern u8   g_combine_mode_table[][16]; /* was D_800A4F88 */
 extern Gfx *D_800BEDE8[];
 extern Gfx  D_8002CC90[];
 extern s32  D_800BEDE4;

@@ -1,4 +1,4 @@
-# P225 setups for object_hit_kind_effect_spawn (obj at 0x80450000; D_800A43B8 rows +0xE: kinds 0 / 8 / 9 = 0, 2 / 10 = 1, 16 = 2). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_ARGMEM=1513531C=0:60 (jal word of bone_emitter_spawn), RET on sfx_emitter_start = jal 1000FD54
+# P225 setups for object_hit_kind_effect_spawn (obj at 0x80450000; g_hit_kind_info rows +0xE: kinds 0 / 8 / 9 = 0, 2 / 10 = 1, 16 = 2). Knobs: DIFFTEST_ROMDATA=1 DIFFTEST_ARGMEM=1513531C=0:60 (jal word of bone_emitter_spawn), RET on sfx_emitter_start = jal 1000FD54
 k0f1 ! 0=80450000,1=0,2=1 ! 80450014=42C80000,80450018=C1200000,8045001C=44FA0000,80450038=00000017,80450094=0 ! 1000FD54=1234 ! ! ! !
 k0f0 ! 0=80450000,1=0,2=0 ! 80450014=42C80000,80450018=C1200000,8045001C=44FA0000,80450038=00000017,80450094=E ! 1000FD54=4321 ! ! ! !
 k2 ! 0=80450000,1=2,2=1 ! 80450014=42C80000,80450018=C1200000,8045001C=44FA0000,80450038=00000017,80450094=0 ! 1000FD54=0055 ! ! ! !

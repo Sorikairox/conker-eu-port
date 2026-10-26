@@ -44,7 +44,7 @@ s32 camera_timed_record_update(s32 idx) {
         cam = (struct108 *) ((u8 *) D_800DBFF0 + rec[1] * 0x9A0);
         D_800D31D8 = cam->unk2C0;
         D_800D2DB4 = 1;
-        D_800DBFF4[rec[1]] = 3;
+        g_camera_timers[rec[1]] = 3;
         mk = (u8 *) D_800DC450 + rec[2] * 0x18;
         ((s32 *) D_800C3A20)[0] = 1;
         ((s32 *) D_800C3A20)[1] = 0;
@@ -192,7 +192,7 @@ s32 event_action_camera(s32 id, s32 op, u8 *cmd) {
         return 1;
     case 10: /* door camera on: path record from marker a[2] */
         D_800D2DB4 = 1;
-        D_800DBFF4[id] = 3;
+        g_camera_timers[id] = 3;
         mk = (u8 *) D_800DC450 + (a[2] & 0xFFF) * 0x18;
         ((s32 *) D_800C3A20)[0] = 1;
         ((s32 *) D_800C3A20)[1] = 0;

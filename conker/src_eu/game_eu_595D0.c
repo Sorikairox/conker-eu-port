@@ -934,7 +934,7 @@ extern s32 D_8008891C;
 /* P48: model instance of object arg1 (record +0x1D4) from its root matrix m. Loads the model of id +4 when
  * D_800D19A0[id] is empty (model_load), makes sure the object has an animation state +0x2D0 (obj_anim_state_alloc),
  * then reserves model_joint_mtx_count(id) joint matrices (0x40 bytes each) in the D_800C42A8 arena (none written and
- * +0x1D4 = 0 when the D_800C3E7C-matrix arena would overflow), sets +0x1D4 to the first one and fills them with the
+ * +0x1D4 = 0 when the g_matrix_arena_count-matrix arena would overflow), sets +0x1D4 to the first one and fills them with the
  * hand-asm skeleton evaluator anim_eval_joint_matrices (D5E90.s). +0x29 of the model header selects a joint remap table
  * (D_800845BC, pairs ending in 0xFF). The evaluator's outputs D_800888F4 / D_800888F8 give the animation
  * position +0x1F8 / +0x1F4 (and +0x2D0 +0x10 with +0x246 & 0x40); +0x7C = D_8008891C. */
@@ -973,7 +973,7 @@ void obj_build_model_instance(f32 (*m)[4], s32 arg1) {
         return;
     }
     n = model_joint_mtx_count(id);
-    if ((u32)(D_800C3E7C << 6) < (u32)(D_800C42A8 + (n << 6) - D_800C42AC)) {
+    if ((u32)(g_matrix_arena_count << 6) < (u32)(D_800C42A8 + (n << 6) - D_800C42AC)) {
         *(s32 *)(obj + 0x1D4) = 0;
         return;
     }

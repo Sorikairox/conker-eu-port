@@ -96,6 +96,7 @@ void smoke_trail_dust_puff(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 a
 
 s32 impact_spark_spawn(s32, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 
+/* was func_151AF064 */
 void smoke_trail_ember_spark(arg0, arg1, arg2)
     s32 arg0;
     u8 arg1;

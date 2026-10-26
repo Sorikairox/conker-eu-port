@@ -559,7 +559,7 @@ void obj_glow_halo_free(struct210 *arg0) {
 /* P146 */
 s32 collision_ray_cast(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 f32 vec3_length(f32 *);
-// laser_sight_update: update handler (D_8008A058 slot 21) of an aim beam carried by an object (+0x110, valid while
+// laser_sight_update: update handler (g_effect3d_update_fns slot 21) of an aim beam carried by an object (+0x110, valid while
 // its +0 is set and its id +0x3B equals +0x114). The beam starts at a bone point (+0x118 in bone +0x130 space) of
 // the object's skeleton (+0x1D4; skipped in mode D_800C35EA 1 when the object's +0x74 low nibble is 0xF). With flag
 // 2 (+0x133) the end comes from the object's aim block (+0x31C): its locked target (+0x109 = hit kind, position

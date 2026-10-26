@@ -9,35 +9,35 @@ void level_setup_scroll_fx_points(void) {
     struct102 *temp_v0;
     struct174 tmp;
 
-    level_dl_add_texture_scroll(D_800B0E00[0], D_800902B8, 1, -1, 0, 0, 0, -8);
-    level_dl_add_texture_scroll(D_800B0E00[1], D_800902B8, 1, -1, 0, 1, 0, -8);
+    level_dl_add_texture_scroll(D_800B0E00[0], g_tex_scroll_id_02b8, 1, -1, 0, 0, 0, -8);
+    level_dl_add_texture_scroll(D_800B0E00[1], g_tex_scroll_id_02b8, 1, -1, 0, 1, 0, -8);
 
-    tmp.unk0 = D_80096220;
-    tmp.unk4 = D_80096224;
-    tmp.unkC = D_80096228;
+    tmp.unk0 = g_scroll_fx_pt0_x;
+    tmp.unk4 = g_scroll_fx_pt0_y;
+    tmp.unkC = g_scroll_fx_pt0_z;
     tmp.unk8 = 400.0f;
     temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }
 
-    tmp.unk0 = D_8009622C;
-    tmp.unk4 = D_80096230;
-    tmp.unkC = D_80096234;
+    tmp.unk0 = g_scroll_fx_pt1_x;
+    tmp.unk4 = g_scroll_fx_pt1_y;
+    tmp.unkC = g_scroll_fx_pt1_z;
     temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }
 
-    tmp.unk4 = D_80096238;
+    tmp.unk4 = g_scroll_fx_pt2_y;
     temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }
 
-    tmp.unk0 = D_8009623C;
-    tmp.unk4 = D_80096240;
-    tmp.unkC = D_80096244;
+    tmp.unk0 = g_scroll_fx_pt3_x;
+    tmp.unk4 = g_scroll_fx_pt3_y;
+    tmp.unkC = g_scroll_fx_pt3_z;
     temp_v0 = (struct102 *)effect_node_create_nodraw((s16) ((random_int() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->unk28, &tmp, 16);

@@ -304,7 +304,7 @@ s32 ground_trail_b_alive_check(u8 *arg0) {
 s32 object_list_move_1(u8 *);
 s32 object_list_free(u8 *);
 
-/* D_80089E40 table entries 6 / 16 (s32 (*)(obj), see emitter_trail_update): clear the data's word +0x70, then return
+/* g_emitter_trail_type_fns table entries 6 / 16 (s32 (*)(obj), see emitter_trail_update): clear the data's word +0x70, then return
  * object_list_move_1 / object_list_free's result (the asm tail value). */
 /* was func_150C7240 */
 s32 ground_trail_b_retire(u8 *arg0) {

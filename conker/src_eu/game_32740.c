@@ -41,7 +41,7 @@ void camera_level_init(s32 arg0, s32 arg1) {
     do {
         D_800BE6D0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
         camera_controller_init((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), i, (s16)arg0, arg1);
-        D_800DBFF4[i] = 0;
+        g_camera_timers[i] = 0;
         i++;
     } while (i <= (u32)D_80082FA0);
     camera_viewport_tables_reset();
@@ -69,7 +69,7 @@ void camera_level_init(s32 arg0, s32 arg1) {
 //     do {
 //         D_800BE2B0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
 //         camera_controller_init(&D_800DBFF0[i], i, arg0, arg1);
-//         D_800DBFF4[i] = 0;
+//         g_camera_timers[i] = 0;
 //     } while (D_80082FA0 >= i++) ;
 //
 //     func_1512ABF8();

@@ -10,9 +10,9 @@
 65s/drop.unk4 = /drop.unk0 = /
 68s/pos\[1\]/pos[1] + 100.0f/
 70s/water = 0;/water = 1;/
-72s/D_80089DC0\[kind\] + 2/D_80089DC0[kind]/
-72s/D_800A42F4\[kind\] - 2/D_800A42F4[kind]/
-72s/D_800A4344\[kind\]/D_800A4344[kind + 1]/
+72s/g_debris_model_lists\[kind\] + 2/g_debris_model_lists[kind]/
+72s/g_debris_list_counts\[kind\] - 2/g_debris_list_counts[kind]/
+72s/g_debris_spec_bytes\[kind\]/g_debris_spec_bytes[kind + 1]/
 72s/size, kind/size, kind + 1/
 74s/!= 2/!= 1/
 75s/arg1, arg2/arg1, 0/

@@ -44,10 +44,10 @@ chk EQUIV  sfx_cooldown_tick src_eu/game_130CB0.c
 chk EQUIV  effect_pulse_sine_update src_eu/game_16DC80.c
 chk EQUIV  effect_orbit_update src_eu/game_16DC80.c
 chk EQUIV  camera_push_mode src_eu/game_14FF90.c
-chk DIFFER sfx_cooldown_clear src_eu/game_130CB0.c 's/D_800D9AB0, 8/D_800D9AB0, 6/'
+chk DIFFER sfx_cooldown_clear src_eu/game_130CB0.c 's/g_sfx_cooldowns, 8/g_sfx_cooldowns, 6/'
 # note: 's/> D_800BE9E4/>= D_800BE9E4/' is a semantically equivalent mutation (x-=x gives 0 too); difftest says EQUIV
-chk EQUIV  sfx_cooldown_tick src_eu/game_130CB0.c 's/D_800D9AB0\[i\] > D_800BE9E4/D_800D9AB0[i] >= D_800BE9E4/'
-chk DIFFER sfx_cooldown_tick src_eu/game_130CB0.c 's/D_800D9AB0\[i\] = 0;/D_800D9AB0[i] = 1;/'
+chk EQUIV  sfx_cooldown_tick src_eu/game_130CB0.c 's/g_sfx_cooldowns\[i\] > D_800BE9E4/g_sfx_cooldowns[i] >= D_800BE9E4/'
+chk DIFFER sfx_cooldown_tick src_eu/game_130CB0.c 's/g_sfx_cooldowns\[i\] = 0;/g_sfx_cooldowns[i] = 1;/'
 chk DIFFER sfx_cooldown_tick src_eu/game_130CB0.c 's/i < 4;/i < 3;/'
 chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/temp->unkC \* D_800BE9A4/temp->unk4 * D_800BE9A4/'
 chk DIFFER effect_pulse_sine_update src_eu/game_16DC80.c 's/return 1;/return 2;/'
@@ -235,10 +235,10 @@ TRIALS=4 chkce DIFFER rail_racers_update "$SAB7C" 's/(s32) "%d"/(s32) "%x"/'
 TRIALS=4 chkce DIFFER rail_racers_update "$SAB7C DIFFTEST_TUPEEK_OLD=1"
 # P221: a jalr to an unaligned / unstubbable target ends the trial as a common fault (inconclusive) on both sides
 # (DIFFTEST_BADJALR_OLD=1 = old: stub_at refused it silently and both sides ran into garbage, then into their own code:
-# effect_handle_message trial 24 handler 0x1167216A from a random D_8008A3CC). Different / one-sided bad targets still DIFFER.
+# effect_handle_message trial 24 handler 0x1167216A from a random g_effect_msg_fns). Different / one-sided bad targets still DIFFER.
 TRIALS=32 chkce EQUIV  effect_handle_message ""
 TRIALS=32 chkce DIFFER effect_handle_message "DIFFTEST_BADJALR_OLD=1"
-TRIALS=32 chkce DIFFER effect_handle_message "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
+TRIALS=32 chkce DIFFER effect_handle_message "" 's/g_effect_msg_fns\[rec\[0x168\]\](rec/g_effect_msg_fns[rec[0x167]](rec/'
 TRIALS=32 chkce DIFFER effect_handle_message "" 's/(rec, msg, c);/(rec, msg, code);/'
 # P234: a callee declared only in a header the TU includes (random_int / random_float in functions.h) has a known
 # prototype: IDO's scratch f12 left right before `jal random_int` is not an argument (P232 point_spark_spawn first run
@@ -263,7 +263,7 @@ TRIALS=4 chkce EQUIV  light_beh_beam_raycast "$S60E30" "$M60E30"
 # no result line, P222).
 TRIALS=8 chkce EQUIV  sfx_cooldown_tick ""
 TRIALS=8 chkce CERR   sfx_cooldown_tick "DIFFTEST_NMNEST_OLD=1"
-TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
+TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/g_sfx_cooldowns\[i\] -= D_800BE9E4;/g_sfx_cooldowns[i] -= D_800BE9E4 + 2;/'
 TRIALS=8 chkce EQUIV  sfx_cooldown_tick "" 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/'
 TRIALS=8 chkce ERROR  sfx_cooldown_tick "DIFFTEST_STKFILL=WORD"
 TRIALS=8 chkce EQUIV  sfx_cooldown_tick "DIFFTEST_STKFILL=A5A5A5A5"
@@ -300,7 +300,7 @@ TRIALS=1 chkce KNOBERROR beam_motion_tick "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150
 # stack copy of a 9-byte part list; the pointer itself differs between the builds, so only the deref sees a swapped list).
 S4A80="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=804100A0 DIFFTEST_POKE=800DC324=80410000,800DC3C4=80420000,80420004=0000000C,80410110=0000F800,800CCD48=00000000,800CD074=00000001 DIFFTEST_ARGMEM=15149A50=0:4,15149A50=0+8:4,15149A50=0*4:9"
 chkce EQUIV  prop_owner_effects_clear "$S4A80"
-chkce DIFFER prop_owner_effects_clear "$S4A80" 's/parts = D_800A275C;/parts = D_800A2768;/'
+chkce DIFFER prop_owner_effects_clear "$S4A80" 's/parts = g_prop_owner_parts_b;/parts = g_prop_owner_parts_c;/'
 # P259: knob keys that are no jal / j target of the reference are flagged statically ("[knob not a jal target of the
 # reference ...]"), also when no trial reaches the call (P256 keyed ARGMEM on effect_nodes_broadcast's US address 151494E0; its
 # EU jal target is 15149A50, and the compare silently did nothing). chkcn: want yes|no, func, env, substring.
@@ -357,7 +357,7 @@ TRIALS=1 chkce DIFFER object_ring_burst_particles "$SD290" 's/(random_float() \*
 # md5s (ERROR "stale container view" if it still differs). The rewritten file must be the DIFFER mutant, not CERR.
 F28=$T/sfx_cooldown_tick.mut.c
 sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/sfx_cooldown_tick.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
-TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
+TRIALS=8 chkce DIFFER sfx_cooldown_tick "" 's/g_sfx_cooldowns\[i\] -= D_800BE9E4;/g_sfx_cooldowns[i] -= D_800BE9E4 + 2;/'
 # P280: DIFFTEST_ARGMEM "N:LEN@K" compares only at the K-th call to ADDR. obj_glow_smoke_attach memcpys a 0x10 link record,
 # then a 0x5C tail: LEN 92 on every call compares stack bytes past the link record (layout-dependent, DIFFER as is);
 # with @0 / @1 the case is EQUIV and a one-ulp change of a tail constant DIFFERs.

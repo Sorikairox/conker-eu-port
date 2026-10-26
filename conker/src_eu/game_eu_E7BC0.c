@@ -186,7 +186,7 @@ s32 fx_gravity_spin_update(f32 *arg0) {
 }
 
 /* P143 */
-// effect_fade_by_height: update handler (D_8008A100 slot 2) of a sprite effect: alpha +0x5C = min(life +0x1C * 16,
+// effect_fade_by_height: update handler (g_effect3d_update2_fns slot 2) of a sprite effect: alpha +0x5C = min(life +0x1C * 16,
 // height above +0x124 (y +0x38 minus floor) * 4, 255). Returns 0 (effect ends) once it is below the floor, else 1.
 /* was func_150BA904 */
 s32 effect_fade_by_height(u8 *fx) {

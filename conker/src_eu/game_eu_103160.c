@@ -238,8 +238,8 @@ void impact_scorch_decal_spawn(s16 *, f32 *, s32, s32);
 void impact_rumble_spawn(f32 *, s32, s32);
 void impact_cam_shake_spawn(f32 *, s32, s32);
 extern s32 D_800A0E00[3];   /* sprites of the first burst */
-extern s32 D_800A42F4[];    /* per type: entry count of the D_80089DC0 list */
-extern s32 *D_80089DC0[];   /* per type: sprite list (entries 2.. are used) */
+extern s32 g_debris_list_counts[];    /* per type: entry count of the g_debris_model_lists list; was D_80089DC0; was D_800A42F4 */
+extern s32 *g_debris_model_lists[];   /* per type: sprite list (entries 2.. are used); was D_80089DC0 */
 
 /* P67: particle request passed to mdl_particle_spawn (0x7C bytes). */
 typedef struct {
@@ -411,7 +411,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
     /* burst 2: the type's own sprites, entries 2 .. count - 1 */
     p.u72 = 0xC;
     p.u74 = 0x15;
-    for (i = 2; i < D_800A42F4[type]; i++) {
+    for (i = 2; i < g_debris_list_counts[type]; i++) {
         f32 speed = random_float() * 0.02f + 0.0052f;
         s32 ang = random_int();
         f32 c, d;
@@ -427,7 +427,7 @@ void debris_burst_destroyed_object(struct127 *arg0, s32 arg1, s32 arg2) {
         p.spinZ = random_float() * 40.45f + -20.225f;
         p.gravity = random_float() * 0.62600005f + -1.0890001f;
         p.life = (u32)random_int() % 41 + 40;
-        p.sprite = D_80089DC0[type][i];
+        p.sprite = g_debris_model_lists[type][i];
         mdl_particle_spawn(&p, 0, 0, 0, id, arg2);
     }
 

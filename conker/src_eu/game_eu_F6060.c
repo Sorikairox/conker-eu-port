@@ -650,7 +650,7 @@ s32 particle_ballistic_update(u8 *arg0) {
 // On real ground it also throws four dust puffs (sprite_fx_spawn_quad kinds 0x51..0x54) at the corners of a square of
 // half-size (rand * 96 + 352) / 2 turned by the character's yaw (obj +0x7A), then landing_dust_spray and a debris spray
 // spawn_circle_random_emit in the ground colour. The N64 code also sums the code words hit_impact_effect..hit_react_impact_large and on a
-// mismatch (anti-tamper) clears the matrix count D_800C3E7C; the port has no MIPS code there, so the
+// mismatch (anti-tamper) clears the matrix count g_matrix_arena_count; the port has no MIPS code there, so the
 // NON_MATCHING build skips the check (as owner_spawn_children, menu_settings_apply_checked). Returns 0: game_981E0 calls it without a
 // prototype (implicit int); the asm leaves a callee's v0 that nobody reads (tested as the void variant d_a150.c).
 s32 collision_floor_probe(u8 *, u16, f32, u8 *);

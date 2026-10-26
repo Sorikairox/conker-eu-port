@@ -499,7 +499,7 @@ block_6:
 // the squared half rope length). When the ends are closer than 0.0001 horizontally nothing moves; when they are too
 // far apart the rope goes taut (cord_nodes_reset_straight, whose result is returned). Each point i takes the ellipse point at
 // angle i * 0.349 (20 degrees): placed there with zero speed while flag 2 of +0x10 is set (then cleared), or with the
-// rest speed D_800A5860 while D_800DBFF4 is set; otherwise it springs towards it (pull (old - target) * sin(angle) *
+// rest speed D_800A5860 while g_camera_timers is set; otherwise it springs towards it (pull (old - target) * sin(angle) *
 // +0x40, acceleration * +0x3C over the frame time D_800BE9A4). Returns 1 except for the taut case.
 /* was func_151B4854 */
 s32 cord_update_sag(u8 *obj) {
@@ -585,7 +585,7 @@ s32 cord_update_sag(u8 *obj) {
                     seg[3] = 0.0f;
                     seg[4] = 0.0f;
                     seg[5] = 0.0f;
-                } else if (*(s32 *) D_800DBFF4 != 0) {
+                } else if (*(s32 *) g_camera_timers != 0) {
                     ((s32 *) seg)[0] = ((s32 *) target)[0];
                     ((s32 *) seg)[1] = ((s32 *) target)[1];
                     ((s32 *) seg)[2] = ((s32 *) target)[2];

@@ -90,16 +90,16 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
 
     if (D_800BE616 == 0) {
         temp_v0 = obj_interaction_category(arg0);
-        if (D_8008A084[temp_v0] != 0) {
-            temp_v0_2 = ((s32 (*)(s32, struct127 *)) D_8008A084[temp_v0])(interaction_mode_for_level(floor_flags_surface_type(arg0->unk184)), arg0);
+        if (g_interaction_hook_fns[temp_v0] != 0) {
+            temp_v0_2 = ((s32 (*)(s32, struct127 *)) g_interaction_hook_fns[temp_v0])(interaction_mode_for_level(floor_flags_surface_type(arg0->unk184)), arg0);
             if (temp_v0_2 != -1) {
-                temp_v1 = &D_8008A0B4[temp_v0_2];
+                temp_v1 = &g_interaction_handlers[temp_v0_2];
                 if (temp_v1->unk0 != 0) {
                     if (temp_v1->unk4 > 0) {
                         obj_interaction_attach_timed(arg0, temp_v0_2);
                     } else {
                         /* P317: the entries are `void (obj, s32, s32)`; the asm leaves the index in a3, no entry reads it */
-                        ((void (*)(struct127 *, s32, s32)) D_8008A0B4[temp_v0_2].unk0)(arg0, arg1, 0);
+                        ((void (*)(struct127 *, s32, s32)) g_interaction_handlers[temp_v0_2].unk0)(arg0, arg1, 0);
                     }
                 }
             }
@@ -109,8 +109,8 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
         if (char_fx_find_slot(temp_a0, 0x1A, &sp3C) != 0) {
             do {
                 temp_v0_3 = sp3C->unk10;
-                if (D_8008A0B4[temp_v0_3->unk28].unk0 != 0) {
-                    ((void (*)(struct127 *, s32, s32)) D_8008A0B4[temp_v0_3->unk28].unk0)(arg0, arg1, temp_v0_3->unkE);
+                if (g_interaction_handlers[temp_v0_3->unk28].unk0 != 0) {
+                    ((void (*)(struct127 *, s32, s32)) g_interaction_handlers[temp_v0_3->unk28].unk0)(arg0, arg1, temp_v0_3->unkE);
                 }
                 temp_t8 = sp3C->unk14;
                 sp3C = temp_t8;
@@ -119,7 +119,7 @@ void obj_interaction_update(struct127 *arg0, s32 arg1) {
     }
 }
 // requires jump table
-/* Category of object `obj` for the interaction tables D_8008A084 / D_8008A0B4 (obj_interaction_update), from its type id
+/* Category of object `obj` for the interaction tables g_interaction_hook_fns / g_interaction_handlers (obj_interaction_update), from its type id
  * (+0x04). Jump tables jtbl_800A55F8 (ids 121..165) and D_eu_800A56AC (ids 0..88); anything else is 11. */
 /* was func_15141C0C */
 s32 obj_interaction_category(struct127 *obj) {
@@ -205,8 +205,8 @@ void obj_interaction_start_timed(void *arg0, s32 arg1, s32 arg2) {
     if ((arg1 < 12) && (arg1 >= 0) &&
         (arg2 < 20) && (arg2 >= 0) &&
         (D_800BE616 == 0) &&
-        (D_8008A084[arg1] != 0) && (arg2 != -1)) {
-        if ((D_8008A0B4[arg2].unk0 != 0) && (D_8008A0B4[arg2].unk4 > 0)) {
+        (g_interaction_hook_fns[arg1] != 0) && (arg2 != -1)) {
+        if ((g_interaction_handlers[arg2].unk0 != 0) && (g_interaction_handlers[arg2].unk4 > 0)) {
             obj_interaction_attach_timed(arg0, arg2);
         }
     }
@@ -232,7 +232,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
             temp_v0 = sp58->unk10;
             if (arg1 == temp_v0->unk28) {
                 var_s1 = sp58;
-                temp_v0->unkE = (s16) D_8008A0B4[arg1].unk4;
+                temp_v0->unkE = (s16) g_interaction_handlers[arg1].unk4;
             }
             temp_t4 = sp58->unk14;
             sp58 = temp_t4;
@@ -242,7 +242,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
         rec.id = arg1;
         rec.owner = arg0;
         rec.uid = arg0->unique_id;
-        temp_v0_2 = effect_node_create((*(s16 *)((u8 *)(&D_8008A0B4[arg1]) + 6)), -1, -1, -1, 1U, 0x32U, (struct37 *)0xC, 0xFFU, 1);
+        temp_v0_2 = effect_node_create((*(s16 *)((u8 *)(&g_interaction_handlers[arg1]) + 6)), -1, -1, -1, 1U, 0x32U, (struct37 *)0xC, 0xFFU, 1);
         if (temp_v0_2 != NULL) {
             memcpy((u8 *)temp_v0_2 + 0x28, (s32 *)&rec, 0xC);
             char_fx_attach(temp_v0_2, arg0, 0x1A);
@@ -267,7 +267,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //         do {
 //             if (arg1 == sp58->unk10->unk28) {
 //                 found = sp58;
-//                 sp58->unk10->unkE = D_8008A0B4[arg1].unk4;
+//                 sp58->unk10->unkE = g_interaction_handlers[arg1].unk4;
 //             }
 //             temp = sp58->unk14;
 //             sp58 = temp;
@@ -277,7 +277,7 @@ void obj_interaction_attach_timed(struct127 *arg0, s32 arg1) {
 //         sp40.unk0 = arg1;
 //         sp40.unk4 = arg0;
 //         sp40.unk8 = arg0->unique_id;
-//         temp_v0 = effect_node_create(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, 0xC, 0xFF, 1);
+//         temp_v0 = effect_node_create(g_interaction_handlers[arg1].unk4, -1, -1, -1, 1, 0x32, 0xC, 0xFF, 1);
 //         if (temp_v0 != NULL) {
 //             memcpy((u8 *)temp_v0 + 0x28, &sp40, 0xC);
 //             char_fx_attach(temp_v0, arg0, 0x1A);
@@ -370,7 +370,7 @@ void fx_spawn_impact_particle(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8
 
 /* was func_151420F8 */
 s32 obj_query_table6(struct127 *arg0) {
-    struct_eu_words6 sp18 = D_800A55E0;
+    struct_eu_words6 sp18 = g_trigger_query_words6;
 
     if (trigger_first_touched(arg0 - D_800CC2D0, 6, &sp18, arg0) == -1) {
         return 0;

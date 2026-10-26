@@ -70,8 +70,8 @@ void level_objects_reset_state(void) {
     (*(struct134 **)((u8 *)D_800D9AA0 + 0)) = NULL;
     (*(s32 *)((u8 *)D_800D9AA0 + 4)) = 0;
     (*(s32 *)((u8 *)D_800D9AA0 + 8)) = 0;
-    D_800BE4F0 = NULL;
-    D_80088B40 = 0;
+    g_level_scroll_handles = NULL;
+    g_storm_thunder_flag = 0;
 }
 /* was func_1500E70C */
 void level_hook_level_2b(s32 arg0) {

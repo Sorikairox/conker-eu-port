@@ -3,12 +3,12 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u16 D_80085EC0[61];
-extern u16 D_80085F3C[64];
-extern u16 D_80085FBC[4];
+extern u16 g_acos_table_coarse[61]; /* was D_80085EC0 */
+extern u16 g_acos_table_fine[64]; /* was D_80085F3C */
+extern u16 g_acos_table_finest[4]; /* was D_80085FBC */
 
 #if 0
-u16 D_80085EC0[61] = {
+u16 g_acos_table_coarse[61] = { /* was D_80085EC0 */
     32768, 32442, 32116, 31789,
     31463, 31136,  30809, 30481,
     30153, 29824,  29495, 29164,
@@ -26,7 +26,7 @@ u16 D_80085EC0[61] = {
     10542,  9848,   9105,  8300,
     7414 };
 
-u16 D_80085F3C[64] = {
+u16 g_acos_table_fine[64] = { /* was D_80085F3C */
     7414, 7355, 7296, 7237,
     7176, 7116, 7055, 6993,
     6931, 6868, 6805, 6741,
@@ -44,7 +44,7 @@ u16 D_80085F3C[64] = {
     2609, 2441, 2259, 2062,
     1844, 1597, 1304, 922 };
 
-u16 D_80085FBC[4] = { 922, 798, 652, 461 };
+u16 g_acos_table_finest[4] = { 922, 798, 652, 461 }; /* was D_80085FBC */
 #endif
 
 /* was func_150485E0 */
@@ -59,17 +59,17 @@ s32 math_acos_table_lookup(s32 arg0) {
     if (arg0 >= 32736) {
         phi_v1 = 7;
         phi_a1 = 3;
-        array = D_80085FBC;
+        array = g_acos_table_finest;
         arg0 -= 32736;
     } else if (arg0 >= 30720) {
         phi_v1 = 31;
         phi_a1 = 5;
-        array = D_80085F3C;
+        array = g_acos_table_fine;
         arg0 -= 30720;
     } else {
         phi_v1 = 511;
         phi_a1 = 9;
-        array = D_80085EC0;
+        array = g_acos_table_coarse;
     }
 
     index = arg0 >> phi_a1;

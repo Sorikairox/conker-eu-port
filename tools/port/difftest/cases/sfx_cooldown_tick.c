@@ -6,16 +6,16 @@ void sfx_cooldown_tick(void) {
 
     for (i = 0; i < 4; i++)
     {
-        if (D_800D9AB0[i]) {
-            if (D_800D9AB0[i] > D_800BE9E4)
+        if (g_sfx_cooldowns[i]) {
+            if (g_sfx_cooldowns[i] > D_800BE9E4)
             {
 #ifdef PORT
-                D_800D9AB0[i] -= D_800BE9E4 + 1;
+                g_sfx_cooldowns[i] -= D_800BE9E4 + 1;
 #else
-                D_800D9AB0[i] -= D_800BE9E4;
+                g_sfx_cooldowns[i] -= D_800BE9E4;
 #endif
             } else {
-                D_800D9AB0[i] = 0;
+                g_sfx_cooldowns[i] = 0;
             }
         }
     }

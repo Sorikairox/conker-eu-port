@@ -7,7 +7,7 @@
 
 // particle_emitter_spawn: spawns a particle record from the spawn block (type byte 1 = 3, flags 0x40400000 set
 // first) through effect3d_spawn_default, copies the emitter block (emitSize bytes) to rec + 0x110, clears its word +0x44,
-// stores arg7 at +0x59 and counts the record in D_800DCE20. Returns the record or NULL. level_fire_emitters_create passes
+// stores arg7 at +0x59 and counts the record in g_particle_emitter_count. Returns the record or NULL. level_fire_emitters_create passes
 // (emit, 0x7C, spawn, 0, 0x20, 0, 0, -1, 0xFF, 1).
 /* was func_151407D0 */
 struct210 *particle_emitter_spawn(void *emit, s32 emitSize, u8 *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
@@ -26,17 +26,17 @@ struct210 *particle_emitter_spawn(void *emit, s32 emitSize, u8 *spawn, u8 arg3, 
     *(s32 *) (e + 0x44) = 0;
     e[0x59] = arg7;
     if (rec != NULL) {
-        D_800DCE20++;
+        g_particle_emitter_count++;
     }
     return rec;
 }
 
 s32 world_to_screen(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
 void vtx_slot_buffer_get(s32 *, s16, s32, s32 *, u8 *);
-extern s32 (*D_8008A330[])(u8 *, s16);
+extern s32 (*g_effect_kind_check_fns[])(u8 *, s16); /* was D_8008A330 */
 extern s32 D_800899D0[8][2];   /* z-buffer decode per exponent (code >> 13): {shift, add} */
 // particle_glow_update: per-player update of a light-flare particle (record from particle_emitter_spawn, emitter block at
-// +0x110). Runs the kind check D_8008A330[+0x169] (-1 = none), clears the player's screen cell (+0x134 / +0x144),
+// +0x110). Runs the kind check g_effect_kind_check_fns[+0x169] (-1 = none), clears the player's screen cell (+0x134 / +0x144),
 // needs flag 2 (+0x58), projects the source (+0x34) with world_to_screen and drops it outside the player's viewport
 // (D_800BE628[player] +0x24..+0x30). Gets 4 vertices from vtx_slot_buffer_get (copying the 0x40-byte template at +0xC0
 // into a fresh buffer), normalises the axis (+0x40 = source + 500 * dir, once, flag 4), takes the facing term
@@ -73,7 +73,7 @@ u8 *effect_flare_update(u8 *obj, s16 player) {
     s16 alpha;
 
     if ((s8) obj[0x169] != -1) {
-        if (D_8008A330[(s8) obj[0x169]](obj, player) == 0) {
+        if (g_effect_kind_check_fns[(s8) obj[0x169]](obj, player) == 0) {
             return NULL;
         }
     }
@@ -219,8 +219,8 @@ void effect_destroy_retire(structEU_16DC80 *arg0) {
     if (*(s32 *)((u8 *)arg0 + 0x154) != 0) {
         flare_node_remove(*(f32 **)((u8 *)arg0 + 0x154), arg0);
     }
-    D_800DCE20 -= 1;
-    D_8008A33C[arg0->unk168](arg0);
+    g_particle_emitter_count -= 1;
+    g_effect_retire_fns[arg0->unk168](arg0);
 }
 
 /* was func_15141250 */
@@ -228,12 +228,12 @@ void effect_destroy_delete(structEU_16DC80 *arg0) {
     if (*(s32 *)((u8 *)arg0 + 0x154) != 0) {
         flare_node_remove(*(f32 **)((u8 *)arg0 + 0x154), arg0);
     }
-    D_800DCE20 -= 1;
-    D_8008A384[arg0->unk168](arg0);
+    g_particle_emitter_count -= 1;
+    g_effect_delete_fns[arg0->unk168](arg0);
 }
 
 /* Per-frame grid-cell lookup for the scene nodes (P13, hand C). For the two node tables D_800DD280[2][104]
- * and the four list heads named by the index table D_800A5168[0..3], walk each list (next at 0x08). A node with
+ * and the four list heads named by the index table g_fx_broadcast_types_a[0..3], walk each list (next at 0x08). A node with
  * flag 0x2000 (word 0x58) clears its four per-player cell values (u16 at 0x15C); with flag 0x10 too, each
  * player's (x, y) cell (s32 at 0x134 / 0x144) inside the D_800BE620 x D_800BE624 grid looks up the u16 grid
  * D_800BEDE4[y][x]; out of range gives 0x7FFF. */
@@ -249,7 +249,7 @@ void effect_sample_zbuffer_cells(void) {
 
     for (row = (u8 *)D_800DD280; row != (u8 *)&D_800DD5C0; row += 0x1A0) {
         for (k = 0; k < 4; k++) {
-            node = ((u8 **)row)[((s32 *)&D_800A5168)[k]];
+            node = ((u8 **)row)[((s32 *)&g_fx_broadcast_types_a)[k]];
             for (; node != NULL; node = *(u8 **)(node + 0x8)) {
                 flags = *(s32 *)(node + 0x58);
                 if (!(flags & 0x2000)) {
@@ -374,17 +374,17 @@ s32 effect_pulse_envelope_update(u8 *arg0) {
     return 1;
 }
 
-extern void (*D_8008A3CC[])(u8 *, u8 *, s32);
+extern void (*g_effect_msg_fns[])(u8 *, u8 *, s32); /* was D_8008A3CC */
 
 // effect_message_dispatch: message handler of an effect record (P151). Forwards (rec, msg, code) to the type's
-// handler D_8008A3CC[rec +0x168] when there is one; then for messages addressed to this type (msg[0] == +0x168):
+// handler g_effect_msg_fns[rec +0x168] when there is one; then for messages addressed to this type (msg[0] == +0x168):
 // 0x22 frees the record (node_destroy), 0x24 / 0x25 set its state +0x169 to -1 / 2.
 /* was func_151416E8 */
 void effect_handle_message(u8 *rec, u8 *msg, s32 code) {
     u8 c = code;
 
-    if (D_8008A3CC[rec[0x168]] != NULL) {
-        D_8008A3CC[rec[0x168]](rec, msg, c);
+    if (g_effect_msg_fns[rec[0x168]] != NULL) {
+        g_effect_msg_fns[rec[0x168]](rec, msg, c);
     }
     if ((c == 0x22 || c == 0x24 || c == 0x25) && msg[0] == rec[0x110 + 0x58]) {
         if (c == 0x22) {

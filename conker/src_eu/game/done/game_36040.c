@@ -11,7 +11,7 @@ void level_timed_queue_init(void) {
 
 /* was func_15008BB0 */
 void level_timed_queue_create(void) {
-    D_800D98E0 = timed_queue_create(12, 1000, 1);
+    g_level_timed_queue = timed_queue_create(12, 1000, 1);
 }
 
 /* was func_15008BE0 */

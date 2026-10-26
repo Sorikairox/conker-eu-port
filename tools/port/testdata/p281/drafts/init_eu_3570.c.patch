@@ -2,17 +2,17 @@ diff --git a/conker/src_eu/init_eu_3570.c b/conker/src_eu/init_eu_3570.c
 index 2bfdbdf0..750afa98 100644
 --- a/conker/src_eu/init_eu_3570.c
 +++ b/conker/src_eu/init_eu_3570.c
-@@ -84,4 +84,47 @@ void func_10003570(OSPri pri) {
+@@ -84,4 +84,47 @@ void os_create_vi_manager(OSPri pri) {
      }
  }
  
 +#ifdef NON_MATCHING
-+/* P281: readable C for func_100036E8 (libultra viMgrMain, compiled C, 110 insns). Verified with difftest up to the
++/* P281: readable C for os_vi_manager_main (libultra viMgrMain, compiled C, 110 insns). Verified with difftest up to the
 +   N-th osRecvMesg (DIFFTEST_STOPCALL): the loop never returns. */
 +// vi_manager_main: the VI manager thread. Waits on the event queue: a retrace message swaps the VI context, counts
 +// down the retrace interval (sending the client's message when it expires and reloading it), counts the interrupt
 +// and advances __osCurrentTime by the counter ticks since the last retrace; a counter message runs the timers.
-+void func_100036E8(void *arg) {
++void os_vi_manager_main(void *arg) {
 +    OSDevMgr_s86 *dm = arg;
 +    OSViContext_s86 *vc;
 +    OSMesg mesg = NULL;
@@ -48,5 +48,5 @@ index 2bfdbdf0..750afa98 100644
 +    }
 +}
 +#else
- #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_3570/func_100036E8.s")
+ #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_3570/os_vi_manager_main.s")
 +#endif

@@ -49,12 +49,12 @@ void effect_node_update(struct260 *arg0) {
         arg0->unkE -= D_800BE9E4;
     }
     if (arg0->unk11 != -1) {
-        D_8008A4E8[arg0->unk11](arg0);
+        g_effect_node_update_fns_b[arg0->unk11](arg0);
     }
 
     if (arg0->unkE < 0) {
         if (arg0->unk10 != -1) {
-            D_8008A4C0[arg0->unk10](arg0);
+            g_effect_node_update_fns_a[arg0->unk10](arg0);
         }
     }
     if (arg0->unkE < 0) {
@@ -90,7 +90,7 @@ void effect_node_kind_call_a(struct260 *arg0) {
             idx = 0U;
         }
     }
-    D_8008A688[idx](arg0);
+    g_effect_node_call_a_fns[idx](arg0);
 }
 
 /* was func_151493E4 */
@@ -104,7 +104,7 @@ void effect_node_kind_call_b(struct260 *arg0) {
             idx = 0U;
         }
     }
-    D_8008A7B0[idx](arg0);
+    g_effect_node_call_b_fns[idx](arg0);
 }
 
 /* was func_15149434 */
@@ -115,8 +115,8 @@ void effect_node_kind_message(struct260 *arg0, s32 arg1, u8 arg2) {
         idx = 0U;
     }
 
-    if (D_8008A8D8[idx] != 0) {
-        D_8008A8D8[idx](arg0, arg1, arg2);
+    if (g_effect_node_msg_fns[idx] != 0) {
+        g_effect_node_msg_fns[idx](arg0, arg1, arg2);
     }
 }
 
@@ -124,7 +124,7 @@ void effect_node_kind_message(struct260 *arg0, s32 arg1, u8 arg2) {
 s32 effect_node_draw(s32 arg0, struct260 *arg1, s16 arg2) {
     s32 idx = arg1->unk12;
     if (idx != -1) {
-        arg0 = D_8008A670[idx](arg0, arg1, arg2);
+        arg0 = g_effect_node_draw_fns[idx](arg0, arg1, arg2);
     }
     return arg0;
 }

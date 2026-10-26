@@ -70,7 +70,7 @@ extern void (*D_80089BA0[])(u8 *);
  * gravity +0x64; 4 position +0x40 moves by the velocity +0x58 (scaled by D_800BE9A4); 0x200 alpha +0x2B fades
  * as timer * +0x30 below timer +0x2E; 0x400 size +0x38 / +0x3C changes by +0x34 below timer +0x32 (0x800 =
  * multiply once per tick, else add per tick; 0x80000 = only +0x38, 0x100000 = only +0x3C). Frame counter +0x1C
- * advances by speed +0x20 over the animation length of D_80090F14[+0x2D] (x 0x10000): 0x10 / 0x20 = die at the
+ * advances by speed +0x20 over the animation length of g_sprite_anim_table[+0x2D] (x 0x10000): 0x10 / 0x20 = die at the
  * end / start, 8 = bounce, else wrap. Then update handler D_80089B00[+0x72] (with the old position; 0 = die);
  * a dead particle runs death handler D_80089BA0[+0x73] and is freed.
  */
@@ -135,7 +135,7 @@ void particle_sprite_update(u8 *arg0) {
         }
     }
     if (!dead && (spd = *(s32 *)(arg0 + 0x20)) != 0) {
-        len = (D_80090F14[arg0[0x2D]][0] << 16) - 1;
+        len = (g_sprite_anim_table[arg0[0x2D]][0] << 16) - 1;
         fr = *(s32 *)(arg0 + 0x1C) + spd * D_800BE9E4;
         *(s32 *)(arg0 + 0x1C) = fr;
         if (len < fr) {

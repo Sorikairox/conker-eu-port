@@ -30,7 +30,7 @@ extern f32 D_800AA500[3]; /* (0, -12, 96): offset of the effect from the model n
 
 // object_hit_flash_spawn: P153: spawns the hit flash (emit_sparks_in_angle_range parameter block) on obj's model node
 // (obj +0x1D4, +0x180) for the target's class: 4 without a target or for target types 0x53 / 0xA5, else
-// obj_get_hit_kind(target); nothing for class 0x63, a class mode (D_800A43B8[class] byte 0xE) of 2, obj without a
+// obj_get_hit_kind(target); nothing for class 0x63, a class mode (g_hit_kind_info[class] byte 0xE) of 2, obj without a
 // model, or obj +0x74 low nibble 0xF. Angle: (u8) ((+0x7A >> 8) + 0x40) - 0x68; +0x3C set for class mode 1.
 // The asm leaves v0 unset; the callers (hit_react_class_fx_steam, game_981E0) declare an int result and ignore it: 0 here.
 /* was func_151B01B8 */
@@ -56,7 +56,7 @@ s32 object_hit_flash_spawn(u8 *obj, u8 *target) {
     if (class == 0x63) {
         return 0;
     }
-    cls = D_800A43B8[class];
+    cls = g_hit_kind_info[class];
     if (cls[0xE] == 2) {
         return 0;
     }
@@ -538,7 +538,7 @@ void character_sparks_update(u8 *obj) {
 extern f32 D_800AA6D0;
 extern f32 D_800AA6D4;
 extern f32 D_800AA6D8;
-// debris_fall_update: update handler (D_8008A058 slot 16) of a falling debris sprite. Motion block at +0x110:
+// debris_fall_update: update handler (g_effect3d_update_fns slot 16) of a falling debris sprite. Motion block at +0x110:
 // velocity x/y/z, gravity +0x11C; x / z speeds are multiplied by 0.25 * dt each frame, y gains gravity * dt; the
 // position +0x34 moves by the mean speed, the trail point +0x40 moves with it and then eases back towards the
 // position (factor D_800AA6D0). With floor check (+0x134) a floor probe (collision_floor_probe, from the previous height

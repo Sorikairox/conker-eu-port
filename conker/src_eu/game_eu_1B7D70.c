@@ -22,7 +22,7 @@ s32 bone_effect_spawn(s32 arg0, u8 *arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5, 
 }
 /* P143 */
 extern s32 (*D_8008D940[])(u8 *, u8 *, s32);
-// effect_follow_bone: update handler (D_8008A058 slot 2) that keeps an effect attached to a model bone. The
+// effect_follow_bone: update handler (g_effect3d_update_fns slot 2) that keeps an effect attached to a model bone. The
 // attachment at +0x170 holds two local points (+0x170, +0x17C), the model (+0x188, looked up once from the id
 // +0x18D with obj_find_by_setup_id), the bone (+0x18C) and an optional visibility check (+0x18E, index into D_8008D940,
 // -1 = none). Ends (0) when the model is missing, gone (+0) or reused for another id (+0x3B); a failing check also

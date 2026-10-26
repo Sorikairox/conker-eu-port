@@ -350,7 +350,7 @@ s32 pulse_sprite_update(u8 *arg0)
   return 1;
 }
 
-/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+/* P224: entry of draw table g_effect3d_draw_fns, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
    matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
 /* was func_150F84D8 */
 u8 * pulse_sprite_draw(u8 *arg0, s16 arg1) {

@@ -69,7 +69,7 @@ extern s32 D_800A4EA8[];
         *(s16 *) ((v) + 0xA) = (t); \
     } while (0)
 
-// electric_bolt_draw: D_8008A670 draw handler (kind 1) of the bolt record of electric_bolt_spawn (state at +0x28: object
+// electric_bolt_draw: g_effect_node_draw_fns draw handler (kind 1) of the bolt record of electric_bolt_spawn (state at +0x28: object
 // A +0x580 / id +0x584, object B +0x588 / id +0x58C, half width +0x590, min / max length +0x594 / +0x598, 1 / max
 // +0x59C, wobble +0x5A0). When either object is gone or reused, the record is marked dead (+0xE = -1). Otherwise,
 // when both have matrices (+0x1D4), the ends are D_800AA7E0 / D_800AA7EC transformed by matrix D_8008FF20 /

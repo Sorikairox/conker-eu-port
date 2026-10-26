@@ -97,7 +97,7 @@ u8 *player_screen_uv_mesh_spawn(u8 *arg0, u8 arg1, s32 arg2)
 extern u8 D_800DA130[];
 extern u8 *D_800CCA08;
 
-// object_screen_uv_project: D_80089FC8 kind-3 handler (s32 (u8 *, s32), called by mesh_effect_draw; same scheme as
+// object_screen_uv_project: g_mesh_effect_draw_fns kind-3 handler (s32 (u8 *, s32), called by mesh_effect_draw; same scheme as
 // sky_dome_project_uv) of a 20-vertex record rec attached to an object (rec + +0x50 + 0xF8 = {obj, obj id}) for
 // player view `slot`: releases the record (node_destroy) when the object is gone or replaced; returns 0 (not
 // drawn) when the object has no matrix, is hidden ((+0x74 & 0xF) == 0xF) or is the object this view looks from

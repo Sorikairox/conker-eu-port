@@ -8,7 +8,7 @@
 /req.u44 = 0.0f/s/0.0f/1.0f/
 /req.life = /s/250/251/
 /req.u56 = \*(u16 \*) (info + 0xC)/s/0xC/0xA/
-/req.u0C = /s/D_800A43B8\[15\]/D_800A43B8[14]/
+/req.u0C = /s/g_hit_kind_info\[15\]/g_hit_kind_info[14]/
 /req.u0C = /s/0.6f : 1.0f/0.5f : 1.0f/
 /req.u0C = /s/y_scale/xz_scale/
 /req.u08 = req.u0C/s/u0C/u04/
@@ -24,14 +24,14 @@
 /req.u68 = 2/s/2/3/
 /req.uid = obj->unique_id/s/unique_id/pad8B/
 /mdl_particle_spawn_ex(&req, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/(s32) arg3, 0/(s32) arg3, 1/
-/if (info == D_800A43B8\[4\]) {/s/\[4\]/[3]/
+/if (info == g_hit_kind_info\[4\]) {/s/\[4\]/[3]/
 /for (i = 0; i < 3; i++) {/s/i < 3/i < 2/
-/if (attachment_find_by_slot(obj, D_800A44F8\[i\], 0) != NULL) {/s/, 0)/, 1)/
-/req.u56 = D_800A4504\[i\]/s/\[i\]/[0]/
-/} else if (info == D_800A43B8\[5\]) {/s/\[5\]/[7]/
+/if (attachment_find_by_slot(obj, g_hit4_sounds\[i\], 0) != NULL) {/s/, 0)/, 1)/
+/req.u56 = g_hit4_spark_sprites\[i\]/s/\[i\]/[0]/
+/} else if (info == g_hit_kind_info\[5\]) {/s/\[5\]/[7]/
 /for (i = 0; i < 4; i++) {/s/i < 4/i < 3/
-/if (!(D_800A4510\[i\] & obj->unk94)) {/s/!(/(/
-/req.u56 = D_800A4520\[i\]/s/\[i\]/[3 - i]/
-/if (!(D_800A4530\[i\] & obj->unk94)) {/s/unk94/unk98/
-/req.u56 = D_800A4538\[i\]/s/\[i\]/[1 - i]/
+/if (!(g_hit5_flag_bits\[i\] & obj->unk94)) {/s/!(/(/
+/req.u56 = g_hit5_spark_sprites\[i\]/s/\[i\]/[3 - i]/
+/if (!(g_hit6_flag_bits\[i\] & obj->unk94)) {/s/unk94/unk98/
+/req.u56 = g_hit6_spark_sprites\[i\]/s/\[i\]/[1 - i]/
 /^            mdl_particle_spawn(&req, 3, 0xFF, 0, kind, owner);/s/0xFF, 0/0xFF, 1/

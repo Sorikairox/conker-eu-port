@@ -629,7 +629,7 @@ s32 sprite_anim_advance(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
 
     temp_t7 = arg3 & 0xFF;
     var_v1 = 0;
-    temp_t0 = (*D_80090F14[arg0 & 0xFF] << 0x10) - 1;
+    temp_t0 = (*g_sprite_anim_table[arg0 & 0xFF] << 0x10) - 1;
     temp_t5 = *arg2 + (*arg1 * D_800BE9E4);
     *arg2 = temp_t5;
     var_t1 = temp_t5;
@@ -673,7 +673,7 @@ s32 sprite_anim_advance(s32 arg0, s32 *arg1, s32 *arg2, s32 arg3) {
 //     s32 ret;
 //
 //     ret = 0;
-//     max = (D_80090F14[arg0][0] << 16) - 1;
+//     max = (g_sprite_anim_table[arg0][0] << 16) - 1;
 //     *arg2 += *arg1 * D_800BE9E4;
 //     pos = *arg2;
 //     if (max < pos) {

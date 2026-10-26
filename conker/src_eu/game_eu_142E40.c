@@ -2819,7 +2819,7 @@ void scenery_door_swing_angle_update(u8 *obj) {
     } else {
         bounce = *(f32 *) (obj + 0x7C);
         if (bounce == 0.0f) {
-            bounce = 0.45f; /* D_800A358C */
+            bounce = 0.45f; /* g_camera_k_358c */
         }
         speed = *(f32 *) (obj + 0x80);
         if (speed == 0.0f) {
@@ -2829,7 +2829,7 @@ void scenery_door_swing_angle_update(u8 *obj) {
         diff = math_angle_diff_deg(angle, target);
         if (fabsf(diff) < fabsf(vel)) {
             vel = -vel * bounce;
-            if (fabsf(vel) < speed * 0.05f /* D_800A3590 */) {
+            if (fabsf(vel) < speed * 0.05f /* g_camera_k_3590 */) {
                 vel = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
@@ -2839,9 +2839,9 @@ void scenery_door_swing_angle_update(u8 *obj) {
                 }
             }
         } else if (0.0f < diff) {
-            vel += (speed - vel) * 0.01f; /* D_800A3594 */
+            vel += (speed - vel) * 0.01f; /* g_camera_k_3594 */
         } else {
-            vel -= (speed + vel) * 0.01f; /* D_800A3598 */
+            vel -= (speed + vel) * 0.01f; /* g_camera_k_3598 */
         }
         if (angle < 0.0f) {
             angle += 360.0f;

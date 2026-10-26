@@ -5696,3 +5696,302 @@ func_160016F4	debugger_identity	(low) Returns its argument unchanged
 func_eu_10017D80	audio_csp_stub_eu	(low) Empty EU-only stub next to ptstart in n_cspgetstate.c
 func_eu_1501B640	obj_vertex_colours_blend	Recolours the object's vertex buffer: per colour group interpolates between key colours by a 0..1 value
 func_eu_1507340C	objev_nop_1507340c	(low) Empty object event handler
+D_160036F3	g_dbg_stick_y	(med) Debugger: controller stick Y (s8); stack page scrolls when > 40 or < -40
+D_160037F0	g_dbg_gpr_name_table	Debugger: GPR display table, 3 bytes per register (2-char name, context word index), 0-terminated
+D_16003848	g_dbg_exc_cause_names	Debugger: exception cause name strings, indexed by (cause >> 2) & 0xF
+D_16003888	g_dbg_fb_index	Debugger: index of the framebuffer (D_8002AAE8[]) the debugger draws into
+D_1600388C	g_dbg_draw_color	Debugger: current RGBA5551 text/fill colour set by debugger_set_color
+D_16003890	g_dbg_buttons_pressed	Debugger: buttons newly pressed this frame (held & ~previous), incl. stick direction bits
+D_16003894	g_dbg_buttons_held	Debugger: buttons held this frame, plus stick direction bits 0x10000..0x80000
+D_16003898	g_dbg_buttons_prev	Debugger: buttons held on the previous frame
+D_1600389C	g_dbg_fault_thread	Debugger: the faulted OSThread whose context (pc, cause, regs, sp) is displayed
+D_160038A0	g_dbg_first_text_row	(med) Debugger: first text row printing is allowed on (cells below row * 32 are skipped)
+D_160038A4	g_dbg_is_lockup	Debugger: 1 when the break is the deliberate lockup at func_150ADC50 (shows "Lockup_Now")
+D_160038A8	g_dbg_fb_width	Debugger: framebuffer width in pixels (line stride used for drawing)
+D_160038AC	g_dbg_tlb_entrylo0	(med) Debugger: 32 saved TLB EntryLo0 words (bit 2 = writable), checked against the fault page
+D_1600392C	g_dbg_tlb_entrylo1	(med) Debugger: 32 saved TLB EntryLo1 words (odd pages), checked against the fault page
+D_160039AC	g_dbg_tlb_entryhi	(med) Debugger: 32 saved TLB EntryHi page addresses compared with the faulting pc page
+D_160039E8	g_dbg_tlb_entryhi_15	(med) Debugger: entry 15 of the saved TLB EntryHi table, set from D_8003CC88 word 2
+D_16003A2C	g_dbg_tlb_pagemask	(low) Debugger: 4th saved TLB table (32 words, likely PageMask); also the end of the EntryHi scan
+D_16003A68	g_dbg_tlb_pagemask_15	(low) Debugger: entry 15 of the 4th saved TLB table, set from D_8003CC88 word 3
+D_16003AF0	g_dbg_fault_not_retryable	(med) Debugger: 1 when the faulting code cannot be retried (pc not in a writable 0x15 page); 0 offers RETRY CODE
+D_16003AF4	g_dbg_page	Debugger: current page index (1 main menu, 2 registers, 3 stack) into the page fn tables
+D_16003AF8	g_dbg_page_draw_fns	Debugger: per-page draw function table, indexed by the current page
+D_16003B08	g_dbg_page_input_fns	Debugger: per-page input function table, indexed by the current page
+D_16003B1C	g_dbg_menu_cursor	Debugger: main menu cursor (0..2)
+D_16003B20	g_dbg_menu_item_strs	Debugger: strings of the first two main menu items (registers / stack pages)
+D_16003B28	g_dbg_regs_subpage	Debugger: register page view (0 GPRs + exception, 1 / 2 FPU register halves)
+D_16003B30	g_dbg_fpcsr_flag_names	(med) Debugger: names of 6 FPCSR flag bits (from bit 12), printed for each set bit
+D_16003B48	g_dbg_gpr_name_template	(med) Debugger: 4-byte name buffer template (2 chars + NUL) used to print GPR names
+D_16003B4C	g_dbg_stack_scroll	Debugger: stack page offset in words from the faulted thread's sp
+D_16003B50	g_dbg_pow10_table	Debugger: powers of ten 1 .. 1000000000 used by debugger_print_number
+D_16003CE0	g_dbg_font_glyphs	Debugger: 8x8 font, 8 bytes per glyph starting at ' '
+D_160046AC	g_dbg_str_title	(med) Debugger: string drawn by the page-title page (page 0)
+D_160046D0	g_dbg_str_main_menu	Debugger string "MAIN MENU"
+D_160046DC	g_dbg_str_menu_continue	(low) Debugger: third menu item text when the fault is a break (cause 32) and not the lockup
+D_160046E8	g_dbg_str_menu_no_retry	(low) Debugger: third menu item text for a fault that cannot be retried
+D_160046F4	g_dbg_str_retry_code	Debugger string "RETRY CODE" (third main menu item when retry is possible)
+D_16004700	g_dbg_str_version	Debugger string "Version"
+D_16004708	g_dbg_str_built	Debugger string "Built"
+D_16004710	g_dbg_str_build_date	Debugger string "Dec 19 2000" (build date)
+D_1600471C	g_dbg_str_build_time	Debugger string "09:57:42" (build time)
+D_16004728	g_dbg_str_pc	Debugger string "Pc"
+D_1600472C	g_dbg_str_cause	Debugger string "Cause"
+D_16004734	g_dbg_str_sr	Debugger string "Sr"
+D_16004738	g_dbg_str_badvaddr	Debugger string "Badvadr"
+D_16004740	g_dbg_str_thread	Debugger string "Thread"
+D_16004748	g_dbg_str_lockup_now	Debugger string "Lockup_Now"
+D_160047A4	g_dbg_str_fpcsr	(med) Debugger: label printed before the FPCSR value on the FPU register page
+D_160047AC	g_dbg_str_fpr_prefix	(med) Debugger: prefix printed before each FPU register number
+D_160047B0	g_dbg_str_stack_title	(med) Debugger: title string of the stack page
+D_160047BC	g_dbg_str_stack_addr_sep	(low) Debugger: separator printed after each stack address
+D_160047C0	g_dbg_str_stack_val_sep	(low) Debugger: separator printed between a stack word's hex and decimal values
+D_160047D0	g_dbg_str_float_bad	(med) Debugger: text printed by debugger_print_float for NaN / Inf / denormal values
+D_160047D4	g_dbg_str_float_fmt	(med) Debugger: sprintf format used by debugger_print_float
+D_160047DC	g_dbg_str_float_arg_a	(low) Debugger: first string argument of debugger_print_float's sprintf
+D_160047E0	g_dbg_str_float_arg_b	(low) Debugger: second string argument of debugger_print_float's sprintf
+D_160047E4	g_dbg_str_nan	Debugger string "NaN" (debugger_print_number float kind)
+D_160047E8	g_dbg_str_number_float_fmt	Debugger string "%s%s%f" (debugger_print_number float kind)
+D_160047F0	g_dbg_str_empty_a	(med) Debugger empty string "" (first %s of debugger_print_number's float format)
+D_160047F4	g_dbg_str_empty_b	(med) Debugger empty string "" (second %s of debugger_print_number's float format)
+D_8002D810	g_boot_idle_stack	(med) Start of bss: 0x400-byte boot idle thread stack; debugger colours stack words inside it
+D_8002DC10	g_boot_thread_stack_4000	(low) 0x4000-byte region after the idle stack (another thread stack); debugger colours words inside it
+D_8003CC88	g_tlb_entry15_saved	(low) 4 words (EntryLo0, EntryLo1, EntryHi, PageMask?) copied into entry 15 of the debugger's TLB tables
+D_16003C70	g_dbg_printf_spaces	Debug printf: 32 spaces used for width padding
+D_16003C94	g_dbg_printf_zeroes	Debug printf: 32 '0' characters used for zero padding
+D_16003CB8	g_dbg_printf_hex_lower	Debug printf: digit string "0123456789abcdef"
+D_16003CCC	g_dbg_printf_hex_upper	Debug printf: digit string "0123456789ABCDEF" (for %X)
+D_16004800	g_dbg_printf_qualifiers	Debug printf: size qualifier characters "hlL"
+D_16004804	g_dbg_printf_flag_chars	Debug printf: flag characters (fchar) of a conversion spec
+D_1600480C	g_dbg_printf_flag_bits	Debug printf: flag bits (fbit) matching each flag character
+D_16004828	g_dbg_printf_pow10_f64	Debug printf: f64 powers of ten 1e1, 1e2, 1e4, 1e8 ... 1e256 used by ldtob
+D_16004870	g_dbg_printf_str_nan	Debug printf string "NaN"
+D_16004874	g_dbg_printf_str_inf	Debug printf string "Inf"
+D_16004878	g_dbg_printf_str_zero	Debug printf string "0" (genld)
+D_80088B40	g_storm_thunder_flag	Storm: thunder pending flag, set by storm_thunder_flag_set and consumed by storm_thunder_flag_take
+D_80088B44	g_storm_thunder_sfx_timer	Storm: frames until the next thunder sound (reloaded 0xC0..0xFF)
+D_800CC454	g_player1_floor_flags	(med) Word +0x184 of object table entry 0 (player 1 floor flags; surface 3 / 4 enables storm thunder)
+D_8008A4C0	g_effect_node_update_fns_a	(med) Effect node handler table indexed by node byte +0x10 (effect_node_update)
+D_8008A4E8	g_effect_node_update_fns_b	(med) Effect node handler table indexed by node byte +0x11 (effect_node_update)
+D_8008A670	g_effect_node_draw_fns	Effect node draw handler table (effect_node_draw)
+D_8008A688	g_effect_node_call_a_fns	(med) Effect node per-kind handler table used by effect_node_kind_call_a
+D_8008A7B0	g_effect_node_call_b_fns	(med) Effect node per-kind handler table used by effect_node_kind_call_b
+D_8008A8D8	g_effect_node_msg_fns	Effect node per-kind message handlers (74 entries, may be NULL)
+D_800C3E7C	g_matrix_arena_count	Number of 64-byte matrices per level matrix arena (level header +0x1A)
+D_800C3E84	g_matrix_arena_b	(med) Second level matrix arena (count * 64 bytes), allocated with D_800C3E80
+D_80082B40	g_camera_level_hook_fns	Per-level camera hook functions, indexed by level header +0xE (0 = none)
+D_800DD2A1	g_particle_cooldown_p1	(med) Particle emitter cooldown counter of player 1 (element 1 of the 4-byte array at D_800DD2A0)
+D_800DD2A2	g_particle_cooldown_p2	(med) Particle emitter cooldown counter of player 2 (element 2 of D_800DD2A0)
+D_800DD2A3	g_particle_cooldown_p3	(med) Particle emitter cooldown counter of player 3 (element 3 of D_800DD2A0)
+D_80088724	g_holder_target_pos	(med) Vertex: target position thrown objects ease towards (second holder's position + 50 up)
+D_800DDDAD	g_screen_fade_dir_p1	(med) Screen fade direction of view 1 (element 1 of the per-view u8 array D_800DDDAC; 0 = fade in)
+D_800DDDAE	g_screen_fade_dir_p2	(med) Screen fade direction of view 2 (element 2 of D_800DDDAC)
+D_800DDDAF	g_screen_fade_dir_p3	(med) Screen fade direction of view 3 (element 3 of D_800DDDAC)
+D_800DDDB4	g_screen_fade_timer_p1	(med) Screen fade elapsed time of view 1 (element 1 of the s32 array D_800DDDB0)
+D_800DDDB8	g_screen_fade_timer_p2	(med) Screen fade elapsed time of view 2 (element 2 of D_800DDDB0)
+D_800DDDBC	g_screen_fade_timer_p3	(med) Screen fade elapsed time of view 3 (element 3 of D_800DDDB0)
+D_800DDDCC	g_hud_lens_zoom_p1	(med) Lens / scope zoom of player 1 (element 1 of the f32 array D_800DDDC8)
+D_800DDDD0	g_hud_lens_zoom_p2	(med) Lens / scope zoom of player 2 (element 2 of D_800DDDC8)
+D_800DDDD4	g_hud_lens_zoom_p3	(med) Lens / scope zoom of player 3 (element 3 of D_800DDDC8)
+D_800DDDDC	g_hud_lens_zoom_rate_p1	(med) Lens zoom rate per frame of player 1 (element 1 of the f32 array D_800DDDD8)
+D_800DDDE0	g_hud_lens_zoom_rate_p2	(med) Lens zoom rate of player 2 (element 2 of D_800DDDD8)
+D_800DDDE4	g_hud_lens_zoom_rate_p3	(med) Lens zoom rate of player 3 (element 3 of D_800DDDD8)
+D_800DDE1D	g_hud_lens_mode_p1	(med) Lens overlay mode of player 1 (0 off, 1 / 2 cross hair style; element 1 of D_800DDE1C)
+D_800DDE1E	g_hud_lens_mode_p2	(med) Lens overlay mode of player 2 (element 2 of D_800DDE1C)
+D_800DDE1F	g_hud_lens_mode_p3	(med) Lens overlay mode of player 3 (element 3 of D_800DDE1C)
+D_800DDE21	g_hud_lens_scripted_p1	(med) Scripted lens zoom flag of player 1 (element 1 of the u8 array D_800DDE20)
+D_800DDE22	g_hud_lens_scripted_p2	(med) Scripted lens zoom flag of player 2 (element 2 of D_800DDE20)
+D_800DDE23	g_hud_lens_scripted_p3	(med) Scripted lens zoom flag of player 3 (element 3 of D_800DDE20)
+D_800DDE2C	g_screen_fade_duration_p1	(med) Screen fade duration of view 1 (element 1 of the s32 array D_800DDE28)
+D_800DDE30	g_screen_fade_duration_p2	(med) Screen fade duration of view 2 (element 2 of D_800DDE28)
+D_800DDE34	g_screen_fade_duration_p3	(med) Screen fade duration of view 3 (element 3 of D_800DDE28)
+D_800DDE3D	g_hud_lens_state_p1	(med) Lens state of player 1 (1..4, 0 = off; element 1 of the u8 array D_800DDE3C)
+D_800DDE3E	g_hud_lens_state_p2	(med) Lens state of player 2 (element 2 of D_800DDE3C)
+D_800DDE3F	g_hud_lens_state_p3	(med) Lens state of player 3 (element 3 of D_800DDE3C)
+D_800D98E0	g_level_timed_queue	Level timed queue handle (timed_queue_create(12, 1000, 1))
+D_800DDD61	g_flare_state_byte	(low) Flare node byte cleared with D_800DDD64 by flare_nodes_level_init
+D_80096220	g_scroll_fx_pt0_x	(low) Rodata f32: field +0 (x) of the 1st effect point spawned by level_setup_scroll_fx_points
+D_80096224	g_scroll_fx_pt0_y	(low) Rodata f32: field +4 (y) of the 1st scroll-fx effect point
+D_80096228	g_scroll_fx_pt0_z	(low) Rodata f32: field +0xC of the 1st scroll-fx effect point
+D_8009622C	g_scroll_fx_pt1_x	(low) Rodata f32: field +0 (x) of the 2nd scroll-fx effect point
+D_80096230	g_scroll_fx_pt1_y	(low) Rodata f32: field +4 (y) of the 2nd scroll-fx effect point
+D_80096234	g_scroll_fx_pt1_z	(low) Rodata f32: field +0xC of the 2nd scroll-fx effect point
+D_80096238	g_scroll_fx_pt2_y	(low) Rodata f32: field +4 (y) of the 3rd scroll-fx effect point (x / +0xC reused from the 2nd)
+D_8009623C	g_scroll_fx_pt3_x	(low) Rodata f32: field +0 (x) of the 4th scroll-fx effect point
+D_80096240	g_scroll_fx_pt3_y	(low) Rodata f32: field +4 (y) of the 4th scroll-fx effect point
+D_80096244	g_scroll_fx_pt3_z	(low) Rodata f32: field +0xC of the 4th scroll-fx effect point
+D_800902B8	g_tex_scroll_id_02b8	(low) Texture id scrolled by -8 (t) in both level DLs (scroll fx points / tex scroll neg / door lift)
+D_800902EC	g_tex_scroll_id_02ec	(low) Texture id scrolled by -3 (t) in both level DLs (level_obj_init_scroll_fx59)
+D_80090310	g_tex_scroll_id_0310	(low) Texture id scrolled in level DL 1 and on world records 249 / 250 (level_obj_init_scroll_handles)
+D_80090314	g_tex_scroll_id_0314	(low) Texture id scrolled in level DL 0 (level_obj_init_scroll_handles)
+D_800BE4F0	g_level_scroll_handles	16-byte block of 4 texture scroll handles created by level_obj_init_scroll_handles
+D_80090318	g_tex_scroll_id_0318	(low) Texture id scrolled by +8 in t in level DL 0 (level_obj_init_scroll_xy)
+D_8009031C	g_tex_scroll_id_031c	(low) Texture id scrolled by +8 in s in level DL 0 (level_obj_init_scroll_xy)
+D_800902E4	g_tex_scroll_id_02e4	(low) Texture id scrolled by +4 (t) in both level DLs (tex scroll pos / scroll e4)
+D_80096530	g_ground_emitter7_param_8	(low) Rodata f32: field +8 of the type-7 ground emitter spec (level_ground_emitter_spawn7)
+D_80096534	g_ground_emitter7_param_c	(low) Rodata f32: field +0xC of the type-7 ground emitter spec
+D_80096540	g_ambient_fx4_param_1c	(low) Rodata f32: field +0x1C of the type-4 ambient effect block (ambient_fx_spawn_type4)
+D_80086000	g_obj_table_reset_word	(low) Word cleared with the object table D_800CC2D0 by records_table_reset
+D_800CC26E	g_records_game_mode	(low) Byte set from the game mode D_800D2138 (2 / 3 / 4, else 0) by records_table_reset
+D_800CC2A2	g_records_flag_2a2	(low) Byte set to 1 by records_table_reset
+D_800D212C	g_start_points	Level start point records (24 bytes each), loaded by start_points_load
+D_80085EC0	g_acos_table_coarse	acos lookup table, 61 entries, step 512 below 30720
+D_80085F3C	g_acos_table_fine	acos lookup table, 64 entries, step 32 for 30720..32735
+D_80085FBC	g_acos_table_finest	acos lookup table, 4 entries, step 8 from 32736
+D_800A1F50	g_camera_segment_start	Camera track segment start point (0, 98, -5530) used by camera_segment_track
+D_800A1F5C	g_camera_segment_end	Camera track segment end point (0, 98, 1198) used by camera_segment_track
+D_800D9AB0	g_sfx_cooldowns	4 sound cooldown timers (u16), ticked down by sfx_cooldown_tick
+D_800A2750	g_prop_owner_parts_a	(med) 9-entry part list of prop owner effects (first)
+D_800A275C	g_prop_owner_parts_b	(med) 9-entry part list of prop owner effects (second)
+D_800A2768	g_prop_owner_parts_c	(med) 9-entry part list of prop owner effects (third)
+D_80089880	g_scope_motion_sound_ids	Per sound set { moving, stop, idle } sound ids of the scope motion sound
+D_800A34B0	g_camera_zoom_levels	(med) Camera zoom level table [4][2] (camera_apply_zoom_level)
+D_800A34D4	g_camera_k_34d4	(low) Camera rodata f32 0.1 (blend factor; C uses literals)
+D_800A34D8	g_camera_k_34d8	(low) Camera rodata f32 999.0
+D_800A34DC	g_camera_deg_to_rad_34dc	(low) Camera rodata f32 pi/180
+D_800A34E0	g_camera_deg_to_rad_34e0	(low) Camera rodata f32 pi/180
+D_800A34E4	g_camera_deg_to_rad_34e4	(low) Camera rodata f32 pi/180
+D_800A34E8	g_camera_deg_to_rad_34e8	(low) Camera rodata f32 pi/180
+D_800A34EC	g_camera_k_34ec	(low) Camera rodata f32 530.0
+D_800A34F0	g_camera_pi_34f0	(low) Camera rodata f32 pi
+D_800A34F4	g_camera_pi_34f4	(low) Camera rodata f32 pi
+D_800A34F8	g_camera_k_34f8	(low) Camera rodata f32 0.325322
+D_800A34FC	g_camera_half_pi_34fc	(low) Camera rodata f32 pi/2
+D_800A3500	g_camera_half_pi_3500	(low) Camera rodata f32 pi/2
+D_800A3504	g_camera_k_3504	(low) Camera rodata f32 0.65
+D_800A3508	g_camera_k_3508	(low) Camera rodata f32 0.55
+D_800A350C	g_camera_k_350c	(low) Camera rodata f32 0.9
+D_800A3510	g_camera_k_3510	(low) Camera rodata f32 0.85
+D_800A3514	g_camera_k_3514	(low) Camera rodata f32 -10000.0
+D_800A3518	g_camera_k_3518	(low) Camera rodata f32 1/300
+D_800A352C	g_camera_deg_to_rad_352c	(low) Camera rodata f32 pi/180
+D_800A3534	g_camera_two_pi_3534	(low) Camera rodata f32 2*pi
+D_800A3538	g_camera_deg_to_rad_3538	(low) Camera rodata f32 pi/180
+D_800A353C	g_camera_k_353c	(low) Camera rodata f32 0.04
+D_800A3540	g_camera_k_3540	(low) Camera rodata f32 0.05
+D_800A3544	g_camera_k_3544	(low) Camera rodata f32 0.08
+D_800A3548	g_camera_k_3548	(low) Camera rodata f32 0.04
+D_800A354C	g_camera_k_354c	(low) Camera rodata f32 0.05
+D_800A3550	g_camera_deg_to_rad_3550	(low) Camera rodata f32 pi/180 (side view angle)
+D_800A3554	g_camera_deg_to_rad_3554	(low) Camera rodata f32 pi/180 (side view angle - 90)
+D_800A3560	g_camera_k_3560	(low) Camera rodata f32 0.6
+D_800A3568	g_camera_k_3568	(low) Camera rodata f32 10000.0
+D_800A356C	g_camera_neg_deg_to_rad_356c	(low) Camera rodata f32 -pi/180
+D_800A3570	g_camera_neg_deg_to_rad_3570	(low) Camera rodata f32 -pi/180
+D_800A3574	g_camera_neg_deg_to_rad_3574	(low) Camera rodata f32 -pi/180
+D_800A3578	g_camera_neg_deg_to_rad_3578	(low) Camera rodata f32 -pi/180
+D_800A357C	g_camera_k_357c	(low) Camera rodata f32 -0.94
+D_800A3580	g_camera_k_3580	(low) Camera rodata f32 -10000.0
+D_800A3584	g_camera_k_3584	(low) Camera rodata f32 1/60
+D_800A3588	g_camera_deg_to_rad_3588	(low) Camera rodata f32 pi/180
+D_800A358C	g_camera_k_358c	(low) Camera rodata f32 0.025 (US value; the EU door swing code cites it as 0.45)
+D_800A3590	g_camera_k_3590	(low) Camera rodata f32 (-pi/180 in the #if 0 table; EU door swing code cites 0.05)
+D_800A3594	g_camera_k_3594	(low) Camera rodata f32 (-pi/180 in the #if 0 table; EU door swing code cites 0.01)
+D_800A3598	g_camera_k_3598	(low) Camera rodata f32 (-pi/180 in the #if 0 table; EU door swing code cites 0.01)
+D_800A359C	g_camera_k_359c	(low) Camera rodata f32 -pi/180
+D_800C3A34	g_camera_side_view_eye_x	(med) Side view camera eye x (target x + sin * 46 + 138 * k)
+D_800C3A38	g_camera_side_view_eye_y	(med) Side view camera eye y (target y + 96)
+D_800C3A3C	g_camera_side_view_eye_z	(med) Side view camera eye z (target z + cos * 46 + 138 * k)
+D_800DBFF4	g_camera_timers	(med) Per-camera countdown timers (u8, indexed by camera +0x23D), ticked by camera_tick_timers
+D_800DC430	g_camera_orbit_distance	(med) Camera eye orbit distance, blended during camera transitions
+D_80089AAC	g_object_state_fns_a	Object state handlers (10) run by object_state_dispatch_a, indexed by object +0x3D
+D_80089AD4	g_object_state_fns_b	Object state handlers (10) run by object_state_dispatch_b, indexed by object +0x3D
+D_80089DC0	g_debris_model_lists	Per hit kind: debris model / sprite id lists (entries 2.. are the debris)
+D_80089E10	g_emitter_trail_spawn_fns	Trail emitter spawn functions, indexed by emitter byte +0x3B
+D_80089E40	g_emitter_trail_type_fns	Trail emitter per-type handlers (0 result frees the emitter), indexed by +0x3C
+D_80089E9C	g_point_emitter_spawn_fns	Point emitter spawn functions, indexed by emitter byte +0x27
+D_80089EB8	g_point_emitter_type_fns	Point emitter per-type handlers (0 result frees it), indexed by +0x29
+D_80089EBC	g_bone_emitter_start_fns	Bone emitter restart handlers (startFn index; 0 result stops)
+D_80089ED8	g_bone_emitter_emit_fns	Bone emitter particle emit functions (emitFn index)
+D_80089EFC	g_bone_emitter_rate_fns	Bone emitter rate scale functions (rateFn index)
+D_80089F0C	g_bone_emitter_tick_fns	Bone emitter per-frame check functions (tickFn index; 0 result stops)
+D_80089F10	g_bone_emitter_stop_fns_a	(med) Bone emitter handler table used by bone_emitter_stop_dispatch_a
+D_80089F28	g_bone_emitter_stop_fns_b	(med) Bone emitter handler table used by bone_emitter_stop_dispatch_b
+D_80089F40	g_blood_splash_kinds	Blood splash main sprite kinds (one picked at random)
+D_80089F44	g_blood_splash_u00	(low) Word copied into field +0 of the blood splash spawn block
+D_80089F48	g_blood_spark_kinds	Blood splash spark sprite kinds (one picked at random)
+D_80089F4C	g_fx_splash_sprite_ids	(med) 4 sprite ids of fx_splash_spawn (one picked at random)
+D_800A3FB4	g_str_blood_power	String "power" (debug tweak name in blood_get_power)
+D_800A3FBC	g_str_blood_c_path	String "../Effects/Blood/blood.c" (debug tweak source file)
+D_800A4010	g_debris_scales	Debris scale table (all 1.0) passed to object_debris_spawn
+D_800A42F4	g_debris_list_counts	Per hit kind: entry count of the D_80089DC0 debris list
+D_800A4344	g_debris_spec_bytes	Per hit kind: debris spec byte (+0x40) passed to object_debris_spawn
+D_800A43B8	g_hit_kind_info	Per hit kind 16-byte info rows (effect point, +0xC sprite, +0xE == 2 = debris only)
+D_800A44F8	g_hit4_sounds	Hit kind 4: attachment sound slots tried in order
+D_800A4504	g_hit4_spark_sprites	Hit kind 4: spark sprite for each sound slot found
+D_800A4510	g_hit5_flag_bits	Hit kind 5: object +0x94 flag bits, a spark for each clear one
+D_800A4520	g_hit5_spark_sprites	Hit kind 5: spark sprites
+D_800A4530	g_hit6_flag_bits	Hit kind 6: object +0x94 flag bits
+D_800A4538	g_hit6_spark_sprites	Hit kind 6: spark sprites
+D_800A4540	g_hit_flash_masks	object_hit_sparks_flash: 6 bit masks (one picked at random) of sparks / puffs
+D_800A4548	g_hit_flash_spark_ids	object_hit_sparks_flash: spark sprite ids
+D_800A4558	g_hit_flash_smoke_ids	object_hit_sparks_flash: smoke sprite ids
+D_800A4568	g_hit_flash_smoke_pts	object_hit_sparks_flash: smoke start points in model space [4][3]
+D_800A4598	g_hit_flash_point	object_hit_sparks_flash: flash start point in model space
+D_800A45A4	g_hit_sparks_masks	object_hit_sparks: 4 bit masks (one at random) of the corner sparks / puffs
+D_800A45A8	g_hit_sparks_spark_ids	object_hit_sparks: spark sprite ids (0x61..0x64)
+D_800A45B8	g_hit_sparks_smoke_ids	object_hit_sparks: smoke sprite ids (0x5D..0x60)
+D_800A45C8	g_hit_sparks_smoke_pts	object_hit_sparks: smoke start points in model space [4][3]
+D_800A45F8	g_hit_small_masks	object_hit_sparks_small: 3 bit masks (one at random)
+D_800A45FC	g_hit_small_spark_ids	object_hit_sparks_small: spark sprite ids
+D_800A4608	g_hit_small_smoke_ids	object_hit_sparks_small: smoke sprite ids
+D_800A4614	g_hit_small_smoke_pts	object_hit_sparks_small: smoke start points in model space [3][3]
+D_800A4638	g_debris_model_ids	4 debris model ids used by object_debris_spawn
+D_800A4640	g_impact_small_tex_ids	(med) impact_burst_small: texture list of emit_textured_burst
+D_800A4644	g_impact_small_tex_scales	(med) impact_burst_small: texture size scales of emit_textured_burst
+D_800A4648	g_impact_burst_tex_ids	(med) impact_burst: texture list (2 entries) of emit_textured_burst
+D_800A4650	g_impact_burst_tex_scales	(med) impact_burst: texture size scales of emit_textured_burst
+D_800A4658	g_hit_four_masks	object_hit_sparks_four: 6 bit masks (one at random)
+D_800A4660	g_hit_four_spark_ids	object_hit_sparks_four: spark sprite ids
+D_800A4670	g_hit_four_smoke_ids	object_hit_sparks_four: smoke sprite ids
+D_800A4680	g_hit_four_smoke_pts	object_hit_sparks_four: smoke start points in model space [4][3]
+D_800A46B0	g_hit_pair_masks	object_hit_sparks_pair: 3 bit masks (one at random)
+D_800A46B4	g_hit_pair_spark_ids	object_hit_sparks_pair: spark sprite ids per variant [2][2]
+D_800A46C4	g_hit_pair_smoke_ids	object_hit_sparks_pair: smoke sprite ids per variant [2][2]
+D_800A46D4	g_hit_pair_smoke_pts	object_hit_sparks_pair: smoke start points per variant [2][2][3]
+D_800A4704	g_hit_burst_masks	object_hit_sparks_burst: 3 bit masks (one at random)
+D_800A4708	g_hit_burst_spark_ids	object_hit_sparks_burst: spark sprite ids
+D_800A4710	g_hit_burst_smoke_ids	object_hit_sparks_burst: smoke sprite ids
+D_800A4718	g_hit_burst_smoke_pts	object_hit_sparks_burst: smoke start points in model space [2][3]
+D_800A4A04	g_spark_emit_speed_scale	(low) Rodata f32 scale of the random 247..359 value in emitter_spawn_spark
+D_800A4A08	g_spark_dust_size_scale	(low) Rodata f32 scale of the dust cloud size in emitter_spawn_spark
+D_800A4A0C	g_spark_dust_size_bias	(low) Rodata f32 offset of the dust cloud size in emitter_spawn_spark
+D_80089C44	g_object_mode_fns_a	Mesh effect handlers run by object_mode_dispatch_a, indexed by object +0x48
+D_80089C54	g_object_mode_fns_b	Handlers run by object_mode_dispatch_b (mesh_effect_free x4), indexed by +0x48
+D_80089FB8	g_mesh_effect_tick_fns	(med) Mesh effect per-kind update checks (index +0x11, 0 result ends it)
+D_80089FC8	g_mesh_effect_draw_fns	Mesh effect per-kind draw / vertex handlers called by mesh_effect_draw
+D_800A4DA0	g_water_proj_centres	The nine water texture-projection centres [9][3]
+D_800A4E0C	g_water_proj_vtx_ranges	Vertex ranges { first, count } of the nine water projection centres
+D_800A4E54	g_water_s_scale_amp	(med) Water texcoord s scale sine amplitude (1.21)
+D_800A4E58	g_water_s_scale_base	(med) Water texcoord s scale base (2.854)
+D_800A4E5C	g_water_t_scale_amp	(med) Water texcoord t scale sine amplitude (1.994)
+D_800A4E60	g_water_t_scale_base	(med) Water texcoord t scale base (8.328)
+D_800A4E64	g_water_wave_rate_c	(med) Water wave phase c rate per frame (0.037)
+D_800A4E68	g_water_wave_rate_a	(med) Water wave phase a rate per frame (1.9)
+D_800A4E6C	g_water_wave_amp_b	(med) Water wave b amplitude (77.3)
+D_800A4E70	g_water_wave_rate_d	(med) Water wave phase d rate per frame (0.019)
+D_800A4E74	g_water_wave_rate_e	(med) Water wave phase e rate per frame (0.01)
+D_80089EE8	g_sprite_fx_fns_a	(med) Sprite fx handler table used by sprite_fx_dispatch_a
+D_80089EF0	g_sprite_fx_fns_b	(med) Sprite fx handler table used by sprite_fx_dispatch_b
+D_80089EF8	g_effect3d_fns_a	(med) 3D effect handler table used by effect3d_dispatch_a
+D_80089F2C	g_effect3d_fns_b	(med) 3D effect handler table used by effect3d_dispatch_b
+D_80089F60	g_sprite_fx_msg_fns	(med) Sprite fx message handlers (sprite_fx_on_msg calls entry 0)
+D_8008A010	g_sprite_fx_update_fns	Sprite fx update handlers (index +0x80, 0 = none; 0 result ends it)
+D_8008A048	g_sprite_fx_end_fns	Sprite fx end handlers (index +0x81, 0 = none)
+D_8008A058	g_effect3d_update_fns	3D effect update handlers (index +0x70, 0 = none; 0 result ends the effect)
+D_8008A100	g_effect3d_update2_fns	3D effect second update handlers (index +0x71, 0 = none)
+D_8008A1B0	g_effect3d_remove_fns	3D effect removal veto handlers (index +0x72, 2 slots)
+D_8008A1BC	g_effect3d_draw_fns	3D effect draw handlers (index +0x73), return the written vertices
+D_8008A304	g_effect3d_msg_fns	3D effect message handlers (effect3d_on_msg)
+D_80090F14	g_sprite_anim_table	Sprite animation rows of 12 bytes; byte 0 = frame count
+D_800A4F88	g_combine_mode_table	Colour combiner LERP rows of 16 bytes for gfx_set_combine_mode
+D_800A5178	g_fx_broadcast_types_b	(med) 3 node list type indices broadcast by fx_lists_broadcast_b
+D_8008A330	g_effect_kind_check_fns	Effect per-kind check handlers (index +0x169, 0 result ends it)
+D_8008A33C	g_effect_retire_fns	Effect per-kind retire handlers (effect_destroy_retire, index +0x168)
+D_8008A384	g_effect_delete_fns	Effect per-kind delete handlers (effect_destroy_delete, index +0x168)
+D_8008A3CC	g_effect_msg_fns	Effect per-kind message handlers (index +0x168, may be NULL)
+D_800A5168	g_fx_broadcast_types_a	(med) 4 node list type indices broadcast by fx_lists_broadcast_a / sampled by z-buffer cells
+D_800DCE20	g_particle_emitter_count	Number of live particle emitters (++ on spawn, -- on retire / delete)
+D_8008A084	g_interaction_hook_fns	Object interaction hooks per category (called with the level interaction mode)
+D_8008A0B4	g_interaction_handlers	Object interaction handler rows { fn, duration } per interaction id
+D_800A55E0	g_trigger_query_words6	(low) 6-word block copied to the stack and passed to trigger_first_touched (obj_query_table6)

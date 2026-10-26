@@ -445,7 +445,7 @@ void impact_splash_ring_spawn(u8, f32, u8, f32 *, u8, u8, s32);
 void impact_dust_particle_spawn(u8, f32, s16, s32, void *, u8, s32);
 extern f32 D_800A83FC;
 extern f32 D_800A8400;
-// drop_fall_update: update handler (D_8008A058 slot 13) of a falling drop / debris sprite. Motion block at +0x110:
+// drop_fall_update: update handler (g_effect3d_update_fns slot 13) of a falling drop / debris sprite. Motion block at +0x110:
 // velocity x/y/z, gravity +0x11C, drag +0x120 (x / z speeds times drag * dt each frame), trail easing +0x128 (the
 // trail point +0x40 follows the position +0x34). Ends (0) when pos_in_world_bounds rejects the new position (out of the
 // level); a floor probe (collision_floor_probe, floor y to +0x148) that hits also ends it and spawns a splash at the floor,
@@ -524,7 +524,7 @@ s32 drop_fade(struct_eu_1BAAA0_e *arg0) {
 
 u8 *model_drip_create(u8 **, s32, u8, s32);
 
-/* owner_effect_watch: P238: entry 13 of D_8008A4E8 (EU 0x8008A888, `void (u8 *)` handlers) for an effect e whose
+/* owner_effect_watch: P238: entry 13 of g_effect_node_update_fns_b (EU 0x8008A888, `void (u8 *)` handlers) for an effect e whose
  * 12-byte spawn record (owner pointer, id byte +4, s16 life +6, flags +8) sits at e +0x28. It kills itself
  * (node_destroy) when the owner is gone (owner word 0 is 0) or has another id (e[0x2C] vs owner[0x3B]). When the
  * owner's +0x1D4 is set it first re-spawns the record through model_drip_create(e + 0x28, 0, e[0xC], e[1]) (life = s16

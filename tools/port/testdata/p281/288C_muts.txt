@@ -1,16 +1,16 @@
 s/        px->prec = 6;/        px->prec = 5;/
 s/(code == 'g' || code == 'G')/(code == 'g' || code == 'E')/
 s/        px->prec = 1;/        px->prec = 2;/
-s/(err == 2) ? D_16004870 : D_16004874/(err == 1) ? D_16004870 : D_16004874/
+s/(err == 2) ? g_dbg_printf_str_nan : g_dbg_printf_str_inf/(err == 1) ? g_dbg_printf_str_nan : g_dbg_printf_str_inf/
 s/        px->n1 = 3;/        px->n1 = 4;/
 s/    if (err == 0) {/    if (err == 1) {/
 s/            val = -val;/            val = val;/
 s/xexp \* 30103 \/ 100000 - 4/xexp * 30103 \/ 100000 - 3/
 s/n = (3 - xexp) \& ~3;/n = (4 - xexp) \& ~3;/
-s/val \*= D_16004828\[i\];/val *= D_16004828[i + 1];/
+s/val \*= g_dbg_printf_pow10_f64\[i\];/val *= g_dbg_printf_pow10_f64[i + 1];/
 s/factor = 1.0f;/factor = 2.0f;/
 s/            xexp \&= ~3;/            xexp \&= ~1;/
-s/factor \*= D_16004828\[i\];/factor *= D_16004828[0];/
+s/factor \*= g_dbg_printf_pow10_f64\[i\];/factor *= g_dbg_printf_pow10_f64[0];/
 s/xexp + 10 : 6/xexp + 11 : 6/
 s/if (gen > 19) {/if (gen > 18) {/
 s/while (gen > 0 \&\& 0.0 < val) {/while (gen > 0 \&\& 0.0 <= val) {/

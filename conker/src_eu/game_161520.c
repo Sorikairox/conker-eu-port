@@ -244,13 +244,13 @@ struct102 *emitter_trail_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
  * parent's position (+0x1C, flag 1), the parent model's bone matrix obj[0x20] (flag 2; the emitter dies when the
  * parent is gone or its slot id changed), or its own double-buffered matrix +0x10/+0x14 (no flag 0x10); the point
  * +0x24 is transformed by mtx_transform_point_or_origin. The accumulator +0x50 grows with the distance moved since the last frame
- * (+0x40; flag 8 = no previous position) and the rate +0x4C / +0x34 (capped at 7); one D_80089E10[obj[0x3B]]
+ * (+0x40; flag 8 = no previous position) and the rate +0x4C / +0x34 (capped at 7); one g_emitter_trail_spawn_fns[obj[0x3B]]
  * spawn per whole unit, spread along the movement and jittered by the size +0x30. Then the per-type handler
- * D_80089E40[(s8) obj[0x3C]] (-1 = none); a 0 result (or the lifetime) frees the emitter (node_destroy). */
+ * g_emitter_trail_type_fns[(s8) obj[0x3C]] (-1 = none); a 0 result (or the lifetime) frees the emitter (node_destroy). */
 typedef void (*EmitterSpawnFn)(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *obj);
 typedef s32 (*EmitterTypeFn)(u8 *obj);
-extern EmitterSpawnFn D_80089E10[];
-extern EmitterTypeFn D_80089E40[];
+extern EmitterSpawnFn g_emitter_trail_spawn_fns[]; /* was D_80089E10 */
+extern EmitterTypeFn g_emitter_trail_type_fns[]; /* was D_80089E40 */
 /* was func_151342BC */
 void emitter_trail_update(u8 *obj) {
     u8 dead;
@@ -317,11 +317,11 @@ void emitter_trail_update(u8 *obj) {
         while (*(f32 *) (obj + 0x50) > 1.0f) {
             size2 = *(f32 *) (obj + 0x30) + *(f32 *) (obj + 0x30);
             t = random_float();
-            if (D_80089E10[obj[0x3B]] != NULL) {
+            if (g_emitter_trail_spawn_fns[obj[0x3B]] != NULL) {
                 jx = random_float();
                 jy = random_float();
                 jz = random_float();
-                D_80089E10[obj[0x3B]](pos[0] + dx * t + *(f32 *) (obj + 0x30) - jx * size2,
+                g_emitter_trail_spawn_fns[obj[0x3B]](pos[0] + dx * t + *(f32 *) (obj + 0x30) - jx * size2,
                                       pos[1] + dy * t + *(f32 *) (obj + 0x30) - jy * size2,
                                       pos[2] + dz * t + *(f32 *) (obj + 0x30) - jz * size2, dx, dy, dz, obj);
             }
@@ -333,7 +333,7 @@ void emitter_trail_update(u8 *obj) {
     ((f32 *) (obj + 0x40))[2] = pos[2];
     obj[0x3A] &= ~8;
     if (!dead && (s8) obj[0x3C] != -1) {
-        if (D_80089E40[(s8) obj[0x3C]](obj) == 0) {
+        if (g_emitter_trail_type_fns[(s8) obj[0x3C]](obj) == 0) {
             dead = TRUE;
         }
     }
@@ -348,7 +348,7 @@ s32 emitter_trail_clear_flag10(s32 arg0, struct102 *arg1, s32 arg2) {
     return arg0;
 }
 
-/* object_list_move_1: D_80089E40 table entry (emitter_trail_update calls the entries as s32 (*)(obj) and runs
+/* object_list_move_1: g_emitter_trail_type_fns table entry (emitter_trail_update calls the entries as s32 (*)(obj) and runs
  * node_destroy on the object when the result is 0): moves the object to list 1 (node_retire). The asm returns
  * what node_list_insert leaves in v0: the object's byte +1 (its type, read as the list index). */
 /* was func_151346EC */
@@ -357,7 +357,7 @@ s32 object_list_move_1(struct102 *arg0) {
     return ((u8 *) arg0)[1];
 }
 
-/* object_list_free: D_80089E40 table entry: unlinks and frees the object (node_unlink_free). The asm returns the free
+/* object_list_free: g_emitter_trail_type_fns table entry: unlinks and frees the object (node_unlink_free). The asm returns the free
  * function's v0 (osSetIntMask's previous mask, never 0), so emitter_trail_update never touches the freed object: 1. */
 /* was func_1513470C */
 s32 object_list_free(struct102 *arg0) {
@@ -365,7 +365,7 @@ s32 object_list_free(struct102 *arg0) {
     return 1;
 }
 
-/* object_state_dispatch_a / _b: run the object's state handler (+0x3D, 0..9, else 0) from D_80089AAC / D_80089AD4 on
+/* object_state_dispatch_a / _b: run the object's state handler (+0x3D, 0..9, else 0) from g_object_state_fns_a / g_object_state_fns_b on
  * the object. The asm leaves the object in a0 for the handler (all entries are s32 (*)(obj): object_list_move_1,
  * object_list_free, ground_trail_a_retire / 6938, ground_trail_b_retire / 7268, char_sound_obj_retire / D88) and returns the handler's v0. */
 /* was func_1513472C */
@@ -378,10 +378,10 @@ s32 object_state_dispatch_a(struct102 *arg0) {
     if (idx >= 10) {
         idx = 0;
     }
-    return ((s32 (*)(struct102 *)) D_80089AAC[idx])(arg0);
+    return ((s32 (*)(struct102 *)) g_object_state_fns_a[idx])(arg0);
 }
 
-// object_state_dispatch_b: as object_state_dispatch_a with the table D_80089AD4.
+// object_state_dispatch_b: as object_state_dispatch_a with the table g_object_state_fns_b.
 /* was func_1513477C */
 s32 object_state_dispatch_b(struct102 *arg0) {
     s32 idx = arg0->unk3D;
@@ -392,7 +392,7 @@ s32 object_state_dispatch_b(struct102 *arg0) {
     if (idx >= 10) {
         idx = 0;
     }
-    return ((s32 (*)(struct102 *)) D_80089AD4[idx])(arg0);
+    return ((s32 (*)(struct102 *)) g_object_state_fns_b[idx])(arg0);
 }
 
 /* was func_151347CC */
@@ -436,16 +436,16 @@ s32 point_emitter_spawn(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3) {
 
 /* point_emitter_update: per-frame update of a point emitter (list type 0x2A, made by point_emitter_spawn; type table
  * entry 0x8008C0D0). The emitter follows a point given as three f32 pointers (+0x10 / +0x14 / +0x18, x / y / z).
- * With flag 4 (+0x26) and a handler D_80089EB8[(s8) +0x29] (-1 = none), a 0 handler result frees it
+ * With flag 4 (+0x26) and a handler g_point_emitter_type_fns[(s8) +0x29] (-1 = none), a 0 handler result frees it
  * (node_destroy) at once. Flag 2 = no previous position this frame (cleared, nothing spawned). Otherwise the
  * accumulator +0x3C grows with the distance moved since the last frame (+0x2C) times +0x38 (= 1 / (2 * size)) plus
- * 1, scaled by D_800BE9A4 and the rate +0x20 (capped at 7); one D_80089E9C[+0x27] spawn per whole unit, spread
+ * 1, scaled by D_800BE9A4 and the rate +0x20 (capped at 7); one g_point_emitter_spawn_fns[+0x27] spawn per whole unit, spread
  * along the movement and jittered by the size +0x1C. Then the position is kept for the next frame; with flag 1 the
  * lifetime +0x24 counts down by D_800BE9E4 and the emitter is freed below 0. */
 typedef void (*PointEmitterSpawnFn)(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *obj);
 typedef s32 (*PointEmitterTypeFn)(u8 *obj);
-extern PointEmitterSpawnFn D_80089E9C[];
-extern PointEmitterTypeFn D_80089EB8[];
+extern PointEmitterSpawnFn g_point_emitter_spawn_fns[]; /* was D_80089E9C */
+extern PointEmitterTypeFn g_point_emitter_type_fns[]; /* was D_80089EB8 */
 /* was func_151349D0 */
 void point_emitter_update(u8 *obj) {
     f32 pos[3];
@@ -459,7 +459,7 @@ void point_emitter_update(u8 *obj) {
     pos[1] = **(f32 **) (obj + 0x14);
     pos[2] = **(f32 **) (obj + 0x18);
     if ((obj[0x26] & 4) && (s8) obj[0x29] != -1) {
-        if (D_80089EB8[(s8) obj[0x29]](obj) == 0) {
+        if (g_point_emitter_type_fns[(s8) obj[0x29]](obj) == 0) {
             node_destroy((struct102 *) obj);
             return;
         }
@@ -478,12 +478,12 @@ void point_emitter_update(u8 *obj) {
         while (*(f32 *) (obj + 0x3C) > 1.0f) {
             size2 = *(f32 *) (obj + 0x1C) + *(f32 *) (obj + 0x1C);
             t = random_float();
-            if (D_80089E9C[obj[0x27]] != NULL) {
+            if (g_point_emitter_spawn_fns[obj[0x27]] != NULL) {
                 jx = random_float();
                 jy = random_float();
                 jz = random_float();
                 size = *(f32 *) (obj + 0x1C);
-                D_80089E9C[obj[0x27]](pos[0] + dx * t + size - jx * size2, pos[1] + dy * t + size - jy * size2,
+                g_point_emitter_spawn_fns[obj[0x27]](pos[0] + dx * t + size - jx * size2, pos[1] + dy * t + size - jy * size2,
                                       pos[2] + dz * t + size - jz * size2, dx, dy, dz, obj);
             }
             *(f32 *) (obj + 0x3C) -= 1.0f;
@@ -570,13 +570,13 @@ typedef struct {
     /* 0x40 */ s16 period;          /* the timer restarts below -period */
     /* 0x42 */ s16 life;
     /* 0x44 */ u16 sound;
-    /* 0x46 */ s8 startFn;          /* D_80089EBC index (-1: none): called on restart, 0 = stop */
-    /* 0x47 */ s8 emitFn;           /* D_80089ED8 index (-1: none): emits one particle */
-    /* 0x48 */ s8 rateFn;           /* D_80089EFC index (-1: none): sets rateScale */
+    /* 0x46 */ s8 startFn;          /* g_bone_emitter_start_fns index (-1: none): called on restart, 0 = stop */
+    /* 0x47 */ s8 emitFn;           /* g_bone_emitter_emit_fns index (-1: none): emits one particle */
+    /* 0x48 */ s8 rateFn;           /* g_bone_emitter_rate_fns index (-1: none): sets rateScale */
     /* 0x49 */ u8 pad49[3];
     /* 0x4C */ f32 rate;            /* particles per frame unit */
     /* 0x50 */ u8 kind;
-    /* 0x51 */ s8 tickFn;           /* D_80089F0C index (-1: none): per-frame check, 0 = stop */
+    /* 0x51 */ s8 tickFn;           /* g_bone_emitter_tick_fns index (-1: none): per-frame check, 0 = stop */
     /* 0x52 */ u8 pad52[2];
     /* 0x54 */ s16 timer;
     /* 0x56 */ u8 pad56[2];
@@ -587,10 +587,10 @@ typedef struct {
     /* 0x78 */ f32 phase;
 } BoneEmitter;
 
-extern s32 (*D_80089EBC[])(BoneEmitter *);
-extern void (*D_80089ED8[])(f32 *, f32 *, f32 *, f32 *, f32, BoneEmitter *);
-extern f32 (*D_80089EFC[])(BoneEmitter *);
-extern s32 (*D_80089F0C[])(BoneEmitter *);
+extern s32 (*g_bone_emitter_start_fns[])(BoneEmitter *); /* was D_80089EBC */
+extern void (*g_bone_emitter_emit_fns[])(f32 *, f32 *, f32 *, f32 *, f32, BoneEmitter *); /* was D_80089ED8 */
+extern f32 (*g_bone_emitter_rate_fns[])(BoneEmitter *); /* was D_80089EFC */
+extern s32 (*g_bone_emitter_tick_fns[])(BoneEmitter *); /* was D_80089F0C */
 void bone_emitter_send_pair(s32, s32, s32, s32, s32);
 
 // bone_emitter_update: per-frame update (pointer at 0x8008C09C, next to EU 0x15134C9C / 0x15134CEC) of a
@@ -634,14 +634,14 @@ void bone_emitter_update(BoneEmitter *e) {
             if (e->timer < -e->period) {
                 e->timer = e->restart;
                 bone_emitter_send_pair((s32) bone, (s32) e->offsetA, (s32) e->offsetB, (s32) e->posA, (s32) e->posB);
-                if (e->startFn != -1 && D_80089EBC[e->startFn](e) == 0) {
+                if (e->startFn != -1 && g_bone_emitter_start_fns[e->startFn](e) == 0) {
                     stop = 1;
                     e->timer = -1;
                 }
             }
             if (e->timer > 0) {
                 if (e->rateFn != -1) {
-                    e->rateScale = D_80089EFC[e->rateFn](e);
+                    e->rateScale = g_bone_emitter_rate_fns[e->rateFn](e);
                 }
                 e->count += e->rate * D_800BE9A4;
                 if (e->count > 1.0f) {
@@ -675,7 +675,7 @@ void bone_emitter_update(BoneEmitter *e) {
                     stepB[2] = dB[2] * inv;
                     do {
                         if (e->emitFn != -1) {
-                            D_80089ED8[e->emitFn](curA, curB, velA, velB, phase, e);
+                            g_bone_emitter_emit_fns[e->emitFn](curA, curB, velA, velB, phase, e);
                         }
                         curA[0] += stepA[0];
                         curA[1] += stepA[1];
@@ -696,7 +696,7 @@ void bone_emitter_update(BoneEmitter *e) {
                 }
             }
         }
-        if (e->tickFn != -1 && D_80089F0C[e->tickFn](e) == 0) {
+        if (e->tickFn != -1 && g_bone_emitter_tick_fns[e->tickFn](e) == 0) {
             stop = 1;
         }
         if (e->flags & 2) {
@@ -735,7 +735,7 @@ void bone_emitter_stop_dispatch_a(struct161520 *arg0) {
         sound_voice_stop(arg0->unk44);
         arg0->unk44 = 0;
     }
-    D_80089F10[idx](arg0);
+    g_bone_emitter_stop_fns_a[idx](arg0);
 }
 
 /* was func_151353A8 */
@@ -752,7 +752,7 @@ void bone_emitter_stop_dispatch_b(struct161520 *arg0) {
         sound_voice_stop(arg0->unk44);
         arg0->unk44 = 0;
     }
-    D_80089F28[idx](arg0);
+    g_bone_emitter_stop_fns_b[idx](arg0);
 }
 
 s32 mtx_transform_points(s32 *, s32 *, s32, s32);
@@ -847,7 +847,7 @@ s32 bone_emitter_rate_one(struct161520 *arg0) {
 /* was func_15135670 */
 f32 blood_get_power(s32 arg0) {
     // "power", "../Effects/Blood/blood.c"
-    return debug_tweak_int(0, &D_800A3FB4, 0, 2000, 1000, &D_800A3FBC, 2938) * 0.001f;
+    return debug_tweak_int(0, &g_str_blood_power, 0, 2000, 1000, &g_str_blood_c_path, 2938) * 0.001f;
 }
 
 /* sprite2d_spawn's sprite spec (0x58 bytes; same layout as game_eu_127840's SpriteSpecFB398). */
@@ -889,14 +889,14 @@ f32 angle_byte_cos(u8);
 s32 random_int(void);
 f32 random_float(void);
 s32 memcpy(u8 *, u8 *, s32); /* as declared earlier in game_161520 */
-extern KindPair356D4 D_80089F40; /* main sprite kinds */
-extern s32 D_80089F44;
-extern KindPair356D4 D_80089F48; /* spark kinds */
+extern KindPair356D4 g_blood_splash_kinds; /* main sprite kinds; was D_80089F40 */
+extern s32 g_blood_splash_u00; /* was D_80089F44 */
+extern KindPair356D4 g_blood_spark_kinds; /* spark kinds; was D_80089F48 */
 
-// sprite_splash_spawn: spawns a screen sprite (list 3, kind D_80089F40[random], flags 9 | random 2 (| random 4 for
+// sprite_splash_spawn: spawns a screen sprite (list 3, kind g_blood_splash_kinds[random], flags 9 | random 2 (| random 4 for
 // kind 0x3A), colour bytes `colA` / `colB`) at `pos` (x, y) with scale `scale`, for `span`; its +0x70 gets a 0x18
 // block (`life`, random growth (100..200) x scale x 0.001, random drift 0..6 x pos x 0.001, `fadeA`, `fadeB`). When it
-// exists, adds (100..400) x scale x 0.001 spark sprites (list 0, kind D_80089F48[random], random flip bits 2 / 4)
+// exists, adds (100..400) x scale x 0.001 spark sprites (list 0, kind g_blood_spark_kinds[random], random flip bits 2 / 4)
 // spread around `pos` at random angles and distances, sized from the main sprite's scale.
 /* was func_151356D4 */
 void blood_splash_spawn(f32 *pos, f32 scale, f32 fadeA, f32 fadeB, u8 colA, u8 colB, s16 life, s16 span, s16 u16,
@@ -923,8 +923,8 @@ void blood_splash_spawn(f32 *pos, f32 scale, f32 fadeA, f32 fadeB, u8 colA, u8 c
     f32 d;
     u8 a;
 
-    blk.kinds = D_80089F40;
-    blk.u00 = D_80089F44;
+    blk.kinds = g_blood_splash_kinds;
+    blk.u00 = g_blood_splash_u00;
     blk.life = life;
     blk.grow = (random_float() * 100.0f + 100.0f) * scale * 0.001f;
     blk.driftX = random_float() * 6.0f * pos[0] * 0.001f;
@@ -994,7 +994,7 @@ void blood_splash_spawn(f32 *pos, f32 scale, f32 fadeA, f32 fadeB, u8 colA, u8 c
     spark.scaleA = (random_float() * 120.0f + 80.0f) * (scale * mid) * 0.0001f;
     spark.scaleB = (random_float() * 120.0f + 80.0f) * (scale * mid) * 0.0001f;
     for (; n > 1.0f; n -= 1.0f) {
-        sparkKinds = D_80089F48;
+        sparkKinds = g_blood_spark_kinds;
         a = random_int();
         c = angle_byte_cos(a - 0x40);
         s = angle_byte_cos(a);
@@ -1241,7 +1241,7 @@ typedef struct {
     /* 0x46 */ u8 pad46[0x12];
 } Blk6698;
 
-extern Tbl6698 D_80089F4C;
+extern Tbl6698 g_fx_splash_sprite_ids; /* was D_80089F4C */
 
 /* was func_15136698 */
 s32 fx_splash_spawn(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA) {
@@ -1252,7 +1252,7 @@ s32 fx_splash_spawn(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, st
     s32 a;
     s32 c;
 
-    tbl = D_80089F4C;
+    tbl = g_fx_splash_sprite_ids;
     scale = arg1;
     b.id = tbl.v[random_int() & 3];
     b.u2 = (arg7 ? 2 : 1) + 0x300;
@@ -1382,9 +1382,9 @@ void point_emitter_spawn_preset(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4,
     point_emitter_spawn(&sp1C, 0, arg4, arg5);
 }
 
-extern f32 D_800A4A04;
-extern f32 D_800A4A08;
-extern f32 D_800A4A0C;
+extern f32 g_spark_emit_speed_scale; /* was D_800A4A04 */
+extern f32 g_spark_dust_size_scale; /* was D_800A4A08 */
+extern f32 g_spark_dust_size_bias; /* was D_800A4A0C */
 /* was func_15136AE4 */
 void emitter_spawn_spark(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, struct161520 *arg6) {
     f32 sp6C[3];
@@ -1398,14 +1398,14 @@ void emitter_spawn_spark(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
     sp6C[0] = arg0;
     sp6C[1] = arg1;
     sp6C[2] = arg2;
-    temp_f2 = ((random_float() * 112.0f) + 247.0f) * D_800A4A04;
+    temp_f2 = ((random_float() * 112.0f) + 247.0f) * g_spark_emit_speed_scale;
     sp60[0] = -arg3 * temp_f2;
     sp60[1] = -arg4 * temp_f2;
     sp60[2] = -arg5 * temp_f2;
     sp4C = random_float();
     sp50 = random_int();
     sp54 = random_int();
-    impact_dust_cloud_spawn(sp6C, sp60, 0, (sp4C * D_800A4A08) + D_800A4A0C, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (random_float() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
+    impact_dust_cloud_spawn(sp6C, sp60, 0, (sp4C * g_spark_dust_size_scale) + g_spark_dust_size_bias, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (random_float() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
 }
 
 /* emit_debris_on_near_surfaces smoke spec (0x2D bytes used) */
@@ -1431,11 +1431,11 @@ void hit_debris_ring_burst(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void object_debris_spawn(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 kind, u8 arg6, u8 *obj, s32 *bounds, u8 arg9, s32 argA);
 void impact_burst_small(struct17 *arg0, u8 arg1, s32 arg2);
 void ground_scatter_spawn(f32 *arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-extern s32 *D_80089DC0[];       /* per hit kind: debris model ids */
-extern s32 D_800A4010[];        /* debris scales (all 1.0) */
-extern s32 D_800A42F4[];        /* per hit kind: debris kinds */
-extern s32 D_800A4344[];        /* per hit kind: debris spec byte +0x40 */
-extern u8 D_800A43B8[][16];     /* per hit kind: +0xE == 2: debris only */
+extern s32 *g_debris_model_lists[];       /* per hit kind: debris model ids; was D_80089DC0 */
+extern s32 g_debris_scales[];        /* debris scales (all 1.0); was D_800A4010 */
+extern s32 g_debris_list_counts[];        /* per hit kind: debris kinds; was D_800A42F4 */
+extern s32 g_debris_spec_bytes[];        /* per hit kind: debris spec byte +0x40; was D_800A4344 */
+extern u8 g_hit_kind_info[][16];     /* per hit kind: +0xE == 2: debris only; was D_800A43B8 */
 
 // object_hit_effects: the hit / break effects of an object by its hit kind (obj_get_hit_kind, 0x63: none), at its
 // effect position (obj_get_fx_point_b): debris pieces (debris; two kinds fewer with fewer, or for kind 4 unless the
@@ -1468,13 +1468,13 @@ s32 object_hit_effects(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fe
     hitinfo_from_obj_floor(bounds, obj);
     if (debris) {
         if (fewer || (kind == 4 && obj[4] != 0x16)) {
-            n = D_800A42F4[kind] - 2;
+            n = g_debris_list_counts[kind] - 2;
         } else {
-            n = D_800A42F4[kind];
+            n = g_debris_list_counts[kind];
         }
-        object_debris_spawn(pos, D_80089DC0[kind], D_800A4010, n, size, kind, D_800A4344[kind], obj, bounds, arg6, arg7);
+        object_debris_spawn(pos, g_debris_model_lists[kind], g_debris_scales, n, size, kind, g_debris_spec_bytes[kind], obj, bounds, arg6, arg7);
     }
-    info = D_800A43B8[kind];
+    info = g_hit_kind_info[kind];
     if (info[0xE] == 2) {
         return 0;
     }
@@ -1749,16 +1749,16 @@ s32 ripple_spawn_alt(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5,
 void obj_set_destroyed(struct127 *arg0);
 f32 random_float(void);
 s32 random_int(void);
-extern s32 *D_80089DC0[];       /* per hit kind: debris model ids */
-extern s32 D_800A4010[];        /* debris scales (all 1.0) */
-extern s32 D_800A42F4[];        /* per hit kind: debris kinds */
-extern s32 D_800A4344[];        /* per hit kind: debris spec byte +0x40 */
-extern u8 D_800A43B8[][16];     /* per hit kind: +0xE == 2: debris only */
+extern s32 *g_debris_model_lists[];       /* per hit kind: debris model ids; was D_80089DC0 */
+extern s32 g_debris_scales[];        /* debris scales (all 1.0); was D_800A4010 */
+extern s32 g_debris_list_counts[];        /* per hit kind: debris kinds; was D_800A42F4 */
+extern s32 g_debris_spec_bytes[];        /* per hit kind: debris spec byte +0x40; was D_800A4344 */
+extern u8 g_hit_kind_info[][16];     /* per hit kind: +0xE == 2: debris only; was D_800A43B8 */
 
 // object_break_effects: the break effects of `obj` (called by game_83300 with (obj, 0xFF, 1)): nothing for hit kind
 // 0x63 (obj_get_hit_kind) or when no floor is found under the effect position + 100 (pos_in_world_bounds). The floor
 // (collision_floor_probe within 500 below, bounds record) sets the drop height; then debris without the first two models
-// (object_debris_spawn, two kinds fewer) at the effect position (obj_get_fx_point_b). Unless the kind's D_800A43B8 +0xE is 2:
+// (object_debris_spawn, two kinds fewer) at the effect position (obj_get_fx_point_b). Unless the kind's g_hit_kind_info +0xE is 2:
 // impact_burst_small at the position and, on a floor with bounds +0x1C bit 0 (water), a splash (fx_splash_spawn, random
 // sizes / alpha / life) and a ripple model (ripple_spawn_flat or ripple_spawn_alt at random, 10 above the floor, random
 // rotation, scale 0.6..0.7). Ends with obj_set_destroyed(obj). arg1 / arg2 are passed on to every spawner.
@@ -1806,9 +1806,9 @@ void object_break_effects_floor(struct127 *obj, s32 arg1, s32 arg2) {
         drop.unk8 = pos[2];
         water = 0;
     }
-    object_debris_spawn(pos, D_80089DC0[kind] + 2, D_800A4010, D_800A42F4[kind] - 2, size, kind, D_800A4344[kind], o, bounds,
+    object_debris_spawn(pos, g_debris_model_lists[kind] + 2, g_debris_scales, g_debris_list_counts[kind] - 2, size, kind, g_debris_spec_bytes[kind], o, bounds,
                   arg1, arg2);
-    if (D_800A43B8[kind][0xE] != 2) {
+    if (g_hit_kind_info[kind][0xE] != 2) {
         impact_burst_small((struct17 *)pos, arg1, arg2);
         if (water) {
             r1 = random_float();
@@ -1920,7 +1920,7 @@ s32 obj_get_hit_effect_pos(struct127 *arg0, s32 arg1, void *arg2) {
     if ((arg0->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    mtx_transform_point_or_origin(D_800A43B8[arg1], arg2, (u8 *)temp_v0 + 0x300);
+    mtx_transform_point_or_origin(g_hit_kind_info[arg1], arg2, (u8 *)temp_v0 + 0x300);
     return 1;
 }
 
@@ -1948,7 +1948,7 @@ typedef struct {
     /* 0x39 */ s8 u39;
 } HitKindEffectSpec;
 
-// object_hit_kind_effect_spawn: unless hit kind `kind`'s D_800A43B8 row has +0xE == 2 (debris only), starts sound
+// object_hit_kind_effect_spawn: unless hit kind `kind`'s g_hit_kind_info row has +0xE == 2 (debris only), starts sound
 // 0x4FE at the object's position and spawns the type-0x29 hit effect (bone_emitter_spawn) attached to the object; `flag`
 // selects variant 0xC (else 1), kinds 8 / 9 get a shorter life (100 when the object's +0x94 has any of bits 1..3, else
 // 200; other kinds 500). Returns what the asm leaves in v0: the new effect, or the kind's row when nothing is spawned
@@ -1957,7 +1957,7 @@ typedef struct {
 s32 object_hit_kind_effect_spawn(struct127 *arg0, s32 kind, u8 flag) {
     HitKindEffectSpec spec;
     u8 *obj = (u8 *)arg0;
-    u8 *info = D_800A43B8[kind];
+    u8 *info = g_hit_kind_info[kind];
 
     if (info[0xE] == 2) {
         return (s32)info;
@@ -2069,19 +2069,19 @@ s32 mdl_particle_spawn_ex(Spark9768 *, s32, s32, s32, s32, u8, s32);
 void mtx_decompose(void *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void vec3_from_angles_byte(s16, s16, f32, f32 *);
 u8 *attachment_find_by_slot(struct127 *, s32, s32);
-extern s32 D_800A44F8[3];       /* hit kind 4: sounds tried in order (attachment_find_by_slot) */
-extern s32 D_800A4504[3];       /* hit kind 4: spark sprite per sound found */
-extern s32 D_800A4510[4];       /* hit kind 5: +0x94 flag bits, a spark for each clear one */
-extern s32 D_800A4520[4];       /* hit kind 5: spark sprites */
-extern s32 D_800A4530[2];       /* hit kind 6: +0x94 flag bits */
-extern s32 D_800A4538[2];       /* hit kind 6: spark sprites */
+extern s32 g_hit4_sounds[3];       /* hit kind 4: sounds tried in order (attachment_find_by_slot); was D_800A44F8 */
+extern s32 g_hit4_spark_sprites[3];       /* hit kind 4: spark sprite per sound found; was D_800A4504 */
+extern s32 g_hit5_flag_bits[4];       /* hit kind 5: +0x94 flag bits, a spark for each clear one; was D_800A4510 */
+extern s32 g_hit5_spark_sprites[4];       /* hit kind 5: spark sprites; was D_800A4520 */
+extern s32 g_hit6_flag_bits[2];       /* hit kind 6: +0x94 flag bits; was D_800A4530 */
+extern s32 g_hit6_spark_sprites[2];       /* hit kind 6: spark sprites; was D_800A4538 */
 
 // object_hit_smoke_puff: generic hit effect of object_hit_effect_generic. A mdl_particle_spawn_ex smoke puff (sprite = hit kind row
-// D_800A43B8[hit] +0xC, life 250..300, size (xz_scale + y_scale) / 2, x 0.6 for hit kind 15) from the model's
+// g_hit_kind_info[hit] +0xC, life 250..300, size (xz_scale + y_scale) / 2, x 0.6 for hit kind 15) from the model's
 // translation (model matrix +0x300, mtx_decompose) aimed at `pos`; y scale 1.0 for row type (+0xE) 1, 2.0 for type 2,
-// else 0. Then, reusing the request, mdl_particle_spawn sparks: hit kind 4: the sprite D_800A4504[i] of the first
-// D_800A44F8[i] sound the object has (attachment_find_by_slot); kind 5 / 6: one per clear +0x94 flag bit (D_800A4510 /
-// D_800A4530) with sprite D_800A4520 / D_800A4538. kind (a byte) and owner go to every spawn. The asm returns a
+// else 0. Then, reusing the request, mdl_particle_spawn sparks: hit kind 4: the sprite g_hit4_spark_sprites[i] of the first
+// g_hit4_sounds[i] sound the object has (attachment_find_by_slot); kind 5 / 6: one per clear +0x94 flag bit (g_hit5_flag_bits /
+// g_hit6_flag_bits) with sprite g_hit5_spark_sprites / g_hit6_spark_sprites. kind (a byte) and owner go to every spawn. The asm returns a
 // leftover v0 that its only caller (object_hit_effect_generic, void) ignores.
 /* was func_15138424 */
 void object_hit_smoke_puff(struct127 *obj, f32 *pos, s32 hit, void *arg3, u8 kind, s32 owner) {
@@ -2097,7 +2097,7 @@ void object_hit_smoke_puff(struct127 *obj, f32 *pos, s32 hit, void *arg3, u8 kin
 
     mtx_decompose((u8 *) obj->unk1D4 + 0x300, &scl[0], &scl[1], &scl[2], &trans[0], &trans[1], &trans[2], &rot[0],
                   &rot[1], &rot[2]);
-    info = D_800A43B8[hit];
+    info = g_hit_kind_info[hit];
     req.scl[0] = 1.0f;
     req.u00 = 20.0f;
     req.u04 = 0.56100005f;
@@ -2114,7 +2114,7 @@ void object_hit_smoke_puff(struct127 *obj, f32 *pos, s32 hit, void *arg3, u8 kin
     req.u44 = 0.0f;
     req.life = (u32) random_int() % 51 + 250;
     req.u56 = *(u16 *) (info + 0xC);
-    req.u0C = ((info == D_800A43B8[15]) ? 0.6f : 1.0f) * ((obj->xz_scale + obj->y_scale) * 0.5f);
+    req.u0C = ((info == g_hit_kind_info[15]) ? 0.6f : 1.0f) * ((obj->xz_scale + obj->y_scale) * 0.5f);
     req.u08 = req.u0C;
     req.u4C = (random_float() * 292.0f + -1099.0f) * 0.001f;
     req.at[0] = pos[0];
@@ -2146,29 +2146,29 @@ void object_hit_smoke_puff(struct127 *obj, f32 *pos, s32 hit, void *arg3, u8 kin
     req.u74 = 21;
     mdl_particle_spawn_ex(&req, 3, 0xFF, (s32) arg3, 0, kind, owner);
 
-    if (info == D_800A43B8[4]) {
+    if (info == g_hit_kind_info[4]) {
         found = FALSE;
         for (i = 0; i < 3; i++) {
-            if (attachment_find_by_slot(obj, D_800A44F8[i], 0) != NULL) {
+            if (attachment_find_by_slot(obj, g_hit4_sounds[i], 0) != NULL) {
                 found = TRUE;
                 break;
             }
         }
         if (found) {
-            req.u56 = D_800A4504[i];
+            req.u56 = g_hit4_spark_sprites[i];
             mdl_particle_spawn(&req, 3, 0xFF, 0, kind, owner);
         }
-    } else if (info == D_800A43B8[5]) {
+    } else if (info == g_hit_kind_info[5]) {
         for (i = 0; i < 4; i++) {
-            if (!(D_800A4510[i] & obj->unk94)) {
-                req.u56 = D_800A4520[i];
+            if (!(g_hit5_flag_bits[i] & obj->unk94)) {
+                req.u56 = g_hit5_spark_sprites[i];
                 mdl_particle_spawn(&req, 3, 0xFF, 0, kind, owner);
             }
         }
-    } else if (info == D_800A43B8[6]) {
+    } else if (info == g_hit_kind_info[6]) {
         for (i = 0; i < 2; i++) {
-            if (!(D_800A4530[i] & obj->unk94)) {
-                req.u56 = D_800A4538[i];
+            if (!(g_hit6_flag_bits[i] & obj->unk94)) {
+                req.u56 = g_hit6_spark_sprites[i];
                 mdl_particle_spawn(&req, 3, 0xFF, 0, kind, owner);
             }
         }
@@ -2303,15 +2303,15 @@ void object_hit_effect(struct127 *arg0, s32 arg1, s32 arg2) {
         }
     }
 }
-extern u8 D_800A4540[6];        /* 6 bit masks (one picked at random) */
-extern s32 D_800A4548[4];       /* spark sprite ids */
-extern s32 D_800A4558[4];       /* smoke sprite ids */
-extern f32 D_800A4568[4][3];    /* smoke start points in model space */
-extern f32 D_800A4598[3];       /* flash start point in model space */
+extern u8 g_hit_flash_masks[6];        /* 6 bit masks (one picked at random); was D_800A4540 */
+extern s32 g_hit_flash_spark_ids[4];       /* spark sprite ids; was D_800A4548 */
+extern s32 g_hit_flash_smoke_ids[4];       /* smoke sprite ids; was D_800A4558 */
+extern f32 g_hit_flash_smoke_pts[4][3];    /* smoke start points in model space; was D_800A4568 */
+extern f32 g_hit_flash_point[3];       /* flash start point in model space; was D_800A4598 */
 
 // object_hit_sparks_flash: hit types 3 (big = 1) / 5 / 6 (big = 0) of object_hit_effect. As object_hit_sparks_small with four
-// sparks / puffs (one of six masks D_800A4540, spark life 100); when `big` is set and the object has a model, one
-// more mdl_particle_spawn_ex puff (sprite 0x48, life 100..160) from the model point D_800A4598, speed 10.9..18.0.
+// sparks / puffs (one of six masks g_hit_flash_masks, spark life 100); when `big` is set and the object has a model, one
+// more mdl_particle_spawn_ex puff (sprite 0x48, life 100..160) from the model point g_hit_flash_point, speed 10.9..18.0.
 /* was func_15138E98 */
 void object_hit_sparks_flash(struct127 *obj, s32 *pos, u8 big, s32 *arg3, u8 kind, s32 owner) {
     Spark9768 flash;
@@ -2329,7 +2329,7 @@ void object_hit_sparks_flash(struct127 *obj, s32 *pos, u8 big, s32 *arg3, u8 kin
     f32 size;
     u8 *p;
 
-    mask = &D_800A4540[(u32) random_int() % 6 & 0xFF];
+    mask = &g_hit_flash_masks[(u32) random_int() % 6 & 0xFF];
     extra = 12;
     spark.u00 = 1.0f;
     spark.u04 = 1.0f;
@@ -2372,7 +2372,7 @@ void object_hit_sparks_flash(struct127 *obj, s32 *pos, u8 big, s32 *arg3, u8 kin
     spark.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
         if (*mask & bit) {
-            spark.u56 = D_800A4548[i];
+            spark.u56 = g_hit_flash_spark_ids[i];
             p = (u8 *) mdl_particle_spawn(&spark, 3, 0xFF, 1, kind, owner);
             if (p != NULL) {
                 memcpy(p + 0x170, &extra, 1);
@@ -2417,8 +2417,8 @@ void object_hit_sparks_flash(struct127 *obj, s32 *pos, u8 big, s32 *arg3, u8 kin
     smoke.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
         if (!(*mask & bit)) {
-            smoke.u56 = D_800A4558[i];
-            mtx_transform_point_or_origin(D_800A4568[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            smoke.u56 = g_hit_flash_smoke_ids[i];
+            mtx_transform_point_or_origin(g_hit_flash_smoke_pts[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
             a = random_int();
             b = random_int();
             vec3_from_angles_byte(a & 0xFF, (u32) b % 35 - 84, random_float() * 6.12f + 3.0f, smoke.vel);
@@ -2463,7 +2463,7 @@ void object_hit_sparks_flash(struct127 *obj, s32 *pos, u8 big, s32 *arg3, u8 kin
     flash.u60[3] = 11;
     flash.u56 = 0x48;
     flash.uid = obj->unique_id;
-    mtx_transform_point_or_origin(D_800A4598, flash.at, (u8 *) obj->unk1D4 + 0x300);
+    mtx_transform_point_or_origin(g_hit_flash_point, flash.at, (u8 *) obj->unk1D4 + 0x300);
     a = random_int();
     b = random_int();
     vec3_from_angles_byte(a & 0xFF, (b & 0xF) - 60, random_float() * 7.1499996f + 10.889999f, flash.vel);
@@ -2521,10 +2521,10 @@ s32 bone_bounce_splash(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 ground, u8 *b
     return 1;
 }
 
-extern u8 D_800A45A4[4];        /* 4 bit masks (one picked at random): which of the 4 corner sparks / smoke puffs */
-extern s32 D_800A45A8[4];       /* spark sprite ids (0x61..0x64) */
-extern s32 D_800A45B8[4];       /* smoke sprite ids (0x5D..0x60) */
-extern f32 D_800A45C8[4][3];    /* smoke start points in model space */
+extern u8 g_hit_sparks_masks[4];        /* 4 bit masks (one picked at random): which of the 4 corner sparks / smoke puffs; was D_800A45A4 */
+extern s32 g_hit_sparks_spark_ids[4];       /* spark sprite ids (0x61..0x64); was D_800A45A8 */
+extern s32 g_hit_sparks_smoke_ids[4];       /* smoke sprite ids (0x5D..0x60); was D_800A45B8 */
+extern f32 g_hit_sparks_smoke_pts[4][3];    /* smoke start points in model space; was D_800A45C8 */
 s32 mdl_particle_spawn(Spark9768 *, s32, s32, s32, u8, s32);
 s32 mdl_particle_spawn_ex(Spark9768 *, s32, s32, s32, s32, u8, s32);
 void debris_sprite_spawn(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
@@ -2533,11 +2533,11 @@ void vec3_from_angles_byte(s16, s16, f32, f32 *);
 s32 memcpy(u8 *, u8 *, s32);
 
 // object_hit_sparks: hit effects on object `obj` (object_hit_effect, hit types 15 / 2 with scale 0.6 / 1.0). One of
-// four bit masks (D_800A45A4) is picked at random. For each set bit, a mdl_particle_spawn spark (kind 3, sprite
-// D_800A45A8[i], size (xz_scale + y_scale) / 2 * scale) whose new particle gets the extra byte 12 at +0x170.
+// four bit masks (g_hit_sparks_masks) is picked at random. For each set bit, a mdl_particle_spawn spark (kind 3, sprite
+// g_hit_sparks_spark_ids[i], size (xz_scale + y_scale) / 2 * scale) whose new particle gets the extra byte 12 at +0x170.
 // If the object has a model (+0x1D4) and (+0x74 & 0xF) != 0xF: 5..8 debris_sprite_spawn debris pieces from `pos` (random
 // direction, speed 6..12) and, for each clear bit, a mdl_particle_spawn_ex smoke puff from the model point
-// D_800A45C8[i] (model matrix +0x300, mtx_transform_point_or_origin), sprite D_800A45B8[i], life 60..160. kind (u8) and owner go to
+// g_hit_sparks_smoke_pts[i] (model matrix +0x300, mtx_transform_point_or_origin), sprite g_hit_sparks_smoke_ids[i], life 60..160. kind (u8) and owner go to
 // every spawn, `arg3` to the debris and the puffs. The asm returns a leftover v0 that no caller reads.
 /* was func_15139768 */
 void object_hit_sparks(struct127 *obj, s32 *pos, f32 scale, s32 *arg3, u8 kind, s32 owner) {
@@ -2558,7 +2558,7 @@ void object_hit_sparks(struct127 *obj, s32 *pos, f32 scale, s32 *arg3, u8 kind, 
     f32 size;
     u8 *p;
 
-    mask = &D_800A45A4[random_int() & 3];
+    mask = &g_hit_sparks_masks[random_int() & 3];
     extra = 12;
     spark.u00 = 1.0f;
     spark.u04 = 1.0f;
@@ -2601,7 +2601,7 @@ void object_hit_sparks(struct127 *obj, s32 *pos, f32 scale, s32 *arg3, u8 kind, 
     spark.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
         if (*mask & bit) {
-            spark.u56 = D_800A45A8[i];
+            spark.u56 = g_hit_sparks_spark_ids[i];
             p = (u8 *) mdl_particle_spawn(&spark, 3, 0xFF, 1, kind, owner);
             if (p != NULL) {
                 memcpy(p + 0x170, &extra, 1);
@@ -2657,8 +2657,8 @@ void object_hit_sparks(struct127 *obj, s32 *pos, f32 scale, s32 *arg3, u8 kind, 
     smoke.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
         if (!(*mask & bit)) {
-            smoke.u56 = D_800A45B8[i];
-            mtx_transform_point_or_origin(D_800A45C8[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            smoke.u56 = g_hit_sparks_smoke_ids[i];
+            mtx_transform_point_or_origin(g_hit_sparks_smoke_pts[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
             a = random_int();
             b = random_int();
             vec3_from_angles_byte(a & 0xFF, (u32) b % 35 - 84, random_float() * 6.12f + 3.0f, smoke.vel);
@@ -2671,17 +2671,17 @@ void object_hit_sparks(struct127 *obj, s32 *pos, f32 scale, s32 *arg3, u8 kind, 
     }
 }
 
-extern u8 D_800A45F8[3];        /* 3 bit masks (one picked at random): which of the 3 sparks / smoke puffs */
-extern s32 D_800A45FC[3];       /* spark sprite ids */
-extern s32 D_800A4608[3];       /* smoke sprite ids */
-extern f32 D_800A4614[3][3];    /* smoke start points in model space */
+extern u8 g_hit_small_masks[3];        /* 3 bit masks (one picked at random): which of the 3 sparks / smoke puffs; was D_800A45F8 */
+extern s32 g_hit_small_spark_ids[3];       /* spark sprite ids; was D_800A45FC */
+extern s32 g_hit_small_smoke_ids[3];       /* smoke sprite ids; was D_800A4608 */
+extern f32 g_hit_small_smoke_pts[3][3];    /* smoke start points in model space; was D_800A4614 */
 
 // object_hit_sparks_small: default hit effect of object_hit_effect (3-way variant of object_hit_sparks without the debris
-// pieces). One of three bit masks (D_800A45F8) is picked at random. For each set bit, a mdl_particle_spawn spark (kind 3,
-// sprite D_800A45FC[i], size (xz_scale + y_scale) / 2, life 400) whose new particle gets the extra byte 12 at +0x170.
+// pieces). One of three bit masks (g_hit_small_masks) is picked at random. For each set bit, a mdl_particle_spawn spark (kind 3,
+// sprite g_hit_small_spark_ids[i], size (xz_scale + y_scale) / 2, life 400) whose new particle gets the extra byte 12 at +0x170.
 // If the object has a model (+0x1D4) and (+0x74 & 0xF) != 0xF: a impact_burst burst at `pos`, then for each clear
-// bit a mdl_particle_spawn_ex smoke puff from the model point D_800A4614[i] (model matrix +0x300, mtx_transform_point_or_origin), sprite
-// D_800A4608[i], life 60..160. The asm returns a leftover v0 that no caller reads (object_hit_effect is void).
+// bit a mdl_particle_spawn_ex smoke puff from the model point g_hit_small_smoke_pts[i] (model matrix +0x300, mtx_transform_point_or_origin), sprite
+// g_hit_small_smoke_ids[i], life 60..160. The asm returns a leftover v0 that no caller reads (object_hit_effect is void).
 /* was func_15139D74 */
 void object_hit_sparks_small(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 owner) {
     Spark9768 smoke;
@@ -2699,7 +2699,7 @@ void object_hit_sparks_small(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 
     u8 *p;
 
     kind &= 0xFF;
-    mask = &D_800A45F8[(u32) random_int() % 3 & 0xFF];
+    mask = &g_hit_small_masks[(u32) random_int() % 3 & 0xFF];
     extra = 12;
     spark.u00 = 1.0f;
     spark.u04 = 1.0f;
@@ -2742,7 +2742,7 @@ void object_hit_sparks_small(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 
     spark.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 3; i++, bit <<= 1) {
         if (*mask & bit) {
-            spark.u56 = D_800A45FC[i];
+            spark.u56 = g_hit_small_spark_ids[i];
             p = (u8 *) mdl_particle_spawn(&spark, 3, 0xFF, 1, kind, owner);
             if (p != NULL) {
                 memcpy(p + 0x170, &extra, 1);
@@ -2787,8 +2787,8 @@ void object_hit_sparks_small(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 
     smoke.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 3; i++, bit <<= 1) {
         if (!(*mask & bit)) {
-            smoke.u56 = D_800A4608[i];
-            mtx_transform_point_or_origin(D_800A4614[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            smoke.u56 = g_hit_small_smoke_ids[i];
+            mtx_transform_point_or_origin(g_hit_small_smoke_pts[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
             a = random_int();
             b = random_int();
             vec3_from_angles_byte(a & 0xFF, (u32) b % 35 - 84, random_float() * 6.12f + 3.0f, smoke.vel);
@@ -2831,11 +2831,11 @@ typedef struct {
 s32 emit_debris_burst(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
                   s32 arg9, f32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
 void mdl_particle_broadcast(s32 arg0, u8 arg1);
-extern u16 D_800A4638[4];
+extern u16 g_debris_model_ids[4]; /* was D_800A4638 */
 
 // object_debris_burst: 40 debris pieces of the kinds ids[] / scales[] (n kinds) at pos, sized scale (debris spec
 // for emit_debris_burst, 0x0D: other spin / speed values; 0x13 in level 0x3C: never solid). Kind 1 adds the extra
-// bytes {4, model D_800A4638[obj +0x128, at most 3], 6, 3} and mode 1. Then mdl_particle_broadcast(0, 0x45).
+// bytes {4, model g_debris_model_ids[obj +0x128, at most 3], 6, 3} and mode 1. Then mdl_particle_broadcast(0, 0x45).
 /* was func_1513A24C */
 void object_debris_spawn(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 kind, u8 arg6, u8 *obj, s32 *bounds,
                    u8 arg9, s32 argA) {
@@ -2868,10 +2868,10 @@ void object_debris_spawn(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 k
     spec.u38 = 16.102001f;
     spec.u40 = arg6;
     if (kind == 1) {
-        models[0] = D_800A4638[0];
-        models[1] = D_800A4638[1];
-        models[2] = D_800A4638[2];
-        models[3] = D_800A4638[3];
+        models[0] = g_debris_model_ids[0];
+        models[1] = g_debris_model_ids[1];
+        models[2] = g_debris_model_ids[2];
+        models[3] = g_debris_model_ids[3];
         mode = 1;
         i = obj[0x128];
         if (i >= 4) {
@@ -2896,8 +2896,8 @@ void object_debris_spawn(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 k
     mdl_particle_broadcast(0, 0x45);
 }
 
-extern u8 D_800A4648[];
-extern u8 D_800A4650[];
+extern u8 g_impact_burst_tex_ids[]; /* was D_800A4648 */
+extern u8 g_impact_burst_tex_scales[]; /* was D_800A4650 */
 
 typedef struct {
     s32 u2C;
@@ -2938,7 +2938,7 @@ void impact_burst_small(struct17 *arg0, u8 arg1, s32 arg2) {
     s.u5C = 0.07f;
     s.u60 = 0.07f;
     s.u64 = 23.4460011f;
-    emit_textured_burst(&s, D_800A4640, D_800A4644, 1, 0.0f, 1, arg1, arg2);
+    emit_textured_burst(&s, g_impact_small_tex_ids, g_impact_small_tex_scales, 1, 0.0f, 1, arg1, arg2);
 }
 
 /* was func_1513A594 */
@@ -2967,16 +2967,16 @@ void impact_burst(s32 arg0, u8 arg1, s32 arg2) {
     s.u5C = 0.0201f;
     s.u60 = 0.0201f;
     s.u64 = 20.187f;
-    emit_textured_burst(&s, D_800A4648, D_800A4650, 2, 0.0f, 1, arg1, arg2);
+    emit_textured_burst(&s, g_impact_burst_tex_ids, g_impact_burst_tex_scales, 2, 0.0f, 1, arg1, arg2);
 }
 
-extern u8 D_800A4658[6];        /* 6 bit masks (one picked at random) */
-extern s32 D_800A4660[4];       /* spark sprite ids */
-extern s32 D_800A4670[4];       /* smoke sprite ids */
-extern f32 D_800A4680[4][3];    /* smoke start points in model space */
+extern u8 g_hit_four_masks[6];        /* 6 bit masks (one picked at random); was D_800A4658 */
+extern s32 g_hit_four_spark_ids[4];       /* spark sprite ids; was D_800A4660 */
+extern s32 g_hit_four_smoke_ids[4];       /* smoke sprite ids; was D_800A4670 */
+extern f32 g_hit_four_smoke_pts[4][3];    /* smoke start points in model space; was D_800A4680 */
 
 // object_hit_sparks_four: hit types 0 / 7 of object_hit_effect; as object_hit_sparks_small with four sparks / puffs, one of six
-// masks (D_800A4658) and spark life 100.
+// masks (g_hit_four_masks) and spark life 100.
 /* was func_1513A6E0 */
 void object_hit_sparks_four(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 owner) {
     Spark9768 smoke;
@@ -2994,7 +2994,7 @@ void object_hit_sparks_four(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 o
     u8 *p;
 
     kind &= 0xFF;
-    mask = &D_800A4658[(u32) random_int() % 6 & 0xFF];
+    mask = &g_hit_four_masks[(u32) random_int() % 6 & 0xFF];
     extra = 12;
     spark.u00 = 1.0f;
     spark.u04 = 1.0f;
@@ -3037,7 +3037,7 @@ void object_hit_sparks_four(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 o
     spark.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
         if (*mask & bit) {
-            spark.u56 = D_800A4660[i];
+            spark.u56 = g_hit_four_spark_ids[i];
             p = (u8 *) mdl_particle_spawn(&spark, 3, 0xFF, 1, kind, owner);
             if (p != NULL) {
                 memcpy(p + 0x170, &extra, 1);
@@ -3082,8 +3082,8 @@ void object_hit_sparks_four(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 o
     smoke.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
         if (!(*mask & bit)) {
-            smoke.u56 = D_800A4670[i];
-            mtx_transform_point_or_origin(D_800A4680[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            smoke.u56 = g_hit_four_smoke_ids[i];
+            mtx_transform_point_or_origin(g_hit_four_smoke_pts[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
             a = random_int();
             b = random_int();
             vec3_from_angles_byte(a & 0xFF, (u32) b % 35 - 84, random_float() * 6.12f + 3.0f, smoke.vel);
@@ -3096,10 +3096,10 @@ void object_hit_sparks_four(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 o
     }
 }
 
-extern u8 D_800A46B0[3];        /* 3 bit masks (one picked at random) */
-extern s32 D_800A46B4[2][2];    /* spark sprite ids per variant */
-extern s32 D_800A46C4[2][2];    /* smoke sprite ids per variant */
-extern f32 D_800A46D4[2][2][3]; /* smoke start points in model space per variant */
+extern u8 g_hit_pair_masks[3];        /* 3 bit masks (one picked at random); was D_800A46B0 */
+extern s32 g_hit_pair_spark_ids[2][2];    /* spark sprite ids per variant; was D_800A46B4 */
+extern s32 g_hit_pair_smoke_ids[2][2];    /* smoke sprite ids per variant; was D_800A46C4 */
+extern f32 g_hit_pair_smoke_pts[2][2][3]; /* smoke start points in model space per variant; was D_800A46D4 */
 
 // object_hit_sparks_pair: hit types 8 / 9 of object_hit_effect (variant = type == 9); as object_hit_sparks_small with two sparks /
 // puffs whose sprites and smoke points come from the variant's row, spark life 100. kind is a byte stack argument.
@@ -3120,7 +3120,7 @@ void object_hit_sparks_pair(struct127 *obj, s32 *pos, s32 variant, s32 *arg3, u8
     u8 *p;
 
     variant &= 0xFF;
-    mask = &D_800A46B0[(u32) random_int() % 3 & 0xFF];
+    mask = &g_hit_pair_masks[(u32) random_int() % 3 & 0xFF];
     extra = 12;
     spark.u00 = 1.0f;
     spark.u04 = 1.0f;
@@ -3163,7 +3163,7 @@ void object_hit_sparks_pair(struct127 *obj, s32 *pos, s32 variant, s32 *arg3, u8
     spark.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
         if (*mask & bit) {
-            spark.u56 = D_800A46B4[variant][i];
+            spark.u56 = g_hit_pair_spark_ids[variant][i];
             p = (u8 *) mdl_particle_spawn(&spark, 3, 0xFF, 1, kind, owner);
             if (p != NULL) {
                 memcpy(p + 0x170, &extra, 1);
@@ -3208,8 +3208,8 @@ void object_hit_sparks_pair(struct127 *obj, s32 *pos, s32 variant, s32 *arg3, u8
     smoke.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
         if (!(*mask & bit)) {
-            smoke.u56 = D_800A46C4[variant][i];
-            mtx_transform_point_or_origin(D_800A46D4[variant][i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            smoke.u56 = g_hit_pair_smoke_ids[variant][i];
+            mtx_transform_point_or_origin(g_hit_pair_smoke_pts[variant][i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
             a = random_int();
             b = random_int();
             vec3_from_angles_byte(a & 0xFF, (u32) b % 35 - 84, random_float() * 6.12f + 3.0f, smoke.vel);
@@ -3233,10 +3233,10 @@ void fx_count_msg_45(struct161520 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-extern u8 D_800A4704[3];        /* 3 bit masks (one picked at random) */
-extern s32 D_800A4708[2];       /* spark sprite ids */
-extern s32 D_800A4710[2];       /* smoke sprite ids */
-extern f32 D_800A4718[2][3];    /* smoke start points in model space */
+extern u8 g_hit_burst_masks[3];        /* 3 bit masks (one picked at random); was D_800A4704 */
+extern s32 g_hit_burst_spark_ids[2];       /* spark sprite ids; was D_800A4708 */
+extern s32 g_hit_burst_smoke_ids[2];       /* smoke sprite ids; was D_800A4710 */
+extern f32 g_hit_burst_smoke_pts[2][3];    /* smoke start points in model space; was D_800A4718 */
 
 // object_hit_sparks_burst: hit type 16 of object_hit_effect; first a pos_debris_burst_spawn burst at `pos`, then as
 // object_hit_sparks_small with two sparks / puffs (spark life 100, smoke y scale 2.0, no impact_burst burst).
@@ -3258,7 +3258,7 @@ void object_hit_sparks_burst(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 
 
     kind &= 0xFF;
     pos_debris_burst_spawn((s32) pos, kind, owner);
-    mask = &D_800A4704[(u32) random_int() % 3 & 0xFF];
+    mask = &g_hit_burst_masks[(u32) random_int() % 3 & 0xFF];
     extra = 12;
     spark.u00 = 1.0f;
     spark.u04 = 1.0f;
@@ -3301,7 +3301,7 @@ void object_hit_sparks_burst(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 
     spark.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
         if (*mask & bit) {
-            spark.u56 = D_800A4708[i];
+            spark.u56 = g_hit_burst_spark_ids[i];
             p = (u8 *) mdl_particle_spawn(&spark, 3, 0xFF, 1, kind, owner);
             if (p != NULL) {
                 memcpy(p + 0x170, &extra, 1);
@@ -3345,8 +3345,8 @@ void object_hit_sparks_burst(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 
     smoke.uid = obj->unique_id;
     for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
         if (!(*mask & bit)) {
-            smoke.u56 = D_800A4710[i];
-            mtx_transform_point_or_origin(D_800A4718[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            smoke.u56 = g_hit_burst_smoke_ids[i];
+            mtx_transform_point_or_origin(g_hit_burst_smoke_pts[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
             a = random_int();
             b = random_int();
             vec3_from_angles_byte(a & 0xFF, (u32) b % 35 - 84, random_float() * 6.12f + 3.0f, smoke.vel);

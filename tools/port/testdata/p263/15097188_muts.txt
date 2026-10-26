@@ -12,7 +12,7 @@ s/cam->unk1B4 = a\[3\];/cam->unk1B4 = a[2];/ % op7
 s/if (\*((u8 \*) cam->unk3D4 + 0x120) == 0) {/if (*((u8 *) cam->unk3D4 + 0x121) == 0) {/ % op8z op8nz
 s/cam->unk348 = (f32) a\[3\];/cam->unk348 = (f32) a[2];/ % op8z
 s/cam->unk134 = a\[2\];/cam->unk134 = a[3];/ % op9
-s/D_800DBFF4\[id\] = 3;/D_800DBFF4[id] = 2;/ % op10
+s/g_camera_timers\[id\] = 3;/g_camera_timers[id] = 2;/ % op10
 s/D_800C3A20\[6\] = (f32) \*(s16 \*) (mk + 2);/D_800C3A20[6] = (f32) *(u16 *) (mk + 2);/ % op10
 s/D_800C3A20\[9\] = \*(f32 \*) (mk + 0xC);/D_800C3A20[9] = *(f32 *) (mk + 0x10);/ % op10
 s/camera_queue_event(cam, 5, NULL);/camera_queue_event(cam, 6, NULL);/ % op10

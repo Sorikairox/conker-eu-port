@@ -6,7 +6,7 @@
 
 /* was func_15103800 */
 void sfx_cooldown_clear(void) {
-    bzero(D_800D9AB0, 8); // bzero
+    bzero(g_sfx_cooldowns, 8); // bzero
 }
 
 /* was func_15103828 */
@@ -16,12 +16,12 @@ void sfx_cooldown_tick(void) {
 
     for (i = 0; i < 4; i++)
     {
-        if (D_800D9AB0[i]) {
-            if (D_800D9AB0[i] > D_800BE9E4)
+        if (g_sfx_cooldowns[i]) {
+            if (g_sfx_cooldowns[i] > D_800BE9E4)
             {
-                D_800D9AB0[i] -= D_800BE9E4;
+                g_sfx_cooldowns[i] -= D_800BE9E4;
             } else {
-              D_800D9AB0[i] = 0;
+              g_sfx_cooldowns[i] = 0;
             }
         }
     }
@@ -161,7 +161,7 @@ void object_sound_play_cooldown(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4
     u16 *temp_v0;
 
     var_s1 = arg0;
-    temp_v0 = &D_800D9AB0[arg3];
+    temp_v0 = &g_sfx_cooldowns[arg3];
     sp48 = 0;
     if ((*temp_v0 == 0) || (var_s1 == 0x58D)) {
         sp40 = temp_v0;

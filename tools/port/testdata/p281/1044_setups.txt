@@ -1,4 +1,4 @@
-# P281 debugger_print_number (debug_print_value). POKE D_160038A0 (first row) = 1 -> cells 0x20..0x340.
+# P281 debugger_print_number (debug_print_value). POKE g_dbg_first_text_row (first row) = 1 -> cells 0x20..0x340.
 # P281: the debugger segment is not in difftest's ROM image: its constant table is poked in every setup.
 # RET 1600160C = cell address (heap-like), 160014F0 = next position (one per call).
 hex ! 0=40,1=0,2=89ABCDEF ! 160038A0=1,16003B50=1,16003B54=A,16003B58=64,16003B5C=3E8,16003B60=2710,16003B64=186A0,16003B68=F4240,16003B6C=989680,16003B70=5F5E100,16003B74=3B9ACA00 ! 1600160C=80480000 ! ! ! ! ! !

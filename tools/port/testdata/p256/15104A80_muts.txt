@@ -5,9 +5,9 @@ s/p->interaction_state != 0 \&\& // % f9dead
 s/(mask \& (1 << i))/(mask \& (2 << i))/ % f9
 s/if (mask != 0)/if (mask == 0)/ % f9 f9nomask
 s/D_800DC3C4\[(struct131 \*) obj - D_800DBEF4\]/D_800DC3C4[1]/ % f9idx2
-s/parts = D_800A2750;/parts = D_800A275C;/ % f9
-s/parts = D_800A275C;/parts = D_800A2768;/ % f8
-s/parts = D_800A2768;/parts = D_800A2750;/ % f7
+s/parts = g_prop_owner_parts_a;/parts = g_prop_owner_parts_b;/ % f9
+s/parts = g_prop_owner_parts_b;/parts = g_prop_owner_parts_c;/ % f8
+s/parts = g_prop_owner_parts_c;/parts = g_prop_owner_parts_a;/ % f7
 s/key.count = 9;/key.count = 8;/ % f9
 s/effect_nodes_broadcast((s32) \&key, 0x35)/effect_nodes_broadcast((s32) \&key, 0x36)/ % f9
 s/effect_nodes_broadcast((s32) \&key38, 0x38)/effect_nodes_broadcast((s32) \&key38, 0x37)/ % f6

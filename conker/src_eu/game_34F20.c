@@ -167,7 +167,7 @@ void level_load(void) {
     D_eu_800E0E30 = 0;
     level_set_lod_shifts();
     debris_counts_reset();
-    D_800DCE20 = 0;
+    g_particle_emitter_count = 0;
     D_800E0D50 = 0;
     zap_bolt_table_clear();
     D_8003E724 = 1;

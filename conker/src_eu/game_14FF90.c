@@ -27,61 +27,61 @@ f32 vec3f_dot(f32 *a, f32 *b);
 void vec3_normalize(struct17 *arg0, struct17 *arg1);
 void vec3_diff(struct17 *arg0, struct17 *arg1, struct17 *arg2);
 extern u8 D_800BEE2C;
-extern f32 D_800DC430;
+extern f32 g_camera_orbit_distance; /* was D_800DC430 */
 extern f32 D_80089950;
 
-extern f32 D_800A34B0[4][2];
-extern f32 D_800A34D4;
-extern f32 D_800A34D8;
-extern f32 D_800A34DC;
-extern f32 D_800A34E0;
-extern f32 D_800A34E4;
-extern f32 D_800A34E8;
-extern f32 D_800A34EC;
-extern f32 D_800A34F0;
-extern f32 D_800A34F4;
-extern f32 D_800A34F8;
-extern f32 D_800A34FC;
-extern f32 D_800A3500;
-extern f32 D_800A3504;
-extern f32 D_800A3508;
-extern f32 D_800A350C;
-extern f32 D_800A3510;
-extern f32 D_800A3514;
-extern f32 D_800A3518;
-extern f32 D_800A352C;
-extern f32 D_800A3534;
-extern f32 D_800A3538;
-extern f32 D_800A353C;
-extern f32 D_800A3540;
-extern f32 D_800A3544;
-extern f32 D_800A3548;
-extern f32 D_800A354C;
-extern f32 D_800A3550;
-extern f32 D_800A3554;
+extern f32 g_camera_zoom_levels[4][2]; /* was D_800A34B0 */
+extern f32 g_camera_k_34d4; /* was D_800A34D4 */
+extern f32 g_camera_k_34d8; /* was D_800A34D8 */
+extern f32 g_camera_deg_to_rad_34dc; /* was D_800A34DC */
+extern f32 g_camera_deg_to_rad_34e0; /* was D_800A34E0 */
+extern f32 g_camera_deg_to_rad_34e4; /* was D_800A34E4 */
+extern f32 g_camera_deg_to_rad_34e8; /* was D_800A34E8 */
+extern f32 g_camera_k_34ec; /* was D_800A34EC */
+extern f32 g_camera_pi_34f0; /* was D_800A34F0 */
+extern f32 g_camera_pi_34f4; /* was D_800A34F4 */
+extern f32 g_camera_k_34f8; /* was D_800A34F8 */
+extern f32 g_camera_half_pi_34fc; /* was D_800A34FC */
+extern f32 g_camera_half_pi_3500; /* was D_800A3500 */
+extern f32 g_camera_k_3504; /* was D_800A3504 */
+extern f32 g_camera_k_3508; /* was D_800A3508 */
+extern f32 g_camera_k_350c; /* was D_800A350C */
+extern f32 g_camera_k_3510; /* was D_800A3510 */
+extern f32 g_camera_k_3514; /* was D_800A3514 */
+extern f32 g_camera_k_3518; /* was D_800A3518 */
+extern f32 g_camera_deg_to_rad_352c; /* was D_800A352C */
+extern f32 g_camera_two_pi_3534; /* was D_800A3534 */
+extern f32 g_camera_deg_to_rad_3538; /* was D_800A3538 */
+extern f32 g_camera_k_353c; /* was D_800A353C */
+extern f32 g_camera_k_3540; /* was D_800A3540 */
+extern f32 g_camera_k_3544; /* was D_800A3544 */
+extern f32 g_camera_k_3548; /* was D_800A3548 */
+extern f32 g_camera_k_354c; /* was D_800A354C */
+extern f32 g_camera_deg_to_rad_3550; /* was D_800A3550 */
+extern f32 g_camera_deg_to_rad_3554; /* was D_800A3554 */
 extern f32 D_800A3558;
 extern f32 D_800A355C;
-extern f32 D_800A3560;
+extern f32 g_camera_k_3560; /* was D_800A3560 */
 extern f32 D_800A3564;
-extern f32 D_800A3568;
-extern f32 D_800A356C;
-extern f32 D_800A3570;
-extern f32 D_800A3574;
-extern f32 D_800A3578;
-extern f32 D_800A357C;
-extern f32 D_800A3580;
-extern f32 D_800A3584;
-extern f32 D_800A3588;
-extern f32 D_800A358C;
-extern f32 D_800A3590;
-extern f32 D_800A3594;
-extern f32 D_800A3598;
-extern f32 D_800A359C;
+extern f32 g_camera_k_3568; /* was D_800A3568 */
+extern f32 g_camera_neg_deg_to_rad_356c; /* was D_800A356C */
+extern f32 g_camera_neg_deg_to_rad_3570; /* was D_800A3570 */
+extern f32 g_camera_neg_deg_to_rad_3574; /* was D_800A3574 */
+extern f32 g_camera_neg_deg_to_rad_3578; /* was D_800A3578 */
+extern f32 g_camera_k_357c; /* was D_800A357C */
+extern f32 g_camera_k_3580; /* was D_800A3580 */
+extern f32 g_camera_k_3584; /* was D_800A3584 */
+extern f32 g_camera_deg_to_rad_3588; /* was D_800A3588 */
+extern f32 g_camera_k_358c; /* was D_800A358C */
+extern f32 g_camera_k_3590; /* was D_800A3590 */
+extern f32 g_camera_k_3594; /* was D_800A3594 */
+extern f32 g_camera_k_3598; /* was D_800A3598 */
+extern f32 g_camera_k_359c; /* was D_800A359C */
 extern f32 D_800A35A0;
 extern f32 D_800A35A4;
 extern f32 D_800A35A8;
 #if 0
-f32 D_800A34B0[4][2] = {
+f32 g_camera_zoom_levels[4][2] = { /* was D_800A34B0 */
     { 267.0f, 100.0f },
     { 247.0f, 100.0f },
     { 370.0f, 185.0f },
@@ -89,57 +89,57 @@ f32 D_800A34B0[4][2] = {
 };
 
 f32 0.02f = 0.01666666753590107f;
-f32 D_800A34D4 = 0.10000000149011612f;
-f32 D_800A34D8 = 999.0f;
-f32 D_800A34DC = 0.01745329238474369f;
-f32 D_800A34E0 = 0.01745329238474369f;
-f32 D_800A34E4 = 0.01745329238474369f;
-f32 D_800A34E8 = 0.01745329238474369f;
-f32 D_800A34EC = 530.0f;
-f32 D_800A34F0 = 3.1415927410125732f;
-f32 D_800A34F4 = 3.1415927410125732f;
-f32 D_800A34F8 = 0.3253220021724701f;
-f32 D_800A34FC = 1.5707963705062866f;
-f32 D_800A3500 = 1.5707963705062866f;
-f32 D_800A3504 = 0.6499999761581421f;
-f32 D_800A3508 = 0.550000011920929f;
-f32 D_800A350C = 0.8999999761581421f;
-f32 D_800A3510 = 0.8500000238418579f;
-f32 D_800A3514 = -10000.0f;
-f32 D_800A3518 = 0.0033333334140479565f;
+f32 g_camera_k_34d4 = 0.10000000149011612f; /* was D_800A34D4 */
+f32 g_camera_k_34d8 = 999.0f; /* was D_800A34D8 */
+f32 g_camera_deg_to_rad_34dc = 0.01745329238474369f; /* was D_800A34DC */
+f32 g_camera_deg_to_rad_34e0 = 0.01745329238474369f; /* was D_800A34E0 */
+f32 g_camera_deg_to_rad_34e4 = 0.01745329238474369f; /* was D_800A34E4 */
+f32 g_camera_deg_to_rad_34e8 = 0.01745329238474369f; /* was D_800A34E8 */
+f32 g_camera_k_34ec = 530.0f; /* was D_800A34EC */
+f32 g_camera_pi_34f0 = 3.1415927410125732f; /* was D_800A34F0 */
+f32 g_camera_pi_34f4 = 3.1415927410125732f; /* was D_800A34F4 */
+f32 g_camera_k_34f8 = 0.3253220021724701f; /* was D_800A34F8 */
+f32 g_camera_half_pi_34fc = 1.5707963705062866f; /* was D_800A34FC */
+f32 g_camera_half_pi_3500 = 1.5707963705062866f; /* was D_800A3500 */
+f32 g_camera_k_3504 = 0.6499999761581421f; /* was D_800A3504 */
+f32 g_camera_k_3508 = 0.550000011920929f; /* was D_800A3508 */
+f32 g_camera_k_350c = 0.8999999761581421f; /* was D_800A350C */
+f32 g_camera_k_3510 = 0.8500000238418579f; /* was D_800A3510 */
+f32 g_camera_k_3514 = -10000.0f; /* was D_800A3514 */
+f32 g_camera_k_3518 = 0.0033333334140479565f; /* was D_800A3518 */
 f32 57.295776f = 57.2957763671875f;
 f32 0.017453292f = 0.01745329238474369f;
 f32 0.017453292f = 0.01745329238474369f;
 f32 0.017453292f = 0.01745329238474369f;
-f32 D_800A352C = 0.01745329238474369f;
+f32 g_camera_deg_to_rad_352c = 0.01745329238474369f; /* was D_800A352C */
 f32 0.017453292f = 0.01745329238474369f;
-f32 D_800A3534 = 6.2831854820251465f;
-f32 D_800A3538 = 0.01745329238474369f;
-f32 D_800A353C = 0.03999999910593033f;
-f32 D_800A3540 = 0.05000000074505806f;
-f32 D_800A3544 = 0.07999999821186066f;
-f32 D_800A3548 = 0.03999999910593033f;
-f32 D_800A354C = 0.05000000074505806f;
-f32 D_800A3550 = 0.01745329238474369f;
-f32 D_800A3554 = 0.01745329238474369f;
+f32 g_camera_two_pi_3534 = 6.2831854820251465f; /* was D_800A3534 */
+f32 g_camera_deg_to_rad_3538 = 0.01745329238474369f; /* was D_800A3538 */
+f32 g_camera_k_353c = 0.03999999910593033f; /* was D_800A353C */
+f32 g_camera_k_3540 = 0.05000000074505806f; /* was D_800A3540 */
+f32 g_camera_k_3544 = 0.07999999821186066f; /* was D_800A3544 */
+f32 g_camera_k_3548 = 0.03999999910593033f; /* was D_800A3548 */
+f32 g_camera_k_354c = 0.05000000074505806f; /* was D_800A354C */
+f32 g_camera_deg_to_rad_3550 = 0.01745329238474369f; /* was D_800A3550 */
+f32 g_camera_deg_to_rad_3554 = 0.01745329238474369f; /* was D_800A3554 */
 f32 D_800A3558 = 0.019999999552965164f;
 f32 D_800A355C = 0.01745329238474369f;
-f32 D_800A3560 = 0.6000000238418579f;
+f32 g_camera_k_3560 = 0.6000000238418579f; /* was D_800A3560 */
 f32 D_800A3564 = 10000.0f;
-f32 D_800A3568 = 10000.0f;
-f32 D_800A356C = -0.01745329238474369f;
-f32 D_800A3570 = -0.01745329238474369f;
-f32 D_800A3574 = -0.01745329238474369f;
-f32 D_800A3578 = -0.01745329238474369f;
-f32 D_800A357C = -0.9399999976158142f;
-f32 D_800A3580 = -10000.0f;
-f32 D_800A3584 = 0.01666666753590107f;
-f32 D_800A3588 = 0.01745329238474369f;
-f32 D_800A358C = 0.02500000037252903f;
-f32 D_800A3590 = -0.01745329238474369f;
-f32 D_800A3594 = -0.01745329238474369f;
-f32 D_800A3598 = -0.01745329238474369f;
-f32 D_800A359C = -0.01745329238474369f;
+f32 g_camera_k_3568 = 10000.0f; /* was D_800A3568 */
+f32 g_camera_neg_deg_to_rad_356c = -0.01745329238474369f; /* was D_800A356C */
+f32 g_camera_neg_deg_to_rad_3570 = -0.01745329238474369f; /* was D_800A3570 */
+f32 g_camera_neg_deg_to_rad_3574 = -0.01745329238474369f; /* was D_800A3574 */
+f32 g_camera_neg_deg_to_rad_3578 = -0.01745329238474369f; /* was D_800A3578 */
+f32 g_camera_k_357c = -0.9399999976158142f; /* was D_800A357C */
+f32 g_camera_k_3580 = -10000.0f; /* was D_800A3580 */
+f32 g_camera_k_3584 = 0.01666666753590107f; /* was D_800A3584 */
+f32 g_camera_deg_to_rad_3588 = 0.01745329238474369f; /* was D_800A3588 */
+f32 g_camera_k_358c = 0.02500000037252903f; /* was D_800A358C */
+f32 g_camera_k_3590 = -0.01745329238474369f; /* was D_800A3590 */
+f32 g_camera_k_3594 = -0.01745329238474369f; /* was D_800A3594 */
+f32 g_camera_k_3598 = -0.01745329238474369f; /* was D_800A3598 */
+f32 g_camera_k_359c = -0.01745329238474369f; /* was D_800A359C */
 f32 D_800A35A0 = 999.0f;
 f32 D_800A35A4 = 0.01745329238474369f;
 f32 D_800A35A8 = 999.0f;
@@ -237,7 +237,7 @@ void camera_update_controller(struct108 *arg0) {
             p[0x23E] = obj[0x78];
         }
     }
-    if (D_800DBFF4[p[0x23D]] != 4) {
+    if (g_camera_timers[p[0x23D]] != 4) {
         CAM_W(0x5F0) &= ~4;
     }
     if (!(CAM_W(0x2C) & 0x400000)) {
@@ -362,7 +362,7 @@ void camera_update_controller(struct108 *arg0) {
 //
 //     temp_v0_2 = arg0->unk23D;
 //
-//     if (D_800DBFF4[temp_v0_2] != 4) {
+//     if (g_camera_timers[temp_v0_2] != 4) {
 //         arg0->unk5F0 &= -5;
 //     }
 //
@@ -389,9 +389,9 @@ void camera_update_controller(struct108 *arg0) {
 //         arg0->unk1A0 = arg0->unk1A8;
 //         // phi_f12 = *(s32*)&arg0; // unk0?
 //     } else {
-//         arg0->unk19C += (arg0->unk1A4 - arg0->unk19C) * D_800A34D4;
-//         arg0->unk1A0 += (arg0->unk1A8 - arg0->unk1A0) * D_800A34D4;
-//         phi_f12 = D_800A34D4;
+//         arg0->unk19C += (arg0->unk1A4 - arg0->unk19C) * g_camera_k_34d4;
+//         arg0->unk1A0 += (arg0->unk1A8 - arg0->unk1A0) * g_camera_k_34d4;
+//         phi_f12 = g_camera_k_34d4;
 //     }
 //
 //     func_1510B128(phi_f12, temp_v0_2, arg0->unk19C, arg0->unk1A0, D_800BE628[temp_v0_2].unk84, (arg0->unk2C & 0x100) ? 16.0f : 0.0f);
@@ -910,7 +910,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
         }
     }
     if (*(u16 *)(p + 0x7F4) != 0) {
-        *(f32 *)(p + 0x374) = D_800DC430;
+        *(f32 *)(p + 0x374) = g_camera_orbit_distance;
     }
     rec = *(u8 **)(p + 0x3D0);
     if (p[0x23C] != 0) {
@@ -1099,7 +1099,7 @@ void camera_apply_zoom_level(struct108 *arg0) {
         arg0->unk34C = 40.0f;
         arg0->unk374 = 194.0f;
     } else {
-        temp_v0 = D_800A34B0[arg0->unk1B4];
+        temp_v0 = g_camera_zoom_levels[arg0->unk1B4];
         arg0->unk374 = temp_v0[0]; //->unk0;
         arg0->unk348 = temp_v0[1]; //->unk4;
         arg0->unk34C = arg0->unk348;
@@ -1407,15 +1407,15 @@ void camera_tick_timers(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        if (D_800DBFF4[i] != 0) {
-            D_800DBFF4[i]--;
+        if (g_camera_timers[i] != 0) {
+            g_camera_timers[i]--;
         }
     }
 }
 
 /* was func_15125690 */
 void camera_raise_timer(struct108 *arg0, s32 arg1) {
-    u8 *temp_v0 = &D_800DBFF4[arg0->unk23D];
+    u8 *temp_v0 = &g_camera_timers[arg0->unk23D];
 
     if (*temp_v0 < arg1) {
         *temp_v0 = arg1;
@@ -1508,9 +1508,9 @@ void camera_update_underwater_mode(struct108 *arg0) {
 }
 void camera_queue_event(u8 *, s32, void *);
 extern s32 D_800C3A20;
-extern f32 D_800C3A34;
-extern f32 D_800C3A38;
-extern f32 D_800C3A3C;
+extern f32 g_camera_side_view_eye_x; /* was D_800C3A34 */
+extern f32 g_camera_side_view_eye_y; /* was D_800C3A38 */
+extern f32 g_camera_side_view_eye_z; /* was D_800C3A3C */
 extern f32 D_800C3A44;
 extern s8 D_800C3A80;
 
@@ -1529,7 +1529,7 @@ void camera_update_side_view_mode(u8 *arg0) {
             camera_queue_event(arg0, 5, NULL);
             (*(u8 *)((u8 *)arg0 + 0x7E4)) = 1U;
         }
-        *D_800DBFF4 = 3;
+        *g_camera_timers = 3;
         (*(s32 *)((u8 *)(&D_800C3A20) + 0)) = 1;
         (*(s32 *)((u8 *)(&D_800C3A20) + 4)) = 0;
         temp_f12 = sp38 * 0.017453292f;
@@ -1537,10 +1537,10 @@ void camera_update_side_view_mode(u8 *arg0) {
         sp2C = sinf(temp_f12);
         temp_f12_2 = (sp38 - 90.0f) * 0.017453292f;
         sp24 = temp_f12_2;
-        D_800C3A34 = (sinf(temp_f12_2) * 46.0f) + ((*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x14)) + (138.0f * sp2C));
-        D_800C3A38 = (*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x18)) + 96.0f;
+        g_camera_side_view_eye_x = (sinf(temp_f12_2) * 46.0f) + ((*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x14)) + (138.0f * sp2C));
+        g_camera_side_view_eye_y = (*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x18)) + 96.0f;
         sp2C = cosf(temp_f12);
-        D_800C3A3C = (cosf(temp_f12_2) * 46.0f) + ((*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x1C)) + (138.0f * sp2C));
+        g_camera_side_view_eye_z = (cosf(temp_f12_2) * 46.0f) + ((*(f32 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x3D0))) + 0x1C)) + (138.0f * sp2C));
         (*(f32 *)((u8 *)(&D_800C3A20) + 0x20)) = 0.0f;
         D_800C3A44 = -180.0f;
         (*(f32 *)((u8 *)(&D_800C3A20) + 8)) = 0.0f;
@@ -1573,13 +1573,13 @@ void camera_update_side_view_mode(u8 *arg0) {
 //             func_1512D560(arg0, 5, 0);
 //             arg0->unk7E4 = 1U;
 //         }
-//         D_800DBFF4[0] = 3;
+//         g_camera_timers[0] = 3;
 //         D_800C3600->unk0 = 1;
 //         D_800C3600->unk4 = 0;
-//         temp_f12 = sp38 * D_800A3550;
+//         temp_f12 = sp38 * g_camera_deg_to_rad_3550;
 //         sp28 = temp_f12;
 //         sp2C = sinf(temp_f12);
-//         temp_f12_2 = (sp38 - 90.0f) * D_800A3554;
+//         temp_f12_2 = (sp38 - 90.0f) * g_camera_deg_to_rad_3554;
 //         sp24 = temp_f12_2;
 //         D_800C3600->unk14 = (sinf(temp_f12_2) * 46.0f) + (arg0->unk3D0->unk14 + (138.0f * sp2C));
 //         D_800C3600->unk18 = arg0->unk3D0->unk18 + 96.0f;
@@ -1972,7 +1972,7 @@ s32 camera_update_aim_mode(struct108 *arg0) {
     camera_projection_set_fov(p[0x23D], A_F(0x19C), A_F(0x1A0), 1.0f);
     A_F_OF((u8 *)D_800BE628 + p[0x23D] * 0x180, 0x84) = 1.0f;
     obj_model_reset((struct127 *)A_HOLD);
-    D_800DBFF4[p[0x23D]] = 2;
+    g_camera_timers[p[0x23D]] = 2;
     if (type == 0x24 || type == 0x23 || type == 0x1B || is1F || type == 0x29) {
         /* f32 -> u32 as the asm converts it (truncation; negative / NaN give 0xFFFFFFFF) */
         sf = -A_F(0x1A4) * 10000.0f;
@@ -2142,13 +2142,13 @@ leave:
 #undef A_HOLD
 #undef A_F_OF
 /* P139 */
-extern u16 D_80089880[2][3];   /* per sound set: { moving id, stop id, idle id }: { 0x603, 0x604, 0x605 }, { 0x620, 0x621, 0x622 } */
+extern u16 g_scope_motion_sound_ids[2][3];   /* per sound set: { moving id, stop id, idle id }: { 0x603, 0x604, 0x605 }, { 0x620, 0x621, 0x622 }; was D_80089880 */
 void aim_hud_send_flash(s32 arg0);
 
 /*
  * scope_motion_sound_update: per-frame callback of the scope's motion sounds (registered with sfx_emitter_start by the
  * scope code above with id 0x605, or 0x622 with bit 31 of the value set; voice +0x18 = the holder, voice +0x1C =
- * (set << 31) | last value). The set (bit 31) picks a row of D_80089880. A pending idle id is cleared to 0, then
+ * (set << 31) | last value). The set (bit 31) picks a row of g_scope_motion_sound_ids. A pending idle id is cleared to 0, then
  * the voice position (+2/+4/+6) follows the holder's position (holder +0x3D0, floats +0x14..+0x1C, truncated).
  * While the holder's player (+0x3D4) is in state 2 (+0x197): the value is holder +0x1A4 * -10000 converted to u32
  * (IDO conversion: out of range / negative -> 0xFFFFFFFF). When it changed it is stored and, unless the id is the
@@ -2164,7 +2164,7 @@ s32 scope_motion_sound_update(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
     u8 *holder = *(u8 **) (voice + 0x18);
     u32 set = packed >> 31;
     u32 last = packed & 0xFFFFFF;
-    u16 *ids = D_80089880[set];
+    u16 *ids = g_scope_motion_sound_ids[set];
     f32 v = *(f32 *) (holder + 0x1A4) * -10000.0f;
     s32 changed = 0;
     u32 cur;
@@ -2425,7 +2425,7 @@ void camera_exit_aim_mode(struct108 *arg0) {
     camera_projection_set_fov(arg0->unk23D, 0.0f, 0.0f, 1.0f);
     (*(f32 *)((u8 *)((D_800BE628 + (arg0->unk23D * 0x180))) + 0x84)) = 1.0f;
     obj_model_reset(arg0->unk3D0);
-    D_800DBFF4[arg0->unk23D] = 2;
+    g_camera_timers[arg0->unk23D] = 2;
     temp_v1 = arg0->unk3D0;
     temp_a0 = temp_v1->unk65;
     var_v0 = temp_v1;
@@ -2450,7 +2450,7 @@ void camera_exit_aim_mode(struct108 *arg0) {
 //     func_1510B32C(arg0->unk23D, 0.0f, 0.0f, 1.0f);
 //     D_800BE628[arg0->unk23D].unk84 = 1.0f;
 //     obj_model_reset(arg0->unk3D0);
-//     D_800DBFF4[arg0->unk23D] = (u8)2;
+//     g_camera_timers[arg0->unk23D] = (u8)2;
 //
 //     phi_v0 = &arg0->unk3D0;
 //     if (phi_v0->unk65 != 0) {
@@ -2473,7 +2473,7 @@ void camera_start_transition(struct108 *arg0, s32 arg1, s32 arg2) {
 
 /* Camera transition (+0x7F4 state: 0 idle, 1 start, 2 running): moves the eye +0x2BC from the start point +0x7F8
  * to the end point +0x804 (end x / z follow the player, y from camera_update_target_height) over +0x834 ticks (countdown
- * +0x840, progress t = +0x830), blending yaw +0x37C, distance D_800DC430, height D_800DC434 and the extra
+ * +0x840, progress t = +0x830), blending yaw +0x37C, distance g_camera_orbit_distance, height D_800DC434 and the extra
  * angles +0x5E8 / +0x3A8 (math_angle_lerp_deg = angle lerp). The camera mode +0x23C cancels it. Returns 0 when idle,
  * nonzero while it runs (on the last tick the asm returns the +0x3D0 pointer left in v0; math_angle_lerp_deg does
  * not touch v0), the state itself for an unknown state. */
@@ -2554,7 +2554,7 @@ s32 camera_update_transition(struct108 *arg0) {
         PF(0x37C) = yaw = math_angle_lerp_deg(TF(0x3C), TF(0x20), TF(0x2C));
         PF(0x39C) = yaw * 0.017453292f;
     }
-    D_800DC430 = TF(0x1C) + (TF(0x28) - TF(0x1C)) * TF(0x3C);
+    g_camera_orbit_distance = TF(0x1C) + (TF(0x28) - TF(0x1C)) * TF(0x3C);
     D_800DC434 = PF(0x83C) + (PF(0x838) - PF(0x83C)) * TF(0x3C);
     PF(0x5E8) = math_angle_lerp_deg(TF(0x3C), 0.0f, TF(0x34));
     PF(0x3A8) = math_angle_lerp_deg(TF(0x3C), 0.0f, TF(0x38));

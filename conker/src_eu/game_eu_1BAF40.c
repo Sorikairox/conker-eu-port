@@ -674,7 +674,7 @@ f32 math_cos_u8(u8);
 extern f32 D_800DD608[]; /* per view: sin of the camera yaw */
 extern f32 D_800DD618[]; /* per view: cos of the camera yaw */
 
-// particle_quad_velocity_build: P203: entry 5 of the particle draw table D_8008A1BC (game_169510): builds the 4
+// particle_quad_velocity_build: P203: entry 5 of the particle draw table g_effect3d_draw_fns (game_169510): builds the 4
 // vertices of the particle `p` for view `view` (a quad stretched along its screen-space motion, e.g. the
 // character-effect flames). vtx_slot_buffer_get gives the view's vertex block (p +0x100[view], 0x40 bytes); when it is
 // new, both of its halves get the template vertices p +0xC0. Lean: the motion since the last frame (+0x40 - +0x34,

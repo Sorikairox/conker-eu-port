@@ -1070,7 +1070,7 @@ u8 char_loop_sound_update(u8 *arg0) {
 s32 object_list_move_1(u8 *);
 s32 object_list_free(u8 *);
 
-/* D_80089E40 table entries 4 / 14 (s32 (*)(obj), see emitter_trail_update): stop the object's sound (+0x5E), clear the
+/* g_emitter_trail_type_fns table entries 4 / 14 (s32 (*)(obj), see emitter_trail_update): stop the object's sound (+0x5E), clear the
  * data's word +0x74, then return object_list_move_1 / object_list_free's result (the asm tail value). */
 /* was func_151ABD38 */
 s32 char_sound_obj_retire(u8 *arg0) {

@@ -9,7 +9,7 @@ void particle_cooldowns_reset(void) {
     u8 tmp = -1;
     D_800DD2A0 = tmp;
     if (0) {};
-    D_800DD2A1 = tmp;
-    D_800DD2A2 = tmp;
-    D_800DD2A3 = tmp;
+    g_particle_cooldown_p1 = tmp;
+    g_particle_cooldown_p2 = tmp;
+    g_particle_cooldown_p3 = tmp;
 }

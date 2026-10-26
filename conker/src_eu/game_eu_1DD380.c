@@ -42,7 +42,7 @@ static const f32 sSplashScaleB[1] = { 0.001f };     /* 0x3A83126F */
 /* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
 #define SPLASH_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
 
-// object_ground_splash: handler of D_8008A0B4 entry 12 (EU 0x8008A4B4, called by obj_interaction_update with (obj, arg1, 0)):
+// object_ground_splash: handler of g_interaction_handlers entry 12 (EU 0x8008A4B4, called by obj_interaction_update with (obj, arg1, 0)):
 // when obj has a model (+0x1D4) and obj_bone_ground_probe finds its effect point (pos) and the ground under it for mode arg1
 // (1 / 2), spawns a 0x50-type splash particle there (effect3d_spawn_oriented_simple: 4 vertices tinted by ground_colour_by_depth's colour of
 // pos z in level 0x14, white elsewhere; size 0.091..0.112, height from obj's u16 +0x7A >> 8, +10 for mode 1, -10 otherwise;

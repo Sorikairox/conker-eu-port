@@ -30,8 +30,8 @@ s32 obj_fx_point_probe_floor(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
 s32 obj_query_table6(struct127 *);
 s32 trigger_first_touched(u32, s32, s32 *);
 
-/* Interaction hook (D_8008A084 table, called by obj_interaction_update with the mode from interaction_mode_for_level and the object):
- * maps mode 0..8 to an entry of D_8008A0B4, -1 = none. Mode 1 in level 4 (D_800BE9F0) asks obj_query_table6; mode 6
+/* Interaction hook (g_interaction_hook_fns table, called by obj_interaction_update with the mode from interaction_mode_for_level and the object):
+ * maps mode 0..8 to an entry of g_interaction_handlers, -1 = none. Mode 1 in level 4 (D_800BE9F0) asks obj_query_table6; mode 6
  * looks the object up with the five ids 0x401D..0x4021 (D_800A5AB0) through trigger_first_touched. */
 /* was func_15146EE0 */
 s32 interaction_hook_map_mode(s32 mode, struct127 *obj) {
@@ -142,6 +142,7 @@ void obj_fx_point_impact_c(s32 arg0, s32 arg1, s32 arg2) {
 
 void fx_spawn_impact_particle(u8, s32 *, f32, s32, f32 *, u8);
 void fx_spawn_impact_burst(u8, f32 *, s32, f32, f32);
+/* was func_15147168 */
 int obj_fx_point_impact(arg0, arg1, arg2, arg3)
     u8 *arg0;
     int arg1;

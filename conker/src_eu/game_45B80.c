@@ -91,7 +91,7 @@ s32 game_frame_step(void) {
             break;
         case 2:
             flare_nodes_read_zbuffer();
-            if (D_800DCE20 != 0) {
+            if (g_particle_emitter_count != 0) {
                 effect_sample_zbuffer_cells();
             }
             D_800BEEC8--;

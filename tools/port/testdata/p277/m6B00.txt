@@ -1,9 +1,9 @@
 \#^    if (event_dispatch(1, 0x4003, 6, 0x2000) != 0 && arg0->unk3D0->health != 0) {$#s/6, 0x2000/6, 0x2001/
 \#^    if (event_dispatch(1, 0x4003, 6, 0x2000) != 0 && arg0->unk3D0->health != 0) {$#s/health != 0/health == 0/
 \#^        arg0->unk84 |= 0xC0001000;$#s/0xC0001000/0xC0000000/
-\#^        vec3_diff(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/unk2A4/unk2A8/
-\#^        vec3_diff(&D_800A1F50, (struct17 \*) &arg0->unk2A4, &toObj);$#s/&D_800A1F50/\&D_800A1F5C/
-\#^        vec3_diff(&D_800A1F50, &D_800A1F5C, &axis);$#s/&D_800A1F50, &D_800A1F5C/\&D_800A1F5C, \&D_800A1F50/
+\#^        vec3_diff(&g_camera_segment_start, (struct17 \*) &arg0->unk2A4, &toObj);$#s/unk2A4/unk2A8/
+\#^        vec3_diff(&g_camera_segment_start, (struct17 \*) &arg0->unk2A4, &toObj);$#s/&g_camera_segment_start/\&g_camera_segment_end/
+\#^        vec3_diff(&g_camera_segment_start, &g_camera_segment_end, &axis);$#s/&g_camera_segment_start, &g_camera_segment_end/\&g_camera_segment_end, \&g_camera_segment_start/
 \#^        invLen = 1.0f / vec3f_magnitude((f32 \*) &axis);$#s/1.0f \//2.0f \//
 \#^        vec3_normalize(&axis, &dir);$#s/&axis/\&toObj/
 \#^        t = vec3f_dot(&dir, &toObj) \* invLen \* 0.75f;$#s/0.75f/0.7f/

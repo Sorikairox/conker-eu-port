@@ -272,7 +272,7 @@ void camera_process_events(struct108 *arg0) {
                 ang = *(f32 *)(d + 0x24) * 0.017453292f;
                 pos[1] = sinf(ang) * -pos[2];
                 pos[2] = cosf(ang) * pos[2];
-                if (D_800DBFF4[0] != 0) {
+                if (g_camera_timers[0] != 0) {
                     *(f32 *)(p + 0x37C) = *(f32 *)(d + 0x28);
                     *(f32 *)(p + 0x380) = *(f32 *)(d + 0x28);
                     *(f32 *)(p + 0x39C) = *(f32 *)(p + 0x37C) * 0.017453292f;
@@ -304,7 +304,7 @@ void camera_process_events(struct108 *arg0) {
                 D_800C3A6C = *(f32 *)(d + 8);
                 camera_projection_update(p[0x23D], *(f32 *)(p + 0x19C), *(f32 *)(p + 0x1A0), 1.0f, 0.0f);
             }
-            if (D_800DBFF4[0] != 0) {
+            if (g_camera_timers[0] != 0) {
                 camera_update_dir_vector(0);
             }
             if (D_800BEAC0 == 0) {

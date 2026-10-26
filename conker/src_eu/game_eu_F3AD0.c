@@ -316,7 +316,7 @@ s32 ground_trail_a_alive_check(struct_eu_F3AD0 *arg0) {
 s32 object_list_move_1(void *);
 s32 object_list_free(void *);
 
-/* D_80089E40 table entries 5 / 15 (s32 (*)(obj), see emitter_trail_update): clear the data's word +0x5C, then return
+/* g_emitter_trail_type_fns table entries 5 / 15 (s32 (*)(obj), see emitter_trail_update): clear the data's word +0x5C, then return
  * object_list_move_1 / object_list_free's result (the asm tail value). */
 /* was func_150C6910 */
 s32 ground_trail_a_retire(struct_eu_F3AD0 *arg0) {
