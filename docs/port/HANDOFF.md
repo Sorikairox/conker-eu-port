@@ -10,6 +10,13 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P324 (port-web) (session P324, 2026-10-26). Details: `docs/port/sessions/P324.md`
+- Options panel in the page (main.js `OPTIONS`, localStorage `opt.KEY`, `?opt=KEY:1,...` test override). Game-side
+  options: `port_option(PORT_OPT_*)` (port/ultra/port_options.h, force-included via port_prefix.h), set by the page
+  with `_port_set_option`. New port-only features must be added as an option (default off unless the user says).
+- Options: skippable cutscenes (on), autosave icon, crouch / R-Look / walk toggles, skip intro (off).
+- Gotcha: a level/menu request on the first frame of a new level stalls the game (see P324.md).
+
 ## P322 (port-web) (session P322, 2026-10-26). Details: `docs/port/sessions/P322.md`
 - New `tools/eu_port/rename.py` + `tools/eu_port/names.tsv` (old, new, description) for repo-wide renames; workflow in
   `docs/RENAMING.md` (add row, `--check`, apply, `--verify`). Adds `new = 0xEUADDR` to symbol_addrs.eu.txt so the

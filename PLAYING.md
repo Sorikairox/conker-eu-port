@@ -52,11 +52,26 @@ Other commands:
 | C buttons | I J K L |
 | D-pad | Arrow keys |
 
-**Skipping cutscenes:** hold **L** (the **R** key, or the L touch button) for 3 seconds to skip any cutscene, even the first time you see it. A ring around an L badge at the bottom right of the picture fills up while you hold it. The original game only allows this for scenes already seen; this is a deliberate change in the browser build only, and your save is unaffected. Start skips the boot intro.
+**Skipping cutscenes:** hold **L** (the **R** key, or the L touch button) for 3 seconds to skip any cutscene, even the first time you see it. A ring around an L badge at the bottom right of the picture fills up while you hold it. The original game only allows this for scenes already seen; this is a deliberate change in the browser build only, and your save is unaffected. Start skips the boot intro. You can turn this off under **Options** (see below).
 
 **Phones and tablets:** on-screen touch controls appear by themselves (the **Touch** button toggles them). The game is also online at https://conker-web-port.netlify.app (you still need your own ROM).
 
 A gamepad works too; plug it in and press a button. **Controls** in the page lets you rebind keys and gamepad buttons, and **Defaults** resets them.
+
+## Options
+
+The **Options** button in the page header opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.
+
+| Option | Default | What it does |
+|---|---|---|
+| Skippable cutscenes (hold L) | on | Hold L for 3 s to skip any cutscene, even one you have not seen (and Start skips the boot intro). Off: the original rules (only scenes you have seen, and L skips at once). |
+| Autosave icon | off | A small save icon blinks in the top right corner of the picture for about 1.5 s whenever the game writes its save. |
+| Toggle crouch | off | Z works as a switch: press once to crouch and stay crouched, press again to stand up. Works for the key, the gamepad button and the touch button. |
+| Toggle R-Look | off | R works as a switch in the same way: press once for R-Look, press again to end it. |
+| Toggle walk (half tilt) | off | The half-tilt key (Ctrl) works as a switch: press once to walk, press again to run. While it is on, the stick of every input (keys, gamepad, touch) is at half tilt. |
+| Skip intro | off | The game starts straight at the title menu, without the boot logos, legal pages and intro. Saves load as usual. Takes effect the next time you press Start. |
+
+While a toggle is latched, a small label (Crouch, R-Look, Walk) shows at the top left of the picture, and the touch Z or R button gets a ring.
 
 ## Saves
 
