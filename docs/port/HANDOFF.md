@@ -60,6 +60,26 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P333 (port-web, 2026-10-27): features #11 and #12
+- d6ffdbba option "Inverted swimming" ('swiminvert', PORT_OPT_SWIM_INVERT 12): the N64 swims like a plane (stick up
+  = target pitch dive * 2.25 > 0 = head-down = dive; down = rise) in swim_water_physics (state 1 in water) and
+  player_swim_update (state 0x15: stick * 1.25 -> gravity, y_velocity -= gravity). port_swim_stick_y (pc_os.c) flips
+  stick y at those reads only. Measured (river, float flags cleared): off up -> pitch -7.5 (floor-capped head-down),
+  down -> -90; on: the mirror. Test aids in p326_probe.c: ?p326nofloat=1, ?p333=1 (swim log), ?p326tpy=Y.
+- ca201310 option "Rumble" ('rumble', PORT_OPT_RUMBLE 13): pc_pif.c answers pak commands 0x02/0x03 for blocks
+  0x400 (probe, 0x80) and 0x600 (motor) with libultra's data CRC when on; motor changes -> Module.portRumble ->
+  vibrationActuator.playEffect('dual-rumble') / reset() in main.js. Other pak addresses and the EEPROM unchanged;
+  off = no pak as before. The game probes at level / area start (g_rumble_probe_request). Proven with a temporary
+  rumble_request hook (removed) + ?p333pad=1 (fake gamepad that logs playEffect / reset): start 405 / stop 441 ...,
+  off: nothing. No natural rumble source was found near the 0x29 start in a few tries (pan, drop from height):
+  sources are impacts / explosions / anim-event cam shakes / fire / lightning.
+- Renames: structEU_151D8E18 fields -> flags / life / strength / player_mask / update_fn (+ selftest case and 3
+  mutant files), D_eu_800E0E30 -> g_rumble_clear_request, locals of rumble_update / rumble_start / rumble_stop /
+  rumble_start_strength / rumble_request / player_swim_anim_speed. wasm md5 unchanged by the renames.
+- Both: check.sh GREEN, hold-L 5789 / 0x29 at 5795, deployed. reverify: emitter2_flame_update 106/106,
+  sinking_platform_update 67/68 (survivor not in the renamed lines), fire_burn_update m8eacb/c keep old survivors.
+- Lesson: a field rename by regex over "the function body" must stop at block scope: scene_event_run_b reuses `s`
+  with other types in other switch cases (census FAIL caught it; check census 0 FAIL + md5 after such renames).
 ### P332 (port-web, 2026-10-27): features #10 and #9
 - 5b49ac4b option "Underwater air meter" ('airbar', PORT_OPT_AIR_BAR 8): hud_air_bar_draw (game_BC510.c, end of
   hud_draw) draws a bar of the air left, (0x5A1 - air_counter) / 0x5A1, while Conker is in water and the counter
