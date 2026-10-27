@@ -212,6 +212,7 @@
   // host: the offer code for the next free slot (players 2, 3, 4)
   N.invite = async function () {
     if (T.role !== 'host') throw new Error('host first');
+    if (T.room && !T.room.closed) throw new Error('a room is open: the other players join with its code (reload the page to use manual codes)');
     if (T.started) throw new Error('the game has started: no more players can join');
     const ch = [1, 2, 3].find((c) => !T.slots[c] || T.slots[c].state === 'left' || T.slots[c].state === 'failed');
     if (ch === undefined) throw new Error('4 players at most');
@@ -237,6 +238,90 @@
     status(`connecting to ${pn(a.ch || 1)}…`);
     return a.ch || 1;
   };
+  // ---- P345 room codes (design section 11): the same payloads as the copy-paste codes, carried by the room server
+  // (port/web/netlify/functions/room, POST N.roomApi). The host makes a room and polls it every second: for each guest
+  // that joined (the server gives slots 2..4 in join order) it posts N.signal.offer(ch) and, when that guest's answer
+  // is there, calls N.signal.accept. A guest joins with the code, polls until its offer is there, posts
+  // N.signal.answer(offer). From then on everything is peer to peer as before; the host deletes the room when the game
+  // starts (or when it leaves). The server compares build id / ROM SHA-256 at join (the host still checks 'hello').
+  const ROOM_POLL_MS = 1000, ROOM_GUEST_WAIT_MS = 120000;
+  N.roomApi = '/api/room';
+  async function roomCall(body) {
+    let r, j = null;
+    try { r = await fetch(N.roomApi, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' }); }
+    catch (e) { throw new Error('the room server cannot be reached (check the internet connection, or use the manual codes)'); }
+    try { j = await r.json(); } catch (e) { /* not json */ }
+    if (!r.ok || !j || j.error) { const e = new Error((j && j.error) || `room server error ${r.status} (try the manual codes)`); e.code = j && j.code; throw e; }
+    return j;
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  function roomStop(close) {   // host: stop polling; close = delete the room on the server
+    const R = T.room; if (!R || R.closed) return;
+    R.closed = true; if (R.timer) clearInterval(R.timer);
+    if (close && R.secret) roomCall({ op: 'close', code: R.code, secret: R.secret }).then(() => N.log(`[net] room ${R.code} closed`), (e) => N.log(`[net] room close: ${e.message}`));
+  }
+  // host: make a room for up to max players; returns the room code. sessionFn as for N.host.
+  N.roomCreate = async function (sessionFn, max = 4) {
+    if (T.role) throw new Error(T.role === 'host' ? 'already hosting' : 'already joined a session');
+    const j = await roomCall({ op: 'create', build: N.buildId, rom: N.romSha256, max });
+    T.role = 'host'; T.myCh = 0; T.sessionFn = sessionFn;
+    const R = T.room = { code: j.code, secret: j.secret, max: j.max, gens: {}, accepted: {}, fails: 0 };
+    status(`room ${j.code} is open: tell the other players this code`, 'ok');
+    R.timer = setInterval(roomHostPoll, ROOM_POLL_MS); roomHostPoll();
+    return j.code;
+  };
+  async function roomHostPoll() {
+    const R = T.room; if (!R || R.closed || R.busy) return;
+    if (T.started) return roomStop(true);
+    R.busy = true;
+    try {
+      const j = await roomCall({ op: 'host', code: R.code, secret: R.secret });
+      for (const s of j.slots) {
+        if (R.closed || T.started) break;
+        if (R.gens[s.ch] !== s.gen) {   // a new guest in this slot: make its offer (ICE gathering, up to 8 s)
+          R.gens[s.ch] = s.gen; delete R.accepted[s.ch];
+          status(`${pn(s.ch)} joined the room: making the connection offer…`);
+          const o = await N.signal.offer(s.ch);
+          await roomCall({ op: 'offer', code: R.code, secret: R.secret, ch: s.ch, gen: s.gen, sdp: o.sdp });
+          status(`room ${R.code}: waiting for ${pn(s.ch)}'s answer…`, 'ok');
+        } else if (s.answer && !R.accepted[s.ch]) {
+          R.accepted[s.ch] = true;
+          await N.signal.accept({ t: 'a', ch: s.ch, sdp: s.answer });
+          status(`connecting to ${pn(s.ch)}…`);
+        }
+      }
+      R.fails = 0; R.ttl = j.ttl;
+    } catch (e) {
+      if (e.code === 'unknown') { roomStop(false); status(`room ${R.code} has expired (rooms last 10 minutes): reload the page and make a new room`, 'bad'); }
+      else if (e.code === 'gone') N.log('[net] room: ' + e.message);
+      else if (++R.fails === 5) status('room server: ' + e.message, 'bad');
+      else N.log('[net] room poll: ' + e.message);
+    } finally { R.busy = false; }
+  }
+  // guest: join a room by its code; resolves with my channel once my answer is posted (the link then opens by itself)
+  N.roomJoin = async function (code) {
+    if (T.role) throw new Error('already in a session (reload the page to join another room)');
+    code = String(code || '').toUpperCase().replace(/[\s-]+/g, '');
+    if (!code) throw new Error('type the room code player 1 gave you');
+    status(`joining room ${code}…`);
+    const j = await roomCall({ op: 'join', code, build: N.buildId, rom: N.romSha256 });
+    const R = T.room = { code, ch: j.ch, token: j.token, guest: true };
+    T.role = 'guest'; T.myCh = j.ch;
+    status(`in room ${code}: you are ${pn(j.ch)}, waiting for player 1…`, 'ok');
+    let offer = null;
+    for (const t0 = Date.now(); !offer; await sleep(ROOM_POLL_MS)) {
+      if (R.closed) throw new Error('left the room');
+      if (Date.now() - t0 > ROOM_GUEST_WAIT_MS) throw new Error('player 1 did not answer (is the host page still open?)');
+      try { offer = (await roomCall({ op: 'guest', code, ch: j.ch, token: j.token })).offer; }
+      catch (e) { if (['unknown', 'token'].includes(e.code)) throw e; N.log('[net] room poll: ' + e.message); }
+    }
+    status('gathering network addresses…');
+    const a = await N.signal.answer({ t: 'o', ch: j.ch, sdp: offer });
+    await roomCall({ op: 'answer', code, ch: j.ch, token: j.token, sdp: a.sdp });
+    R.closed = true;
+    status(`you are ${pn(j.ch)}: connecting to player 1…`, 'ok');
+    return j.ch;
+  };
   // host: the slots for the panel: [{ch, state, rtt, why, route}]
   N.slots = () => [1, 2, 3].filter((c) => T.slots[c]).map((c) => {
     const p = T.peers[c], s = T.slots[c];
@@ -245,6 +330,7 @@
   });
   N.leave = function () {
     T.quit = true;
+    if (T.room && !T.room.guest) roomStop(true); else if (T.room) T.room.closed = true;   // P345
     for (const c of Object.keys(T.links)) try { sendCtlTo(+c, { t: 'bye' }); } catch (e) { /* closed */ }
     setTimeout(() => { for (const L of Object.values(T.links)) try { L.pc.close(); } catch (e) { /* closed */ } }, 150);
   };
@@ -349,6 +435,7 @@
     const guests = [1, 2, 3].filter((c) => T.slots[c] && T.slots[c].state === 'joined');
     if (!guests.length) throw new Error('no player has joined yet');
     T.started = true;
+    roomStop(true);   // P345: the room is not needed any more (nobody can join a started game)
     T.roster = [0, ...guests];
     for (const c of [1, 2, 3]) if (!guests.includes(c) && T.links[c]) { try { T.links[c].pc.close(); } catch (e) { /* closed */ } delete T.links[c]; }
     T.meshReports = {};
