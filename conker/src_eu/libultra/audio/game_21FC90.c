@@ -152,6 +152,16 @@ void mp3_stream_set_fx(s32 arg0, s32 arg1) {
     }
 }
 
+/* P332 "Speech volume" slider: the MP3 voice stream's left / right envelope targets are eqpower[pan] * volume >> 15,
+ * computed in two places (the stream's first envelope in the mixer callback, and mp3_stream_update_vol_pan when the
+ * volume / pan target changes); both use SPEECH_VOL(volume). A slider change applies from the next line / volume
+ * change. 100 % = the N64 volume. */
+#ifdef PORT
+#define SPEECH_VOL(v) port_volume_scale(PORT_OPT_VOL_SPEECH, (v))
+#else
+#define SPEECH_VOL(v) (v)
+#endif
+
 extern s32 g_audio_unused_c05e; /* was D_8002C05E */
 extern s32 g_level_id; /* was D_800BE9F0 */
 extern s32 g_mp3_stream_decoder; /* was D_800E11B4 */
@@ -311,9 +321,9 @@ s32 mp3_stream_synth_pull(s32 count, Acmd **cmdp) {
                 }
                 if (g_mp3_stream_env_first != 0) {
                     g_mp3_stream_env_first = 0;
-                    g_mp3_stream_ltgt = (g_mp3_stream_volume * g_audio_eqpower[g_mp3_stream_pan]) >> 15;
+                    g_mp3_stream_ltgt = (SPEECH_VOL(g_mp3_stream_volume) * g_audio_eqpower[g_mp3_stream_pan]) >> 15;
                     g_mp3_stream_lratm = _getRate(g_mp3_stream_cvol_l, g_mp3_stream_ltgt, g_mp3_stream_env_seg_end, (u16 *)((u8 *)&g_mp3_stream + 0x18));
-                    g_mp3_stream_rtgt = (g_mp3_stream_volume * g_audio_eqpower[128 - g_mp3_stream_pan - 1]) >> 15;
+                    g_mp3_stream_rtgt = (SPEECH_VOL(g_mp3_stream_volume) * g_audio_eqpower[128 - g_mp3_stream_pan - 1]) >> 15;
                     g_mp3_stream_rratm = _getRate(g_mp3_stream_cvol_r, g_mp3_stream_rtgt, g_mp3_stream_env_seg_end, (u16 *)((u8 *)&g_mp3_stream + 0x1E));
                     CMD(*cmdp, (g_mp3_stream_cvol_l & 0xFFFF) | 0x09060000, ((g_mp3_stream_dry_amt & 0xFFFF) << 0x10) | (g_mp3_stream_wet_amt & 0xFFFF));
                     CMD(*cmdp, (g_mp3_stream_rtgt & 0xFFFF) | 0x09040000, ((g_mp3_stream_rratm & 0xFFFF) << 0x10) | (g_mp3_stream_rratl & 0xFFFF));
@@ -379,40 +389,40 @@ s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 void mp3_stream_stop(void);
 
 /* was func_151F39E4 */
-void mp3_stream_update_vol_pan(struct_151F39E4 *arg0) {
-    if ((arg0->volume != arg0->unk88) || (arg0->pan != arg0->unk94)) {
-        if (arg0->delta >= arg0->segEnd) {
-            arg0->ltgt = (g_audio_eqpower[arg0->pan] * arg0->volume) >> 15;
-            arg0->rtgt = (g_audio_eqpower[127 - arg0->pan] * arg0->volume) >> 15;
-            arg0->delta = arg0->segEnd;
-            arg0->cvolL = arg0->ltgt;
-            arg0->cvolR = arg0->rtgt;
+void mp3_stream_update_vol_pan(struct_151F39E4 *stream) { /* stream was arg0 */
+    if ((stream->volume != stream->unk88) || (stream->pan != stream->unk94)) {
+        if (stream->delta >= stream->segEnd) {
+            stream->ltgt = (g_audio_eqpower[stream->pan] * SPEECH_VOL(stream->volume)) >> 15;
+            stream->rtgt = (g_audio_eqpower[127 - stream->pan] * SPEECH_VOL(stream->volume)) >> 15;
+            stream->delta = stream->segEnd;
+            stream->cvolL = stream->ltgt;
+            stream->cvolR = stream->rtgt;
         } else {
-            arg0->cvolL = _getVol(arg0->cvolL, arg0->delta, arg0->lratm, arg0->lratl);
-            arg0->cvolR = _getVol(arg0->cvolR, arg0->delta, arg0->rratm, arg0->rratl);
+            stream->cvolL = _getVol(stream->cvolL, stream->delta, stream->lratm, stream->lratl);
+            stream->cvolR = _getVol(stream->cvolR, stream->delta, stream->rratm, stream->rratl);
         }
-        if (arg0->cvolL == 0) {
-            arg0->cvolL = 1;
+        if (stream->cvolL == 0) {
+            stream->cvolL = 1;
         }
-        if (arg0->cvolR == 0) {
-            arg0->cvolR = 1;
+        if (stream->cvolR == 0) {
+            stream->cvolR = 1;
         }
-        arg0->volume = arg0->unk88;
-        if ((arg0->volume == 0) && (arg0->unk90 != 0)) {
+        stream->volume = stream->unk88;
+        if ((stream->volume == 0) && (stream->unk90 != 0)) {
             mp3_stream_stop();
         }
-        if (arg0->pan != arg0->unk94) {
+        if (stream->pan != stream->unk94) {
             if (g_audio_headphones != 0) {
-                arg0->pan = (arg0->unk94 >> 1) + 0x20;
+                stream->pan = (stream->unk94 >> 1) + 0x20;
             } else if (g_audio_mono != 0) {
-                arg0->pan = 0x40;
+                stream->pan = 0x40;
             } else {
-                arg0->pan = arg0->unk94;
+                stream->pan = stream->unk94;
             }
         }
-        arg0->delta = 0;
-        arg0->segEnd = ((arg0->unk90 + 183) / 184) * 184;
-        arg0->unk24 = 1;
+        stream->delta = 0;
+        stream->segEnd = ((stream->unk90 + 183) / 184) * 184;
+        stream->unk24 = 1;
     }
 }
 

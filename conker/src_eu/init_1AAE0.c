@@ -220,20 +220,25 @@ ALSound *n_seqp_lookup_sound_quick(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan)
 
 s16 __n_vsVol(N_ALVoiceState *vs, N_ALSeqPlayer *seqp)
 {
-    u32     t1,t2;
+    u32     voice_gain, chan_gain; /* were t1, t2: tremolo * velocity * envelope; sample * player * channel volume */
 
-    t1 = (vs->tremelo*vs->velocity*vs->envGain) >> 6;
-    t2 = (vs->sound->sampleVolume*seqp->vol*
+    voice_gain = (vs->tremelo*vs->velocity*vs->envGain) >> 6;
+    chan_gain = (vs->sound->sampleVolume*seqp->vol*
           seqp->chanState[vs->channel].vol) >> 14;
 
     if (seqp->chanState[vs->channel].unkD != 0xFF) {
-        t2 = ((seqp->chanState[vs->channel].unkD * t2) + 1) >> 8;
+        chan_gain = ((seqp->chanState[vs->channel].unkD * chan_gain) + 1) >> 8;
     }
 
-    t1 *= t2;
-    t1 >>= 15;
+    voice_gain *= chan_gain;
+    voice_gain >>= 15;
+#ifdef PORT
+    /* P332 "Music volume" slider: every volume a sequence (music) voice gets passes through here (voice start and
+     * the updates in n_csplayer / init_19B50), so scaling the result scales the music only. 100 % returns voice_gain. */
+    voice_gain = port_volume_scale(PORT_OPT_VOL_MUSIC, voice_gain);
+#endif
 
-    return t1;
+    return voice_gain;
 }
 
 // fx mix for a voice, scaled by the player's unk7C/unk80

@@ -16,9 +16,15 @@ enum {
                                  * camera_wobble_apply, P331) */
     PORT_OPT_CONKER_FULL_LOD = 7, /* Conker always drawn with his most detailed model (obj_select_lod, P331) */
     PORT_OPT_AIR_BAR = 8,       /* bar of the air left while under water (hud_air_bar_draw, P332) */
+    /* P332 sliders: the value is a percentage 0..100 (default 100 = N64); game C scales with port_volume_scale */
+    PORT_OPT_VOL_MUSIC = 9,     /* sequenced music: __n_vsVol */
+    PORT_OPT_VOL_SFX = 10,      /* sound player effects: SND_VOL155 (n_sndp_handle_event) */
+    PORT_OPT_VOL_SPEECH = 11,   /* MP3 voice streams: mp3_stream_update_vol_pan / the stream's first envelope */
     PORT_OPT_COUNT = 16
 };
 int port_option(int id);
+/* P332: v * port_option(id) / 100 for the volume sliders; exactly v at 100 % (the default). */
+int port_volume_scale(int id, int v);
 /* P327 test aids (URL flags, port/ultra/pc_os.c), 0 when the flag is absent so they do nothing unless given:
  * port_warp_level() = ?warp=29 (hex level id), port_warp_scene() = ?warpscene=N (decimal, or 0x..). */
 int port_warp_level(void);

@@ -18,7 +18,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 6 | Longer tail spin (2×) | Done P326 |
 | 7 | No motion blur / drunken sway | Done P331 |
 | 8 | Conker always full detail (LOD) | Done P331 |
-| 9 | Separate music / SFX / speech volume | To do |
+| 9 | Separate music / SFX / speech volume | Done P332 |
 | 10 | Underwater air meter | Done P332 |
 | 11 | Inverted swimming | To do |
 | 12 | Rumble (browser gamepad) | To do |

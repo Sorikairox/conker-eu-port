@@ -72,20 +72,42 @@ const OPTIONS = [
     help: 'Conker is always drawn with his most detailed model. Off: as on the N64, he switches to simpler models once the camera is more than 500 units away (the normal follow camera is often 450 to 650 units behind him, more while running).' },
   { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
+  // P332: sliders (range: true): the value 0..100 (%) goes to the game through the same port_set_option channel.
+  { key: 'volmusic', label: 'Music volume', def: 100, range: true, game: 9,
+    help: 'Volume of the music (the sequenced songs), 0 to 100 %. 100 % = as on the N64.' },
+  { key: 'volsfx', label: 'Sound effects volume', def: 100, range: true, game: 10,
+    help: 'Volume of the sound effects (footsteps, hits, ambience, short grunts), 0 to 100 %. 100 % = as on the N64.' },
+  { key: 'volspeech', label: 'Speech volume', def: 100, range: true, game: 11,
+    help: 'Volume of the spoken dialogue (the MP3 voice streams), 0 to 100 %. 100 % = as on the N64.' },
 ];
 const optOverride = {};
-for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }
+for (const kv of (Q.get('opt') || '').split(',')) {
+  const [k, v] = kv.split(':'), o = OPTIONS.find((x) => x.key === k);
+  if (k) optOverride[k] = o && o.range ? Math.max(0, Math.min(100, parseInt(v, 10) || 0)) : v === '1';
+}
 const optCache = {};   // opt() is read every animation frame by the input code: cache, refreshed on change
 const opt = (key) => {
   if (key in optCache) return optCache[key];
   const o = OPTIONS.find((x) => x.key === key);
   return (optCache[key] = key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def));
 };
-function sendOption(o) { if (o.game !== undefined && M && M._port_set_option) M._port_set_option(o.game, opt(o.key) ? 1 : 0); }
+function sendOption(o) {
+  if (o.game !== undefined && M && M._port_set_option) M._port_set_option(o.game, o.range ? opt(o.key) | 0 : opt(o.key) ? 1 : 0);
+}
 const optionChanged = {};   // key -> callback for page-side options that need to react at once
 (function renderOptions() {
   for (const o of OPTIONS) {
     const l = document.createElement('label'), c = document.createElement('input'), t = document.createElement('span');
+    if (o.range) {   // P332 slider: 0..100 %, sent while dragging, saved on release
+      c.type = 'range'; c.min = 0; c.max = 100; c.step = 5; c.value = opt(o.key); c.id = 'opt-' + o.key;
+      const pct = document.createElement('b'); pct.textContent = ` ${c.value} %`;
+      c.oninput = () => { delete optOverride[o.key]; optCache[o.key] = +c.value; pct.textContent = ` ${c.value} %`; sendOption(o); };
+      c.onchange = () => { store.set('opt.' + o.key, +c.value); log(`[options] ${o.key} ${c.value}`); };
+      t.textContent = o.label; t.appendChild(pct);
+      const h = document.createElement('small'); h.textContent = o.help; t.appendChild(h);
+      l.append(t, c); $('options').appendChild(l);
+      continue;
+    }
     c.type = 'checkbox'; c.checked = opt(o.key); c.id = 'opt-' + o.key;
     c.onchange = () => {
       delete optOverride[o.key]; store.set('opt.' + o.key, c.checked); optCache[o.key] = c.checked;
@@ -612,7 +634,7 @@ async function start(app) {
   });
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
-  log('[options] ' + OPTIONS.map((o) => `${o.key}=${opt(o.key) ? 1 : 0}`).join(' '));
+  log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));
   if (app === 'game' && romBytes) {
     const p = M._malloc(romBytes.length);
     M.HEAPU8.set(romBytes, p);

@@ -87,6 +87,14 @@ typedef struct {
 
 #define SND_VOL155(state, sound, keymap) \
     ((((s16 *)g_sndp_group_volumes)[(keymap)->keyMin & 0x1f] * ((state)->envvol * (state)->vol * (sound)->sampleVolume / 0x3f01)) / 0x7fff)
+#ifdef PORT
+/* P332 "Sound effects volume" slider: every volume the sound player gives a voice is SND_VOL155 (start, attack ->
+ * decay, volume events), so scaling it here scales the sound effects only. 100 % = the N64 value. */
+#undef SND_VOL155
+#define SND_VOL155(state, sound, keymap) \
+    port_volume_scale(PORT_OPT_VOL_SFX, \
+        ((((s16 *)g_sndp_group_volumes)[(keymap)->keyMin & 0x1f] * ((state)->envvol * (state)->vol * (sound)->sampleVolume / 0x3f01)) / 0x7fff))
+#endif
 #define SND_MIN155(a, b) ((a) < (b) ? (a) : (b))
 #define SND_MAX155(a, b) ((a) > (b) ? (a) : (b))
 

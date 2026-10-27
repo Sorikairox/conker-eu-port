@@ -330,11 +330,20 @@ EMSCRIPTEN_KEEPALIVE void port_set_paused(int p) {
  * The defaults here are the page defaults, so runs without the page (node) behave like a fresh browser. */
 static int port_options[PORT_OPT_COUNT] = {
     [PORT_OPT_CUTSCENE_SKIP] = 1,   /* "Skippable cutscenes (hold L)": on by default (user request) */
+    [PORT_OPT_VOL_MUSIC] = 100,     /* P332 volume sliders, in %: 100 = the N64 volume */
+    [PORT_OPT_VOL_SFX] = 100,
+    [PORT_OPT_VOL_SPEECH] = 100,
 };
 EMSCRIPTEN_KEEPALIVE void port_set_option(int id, int value) {
     if (id >= 0 && id < PORT_OPT_COUNT) port_options[id] = value;
 }
 int port_option(int id) { return id >= 0 && id < PORT_OPT_COUNT ? port_options[id] : 0; }
+int port_volume_scale(int id, int v) {
+    int pct = port_option(id);
+    if (pct >= 100) return v; /* the default: the N64 value, untouched */
+    if (pct <= 0) return 0;
+    return (int)((long long)v * pct / 100);
+}
 
 /* P321: hold-to-skip for cutscenes (user request; the game side is cutscene_can_skip under PORT). The game calls
  * port_skip_hold() every frame a cutscene may be skipped; it answers 1 once L was held for 3 s of
