@@ -39,7 +39,7 @@ def expectations(regs):
             nm = fstart.get(v)
             ws = None
             if nm and '@' + nm in can:
-                r, ps = can['@' + nm]
+                r, ps = can['@' + nm][:2]
                 ws = None if '...' in ps else wsig(r, ps)
             elif nm in regs:
                 ws = regs[nm]

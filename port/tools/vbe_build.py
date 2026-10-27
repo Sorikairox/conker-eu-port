@@ -118,7 +118,8 @@ def main():
         for tag, rc, msg, rebuilt in pool.map(to_ll, files):
             nll += rebuilt
             (fails.append((tag, rc, msg)) if rc else tags.append(tag))
-        if nll == 0 and not fails and state.get('tags') == tags and os.path.exists(SIGDB):
+        sigs_tool = depkey.file_hash('port/tools/sigs.py')  # P341: a sigs.py change re-runs phase 2
+        if nll == 0 and not fails and state.get('tags') == tags and state.get('sigs') == sigs_tool and os.path.exists(SIGDB):
             tot['mismatched_functions'] = state['mismatched_functions']  # P327: same .ll set, same signatures
         else:
             defs, sites = {}, collections.defaultdict(collections.Counter)
@@ -127,8 +128,8 @@ def main():
             can = sigs.canonical(defs, sites)
             depkey.write_if_changed(SIGDB, json.dumps(can))
             tot['mismatched_functions'] = sum(1 for f, c in sites.items() if len(c) > 1 or
-                                              (f in defs and json.dumps(list(defs[f])) not in c))
-            depkey.save(state_f, {'tags': tags, 'mismatched_functions': tot['mismatched_functions']})
+                                              (f in defs and json.dumps(list(defs[f])[:2]) not in c))
+            depkey.save(state_f, {'tags': tags, 'mismatched_functions': tot['mismatched_functions'], 'sigs': sigs_tool})
         depkey._memo.pop(SIGDB, None)
         sig_hash = depkey.file_hash(SIGDB)
         for tag, rc, msg, rebuilt in pool.map(lambda t: build_one(t, sig_hash), tags):

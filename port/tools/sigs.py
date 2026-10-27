@@ -9,6 +9,13 @@ each mismatching call site and `declare` in a TU to the canonical type, converti
 (int<->int sext/trunc, ptr<->int, float<->int bitcast, missing -> 0, extra -> dropped) and the
 result (void -> 0). This reproduces what the MIPS o32 call would do for integer/pointer arguments;
 an f32/int mix is wrong either way (different registers on MIPS too) and is reported.
+
+P341: the definition's zeroext / signext attributes of i8 / i16 parameters and results are part of the canonical
+signature (can[f][2] / can[f][3]). wasm passes an i8 / i16 in an i32 and the callee trusts the caller to have
+extended it; a rewritten call without the attribute handed over the unmasked int (event_action_rail command 11 ->
+world_record_find(u8) got 0x300B for record id 0x0B, so no multiplayer weapon pickup ever reached a player).
+Rewritten sites now carry the attributes, sites whose only difference is a missing / different extension are
+rewritten too, and a narrow zeroext result widens with zext.
 """
 import collections, json, re
 from vbe import split_top, take_type
@@ -42,6 +49,42 @@ def site_ret(mid):
     return toks[-1] if toks else None
 
 
+EXT = ('zeroext', 'signext')
+
+
+def pexts(params):
+    """zeroext / signext (or '') of each parameter of a define / declare parameter list"""
+    out = []
+    for p in split_top(params):
+        if not p:
+            continue
+        if p == '...':
+            out.append('')
+            continue
+        _, rest = take_type(p)
+        out.append(next((t for t in rest.split() if t in EXT), ''))
+    return out
+
+
+def rext(prefix):
+    """zeroext / signext (or '') among the return attributes in front of the type"""
+    return next((t for t in prefix.split() if t in EXT), '')
+
+
+def site_exts(args):
+    out = []
+    for a in split_top(args):
+        if not a:
+            continue
+        _, rest = take_type(a)
+        out.append(next((t for t in rest.split() if t in EXT), ''))
+    return out
+
+
+def narrow(t):
+    return t in ('i8', 'i16')
+
+
 def site_args(args):
     out = []
     for a in split_top(args):
@@ -62,7 +105,7 @@ def scan(text, defs, sites):
         if l.startswith('define '):
             m = DEFINE.match(l)
             if m and 'internal' not in m[1] and 'private' not in m[1]:
-                defs[m[3]] = (m[2], ptypes(m[4]))
+                defs[m[3]] = (m[2], ptypes(m[4]), rext(m[1]), pexts(m[4]))
         elif l.startswith('declare ') and '...' in l:
             m = DECLARE.match(l)
             if m and not m[2].startswith('@llvm.') and ptypes(m[3])[:-1]:
@@ -91,7 +134,7 @@ def zero(t):
     return ZERO.get(t, '0' if t.startswith('i') else 'zeroinitializer')
 
 
-def conv(ind, v, src, dst, tmp, out):
+def conv(ind, v, src, dst, tmp, out, ext='sext'):
     if src == dst:
         return v
     if v in ('undef', 'poison'):
@@ -100,7 +143,7 @@ def conv(ind, v, src, dst, tmp, out):
     t = tmp()
     if isint(src) and isint(dst):
         a, b = int(src[1:]), int(dst[1:])
-        out.append(f'{ind}{t} = {"sext" if a < b else "trunc"} {src} {v} to {dst}')
+        out.append(f'{ind}{t} = {ext if a < b else "trunc"} {src} {v} to {dst}')
     elif src == 'ptr' and isint(dst):
         out.append(f'{ind}{t} = ptrtoint ptr {v} to {dst}')
     elif isint(src) and dst == 'ptr':
@@ -124,6 +167,15 @@ A0_KEEP = set()
 DEFINE_A0 = re.compile(r'^define [^@]*(@[\w.$]+)\((ptr|i32)[^%,)]*(%[\w.]+)?')
 
 
+def attrs(entry):
+    """(return attribute + ' ' or '', [parameter attribute or '']) of a canonical entry; only narrow ints keep one"""
+    r, ps = entry[0], entry[1]
+    ra = entry[2] if len(entry) > 2 and narrow(r) else ''
+    pa = list(entry[3]) if len(entry) > 3 else []
+    pa = [(pa[i] if i < len(pa) and narrow(p) else '') for i, p in enumerate(ps)]
+    return (ra + ' ' if ra else ''), pa
+
+
 def normalize(lines, can, tmp, stats):
     out = []
     cur = (None, None, None)
@@ -134,27 +186,34 @@ def normalize(lines, can, tmp, stats):
         if l.startswith('declare '):
             m = DECLARE.match(l)
             if m and m[2] in can and not m[2].startswith('@llvm.'):
-                r, ps = can[m[2]]
+                r, ps = can[m[2]][:2]
+                ra, pa = attrs(can[m[2]])
                 if '...' not in ps or ps[:-1]:
-                    out.append(f'declare {r} {m[2]}({", ".join(ps)})')
+                    out.append(f'declare {ra}{r} {m[2]}({", ".join(p + (" " + pa[i] if pa[i] else "") for i, p in enumerate(ps))})')
                     continue
         elif l.startswith('  ') and 'call ' in l:
             m = CALL.match(l)
             if m and m[5] in can and not m[5].startswith('@llvm.'):
-                r, ps = can[m[5]]
+                r, ps = can[m[5]][:2]
+                ra, pa = attrs(can[m[5]])
+                rx = 'zext' if ra.strip() == 'zeroext' else 'sext'
                 sr = site_ret(m[4])
                 sa = site_args(m[6])
+                se = site_exts(m[6])
+                # P341: a narrow parameter whose extension differs from the definition's must be rewritten as well
+                extdiff = any(narrow(p) and pa[i] and (i >= len(se) or se[i] != pa[i]) for i, p in enumerate(ps) if p != '...') \
+                    or (narrow(r) and ra and sr != r)
                 var = ps and ps[-1] == '...'
                 fixed = ps[:-1] if var else ps
                 if var and sr and (sr != r or [t for t, _ in sa][:len(fixed)] != fixed or '...' not in m[4]):
                     ind, res, new, args = m[1], m[2], [], []
                     for i, p in enumerate(fixed):
-                        args.append(f'{p} {conv(ind, sa[i][1], sa[i][0], p, tmp, new) if i < len(sa) else zero(p)}')
+                        args.append(f'{p}{" " + pa[i] if pa[i] else ""} {conv(ind, sa[i][1], sa[i][0], p, tmp, new) if i < len(sa) else zero(p)}')
                     args += [f'{t} {v}' for t, v in sa[len(fixed):]]
-                    call = f'{m[3]}{r} ({", ".join(fixed + ["..."])}) {m[5]}({", ".join(args)})'
+                    call = f'{m[3]}{ra}{r} ({", ".join(fixed + ["..."])}) {m[5]}({", ".join(args)})'
                     if res and sr != 'void' and r != 'void':
                         t = tmp(); new.append(f'{ind}{t} = {call}')
-                        c = conv(ind, t, r, sr, tmp, new)
+                        c = conv(ind, t, r, sr, tmp, new, rx)
                         new.append(f'{ind}{res} = select i1 true, {sr} {c}, {sr} {c}')
                     elif res and sr != 'void':
                         new.append(f'{ind}{call}'); new.append(f'{ind}{res} = select i1 true, {sr} {zero(sr)}, {sr} {zero(sr)}')
@@ -163,7 +222,9 @@ def normalize(lines, can, tmp, stats):
                     out += new
                     stats['call_fixed_var'] += 1
                     continue
-                if not var and sr and (sr != r or [t for t, _ in sa] != ps):
+                if not var and sr and (sr != r or [t for t, _ in sa] != ps or extdiff):
+                    if not (sr != r or [t for t, _ in sa] != ps):
+                        stats['ext_fixed'] += 1
                     ind, res = m[1], m[2]
                     new = []
                     args = []
@@ -171,13 +232,13 @@ def normalize(lines, can, tmp, stats):
                         if i < len(sa):
                             if {sa[i][0], p} == {'float', 'i32'}:
                                 stats['fp_int_arg'] += 1
-                            args.append(f'{p} {conv(ind, sa[i][1], sa[i][0], p, tmp, new)}')
+                            args.append(f'{p}{" " + pa[i] if pa[i] else ""} {conv(ind, sa[i][1], sa[i][0], p, tmp, new)}')
                         elif i == 0 and (cur[0], m[5]) in A0_KEEP and cur[2] and cur[1] == p:
                             args.append(f'{p} {cur[2]}')
                             stats['a0_keep'] += 1
                         else:
                             args.append(f'{p} {zero(p)}')
-                    call = f'{m[3]}{r} {m[5]}({", ".join(args)})'
+                    call = f'{m[3]}{ra}{r} {m[5]}({", ".join(args)})'
                     if res and sr != 'void':
                         if r == 'void':
                             new.append(f'{ind}{call}')
@@ -185,7 +246,7 @@ def normalize(lines, can, tmp, stats):
                         else:
                             t = tmp()
                             new.append(f'{ind}{t} = {call}')
-                            c = conv(ind, t, r, sr, tmp, new)
+                            c = conv(ind, t, r, sr, tmp, new, rx)
                             new.append(f'{ind}{res} = select i1 true, {sr} {c}, {sr} {c}')
                     elif r != 'void':  # an unnamed non-void call would take an implicit %N slot
                         new.append(f'{ind}{tmp()} = {call}')
