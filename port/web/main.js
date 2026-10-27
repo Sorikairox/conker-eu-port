@@ -724,6 +724,7 @@ async function netLoad() {
     PortNet.buildId = (await sha256hex(await (await fetch('conker.wasm')).arrayBuffer())).slice(0, 16);
     PortNet.romSha256 = await sha256hex(romBytes);
     PortNet.log = log;
+    if (Q.get('roomapi')) PortNet.roomApi = Q.get('roomapi');   // P345 tests: a local room server (tools/port/scripts/roomserver.mjs)
     for (const ev of Object.keys(netEvents)) PortNet.t.on[ev] = (...a) => { for (const f of netEvents[ev]) f(...a); };
     PortNet.t.on.config = (cfg) => {   // both peers: boot the game into the session
       netCfg = cfg;
@@ -748,9 +749,29 @@ $('net-delay-auto').onchange = () => { store.set('netdelayauto', $('net-delay-au
 // P344: the host's panel lists the guest slots (players 2..4): each with its offer code, the answer box and its state
 $('net-host').onclick = () => netGuard(async () => {
   netNeedRom();   // before the buttons are disabled, so the player can load the ROM and try again
-  $('net-step-host').hidden = false; $('net-step-join').hidden = true; $('net-host').disabled = $('net-join').disabled = true;
+  $('net-step-host').hidden = false; $('net-step-join').hidden = true; netLockStart();
   netShowSlot(await window.__online.invite());
 });
+// P345 room codes: Create room (host: the code big + copy + the joined players), Join room (code field); the
+// copy-paste flow above stays under "manual codes"
+const netLockStart = () => { for (const id of ['net-host', 'net-join', 'net-room-create', 'net-room-join', 'net-manual']) $(id).disabled = true; };
+const netUnlockStart = () => { for (const id of ['net-host', 'net-join', 'net-room-create', 'net-room-join', 'net-manual']) $(id).disabled = false; };
+$('net-manual').onchange = () => { $('net-manual-box').hidden = !$('net-manual').checked; };
+$('net-room-create').onclick = () => netGuard(async () => {
+  netNeedRom();
+  netLockStart();
+  try { $('net-room-show').textContent = await window.__online.roomCreate(); } catch (e) { netUnlockStart(); throw e; }
+  $('net-room-box').hidden = false; $('net-room-start').hidden = true;
+  $('net-step-host').hidden = false; $('net-invite').hidden = true;
+});
+$('net-room-copy').onclick = () => { const c = $('net-room-show').textContent; (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).catch(() => {}); };
+$('net-room-join').onclick = () => netGuard(async () => {
+  netNeedRom();
+  netLockStart();
+  try { await window.__online.roomJoin($('net-room-code').value); } catch (e) { if (!window.PortNet || !PortNet.t.role) netUnlockStart(); throw e; }
+  $('net-room-start').hidden = true;
+});
+$('net-room-code').onkeydown = (e) => { if (e.key === 'Enter') $('net-room-join').click(); };
 $('net-invite').onclick = () => netGuard(async () => { $('net-invite').disabled = true; try { netShowSlot(await window.__online.invite()); } finally { $('net-invite').disabled = false; } });
 $('net-start').onclick = () => netGuard(async () => { $('net-start').disabled = $('net-invite').disabled = true; await window.__online.start(); });
 function netSlotBox(ch) {
@@ -783,21 +804,21 @@ netEvents.roster.push((slots) => {   // host
     netSlotBox(s.ch);
     const n = s.ch + 1;
     if (s.state === 'joined') joined++;
-    $('net-slot-' + n + '-codes').hidden = !['invited', 'connecting', 'failed'].includes(s.state);
-    $('net-slot-' + n + '-state').textContent = (NET_SLOT_TEXT[s.state] || s.state) + (s.why && s.state !== 'joined' ? ` (${s.why})` : '') +
+    $('net-slot-' + n + '-codes').hidden = !!PortNet.t.room || !['invited', 'connecting', 'failed'].includes(s.state);   // P345: no codes in a room
+    $('net-slot-' + n + '-state').textContent = (PortNet.t.room && s.state === 'invited' ? 'joined the room: connecting…' : NET_SLOT_TEXT[s.state] || s.state) + (s.why && s.state !== 'joined' ? ` (${s.why})` : '') +
       (s.rtt && s.state === 'joined' ? ` · ping ${s.rtt} ms` : '') + (s.relay && s.relay.length ? ` · through player 1 with ${s.relay.map((k) => k.split('-').filter((c) => +c !== s.ch).map((c) => 'player ' + (+c + 1))).join(', ')}` : '');
   }
   if (!window.PortNet || !PortNet.t.started) { $('net-start').disabled = !joined; $('net-start').textContent = `Start the game (${joined + 1} players)`; }
-  else $('net-host-actions').hidden = true;   // the game started: no more invitations
+  else $('net-host-actions').hidden = $('net-room-box').hidden = true;   // the game started: no more invitations (P345: the room is closed)
   $('net-invite').disabled = slots.length >= 3 && slots.every((s) => !['left', 'failed'].includes(s.state));
 });
-$('net-join').onclick = () => { $('net-step-join').hidden = false; $('net-step-host').hidden = true; $('net-host').disabled = $('net-join').disabled = true; };
+$('net-join').onclick = () => { $('net-step-join').hidden = false; $('net-step-host').hidden = true; netLockStart(); };
 $('net-answer-make').onclick = () => netGuard(async () => { netNeedRom(); $('net-answer-make').disabled = true; $('net-answer').value = await window.__online.join($('net-offer-in').value); });
 $('net-answer-copy').onclick = () => copyCode('net-answer');
 $('net-leave').onclick = () => { window.__online.leave(); $('net-leave').hidden = true; };
 netEvents.status.push((s, cls) => {
   netStatus(s, cls);
-  if (/^(connected|joined as)/.test(s) || (window.PortNet && PortNet.t.started)) { $('net-step-join').hidden = true; $('net-leave').hidden = false; }
+  if (/^(connected|joined as)/.test(s) || (window.PortNet && PortNet.t.started)) { $('net-step-join').hidden = true; $('net-room-start').hidden = true; $('net-leave').hidden = false; }
 });
 let netWaitSince = 0;
 netEvents.tick.push((t) => {   // ~100 Hz from net.js
@@ -835,6 +856,18 @@ function netNeedRom() {
   if (!romOk) throw new Error('this ROM is not the Conker EU ROM; both players need the EU ROM');
   if (!crypto.subtle) throw new Error('this page needs a secure (https) connection for online play');
 }
+// the host's session config (P345: was inline in __online.invite; also used by rooms): sessionFn of net.js
+async function netSessionConfig({ ping, mask }) {   // ping: {n, min, median, p90} ms of the slowest pair (or null)
+  const options = {};
+  for (const o of OPTIONS) if (o.game !== undefined) options[o.key] = opt(o.key);
+  let eeprom = null;
+  if (Q.get('neteep') !== 'blank') try { const b = await idb('saves', 'readonly', (s) => s.get(saveKey())); if (b && b.length) eeprom = new Uint8Array(b); } catch (e) { /* no save */ }
+  // P339: input delay automatic from the measured ping (panel checkbox, default on) or the panel's field;
+  // ?netd=D / ?netd=auto (tests) wins
+  const auto = Q.get('netd') ? Q.get('netd') === 'auto' : $('net-delay-auto').checked;
+  const d = auto ? PortNet.autoDelay(ping) : +(Q.get('netd') || $('net-delay').value || 3);
+  return { mask, delay: Math.max(1, Math.min(16, d | 0)), autoDelay: auto, hashEvery: 10, options, eeprom };
+}
 window.__online = {
   ready: () => !!romBytes && !running,
   // host: start hosting, returns player 2's offer code (P344: __online.invite() for players 3 and 4, then start())
@@ -844,18 +877,22 @@ window.__online = {
     if (running) throw new Error('the game already runs: reload the page, then host before pressing Start');
     netNeedRom();
     await netLoad();
-    return PortNet.host(async ({ ping, mask }) => {   // ping: {n, min, median, p90} ms of the slowest pair (or null)
-      const options = {};
-      for (const o of OPTIONS) if (o.game !== undefined) options[o.key] = opt(o.key);
-      let eeprom = null;
-      if (Q.get('neteep') !== 'blank') try { const b = await idb('saves', 'readonly', (s) => s.get(saveKey())); if (b && b.length) eeprom = new Uint8Array(b); } catch (e) { /* no save */ }
-      // P339: input delay automatic from the measured ping (panel checkbox, default on) or the panel's field;
-      // ?netd=D / ?netd=auto (tests) wins
-      const auto = Q.get('netd') ? Q.get('netd') === 'auto' : $('net-delay-auto').checked;
-      const d = auto ? PortNet.autoDelay(ping) : +(Q.get('netd') || $('net-delay').value || 3);
-      return { mask, delay: Math.max(1, Math.min(16, d | 0)), autoDelay: auto, hashEvery: 10, options, eeprom };
-    });
+    return PortNet.host(netSessionConfig);
   },
+  // P345 room codes: host -> the room code (players 2..4 join with it); guest -> joins, resolves with its channel
+  async roomCreate(max = 4) {
+    if (running) throw new Error('the game already runs: reload the page, then create the room before pressing Start');
+    netNeedRom();
+    await netLoad();
+    return PortNet.roomCreate(netSessionConfig, max);
+  },
+  async roomJoin(code) {
+    if (running) throw new Error('the game already runs: reload the page, then join before pressing Start');
+    netNeedRom();
+    await netLoad();
+    return PortNet.roomJoin(code);
+  },
+  room: () => window.PortNet && PortNet.t.room ? { code: PortNet.t.room.code, ch: PortNet.t.room.ch, closed: !!PortNet.t.room.closed } : null,
   async join(code) {
     if (running) throw new Error('the game already runs: reload the page, then join before pressing Start');
     netNeedRom();

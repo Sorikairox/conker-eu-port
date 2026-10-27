@@ -97,6 +97,13 @@
     background: rgba(0,0,0,.7); color: #fff; font-size: 13px; pointer-events: none; }
   #netwait[hidden] { display: none; }
   #net-host-actions[hidden] { display: none; }
+  /* P345: room codes */
+  #net-room-code { width: 8em; text-transform: uppercase; letter-spacing: 2px; font: 16px ui-monospace, monospace; background: var(--panel2);
+    color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; }
+  #net-room-box { margin-top: 8px; font-size: 13px; }
+  #net-room-show { display: inline-block; margin: 0 6px; font: bold 30px ui-monospace, monospace; letter-spacing: 4px; color: var(--accent); vertical-align: middle; }
+  .netmanual { display: block; margin-top: 8px; font-size: 12px; color: var(--muted); }
+  #net-room-start[hidden], #net-room-box[hidden], #net-manual-box[hidden] { display: none; }
   .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   #pads { font-size: 12px; color: var(--muted); margin-top: 6px; }
   #console { background: #0b0c0f; border-radius: 4px; padding: 8px 10px; margin: 8px 0 0; height: 360px; overflow: auto;
@@ -198,10 +205,18 @@
     </section>
     <section class="panel" id="p-online" hidden>
       <h3>Online (experimental)</h3>
-      <p class="hint" style="text-align:left">2 to 4 players on their own computers, each with their own ROM, in Chrome. Player 1 hosts,
-        sends each other player a code and drives the menus; the others join with Start on the "press START" page of a multiplayer mode.
+      <p class="hint" style="text-align:left">2 to 4 players on their own computers, each with their own ROM, in Chrome. Player 1 creates a room
+        and tells the others its code (they type it and press Join room) and drives the menus; the others join with Start on the "press START" page of a multiplayer mode.
         Connect before pressing Start (reload the page first if the game already runs). The session uses player 1's options and save.</p>
-      <div class="row"><button id="net-host">Host (player 1)</button><button id="net-join">Join (players 2 to 4)</button></div>
+      <div id="net-room-start">
+        <div class="row"><button id="net-room-create" class="primary" title="Get a short room code for your friends (players 2 to 4)">Create room (player 1)</button></div>
+        <div class="row" style="margin-top:6px"><input id="net-room-code" placeholder="room code" maxlength="9" autocomplete="off" spellcheck="false">
+          <button id="net-room-join" title="Join the room of player 1 with the code they gave you">Join room</button></div>
+        <label class="netmanual"><input id="net-manual" type="checkbox"> manual codes (copy-paste, without the room server)</label>
+        <div id="net-manual-box" class="row" hidden><button id="net-host">Host (player 1)</button><button id="net-join">Join (players 2 to 4)</button></div>
+      </div>
+      <div id="net-room-box" hidden>Room code <span id="net-room-show"></span> <button id="net-room-copy">Copy</button>
+        <div class="hint" style="text-align:left">Tell each friend this code: they type it and press Join room. Players 2 to 4 join in that order.</div></div>
       <label class="netdelay" title="Each player's input reaches the game this many frames (20 ms each) late, so the network has time to bring it to the other computer. Automatic: the host measures the ping before the game starts and picks 2 to 8 frames. Untick it and raise the number if the game often waits for the other player.">Input delay
         <input id="net-delay-auto" type="checkbox" checked> automatic, or
         <input id="net-delay" type="number" min="1" max="16" value="3"> frames (host)</label>
