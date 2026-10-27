@@ -2240,6 +2240,7 @@ void __wrap_objects_run_state_handlers(void) {
     volatile unsigned char here = 0;
     unsigned before = g_cur_pad, after, sp = (unsigned)(uintptr_t)&here;
     __real_objects_run_state_handlers();
+    { extern void p340_probe(void); p340_probe(); }   /* P340 ?p340=F multiplayer pickup probe */
     after = g_cur_pad;
     if (p38_on()) {
         int in_stack = after < sp && sp - after < 0x10000; /* below our frame = the callee's dead frame */

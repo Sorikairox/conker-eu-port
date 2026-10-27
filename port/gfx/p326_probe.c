@@ -9,6 +9,7 @@
  * surface (+0x118), y_velocity / gravity 0, and the "float water" flags of the state block are cleared, as if the player
  * kept diving in diving water, so the air runs out without a dive route. */
 #include <stdint.h>
+#include <string.h>
 #include "../ultra/pc_mem.h"
 #include "../ultra/port_options.h"
 
@@ -148,4 +149,98 @@ void p326_probe(void) {
     if (g != glide && (g <= 3 || glide <= 1))
         port_log("[p326] frame %u spin %d -> %d y %.1f\n", port_frame_count, glide, g, F(r, 0x18));
     glide = g;
+}
+
+/* P340 TEST ?p340=F, called once per retrace from __wrap_objects_run_state_handlers (gfx_f3dex2.c), so it runs in
+ * multiplayer too (p326_probe only runs from Conker's look callback). */
+void p340_probe(void) {
+    unsigned char *r = g_objects;
+    {   /* P340 TEST ?p340=F (multiplayer weapon pickups): from retrace F, once lists the floating pickups (world objects
+         * whose update +0x38 is pickup_update: index, kind +0x54, position, team filter +0x84); ?p340tp=I+1 at retrace
+         * ?p340tpf teleports player 0 onto pickup I (x / z); logs every pickup state change (state block +0x7C, +4; taker
+         * +0x80) and, for 120 retraces after a pickup is taken, every byte of player 0's control block (+0x31C, 0x1B4
+         * bytes) that changes; every 50 retraces pad kind +0x75, item kind +0x78, fallback +0x7C, item phase +0x11A,
+         * aim state +0x197. */
+        extern void pickup_update(unsigned char *);
+        extern unsigned char *g_world_objs; /* was D_800DBEF4 */
+        extern int g_world_obj_count; /* was D_800DBE18 */
+        static int f340 = -2, tpf, tpi, listed, laststate[512], watch;
+        static unsigned last340;
+        static unsigned char snap[0x1B4];
+        unsigned char *st = (unsigned char *)(uintptr_t) * (const unsigned *)(r + 0x31C);
+        int i, n = g_world_obj_count;
+        if (f340 == -2) { f340 = port_flag("p340"); tpf = port_flag("p340tpf"); tpi = port_flag("p340tp"); }
+        if (n > 512) n = 512;
+        { static int once; if (f340 > 0 && port_frame_count >= (unsigned)f340 && !once++)
+            port_log("[p340] frame %u start: world objs %p n %d ctl %p pickup_update %p\n", port_frame_count,
+                     (void *)g_world_objs, n, (void *)st, (void *)pickup_update); }
+        if (f340 > 0 && port_frame_count >= (unsigned)f340 && g_world_objs && st) {
+            for (i = 0; i < n; i++) {
+                unsigned char *o = g_world_objs + i * 0xA0;
+                const unsigned char *s;
+                int state;
+                if (*(const unsigned *)(o + 0x38) != (unsigned)(uintptr_t)pickup_update &&
+                    *(const unsigned *)(o + 0x38) != 0x1511E4F4u) continue;
+                s = (const unsigned char *)(uintptr_t) * (const unsigned *)(o + 0x7C);
+                state = s ? vbe_ld16(s + 4) : -1;
+                if (!listed)
+                    port_log("[p340] frame %u pickup %d kind 0x%x pos %d %d %d filter %d state %d\n", port_frame_count, i,
+                             vbe_ld16(o + 0x54), (short)vbe_ld16(o + 0x10), (short)vbe_ld16(o + 0x12),
+                             (short)vbe_ld16(o + 0x14), *(const int *)(o + 0x84), state);
+                else if (state != laststate[i]) {
+                    port_log("[p340] frame %u pickup %d kind 0x%x state %d -> %d taker 0x%x gone %d | p0 at %.0f %.0f %.0f\n",
+                             port_frame_count, i, vbe_ld16(o + 0x54), laststate[i], state, *(const int *)(o + 0x80),
+                             vbe_ld8(o + 0x6E), F(r, 0x14), F(r, 0x18), F(r, 0x1C));
+                    if (state == 3) { watch = 120; memcpy(snap, st, sizeof snap); }
+                }
+                laststate[i] = state;
+                if (tpi > 0 && i == tpi - 1 && port_frame_count >= (unsigned)tpf) {
+                    tpi = 0;
+                    *(float *)(r + 0x14) = (float)(short)vbe_ld16(o + 0x10);
+                    *(float *)(r + 0x1C) = (float)(short)vbe_ld16(o + 0x14);
+                    port_log("[p340] frame %u teleport p0 to pickup %d (%.0f %.0f), y %.0f\n", port_frame_count, i,
+                             F(r, 0x14), F(r, 0x1C), F(r, 0x18));
+                }
+            }
+            if (!listed) {
+                extern unsigned char *g_level_zones; extern unsigned g_level_zone_count;
+                int j;
+                for (j = 0; j < (int)g_level_zone_count && j < 400; j++) {
+                    const unsigned char *z = g_level_zones + j * 0x34;
+                    if ((vbe_ld8(z + 0x15) >> 2) != 11) continue;
+                    port_log("[p340] zone %d type 11 action 0x%x arg %d pos %d %d %d\n", j, vbe_ld8(z + 0x17),
+                             *(const int *)(z + 0x18), (short)vbe_ld16(z), (short)vbe_ld16(z + 2), (short)vbe_ld16(z + 4));
+                }
+                port_log("[p340] %u zones\n", g_level_zone_count);
+                for (j = 0; j < 0x19; j++) {
+                    const unsigned char *q = g_objects + j * 0x32C;
+                    if (*(const int *)q == 0) continue;
+                    port_log("[p340] frame %u obj %d state %d type 0x%x id 0x%x pos %.0f %.0f %.0f\n", port_frame_count, j,
+                             *(const int *)q, vbe_ld8(q + 4), vbe_ld8(q + 0x3B), F(q, 0x14), F(q, 0x18), F(q, 0x1C));
+                }
+            }
+            listed = 1;
+            if (watch > 0) {
+                int k;
+                watch--;
+                for (k = 0; k < (int)sizeof snap; k++)
+                    if (st[k] != snap[k]) {
+                        port_log("[p340] frame %u ctl +0x%x %02x -> %02x\n", port_frame_count, k ^ 3, snap[k], st[k]);
+                        snap[k] = st[k];
+                    }
+            }
+            if (port_frame_count - last340 >= 50) {
+                const unsigned char *q1 = g_objects + 0x32C;
+                const unsigned char *s1 = (const unsigned char *)(uintptr_t) * (const unsigned *)(q1 + 0x31C);
+                last340 = port_frame_count;
+                if (*(const int *)q1 && s1)
+                    port_log("[p340] frame %u p1 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d 74 0x%x\n", port_frame_count,
+                             vbe_ld8(s1 + 0x75), vbe_ld8(s1 + 0x78), vbe_ld8(s1 + 0x7C), vbe_ld8(s1 + 0x11A), vbe_ld8(s1 + 0x197),
+                             vbe_ld8(s1 + 0x74));
+                port_log("[p340] frame %u p0 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d pos %.0f %.0f %.0f\n",
+                         port_frame_count, vbe_ld8(st + 0x75), vbe_ld8(st + 0x78), vbe_ld8(st + 0x7C), vbe_ld8(st + 0x11A),
+                         vbe_ld8(st + 0x197), F(r, 0x14), F(r, 0x18), F(r, 0x1C));
+            }
+        }
+    }
 }
