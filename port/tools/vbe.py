@@ -311,6 +311,8 @@ class Pass:
             self.st['other'] += 1
             return False
         opts = [o for o in opts if not o.startswith('align ')]
+        meta = [o for o in opts if o.startswith('!')]  # P342: -g builds: `!dbg !N` attachments go after the align
+        opts = [o for o in opts if not o.startswith('!')]
         al = ALIGN.search(rest2)
         al = max(4, int(al[1]) if al else 4)
         pad = (-size) % 4
@@ -319,7 +321,7 @@ class Pass:
             init = 'zeroinitializer' if init == 'zeroinitializer' else f'<{{ {ty} {init}, [{pad} x i8] zeroinitializer }}>'
             ty = ty2
         attrs = attrs.replace('unnamed_addr ', '')  # objects must not be merged/rewritten as constants
-        out.append(f'{name} = {attrs}global {ty} {init}' + ''.join(', ' + o for o in opts) + f', align {al}')
+        out.append(f'{name} = {attrs}global {ty} {init}' + ''.join(', ' + o for o in opts) + f', align {al}' + ''.join(', ' + o for o in meta))
         self.st['glob'] += 1
         if leaves and init not in ('zeroinitializer', 'undef', 'poison'):
             fixes.append((name, leaves, ty, size))
@@ -497,7 +499,7 @@ def abs_syms(text, st):
 #   and p, 0x1FFFFFFF ; icmp ugt 0x800000       ->  ... icmp ugt 0x16000000 (end of wasm memory)
 # Unloaded references (ROM offset << 5 | tag, small offsets) keep failing the first test: their
 # tag has the low bits set. Sites: init_1AAE0, init_15550, init_214F0 (the only ones in the game).
-K0_AND = re.compile(r'^\s*(%[\w.$-]+) = and i32 %[\w.$-]+, (-16777213|536870911)$', re.M)
+K0_AND = re.compile(r'^\s*(%[\w.$-]+) = and i32 %[\w.$-]+, (-16777213|536870911)(?:, !dbg !\d+)?$', re.M)
 
 
 def k0_checks(text, st):
@@ -566,14 +568,14 @@ def k0_add_sites(text, st):
         m = re.match(r'define [^@\n]*@(\w+)\(', blk)
         want = K0_ADD_SITES.get(m[1]) if m else None
         if want:
-            blk, n = re.subn(r'= add i32 (%[\w.$-]+), -2147483648$', r'= add i32 \1, 0', blk, flags=re.M)
+            blk, n = re.subn(r'= add i32 (%[\w.$-]+), -2147483648(?=(?:, !dbg !\d+)?$)', r'= add i32 \1, 0', blk, flags=re.M)
             st['k0_add'] += n
             if n != want:
                 sys.stderr.write(f'vbe.py: k0_add_sites {m[1]}: {n} adds rewritten, expected {want}\n')
         phys = K0_PHYS_SITES.get(m[1]) if m else None
         if phys:
             op, c, want = phys
-            blk, n = re.subn(rf'= {op} i32 (%[\w.$-]+), {c}$', rf'= {op} i32 \1, {K0_PHYS_IDENT[op]}', blk, flags=re.M)
+            blk, n = re.subn(rf'= {op} i32 (%[\w.$-]+), {c}(?=(?:, !dbg !\d+)?$)', rf'= {op} i32 \1, {K0_PHYS_IDENT[op]}', blk, flags=re.M)
             st['k0_phys'] += n
             if n != want:
                 sys.stderr.write(f'vbe.py: k0_phys_sites {m[1]}: {n} {op}s rewritten, expected {want}\n')
@@ -592,8 +594,8 @@ K0_PHYS_IDENT = {'and': '-1', 'or': '0'}
 # matched game C, e.g. `IO_READ(AI_LEN_REG)` in audio_do_frame) are not memory on the PC. Constant
 # 32-bit loads/stores in 0xA4000000..0xA4FFFFFF become calls to the PC register model
 # (port/ultra/pc_os.c __port_io_read / __port_io_write). Non-constant addresses are left alone.
-IO_LD = re.compile(r'^(\s*)(%[\w.$-]+) = load (?:volatile )?i32, ptr inttoptr \(i32 (-?\d+) to ptr\)(?:, align \d+)?$', re.M)
-IO_ST = re.compile(r'^(\s*)store (?:volatile )?i32 ([^,]+), ptr inttoptr \(i32 (-?\d+) to ptr\)(?:, align \d+)?$', re.M)
+IO_LD = re.compile(r'^(\s*)(%[\w.$-]+) = load (?:volatile )?i32, ptr inttoptr \(i32 (-?\d+) to ptr\)(?:, align \d+)?((?:, !dbg !\d+)?)$', re.M)
+IO_ST = re.compile(r'^(\s*)store (?:volatile )?i32 ([^,]+), ptr inttoptr \(i32 (-?\d+) to ptr\)(?:, align \d+)?((?:, !dbg !\d+)?)$', re.M)
 
 
 def rcp_io(text, st):
@@ -603,29 +605,29 @@ def rcp_io(text, st):
         if not isio(m[3]):
             return m[0]
         st['rcp_io'] += 1
-        return f'{m[1]}{m[2]} = call i32 @__port_io_read(i32 {m[3]})'
+        return f'{m[1]}{m[2]} = call i32 @__port_io_read(i32 {m[3]}){m[4]}'
     def stv(m):
         if not isio(m[3]):
             return m[0]
         st['rcp_io'] += 1
-        return f'{m[1]}call void @__port_io_write(i32 {m[3]}, i32 {m[2]})'
+        return f'{m[1]}call void @__port_io_write(i32 {m[3]}, i32 {m[2]}){m[4]}'
     n = st['rcp_io']
     text = IO_ST.sub(stv, IO_LD.sub(ld, text))
     # P42: IO_READ with a computed address, i.e. PHYS_TO_K1(x) = `or i32 x, 0xA0000000` -> inttoptr -> volatile
     # load (quadtree_alloc_node_pool: IO_READ(osRomBase | 0xB0000D24), the cart word). The load becomes __port_io_read(x);
     # the register model answers the cart domain 0xB0000000.. with the big-endian ROM word.
-    k1 = set(re.findall(r'^\s*(%[\w.$-]+) = or i32 %[\w.$-]+, -1610612736$', text, re.M))
+    k1 = set(re.findall(r'^\s*(%[\w.$-]+) = or i32 %[\w.$-]+, -1610612736(?:, !dbg !\d+)?$', text, re.M))
     if k1:
         ptr = {}
-        for m in re.finditer(r'^\s*(%[\w.$-]+) = inttoptr i32 (%[\w.$-]+) to ptr$', text, re.M):
+        for m in re.finditer(r'^\s*(%[\w.$-]+) = inttoptr i32 (%[\w.$-]+) to ptr(?:, !dbg !\d+)?$', text, re.M):
             if m[2] in k1:
                 ptr[m[1]] = m[2]
         def dld(m):
             if m[3] not in ptr:
                 return m[0]
             st['rcp_io_dyn'] += 1
-            return f'{m[1]}{m[2]} = call i32 @__port_io_read(i32 {ptr[m[3]]})'
-        text = re.sub(r'^(\s*)(%[\w.$-]+) = load volatile i32, ptr (%[\w.$-]+)(?:, align \d+)?$', dld, text, flags=re.M)
+            return f'{m[1]}{m[2]} = call i32 @__port_io_read(i32 {ptr[m[3]]}){m[4]}'
+        text = re.sub(r'^(\s*)(%[\w.$-]+) = load volatile i32, ptr (%[\w.$-]+)(?:, align \d+)?((?:, !dbg !\d+)?)$', dld, text, flags=re.M)
         if st['rcp_io_dyn']:
             n = -1
     if st['rcp_io'] != n:
@@ -633,6 +635,104 @@ def rcp_io(text, st):
             text += '\ndeclare i32 @__port_io_read(i32)\n'
         if not re.search(r'^declare [^\n]*@__port_io_write\(', text, re.M):
             text += '\ndeclare void @__port_io_write(i32, i32)\n'
+    return text
+
+
+DBG_LOC = re.compile(r', !dbg (!\d+)$')
+
+
+def dbg_calls(text):
+    """P342, debug builds only (-g IR, i.e. the TU has !llvm.dbg.cu): calls that the passes above create (vbe helpers,
+    canonical-signature calls in sigs.py, icall trampolines, __port_io_*) carry no `!dbg`. LLVM's verifier rejects a
+    call without a location to a function with debug info in a function with debug info, and then drops ALL debug
+    info of the TU. Every such call gets the location of the nearest instruction of the same function (the one
+    before it, else the next one), which is also the C line it was made for. Release IR (no -g) is returned unchanged."""
+    if '!llvm.dbg.cu' not in text:
+        return text
+    lines = text.split('\n')
+    i = 0
+    while i < len(lines):
+        if not (lines[i].startswith('define ') and '!dbg' in lines[i]):
+            i += 1
+            continue
+        j = i + 1
+        while j < len(lines) and lines[j] != '}':
+            j += 1
+        last = None
+        locs = [None] * (j - i)
+        for k in range(j - 1, i, -1):  # the next location, for calls before the first located instruction
+            m = DBG_LOC.search(lines[k])
+            last = m[1] if m and not lines[k].lstrip().startswith('#dbg') else last
+            locs[k - i] = last
+        last = None
+        for k in range(i + 1, j):
+            l = lines[k]
+            m = DBG_LOC.search(l)
+            if m and not l.lstrip().startswith('#dbg'):
+                last = m[1]
+            elif l.startswith('  ') and 'call ' in l and not m and (last or locs[k - i]):
+                lines[k] = l + f', !dbg {last or locs[k - i]}'
+        i = j
+    return '\n'.join(lines)
+
+
+DIV = re.compile(r'^(\s*)(%[\w.$-]+) = (sdiv|udiv|srem|urem)(?: exact)? (i32|i64) ([^,]+), (%[\w.$-]+)(.*)$', re.M)
+
+
+def dbg_div(text):
+    """P342, debug builds only (PORT_DBG_CFLAGS set, port/tools/vbe_build.py): an integer division by a variable goes
+    through a helper that gives the R4300's results for a zero divisor (div: quotient a >= 0 ? -1 : 1, remainder a;
+    divu: quotient all ones, remainder a) and for INT_MIN / -1 (quotient INT_MIN, remainder 0) instead of a wasm trap.
+    Needed at -O0: matched code keeps dead divisions by an unset local (screen_fade_alpha's fakematch `/ d`, which
+    -O1 deletes) that trap in wasm. The release build (-O1) is not affected: this pass does not run there."""
+    used = set()
+    def rep(m):
+        used.add((m[3], m[4]))
+        return f'{m[1]}{m[2]} = call {m[4]} @__vbe_dbg_{m[3]}.{m[4]}({m[4]} {m[5]}, {m[4]} {m[6]}){m[7]}'
+    text = DIV.sub(rep, text)
+    for op, t in sorted(used):
+        mn = '-2147483648' if t == 'i32' else '-9223372036854775808'
+        zero = {'sdiv': f'%n = icmp slt {t} %a, 0\n  %q = select i1 %n, {t} 1, {t} -1\n  ret {t} %q',
+                'udiv': f'ret {t} -1', 'srem': f'ret {t} %a', 'urem': f'ret {t} %a'}[op]
+        ovf = (f'  %o1 = icmp eq {t} %b, -1\n  %o2 = icmp eq {t} %a, {mn}\n  %o = and i1 %o1, %o2\n'
+               f'  br i1 %o, label %ovf, label %div\novf:\n  ret {t} ' + (mn if op == 'sdiv' else '0') + '\n'
+               if op in ('sdiv', 'srem') else '  br label %div\n')
+        text += (f'\ndefine linkonce_odr hidden {t} @__vbe_dbg_{op}.{t}({t} %a, {t} %b) {{\n'
+                 f'  %z = icmp eq {t} %b, 0\n  br i1 %z, label %zero, label %nz\nzero:\n  {zero}\nnz:\n{ovf}'
+                 f'div:\n  %r = {op} {t} %a, %b\n  ret {t} %r\n}}\n')
+    return text
+
+
+LANE_ALLOCA = re.compile(r'^\s*(%[\w.$"-]+) = alloca <\{ (i8|i1|i16), \[\d+ x i8\] \}>, align \d+$')
+LANE_GLOBAL = re.compile(r'^@[\w.$"-]+ = [^\n]*global <\{ (i8|i1|i16), \[\d+ x i8\] \}> [^\n]*, align \d+, !dbg (!\d+)$', re.M)
+
+
+def dbg_lanes(text):
+    """P342, -g builds only: in vbe memory a byte at virtual address A lives at A ^ 3 and a halfword at A ^ 2. A scalar
+    8 / 16-bit local or parameter (its slot is padded to a 4-aligned word by Pass.do_alloca) or global (do_global) has
+    its value at slot + 3 / slot + 2, so its DWARF location gets DW_OP_plus_uconst 3 / 2 and the debugger shows the right
+    value. Struct fields and arrays cannot be fixed this way (docs/port/DEBUGGING.md)."""
+    if '!llvm.dbg.cu' not in text:
+        return text
+    lines = text.split('\n')
+    lane = {}
+    for i, l in enumerate(lines):
+        if l.startswith('define '):
+            lane = {}
+            continue
+        m = LANE_ALLOCA.match(l)
+        if m:
+            lane[m[1]] = 2 if m[2] == 'i16' else 3
+            continue
+        if '#dbg_declare(ptr %' in l and ', !DIExpression(), ' in l:
+            v = l.split('#dbg_declare(ptr ', 1)[1].split(',', 1)[0]
+            if v in lane:
+                lines[i] = l.replace(', !DIExpression(), ', f', !DIExpression(DW_OP_plus_uconst, {lane[v]}), ', 1)
+    text = '\n'.join(lines)
+    for m in LANE_GLOBAL.finditer(text):
+        off = 2 if m[1] == 'i16' else 3
+        text = re.sub(r'^(' + re.escape(m[2]) + r' = (?:distinct )?!DIGlobalVariableExpression\(var: ![0-9]+, expr: )'
+                      r'!DIExpression\(\)\)', rf'\1!DIExpression(DW_OP_plus_uconst, {off}))', text, flags=re.M)
     return text
 
 
@@ -657,7 +757,10 @@ def main():
     p.lines, need = icall.rewrite(p.lines, st2)
     regs = icall.registrations(p.lines)
     p.st.update(st2)
-    open(dst, 'w').write(icall.epilogue(p.run(), need, regs))
+    text = icall.epilogue(p.run(), need, regs)
+    if os.environ.get('PORT_DBG_CFLAGS'):
+        text = dbg_div(text)
+    open(dst, 'w').write(dbg_lanes(dbg_calls(text)))
     open(dst + '.isig', 'w').write(''.join(sorted({w + '\n' for _, w in regs})))
     print(src, ' '.join(f'{k}={v}' for k, v in p.st.items() if v))
 

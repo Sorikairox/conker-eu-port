@@ -25,6 +25,12 @@ ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_pif.c ultra/pc_net.c ultra/
 ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
 # P327: -MMD depfiles so a header edit (e.g. port_options.h, included by pc_os.c) rebuilds the PC-side objects using it
 ULTRA_CFLAGS += -MMD -MP
+# P342: source-level debug build (tools/port/scripts/debug_build.sh, in its own copy of the tree port/build-dbg/tree):
+# DWARF and -O0 for the PC layer, DWARF kept at link. Game TUs get theirs in port/tools/vbe_build.py. Release: unset.
+ifdef PORT_DBG_CFLAGS
+ULTRA_CFLAGS := $(filter-out -O2 -g0,$(ULTRA_CFLAGS)) $(or $(PORT_DBG_OPT),-O0) $(PORT_DBG_CFLAGS)
+LINK_COMMON += -g
+endif
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/design/P6.md)
 GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c gfx/p69_checks.c gfx/p75_checks.c gfx/p81_checks.c gfx/p84_checks.c gfx/p103_boot.c gfx/p144_hits.c gfx/p165_hits.c gfx/p171_tb.c gfx/p174_ev.c gfx/p202_fx.c gfx/p205_obj.c gfx/p326_probe.c gfx/p223_hit.c gfx/p268_nodes.c
 GFX_OBJ := $(patsubst gfx/%.c,$(B)/gfx/%.o,$(GFX_SRC))

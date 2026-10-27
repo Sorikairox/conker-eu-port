@@ -76,6 +76,11 @@ def build_one(tag, sig_hash=''):
         return tag, 2, p.stderr[-2000:], True
     stats = p.stdout.strip()
     q = subprocess.run(['emcc'] + O1_FLAGS + [vll, '-o', obj], capture_output=True, text=True)
+    if q.returncode and DBG_CFLAGS and O1_FLAGS[1] != '-O1':
+        # P342 debug build: at -O0 the wasm backend rejects a function address with a constant offset that -O1 folds
+        # (game_EF410.c bomb_explode: "Function addresses with offsets not supported"); such a TU is built at -O1 -g
+        q = subprocess.run(['emcc', '-c', '-O1', '-g', '-Wno-everything', vll, '-o', obj], capture_output=True, text=True)
+        stats += ' dbg_O1_fallback=1'
     if q.returncode:
         return tag, 3, q.stderr[-2000:], True
     depkey.save(kf, {'key': k, 'stats': stats})
@@ -83,6 +88,15 @@ def build_one(tag, sig_hash=''):
 
 
 SIGDB = f'{OUT}/sigdb.json'
+
+# P342: source-level debug build (tools/port/scripts/debug_build.sh runs this in its own copy of the tree,
+# port/build-dbg/tree, never in the release tree). PORT_DBG_CFLAGS (e.g. "-g -fdebug-prefix-map=...") replaces -g0 in
+# the C -> IR step, so the IR carries DWARF metadata through vbe.py; the object is compiled at PORT_DBG_OPT (default
+# -O0) with -g. Unset (the release build): flags, keys and output are unchanged.
+DBG_CFLAGS = os.environ.get('PORT_DBG_CFLAGS', '').split()
+if DBG_CFLAGS:
+    census.BASE = [a for a in census.BASE if a != '-g0'] + DBG_CFLAGS
+    O1_FLAGS = ['-c', os.environ.get('PORT_DBG_OPT', '-O0'), '-g', '-Wno-everything']
 
 
 def main():

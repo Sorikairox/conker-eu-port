@@ -46,8 +46,8 @@ def tramp_name(ret, params):
     return '@__icall.' + hashlib.md5((ret + '(' + ','.join(params) + ')').encode()).hexdigest()[:12]
 
 
-LOADP = re.compile(r'^\s*(%[\w.$-]+) = load ptr, ptr (%[\w.$-]+)(?:, align \d+)?$')
-STOREP = re.compile(r'^\s*store ptr (%[\w.$-]+), ptr (%[\w.$-]+)(?:, align \d+)?$')
+LOADP = re.compile(r'^\s*(%[\w.$-]+) = load ptr, ptr (%[\w.$-]+)(?:, align \d+)?(?:, !dbg !\d+)?$')
+STOREP = re.compile(r'^\s*store ptr (%[\w.$-]+), ptr (%[\w.$-]+)(?:, align \d+)?(?:, !dbg !\d+)?$')
 
 
 def rewrite(lines, stats):

@@ -32,11 +32,16 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - difftest (IDO 5.3 in the container compiles the candidate, reference = ROM): `tools/port/difftest.sh FUNC [FILE]`,
   registry re-runs `tools/port/reverify.sh FUNC` / `reverify_all.sh` (setups / mutants in `tools/port/testdata/`).
   The 21 registry rows with a HARNESS knob needed the matching build's ELFs and are reported as skipped.
+- Source-level debugging (P342, docs/port/DEBUGGING.md): `tools/port/scripts/debug_build.sh` builds a DWARF `-O0`
+  wasm in its own copy of the tree (port/build-dbg/tree; never touches port/build) and serves it at
+  http://localhost:8077/app/index.html?app=game&mute=1&romurl=../dev/rom.z64&warp=29 (`debug_build.sh stop` stops the
+  server). Chrome + "C/C++ DevTools Support (DWARF)": breakpoints on C lines. CLion: `compile_commands.json`
+  (`tools/port/scripts/gen_compile_commands.py`).
 - Renames: docs/RENAMING.md (`tools/eu_port/rename.py`, `apply_names.sh`).
 - Deploy after a green check + browser test: `tools/eu_port/deploy_web.sh`; backup: `~/conker/tools/eu_port/backup_push.sh`.
 
 ## Reference docs
-`docs/port/PLAN.md` (original port plan), `docs/port/MEMORY.md` (wasm memory model), `docs/port/design/P4..P9.md`
+`docs/port/PLAN.md` (original port plan), `docs/port/MEMORY.md` (wasm memory model), `docs/port/DEBUGGING.md` (debugger), `docs/port/design/P4..P9.md`
 (browser harness, PC replacements, gfx interpreter, texture ids, audio HLE; cited by port code comments),
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
@@ -70,6 +75,33 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P342 (port-web, 2026-10-27): source-level debugging (DWARF debug build + CLion compile_commands.json)
+- `tools/port/scripts/debug_build.sh` [build|serve|stop|cc]: rsyncs conker/ + port/ into port/build-dbg/tree and runs
+  the normal `make -C port game web` there with `PORT_DBG_CFLAGS` (`-g` + `-fdebug-prefix-map` from the container path
+  /src/port/build-dbg/tree to the worktree host path; srcfix copies map to conker/src_eu) and `PORT_DBG_OPT` (-O0).
+  port/Makefile (PC layer -O0 -g, link -g) and port/tools/vbe_build.py (C -> IR with -g, object at -O0 -g) read them;
+  unset = release, flags and keys unchanged. Full debug build ~1 min, 21 MB wasm, server on 127.0.0.1:8077 (ROM via
+  ?romurl like audprobe.sh). `DBG_REV=HEAD` builds a commit (someone's WIP may not compile), `DBG_NOSYNC=1` skips the copy.
+- vbe.py with -g IR: the `$`-anchored IR regexes (k0_*, rcp_io, icall LOADP/STOREP) accept a `, !dbg !N` suffix and keep
+  it; `!dbg` attachments of globals go after the align; `dbg_calls` gives calls the passes create a location (else the
+  verifier drops the TU's debug info); `dbg_lanes` adds DW_OP_plus_uconst 3 / 2 to scalar 8 / 16-bit locals, params and
+  globals (vbe lanes), so they display right. Debug-only (`PORT_DBG_CFLAGS`): `dbg_div` (variable-divisor div/rem ->
+  helper with R4300 divide-by-zero results; -O0 ran screen_fade_alpha's fakematch dead `/ d` and trapped) and an -O1 -g
+  fallback for game_EF410.c (wasm backend: "Function addresses with offsets not supported" at -O0).
+- Verified: every vobj with code has DWARF (14 without are empty TUs); 843 CUs, 6903 functions, 46727 / 47041 variables
+  with a location; player_try_begin_action -> /Users/sorikairo/conker-wt/web/conker/src_eu/game_eu_90F50.c:295, `arg3`
+  (s8) at fbreg+28 +3; headless Chrome ?warp=29: gameplay level 29 at frame 38, no traps, ~12 frames/s at det=2; a CDP
+  breakpoint at DWARF low_pc + code section offset pauses in screen_fade_alpha (caller screen_fade_is_opaque), so the
+  addresses survive binaryen's ASYNCIFY pass. compile_commands.json: 766 TUs (722 game, 9 port game-side, 35 PC), host
+  clang --target=wasm32-unknown-emscripten -fsyntax-only clean on a 22-TU sample.
+- Release unchanged: an isolated release build of HEAD (port/build-dbg/relcheck) and of HEAD + this commit's tooling
+  give the same conker.wasm md5 3bf13ec0c5b3408681f846e8b7c43ff2 (census 722 / 0 FAIL); old vs new vbe.py on all 731
+  release .ll files: byte-identical .v.ll + .isig. check.sh was not run in the worktree (P341 was building in
+  port/build); implicit_scan 0 NM+float, romabs 0 FAIL; census + build ran in the isolated tree. The tooling change
+  makes the next release `make` re-run phase 3 of vbe_build once (tool hash), same objects.
+- Limits (DEBUGGING.md): sub-word struct fields / arrays display lane-swapped (read with Module.HEAPU8[a ^ 3]); s64/f64
+  halves swapped; N64 0x80xxxxxx addresses = &n64_rdram + (a & 0x7FFFFF); asyncify fibers make step-over of yielding
+  calls jump threads. player_try_begin_action is not hit by a plain jump (held item / context B action).
 ### P340 (port-web, 2026-10-27): MP weapon pickup investigation (user report: no weapon after a pickup online)
 - Reproduced offline: Deathmatch = "Bunker", level 0x34 (P1 menu: as netmp_pads.py up to the skull list at 4700, then
   stick down at 4900, Start at 5100; gameplay 5947; the route flaked once in ~12 runs). Probe b1020ef9 ?p340=F
