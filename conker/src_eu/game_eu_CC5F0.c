@@ -4,6 +4,9 @@
 // hoisted declarations of the NON_MATCHING bodies
 void sound_loop_at_object(u16 arg0, s32 arg1, s16 arg2, s32 arg3, s32 arg4);
 s32 world_record_find(u8);
+s32 world_record_touched_by(s32, s32);
+s32 world_record_first_toucher(s32);
+s32 obj_slot_by_spawn(s32);
 
 
 s32 rail_node_position(s32, f32 *, f32 *, f32 *);
@@ -196,100 +199,92 @@ block_62:
         goto block_62;
     }
 }
+/* event_query_world_object: handler of g_event_query_fns for world records (event VM query; record id = the id word's
+ * low byte, what = args[1], args[2] = operand). 19 = record touched by anything (world_record_touched_by(rec, -1)),
+ * 20 = touched by the object whose spawn id is args[2] (obj_slot_by_spawn), 21 = touched by any game object whose
+ * interaction_state is args[2], 22 = flags +0x4F bit 2, 23 = first toucher's slot | 0x2000 (-1 -> 0), 24 = flags +0x4F,
+ * 25 = s32 +0x84 == s32 +0x7C, 26 = word +0x3C, 27 = +0x73 & 3, 28 = +0x6E == 0, 29..31 = s16 +0x10 / +0x12 / +0x14,
+ * 32 = (s32) f32 +0x08, 33 = raw word +0x7C / +0x80 / +0x84 by args[2], 34 = the same three fields as f32 truncated to
+ * s32, 35 = +0x73 bit 2; anything else / no record = 0. The VM uses the full 32-bit result.
+ * P343: the conversion returned u8 (cut 0x2000 / the high bits / the sign), read case 34's +0x7C and +0x84 as s32 and
+ * case 33's +0x80 as its first byte, ran case 19 / 20 as the 21 loop and stepped that loop by 0x32C objects. */
 /* was func_1509F254 */
-u8 event_query_world_object(s32 arg0, s32 arg1, u8 *arg2) {
-    struct127 *sp24;
-    s32 temp_v0;
-    s32 temp_v0_2;
-    s32 temp_v0_3;
-    s32 temp_v0_4;
-    s32 var_s0;
-    struct127 *var_v1;
+s32 event_query_world_object(s32 id, s32 what, s32 *args) {
+    s32 rec;      /* was temp_v0 */
+    s32 toucher;  /* was temp_v0_2 */
+    s32 field;    /* was temp_v0_3 / temp_v0_4 */
+    s32 i;        /* was var_s0 */
 
-    temp_v0 = world_record_find(arg0 & 0xFF);
-    if (temp_v0 == 0) {
-        goto block_42;
+    rec = world_record_find(id & 0xFF);
+    if (rec == 0) {
+        return 0;
     }
-    switch (arg1) {
+    switch (what) {
     case 19:
+        return world_record_touched_by(rec, -1);
     case 20:
+        return world_record_touched_by(rec, obj_slot_by_spawn(args[2] & 0xFFFF0FFF));
     case 21:
-        var_v1 = g_objects;
-        var_s0 = 0;
-loop_7:
-        if (var_v1->interaction_state == (*(s32 *)((u8 *)arg2 + 8))) {
-            sp24 = var_v1;
-            if (world_record_touched_by(temp_v0, var_s0, arg2) != 0) {
-                return 1U;
+        for (i = 0; i < 25; i++) {
+            if (g_objects[i].interaction_state == args[2] && world_record_touched_by(rec, i) != 0) {
+                return 1;
             }
         }
-        var_s0 += 1;
-        var_v1 += 0x32C;
-        if (var_s0 == 0x19) {
-        default:
-block_42:
-            return 0U;
-        }
-        goto loop_7;
+        return 0;
     case 22:
-        if (((*(u8 *)((u8 *)temp_v0 + 0x4F)) & 4) == 4) {
-            return 1U;
-        }
-        goto block_42;
+        return ((*(u8 *)(rec + 0x4F)) & 4) == 4;
     case 23:
-        temp_v0_2 = world_record_first_toucher(temp_v0);
-        if (temp_v0_2 < 0) {
-            goto block_42;
+        toucher = world_record_first_toucher(rec);
+        if (toucher < 0) {
+            return 0;
         }
-        return temp_v0_2 | 0x2000;
+        return toucher | 0x2000;
     case 24:
-        return (*(u8 *)((u8 *)temp_v0 + 0x4F));
+        return *(u8 *)(rec + 0x4F);
     case 25:
-        if ((*(s32 *)((u8 *)temp_v0 + 0x84)) == (*(s32 *)((u8 *)temp_v0 + 0x7C))) {
-            return 1U;
-        }
-        goto block_42;
+        return *(s32 *)(rec + 0x84) == *(s32 *)(rec + 0x7C);
     case 26:
-        return (u8) (*(s32 *)((u8 *)temp_v0 + 0x3C));
+        return *(s32 *)(rec + 0x3C);
     case 27:
-        return (*(u8 *)((u8 *)temp_v0 + 0x73)) & 3;
+        return (*(u8 *)(rec + 0x73)) & 3;
     case 28:
-        return (*(u8 *)((u8 *)temp_v0 + 0x6E)) == 0;
+        return (*(u8 *)(rec + 0x6E)) == 0;
     case 29:
-        return (u8) (*(s16 *)((u8 *)temp_v0 + 0x10));
+        return *(s16 *)(rec + 0x10);
     case 30:
-        return (u8) (*(s16 *)((u8 *)temp_v0 + 0x12));
+        return *(s16 *)(rec + 0x12);
     case 31:
-        return (u8) (*(s16 *)((u8 *)temp_v0 + 0x14));
+        return *(s16 *)(rec + 0x14);
     case 32:
-        return (u8) (s32) (*(f32 *)((u8 *)temp_v0 + 8));
+        return (s32) *(f32 *)(rec + 8);
     case 33:
-        temp_v0_3 = (*(s32 *)((u8 *)arg2 + 8));
-        if (temp_v0_3 == 0) {
-            return (u8) (*(s32 *)((u8 *)temp_v0 + 0x7C));
+        field = args[2];
+        if (field == 0) {
+            return *(s32 *)(rec + 0x7C);
         }
-        if (temp_v0_3 == 1) {
-            return (*(u8 *)&((*(f32 *)((u8 *)temp_v0 + 0x80))));
+        if (field == 1) {
+            return *(s32 *)(rec + 0x80);
         }
-        if (temp_v0_3 == 2) {
-            return (u8) (*(s32 *)((u8 *)temp_v0 + 0x84));
+        if (field == 2) {
+            return *(s32 *)(rec + 0x84);
         }
-        goto block_42;
+        return 0;
     case 34:
-        temp_v0_4 = (*(s32 *)((u8 *)arg2 + 8));
-        if (temp_v0_4 == 0) {
-            return (u8) (s32) (*(s32 *)((u8 *)temp_v0 + 0x7C));
+        field = args[2];
+        if (field == 0) {
+            return (s32) *(f32 *)(rec + 0x7C);
         }
-        if (temp_v0_4 == 1) {
-            return (u8) (s32) (*(f32 *)((u8 *)temp_v0 + 0x80));
+        if (field == 1) {
+            return (s32) *(f32 *)(rec + 0x80);
         }
-        if (temp_v0_4 == 2) {
-            return (u8) (s32) (*(s32 *)((u8 *)temp_v0 + 0x84));
+        if (field == 2) {
+            return (s32) *(f32 *)(rec + 0x84);
         }
-        goto block_42;
+        return 0;
     case 35:
-        return ((*(u8 *)((u8 *)temp_v0 + 0x73)) & 4) != 0;
+        return ((*(u8 *)(rec + 0x73)) & 4) != 0;
     }
+    return 0;
 }
 u16 sound_play_plain(s32, s32, s32, s32);
 u32 sound_play_random_on_object(s32, s32, u32, u32, s32, s16, s32);

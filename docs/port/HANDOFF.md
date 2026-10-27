@@ -47,8 +47,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 
 ## Open items
 - MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls), proven online in 2-player Bunker
-  (netmp_bunker.sh). Open: event_query_world_object case 34 arg 0 reads +0x7C as
-  s32 where the asm reads it as f32 (lwc1 + trunc.w.s; game_eu_CC5F0.c), not fixed / not difftested.
+  (netmp_bunker.sh). event_query_world_object fixed in P343 (it was converted with
+  six mistakes, see P343).
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
   WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync + send at sampling
   + 4 ms session loop (99.6 % speed at 40+0..20 ms 5 % loss D 3), automatic input delay from the ping, hidden / covered
@@ -108,6 +108,24 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   Bunker, IDENTICAL 7502 retraces, player 2 has the weapon icon and fires (port_work/p340/p341bunker2/guest_140s.png;
   guest_142s.png holding it). Same pads offline with ?p340 (port_work/p340/p341off): pad kind 0x94 at 6365, item 0x14
   phase 2 at 6573, shot counter (ctl +0x1AA) 1, 2, 3, 4, 5, 6 for the Z presses. e1c7a791 probe ?p341m=1.
+
+### P343 (port-web, 2026-10-28): event_query_world_object fixed (wrong conversion, 6 mistakes)
+- event_query_world_object (game_eu_CC5F0.c, 0x1509F254) = g_event_query_fns[2]: event script queries on world records
+  (ids 0x3xxx). Checked against the ROM disassembly (objdump of the romimage.py image) and its jump table at 0x8009F80C
+  (cases 19..35). The old C: (1) returned u8, but the ROM returns the full word and event_native_query passes it on as
+  s32 -> case 23's 0x2000 marker, case 26's word, the sign of 29..31 (s16 coordinates) and all values > 255 were cut;
+  (2) case 34 read +0x7C and +0x84 as s32 (ROM: lwc1 + trunc.w.s on all three fields); (3) case 33 field 1 returned the
+  first byte of +0x80 (ROM: lw of the word); (4) case 19 is world_record_touched_by(rec, -1) and (5) case 20
+  touched_by(rec, obj_slot_by_spawn(args[2] & 0xFFFF0FFF)), both ran case 21's loop instead; (6) the case 21 loop
+  stepped a struct127 pointer by 0x32C elements (ROM: 0x32C bytes = one object). Rewritten as readable C, s32 return,
+  locals renamed (`was` comments).
+- +0x7C/+0x80/+0x84 is an f32 triple set by event_action_world_object 3 (16.16 fixed) / 4 (raw bits); query 33 returns
+  the bits, 34 the truncated values. Which level script uses which subcase was not found: scripts are asset group 20
+  (event_load), not decoded statically; a runtime log in event_native_query (n == 3) would answer it.
+- difftest: plain --self is blind (record never found); with DIFFTEST_ROMDATA=1 DIFFTEST_ARG=1=12..24,2=80200000
+  DIFFTEST_POKE=80200008=0/1/2 DIFFTEST_RET=15114F2C=80180000: new EQUIV 200 trials each; old C DIFFER (case 34 f0
+  ref 0x0 cand 0x2; 21 / 19 / 20 call arguments / callee differ). Old candidate in port_work/p343/old_CC5F0.c.
+- Checks: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps.
 
 ### P342 (port-web, 2026-10-27): source-level debugging (DWARF debug build + CLion compile_commands.json)
 - `tools/port/scripts/debug_build.sh` [build|serve|stop|cc]: rsyncs conker/ + port/ into port/build-dbg/tree and runs
