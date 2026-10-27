@@ -157,6 +157,7 @@
     L.ctl.onmessage = (e) => onCtl(JSON.parse(e.data), ch);
     L.ctl.onclose = () => { if (T.links[ch] !== L) return; L.open = false; linkClosed(L, 'the connection closed'); };
     L.inp.onmessage = (e) => onPacket(e.data);
+    L.inp.onopen = () => { if (T.meshWait) T.meshWait(); };   // 'in' can open after 'ctl' (the mesh waits for both)
     pc.oniceconnectionstatechange = () => {
       const s = pc.iceConnectionState;
       N.log(`[net] ICE ${s} (${pn(ch)})`);

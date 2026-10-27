@@ -100,26 +100,32 @@ A save is tied to the browser profile. Clearing site data, or using a private wi
 
 ## Online (experimental)
 
-Two players on two computers can play a multiplayer match together. Each player needs their own copy of the EU ROM
-(only a hash of it is compared, the ROM itself never leaves the browser) and **Chrome**. There is no server: you connect
-by copying two codes back and forth (chat, e-mail, Discord...).
+Two to four players on their own computers can play a multiplayer match together. Each player needs their own copy of
+the EU ROM (only a hash of it is compared, the ROM itself never leaves the browser) and **Chrome**. There is no server:
+player 1 (the host) exchanges two codes with each other player (chat, e-mail, Discord...); the other players never
+exchange codes with each other.
 
-1. Both: open the page, load the ROM, but do **not** press Start. In **Options**, switch on *Online multiplayer
+1. Everyone: open the page, load the ROM, but do **not** press Start. In **Options**, switch on *Online multiplayer
    (experimental)*; an **Online** button appears in the header. Open it.
-2. Player 1: **Host (player 1)**. A code appears: **Copy** it and send it to player 2.
-3. Player 2: **Join (player 2)**, paste the code, **Make my answer code**, **Copy** the answer and send it back.
-4. Player 1: paste the answer code and press **Connect**. Both games start by themselves, at the same moment of
-   the boot.
-5. Player 1 uses the menus as on an N64 (Multi, a mode...). Player 2 presses Start on the "press START" join page and
-   picks a character like a second controller. From then on each of you controls your own Conker in split screen.
+2. Player 1: **Host (player 1)**. A box *Player 2* appears with a code: **Copy** it and send it to player 2.
+   For a third and fourth player press **Invite another player**: a box *Player 3* (then *Player 4*) appears with
+   that player's own code. Each code is for one player only: it decides which controller (2, 3 or 4) they get.
+3. Players 2 to 4: **Join (players 2 to 4)**, paste the code you got, **Make my answer code**, **Copy** the answer
+   and send it back to player 1.
+4. Player 1: paste each answer code into that player's box and press **Connect player N**. The box then says
+   *joined · ping … ms*. When everybody has joined, press **Start the game (N players)**. The players' computers then
+   connect to each other by themselves (a few seconds), and all games start at the same moment of the boot.
+5. Player 1 uses the menus as on an N64 (Multi, a mode...). The other players press Start on the "press START" join
+   page and pick a character like a second, third or fourth controller. From then on each of you controls your own
+   Conker in split screen (two players: top / bottom; three or four: four quarters).
 
 Good to know:
 - Both games run the same frames with the same inputs (lockstep). Your input reaches the game a little later than in
   a local game (the *input delay*), so the network has time to carry it to the other computer. By default the host
-  measures the ping when the two of you connect and picks the delay itself (*automatic*, shown in the panel as
+  measures the ping between every two players when the game starts and picks the delay for the slowest pair (*automatic*, shown in the panel as
   "input delay … ms (auto)"):
 
-  | Ping between the two computers | Input delay (automatic) |
+  | Ping between the two farthest computers | Input delay (automatic) |
   |---|---|
   | same house / same city (under ~20 ms) | 40 ms (2 frames) |
   | same country (~40 ms) | 60 ms |
@@ -128,18 +134,21 @@ Good to know:
 
   Up to about 100 ms of input delay most players do not notice it. Untick *automatic* to set it yourself (player 1,
   before Host): lower = more responsive, but the game waits more often.
-- If the other computer is slow or far away, the game pauses briefly ("waiting for the other player…" over the
-  picture). Waiting often: leave the session, reload both pages and connect again with a higher input delay.
+- If another computer is slow or far away, the game pauses briefly ("waiting for player N…" over the picture).
+  Waiting often: leave the session, reload all pages and connect again with a higher input delay.
 - The session uses player 1's options and player 1's save (unlocks), and saves made during the session are not kept.
-- If a player leaves or the connection drops, that player's Conker stands still and the game goes on.
-- The Online panel shows the ping, how many frames had to wait for the other player, and the input delay. If it ever
-  says **Desync**, the two games no longer show the same thing; the box also says where the two games' memory
-  differs. Please report it with the Debug log of both players.
+- If a player leaves or the connection drops, that player's Conker stands still and the game goes on for the others
+  (also when player 1 leaves).
+- If two of the guests cannot connect to each other directly, their inputs go through player 1's computer instead
+  (the panel says "through player 1"); this only adds a little delay for that pair.
+- The Online panel shows which player you are, every other player's ping, how many frames had to wait, and the input
+  delay. If it ever says **Desync**, the games no longer show the same thing; the box also says where the two games'
+  memory differs. Please report it with the Debug log of every player.
 - Switching to another tab or minimising the window is fine: the game keeps running (and keeps the other player
   going) while the page is hidden.
 
 When the codes do not connect ("Could not connect: the two networks do not allow a direct connection"):
-- There is no relay server, so the two computers must reach each other directly. This fails behind some company,
+- There is no relay server, so each guest's computer must reach player 1's computer directly. This fails behind some company,
   school, hotel and mobile networks and some routers.
 - Try another network for one of you: the easiest is a **phone hotspot** for one player (it has a different kind of
   NAT). A home network for both players usually works.
