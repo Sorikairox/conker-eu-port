@@ -6,6 +6,10 @@
 const EU_SHA1 = 'ee7bc6656fd1e1d9ffb3d19add759f28b88df710';
 const $ = (id) => document.getElementById(id);
 const Q = new URLSearchParams(location.search);
+// P337 online multiplayer phase 0: ?netdet=1 = forced online determinism (port/ultra/pc_net.c). The page then writes no
+// pad state (pads come from the ?padf scripts / the input ring only), sends the default options vector once (no ?opt, no
+// saved options, no changes during the run) and boots with a blank EEPROM that is never persisted.
+const NETDET = /[?&]netdet(=1)?(&|$)/.test(location.search);
 const out = $('console');
 let romBytes = null, romSha1 = null, romOk = false;
 let running = null, M = null;
@@ -95,9 +99,12 @@ const optCache = {};   // opt() is read every animation frame by the input code:
 const opt = (key) => {
   if (key in optCache) return optCache[key];
   const o = OPTIONS.find((x) => x.key === key);
+  if (NETDET) return (optCache[key] = o.def);   // P337: the session's fixed options vector
   return (optCache[key] = key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def));
 };
+let optionsLocked = false;   // P337: under ?netdet the vector is sent once before callMain, never changed afterwards
 function sendOption(o) {
+  if (optionsLocked) return;
   if (o.game !== undefined && M && M._port_set_option) M._port_set_option(o.game, o.range ? opt(o.key) | 0 : opt(o.key) ? 1 : 0);
 }
 const optionChanged = {};   // key -> callback for page-side options that need to react at once
@@ -370,7 +377,7 @@ function pollInput() {
     if (pr > 0) $('skiparc').style.strokeDashoffset = String(SKIP_ARC * (1 - Math.min(1, pr)));
     if (ring.hasAttribute('hidden') !== !(pr > 0)) ring.toggleAttribute('hidden', !(pr > 0));  // SVG: no .hidden property
   }
-  if (M && M._port_pad_state) {
+  if (M && M._port_pad_state && !NETDET) {   // P337: under ?netdet the pads come only from the frame-indexed scripts
     const p = M._port_pad_state() >> 2, H = M.HEAP32;
     for (let i = 0; i < 4; i++) {
       const d = pads[i];
@@ -685,12 +692,14 @@ async function start(app) {
   });
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
+  optionsLocked = NETDET;
   log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));
   if (app === 'game' && romBytes) {
     const p = M._malloc(romBytes.length);
     M.HEAPU8.set(romBytes, p);
     M._port_set_rom(p, romBytes.length);
-    await loadEeprom(M);
+    if (NETDET) { saveBlocked = true; log('[netdet] blank EEPROM, saves stay in this session'); }   // P337 sandbox
+    else await loadEeprom(M);
   }
   $('threads').disabled = false;
   $('threads').onclick = () => M._port_dump_threads();

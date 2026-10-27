@@ -27,6 +27,7 @@
 
 void port_log(const char *fmt, ...);
 int port_flag(const char *name);
+int port_flag_hex(const char *name);
 void *port_n64_to_wasm(unsigned n64addr);
 
 /* ---- input state written by the page: per pad {present, buttons (N64 bits), stick_x, stick_y} */
@@ -40,47 +41,76 @@ int port_pad0_held(void) { return (int)pad0_delivered; }
 /* ---- P149: frame-based pad script for test runs (50 Hz retraces made wall-clock scripts drift).
  * ?padf=F:BTN:X:Y,F:BTN:X:Y,...  (node: PORT_PADF=...): from VI retrace F (port_frame_count) on, pad 0 reports
  * buttons BTN (hex N64 bits: START 1000, A 8000, B 4000, Z 2000) and stick X / Y (decimal, y > 0 = up) instead of the
- * page's keyboard / gamepad state; before the first entry the page state is used. Entries in frame order. */
+ * page's keyboard / gamepad state; before the first entry the page state is used. Entries in frame order.
+ * P337: ?padf1= / ?padf2= / ?padf3= (node PORT_PADF1..3) script controllers 2..4 the same way (each channel that has a
+ * script is reported present from its first entry on), and ?padmask=HEX fixes which controllers are plugged in at
+ * boot (bit i = channel i; osContInit and every read). Under forced online determinism (pc_net.c ?netdet) the page
+ * writes no pad state at all, so a channel without a script reads neutral input, and the mask defaults to 1 (pad 1). */
 extern unsigned port_frame_count;
-EM_JS(int, __port_padf_char, (int i), {
-    var v = null;
-    if (typeof location !== 'undefined') { var m = /[?&]padf=([^&]*)/.exec(location.search); if (m) v = decodeURIComponent(m[1]); }
-    else if (typeof process !== 'undefined' && process.env && process.env.PORT_PADF !== undefined) v = process.env.PORT_PADF;
+int port_net_det(void);
+EM_JS(int, __port_padf_char, (int ch, int i), {
+    var v = null, k = ch ? 'padf' + ch : 'padf';
+    if (typeof location !== 'undefined') { var m = new RegExp('[?&]' + k + '=([^&]*)').exec(location.search); if (m) v = decodeURIComponent(m[1]); }
+    else if (typeof process !== 'undefined' && process.env && process.env['PORT_' + k.toUpperCase()] !== undefined) v = process.env['PORT_' + k.toUpperCase()];
     return v === null || i >= v.length ? 0 : v.charCodeAt(i);
 });
-#define PADF_MAX 16384 /* P154: 128 -> 2048 (long new-game scripts); P228: 16384 (human recordings, ?padrec) */
+#define PADF_MAX 16384 /* P154: 128 -> 2048 (long new-game scripts); P228: 16384 (human recordings, ?padrec); P337: all 4 channels */
 static struct { unsigned f; int b, x, y; } padf[PADF_MAX];
-static int padf_n = -1, padf_cur = -1;
-static void padf_apply(void) {
-    if (padf_n < 0) {
-        static char s[524288]; int n = 0, c;   /* P228: 64K -> 512K */
-        while (n < (int)sizeof s - 1 && (c = __port_padf_char(n)) != 0) s[n++] = (char)c;
-        s[n] = 0; padf_n = 0;
-        for (char *p = s; *p && padf_n < PADF_MAX;) {
-            unsigned f = 0; int b = 0, x = 0, y = 0, neg;
-            while (*p >= '0' && *p <= '9') f = f * 10 + (unsigned)(*p++ - '0');
-            if (*p == ':' && (p[1] == 'P' || p[1] == 'p')) { b = -1; p += 2; }   /* P228: F:P = hand back to the page */
-            else if (*p == ':') { p++; while ((c = *p) && c != ':' && c != ',') { b = b * 16 + (c <= '9' ? c - '0' : (c | 0x20) - 'a' + 10); p++; } }
-            if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') x = x * 10 + (*p++ - '0'); if (neg) x = -x; }
-            if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') y = y * 10 + (*p++ - '0'); if (neg) y = -y; }
-            padf[padf_n].f = f; padf[padf_n].b = b; padf[padf_n].x = x; padf[padf_n].y = y; padf_n++;
-            while (*p && *p != ',') p++;
-            if (*p == ',') p++;
-        }
-        if (padf_n) port_log("[padf] %d entries, first at retrace %u\n", padf_n, padf[0].f);
+static int padf_n = -1;                                  /* entries of all channels; -1 = not parsed yet */
+static int padf_first[MAXCONTROLLERS], padf_end[MAXCONTROLLERS], padf_cur[MAXCONTROLLERS]; /* per channel: [first, end), current */
+static char padf_text[524288];                           /* P228: 64K -> 512K; was padf_apply's local s */
+static void padf_parse_channel(int ch) {
+    int len = 0, c;
+    while (len < (int)sizeof padf_text - 1 && (c = __port_padf_char(ch, len)) != 0) padf_text[len++] = (char)c;
+    padf_text[len] = 0;
+    padf_first[ch] = padf_n; padf_cur[ch] = -1;
+    for (char *p = padf_text; *p && padf_n < PADF_MAX;) {
+        unsigned f = 0; int b = 0, x = 0, y = 0, neg;
+        while (*p >= '0' && *p <= '9') f = f * 10 + (unsigned)(*p++ - '0');
+        if (*p == ':' && (p[1] == 'P' || p[1] == 'p')) { b = -1; p += 2; }   /* P228: F:P = hand back to the page */
+        else if (*p == ':') { p++; while ((c = *p) && c != ':' && c != ',') { b = b * 16 + (c <= '9' ? c - '0' : (c | 0x20) - 'a' + 10); p++; } }
+        if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') x = x * 10 + (*p++ - '0'); if (neg) x = -x; }
+        if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') y = y * 10 + (*p++ - '0'); if (neg) y = -y; }
+        padf[padf_n].f = f; padf[padf_n].b = b; padf[padf_n].x = x; padf[padf_n].y = y; padf_n++;
+        while (*p && *p != ',') p++;
+        if (*p == ',') p++;
     }
-    if (!padf_n) return;
-    int k = padf_cur;
-    while (k + 1 < padf_n && padf[k + 1].f <= port_frame_count) k++;
-    if (k < 0) return;
-    if (k != padf_cur) { padf_cur = k; port_log("[padf] retrace %u: buttons %X stick %d,%d\n", port_frame_count, padf[k].b, padf[k].x, padf[k].y); }
-    /* P228 F:P entry: keyboard / gamepad from here on (record with ?padrec=1). Once a P entry has been reached the
-     * ?p205goto autopilot is off for good, so a replay (prefix, F:P, then the recorded entries) is not disturbed by
-     * the autopilot's after-arrival taps. */
-    static int handed;
-    if (padf[k].b == -1) { handed = 1; return; }
-    port_pads[0][0] = 1; port_pads[0][1] = padf[k].b; port_pads[0][2] = padf[k].x; port_pads[0][3] = padf[k].y;
-    if (!handed) { extern void p205_goto_apply(int *, int *, int *); p205_goto_apply(&port_pads[0][1], &port_pads[0][2], &port_pads[0][3]); } /* P205 TEST ?p205goto */
+    padf_end[ch] = padf_n;
+    if (padf_end[ch] > padf_first[ch])
+        port_log("[padf] pad %d: %d entries, first at retrace %u\n", ch + 1, padf_end[ch] - padf_first[ch], padf[padf_first[ch]].f);
+}
+/* P337 ?padmask: -1 = not given (presence comes from the page) */
+static int pad_mask = -2;
+static int padmask_get(void) {
+    if (pad_mask == -2) {
+        int v = port_flag_hex("padmask");
+        pad_mask = v > 0 ? v & 0xF : port_net_det() ? 1 : -1;
+        if (pad_mask >= 0) port_log("[padf] controller presence mask %X\n", pad_mask);
+    }
+    return pad_mask;
+}
+static void pads_apply_mask(void) {
+    int m = padmask_get();
+    if (m >= 0) for (int ch = 0; ch < MAXCONTROLLERS; ch++) port_pads[ch][0] = (m >> ch) & 1;
+}
+static void padf_apply(void) {
+    if (padf_n < 0) { padf_n = 0; for (int ch = 0; ch < MAXCONTROLLERS; ch++) padf_parse_channel(ch); }
+    pads_apply_mask();
+    for (int ch = 0; ch < MAXCONTROLLERS; ch++) {
+        if (padf_end[ch] == padf_first[ch]) continue;
+        int k = padf_cur[ch] < 0 ? padf_first[ch] - 1 : padf_cur[ch];
+        while (k + 1 < padf_end[ch] && padf[k + 1].f <= port_frame_count) k++;
+        if (k < padf_first[ch]) continue;
+        if (k != padf_cur[ch]) { padf_cur[ch] = k; port_log("[padf] retrace %u: %sbuttons %X stick %d,%d\n", port_frame_count, ch ? (ch == 1 ? "pad 2 " : ch == 2 ? "pad 3 " : "pad 4 ") : "", padf[k].b, padf[k].x, padf[k].y); }
+        /* P228 F:P entry: keyboard / gamepad from here on (record with ?padrec=1). Once a P entry has been reached the
+         * ?p205goto autopilot is off for good, so a replay (prefix, F:P, then the recorded entries) is not disturbed by
+         * the autopilot's after-arrival taps. */
+        static int handed;
+        if (padf[k].b == -1) { if (!ch) handed = 1; continue; }
+        if (pad_mask < 0) port_pads[ch][0] = 1;   /* a scripted pad is plugged in, unless ?padmask says otherwise */
+        port_pads[ch][1] = padf[k].b; port_pads[ch][2] = padf[k].x; port_pads[ch][3] = padf[k].y;
+        if (!ch && !handed) { extern void p205_goto_apply(int *, int *, int *); p205_goto_apply(&port_pads[0][1], &port_pads[0][2], &port_pads[0][3]); } /* P205 TEST ?p205goto */
+    }
 }
 
 /* ---- P228: ?padrec=1 logs every change of pad 0 (after ?padf, i.e. what the game reads) as
@@ -197,7 +227,7 @@ static void pif_run(void) {
             else if (c[0] == 0x04 && tx >= 2) memcpy(r, &eeprom[(c[1] & 0xFF) * 8], rx < 8 ? rx : 8);
             else if (c[0] == 0x05 && tx >= 10) {
                 u8 *blk = &eeprom[(c[1] & 0xFF) * 8];
-                if (memcmp(blk, &c[2], 8)) { memcpy(blk, &c[2], 8); eep_writes++; __port_eep_dirty(); }
+                if (memcmp(blk, &c[2], 8)) { memcpy(blk, &c[2], 8); eep_writes++; if (!port_net_det()) __port_eep_dirty(); } /* P337: online saves stay in this session (sandbox) */
                 if (rx) r[0] = 0;
             }
             else ok = 0;
@@ -231,6 +261,7 @@ s32 osContInit(OSMesgQueue *mq, u8 *bits, OSContStatus *st) {
     u8 present = 0;
     static int eep_q_done;
     if (!eep_q_done) { osCreateMesgQueue(&g_eep_timer_queue, &g_eep_timer_msg, 1); eep_q_done = 1; }
+    pads_apply_mask();                                 /* P337 ?padmask / online presence mask */
     for (int i = 0; i < MAXCONTROLLERS; i++) {
         int on = port_pads[i][0] != 0;
         present |= on << i;

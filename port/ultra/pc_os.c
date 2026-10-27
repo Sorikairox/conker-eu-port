@@ -33,7 +33,17 @@ EM_JS(int, __port_flag_js, (const char *name), {
     else if (typeof process !== 'undefined' && process.env) { var e = process.env['PORT_' + n.toUpperCase()]; if (e !== undefined) v = e; }
     return v === null ? 0 : (parseInt(v, 0) || (v === '' ? 1 : 0));
 });
-int port_flag(const char *name) { return __port_flag_js(name); }
+/* P337: under forced online determinism (pc_net.c, ?netdet) "det" reads 2 and every flag outside the session whitelist
+ * reads 0, so peers with different URLs still run the same game. */
+int port_net_det(void);
+int port_net_flag_allowed(const char *name);
+int port_flag(const char *name) {
+    if (port_net_det()) {
+        if (!strcmp(name, "det")) return 2;
+        if (!port_net_flag_allowed(name)) return 0;
+    }
+    return __port_flag_js(name);
+}
 /* P327: same, but the value is hex without a prefix (?warp=29 = level 0x29). Absent = 0, present without a value = 1. */
 EM_JS(int, __port_flag_hex_js, (const char *name), {
     var n = UTF8ToString(name), v = null;
@@ -41,7 +51,7 @@ EM_JS(int, __port_flag_hex_js, (const char *name), {
     else if (typeof process !== 'undefined' && process.env) { var e = process.env['PORT_' + n.toUpperCase()]; if (e !== undefined) v = e; }
     return v === null ? 0 : (parseInt(v, 16) || (v === '' ? 1 : 0));
 });
-int port_flag_hex(const char *name) { return __port_flag_hex_js(name); }
+int port_flag_hex(const char *name) { return port_net_det() && !port_net_flag_allowed(name) ? 0 : __port_flag_hex_js(name); }
 /* P327 test aid for game C (which cannot pass string literals here: its strings live in word-swapped vbe memory):
  * ?warp=<level hex> boots straight into that level (intro_mode_update), ?warpscene=N its start / scene argument. */
 int port_warp_level(void) {
