@@ -12,6 +12,8 @@ enum {
     PORT_OPT_CASH_ALWAYS = 3,   /* cash total always on screen, pause-screen digit images (hud_cash_counter_draw, P330) */
     PORT_OPT_LONG_BREATH = 4,   /* air under water lasts twice as long (swim_water_physics, P326) */
     PORT_OPT_LONG_TAILSPIN = 5, /* helicopter tail spin hovers twice as long (obj_jump_swim_glide_update, P326) */
+    PORT_OPT_NO_DRUNK_FX = 6,   /* no frame-blend blur, no drunk camera sway (fb_ghost_set_mode, camera_update_shake,
+                                 * camera_wobble_apply, P331) */
     PORT_OPT_COUNT = 16
 };
 int port_option(int id);

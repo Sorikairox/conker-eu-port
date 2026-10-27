@@ -16,7 +16,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 5 | Show cash "on change" | Not needed: this is what the original game does |
 | 6 | Longer breath (2×) | Done P326 |
 | 6 | Longer tail spin (2×) | Done P326 |
-| 7 | No motion blur / drunken sway | To do |
+| 7 | No motion blur / drunken sway | Done P331 |
 | 8 | Conker always full detail (LOD) | To do |
 | 9 | Separate music / SFX / speech volume | To do |
 | 10 | Underwater air meter | To do |

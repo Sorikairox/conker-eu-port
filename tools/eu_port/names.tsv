@@ -81,7 +81,7 @@ func_15125594	camera_sync_angles	(med) Recomputes the camera pitch, yaw and view
 func_15125608	camera_reset_rates	(low) Sets the camera rates +0x24C / +0x250 to 3.0 and 2.5
 func_15125628	camera_tick_timers	(low) Counts the four per-player camera timers D_800DBFF4 down by one
 func_15125690	camera_raise_timer	(low) Raises this camera's timer D_800DBFF4[player] to at least arg1
-func_151256BC	camera_update_shake	(med) Camera shake: advances or decays the shake phase and pulls the eye and target towards each other by its amplitude
+func_151256BC	camera_update_shake	(med) Camera sway (drunk sway / title menu camera): advances or decays the sway phase and pulls the eye and target towards each other by its amplitude
 func_15125924	camera_update_underwater_mode	(med) Pushes the underwater camera mode when the target is deep in water and pops it when it leaves
 func_15125A6C	camera_update_side_view_mode	(low) For camera type 0x2A queues a fixed side view next to the player; otherwise ends it when it was set
 func_15125C40	camera_update_forced_look	(low) For camera types 3 / 0x1A forces the look control after a short delay and releases it afterwards
@@ -2315,7 +2315,7 @@ func_1512C770	camera_step_noop	Empty camera step (does nothing)
 func_1512C77C	camera_cylinder_push	Pushes the camera out of a requested collision cylinder, turning it 5 degrees when the push is close to the view direction
 func_1512C9EC	camera_always_true	Returns 1 (always-true camera predicate)
 func_1512C490	camera_build_view_matrix	Builds the gameplay view matrix of a camera controller: eased orbit, look-at, then shake, roll and per-player extra rotation/translation
-func_1512D5E0	camera_wobble_apply	Applies a sine wobble (x/y scale pulsing) to the camera's view matrix in some modes, with an eased strength
+func_1512D5E0	camera_wobble_apply	Applies a sine wobble (x/y scale pulsing) to the camera's view matrix (title menu, under water, drunk), with an eased strength
 func_1512D7A8	camera_shake_tracks_load	(med) Loads the 4 camera track assets (type 0x1B) into D_800DC6B0 and stores their lengths in 24-byte frames
 func_1512D854	camera_track_start	(med) Starts camera track arg1 on the camera (+0x850 = track, state +0x84D = 1)
 func_1512D868	camera_track_update	(med) Advances the camera track timer (+0x84E) and ends it (state 0) after the track's frame count

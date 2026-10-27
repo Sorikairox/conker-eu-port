@@ -74,6 +74,7 @@ The **Options** button in the page header opens a panel of extras that are not i
 | Always show cash | off | Your cash total ("$ N", in the same green as the game's own cash pop-up) stays at the top right during play. Original: the total only pops up above Conker when he gets cash, and on the pause screen. Hidden in cutscenes and while paused. |
 | Longer breath | off | Conker can stay under water about twice as long before he starts to drown (about 58 s instead of 29 s); the air meter empties at half speed. Once the air is gone, drowning works as in the original. |
 | Longer tail spin | off | Holding A during the helicopter tail spin (A, then A again in the air) keeps Conker hovering about twice as long before he drops (about 4 s instead of 2 s). Releasing A early, and the hover's slow descent, are unchanged. |
+| No motion blur / drunk sway | off | Turns off the frame-blend motion blur (the blurred, smeared picture when Conker wakes up with his hangover after the opening, and in a slow-motion camera cut) and the drunk camera sway: the swaying camera and the slow stretching of the picture on the title menu (drunk Conker in the bar) and while Conker is drunk. Camera moves that are part of a cutscene's own camera path (the tilted view when Conker wakes up) and the wobble under water are unchanged. |
 
 While a toggle is latched, a small label (Crouch, R-Look, Walk) shows at the top left of the picture, and the touch Z or R button gets a ring.
 

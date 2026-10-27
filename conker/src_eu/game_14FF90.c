@@ -1422,21 +1422,29 @@ void camera_raise_timer(struct108 *arg0, s32 arg1) {
     }
 }
 
-/* Camera shake: while shaking (flag 0x80000, or +0x5F0 bit 3 without flag 0x40000) the phase +0x29C advances
- * by a random 0..4 degrees per tick (wrapped to 2 pi), else it decays by 8 % per frame. The amplitude +0x5EC
- * follows 4 sin(phase) by 4 %; eye +0x2F8 and target +0x2BC are pulled towards each other by
- * amp * 0.05 * (4, 4) when shaking hard, (1, 20) otherwise (vec_rotate_xz_about_point = lerp). */
+/* Camera sway ("shake"; the drunk sway): while swaying (camera mode +0x2C 0x80000 = the title menu's drunk-Conker
+ * camera, or +0x5F0 bit 3 = the followed character's state record has +0x08 set and +0x16 clear, outside cutscene
+ * mode 0x40000) the phase +0x29C advances by a random 0..4 degrees per tick (wrapped to 2 pi), else it decays by
+ * 8 % per frame. The amplitude +0x5EC follows 4 sin(phase) by 4 %; eye +0x2F8 and target +0x2BC are pulled towards
+ * each other by amp * 0.05 * (4, 4) in mode 0x80000, (1, 20) otherwise (vec_rotate_xz_about_point = lerp).
+ * PORT option PORT_OPT_NO_DRUNK_FX (P331): never sways (the phase stays 0, so the decay branch returns at once). */
 #define CAM_W(o) (*(s32 *)(p + (o)))
 #define CAM_H(o) (*(s16 *)(p + (o)))
 #define CAM_F(o) (*(f32 *)(p + (o)))
 /* was func_151256BC */
-void camera_update_shake(struct108 *arg0) {
-    u8 *p = (u8 *)arg0;
+void camera_update_shake(struct108 *cam /* was arg0 */) {
+    u8 *p = (u8 *)cam;
     f32 t;
     f32 eyeK;
     f32 targetK;
+    s32 swaying = (CAM_W(0x2C) & 0x80000) || ((CAM_W(0x5F0) & 8) && !(CAM_W(0x2C) & 0x40000));
 
-    if ((CAM_W(0x2C) & 0x80000) || ((CAM_W(0x5F0) & 8) && !(CAM_W(0x2C) & 0x40000))) {
+#ifdef PORT
+    if (port_option(PORT_OPT_NO_DRUNK_FX)) {
+        swaying = FALSE;
+    }
+#endif
+    if (swaying) {
         CAM_F(0x29C) += (f32)((u32)random_int() % 3) * 2 * 0.017453292f * g_frame_step_f;
         while (6.2831855f < CAM_F(0x29C)) {
             CAM_F(0x29C) -= 6.2831855f;

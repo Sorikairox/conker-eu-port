@@ -254,37 +254,48 @@ void camera_build_view_matrix(struct108 *arg0) {
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern Mtx *g_view_mtx_bufs[]; /* was D_800DC6D0 */
 
+/* camera_wobble_apply: stretches the view matrix by (1 + 2a + 2a sin phase, 1 + a + a cos phase) so the picture
+ * breathes. Target amplitude 0.003 in the title menu camera (mode +0x2C 0x80000), 0.04 / 0.03 under water (+0x5F0
+ * bit 0, eye below the water level) and for the drunk sway (+0x5F0 bit 3, not in cutscene mode 0x40000); the phase
+ * +0x7B0 advances 2.5 degrees per tick, the amplitude +0x7DC eases to the target (instantly when +0x23C
+ * is set or +0x5F0 bit 2). PORT option PORT_OPT_NO_DRUNK_FX (P331): only the under-water wobble is kept. */
 /* was func_1512D5E0 */
-void camera_wobble_apply(u8 *arg0) {
+void camera_wobble_apply(u8 *cam /* was arg0 */) {
     Mtx m;
     f32 mf[4][4];
     f32 k;
+    s32 drunk = (*(s32 *)(cam + 0x2C) & 0x80000) || (*(s32 *)(cam + 0x2C) != 0x40000 && (*(s32 *)(cam + 0x5F0) & 8));
 
-    if ((*(s32 *)(arg0 + 0x2C) & 0x80000)) {
+#ifdef PORT
+    if (port_option(PORT_OPT_NO_DRUNK_FX)) {
+        drunk = FALSE;
+    }
+#endif
+    if ((*(s32 *)(cam + 0x2C) & 0x80000)) {
         k = 0.003f;
-    } else if (*(s16 *)(arg0 + 0x298) != 0) {
+    } else if (*(s16 *)(cam + 0x298) != 0) {
         k = 0.04f;
     } else {
         k = 0.03f;
     }
-    if ((*(s32 *)(arg0 + 0x2C) & 0x80000) || (*(s32 *)(arg0 + 0x5F0) & 1) || (*(s32 *)(arg0 + 0x2C) != 0x40000 && (*(s32 *)(arg0 + 0x5F0) & 8))) {
-        *(f32 *)(arg0 + 0x7B0) += 0.04363323f * g_frame_ticks;
-        if (*(f32 *)(arg0 + 0x7B0) > 3.1415927f) {
-            *(f32 *)(arg0 + 0x7B0) -= 6.2831855f;
+    if (drunk || (*(s32 *)(cam + 0x5F0) & 1)) {
+        *(f32 *)(cam + 0x7B0) += 0.04363323f * g_frame_ticks;
+        if (*(f32 *)(cam + 0x7B0) > 3.1415927f) {
+            *(f32 *)(cam + 0x7B0) -= 6.2831855f;
         }
     } else {
         k = 0.0f;
     }
-    if (arg0[0x23C] != 0 || (*(s32 *)(arg0 + 0x5F0) & 4)) {
-        *(f32 *)(arg0 + 0x7DC) = k;
+    if (cam[0x23C] != 0 || (*(s32 *)(cam + 0x5F0) & 4)) {
+        *(f32 *)(cam + 0x7DC) = k;
     } else {
-        math_spring_approach((f32 *)(arg0 + 0x7DC), k, (f32 *)(arg0 + 0x7D8), 0.2f, 0.4f, *(f32 *)(arg0 + 0x7B4));
+        math_spring_approach((f32 *)(cam + 0x7DC), k, (f32 *)(cam + 0x7D8), 0.2f, 0.4f, *(f32 *)(cam + 0x7B4));
     }
     guMtxIdentF(mf);
-    mf[0][0] = 2.0f * *(f32 *)(arg0 + 0x7DC) + 2.0f * (*(f32 *)(arg0 + 0x7DC) * fast_sinf(*(f32 *)(arg0 + 0x7B0))) + 1.0f;
-    mf[1][1] = *(f32 *)(arg0 + 0x7DC) + *(f32 *)(arg0 + 0x7DC) * fast_cosf(*(f32 *)(arg0 + 0x7B0)) + 1.0f;
+    mf[0][0] = 2.0f * *(f32 *)(cam + 0x7DC) + 2.0f * (*(f32 *)(cam + 0x7DC) * fast_sinf(*(f32 *)(cam + 0x7B0))) + 1.0f;
+    mf[1][1] = *(f32 *)(cam + 0x7DC) + *(f32 *)(cam + 0x7DC) * fast_cosf(*(f32 *)(cam + 0x7B0)) + 1.0f;
     guMtxF2L(mf, &m);
-    guMtxCatL(arg0[0x23D] + g_view_mtx_bufs[g_dl_buf_index], &m, arg0[0x23D] + g_view_mtx_bufs[g_dl_buf_index]);
+    guMtxCatL(cam[0x23D] + g_view_mtx_bufs[g_dl_buf_index], &m, cam[0x23D] + g_view_mtx_bufs[g_dl_buf_index]);
 }
 
 s32 asset_load(u32 *, s32, s32, s32);

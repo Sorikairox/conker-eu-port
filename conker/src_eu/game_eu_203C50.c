@@ -275,21 +275,32 @@ u8 *fb_ghost_image_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
     return var_a0;
 }
+/* fb_ghost_set_mode: the frame-blend ("ghost" / motion blur) effect. alpha 0 = off; pass 2 = blend inside the player
+ * scene (after the sky), 1 = over the whole frame, 0 = off. While on, fb_ghost_render draws the previous frame's
+ * copy (g_fb_ghost_image) over the new frame with this alpha, then copies the new frame into it. Called by scene
+ * track events (scene_event_run_c event 0x76, e.g. Conker's hangover wake-up on level 0x29: alpha 210, pass 1) and by the
+ * camera cut fade (alpha 210, pass 2). Skipped on level 6 without the Expansion Pak.
+ * PORT option PORT_OPT_NO_DRUNK_FX (P331): every request becomes "off", so the effect never starts. */
 /* was func_151D6CA0 */
-void fb_ghost_set_mode(s32 arg0, s32 arg1) {
+void fb_ghost_set_mode(s32 alpha /* was arg0 */, s32 pass /* was arg1 */) {
     if (g_level_id == 6 && g_mem_expansion_pak == 0) {
         return;
     }
-    if (arg1 == 0) {
-        arg0 = 0;
+#ifdef PORT
+    if (port_option(PORT_OPT_NO_DRUNK_FX)) {
+        pass = 0;
     }
-    g_fb_ghost_alpha = arg0;
-    if (arg0 != 0) {
-        g_fb_ghost_pass = arg1;
+#endif
+    if (pass == 0) {
+        alpha = 0;
+    }
+    g_fb_ghost_alpha = alpha;
+    if (alpha != 0) {
+        g_fb_ghost_pass = pass;
     } else {
         g_fb_ghost_pass = 0;
     }
-    if (arg0 == 0 && g_fb_ghost_image != 0) {
+    if (alpha == 0 && g_fb_ghost_image != 0) {
         heap_set_block_tag((s32 *)g_fb_ghost_image, 3);
         g_fb_ghost_image = 0;
     }
