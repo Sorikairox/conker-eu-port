@@ -45,6 +45,14 @@ static PcThread threads[MAX_THREADS];
 static PcThread *cur;
 static emscripten_fiber_t sched_fiber;
 static char sched_astack[A_STACK] __attribute__((aligned(16)));
+/* P337: under forced online determinism (pc_net.c) the game threads' fiber stacks come from these static slots (one per
+ * thread slot) instead of the heap. Their addresses end up in game memory (message queues and structs on thread
+ * stacks), and heap addresses depend on what the renderer / runtime allocated before (GL context and extension strings
+ * differ between browsers and node: Chrome and node placed the stacks 0xEB0 bytes apart), so peers would disagree on
+ * pointer values. Static slots have the same address on every peer. bss: zero pages, no file size. */
+static char fiber_cstack_pool[MAX_THREADS][C_STACK] __attribute__((aligned(16)));
+static char fiber_astack_pool[MAX_THREADS][A_STACK] __attribute__((aligned(16)));
+int port_net_det(void);
 static unsigned long long seq_counter;
 static int in_main_loop;
 unsigned port_frame_count;
@@ -191,7 +199,7 @@ void port_sched_run(void) {
         { static char w2[48]; snprintf(w2, sizeof w2, "switch out of thread %d", (int)p->t->id); p113_watch(w2); }
         if (hw_mode) { static char w[48]; snprintf(w, sizeof w, "switch out of thread %d", (int)p->t->id); port_heapwatch(w); }
         if (p->state == P_DEAD) {
-            free(p->cstack); free(p->astack);
+            if (!port_net_det()) { free(p->cstack); free(p->astack); }
             memset(p, 0, sizeof *p);
         }
     }
@@ -227,7 +235,10 @@ void osCreateThread(OSThread *t, OSId id, void (*entry)(void *), void *arg, void
      * only guarantees 8, so whether a fiber stack was 16-aligned depended on earlier mallocs (WebGL
      * context creation in the browser, none in node): the asset-table walk asset_rec_read_cached then read
      * its record 8 bytes off, loaded the wrong assets and corrupted the game heap (P19 §6). */
-    if (!p->cstack) { p->cstack = aligned_alloc(16, C_STACK); p->astack = aligned_alloc(16, A_STACK); }
+    if (!p->cstack) {
+        if (port_net_det()) { p->cstack = fiber_cstack_pool[p - threads]; p->astack = fiber_astack_pool[p - threads]; }   /* P337 */
+        else { p->cstack = aligned_alloc(16, C_STACK); p->astack = aligned_alloc(16, A_STACK); }
+    }
     p->t = t; p->entry = entry; p->arg = arg; p->state = P_STOPPED; p->waitq = NULL;
     memset(t, 0, sizeof *t);
     t->id = id; t->priority = pri; t->state = OS_STATE_STOPPED;

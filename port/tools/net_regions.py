@@ -20,7 +20,7 @@ hashed, except what is port-only and may legitimately differ between peers:
              renderer allocations), stdio buffers (log text)
   renderer   pc_os.o port_vi_view.full (?p147vifull cache, first read by the gfx task)
 The main C stack (__data_end .. __heap_base) and the heap are outside the static region; the game threads' fiber stacks
-on the heap are hashed separately, live slots only (S column)."""
+(static slots fiber_*stack_pool under ?netdet, heap otherwise) are hashed separately, live slots only (S column)."""
 import sys
 
 EXCLUDE_OBJ = {'gfx_f3dex2.o': 'renderer', 'gfx_demo.o': 'renderer', 'pc_net.o': 'harness', 'pc_nethash.o': 'harness'}
@@ -28,7 +28,8 @@ KEEP_IN_AUD_OUT = {'det_vq', 'det_vf', 'det_on', 'game_rate'}
 EXCLUDE_SYM = {
     'pc_os.o': {'port_vi_view.full': 'renderer flag cache', 't0': 'wall time', 'pause_at': 'wall time', 'pause_total': 'wall time', 'port_paused': 'page pause'},
     'pc_sched.o': {'frame.last': 'wall time', 'frame.acc': 'wall time', 'frame.mode': 'pacing mode', 'slow_frames': 'wall time',
-                   'budget_frames': 'wall time', 'sched_astack': 'browser context', 'sched_fiber': 'browser context'},
+                   'budget_frames': 'wall time', 'sched_astack': 'browser context', 'sched_fiber': 'browser context',
+                   'fiber_cstack_pool': 'hashed as stacks', 'fiber_astack_pool': 'hashed as stacks'},
     'pc_video.o': None,   # whole object
     'dlmalloc.o': None, 'sbrk.o': None, 'stdout.o': None, 'stderr.o': None, 'ofl.o': None,
 }
