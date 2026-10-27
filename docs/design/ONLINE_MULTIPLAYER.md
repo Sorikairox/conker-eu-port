@@ -1,6 +1,6 @@
 # Online multiplayer for the Conker EU web port: design (P336)
 
-Status: design accepted (user decisions in §6); Phase 0 (determinism harness, measurements) done in P337, results in §7. Diagram: `online_multiplayer_architecture.svg` (same folder).
+Status: design accepted (user decisions in §6); Phase 0 (determinism harness, measurements) done in P337, results in §7; Phase 1 part 1 (2-player online MVP: lockstep netcode, WebRTC with copy-paste codes, Online panel, two-peer tests) done in P338, results in §8. Diagram: `online_multiplayer_architecture.svg` (same folder).
 Evidence comes from branch port-web at the P334 head (2026-10-27). Citations are file:line or function names.
 
 ## TL;DR (recommendation)
@@ -268,3 +268,56 @@ cover the live part of each stack (phase 4).
   1.7 ms max; snapshot 11.4 MB, about 0.4 ms each way, only ~14 KB / 38 pages dirty per retrace, so a dirty-page delta
   ring is cheap). A 100 ms RTT rollback of 3 to 5 retraces would cost about 3 to 5 ms per tick here. Still to measure:
   a phone / low-end laptop before committing to phase 4.
+
+## 8. Phase 1 part 1 results (P338, 2026-10-27)
+
+**What exists** (commits 20c14399, 156d900b, 88c794a3 and the item 4 commit):
+- Game side (port/ultra/pc_net.c §4, pc_sched.c `frame()`, pc_pif.c): input ring 256 frames x 4 channels with a frame
+  tag per slot, `port_net_session(mask, local, D, K)` before callMain (forces online determinism, presence mask),
+  local input for frame N + D sampled at the start of retrace N (from the page's local pad, or the ?padf script under
+  `?netscript=1`), frames 1..D neutral, the controller read takes frame N's inputs from the ring, the frame barrier
+  (`port_net_ready`), `port_net_drop(ch, F)` (a lost player is neutral from F), hash ring (H / S folded to 32 bits)
+  every K = 10 retraces, `port_net_background` (timer main loop while the tab is hidden). The ring lives in pc_net.o,
+  outside the hashed state.
+- Page side (port/web/net.js, loaded only for a session): RTCPeerConnection, public STUN only; negotiated DataChannels
+  'ctl' (reliable) and 'in' (unordered, maxRetransmits 0); copy-paste codes `CK1.` + base64url(deflate-raw(SDP after
+  ICE gathering)), about 770 characters; hello with build id (SHA-256 of conker.wasm) and ROM SHA-256; host config
+  (channels, D, K, game options, EEPROM image); input packets repeating all unacknowledged inputs with an ack and the
+  newest hash; ping every second; hash comparison (desync event with retrace and both hashes); lost peer after 5 s
+  without data / channel closed / ICE failed -> neutral controller, the game goes on. `?netsim=lat:MS,jit:MS,loss:PCT`.
+  Loopback test peer `?netloop=1` (one page).
+- Online panel behind the option "Online multiplayer (experimental)" (default off): Host / Join, the two codes with
+  Copy, input delay field (host), status, retrace / ping / stall line, "waiting for the other player…" over the
+  picture, desync box, Leave. PLAYING.md "Online (experimental)".
+- Tests: tools/port/scripts/netpair.sh (two windows in one muted headless Chrome; `UI=1` clicks the panel; NETSIM_*,
+  NETD, GUEST_LEAVE, SHOTS), netrun.sh `?netloop` runs, nethash_diff.py.
+
+**Results** (2-player Total War from power-on, netmp_pads.py 7000 20: P1 drives the menus, P2 joins, both move;
+H = hashed static memory, S = live fiber stacks, compared every retrace from the `?nethash=1` logs of both pages):
+
+| Run | Retraces identical (H and S, host vs guest) | Stalled ticks host / guest | Game speed | Notes |
+|---|---|---|---|---|
+| WebRTC loopback, no netsim, D 3 | 9937 | 3 / 3 | 100 % | RTT ~1 ms, ~10.4k packets each way, in-band hash check to 9930 |
+| Same through the panel's buttons (UI=1) | 8448 | 3 / 9 | 100 % | |
+| netsim 40 ms + 0..20 jitter + 5 % loss both ways, D 3, guest leaves at the end | 6801 (until the leave) | 5278 / 5281 | ~79 % | RTT ~112 ms; host goes on alone with controller 2 neutral (7477 retraces, no trap) |
+| same netsim, D 5 | 8432 | 271 / 21 | ~99 % | RTT ~110 ms |
+| asymmetric 80+0..40 / 20+0..10 ms, 15 % loss, D 3 | 3867 | 4625 / 4607 | ~64 % | RTT ~135 ms, ~650 dropped packets per side |
+
+Against the offline reference (one page, `?netdet`, the same 2 pad scripts as `?padf`/`?padf1`, `?padmask=3`), the
+online host's static memory H is identical at all 6801 retraces before the leave (S differs only in dead stack bytes:
+the `?padf` path logs on the game thread's stack, the ring path does not; two online / loopback sessions are identical
+in S too). The 4-pad loopback session (`?netloop`, 30 ms + 5 % loss, 4252 stalled ticks) matched the 4-pad offline run
+in H for all 8114 retraces. No desync was ever reported.
+
+**Findings / left for part 2:**
+1. Speed under latency: with one-way latency near D x 20 ms the game slows (79 % at 40 to 60 ms, D 3). Causes: no time
+   sync (after a stall the backlog is clamped, so the stalled peer stays behind and the other one waits next), inputs
+   leave on a 10 ms pump instead of right after the tick, and retraces only run on animation frames. D 5 removes the
+   stalls at the cost of 100 ms input lag. Part 2: frame-advantage time sync (design §4), send after every tick,
+   then maybe an automatic D from the measured ping.
+2. Not tested: two real machines over the internet (NAT / STUN path), a hidden tab during a session
+   (`port_net_background`), a Firefox / Safari peer (cross-engine floats; this session used Chrome only, as briefed), a
+   real desync report (none happened; the per-block hash exchange of §4 is not built).
+3. Disconnect: each side drops the other from the first frame it does not hold; with 2 players that is all that is
+   needed. With 3 to 4 players the remaining peers must agree on F (phase 2).
+4. The session only starts before the game: a running game must reload first (the panel says so).

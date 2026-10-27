@@ -739,6 +739,8 @@ showOnlineButton(opt('online') || !!Q.get('netpanel'));
 const netStatus = (s, cls) => { $('net-status').textContent = s; $('net-status').className = cls || ''; };
 const copyCode = (id) => { const t = $(id); t.select(); (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject()).catch(() => document.execCommand('copy')); };
 const netGuard = async (fn) => { try { await fn(); } catch (e) { netStatus(String(e.message || e), 'bad'); log('[net] ' + e, 'fail'); } };
+$('net-delay').value = store.get('netdelay', 3);
+$('net-delay').onchange = () => store.set('netdelay', Math.max(1, Math.min(16, +$('net-delay').value | 0)));
 $('net-host').onclick = () => netGuard(async () => {
   $('net-step-host').hidden = false; $('net-step-join').hidden = true; $('net-host').disabled = $('net-join').disabled = true;
   $('net-offer').value = await window.__online.host();
@@ -776,7 +778,8 @@ window.__online = {
       for (const o of OPTIONS) if (o.game !== undefined) options[o.key] = opt(o.key);
       let eeprom = null;
       if (Q.get('neteep') !== 'blank') try { const b = await idb('saves', 'readonly', (s) => s.get(saveKey())); if (b && b.length) eeprom = new Uint8Array(b); } catch (e) { /* no save */ }
-      return { mask: 3, delay: Math.max(1, Math.min(16, +(Q.get('netd') || 3))), hashEvery: 10, options, eeprom };
+      const d = +(Q.get('netd') || $('net-delay').value || 3);   // the panel's field; ?netd=D (tests) wins
+      return { mask: 3, delay: Math.max(1, Math.min(16, d | 0)), hashEvery: 10, options, eeprom };
     });
   },
   async join(code) {

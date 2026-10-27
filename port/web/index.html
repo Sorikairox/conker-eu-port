@@ -85,6 +85,8 @@
   .netstep label { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; }
   .netstep textarea { width: 100%; box-sizing: border-box; background: var(--panel2); color: var(--fg); border: 1px solid var(--line);
     border-radius: 4px; font: 11px ui-monospace, monospace; word-break: break-all; }
+  .netdelay { display: block; margin-top: 8px; font-size: 13px; }
+  .netdelay input { width: 3.5em; background: var(--panel2); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; }
   #net-status { margin-top: 8px; font-size: 13px; }
   #net-status.ok { color: var(--accent); } #net-status.bad { color: #ff7b72; }
   #net-info { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -197,6 +199,8 @@
         menus; player 2 joins with Start on the "press START" page of a multiplayer mode. Connect before pressing Start (reload the page first if
         the game already runs). The session uses player 1's options and save.</p>
       <div class="row"><button id="net-host">Host (player 1)</button><button id="net-join">Join (player 2)</button></div>
+      <label class="netdelay" title="Each player's input reaches the game this many frames (20 ms each) late, so the network has time to bring it to the other computer. Raise it if the game often waits for the other player.">Input delay
+        <input id="net-delay" type="number" min="1" max="16" value="3"> frames (host)</label>
       <div id="net-step-host" class="netstep" hidden>
         <label>1. Send this code to player 2 <button id="net-offer-copy">Copy</button></label>
         <textarea id="net-offer" readonly rows="3" placeholder="making the code…"></textarea>

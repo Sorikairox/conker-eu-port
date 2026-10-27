@@ -80,6 +80,7 @@ The **Options** button in the page header opens a panel of extras that are not i
 | Inverted swimming | off | Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. The original steers like a plane: stick up tilts him head-down and dives, stick down tilts him up. Only the swimming controls change; walking, flying and aiming stay as they are. |
 | Aiming crosshair | off | In the first-person aim views that the original leaves bare, the game's own small crosshair (the one the other guns use) is drawn in the middle of the screen, which is exactly where the shots go there. In this ROM that is the aim kind 0x18 (hold R with that weapon); the scope, lens, bracket and turret views and the other guns already have their own reticles and are unchanged, and the third-person R-look with a held item gets nothing (its shots are aimed from the hand / mouth, not through a fixed screen point). Takes effect the next time you aim. |
 | Rumble (gamepad vibration) | off | The game sees a Rumble Pak in your controller and a connected gamepad vibrates whenever the N64 Rumble Pak would (explosions, hits, heavy effects; the game pulses it on and off by strength). Needs a browser with gamepad vibration (Chrome / Edge, most Xbox and PlayStation pads). Takes effect immediately: switching it on or off makes the game look for the Rumble Pak again at once (before, it waited for the next level or area load). Saves are not affected (they use the cartridge EEPROM). |
+| Online multiplayer (experimental) | off | Shows the **Online** button in the page header: play a multiplayer match with a friend on another computer (see Online below). |
 | Music / Sound effects / Speech volume | 100 % | Three sliders (0 to 100 %, steps of 5) that set the volume of the music, the sound effects and the spoken dialogue separately. 100 % is the original volume. A change to the speech volume applies from the next spoken line. The page's Vol slider still sets the overall volume. |
 
 While a toggle is latched, a small label (Crouch, R-Look, Walk) shows at the top left of the picture, and the touch Z or R button gets a ring.
@@ -91,6 +92,33 @@ The game saves to its virtual EEPROM, which the page stores in the browser for t
 **Saves** in the page lets you export the save as a `.eep` file and import one, either with the button or by dropping the file on the page.
 
 A save is tied to the browser profile. Clearing site data, or using a private window, gives you a fresh game.
+
+## Online (experimental)
+
+Two players on two computers can play a multiplayer match together. Each player needs their own copy of the EU ROM
+(only a hash of it is compared, the ROM itself never leaves the browser) and **Chrome**. There is no server: you connect
+by copying two codes back and forth (chat, e-mail, Discord...).
+
+1. Both: open the page, load the ROM, but do **not** press Start. In **Options**, switch on *Online multiplayer
+   (experimental)*; an **Online** button appears in the header. Open it.
+2. Player 1: **Host (player 1)**. A code appears: **Copy** it and send it to player 2.
+3. Player 2: **Join (player 2)**, paste the code, **Make my answer code**, **Copy** the answer and send it back.
+4. Player 1: paste the answer code and press **Connect**. Both games start by themselves, at the same moment of
+   the boot.
+5. Player 1 uses the menus as on an N64 (Multi, a mode...). Player 2 presses Start on the "press START" join page and
+   picks a character like a second controller. From then on each of you controls your own Conker in split screen.
+
+Good to know:
+- Both games run the same frames with the same inputs (lockstep). Your input reaches the game 60 ms later than in a
+  local game (input delay of 3 frames), so that a normal internet connection does not make the game wait. If the
+  other computer is slow or far away, the game pauses briefly ("waiting for the other player…" over the picture).
+- The session uses player 1's options and player 1's save (unlocks), and saves made during the session are not kept.
+- If the connection cannot be made, the page says so: some home or mobile networks do not allow a direct connection
+  between two computers, and no relay server is used. Another network (e.g. a phone hotspot) may work.
+- If a player leaves or the connection drops, that player's Conker stands still and the game goes on.
+- The Online panel shows the ping and how often the game had to wait. If it ever says **Desync**, the two games no
+  longer show the same thing: please report it with the Debug log of both players.
+- Keep the tab visible if you can: browsers slow down hidden tabs, which makes the other player wait.
 
 ## What should work (as of 2026-10-26)
 
