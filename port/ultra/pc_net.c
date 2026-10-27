@@ -135,7 +135,7 @@ static int net_has(unsigned f, int ch) {
     return f <= net_delay || (net_drop_from[ch] && f >= net_drop_from[ch]) || net.frame[f % NET_RING][ch] == f;
 }
 /* the frame barrier (pc_sched.c frame): may retrace f run? */
-int port_net_ready(unsigned f) {
+EMSCRIPTEN_KEEPALIVE int port_net_ready(unsigned f) {
     for (int ch = 0; ch < 4; ch++)
         if ((net_mask >> ch & 1) && !net_has(f, ch)) return 0;
     return 1;

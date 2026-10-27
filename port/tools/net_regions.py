@@ -11,7 +11,7 @@ hashed, except what is port-only and may legitimately differ between peers:
   renderer   gfx_f3dex2.o, gfx_demo.o: GL object mirrors, texture caches, glReadPixels scratch (GPU-dependent bytes)
   audio out  aud_out.o except the virtual AI queue (det_vq, det_vf, det_on, game_rate): the Web Audio ring and its
              indices (moved by the browser's audio callback), WAV capture, pacing statistics
-  wall time  pc_os.o t0 / pause_at / pause_total / port_paused, pc_sched.o frame.last / frame.acc / frame.mode (wall-clock
+  wall time  pc_os.o t0 / pause_at / pause_total / port_paused, pc_sched.o frame.last_tick_ms / backlog_ms / pacing_mode (wall-clock
              VI pacing), slow_frames / budget_frames (wall-time statistics), sched_astack / sched_fiber (the browser-side
              scheduler context: its stack depth depends on whether rAF or setTimeout called frame()), pc_video.o (GL
              context handle; port_gfx_frame_tasks resets per presented frame, i.e. per rAF tick)
@@ -28,7 +28,7 @@ EXCLUDE_OBJ = {'gfx_f3dex2.o': 'renderer', 'gfx_demo.o': 'renderer', 'pc_net.o':
 KEEP_IN_AUD_OUT = {'det_vq', 'det_vf', 'det_on', 'game_rate'}
 EXCLUDE_SYM = {
     'pc_os.o': {'port_vi_view.full': 'renderer flag cache', 't0': 'wall time', 'pause_at': 'wall time', 'pause_total': 'wall time', 'port_paused': 'page pause'},
-    'pc_sched.o': {'frame.last': 'wall time', 'frame.acc': 'wall time', 'frame.mode': 'pacing mode', 'slow_frames': 'wall time',
+    'pc_sched.o': {'frame.last_tick_ms': 'wall time', 'frame.backlog_ms': 'wall time', 'frame.pacing_mode': 'pacing mode', 'slow_frames': 'wall time',
                    'budget_frames': 'wall time', 'sched_astack': 'browser context', 'sched_fiber': 'browser context',
                    'fiber_cstack_pool': 'hashed as stacks', 'fiber_astack_pool': 'hashed as stacks'},
     'p205_obj.o': {'go_n': 'test aid', 'p240_steer.cfg': 'test aid'},   # P338: ?p205goto / ?p240steer autopilot state (lazy flag reads)

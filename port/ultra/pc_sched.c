@@ -434,27 +434,27 @@ static void retrace(void) {
 int port_tv_type = 1; /* P147: osTvType as set at boot (port/boot/game_main.c; the scheduler demo stays NTSC) */
 double port_vi_period_ms(void) { return port_tv_type == 0 ? 20.0 : 1000.0 / 59.94; }
 static void frame(void) {
-    static int mode = -1; static double last, acc;
+    static int pacing_mode = -1; static double last_tick_ms, backlog_ms;   /* P338 names: were mode, last, acc (locals: per, now, dt, n) */
     /* P252: ?det=2 = deterministic clock and no wall budget (pc_os.c, port_sched_run) but keep this wall-paced 50 Hz VI,
      * so Chrome route runs keep their real-time screenshot timing and still replay identically (?det=1 = one retrace per tick) */
-    if (mode < 0) mode = port_flag("det") == 1 || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
-    if (port_paused) { last = 0; return; }
+    if (pacing_mode < 0) pacing_mode = port_flag("det") == 1 || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
+    if (port_paused) { last_tick_ms = 0; return; }
     /* P338 online: the frame barrier. Retrace N runs only when every peer's input for N is in the ring (pc_net.c);
      * otherwise the tick presents the last frame and the backlog waits (clamped below). */
-    if (!mode) { if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled(1); return; } retrace(); port_video_frame(); return; }
-    double now = emscripten_get_now(), per = port_vi_period_ms();
-    if (!last) { last = now - per; acc = 0; }  /* first tick / after a pause: one retrace, no catch-up */
-    double dt = now - last; last = now;
-    if (dt > 250.0) dt = 250.0;
-    acc += dt;
-    int n = 0;
-    while (acc >= per && n < VI_MAX_STEPS && !port_paused) {   /* P337: ?nethashstop pauses right after its retrace */
-        if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled((int)(acc / per)); break; }   /* P338 */
-        retrace(); n++; acc -= per;
-        if (emscripten_get_now() - now > VI_TICK_MS) break;
+    if (!pacing_mode) { if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled(1); return; } retrace(); port_video_frame(); return; }
+    double now_ms = emscripten_get_now(), period_ms = port_vi_period_ms();
+    if (!last_tick_ms) { last_tick_ms = now_ms - period_ms; backlog_ms = 0; }  /* first tick / after a pause: one retrace, no catch-up */
+    double elapsed_ms = now_ms - last_tick_ms; last_tick_ms = now_ms;
+    if (elapsed_ms > 250.0) elapsed_ms = 250.0;
+    backlog_ms += elapsed_ms;
+    int steps = 0;
+    while (backlog_ms >= period_ms && steps < VI_MAX_STEPS && !port_paused) {   /* P337: ?nethashstop pauses right after its retrace */
+        if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled((int)(backlog_ms / period_ms)); break; }   /* P338 */
+        retrace(); steps++; backlog_ms -= period_ms;
+        if (emscripten_get_now() - now_ms > VI_TICK_MS) break;
     }
-    if (acc > 2 * per) acc = 2 * per;
-    if (n) port_video_frame();
+    if (backlog_ms > 2 * period_ms) backlog_ms = 2 * period_ms;
+    if (steps) port_video_frame();
 }
 
 void port_dump_stubs(int max);

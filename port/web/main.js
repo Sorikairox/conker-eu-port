@@ -703,6 +703,58 @@ window.__netdump = {
   },
 };
 
+// ---------------------------------------------------------------- P338 online session (port/web/net.js)
+// window.__online is what the Online panel's buttons call (and tools/port/scripts/netpair.js, which plays both sides
+// of a session in one browser). Host = controller 1, guest = controller 2. The host dictates the session: game options,
+// its EEPROM image (user save data, never ROM bytes), the input delay. Both peers check build id (SHA-256 of
+// conker.wasm) and ROM SHA-256 before anything starts. Test aids: ?netd=D input delay (host), ?neteep=blank.
+const netEvents = { status: [], tick: [], desync: [], left: [] };   // the Online panel subscribes here
+const sha256hex = async (buf) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', buf)), (b) => b.toString(16).padStart(2, '0')).join('');
+async function netLoad() {
+  if (!window.PortNet) await loadScript('net.js');
+  if (!PortNet.buildId) {
+    PortNet.buildId = (await sha256hex(await (await fetch('conker.wasm')).arrayBuffer())).slice(0, 16);
+    PortNet.romSha256 = await sha256hex(romBytes);
+    PortNet.log = log;
+    for (const ev of Object.keys(netEvents)) PortNet.t.on[ev] = (...a) => { for (const f of netEvents[ev]) f(...a); };
+    PortNet.t.on.config = (cfg) => {   // both peers: boot the game into the session
+      netCfg = cfg;
+      for (const k of Object.keys(optCache)) delete optCache[k];
+      log(`[net] session config: channels ${cfg.mask}, mine ${cfg.local}, delay ${cfg.delay}, EEPROM ${cfg.eeprom ? 'host image' : 'blank'}`);
+      start('game');
+    };
+  }
+}
+window.__online = {
+  ready: () => !!romBytes && !running,
+  async host() {
+    if (running) throw new Error('the game already runs: reload the page, then host before pressing Start');
+    await netLoad();
+    return PortNet.host(async () => {
+      const options = {};
+      for (const o of OPTIONS) if (o.game !== undefined) options[o.key] = opt(o.key);
+      let eeprom = null;
+      if (Q.get('neteep') !== 'blank') try { const b = await idb('saves', 'readonly', (s) => s.get(saveKey())); if (b && b.length) eeprom = new Uint8Array(b); } catch (e) { /* no save */ }
+      return { mask: 3, delay: Math.max(1, Math.min(16, +(Q.get('netd') || 3))), hashEvery: 10, options, eeprom };
+    });
+  },
+  async join(code) {
+    if (running) throw new Error('the game already runs: reload the page, then join before pressing Start');
+    await netLoad();
+    return PortNet.join(code);
+  },
+  accept: (code) => PortNet.accept(code),
+  leave: () => window.PortNet && PortNet.t && PortNet.leave(),
+  stats() {
+    if (!window.PortNet || !PortNet.t) return null;
+    const t = PortNet.t, on = PortNet.M && PortNet.base.input !== undefined;
+    const hs = on ? PortNet.hashes() : [], h = hs[hs.length - 1];
+    return { state: t.state, frame: on ? PortNet.frame() : 0, rtt: Math.round(t.rtt), stalledTicks: on ? PortNet.stat(0) : 0,
+      stalledSlots: on ? PortNet.stat(1) : 0, sent: t.sent, recv: t.recv, simDropped: t.simDropped, hashChecked: t.myHashSeen,
+      lastHash: h ? `${h.f}:${h.h.toString(16)}:${h.s.toString(16)}` : '', desync: t.desync, left: t.left };
+  },
+};
+
 // ---------------------------------------------------------------- wasm apps
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -717,7 +769,7 @@ async function start(app) {
   $('demo').disabled = $('start').disabled = true;
   $('drop').hidden = true;
   status(app === 'game' ? 'starting…' : 'scheduler demo', 'ok');
-  if (netCfg && app === 'game') await loadScript('net.js');   // P338
+  if (netCfg && app === 'game' && !window.PortNet) await loadScript('net.js');   // P338 (the Online panel loaded it already)
   const [js, factory] = app === 'demo' ? ['sched_demo.js', 'createSchedDemo'] : ['conker.js', 'createConker'];
   log(`-- loading ${js}`);
   await loadScript(js);
@@ -756,6 +808,7 @@ async function start(app) {
   }
   if (app === 'game') status('running', 'ok');
   if (netCfg && netCfg.loop) PortNet.loopback(netCfg.loop);   // P338 test peer
+  else if (netCfg) PortNet.startTransport();                    // P338 online: send / receive inputs
   applyPause();
   $('canvas').focus();
   // &audtest=HEX[:FRAMES]: n_audio synth + audio HLE test (port/audio/aud_test.c);

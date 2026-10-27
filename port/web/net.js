@@ -18,6 +18,7 @@
       for (const [k, i] of [['input', 0], ['frame', 1], ['hash', 2], ['pad', 3], ['stat', 4]]) N.base[k] = M._port_net_addr(i) >>> 2;
     },
     frame() { return N.M._port_net_frame() >>> 0; },          // the last retrace run
+    ready(f) { return N.M._port_net_ready(f) !== 0; },          // may retrace f run (the frame barrier)
     stat(i) { return U32()[N.base.stat + i]; },          // 0 stalled ticks, 1 stalled retrace slots
     has(f, ch) { return U32()[N.base.frame + (f % RING) * 4 + ch] === f; },
     get(f, ch) { return N.has(f, ch) ? U32()[N.base.input + (f % RING) * 4 + ch] : -1; },
@@ -63,5 +64,208 @@
       N.log(`[net] loopback peer: channels ${remote.join(',')}, latency ${lat} ms, loss ${loss} %`);
     },
   };
+  // ---------------------------------------------------------------- P338 item 2: the WebRTC transport
+  // Two peers (host = controller 1, guest = controller 2). One RTCPeerConnection with two negotiated DataChannels:
+  // 'ctl' (reliable, ordered: session setup, bye) and 'in' (unordered, maxRetransmits 0: input packets, pings).
+  // Signaling is copy-paste: the host's offer code and the guest's answer code are the SDP after ICE gathering
+  // (no trickle), deflate-compressed and base64url-encoded. Only public STUN, no TURN: a pair behind strict NATs
+  // cannot connect, and the page says so.
+  // Input packet (little endian): u8 type 1 | u8 channel | u32 ack (the newest frame of the receiver's channel this
+  // sender holds without gaps) | u32 first frame | u8 count | u32 input x count | u32 hash frame | u32 H | u32 S.
+  // Every packet repeats all of the sender's inputs the receiver has not acknowledged (up to 64), so a lost packet
+  // costs nothing and only a burst longer than the input delay stalls. Ping: u8 2 | f64 time; pong: u8 3 | f64 time.
+  const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
+  const CODE_TAG = 'CK1.';
+  async function packCode(obj) {
+    const raw = new TextEncoder().encode(JSON.stringify(obj));
+    const z = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+    let s = ''; for (let i = 0; i < z.length; i += 32768) s += String.fromCharCode.apply(null, z.subarray(i, i + 32768));
+    return CODE_TAG + btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  async function unpackCode(code) {
+    code = String(code).replace(/\s+/g, '');
+    if (!code.startsWith(CODE_TAG)) throw new Error('not a connection code (it starts with ' + CODE_TAG + ')');
+    const b = atob(code.slice(CODE_TAG.length).replace(/-/g, '+').replace(/_/g, '/'));
+    const z = Uint8Array.from(b, (c) => c.charCodeAt(0));
+    const raw = await new Response(new Blob([z]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+    return JSON.parse(new TextDecoder().decode(raw));
+  }
+  const b64 = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 32768) s += String.fromCharCode.apply(null, u8.subarray(i, i + 32768)); return btoa(s); };
+  const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+  // test aid: ?netsim=lat:80,jit:20,loss:5 delays (ms, plus 0..jit), reorders and drops this page's input packets
+  const SIM = {};
+  { const m = /[?&]netsim=([^&]*)/.exec(location.search); if (m) for (const kv of decodeURIComponent(m[1]).split(',')) { const [k, v] = kv.split(':'); SIM[k] = +v || 0; } }
+
+  const T = N.t = {
+    pc: null, ctl: null, inp: null, role: null, myCh: 0, peerCh: 1, state: 'idle',
+    peerAck: 0,         // newest frame of my channel the peer holds
+    recvTop: 0,         // newest frame of the peer's channel I hold without gaps
+    pending: [],        // peer inputs that arrived before the session began [f, v]
+    peerHash: new Map(), myHashSeen: 0, desync: null,
+    rtt: 0, lastRecv: 0, sent: 0, recv: 0, simDropped: 0, left: false,
+    on: {},             // event handlers set by main.js: status(text, cls), config(cfg), desync(info), left()
+  };
+  const emit = (ev, ...a) => { if (T.on[ev]) try { T.on[ev](...a); } catch (e) { N.log('[net] ' + ev + ' handler: ' + e, 'fail'); } };
+  const status = (s, cls) => { T.state = s; emit('status', s, cls); N.log('[net] ' + s); };
+
+  function newPc() {
+    const pc = new RTCPeerConnection({ iceServers: STUN });
+    T.pc = pc;
+    T.ctl = pc.createDataChannel('ctl', { negotiated: true, id: 0 });
+    T.inp = pc.createDataChannel('in', { negotiated: true, id: 1, ordered: false, maxRetransmits: 0 });
+    T.inp.binaryType = 'arraybuffer';
+    T.ctl.onopen = () => { status('connected', 'ok'); if (T.role === 'guest') sendCtl({ t: 'hello', build: N.buildId, rom: N.romSha256 }); };
+    T.ctl.onmessage = (e) => onCtl(JSON.parse(e.data));
+    T.ctl.onclose = () => peerLost('the connection closed');
+    T.inp.onmessage = (e) => onPacket(e.data);
+    pc.oniceconnectionstatechange = () => {
+      const s = pc.iceConnectionState;
+      N.log('[net] ICE ' + s);
+      if (s === 'failed') {
+        if (T.state === 'playing') peerLost('the network path failed');
+        else status('Could not connect: the two networks do not allow a direct connection (no relay server is used). Try another network, e.g. a phone hotspot.', 'bad');
+      }
+    };
+    return pc;
+  }
+  function gathered(pc, ms = 8000) {
+    return new Promise((res) => {
+      if (pc.iceGatheringState === 'complete') return res();
+      const t = setTimeout(res, ms);   // use what was gathered so far
+      pc.addEventListener('icegatheringstatechange', () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); res(); } });
+    });
+  }
+  // host: returns the offer code to send to the guest
+  N.host = async function (sessionFn) {
+    T.role = 'host'; T.myCh = 0; T.peerCh = 1; T.sessionFn = sessionFn;
+    const pc = newPc();
+    await pc.setLocalDescription(await pc.createOffer());
+    status('gathering network addresses…');
+    await gathered(pc);
+    status('waiting for the answer code', 'ok');
+    return packCode({ t: 'o', sdp: pc.localDescription.sdp });
+  };
+  // guest: takes the host's offer code, returns the answer code
+  N.join = async function (code) {
+    T.role = 'guest'; T.myCh = 1; T.peerCh = 0;
+    const o = await unpackCode(code);
+    if (o.t !== 'o') throw new Error('this is not an offer code (paste the code the host made)');
+    const pc = newPc();
+    await pc.setRemoteDescription({ type: 'offer', sdp: o.sdp });
+    await pc.setLocalDescription(await pc.createAnswer());
+    status('gathering network addresses…');
+    await gathered(pc);
+    status('send the answer code to the host, then wait', 'ok');
+    return packCode({ t: 'a', sdp: pc.localDescription.sdp });
+  };
+  // host: takes the guest's answer code
+  N.accept = async function (code) {
+    const a = await unpackCode(code);
+    if (a.t !== 'a') throw new Error('this is not an answer code (paste the code the guest sent back)');
+    await T.pc.setRemoteDescription({ type: 'answer', sdp: a.sdp });
+    status('connecting…');
+  };
+  N.leave = function () { try { sendCtl({ t: 'bye' }); } catch (e) { /* closed */ } setTimeout(() => { try { T.pc && T.pc.close(); } catch (e) { /* closed */ } }, 100); };
+
+  function sendCtl(m) { if (T.ctl && T.ctl.readyState === 'open') T.ctl.send(JSON.stringify(m)); }
+  async function onCtl(m) {
+    if (m.t === 'hello' && T.role === 'host') {   // the guest's build and ROM must be ours
+      if (m.build !== N.buildId) { sendCtl({ t: 'refuse', why: 'different game builds (reload both pages to get the latest version)' }); status('refused: the guest runs a different build', 'bad'); return; }
+      if (m.rom !== N.romSha256) { sendCtl({ t: 'refuse', why: 'different ROMs (the EU ROM is needed on both sides)' }); status('refused: the guest has a different ROM', 'bad'); return; }
+      const cfg = await T.sessionFn();   // {mask, delay, hashEvery, options, eeprom (Uint8Array|null)}
+      sendCtl({ t: 'config', mask: cfg.mask, delay: cfg.delay, hashEvery: cfg.hashEvery, options: cfg.options, eeprom: cfg.eeprom ? b64(cfg.eeprom) : null, ch: T.peerCh });
+      emit('config', Object.assign({}, cfg, { local: 1 << T.myCh }));
+    } else if (m.t === 'config' && T.role === 'guest') {
+      T.myCh = m.ch;
+      emit('config', { mask: m.mask, local: 1 << m.ch, delay: m.delay, hashEvery: m.hashEvery, options: m.options, eeprom: m.eeprom ? unb64(m.eeprom) : null });
+    } else if (m.t === 'refuse') status('the host refused: ' + m.why, 'bad');
+    else if (m.t === 'bye') peerLost('the other player left');
+    else if (m.t === 'desync') emit('desync', Object.assign({ remote: true }, m));
+  }
+
+  // ---- session (after N.begin): the pump sends inputs, pings, checks for a lost peer
+  N.startTransport = function () {
+    for (const [f, v] of T.pending) N.put(f, T.peerCh, v);
+    T.recvTop = Math.max(T.recvTop, N.cfg.delay); T.peerAck = Math.max(T.peerAck, N.cfg.delay);   // frames 1..D are neutral
+    T.pending = []; advanceRecvTop();
+    T.lastRecv = performance.now();
+    status('waiting for the other player', 'ok');
+    setInterval(pump, 10);
+    setInterval(() => { const b = new DataView(new ArrayBuffer(9)); b.setUint8(0, 2); b.setFloat64(1, performance.now(), true); sendIn(b.buffer); }, 1000);
+  };
+  function advanceRecvTop() { while (N.has(T.recvTop + 1, T.peerCh)) T.recvTop++; }
+  let lastSendTop = 0, lastSendAt = 0;
+  function pump() {
+    if (T.left) return;
+    const now = performance.now(), top = N.localTop(), f = N.frame();
+    // send when there is a new local input, or every 30 ms anyway (acks, hashes, keep-alive)
+    if (top !== lastSendTop || now - lastSendAt > 30) {
+      const first = Math.max(T.peerAck + 1, N.cfg.delay + 1, top - 63);
+      const count = Math.max(0, top - first + 1);
+      const dv = new DataView(new ArrayBuffer(14 + 4 * count + 12));
+      dv.setUint8(0, 1); dv.setUint8(1, T.myCh); dv.setUint32(2, T.recvTop, true); dv.setUint32(6, first, true); dv.setUint8(10, count);
+      for (let i = 0; i < count; i++) dv.setUint32(11 + 4 * i, N.get(first + i, T.myCh) >>> 0, true);
+      const hs = N.hashes(), h = hs[hs.length - 1] || { f: 0, h: 0, s: 0 }, o = 11 + 4 * count;
+      dv.setUint32(o, h.f, true); dv.setUint32(o + 4, h.h, true); dv.setUint32(o + 8, h.s, true);
+      sendIn(dv.buffer.slice(0, o + 12));
+      lastSendTop = top; lastSendAt = now;
+    }
+    checkHashes();
+    const waiting = !N.ready(f + 1);
+    if (T.state !== 'playing' && f > N.cfg.delay + 1) status('playing', 'ok');
+    emit('tick', { frame: f, waiting, rtt: T.rtt, stalls: N.stat(0) });
+    if (now - T.lastRecv > 5000 && T.state !== 'idle') peerLost('no data from the other player for 5 s');
+  }
+  function sendIn(buf) {
+    if (!T.inp || T.inp.readyState !== 'open') return;
+    T.sent++;
+    if (SIM.loss && Math.random() * 100 < SIM.loss) { T.simDropped++; return; }
+    if (SIM.lat || SIM.jit) { setTimeout(() => { if (T.inp.readyState === 'open') T.inp.send(buf); }, (SIM.lat || 0) + Math.random() * (SIM.jit || 0)); return; }
+    T.inp.send(buf);
+  }
+  function onPacket(buf) {
+    T.recv++; T.lastRecv = performance.now();
+    const dv = new DataView(buf), type = dv.getUint8(0);
+    if (type === 2) { const r = new DataView(new ArrayBuffer(9)); r.setUint8(0, 3); r.setFloat64(1, dv.getFloat64(1, true), true); sendIn(r.buffer); return; }
+    if (type === 3) { const r = performance.now() - dv.getFloat64(1, true); T.rtt = T.rtt ? T.rtt * 0.8 + r * 0.2 : r; return; }
+    if (type !== 1) return;
+    const ch = dv.getUint8(1), ack = dv.getUint32(2, true), first = dv.getUint32(6, true), count = dv.getUint8(10);
+    if (ch !== T.peerCh) return;
+    if (ack > T.peerAck) T.peerAck = ack;
+    for (let i = 0; i < count; i++) {
+      const f = first + i, v = dv.getUint32(11 + 4 * i, true);
+      if (N.M && N.base.input !== undefined) N.put(f, ch, v); else T.pending.push([f, v]);
+    }
+    if (N.M && N.base.input !== undefined && T.recvTop) advanceRecvTop();
+    const o = 11 + 4 * count, hf = dv.getUint32(o, true);
+    if (hf) T.peerHash.set(hf, [dv.getUint32(o + 4, true), dv.getUint32(o + 8, true)]);
+  }
+  function checkHashes() {
+    if (T.desync || !T.peerHash.size) return;
+    for (const h of N.hashes()) {
+      const p = T.peerHash.get(h.f);
+      if (!p) continue;
+      if (p[0] !== h.h || p[1] !== h.s) {
+        T.desync = { frame: h.f, mine: [h.h, h.s], theirs: p };
+        N.log(`[net] DESYNC at retrace ${h.f}: mine ${h.h.toString(16)} ${h.s.toString(16)}, peer ${p[0].toString(16)} ${p[1].toString(16)}`, 'fail');
+        sendCtl({ t: 'desync', frame: h.f, mine: [h.h, h.s], theirs: p });
+        emit('desync', T.desync);
+        return;
+      }
+      if (h.f > T.myHashSeen) T.myHashSeen = h.f;
+      T.peerHash.delete(h.f);
+    }
+    if (T.peerHash.size > 256) for (const k of [...T.peerHash.keys()].slice(0, 128)) T.peerHash.delete(k);
+  }
+  // the other player is gone: its controller reads neutral from the first frame I do not hold, the game goes on
+  function peerLost(why) {
+    if (T.left) return;
+    T.left = true;
+    if (N.M && N.base.input !== undefined) N.M._port_net_drop(T.peerCh, T.recvTop + 1);
+    status(`${why}: controller ${T.peerCh + 1} stands still from now on`, 'bad');
+    emit('left', why);
+  }
+
   window.PortNet = N;
 })();
