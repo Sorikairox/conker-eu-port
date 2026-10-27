@@ -1141,7 +1141,7 @@ struct struct127 {
     u8  padAF;
     s8  unkB0;
     u8  padB1;
-    u16 unkB2;  // (oxygen?)
+    u16 air_counter;  /* 0xB2, was unkB2: ticks with the head under water; 0x5A1 = warning, drowning (swim_water_physics) */
     f32 unkB4;
     f32 unkB8;  // used
     f32 unkBC;

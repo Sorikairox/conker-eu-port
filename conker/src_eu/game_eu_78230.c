@@ -2998,7 +2998,7 @@ block_593:
                 arg0->unk31C->pad17[0xB] = 0;
                 if (g_level_first_frame == 0) {
                     arg0->unk31C->pad17[0xA] = 1;
-                    arg0->unkB2 = 0;
+                    arg0->air_counter = 0;
                 }
                 if ((arg0->unk31C->pad17[9] & 1) && (g_mp_mode_active == 0)) {
                     sp88 = 4.0f;
@@ -3551,7 +3551,7 @@ void obj_move_to_grab_point(struct127 *arg0) {
 
 /* was func_15052408 */
 void swim_exit_water(struct127 *arg0) {
-    arg0->unkB2 = 0;
+    arg0->air_counter = 0;
     arg0->unk31C->unk95 = 0;
     if (arg0->health != 0) { // if health not zero
         arg0->unk81 = 0;

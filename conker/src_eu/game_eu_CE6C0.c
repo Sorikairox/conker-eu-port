@@ -790,13 +790,13 @@ extern s32 g_tint_request_level; /* was D_800DA2D8 */
 
 /* was func_150A2AB4 */
 void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was `s32 arg5` (read a3); the asm reads the low word of a u64 at sp+0x14
-    u16 temp_v0_2;
-    u8 temp_t1;
-    u8 temp_t6;
+    u16 air_used; /* was temp_v0_2: the object's air counter (struct127 air_counter) */
+    u8 ambfx_timer; /* was temp_t1 */
+    u8 zone_kind; /* was temp_t6: trigger zone byte +0x17 */
     u8 *temp_v0;
 
-    temp_t6 = (*(u8 *)((u8 *)arg0 + 0x17));
-    switch (temp_t6) {
+    zone_kind = (*(u8 *)((u8 *)arg0 + 0x17));
+    switch (zone_kind) {
     case 1:
         if (arg2 != 0xFF) {
             screen_lightning_random_flash(arg2, 0xFF, 0);
@@ -824,16 +824,16 @@ void trigger_zone_event_fire(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { //
             g_trigger_ambfx_timer = 0x19;
             actor_sound_play2(0x66FU, arg1, 0x5DC0, 0x190, 0x1F4U);
         }
-        temp_t1 = (g_trigger_ambfx_timer + g_frame_ticks) & 0xFF;
-        g_trigger_ambfx_timer = temp_t1;
-        if ((s32) temp_t1 >= 0x1A) {
-            temp_v0_2 = arg1->unkB2;
-            if ((s32) temp_v0_2 >= 0x5A1) {
-                arg1->unkB2 = 0x4B0;
-            } else if ((s32) temp_v0_2 < 0xF1) {
-                arg1->unkB2 = 0x5A;
+        ambfx_timer = (g_trigger_ambfx_timer + g_frame_ticks) & 0xFF;
+        g_trigger_ambfx_timer = ambfx_timer;
+        if ((s32) ambfx_timer >= 0x1A) {
+            air_used = arg1->air_counter;
+            if ((s32) air_used >= 0x5A1) {
+                arg1->air_counter = 0x4B0;
+            } else if ((s32) air_used < 0xF1) {
+                arg1->air_counter = 0x5A;
             } else {
-                arg1->unkB2 = temp_v0_2 - 0xF0;
+                arg1->air_counter = air_used - 0xF0;
             }
             g_trigger_ambfx_timer = 0;
             return;

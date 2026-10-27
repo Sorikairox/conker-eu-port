@@ -70,6 +70,8 @@ const OPTIONS = [
     help: 'Turns off the frame-blend motion blur (the hangover wake-up after the opening, a slow-motion camera cut) and the drunk camera sway and screen stretching (drunk Conker, the title menu). The under-water wobble stays. Off: as on the N64.' },
   { key: 'conkerlod', label: 'Conker always full detail', def: false, game: 7,
     help: 'Conker is always drawn with his most detailed model. Off: as on the N64, he switches to simpler models once the camera is more than 500 units away (the normal follow camera is often 450 to 650 units behind him, more while running).' },
+  { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
+    help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }

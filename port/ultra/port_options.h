@@ -15,6 +15,7 @@ enum {
     PORT_OPT_NO_DRUNK_FX = 6,   /* no frame-blend blur, no drunk camera sway (fb_ghost_set_mode, camera_update_shake,
                                  * camera_wobble_apply, P331) */
     PORT_OPT_CONKER_FULL_LOD = 7, /* Conker always drawn with his most detailed model (obj_select_lod, P331) */
+    PORT_OPT_AIR_BAR = 8,       /* bar of the air left while under water (hud_air_bar_draw, P332) */
     PORT_OPT_COUNT = 16
 };
 int port_option(int id);

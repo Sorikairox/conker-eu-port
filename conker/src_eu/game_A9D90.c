@@ -492,7 +492,7 @@ void player_lose_life(s32 idx) {
 //     if (player_stat_get(arg0, 3) != 0) {
 //         player_stat_modify(arg0, 5, g_player_start_health); //temp_ret =
 //         temp_a0 = &g_objects[arg0];
-//         temp_a0->unkB2 = (u16)0;
+//         temp_a0->air_counter = (u16)0;
 //         if (g_mp_mode_active == 0) {
 //             g_mp_respawning = (u8)1;
 //             if (((g_save_progress_bits->unk19 & 4) != 0) || (g_save_cur_slot < 0)) {

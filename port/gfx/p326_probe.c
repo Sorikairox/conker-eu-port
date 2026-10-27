@@ -30,6 +30,18 @@ void p326_probe(void) {
     if (f < 0) f = port_flag("p326");
     if (fs < 0) fs = port_flag("p326sink");
     if (f <= 0) return;
+    {   /* P332 TEST ?p326tpf=F&p326tpx=X&p326tpz=Z: once, at retrace F, puts Conker at (X, -60, Z) (e.g. over the
+         * 0x29 river at 855, -1056) so a ?warp run reaches water without a route */
+        static int tpf = -1;
+        if (tpf < 0) tpf = port_flag("p326tpf");
+        if (tpf > 0 && port_frame_count >= (unsigned)tpf) {
+            tpf = 0;
+            *(float *)(r + 0x14) = (float)port_flag("p326tpx");
+            *(float *)(r + 0x18) = -60.0f;
+            *(float *)(r + 0x1C) = (float)port_flag("p326tpz");
+            port_log("[p326] frame %u teleport to %.0f %.0f\n", port_frame_count, F(r, 0x14), F(r, 0x1C));
+        }
+    }
     w = vbe_ld8(r + 0xAD);
     h = vbe_ld8(r + 0x1CA);
     air = vbe_ld16(r + 0xB2);

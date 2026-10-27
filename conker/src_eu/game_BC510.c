@@ -300,7 +300,7 @@ void hud_health_add_piece(void) {
 #define BUB_S16(r, o) (*(s16 *)((r) + (o)))
 
 // underwater_bubbles_update: spawns, grows, floats and pops the HUD air bubbles; a new bubble needs the player
-// (object 0) under water for unkB2 >= 0x5B and a free spawn timer; its pop delay is (6 - min(unkB2 / 240, 6)) * 9.
+// (object 0) under water for air_counter >= 0x5B and a free spawn timer; its pop delay is (6 - min(air_counter / 240, 6)) * 9.
 /* was func_1508F9F4 */
 void underwater_bubbles_update(void) {
     u8 *r;
@@ -318,7 +318,7 @@ void underwater_bubbles_update(void) {
             g_hud_bubble_spawn_timer = 0;
         }
     }
-    value = g_objects[0].in_water ? g_objects[0].unkB2 : 0;
+    value = g_objects[0].in_water ? g_objects[0].air_counter : 0;
     /* The asm never sets the spawn flag (sp+0x44) to non-zero: it only clears it (value < 0x5B, or delay 0) and
      * otherwise reads whatever the stack slot holds. On the N64 that slot is always the s1 that player_morph_cache_age
      * saved there just before (game_frame_end_update -> player_morph_cache_age, then -> hud_health_air_update -> hud_health_update, which
@@ -417,6 +417,61 @@ extern s16 g_hud_health_pos_hidden; /* was D_8009E084 */
 extern f32 g_hud_health_pos; /* was D_800D2848 */
 extern s32 g_hud_health_piece_dl; /* was D_800D29A8 */
 
+#ifdef PORT
+Gfx *render_fill_rect_clamped(Gfx *, s32, s32, s32, s32);
+/* hud_air_bar_draw: P332 option "Underwater air meter" (off by default). What the original shows for air
+ * (underwater_air_meter_update / hud_air_meter_draw, underwater_bubbles_update): nothing for the first 0x5B (91)
+ * ticks under water, then the 3D meter model 0xB9 (Conker's face with puffed cheeks, right of the screen) whose
+ * shape follows counter / 720 and stops changing at half the air (counter 720 of 1441); after that only its
+ * textures (480 / 960 / 1200), a darkening (720..1200), a wobble (1201..1440) and the drop at 1440 tell how much is
+ * left. This adds a plain bar of the air that is really left: full when Conker's head goes under, empty at the
+ * warning point 0x5A1 (1441, where drowning starts, see swim_water_physics). Air bubble trigger zones
+ * (trigger_zone_event_fire kind 6) give back 0xF0 every 0x1A ticks, and the bar shows that too. It reads the same
+ * counter (g_objects[0].air_counter, +0xB2), so with "Longer breath" (the counter grows at half speed) the bar
+ * simply empties half as fast. Shown while object 0 is in water and the counter is running (float water keeps it at
+ * 0: no bar there, as you cannot run out of air). Drawn in frame-buffer pixels (HUD units x g_hud_scale_x) as fill
+ * rectangles with the screen-fade render state (screen_fade_rect_draw): a dark frame, the remaining air in light
+ * blue, red for the last quarter. hud_draw already skips cutscenes, multiplayer and the title level. */
+#define AIR_BAR_FULL 0x5A1 /* the counter at which the warning sounds and drowning starts */
+#define AIR_BAR_W 80       /* HUD units (320-wide screen) */
+#define AIR_BAR_H 5
+#define AIR_BAR_Y 22
+static Gfx *hud_air_bar_draw(Gfx *gdl) {
+    s32 used, left, x0, y0, x1, y1, fill, border;
+    f32 scale;
+    u32 colour;
+
+    if (!port_option(PORT_OPT_AIR_BAR) || !g_objects[0].in_water || g_objects[0].air_counter == 0) {
+        return gdl;
+    }
+    used = g_objects[0].air_counter;
+    left = (used >= AIR_BAR_FULL) ? 0 : AIR_BAR_FULL - used;
+    scale = g_hud_scale_x;
+    border = (s32) scale;
+    x0 = g_framebuffer_width / 2 - (s32) (AIR_BAR_W / 2 * scale);
+    x1 = g_framebuffer_width / 2 + (s32) (AIR_BAR_W / 2 * scale);
+    y0 = (s32) (AIR_BAR_Y * scale);
+    y1 = (s32) ((AIR_BAR_Y + AIR_BAR_H) * scale);
+    fill = x0 + (x1 - x0) * left / AIR_BAR_FULL;
+    colour = (left * 4 < AIR_BAR_FULL) ? 0xFF4030E0 : 0x70D0FFE0; /* RGBA: red in the last quarter, else light blue */
+    gDPPipeSync(gdl++);
+    gDPSetOtherMode(gdl++, 0x082C3F, 0x504340); /* 1-cycle, blended: as screen_fade_rect_draw */
+    gDPSetCombine(gdl++, 0xFFFFFF, 0xFFFEFB7D);  /* shade = env colour */
+    gDPSetEnvColor(gdl++, 0, 0, 0, 0xA0);
+    gdl = render_fill_rect_clamped(gdl, x0 - border, y0 - border, x1 + border, y1 + border);
+    if (fill > x0) {
+        gDPPipeSync(gdl++);
+        gDPSetEnvColor(gdl++, colour >> 24, (colour >> 16) & 0xFF, (colour >> 8) & 0xFF, colour & 0xFF);
+        gdl = render_fill_rect_clamped(gdl, x0, y0, fill, y1);
+    }
+    return gdl;
+}
+#undef AIR_BAR_FULL
+#undef AIR_BAR_W
+#undef AIR_BAR_H
+#undef AIR_BAR_Y
+#endif
+
 /* Overlay pass after the world: returns `gdl` unchanged when the list would overflow. */
 /* was func_1508FD38 */
 u8 *hud_draw(u8 *arg0) {
@@ -476,6 +531,9 @@ u8 *hud_draw(u8 *arg0) {
     gdl = sprite_gfx_begin(gdl);
     gdl = hud_bubbles_draw(gdl);
     gdl = sprite_gfx_begin_alt(gdl);
+#ifdef PORT
+    gdl = hud_air_bar_draw(gdl);
+#endif
     if (g_dl_capacity < gdl - g_gfx_dl_buffers[g_dl_buf_index]) {
         return (u8 *)start;
     }
@@ -729,8 +787,8 @@ extern u16 g_air_meter_tex_r_low; /* was D_80090622 */
 s32 model_asset9_load_refcounted(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC);
 
 // underwater_air_meter_update: animates the HUD air meter while the player is under water (object 0's in_water,
-// unkB2 = time under water): loads model 0xB9 once, blends its vertices towards the target shape around the air
-// level, tints them, wobbles the meter when air runs low and drops it once the air is gone (unkB2 >= 1440).
+// air_counter +0xB2 = time under water): loads model 0xB9 (Conker's face, cheeks puffed) once, blends its vertices towards the target shape around the air
+// level, tints them, wobbles the meter when air runs low and drops it once the air is gone (air_counter >= 1440).
 /* was func_1509093C */
 void underwater_air_meter_update(void) {
     AirMeter *am = (AirMeter *)((u8 *)&g_hud_air_meter_block + 0x80);
@@ -750,7 +808,7 @@ void underwater_air_meter_update(void) {
     s32 dark;
     s32 tint_r, tint_g;
 
-    used = g_objects[0].in_water ? g_objects[0].unkB2 : 0;
+    used = g_objects[0].in_water ? g_objects[0].air_counter : 0;
     if (used < 0x5B) {
         am->active = 0;
         return;
@@ -765,7 +823,7 @@ void underwater_air_meter_update(void) {
         am->drop_vel = g_air_meter_drop_vel0;
         am->wobble_timer = (random_int() & 0x3F) + 0x3C;
     }
-    am->level = (f32)g_objects[0].unkB2 / 720.0f;
+    am->level = (f32)g_objects[0].air_counter / 720.0f;
     if (am->level > 1.0f) {
         am->level = 1.0f;
     }
@@ -905,102 +963,102 @@ extern s32 g_hud_air_meter_block; /* was D_800D28E8 */
 
 /* was func_150911F4 */
 Gfx *hud_air_meter_draw(Gfx *gdlArg) {
-    u8 *arg0 = (u8 *)gdlArg;
-    s32 sp90;
-    s32 temp_v0;
-    s32 temp_v0_2;
-    s32 temp_v0_3;
-    s32 temp_v0_4;
-    u8 *temp_s0;
-    u8 *temp_s0_10;
-    u8 *temp_s0_2;
-    u8 *temp_s0_3;
-    u8 *temp_s0_4;
-    u8 *temp_s0_5;
-    u8 *temp_s0_6;
-    u8 *temp_s0_7;
-    u8 *temp_s0_8;
-    u8 *temp_s0_9;
-    u8 *var_s0;
-    u8 *var_s0_2;
-    u8 *var_s0_3;
+    u8 *gdl_start = (u8 *)gdlArg; /* was arg0 */
+    s32 tex_info; /* was sp90 */
+    s32 tex0_addr; /* was temp_v0 */
+    s32 tex1_addr; /* was temp_v0_2 */
+    s32 tex2_addr; /* was temp_v0_3 */
+    s32 tex3_addr; /* was temp_v0_4 */
+    u8 *dl1; /* was temp_s0 */
+    u8 *dl10; /* was temp_s0_10 */
+    u8 *dl2; /* was temp_s0_2 */
+    u8 *dl3; /* was temp_s0_3 */
+    u8 *dl4; /* was temp_s0_4 */
+    u8 *dl5; /* was temp_s0_5 */
+    u8 *dl6; /* was temp_s0_6 */
+    u8 *dl7; /* was temp_s0_7 */
+    u8 *dl8; /* was temp_s0_8 */
+    u8 *dl9; /* was temp_s0_9 */
+    u8 *gdl; /* was var_s0 */
+    u8 *gdl_seg; /* was var_s0_2 */
+    u8 *gdl_tex; /* was var_s0_3 */
 
-    var_s0 = arg0;
+    gdl = gdl_start;
     if ((*(u8 *)((u8 *)(&g_hud_air_meter_block) + 0xBA)) == 0) {
 
     } else {
-        (*(s32 **)((u8 *)var_s0 + 4)) = &g_obj_draw_begin_dl;
-        temp_s0 = var_s0 + 8;
-        (*(s32 *)((u8 *)var_s0 + 0)) = 0xDE000000;
-        (*(s32 *)((u8 *)temp_s0 + 4)) = 0x400;
-        (*(s32 *)((u8 *)temp_s0 + 0)) = 0xD9FFFFFF;
-        temp_s0_2 = temp_s0 + 8;
-        (*(s32 *)((u8 *)temp_s0_2 + 0)) = 0xD9F1FDFE;
-        (*(s32 *)((u8 *)temp_s0_2 + 4)) = 0;
-        temp_s0_3 = temp_s0_2 + 8;
-        (*(s32 *)((u8 *)temp_s0_3 + 0)) = 0xD9BDFFFF;
-        (*(s32 *)((u8 *)temp_s0_3 + 4)) = 0;
-        temp_s0_4 = temp_s0_3 + 8;
+        (*(s32 **)((u8 *)gdl + 4)) = &g_obj_draw_begin_dl;
+        dl1 = gdl + 8;
+        (*(s32 *)((u8 *)gdl + 0)) = 0xDE000000;
+        (*(s32 *)((u8 *)dl1 + 4)) = 0x400;
+        (*(s32 *)((u8 *)dl1 + 0)) = 0xD9FFFFFF;
+        dl2 = dl1 + 8;
+        (*(s32 *)((u8 *)dl2 + 0)) = 0xD9F1FDFE;
+        (*(s32 *)((u8 *)dl2 + 4)) = 0;
+        dl3 = dl2 + 8;
+        (*(s32 *)((u8 *)dl3 + 0)) = 0xD9BDFFFF;
+        (*(s32 *)((u8 *)dl3 + 4)) = 0;
+        dl4 = dl3 + 8;
         if ((s32) (*(u8 *)((u8 *)(&g_hud_air_meter_block) + 0xBA)) < 0xFF) {
-            (*(s32 *)((u8 *)temp_s0_4 + 0)) = 0xDB060020;
-            (*(s32 **)((u8 *)temp_s0_4 + 4)) = &g_air_meter_seg6_dl_xlu;
-            var_s0_2 = temp_s0_4 + 8;
+            (*(s32 *)((u8 *)dl4 + 0)) = 0xDB060020;
+            (*(s32 **)((u8 *)dl4 + 4)) = &g_air_meter_seg6_dl_xlu;
+            gdl_seg = dl4 + 8;
         } else {
-            (*(s32 *)((u8 *)temp_s0_4 + 0)) = 0xDB060020;
-            (*(s32 **)((u8 *)temp_s0_4 + 4)) = &g_air_meter_seg6_dl_opa;
-            var_s0_2 = temp_s0_4 + 8;
+            (*(s32 *)((u8 *)dl4 + 0)) = 0xDB060020;
+            (*(s32 **)((u8 *)dl4 + 4)) = &g_air_meter_seg6_dl_opa;
+            gdl_seg = dl4 + 8;
         }
         mtx_build_rot_scale_trans((u8 *)&g_hud_air_meter_block + (g_dl_buf_index << 6), -1.0f - (*(f32 *)((u8 *)(&g_hud_air_meter_block) + 0xA0)), -11.0f + (*(f32 *)((u8 *)(&g_hud_air_meter_block) + 0xA8)), 0.0f, 4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
-        (*(s32 *)((u8 *)var_s0_2 + 0)) = 0xDA380003;
-        temp_s0_5 = var_s0_2 + 8;
-        (*(u8 **)((u8 *)var_s0_2 + 4)) = (u8 *) ((u8 *)&g_hud_air_meter_block + (g_dl_buf_index << 6));
-        (*(s32 *)((u8 *)temp_s0_5 + 4)) = 0xFF;
-        (*(s32 *)((u8 *)temp_s0_5 + 0)) = 0xF8000000;
-        temp_s0_6 = temp_s0_5 + 8;
-        (*(s32 *)((u8 *)temp_s0_6 + 0)) = 0xFA00F200;
-        (*(s32 *)((u8 *)temp_s0_6 + 4)) = 0;
-        temp_s0_7 = temp_s0_6 + 8;
-        (*(s32 *)((u8 *)temp_s0_7 + 0)) = 0xFB000000;
-        temp_s0_8 = temp_s0_7 + 8;
-        (*(s32 *)((u8 *)temp_s0_7 + 4)) = (s32) (*(u8 *)((u8 *)(&g_hud_air_meter_block) + 0xBA));
-        (*(s32 *)((u8 *)temp_s0_8 + 0)) = 0xDB06000C;
-        temp_s0_9 = temp_s0_8 + 8;
-        (*(u8 **)((u8 *)temp_s0_8 + 4)) = (u8 *) ((u8 *)&g_hud_air_meter_block + (g_dl_buf_index << 6));
-        (*(s32 *)((u8 *)temp_s0_9 + 0)) = 0xDB060004;
-        var_s0_3 = temp_s0_9 + 8;
-        (*(s32 *)((u8 *)temp_s0_9 + 4)) = (s32) (*(s32 *)((u8 *)(((u8 *)&g_hud_air_meter_block + (g_dl_buf_index * 4))) + 0x84));
+        (*(s32 *)((u8 *)gdl_seg + 0)) = 0xDA380003;
+        dl5 = gdl_seg + 8;
+        (*(u8 **)((u8 *)gdl_seg + 4)) = (u8 *) ((u8 *)&g_hud_air_meter_block + (g_dl_buf_index << 6));
+        (*(s32 *)((u8 *)dl5 + 4)) = 0xFF;
+        (*(s32 *)((u8 *)dl5 + 0)) = 0xF8000000;
+        dl6 = dl5 + 8;
+        (*(s32 *)((u8 *)dl6 + 0)) = 0xFA00F200;
+        (*(s32 *)((u8 *)dl6 + 4)) = 0;
+        dl7 = dl6 + 8;
+        (*(s32 *)((u8 *)dl7 + 0)) = 0xFB000000;
+        dl8 = dl7 + 8;
+        (*(s32 *)((u8 *)dl7 + 4)) = (s32) (*(u8 *)((u8 *)(&g_hud_air_meter_block) + 0xBA));
+        (*(s32 *)((u8 *)dl8 + 0)) = 0xDB06000C;
+        dl9 = dl8 + 8;
+        (*(u8 **)((u8 *)dl8 + 4)) = (u8 *) ((u8 *)&g_hud_air_meter_block + (g_dl_buf_index << 6));
+        (*(s32 *)((u8 *)dl9 + 0)) = 0xDB060004;
+        gdl_tex = dl9 + 8;
+        (*(s32 *)((u8 *)dl9 + 4)) = (s32) (*(s32 *)((u8 *)(((u8 *)&g_hud_air_meter_block + (g_dl_buf_index * 4))) + 0x84));
         if ((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB0)) != 0) {
-            temp_v0 = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB0)), &sp90, 3, 0);
-            (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB060018;
-            (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0;
-            var_s0_3 += 8;
+            tex0_addr = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB0)), &tex_info, 3, 0);
+            (*(s32 *)((u8 *)gdl_tex + 0)) = 0xDB060018;
+            (*(s32 *)((u8 *)gdl_tex + 4)) = tex0_addr;
+            gdl_tex += 8;
         }
         if ((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB2)) != 0) {
-            temp_v0_2 = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB2)), &sp90, 3, 0);
-            (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB06001C;
-            (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0_2;
-            var_s0_3 += 8;
+            tex1_addr = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB2)), &tex_info, 3, 0);
+            (*(s32 *)((u8 *)gdl_tex + 0)) = 0xDB06001C;
+            (*(s32 *)((u8 *)gdl_tex + 4)) = tex1_addr;
+            gdl_tex += 8;
         }
         if ((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB4)) != 0) {
-            temp_v0_3 = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB4)), &sp90, 3, 0);
-            (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB060028;
-            (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0_3;
-            var_s0_3 += 8;
+            tex2_addr = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB4)), &tex_info, 3, 0);
+            (*(s32 *)((u8 *)gdl_tex + 0)) = 0xDB060028;
+            (*(s32 *)((u8 *)gdl_tex + 4)) = tex2_addr;
+            gdl_tex += 8;
         }
         if ((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB6)) != 0) {
-            temp_v0_4 = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB6)), &sp90, 3, 0);
-            (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDB06002C;
-            (*(s32 *)((u8 *)var_s0_3 + 4)) = temp_v0_4;
-            var_s0_3 += 8;
+            tex3_addr = texture_cache_lookup((*(u16 *)((u8 *)(&g_hud_air_meter_block) + 0xB6)), &tex_info, 3, 0);
+            (*(s32 *)((u8 *)gdl_tex + 0)) = 0xDB06002C;
+            (*(s32 *)((u8 *)gdl_tex + 4)) = tex3_addr;
+            gdl_tex += 8;
         }
-        (*(s32 *)((u8 *)var_s0_3 + 0)) = 0xDE000000;
-        temp_s0_10 = var_s0_3 + 8;
-        (*(s32 *)((u8 *)var_s0_3 + 4)) = (s32) (*(s32 *)((u8 *)(&g_hud_air_meter_block) + 0x80));
-        (*(s32 **)((u8 *)temp_s0_10 + 4)) = &g_obj_draw_end_dl;
-        var_s0 = temp_s0_10 + 8;
-        (*(s32 *)((u8 *)temp_s0_10 + 0)) = 0xDE000000;
+        (*(s32 *)((u8 *)gdl_tex + 0)) = 0xDE000000;
+        dl10 = gdl_tex + 8;
+        (*(s32 *)((u8 *)gdl_tex + 4)) = (s32) (*(s32 *)((u8 *)(&g_hud_air_meter_block) + 0x80));
+        (*(s32 **)((u8 *)dl10 + 4)) = &g_obj_draw_end_dl;
+        gdl = dl10 + 8;
+        (*(s32 *)((u8 *)dl10 + 0)) = 0xDE000000;
     }
-    return (Gfx *)(var_s0);
+    return (Gfx *)(gdl);
 }
 s32 texture_cache_lookup(s32, s32 *, s32, s32);
 
