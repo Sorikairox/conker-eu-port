@@ -1,3 +1,4 @@
+#include <stdio.h>
 /* P326 TEST ?p326=1 (called from p205_obj_hook, i.e. once per frame of Conker's look callback): measures the two
  * gameplay options "Longer breath" and "Longer tail spin" on player record 0 (Conker, g_objects[0], struct127):
  *   - air: logs the water entry / exit (+0xAD in_water), the air counter +0xB2 every 100 ticks and every health
@@ -153,6 +154,7 @@ void p326_probe(void) {
 
 /* P340 TEST ?p340=F, called once per retrace from __wrap_objects_run_state_handlers (gfx_f3dex2.c), so it runs in
  * multiplayer too (p326_probe only runs from Conker's look callback). */
+unsigned p341_rail_calls[32]; /* P341: event_action_rail calls per command (p174_ev.c wrap) */
 void p340_probe(void) {
     unsigned char *r = g_objects;
     {   /* P340 TEST ?p340=F (multiplayer weapon pickups): from retrace F, once lists the floating pickups (world objects
@@ -229,6 +231,10 @@ void p340_probe(void) {
                         snap[k] = st[k];
                     }
             }
+            if (port_flag("p341b") > 0 && port_frame_count >= (unsigned)port_flag("p341b") && port_frame_count < (unsigned)port_flag("p341b") + 24)
+                port_log("[p341b] frame %u f28 %.2f yv %.2f c95 %d h84 0x%x phase %d c27 %d djump %d pad 0x%x item 0x%x\n", port_frame_count,
+                         F(r, 0x28), F(r, 0x20), vbe_ld8(st + 0x95), vbe_ld16(r + 0x84), vbe_ld8(st + 0x11A), vbe_ld8(st + 0x27),
+                         vbe_ld8(r + 0x8A), vbe_ld8(st + 0x75), vbe_ld8(st + 0x78));
             if (port_frame_count - last340 >= 50) {
                 const unsigned char *q1 = g_objects + 0x32C;
                 const unsigned char *s1 = (const unsigned char *)(uintptr_t) * (const unsigned *)(q1 + 0x31C);
@@ -237,10 +243,36 @@ void p340_probe(void) {
                     port_log("[p340] frame %u p1 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d 74 0x%x\n", port_frame_count,
                              vbe_ld8(s1 + 0x75), vbe_ld8(s1 + 0x78), vbe_ld8(s1 + 0x7C), vbe_ld8(s1 + 0x11A), vbe_ld8(s1 + 0x197),
                              vbe_ld8(s1 + 0x74));
-                port_log("[p340] frame %u p0 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d pos %.0f %.0f %.0f\n",
+                port_log("[p340] frame %u p0 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d shots %d pos %.0f %.0f %.0f\n",
                          port_frame_count, vbe_ld8(st + 0x75), vbe_ld8(st + 0x78), vbe_ld8(st + 0x7C), vbe_ld8(st + 0x11A),
-                         vbe_ld8(st + 0x197), F(r, 0x14), F(r, 0x18), F(r, 0x1C));
+                         vbe_ld8(st + 0x197), vbe_ld16(st + 0x1AA), F(r, 0x14), F(r, 0x18), F(r, 0x1C));
+                {   /* P341: the multiplayer weapon slots of rail_weapons_update (event_action_rail command 11) */
+                    extern unsigned char *g_race_state; /* was D_800D27D0 */
+                    extern unsigned char *world_record_find(int);
+                    unsigned char *rs = g_race_state;
+                    extern int g_frame_ticks; /* was D_800BE9E4 */
+                    { int c; char b[400]; int k = 0;
+                      for (c = 0; c < 32; c++) if (p341_rail_calls[c]) k += snprintf(b + k, sizeof b - k, " %d:%u", c, p341_rail_calls[c]);
+                      port_log("[p341] frame %u ticks %d rail command calls%s\n", port_frame_count, g_frame_ticks, b); }
+                    if (rs) {
+                        int ns = *(const int *)(rs + 0xEA4), k;
+                        port_log("[p341] frame %u racers %d slots %d mode 0x%x default %d slotOf %d %d want %d %d\n",
+                                 port_frame_count, *(const int *)(rs + 0x10), ns, vbe_ld16(rs + 0x16BC),
+                                 *(const int *)(rs + 0x1170), *(const int *)(rs + 0xEB0), *(const int *)(rs + 0xEB4),
+                                 *(const int *)(rs + 0xFF0), *(const int *)(rs + 0xFF4));
+                        for (k = 0; k < ns && k < 32; k++) {
+                            int id = *(const int *)(rs + 0xEF0 + 4 * k);
+                            unsigned char *pk = world_record_find(id & 0xFF);
+                            port_log("[p341]  slot %d obj 0x%x rec %p (idx %d) respawn %d hide %d weapon 0x%x flags %d taker %d gone %d\n",
+                                     k, id, (void *)pk, pk ? (int)((pk - g_world_objs) / 0xA0) : -1,
+                                     *(const int *)(rs + 0x1070 + 4 * k), *(const int *)(rs + 0x12F4 + 4 * k),
+                                     *(const int *)(rs + 0x1174 + 4 * k), *(const int *)(rs + 0x11F4 + 4 * k),
+                                     pk ? *(const int *)(pk + 0x80) : -1, pk ? vbe_ld8(pk + 0x6E) : -1);
+                        }
+                    } else port_log("[p341] frame %u no race state\n", port_frame_count);
+                }
             }
         }
     }
 }
+

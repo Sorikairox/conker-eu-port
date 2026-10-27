@@ -117,6 +117,7 @@ s32 __wrap_event_native_action(s32 *args) {
     int fin = on() && (args[0] & 0xF000) == 0x5000 && args[1] == 1 && nf < 40;
     if (fin) nf++, p178fin("before", args[0] & 0xFFF);
     s32 r = __real_event_native_action(args);
+    { extern unsigned p341_rail_calls[32]; if ((args[0] & 0xFFFF) == 0xF000 && (unsigned)args[1] < 32) p341_rail_calls[args[1]]++; }
     if (fin) p178fin("after ", args[0] & 0xFFF);
     if (on()) {
         static unsigned nlog; static s32 lid[1024], la1[1024]; static int nl;
