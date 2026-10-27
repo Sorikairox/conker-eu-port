@@ -11,7 +11,10 @@
 #        NETFAIL=A-B                  test: players A and B (2..4) never get a direct link (?netfailto): the host relays
 #        NETD=D                       input delay (host, default 3; auto = from the pings)
 #        LEAVE=NAME (GUEST_LEAVE=1 = guest)  that page leaves at the end, the others run on 15 s
-#        UI=1  codes through the Online panel's buttons     SHOTS="60 150"  screenshots of every window
+#        ROOM=1  P345: connect with a room code through a LOCAL room server (tools/port/scripts/roomserver.mjs, the
+#                function's core.mjs on a Map; never the production function), ROOMCHECK=1 also checks an unknown
+#                code and a full room (ROOMMAX=N room size; netgroup.js)
+#        UI=1  codes (or the room code) through the Online panel's buttons     SHOTS="60 150"  screenshots of every window
 #        DESYNC_AT=N  test: the guest flips one byte of game memory at retrace N (?netdesync, desync report);
 #                     DESYNC_OFF=decimal offset in n64_rdram (default 0x200000)
 #        HIDE=AT:FOR  the guest's page is hidden from AT s for FOR s     REALBG=1  normal background throttling
@@ -30,9 +33,15 @@ eval "$(python3 tools/port/scripts/netmp_pads.py 7000 "${PLAY_SECS:-20}")"
 NAME=conker-web-pair-$$; PORT=$((8100 + $$ % 800))
 docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$PWD/port/build/web":/www/app:ro \
   -v "$PWD/baserom.eu.z64":/www/dev/rom.z64:ro -w /www conker-emsdk python3 -m http.server 8000 >/dev/null
-trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
+RPID=
+trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true; [ -n "$RPID" ] && kill $RPID 2>/dev/null' EXIT
+ROOMQ=
+if [ -n "${ROOM:-}" ]; then   # P345: the local room server (killed by the trap)
+  RPORT=$((8900 + $$ % 90)); node tools/port/scripts/roomserver.mjs $RPORT > "$D/roomserver.log" 2>&1 &
+  RPID=$!; ROOMQ="&roomapi=http://127.0.0.1:$RPORT/api/room"
+fi
 sleep 1.5
-B="http://localhost:$PORT/app/index.html?romurl=../dev/rom.z64&mute=1&p103boot=1&nethash=1&netscript=1&netpanel=1&padf=$PADF0&padf1=$PADF1&padf2=$PADF2&padf3=$PADF3${NETD:+&netd=$NETD}"
+B="http://localhost:$PORT/app/index.html?romurl=../dev/rom.z64&mute=1&p103boot=1&nethash=1&netscript=1&netpanel=1&padf=$PADF0&padf1=$PADF1&padf2=$PADF2&padf3=$PADF3${NETD:+&netd=$NETD}$ROOMQ"
 FA=${NETFAIL%-*}; FB=${NETFAIL#*-}
 fail() { [ -n "${NETFAIL:-}" ] && { [ "$1" = "$FA" ] && echo "&netfailto=$FB"; [ "$1" = "$FB" ] && echo "&netfailto=$FA"; }; }
 URLS=("$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}"
