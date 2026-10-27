@@ -405,6 +405,7 @@ int port_net_ready(unsigned f);
 void port_net_stalled(int slots);
 void port_net_retrace_start(void);
 void port_net_retrace_done(void);
+double port_net_take_slow_ms(double elapsed_ms);   /* P339 time sync */
 static void retrace(void) {
     port_frame_count++;
     if (port_net_on) port_net_retrace_start();   /* P338: sample the local input for retrace N + D */
@@ -447,15 +448,20 @@ static void frame(void) {
     double elapsed_ms = now_ms - last_tick_ms; last_tick_ms = now_ms;
     if (elapsed_ms > 250.0) elapsed_ms = 250.0;
     backlog_ms += elapsed_ms;
-    int steps = 0;
-    while (backlog_ms >= period_ms && steps < VI_MAX_STEPS && !port_paused) {   /* P337: ?nethashstop pauses right after its retrace */
+    if (port_net_on) backlog_ms -= port_net_take_slow_ms(elapsed_ms);   /* P339: this peer is ahead of the other one: run a bit later */
+    int retraces_run = 0;   /* P339 name: was steps */
+    while (backlog_ms >= period_ms && retraces_run < VI_MAX_STEPS && !port_paused) {   /* P337: ?nethashstop pauses right after its retrace */
         if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled((int)(backlog_ms / period_ms)); break; }   /* P338 */
-        retrace(); steps++; backlog_ms -= period_ms;
+        retrace(); retraces_run++; backlog_ms -= period_ms;
         if (emscripten_get_now() - now_ms > VI_TICK_MS) break;
     }
     if (backlog_ms > 2 * period_ms) backlog_ms = 2 * period_ms;
-    if (steps) port_video_frame();
+    if (retraces_run) port_video_frame();
 }
+
+/* P339 online: net.js calls this when a packet brings the input a stalled session waits for, so the retrace runs at
+ * once instead of on the next main-loop tick (the other player's next input sample depends on it) */
+EMSCRIPTEN_KEEPALIVE void port_net_kick(void) { if (in_main_loop && port_net_on && !port_paused) frame(); }
 
 void port_dump_stubs(int max);
 EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
@@ -489,5 +495,6 @@ void port_run(port_boot_fn boot) {
         int tm = port_flag("timer");
         if (tm > 0) emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, tm == 1 ? 16 : tm);
     }
+    { void port_net_main_loop_timing(void); port_net_main_loop_timing(); }   /* P339: an online session ticks on a 4 ms timer */
     /* main() returns; the runtime stays alive (EXIT_RUNTIME=0) and the main loop drives everything */
 }

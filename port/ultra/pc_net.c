@@ -75,7 +75,7 @@ static struct {
     uint32_t frame[NET_RING][4];  /* the frame the slot holds (0 = empty) */
     uint32_t hash[NET_HASHES][3]; /* {retrace, H, S} every net_hash_every retraces, slot (retrace / every) % NET_HASHES */
     int32_t local_pad[4];         /* the page's local pad: present, buttons, stick x, stick y */
-    uint32_t stat[8];             /* see port_net_addr */
+    uint32_t stat[10];            /* see port_net_addr */
 } net;
 int port_net_on;                  /* a session runs: pc_sched.c barrier, pc_pif.c input source */
 static int net_mask;              /* channels in the session (= presence mask) */
@@ -84,6 +84,7 @@ static unsigned net_delay = 3;    /* D */
 static unsigned net_drop_from[4]; /* a lost player's channel reads neutral from this frame on (0 = not dropped) */
 static int net_hash_every = 10;
 static int net_script;            /* ?netscript=1: local input from the ?padf script (tests) */
+#define NET_TICK_MS 4             /* P339: the session's main-loop timer period (section 4, time sync) */
 
 void port_padf_value(int ch, unsigned frame, int *buttons, int *stick_x, int *stick_y);   /* pc_pif.c */
 void port_pads_set_mask(int mask);                                                         /* pc_pif.c */
@@ -109,7 +110,8 @@ EMSCRIPTEN_KEEPALIVE void port_net_session(int present_mask, int local_mask, int
 }
 /* 0 = input ring (u32 [256][4]), 1 = frame tags (u32 [256][4]), 2 = hash ring (u32 [64][3]), 3 = local pad (s32 [4]),
  * 4 = stats (u32 [8]: 0 stalled ticks, 1 stalled retrace slots, 2 last retrace run, 3 input delay, 4 hash every K,
- *     5 channel mask, 6 local mask) */
+ *     5 channel mask, 6 local mask, 7 ms slowed by the time sync so far, 8 retraces that had to wait for input,
+ *     9 ms waited in all) */
 EMSCRIPTEN_KEEPALIVE uintptr_t port_net_addr(int which) {
     net.stat[2] = port_frame_count; net.stat[3] = net_delay; net.stat[4] = (uint32_t)net_hash_every;
     net.stat[5] = (uint32_t)net_mask; net.stat[6] = (uint32_t)net_local_mask;
@@ -122,9 +124,11 @@ EMSCRIPTEN_KEEPALIVE unsigned port_net_frame(void) { return port_frame_count; } 
 /* a hidden tab gets no requestAnimationFrame: the page switches the main loop to a 10 ms timer while hidden, so the
  * session does not stall for the other player (browsers may still slow timers in background tabs) */
 EMSCRIPTEN_KEEPALIVE void port_net_background(int hidden) {
-    if (hidden) emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 10);
-    else emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
+    (void)hidden;   /* P339: the session's loop is a timer whether the tab is visible or not (section 4, time sync) */
+    emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, NET_TICK_MS);
 }
+/* pc_sched.c port_run, after the main loop is set up: a session ticks on a 4 ms timer (see the time sync below) */
+void port_net_main_loop_timing(void) { if (port_net_on) emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, NET_TICK_MS); }
 /* the page's loopback peer and tests: the ?padf script's packed input of a channel at a frame */
 EMSCRIPTEN_KEEPALIVE uint32_t port_net_script_input(int ch, unsigned frame) {
     int b, x, y;
@@ -146,11 +150,44 @@ EMSCRIPTEN_KEEPALIVE int port_net_ready(unsigned f) {
         if ((net_mask >> ch & 1) && !net_has(f, ch)) return 0;
     return 1;
 }
-void port_net_stalled(int slots) { net.stat[0]++; net.stat[1] += (uint32_t)slots; }
+static double net_wait_since_ms;   /* P339: the next retrace waits for input since then (0 = not waiting) */
+void port_net_stalled(int slots) {
+    net.stat[0]++; net.stat[1] += (uint32_t)slots;
+    if (!net_wait_since_ms) { net_wait_since_ms = emscripten_get_now(); net.stat[8]++; }
+}
+
+/* P339 time sync (GGPO-style frame advantage). The page (net.js) measures how many frames of the other player's input
+ * this peer holds ahead of the retrace it runs (its "input margin") and exchanges it with every packet. The peer with
+ * the smaller margin is ahead of the other one: its inputs arrive late there, and the other peer stalls. That peer
+ * calls port_net_slow(ms): frame() then takes that much wall time out of its 50 Hz backlog, at most NET_SLOW_MAX_RATE
+ * of the elapsed wall time (8 %: 1.6 ms per retrace), until both peers sit in the middle of the input window.
+ * Only WHEN a retrace runs changes, never what it computes, so the session stays deterministic.
+ * The session's main loop runs on a 4 ms timer instead of requestAnimationFrame (port_net_main_loop_timing): retraces
+ * then start within ~4 ms of their 50 Hz time and a stalled peer runs the retrace ~4 ms after the input arrives, not
+ * on the next display frame (16.7 ms at 60 Hz). With rAF each stall delayed this peer's next input sample by a display
+ * frame, which made the other peer stall in turn (P338: 79 % speed at 40 to 60 ms one way with D 3). */
+#define NET_SLOW_MAX_RATE 0.08
+static double net_slow_left_ms;   /* wall time still to take out of the VI backlog */
+static double net_slow_total_ms;  /* all of it so far (stats) */
+EMSCRIPTEN_KEEPALIVE void port_net_slow(double ms) { net_slow_left_ms = ms > 0 ? ms : 0; }   /* replaces the old request */
+/* pc_sched.c frame(), once per tick: the wall time to take out of the backlog now */
+double port_net_take_slow_ms(double elapsed_ms) {
+    double cap_ms = elapsed_ms * NET_SLOW_MAX_RATE;
+    double take_ms = net_slow_left_ms < cap_ms ? net_slow_left_ms : cap_ms;
+    net_slow_left_ms -= take_ms; net_slow_total_ms += take_ms;
+    net.stat[7] = (uint32_t)net_slow_total_ms;
+    return take_ms;
+}
+/* port_net_retrace_start, right after the local input for N + D is sampled: the page sends it at once, before this
+ * retrace runs (1.5 ms mean, up to ~10 ms with rendering), not on its timer */
+static void net_send_now(void) {
+    EM_ASM({ if (Module['netAfterTick']) Module['netAfterTick'](); });
+}
 
 /* start of retrace N (pc_sched.c retrace): sample the local input for frame N + D */
 void port_net_retrace_start(void) {
     unsigned f = port_frame_count + net_delay, slot = f % NET_RING;
+    if (net_wait_since_ms) { net.stat[9] += (uint32_t)(emscripten_get_now() - net_wait_since_ms + 0.5); net_wait_since_ms = 0; }
     for (int ch = 0; ch < 4; ch++) {
         if (!(net_local_mask >> ch & 1)) continue;
         int b = net.local_pad[1], x = net.local_pad[2], y = net.local_pad[3];
@@ -158,6 +195,7 @@ void port_net_retrace_start(void) {
         net.input[slot][ch] = net_pack(b, x, y);
         net.frame[slot][ch] = f;
     }
+    if (net_local_mask) net_send_now();   /* P339 */
 }
 /* pc_pif.c osContStartReadData: this retrace's buttons / sticks for every session channel ([present, b, x, y] x 4) */
 void port_net_fill_pads(int32_t *pads) {

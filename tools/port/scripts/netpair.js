@@ -69,10 +69,11 @@ async function connect(wsUrl, logFile) {
     await host.ev(`__online.accept(${JSON.stringify(answer)})`);
   }
   console.log(`netpair: offer ${offer.length} chars, answer ${answer.length} chars, codes exchanged in ${Date.now() - t0} ms`);
-  const t1 = Date.now();
+  const t1 = Date.now(), speed = [];   // P339: [seconds, host / guest frame, host / guest retraces that waited, host / guest ms waited] every 10 s
   while (Date.now() - t1 < +secs * 1000) {
     await sleep(10000);
     const s = await Promise.all([host.ev('__online.stats()'), guest.ev('__online.stats()')]).catch((e) => [String(e), '']);
+    if (s[0] && s[1] && s[0].frame) speed.push([(Date.now() - t1) / 1000, s[0].frame, s[1].frame, s[0].waits, s[1].waits, s[0].waitMs, s[1].waitMs]);
     console.log(`netpair ${Math.round((Date.now() - t1) / 1000)} s: host ${JSON.stringify(s[0])}  guest ${JSON.stringify(s[1])}`);
     for (const t of (process.env.SHOTS || '').split(' ').filter(Boolean))   // SHOTS="60 120": screenshots of both windows
       if (Math.abs((Date.now() - t1) / 1000 - +t) < 5) for (const [n, p] of [['host', host], ['guest', guest]]) {
@@ -81,6 +82,10 @@ async function connect(wsUrl, logFile) {
         if (r.result) fs.writeFileSync(path.join(out, `${n}_${t}s.png`), Buffer.from(r.result.data, 'base64'));
       }
   }
+  // P339: game speed = retraces per second / 50 from the first sample with the game running (>= 20 s) to the end
+  const a = speed.find((x) => x[0] >= 20 && x[1] > 100), z = speed[speed.length - 1];
+  if (a && z && z !== a) console.log(`netpair speed ${a[0].toFixed(0)}..${z[0].toFixed(0)} s: host ${((z[1] - a[1]) / (z[0] - a[0]) / 50 * 100).toFixed(1)} %` +
+    ` guest ${((z[2] - a[2]) / (z[0] - a[0]) / 50 * 100).toFixed(1)} %, retraces that waited for input host ${z[3] - a[3]} (${z[5] - a[5]} ms) guest ${z[4] - a[4]} (${z[6] - a[6]} ms)`);
   // optional: GUEST_LEAVE=1 closes the guest at the end and lets the host run on alone for 15 s
   if (process.env.GUEST_LEAVE) {
     await guest.ev('__online.leave()');

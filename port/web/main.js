@@ -795,7 +795,8 @@ window.__online = {
     const hs = on ? PortNet.hashes() : [], h = hs[hs.length - 1];
     return { state: t.state, frame: on ? PortNet.frame() : 0, rtt: Math.round(t.rtt), stalledTicks: on ? PortNet.stat(0) : 0,
       stalledSlots: on ? PortNet.stat(1) : 0, sent: t.sent, recv: t.recv, simDropped: t.simDropped, hashChecked: t.myHashSeen,
-      lastHash: h ? `${h.f}:${h.h.toString(16)}:${h.s.toString(16)}` : '', desync: t.desync, left: t.left };
+      lastHash: h ? `${h.f}:${h.h.toString(16)}:${h.s.toString(16)}` : '', desync: t.desync, left: t.left,
+      slowedMs: on ? PortNet.stat(7) : 0, waits: on ? PortNet.stat(8) : 0, waitMs: on ? PortNet.stat(9) : 0, margin: +t.myMargin.toFixed(2), peerMargin: +t.peerMargin.toFixed(2) };   // P339 time sync
   },
 };
 

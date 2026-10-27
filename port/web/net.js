@@ -16,10 +16,11 @@
       N.M = M; N.cfg = cfg; if (log) N.log = log;
       M._port_net_session(cfg.mask, cfg.local, cfg.delay, cfg.hashEvery);
       for (const [k, i] of [['input', 0], ['frame', 1], ['hash', 2], ['pad', 3], ['stat', 4]]) N.base[k] = M._port_net_addr(i) >>> 2;
+      M.netAfterTick = () => { if (N.afterTick) N.afterTick(); };   // P339: pc_net.c, right after a local input is sampled
     },
     frame() { return N.M._port_net_frame() >>> 0; },          // the last retrace run
     ready(f) { return N.M._port_net_ready(f) !== 0; },          // may retrace f run (the frame barrier)
-    stat(i) { return U32()[N.base.stat + i]; },          // 0 stalled ticks, 1 stalled retrace slots
+    stat(i) { return U32()[N.base.stat + i]; },          // 0 stalled ticks, 1 stalled retrace slots, 7 ms slowed (time sync)
     has(f, ch) { return U32()[N.base.frame + (f % RING) * 4 + ch] === f; },
     get(f, ch) { return N.has(f, ch) ? U32()[N.base.input + (f % RING) * 4 + ch] : -1; },
     put(f, ch, v) {   // a peer's input for frame f (packed: buttons << 16 | (u8)x << 8 | (u8)y)
@@ -71,9 +72,19 @@
   // (no trickle), deflate-compressed and base64url-encoded. Only public STUN, no TURN: a pair behind strict NATs
   // cannot connect, and the page says so.
   // Input packet (little endian): u8 type 1 | u8 channel | u32 ack (the newest frame of the receiver's channel this
-  // sender holds without gaps) | u32 first frame | u8 count | u32 input x count | u32 hash frame | u32 H | u32 S.
+  // sender holds without gaps) | u32 first frame | u8 count | u32 input x count | u32 hash frame | u32 H | u32 S |
+  // u32 the sender's last retrace | i16 the sender's input margin x 64 (P339 time sync, below).
   // Every packet repeats all of the sender's inputs the receiver has not acknowledged (up to 64), so a lost packet
   // costs nothing and only a burst longer than the input delay stalls. Ping: u8 2 | f64 time; pong: u8 3 | f64 time.
+  // P339: a packet leaves as soon as a local input is sampled (pc_net.c, start of each retrace), the same packet goes
+  // out a second time ~8 ms later (one lost packet then costs nothing), and a keep-alive every 30 ms. A packet that
+  // brings the input a stalled game waits for runs the retrace at once (pc_sched.c port_net_kick).
+  // Time sync (GGPO-style frame advantage): the input margin = frames of the other player's input this peer holds
+  // beyond the retrace it has run (time average, ~0.5 s). The peer that is ahead of the other one sees a small margin
+  // (its retraces run early, the inputs arrive just in time or late); the other one sees a large margin. Every 250 ms
+  // the peer whose margin is smaller by more than 0.3 frames asks the game to slow down by about half the difference
+  // (pc_net.c port_net_slow: it delays retraces within the 50 Hz pacing), so both sit in the middle of the input window
+  // and neither stalls. The faster peer never speeds up (catching up in bursts uses up the margin: P338).
   const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
   const CODE_TAG = 'CK1.';
   async function packCode(obj) {
@@ -104,6 +115,7 @@
     pending: [],        // peer inputs that arrived before the session began [f, v]
     peerHash: new Map(), myHashSeen: 0, desync: null,
     rtt: 0, lastRecv: 0, sent: 0, recv: 0, simDropped: 0, left: false,
+    myMargin: 0, peerMargin: 0, peerFrame: 0, marginAt: 0, slowAsked: 0,   // P339 time sync
     on: {},             // event handlers set by main.js: status(text, cls), config(cfg), desync(info), left()
   };
   const emit = (ev, ...a) => { if (T.on[ev]) try { T.on[ev](...a); } catch (e) { N.log('[net] ' + ev + ' handler: ' + e, 'fail'); } };
@@ -191,31 +203,55 @@
     T.pending = []; advanceRecvTop();
     T.lastRecv = performance.now();
     status('waiting for the other player', 'ok');
-    setInterval(pump, 10);
+    N.afterTick = () => sendInputs(performance.now());   // P339
+    setInterval(pump, 5);
+    setInterval(timeSync, 250);
     setInterval(() => { const b = new DataView(new ArrayBuffer(9)); b.setUint8(0, 2); b.setFloat64(1, performance.now(), true); sendIn(b.buffer); }, 1000);
   };
   function advanceRecvTop() { while (N.has(T.recvTop + 1, T.peerCh)) T.recvTop++; }
-  let lastSendTop = 0, lastSendAt = 0;
+  let lastSendTop = 0, lastSendAt = 0, lastPacket = null, lastPacketRepeated = true, lastSyncLog = 0;
+  // one input packet: every local input the peer has not acknowledged, the ack, the newest hash, retrace and margin
+  function sendInputs(now) {
+    const top = N.localTop();
+    const first = Math.max(T.peerAck + 1, N.cfg.delay + 1, top - 63);
+    const count = Math.max(0, top - first + 1);
+    const dv = new DataView(new ArrayBuffer(11 + 4 * count + 18));
+    dv.setUint8(0, 1); dv.setUint8(1, T.myCh); dv.setUint32(2, T.recvTop, true); dv.setUint32(6, first, true); dv.setUint8(10, count);
+    for (let i = 0; i < count; i++) dv.setUint32(11 + 4 * i, N.get(first + i, T.myCh) >>> 0, true);
+    const hs = N.hashes(), h = hs[hs.length - 1] || { f: 0, h: 0, s: 0 }, o = 11 + 4 * count;
+    dv.setUint32(o, h.f, true); dv.setUint32(o + 4, h.h, true); dv.setUint32(o + 8, h.s, true);
+    dv.setUint32(o + 12, N.frame(), true); dv.setInt16(o + 16, Math.max(-32768, Math.min(32767, Math.round(T.myMargin * 64))), true);
+    sendIn(dv.buffer);
+    lastSendTop = top; lastSendAt = now; lastPacket = dv.buffer; lastPacketRepeated = false;
+  }
   function pump() {
     if (T.left) return;
-    const now = performance.now(), top = N.localTop(), f = N.frame();
-    // send when there is a new local input, or every 30 ms anyway (acks, hashes, keep-alive)
-    if (top !== lastSendTop || now - lastSendAt > 30) {
-      const first = Math.max(T.peerAck + 1, N.cfg.delay + 1, top - 63);
-      const count = Math.max(0, top - first + 1);
-      const dv = new DataView(new ArrayBuffer(14 + 4 * count + 12));
-      dv.setUint8(0, 1); dv.setUint8(1, T.myCh); dv.setUint32(2, T.recvTop, true); dv.setUint32(6, first, true); dv.setUint8(10, count);
-      for (let i = 0; i < count; i++) dv.setUint32(11 + 4 * i, N.get(first + i, T.myCh) >>> 0, true);
-      const hs = N.hashes(), h = hs[hs.length - 1] || { f: 0, h: 0, s: 0 }, o = 11 + 4 * count;
-      dv.setUint32(o, h.f, true); dv.setUint32(o + 4, h.h, true); dv.setUint32(o + 8, h.s, true);
-      sendIn(dv.buffer.slice(0, o + 12));
-      lastSendTop = top; lastSendAt = now;
-    }
+    const now = performance.now(), lastRun = N.frame();   // P339 name: lastRun was f
+    // the input margin, time-averaged (exponential, time constant 500 ms)
+    const margin = T.recvTop - lastRun;
+    if (T.marginAt) { const a = Math.min(1, (now - T.marginAt) / 500); T.myMargin += (margin - T.myMargin) * a; } else T.myMargin = margin;
+    T.marginAt = now;
+    if (N.localTop() !== lastSendTop || now - lastSendAt > 30) sendInputs(now);         // new local input (normally sent by
+    else if (!lastPacketRepeated && now - lastSendAt >= 8) { sendIn(lastPacket); lastPacketRepeated = true; }   // afterTick) / keep-alive; the repeat
     checkHashes();
-    const waiting = !N.ready(f + 1);
-    if (T.state !== 'playing' && f > N.cfg.delay + 1) status('playing', 'ok');
-    emit('tick', { frame: f, waiting, rtt: T.rtt, stalls: N.stat(0) });
+    const waiting = !N.ready(lastRun + 1);
+    if (T.state !== 'playing' && lastRun > N.cfg.delay + 1) status('playing', 'ok');
+    emit('tick', { frame: lastRun, waiting, rtt: T.rtt, stalls: N.stat(0), margin: T.myMargin, peerMargin: T.peerMargin, slowed: N.stat(7) });
     if (now - T.lastRecv > 5000 && T.state !== 'idle') peerLost('no data from the other player for 5 s');
+  }
+  // P339 time sync, every 250 ms: the peer that is ahead (smaller input margin) slows down by half the difference
+  function timeSync() {
+    if (T.left || !T.peerFrame) return;
+    const ahead = (T.peerMargin - T.myMargin) / 2;   // frames this peer runs ahead of the middle of the input window
+    T.slowAsked = ahead > 0.3 ? Math.min(15, ahead * 20 * 0.6) : 0;
+    N.M._port_net_slow(T.slowAsked);
+    const now = performance.now();
+    if (now - lastSyncLog > 5000) {
+      lastSyncLog = now;
+      const remoteNow = T.peerFrame + T.rtt / 2 / 20;   // GGPO's estimate of the other peer's retrace now
+      N.log(`[net] sync: retrace ${N.frame()}, peer ~${remoteNow.toFixed(1)}, margin mine ${T.myMargin.toFixed(2)} peer ${T.peerMargin.toFixed(2)}, ` +
+            `slow ${T.slowAsked.toFixed(1)} ms, slowed ${N.stat(7)} ms total, stalled ticks ${N.stat(0)}, rtt ${Math.round(T.rtt)}`);
+    }
   }
   function sendIn(buf) {
     if (!T.inp || T.inp.readyState !== 'open') return;
@@ -237,9 +273,15 @@
       const f = first + i, v = dv.getUint32(11 + 4 * i, true);
       if (N.M && N.base.input !== undefined) N.put(f, ch, v); else T.pending.push([f, v]);
     }
-    if (N.M && N.base.input !== undefined && T.recvTop) advanceRecvTop();
+    if (N.M && N.base.input !== undefined && T.recvTop) {
+      const lastRun = N.frame();
+      advanceRecvTop();
+      if (T.recvTop > lastRun && N.ready(lastRun + 1)) N.M._port_net_kick();   // P339: no need to wait for the next tick
+    }
     const o = 11 + 4 * count, hf = dv.getUint32(o, true);
     if (hf) T.peerHash.set(hf, [dv.getUint32(o + 4, true), dv.getUint32(o + 8, true)]);
+    const peerFrame = dv.getUint32(o + 12, true);   // P339 time sync: newer packets only (they arrive out of order)
+    if (peerFrame >= T.peerFrame) { T.peerFrame = peerFrame; T.peerMargin = dv.getInt16(o + 16, true) / 64; }
   }
   function checkHashes() {
     if (T.desync || !T.peerHash.size) return;
