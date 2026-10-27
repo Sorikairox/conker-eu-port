@@ -68,7 +68,34 @@ def classify(obj, sym):
     return None
 
 
+def syms(map_path):
+    """P339 --syms: the symbol table of the desync report (net.js comparePages): 'W addr size name' for every hashed
+    wasm static symbol (from the map), 'N addr size name' for every N64 data symbol (port/symbols/symbols.tsv, renamed
+    through tools/eu_port/names.tsv) for pages inside the n64_rdram mirror."""
+    from pathlib import Path
+    import re
+    root = Path(__file__).resolve().parents[2]
+    for addr, size, obj, sym in entries(map_path):
+        if size and not classify(obj, sym):
+            print(f'W {addr:X} {size:X} {obj}:{sym}')
+    new = {}
+    names = root / 'tools/eu_port/names.tsv'
+    if names.exists():
+        for line in open(names):
+            f = line.rstrip('\n').split('\t')
+            if len(f) >= 2 and not line.startswith('#'):
+                new[f[0]] = f[1]
+    for line in open(root / 'port/symbols/symbols.tsv'):
+        f = line.rstrip('\n').split('\t')
+        if line.startswith('#') or len(f) < 4 or f[3] in ('func', 'none') or not re.fullmatch(r'80[0-7][0-9A-Fa-f]{5}', f[1]):
+            continue
+        size = int(f[2], 16) if re.fullmatch(r'[0-9A-Fa-f]+', f[2] or '') else 0
+        print(f'N {f[1].upper()} {size:X} {new.get(f[0], f[0])}')
+
+
 def main():
+    if len(sys.argv) == 3 and sys.argv[1] == '--syms':
+        return syms(sys.argv[2])
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     n = total = 0

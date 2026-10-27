@@ -220,8 +220,83 @@
       emit('config', { mask: m.mask, local: 1 << m.ch, delay: m.delay, autoDelay: m.autoDelay, ping: m.ping, hashEvery: m.hashEvery, options: m.options, eeprom: m.eeprom ? unb64(m.eeprom) : null });
     } else if (m.t === 'refuse') status('the host refused: ' + m.why, 'bad');
     else if (m.t === 'bye') peerLost('the other player left');
-    else if (m.t === 'desync') emit('desync', Object.assign({ remote: true }, m));
+    else if (m.t === 'desync') { emit('desync', Object.assign({ remote: true }, m)); sendPages(m.frame); }
+    else if (m.t === 'pages') comparePages(m);
   }
+  // ---- P339 desync report: both peers swap the per-page hashes of the desync retrace (pc_nethash.c keeps the last 16
+  // hash points: 4 KB pages of the static region + one hash per game-thread stack) and name the first page that
+  // differs, with the symbols in it (conker_netsyms.txt from port/tools/net_regions.py --syms: wasm static symbols
+  // and, inside the n64_rdram mirror, the game's N64 data symbols with their current names).
+  const pagesSent = new Set();
+  function pageVector(frame) {
+    const p = N.M._port_net_page_hashes(frame) >>> 0;
+    if (!p) return null;
+    const n = N.M._port_net_page_info(0) + N.M._port_net_page_info(1);
+    return new Uint32Array(N.M.HEAPU8.buffer.slice(p, p + 4 * n));
+  }
+  function sendPages(frame) {
+    if (!frame || pagesSent.has(frame)) return;
+    pagesSent.add(frame);
+    const v = pageVector(frame);
+    if (!v) { N.log(`[net] desync report: the page hashes of retrace ${frame} are no longer kept`, 'fail'); return; }
+    sendCtl({ t: 'pages', frame, h: b64(new Uint8Array(v.buffer)) });
+  }
+  let symTable = null;
+  async function symbols() {
+    if (!symTable) {
+      symTable = { W: [], N: [] };
+      try {
+        for (const l of (await (await fetch('conker_netsyms.txt')).text()).split('\n')) {
+          const f = l.split(' ');
+          if (f.length >= 4 && symTable[f[0]]) symTable[f[0]].push([parseInt(f[1], 16), parseInt(f[2], 16), f[3]]);
+        }
+      } catch (e) { /* no table: addresses only */ }
+      for (const k of ['W', 'N']) symTable[k].sort((x, y) => x[0] - y[0]);
+    }
+    return symTable;
+  }
+  const hex = (x) => (x >>> 0).toString(16).toUpperCase().padStart(8, '0');
+  async function comparePages(m) {
+    const mine = pageVector(m.frame);
+    sendPages(m.frame);   // the other side needs mine too
+    if (!mine) return;
+    const theirs = new Uint32Array(unb64(m.h).buffer), pages = N.M._port_net_page_info(0), slots = N.M._port_net_page_info(1);
+    const diff = [], stacks = [];
+    for (let i = 0; i < pages; i++) if (mine[i] !== theirs[i]) diff.push(i);
+    for (let i = 0; i < slots; i++) if (mine[pages + i] !== theirs[pages + i]) stacks.push(i);
+    const base = N.M._port_net_page_info(2) >>> 0, size = N.M._port_net_page_info(3), rdram = N.M._port_net_page_info(4) >>> 0;
+    let where = 'no static page differs';
+    if (diff.length) {
+      const a = base + diff[0] * size, syms = await symbols();
+      let list, label;
+      if (a >= rdram && a < rdram + 0x800000) {
+        const n64 = 0x80000000 + (a - rdram);
+        label = `n64_rdram N64 ${hex(n64)}..${hex(n64 + size - 1)}`;
+        list = syms.N.filter(([s, l]) => s < n64 + size && s + Math.max(l, 1) > n64);
+      } else {
+        label = `wasm ${hex(a)}..${hex(a + size - 1)}`;
+        list = syms.W.filter(([s, l]) => s < a + size && s + Math.max(l, 1) > a);
+      }
+      where = `first different page ${diff[0]} (${label}${list.length ? `, ${list.length} symbol(s) in it: ` + list.slice(0, 6).map((x) => x[2]).join(', ') + (list.length > 6 ? ', …' : '') : ''})`;
+    }
+    const report = { frame: m.frame, where, pages: diff.length, firstPages: diff.slice(0, 8), stacks };
+    T.desyncReport = report;
+    N.log(`[net] DESYNC REPORT retrace ${m.frame}: ${where}; ${diff.length} page(s) differ` +
+          `${diff.length ? ' [' + diff.slice(0, 8).join(' ') + (diff.length > 8 ? ' …' : '') + ']' : ''}, thread stacks ${stacks.length ? stacks.join(' ') : 'none'}`, 'fail');
+    emit('desyncReport', report);
+  }
+
+  // ---- P339: a hidden page's timers (the 4 ms main loop, the pump) are throttled to ~1 Hz by Chrome, even with a live
+  // WebRTC connection, and the other player would wait. While hidden, a dedicated Worker posts a message every 4 ms
+  // (worker timers are not throttled); each one runs a game tick (pc_sched.c port_net_kick) and the pump.
+  let hiddenTicker = null, hiddenTicks = 0;
+  N.background = function (hidden) {
+    if (hidden && !hiddenTicker) {
+      hiddenTicker = new Worker(URL.createObjectURL(new Blob(['setInterval(() => postMessage(0), 4);'], { type: 'text/javascript' })));
+      hiddenTicker.onmessage = () => { hiddenTicks++; N.M._port_net_kick(); pump(); };
+    } else if (!hidden && hiddenTicker) { hiddenTicker.terminate(); hiddenTicker = null; }
+    N.log(`[net] page ${hidden ? 'hidden: the game ticks from a worker timer' : 'visible again'} (retrace ${N.frame()}, ${hiddenTicks} worker ticks so far)`);
+  };
 
   // ---- session (after N.begin): the pump sends inputs, pings, checks for a lost peer
   N.startTransport = function () {
@@ -233,6 +308,7 @@
     N.afterTick = () => sendInputs(performance.now());   // P339
     setInterval(pump, 5);
     setInterval(timeSync, 250);
+    if (document.hidden) N.background(true);   // P339: the page was hidden before the session started
     setInterval(() => { const b = new DataView(new ArrayBuffer(9)); b.setUint8(0, 2); b.setFloat64(1, performance.now(), true); sendIn(b.buffer); }, 1000);
   };
   function advanceRecvTop() { while (N.has(T.recvTop + 1, T.peerCh)) T.recvTop++; }
@@ -320,6 +396,7 @@
         N.log(`[net] DESYNC at retrace ${h.f}: mine ${h.h.toString(16)} ${h.s.toString(16)}, peer ${p[0].toString(16)} ${p[1].toString(16)}`, 'fail');
         sendCtl({ t: 'desync', frame: h.f, mine: [h.h, h.s], theirs: p });
         emit('desync', T.desync);
+        sendPages(h.f);   // P339: the per-page hashes, to name where the two games differ
         return;
       }
       if (h.f > T.myHashSeen) T.myHashSeen = h.f;

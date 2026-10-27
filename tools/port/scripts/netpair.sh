@@ -7,6 +7,9 @@
 #   env: NETSIM_HOST / NETSIM_GUEST   e.g. lat:60,jit:20,loss:5 (net.js ?netsim: delay / reorder / drop sent packets)
 #        NETD=D                       input delay (host, default 3)       GUEST_LEAVE=1  the guest leaves at the end
 #        UI=1  codes through the Online panel's buttons     SHOTS="60 150"  screenshots of both windows
+#        DESYNC_AT=N  test: the guest flips one byte of game memory at retrace N (?netdesync, desync report);
+#                     DESYNC_OFF=decimal offset in n64_rdram (default 0x200000)
+#        HIDE=AT:FOR  the guest's page is hidden from AT s for FOR s     REALBG=1  normal background throttling
 #        PLAY_SECS=N                  seconds of free play in the pad scripts (default 20)
 # Logs: port_work/${NETDIR:-p339}/NAME/{host,guest}.log; [nethash] lines compared with tools/port/nethash_diff.py.
 cd ~/conker-wt/web || exit 1
@@ -22,7 +25,7 @@ trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
 sleep 1.5
 B="http://localhost:$PORT/app/index.html?romurl=../dev/rom.z64&mute=1&p103boot=1&nethash=1&netscript=1&netpanel=1&padf=$PADF0&padf1=$PADF1${NETD:+&netd=$NETD}"
 s=$(date +%s)
-node tools/port/scripts/netpair.js "$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}" "$B${NETSIM_GUEST:+&netsim=$NETSIM_GUEST}" "$T" "$D" | tee "$D/driver.out" | tail -5
+node tools/port/scripts/netpair.js "$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}" "$B${NETSIM_GUEST:+&netsim=$NETSIM_GUEST}${DESYNC_AT:+&netdesync=$DESYNC_AT}${DESYNC_OFF:+&netdesyncoff=$DESYNC_OFF}" "$T" "$D" | tee "$D/driver.out" | tail -5
 echo "== $1 (${T}s, $(( $(date +%s) - s ))s wall)"
 for p in host guest; do
   L=$D/$p.log

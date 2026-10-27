@@ -251,10 +251,46 @@ EMSCRIPTEN_KEEPALIVE int port_net_region(int i, int want_len) {
 
 /* P338: the online session's desync check (pc_net.c port_net_retrace_done, every K retraces): the same H / S hashes as
  * ?nethash, folded to 32 bits each. */
+/* P339 desync report: every session hash also keeps the per-page hashes of the static region (4 KB pages, folded to
+ * 32 bits) and one hash per game-thread stack, for the last NET_PAGE_RING hash points. After a desync both peers swap
+ * the vector of the reported retrace (net.js) and name the first page that differs (the symbols in it come from
+ * conker_netsyms.txt, port/tools/net_regions.py --syms). */
+#define NET_PAGE_RING 16
+#define NET_STACK_SLOTS 32
+static uint32_t *net_page_ring;                    /* [NET_PAGE_RING][net_npages + NET_STACK_SLOTS] */
+static uint32_t net_page_ring_frame[NET_PAGE_RING];
+static unsigned net_page_ring_next;
 void port_net_hash_now(uint32_t *hash_static, uint32_t *hash_stacks) {
     unsigned stk;
     if (!net_page_hash) net_build_segments();
     uint64_t h = net_hash_static(), s = net_hash_stacks(&stk);
     *hash_static = (uint32_t)(h ^ (h >> 32));
     *hash_stacks = (uint32_t)(s ^ (s >> 32));
+    if (!net_page_ring) net_page_ring = calloc((size_t)NET_PAGE_RING * (net_npages + NET_STACK_SLOTS), sizeof *net_page_ring);
+    if (!net_page_ring) return;
+    unsigned slot = net_page_ring_next++ % NET_PAGE_RING;
+    uint32_t *row = net_page_ring + (size_t)slot * (net_npages + NET_STACK_SLOTS);
+    for (unsigned pg = 0; pg < net_npages; pg++) row[pg] = (uint32_t)(net_page_hash[pg] ^ (net_page_hash[pg] >> 32));
+    void *cs, *as; unsigned cl, al;
+    for (int i = 0; i < NET_STACK_SLOTS; i++) {
+        uint64_t t = 0;
+        if (port_sched_stack(i, &cs, &cl, &as, &al) >= 0 && cs)
+            t = net_mix(net_mix(0x13198A2E03707344ull ^ (uint64_t)i, cs, (const unsigned char *)cs + cl), as, (const unsigned char *)as + al);
+        row[net_npages + i] = (uint32_t)(t ^ (t >> 32));
+    }
+    net_page_ring_frame[slot] = port_frame_count;
+}
+/* the page / stack hashes of a retrace still in the ring (u32 [pages + 32 stacks]), or 0 */
+EMSCRIPTEN_KEEPALIVE uint32_t *port_net_page_hashes(unsigned retrace) {
+    for (int i = 0; i < NET_PAGE_RING; i++)
+        if (net_page_ring && net_page_ring_frame[i] == retrace) return net_page_ring + (size_t)i * (net_npages + NET_STACK_SLOTS);
+    return 0;
+}
+/* 0 = pages, 1 = stack slots, 2 = wasm address of page 0 (__global_base), 3 = page size, 4 = wasm address of n64_rdram */
+EMSCRIPTEN_KEEPALIVE uintptr_t port_net_page_info(int which) {
+    extern unsigned char n64_rdram[];
+    switch (which) {
+    case 0: return net_npages; case 1: return NET_STACK_SLOTS; case 2: return (uintptr_t)&__global_base;
+    case 3: return NET_PAGE; default: return (uintptr_t)n64_rdram;
+    }
 }

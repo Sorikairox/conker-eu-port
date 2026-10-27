@@ -112,7 +112,7 @@ $(B)/census/files.tsv: FORCE
 	@mkdir -p $(@D)
 	cd .. && python3 port/tools/census.py --incremental
 
-game: $(WEB)/conker.js $(WEB)/conker_netx.txt
+game: $(WEB)/conker.js $(WEB)/conker_netx.txt $(WEB)/conker_netsyms.txt
 $(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS)
 	@mkdir -p $(@D)
 	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS) -o $@ \
@@ -124,6 +124,9 @@ $(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS)
 # P338: its own rule, so an edit of net_regions.py alone rebuilds it
 $(WEB)/conker_netx.txt: $(WEB)/conker.js tools/net_regions.py
 	python3 tools/net_regions.py $(B)/conker.map > $@
+# P339: symbol table of the online desync report (hashed wasm symbols + N64 data symbols)
+$(WEB)/conker_netsyms.txt: $(WEB)/conker.js tools/net_regions.py ../port/symbols/symbols.tsv ../tools/eu_port/names.tsv
+	python3 tools/net_regions.py --syms $(B)/conker.map > $@
 
 # ---- page
 web: $(WEB)/index.html $(WEB)/main.js $(WEB)/net.js

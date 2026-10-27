@@ -488,13 +488,15 @@ void port_run(port_boot_fn boot) {
     { void port_net_init(void); port_net_init(); }   /* P337 online-multiplayer harness flags (pc_nethash.c) */
     boot();
     in_main_loop = 1;
-    emscripten_set_main_loop(frame, 0, 0);
+    /* P339: an online session's loop is a 4 ms timer from the first tick (250 per second, pc_net.c section 4). Switching
+     * the timing after a requestAnimationFrame start waits for that first animation frame, which a covered / hidden
+     * window never gets: its game stayed at retrace 0 */
+    emscripten_set_main_loop(frame, port_net_on ? 250 : 0, 0);
     /* ?timer=1: drive frames from setTimeout (headless Chrome's virtual time throttles rAF); P147: ?timer=N (N > 1) uses
      * an N ms period, e.g. 7 to test the 50 Hz VI pacing against a ~144 Hz main loop */
     if (EM_ASM_INT({ return typeof location !== 'undefined' ? 1 : 0; })) {
         int tm = port_flag("timer");
         if (tm > 0) emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, tm == 1 ? 16 : tm);
     }
-    { void port_net_main_loop_timing(void); port_net_main_loop_timing(); }   /* P339: an online session ticks on a 4 ms timer */
     /* main() returns; the runtime stays alive (EXIT_RUNTIME=0) and the main loop drives everything */
 }

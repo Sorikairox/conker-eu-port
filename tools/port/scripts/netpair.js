@@ -3,6 +3,9 @@
 // same calls as the Online panel buttons; the copy-paste codes are passed by this driver).
 //   node tools/port/scripts/netpair.js URL_HOST URL_GUEST SECS OUTDIR
 //   env UI=1: exchange the codes through the Online panel's buttons and text boxes; SHOTS="S1 S2": screenshots (s)
+//   P339: HIDE=AT:FOR hides the guest's page at AT s for FOR s (window minimised; if the page still reports visible,
+//   another tab is opened in front of it, as when the player switches tabs); REALBG=1 runs Chrome without the
+//   --disable-background* switches, so hidden-page timer throttling is as in a normal Chrome
 // Logs: OUTDIR/host.log, OUTDIR/guest.log (the page console). Prints a summary of the [net] lines.
 const { spawn } = require('child_process');
 const fs = require('fs'), os = require('os'), path = require('path');
@@ -10,10 +13,10 @@ const [urlHost, urlGuest, secs = '60', out = '.'] = process.argv.slice(2);
 const CH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'netpair-'));
 const port = 9300 + (process.pid % 500);
+const bgSwitches = process.env.REALBG ? [] : ['--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'];
 const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debugging-port=${port}`, '--use-angle=metal',
   '--mute-audio', '--autoplay-policy=no-user-gesture-required', '--window-size=1500,900',
-  '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
-  'about:blank'], { stdio: 'ignore' });
+  ...bgSwitches, 'about:blank'], { stdio: 'ignore' });
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
 setTimeout(() => { console.log('netpair: timeout'); done(2); }, (+secs + 180) * 1000);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -40,12 +43,13 @@ async function connect(wsUrl, logFile) {
   for (let i = 0; i < 50 && !ver; i++) { await sleep(300); try { ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json(); } catch (e) {} }
   if (!ver) { console.log('netpair: no DevTools'); return done(2); }
   const br = await connect(ver.webSocketDebuggerUrl);
-  const pages = {};
+  const pages = {}, targetIds = {};
   for (const [name, url] of [['host', urlHost], ['guest', urlGuest]]) {
     fs.writeFileSync(path.join(out, name + '.log'), '');
     const t = await br.call('Target.createTarget', { url: 'about:blank', newWindow: true, width: 1500, height: 900 });
     const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
     const pg = list.find((x) => x.id === t.result.targetId);
+    targetIds[name] = t.result.targetId;
     pages[name] = await connect(pg.webSocketDebuggerUrl, path.join(out, name + '.log'));
     await pages[name].call('Runtime.enable', {});
     await pages[name].call('Page.navigate', { url });
@@ -68,11 +72,36 @@ async function connect(wsUrl, logFile) {
     answer = await guest.ev(`__online.join(${JSON.stringify(offer)})`);
     await host.ev(`__online.accept(${JSON.stringify(answer)})`);
   }
+  console.log(`netpair: page visibility host ${await host.ev('document.visibilityState')} guest ${await guest.ev('document.visibilityState')}`);
   console.log(`netpair: offer ${offer.length} chars, answer ${answer.length} chars, codes exchanged in ${Date.now() - t0} ms`);
+  const [hideAt, hideFor] = (process.env.HIDE || '').split(':').map(Number);
+  let hideState = 0, coverId = null, winId = null;
+  const hideGuest = async (on) => {   // P339: minimise the guest's window (or cover its tab), then restore
+    if (!winId) winId = (await br.call('Browser.getWindowForTarget', { targetId: targetIds.guest })).result?.windowId;
+    if (on) {
+      await br.call('Browser.setWindowBounds', { windowId: winId, bounds: { windowState: 'minimized' } });
+      await sleep(500);
+      if (await guest.ev('document.visibilityState') !== 'hidden') {
+        coverId = (await br.call('Target.createTarget', { url: 'about:blank', windowId: winId })).result?.targetId;
+        if (coverId) await br.call('Target.activateTarget', { targetId: coverId });
+        await sleep(500);
+      }
+    } else {
+      if (coverId) { await br.call('Target.closeTarget', { targetId: coverId }); coverId = null; }
+      await br.call('Browser.setWindowBounds', { windowId: winId, bounds: { windowState: 'normal' } });
+      await br.call('Target.activateTarget', { targetId: targetIds.guest });
+      await sleep(500);
+    }
+    console.log(`netpair ${Math.round((Date.now() - t1) / 1000)} s: guest page ${on ? 'hidden' : 'shown again'}` +
+      `${on && coverId ? ' (a tab in front of it)' : ''}, visibilityState ${await guest.ev('document.visibilityState')}, frame ${await guest.ev('__online.stats().frame')}`);
+  };
   const t1 = Date.now(), speed = [];   // P339: [seconds, host / guest frame, host / guest retraces that waited, host / guest ms waited] every 10 s
   while (Date.now() - t1 < +secs * 1000) {
     await sleep(10000);
     const s = await Promise.all([host.ev('__online.stats()'), guest.ev('__online.stats()')]).catch((e) => [String(e), '']);
+    const el = (Date.now() - t1) / 1000;
+    if (hideAt && hideState === 0 && el >= hideAt) { hideState = 1; await hideGuest(true); }
+    else if (hideAt && hideState === 1 && el >= hideAt + hideFor) { hideState = 2; await hideGuest(false); }
     if (s[0] && s[1] && s[0].frame) speed.push([(Date.now() - t1) / 1000, s[0].frame, s[1].frame, s[0].waits, s[1].waits, s[0].waitMs, s[1].waitMs]);
     console.log(`netpair ${Math.round((Date.now() - t1) / 1000)} s: host ${JSON.stringify(s[0])}  guest ${JSON.stringify(s[1])}`);
     for (const t of (process.env.SHOTS || '').split(' ').filter(Boolean))   // SHOTS="60 120": screenshots of both windows

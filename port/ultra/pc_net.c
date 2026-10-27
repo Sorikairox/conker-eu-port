@@ -51,6 +51,8 @@ static const char *const net_flag_whitelist[] = {
     "p103boot",    /* mode / level change log */
     "padlog",      /* pad log line limit */
     "netscript",   /* P338 test session: the local input comes from the ?padf scripts */
+    "netdesync",   /* P339 test: flip one byte of game memory at that retrace (desync report test) */
+    "netdesyncoff", /* P339 test: ... at this offset in n64_rdram (decimal; default 0x200000) */
     0 };
 int port_net_flag_allowed(const char *name) {
     for (int i = 0; net_flag_whitelist[i]; i++)
@@ -84,7 +86,6 @@ static unsigned net_delay = 3;    /* D */
 static unsigned net_drop_from[4]; /* a lost player's channel reads neutral from this frame on (0 = not dropped) */
 static int net_hash_every = 10;
 static int net_script;            /* ?netscript=1: local input from the ?padf script (tests) */
-#define NET_TICK_MS 4             /* P339: the session's main-loop timer period (section 4, time sync) */
 
 void port_padf_value(int ch, unsigned frame, int *buttons, int *stick_x, int *stick_y);   /* pc_pif.c */
 void port_pads_set_mask(int mask);                                                         /* pc_pif.c */
@@ -121,14 +122,11 @@ EMSCRIPTEN_KEEPALIVE uintptr_t port_net_addr(int which) {
     }
 }
 EMSCRIPTEN_KEEPALIVE unsigned port_net_frame(void) { return port_frame_count; }   /* the last retrace run */
-/* a hidden tab gets no requestAnimationFrame: the page switches the main loop to a 10 ms timer while hidden, so the
- * session does not stall for the other player (browsers may still slow timers in background tabs) */
-EMSCRIPTEN_KEEPALIVE void port_net_background(int hidden) {
-    (void)hidden;   /* P339: the session's loop is a timer whether the tab is visible or not (section 4, time sync) */
-    emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, NET_TICK_MS);
-}
-/* pc_sched.c port_run, after the main loop is set up: a session ticks on a 4 ms timer (see the time sync below) */
-void port_net_main_loop_timing(void) { if (port_net_on) emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, NET_TICK_MS); }
+/* P339: a hidden page (another tab in front, window minimised or covered) gets its timers throttled to about one
+ * wake-up per second, which stalled the session for the other player (tested: the 4 ms timer loop ran ~1-2 Hz).
+ * net.js N.background then ticks the game from a dedicated Worker (its timers are not throttled) through
+ * pc_sched.c port_net_kick. (P338's port_net_background, a 10 ms main-loop timer while hidden, is gone.) */
+
 /* the page's loopback peer and tests: the ?padf script's packed input of a channel at a frame */
 EMSCRIPTEN_KEEPALIVE uint32_t port_net_script_input(int ch, unsigned frame) {
     int b, x, y;
@@ -162,7 +160,7 @@ void port_net_stalled(int slots) {
  * calls port_net_slow(ms): frame() then takes that much wall time out of its 50 Hz backlog, at most NET_SLOW_MAX_RATE
  * of the elapsed wall time (8 %: 1.6 ms per retrace), until both peers sit in the middle of the input window.
  * Only WHEN a retrace runs changes, never what it computes, so the session stays deterministic.
- * The session's main loop runs on a 4 ms timer instead of requestAnimationFrame (port_net_main_loop_timing): retraces
+ * The session's main loop runs on a 4 ms timer instead of requestAnimationFrame (pc_sched.c port_run): retraces
  * then start within ~4 ms of their 50 Hz time and a stalled peer runs the retrace ~4 ms after the input arrives, not
  * on the next display frame (16.7 ms at 60 Hz). With rAF each stall delayed this peer's next input sample by a display
  * frame, which made the other peer stall in turn (P338: 79 % speed at 40 to 60 ms one way with D 3). */
@@ -208,6 +206,18 @@ void port_net_fill_pads(int32_t *pads) {
 }
 /* end of retrace N: the desync-check hash every K retraces */
 void port_net_retrace_done(void) {
+    static int desync_at = -1, desync_off;   /* P339 test (?netdesync=N[&netdesyncoff=OFS], one peer only): */
+    if (desync_at < 0) {                     /* a one-byte divergence right before hash N */
+        desync_at = port_flag("netdesync");
+        desync_off = port_flag("netdesyncoff");
+        if (desync_off <= 0 || desync_off >= 0x800000) desync_off = 0x200000;
+    }
+    if (desync_at > 0 && port_frame_count == (unsigned)desync_at) {
+        extern unsigned char n64_rdram[];
+        n64_rdram[desync_off] ^= 1;
+        port_log("[net] test: flipped one byte of game memory (n64_rdram + 0x%X, N64 %08X) at retrace %u\n", desync_off,
+                 0x80000000u + (unsigned)desync_off, port_frame_count);
+    }
     if (net_hash_every <= 0 || port_frame_count % (unsigned)net_hash_every) return;
     uint32_t *e = net.hash[(port_frame_count / (unsigned)net_hash_every) % NET_HASHES];
     port_net_hash_now(&e[1], &e[2]);

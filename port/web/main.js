@@ -610,9 +610,9 @@ function applyPause() {
 function setPaused(p) { userPaused = p; applyPause(); }
 $('pause').onclick = () => setPaused(!userPaused);
 document.addEventListener('visibilitychange', () => {
-  if (netCfg && M && M._port_net_background) {   // P338: never pause a session; a hidden tab gets no animation frames, so the
-    M._port_net_background(document.hidden ? 1 : 0);   // main loop switches to a timer while hidden
-    log(`[net] tab ${document.hidden ? 'hidden: timer main loop' : 'visible: animation-frame main loop'}`);
+  if (netCfg && window.PortNet && PortNet.M) {   // P338: never pause a session; P339: net.js ticks the game from a worker
+    PortNet.background(document.hidden);          // while the page is hidden (hidden pages' timers are throttled to ~1 Hz)
+    if (hiddenPaused) { hiddenPaused = false; applyPause(); }
     return;
   }
   if (Q.get('nohidepause')) return;  // dev flag: keep running in a background tab
@@ -715,7 +715,7 @@ window.__netdump = {
 // of a session in one browser). Host = controller 1, guest = controller 2. The host dictates the session: game options,
 // its EEPROM image (user save data, never ROM bytes), the input delay. Both peers check build id (SHA-256 of
 // conker.wasm) and ROM SHA-256 before anything starts. Test aids: ?netd=D input delay (host), ?neteep=blank.
-const netEvents = { status: [], tick: [], desync: [], left: [] };   // the Online panel subscribes here
+const netEvents = { status: [], tick: [], desync: [], desyncReport: [], left: [] };   // the Online panel subscribes here
 const sha256hex = async (buf) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', buf)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function netLoad() {
   if (!window.PortNet) await loadScript('net.js');
@@ -766,9 +766,14 @@ netEvents.tick.push((t) => {   // ~100 Hz from net.js
   }
 });
 netEvents.desync.push((d) => {
-  const e = $('net-desync'); e.hidden = false;
+  const e = $('net-desync'); if (!e.hidden) return;   // P339: reported once (both peers detect it)
+  e.hidden = false;
   e.textContent = `Desync at retrace ${d.frame}: this game ${d.mine.map((x) => (x >>> 0).toString(16)).join(' ')}, the other ${d.theirs.map((x) => (x >>> 0).toString(16)).join(' ')}. ` +
     'The two games no longer show the same thing; please report it (open Debug for the log).';
+});
+netEvents.desyncReport.push((r) => {   // P339: where the two games differ (net.js comparePages)
+  const e = $('net-desync'); e.hidden = false;
+  e.textContent += ` Where: ${r.where}; ${r.pages} memory page(s) and ${r.stacks.length} thread stack(s) differ.`;
 });
 netEvents.left.push(() => { $('netwait').hidden = true; $('net-leave').hidden = true; });
 window.__online = {
@@ -801,7 +806,7 @@ window.__online = {
     const hs = on ? PortNet.hashes() : [], h = hs[hs.length - 1];
     return { state: t.state, frame: on ? PortNet.frame() : 0, rtt: Math.round(t.rtt), stalledTicks: on ? PortNet.stat(0) : 0,
       stalledSlots: on ? PortNet.stat(1) : 0, sent: t.sent, recv: t.recv, simDropped: t.simDropped, hashChecked: t.myHashSeen,
-      lastHash: h ? `${h.f}:${h.h.toString(16)}:${h.s.toString(16)}` : '', desync: t.desync, left: t.left,
+      lastHash: h ? `${h.f}:${h.h.toString(16)}:${h.s.toString(16)}` : '', desync: t.desync, desyncReport: t.desyncReport || null, left: t.left,
       slowedMs: on ? PortNet.stat(7) : 0, waits: on ? PortNet.stat(8) : 0, waitMs: on ? PortNet.stat(9) : 0, margin: +t.myMargin.toFixed(2), peerMargin: +t.peerMargin.toFixed(2) };   // P339 time sync
   },
 };
@@ -860,6 +865,8 @@ async function start(app) {
   if (app === 'game') status('running', 'ok');
   if (netCfg && netCfg.loop) PortNet.loopback(netCfg.loop);   // P338 test peer
   else if (netCfg) PortNet.startTransport();                    // P338 online: send / receive inputs
+  if (netCfg && hiddenPaused) { hiddenPaused = false; applyPause(); }   // P339: the page was hidden before the session
+                                                                        // (a covered window): a session never pauses
   applyPause();
   $('canvas').focus();
   // &audtest=HEX[:FRAMES]: n_audio synth + audio HLE test (port/audio/aud_test.c);
