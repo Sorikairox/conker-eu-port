@@ -400,14 +400,21 @@ extern int port_paused; /* P27: pc_os.c port_set_paused */
 extern int port_net_hooks;            /* P337 pc_nethash.c: per-retrace hash / measurements (?nethash, ?netprof, ?netsnap) */
 void port_net_retrace_begin(void);
 void port_net_retrace_end(void);
+extern int port_net_on;               /* P338 pc_net.c: online lockstep session */
+int port_net_ready(unsigned f);
+void port_net_stalled(int slots);
+void port_net_retrace_start(void);
+void port_net_retrace_done(void);
 static void retrace(void) {
     port_frame_count++;
+    if (port_net_on) port_net_retrace_start();   /* P338: sample the local input for retrace N + D */
     if (port_frame_hook) port_frame_hook();
     if (port_net_hooks) port_net_retrace_begin();
     port_vi_retrace();
     if (frame_mq_init) osSendMesg(&frame_mq, NULL, OS_MESG_NOBLOCK);
     port_sched_run();
     if (port_net_hooks) port_net_retrace_end();
+    if (port_net_on) port_net_retrace_done();    /* P338: desync-check hash every K retraces */
     { extern void port_pace_report(void) __attribute__((weak)); if (port_pace_report) port_pace_report(); } /* P147 ?p147pace */
 }
 
@@ -432,7 +439,9 @@ static void frame(void) {
      * so Chrome route runs keep their real-time screenshot timing and still replay identically (?det=1 = one retrace per tick) */
     if (mode < 0) mode = port_flag("det") == 1 || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
     if (port_paused) { last = 0; return; }
-    if (!mode) { retrace(); port_video_frame(); return; }
+    /* P338 online: the frame barrier. Retrace N runs only when every peer's input for N is in the ring (pc_net.c);
+     * otherwise the tick presents the last frame and the backlog waits (clamped below). */
+    if (!mode) { if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled(1); return; } retrace(); port_video_frame(); return; }
     double now = emscripten_get_now(), per = port_vi_period_ms();
     if (!last) { last = now - per; acc = 0; }  /* first tick / after a pause: one retrace, no catch-up */
     double dt = now - last; last = now;
@@ -440,6 +449,7 @@ static void frame(void) {
     acc += dt;
     int n = 0;
     while (acc >= per && n < VI_MAX_STEPS && !port_paused) {   /* P337: ?nethashstop pauses right after its retrace */
+        if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled((int)(acc / per)); break; }   /* P338 */
         retrace(); n++; acc -= per;
         if (emscripten_get_now() - now > VI_TICK_MS) break;
     }

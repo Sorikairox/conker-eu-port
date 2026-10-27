@@ -12,7 +12,7 @@ D=port_work/p337/$1; rm -rf "$D"; mkdir -p "$D"
 T=${2:-200}
 if [ -z "${PADF0:-}" ]; then eval "$(python3 tools/port/scripts/netmp_pads.py)"; fi
 S=""; for t in ${SHOTS:-}; do S="$S${S:+; }$t:shot:$D/s_${t}ms.png"; done
-Q="app=game&netdet=1&padmask=F&p103boot=1&padf=$PADF0&padf1=$PADF1&padf2=$PADF2&padf3=$PADF3${3:-}"
+Q="app=game&netdet=1&padmask=${PADMASK:-F}&p103boot=1&padf=$PADF0&padf1=$PADF1&padf2=$PADF2&padf3=$PADF3${3:-}"
 s=$(date +%s)
 PROBE_LOG=$D/chrome.log PROBE_ANGLE=metal PROBE_NOAUDIO=1 PROBE_SAMPLES=0 PROBE_STEPS="$S" PROBE_THROTTLE=${THROTTLE:-} \
   PROBE_DUMP=${DUMP:+$D/mem.bin} port/web/audprobe.sh "$Q" "$T" > "$D.out" 2>&1

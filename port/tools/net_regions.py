@@ -16,6 +16,7 @@ hashed, except what is port-only and may legitimately differ between peers:
              scheduler context: its stack depth depends on whether rAF or setTimeout called frame()), pc_video.o (GL
              context handle; port_gfx_frame_tasks resets per presented frame, i.e. per rAF tick)
   harness    pc_net.o, pc_nethash.o (this hash itself), pc_pif.o padf* / padrec* (each peer's script text and table)
+             p205_obj.o go_n / p240_steer.cfg (test autopilots, set by the ?padf path only; P338)
   libc       dlmalloc state (_gm_, mparams: mparams.magic is seeded from time()), sbrk_val (heap top: moves with page /
              renderer allocations), stdio buffers (log text)
   renderer   pc_os.o port_vi_view.full (?p147vifull cache, first read by the gfx task)
@@ -30,6 +31,7 @@ EXCLUDE_SYM = {
     'pc_sched.o': {'frame.last': 'wall time', 'frame.acc': 'wall time', 'frame.mode': 'pacing mode', 'slow_frames': 'wall time',
                    'budget_frames': 'wall time', 'sched_astack': 'browser context', 'sched_fiber': 'browser context',
                    'fiber_cstack_pool': 'hashed as stacks', 'fiber_astack_pool': 'hashed as stacks'},
+    'p205_obj.o': {'go_n': 'test aid', 'p240_steer.cfg': 'test aid'},   # P338: ?p205goto / ?p240steer autopilot state (lazy flag reads)
     'pc_video.o': None,   # whole object
     'dlmalloc.o': None, 'sbrk.o': None, 'stdout.o': None, 'stderr.o': None, 'ofl.o': None,
 }

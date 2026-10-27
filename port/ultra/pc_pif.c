@@ -48,6 +48,8 @@ int port_pad0_held(void) { return (int)pad0_delivered; }
  * writes no pad state at all, so a channel without a script reads neutral input, and the mask defaults to 1 (pad 1). */
 extern unsigned port_frame_count;
 int port_net_det(void);
+extern int port_net_on;                       /* P338 pc_net.c: an online (lockstep) session runs */
+void port_net_fill_pads(int32_t *pads);       /* P338 pc_net.c: buttons / sticks of this retrace from the input ring */
 EM_JS(int, __port_padf_char, (int ch, int i), {
     var v = null, k = ch ? 'padf' + ch : 'padf';
     if (typeof location !== 'undefined') { var m = new RegExp('[?&]' + k + '=([^&]*)').exec(location.search); if (m) v = decodeURIComponent(m[1]); }
@@ -93,8 +95,23 @@ static void pads_apply_mask(void) {
     int m = padmask_get();
     if (m >= 0) for (int ch = 0; ch < MAXCONTROLLERS; ch++) port_pads[ch][0] = (m >> ch) & 1;
 }
-static void padf_apply(void) {
+static void padf_parse_all(void) {
     if (padf_n < 0) { padf_n = 0; for (int ch = 0; ch < MAXCONTROLLERS; ch++) padf_parse_channel(ch); }
+}
+/* P338: random access into a channel's ?padf script for the online session (pc_net.c): the input that ?padf would
+ * deliver at retrace `frame` (neutral before the first entry and for an F:P entry). Used as the local input source of a
+ * test session (?netscript) and by the page's loopback peer. */
+void port_padf_value(int ch, unsigned frame, int *buttons, int *stick_x, int *stick_y) {
+    padf_parse_all();
+    *buttons = *stick_x = *stick_y = 0;
+    for (int k = padf_first[ch]; k < padf_end[ch] && padf[k].f <= frame; k++)
+        if (padf[k].b == -1) *buttons = *stick_x = *stick_y = 0;
+        else { *buttons = padf[k].b; *stick_x = padf[k].x; *stick_y = padf[k].y; }
+}
+/* P338: the online session's presence mask (pc_net.c port_net_session, before callMain) */
+void port_pads_set_mask(int mask) { pad_mask = mask & 0xF; port_log("[padf] controller presence mask %X (online session)\n", pad_mask); }
+static void padf_apply(void) {
+    padf_parse_all();
     pads_apply_mask();
     for (int ch = 0; ch < MAXCONTROLLERS; ch++) {
         if (padf_end[ch] == padf_first[ch]) continue;
@@ -287,7 +304,8 @@ s32 osContStartReadData(OSMesgQueue *mq) {
     }
     pif_ram[i] = 0xFE;
     pif_ram[63] = 1;
-    padf_apply();                                      /* P149 ?padf frame script */
+    if (port_net_on) { pads_apply_mask(); port_net_fill_pads(&port_pads[0][0]); }   /* P338 online: the input ring */
+    else padf_apply();                                 /* P149 ?padf frame script */
     padrec_log();                                      /* P228 ?padrec=1 */
     pif_run();
     memcpy(cont_ram, pif_ram, sizeof cont_ram);         /* the RD64B DMA into libultra's __osContPifRam */

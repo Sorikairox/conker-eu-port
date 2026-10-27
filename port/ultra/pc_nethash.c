@@ -248,3 +248,13 @@ EMSCRIPTEN_KEEPALIVE int port_net_region(int i, int want_len) {
     if ((i - 1) & 1) return want_len ? (int)al : (int)(uintptr_t)as;
     return want_len ? (int)cl : (int)(uintptr_t)cs;
 }
+
+/* P338: the online session's desync check (pc_net.c port_net_retrace_done, every K retraces): the same H / S hashes as
+ * ?nethash, folded to 32 bits each. */
+void port_net_hash_now(uint32_t *hash_static, uint32_t *hash_stacks) {
+    unsigned stk;
+    if (!net_page_hash) net_build_segments();
+    uint64_t h = net_hash_static(), s = net_hash_stacks(&stk);
+    *hash_static = (uint32_t)(h ^ (h >> 32));
+    *hash_stacks = (uint32_t)(s ^ (s >> 32));
+}

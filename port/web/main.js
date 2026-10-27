@@ -10,6 +10,14 @@ const Q = new URLSearchParams(location.search);
 // pad state (pads come from the ?padf scripts / the input ring only), sends the default options vector once (no ?opt, no
 // saved options, no changes during the run) and boots with a blank EEPROM that is never persisted.
 const NETDET = /[?&]netdet(=1)?(&|$)/.test(location.search);
+// P338 online multiplayer phase 1: netCfg = the lockstep session this page boots into (port/web/net.js, pc_net.c), or
+// null (the normal game). { mask: channels in the session, local: this peer's channels, delay: D retraces, hashEvery: K,
+// options: the host's game options {key: value}, eeprom: the host's EEPROM image (Uint8Array) or null = blank,
+// loop: loopback test peer {lat, loss} }. Test aid: ?netloop=1[&netmask=HEX][&netd=D][&netlat=MS][&netloss=PCT] runs a
+// session against a loopback peer in this page that plays the ?padf1..3 scripts (with &netscript=1 pad 1 plays ?padf).
+let netCfg = null;
+if (Q.get('netloop')) netCfg = { mask: parseInt(Q.get('netmask') || 'F', 16), local: 1, delay: +(Q.get('netd') || 3), hashEvery: 10,
+  options: null, eeprom: null, loop: { lat: +(Q.get('netlat') || 0), loss: +(Q.get('netloss') || 0) } };
 const out = $('console');
 let romBytes = null, romSha1 = null, romOk = false;
 let running = null, M = null;
@@ -100,6 +108,7 @@ const opt = (key) => {
   if (key in optCache) return optCache[key];
   const o = OPTIONS.find((x) => x.key === key);
   if (NETDET) return (optCache[key] = o.def);   // P337: the session's fixed options vector
+  if (netCfg && o.game !== undefined) return (optCache[key] = netCfg.options && key in netCfg.options ? netCfg.options[key] : o.def);   // P338: the host's
   return (optCache[key] = key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def));
 };
 let optionsLocked = false;   // P337: under ?netdet the vector is sent once before callMain, never changed afterwards
@@ -377,7 +386,8 @@ function pollInput() {
     if (pr > 0) $('skiparc').style.strokeDashoffset = String(SKIP_ARC * (1 - Math.min(1, pr)));
     if (ring.hasAttribute('hidden') !== !(pr > 0)) ring.toggleAttribute('hidden', !(pr > 0));  // SVG: no .hidden property
   }
-  if (M && M._port_pad_state && !NETDET) {   // P337: under ?netdet the pads come only from the frame-indexed scripts
+  if (netCfg && window.PortNet && PortNet.M) PortNet.setLocalPad(pads[0].b, pads[0].x, pads[0].y);   // P338: this peer's pad -> the ring
+  else if (M && M._port_pad_state && !NETDET) {   // P337: under ?netdet the pads come only from the frame-indexed scripts
     const p = M._port_pad_state() >> 2, H = M.HEAP32;
     for (let i = 0; i < 4; i++) {
       const d = pads[i];
@@ -598,7 +608,7 @@ function applyPause() {
 function setPaused(p) { userPaused = p; applyPause(); }
 $('pause').onclick = () => setPaused(!userPaused);
 document.addEventListener('visibilitychange', () => {
-  if (Q.get('nohidepause')) return;  // dev flag: keep running in a background tab
+  if (Q.get('nohidepause') || netCfg) return;  // dev flag: keep running in a background tab; P338: never pause a session
   hiddenPaused = document.hidden; applyPause();
   log(`[page] tab ${document.hidden ? 'hidden: paused' : 'visible: resumed'}`);
 });
@@ -707,6 +717,7 @@ async function start(app) {
   $('demo').disabled = $('start').disabled = true;
   $('drop').hidden = true;
   status(app === 'game' ? 'starting…' : 'scheduler demo', 'ok');
+  if (netCfg && app === 'game') await loadScript('net.js');   // P338
   const [js, factory] = app === 'demo' ? ['sched_demo.js', 'createSchedDemo'] : ['conker.js', 'createConker'];
   log(`-- loading ${js}`);
   await loadScript(js);
@@ -720,14 +731,18 @@ async function start(app) {
   });
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
-  optionsLocked = NETDET;
+  optionsLocked = NETDET || !!netCfg;
   log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));
   if (app === 'game' && romBytes) {
     const p = M._malloc(romBytes.length);
     M.HEAPU8.set(romBytes, p);
     M._port_set_rom(p, romBytes.length);
     if (NETDET) { saveBlocked = true; log('[netdet] blank EEPROM, saves stay in this session'); }   // P337 sandbox
-    else await loadEeprom(M);
+    else if (netCfg) {   // P338: the host's EEPROM image (or blank); saves stay in this session
+      saveBlocked = true;
+      if (netCfg.eeprom) M.HEAPU8.set(netCfg.eeprom.subarray(0, M._port_eeprom_size()), M._port_eeprom_ptr());
+      log(`[net] ${netCfg.eeprom ? "host's" : 'blank'} EEPROM, saves stay in this session`);
+    } else await loadEeprom(M);
   }
   $('threads').disabled = false;
   $('threads').onclick = () => M._port_dump_threads();
@@ -735,10 +750,12 @@ async function start(app) {
   // &audonly=1 (P14, audprobe.sh): data segments only, no game threads; for the audio tests
   if (Q.get('audonly')) log('audonly: game memory ' + (M._port_audio_prepare() > 0 ? 'loaded' : 'FAILED') + ', game not started');
   else {
-    if (/[?&](nethash|nethashstop|netsnap)=/.test(location.search)) await netLoadExclusions(M);   // P337
+    if (netCfg || /[?&](nethash|nethashstop|netsnap)=/.test(location.search)) await netLoadExclusions(M);   // P337
+    if (netCfg) PortNet.begin(M, netCfg, log);   // P338: session before the first retrace
     try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
   }
   if (app === 'game') status('running', 'ok');
+  if (netCfg && netCfg.loop) PortNet.loopback(netCfg.loop);   // P338 test peer
   applyPause();
   $('canvas').focus();
   // &audtest=HEX[:FRAMES]: n_audio synth + audio HLE test (port/audio/aud_test.c);
