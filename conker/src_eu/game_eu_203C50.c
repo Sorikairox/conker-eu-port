@@ -4,127 +4,127 @@
 
 
 /* was func_151D6440 */
-u8 *fb_ghost_copy_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u32 sp8C;
-    s32 sp84;
-    u32 sp34;
-    s32 temp_a1;
-    s32 temp_s1;
-    s32 temp_t0;
-    s32 temp_t1;
-    s32 temp_t2;
-    s32 temp_t7;
-    s32 var_a1;
-    s32 var_s0;
-    s32 var_v1;
-    u32 var_a2;
-    u32 var_a3;
-    u32 var_a3_2;
-    u32 var_v0;
-    u8 *temp_a0;
-    u8 *temp_a0_10;
-    u8 *temp_a0_11;
-    u8 *temp_a0_12;
-    u8 *temp_a0_13;
-    u8 *temp_a0_14;
-    u8 *temp_a0_2;
-    u8 *temp_a0_3;
-    u8 *temp_a0_4;
-    u8 *temp_a0_5;
-    u8 *temp_a0_6;
-    u8 *temp_a0_7;
-    u8 *temp_a0_8;
-    u8 *temp_a0_9;
-    u8 *var_a0;
+u8 *fb_ghost_copy_draw(u8 *gdl, s32 src_image, s32 unused_x, s32 unused_mode) {
+    u32 saved_height;
+    s32 saved_band_rows;
+    u32 saved_row_end;
+    s32 col_last_fx;
+    s32 row_last_fx;
+    s32 col0_fx;
+    s32 col_last;
+    s32 settile_w0;
+    s32 row0_fx;
+    s32 band_rows;
+    s32 band_cols;
+    s32 height;
+    u32 col0;
+    u32 row_end;
+    u32 col_end;
+    u32 row0;
+    u8 *cmd1;
+    u8 *cmd10;
+    u8 *cmd11;
+    u8 *cmd12;
+    u8 *cmd13;
+    u8 *cmd14;
+    u8 *cmd2;
+    u8 *cmd3;
+    u8 *cmd4;
+    u8 *cmd5;
+    u8 *cmd6;
+    u8 *cmd7;
+    u8 *cmd8;
+    u8 *cmd9;
+    u8 *cmd;
 
-    var_v1 = g_framebuffer_height;
-    (*(s32 *)((u8 *)arg0 + 0)) = 0xE7000000;
-    (*(s32 *)((u8 *)arg0 + 4)) = 0;
-    temp_a0 = arg0 + 8;
-    (*(s32 *)((u8 *)temp_a0 + 0)) = 0xFCFFFFFF;
-    (*(s32 *)((u8 *)temp_a0 + 4)) = 0xFFFCF279;
-    temp_a0_2 = temp_a0 + 8;
-    (*(s32 *)((u8 *)temp_a0_2 + 0)) = 0xEF000CFF;
-    (*(s32 *)((u8 *)temp_a0_2 + 4)) = 0x0F0A4000;
-    temp_a0_3 = temp_a0_2 + 8;
-    (*(s32 *)((u8 *)temp_a0_3 + 0)) = 0xD9000000;
-    (*(s32 *)((u8 *)temp_a0_3 + 4)) = 0;
-    temp_a0_4 = temp_a0_3 + 8;
-    (*(s32 *)((u8 *)temp_a0_4 + 4)) = -1;
-    (*(s32 *)((u8 *)temp_a0_4 + 0)) = 0xD7000002;
-    var_a0 = temp_a0_4 + 8;
-    var_a1 = 0x10;
-    var_v0 = 0;
-    if (var_v1 != 0) {
+    height = g_framebuffer_height;
+    (*(s32 *)((u8 *)gdl + 0)) = 0xE7000000;
+    (*(s32 *)((u8 *)gdl + 4)) = 0;
+    cmd1 = gdl + 8;
+    (*(s32 *)((u8 *)cmd1 + 0)) = 0xFCFFFFFF;
+    (*(s32 *)((u8 *)cmd1 + 4)) = 0xFFFCF279;
+    cmd2 = cmd1 + 8;
+    (*(s32 *)((u8 *)cmd2 + 0)) = 0xEF000CFF;
+    (*(s32 *)((u8 *)cmd2 + 4)) = 0x0F0A4000;
+    cmd3 = cmd2 + 8;
+    (*(s32 *)((u8 *)cmd3 + 0)) = 0xD9000000;
+    (*(s32 *)((u8 *)cmd3 + 4)) = 0;
+    cmd4 = cmd3 + 8;
+    (*(s32 *)((u8 *)cmd4 + 4)) = -1;
+    (*(s32 *)((u8 *)cmd4 + 0)) = 0xD7000002;
+    cmd = cmd4 + 8;
+    band_rows = 0x10;
+    row0 = 0;
+    if (height != 0) {
         do {
-            var_a3 = var_v0 + var_a1;
-            var_a2 = 0;
-            var_s0 = 0x80;
-            if ((u32) var_v1 < var_a3) {
-                var_a1 = var_v1 - var_v0;
-                var_a3 = var_v0 + var_a1;
+            row_end = row0 + band_rows;
+            col0 = 0;
+            band_cols = 0x80;
+            if ((u32) height < row_end) {
+                band_rows = height - row0;
+                row_end = row0 + band_rows;
             }
             if (g_framebuffer_width != 0) {
-                temp_t7 = (var_v0 * 4) & 0xFFF;
-                temp_s1 = ((var_a3 - 1) * 4) & 0xFFF;
-                sp84 = var_a1;
-                sp8C = (u32) var_v1;
-                sp34 = var_a3;
+                row0_fx = (row0 * 4) & 0xFFF;
+                row_last_fx = ((row_end - 1) * 4) & 0xFFF;
+                saved_band_rows = band_rows;
+                saved_height = (u32) height;
+                saved_row_end = row_end;
                 do {
-                    var_a3_2 = var_a2 + var_s0;
-                    if ((u32) g_framebuffer_width < var_a3_2) {
-                        var_s0 = g_framebuffer_width - var_a2;
-                        var_a3_2 = var_a2 + var_s0;
+                    col_end = col0 + band_cols;
+                    if ((u32) g_framebuffer_width < col_end) {
+                        band_cols = g_framebuffer_width - col0;
+                        col_end = col0 + band_cols;
                     }
-                    (*(s32 *)((u8 *)var_a0 + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFD100000);
-                    temp_a0_5 = var_a0 + 8;
-                    (*(s32 *)((u8 *)var_a0 + 4)) = arg1;
-                    temp_t1 = var_a3_2 - 1;
-                    temp_t2 = ((((u32) (((temp_t1 - var_a2) * 2) + 9) >> 3) & 0x1FF) << 9) | 0xF5100000;
-                    (*(s32 *)((u8 *)temp_a0_5 + 0)) = temp_t2;
-                    temp_a0_6 = temp_a0_5 + 8;
-                    (*(s32 *)((u8 *)temp_a0_5 + 4)) = 0x07000000;
-                    (*(s32 *)((u8 *)temp_a0_6 + 0)) = 0xE6000000;
-                    (*(s32 *)((u8 *)temp_a0_6 + 4)) = 0;
-                    temp_a0_7 = temp_a0_6 + 8;
-                    temp_t0 = ((var_a2 * 4) & 0xFFF) << 0xC;
-                    temp_a1 = ((temp_t1 * 4) & 0xFFF) << 0xC;
-                    (*(s32 *)((u8 *)temp_a0_7 + 0)) = (s32) (temp_t0 | 0xF4000000 | temp_t7);
-                    (*(s32 *)((u8 *)temp_a0_7 + 4)) = (s32) (temp_a1 | 0x07000000 | temp_s1);
-                    temp_a0_8 = temp_a0_7 + 8;
-                    (*(s32 *)((u8 *)temp_a0_8 + 0)) = 0xE7000000;
-                    (*(s32 *)((u8 *)temp_a0_8 + 4)) = 0;
-                    temp_a0_9 = temp_a0_8 + 8;
-                    (*(s32 *)((u8 *)temp_a0_9 + 0)) = temp_t2;
-                    (*(s32 *)((u8 *)temp_a0_9 + 4)) = 0;
-                    temp_a0_10 = temp_a0_9 + 8;
-                    (*(s32 *)((u8 *)temp_a0_10 + 4)) = (s32) (temp_a1 | temp_s1);
-                    (*(s32 *)((u8 *)temp_a0_10 + 0)) = (s32) (temp_t0 | 0xF2000000 | temp_t7);
-                    temp_a0_11 = temp_a0_10 + 8;
-                    (*(s32 *)((u8 *)temp_a0_11 + 4)) = (s32) (temp_t0 | temp_t7);
-                    (*(s32 *)((u8 *)temp_a0_11 + 0)) = (s32) ((((var_a3_2 * 4) & 0xFFF) << 0xC) | 0xE4000000 | ((var_a3 * 4) & 0xFFF));
-                    temp_a0_12 = temp_a0_11 + 8;
-                    (*(s32 *)((u8 *)temp_a0_12 + 0)) = 0xE1000000;
-                    (*(s32 *)((u8 *)temp_a0_12 + 4)) = (s32) ((var_a2 << 0x15) | ((var_v0 << 5) & 0xFFFF));
-                    temp_a0_13 = temp_a0_12 + 8;
-                    (*(s32 *)((u8 *)temp_a0_13 + 0)) = 0xF1000000;
-                    (*(s32 *)((u8 *)temp_a0_13 + 4)) = 0x04000400;
-                    temp_a0_14 = temp_a0_13 + 8;
-                    (*(s32 *)((u8 *)temp_a0_14 + 0)) = 0xE7000000;
-                    (*(s32 *)((u8 *)temp_a0_14 + 4)) = 0;
-                    var_a0 = temp_a0_14 + 8;
-                    var_a2 = var_a3_2;
-                } while (var_a3_2 < (u32) g_framebuffer_width);
-                var_a3 = sp34;
-                var_a1 = sp84;
-                var_v1 = (s32) sp8C;
+                    (*(s32 *)((u8 *)cmd + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFD100000);
+                    cmd5 = cmd + 8;
+                    (*(s32 *)((u8 *)cmd + 4)) = src_image;
+                    col_last = col_end - 1;
+                    settile_w0 = ((((u32) (((col_last - col0) * 2) + 9) >> 3) & 0x1FF) << 9) | 0xF5100000;
+                    (*(s32 *)((u8 *)cmd5 + 0)) = settile_w0;
+                    cmd6 = cmd5 + 8;
+                    (*(s32 *)((u8 *)cmd5 + 4)) = 0x07000000;
+                    (*(s32 *)((u8 *)cmd6 + 0)) = 0xE6000000;
+                    (*(s32 *)((u8 *)cmd6 + 4)) = 0;
+                    cmd7 = cmd6 + 8;
+                    col0_fx = ((col0 * 4) & 0xFFF) << 0xC;
+                    col_last_fx = ((col_last * 4) & 0xFFF) << 0xC;
+                    (*(s32 *)((u8 *)cmd7 + 0)) = (s32) (col0_fx | 0xF4000000 | row0_fx);
+                    (*(s32 *)((u8 *)cmd7 + 4)) = (s32) (col_last_fx | 0x07000000 | row_last_fx);
+                    cmd8 = cmd7 + 8;
+                    (*(s32 *)((u8 *)cmd8 + 0)) = 0xE7000000;
+                    (*(s32 *)((u8 *)cmd8 + 4)) = 0;
+                    cmd9 = cmd8 + 8;
+                    (*(s32 *)((u8 *)cmd9 + 0)) = settile_w0;
+                    (*(s32 *)((u8 *)cmd9 + 4)) = 0;
+                    cmd10 = cmd9 + 8;
+                    (*(s32 *)((u8 *)cmd10 + 4)) = (s32) (col_last_fx | row_last_fx);
+                    (*(s32 *)((u8 *)cmd10 + 0)) = (s32) (col0_fx | 0xF2000000 | row0_fx);
+                    cmd11 = cmd10 + 8;
+                    (*(s32 *)((u8 *)cmd11 + 4)) = (s32) (col0_fx | row0_fx);
+                    (*(s32 *)((u8 *)cmd11 + 0)) = (s32) ((((col_end * 4) & 0xFFF) << 0xC) | 0xE4000000 | ((row_end * 4) & 0xFFF));
+                    cmd12 = cmd11 + 8;
+                    (*(s32 *)((u8 *)cmd12 + 0)) = 0xE1000000;
+                    (*(s32 *)((u8 *)cmd12 + 4)) = (s32) ((col0 << 0x15) | ((row0 << 5) & 0xFFFF));
+                    cmd13 = cmd12 + 8;
+                    (*(s32 *)((u8 *)cmd13 + 0)) = 0xF1000000;
+                    (*(s32 *)((u8 *)cmd13 + 4)) = 0x04000400;
+                    cmd14 = cmd13 + 8;
+                    (*(s32 *)((u8 *)cmd14 + 0)) = 0xE7000000;
+                    (*(s32 *)((u8 *)cmd14 + 4)) = 0;
+                    cmd = cmd14 + 8;
+                    col0 = col_end;
+                } while (col_end < (u32) g_framebuffer_width);
+                row_end = saved_row_end;
+                band_rows = saved_band_rows;
+                height = (s32) saved_height;
             }
-            var_v0 = var_a3;
-        } while (var_a3 < (u32) var_v1);
+            row0 = row_end;
+        } while (row_end < (u32) height);
     }
-    (*(s32 *)((u8 *)var_a0 + 0)) = 0xEF080C3F;
-    (*(s32 *)((u8 *)var_a0 + 4)) = 0x0F0A4000;
-    return var_a0 + 8;
+    (*(s32 *)((u8 *)cmd + 0)) = 0xEF080C3F;
+    (*(s32 *)((u8 *)cmd + 4)) = 0x0F0A4000;
+    return cmd + 8;
 }
 /* was func_151D6760 */
 void fb_blur_average(u8 *arg0) {
@@ -170,110 +170,117 @@ void fb_blur_average(u8 *arg0) {
     }
 }
 /* was func_151D69C8 */
-u8 *fb_ghost_image_draw(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 sp34;
-    s32 var_t5;
-    u32 temp_a2;
-    u32 temp_s0;
-    u32 temp_t0;
-    u32 temp_v1;
-    u32 var_a2;
-    u32 var_t1;
-    u32 var_t2;
-    u32 var_t3;
-    u8 *temp_a0;
-    u8 *temp_a0_10;
-    u8 *temp_a0_11;
-    u8 *temp_a0_12;
-    u8 *temp_a0_13;
-    u8 *temp_a0_14;
-    u8 *temp_a0_2;
-    u8 *temp_a0_3;
-    u8 *temp_a0_4;
-    u8 *temp_a0_5;
-    u8 *temp_a0_6;
-    u8 *temp_a0_7;
-    u8 *temp_a0_8;
-    u8 *temp_a0_9;
-    u8 *var_a0;
+u8 *fb_ghost_image_draw(u8 *gdl, s32 image, s32 right_trim, s32 alpha) {
+    s32 height;
+    s32 strip_addr;
+    u32 next_row;
+    u32 block_lrs;
+    u32 row_words;
+    u32 row_bytes;
+    u32 dxt_den;
+    u32 load_lrs;
+    u32 dxt_num;
+    u32 row;
+    u8 *cmd1;
+    u8 *cmd10;
+    u8 *cmd11;
+    u8 *cmd12;
+    u8 *cmd13;
+    u8 *cmd14;
+    u8 *cmd2;
+    u8 *cmd3;
+    u8 *cmd4;
+    u8 *cmd5;
+    u8 *cmd6;
+    u8 *cmd7;
+    u8 *cmd8;
+    u8 *cmd9;
+    u8 *cmd;
 
-    var_t5 = arg1;
-    (*(s32 *)((u8 *)arg0 + 0)) = 0xFA000000;
-    (*(s32 *)((u8 *)arg0 + 4)) = (s32) ((arg3 & 0xFF) | ~0xFF);
-    temp_a0 = arg0 + 8;
-    (*(s32 *)((u8 *)temp_a0 + 4)) = -0x805;
-    (*(s32 *)((u8 *)temp_a0 + 0)) = 0xFC11FE23;
-    temp_a0_2 = temp_a0 + 8;
-    (*(s32 *)((u8 *)temp_a0_2 + 0)) = 0xEF000CFF;
-    (*(s32 *)((u8 *)temp_a0_2 + 4)) = 0x504340;
-    temp_a0_3 = temp_a0_2 + 8;
-    (*(s32 *)((u8 *)temp_a0_3 + 0)) = 0xD9000000;
-    (*(s32 *)((u8 *)temp_a0_3 + 4)) = 0;
-    temp_a0_4 = temp_a0_3 + 8;
-    (*(s32 *)((u8 *)temp_a0_4 + 4)) = -1;
-    (*(s32 *)((u8 *)temp_a0_4 + 0)) = 0xD7000002;
-    var_a0 = temp_a0_4 + 8;
-    var_t3 = 0;
-    sp34 = g_framebuffer_height;
+    strip_addr = image;
+    (*(s32 *)((u8 *)gdl + 0)) = 0xFA000000;
+    (*(s32 *)((u8 *)gdl + 4)) = (s32) ((alpha & 0xFF) | ~0xFF);
+    cmd1 = gdl + 8;
+    (*(s32 *)((u8 *)cmd1 + 4)) = -0x805;
+    (*(s32 *)((u8 *)cmd1 + 0)) = 0xFC11FE23;
+    cmd2 = cmd1 + 8;
+    (*(s32 *)((u8 *)cmd2 + 0)) = 0xEF000CFF;
+    (*(s32 *)((u8 *)cmd2 + 4)) = 0x504340;
+    cmd3 = cmd2 + 8;
+    (*(s32 *)((u8 *)cmd3 + 0)) = 0xD9000000;
+    (*(s32 *)((u8 *)cmd3 + 4)) = 0;
+    cmd4 = cmd3 + 8;
+    (*(s32 *)((u8 *)cmd4 + 4)) = -1;
+    (*(s32 *)((u8 *)cmd4 + 0)) = 0xD7000002;
+    cmd = cmd4 + 8;
+    row = 0;
+    height = g_framebuffer_height;
     if (g_framebuffer_height != 0) {
-        temp_v1 = g_framebuffer_width * 2;
-        temp_s0 = (g_framebuffer_width * 4) - 1;
-        temp_t0 = temp_v1 >> 3;
+        row_bytes = g_framebuffer_width * 2;
+        block_lrs = (g_framebuffer_width * 4) - 1;
+        row_words = row_bytes >> 3;
         do {
-            (*(s32 *)((u8 *)var_a0 + 4)) = (s32) (var_t5 + 0x80000000);
-            (*(s32 *)((u8 *)var_a0 + 0)) = 0xFD100000;
-            temp_a0_5 = var_a0 + 8;
-            (*(s32 *)((u8 *)temp_a0_5 + 0)) = 0xF5100000;
-            (*(s32 *)((u8 *)temp_a0_5 + 4)) = 0x07000000;
-            temp_a0_6 = temp_a0_5 + 8;
-            (*(s32 *)((u8 *)temp_a0_6 + 0)) = 0xE6000000;
-            (*(s32 *)((u8 *)temp_a0_6 + 4)) = 0;
-            temp_a0_7 = temp_a0_6 + 8;
-            (*(s32 *)((u8 *)temp_a0_7 + 0)) = 0xF3000000;
-            temp_a0_8 = temp_a0_7 + 8;
-            if (temp_s0 < 0x7FFU) {
-                var_t1 = temp_s0;
+#ifdef PORT
+            /* P335: the N64 adds 0x80000000 to turn the KSEG0 image pointer into a physical address for the RDP. Here
+             * the image is a wasm pointer and the sum named some other memory (the ghost read garbage); the port's
+             * display-list addresses take wasm pointers as they are. */
+            (*(s32 *)((u8 *)cmd + 4)) = (s32) strip_addr;
+#else
+            (*(s32 *)((u8 *)cmd + 4)) = (s32) (strip_addr + 0x80000000);
+#endif
+            (*(s32 *)((u8 *)cmd + 0)) = 0xFD100000;
+            cmd5 = cmd + 8;
+            (*(s32 *)((u8 *)cmd5 + 0)) = 0xF5100000;
+            (*(s32 *)((u8 *)cmd5 + 4)) = 0x07000000;
+            cmd6 = cmd5 + 8;
+            (*(s32 *)((u8 *)cmd6 + 0)) = 0xE6000000;
+            (*(s32 *)((u8 *)cmd6 + 4)) = 0;
+            cmd7 = cmd6 + 8;
+            (*(s32 *)((u8 *)cmd7 + 0)) = 0xF3000000;
+            cmd8 = cmd7 + 8;
+            if (block_lrs < 0x7FFU) {
+                load_lrs = block_lrs;
             } else {
-                var_t1 = 0x7FF;
+                load_lrs = 0x7FF;
             }
-            if (temp_t0 == 0) {
-                var_t2 = 1;
+            if (row_words == 0) {
+                dxt_num = 1;
             } else {
-                var_t2 = temp_t0;
+                dxt_num = row_words;
             }
-            if (temp_t0 == 0) {
-                var_a2 = 1;
+            if (row_words == 0) {
+                dxt_den = 1;
             } else {
-                var_a2 = temp_t0;
+                dxt_den = row_words;
             }
-            (*(s32 *)((u8 *)temp_a0_7 + 4)) = (s32) ((((u32) (var_t2 + 0x7FF) / var_a2) & 0xFFF) | 0x07000000 | ((var_t1 & 0xFFF) << 0xC));
-            temp_a0_9 = temp_a0_8 + 8;
-            (*(s32 *)((u8 *)temp_a0_8 + 0)) = 0xE7000000;
-            (*(s32 *)((u8 *)temp_a0_8 + 4)) = 0;
-            (*(s32 *)((u8 *)temp_a0_9 + 0)) = (s32) (((((u32) (temp_v1 + 7) >> 3) & 0x1FF) << 9) | 0xF5100000);
-            (*(s32 *)((u8 *)temp_a0_9 + 4)) = 0;
-            temp_a0_10 = temp_a0_9 + 8;
-            (*(s32 *)((u8 *)temp_a0_10 + 0)) = 0xF2000000;
-            (*(s32 *)((u8 *)temp_a0_10 + 4)) = (s32) (((((g_framebuffer_width - 1) * 4) & 0xFFF) << 0xC) | 0xC);
-            temp_a0_11 = temp_a0_10 + 8;
-            temp_a2 = var_t3 + 4;
-            (*(s32 *)((u8 *)temp_a0_11 + 0)) = (s32) (((((g_framebuffer_width - arg2) * 4) & 0xFFF) << 0xC) | 0xE4000000 | ((temp_a2 * 4) & 0xFFF));
-            (*(s32 *)((u8 *)temp_a0_11 + 4)) = (s32) ((var_t3 * 4) & 0xFFF);
-            temp_a0_12 = temp_a0_11 + 8;
-            (*(s32 *)((u8 *)temp_a0_12 + 0)) = 0xE1000000;
-            (*(s32 *)((u8 *)temp_a0_12 + 4)) = 0;
-            temp_a0_13 = temp_a0_12 + 8;
-            (*(s32 *)((u8 *)temp_a0_13 + 0)) = 0xF1000000;
-            (*(s32 *)((u8 *)temp_a0_13 + 4)) = 0x04000400;
-            temp_a0_14 = temp_a0_13 + 8;
-            (*(s32 *)((u8 *)temp_a0_14 + 0)) = 0xE7000000;
-            (*(s32 *)((u8 *)temp_a0_14 + 4)) = 0;
-            var_a0 = temp_a0_14 + 8;
-            var_t3 = temp_a2;
-            var_t5 += g_framebuffer_width * 8;
-        } while (temp_a2 < (u32) sp34);
+            (*(s32 *)((u8 *)cmd7 + 4)) = (s32) ((((u32) (dxt_num + 0x7FF) / dxt_den) & 0xFFF) | 0x07000000 | ((load_lrs & 0xFFF) << 0xC));
+            cmd9 = cmd8 + 8;
+            (*(s32 *)((u8 *)cmd8 + 0)) = 0xE7000000;
+            (*(s32 *)((u8 *)cmd8 + 4)) = 0;
+            (*(s32 *)((u8 *)cmd9 + 0)) = (s32) (((((u32) (row_bytes + 7) >> 3) & 0x1FF) << 9) | 0xF5100000);
+            (*(s32 *)((u8 *)cmd9 + 4)) = 0;
+            cmd10 = cmd9 + 8;
+            (*(s32 *)((u8 *)cmd10 + 0)) = 0xF2000000;
+            (*(s32 *)((u8 *)cmd10 + 4)) = (s32) (((((g_framebuffer_width - 1) * 4) & 0xFFF) << 0xC) | 0xC);
+            cmd11 = cmd10 + 8;
+            next_row = row + 4;
+            (*(s32 *)((u8 *)cmd11 + 0)) = (s32) (((((g_framebuffer_width - right_trim) * 4) & 0xFFF) << 0xC) | 0xE4000000 | ((next_row * 4) & 0xFFF));
+            (*(s32 *)((u8 *)cmd11 + 4)) = (s32) ((row * 4) & 0xFFF);
+            cmd12 = cmd11 + 8;
+            (*(s32 *)((u8 *)cmd12 + 0)) = 0xE1000000;
+            (*(s32 *)((u8 *)cmd12 + 4)) = 0;
+            cmd13 = cmd12 + 8;
+            (*(s32 *)((u8 *)cmd13 + 0)) = 0xF1000000;
+            (*(s32 *)((u8 *)cmd13 + 4)) = 0x04000400;
+            cmd14 = cmd13 + 8;
+            (*(s32 *)((u8 *)cmd14 + 0)) = 0xE7000000;
+            (*(s32 *)((u8 *)cmd14 + 4)) = 0;
+            cmd = cmd14 + 8;
+            row = next_row;
+            strip_addr += g_framebuffer_width * 8;
+        } while (next_row < (u32) height);
     }
-    return var_a0;
+    return cmd;
 }
 /* fb_ghost_set_mode: the frame-blend ("ghost" / motion blur) effect. alpha 0 = off; pass 2 = blend inside the player
  * scene (after the sky), 1 = over the whole frame, 0 = off. While on, fb_ghost_render draws the previous frame's
@@ -312,41 +319,41 @@ u8 *fb_ghost_copy_draw(u8 *, s32, s32, s32);
 u8 *fb_ghost_image_draw(u8 *, s32, s32, s32);
 
 /* was func_151D6D28 */
-u8 *fb_ghost_render(u8 *arg0) {
-    s32 temp_v0;
-    u8 *temp_s0;
-    u8 *temp_v0_2;
-    u8 *var_s0;
+u8 *fb_ghost_render(u8 *gdl) {
+    s32 new_image;
+    u8 *cmd_after_scissor;
+    u8 *cmd_after_copy;
+    u8 *cmd;
 
-    var_s0 = arg0;
+    cmd = gdl;
     if (((g_fb_ghost_alpha == 0) && (g_level_id != 0x32) && (g_level_id != 0x33)) || (g_game_paused != 0)) {
 
     } else if (g_fb_ghost_alpha != 0) {
-        (*(s32 *)((u8 *)var_s0 + 0)) = 0xE7000000;
-        (*(s32 *)((u8 *)var_s0 + 4)) = 0;
-        var_s0 += 8;
+        (*(s32 *)((u8 *)cmd + 0)) = 0xE7000000;
+        (*(s32 *)((u8 *)cmd + 4)) = 0;
+        cmd += 8;
         if (g_fb_ghost_image != 0) {
-            var_s0 = fb_ghost_image_draw(var_s0, g_fb_ghost_image, 0, g_fb_ghost_alpha);
+            cmd = fb_ghost_image_draw(cmd, g_fb_ghost_image, 0, g_fb_ghost_alpha);
             goto block_10;
         }
-        temp_v0 = allocate_memory(g_framebuffer_width * g_framebuffer_height * 2, 1, 3, 1);
-        g_fb_ghost_image = temp_v0;
-        if (temp_v0 == 0) {
+        new_image = allocate_memory(g_framebuffer_width * g_framebuffer_height * 2, 1, 3, 1);
+        g_fb_ghost_image = new_image;
+        if (new_image == 0) {
 
         } else {
 block_10:
-            (*(s32 *)((u8 *)var_s0 + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFF100000);
-            temp_s0 = var_s0 + 8;
-            (*(s32 *)((u8 *)var_s0 + 4)) = (s32) g_fb_ghost_image;
-            (*(s32 *)((u8 *)temp_s0 + 0)) = 0xED000000;
-            (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((((s32) ((f32) g_framebuffer_width * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) g_framebuffer_height * 4.0f) & 0xFFF));
-            temp_v0_2 = fb_ghost_copy_draw(temp_s0 + 8, g_framebuffers[g_dl_buf_index], 0, 4);
-            (*(s32 *)((u8 *)temp_v0_2 + 0)) = 0xEF082C3F;
-            (*(s32 *)((u8 *)temp_v0_2 + 4)) = 0x552230;
-            (*(s32 *)((u8 *)temp_v0_2 + 8)) = 0xD9FFFFFF;
-            (*(s32 *)((u8 *)temp_v0_2 + 0xC)) = 0x220405;
-            var_s0 = render_set_color_image(temp_v0_2 + 0x10);
+            (*(s32 *)((u8 *)cmd + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFF100000);
+            cmd_after_scissor = cmd + 8;
+            (*(s32 *)((u8 *)cmd + 4)) = (s32) g_fb_ghost_image;
+            (*(s32 *)((u8 *)cmd_after_scissor + 0)) = 0xED000000;
+            (*(s32 *)((u8 *)cmd_after_scissor + 4)) = (s32) ((((s32) ((f32) g_framebuffer_width * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) g_framebuffer_height * 4.0f) & 0xFFF));
+            cmd_after_copy = fb_ghost_copy_draw(cmd_after_scissor + 8, g_framebuffers[g_dl_buf_index], 0, 4);
+            (*(s32 *)((u8 *)cmd_after_copy + 0)) = 0xEF082C3F;
+            (*(s32 *)((u8 *)cmd_after_copy + 4)) = 0x552230;
+            (*(s32 *)((u8 *)cmd_after_copy + 8)) = 0xD9FFFFFF;
+            (*(s32 *)((u8 *)cmd_after_copy + 0xC)) = 0x220405;
+            cmd = render_set_color_image(cmd_after_copy + 0x10);
         }
     }
-    return var_s0;
+    return cmd;
 }

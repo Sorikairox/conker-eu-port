@@ -137,6 +137,11 @@ static int bany;
 static unsigned oth_h, oth_l, combine_w0, combine_w1;
 static unsigned prim_col, env_col, fog_col, blend_col, fill_col, prim_lod;
 static unsigned cimg_addr, zimg_addr, cimg_width = 320, prim_z;
+/* P335: set for one texture rectangle that reads a full-frame image the port keeps at canvas resolution (hx_*, below):
+ * the GL texture and the offset (canvas pixels, GL orientation) from the drawn pixel to the texel it reads. */
+static int hxs_on;
+static unsigned hxs_tex;
+static float hxs_ox, hxs_oy;
 /* P137: offscreen colour image (render to texture, e.g. the P130 object shadow pass: SETCIMG RGBA16 64 wide).
  * While on, draws go to an FBO of cimg_width x cimg_width N64 pixels (1:1) and the canvas is that size; the FBO is
  * written back to RDRAM in the image's pixel size (8-bit: the red byte, as the RDP's 8-bit colour images; 16-bit:
@@ -207,7 +212,7 @@ static void mtx_ident(float m[4][4]) {
 /* ------------------------------------------------------------------ GL backend */
 static GLuint prog, vbo, vao;
 static GLint u_tex[6], u_tp[6], u_tm[6], u_ts[6], u_lodviz, u_splitx, u_c0, u_c1, u_a0, u_a1, u_2cyc, u_prim, u_env, u_fogc, u_blendc,
-    u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg, u_dbg, u_idx;
+    u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg, u_dbg, u_idx, u_hires;
 static int gl_ok, canvas_w = 640, canvas_h = 480;
 #define VF 11
 #define BATCH_TRIS 4096
@@ -247,7 +252,7 @@ static const char *FS =
     "in vec4 vCol; in vec2 vST; in float vFog;\n"
     "uniform highp sampler2D uT0, uT1, uT2, uT3, uT4, uT5; uniform vec4 uTP[6]; uniform ivec4 uTM[6], uTS[6]; uniform int uLodViz; uniform float uSplitX;\n"
     "uniform ivec4 uC0, uC1, uA0, uA1, uBl1, uBl2, uLod; uniform int u2cyc, uAcmp, uMode, uTexOn, uFilt, uBlFin, uCvg, uDbg, uIdx;\n"
-    "uniform vec4 uPrim, uEnv, uFogC, uBlendC; uniform vec2 uK45; uniform float uPrimLod, uPixScale, uPrimZ;\n"
+    "uniform vec4 uPrim, uEnv, uFogC, uBlendC, uHiRes; uniform vec2 uK45; uniform float uPrimLod, uPixScale, uPrimZ;\n"
     "out vec4 frag;\n"
     "vec4 T0, T1, SH; float LF;\n"
     "int wrapc(int c, int cl, int mi, int mk, int mx) {\n"
@@ -311,8 +316,12 @@ static const char *FS =
     "    else if (uLod.z != 0) LF = l;\n"
     "    lt = min(lt, 4);\n"
     "  }\n"
-    "  T0 = samp(lt);\n"
-    "  T1 = !distant && (uTexOn & (2 << lt)) != 0 ? samp(lt + 1) : T0;\n"
+    /* P335: a texture rectangle that reads a full-frame image kept at canvas resolution (hx_*: the frame-blend ghost):
+     * unit 0 is that image, read 1:1 per canvas pixel at uHiRes.xy (canvas px) from this pixel, alpha 1 */
+    "  if (uHiRes.z != 0.0) { ivec2 hc = clamp(ivec2(floor(gl_FragCoord.xy + uHiRes.xy)), ivec2(0), textureSize(uT0, 0) - 1);\n"
+    "    T0 = vec4(texelFetch(uT0, hc, 0).rgb, 1.0); T1 = T0; }\n"
+    "  else { T0 = samp(lt);\n"
+    "  T1 = !distant && (uTexOn & (2 << lt)) != 0 ? samp(lt + 1) : T0; }\n"
     "  if (uMode == 3) { if (T0.a < 0.5) discard; frag = vec4(T0.rgb, 1.0); return; }\n"
     "  vec3 c = vec3(0.0); float a = 0.0;\n"
     "  vec3 c1 = (cA(uC0.x, c) - cB(uC0.y, c)) * cC(uC0.z, c, a) + cD(uC0.w, c);\n"
@@ -379,7 +388,7 @@ int gfx_init(void) {
     U(u_c0, "uC0"); U(u_c1, "uC1"); U(u_a0, "uA0"); U(u_a1, "uA1"); U(u_2cyc, "u2cyc"); U(u_prim, "uPrim");
     U(u_env, "uEnv"); U(u_fogc, "uFogC"); U(u_blendc, "uBlendC"); U(u_primlod, "uPrimLod"); U(u_acmp, "uAcmp");
     U(u_mode, "uMode"); U(u_texon, "uTexOn"); U(u_filt, "uFilt"); U(u_lod, "uLod"); U(u_pixscale, "uPixScale"); U(u_lodviz, "uLodViz"); U(u_splitx, "uSplitX");
-    U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg"); U(u_dbg, "uDbg"); U(u_idx, "uIdx");
+    U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg"); U(u_dbg, "uDbg"); U(u_idx, "uIdx"); U(u_hires, "uHiRes");
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -601,6 +610,10 @@ static void apply_state(void) {
         glActiveTexture(GL_TEXTURE0);
         glUniform4i(u_lod, lod, (int)tex_level, (oth_h & 0x60000) != 0, 0);
     } else glUniform4i(u_lod, 0, 0, 0, 0);
+    if (hxs_on) {   /* P335 */
+        glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, hxs_tex);
+        texon |= 1; glUniform4f(u_hires, hxs_ox, hxs_oy, 1, 0);
+    } else glUniform4f(u_hires, 0, 0, 0, 0);
     glUniform1i(u_texon, texon);
     unsigned tf = oth_h >> 12 & 3;   /* G_TF_POINT 0, G_TF_BILERP 2, G_TF_AVERAGE 3 */
     glUniform1i(u_filt, tf == 0 || cyc >= 2 ? 0 : filt_mode);
@@ -875,6 +888,33 @@ static void off_end(void) {
     off_on = 0; state_dirty = 1;
 }
 
+/* P335: full-frame images the game draws into besides the screen. fb_ghost_render (the frame-blend "ghost" / motion
+ * blur, g_fb_ghost_image) selects a second 292-wide RGBA16 colour image in the same task, copies the screen image into
+ * it with 1:1 texture rectangles (LOADTILE strips of the screen), selects the screen again, and the next frame draws
+ * that image back over the new frame with an alpha (LOADBLOCK strips, blender IN * a + MEM * (1 - a)). The RDP does
+ * all of it in RDRAM at the framebuffer's resolution. Before P335 the port took the ghost image for a screen image
+ * (P161): the copy's texture reads of the screen wrote the canvas copy of two frames ago into RDRAM and drew it at
+ * N64 resolution over the canvas, and the ghost image was never written: one pixelated frame frozen for the whole
+ * effect. Now a second >= 256-wide 16-bit colour image in a task that is not one of the screen images is an FBO
+ * texture at canvas resolution (hx[]): draws into it render into the texture, texture reads of the screen image while
+ * it is bound come from a snapshot of the canvas (taken at the first such read), and later texture rectangles that
+ * read it sample the texture per canvas pixel (uHiRes). Its RDRAM is not written (only the RDP reads the ghost). The
+ * camera's depth-row buffer (camera_read_depth_row, a 292 x 1 copy of a z row) takes this path too; its RDRAM was not
+ * written before either, and its copy rectangle no longer lands on the canvas.
+ * ?p335off=1 = the old behaviour; ?p335log=F logs from retrace F. */
+#define HX_N 2
+static struct { unsigned char *p; unsigned w, rows; GLuint tex, fbo; int tw, th; unsigned task; } hx[HX_N];
+static int hx_cur = -1;                  /* slot bound as the colour image, -1 none */
+static GLuint hx_snap; static int hx_snap_w, hx_snap_h, hx_snap_due;
+/* texture source: kind 0 none, 1 the screen image (snapshot), 2 hx slot; idx = texel index of timg in the image */
+static struct { int kind, slot; unsigned char *p; unsigned idx, w; } hx_src;
+static struct { int kind, slot; unsigned char *p; float x, y; unsigned tmem, gen; } hx_load;   /* source px of the first TMEM texel */
+static unsigned hx_nrect[2];
+static GLuint bound_fb(void) { return off_on ? off_cur : hx_cur >= 0 ? hx[hx_cur].fbo : 0; }
+static int hx_disabled(void) { static int f = -1; if (f < 0) f = port_flag("p335off"); return f; }
+static int hx_logging(void) { static int f = -1, n; if (f < 0) f = port_flag("p335log");
+    return f > 0 && port_frame_count >= (unsigned)f && n++ < 300; }
+
 /* P161: write-back of the on-screen frame into the game's colour image when the game reads it as a texture
  * (the pause menu draws the frozen frame from the last colour image, LOADTILE strips of a 292-wide RGBA16 image).
  * The port renders the main frame only on the GL canvas, so RDRAM held an empty image (black pause background).
@@ -947,7 +987,7 @@ static void fbc_check_timg(const unsigned char *t) {
         glBindFramebuffer(GL_FRAMEBUFFER, fbc[i].fbo);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbc[i].tex, 0);
         glReadPixels(0, 0, fbc[i].tw, fbc[i].th, GL_RGBA, GL_UNSIGNED_BYTE, px);
-        glBindFramebuffer(GL_FRAMEBUFFER, off_on ? off_cur : 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());   /* P335: or the hx image */
         for (y = 0; y < H; y++) {
             float cy = (y + 0.5f - fbc[i].y0) * fbc[i].th / fbc[i].h;   /* canvas row from the top */
             if (cy < 0 || cy >= fbc[i].th) continue;
@@ -964,6 +1004,93 @@ static void fbc_check_timg(const unsigned char *t) {
           if (n++ < 8) port_log("[p161] frame copy %p (%ux%u) written back for a texture read at +0x%X (frame %u), mean rgb %.1f\n",
                                 (void *)dst, w, H, (unsigned)(t - dst), port_frame_count, sum / 3.0 / (fbc[i].tw * fbc[i].th)); }
     }
+}
+
+/* P335: hx_* (see hx[] above) */
+extern int g_framebuffers[2] __attribute__((weak));   /* the game's two screen images (weak: sched_demo has no game) */
+static int hx_is_screen(const unsigned char *p) {
+    for (int i = 0; i < FBC_N; i++) if (fbc[i].p == p) return 1;
+    if (g_framebuffers) for (int i = 0; i < 2; i++) if (g_framebuffers[i] && phys((unsigned)g_framebuffers[i]) == p) return 1;
+    return 0;
+}
+static void hx_tex_alloc(GLuint tex, GLenum ifmt, GLenum fmt) {
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, ifmt, canvas_w, canvas_h, 0, fmt, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+static void hx_end(void) {
+    if (hx_cur < 0) return;
+    flush();
+    hx_cur = -1;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    state_dirty = 1;
+}
+static void hx_begin(unsigned char *p, unsigned w) {
+    int i, s = -1;
+    flush();
+    for (i = 0; i < HX_N; i++) if (hx[i].p == p) s = i;
+    if (s < 0) { s = 0; for (i = 1; i < HX_N; i++) if (hx[i].task < hx[s].task) s = i; hx[s].p = p; }
+    hx_snap_due = 1;   /* the screen is snapshot when the first texture rectangle reads it (hx_texrect) */
+    if (!hx[s].tex) { glGenTextures(1, &hx[s].tex); glGenFramebuffers(1, &hx[s].fbo); }
+    if (hx[s].tw != canvas_w || hx[s].th != canvas_h) {
+        hx_tex_alloc(hx[s].tex, GL_RGBA8, GL_RGBA);
+        glBindFramebuffer(GL_FRAMEBUFFER, hx[s].fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hx[s].tex, 0);
+        hx[s].tw = canvas_w; hx[s].th = canvas_h;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, hx[s].fbo);
+    hx[s].w = w; hx[s].task = gfx_stats.tasks; hx_cur = s; state_dirty = 1;
+    hx[s].rows = (unsigned)(vi_y0 + (vi_h > 0 ? vi_h : w * 0.75f) + 0.999f); if (hx[s].rows > 288) hx[s].rows = 288;
+    { static unsigned n; if (n++ < 4 || hx_logging()) port_log("[p335] task %u frame %u: colour image %p (%u wide) kept at canvas resolution %dx%d (slot %d)\n",
+                                                              gfx_stats.tasks, port_frame_count, (void *)p, w, canvas_w, canvas_h, s); }
+}
+/* SETTIMG: is the texture image the screen image while an hx image is bound, or a recent hx image? */
+static void hx_settimg(void) {
+    unsigned char *base = 0; unsigned w = 0;
+    hx_src.kind = 0;
+    if (!timg.p || !gl_ok || gfx_measure_only || hx_disabled() || timg.siz != 2) return;
+    if (hx_cur >= 0 && fbc_task_p && timg.p >= fbc_task_p && timg.p < fbc_task_p + 2 * fbc_task_w * hx[hx_cur].rows) {
+        hx_src.kind = 1; base = fbc_task_p; w = fbc_task_w;
+    } else for (int i = 0; i < HX_N; i++)
+        if (i != hx_cur && hx[i].p && hx[i].tex && gfx_stats.tasks - hx[i].task <= 4 && timg.p >= hx[i].p && timg.p < hx[i].p + 2 * hx[i].w * hx[i].rows) {
+            hx_src.kind = 2; hx_src.slot = i; base = hx[i].p; w = hx[i].w; break; }
+    if (hx_src.kind) { hx_src.p = base; hx_src.w = w; hx_src.idx = (unsigned)(timg.p - base) / 2; }
+}
+/* LOADTILE / LOADBLOCK: remember which source pixel the first loaded texel is (texel index first = row * timg width + col) */
+static void hx_loaded(const Tile *t, unsigned first) {
+    hx_load.kind = hx_src.kind;
+    if (!hx_src.kind) return;
+    unsigned i = hx_src.idx + first;
+    hx_load.slot = hx_src.slot; hx_load.p = hx_src.p; hx_load.x = (float)(i % hx_src.w); hx_load.y = (float)(i / hx_src.w);
+    hx_load.tmem = t->tmem; hx_load.gen = tmem_gen;
+}
+/* TEXRECT: set hxs_* when the rectangle reads the last hx load 1:1 (s, t at the upper-left corner ulx, uly) */
+static void hx_texrect(int ti, float ulx, float uly, float s, float t, float ds, float dt) {
+    const Tile *T = &tiles[ti & 7];
+    hxs_on = 0;
+    if (!hx_load.kind || hx_load.gen != tmem_gen || T->tmem != hx_load.tmem || fabsf(ds - 1) > 0.01f || fabsf(dt - 1) > 0.01f) return;
+    if (hx_load.kind == 2 && (hx[hx_load.slot].p != hx_load.p || hx_load.slot == hx_cur)) return;
+    float sx = hx_load.x + s - T->uls / 4.0f, sy = hx_load.y + t - T->ult / 4.0f;   /* source N64 pixel at (ulx, uly) */
+    if (hx_load.kind == 1 && hx_snap_due) {   /* the screen so far (nothing draws on it while an hx image is bound) */
+        flush();
+        if (!hx_snap) glGenTextures(1, &hx_snap);
+        if (hx_snap_w != canvas_w || hx_snap_h != canvas_h) { hx_tex_alloc(hx_snap, GL_RGB8, GL_RGB); hx_snap_w = canvas_w; hx_snap_h = canvas_h; }
+        else glBindTexture(GL_TEXTURE_2D, hx_snap);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, canvas_w, canvas_h);
+        glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());
+        hx_snap_due = 0; state_dirty = 1;
+    }
+    hxs_on = 1; hxs_tex = hx_load.kind == 1 ? hx_snap : hx[hx_load.slot].tex;
+    hxs_ox = (sx - ulx) * canvas_w / cimg_width; hxs_oy = -(sy - uly) * canvas_h / CIMG_H;
+    hx_nrect[hx_load.kind - 1]++;
+}
+static void hx_task_end(void) {
+    hx_end();
+    if ((hx_nrect[0] || hx_nrect[1]) && hx_logging())
+        port_log("[p335] task %u frame %u: %u rects copied the screen into the hx image, %u rects drew an hx image\n",
+                 gfx_stats.tasks, port_frame_count, hx_nrect[0], hx_nrect[1]);
+    hx_nrect[0] = hx_nrect[1] = 0; hx_src.kind = 0; hx_load.kind = 0;
 }
 
 /* screen-space rectangle in N64 pixels (fill / texture rectangles) */
@@ -1187,6 +1314,7 @@ static void load_block(unsigned w0, unsigned w1) {
             }
         }
     tmem_gen++;
+    hx_loaded(t, ult * timg.width + uls);   /* P335 */
     state_dirty = 1;
 }
 
@@ -1207,6 +1335,7 @@ static void load_tile(unsigned w0, unsigned w1) {
     }
     t->uls = w0 >> 12 & 0xFFF; t->ult = w0 & 0xFFF; t->lrs = w1 >> 12 & 0xFFF; t->lrt = w1 & 0xFFF;
     tmem_gen++;
+    hx_loaded(t, y0 * timg.width + x0);   /* P335 */
     state_dirty = 1;
 }
 
@@ -1536,8 +1665,9 @@ void gfx_run_dl(const void *dl) {
             if (cyc >= 2) { lrx += 1; lry += 1; if (cyc == 2) ds /= 4; }
             unsigned keep = tex_tile;
             tex_tile = w1 >> 24 & 7; state_dirty = 1;
+            hx_texrect(tex_tile, ulx, uly, s, t, ds, dt);   /* P335 */
             if (!gfx_measure_only) rect(ulx, uly, lrx, lry, s, t, s + ds * (lrx - ulx), t + dt * (lry - uly), 0xFFFFFFFF, 2);
-            tex_tile = keep; state_dirty = 1;
+            tex_tile = keep; hxs_on = 0; state_dirty = 1;
             break;
         }
         case 0xE6: case 0xE7: case 0xE8: case 0xE9: break;   /* syncs */
@@ -1546,6 +1676,7 @@ void gfx_run_dl(const void *dl) {
             sc_box[2] = (w1 >> 12 & 0xFFF) / 4.0f; sc_box[3] = (w1 & 0xFFF) / 4.0f;
             sc_on = sc_box[2] > sc_box[0] && sc_box[3] > sc_box[1]; state_dirty = 1;
             if (off_on && sc_on) { unsigned r = (unsigned)(sc_box[3] + 0.75f); off_rows = r < 1 ? 1 : r > OFF_FBO_H ? OFF_FBO_H : r; }  /* P140 */
+            if (hx_cur >= 0 && sc_on) { unsigned r = (unsigned)(sc_box[3] + 0.75f); hx[hx_cur].rows = r < 1 ? 1 : r > 288 ? 288 : r; }   /* P335: as P140 (depth row: 1) */
             break;
         case 0xEE: prim_z = w1 >> 16; state_dirty = 1; break; /* G_SETPRIMDEPTH (used with G_ZS_PRIM) */
         case 0xEC: k4k5 = w1 & 0x3FFFF; state_dirty = 1; break;  /* G_SETCONVERT (YUV coefficients, K4/K5). P26: the frame sends EC000000 000000FF
@@ -1595,7 +1726,8 @@ void gfx_run_dl(const void *dl) {
             timg.p = (w1 & ~0x00400000u) < 0x10000 || (w1 < 0x10000000u && (gfx_tex_unresolved_segs >> (w1 >> 24) & 1)) ? 0 : gfx_addr(w1);
             if (!timg.p) gfx_stats.tex_ids++;
             if (off_on && timg.p && timg.p == gfx_addr(off_addr)) off_writeback();   /* P137: texture = render target */
-            if (timg.p && fbc_clock) fbc_check_timg(timg.p);                       /* P161: texture = an earlier frame */
+            hx_settimg();                                                           /* P335: a frame kept at canvas resolution */
+            if (timg.p && fbc_clock && !hx_src.kind) fbc_check_timg(timg.p);       /* P161: texture = an earlier frame */
             if (timg.width >= 256 && fbc_logging()) port_log("[p161] task %u: SETTIMG %08X -> %p width %u siz %u\n", gfx_stats.tasks, w1, (void *)timg.p, timg.width, timg.siz);
             break;
         case 0xFE: zimg_addr = w1; break;
@@ -1605,12 +1737,16 @@ void gfx_run_dl(const void *dl) {
             static int nozc = -1; if (nozc < 0) nozc = port_flag("p161nozc");
             int off = gl_ok && !nooff && !gfx_measure_only && w >= 16 && w < 320 && w <= 256 && w1 != zimg_addr && gfx_addr(w1);
             if (gl_ok && !nooff && !nozc && !gfx_measure_only && w1 == zimg_addr && w >= 16 && w <= 320 && (w0 >> 19 & 3) == 2 && gfx_addr(w1)) off = 1;   /* P161 */
+            hx_end();   /* P335 */
             if (off_on && (!off || w1 != off_addr)) off_end();
             cimg_addr = w1; cimg_width = w; if (cimg_width < 64 && !off) cimg_width = 320;   /* P140: !off (16..63 wide offscreen images keep their width) */
             if (off && !off_on) off_begin(w1, w, w0 >> 19 & 3);
             if (fbc_off < 0) fbc_off = port_flag("p161nofb");
             if (fbc_logging()) port_log("[p161] task %u: SETCIMG %08X -> %p width %u siz %u (z %08X, off %d)\n", gfx_stats.tasks, w1, gfx_addr(w1), w, w0 >> 19 & 3, zimg_addr, off);
-            if (!off && w >= 256 && w1 != zimg_addr && (w0 >> 19 & 3) == 2) {   /* P161: the screen image of this task */
+            if (!off && w >= 256 && w1 != zimg_addr && (w0 >> 19 & 3) == 2 && gl_ok && !gfx_measure_only && !hx_disabled() && fbc_task_p &&
+                gfx_addr(w1) && gfx_addr(w1) != fbc_task_p && !hx_is_screen(gfx_addr(w1)))
+                hx_begin(gfx_addr(w1), w);                                      /* P335: a second full-frame image (ghost) */
+            else if (!off && w >= 256 && w1 != zimg_addr && (w0 >> 19 & 3) == 2) {   /* P161: the screen image of this task */
                 if (!fbc_task_p) fbc_restore(gfx_addr(w1));
                 fbc_task_p = gfx_addr(w1); fbc_task_w = w;
                 { static unsigned n; static unsigned char *last[4]; int k, seen = 0; for (k = 0; k < 4; k++) seen |= last[k] == fbc_task_p;
@@ -1721,6 +1857,7 @@ void gfx_run_task(void *task) {
     memset(p61_icls, 0, sizeof p61_icls); p61_mn[0] = p61_mn[1] = 1e30f; p61_mx[0] = p61_mx[1] = -1e30f;
     gfx_run_dl(dl);
     if (off_on) off_end();   /* P137 */
+    hx_task_end();           /* P335 */
     fbc_task_end();          /* P161 */
     if (p61_flag && p61_mtx && (++p61_frames <= (unsigned)p61_flag || p61_frames % 256 == 0))
         port_log("[p61] task %u: model G_MTX %u, sub-DLs %u: %u commands, %u vertices, %u triangles, inner G_MTX %u "
