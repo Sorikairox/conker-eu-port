@@ -156,6 +156,27 @@ void p326_probe(void) {
  * multiplayer too (p326_probe only runs from Conker's look callback). */
 unsigned p341_rail_calls[32]; /* P341: event_action_rail calls per command (p174_ev.c wrap) */
 void p340_probe(void) {
+    {   /* P341 TEST ?p341m=1: multiplayer menu state (menu, title / main page, page alpha, joined players, new presses of
+         * controllers 1..3), logged on change: how pads 2..4 join a mode */
+        extern unsigned char *g_menu_state; /* was D_80090174 */
+        extern unsigned char g_menu_page_alpha; /* was D_800E0EC5 */
+        extern signed char g_menu_joined_count; /* was D_800901E0 */
+        extern unsigned short g_cont_pressed; /* was D_800BED50 */
+        static int on = -1; static unsigned key0 = ~0u;
+        if (on < 0) on = port_flag("p341m") > 0;
+        if (on && g_menu_state) {
+            const unsigned short *cp = &g_cont_pressed;
+            unsigned m = vbe_ld8(g_menu_state + 0x3E), tp = vbe_ld8(g_menu_state + 0x2C), mp = vbe_ld8(g_menu_state + 0x3F);
+            unsigned al = vbe_ld8(&g_menu_page_alpha), jc = vbe_ld8(&g_menu_joined_count);
+            unsigned p1 = vbe_ld16(cp + 1), p2 = vbe_ld16(cp + 2);
+            unsigned key = m | tp << 4 | mp << 12 | (al == 0xFF) << 20 | jc << 21 | (p1 != 0) << 25 | (p2 != 0) << 26;
+            if (key != key0) {
+                key0 = key;
+                port_log("[p341m] frame %u menu %u title page %u main page %u alpha %u joined %u pressed c1 %04x c2 %04x\n",
+                         port_frame_count, m, tp, mp, al, jc, p1, p2);
+            }
+        }
+    }
     unsigned char *r = g_objects;
     {   /* P340 TEST ?p340=F (multiplayer weapon pickups): from retrace F, once lists the floating pickups (world objects
          * whose update +0x38 is pickup_update: index, kind +0x54, position, team filter +0x84); ?p340tp=I+1 at retrace
@@ -240,9 +261,9 @@ void p340_probe(void) {
                 const unsigned char *s1 = (const unsigned char *)(uintptr_t) * (const unsigned *)(q1 + 0x31C);
                 last340 = port_frame_count;
                 if (*(const int *)q1 && s1)
-                    port_log("[p340] frame %u p1 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d 74 0x%x\n", port_frame_count,
-                             vbe_ld8(s1 + 0x75), vbe_ld8(s1 + 0x78), vbe_ld8(s1 + 0x7C), vbe_ld8(s1 + 0x11A), vbe_ld8(s1 + 0x197),
-                             vbe_ld8(s1 + 0x74));
+                    port_log("[p340] frame %u p1 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d 74 0x%x shots %d pos %.0f %.0f %.0f\n",
+                             port_frame_count, vbe_ld8(s1 + 0x75), vbe_ld8(s1 + 0x78), vbe_ld8(s1 + 0x7C), vbe_ld8(s1 + 0x11A),
+                             vbe_ld8(s1 + 0x197), vbe_ld8(s1 + 0x74), vbe_ld16(s1 + 0x1AA), F(q1, 0x14), F(q1, 0x18), F(q1, 0x1C));
                 port_log("[p340] frame %u p0 pad_kind 0x%x item 0x%x fb 0x%x phase %d aim %d shots %d pos %.0f %.0f %.0f\n",
                          port_frame_count, vbe_ld8(st + 0x75), vbe_ld8(st + 0x78), vbe_ld8(st + 0x7C), vbe_ld8(st + 0x11A),
                          vbe_ld8(st + 0x197), vbe_ld16(st + 0x1AA), F(r, 0x14), F(r, 0x18), F(r, 0x1C));
