@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 900" width="1280" height="900" font-family="system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Conker EU web port: online multiplayer architecture (P336 design)</title>
+  <style>
+    :root { --bg:#ffffff; --fg:#1d2330; --mut:#5b6474; --line:#7a8496; --box:#f4f6fa; --peer:#eef4ff; --peerS:#3b6fd8;
+            --wasm:#fff6e8; --wasmS:#c9821b; --net:#eaf7ef; --netS:#2f9b5a; --srv:#f6eefc; --srvS:#8a4fc4; --warn:#c0392b; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#151922; --fg:#e7ebf3; --mut:#a3acbd; --line:#8792a8; --box:#1f2531; --peer:#1b2740; --peerS:#7aa2ff;
+              --wasm:#2d2618; --wasmS:#e0a54a; --net:#17302a; --netS:#5fd08f; --srv:#281e36; --srvS:#c49af0; --warn:#ff7b6b; }
+    }
+    .bg { fill: var(--bg); }
+    text { fill: var(--fg); font-size: 13px; }
+    .t { font-size: 15px; font-weight: 700; }
+    .h { font-size: 20px; font-weight: 700; }
+    .s { font-size: 11.5px; fill: var(--mut); }
+    .m { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+    .peer { fill: var(--peer); stroke: var(--peerS); stroke-width: 2; }
+    .page { fill: var(--box); stroke: var(--peerS); stroke-width: 1.2; }
+    .net  { fill: var(--net); stroke: var(--netS); stroke-width: 1.6; }
+    .wasm { fill: var(--wasm); stroke: var(--wasmS); stroke-width: 1.6; }
+    .srv  { fill: var(--srv); stroke: var(--srvS); stroke-width: 1.6; }
+    .ln   { stroke: var(--line); stroke-width: 1.6; fill: none; }
+    .dc   { stroke: var(--netS); stroke-width: 3; fill: none; }
+    .sig  { stroke: var(--srvS); stroke-width: 1.6; fill: none; stroke-dasharray: 6 5; }
+    .in   { stroke: var(--peerS); stroke-width: 2.2; fill: none; }
+    .warn { fill: var(--warn); font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7a8496"/></marker>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2f9b5a"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3b6fd8"/></marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a4fc4"/></marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1280" height="900"/>
+  <text class="h" x="24" y="34">Online multiplayer: deterministic input lockstep over WebRTC (recommended MVP)</text>
+  <text class="s" x="24" y="54">Each peer runs the same conker.wasm on its OWN ROM. Only inputs (4 bytes per player per 50 Hz retrace), hashes and session metadata cross the network.</text>
+
+  <!-- servers row -->
+  <rect class="srv" x="24" y="74" width="300" height="92" rx="10"/>
+  <text class="t" x="38" y="98">Netlify (static, already used)</text>
+  <text class="s" x="38" y="118">index.html + main.js + net.js + conker.wasm</text>
+  <text class="s" x="38" y="136">build id = sha256(conker.wasm) shown in lobby</text>
+  <text class="s" x="38" y="154">no WebSockets on Netlify Functions</text>
+
+  <rect class="srv" x="344" y="74" width="330" height="92" rx="10"/>
+  <text class="t" x="358" y="98">Signaling (handshake only, ~5 s)</text>
+  <text class="s" x="358" y="118">MVP: copy-paste offer / answer codes (no server)</text>
+  <text class="s" x="358" y="136">Phase 2: room code -> Netlify Function + Blobs</text>
+  <text class="s" x="358" y="154">(HTTP polling) or Cloudflare Durable Object (WS)</text>
+
+  <rect class="srv" x="694" y="74" width="270" height="92" rx="10"/>
+  <text class="t" x="708" y="98">STUN (free, public)</text>
+  <text class="s" x="708" y="118">stun.l.google.com:19302</text>
+  <text class="s" x="708" y="136">stun.cloudflare.com:3478</text>
+  <text class="s" x="708" y="154">finds public address (most NATs)</text>
+
+  <rect class="srv" x="984" y="74" width="272" height="92" rx="10"/>
+  <text class="t" x="998" y="98">TURN relay (optional)</text>
+  <text class="s" x="998" y="118">symmetric NAT / CGNAT fallback</text>
+  <text class="s" x="998" y="136">~6 KB/s per link: ~20 MB/h/player</text>
+  <text class="s" x="998" y="154">creds minted by a Netlify Function</text>
+
+  <!-- signaling dashed lines to peers -->
+  <path class="sig" d="M509,166 L509,196 L190,196 L190,226" marker-end="url(#p)"/>
+  <path class="sig" d="M509,196 L860,196 L860,226" marker-end="url(#p)"/>
+  <path class="sig" d="M829,166 L829,186 L1110,186 L1110,226" marker-end="url(#p)"/>
+  <text class="s" x="520" y="190">SDP offer/answer + ICE candidates, compat check</text>
+
+  <!-- Peer A -->
+  <rect class="peer" x="24" y="226" width="560" height="470" rx="14"/>
+  <text class="t" x="40" y="252">Peer A: browser tab (host, controller port 1)</text>
+  <text class="s" x="40" y="270">own ROM from IndexedDB, sha256 checked against the room; options + EEPROM image dictated by host</text>
+
+  <rect class="page" x="40" y="282" width="250" height="118" rx="8"/>
+  <text class="t" x="52" y="304">Page input (main.js)</text>
+  <text class="s" x="52" y="322">pollInput(): keyboard / gamepad / touch</text>
+  <text class="s" x="52" y="338">toggle latches (crouch / walk / R-look)</text>
+  <text class="s" x="52" y="354">netplay: NO direct write of port_pads;</text>
+  <text class="s" x="52" y="370">sample -> local input for frame N+D</text>
+  <text class="s" x="52" y="388">Online panel / lobby (default off)</text>
+
+  <rect class="net" x="310" y="282" width="258" height="190" rx="8"/>
+  <text class="t" x="322" y="304">Netcode (new net.js + net.c)</text>
+  <text class="s" x="322" y="322">input ring [frame][4 ch] in wasm memory</text>
+  <text class="s" x="322" y="338">input delay D = 2..4 retraces (adaptive)</text>
+  <text class="s" x="322" y="354">send each retrace: last K unacked inputs</text>
+  <text class="s" x="322" y="370">+ ack; unordered, maxRetransmits 0</text>
+  <text class="s" x="322" y="386">time sync: nudge VI period +-1 %</text>
+  <text class="s" x="322" y="402">desync: state hash every 10 retraces</text>
+  <text class="s" x="322" y="418">stall overlay &gt; 250 ms, drop &gt; 10 s</text>
+  <text class="s" x="322" y="434">tab hidden: setTimeout-driven loop or</text>
+  <text class="s" x="322" y="450">session-wide pause (never silent)</text>
+
+  <path class="in" d="M290,360 L310,360" marker-end="url(#b)"/>
+
+  <rect class="wasm" x="40" y="486" width="528" height="196" rx="8"/>
+  <text class="t" x="52" y="508">conker.wasm: port layer + game C (forced det clock while online)</text>
+  <text class="m" x="52" y="530">pc_sched.c frame(): while (acc &gt;= 20 ms &amp;&amp; net_ready(N+1)) retrace()</text>
+  <text class="m" x="52" y="548">retrace(): port_frame_count++ -&gt; port_frame_hook = net_apply(N)</text>
+  <text class="m" x="52" y="566">  copies inputs[N][0..3] -&gt; pc_pif.c port_pads[ch]</text>
+  <text class="m" x="52" y="584">game thread: cont_read_frame -&gt; osContStartReadData (PIF ch 0-3)</text>
+  <text class="m" x="52" y="602">game_update_frame_timing: g_frame_ticks = g_sched_retrace_count</text>
+  <text class="m" x="52" y="620">pc_os.c det_now(): osGetTime/osGetCount = f(retrace, reads)</text>
+  <text class="m" x="52" y="638">aud_out.c det_vq: AI_LEN from virtual queue (not Web Audio)</text>
+  <text class="s" x="52" y="660">outputs only (never fed back to logic): WebGL renderer, Web Audio ring, rumble, EEPROM sandbox</text>
+  <text class="s" x="52" y="676">optional "my view only": crop own split-screen viewport at present time</text>
+  <path class="in" d="M440,472 L440,486" marker-end="url(#b)"/>
+
+  <!-- Peer B -->
+  <rect class="peer" x="700" y="226" width="556" height="300" rx="14"/>
+  <text class="t" x="716" y="252">Peer B: browser tab (controller port 2)</text>
+  <text class="s" x="716" y="270">identical stack: page input -> netcode -> conker.wasm</text>
+  <rect class="page" x="716" y="282" width="160" height="70" rx="8"/>
+  <text class="t" x="728" y="304">Page input</text>
+  <text class="s" x="728" y="324">sample local pad</text>
+  <text class="s" x="728" y="340">-> frame N+D, ch 1</text>
+  <rect class="net" x="892" y="282" width="348" height="70" rx="8"/>
+  <text class="t" x="904" y="304">Netcode</text>
+  <text class="s" x="904" y="324">same input ring; waits for ch 0, 2, 3 of frame N</text>
+  <text class="s" x="904" y="340">before retrace N (frame barrier)</text>
+  <rect class="wasm" x="716" y="366" width="524" height="88" rx="8"/>
+  <text class="t" x="728" y="388">conker.wasm (same build id, same ROM hash)</text>
+  <text class="s" x="728" y="408">same boot from retrace 0, same options, same EEPROM image,</text>
+  <text class="s" x="728" y="424">same controller presence mask (osContInit at boot)</text>
+  <text class="s" x="728" y="442">=> identical game state every retrace (hash-checked)</text>
+  <path class="in" d="M876,318 L892,318" marker-end="url(#b)"/>
+  <path class="in" d="M1066,352 L1066,366" marker-end="url(#b)"/>
+  <text class="s" x="716" y="474">split-screen picture on every peer (N64 layout),</text>
+  <text class="s" x="716" y="490">or only its own viewport (presentation crop)</text>
+
+  <!-- Peers C/D -->
+  <rect class="peer" x="700" y="560" width="270" height="110" rx="14"/>
+  <text class="t" x="716" y="586">Peer C (port 3)</text>
+  <text class="s" x="716" y="606">optional</text>
+  <rect class="peer" x="986" y="560" width="270" height="110" rx="14"/>
+  <text class="t" x="1002" y="586">Peer D (port 4)</text>
+  <text class="s" x="1002" y="606">optional; empty ports =</text>
+  <text class="s" x="1002" y="622">game bots / not present</text>
+
+  <!-- DataChannels (mesh) -->
+  <path class="dc" d="M568,318 L700,318" marker-start="url(#g)" marker-end="url(#g)"/>
+  <path class="dc" d="M584,615 L700,615" marker-start="url(#g)" marker-end="url(#g)"/>
+  <path class="dc" d="M584,686 L1121,686 L1121,670" marker-start="url(#g)" marker-end="url(#g)"/>
+  <path class="dc" d="M835,526 L835,560" marker-start="url(#g)" marker-end="url(#g)"/>
+  <path class="dc" d="M1121,526 L1121,560" marker-start="url(#g)" marker-end="url(#g)"/>
+  <path class="dc" d="M970,615 L986,615" marker-start="url(#g)" marker-end="url(#g)"/>
+  <text class="s" x="590" y="300">RTCDataChannel</text>
+  <text class="s" x="590" y="314">(mesh, &lt;= 6 links)</text>
+  <text class="s" x="736" y="640">every peer sends its own inputs to all</text>
+  <text class="s" x="736" y="656">others; host relays if a pair fails</text>
+
+  <!-- per-frame timeline -->
+  <rect class="srv" x="24" y="712" width="1232" height="170" rx="10" style="fill:var(--box);stroke:var(--line)"/>
+  <text class="t" x="40" y="736">Per-retrace exchange (PAL 50 Hz, one retrace = 20 ms; D = input delay, here D = 3)</text>
+  <g>
+    <rect class="page" x="40" y="752" width="220" height="56" rx="6"/>
+    <text x="52" y="772">1. sample local pad at tick</text>
+    <text class="s" x="52" y="790">store as inputs[N+D][my ch]</text>
+    <rect class="net" x="282" y="752" width="250" height="56" rx="6"/>
+    <text x="294" y="772">2. send {N+D-K+1 .. N+D, ack}</text>
+    <text class="s" x="294" y="790">~40-60 B payload, 50 packets/s</text>
+    <rect class="net" x="554" y="752" width="230" height="56" rx="6"/>
+    <text x="566" y="772">3. barrier: inputs[N] complete</text>
+    <text class="s" x="566" y="790">for every present channel?</text>
+    <rect class="wasm" x="806" y="752" width="210" height="56" rx="6"/>
+    <text x="818" y="772">4. retrace N (game step)</text>
+    <text class="s" x="818" y="790">port_pads = inputs[N]</text>
+    <rect class="wasm" x="1038" y="752" width="202" height="56" rx="6"/>
+    <text x="1050" y="772">5. every 10th: hash(N)</text>
+    <text class="s" x="1050" y="790">piggy-back, compare</text>
+    <path class="ln" d="M260,780 L282,780" marker-end="url(#a)"/>
+    <path class="ln" d="M532,780 L554,780" marker-end="url(#a)"/>
+    <path class="ln" d="M784,780 L806,780" marker-end="url(#a)"/>
+    <path class="ln" d="M1016,780 L1038,780" marker-end="url(#a)"/>
+  </g>
+  <text class="s" x="40" y="834">Missing input at step 3: do not run the retrace (the game simply waits; audio keeps playing its ring). The peer that runs ahead stalls, so all peers stay on the same retrace +- D.</text>
+  <text class="s" x="40" y="852">Loss: each packet repeats every unacked input (K up to 32), so one lost packet costs nothing. Latency felt = D x 20 ms (+ the game's own 1-2 frames), symmetric for every player.</text>
+  <text class="warn" x="40" y="872">Hash mismatch = desync: stop the session with a report (frame, differing memory blocks). No state transfer (it would contain ROM-derived data).</text>
+</svg>
