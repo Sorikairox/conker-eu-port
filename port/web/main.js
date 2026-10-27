@@ -788,6 +788,7 @@ netEvents.roster.push((slots) => {   // host
       (s.rtt && s.state === 'joined' ? ` · ping ${s.rtt} ms` : '') + (s.relay && s.relay.length ? ` · through player 1 with ${s.relay.map((k) => k.split('-').filter((c) => +c !== s.ch).map((c) => 'player ' + (+c + 1))).join(', ')}` : '');
   }
   if (!window.PortNet || !PortNet.t.started) { $('net-start').disabled = !joined; $('net-start').textContent = `Start the game (${joined + 1} players)`; }
+  else $('net-host-actions').hidden = true;   // the game started: no more invitations
   $('net-invite').disabled = slots.length >= 3 && slots.every((s) => !['left', 'failed'].includes(s.state));
 });
 $('net-join').onclick = () => { $('net-step-join').hidden = false; $('net-step-host').hidden = true; $('net-host').disabled = $('net-join').disabled = true; };
