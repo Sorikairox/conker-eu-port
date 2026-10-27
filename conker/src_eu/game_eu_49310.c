@@ -178,6 +178,21 @@ void rumble_update(void) {
     u8 *pfs_stop; /* was temp_s0_2 */
     u8 *pfs_idle; /* was temp_s0_3 */
 
+#ifdef PORT
+    {   /* P335: the page option "Rumble" (PORT_OPT_RUMBLE) decides whether pc_pif.c answers as a Rumble Pak. The game
+         * only probes at a level / area start (g_rumble_probe_request from level_start_game), so a toggle used to wait
+         * for the next load. Now a change of the option requests the same probe this frame: on -> os_motor_init finds
+         * the pak (g_rumble_pak_present 1, pattern state reset, motor stopped); off -> it finds none (present 0, the
+         * channel is skipped and rumble_request / rumble_start ignore it). */
+        static s32 rumble_option_seen = -1; /* -1 until the first frame */
+        s32 rumble_option_on = port_option(PORT_OPT_RUMBLE) != 0;
+
+        if (rumble_option_seen >= 0 && rumble_option_on != rumble_option_seen) {
+            g_rumble_probe_request = 1;
+        }
+        rumble_option_seen = rumble_option_on;
+    }
+#endif
     pak_present = g_rumble_pak_present;
     ch = 0;
     do {

@@ -10,6 +10,7 @@
  * kept diving in diving water, so the air runs out without a dive route. */
 #include <stdint.h>
 #include "../ultra/pc_mem.h"
+#include "../ultra/port_options.h"
 
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
@@ -76,6 +77,16 @@ void p326_probe(void) {
                          F(cam, 0x2F8), F(cam, 0x2FC), F(cam, 0x300), F(cam, 0x2BC) - F(cam, 0x2F8),
                          F(cam, 0x2C0) - F(cam, 0x2FC), F(cam, 0x2C4) - F(cam, 0x300));
         }
+    }
+    {   /* P335 TEST ?p335rumble=F[&p335rumbleoff=G]: at retrace F turns the page option "Rumble" on through the page's
+         * option channel (port_set_option, as the Options panel does), at G off again; rumble_update should re-probe the
+         * pak at once (no level load). With ?p333pad=1 the page logs the gamepad calls. */
+        static int on_at = -1, off_at = -1;
+        if (on_at < 0) { on_at = port_flag("p335rumble"); off_at = port_flag("p335rumbleoff"); }
+        if (on_at > 0 && port_frame_count >= (unsigned)on_at) {
+            on_at = 0; port_set_option(PORT_OPT_RUMBLE, 1); port_log("[p335] frame %u: option rumble -> on\n", port_frame_count); }
+        if (off_at > 0 && port_frame_count >= (unsigned)off_at) {
+            off_at = 0; port_set_option(PORT_OPT_RUMBLE, 0); port_log("[p335] frame %u: option rumble -> off\n", port_frame_count); }
     }
     w = vbe_ld8(r + 0xAD);
     {   /* P333 TEST ?p326nofloat=1 (changes the game): while Conker is in water, clears the "float water" flags of the

@@ -120,7 +120,8 @@ EM_JS(void, __port_eep_dirty, (void), { if (typeof Module !== 'undefined' && Mod
  * Option off (the default): pak commands get no response, exactly as before (no pak, g_rumble_pak_present stays 0).
  * Option on: those two blocks answer as above; every other pak address still gets no response, so the Controller
  * Pak code and the EEPROM saves (channel 4) see what they always saw. Motor changes go to the page
- * (Module.portRumble(channel, on)), which drives the gamepad's vibration. */
+ * (Module.portRumble(channel, on)), which drives the gamepad's vibration. P335: rumble_update re-probes when the
+ * option changes, so a toggle takes effect at once (not at the next level load). */
 EM_JS(void, __port_rumble, (int ch, int on), { if (typeof Module !== 'undefined' && Module.portRumble) Module.portRumble(ch, on); });
 static u8 rumble_probe[MAXCONTROLLERS];   /* last byte written to the probe block (0x80 = rumble pak selected) */
 static u8 rumble_motor[MAXCONTROLLERS];
@@ -138,7 +139,10 @@ static u8 pak_data_crc(const u8 *d) {
 }
 /* 1 = handled (reply written), 0 = no pak there */
 static int rumble_pak_cmd(int ch, const u8 *c, int tx, u8 *r, int rx) {
-    if (!port_option(PORT_OPT_RUMBLE)) return 0;
+    if (!port_option(PORT_OPT_RUMBLE)) {   /* P335: option off = no pak; forget the probe / motor state for the next "on" */
+        rumble_probe[ch] = 0; rumble_motor[ch] = 0;
+        return 0;
+    }
     unsigned block = ((unsigned)c[1] << 8 | c[2]) >> 5;
     if (c[0] == 0x03 && tx >= 35 && rx >= 1) {
         if (block >= 0x400 && block < 0x600) rumble_probe[ch] = c[34];
