@@ -50,6 +50,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   the picture shows one pixelated frame that stays frozen for seconds (two shots 3 s apart identical) instead of a
   blend of live frames. Its copy of the new frame into g_fb_ghost_image (SETCIMG into RDRAM) probably never lands.
   Option "No motion blur / drunk sway" hides it; the default (off) still shows it (P331).
+- fire_burn_update (registry row P206) kills only 46 / 89 m8eac mutants now (P206: 89 / 91); every survivor edits a
+  stack record passed to a callee (effect / rumble request blocks). Add ARGMEM setups or find the harness change (P334).
+- Aim kinds are only known by number (P334 table in the 69670be3 message); naming them (which is the slingshot, which
+  the guns) needs a level route to each weapon pad.
 - Route tests `p261 r5g / pan8` (new game -> later levels) were not re-tuned after P319; their pad scripts are in git
   history (docs/port/sessions/p261).
 - port-b P317 leftovers (memcpy re-run of 19 registry rows, v0use candidates, random DIFFERs of func_1510E004 /
@@ -60,6 +64,27 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P334 (port-web, 2026-10-27): feature #13 aiming crosshair
+- 69670be3 option "Aiming crosshair" ('crosshair', PORT_OPT_AIM_CROSSHAIR 14): the original aim HUD
+  (aim_hud_spawn_for_mode) gives every aim kind a reticle except 0x12 / 0x18 / 0x38 / 0x3B; of those only 0x18 uses
+  the first-person aim camera (camera_update_aim_mode), whose fire ray (obj_ray_cast_from_ctl, record +0x13C along
+  +0x130) is the camera's view axis = screen centre (measured: same origin, same direction within one frame of
+  easing). With the option on, that branch spawns the game's own centred crosshair sprite (aim_hud_crosshair_spawn)
+  when the aim state is 2; R-look kinds (hand / mouth-aimed shots) are left alone. Shots: port_work/p327/p334o0 (off),
+  p334o1 (on), p334_<kind> (original HUD of 14 kinds).
+- Test aid: ?p326=1&p334aim=T (p326_probe.c) keeps the fallback pad kind (+0x7C) at T so B takes item kind T on any
+  level; ?p334log=1 logs kind / phase / aim / look state and the fire ray vs the camera. Pad: B at 200, R from 450.
+- Renames: struct126 unk75 / unk78 / unk11A / unk197 / unk198 -> pad_kind / item_kind / item_phase / aim_state /
+  look_state (compile-driven from census errors, port_work/p334/fieldren.py: only accesses clang reported as
+  struct126 members change; 3 mutant files follow); locals of aim_hud_spawn_for_mode, aim_hud_crosshair_spawn,
+  obj_ray_cast_from_ctl. wasm md5 unchanged by each rename step.
+- fire_burn_update re-run (MUT=1 NORAND=1): setups 21/21 EQUIV; m8eac 46 killed / 89, m8eacb 1/4, m8eacc 0/2, 0 not
+  applied. P206 had 89/91. All 43 m8eac survivors change stores into stack records handed to callees (smoke / flame /
+  crackle / burst effect and rumble request blocks), not the P333-renamed names alone: most likely the known blind spot
+  "random EQUIV compares stack records only by class STK" (needs ARGMEM setups, P220). Not re-run on pre-P333 code to
+  pin the cause; open item. Mutant files changed here re-run: 15073FA0 74/74, 15072B44 34/34, m4A94 34/40 (its 6
+  survivors are on untouched lines).
+- check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps. Deployed.
 ### P333 (port-web, 2026-10-27): features #11 and #12
 - d6ffdbba option "Inverted swimming" ('swiminvert', PORT_OPT_SWIM_INVERT 12): the N64 swims like a plane (stick up
   = target pitch dive * 2.25 > 0 = head-down = dive; down = rise) in swim_water_physics (state 1 in water) and
