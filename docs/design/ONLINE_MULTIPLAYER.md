@@ -154,7 +154,17 @@ sequenceDiagram
 6. **Audio during stalls:** the ring underruns into short silences (no crackle, since the ring drops cleanly). Acceptable.
 7. **Unconverted or stubbed MP code paths** (e.g. P224's MP stubs, now all C) may hide port bugs that are themselves nondeterministic, such as reads of uninitialised null-zone memory. Phase 0 surfaces them as divergences.
 
-**Open questions for the user**
+**Decisions (user, 2026-10-27)**
+1. Input delay of 40 to 80 ms is acceptable. Lockstep it is; rollback stays optional.
+2. Copy-paste connection codes for the first version.
+3. No TURN: accept that some pairs cannot connect.
+4. Power-on lockstep, Player 1 drives the menus.
+5. The session uses the host's EEPROM (unlocks shared).
+6. A disconnected player stays in the game standing still (neutral input); the session continues.
+7. "My view only" is an option (Online panel), not forced.
+8. Spectators: not now.
+
+**Open questions for the user** (answered above)
 1. Is input delay (40 to 80 ms) acceptable for the MVP, with rollback only later or never?
 2. Signaling: is copy-paste codes OK for the first version? For room codes, Netlify Functions + Blobs (stays on Netlify) or a Cloudflare Worker (instant, real WebSocket, a second account)?
 3. TURN: pay or self-host one, or accept that roughly 10 to 20 % of pairs cannot connect (they could fall back to the host relay only if the host itself is reachable)?
