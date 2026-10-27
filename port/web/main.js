@@ -68,6 +68,8 @@ const OPTIONS = [
     help: 'Holding A during the helicopter tail spin (A, then A again in the air) keeps Conker hovering about twice as long before he drops. Off: the N64 hover time.' },
   { key: 'nodrunk', label: 'No motion blur / drunk sway', def: false, game: 6,
     help: 'Turns off the frame-blend motion blur (the hangover wake-up after the opening, a slow-motion camera cut) and the drunk camera sway and screen stretching (drunk Conker, the title menu). The under-water wobble stays. Off: as on the N64.' },
+  { key: 'conkerlod', label: 'Conker always full detail', def: false, game: 7,
+    help: 'Conker is always drawn with his most detailed model. Off: as on the N64, he switches to simpler models once the camera is more than 500 units away (the normal follow camera is often 450 to 650 units behind him, more while running).' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }

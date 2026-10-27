@@ -398,9 +398,13 @@ u8 obj_current_part_model(struct127 *);
 /*
  * P62: model level of detail. For object i (not hidden by +0x1C9, not state 7) with +0x2C8 levels: pick a level from
  * the squared distance to the camera record g_player_views[cam] (a pointer; +0x2F8 / +0x2FC / +0x300): < 500 -> 0, < 730 -> 1,
- * < 1500 -> 2, < 2000 -> 3, else 4; one level finer when slow (xz_velocity < 3). Overrides: obj_current_part_model's
- * code 0x5A at level 0, or no code while g_mp_mode_active is set, -> 1; g_cutscene_slot_state == 1 -> 0. Clamped to the last level.
+ * < 1500 -> 2, < 2000 -> 3, else 4; one level finer when slow (xz_velocity < 3). Overrides: model0 (the model id of
+ * level 0, obj_current_part_model) 0x5A at level 0, or model0 0 while g_mp_mode_active is set, -> 1;
+ * g_cutscene_slot_state == 1 -> 0. Clamped to the last level.
  * A new level loads model ((u8 *)+0x2C4)[level] through obj_set_type and is stored in +0x1C8.
+ * Conker (object 0 on level 0x29) has 5 levels, models 0..4, so model0 == 0 identifies him; the follow camera keeps
+ * him at about 390..630 units, so he often drops to level 1 while running. PORT option PORT_OPT_CONKER_FULL_LOD
+ * (P331): model0 == 0 always gets level 0 (applied after the other overrides, before the clamp).
  */
 /* was func_1502C9D8 */
 void obj_select_lod(s32 i, s16 cam, s32 unused) {
@@ -411,7 +415,7 @@ void obj_select_lod(s32 i, s16 cam, s32 unused) {
     f32 near2 = 1500.0f;
     f32 near3 = 2000.0f;
     s32 last;
-    s32 code;
+    s32 model0; /* was code: model id of detail level 0 (obj_current_part_model) */
     s32 level;
     f32 dx, dy, dz, d2;
 
@@ -422,7 +426,7 @@ void obj_select_lod(s32 i, s16 cam, s32 unused) {
     if (last == -1) {
         return;
     }
-    code = obj_current_part_model(obj);
+    model0 = obj_current_part_model(obj);
     dx = view->unk2F8 - obj->x_position;
     dy = view->unk2FC - obj->y_position;
     dz = view->unk300 - obj->z_position;
@@ -441,8 +445,8 @@ void obj_select_lod(s32 i, s16 cam, s32 unused) {
     if (level >= 2 && obj->xz_velocity < 3.0f) {
         level--;
     }
-    if (code != 0) {
-        if (code == 0x5A && level == 0) {
+    if (model0 != 0) {
+        if (model0 == 0x5A && level == 0) {
             level = 1;
         }
     } else if (g_mp_mode_active != 0) {
@@ -451,6 +455,11 @@ void obj_select_lod(s32 i, s16 cam, s32 unused) {
     if (g_cutscene_slot_state == 1) {
         level = 0;
     }
+#ifdef PORT
+    if (port_option(PORT_OPT_CONKER_FULL_LOD) && model0 == 0) {
+        level = 0; /* Conker: his detail levels are models 0..4, so model0 == 0 picks him out */
+    }
+#endif
     if (last < level) {
         level = last < 0 ? 0 : last;
     }
