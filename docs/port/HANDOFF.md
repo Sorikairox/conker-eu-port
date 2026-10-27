@@ -60,6 +60,22 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P332 (port-web, 2026-10-27): features #10 and #9
+- 5b49ac4b option "Underwater air meter" ('airbar', PORT_OPT_AIR_BAR 8): hud_air_bar_draw (game_BC510.c, end of
+  hud_draw) draws a bar of the air left, (0x5A1 - air_counter) / 0x5A1, while Conker is in water and the counter
+  runs; red in the last quarter. The original only has the face meter (model 0xB9, from 0x5B ticks, shape stops
+  changing at counter 720) and bubbles. Works with Longer breath (reads the same counter). struct127 unkB2 ->
+  air_counter. Shots: port_work/p327/p332a (on), p332off, p332lb (with longbreath).
+- 27967f91 sliders "Music / Sound effects / Speech volume" ('volmusic' / 'volsfx' / 'volspeech', ids 9..11, 0..100 %,
+  default 100): port_volume_scale (pc_os.c) in __n_vsVol (sequence voices), SND_VOL155 (sound player) and the MP3
+  stream's envelope targets (SPEECH_VOL). Page: OPTIONS rows with range: true, same port_set_option channel.
+  Measured on the opening: music x0.49996, sfx x0.24995, speech 0 at 50/25/0; all 0 -> output rms 0.0871 -> 0.0007.
+- Test aid: ?p326tpf=F&p326tpx=X&p326tpz=Z teleports Conker (river: 855, -1056); the 0x29 river is float water, so
+  air tests still need a temporary hook clearing the float flags in swim_water_physics.
+- Lesson: game TUs cannot hand string literals to host helpers (port_flag / port_log saw nothing), and an undefined
+  symbol (e.g. a static referenced from a probe) is silently stubbed by gen_stubs: pass test switches through a
+  global defined in the game TU.
+- Both: check.sh GREEN, hold-L 5789 / 0x29 at 5795, deployed.
 ### P331 (port-web, 2026-10-27): features #7 and #8
 - 2023e2ed option "No motion blur / drunk sway" ('nodrunk', PORT_OPT_NO_DRUNK_FX 6): fb_ghost_set_mode turns every
   frame-blend request off; camera_update_shake and camera_wobble_apply ignore their drunk triggers (camera mode
