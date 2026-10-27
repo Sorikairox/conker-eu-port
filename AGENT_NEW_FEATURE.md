@@ -30,7 +30,8 @@ Do:
 5. One commit for the feature, with a message that explains how it works (the user learns from it).
    Rename anything you touch that still has a vague name (names.tsv + apply_names.sh).
 6. Update PLAYING.md (Options), PLAN_NEW_FEATURE.md (status), the HANDOFF.md session entry and
-   the sessions.tsv row. Then run tools/eu_port/deploy_web.sh and tools/eu_port/backup_push.sh.
+   the sessions.tsv row. Then run tools/eu_port/deploy_web.sh, and the backup from the main checkout:
+   (cd ~/conker && tools/eu_port/backup_push.sh).
 
 If you are blocked or denied permission, stop and report the exact command.
 Report: commit hash, what the option does (original vs new), the evidence, and whether it was deployed.
