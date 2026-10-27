@@ -3202,14 +3202,14 @@ typedef struct {
     u8  pad54[0x110 - 0x54];
     struct_eu_2062D0_b_sub unk110;
 } struct_eu_2062D0_b;
-// argument block of rumble_request
+// argument block of rumble_request (copied to +0xE of the kind-0x3F rumble effect, see rumble_record_update)
 typedef struct {
-    u8  unk0;
+    u8  flags;      /* bit 0: the effect has a life (counts down by g_frame_ticks); was unk0 */
     u8  pad1;
-    s16 unk2;
-    u8  unk4;
-    u8  unk5;
-    s8  unk6;
+    s16 life;       /* ticks left when flags bit 0; was unk2 */
+    u8  strength;   /* 0..8, rumble_start_strength; was unk4 */
+    u8  player_mask; /* bit per player that rumbles; was unk5 */
+    s8  update_fn;  /* g_rumble_rec_update_fns index, -1 = none; was unk6 */
     u8  pad7;
 } structEU_151D8E18;
 typedef struct {

@@ -21,7 +21,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 9 | Separate music / SFX / speech volume | Done P332 |
 | 10 | Underwater air meter | Done P332 |
 | 11 | Inverted swimming | Done P333 |
-| 12 | Rumble (browser gamepad) | To do |
+| 12 | Rumble (browser gamepad) | Done P333 |
 | 13 | Aiming crosshair | To do |
 | 14 | Language selector (EN/FR/DE in the EU ROM) | To do |
 | 15 | Widescreen without bars | To do (hard) |

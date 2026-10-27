@@ -1373,7 +1373,7 @@ D_8009A1BC	8009A1BC	0	none	global	abs	game_data	2282
 var70059a0c	800B0DFC	4	data	global	.game_data	game_data	-
 water_ring_draw	151667D8	650	func	global	.game	game	12610
 player_swim_anim_speed	150F3A20	54	func	global	.game	game	11770
-D_eu_800E0E30	800E0E30	0	data	global	abs	game_data	7756
+g_rumble_clear_request	800E0E30	0	data	global	abs	game_data	7756
 g_splash_spawn_word	8008CE7C	0	none	global	abs	game_data	1047
 fx_spawn_impact_burst	151426F0	140	func	global	.game	game	10492
 n_csp_stop	10019040	44	func	global	.init	init	9173

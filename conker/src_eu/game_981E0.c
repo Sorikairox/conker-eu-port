@@ -2995,11 +2995,11 @@ void objfx_fede0_cam_shake(s32 arg0) {
 
     character_smoke_puff(g_cur_obj, 0xFF, 1);
     if (g_cur_obj->camera != NULL) {
-        sp18.unk0 = 1;
-        sp18.unk2 = (random_int() % 7U) + 10;
-        sp18.unk5 = 1 << g_cur_obj->camera->unk23D;
-        sp18.unk4 = (random_int() % 7U) + 2;
-        sp18.unk6 = -1;
+        sp18.flags = 1;
+        sp18.life = (random_int() % 7U) + 10;
+        sp18.player_mask = 1 << g_cur_obj->camera->unk23D;
+        sp18.strength = (random_int() % 7U) + 2;
+        sp18.update_fn = -1;
         rumble_request(&sp18, 0, 0xFF, 1);
     }
 }
@@ -3013,11 +3013,11 @@ void objfx_ff2b0_cam_shake(s32 arg0) {
         object_bolt_fire(g_cur_obj, 0xFF, 1);
     }
     if (g_cur_obj->camera != NULL) {
-        sp18.unk0 = 1;
-        sp18.unk2 = (random_int() % 5U) + 15;
-        sp18.unk5 = 1 << g_cur_obj->camera->unk23D;
-        sp18.unk4 = (random_int() & 3) + 3;
-        sp18.unk6 = -1;
+        sp18.flags = 1;
+        sp18.life = (random_int() % 5U) + 15;
+        sp18.player_mask = 1 << g_cur_obj->camera->unk23D;
+        sp18.strength = (random_int() & 3) + 3;
+        sp18.update_fn = -1;
         rumble_request(&sp18, 0, 0xFF, 1);
     }
 }

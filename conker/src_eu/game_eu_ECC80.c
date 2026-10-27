@@ -318,11 +318,11 @@ void sinking_platform_update(u8 *p) {
                       *(f32 *) ((u8 *) g_objects + 0x1C), 0xFF, 0);
         if (mode == 0) {
             cam_wobble_start_preset(3, g_view_count_minus1_lo, NULL, 0xFF, 0);
-            rumble.unk0 = 1;
-            rumble.unk2 = 0x3C;
-            rumble.unk5 = 1;
-            rumble.unk4 = 8;
-            rumble.unk6 = -1;
+            rumble.flags = 1;
+            rumble.life = 0x3C;
+            rumble.player_mask = 1;
+            rumble.strength = 8;
+            rumble.update_fn = -1;
             rumble_request(&rumble, 0, 0xFF, 0);
         }
     }

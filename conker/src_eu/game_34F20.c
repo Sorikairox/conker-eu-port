@@ -39,7 +39,7 @@ extern s32 g_view_count_minus1; /* was D_800BEE08 */
 extern s32 g_save_stat9; /* was D_800BE804 */
 extern u8 g_level_zoom_in_request; /* was D_800E0FC9 */
 extern u8 g_level_start_point_override; /* was D_800E1001 */
-extern s8 D_eu_800E0E30;
+extern s8 g_rumble_clear_request; /* was D_eu_800E0E30 */
 void tlb_remap_game_segment(s32 arg0);
 void heap_free_tags_1_to_4(void);
 void sound_level_init(s32 arg0);
@@ -164,7 +164,7 @@ void level_load(void) {
     }
     tlb_remap_game_segment(snd);
 
-    D_eu_800E0E30 = 0;
+    g_rumble_clear_request = 0;
     level_set_lod_shifts();
     debris_counts_reset();
     g_particle_emitter_count = 0;

@@ -23,6 +23,7 @@
 #include "pc_mem.h"
 #include <PR/os_cont.h>
 #include <PR/os_message.h>
+#include "port_options.h"
 
 void port_log(const char *fmt, ...);
 int port_flag(const char *name);
@@ -109,6 +110,59 @@ EMSCRIPTEN_KEEPALIVE u8 *port_eeprom_ptr(void) { return eeprom; }
 EMSCRIPTEN_KEEPALIVE int port_eeprom_size(void) { return EEP_SIZE; }
 EM_JS(void, __port_eep_dirty, (void), { if (typeof Module !== 'undefined' && Module.portEepDirty) Module.portEepDirty(); });
 
+/* ---- P333 option "Rumble" (PORT_OPT_RUMBLE): a Rumble Pak in every connected controller.
+ * libultra talks to a pak with two PIF commands on the controller's channel: 0x02 read 32 bytes (tx 3: cmd + address
+ * word, rx 33: data + data CRC) and 0x03 write 32 bytes (tx 35: cmd + address + data, rx 1: data CRC). The address
+ * word is (address >> 5) << 5 | address CRC, i.e. the game's block number in the top 11 bits. A Rumble Pak answers:
+ *   block 0x400 (bytes 0x8000..): the probe. os_motor_init writes 32 x 0x80 and reads back; the last byte must be 0x80.
+ *   block 0x600 (bytes 0xC000..): the motor. os_motor_start writes 32 x 0x01 (expects data CRC 0xEB), os_motor_stop
+ *   32 x 0x00 (CRC 0).
+ * Option off (the default): pak commands get no response, exactly as before (no pak, g_rumble_pak_present stays 0).
+ * Option on: those two blocks answer as above; every other pak address still gets no response, so the Controller
+ * Pak code and the EEPROM saves (channel 4) see what they always saw. Motor changes go to the page
+ * (Module.portRumble(channel, on)), which drives the gamepad's vibration. */
+EM_JS(void, __port_rumble, (int ch, int on), { if (typeof Module !== 'undefined' && Module.portRumble) Module.portRumble(ch, on); });
+static u8 rumble_probe[MAXCONTROLLERS];   /* last byte written to the probe block (0x80 = rumble pak selected) */
+static u8 rumble_motor[MAXCONTROLLERS];
+static unsigned rumble_events;
+/* libultra __osContDataCrc: CRC-8 (poly 0x85) of the 32 data bytes plus 8 zero bits */
+static u8 pak_data_crc(const u8 *d) {
+    u8 t = 0;
+    for (int i = 0; i <= 32; i++)
+        for (int j = 7; j >= 0; j--) {
+            u8 x = (t & 0x80) ? 0x85 : 0;
+            t = (u8)(t << 1) | (i < 32 && (d[i] >> j & 1));
+            t ^= x;
+        }
+    return t;
+}
+/* 1 = handled (reply written), 0 = no pak there */
+static int rumble_pak_cmd(int ch, const u8 *c, int tx, u8 *r, int rx) {
+    if (!port_option(PORT_OPT_RUMBLE)) return 0;
+    unsigned block = ((unsigned)c[1] << 8 | c[2]) >> 5;
+    if (c[0] == 0x03 && tx >= 35 && rx >= 1) {
+        if (block >= 0x400 && block < 0x600) rumble_probe[ch] = c[34];
+        else if (block >= 0x600 && block < 0x800) {
+            u8 on = c[34] != 0;
+            if (on != rumble_motor[ch]) {
+                rumble_motor[ch] = on;
+                if (rumble_events++ < 400) port_log("[rumble] frame %u ch %d motor %s\n", port_frame_count, ch, on ? "start" : "stop");
+                __port_rumble(ch, on);
+            }
+        } else return 0;
+        r[0] = pak_data_crc(&c[3]);
+        return 1;
+    }
+    if (c[0] == 0x02 && tx >= 3 && rx >= 33) {
+        if (block >= 0x400 && block < 0x600) memset(r, rumble_probe[ch] == 0x80 ? 0x80 : 0x00, 32);
+        else if (block >= 0x600 && block < 0x800) memset(r, 0, 32);
+        else return 0;
+        r[32] = pak_data_crc(r);
+        return 1;
+    }
+    return 0;
+}
+
 /* ---- PIF RAM and the command interpreter */
 static u8 pif_ram[64];
 static void pif_run(void) {
@@ -133,7 +187,7 @@ static void pif_run(void) {
                 if (ch == 0) pad0_delivered = b;
                 r[2] = (u8)(s8)port_pads[ch][2]; r[3] = (u8)(s8)port_pads[ch][3];
             }
-            else ok = 0;                                /* pak commands: no pak */
+            else ok = rumble_pak_cmd(ch, c, tx, r, rx);  /* pak commands: no pak, or the P333 Rumble Pak */
         } else if (ch == 4) {                           /* EEPROM 16K */
             if (c[0] == 0x00 || c[0] == 0xFF) { if (rx >= 3) { r[0] = 0x00; r[1] = 0xC0; r[2] = 0x00; } }
             else if (c[0] == 0x04 && tx >= 2) memcpy(r, &eeprom[(c[1] & 0xFF) * 8], rx < 8 ? rx : 8);

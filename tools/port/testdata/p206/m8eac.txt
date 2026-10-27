@@ -11,15 +11,15 @@ s/            st->parts\[st->stage\]\[0x6E\] = 1;/            st->parts[st->stag
 s/            st->stage++;/            st->stage += 2;/
 s/            st->parts\[st->stage\]\[0x6E\] = 0;/            st->parts[st->stage][0x6D] = 0;/
 s/            cam_wobble_start_preset(7, 0, NULL, arg0\[0xC\], arg0\[1\]);/            cam_wobble_start_preset(7, 0, NULL, arg0[1], arg0[0xC]);/
-s/            burst.unk2 = 0x19;/            burst.unk2 = 0x18;/
-s/            burst.unk4 = 8;/            burst.unk4 = 9;/
-s/            burst.unk6 = -1;/            burst.unk6 = 0;/
+s/            burst.life = 0x19;/            burst.life = 0x18;/
+s/            burst.strength = 8;/            burst.strength = 9;/
+s/            burst.update_fn = -1;/            burst.update_fn = 0;/
 s/            rumble_request(\&burst, 0, arg0\[0xC\], arg0\[1\]);/            rumble_request(\&burst, 0, arg0[0xC], arg0[0]);/
 s/            st->timer = (random_int() \(.\) 31U) + 70;/            st->timer = (random_int() \1 31U) + 71;/
 s/    st->crackle -= g_frame_ticks \* count;/    st->crackle -= count;/
-s/        crackle.unk2 = (random_int() \(.\) 21U) + 10;/        crackle.unk2 = (random_int() \1 20U) + 10;/
-s/        crackle.unk4 = (random_int() \& 3) + 1;/        crackle.unk4 = (random_int() \& 7) + 1;/
-s/        crackle.unk5 = 1;/        crackle.unk5 = 0;/
+s/        crackle.life = (random_int() \(.\) 21U) + 10;/        crackle.life = (random_int() \1 20U) + 10;/
+s/        crackle.strength = (random_int() \& 3) + 1;/        crackle.strength = (random_int() \& 7) + 1;/
+s/        crackle.player_mask = 1;/        crackle.player_mask = 0;/
 s/        sound_play_at((random_int() \& 3) + 0x6D6/        sound_play_at((random_int() \& 1) + 0x6D6/
 s/        st->crackle = (random_int() \(.\) 151U) + 150;/        st->crackle = (random_int() \1 150U) + 150;/
 s/    countf = count;/    countf = count + 1;/

@@ -127,12 +127,12 @@ void object_gun_fire(u8 *obj, u8 side, s32 aimed_, u8 *att, s32 kind, s32 flag, 
     weapon_find_aim_target(obj, (u8 *) muzzle, aim, out280, out228, (u8 *) out304, (u8 *) out292, &hit244, &hit240,
                   (u8 *) start);
     if (*(u8 **) (obj + 0x318) != NULL) {
-        snd.unk0 = 1;
-        snd.unk2 = (u32) random_int() % 11 + 11;
-        snd.unk5 = 1 << (*(u8 **) (obj + 0x318))[0x23D];
+        snd.flags = 1;
+        snd.life = (u32) random_int() % 11 + 11;
+        snd.player_mask = 1 << (*(u8 **) (obj + 0x318))[0x23D];
         random_int();
-        snd.unk4 = 8;
-        snd.unk6 = -1;
+        snd.strength = 8;
+        snd.update_fn = -1;
         rumble_request(&snd, 0, 255, 1);
     }
     if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 15) {

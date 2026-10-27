@@ -107,26 +107,26 @@ struct14 *cont_read_frame(void) {
 extern f32 g_rumble_k_6d10; /* was D_80096D10 */
 void rumble_start(u8, f32, f32);
 /* was func_1501BFF0 */
-void rumble_start_strength(u8 arg0, u8 arg1)
+void rumble_start_strength(u8 player /* was arg0 */, u8 strength /* was arg1 */)
 {
-  f32 t;
-  f32 a;
-  f32 b;
-  if (arg1 >= 9) {
-    arg1 = 8;
+  f32 step; /* was t */
+  f32 on_time; /* was a; frames on per period */
+  f32 off_time; /* was b */
+  if (strength >= 9) {
+    strength = 8;
   }
-  if (arg1 == 8) {
-    a = 20.0f;
-    b = 0.0f;
-  } else if (arg1 == 0) {
-    a = 0.0f;
-    b = 99.0f;
+  if (strength == 8) {
+    on_time = 20.0f;
+    off_time = 0.0f;
+  } else if (strength == 0) {
+    on_time = 0.0f;
+    off_time = 99.0f;
   } else {
-    t = ((f32)(u32)arg1 - 1) * g_rumble_k_6d10 * 5.0f;
-    a = t + 2.0f;
-    b = 7.0f - t;
+    step = ((f32)(u32)strength - 1) * g_rumble_k_6d10 * 5.0f;
+    on_time = step + 2.0f;
+    off_time = 7.0f - step;
   }
-  rumble_start(arg0, a, b);
+  rumble_start(player, on_time, off_time);
 }
 
 extern u8 g_rumble_pak_present[]; /* was D_800BED64 */
@@ -135,24 +135,24 @@ extern f32 g_rumble_on_time[]; /* was D_800BED80 */
 extern f32 g_rumble_off_time[]; /* was D_800BED90 */
 extern f32 g_rumble_period[]; /* was D_800BEDA0 */
 /* was func_1501C0D0 */
-void rumble_start(u8 arg0, f32 arg1, f32 arg2) {
+void rumble_start(u8 player /* was arg0 */, f32 on_time /* was arg1 */, f32 off_time /* was arg2 */) {
     s32 idx;
-    idx = g_player_pad_map[arg0];
+    idx = g_player_pad_map[player];
     if (idx < 4 && g_rumble_pak_present[idx] != 0) {
         g_rumble_active[idx] = 1;
         g_rumble_phase[idx] = 0.0f;
-        g_rumble_on_time[idx] = arg1;
-        g_rumble_off_time[idx] = arg2;
-        g_rumble_period[idx] = arg1 + arg2;
+        g_rumble_on_time[idx] = on_time;
+        g_rumble_off_time[idx] = off_time;
+        g_rumble_period[idx] = on_time + off_time;
     }
 }
 
 /* was func_1501C15C */
-void rumble_stop(u8 arg0) {
-    s32 temp_v0 = g_player_pad_map[arg0];
+void rumble_stop(u8 player /* was arg0 */) {
+    s32 pad = g_player_pad_map[player]; /* was temp_v0 */
 
-    if (temp_v0 < 4) {
-        g_rumble_active[temp_v0] = 0;
+    if (pad < 4) {
+        g_rumble_active[pad] = 0;
     }
 }
 
@@ -161,99 +161,99 @@ extern s32 g_rumble_prev_active; /* was D_800BED60 */
 extern s32 g_rumble_motor_on; /* was D_800BED68 */
 extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
 extern u8 g_rumble_stop_request; /* was D_800BEEE3 */
-extern u8 D_eu_800E0E30;
+extern u8 g_rumble_clear_request; /* was D_eu_800E0E30 */
 
 /* was func_1501C1B0 */
 void rumble_update(void) {
-    f32 *temp_v0_2;
-    f32 temp_f2;
-    s32 var_s1;
-    u8 *temp_s2;
-    u8 *temp_s4;
-    u8 *temp_s7;
-    u8 *var_s3;
-    u8 temp_v0;
-    u8 var_s0;
-    u8 *temp_s0;
-    u8 *temp_s0_2;
-    u8 *temp_s0_3;
+    f32 *phase; /* was temp_v0_2 */
+    f32 period; /* was temp_f2 */
+    s32 ch; /* was var_s1 */
+    u8 *motor_on; /* was temp_s2 */
+    u8 *active; /* was temp_s4 */
+    u8 *prev_active; /* was temp_s7 */
+    u8 *pak_present; /* was var_s3 */
+    u8 state; /* was temp_v0 */
+    u8 want_on; /* was var_s0 */
+    u8 *pfs; /* was temp_s0 */
+    u8 *pfs_stop; /* was temp_s0_2 */
+    u8 *pfs_idle; /* was temp_s0_3 */
 
-    var_s3 = g_rumble_pak_present;
-    var_s1 = 0;
+    pak_present = g_rumble_pak_present;
+    ch = 0;
     do {
         if (g_rumble_probe_request != 0) {
-            temp_s0 = ((u8 *)&g_rumble_pfs + (var_s1 * 0x68));
-            if (os_motor_init(&g_si_mesg_queue, temp_s0, var_s1) == 0) {
-                if (*var_s3 == 0) {
-                    *var_s3 = 1;
-                    g_rumble_active[var_s1] = 0;
-                    ((u8 *)&g_rumble_prev_active)[var_s1] = 0;
-                    ((u8 *)&g_rumble_motor_on)[var_s1] = 0;
-                    g_rumble_phase[var_s1] = 0.0f;
-                    g_rumble_on_time[var_s1] = 1.0f;
-                    g_rumble_off_time[var_s1] = 1.0f;
-                    g_rumble_period[var_s1] = 2.0f;
-                    os_motor_stop(temp_s0);
+            pfs = ((u8 *)&g_rumble_pfs + (ch * 0x68));
+            if (os_motor_init(&g_si_mesg_queue, pfs, ch) == 0) {
+                if (*pak_present == 0) {
+                    *pak_present = 1;
+                    g_rumble_active[ch] = 0;
+                    ((u8 *)&g_rumble_prev_active)[ch] = 0;
+                    ((u8 *)&g_rumble_motor_on)[ch] = 0;
+                    g_rumble_phase[ch] = 0.0f;
+                    g_rumble_on_time[ch] = 1.0f;
+                    g_rumble_off_time[ch] = 1.0f;
+                    g_rumble_period[ch] = 2.0f;
+                    os_motor_stop(pfs);
                 }
             } else {
-                *var_s3 = 0;
+                *pak_present = 0;
             }
         }
-        temp_s4 = &g_rumble_active[var_s1];
-        if (*var_s3 != 0) {
-            temp_s7 = ((u8 *)&g_rumble_prev_active + var_s1);
-            if ((g_rumble_stop_request != 0) || (D_eu_800E0E30 != 0)) {
-                temp_s0_2 = ((u8 *)&g_rumble_pfs + (var_s1 * 0x68));
-                os_motor_init(&g_si_mesg_queue, temp_s0_2, var_s1);
-                os_motor_stop(temp_s0_2);
-                ((u8 *)&g_rumble_motor_on)[var_s1] = 0;
-                *temp_s4 = 0;
+        active = &g_rumble_active[ch];
+        if (*pak_present != 0) {
+            prev_active = ((u8 *)&g_rumble_prev_active + ch);
+            if ((g_rumble_stop_request != 0) || (g_rumble_clear_request != 0)) {
+                pfs_stop = ((u8 *)&g_rumble_pfs + (ch * 0x68));
+                os_motor_init(&g_si_mesg_queue, pfs_stop, ch);
+                os_motor_stop(pfs_stop);
+                ((u8 *)&g_rumble_motor_on)[ch] = 0;
+                *active = 0;
             }
-            if ((g_pause_open == 0) && (g_game_paused == 0) && (g_unpause_settle_frames == 0) && (g_rumble_stop_request == 0) && (D_eu_800E0E30 == 0)) {
-                temp_v0 = *temp_s4;
-                switch (temp_v0) {                  /* irregular */
+            if ((g_pause_open == 0) && (g_game_paused == 0) && (g_unpause_settle_frames == 0) && (g_rumble_stop_request == 0) && (g_rumble_clear_request == 0)) {
+                state = *active;
+                switch (state) {                  /* irregular */
                 case 0:
-                    if (*temp_s7 == 1) {
-                        temp_s0_3 = ((u8 *)&g_rumble_pfs + (var_s1 * 0x68));
-                        os_motor_init(&g_si_mesg_queue, temp_s0_3, var_s1);
-                        os_motor_stop(temp_s0_3);
-                        ((u8 *)&g_rumble_motor_on)[var_s1] = 0;
+                    if (*prev_active == 1) {
+                        pfs_idle = ((u8 *)&g_rumble_pfs + (ch * 0x68));
+                        os_motor_init(&g_si_mesg_queue, pfs_idle, ch);
+                        os_motor_stop(pfs_idle);
+                        ((u8 *)&g_rumble_motor_on)[ch] = 0;
                     }
                     break;
                 case 1:
-                    temp_v0_2 = &g_rumble_phase[var_s1];
-                    *temp_v0_2 += g_frame_step_f;
-                    temp_f2 = g_rumble_period[var_s1];
-                    temp_s2 = ((u8 *)&g_rumble_motor_on + var_s1);
-                    var_s0 = 1;
-                    if (temp_f2 < *temp_v0_2) {
+                    phase = &g_rumble_phase[ch];
+                    *phase += g_frame_step_f;
+                    period = g_rumble_period[ch];
+                    motor_on = ((u8 *)&g_rumble_motor_on + ch);
+                    want_on = 1;
+                    if (period < *phase) {
                         do {
-                            *temp_v0_2 -= temp_f2;
-                        } while (temp_f2 < *temp_v0_2);
+                            *phase -= period;
+                        } while (period < *phase);
                     }
-                    if (g_rumble_on_time[var_s1] <= *temp_v0_2) {
-                        var_s0 = 0;
+                    if (g_rumble_on_time[ch] <= *phase) {
+                        want_on = 0;
                     }
-                    if (var_s0 != 0) {
-                        if (*temp_s2 == 0) {
-                            os_motor_start(((u8 *)&g_rumble_pfs + (var_s1 * 0x68)));
+                    if (want_on != 0) {
+                        if (*motor_on == 0) {
+                            os_motor_start(((u8 *)&g_rumble_pfs + (ch * 0x68)));
                         }
-                    } else if (*temp_s2 == 1) {
+                    } else if (*motor_on == 1) {
     s32 pad;
-                        os_motor_stop(((u8 *)&g_rumble_pfs + (var_s1 * 0x68)));
+                        os_motor_stop(((u8 *)&g_rumble_pfs + (ch * 0x68)));
                     }
-                    *temp_s2 = var_s0;
+                    *motor_on = want_on;
                     break;
                 }
             }
-            *temp_s7 = *temp_s4;
+            *prev_active = *active;
         }
-        var_s1 += 1;
-        var_s3 += 1;
-    } while (var_s1 != 4);
+        ch += 1;
+        pak_present += 1;
+    } while (ch != 4);
     g_rumble_probe_request = 0;
     g_rumble_stop_request = 0;
-    D_eu_800E0E30 = 0;
+    g_rumble_clear_request = 0;
 }
 /* was func_1501C51C */
 void rumble_stop_all(void) {

@@ -606,11 +606,11 @@ u8 fx_try_camera_shake(s32 arg0, s32 arg1)
     if (found2)
     {
       camera_shake_start(&g_player_views[g_view_count_minus1], arg0, 1);
-      sp28.unk0 = 1;
-      sp28.unk2 = (random_int() & 0xF) + 20;
-      sp28.unk4 = (random_int() & 3) + 4;
-      sp28.unk6 = -1;
-      sp28.unk5 = 1;
+      sp28.flags = 1;
+      sp28.life = (random_int() & 0xF) + 20;
+      sp28.strength = (random_int() & 3) + 4;
+      sp28.update_fn = -1;
+      sp28.player_mask = 1;
       rumble_request(&sp28, 0, 0xFF, 0);
       ret = 1;
     }

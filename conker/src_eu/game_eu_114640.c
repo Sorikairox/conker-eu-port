@@ -296,11 +296,11 @@ void screen_lightning_random_flash(u8 arg0, u8 arg1, s32 arg2) {
         }
         sound_play_2d(0x360, 0x7FFF, 0, 0, 0);
         cam_wobble_start_preset(1, arg0, 0, arg1, arg2);
-        s.unk0 = 1;
-        s.unk2 = (random_int() % 26U) + 0x19;
-        s.unk5 = 1;
-        s.unk4 = (random_int() % 6U) + 3;
-        s.unk6 = -1;
+        s.flags = 1;
+        s.life = (random_int() % 26U) + 0x19;
+        s.player_mask = 1;
+        s.strength = (random_int() % 6U) + 3;
+        s.update_fn = -1;
         rumble_request(&s, 0, 0xFF, 0);
     }
 }
@@ -515,11 +515,11 @@ u8 *screen_lightning_curve_spawn(s16 count, f32 scale, u8 arg2, s32 arg3) {
         return NULL;
     }
     camera_shake_start((struct108 *)((u8 *)g_player_views + g_view_count_minus1 * 0x9A0), 0, 1);
-    fx.unk0 = 1;
-    fx.unk2 = (u32)random_int() % 11 + 30;
-    fx.unk4 = 8;
-    fx.unk6 = -1;
-    fx.unk5 = 1;
+    fx.flags = 1;
+    fx.life = (u32)random_int() % 11 + 30;
+    fx.strength = 8;
+    fx.update_fn = -1;
+    fx.player_mask = 1;
     rumble_request(&fx, 0, 0xFF, 0);
     hdr.scale = scale;
     hdr.zero = 0.0f;

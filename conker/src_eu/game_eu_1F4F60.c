@@ -760,11 +760,11 @@ void laser_break_effects(u8 *obj, u8 *rec) {
 
     if (obj != NULL) {
         cam_wobble_start_preset(2, (*(u8 **)(obj + 0x318))[0x23D], NULL, rec[0xC], rec[1]);
-        rumble.unk0 = 1;
-        rumble.unk2 = 0x28;
-        rumble.unk5 = 1;
-        rumble.unk4 = 8;
-        rumble.unk6 = -1;
+        rumble.flags = 1;
+        rumble.life = 0x28;
+        rumble.player_mask = 1;
+        rumble.strength = 8;
+        rumble.update_fn = -1;
         rumble_request(&rumble, 0, 0xFF, 0);
     }
     if (obj != NULL) {

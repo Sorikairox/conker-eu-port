@@ -9616,3 +9616,4 @@ D_800DBE62	g_coll_quadtrees_built	Set when the collision quadtrees are built; el
 D_800DC208	g_coll_area_tri_tables	Per collision area: triangle table (3 vertex pointers per triangle)
 D_800C5000	g_model_skeletons	Per model id: skeleton pointer (model +0x10), set by model_load
 D_800894C0	g_coll_area_enabled	Per collision area: enable byte (1 = tested by the floor / wall queries; camera_eye_collision toggles [1..2])
+D_eu_800E0E30	g_rumble_clear_request	(med) s8 set by rumble_records_clear_all (all rumble effects dropped): rumble_update stops every motor and blocks new pulses for that frame, then clears it

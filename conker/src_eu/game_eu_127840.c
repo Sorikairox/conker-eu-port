@@ -300,11 +300,11 @@ void aura_group_spawn(u8 *obj, u8 alpha, s32 owner) {
             }
         }
     }
-    shake.unk0 = 1;
-    shake.unk2 = 0x46;
-    shake.unk5 = 1;
-    shake.unk4 = 8;
-    shake.unk6 = -1;
+    shake.flags = 1;
+    shake.life = 0x46;
+    shake.player_mask = 1;
+    shake.strength = 8;
+    shake.update_fn = -1;
     rumble_request(&shake, 0, alpha, owner);
     light_create_obj_joint(obj, 1, &g_aura_light_offset, 3, 0x46, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, alpha, owner);
 }

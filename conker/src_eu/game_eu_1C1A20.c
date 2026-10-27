@@ -284,11 +284,11 @@ void hit_react_burst_shake(s32 arg0, u8 *arg1, s32 arg2) {
         sp50.unk3C = 0;
         sp50.unk40 = 0.5f;
         emit_sparks_in_angle_range(&sp50, &sp50.unk8, (s32) sp2C, 0xFF, 1);
-        sp24.unk0 = 1;
-        sp24.unk2 = (random_int() % 11U) + 20;
-        sp24.unk4 = 8;
-        sp24.unk6 = -1;
-        sp24.unk5 = 1;
+        sp24.flags = 1;
+        sp24.life = (random_int() % 11U) + 20;
+        sp24.strength = 8;
+        sp24.update_fn = -1;
+        sp24.player_mask = 1;
         rumble_request(&sp24, 0, 0xFF, 0);
         break;
     }
@@ -675,10 +675,10 @@ void hit_react_retire_if_dead(u8 *arg0, struct127 *arg1, s32 arg2) {
 void hit_react_camera_shake(s32 arg0, s32 arg1, s32 arg2) {
     structEU_151D8E18 sp18;
 
-    sp18.unk0 = 1;
-    sp18.unk2 = (random_int() % 11U) + 20;
-    sp18.unk4 = 8;
-    sp18.unk6 = -1;
-    sp18.unk5 = 1;
+    sp18.flags = 1;
+    sp18.life = (random_int() % 11U) + 20;
+    sp18.strength = 8;
+    sp18.update_fn = -1;
+    sp18.player_mask = 1;
     rumble_request(&sp18, 0, 0xFF, 0);
 }

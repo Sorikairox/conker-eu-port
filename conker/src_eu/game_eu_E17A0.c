@@ -18,11 +18,11 @@ void obj_joint_blast_fx(struct127 *arg0, u8 arg1) {
         angle = (*(u16 *)((u8 *)arg0 + 0x7A) >> 8) + 0x40;
         mtx_transform_point_or_origin(g_joint_blast_offset, &pos, (u8 *)arg0->unk1D4 + 0x640);
         spawn_arc_emit(pos.unk0, pos.unk4, pos.unk8, 10.0f, angle, 0, 0xFF, (u32)random_int() % 31 + 0x28, 8, 0, 0.0f, 0, arg1);
-        blk.unk0 = 1;
-        blk.unk2 = (random_int() & 0xF) + 0xC;
-        blk.unk4 = (random_int() & 3) + 5;
-        blk.unk6 = -1;
-        blk.unk5 = 1;
+        blk.flags = 1;
+        blk.life = (random_int() & 0xF) + 0xC;
+        blk.strength = (random_int() & 3) + 5;
+        blk.update_fn = -1;
+        blk.player_mask = 1;
         rumble_request(&blk, 0, arg1, 0);
         explosion_light_spawn((f32 *)&pos, arg1, 0);
     }

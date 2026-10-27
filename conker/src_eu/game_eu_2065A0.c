@@ -31,53 +31,54 @@ extern u8 g_unpause_settle_frames; /* was D_800BEEE2 */
 extern u8 g_rumble_stop_request; /* was D_800BEEE3 */
 
 /* was func_151D8E18 */
-s32 rumble_request(structEU_151D8E18 *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    s32 var_s0;
-    s32 var_s0_2;
-    s32 var_s1;
-    s32 var_v1;
-    u8 *temp_v0;
+s32 rumble_request(structEU_151D8E18 *req /* was arg0 */, s32 extra_size /* was arg1 */, u8 node_arg /* was arg2 */,
+                   s32 owner /* was arg3 */) {
+    s32 p; /* was var_s0 */
+    s32 player; /* was var_s0_2 */
+    s32 next; /* was var_s1 */
+    s32 next_player; /* was var_v1 */
+    u8 *fx; /* was temp_v0 */
 
     if (g_game_mode != 0) {
         return 0;
     }
-    if (rumble_mask_has_pak(arg0->unk5) == 0) {
+    if (rumble_mask_has_pak(req->player_mask) == 0) {
         return 0;
     }
     if ((g_game_paused != 0) || (g_pause_open != 0) || (g_unpause_settle_frames != 0) || (g_rumble_stop_request != 0)) {
         return 0;
     }
-    var_s1 = 0;
-    var_s0 = 0;
+    next = 0;
+    p = 0;
     if (g_last_player_index >= 0) {
 loop_10:
-        if ((arg0->unk5 & (1 << var_s0)) && ((hud_lens_is_off(var_s0) == 0) || (screen_fade_alpha(var_s0) != 0))) {
+        if ((req->player_mask & (1 << p)) && ((hud_lens_is_off(p) == 0) || (screen_fade_alpha(p) != 0))) {
             return 0;
         }
-        var_s0 = (var_s1 + 1) & 0xFF;
-        var_s1 = var_s0;
-        if (g_last_player_index < var_s0) {
+        p = (next + 1) & 0xFF;
+        next = p;
+        if (g_last_player_index < p) {
             goto block_15;
         }
         goto loop_10;
     }
 block_15:
-    temp_v0 = node_alloc(0x3F, arg3, arg1 + 0x18, 1, (u8) (s32) arg2, 1U);
-    if (temp_v0 == NULL) {
+    fx = node_alloc(0x3F, owner, extra_size + 0x18, 1, (u8) (s32) node_arg, 1U);
+    if (fx == NULL) {
         return 0;
     }
-    memcpy(temp_v0 + 0xE, arg0, 8);
-    var_s0_2 = 0;
-    var_v1 = 0;
+    memcpy(fx + 0xE, req, 8);
+    player = 0;
+    next_player = 0;
     do {
-        if ((*(u8 *)((u8 *)temp_v0 + 0x13)) & (1 << var_v1)) {
-            rumble_start_strength(var_s0_2 & 0xFF, arg0->unk4);
+        if ((*(u8 *)((u8 *)fx + 0x13)) & (1 << next_player)) {
+            rumble_start_strength(player & 0xFF, req->strength);
         }
-        var_v1 = (var_s0_2 + 1) & 0xFF;
-        var_s0_2 = var_v1;
-    } while (var_v1 < 4);
-    (*(u8 *)((u8 *)temp_v0 + 0x16)) = (u8) arg0->unk4;
-    return (s32) temp_v0;
+        next_player = (player + 1) & 0xFF;
+        player = next_player;
+    } while (next_player < 4);
+    (*(u8 *)((u8 *)fx + 0x16)) = (u8) req->strength;
+    return (s32) fx;
 }
 /* P241: readable C for rumble_record_update (game_eu_2065A0, 64 insns). */
 // rumble_effect_update: update of the kind-0x3F effect made by rumble_request (rumble for the players in the mask
@@ -183,10 +184,10 @@ void rumble_broadcast(s32 arg0, u8 arg1) {
     node_broadcast_types(&g_rumble_bcast_types, 1, arg0, arg1);
 }
 
-extern s8 D_eu_800E0E30;
+extern s8 g_rumble_clear_request; /* was D_eu_800E0E30 */
 
 /* was func_151D9398 */
 void rumble_records_clear_all(void) {
-    D_eu_800E0E30 = 1;
+    g_rumble_clear_request = 1;
     rumble_broadcast(0, 0x58U);
 }

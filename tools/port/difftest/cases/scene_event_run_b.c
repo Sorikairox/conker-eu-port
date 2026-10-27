@@ -561,11 +561,11 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
         }
         case 26: {
             structEU_151D8E18 s;
-            s.unk0 = 1;
-            s.unk4 = 8;
-            s.unk5 = 1;
-            s.unk6 = -1;
-            s.unk2 = span;
+            s.flags = 1;
+            s.strength = 8;
+            s.player_mask = 1;
+            s.update_fn = -1;
+            s.life = span;
             rumble_request(&s, 0, (u8) flag, 1);
             break;
         }
@@ -862,11 +862,11 @@ s32 scene_event_run_b(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct
             break;
         case 17: {
             structEU_151D8E18 s;
-            s.unk0 = 1;
-            s.unk2 = 50;
-            s.unk4 = 8;
-            s.unk5 = 1;
-            s.unk6 = -1;
+            s.flags = 1;
+            s.life = 50;
+            s.strength = 8;
+            s.player_mask = 1;
+            s.update_fn = -1;
             rumble_request(&s, 0, (u8) flag, 1);
             break;
         }

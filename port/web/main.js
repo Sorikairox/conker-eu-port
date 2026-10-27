@@ -72,6 +72,8 @@ const OPTIONS = [
     help: 'Conker is always drawn with his most detailed model. Off: as on the N64, he switches to simpler models once the camera is more than 500 units away (the normal follow camera is often 450 to 650 units behind him, more while running).' },
   { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
+  { key: 'rumble', label: 'Rumble (gamepad vibration)', def: false, game: 13,
+    help: 'The game sees a Rumble Pak in each controller and your gamepad vibrates when the N64 one would (hits, explosions, heavy landings), if the browser supports gamepad vibration (Chrome / Edge with most Xbox and PlayStation pads). Takes effect at the next level or area load. Off: as now, no Rumble Pak. Saves are not affected.' },
   { key: 'swiminvert', label: 'Inverted swimming', def: false, game: 12,
     help: 'Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. Off: as on the N64, which steers like a plane: up dives, down rises.' },
   // P332: sliders (range: true): the value 0..100 (%) goes to the game through the same port_set_option channel.
@@ -530,10 +532,54 @@ document.addEventListener('fullscreenchange', () => {
 $('fullscreen').onclick = fullscreen;
 $('canvas').addEventListener('dblclick', fullscreen);
 
+// P333 option "Rumble": pc_pif.c answers the game's Rumble Pak commands and calls Module.portRumble(channel, on) when
+// the motor starts / stops (on the N64 the game pulses it: on for a few frames, off for a few, by strength). Channel 0
+// is the keyboard + first gamepad, channel i the gamepad i. Chrome: vibrationActuator.playEffect('dual-rumble');
+// Firefox-style: hapticActuators[0].pulse. A long effect is started on "start" and cut by reset() on "stop", so the
+// gamepad follows the motor's on / off pattern. window.portRumbleStats counts what happened (headless tests).
+const rumbleStats = window.portRumbleStats = { start: 0, stop: 0, played: 0, logged: 0 };
+const rumbleMotor = [false, false, false, false];
+// Test aid ?p333pad=1: a fake standard gamepad with a vibrationActuator that only counts and logs the calls, so a
+// headless run (no real gamepad) shows the playEffect / reset calls the option makes.
+if (Q.get('p333pad') === '1') {
+  const fake = { id: 'P333 test pad (fake vibrationActuator)', index: 0, connected: true, mapping: 'standard', timestamp: 0,
+    buttons: Array.from({ length: 17 }, () => ({ pressed: false, touched: false, value: 0 })), axes: [0, 0, 0, 0],
+    vibrationActuator: { type: 'dual-rumble',
+      playEffect: (type, p) => { rumbleStats.fakePlay = (rumbleStats.fakePlay || 0) + 1; if (rumbleStats.fakePlay <= 12) log(`[rumble-page] playEffect('${type}', ${JSON.stringify(p)}) #${rumbleStats.fakePlay}`); return Promise.resolve('complete'); },
+      reset: () => { rumbleStats.fakeReset = (rumbleStats.fakeReset || 0) + 1; if (rumbleStats.fakeReset <= 12) log(`[rumble-page] reset() #${rumbleStats.fakeReset}`); return Promise.resolve('complete'); } } };
+  navigator.getGamepads = () => [fake];
+}
+function rumbleGamepad(ch) {
+  const gps = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter((g) => g && g.connected);
+  return gps[ch] || null;
+}
+function rumbleSet(ch, on) {
+  const gp = rumbleGamepad(ch), act = gp && gp.vibrationActuator, hap = gp && gp.hapticActuators && gp.hapticActuators[0];
+  let played = false;
+  try {
+    if (on && act && act.playEffect) { act.playEffect('dual-rumble', { startDelay: 0, duration: 5000, strongMagnitude: 1.0, weakMagnitude: 0.6 }).catch(() => {}); played = true; }
+    else if (on && hap && hap.pulse) { hap.pulse(1.0, 5000); played = true; }
+    else if (!on && act) { if (act.reset) act.reset().catch(() => {}); else act.playEffect('dual-rumble', { duration: 0, strongMagnitude: 0, weakMagnitude: 0 }).catch(() => {}); }
+    else if (!on && hap && hap.pulse) hap.pulse(0, 1);
+  } catch (e) { /* no vibration support */ }
+  return played;
+}
+function portRumble(ch, on) {
+  rumbleMotor[ch] = !!on;
+  const paused = userPaused || hiddenPaused;
+  const played = on && !paused ? rumbleSet(ch, true) : (rumbleSet(ch, false), false);
+  if (on) rumbleStats.start++; else rumbleStats.stop++;
+  if (played) rumbleStats.played++;
+  if (rumbleStats.logged++ < 40) log(`[rumble-page] ch ${ch} ${on ? 'start' : 'stop'}: gamepad ${rumbleGamepad(ch) ? 'yes' : 'none'}, effect ${played ? 'played' : 'not played'} (starts ${rumbleStats.start}, stops ${rumbleStats.stop}, played ${rumbleStats.played})`);
+}
+function rumbleStopAll() { for (let ch = 0; ch < 4; ch++) if (rumbleMotor[ch]) rumbleSet(ch, false); }
+optionChanged.rumble = (on) => { if (!on) { rumbleStopAll(); rumbleMotor.fill(false); } };
+
 let userPaused = false, hiddenPaused = false;
 function applyPause() {
   const p = userPaused || hiddenPaused;
   if (M && M._port_set_paused) M._port_set_paused(p ? 1 : 0);
+  if (p) rumbleStopAll();   // P333: no vibration while the page is paused
   const a = window.portAudio;
   if (a && a.ctx) { if (p) a.ctx.suspend().catch(() => {}); else if (gestured) a.ctx.resume().catch(() => {}); }
   $('paused').hidden = !p || running !== 'game';
@@ -632,6 +678,7 @@ async function start(app) {
     print: (s) => log(s),
     printErr: (s) => log(s, 'fail'),
     onAbort: (w) => { log('Aborted: ' + w, 'fail'); status('crashed (open Debug)', 'bad'); },
+    portRumble: (ch, on) => portRumble(ch, on),   // P333 option "Rumble" (pc_pif.c)
     portEepDirty: () => { eepWrites++; if (!eepTimer) eepTimer = setTimeout(persistEeprom, 400); flashSaveIcon(); },
   });
   window.Module = M = Mod;

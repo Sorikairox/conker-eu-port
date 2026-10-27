@@ -311,11 +311,11 @@ void fire_burn_update(u8 *arg0) {
             st->stage++;
             st->parts[st->stage][0x6E] = 0;
             cam_wobble_start_preset(7, 0, NULL, arg0[0xC], arg0[1]);
-            burst.unk0 = 1;
-            burst.unk2 = 0x19;
-            burst.unk5 = 1;
-            burst.unk4 = 8;
-            burst.unk6 = -1;
+            burst.flags = 1;
+            burst.life = 0x19;
+            burst.player_mask = 1;
+            burst.strength = 8;
+            burst.update_fn = -1;
             rumble_request(&burst, 0, arg0[0xC], arg0[1]);
             st->timer = (random_int() % 31U) + 70;
         }
@@ -324,11 +324,11 @@ void fire_burn_update(u8 *arg0) {
     /* crackle */
     st->crackle -= g_frame_ticks * count;
     if (st->crackle < 0) {
-        crackle.unk0 = 1;
-        crackle.unk2 = (random_int() % 21U) + 10;
-        crackle.unk5 = 1;
-        crackle.unk4 = (random_int() & 3) + 1;
-        crackle.unk6 = -1;
+        crackle.flags = 1;
+        crackle.life = (random_int() % 21U) + 10;
+        crackle.player_mask = 1;
+        crackle.strength = (random_int() & 3) + 1;
+        crackle.update_fn = -1;
         rumble_request(&crackle, 0, arg0[0xC], arg0[1]);
         part = st->parts[st->stage];
         sound_play_at((random_int() & 3) + 0x6D6, 0x5DC0, 0, 0, -1, *(s16 *)(part + 0x10),

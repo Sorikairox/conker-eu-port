@@ -17,6 +17,7 @@ enum {
     PORT_OPT_CONKER_FULL_LOD = 7, /* Conker always drawn with his most detailed model (obj_select_lod, P331) */
     PORT_OPT_AIR_BAR = 8,       /* bar of the air left while under water (hud_air_bar_draw, P332) */
     PORT_OPT_SWIM_INVERT = 12,  /* swim state: stick y flipped, up rises / down dives (player_swim_update, P333) */
+    PORT_OPT_RUMBLE = 13,       /* controllers report a Rumble Pak; motor start/stop -> gamepad vibration (pc_pif.c, P333) */
     /* P332 sliders: the value is a percentage 0..100 (default 100 = N64); game C scales with port_volume_scale */
     PORT_OPT_VOL_MUSIC = 9,     /* sequenced music: __n_vsVol */
     PORT_OPT_VOL_SFX = 10,      /* sound player effects: SND_VOL155 (n_sndp_handle_event) */

@@ -879,12 +879,12 @@ void rumble_all_players_at(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg
     sp38.unkC = arg1;
     sp38.unk10 = arg2;
     sp38.unk14 = arg3;
-    sp30.unk0 = 1;
-    sp30.unk2 = (random_int() % (u32) (arg5 + 1)) + arg4;
-    sp30.unk4 = 0;
-    sp30.unk6 = 0;
+    sp30.flags = 1;
+    sp30.life = (random_int() % (u32) (arg5 + 1)) + arg4;
+    sp30.strength = 0;
+    sp30.update_fn = 0;
     for (i = 0; i < g_last_player_index + 1; i++) {
-        sp30.unk5 = 1 << i;
+        sp30.player_mask = 1 << i;
         sp38.unk18 = i;
         p = rumble_request(&sp30, 0x1C, 0xFF, 0);
         if (p != 0) {

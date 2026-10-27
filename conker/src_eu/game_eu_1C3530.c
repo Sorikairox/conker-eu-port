@@ -2587,11 +2587,11 @@ s32 emitter2_flame_update(u8 *e) {
     if ((rec->flags & 8) && *(u8 **) (obj + 0x318) != NULL) {
         rec->u152 -= g_frame_ticks;
         if (rec->u152 < 0) {
-            burst.unk0 = 1;
-            burst.unk2 = (u32) random_int() % 21 + 20;
-            burst.unk5 = 1 << (*(u8 **) (obj + 0x318))[0x23D];
-            burst.unk4 = (u32) random_int() % 7 + 2;
-            burst.unk6 = -1;
+            burst.flags = 1;
+            burst.life = (u32) random_int() % 21 + 20;
+            burst.player_mask = 1 << (*(u8 **) (obj + 0x318))[0x23D];
+            burst.strength = (u32) random_int() % 7 + 2;
+            burst.update_fn = -1;
             rumble_request(&burst, 0, e[0xC], e[1]);
             rec->u152 = (u32) random_int() % 21 + 0x78;
         }

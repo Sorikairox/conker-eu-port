@@ -19,8 +19,8 @@ s/        rubble_burst_with_dust(\*(f32 \*) ((u8 \*) g_objects + 0x14), \*(f32 \
 s/                      \*(f32 \*) ((u8 \*) g_objects + 0x1C), 0xFF, 0);/                      *(f32 *) ((u8 *) g_objects + 0x1C), 0xFE, 0);/
 s/        if (mode == 0) {/        if (mode != 3) {/
 s/            cam_wobble_start_preset(3, g_view_count_minus1_lo, NULL, 0xFF, 0);/            cam_wobble_start_preset(2, g_view_count_minus1_lo, NULL, 0xFF, 0);/
-s/            rumble.unk2 = 0x3C;/            rumble.unk2 = 0x28;/
-s/            rumble.unk4 = 8;/            rumble.unk4 = 7;/
+s/            rumble.life = 0x3C;/            rumble.life = 0x28;/
+s/            rumble.strength = 8;/            rumble.strength = 7;/
 s/            rumble_request(\&rumble, 0, 0xFF, 0);/            rumble_request(\&rumble, 1, 0xFF, 0);/
 s/        if (low != \*(s16 \*) (p + 0x12)) {/        if (top != *(s16 *) (p + 0x12)) {/
 s/            \*(s16 \*) (p + 0x12) = low;/            *(s16 *) (p + 0x12) = top;/

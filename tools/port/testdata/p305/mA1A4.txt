@@ -96,11 +96,11 @@ s/if (o != NULL && \*(u8 \*\*) (o + 0x31C) != NULL) {/if (o != NULL) {/ % tick51
 s/if ((rec->flags & 8) && \*(u8 \*\*) (obj + 0x318) != NULL) {/if ((rec->flags \& 8)) {/ % flag8n318
 s/rec->u152 -= g_frame_ticks;/rec->u152 -= g_frame_ticks + 1;/ % flag8
 s/if (rec->u152 < 0) {/if (rec->u152 <= 0) {/ % flag8eq
-s/burst.unk0 = 1;/burst.unk0 = 2;/ % flag8fire
+s/burst.flags = 1;/burst.flags = 2;/ % flag8fire
 s/ 21 + 20;/ 20 + 20;/ % flag8fire
 s/(obj + 0x318))\[0x23D\];/(obj + 0x318))[0x23C];/ % flag8fire
 s/ 7 + 2;/ 7 + 3;/ % flag8fire
-s/burst.unk6 = -1;/burst.unk6 = 0;/ % flag8fire
+s/burst.update_fn = -1;/burst.update_fn = 0;/ % flag8fire
 s/rumble_request(&burst, 0, e\[0xC\], e\[1\]);/rumble_request(\&burst, 1, e[0xC], e[1]);/ % flag8fire
 s/ 21 + 0x78;/ 21 + 0x77;/ % flag8fire
 s/^    return 1;$/    return 2;/ % base
