@@ -727,7 +727,7 @@ async function netLoad() {
     PortNet.t.on.config = (cfg) => {   // both peers: boot the game into the session
       netCfg = cfg;
       for (const k of Object.keys(optCache)) delete optCache[k];
-      log(`[net] session config: channels ${cfg.mask}, mine ${cfg.local}, delay ${cfg.delay}, EEPROM ${cfg.eeprom ? 'host image' : 'blank'}`);
+      log(`[net] session config: channels ${cfg.mask}, mine ${cfg.local}, delay ${cfg.delay}${cfg.autoDelay ? ` (auto, ping ${cfg.ping} ms)` : ''}, EEPROM ${cfg.eeprom ? 'host image' : 'blank'}`);
       start('game');
     };
   }
@@ -741,6 +741,9 @@ const copyCode = (id) => { const t = $(id); t.select(); (navigator.clipboard ? n
 const netGuard = async (fn) => { try { await fn(); } catch (e) { netStatus(String(e.message || e), 'bad'); log('[net] ' + e, 'fail'); } };
 $('net-delay').value = store.get('netdelay', 3);
 $('net-delay').onchange = () => store.set('netdelay', Math.max(1, Math.min(16, +$('net-delay').value | 0)));
+$('net-delay-auto').checked = store.get('netdelayauto', true);   // P339: automatic input delay from the measured ping
+$('net-delay').disabled = $('net-delay-auto').checked;
+$('net-delay-auto').onchange = () => { store.set('netdelayauto', $('net-delay-auto').checked); $('net-delay').disabled = $('net-delay-auto').checked; };
 $('net-host').onclick = () => netGuard(async () => {
   $('net-step-host').hidden = false; $('net-step-join').hidden = true; $('net-host').disabled = $('net-join').disabled = true;
   $('net-offer').value = await window.__online.host();
@@ -759,7 +762,7 @@ netEvents.tick.push((t) => {   // ~100 Hz from net.js
   $('netwait').hidden = !(netWaitSince && now - netWaitSince > 400);
   if (now - (netEvents.lastInfo || 0) > 500) {
     netEvents.lastInfo = now;
-    $('net-info').textContent = `retrace ${t.frame} · ping ${t.rtt ? Math.round(t.rtt) + ' ms' : '–'} · stalls ${t.stalls} · input delay ${netCfg ? netCfg.delay * 20 : '–'} ms`;
+    $('net-info').textContent = `retrace ${t.frame} · ping ${t.rtt ? Math.round(t.rtt) + ' ms' : '–'} · waits ${t.stalls} · input delay ${netCfg ? netCfg.delay * 20 + ' ms' + (netCfg.autoDelay ? ' (auto)' : '') : '–'}`;
   }
 });
 netEvents.desync.push((d) => {
@@ -773,13 +776,16 @@ window.__online = {
   async host() {
     if (running) throw new Error('the game already runs: reload the page, then host before pressing Start');
     await netLoad();
-    return PortNet.host(async () => {
+    return PortNet.host(async (ping) => {   // ping: {n, min, median, p90} ms over 'ctl' before the session (or null)
       const options = {};
       for (const o of OPTIONS) if (o.game !== undefined) options[o.key] = opt(o.key);
       let eeprom = null;
       if (Q.get('neteep') !== 'blank') try { const b = await idb('saves', 'readonly', (s) => s.get(saveKey())); if (b && b.length) eeprom = new Uint8Array(b); } catch (e) { /* no save */ }
-      const d = +(Q.get('netd') || $('net-delay').value || 3);   // the panel's field; ?netd=D (tests) wins
-      return { mask: 3, delay: Math.max(1, Math.min(16, d | 0)), hashEvery: 10, options, eeprom };
+      // P339: input delay automatic from the measured ping (panel checkbox, default on) or the panel's field;
+      // ?netd=D / ?netd=auto (tests) wins
+      const auto = Q.get('netd') ? Q.get('netd') === 'auto' : $('net-delay-auto').checked;
+      const d = auto ? PortNet.autoDelay(ping) : +(Q.get('netd') || $('net-delay').value || 3);
+      return { mask: 3, delay: Math.max(1, Math.min(16, d | 0)), autoDelay: auto, hashEvery: 10, options, eeprom };
     });
   },
   async join(code) {

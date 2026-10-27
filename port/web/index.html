@@ -199,7 +199,8 @@
         menus; player 2 joins with Start on the "press START" page of a multiplayer mode. Connect before pressing Start (reload the page first if
         the game already runs). The session uses player 1's options and save.</p>
       <div class="row"><button id="net-host">Host (player 1)</button><button id="net-join">Join (player 2)</button></div>
-      <label class="netdelay" title="Each player's input reaches the game this many frames (20 ms each) late, so the network has time to bring it to the other computer. Raise it if the game often waits for the other player.">Input delay
+      <label class="netdelay" title="Each player's input reaches the game this many frames (20 ms each) late, so the network has time to bring it to the other computer. Automatic: the host measures the ping before the game starts and picks 2 to 8 frames. Untick it and raise the number if the game often waits for the other player.">Input delay
+        <input id="net-delay-auto" type="checkbox" checked> automatic, or
         <input id="net-delay" type="number" min="1" max="16" value="3"> frames (host)</label>
       <div id="net-step-host" class="netstep" hidden>
         <label>1. Send this code to player 2 <button id="net-offer-copy">Copy</button></label>

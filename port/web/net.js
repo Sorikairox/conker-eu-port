@@ -181,16 +181,43 @@
   N.leave = function () { try { sendCtl({ t: 'bye' }); } catch (e) { /* closed */ } setTimeout(() => { try { T.pc && T.pc.close(); } catch (e) { /* closed */ } }, 100); };
 
   function sendCtl(m) { if (T.ctl && T.ctl.readyState === 'open') T.ctl.send(JSON.stringify(m)); }
+  // P339 item 2: before the session starts, the host pings the guest over 'ctl' (PING_COUNT pings, PING_GAP_MS apart,
+  // at most PING_WAIT_MS) and picks the input delay from the round trips (N.autoDelay). Under ?netsim the pings and
+  // pongs get the same latency / jitter as the input packets (not the loss: 'ctl' is reliable).
+  const PING_COUNT = 12, PING_GAP_MS = 40, PING_WAIT_MS = 2000;
+  let pingDone = null;
+  const pingRtts = [];
+  function sendCtlSim(m) { const ms = (SIM.lat || 0) + Math.random() * (SIM.jit || 0); if (ms) setTimeout(() => sendCtl(m), ms); else sendCtl(m); }
+  function measurePing() {
+    return new Promise((resolve) => {
+      pingRtts.length = 0;
+      const finish = () => { if (!pingDone) return; pingDone = null; const r = pingRtts.slice().sort((a, b) => a - b);
+        resolve(r.length ? { n: r.length, min: r[0], median: r[r.length >> 1], p90: r[Math.min(r.length - 1, Math.floor(r.length * 0.9))] } : null); };
+      pingDone = () => { if (pingRtts.length >= PING_COUNT) finish(); };
+      for (let i = 0; i < PING_COUNT; i++) setTimeout(() => sendCtlSim({ t: 'ping', at: performance.now() }), i * PING_GAP_MS);
+      setTimeout(finish, PING_WAIT_MS);
+    });
+  }
+  // D = clamp(ceil((RTT / 2 + jitter margin) / 20 ms) + 1, 2, 8): RTT = the median round trip, jitter margin = half of
+  // (90th percentile - median); the + 1 covers sending / scheduling and the loss of single packets
+  N.autoDelay = (p) => p ? Math.max(2, Math.min(8, Math.ceil((p.median / 2 + (p.p90 - p.median) / 2) / 20) + 1)) : 4;
   async function onCtl(m) {
+    if (m.t === 'ping') { sendCtlSim({ t: 'pong', at: m.at }); return; }
+    if (m.t === 'pong') { if (pingDone) { pingRtts.push(performance.now() - m.at); pingDone(); } return; }
     if (m.t === 'hello' && T.role === 'host') {   // the guest's build and ROM must be ours
       if (m.build !== N.buildId) { sendCtl({ t: 'refuse', why: 'different game builds (reload both pages to get the latest version)' }); status('refused: the guest runs a different build', 'bad'); return; }
       if (m.rom !== N.romSha256) { sendCtl({ t: 'refuse', why: 'different ROMs (the EU ROM is needed on both sides)' }); status('refused: the guest has a different ROM', 'bad'); return; }
-      const cfg = await T.sessionFn();   // {mask, delay, hashEvery, options, eeprom (Uint8Array|null)}
-      sendCtl({ t: 'config', mask: cfg.mask, delay: cfg.delay, hashEvery: cfg.hashEvery, options: cfg.options, eeprom: cfg.eeprom ? b64(cfg.eeprom) : null, ch: T.peerCh });
+      status('measuring the ping…', 'ok');
+      const ping = await measurePing();   // P339 item 2
+      if (ping) { T.rtt = ping.median; N.log(`[net] ping over ${ping.n} round trips: min ${ping.min.toFixed(1)} median ${ping.median.toFixed(1)} p90 ${ping.p90.toFixed(1)} ms -> auto input delay ${N.autoDelay(ping)}`); }
+      const cfg = await T.sessionFn(ping);   // {mask, delay, autoDelay, hashEvery, options, eeprom (Uint8Array|null)}
+      cfg.ping = ping ? Math.round(ping.median) : 0;
+      sendCtl({ t: 'config', mask: cfg.mask, delay: cfg.delay, autoDelay: cfg.autoDelay, ping: cfg.ping, hashEvery: cfg.hashEvery, options: cfg.options, eeprom: cfg.eeprom ? b64(cfg.eeprom) : null, ch: T.peerCh });
       emit('config', Object.assign({}, cfg, { local: 1 << T.myCh }));
     } else if (m.t === 'config' && T.role === 'guest') {
       T.myCh = m.ch;
-      emit('config', { mask: m.mask, local: 1 << m.ch, delay: m.delay, hashEvery: m.hashEvery, options: m.options, eeprom: m.eeprom ? unb64(m.eeprom) : null });
+      if (m.ping) T.rtt = m.ping;
+      emit('config', { mask: m.mask, local: 1 << m.ch, delay: m.delay, autoDelay: m.autoDelay, ping: m.ping, hashEvery: m.hashEvery, options: m.options, eeprom: m.eeprom ? unb64(m.eeprom) : null });
     } else if (m.t === 'refuse') status('the host refused: ' + m.why, 'bad');
     else if (m.t === 'bye') peerLost('the other player left');
     else if (m.t === 'desync') emit('desync', Object.assign({ remote: true }, m));
@@ -236,7 +263,7 @@
     checkHashes();
     const waiting = !N.ready(lastRun + 1);
     if (T.state !== 'playing' && lastRun > N.cfg.delay + 1) status('playing', 'ok');
-    emit('tick', { frame: lastRun, waiting, rtt: T.rtt, stalls: N.stat(0), margin: T.myMargin, peerMargin: T.peerMargin, slowed: N.stat(7) });
+    emit('tick', { frame: lastRun, waiting, rtt: T.rtt, stalls: N.stat(8), margin: T.myMargin, peerMargin: T.peerMargin, slowed: N.stat(7) });
     if (now - T.lastRecv > 5000 && T.state !== 'idle') peerLost('no data from the other player for 5 s');
   }
   // P339 time sync, every 250 ms: the peer that is ahead (smaller input margin) slows down by half the difference
