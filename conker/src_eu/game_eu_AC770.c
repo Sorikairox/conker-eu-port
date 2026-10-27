@@ -282,7 +282,7 @@ void idle_choose_next_set(void) {
         goto choose;
     }
     ctl = rec->unk31C;
-    if ((s16)ctl->unk66 != 0 && ctl->unk78 == 0) {
+    if ((s16)ctl->unk66 != 0 && ctl->item_kind == 0) {
         s32 id = 0xB;
         if (st->timer > 100) {
             ctl->unk66 = 0;
@@ -306,11 +306,11 @@ void idle_choose_next_set(void) {
     group = -1;
     if (rec->unk2F8 & 0x200) {
         group = 2;
-    } else if (rec->unk31C->unk78 == 9) {
+    } else if (rec->unk31C->item_kind == 9) {
         group = 5;
-    } else if (rec->unk31C->unk78 == 0x23) {
+    } else if (rec->unk31C->item_kind == 0x23) {
         group = 9;
-    } else if (rec->unk31C->unk78 == 0x16) {
+    } else if (rec->unk31C->item_kind == 0x16) {
         group = 0xA;
     } else if (attachment_find_by_slot((u8 *)rec, 0x17, 0) != NULL) {
         group = 6;
@@ -503,7 +503,7 @@ void player_idle_animation(void) {
         obj_start_anim(g_cur_obj, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
-    ch = ctl->unk78;
+    ch = ctl->item_kind;
     switch (ch) {
         case 0x02: case 0x13: anim = 0x3E; break;
         case 0x38: anim = 0x1DF; break;
@@ -562,8 +562,8 @@ void player_idle_animation(void) {
 
     if (idle_set_advance() != 0) {
         rec = g_cur_obj;
-        if (rec->unk31C->unk198 != 0 && ctl->unk5C == 0) {
-            switch (rec->unk31C->unk78) {
+        if (rec->unk31C->look_state != 0 && ctl->unk5C == 0) {
+            switch (rec->unk31C->item_kind) {
                 case 0x03: anim = 0x2C; break;
                 case 0x09: anim = 0x7F; break;
                 case 0x16: anim = 0xBD; break;
@@ -581,7 +581,7 @@ void player_idle_animation(void) {
     e = g_idle_anim_entries[g_idle_sets[ctl->unk5C][ctl->unk5D]];
     if (g_idle_sets[ctl->unk5C][ctl->unk5D] == 0) {
         rec = g_cur_obj;
-        switch (rec->unk31C->unk78) {
+        switch (rec->unk31C->item_kind) {
             case 0x09: anim = 0x3A; break;
             case 0x23: anim = 0x42; break;
             case 0x16: anim = 0x44; break;

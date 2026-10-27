@@ -567,8 +567,8 @@ void camera_ride_view_set(struct127 *arg0, u16 *arg1) {
     struct126 *temp_v1;
     u8 temp_v0;
 
-    arg0->unk31C->unk198 = 0;
-    if ((*arg1 & 0x10) && ((temp_v1 = arg0->unk31C, temp_v0 = temp_v1->unk78, (temp_v0 == 9)) || (temp_v0 == 0x38) || (temp_v0 == 0x39) || (temp_v0 == 0x37) || (temp_v0 == 0x3B) || (temp_v0 == 0x15) || (temp_v0 == 0x26) || (temp_v0 == 0x3A))) {
+    arg0->unk31C->look_state = 0;
+    if ((*arg1 & 0x10) && ((temp_v1 = arg0->unk31C, temp_v0 = temp_v1->item_kind, (temp_v0 == 9)) || (temp_v0 == 0x38) || (temp_v0 == 0x39) || (temp_v0 == 0x37) || (temp_v0 == 0x3B) || (temp_v0 == 0x15) || (temp_v0 == 0x26) || (temp_v0 == 0x3A))) {
         sp.u44 = arg0->x_position;
         temp_f12 = (arg0->unk40 - 90.0f) * 0.017453292f;
         sp.u48 = arg0->y_position + ((f32) (s16) temp_v1->unk114 * 0.75f);
@@ -587,7 +587,7 @@ void camera_ride_view_set(struct127 *arg0, u16 *arg1) {
         (*(s32 *)((u8 *)temp_v1 + 0x144)) = (s32) (*(s32 *)((u8 *)(&sp.u38) + 8));
         (*(f32 *)((u8 *)temp_v1 + 0x148)) = (f32) (*(f32 *)((u8 *)(&sp.u44) + 0));
         (*(s32 *)((u8 *)temp_v1 + 0x14C)) = (s32) (*(s32 *)((u8 *)(&sp.u44) + 4));
-        temp_v1->unk198 = 1;
+        temp_v1->look_state = 1;
         (*(s32 *)((u8 *)temp_v1 + 0x150)) = (s32) (*(s32 *)((u8 *)(&sp.u44) + 8));
         sp.u28 = 1.0f;
         sp24 = cosf((*(f32 *)((u8 *)temp_v1 + 0x170)) * -0.017453292f) * sp.u28;

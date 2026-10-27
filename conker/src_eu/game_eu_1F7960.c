@@ -19,55 +19,55 @@ void aim_hud_gauge_small_spawn(u8 *, u8, u8, u8);
 extern u8 g_obj_id_by_slot1[]; /* was D_800CC3C8 */
 
 /* was func_151CA150 */
-void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1)
+void aim_hud_spawn_for_mode(u8 *cam, s32 mode) /* cam was arg0 (camera record), mode was arg1 (aim kind) */
 {
-  s32 v; s32 t;
-  aim_hud_clear(arg0);
-  v = *((u8 *) (((u8 *) (*((u8 **) (((u8 *) arg0) + 0x3D0)))) + 0x65));
-  if (v != 0) { t = g_obj_id_by_slot1[v * 0x32C]; if ((t == 0x23) || (t == 0x8A)) arg1 = 0x1B; }
-  switch (arg1)
+  s32 held_slot; s32 held_id; /* were v, t */
+  aim_hud_clear(cam);
+  held_slot = *((u8 *) (((u8 *) (*((u8 **) (((u8 *) cam) + 0x3D0)))) + 0x65));
+  if (held_slot != 0) { held_id = g_obj_id_by_slot1[held_slot * 0x32C]; if ((held_id == 0x23) || (held_id == 0x8A)) mode = 0x1B; }
+  switch (mode)
   {
     case 0x23:
-      aim_hud_bar_spawn(arg0, 1, 1, -1, 0xFF);
-      aim_hud_quad_reticle_spawn(arg0, 0);
+      aim_hud_bar_spawn(cam, 1, 1, -1, 0xFF);
+      aim_hud_quad_reticle_spawn(cam, 0);
       return;
 
     case 0x1F:
 
     case 0x29:
-      aim_hud_bar_spawn(arg0, 2, 1, -1, 0xFF);
-      aim_hud_lens_reticle_spawn(arg0, 0);
+      aim_hud_bar_spawn(cam, 2, 1, -1, 0xFF);
+      aim_hud_lens_reticle_spawn(cam, 0);
       return;
 
     case 0xC:
 
     case 0x16:
-      aim_hud_lens_reticle_spawn(arg0, 0);
-      aim_hud_tint_spawn(arg0);
+      aim_hud_lens_reticle_spawn(cam, 0);
+      aim_hud_tint_spawn(cam);
       return;
 
     case 0x1B:
       if (g_level_id == 0x27)
     {
-      aim_hud_spawn_track_mode(arg0, 1, -1, 0xFF, 1);
+      aim_hud_spawn_track_mode(cam, 1, -1, 0xFF, 1);
       return;
     }
       if (g_last_player_index == 0)
     {
-      aim_hud_gauge_spawn(arg0, 0xFF, 0, 0, 1, 0xFF);
-      aim_hud_gauge_marks_spawn(arg0, 0xFF, 0, 0, 1, 0xFF);
+      aim_hud_gauge_spawn(cam, 0xFF, 0, 0, 1, 0xFF);
+      aim_hud_gauge_marks_spawn(cam, 0xFF, 0, 0, 1, 0xFF);
     }
     else
     {
-      aim_hud_gauge_small_spawn(arg0, 0xFF, 0, 0);
+      aim_hud_gauge_small_spawn(cam, 0xFF, 0, 0);
     }
-      aim_hud_bar_spawn(arg0, 3, 1, -1, 0xFF);
-      aim_hud_side_bars_spawn(arg0, 1, 1, -1, 0xFF);
+      aim_hud_bar_spawn(cam, 3, 1, -1, 0xFF);
+      aim_hud_side_bars_spawn(cam, 1, 1, -1, 0xFF);
       return;
 
     case 0x24:
-      aim_hud_bar_spawn(arg0, 0, 1, -1, 0xFF);
-      aim_hud_quad_reticle_spawn(arg0, 0);
+      aim_hud_bar_spawn(cam, 0, 1, -1, 0xFF);
+      aim_hud_quad_reticle_spawn(cam, 0);
       return;
 
     case 0x12:
@@ -77,12 +77,24 @@ void aim_hud_spawn_for_mode(u8 *arg0, s32 arg1)
     case 0x38:
 
     case 0x3B:
+#ifdef PORT
+      /* P334 option "Aiming crosshair" (off by default). The original gives these four kinds no aim HUD at all.
+       * Only the first-person aim camera can reach here with aim state 2 (camera_update_aim_mode sets the player
+       * record's +0x197 = 2 just before calling this; R-look (camera_look_enter, kinds 0x38 / 0x3B) keeps it 0), and
+       * in that camera the shot goes through the screen centre: the eye is the aim point (+0x2F8 = record +0x13C),
+       * the look target is eye + the unit look vector (+0x2BC, record +0x130), and the fire ray
+       * (obj_ray_cast_from_ctl) starts at +0x13C along +0x130. So spawn the game's own centred crosshair sprite
+       * (kind 0x64, the one aim kinds 9 / 0x14 / 0x3F / 0x41 get) there. In practice this is kind 0x18. */
+      if (port_option(PORT_OPT_AIM_CROSSHAIR) && (*(u8 **) (cam + 0x3D4))[0x197] == 2) {
+        aim_hud_crosshair_spawn(cam, 0);
+      }
+#endif
       break;
 
     case 9:
 
     default:
-      aim_hud_crosshair_spawn(arg0, 0);
+      aim_hud_crosshair_spawn(cam, 0);
       break;
 
   }
@@ -544,28 +556,28 @@ typedef struct {
 } Spawn559B;
 
 /* was func_151CB128 */
-void aim_hud_crosshair_spawn(u8 *arg0, u8 arg1) {
+void aim_hud_crosshair_spawn(u8 *cam, u8 alt_list) { /* cam was arg0 (camera record), alt_list was arg1 */
     Spawn559A a;
     s32 pad2; // fakematch: 4-byte hole between blocks
     Spawn559B b;
-    f32 f;
-    s32 ret;
+    f32 scale;   /* was f */
+    s32 sprite;  /* was ret */
 
-    b.u0 = arg0;
+    b.u0 = cam;
     b.u4 = 0.0f;
     b.u8 = 130.0f;
     b.uD = 0;
     b.uC = 0;
     if (g_last_player_index > 0) {
-        f = 2.0f;
+        scale = 2.0f;
     } else {
-        f = 1.0f;
+        scale = 1.0f;
     }
     a.u10 = 0x64;
     a.u12 = 0x12C;
-    a.uC = f * 12.0f;
+    a.uC = scale * 12.0f;
     a.u8 = a.uC;
-    a.u14 = (1 << (arg0[0x23D] + 0xB)) | 0x50;
+    a.u14 = (1 << (cam[0x23D] + 0xB)) | 0x50;
     a.u16 = 1;
     a.u18 = 0xFF;
     a.u1A = 7;
@@ -589,10 +601,10 @@ void aim_hud_crosshair_spawn(u8 *arg0, u8 arg1) {
     a.u41 = 0xA;
     a.u0 = 0.0f;
     a.u4 = 0.0f;
-    a.u44 = arg0[0x23D];
-    ret = sprite2d_spawn(&a, (u8)(arg1 ? 4 : 0), 0, 0, 0x58, 0xFF, 1);
-    if (ret != 0) {
-        memcpy((void *)(ret + 0x70), &b, 0x58);
+    a.u44 = cam[0x23D];
+    sprite = sprite2d_spawn(&a, (u8)(alt_list ? 4 : 0), 0, 0, 0x58, 0xFF, 1);
+    if (sprite != 0) {
+        memcpy((void *)(sprite + 0x70), &b, 0x58);
     }
 }
 

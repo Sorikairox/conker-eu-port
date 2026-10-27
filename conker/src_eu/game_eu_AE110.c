@@ -59,9 +59,9 @@ void context_action_clear(s32 arg0) {
     if ((p->unk31C->pad6C[8] != 0) && (!(p->unk31C->pad6C[8] & 0x80))) {
         p->unk31C->pad6C[8] = 0;
     }
-    b = p->unk31C->unk75;
+    b = p->unk31C->pad_kind;
     if ((b != 0) && (!(b & 0x80))) {
-        p->unk31C->unk75 = 0;
+        p->unk31C->pad_kind = 0;
     }
 }
 

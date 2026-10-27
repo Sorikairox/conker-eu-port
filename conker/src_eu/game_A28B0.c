@@ -2699,7 +2699,7 @@ void aiscript_set_fieldd0(void) {
 
 /* was func_1507B5C4 */
 void aiscript_if_player_field75(void) {
-    if (g_cur_obj->unk31C->unk75 == g_aiscript_arg1) {
+    if (g_cur_obj->unk31C->pad_kind == g_aiscript_arg1) {
         g_aiscript_arg2 ^= 1;
     }
     if (g_aiscript_arg2 != 0) {
@@ -2710,7 +2710,7 @@ void aiscript_if_player_field75(void) {
 /* was func_1507B630 */
 void aiscript_player_jump_when_grounded(void) {
     if ((g_cur_obj->disable_run == 0) && (g_cur_obj->unk28 == 0.0f)) {
-        if (g_cur_obj->unk31C->unk78 != 0) {
+        if (g_cur_obj->unk31C->item_kind != 0) {
             g_aiscript_arg0 ^= 1;
         }
         if (g_aiscript_arg0 != 0) {

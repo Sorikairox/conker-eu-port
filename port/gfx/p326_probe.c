@@ -45,6 +45,38 @@ void p326_probe(void) {
             port_log("[p326] frame %u teleport to %.0f %.0f\n", port_frame_count, F(r, 0x14), F(r, 0x1C));
         }
     }
+    {   /* P334 TEST ?p334aim=T (e.g. 0x18): from retrace 120 on, keeps Conker's context-pad kind (player record +0x31C,
+         * +0x75) at T, as standing on a weapon pad would. Pressing B then takes the item (player_item_action ->
+         * player_try_begin_action: +0x78 = T) and holding R (0x10) enters that kind's aim mode
+         * (camera_update_aim_mode / camera_look_enter) without a level route.
+         * ?p334log=1: every 30 retraces logs kind, item phase, aim state +0x197, look state +0x198, the camera's copy of the
+         * kind, and in first-person aim the fire ray (record +0x13C / +0x130) next to the camera eye and look vector. */
+        static int aim = -1, aimlog = -1, resets;
+        static unsigned last334;
+        unsigned char *st = (unsigned char *)(uintptr_t) * (const unsigned *)(r + 0x31C);
+        if (aim < 0) aim = port_flag("p334aim");
+        if (aimlog < 0) aimlog = port_flag("p334log");
+        if (aim > 0 && st && port_frame_count >= 120 && vbe_ld8(st + 0x7C) != (unsigned)aim) {
+            vbe_st8(st + 0x7C, aim);
+            resets++;
+        }
+        if (aimlog > 0 && st && port_frame_count - last334 >= 30) {
+            last334 = port_frame_count;
+            extern unsigned g_player_views; /* struct108 *, was D_800DBFF0 */
+            const unsigned char *cam = (const unsigned char *)(uintptr_t)g_player_views;
+            port_log("[p334] frame %u kind 0x%x phase %d aim %d look %d yaw %.1f pitch %.1f | cam type 0x%x mode %d "
+                     "flags 0x%x tgt %d | obj 104 %d h28 %.1f 65 %d resets %d\n", port_frame_count,
+                     vbe_ld8(st + 0x78), vbe_ld8(st + 0x11A), vbe_ld8(st + 0x197), vbe_ld8(st + 0x198), F(st, 0x16C),
+                     F(st, 0x170), vbe_ld8(cam + 0x23E), (short)vbe_ld16(cam + 0x73C), *(const unsigned *)(cam + 0x2C),
+                     *(const unsigned *)(cam + 0x3D4) == (unsigned)(uintptr_t)st, vbe_ld8(r + 0x104), F(r, 0x28),
+                     vbe_ld8(r + 0x65), resets);
+            if (vbe_ld8(st + 0x197) == 2)   /* fire ray (obj_ray_cast_from_ctl) vs the aim camera's eye / look target */
+                port_log("[p334] ray from %.1f %.1f %.1f dir %.4f %.4f %.4f | cam eye %.1f %.1f %.1f at-eye %.4f %.4f %.4f\n",
+                         F(st, 0x13C), F(st, 0x140), F(st, 0x144), F(st, 0x130), F(st, 0x134), F(st, 0x138),
+                         F(cam, 0x2F8), F(cam, 0x2FC), F(cam, 0x300), F(cam, 0x2BC) - F(cam, 0x2F8),
+                         F(cam, 0x2C0) - F(cam, 0x2FC), F(cam, 0x2C4) - F(cam, 0x300));
+        }
+    }
     w = vbe_ld8(r + 0xAD);
     {   /* P333 TEST ?p326nofloat=1 (changes the game): while Conker is in water, clears the "float water" flags of the
          * state block (+0x20 bit 0, +0x21) so the 0x29 river can be dived in. ?p333=1: every 20 retraces in water, logs

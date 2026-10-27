@@ -1105,7 +1105,7 @@ void walk_select_move_anim(struct127 *arg0, s32 arg1, f32 arg2) {
             return;
         }
         if ((arg0->unk81 == 0) && (arg0->stunned == 0) && (arg0->in_water == 0)) {
-            if ((arg0->unk83 == 0) && (temp_v1_3->unk11A != 3)) {
+            if ((arg0->unk83 == 0) && (temp_v1_3->item_phase != 3)) {
                 arg0->unk80 = 1;
                 arg0->unk100 &= 0xF3;
                 g_walk_flags |= 0x80;
@@ -1114,7 +1114,7 @@ void walk_select_move_anim(struct127 *arg0, s32 arg1, f32 arg2) {
                 var_v1 = arg0->unk31C;
                 var_f12 = 1.0f;
                 var_f2 = (arg0->xz_velocity * 0.4f) + (arg2 * 0.6f);
-                if (((*(s16 *)((u8 *)var_v1 + 0x46)) > 0) || (var_v1->unk4E != 0) || ((s32) arg0->unk13C >= 0x64) || (arg1 != 0) || ((*(u16 *)((u8 *)var_v1 + 0x32)) & 3) || (var_v1->unk78 != 0) || (var_v1->pad17[3] != 0) || (var_v1->unk8 > 0) || (var_v1->pad17[0] != 0)) {
+                if (((*(s16 *)((u8 *)var_v1 + 0x46)) > 0) || (var_v1->unk4E != 0) || ((s32) arg0->unk13C >= 0x64) || (arg1 != 0) || ((*(u16 *)((u8 *)var_v1 + 0x32)) & 3) || (var_v1->item_kind != 0) || (var_v1->pad17[3] != 0) || (var_v1->unk8 > 0) || (var_v1->pad17[0] != 0)) {
                     sp28 = 0x3E7;
                     sp34 = var_f2;
                     sp2C = 1.0f;
@@ -1129,7 +1129,7 @@ void walk_select_move_anim(struct127 *arg0, s32 arg1, f32 arg2) {
                 } else {
 block_25:
                     temp_t8 = *(u16 *)g_cur_pad & 0x2000;
-                    if ((temp_t8 == 0) || (g_walk_no_run != 0) || (var_v1->unk78 != 0) || ((var_v1->unk4E & 0xF) == 1)) {
+                    if ((temp_t8 == 0) || (g_walk_no_run != 0) || (var_v1->item_kind != 0) || ((var_v1->unk4E & 0xF) == 1)) {
                         if (arg0->xz_velocity > 4.0f) {
                             var_v1->pad37 = 0;
                             var_v1 = arg0->unk31C;
@@ -1184,7 +1184,7 @@ block_25:
                             arg0->unk100 |= 0x10;
                         }
                         if (arg0->xz_velocity > 18.0f) {
-                            temp_v0_4 = arg0->unk31C->unk11A;
+                            temp_v0_4 = arg0->unk31C->item_phase;
                             if ((temp_v0_4 != 1) && (temp_v0_4 != 3) && (arg2 == 0.0f) && (arg0->unk28 == 0.0f) && (g_cur_floor_kind == 0)) {
                                 var_f12_2 = 0.5f;
                                 var_t0 = 0x21;
@@ -1708,7 +1708,7 @@ void obj_state_walk(struct127 *arg0) {
             (*(u8 *)((u8 *)(temp_t0_2) + 0x1B1)) = 0U;
             obj_tint_pulse_stop(arg0);
         }
-        if (((g_level_id == 0x2D) || (g_level_id == 0x30) || (g_level_id == 0x34) || (g_level_id == 0x1A) || (g_level_id == 0x3F)) && (g_cur_buttons_pressed & 4) && !(g_cur_buttons_pressed & 0xC000) && ((s32) arg0->unk28 == 0) && (arg0->y_velocity < 0.0f) && (arg0->disable_run == 0) && (arg0->unk13C == 0) && (arg0->unk31C->unk19B == 0) && (arg0->unk31C->unk78 == 0) && ((arg0->unk31C->unk75 & ~0x80) != 3) && (arg0->unk31C->grenade_count != 0)) {
+        if (((g_level_id == 0x2D) || (g_level_id == 0x30) || (g_level_id == 0x34) || (g_level_id == 0x1A) || (g_level_id == 0x3F)) && (g_cur_buttons_pressed & 4) && !(g_cur_buttons_pressed & 0xC000) && ((s32) arg0->unk28 == 0) && (arg0->y_velocity < 0.0f) && (arg0->disable_run == 0) && (arg0->unk13C == 0) && (arg0->unk31C->unk19B == 0) && (arg0->unk31C->item_kind == 0) && ((arg0->unk31C->pad_kind & ~0x80) != 3) && (arg0->unk31C->grenade_count != 0)) {
             if ((arg0->id == 0x3B) || (g_level_id == 0x1A) || (g_level_id == 0x3F)) {
                 arg0->unk31C->unk19B = 5;
             } else {
@@ -1751,9 +1751,9 @@ void obj_state_walk(struct127 *arg0) {
         }
     }
     temp_t0_3 = arg0->unk31C;
-    temp_v0_2 = temp_t0_3->unk78;
+    temp_v0_2 = temp_t0_3->item_kind;
     if (temp_v0_2 != 0x1B) {
-        if (((temp_t0_3->unk198 == 0) || (temp_v0_2 == 3)) && (temp_v0_2 != 0x12) && (temp_v0_2 != 2) && (temp_v0_2 != 0x13) && (temp_v0_2 != 0xA) && (temp_v0_2 != 0x34)) {
+        if (((temp_t0_3->look_state == 0) || (temp_v0_2 == 3)) && (temp_v0_2 != 0x12) && (temp_v0_2 != 2) && (temp_v0_2 != 0x13) && (temp_v0_2 != 0xA) && (temp_v0_2 != 0x34)) {
             sp17C = (s32) temp_v0_2;
             g_walk_flags |= 0x10;
             sp1C4 = math_atan2_u16((f32) ((struct49 *)g_cur_pad)->unk2, (f32) ((struct49 *)g_cur_pad)->unk3, 0);
@@ -1816,7 +1816,7 @@ void obj_state_walk(struct127 *arg0) {
                 arg0->unk78 = temp_v0_3;
                 arg0->unk7A = temp_v0_3;
             }
-            if (arg0->unk31C->unk197 != 0) {
+            if (arg0->unk31C->aim_state != 0) {
                 sp1BC = 0.1f;
                 temp_f10 = (s32) ((*(f32 *)((u8 *)(arg0->unk31C) + 0x16C)) * 182.04445f);
                 arg0->unk7A = (u16) temp_f10;
@@ -1906,18 +1906,18 @@ void obj_state_walk(struct127 *arg0) {
                 sp19F = (s8) ((s8) ((struct49 *)g_cur_pad)->unk3 / 2);
             }
             temp_t0_11 = arg0->unk31C;
-            if (temp_t0_11->unk78 == 0x38) {
+            if (temp_t0_11->item_kind == 0x38) {
                 sp19F -= (s32) (*(u16 *)((u8 *)(temp_t0_11) + 0x1A2)) >> 8;
             }
         } else {
             sp1C4 = 0;
             sp1BC = 0.0f;
             *var_a2 |= 0x20;
-            var_v0_3 = arg0->unk31C->unk78;
+            var_v0_3 = arg0->unk31C->item_kind;
             if ((var_v0_3 == 2) || (var_v0_3 == 0x12) || (var_v0_3 == 0x13) || (var_v0_3 == 0x10) || (var_v0_3 == 0xA) || (var_v0_3 == 0x34) || (((u16) ((struct49 *)g_cur_pad)->unk0 & 0x10) && (var_v0_3 == 0x16)) || (var_v0_3 == 9) || (var_v0_3 == 0x38) || (var_v0_3 == 0x39) || (var_v0_3 == 0x37) || (var_v0_3 == 0x3B) || (var_v0_3 == 0x15) || (var_v0_3 == 0x26) || (var_v0_3 == 0x3A)) {
                 if ((var_v0_3 == 0x10) || (var_v0_3 == 0x14) || (var_v0_3 == 0x3F)) {
                     sp19F = (s8) ((s8) ((struct49 *)g_cur_pad)->unk3 / 2);
-                    var_v0_3 = arg0->unk31C->unk78;
+                    var_v0_3 = arg0->unk31C->item_kind;
                 }
                 if ((var_v0_3 == 0xC) || (var_v0_3 == 0x16) || (var_v0_3 == 0x15) || (var_v0_3 == 0x38) || (var_v0_3 == 0x39) || (var_v0_3 == 0x37) || (var_v0_3 == 0x3B) || (var_v0_3 == 0x12) || (var_v0_3 == 9)) {
                     var_f0_3 = (*(f32 *)((u8 *)(arg0->unk31C) + 0x170));
@@ -1926,10 +1926,10 @@ void obj_state_walk(struct127 *arg0) {
                     }
                     sp19F = (s8) (s32) (var_f0_3 * 0.91022223f);
                     temp_t0_12 = arg0->unk31C;
-                    var_v0_3 = temp_t0_12->unk78;
+                    var_v0_3 = temp_t0_12->item_kind;
                     if (var_v0_3 == 0x38) {
                         sp19F -= (s32) (*(u16 *)((u8 *)(temp_t0_12) + 0x1A2)) >> 8;
-                        var_v0_3 = arg0->unk31C->unk78;
+                        var_v0_3 = arg0->unk31C->item_kind;
                     }
                 }
                 if ((var_v0_3 != 9) && (var_v0_3 != 0x38) && (var_v0_3 != 0x39) && (var_v0_3 != 0x37) && (var_v0_3 != 0x3B) && (var_v0_3 != 0x15) && (var_v0_3 != 0x26) && (var_v0_3 != 0x3A)) {
@@ -1943,7 +1943,7 @@ void obj_state_walk(struct127 *arg0) {
                 ((struct49 *)g_cur_pad)->unk0 = (u16) ((struct49 *)g_cur_pad)->unk0 & 0xDFFF;
                 g_cur_buttons_pressed &= ~0x2000;
 block_197:
-                var_v0_3 = arg0->unk31C->unk78;
+                var_v0_3 = arg0->unk31C->item_kind;
             }
             if (var_v0_3 != 9) {
                 g_walk_flags |= 0x200;
@@ -1952,16 +1952,16 @@ block_197:
             }
         }
     }
-    if (!(arg0->unk31C->unk4E & 0xF) && (arg0->health != 0) && (arg0->stunned == 0) && (arg0->unk28 == 0.0f) && ((g_mp_mode_active != 0) || ((temp_v0_9 = arg0->unk31C->unk78, (temp_v0_9 == 9)) && (arg0->unk31C->matrix_physics == 0)) || (temp_v0_9 == 0x16) || (temp_v0_9 == 0x3B)) && ((temp_v0_10 = arg0->unk31C->unk11A, (temp_v0_10 == 2)) || (temp_v0_10 == 0))) {
-        temp_a2 = arg0->unk31C->unk78;
+    if (!(arg0->unk31C->unk4E & 0xF) && (arg0->health != 0) && (arg0->stunned == 0) && (arg0->unk28 == 0.0f) && ((g_mp_mode_active != 0) || ((temp_v0_9 = arg0->unk31C->item_kind, (temp_v0_9 == 9)) && (arg0->unk31C->matrix_physics == 0)) || (temp_v0_9 == 0x16) || (temp_v0_9 == 0x3B)) && ((temp_v0_10 = arg0->unk31C->item_phase, (temp_v0_10 == 2)) || (temp_v0_10 == 0))) {
+        temp_a2 = arg0->unk31C->item_kind;
         var_v0_4 = 3;
-        if ((temp_a2 != 0) && ((arg0->unk31C->unk197 == 0) || (temp_a2 == 0x16)) && (arg0->unk31C->unk19B == 0)) {
+        if ((temp_a2 != 0) && ((arg0->unk31C->aim_state == 0) || (temp_a2 == 0x16)) && (arg0->unk31C->unk19B == 0)) {
             var_v0_4 = 0xF;
         }
         temp_a0 = (u16) ((struct49 *)g_cur_pad)->unk0 & var_v0_4;
         if (temp_a0 != 0) {
             var_v0_5 = temp_a0;
-            if ((arg0->unk31C->unk197 == 0) && (arg0->unk31C->unk198 == 0)) {
+            if ((arg0->unk31C->aim_state == 0) && (arg0->unk31C->look_state == 0)) {
                 temp_a0_2 = ((struct49 *)g_cur_pad)->unk3;
                 if (temp_a0_2 >= 6) {
                     var_v0_5 |= 8;
@@ -1987,7 +1987,7 @@ block_197:
                 temp_t8 = (((temp_t5 & 0xFFFF) + temp_a0_3) - arg0->unk31C->unk12) - g_cur_cam_yaw;
                 sp1C4 = temp_t8;
                 sp1BC = 34.0f;
-                if (arg0->unk31C->unk197 != 0) {
+                if (arg0->unk31C->aim_state != 0) {
                     arg0->unk76 = temp_t8 + g_cur_cam_yaw;
                 }
                 (*(s8 *)((u8 *)(arg0->unk31C) + 0x1B3)) = 1;
@@ -1996,7 +1996,7 @@ block_197:
             }
         } else if (arg0->unk31C->unk52 != 0) {
             arg0->unk76 = arg0->unk7A;
-            if (arg0->unk31C->unk197 != 0) {
+            if (arg0->unk31C->aim_state != 0) {
                 arg0->xz_velocity = 0.0f;
             }
         }
@@ -2041,11 +2041,11 @@ block_197:
     }
     sp1C1 = 0xC;
     temp_t0_14 = arg0->unk31C;
-    if (((s16) temp_t0_14->unk8 > 0) || (var_a2_3 = temp_t0_14->unk78, (var_a2_3 == 3))) {
+    if (((s16) temp_t0_14->unk8 > 0) || (var_a2_3 = temp_t0_14->item_kind, (var_a2_3 == 3))) {
         sp1B0 = var_f12;
         walk_idle_variation((u8 *)arg0, &sp1C4, &sp1BC, &sp19F);
         var_f12 = sp1B0;
-        var_a2_3 = arg0->unk31C->unk78;
+        var_a2_3 = arg0->unk31C->item_kind;
     }
     sp1B0 = var_f12;
     obj_step_tilt_toward(arg0, sp19F, var_a2_3);
@@ -2144,9 +2144,9 @@ block_197:
             }
         } else {
             temp_t0_20 = arg0->unk31C;
-            temp_v0_16 = temp_t0_20->unk78;
+            temp_v0_16 = temp_t0_20->item_kind;
             if ((temp_v0_16 == 2) || (temp_v0_16 == 0x13) || (temp_v0_16 == 0xA) || (temp_v0_16 == 0x34)) {
-                if (temp_t0_20->unk198 != 0) {
+                if (temp_t0_20->look_state != 0) {
                     temp_f0_2 = -(*(f32 *)((u8 *)(temp_t0_20) + 0x170));
                     if ((temp_v0_16 == 2) || (temp_v0_16 == 0x13)) {
                         var_f0_4 = temp_f0_2 + 30.0f;
@@ -2180,7 +2180,7 @@ block_197:
                         }
                     }
                 }
-                if (((arg0->unk13C != 0) && (g_objects_ref_id[g_cur_obj->unk13C * 0x32C] != 0x57)) || (temp_t0_20->unk198 != 0) || ((u16) ((struct49 *)g_cur_pad)->unk0 & 0x2000)) {
+                if (((arg0->unk13C != 0) && (g_objects_ref_id[g_cur_obj->unk13C * 0x32C] != 0x57)) || (temp_t0_20->look_state != 0) || ((u16) ((struct49 *)g_cur_pad)->unk0 & 0x2000)) {
                     var_f14 = 0.0f;
                 }
             }
@@ -2269,7 +2269,7 @@ block_197:
                                 var_v1_3 = 0xC;
                                 arg0->xz_velocity = 0.0f;
                                 if ((s32) arg0->unk83 >= 5) {
-                                    temp_v0_18 = arg0->unk31C->unk11A;
+                                    temp_v0_18 = arg0->unk31C->item_phase;
                                     if ((temp_v0_18 != 1) && (temp_v0_18 != 3)) {
                                         arg0->unk83 = 4;
                                     }
@@ -2801,7 +2801,7 @@ block_593:
                             arg0->xz_velocity = 14.0f;
                             var_a2_4 = arg0->unk31C->unk4E;
                         }
-                        if ((var_a2_4 == 0) && (arg0->unk31C->unk11A == 0)) {
+                        if ((var_a2_4 == 0) && (arg0->unk31C->item_phase == 0)) {
                             sp1A0 = 0x7A;
                             if ((arg0->unk81 == 0) && (arg0->unk83 == 0)) {
                                 arg0->unk40 = (f32) (temp_t1 - 0x4000) * 0.005493164f;
@@ -2847,7 +2847,7 @@ block_593:
             }
             temp_t0_31 = arg0->unk31C;
             if ((temp_t0_31->unk8C & 0x2000) && (arg0->health != 0)) {
-                obj_fire_weapon_kind(arg0, temp_t0_31->unk75 & 0x7F);
+                obj_fire_weapon_kind(arg0, temp_t0_31->pad_kind & 0x7F);
             }
         }
         if ((arg0->y_position < (spC4 + spC0)) && (arg0->y_velocity < 0.0f) && ((spC0 > 20.0f) || (arg0->unk28 == 0.0f))) {
@@ -2954,7 +2954,7 @@ block_593:
     temp_t0_36 = arg0->unk31C;
     temp_a2_4 = temp_t0_36->unk4E;
     if (temp_a2_4 == 0) {
-        if ((arg0->unk28 > 5.0f) && (arg0->unk137 == 0) && (arg0->disable_run == 0) && (temp_t0_36->unk78 == 0) && (temp_t0_36->pad17[0] == 0) && (arg0->stunned == 0) && ((*(s16 *)((u8 *)(temp_t0_36) + 0x46)) == 0) && (arg0->in_water == 0) && (arg0->unk13C == 0) && (arg0->unk180 != -10000.0f) && (arg0->health != 0) && ((s16) temp_t0_36->unk8 == 0) && (temp_a2_4 == 0) && (arg0->unk110 == 0) && ((arg0->unk1CC - arg0->y_position) < 450.0f)) {
+        if ((arg0->unk28 > 5.0f) && (arg0->unk137 == 0) && (arg0->disable_run == 0) && (temp_t0_36->item_kind == 0) && (temp_t0_36->pad17[0] == 0) && (arg0->stunned == 0) && ((*(s16 *)((u8 *)(temp_t0_36) + 0x46)) == 0) && (arg0->in_water == 0) && (arg0->unk13C == 0) && (arg0->unk180 != -10000.0f) && (arg0->health != 0) && ((s16) temp_t0_36->unk8 == 0) && (temp_a2_4 == 0) && (arg0->unk110 == 0) && ((arg0->unk1CC - arg0->y_position) < 450.0f)) {
             var_v0_9 = 0;
             if (g_wall_ledge_h_neg != -32768.0f) {
                 sp8C = g_wall_ledge_h_neg;
@@ -3089,8 +3089,8 @@ block_593:
     temp_v1_10 = arg0->unk100;
     if (temp_v1_10 & 1) {
         temp_t0_37 = arg0->unk31C;
-        if (temp_t0_37->unk78 == 0) {
-            temp_v0_44 = temp_t0_37->unk11A;
+        if (temp_t0_37->item_kind == 0) {
+            temp_v0_44 = temp_t0_37->item_phase;
             if ((temp_v0_44 != 1) && (temp_v0_44 != 3) && (arg0->in_water == 0) && (arg0->stunned == 0) && (g_walk_no_run == 0) && ((arg0->disable_run == 0) || (arg0->unk84.uh == 0x279)) && ((s16) temp_t0_37->unk8 <= 0) && (arg0->unk28 == 0.0f) && ((u16) ((struct49 *)g_cur_pad)->unk0 & 0x2000)) {
                 arg0->unk81 = 0;
                 arg0->unk83 = 0;
@@ -3101,7 +3101,7 @@ block_593:
     }
     temp_t0_38 = arg0->unk31C;
     if (((arg0->unk1CC - arg0->y_position) > 600.0f) && (temp_t0_38->unk120 == 0)) {
-        temp_v0_45 = temp_t0_38->unk11A;
+        temp_v0_45 = temp_t0_38->item_phase;
         if ((temp_v0_45 != 1) && (temp_v0_45 != 3) && (arg0->unk118 == -10000.0f)) {
             temp_v0_46 = arg0->unk84.uh;
             if ((temp_v0_46 != 0x101) && (arg0->in_water == 0)) {
@@ -3364,7 +3364,7 @@ void walk_ground_slide_push(struct127 *rec, f32 x, f32 z, u16 angle) {
                     }
                     if (rec->stunned == 0 && rec->unk13C == 0 && rec->disable_run != 0xFF && rec->unk83 < 0xFA) {
                         ctl = rec->unk31C;
-                        if (ctl->unk11A != 1 && ctl->unk11A != 3 && ctl->unk120 == 0 && ctl->unk19B == 0) {
+                        if (ctl->item_phase != 1 && ctl->item_phase != 3 && ctl->unk120 == 0 && ctl->unk19B == 0) {
                             obj_start_anim(rec, anim, anim_speed, 6.0f, 0.0f, 0.0f, 0);
                         }
                     }
@@ -3382,7 +3382,7 @@ void walk_ground_slide_push(struct127 *rec, f32 x, f32 z, u16 angle) {
                                                rec->old_z_position - rec->z_position, 0);
             anim = rec->unk84.uh;
             if (anim == 0x28E || anim == 0x101 || anim == 0xD0) {
-                if (rec->unk31C->unk11A != 1 && rec->unk31C->unk11A != 3) {
+                if (rec->unk31C->item_phase != 1 && rec->unk31C->item_phase != 3) {
                     rec->unk83 = g_frame_delta + 1;
                 }
             }
@@ -4722,7 +4722,7 @@ void obj_state_remove_on_anim_end(struct127 *arg0) {
 
 /* was func_15054A5C */
 void obj_release_partner_remove(struct127 *arg0, struct127 *arg1) {
-    arg1->unk31C->unk11A = 0;
+    arg1->unk31C->item_phase = 0;
     obj_glow_post_remove_event(arg1);
     obj_remove(arg0, 0);
 }
@@ -4793,7 +4793,7 @@ void obj_state_partner_anim(struct127 *obj) {
         return;
     }
     ctl = partner->unk31C;
-    if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {
+    if (ctl->item_kind != 0x12 && ctl->item_kind != 0x18 && ctl->item_kind != 0x41 && ctl->item_phase != 3) {
         obj_release_partner_remove(obj, partner);
         return;
     }
@@ -4848,10 +4848,10 @@ void obj_state_partner_anim(struct127 *obj) {
     }
 
     ctl = partner->unk31C;
-    if (ctl->unk78 == 0x12) {
+    if (ctl->item_kind == 0x12) {
         ok = TRUE;
     } else {
-        ok = ctl->unk197;
+        ok = ctl->aim_state;
         if (ctl->unk84 == 0) {
             n = ((u8 *) partner - (u8 *) g_objects) / (s32) sizeof(struct127);
             if (n < 4 && !(*(u16 *) ((s32 *) g_cont_frame[0])[n] & 0x10)) {

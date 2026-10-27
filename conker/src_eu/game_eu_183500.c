@@ -75,9 +75,9 @@ void head_icon_update(u8 *arg0) {
         temp_v1_2 = g_objects[temp_a2].unk31C;
         var_v0 = 0;
         if (temp_v1_2 != NULL) {
-            var_v0 = temp_v1_2->unk75;
+            var_v0 = temp_v1_2->pad_kind;
         }
-        if (!(var_v0 & 0x80) && (var_v0 != 0x2A) && (var_v0 != 0x2B) && ((var_v0 != 0x42) || !(g_hints_seen_b8 & 4)) && (var_v0 != 0x2C) && (temp_v1_2->unk197 == 0) && (var_v0 != 0) && (var_v0 != 0x1F) && (temp_t0->in_water == 0)) {
+        if (!(var_v0 & 0x80) && (var_v0 != 0x2A) && (var_v0 != 0x2B) && ((var_v0 != 0x42) || !(g_hints_seen_b8 & 4)) && (var_v0 != 0x2C) && (temp_v1_2->aim_state == 0) && (var_v0 != 0) && (var_v0 != 0x1F) && (temp_t0->in_water == 0)) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 1U;
             (*(s16 *)((u8 *)arg0 + 0xE)) = 0x78;
             sound_play_2d(0x1EB, 0x7FFFU, 0x40U, 0, 0U);
@@ -92,7 +92,7 @@ void head_icon_update(u8 *arg0) {
         return;
     case 1:
         var_v0_2 = (*(s16 *)((u8 *)arg0 + 0xE)) - g_frame_ticks;
-        if ((var_v0_2 <= 0) || (g_objects[temp_a2].unk31C->unk75 == 0)) {
+        if ((var_v0_2 <= 0) || (g_objects[temp_a2].unk31C->pad_kind == 0)) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 2U;
             var_v0_2 = 0;
         }
@@ -100,7 +100,7 @@ void head_icon_update(u8 *arg0) {
         temp_a1_2 = (*(u8 **)((u8 *)arg0 + 0x14));
         (*(u8 *)((u8 *)arg0 + 0x12)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x12)) + (g_frame_ticks * 2));
         if (temp_a1_2 != NULL) {
-            if (g_objects[temp_a2].unk31C->unk75 == 5) {
+            if (g_objects[temp_a2].unk31C->pad_kind == 5) {
                 var_f2 = 85.0f;
             } else {
                 var_f2 = 0.0f;
@@ -117,7 +117,7 @@ block_38:
         (*(u8 **)((u8 *)arg0 + 0x14)) = var_v0_3;
         break;
     case 2:
-        if (g_objects[temp_a2].unk31C->unk75 == 0) {
+        if (g_objects[temp_a2].unk31C->pad_kind == 0) {
             (*(u8 *)((u8 *)arg0 + 0x11)) = 0U;
         }
         temp_a1_3 = (*(u8 **)((u8 *)arg0 + 0x14));
@@ -174,7 +174,7 @@ Gfx *head_icon_draw(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
         f32 h;
 
         p = &g_objects[obj];
-        if (p->unk31C->unk75 == 5) {
+        if (p->unk31C->pad_kind == 5) {
             h = 85.0f;
         } else {
             h = 0.0f;

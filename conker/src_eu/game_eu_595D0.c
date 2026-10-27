@@ -1311,7 +1311,7 @@ block_37:
         }
         obj_visibility_stub((s32) temp_s1, var_fp);
         temp_v0_7 = temp_s1->camera;
-        if ((temp_v0_7 != NULL) && ((temp_v0_7->unk2C == 0x10000) || (temp_s1->unk31C->unk197 != 0))) {
+        if ((temp_v0_7 != NULL) && ((temp_v0_7->unk2C == 0x10000) || (temp_s1->unk31C->aim_state != 0))) {
             temp_s1->unk74 |= 1 << arg0;
         }
         if (g_cutscene_slot_state != 1) {

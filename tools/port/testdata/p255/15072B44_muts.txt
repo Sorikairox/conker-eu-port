@@ -5,7 +5,7 @@ s/case 0xFD:/case 0xFC:/ % aFD
 s/next = 0xFE;/next = 0xFD;/ % aFD
 1,/next = 0x10A;/s/next = 0x10A;/next = 0x10B;/ % a10A
 s/case 0x10C:/case 0x10B:/ % a10Cf1 a10Cf0
-1,/unk197 != 0/s/unk197 != 0/unk197 == 0/ % a10Cf1 a10Cf0
+1,/aim_state != 0/s/aim_state != 0/aim_state == 0/ % a10Cf1 a10Cf0
 s/case 0x12C:/case 0x12B:/ % a12C
 s/case 0x142:/case 0x143:/ % a142
 s/next = 0x12D;/next = 0x12C;/ % a12C

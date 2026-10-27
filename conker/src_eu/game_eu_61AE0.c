@@ -65,7 +65,7 @@ s16 *obj_adjust_entries_player(s16 *arg0, s32 arg1) {
         temp_f10 = (s32) (temp_v0->unk54 * 182.04445f);
         if ((temp_a1 != 0x42) && (temp_a1 != 0x14) && (temp_a1 != 0x76)) {
             var_v1 = 4;
-            if (temp_v1->unk78 == 0xA) {
+            if (temp_v1->item_kind == 0xA) {
                 var_v1 = 0;
             }
             (*(s16 *)((u8 *)var_a2 + 0)) = var_v1 + 6;

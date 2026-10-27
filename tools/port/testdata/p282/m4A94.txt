@@ -10,9 +10,9 @@
 /if (cur == 1 && anim->unk18 - 1.0f <= anim->unk8) {/s/- 1.0f/- 2.0f/
 /if (obj->id != 0x1D && obj->id != 0x6E && obj->id != 0x2F) {/s/!= 0x2F)/!= 0x30)/
 /if (partner->unk65 != 0 || partner->health == 0) {/s/partner->health == 0/partner->health == 1/
-/if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {/s/!= 0x41/!= 0x40/
-/if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {/s/unk11A != 3/unk11A != 2/
-/if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {/s/!= 0x18/!= 0x19/
+/if (ctl->item_kind != 0x12 && ctl->item_kind != 0x18 && ctl->item_kind != 0x41 && ctl->item_phase != 3) {/s/!= 0x41/!= 0x40/
+/if (ctl->item_kind != 0x12 && ctl->item_kind != 0x18 && ctl->item_kind != 0x41 && ctl->item_phase != 3) {/s/item_phase != 3/item_phase != 2/
+/if (ctl->item_kind != 0x12 && ctl->item_kind != 0x18 && ctl->item_kind != 0x41 && ctl->item_phase != 3) {/s/!= 0x18/!= 0x19/
 /^        anim2 = 0xC7;/s/0xC7/0xC8/
 /^        anim1 = 0xFB;/s/0xFB/0xFA/
 /^        anim2 = 0x2C9;/s/0x2C9/0x2C8/
@@ -28,7 +28,7 @@
 /obj_start_anim(obj, cur, 1.0f, 0.0f, 0.0f, 0.0f, 0);/s/1.0f, 0.0f/1.0f, 1.0f/
 /^    if (place) {/s/place/!place/
 /^        ok = TRUE;/s/TRUE/FALSE/
-/^        ok = ctl->unk197;/s/unk197/unk11A/
+/^        ok = ctl->aim_state;/s/aim_state/item_phase/
 /if (ctl->unk84 == 0) {/s/== 0/!= 0/
 /if (n < 4 && !(\*(u16 \*) ((s32 \*) g_cont_frame\[0\])\[n\] & 0x10)) {/s/n < 4/n < 5/
 /if (n < 4 && !(\*(u16 \*) ((s32 \*) g_cont_frame\[0\])\[n\] & 0x10)) {/s/0x10)/0x20)/

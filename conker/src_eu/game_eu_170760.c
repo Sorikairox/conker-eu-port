@@ -1487,7 +1487,7 @@ void obj_set_destroyed(struct127 *arg0) {
         if ((g_mp_mode_active != 0) || (arg0->interaction_state == 5) || (arg0->interaction_state == 1) || (arg0->interaction_state == 21)) {
             arg0->interaction_state = 5;
             if (arg0->unk31C != NULL) {
-                arg0->unk31C->unk78 = 0;
+                arg0->unk31C->item_kind = 0;
             }
         } else {
             obj_set_dead_fading(arg0);

@@ -22,13 +22,13 @@ s/    if (g_mp_mode_active != 0) {/    if (g_mp_mode_active == 0) {/ % k75_tbl n
 s/        state = 5;/        state = 6;/ % k75_tbl
 s/        obj->unk2E4 = CTL_U16(me->unk31C, 0x19C);/        obj->unk2E4 = CTL_U16(me->unk31C, 0x19E);/ % k75_tbl
 s/        me->unk31C->unk19B = 0;/        me->unk31C->unk19B = 1;/ % k75_tbl
-s/        g_cur_obj->unk31C->unk78 = 0;/        g_cur_obj->unk31C->unk78 = 2;/ % k75_tbl
+s/        g_cur_obj->unk31C->item_kind = 0;/        g_cur_obj->unk31C->item_kind = 2;/ % k75_tbl
 s/        obj->gravity = 4.0f;/        obj->gravity = 2.0f;/ % k75_tbl
 s/        speed = (f32) (200 - CTL_U16(ctl, 0x19C)) \* 60.0f \/ 200.0f + 40.0f;/        speed = (f32) (200 - CTL_U16(ctl, 0x19C)) * 60.0f \/ 100.0f + 40.0f;/ % k75_tbl
 s/        speed = (f32) (200 - CTL_U16(ctl, 0x19C)) \* 60.0f \/ 200.0f + 40.0f;/        speed = (f32) (201 - CTL_U16(ctl, 0x19C)) * 60.0f \/ 200.0f + 40.0f;/ % k75_tbl
 s/        if ((g_cur_obj_cmd >> 16) \& 1) {/        if ((g_cur_obj_cmd >> 17) \& 1) {/ % bit16 k75_tbl
 s/            speed = 0.0f;/            speed = 1.0f;/ % bit16
-s/        if (ctl->unk198 != 0) {/        if (ctl->unk198 == 0) {/ % k75_tbl c198_0
+s/        if (ctl->look_state != 0) {/        if (ctl->look_state == 0) {/ % k75_tbl c198_0
 s/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 182.04445f), speed \* 4.0f, 0.0f, \&dx, \&dy, \&dz);/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 2.0f, 0.0f, \&dx, \&dy, \&dz);/ % k75_tbl
 s/            vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) \* 182.04445f), speed \* 4.0f, 0.0f, \&dx, \&dy, \&dz);/            vec_from_yaw_pitch((u16) (s32) ((40.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 4.0f, 0.0f, \&dx, \&dy, \&dz);/ % k75_tbl
 s/            obj->y_velocity = -dy;/            obj->y_velocity = -dx;/ % k75_tbl

@@ -43,8 +43,8 @@ s32 obj_setup_undo(struct127 *, s32);
 void obj_knockdown_clear(struct127 *arg0) {
     struct127 *temp_v0;
     temp_v0 = &g_objects[arg0 - g_objects];
-    temp_v0->unk31C->unk78 = 0;
-    temp_v0->unk31C->unk11A = 0;
+    temp_v0->unk31C->item_kind = 0;
+    temp_v0->unk31C->item_phase = 0;
     obj_setup_undo(arg0, 0x1D);
     obj_setup_undo(arg0, 0x1E);
     *((u8 *)arg0 + 0x8A) = 0;
@@ -75,11 +75,11 @@ void obj_hit_react_start(struct127 *rec) {
 
 s32 ray_cast_world(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 /* was func_150639D8 */
-void obj_ray_cast_from_ctl(u8 *arg0, f32 arg1) {
-    u8 *temp_v0;
-    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x31C));
-    ray_cast_world(arg0, (*(f32 *)((u8 *)temp_v0 + 0x13C)), (*(f32 *)((u8 *)temp_v0 + 0x140)), (*(f32 *)((u8 *)temp_v0 + 0x144)), (*(f32 *)((u8 *)temp_v0 + 0x130)), (*(f32 *)((u8 *)temp_v0 + 0x134)), (*(f32 *)((u8 *)temp_v0 + 0x138)), temp_v0 + 0xB0, arg1, 0, 0, 0, -1, 0, 0);
-    obj_notify_hit_target((struct127 *)arg0);
+void obj_ray_cast_from_ctl(u8 *obj, f32 max_len) { /* obj was arg0, max_len was arg1 (ray length; 0 here) */
+    u8 *ctl; /* was temp_v0 */
+    ctl = (*(u8 **)((u8 *)obj + 0x31C));
+    ray_cast_world(obj, (*(f32 *)((u8 *)ctl + 0x13C)), (*(f32 *)((u8 *)ctl + 0x140)), (*(f32 *)((u8 *)ctl + 0x144)), (*(f32 *)((u8 *)ctl + 0x130)), (*(f32 *)((u8 *)ctl + 0x134)), (*(f32 *)((u8 *)ctl + 0x138)), ctl + 0xB0, max_len, 0, 0, 0, -1, 0, 0);
+    obj_notify_hit_target((struct127 *)obj);
 }
 
 /* was func_15063A54 */
@@ -300,7 +300,7 @@ s32 player_try_begin_action(struct127 *arg0, s32 arg1, s32 arg2, s8 arg3, s32 ar
     temp_t6 = arg1 & 0xFFFF;
     if ((arg4 & 0x4000) && (arg0->unk28 == 0.0f) && (arg0->y_velocity <= 0.0f)) {
         temp_v0 = arg0->unk31C;
-        if (((u8) temp_v0->unk95 == 0) && (temp_t6 != arg0->unk84.uh) && ((temp_a1 = temp_v0->unk11A, (temp_a1 == 0)) || (temp_a1 == 2)) && (temp_v0->unk27 == 0)) {
+        if (((u8) temp_v0->unk95 == 0) && (temp_t6 != arg0->unk84.uh) && ((temp_a1 = temp_v0->item_phase, (temp_a1 == 0)) || (temp_a1 == 2)) && (temp_v0->unk27 == 0)) {
             if ((arg3 != 0) && (arg0->disable_jump != 0)) {
                 return 0x3E7;
             }
@@ -308,18 +308,18 @@ s32 player_try_begin_action(struct127 *arg0, s32 arg1, s32 arg2, s8 arg3, s32 ar
                 arg0->disable_jump = 0x14;
             }
             if (arg3 != 0) {
-                if (arg0->unk31C->unk11A == 2) {
+                if (arg0->unk31C->item_phase == 2) {
                     return 0x3E7;
                 }
-                arg0->unk31C->unk11A = 1;
+                arg0->unk31C->item_phase = 1;
                 /* Duplicate return node #18. Try simplifying control flow for better match */
-                arg0->unk31C->unk78 = (u8) arg3;
+                arg0->unk31C->item_kind = (u8) arg3;
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
                 return temp_t6;
             }
-            arg0->unk31C->unk11A = 3;
-            arg0->unk31C->unk78 = (u8) arg3;
+            arg0->unk31C->item_phase = 3;
+            arg0->unk31C->item_kind = (u8) arg3;
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
             return temp_t6;

@@ -955,9 +955,9 @@ typedef struct {
     u8  pad68[0x3];
     u8  unk6B;
     u8  pad6C[0x9];
-    u8  unk75;
+    u8  pad_kind; /* was unk75 */
     u8  pad76[0x2];
-    u8  unk78;
+    u8  item_kind; /* was unk78 */
     u8  pad79[0x4];
     /* 0x7D */  u8  matrix_physics; //unk7D;
     u8  pad7E[0x2];
@@ -986,7 +986,7 @@ typedef struct {
     u16 unk114;
     u16 unk116;
     u16 unk118;
-    u8  unk11A;
+    u8  item_phase; /* was unk11A */
     u8  pad11B[0x5];
     u8  unk120;
     u8  unk121;
@@ -998,8 +998,8 @@ typedef struct {
     u8  pad129[0x6C];
     u8  unk195;
     u8  pad196;
-    u8  unk197;
-    u8  unk198;
+    u8  aim_state; /* was unk197 */
+    u8  look_state; /* was unk198 */
     u8  pad199;
     /* 0x19a */ u8  grenade_count;
     u8  unk19B;

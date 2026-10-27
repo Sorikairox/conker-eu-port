@@ -74,6 +74,8 @@ const OPTIONS = [
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
   { key: 'rumble', label: 'Rumble (gamepad vibration)', def: false, game: 13,
     help: 'The game sees a Rumble Pak in each controller and your gamepad vibrates when the N64 one would (hits, explosions, heavy landings), if the browser supports gamepad vibration (Chrome / Edge with most Xbox and PlayStation pads). Takes effect at the next level or area load. Off: as now, no Rumble Pak. Saves are not affected.' },
+  { key: 'crosshair', label: 'Aiming crosshair', def: false, game: 14,
+    help: 'Shows the game\'s small crosshair in the middle of the screen in the first-person aim views that have none (R with the weapon kind 0x18), where the shots go. Takes effect the next time you aim. Off: as on the N64, no crosshair there; the other weapons keep their own reticles.' },
   { key: 'swiminvert', label: 'Inverted swimming', def: false, game: 12,
     help: 'Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. Off: as on the N64, which steers like a plane: up dives, down rises.' },
   // P332: sliders (range: true): the value 0..100 (%) goes to the game through the same port_set_option channel.

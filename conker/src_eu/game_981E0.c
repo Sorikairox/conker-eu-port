@@ -295,7 +295,7 @@ void objev_hurt_or_die(void) {
     s32 tmp;
 
     if (g_cur_obj->health != 0) {
-        if ((g_cur_obj->unk31C != 0) && (g_cur_obj->unk31C->unk78 == 0x25)) {
+        if ((g_cur_obj->unk31C != 0) && (g_cur_obj->unk31C->item_kind == 0x25)) {
             tmp = 427;
         } else {
             tmp = 240;
@@ -435,7 +435,7 @@ void objev_anim_b6(void) {
 
 /* was func_1506B8B4 */
 void objev_reset_state_idle(void) {
-    g_cur_obj->unk31C->unk78 = (u8)0;
+    g_cur_obj->unk31C->item_kind = (u8)0;
     g_cur_obj->disable_run = (u8)0;
     g_cur_obj->unk83 = (u8)0;
     player_idle_animation();
@@ -475,7 +475,7 @@ void objev_finish_and_idle(void) {
     g_cont_forced_buttons[g_cur_obj_index] |= 0x4000;
     temp_a0 = g_cur_obj->unk31C;
     if (temp_a0 != 0) {
-        temp_a0->unk78 = 0;
+        temp_a0->item_kind = 0;
         g_hints_seen[g_hint_action >> 3] |=  (1 << (g_hint_action & 7));
     }
     player_idle_animation(); /* takes no arguments (a0 is left over) */
@@ -2648,7 +2648,7 @@ void objfx_gun_fire(s32 arg0) {
             sp.uA0 = &g_objects[temp_v1];
         } else {
             var_a1 = 0;
-            if (sp.uA8->unk31C->unk197 != 0) {
+            if (sp.uA8->unk31C->aim_state != 0) {
                 var_a1 = 1;
             }
         }
@@ -2659,7 +2659,7 @@ void objfx_gun_fire(s32 arg0) {
         sp.uA8 = temp_v0_2;
         var_a3 = 0;
         var_a1 = 0;
-        if (temp_v0_2->unk31C->unk197 != 0) {
+        if (temp_v0_2->unk31C->aim_state != 0) {
             var_a1 = 1;
         }
 block_10:
@@ -3642,7 +3642,7 @@ void objev_clear_66_idle(void) {
 /* was func_15072A40 */
 void objev_clear_19b_idle(void) {
     g_cur_obj->unk31C->unk19B = (u8)0;
-    g_cur_obj->unk31C->unk78 = (u8)0;
+    g_cur_obj->unk31C->item_kind = (u8)0;
     player_idle_animation();
 }
 
@@ -3682,7 +3682,7 @@ void objev_anim_follow_up(void) {
             next = 0x10A;
             break;
         case 0x10C:
-            if (g_cur_obj->unk31C->unk197 != 0) {
+            if (g_cur_obj->unk31C->aim_state != 0) {
                 next = 0x10A;
             } else {
                 player_idle_animation();
@@ -3696,14 +3696,14 @@ void objev_anim_follow_up(void) {
             next = 0x3E;
             break;
         case 0x156:
-            if (g_cur_obj->unk31C->unk197 != 0) {
+            if (g_cur_obj->unk31C->aim_state != 0) {
                 next = 0x157;
             } else {
                 player_idle_animation();
             }
             break;
         case 0x167:
-            if (g_cur_obj->unk31C->unk197 != 0) {
+            if (g_cur_obj->unk31C->aim_state != 0) {
                 next = 0x165;
             } else {
                 player_idle_animation();
@@ -3756,8 +3756,8 @@ void objev_set_2f8_low3(void) {
 void objev_loop_sound_start(void) {
     obj_setup_run(g_cur_obj, g_cur_obj_cmd, 1.0f, 0);
 
-    if ((g_cur_obj->unk31C != 0) && (g_cur_obj->unk31C->unk11A == 1)) {
-        g_cur_obj->unk31C->unk11A = (u8)2U;
+    if ((g_cur_obj->unk31C != 0) && (g_cur_obj->unk31C->item_phase == 1)) {
+        g_cur_obj->unk31C->item_phase = (u8)2U;
     }
 }
 
@@ -3766,7 +3766,7 @@ void objev_loop_sound_stop(void) {
     obj_setup_undo(g_cur_obj, g_cur_obj_cmd);
 
     if (g_cur_obj->unk31C != 0) {
-        g_cur_obj->unk31C->unk11A = (u8)0;
+        g_cur_obj->unk31C->item_phase = (u8)0;
     }
 }
 
@@ -4262,7 +4262,7 @@ void objev_spawn_helper_object(void) {
         state = 5;
         obj->unk2E4 = CTL_U16(me->unk31C, 0x19C);
         me->unk31C->unk19B = 0;
-        g_cur_obj->unk31C->unk78 = 0;
+        g_cur_obj->unk31C->item_kind = 0;
         obj->gravity = 4.0f;
         me = g_cur_obj;
         ctl = me->unk31C;
@@ -4270,7 +4270,7 @@ void objev_spawn_helper_object(void) {
         if ((g_cur_obj_cmd >> 16) & 1) {
             speed = 0.0f;
         }
-        if (ctl->unk198 != 0) {
+        if (ctl->look_state != 0) {
             vec_from_yaw_pitch((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 4.0f, 0.0f, &dx, &dy, &dz);
             obj->y_velocity = -dy;
         } else {
@@ -4347,7 +4347,7 @@ void objev_spawn_helper_object(void) {
 
 /* was func_15074644 */
 void objev_set_31c_11a(void) {
-    g_cur_obj->unk31C->unk11A = (s8) g_cur_obj_cmd;
+    g_cur_obj->unk31C->item_phase = (s8) g_cur_obj_cmd;
 }
 
 /* was func_15074664 */
@@ -4381,7 +4381,7 @@ void objev_damage(void) {
         } else {
             var_a0->health -= g_cur_obj_cmd;
             if (var_a0->unk31C != NULL) {
-                if ((var_a0->camera != NULL) && (var_a0->unk31C->unk197 != 0)) {
+                if ((var_a0->camera != NULL) && (var_a0->unk31C->aim_state != 0)) {
                     screen_tint_start(0xFF, 0, 0, 0xB4, 0x14, var_a0->camera->unk23D);
                 }
             }

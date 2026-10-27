@@ -2725,7 +2725,7 @@ void obj_ctrl_floor_contact(struct127 *arg0, f32 arg1) {
             }
             if ((arg0->unk1CC - arg0->y_position) > 600.0f) {
                 temp_v0 = arg0->unk31C;
-                if ((temp_v0->unk120 == 0) && (temp_v0->unk78 != 1)) {
+                if ((temp_v0->unk120 == 0) && (temp_v0->item_kind != 1)) {
                     var_f12 = 1.3f;
                     temp_v0->unk95 = 0;
                     var_t2 = 0;
@@ -2747,7 +2747,7 @@ void obj_ctrl_floor_contact(struct127 *arg0, f32 arg1) {
                         } else {
                             temp_v0_2 = arg0->health;
                             if (temp_v0_2 != 0) {
-                                if (arg0->unk31C->unk78 == 0x21) {
+                                if (arg0->unk31C->item_kind == 0x21) {
                                     var_t1 = 1;
                                 }
                                 if (arg0->id == 0x75) {
@@ -2795,7 +2795,7 @@ void obj_ctrl_floor_contact(struct127 *arg0, f32 arg1) {
 block_64:
                                 var_t0 = 0x27;
                             }
-                            if ((var_t0 == 0x27) && (arg0->unk31C->unk78 == 0x25)) {
+                            if ((var_t0 == 0x27) && (arg0->unk31C->item_kind == 0x25)) {
                                 var_t0 = 0x1AA;
                             }
                         }
@@ -2873,7 +2873,7 @@ block_64:
                     var_t0_3 = 0;
                     if ((s32) arg0->unk28 > 0) {
                         temp_v0_5 = arg0->unk31C;
-                        temp_v1_3 = temp_v0_5->unk11A;
+                        temp_v1_3 = temp_v0_5->item_phase;
                         if ((temp_v1_3 != 1) && (temp_v1_3 != 3) && (temp_v0_5->unk4E == 0) && ((temp_v0_6 = arg0->unk100, temp_v1_4 = temp_v0_6 & 0x10, (temp_v1_4 != 0)) || (!(temp_v0_6 & 8) && (((arg0->unk44 == 0.0f) && (arg0->unkA8 == 0)) || (temp_v0_6 & 4))))) {
                             if (temp_v1_4 != 0) {
                                 arg0->unk83 = 8;
@@ -2889,7 +2889,7 @@ block_64:
                                 arg0->xz_velocity = 0.0f;
                                 arg0->unk83 = 0x10;
                             }
-                            temp_v0_7 = arg0->unk31C->unk78;
+                            temp_v0_7 = arg0->unk31C->item_kind;
                             if (temp_v0_7 == 0x21) {
                                 var_t0_3 = 0x19D;
                             } else {
@@ -4959,7 +4959,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
             blend = 7.0f;
             anim = 0xCB;
         }
-        if (ctl->unk11A != 0 || (ctl->unk78 != 0 && ctl->unk78 != 0x27)) {
+        if (ctl->item_phase != 0 || (ctl->item_kind != 0 && ctl->item_kind != 0x27)) {
             obj_ctrl_action_update(rec, 0, 0, height, 1);
         }
         if (anim != 0) {
@@ -5013,7 +5013,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
         rec->unk137 = 0;
         jumped = 0;
         jump_v = 0.0f;
-        if ((g_cur_buttons_pressed & 0x8000) && rec->unk31C->unk11A != 1 && rec->unk31C->unk11A != 3
+        if ((g_cur_buttons_pressed & 0x8000) && rec->unk31C->item_phase != 1 && rec->unk31C->item_phase != 3
             && (ride != 0 || (rec->unk13C < 100 && rec->disable_jump == 0 && rec->disable_run != 0xFF))) {
             jumped = 1;
             jump_v = 15.0f;
@@ -5063,7 +5063,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                         speed = 0.8f;
                         ctl->unk31 = 2;
                         anim = 0x37;
-                        if (rec->unk31C->unk78 == 0x21) {
+                        if (rec->unk31C->item_kind == 0x21) {
                             anim = 0x19E;
                             speed = 1.4f;
                         }
@@ -5329,12 +5329,12 @@ void obj_ctrl_action_update(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 a
             }
         }
         temp_v0_2 = arg0->unk31C->pad79[3];
-        temp_t8 = arg0->unk31C->unk75 & ~0x80;
+        temp_t8 = arg0->unk31C->pad_kind & ~0x80;
         var_s0 = temp_t8;
         if ((temp_v0_2 != 0) && (temp_t8 == 0)) {
             var_s0 = temp_v0_2;
         }
-        if ((g_level_id != 0x29) && (g_level_id != 0x2E) && (arg0->unk31C->unk78 == 0) && (*g_cur_pad & 0x20)) {
+        if ((g_level_id != 0x29) && (g_level_id != 0x2E) && (arg0->unk31C->item_kind == 0) && (*g_cur_pad & 0x20)) {
             sp4C = 0;
             sp44 = var_t2;
             sp3C = 0;
@@ -5345,7 +5345,7 @@ void obj_ctrl_action_update(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 a
             }
         }
         temp_v1_2 = arg0->unk31C;
-        temp_t0 = temp_v1_2->unk78;
+        temp_t0 = temp_v1_2->item_kind;
         if (temp_t0 == 0x1A) {
             var_s0 = 0x1A;
         }
@@ -5384,16 +5384,16 @@ block_32:
             var_s0 = 0x3C;
         }
         if ((arg4 == 0) && (temp_t0 != 0) && (var_s0 != (temp_t0 & ~0x80))) {
-            sp38 = (s32) temp_v1_2->unk75;
-            temp_v1_2->unk75 = temp_t0;
+            sp38 = (s32) temp_v1_2->pad_kind;
+            temp_v1_2->pad_kind = temp_t0;
             sp3C = 0;
             sp44 = var_t2;
             sp4C = 0;
             obj_ctrl_action_update(arg0, arg1, arg2, arg3, 1);
             var_t1 = 0;
             var_t4 = 0;
-            arg0->unk31C->unk75 = (u8) sp38;
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->pad_kind = (u8) sp38;
+            arg0->unk31C->item_kind = 0;
         }
         if (arg0->stunned != 0) {
             var_t1 = 1;

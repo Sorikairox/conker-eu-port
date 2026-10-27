@@ -11,7 +11,7 @@ u8 *cam_wobble_spawn(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
 
     e = &g_player_views[arg0[6]];
     obj = e->unk3D0;
-    if (obj != NULL && obj->unk31C != NULL && obj->unk31C->unk198 != 0) {
+    if (obj != NULL && obj->unk31C != NULL && obj->unk31C->look_state != 0) {
         return NULL;
     }
     p = node_alloc(0x39, arg3, arg1 + 0x68, 1, arg2, 1);

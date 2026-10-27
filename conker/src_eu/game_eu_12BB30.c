@@ -72,7 +72,7 @@ void weapon_a_shell_sparks(struct127 *arg0, s32 arg1, u8 arg2, s32 arg3)
   {
     sp60[1] = (random_float() * 1.5f) + 2.0f;
     sp60[0] = (random_float() * 10.1f) + 2.06f;
-    if (((arg0->unk31C != 0) && (arg0->unk31C->unk197 != 0)) && (arg0->camera != 0))
+    if (((arg0->unk31C != 0) && (arg0->unk31C->aim_state != 0)) && (arg0->camera != 0))
     {
       sp5F = (~(1 << arg0->camera->unk23D)) & 0xFFFFu;
     }

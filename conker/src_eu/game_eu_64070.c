@@ -83,7 +83,7 @@ u8 *player_draw_slot8_strip(u8 *arg0, s32 arg1, s32 arg2) {
     u8 *var_s1;
 
     temp_s0 = &g_objects[arg1];
-    temp_v0_2 = temp_s0->unk31C->unk75;
+    temp_v0_2 = temp_s0->unk31C->pad_kind;
     if ((temp_v0_2 != 2) && (temp_v0_2 != 0x13)) {
         return arg0;
     }
