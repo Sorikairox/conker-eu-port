@@ -94,7 +94,7 @@
   // players (pc_net.c port_net_slow). Nobody ever speeds up.
   // Lost player (decision 6: it stands still): the coordinator (the host; if the host itself is gone, the lowest
   // remaining player) asks every remaining player for the inputs of the lost player it holds, picks F = 1 + the newest
-  // frame anyone holds, sends everybody the inputs up to F - 1 and F; from F that controller reads neutral everywhere
+  // frame anyone holds, sends everybody the inputs up to F - 1 and F ('drop' {neutralFrom: F}); from F that controller reads neutral everywhere
   // (pc_net.c port_net_drop). So all remaining players run the same inputs and stay in lockstep.
   const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
   const CODE_TAG = 'CK1.';
@@ -661,13 +661,13 @@
     const d = T.drop;
     if (!d || d.done) return;
     d.done = true; clearTimeout(d.timer);
-    const from = Math.max(...d.held.map((h) => h.top)) + 1, first = Math.min(...d.held.map((h) => h.first)), v = [];
-    for (let f = first; f < from; f++) {
+    const neutralFrom = Math.max(...d.held.map((h) => h.top)) + 1, first = Math.min(...d.held.map((h) => h.first)), v = [];
+    for (let f = first; f < neutralFrom; f++) {
       let x = -1;
       for (const h of d.held) if (f >= h.first && f <= h.top && h.v[f - h.first] !== -1) { x = h.v[f - h.first]; break; }
       v.push(x);
     }
-    const m = { t: 'drop', ch: d.ch, from, first, v, why: d.why };
+    const m = { t: 'drop', ch: d.ch, neutralFrom, first, v, why: d.why };   // ('from' is the sender of every 'ctl' message)
     for (const q of livePeers()) if (q.ch !== d.ch) sendCtlTo(q.ch, Object.assign({}, m));
     applyDrop(m);
   }
@@ -676,11 +676,11 @@
     if (p.lost) return;
     for (let i = 0; i < m.v.length; i++) if (m.v[i] !== -1) N.put(m.first + i, m.ch, m.v[i]);
     advanceRecvTop(p);
-    N.M._port_net_drop(m.ch, m.from);
+    N.M._port_net_drop(m.ch, m.neutralFrom);
     p.lost = true;
     if (T.slots[m.ch]) setSlot(m.ch, 'left', m.why);
     T.left = livePeers().length === 0;
-    status(`${m.why || pn(m.ch) + ' left'}: controller ${m.ch + 1} stands still from retrace ${m.from}`, 'bad');
+    status(`${m.why || pn(m.ch) + ' left'}: controller ${m.ch + 1} stands still from retrace ${m.neutralFrom}`, 'bad');
     emit('left', m.ch, m.why);
     if (N.ready(N.frame() + 1)) N.M._port_net_kick();
   }
