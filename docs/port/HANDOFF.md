@@ -46,10 +46,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
 - port_cdata name strings (n64mem_tab.c) still print the original D_ names (n64mem.py, RENAMED_FROM).
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
-- Frame-blend "ghost" effect (fb_ghost_render) looks wrong in the port: in the hangover wake-up scene after the opening
-  the picture shows one pixelated frame that stays frozen for seconds (two shots 3 s apart identical) instead of a
-  blend of live frames. Its copy of the new frame into g_fb_ghost_image (SETCIMG into RDRAM) probably never lands.
-  Option "No motion blur / drunk sway" hides it; the default (off) still shows it (P331).
+- The slow-motion camera cut's blur (camera_cut_fade_update, fb_ghost pass 2) was not reached in a test since the
+  P335 fix; it uses the same draw as the wake-up blur (fixed), so it should be right.
 - fire_burn_update (registry row P206) kills only 46 / 89 m8eac mutants now (P206: 89 / 91); every survivor edits a
   stack record passed to a callee (effect / rumble request blocks). Add ARGMEM setups or find the harness change (P334).
 - Aim kinds are only known by number (P334 table in the 69670be3 message); naming them (which is the slingshot, which
@@ -64,6 +62,26 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P335 (port-web, 2026-10-27): motion blur fix, rumble takes effect at once
+- 19d444bd fix (not an option): the frame-blend ghost (fb_ghost_render: draw g_fb_ghost_image over the frame with
+  prim alpha 210, blender IN*a + MEM*(1-a); SETCIMG ghost; copy the screen into it 1:1 in 128 x 16 tiles; SETCIMG
+  screen) is a feedback blur at the framebuffer's own size (292 x 216 RGBA16 on the N64: as sharp as the frame).
+  Two port bugs: the renderer took the ghost image for a screen image (P161), so the copy wrote the canvas of two
+  frames ago into RDRAM and drew it at N64 resolution (the frozen, blocky frame), and fb_ghost_image_draw's
+  `image + 0x80000000` (KSEG0 -> physical) named other memory for a wasm pointer (now #ifdef PORT: pointer as is).
+  Renderer: "hx" images (gfx_f3dex2.c): a second >= 256-wide 16-bit colour image of a task that is not a game
+  framebuffer is an FBO at canvas resolution; screen reads while it is bound come from a canvas snapshot; LOADTILE /
+  LOADBLOCK remember the source pixel and 1:1 texrects sample the GL texture per canvas pixel (shader uHiRes).
+  ?p335off=1 old behaviour, ?p335log=F logs. camera_read_depth_row's 292 x 1 buffer also goes this way (its RDRAM
+  was never written before either). Shots port_work/p326/p335d (ghost 123.0..127.4 s, every shot differs, trails),
+  p335nd (nodrunk: no ghost). Renames: params / locals of fb_ghost_copy_draw / fb_ghost_image_draw /
+  fb_ghost_render (md5 unchanged).
+- 383404a1 rumble: rumble_update (#ifdef PORT) sets g_rumble_probe_request when PORT_OPT_RUMBLE changes, so the
+  game's own probe runs that frame (on: pak found, state reset; off: pak gone); pc_pif forgets probe / motor bytes
+  while off. Test aid ?p326=1&p335rumble=F&p335rumbleoff=G (p326_probe.c, via port_set_option). Proven on warp 0x29
+  with a temporary rumble_request hook (removed): request at 300 (off) nothing, on at 401, request at 450 -> motor
+  start 453 + page playEffect, off at 601, request at 650 nothing; no level reload (port_work/p327/p335rum).
+- Both: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps. Deployed.
 ### P334 (port-web, 2026-10-27): feature #13 aiming crosshair
 - 69670be3 option "Aiming crosshair" ('crosshair', PORT_OPT_AIM_CROSSHAIR 14): the original aim HUD
   (aim_hud_spawn_for_mode) gives every aim kind a reticle except 0x12 / 0x18 / 0x38 / 0x3B; of those only 0x18 uses
