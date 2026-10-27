@@ -745,11 +745,12 @@ $('net-delay-auto').checked = store.get('netdelayauto', true);   // P339: automa
 $('net-delay').disabled = $('net-delay-auto').checked;
 $('net-delay-auto').onchange = () => { store.set('netdelayauto', $('net-delay-auto').checked); $('net-delay').disabled = $('net-delay-auto').checked; };
 $('net-host').onclick = () => netGuard(async () => {
+  netNeedRom();   // before the buttons are disabled, so the player can load the ROM and try again
   $('net-step-host').hidden = false; $('net-step-join').hidden = true; $('net-host').disabled = $('net-join').disabled = true;
   $('net-offer').value = await window.__online.host();
 });
 $('net-join').onclick = () => { $('net-step-join').hidden = false; $('net-step-host').hidden = true; $('net-host').disabled = $('net-join').disabled = true; };
-$('net-answer-make').onclick = () => netGuard(async () => { $('net-answer-make').disabled = true; $('net-answer').value = await window.__online.join($('net-offer-in').value); });
+$('net-answer-make').onclick = () => netGuard(async () => { netNeedRom(); $('net-answer-make').disabled = true; $('net-answer').value = await window.__online.join($('net-offer-in').value); });
 $('net-accept').onclick = () => netGuard(async () => { await window.__online.accept($('net-answer-in').value); $('net-accept').disabled = true; });
 $('net-offer-copy').onclick = () => copyCode('net-offer');
 $('net-answer-copy').onclick = () => copyCode('net-answer');
@@ -776,10 +777,18 @@ netEvents.desyncReport.push((r) => {   // P339: where the two games differ (net.
   e.textContent += ` Where: ${r.where}; ${r.pages} memory page(s) and ${r.stacks.length} thread stack(s) differ.`;
 });
 netEvents.left.push(() => { $('netwait').hidden = true; $('net-leave').hidden = true; });
+// Host / Join compare ROM hashes, so the ROM must be loaded first (without it the hash call failed with a
+// SubtleCrypto "not an ArrayBuffer" error).
+function netNeedRom() {
+  if (!romBytes) throw new Error('load your ROM first ("Choose ROM file…" or drop the file on the page), then Host / Join');
+  if (!romOk) throw new Error('this ROM is not the Conker EU ROM; both players need the EU ROM');
+  if (!crypto.subtle) throw new Error('this page needs a secure (https) connection for online play');
+}
 window.__online = {
   ready: () => !!romBytes && !running,
   async host() {
     if (running) throw new Error('the game already runs: reload the page, then host before pressing Start');
+    netNeedRom();
     await netLoad();
     return PortNet.host(async (ping) => {   // ping: {n, min, median, p90} ms over 'ctl' before the session (or null)
       const options = {};
@@ -795,6 +804,7 @@ window.__online = {
   },
   async join(code) {
     if (running) throw new Error('the game already runs: reload the page, then join before pressing Start');
+    netNeedRom();
     await netLoad();
     return PortNet.join(code);
   },
