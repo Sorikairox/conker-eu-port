@@ -1,6 +1,6 @@
 # Online multiplayer for the Conker EU web port: design (P336)
 
-Status: design for review. Nothing is implemented. Diagram: `online_multiplayer_architecture.svg` (same folder).
+Status: design accepted (user decisions in §6); Phase 0 (determinism harness, measurements) done in P337, results in §7. Diagram: `online_multiplayer_architecture.svg` (same folder).
 Evidence comes from branch port-web at the P334 head (2026-10-27). Citations are file:line or function names.
 
 ## TL;DR (recommendation)
@@ -191,3 +191,80 @@ sequenceDiagram
 - **Network emulation in-page:** a `net.js` shim with `?netsim=lat:80,jit:20,loss:5` delays, reorders and drops DataChannel messages (no root-level tc/dnctl needed). Check that there are no desyncs, that stalls stay below a threshold at D = 3 with 80 ms latency, and that disconnect handling works.
 - **CI-friendly:** a node test with two module instances in one process exchanging inputs through an in-memory lossy queue. It runs fast with no browser.
 - **Regression:** with the feature off, conker.wasm behaviour is unchanged (holdl.sh, warp.sh), and check.sh is GREEN.
+
+## 7. Phase 0 results (P337, 2026-10-27)
+
+Harness (all behind test flags; without them the game is unchanged: hold-L 5789 / 0x29 at 5795, check.sh GREEN):
+- `?netdet=1` (port/ultra/pc_net.c; phase 1 calls `port_net_force_det()` instead): det clock, no frame budget, virtual AI
+  queue (`port_flag("det")` = 2), every other flag reads 0 unless whitelisted, page writes no pad state, default options
+  vector sent once, blank EEPROM never persisted, game threads' fiber stacks in fixed static slots.
+- `?padf` / `?padf1..3` frame scripts for the 4 channels, `?padmask=HEX` presence (pc_pif.c).
+- `?nethash=F` per-retrace hash (port/ultra/pc_nethash.c): H = static region minus the port-only ranges in
+  `conker_netx.txt` (port/tools/net_regions.py, from the link map; reasons listed there) minus GPU read-back ranges;
+  S = live fiber stacks. `?nethashstop=N` + dump, `tools/port/nethash_diff.py` names the divergent bytes.
+- `?netprof`, `?netsnap`, `?netnogfx`, `?netgpujunk`; runners `tools/port/scripts/netrun.sh` (Chrome) and `netnode.sh`.
+- Session used: power-on, Player 1 drives title -> MULTI -> War -> Total War, pads 2..4 press Start on the join page
+  (~retrace 5750), 4-player split screen from retrace 6545, then ~60 s with all 4 pads moving, jumping, attacking
+  (`tools/port/scripts/netmp_pads.py`). Logs: port_work/p337 (not committed).
+
+**Proven identical (H and S, every retrace):**
+
+| Runs (same build, same Chrome, one at a time) | Retraces compared |
+|---|---|
+| A vs B: two plain runs (P337 commit 2 build) | 10716 |
+| A vs C: C with 4x CDP CPU throttling and a 7 ms setTimeout main loop (other ticks / catch-up pattern) | 10722 |
+| A3 vs D3: D3 saves and restores a full snapshot every retrace (`?netsnap`) | 9975 |
+| A3 vs F3: F3 with 6x CPU throttling, 7 ms loop, and the GPU read-back bytes replaced by 0x5A (`?netgpujunk`) | 9975 |
+
+The last row shows that game logic never reads the renderer's RDRAM write-backs as data (only one range was written in
+this session: the 4 KB image at N64 0x800E2480, retrace 745, during the boot sequence). Note: the game kept 50 retraces/s
+even at 6x throttling on this Mac mini, so a backlog drop never happened in these runs; the retrace content does not
+depend on the tick pattern by construction (each retrace is a complete, input-indexed unit).
+
+**Without rendering (`?netnogfx`, gfx task skipped):** static game memory equals the rendered run except the GPU
+read-back range itself (not written) and one renderer flag cache (now excluded); the fiber stacks differ only in dead
+slots below the stack pointers (the renderer runs on the game's scheduler thread and leaves different garbage there).
+So resimulation can skip rendering. For a rollback snapshot the stacks must be saved, but the S hash should then only
+cover the live part of each stack (phase 4).
+
+**Divergences found:**
+1. Fixed (commit 85a21fd5): fiber stacks came from the heap, whose layout depends on earlier runtime / renderer
+   allocations (Chrome vs node: 0xEB0 apart). Their addresses end up in game memory, so peers with a different browser /
+   GPU would have disagreed on pointer values from retrace 1. Under `?netdet` they are static slots now. Also excluded:
+   dlmalloc `sbrk_val` (heap top).
+2. Open, node only: Chrome vs node (node_run.js in the emsdk container) still differ from retrace 6 in 6 two-byte words
+   of the audio heap arena (N64 8007BF88, 8007DAA0, 8007DAE8, 8007F600, 8007F648, 80081144, stride ~0x1B18: Chrome 0,
+   node 0x5604 in the low half of the word). Chrome with `?nogl=1` matches Chrome with WebGL there, so it is not the
+   renderer; the remaining node difference is the missing AudioContext (aud_out_open returns -1) or another
+   node/browser runtime difference, not yet located. Phase 1 peers are browsers, so this does not block phase 1, but a
+   node CI peer (design §6 test strategy) needs it found first: write-watch those words from retrace 4 to 6.
+3. Not tested: Firefox (not installed) and Safari (installed, but headless automation needs `safaridriver --enable`,
+   a user action). Cross-engine float/NaN determinism (risk 13) is therefore still unproven; the first phase 1 two-tab
+   test should include a Firefox or Safari peer.
+
+**Measurements** (Mac mini M-series, headless Chrome, ANGLE Metal, 4-player Total War split screen, retraces
+6750..10500; Chrome's timer resolution is 0.1 ms):
+
+| Quantity | Value |
+|---|---|
+| Retrace cost with rendering | 1.4 to 1.9 ms mean (p50 0.2, p95 5.7 to 9.5, max 13.4) |
+| of which gfx task (display list interpreter + WebGL calls) | 1.2 to 1.7 ms mean |
+| of which audio task | 0.07 ms mean |
+| of which game threads + scheduler | 0.13 ms mean |
+| Retrace cost without rendering (`?netnogfx`) | 0.52 ms mean (p95 1.5, max 1.7) |
+| Hash of all hashed bytes (static 9.5 MB + stacks 2.3 MB) | 3.4 to 3.7 ms per hash (once per 10 retraces in phase 1: fine) |
+| Static region | 19.4 MB without the stack slots (31 MB with them; 7934 pages of 4 KB), of which 9.5 MB hashed |
+| wasm memory | INITIAL_MEMORY 352 MB (256 MB address space below GLOBAL_BASE unused, ROM copy 64 MB on the heap) |
+| Rollback snapshot (hashed static bytes + live fiber stacks) | 11.4 MB |
+| Bytes changed per retrace | 13.5 to 14 KB mean (max 29 KB) in 38 pages mean (max 85 of 7934) |
+| Full snapshot save / restore (memcpy) | 0.28 to 0.38 ms / 0.30 to 0.41 ms mean (max 1.2 ms each) |
+
+**Go / no-go:**
+- Phase 1 (lockstep MVP): **GO.** Same-browser determinism holds for a full 4-player MP session from power-on,
+  including different wall speeds, main-loop pacing and snapshot save/restore. Phase 1 should reuse `?netdet` as the
+  online boot, the 4-channel input path, the presence mask and the hash (every 10 retraces; per 64 KB block hashes for
+  the desync report, as designed). First phase 1 test: one Chrome tab + one Firefox/Safari tab.
+- Rollback gate (retrace without rendering <= 4 ms on mid hardware): **passed on this desktop** (0.5 ms mean,
+  1.7 ms max; snapshot 11.4 MB, about 0.4 ms each way, only ~14 KB / 38 pages dirty per retrace, so a dirty-page delta
+  ring is cheap). A 100 ms RTT rollback of 3 to 5 retraces would cost about 3 to 5 ms per tick here. Still to measure:
+  a phone / low-end laptop before committing to phase 4.

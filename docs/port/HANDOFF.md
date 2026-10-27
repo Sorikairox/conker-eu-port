@@ -41,6 +41,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
+- Online multiplayer: phase 0 done (P337, docs/design/ONLINE_MULTIPLAYER.md §7); next is phase 1 (pc_net ring +
+  barrier, net.js WebRTC, copy-paste signaling). Node vs Chrome audio-arena divergence (§7 item 2) still open.
 - Globals not renamed: 562 D_ symbols only declared in conker/include/variables.h (no C use), D_ names that appear
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
@@ -62,6 +64,24 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P337 (port-web, 2026-10-27): online multiplayer phase 0 (determinism harness + measurements)
+- 73d4e325 `?netdet=1` forced online determinism (port/ultra/pc_net.c: det=2, flag whitelist, page writes no pads,
+  default options once, blank sandboxed EEPROM) + `?padf1..3` / `?padmask` (pc_pif.c, the 4 channels share one table).
+- c9faac16 `?nethash=F` per-retrace hash (pc_nethash.c: static region minus conker_netx.txt from the link map via
+  port/tools/net_regions.py, minus GPU read-back ranges; S = fiber stacks), `?nethashstop` + dump, `?netprof`,
+  `?netsnap`, `?netnogfx`, `?netgpujunk`; tools/port/nethash_diff.py (first differing retrace, bytes -> symbols),
+  tools/port/scripts/netrun.sh (Chrome) / netnode.sh (node) / netmp_pads.py (4-pad Total War session: P1 menus, pads
+  2-4 Start at ~5750, split screen from 6545). port/Makefile links with -Wl,-Map (wasm unchanged).
+- 85a21fd5 fix: under ?netdet fiber stacks are static slots (heap layout differed Chrome vs node by 0xEB0; stack
+  addresses live in game memory).
+- Proven: 2 Chrome runs identical 10716 retraces (H and S); 4x throttle + 7 ms timer identical 10722; snapshot
+  save/restore every retrace identical 9975; 6x throttle + GPU write-backs replaced by junk identical 9975 (game never
+  reads them). Without rendering: static state identical (stacks differ only in dead garbage).
+- Open: node vs Chrome differ from retrace 6 in 6 audio-arena words (N64 8007BF88...; not GL: Chrome ?nogl=1 matches
+  Chrome). Firefox not installed; Safari needs `safaridriver --enable` (user). Numbers + go/no-go:
+  docs/design/ONLINE_MULTIPLAYER.md §7 (phase 1 GO; rollback gate passed on desktop: 0.5 ms/retrace without
+  rendering, 11.4 MB snapshot, ~0.4 ms save/restore, ~14 KB dirty per retrace).
+- Both code commits: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps. Deployed.
 ### P335 (port-web, 2026-10-27): motion blur fix, rumble takes effect at once
 - 19d444bd fix (not an option): the frame-blend ghost (fb_ghost_render: draw g_fb_ghost_image over the frame with
   prim alpha 210, blender IN*a + MEM*(1-a); SETCIMG ghost; copy the screen into it 1:1 in 128 x 16 tiles; SETCIMG
