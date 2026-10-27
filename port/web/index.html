@@ -89,7 +89,9 @@
   .netdelay input { width: 3.5em; background: var(--panel2); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; }
   #net-status { margin-top: 8px; font-size: 13px; }
   #net-status.ok { color: var(--accent); } #net-status.bad { color: #ff7b72; }
-  #net-info { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  #net-info, #net-peers { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .netslot { margin-top: 8px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; }
+  .netslotstate { color: var(--muted); font-size: 12px; }
   #net-desync { margin-top: 6px; padding: 6px 8px; border: 1px solid #ff7b72; border-radius: 4px; color: #ff7b72; font-size: 12px; }
   #netwait { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); padding: 4px 10px; border-radius: 4px;
     background: rgba(0,0,0,.7); color: #fff; font-size: 13px; pointer-events: none; }
@@ -170,7 +172,7 @@
         <rect x="7" y="3.8" width="9" height="5" fill="var(--accent)"/><rect x="6.5" y="13" width="11" height="7" rx="1" fill="#fff"/></svg>
       <div id="latches" hidden></div>
       <div id="soundhint" hidden>click or press a key to enable sound</div>
-      <div id="netwait" hidden>waiting for the other player…</div>
+      <div id="netwait" hidden>waiting for the other players…</div>
     </div>
     <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>
   </div>
@@ -195,22 +197,20 @@
     </section>
     <section class="panel" id="p-online" hidden>
       <h3>Online (experimental)</h3>
-      <p class="hint" style="text-align:left">Two players on two computers, each with their own ROM, in Chrome. Player 1 hosts and drives the
-        menus; player 2 joins with Start on the "press START" page of a multiplayer mode. Connect before pressing Start (reload the page first if
-        the game already runs). The session uses player 1's options and save.</p>
-      <div class="row"><button id="net-host">Host (player 1)</button><button id="net-join">Join (player 2)</button></div>
+      <p class="hint" style="text-align:left">2 to 4 players on their own computers, each with their own ROM, in Chrome. Player 1 hosts,
+        sends each other player a code and drives the menus; the others join with Start on the "press START" page of a multiplayer mode.
+        Connect before pressing Start (reload the page first if the game already runs). The session uses player 1's options and save.</p>
+      <div class="row"><button id="net-host">Host (player 1)</button><button id="net-join">Join (players 2 to 4)</button></div>
       <label class="netdelay" title="Each player's input reaches the game this many frames (20 ms each) late, so the network has time to bring it to the other computer. Automatic: the host measures the ping before the game starts and picks 2 to 8 frames. Untick it and raise the number if the game often waits for the other player.">Input delay
         <input id="net-delay-auto" type="checkbox" checked> automatic, or
         <input id="net-delay" type="number" min="1" max="16" value="3"> frames (host)</label>
       <div id="net-step-host" class="netstep" hidden>
-        <label>1. Send this code to player 2 <button id="net-offer-copy">Copy</button></label>
-        <textarea id="net-offer" readonly rows="3" placeholder="making the code…"></textarea>
-        <label>2. Paste player 2's answer code here</label>
-        <textarea id="net-answer-in" rows="3"></textarea>
-        <div class="row"><button id="net-accept" class="primary">Connect</button></div>
+        <div id="net-slots"></div>
+        <div class="row" style="margin-top:8px"><button id="net-invite" title="Make a code for one more player (4 players at most)">Invite another player</button>
+          <button id="net-start" class="primary" disabled>Start the game</button></div>
       </div>
       <div id="net-step-join" class="netstep" hidden>
-        <label>1. Paste player 1's code here</label>
+        <label>1. Paste the code player 1 made for you here</label>
         <textarea id="net-offer-in" rows="3"></textarea>
         <div class="row"><button id="net-answer-make" class="primary">Make my answer code</button></div>
         <label>2. Send this answer code back to player 1 <button id="net-answer-copy">Copy</button></label>
@@ -218,6 +218,7 @@
       </div>
       <div id="net-status">not connected</div>
       <div id="net-info"></div>
+      <div id="net-peers"></div>
       <div id="net-desync" hidden></div>
       <div class="row"><button id="net-leave" hidden>Leave the session</button></div>
     </section>

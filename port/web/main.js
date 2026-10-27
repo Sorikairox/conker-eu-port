@@ -712,10 +712,11 @@ window.__netdump = {
 
 // ---------------------------------------------------------------- P338 online session (port/web/net.js)
 // window.__online is what the Online panel's buttons call (and tools/port/scripts/netpair.js, which plays both sides
-// of a session in one browser). Host = controller 1, guest = controller 2. The host dictates the session: game options,
-// its EEPROM image (user save data, never ROM bytes), the input delay. Both peers check build id (SHA-256 of
-// conker.wasm) and ROM SHA-256 before anything starts. Test aids: ?netd=D input delay (host), ?neteep=blank.
-const netEvents = { status: [], tick: [], desync: [], desyncReport: [], left: [] };   // the Online panel subscribes here
+// of a session in one browser). Host = controller 1; P344: up to 3 guests, each with the controller slot (2..4) the host
+// gave it with its code. The host dictates the session: game options, its EEPROM image (user save data, never ROM
+// bytes), the input delay. The host checks every guest's build id (SHA-256 of conker.wasm) and ROM SHA-256 before
+// anything starts. Test aids: ?netd=D input delay (host), ?neteep=blank.
+const netEvents = { status: [], tick: [], desync: [], desyncReport: [], left: [], roster: [] };   // the Online panel subscribes here
 const sha256hex = async (buf) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', buf)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function netLoad() {
   if (!window.PortNet) await loadScript('net.js');
@@ -727,7 +728,7 @@ async function netLoad() {
     PortNet.t.on.config = (cfg) => {   // both peers: boot the game into the session
       netCfg = cfg;
       for (const k of Object.keys(optCache)) delete optCache[k];
-      log(`[net] session config: channels ${cfg.mask}, mine ${cfg.local}, delay ${cfg.delay}${cfg.autoDelay ? ` (auto, ping ${cfg.ping} ms)` : ''}, EEPROM ${cfg.eeprom ? 'host image' : 'blank'}`);
+      log(`[net] session config: channels ${cfg.mask} (players ${(cfg.roster || []).map((c) => c + 1).join(' ')}), mine ${cfg.local}, delay ${cfg.delay}${cfg.autoDelay ? ` (auto, ping ${cfg.ping} ms)` : ''}, EEPROM ${cfg.eeprom ? 'host image' : 'blank'}`);
       start('game');
     };
   }
@@ -744,39 +745,88 @@ $('net-delay').onchange = () => store.set('netdelay', Math.max(1, Math.min(16, +
 $('net-delay-auto').checked = store.get('netdelayauto', true);   // P339: automatic input delay from the measured ping
 $('net-delay').disabled = $('net-delay-auto').checked;
 $('net-delay-auto').onchange = () => { store.set('netdelayauto', $('net-delay-auto').checked); $('net-delay').disabled = $('net-delay-auto').checked; };
+// P344: the host's panel lists the guest slots (players 2..4): each with its offer code, the answer box and its state
 $('net-host').onclick = () => netGuard(async () => {
   netNeedRom();   // before the buttons are disabled, so the player can load the ROM and try again
   $('net-step-host').hidden = false; $('net-step-join').hidden = true; $('net-host').disabled = $('net-join').disabled = true;
-  $('net-offer').value = await window.__online.host();
+  netShowSlot(await window.__online.invite());
+});
+$('net-invite').onclick = () => netGuard(async () => { $('net-invite').disabled = true; try { netShowSlot(await window.__online.invite()); } finally { $('net-invite').disabled = false; } });
+$('net-start').onclick = () => netGuard(async () => { $('net-start').disabled = $('net-invite').disabled = true; await window.__online.start(); });
+function netSlotBox(ch) {
+  let e = $('net-slot-' + (ch + 1));
+  if (e) return e;
+  const n = ch + 1;
+  e = document.createElement('div'); e.className = 'netslot'; e.id = 'net-slot-' + n;
+  e.innerHTML = `<div class="row"><b>Player ${n}</b><span id="net-slot-${n}-state" class="netslotstate">invited</span></div>
+    <div id="net-slot-${n}-codes"><label>1. Send this code to player ${n} <button id="net-offer-copy-${n}">Copy</button></label>
+    <textarea id="net-offer-${n}" readonly rows="2"></textarea>
+    <label>2. Paste player ${n}'s answer code here</label>
+    <textarea id="net-answer-in-${n}" rows="2"></textarea>
+    <div class="row"><button id="net-accept-${n}" class="primary">Connect player ${n}</button></div></div>`;
+  $('net-slots').appendChild(e);
+  $('net-offer-copy-' + n).onclick = () => copyCode('net-offer-' + n);
+  $('net-accept-' + n).onclick = () => netGuard(async () => { await window.__online.accept($('net-answer-in-' + n).value); $('net-accept-' + n).disabled = true; });
+  return e;
+}
+function netShowSlot({ ch, code }) {
+  netSlotBox(ch);
+  const n = ch + 1;
+  $('net-slot-' + n + '-codes').hidden = false; $('net-accept-' + n).disabled = false;
+  $('net-offer-' + n).value = code; $('net-answer-in-' + n).value = '';
+}
+const NET_SLOT_TEXT = { invited: 'invited: waiting for the answer code', connecting: 'connecting…', connected: 'connected, checking the game build…',
+  joined: 'joined', left: 'left', failed: 'could not connect' };
+netEvents.roster.push((slots) => {   // host
+  let joined = 0;
+  for (const s of slots) {
+    netSlotBox(s.ch);
+    const n = s.ch + 1;
+    if (s.state === 'joined') joined++;
+    $('net-slot-' + n + '-codes').hidden = !['invited', 'connecting', 'failed'].includes(s.state);
+    $('net-slot-' + n + '-state').textContent = (NET_SLOT_TEXT[s.state] || s.state) + (s.why && s.state !== 'joined' ? ` (${s.why})` : '') +
+      (s.rtt && s.state === 'joined' ? ` · ping ${s.rtt} ms` : '') + (s.relay && s.relay.length ? ` · through player 1 with ${s.relay.map((k) => k.split('-').filter((c) => +c !== s.ch).map((c) => 'player ' + (+c + 1))).join(', ')}` : '');
+  }
+  if (!window.PortNet || !PortNet.t.started) { $('net-start').disabled = !joined; $('net-start').textContent = `Start the game (${joined + 1} players)`; }
+  $('net-invite').disabled = slots.length >= 3 && slots.every((s) => !['left', 'failed'].includes(s.state));
 });
 $('net-join').onclick = () => { $('net-step-join').hidden = false; $('net-step-host').hidden = true; $('net-host').disabled = $('net-join').disabled = true; };
 $('net-answer-make').onclick = () => netGuard(async () => { netNeedRom(); $('net-answer-make').disabled = true; $('net-answer').value = await window.__online.join($('net-offer-in').value); });
-$('net-accept').onclick = () => netGuard(async () => { await window.__online.accept($('net-answer-in').value); $('net-accept').disabled = true; });
-$('net-offer-copy').onclick = () => copyCode('net-offer');
 $('net-answer-copy').onclick = () => copyCode('net-answer');
 $('net-leave').onclick = () => { window.__online.leave(); $('net-leave').hidden = true; };
-netEvents.status.push((s, cls) => { netStatus(s, cls); if (s === 'connected') { $('net-step-host').hidden = $('net-step-join').hidden = true; $('net-leave').hidden = false; } });
+netEvents.status.push((s, cls) => {
+  netStatus(s, cls);
+  if (/^(connected|joined as)/.test(s) || (window.PortNet && PortNet.t.started)) { $('net-step-join').hidden = true; $('net-leave').hidden = false; }
+});
 let netWaitSince = 0;
 netEvents.tick.push((t) => {   // ~100 Hz from net.js
   const now = performance.now();
   if (!t.waiting) netWaitSince = 0; else if (!netWaitSince) netWaitSince = now;
   $('netwait').hidden = !(netWaitSince && now - netWaitSince > 400);
+  if (!$('netwait').hidden) {   // P344: name the players the game waits for
+    const w = (t.peers || []).filter((p) => p.waiting).map((p) => 'player ' + (p.ch + 1));
+    $('netwait').textContent = `waiting for ${w.length ? w.join(', ') : 'the other players'}…`;
+  }
   if (now - (netEvents.lastInfo || 0) > 500) {
     netEvents.lastInfo = now;
-    $('net-info').textContent = `retrace ${t.frame} · ping ${t.rtt ? Math.round(t.rtt) + ' ms' : '–'} · waits ${t.stalls} · input delay ${netCfg ? netCfg.delay * 20 + ' ms' + (netCfg.autoDelay ? ' (auto)' : '') : '–'}`;
+    $('net-info').textContent = `you are player ${PortNet.t.myCh + 1} · retrace ${t.frame} · waits ${t.stalls} · input delay ${netCfg ? netCfg.delay * 20 + ' ms' + (netCfg.autoDelay ? ' (auto)' : '') : '–'}`;
+    // P344: every other player's ping (and who the game waits for)
+    $('net-peers').textContent = (t.peers || []).map((p) => `player ${p.ch + 1}: ${p.lost ? 'left (stands still)' : (p.rtt ? 'ping ' + p.rtt + ' ms' : 'ping –') +
+      (PortNet.t.routes && Object.entries(PortNet.t.routes).some(([k, v]) => v === 'relay' && k.split('-').map(Number).includes(p.ch) && k.split('-').map(Number).includes(PortNet.t.myCh)) ? ' (through player 1)' : '') +
+      (p.waiting ? ' · waiting' : '')}`).join(' · ');
   }
 });
 netEvents.desync.push((d) => {
   const e = $('net-desync'); if (!e.hidden) return;   // P339: reported once (both peers detect it)
   e.hidden = false;
-  e.textContent = `Desync at retrace ${d.frame}: this game ${d.mine.map((x) => (x >>> 0).toString(16)).join(' ')}, the other ${d.theirs.map((x) => (x >>> 0).toString(16)).join(' ')}. ` +
+  e.textContent = `Desync at retrace ${d.frame} with player ${(d.ch || 0) + 1}: this game ${d.mine.map((x) => (x >>> 0).toString(16)).join(' ')}, the other ${d.theirs.map((x) => (x >>> 0).toString(16)).join(' ')}. ` +
     'The two games no longer show the same thing; please report it (open Debug for the log).';
 });
 netEvents.desyncReport.push((r) => {   // P339: where the two games differ (net.js comparePages)
   const e = $('net-desync'); e.hidden = false;
   e.textContent += ` Where: ${r.where}; ${r.pages} memory page(s) and ${r.stacks.length} thread stack(s) differ.`;
 });
-netEvents.left.push(() => { $('netwait').hidden = true; $('net-leave').hidden = true; });
+netEvents.left.push(() => { if (PortNet.t.left) { $('netwait').hidden = true; $('net-leave').hidden = true; } });   // P344: alone now
 // Host / Join compare ROM hashes, so the ROM must be loaded first (without it the hash call failed with a
 // SubtleCrypto "not an ArrayBuffer" error).
 function netNeedRom() {
@@ -786,11 +836,14 @@ function netNeedRom() {
 }
 window.__online = {
   ready: () => !!romBytes && !running,
-  async host() {
+  // host: start hosting, returns player 2's offer code (P344: __online.invite() for players 3 and 4, then start())
+  async host() { return (await window.__online.invite()).code; },
+  async invite() {   // host: {ch, code} for the next free slot
+    if (window.PortNet && PortNet.t.role === 'host') return PortNet.invite();
     if (running) throw new Error('the game already runs: reload the page, then host before pressing Start');
     netNeedRom();
     await netLoad();
-    return PortNet.host(async (ping) => {   // ping: {n, min, median, p90} ms over 'ctl' before the session (or null)
+    return PortNet.host(async ({ ping, mask }) => {   // ping: {n, min, median, p90} ms of the slowest pair (or null)
       const options = {};
       for (const o of OPTIONS) if (o.game !== undefined) options[o.key] = opt(o.key);
       let eeprom = null;
@@ -799,7 +852,7 @@ window.__online = {
       // ?netd=D / ?netd=auto (tests) wins
       const auto = Q.get('netd') ? Q.get('netd') === 'auto' : $('net-delay-auto').checked;
       const d = auto ? PortNet.autoDelay(ping) : +(Q.get('netd') || $('net-delay').value || 3);
-      return { mask: 3, delay: Math.max(1, Math.min(16, d | 0)), autoDelay: auto, hashEvery: 10, options, eeprom };
+      return { mask, delay: Math.max(1, Math.min(16, d | 0)), autoDelay: auto, hashEvery: 10, options, eeprom };
     });
   },
   async join(code) {
@@ -808,16 +861,20 @@ window.__online = {
     await netLoad();
     return PortNet.join(code);
   },
-  accept: (code) => PortNet.accept(code),
+  accept: (code) => PortNet.accept(code),   // host: a guest's answer code; returns its channel
+  start: () => PortNet.start(),             // host: P344 start the game with every joined player
+  slots: () => window.PortNet ? PortNet.slots() : [],
   leave: () => window.PortNet && PortNet.t && PortNet.leave(),
   stats() {
     if (!window.PortNet || !PortNet.t) return null;
     const t = PortNet.t, on = PortNet.M && PortNet.base.input !== undefined;
     const hs = on ? PortNet.hashes() : [], h = hs[hs.length - 1];
-    return { state: t.state, frame: on ? PortNet.frame() : 0, rtt: Math.round(t.rtt), stalledTicks: on ? PortNet.stat(0) : 0,
-      stalledSlots: on ? PortNet.stat(1) : 0, sent: t.sent, recv: t.recv, simDropped: t.simDropped, hashChecked: t.myHashSeen,
+    return { state: t.state, me: t.myCh + 1, frame: on ? PortNet.frame() : 0, rtt: Math.round(t.rtt), stalledTicks: on ? PortNet.stat(0) : 0,
+      stalledSlots: on ? PortNet.stat(1) : 0, sent: t.sent, recv: t.recv, relayed: t.relayed, simDropped: t.simDropped, hashChecked: t.myHashSeen,
       lastHash: h ? `${h.f}:${h.h.toString(16)}:${h.s.toString(16)}` : '', desync: t.desync, desyncReport: t.desyncReport || null, left: t.left,
-      slowedMs: on ? PortNet.stat(7) : 0, waits: on ? PortNet.stat(8) : 0, waitMs: on ? PortNet.stat(9) : 0, margin: +t.myMargin.toFixed(2), peerMargin: +t.peerMargin.toFixed(2) };   // P339 time sync
+      slowedMs: on ? PortNet.stat(7) : 0, waits: on ? PortNet.stat(8) : 0, waitMs: on ? PortNet.stat(9) : 0,
+      peers: Object.values(t.peers).map((p) => ({ p: p.ch + 1, rtt: Math.round(p.rtt), m: +p.myMargin.toFixed(2), pm: +p.peerMargin.toFixed(2), lost: p.lost })),
+      routes: t.routes };   // P339 time sync, P344 per player
   },
 };
 
