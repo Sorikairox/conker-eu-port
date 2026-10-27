@@ -18,7 +18,10 @@ rm -rf $F/functions/room; cp -R port/web/netlify/functions/room $F/functions/
 if ! cmp -s port/web/netlify/package.json $F/package.json || [ ! -d $F/node_modules/@netlify/blobs ]; then
   cp port/web/netlify/package.json $F/ && (cd $F && npm install --no-audit --no-fund --silent)
 fi
-cd $S && npx -y netlify-cli@latest deploy --prod --dir . --functions $F/functions --no-build 2>&1 | grep -E "Deploy is live|Error|error|function" || true
+# the deploy runs from $F (linked to the same Netlify project): the function bundler only takes packages from under the
+# directory it runs in (from ~/conker-site it shipped room.mjs without @netlify/blobs)
+mkdir -p $F/.netlify && cp $S/.netlify/state.json $F/.netlify/
+cd $F && npx -y netlify-cli@latest deploy --prod --dir $S --functions functions --no-build 2>&1 | grep -E "Deploy is live|Error|error|function" || true
 curl -s https://conker-web-port.netlify.app/BUILD.txt
 # the room server answers (a bad request gives a JSON error, nothing is stored)
 curl -s -X POST -H 'content-type: application/json' -d '{"op":"host","code":"QQQQQ","secret":"x"}' https://conker-web-port.netlify.app/api/room; echo
