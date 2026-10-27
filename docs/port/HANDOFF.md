@@ -46,6 +46,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
 - port_cdata name strings (n64mem_tab.c) still print the original D_ names (n64mem.py, RENAMED_FROM).
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
+- Frame-blend "ghost" effect (fb_ghost_render) looks wrong in the port: in the hangover wake-up scene after the opening
+  the picture shows one pixelated frame that stays frozen for seconds (two shots 3 s apart identical) instead of a
+  blend of live frames. Its copy of the new frame into g_fb_ghost_image (SETCIMG into RDRAM) probably never lands.
+  Option "No motion blur / drunk sway" hides it; the default (off) still shows it (P331).
 - Route tests `p261 r5g / pan8` (new game -> later levels) were not re-tuned after P319; their pad scripts are in git
   history (docs/port/sessions/p261).
 - port-b P317 leftovers (memcpy re-run of 19 registry rows, v0use candidates, random DIFFERs of func_1510E004 /
@@ -56,6 +60,15 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P331 (port-web, 2026-10-27): features #7 and #8
+- 2023e2ed option "No motion blur / drunk sway" ('nodrunk', PORT_OPT_NO_DRUNK_FX 6): fb_ghost_set_mode turns every
+  frame-blend request off; camera_update_shake and camera_wobble_apply ignore their drunk triggers (camera mode
+  0x80000 = title menu, +0x5F0 bit 3 = drunk state); the under-water wobble and cutscene camera-path roll stay.
+  Measured on the new game route: menu wobble 0.003 -> 0, menu roll +-2.9 -> 0, wake-up ghost 210/1 -> 0/0.
+- 42be5836 option "Conker always full detail" ('conkerlod', PORT_OPT_CONKER_FULL_LOD 7): obj_select_lod gives
+  level 0 to the object whose level-0 model is 0 (Conker, models 0..4). Off: level 1 at 529..627 units while
+  running; on: level 0 always.
+- Both: check.sh GREEN, hold-L 5789 / 0x29 at 5795, deployed. Found the ghost-effect render problem (Open items).
 ### P330 (port-web, 2026-10-27): global variable names, cash counter images
 - Tooling 666e0ef9 (+ fixes 2 later commits): rename.py / apply_names.sh handle `D_` rows (`/* was D_X */` on each
   declaration line, string literals kept, wasm byte-identity enforced; tools/eu_port/wasm_sig.py,
