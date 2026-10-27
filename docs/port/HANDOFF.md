@@ -46,8 +46,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
-- MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls). Open: online 2-player Bunker proof (the
-  netmp route does not get pad 2 into Deathmatch; see P341), and event_query_world_object case 34 arg 0 reads +0x7C as
+- MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls), proven online in 2-player Bunker
+  (netmp_bunker.sh). Open: event_query_world_object case 34 arg 0 reads +0x7C as
   s32 where the asm reads it as f32 (lwc1 + trunc.w.s; game_eu_CC5F0.c), not fixed / not difftested.
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
   WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync + send at sampling
@@ -100,13 +100,15 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - 7e6194f0 test aid: ?p340 logs the rail weapon slots ([p341]) and shots; ?p341b=F begin-action conditions.
 - Checks: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps; netpair (Total War, 180 s) IDENTICAL 8941 retraces,
   100 % speed (no pickup taken in its random play, port_work/p340/p341pair).
-- NOT done (user asked for it): online 2-player Bunker proof. The netmp route only gets pad 1 into Deathmatch: on the
-  skull page pad 2's Start (5751 / 5800) or A (5800 / 5870) never joins (shots port_work/p340/p341m), the game is
-  single-view and the 2nd player (type 0x75) is CPU-like. Next: find how pad 2 joins Deathmatch (menu page shots
-  ~113..119 s wall = retraces ~5650..5900), add a Bunker option to netmp_pads.py / netpair.sh (an env to override
-  PADF0/PADF1), walk to a pickup by pad script (no probes under ?netdet; in the 1-human run the 2nd player spawns on
-  pickup 21 and takes it at 6229), then B / Z with screenshots. Also worth a look with the P342 debug build:
-  break in rail_weapons_update (game_eu_B7840.c, pass 2 `pick = world_record_find(...)`).
+- Online proof (part 2): pad 2 never joined Deathmatch because the route pressed its Start at 5751, on page 5 after
+  the join page (menu_player_join_page = main page 4, full alpha 5125 .. 5613; found with ?p341m=1); not a port bug.
+  ae9cfc92 tools/port/scripts/netmp_bunker.sh (pad 2 Start at 5300; NET_BUNKER_DEMO=1: player 2 runs onto pickup 20,
+  weapon 0x14, B at 6500, Z every 60 retraces) + netpair.sh PADS=FILE. Online run
+  `NETDIR=p340 PADS=tools/port/scripts/netmp_bunker.sh NET_BUNKER_DEMO=1 netpair.sh p341bunker2 150`: split-screen
+  Bunker, IDENTICAL 7502 retraces, player 2 has the weapon icon and fires (port_work/p340/p341bunker2/guest_140s.png;
+  guest_142s.png holding it). Same pads offline with ?p340 (port_work/p340/p341off): pad kind 0x94 at 6365, item 0x14
+  phase 2 at 6573, shot counter (ctl +0x1AA) 1, 2, 3, 4, 5, 6 for the Z presses. e1c7a791 probe ?p341m=1.
+
 ### P342 (port-web, 2026-10-27): source-level debugging (DWARF debug build + CLion compile_commands.json)
 - `tools/port/scripts/debug_build.sh` [build|serve|stop|cc]: rsyncs conker/ + port/ into port/build-dbg/tree and runs
   the normal `make -C port game web` there with `PORT_DBG_CFLAGS` (`-g` + `-fdebug-prefix-map` from the container path

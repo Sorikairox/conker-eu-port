@@ -172,8 +172,7 @@ When the codes do not connect ("Could not connect: the two networks do not allow
 - **Speed:** heavy scenes may run slower than full speed.
 - **Multiplayer weapons (Deathmatch / Total War):** fixed in P341 (a port bug in how some function calls passed small
   numbers). Walking over a floating weapon now gives it to you: its icon appears top right, B takes it out, Z fires.
-  Tested offline through the Multi menu in Bunker; not yet confirmed in a real online Bunker game, so please report if
-  it still fails online.
+  Tested in an online 2-player Bunker game (both test windows on one machine); please report if it still fails for you.
 
 ## Reporting what you find
 
