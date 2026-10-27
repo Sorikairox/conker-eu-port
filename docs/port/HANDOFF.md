@@ -55,7 +55,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   host relay for guest pairs that cannot connect, copy-paste only with the host (star signaling for the mesh), the
   signaler is an interface (N.signal payloads) ready for room codes, lost players stand still for N players (also the
   host). Tests: netpair.sh (PLAYERS=2..4, NETFAIL=A-B, NETSIM_*, LEAVE, UI, PADS=netmp_bunker.sh NET_BUNKER_PLAY /
-  NET_BUNKER_DEMO). Next: phase 2b room codes (Netlify Function + Blobs signaler), a real multi-machine internet test.
+  NET_BUNKER_DEMO). Phase 2b done (P345, §11): room codes (Create room / Join room) through the Netlify Function
+  /api/room on Netlify Blobs (source port/web/netlify, shipped by deploy_web.sh from ~/conker-netlify-fn), manual
+  copy-paste codes under "manual codes"; local tests use tools/port/scripts/roomserver.mjs (netpair.sh ROOM=1), never
+  the production function. Next: a real multi-machine internet test; maybe a host "kick" for a stranger in the room.
 - Globals not renamed: 562 D_ symbols only declared in conker/include/variables.h (no C use), D_ names that appear
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
@@ -77,6 +80,25 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P345 (port-web, 2026-10-28): online multiplayer phase 2b (room codes)
+- 6ef0d56f Netlify Function /api/room (port/web/netlify/functions/room: core.mjs logic, room.mjs on Netlify Blobs
+  store conker-rooms): create / join / host poll / offer / guest poll / answer / close; 5-char codes without
+  ambiguous characters, slots 2..4 in join order (etag compare-and-swap), host secret + guest tokens, build / ROM
+  refused at join, 10 min expiry, delete on Start, size checks, light per-instance rate limit. 885c8a8f net.js
+  N.roomCreate / N.roomJoin (same N.signal payloads, 1 s polling, stops when connected / started). 523c2e58 panel:
+  Create room (big code + Copy + joined players), Join room (code field), copy-paste under "manual codes".
+  eb7063b8 + fix: deploy_web.sh ships the function (deploys from ~/conker-netlify-fn: from ~/conker-site the bundle
+  lacked @netlify/blobs). 2c17d91d tests: roomserver.mjs (+ --selftest, 20 cases), netgroup.js ROOM / ROOMCHECK /
+  ROOMMAX / ROMFILE, netpair.sh ROOM=1.
+- Evidence (port_work/p345, Bunker via the real MULTI route): room2 2p 7952 identical (guest_150s.png), unknown code +
+  full room messages; room4ui 4p through the panel 9908 identical (host_10s.png = room code + 3 joined, guest4_190s.png
+  4-way split); room4ui2 10352 identical; regression pair2manual 2p copy-paste through the panel + netsim 7929
+  identical; room2final 2p UI 2926 identical. Production (prod2): 2 headless pages on conker-web-port.netlify.app,
+  room VYXPK, create 4 s (cold), join 4.1 s, unknown code and full room refused, 2402 identical retraces, room deleted
+  on Start (later join: unknown); curl: build mismatch refused, close works. check.sh GREEN, hold-L 5789 / 0x29 at
+  5795, no traps, conker.wasm unchanged (75b5431b).
+- Left: real multi-machine internet test; no kick button (a stranger guessing a code could take a slot before Start);
+  a guest whose host link fails keeps its room slot; rate limit is per function instance.
 ### P344 (port-web, 2026-10-28): online multiplayer phase 2a (3 to 4 players: mesh, host relay, star signaling)
 - dd7c6c05 net.js for 2 to 4 players (design §10): host = player 1, each offer names a guest slot 2..4; signaling
   interface N.signal {offer, answer, accept} on payloads {t, ch, sdp} (copy-paste codes wrap them; room codes plug in

@@ -1,6 +1,6 @@
 # Online multiplayer for the Conker EU web port: design (P336)
 
-Status: design accepted (user decisions in §6); Phase 0 (determinism harness, measurements) done in P337, results in §7; Phase 1 part 1 (2-player online MVP: lockstep netcode, WebRTC with copy-paste codes, Online panel, two-peer tests) done in P338, results in §8; P339 part 2 in §9; phase 2a (3 to 4 players: mesh, host relay, star signaling) done in P344, results in §10. Diagram: `online_multiplayer_architecture.svg` (same folder).
+Status: design accepted (user decisions in §6); Phase 0 (determinism harness, measurements) done in P337, results in §7; Phase 1 part 1 (2-player online MVP: lockstep netcode, WebRTC with copy-paste codes, Online panel, two-peer tests) done in P338, results in §8; P339 part 2 in §9; phase 2a (3 to 4 players: mesh, host relay, star signaling) done in P344, results in §10; phase 2b (room codes: Netlify Function + Blobs) done in P345, §11. Diagram: `online_multiplayer_architecture.svg` (same folder).
 Evidence comes from branch port-web at the P334 head (2026-10-27). Citations are file:line or function names.
 
 ## TL;DR (recommendation)
@@ -436,3 +436,64 @@ No desync in any run, no trap; hold-L 5789 / 0x29 at 5795; check.sh GREEN.
 multi-machine internet test (all runs above are one machine, `?netsim` latency); when the host leaves, relayed guest
 pairs lose each other (they are then dropped after 5 s); the leaver's own game diverges from the frame it did not send
 (expected, it is out of the session); a late joiner / reconnect is not possible (design §6, fast-forward).
+
+## 11. Phase 2b results: room codes (P345, 2026-10-28)
+
+**What changed** (commits 6ef0d56f function, 885c8a8f net.js signaler, 523c2e58 panel, eb7063b8 + the follow-up
+deploy fix, 2c17d91d tests; conker.wasm unchanged):
+- **Server.** `port/web/netlify/functions/room/room.mjs`, a Netlify Function v2 at `/api/room` on the existing project
+  conker-web-port, stores rooms in Netlify Blobs (store `conker-rooms`, strong consistency). The logic is `core.mjs`
+  (storage-independent: the local test server runs the same file on a Map). One blob per room `room-<CODE>`:
+  `{created, build, rom, max, secret, slots: {ch: {token, gen, seen, offer, answer}}}`; nothing else (no names, no IP).
+  HTTP polling only (no WebSocket).
+
+  | op (POST JSON) | who | result |
+  |---|---|---|
+  | `create {build, rom, max}` | host | `{code, secret, max, ttl}` |
+  | `join {code, build, rom}` | guest | `{ch, token, max}`: next free slot (players 2..max in join order); refused: unknown / expired code (404), different build or ROM, full, started (409) |
+  | `host {code, secret}` | host poll, 1 s | `{slots: [{ch, gen, state, answer}], ttl}` |
+  | `offer {code, secret, ch, gen, sdp}` | host | stores that slot's offer |
+  | `guest {code, ch, token}` | guest poll, 1 s | `{offer}` (null while waiting) |
+  | `answer {code, ch, token, sdp}` | guest | stores the answer |
+  | `close {code, secret}` | host | deletes the room (on Start and on Leave) |
+
+  Codes: 5 characters from `ACDEFHJKMNPQRTUVWXY3479` (no 0/O 1/I/L 2/Z 5/S 6/G 8/B; 6.4 M codes; typed in any case,
+  spaces / dashes ignored). Room secret (128 bit) for the host, a token per guest slot. Writes are compare-and-swap on
+  the blob etag (`onlyIfMatch`, `onlyIfNew` on create), so simultaneous joins get different slots. Rooms expire 10 min
+  after creation (deleted when read later; `create` sweeps expired rooms), a slot without an answer whose guest stopped
+  polling for 20 s is re-given (gen + 1, the host makes a new offer). Limits: body 16 KB, SDP 10000 chars, format checks,
+  600 requests / min and 20 rooms / 10 min per IP per function instance (best effort).
+- **Signaler** (`net.js` `N.roomCreate(sessionFn, max)` / `N.roomJoin(code)`): carries the §10 payloads and calls
+  `N.signal.offer / answer / accept`; nothing after the host link changed. The host polls while the room is open, the
+  guest only until its answer is posted (about 2 to 4 s: the host's 1 s poll + non-trickle ICE gathering). The server
+  refuses a different build / ROM at join; the host's `hello` check stays.
+- **Panel.** *Create room (player 1)* shows the code in big letters with Copy and the joined players (the §10 slot
+  boxes without code fields); *Join room* has a code field. The copy-paste flow is under *manual codes*. Errors from the
+  server show in the status line. `?roomapi=URL` points a page at another room server (tests).
+- **Deploy.** `tools/eu_port/deploy_web.sh` copies `port/web/netlify/functions/room` to `~/conker-netlify-fn`,
+  npm-installs `@netlify/blobs` there (from `port/web/netlify/package.json`) and deploys from that directory (linked to
+  the same project) with `--dir ~/conker-site --functions functions`. Deploying from `~/conker-site` shipped the function
+  without its package (the bundler only takes packages from under the directory it runs in). Blobs needed no token or
+  extra setup.
+- **Tests.** `tools/port/scripts/roomserver.mjs` (core.mjs on a Map, CORS; `--selftest`: 20 API cases);
+  `netpair.sh ROOM=1` starts it and passes `?roomapi`; `netgroup.js ROOM=1` (host creates, guests join in order; with
+  `UI=1` through the panel), `ROOMCHECK=1` (unknown code, one player more than `ROOMMAX`), `ROMFILE=PATH` (ROM through
+  the file picker, for the public site).
+
+**Results** (real MULTI menu route into Bunker Deathmatch; logs / screenshots in port_work/p345, not committed):
+
+| Run | Setup | Retraces identical | Notes |
+|---|---|---|---|
+| room2 | 2 players, room code (local server), ROOMMAX 2 | 7952 | join 3.0 s; unknown code and 3rd player (full) refused with the messages above; guest_150s.png |
+| room4ui | 4 players through the panel buttons, local server | 9908 | room code + 3 joined players in host_10s.png; 4-way split guest4_190s.png |
+| room4ui2 | same, final panel | 10352 | joins 3.3 / 2.2 / 2.2 s; room box hidden after start (host_10s.png) |
+| pair2manual (regression) | 2 players, copy-paste codes through the panel, netsim 20+0..10 ms 3 % both | 7929 | codes 788 / 776 chars, D 3 auto |
+| prod2 (production) | 2 headless pages on https://conker-web-port.netlify.app, ROM through the file picker | 2402 (boot) | room VYXPK: create 4 s (cold function), join 4.1 s, unknown code and full room refused, room deleted on Start (a later join: unknown) |
+
+check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps, conker.wasm md5 75b5431b... unchanged.
+
+**Left / limits:** all peers ran on one machine (a real multi-machine internet test is still to do); the rate limit is
+per function instance; a room code is guessable by brute force in principle (6.4 M codes, 10 min, 600 req / min per IP
+per instance), and a stranger who guesses one only takes a slot the host can see before pressing Start (no kick
+button yet); a guest whose link to the host fails keeps its room slot (reload and make a new room); no TURN.
+

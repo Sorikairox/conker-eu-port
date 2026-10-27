@@ -59,7 +59,7 @@ if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', fals
 // Test aid: ?opt=KEY:1,KEY:0 overrides options for this page load (not saved).
 const OPTIONS = [
   { key: 'online', label: 'Online multiplayer (experimental)', def: false,
-    help: 'Shows the Online button: two players on two computers play a multiplayer match together (copy-paste connection codes, no server).' },
+    help: 'Shows the Online button: 2 to 4 players on their own computers play a multiplayer match together (player 1 makes a room, the others join with its code; manual copy-paste codes also work).' },
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,

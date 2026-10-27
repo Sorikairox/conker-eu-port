@@ -85,7 +85,7 @@ The **Options** button in the page header opens a panel of extras that are not i
 | Inverted swimming | off | Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. The original steers like a plane: stick up tilts him head-down and dives, stick down tilts him up. Only the swimming controls change; walking, flying and aiming stay as they are. |
 | Aiming crosshair | off | In the first-person aim views that the original leaves bare, the game's own small crosshair (the one the other guns use) is drawn in the middle of the screen, which is exactly where the shots go there. In this ROM that is the aim kind 0x18 (hold R with that weapon); the scope, lens, bracket and turret views and the other guns already have their own reticles and are unchanged, and the third-person R-look with a held item gets nothing (its shots are aimed from the hand / mouth, not through a fixed screen point). Takes effect the next time you aim. |
 | Rumble (gamepad vibration) | off | The game sees a Rumble Pak in your controller and a connected gamepad vibrates whenever the N64 Rumble Pak would (explosions, hits, heavy effects; the game pulses it on and off by strength). Needs a browser with gamepad vibration (Chrome / Edge, most Xbox and PlayStation pads). Takes effect immediately: switching it on or off makes the game look for the Rumble Pak again at once (before, it waited for the next level or area load). Saves are not affected (they use the cartridge EEPROM). |
-| Online multiplayer (experimental) | off | Shows the **Online** button in the page header: play a multiplayer match with a friend on another computer (see Online below). |
+| Online multiplayer (experimental) | off | Shows the **Online** button in the page header: play a multiplayer match with up to three friends on other computers, joining with a room code (see Online below). |
 | Music / Sound effects / Speech volume | 100 % | Three sliders (0 to 100 %, steps of 5) that set the volume of the music, the sound effects and the spoken dialogue separately. 100 % is the original volume. A change to the speech volume applies from the next spoken line. The page's Vol slider still sets the overall volume. |
 
 While a toggle is latched, a small label (Crouch, R-Look, Walk) shows at the top left of the picture, and the touch Z or R button gets a ring.
@@ -101,23 +101,35 @@ A save is tied to the browser profile. Clearing site data, or using a private wi
 ## Online (experimental)
 
 Two to four players on their own computers can play a multiplayer match together. Each player needs their own copy of
-the EU ROM (only a hash of it is compared, the ROM itself never leaves the browser) and **Chrome**. There is no server:
-player 1 (the host) exchanges two codes with each other player (chat, e-mail, Discord...); the other players never
-exchange codes with each other.
+the EU ROM (only a hash of it is compared, the ROM itself never leaves the browser) and **Chrome**. Player 1 (the host)
+makes a **room** and tells the others its short code (chat, phone, Discord...); the game itself then goes directly
+between your computers. (The room server only passes the connection details between player 1 and each friend; rooms
+close when the game starts and expire after 10 minutes.)
 
-1. Everyone: open the page, load the ROM, but do **not** press Start. In **Options**, switch on *Online multiplayer
-   (experimental)*; an **Online** button appears in the header. Open it.
-2. Player 1: **Host (player 1)**. A box *Player 2* appears with a code: **Copy** it and send it to player 2.
-   For a third and fourth player press **Invite another player**: a box *Player 3* (then *Player 4*) appears with
-   that player's own code. Each code is for one player only: it decides which controller (2, 3 or 4) they get.
-3. Players 2 to 4: **Join (players 2 to 4)**, paste the code you got, **Make my answer code**, **Copy** the answer
-   and send it back to player 1.
-4. Player 1: paste each answer code into that player's box and press **Connect player N**. The box then says
-   *joined · ping … ms*. When everybody has joined, press **Start the game (N players)**. The players' computers then
-   connect to each other by themselves (a few seconds), and all games start at the same moment of the boot.
+1. Everyone: open https://conker-web-port.netlify.app, load the ROM, but do **not** press Start. In **Options**, switch
+   on *Online multiplayer (experimental)*; an **Online** button appears in the header. Open it.
+2. Player 1: press **Create room (player 1)**. A code like **K7QXM** appears in big letters (**Copy** copies it): tell
+   it to your friends.
+3. Players 2 to 4: type the code into the box under it (upper or lower case) and press **Join room**. You get the
+   next free controller in the order you join (the first friend is player 2, then 3, then 4) and the status line says
+   *you are player N: connecting to player 1…*.
+4. Player 1: each friend appears in the panel (*Player N joined · ping … ms*). When everybody has joined, press
+   **Start the game (N players)**. The players' computers then connect to each other by themselves (a few seconds),
+   and all games start at the same moment of the boot.
 5. Player 1 uses the menus as on an N64 (Multi, a mode...). The other players press Start on the "press START" join
    page and pick a character like a second, third or fourth controller. From then on each of you controls your own
    Conker in split screen (two players: top / bottom; three or four: four quarters).
+
+Room messages: *No room with the code …* (a typo, or the room was closed / expired: ask player 1 for a new code),
+*Room … is full* (the room already has 4 players), *Player 1 runs a different version of the game* (reload both pages),
+*Your ROM is not the same as player 1's* (everyone needs the EU ROM). If the room server cannot be reached, use the
+manual codes.
+
+**Manual codes (no room server):** tick *manual codes* in the Online panel. Player 1 presses **Host (player 1)**: a
+box *Player 2* appears with a long code to **Copy** and send to player 2 (**Invite another player** makes the code for
+players 3 and 4). Each friend presses **Join (players 2 to 4)**, pastes the code, presses **Make my answer code** and
+sends that answer back; player 1 pastes it into that player's box and presses **Connect player N**. Then continue at
+step 4.
 
 Good to know:
 - Both games run the same frames with the same inputs (lockstep). Your input reaches the game a little later than in
@@ -133,7 +145,7 @@ Good to know:
   | far away (~130 to 150 ms) | 100 ms |
 
   Up to about 100 ms of input delay most players do not notice it. Untick *automatic* to set it yourself (player 1,
-  before Host): lower = more responsive, but the game waits more often.
+  before Create room / Host): lower = more responsive, but the game waits more often.
 - If another computer is slow or far away, the game pauses briefly ("waiting for player N…" over the picture).
   Waiting often: leave the session, reload all pages and connect again with a higher input delay.
 - The session uses player 1's options and player 1's save (unlocks), and saves made during the session are not kept.
@@ -152,7 +164,7 @@ When the codes do not connect ("Could not connect: the two networks do not allow
   school, hotel and mobile networks and some routers.
 - Try another network for one of you: the easiest is a **phone hotspot** for one player (it has a different kind of
   NAT). A home network for both players usually works.
-- Make new codes for each try (reload both pages, Host / Join again): a code belongs to one connection attempt, and
+- Reload all pages and make a new room (or new manual codes) for each try: a connection belongs to one attempt, and
   an old one may no longer match your network address.
 - A VPN on one side can block it; switch it off for the session.
 - Both players need the same page version: reload both pages if one of you had the page open for a long time
