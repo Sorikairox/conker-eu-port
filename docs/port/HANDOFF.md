@@ -41,6 +41,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
+- MP weapons are never given (P340): floating pickups vanish, item / pad kinds stay 0 for every player in Deathmatch
+  (Bunker 0x34) and Total War. Probe ?p340, findings in the P340 entry.
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
   WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync + send at sampling
   + 4 ms session loop (99.6 % speed at 40+0..20 ms 5 % loss D 3), automatic input delay from the ping, hidden / covered
@@ -68,6 +70,31 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P340 (port-web, 2026-10-27): MP weapon pickup investigation (user report: no weapon after a pickup online)
+- Reproduced offline: Deathmatch = "Bunker", level 0x34 (P1 menu: as netmp_pads.py up to the skull list at 4700, then
+  stick down at 4900, Start at 5100; gameplay 5947; the route flaked once in ~12 runs). Probe b1020ef9 ?p340=F
+  (p340_probe, per retrace from __wrap_objects_run_state_handlers; ?p340tp=I+1&p340tpf=F teleports P1 onto pickup I):
+  Bunker has 16 floating pickups (world objects with update pickup_update, kinds 0x39 .. 0x5E), no type-11 (B pad)
+  zones, objects: P1 type 0x80, P2 0x75 (idle 2nd pad), 0x8A. Teleport onto pickup 22 (kind 0x39): state 2 -> 3,
+  taker +0x80 = 1, gone; the other player took pickup 21. Control block (+0x31C) bytes after the pickup: nothing
+  weapon-like changes (pad kind +0x75, item kind +0x78, fallback +0x7C stay 0 for both players for minutes); no event
+  action, no obj_setup_run. Same in Total War (0x2D). Logs port_work/p340/dm2, dm4, dm6, dm7; Total War p340/b, c.
+- N64 logic read from the code: pickup_update (= ROM: same calls and stores) only sets taker +0x80, plays
+  pickup_collect_sound_play and hides itself. ROM scans (port_work/p340/*.py): nothing in .game reads a world object's
+  +0x80 together with +0x54 / +0x6E, nothing references pickup_update's address, nothing reads g_world_objs + 0x54.
+  Held weapon = ctl item_kind (+0x78), set by player_try_begin_action from pad_kind (+0x75) or the fallback +0x7C when B
+  is pressed (obj_ctrl_action_update). Writers: +0x7C only event action 0x7E (event_action_object); +0x75 only
+  context_action_set (zone type 11), context_action_lock (event actions 0x26 / 0x27, race) and resets. In MP with a
+  weapon kind 0x18 / 0x41 / 0x23 / 0x24: R = aim (aim_state), Z = fire (player update, game_eu_78230.c ~1832); C-down =
+  grenade in levels 0x2D / 0x30 / 0x34 / 0x1A / 0x3F (ctl +0x19A count); B melee is disabled in 0x2D / 0x2B / 0x30 /
+  0x34 (player_context_action). So the hand-over must be an event script action (0x7E / 0x27) or code not found yet;
+  the Bunker / Total War scripts (p174ev) never query the pickups or run 0x7E / 0x27 / 0x26.
+- Controls: the page's gamepad already maps the right stick to all four C buttons (main.js gamepadPad); no page bug.
+  PLAYING.md: MP controls + known problem.
+- Checks: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps; netpair 170 s IDENTICAL 8419 retraces. Not fixed.
+  Next: find who gives MP weapons (ideas: per-character weapon setup at character select / spawn, the MP level
+  script's world-record actions 30F3..30FF at spawn, a stubbed or wrongly converted MP game-mode function; compare
+  with an emulator run of the ROM if one becomes available).
 ### P339 (port-web, 2026-10-27): online multiplayer phase 1 part 2 (time sync, auto delay, hidden tab, desync report)
 - ff8ccdce time sync: input for N + D sent the moment it is sampled (pc_net.c -> Module.netAfterTick), session main
   loop on a 4 ms timer, port_net_kick runs the tick when the awaited input arrives, packets repeated once ~8 ms later;

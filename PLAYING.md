@@ -56,6 +56,11 @@ Other commands:
 
 **Phones and tablets:** on-screen touch controls appear by themselves (the **Touch** button toggles them). The game is also online at https://conker-web-port.netlify.app (you still need your own ROM).
 
+**Multiplayer (War / Deathmatch) controls, as the game code reads them:** B is the context action (it draws the
+weapon / item the game has given you; without one it does **not** melee-attack in Total War, Bunker / Deathmatch and
+the other War levels), R aims (over-the-shoulder view), Z fires the weapon you hold while aiming, C-down throws a grenade (needs
+grenades, the orange squares at the top left). On a gamepad the right stick gives the four C buttons.
+
 A gamepad works too; plug it in and press a button. **Controls** in the page lets you rebind keys and gamepad buttons, and **Defaults** resets them.
 
 ## Options
@@ -165,6 +170,9 @@ When the codes do not connect ("Could not connect: the two networks do not allow
 - **Test routes:** on the latest build the automated level 0x29 test route falls at one of the gaps before the lever, so the lever / Frying Pan part was not re-checked. It worked in testing on earlier builds. Playing it by hand should work.
 - **Newly converted code:** the last functions were converted just now and have only had a short browser test (intro, Race A). Parts of the game that weren't tested may draw or behave wrongly; please report them.
 - **Speed:** heavy scenes may run slower than full speed.
+- **Multiplayer weapons (Deathmatch / Total War):** walking over a floating weapon makes it disappear (the game's own
+  pickup code runs and plays its sound), but no weapon is given, so B / R / Z have nothing to draw or fire. Under
+  investigation (P340: the pickup code matches the original; what normally hands over the weapon is not found yet).
 
 ## Reporting what you find
 
