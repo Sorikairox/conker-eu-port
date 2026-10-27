@@ -198,6 +198,17 @@ void port_sched_run(void) {
     port_log("[sched] more than %d switches in one frame; yielding to the browser\n", MAX_SWITCHES_PER_FRAME);
 }
 
+/* P337 (pc_nethash.c): the fiber stacks of thread slot i (C stack + asyncify stack), NULL for a free slot; -1 past the end.
+ * They hold the suspended game threads' frames, so they are game state between retraces (hash, rollback snapshot). */
+int port_sched_stack(int i, void **cstack, unsigned *clen, void **astack, unsigned *alen) {
+    if (i < 0 || i >= MAX_THREADS) return -1;
+    PcThread *p = &threads[i];
+    int live = p->state != P_FREE && p->cstack;
+    *cstack = live ? p->cstack : NULL; *clen = live ? C_STACK : 0;
+    *astack = live ? p->astack : NULL; *alen = live ? A_STACK : 0;
+    return 0;
+}
+
 /* ---------------- threads ---------------- */
 
 void osCreateThread(OSThread *t, OSId id, void (*entry)(void *), void *arg, void *sp, OSPri pri) {
@@ -375,12 +386,17 @@ void port_post_event(int e) {
 
 extern int port_paused; /* P27: pc_os.c port_set_paused */
 /* one emulated VI retrace: post VI / timer messages and run the threads until they block */
+extern int port_net_hooks;            /* P337 pc_nethash.c: per-retrace hash / measurements (?nethash, ?netprof, ?netsnap) */
+void port_net_retrace_begin(void);
+void port_net_retrace_end(void);
 static void retrace(void) {
     port_frame_count++;
     if (port_frame_hook) port_frame_hook();
+    if (port_net_hooks) port_net_retrace_begin();
     port_vi_retrace();
     if (frame_mq_init) osSendMesg(&frame_mq, NULL, OS_MESG_NOBLOCK);
     port_sched_run();
+    if (port_net_hooks) port_net_retrace_end();
     { extern void port_pace_report(void) __attribute__((weak)); if (port_pace_report) port_pace_report(); } /* P147 ?p147pace */
 }
 
@@ -412,7 +428,7 @@ static void frame(void) {
     if (dt > 250.0) dt = 250.0;
     acc += dt;
     int n = 0;
-    while (acc >= per && n < VI_MAX_STEPS) {
+    while (acc >= per && n < VI_MAX_STEPS && !port_paused) {   /* P337: ?nethashstop pauses right after its retrace */
         retrace(); n++; acc -= per;
         if (emscripten_get_now() - now > VI_TICK_MS) break;
     }
@@ -442,6 +458,7 @@ void port_run(port_boot_fn boot) {
     emscripten_fiber_init_from_current_context(&sched_fiber, sched_astack, sizeof sched_astack);
     { int pad = port_flag("mallocpad"); if (pad) port_log("[sched] mallocpad %d at %p\n", pad, malloc(pad)); } /* P21 test aid: shift the malloc layout */
     port_video_init();
+    { void port_net_init(void); port_net_init(); }   /* P337 online-multiplayer harness flags (pc_nethash.c) */
     boot();
     in_main_loop = 1;
     emscripten_set_main_loop(frame, 0, 0);

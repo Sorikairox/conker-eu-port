@@ -826,6 +826,10 @@ static void tri(unsigned i0, unsigned i1, unsigned i2) {
     put(a, 1, 1); put(b, 1, 1); put(c, 1, 1);   /* P35: the tile shift is applied per tile in the shader */
 }
 
+/* P337 (port/ultra/pc_nethash.c): every RDRAM range written from GPU pixels is reported before the write, so the
+ * online-multiplayer state hash leaves it out (GPU bytes may differ between browsers); 1 = ?netgpujunk, write a fixed
+ * pattern instead (proves the game logic never reads them). */
+int port_net_gpu_write(void *p, unsigned len);
 /* P137: offscreen colour image helpers (see off_on) */
 static GLuint off_fbo, off_tex, off_zfbo, off_ztex, off_cur;   /* P161: own FBO for the z image, off_cur = bound one */
 static void off_writeback(void) {
@@ -838,6 +842,7 @@ static void off_writeback(void) {
     if (off_zimg) { static unsigned nz; nz++; if (!(nz & (nz - 1))) port_log("[p161] z image written back as a colour image (%u times, frame %u)\n", nz, port_frame_count); }
     if (!dst || w > 320 || h == 0 || h > OFF_FBO_H) return;
     glReadPixels(0, OFF_FBO_H - h, w, h, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    if (port_net_gpu_write(dst, w * h * (off_siz == 1 ? 1 : off_siz == 2 ? 2 : 4))) memset(px, 0x5A, sizeof px); /* P337 */
     for (y = 0; y < h; y++)                 /* GL row 0 is the bottom: N64 row y = read row h - 1 - y (P140) */
         for (x = 0; x < w; x++) {
             const unsigned char *q = px + ((h - 1 - y) * w + x) * 4;
@@ -988,6 +993,7 @@ static void fbc_check_timg(const unsigned char *t) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbc[i].tex, 0);
         glReadPixels(0, 0, fbc[i].tw, fbc[i].th, GL_RGBA, GL_UNSIGNED_BYTE, px);
         glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());   /* P335: or the hx image */
+        if (port_net_gpu_write(dst, 2 * w * H)) memset(px, 0x5A, sizeof px);   /* P337 */
         for (y = 0; y < H; y++) {
             float cy = (y + 0.5f - fbc[i].y0) * fbc[i].th / fbc[i].h;   /* canvas row from the top */
             if (cy < 0 || cy >= fbc[i].th) continue;

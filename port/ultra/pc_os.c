@@ -631,8 +631,11 @@ void osSpTaskStartGo(OSTask *tp) {
         port_log("[sp] task %u: type %u%s ucode %08X data_ptr %08X size %u\n", sp_tasks, type,
                  type == M_GFXTASK ? " (gfx)" : type == M_AUDTASK ? " (audio)" : "",
                  (unsigned)(uintptr_t)tp->t.ucode, (unsigned)(uintptr_t)tp->t.data_ptr, (unsigned)tp->t.data_size);
-    if (type == M_GFXTASK) { gfx_run_task(tp); port_gfx_frame_tasks++; }
-    if (type == M_AUDTASK) aud_run_alist((const uint32_t *)tp->t.data_ptr, (uint32_t)tp->t.data_size); /* port/audio */
+    { extern int port_net_hooks, port_net_nogfx; extern double port_net_task_ms[2];   /* P337 ?netprof / ?netnogfx (pc_nethash.c) */
+      double t = port_net_hooks ? emscripten_get_now() : 0;
+      if (type == M_GFXTASK) { if (port_net_nogfx <= 0) gfx_run_task(tp); port_gfx_frame_tasks++; }
+      if (type == M_AUDTASK) aud_run_alist((const uint32_t *)tp->t.data_ptr, (uint32_t)tp->t.data_size); /* port/audio */
+      if (port_net_hooks) port_net_task_ms[type == M_AUDTASK] += emscripten_get_now() - t; }
     port_post_event(OS_EVENT_SP);
     if (type == M_GFXTASK) port_post_event(OS_EVENT_DP);
 }

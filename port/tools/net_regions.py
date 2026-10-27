@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""P337 online multiplayer phase 0: the static ranges the per-retrace state hash leaves out (port/ultra/pc_nethash.c).
+
+Reads the wasm-ld map (port/build/conker.map, -Wl,-Map in port/Makefile) and prints one line per excluded data symbol,
+"ADDR_HEX LEN_HEX OBJECT SYMBOL REASON". The page (main.js) loads the file (port/build/web/conker_netx.txt) under ?nethash
+and passes each range to port_net_exclude() before callMain; tools/port/nethash_diff.py reads it to ignore the same bytes.
+
+Rule: everything in the static region (the n64_rdram / n64_seg16 mirrors, every game C global, the port's PIF / timer /
+scheduler state, the audio HLE and MP3 decoder state, the game-logic wrappers in port/gfx/p*.c) is game state and is
+hashed, except what is port-only and may legitimately differ between peers:
+  renderer   gfx_f3dex2.o, gfx_demo.o: GL object mirrors, texture caches, glReadPixels scratch (GPU-dependent bytes)
+  audio out  aud_out.o except the virtual AI queue (det_vq, det_vf, det_on, game_rate): the Web Audio ring and its
+             indices (moved by the browser's audio callback), WAV capture, pacing statistics
+  wall time  pc_os.o t0 / pause_at / pause_total / port_paused, pc_sched.o frame.last / frame.acc / frame.mode (wall-clock
+             VI pacing), slow_frames / budget_frames (wall-time statistics), sched_astack / sched_fiber (the browser-side
+             scheduler context: its stack depth depends on whether rAF or setTimeout called frame()), pc_video.o (GL
+             context handle; port_gfx_frame_tasks resets per presented frame, i.e. per rAF tick)
+  harness    pc_net.o, pc_nethash.o (this hash itself), pc_pif.o padf* / padrec* (each peer's script text and table)
+  libc       dlmalloc state (_gm_, mparams: mparams.magic is seeded from time()), sbrk_val (heap top: moves with page /
+             renderer allocations), stdio buffers (log text)
+  renderer   pc_os.o port_vi_view.full (?p147vifull cache, first read by the gfx task)
+The main C stack (__data_end .. __heap_base) and the heap are outside the static region; the game threads' fiber stacks
+on the heap are hashed separately, live slots only (S column)."""
+import sys
+
+EXCLUDE_OBJ = {'gfx_f3dex2.o': 'renderer', 'gfx_demo.o': 'renderer', 'pc_net.o': 'harness', 'pc_nethash.o': 'harness'}
+KEEP_IN_AUD_OUT = {'det_vq', 'det_vf', 'det_on', 'game_rate'}
+EXCLUDE_SYM = {
+    'pc_os.o': {'port_vi_view.full': 'renderer flag cache', 't0': 'wall time', 'pause_at': 'wall time', 'pause_total': 'wall time', 'port_paused': 'page pause'},
+    'pc_sched.o': {'frame.last': 'wall time', 'frame.acc': 'wall time', 'frame.mode': 'pacing mode', 'slow_frames': 'wall time',
+                   'budget_frames': 'wall time', 'sched_astack': 'browser context', 'sched_fiber': 'browser context'},
+    'pc_video.o': None,   # whole object
+    'dlmalloc.o': None, 'sbrk.o': None, 'stdout.o': None, 'stderr.o': None, 'ofl.o': None,
+}
+
+
+def entries(path):
+    """(addr, size, object, symbol) of every data input section in the map"""
+    for line in open(path):
+        p = line.split(None, 3)
+        if len(p) != 4 or p[0] == '-' or ':(' not in p[3]:
+            continue
+        obj, sec = p[3].strip().rsplit(':(', 1)
+        sec = sec.rstrip(')')
+        if not sec.startswith(('.data.', '.bss.', '.rodata.', '.tdata.')):
+            continue
+        objname = obj.split('/')[-1]
+        if '(' in objname:                       # libc-debug.a(stdout.o)
+            objname = objname.split('(')[-1].rstrip(')')
+        yield int(p[0], 16), int(p[2], 16), objname, sec.split('.', 2)[2]
+
+
+def classify(obj, sym):
+    if obj in EXCLUDE_OBJ:
+        return EXCLUDE_OBJ[obj]
+    if obj == 'aud_out.o':
+        return None if sym in KEEP_IN_AUD_OUT else 'audio out'
+    if obj == 'pc_pif.o' and sym.startswith(('padf', 'padrec')):
+        return 'harness (pad script)'
+    if obj in EXCLUDE_SYM:
+        rules = EXCLUDE_SYM[obj]
+        if rules is None:
+            return 'port only'
+        return rules.get(sym)
+    return None
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    n = total = 0
+    for addr, size, obj, sym in entries(sys.argv[1]):
+        why = classify(obj, sym)
+        if why and size:
+            print(f'{addr:08X} {size:X} {obj} {sym} {why.replace(" ", "_")}')
+            n += 1; total += size
+    print(f'net_regions: {n} excluded ranges, {total >> 10} KB', file=sys.stderr)
+
+
+if __name__ == '__main__':
+    main()

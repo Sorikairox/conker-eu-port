@@ -8,6 +8,13 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
     const b = fs.readFileSync(rom); const p = M._malloc(b.length); M.HEAPU8.set(b, p); M._port_set_rom(p, b.length);
   }
   if (process.env.GFXDEMO) { const t = M.stringToNewUTF8 ? M.stringToNewUTF8(process.env.GFXDEMO) : 0; M._port_gfx_demo_test(t); }
+  // P337: the online-multiplayer state hash (PORT_NETHASH / PORT_NETHASHSTOP / PORT_NETSNAP) leaves out the ranges the
+  // build lists in conker_netx.txt (port/tools/net_regions.py), as the page does
+  if ((process.env.PORT_NETHASH || process.env.PORT_NETSNAP) && M._port_net_exclude) {
+    const t = fs.readFileSync(path.join(path.dirname(path.resolve(js)), 'conker_netx.txt'), 'utf8'); let n = 0;
+    for (const l of t.split('\n')) { const f = l.split(' '); if (f.length >= 2) { M._port_net_exclude(parseInt(f[0], 16), parseInt(f[1], 16)); n++; } }
+    console.log(`[nethash] ${n} excluded static ranges from conker_netx.txt`);
+  }
   M.callMain([]);
   // AUDTEST=<hex sound record offset>[:frames]: drive the C n_audio synth + audio HLE (port/audio/aud_test.c)
   if (process.env.AUDTEST) setTimeout(() => { const [r, f] = process.env.AUDTEST.split(':'); M._port_audio_test(parseInt(r, 16), +(f || 150)); }, 1500);
@@ -31,5 +38,16 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
   }
   // P27 EEPTEST=seed: EEPROM write then read back through PIF commands 05/04 (no IndexedDB in node)
   if (process.env.EEPTEST && M._port_eep_test) setTimeout(() => { M._port_eep_test(1, +process.env.EEPTEST); M._port_eep_test(2, +process.env.EEPTEST); }, 2000);
-  setTimeout(() => { M._port_dump_threads(); process.exit(0); }, +secs * 1000);
+  // P337 NETDUMP=PATH: at the end, write the hashed memory regions (after PORT_NETHASHSTOP paused the game) in the
+  // page's dump format (port/web/audprobe.js PROBE_DUMP) for tools/port/nethash_diff.py --dump
+  const netdump = () => {
+    if (!process.env.NETDUMP || !M._port_net_region) return;
+    const regions = [];
+    for (let i = 0; M._port_net_region(i, 0) !== -1; i++) { const a = M._port_net_region(i, 0) >>> 0, l = M._port_net_region(i, 1); if (l) regions.push({ i, addr: a, len: l }); }
+    const fd = fs.openSync(process.env.NETDUMP, 'w');
+    fs.writeSync(fd, JSON.stringify({ frame: +(process.env.PORT_NETHASHSTOP || 0), regions }) + '\n');
+    for (const r of regions) fs.writeSync(fd, M.HEAPU8.subarray(r.addr, r.addr + r.len));
+    fs.closeSync(fd); console.log(`[nethash] dump of ${regions.length} regions -> ${process.env.NETDUMP}`);
+  };
+  setTimeout(() => { netdump(); M._port_dump_threads(); process.exit(0); }, +secs * 1000);
 });

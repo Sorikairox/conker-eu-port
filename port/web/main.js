@@ -665,6 +665,34 @@ window.portAudioReady = (ctx) => {
   updateSoundHint();
 };
 
+// ---------------------------------------------------------------- P337 online multiplayer phase 0
+// The state hash (port/ultra/pc_nethash.c) leaves out the port-only static ranges listed in conker_netx.txt
+// (port/tools/net_regions.py, written by the build next to conker.wasm). window.__netdump reads the hashed memory after
+// ?nethashstop paused the game (port/web/audprobe.js PROBE_DUMP -> tools/port/nethash_diff.py).
+async function netLoadExclusions(Mod) {
+  try {
+    const t = await (await fetch('conker_netx.txt')).text(); let n = 0;
+    for (const l of t.split('\n')) { const f = l.split(' '); if (f.length >= 2) { Mod._port_net_exclude(parseInt(f[0], 16), parseInt(f[1], 16)); n++; } }
+    log(`[nethash] ${n} excluded static ranges from conker_netx.txt`);
+  } catch (e) { log('[nethash] conker_netx.txt not loaded: ' + e, 'fail'); }
+}
+window.__netdump = {
+  info() {
+    const regions = [];
+    for (let i = 0; M._port_net_region(i, 0) !== -1; i++) {
+      const a = M._port_net_region(i, 0) >>> 0, l = M._port_net_region(i, 1);
+      if (l) regions.push({ i, addr: a, len: l });
+    }
+    const fm = /\bnethashstop=(\d+)/.exec(location.search);
+    return { frame: fm ? +fm[1] : 0, regions };
+  },
+  chunk(addr, len) {
+    const b = M.HEAPU8.subarray(addr, addr + len); let s = '';
+    for (let i = 0; i < b.length; i += 32768) s += String.fromCharCode.apply(null, b.subarray(i, i + 32768));
+    return btoa(s);
+  },
+};
+
 // ---------------------------------------------------------------- wasm apps
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -706,7 +734,10 @@ async function start(app) {
   $('pause').disabled = app !== 'game';
   // &audonly=1 (P14, audprobe.sh): data segments only, no game threads; for the audio tests
   if (Q.get('audonly')) log('audonly: game memory ' + (M._port_audio_prepare() > 0 ? 'loaded' : 'FAILED') + ', game not started');
-  else try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
+  else {
+    if (/[?&](nethash|nethashstop|netsnap)=/.test(location.search)) await netLoadExclusions(M);   // P337
+    try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
+  }
   if (app === 'game') status('running', 'ok');
   applyPause();
   $('canvas').focus();

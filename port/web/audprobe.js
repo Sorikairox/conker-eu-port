@@ -71,6 +71,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       for (const [k, v] of [...self.entries()].sort((a, b) => b[1] - a[1]).slice(0, +(process.env.PROBE_TOP || 20))) console.log(`  ${(v / 1000).toFixed(0).padStart(6)} ms  ${k}`);
     }
   }
+  // P337: PROBE_THROTTLE=N slows the page's CPU N times (determinism at another wall speed)
+  if (process.env.PROBE_THROTTLE) { await call('Emulation.setCPUThrottlingRate', { rate: +process.env.PROBE_THROTTLE }); console.log('cpu throttle', process.env.PROBE_THROTTLE); }
   let last = null; const t0 = Date.now();
   // P27: PROBE_STEPS="MS:click; MS:keydown:CODE; MS:keyup:CODE; MS:nav:QUERY; MS:eval:EXPR; MS:shot:PATH" (MS from now; shot: P49).
   // Input goes through Input.dispatch*Event, so it counts as a real user gesture (audio resume test).
@@ -117,6 +119,21 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const lines = await ev(`Array.from(document.querySelectorAll('#console *')).map(e => e.textContent).filter(l => new RegExp(${grep}).test(l)).slice(-${tail}).join('\\n')`);
   if (lines) console.log(lines);
   console.log(`evaluate: slowest answer ${maxLat} ms`);
+  // P337: PROBE_DUMP=PATH writes the memory regions of the online-multiplayer hash (main.js window.__netdump, after
+  // ?nethashstop paused the game): a JSON header line, then the raw bytes of each region in order
+  if (process.env.PROBE_DUMP) {
+    const info = await ev('window.__netdump ? JSON.stringify(window.__netdump.info()) : null');
+    if (!info) console.log('dump: no window.__netdump');
+    else {
+      const regs = JSON.parse(info), fd = fs.openSync(process.env.PROBE_DUMP, 'w'); let n = 0;
+      fs.writeSync(fd, info + '\n');
+      for (const r of regs.regions) for (let o = 0; o < r.len; o += 1 << 20) {
+        const b64 = await ev(`window.__netdump.chunk(${r.addr + o}, ${Math.min(1 << 20, r.len - o)})`);
+        const b = Buffer.from(b64 || '', 'base64'); fs.writeSync(fd, b); n += b.length;
+      }
+      fs.closeSync(fd); console.log(`dump: ${regs.regions.length} regions, ${n} bytes at retrace ${regs.frame} -> ${process.env.PROBE_DUMP}`);
+    }
+  }
   if (process.env.PROBE_NOAUDIO) return done(0);  // P27: input / save / screenshot runs
   const ok = last && last.frames > 0 && last.nonzero > 1000 && last.sq / last.nonzero > 1e-5;
   console.log(ok ? `[audprobe] PASS: Web Audio pulled ${last.frames} frames, ${last.nonzero} non-zero samples`
