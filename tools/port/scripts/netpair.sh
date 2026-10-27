@@ -11,6 +11,8 @@
 #                     DESYNC_OFF=decimal offset in n64_rdram (default 0x200000)
 #        HIDE=AT:FOR  the guest's page is hidden from AT s for FOR s     REALBG=1  normal background throttling
 #        PLAY_SECS=N                  seconds of free play in the pad scripts (default 20)
+#        PADS=FILE  sourced after netmp_pads.py to replace PADF0 / PADF1 (netmp_bunker.sh: 2-player Bunker,
+#                   NET_BUNKER_DEMO=1 player 2 takes a weapon, draws it and fires)
 # Logs: port_work/${NETDIR:-p339}/NAME/{host,guest}.log; [nethash] lines compared with tools/port/nethash_diff.py.
 cd ~/conker-wt/web || exit 1
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
@@ -18,6 +20,7 @@ while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do
 D=port_work/${NETDIR:-p339}/$1; rm -rf "$D"; mkdir -p "$D"
 T=${2:-120}
 eval "$(python3 tools/port/scripts/netmp_pads.py 7000 "${PLAY_SECS:-20}")"
+[ -n "${PADS:-}" ] && source "$PADS"   # P341: another pad script, e.g. tools/port/scripts/netmp_bunker.sh (Bunker)
 NAME=conker-web-pair-$$; PORT=$((8100 + $$ % 800))
 docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$PWD/port/build/web":/www/app:ro \
   -v "$PWD/baserom.eu.z64":/www/dev/rom.z64:ro -w /www conker-emsdk python3 -m http.server 8000 >/dev/null
