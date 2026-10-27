@@ -41,11 +41,12 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
-- Online multiplayer: phase 1 part 1 done (P338, docs/design/ONLINE_MULTIPLAYER.md §8): 2-player lockstep over WebRTC
-  with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), tests netpair.sh. Part 2: time sync
-  (frame-advantage nudging) so links near the input delay do not slow the game, send right after each tick, a real
-  two-machine test (and a Firefox/Safari peer if the user enables one), hidden-tab timer loop test, per-block hash
-  exchange on desync, then phase 2 (room codes, 3-4 players). Node vs Chrome audio-arena divergence (§7 item 2) open.
+- Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
+  WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync + send at sampling
+  + 4 ms session loop (99.6 % speed at 40+0..20 ms 5 % loss D 3), automatic input delay from the ping, hidden / covered
+  page ticks from a Worker, desync report naming the first different 4 KB page + symbols. Tests: netpair.sh (NETSIM_*,
+  NETD=auto, HIDE, REALBG, DESYNC_AT/OFF, UI). Next: a real two-machine internet test, then phase 2 (room codes, 3-4
+  players).
 - Globals not renamed: 562 D_ symbols only declared in conker/include/variables.h (no C use), D_ names that appear
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
@@ -67,6 +68,27 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P339 (port-web, 2026-10-27): online multiplayer phase 1 part 2 (time sync, auto delay, hidden tab, desync report)
+- ff8ccdce time sync: input for N + D sent the moment it is sampled (pc_net.c -> Module.netAfterTick), session main
+  loop on a 4 ms timer, port_net_kick runs the tick when the awaited input arrives, packets repeated once ~8 ms later;
+  GGPO-style frame advantage (packets carry retrace + input margin; the peer ahead calls port_net_slow, frame() takes
+  it out of the backlog, max 8 %; never needed in the tests). Stats: stat 7 ms slowed, 8 retraces that waited, 9 ms
+  waited; netpair.js prints speed + waits. 40+0..20 ms 5 % D3: 79.2 % -> 99.6 % (8397 identical); 80/20 ms 15 % D3:
+  65.7 % -> 87.5 % (5199 identical; RTT > D3 window); no netsim 100 % (7442).
+- 9ac954a0 auto input delay: host pings 12x over 'ctl' before the session, D = clamp(ceil((median/2 + (p90 -
+  median)/2) / 20) + 1, 2, 8); panel checkbox "automatic" (default on), ?netd=auto. Pings 0.8 / 36 / 94 / 134 ms ->
+  D 2 / 3 / 4 / 5, all 100 % speed, identical. Panel shows "waits" (retraces) instead of 4 ms stalled ticks.
+- 6facf7f1 hidden page: with normal throttling (REALBG=1) a covered guest never started (first main-loop iteration
+  waited for rAF; a pre-session hidden pause stuck; page timers ~1 Hz). Fixes: session loop at 250 fps from the first
+  tick, pause cleared, Worker ticker while hidden (port_net_background removed). Guest covered + minimised: 100 %, 5467
+  identical. Desync report: per-page hash ring (16 points), page vector swap over 'ctl', first different page + symbols
+  (conker_netsyms.txt, net_regions.py --syms); ?netdesync=N&netdesyncoff=OFS test: both panels report retrace 3000 and
+  page N64 800B0000..800B0FFF with var70059904.
+- PLAYING.md Online: automatic delay table, what to do when codes fail (phone hotspot, fresh codes, VPN, same build),
+  hidden tab is fine now.
+- Every commit: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps; deployed. Not done: real two-machine test,
+  byte-level desync location; the time-sync slow-down never triggered (margins stayed balanced), so it is untested
+  under real clock drift.
 ### P338 (port-web, 2026-10-27): online multiplayer phase 1 part 1 (2-player online MVP)
 - 20c14399 game side: pc_net.c §4 input ring (256 x 4, frame tags; pc_net.o is outside the hash), port_net_session
   (mask, local, D, K) before callMain (forces det, presence mask), local input for N + D sampled at retrace N (page

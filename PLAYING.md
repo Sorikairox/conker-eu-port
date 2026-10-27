@@ -109,16 +109,40 @@ by copying two codes back and forth (chat, e-mail, Discord...).
    picks a character like a second controller. From then on each of you controls your own Conker in split screen.
 
 Good to know:
-- Both games run the same frames with the same inputs (lockstep). Your input reaches the game 60 ms later than in a
-  local game (input delay of 3 frames), so that a normal internet connection does not make the game wait. If the
-  other computer is slow or far away, the game pauses briefly ("waiting for the other player…" over the picture).
+- Both games run the same frames with the same inputs (lockstep). Your input reaches the game a little later than in
+  a local game (the *input delay*), so the network has time to carry it to the other computer. By default the host
+  measures the ping when the two of you connect and picks the delay itself (*automatic*, shown in the panel as
+  "input delay … ms (auto)"):
+
+  | Ping between the two computers | Input delay (automatic) |
+  |---|---|
+  | same house / same city (under ~20 ms) | 40 ms (2 frames) |
+  | same country (~40 ms) | 60 ms |
+  | neighbouring countries (~100 ms) | 80 ms |
+  | far away (~130 to 150 ms) | 100 ms |
+
+  Up to about 100 ms of input delay most players do not notice it. Untick *automatic* to set it yourself (player 1,
+  before Host): lower = more responsive, but the game waits more often.
+- If the other computer is slow or far away, the game pauses briefly ("waiting for the other player…" over the
+  picture). Waiting often: leave the session, reload both pages and connect again with a higher input delay.
 - The session uses player 1's options and player 1's save (unlocks), and saves made during the session are not kept.
-- If the connection cannot be made, the page says so: some home or mobile networks do not allow a direct connection
-  between two computers, and no relay server is used. Another network (e.g. a phone hotspot) may work.
 - If a player leaves or the connection drops, that player's Conker stands still and the game goes on.
-- The Online panel shows the ping and how often the game had to wait. If it ever says **Desync**, the two games no
-  longer show the same thing: please report it with the Debug log of both players.
-- Keep the tab visible if you can: browsers slow down hidden tabs, which makes the other player wait.
+- The Online panel shows the ping, how many frames had to wait for the other player, and the input delay. If it ever
+  says **Desync**, the two games no longer show the same thing; the box also says where the two games' memory
+  differs. Please report it with the Debug log of both players.
+- Switching to another tab or minimising the window is fine: the game keeps running (and keeps the other player
+  going) while the page is hidden.
+
+When the codes do not connect ("Could not connect: the two networks do not allow a direct connection"):
+- There is no relay server, so the two computers must reach each other directly. This fails behind some company,
+  school, hotel and mobile networks and some routers.
+- Try another network for one of you: the easiest is a **phone hotspot** for one player (it has a different kind of
+  NAT). A home network for both players usually works.
+- Make new codes for each try (reload both pages, Host / Join again): a code belongs to one connection attempt, and
+  an old one may no longer match your network address.
+- A VPN on one side can block it; switch it off for the session.
+- Both players need the same page version: reload both pages if one of you had the page open for a long time
+  ("different game builds").
 
 ## What should work (as of 2026-10-26)
 

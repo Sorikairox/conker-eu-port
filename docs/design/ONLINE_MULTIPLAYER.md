@@ -10,6 +10,8 @@ Evidence comes from branch port-web at the P334 head (2026-10-27). Citations are
 - **Rollback (GGPO-style) is not in the MVP.** It is feasible in principle: the whole machine is wasm linear memory, roughly 10 to 12 MB of real game state per snapshot. But the renderer and audio run inside the retrace, and resimulation cost has not been measured. It is a Phase 4 option, gated on Phase 0 measurements. **Host video streaming is ruled out:** guests would play without a ROM, it adds 100 ms or more of latency, and it needs megabits of upload per guest.
 - **Session start:** every peer reboots into an "online" boot. The host dictates the build id, ROM SHA-256 (the hash only), options, the EEPROM image (2 KB of user save data, not ROM data) and the controller presence mask. From retrace 0, all peers run in lockstep. Player 1 drives the title and MP menus as on the N64, and the other players join at character select.
 - **Optional and off by default**, per the feature rule. The feature lives in an "Online" panel. Without it, the page and the game behave exactly as today.
+- **Status (P339):** phase 1 (2-player online, Chrome) is done: lockstep with time sync and automatic input delay,
+  copy-paste codes, hidden-tab safe, desync report (§8, §9). Next: a real two-machine test, then phase 2.
 - **Effort:** MVP for 2 players with copy-paste signaling is about 5 to 6 sessions (Phase 0 + 1). Room codes, 4 players and robustness add 2 to 3 more. The "my view only" crop adds 1 to 2. Rollback would be 4 to 6 more.
 
 ---
@@ -323,3 +325,50 @@ in H for all 8114 retraces. No desync was ever reported.
 3. Disconnect: each side drops the other from the first frame it does not hold; with 2 players that is all that is
    needed. With 3 to 4 players the remaining peers must agree on F (phase 2).
 4. The session only starts before the game: a running game must reload first (the panel says so).
+
+## 9. Phase 1 part 2 results (P339, 2026-10-27)
+
+**Status:** phase 1 (2-player online, copy-paste codes, Chrome only) is feature-complete. Still untested: two real
+machines over the internet (NAT / STUN path); a Firefox / Safari peer is out of scope (user decision: Chrome only).
+
+**What changed** (commits ff8ccdce, 9ac954a0, 6facf7f1):
+- Why P338 slowed at one-way latency near D x 20 ms: retraces ran only on requestAnimationFrame. A stalled peer
+  checked again one display frame (16.7 ms) later, so its next input sample went out late and the other peer stalled
+  next (ping-pong). Fixes: the local input for N + D is sent the moment it is sampled (start of retrace N, before the
+  retrace runs); a session's main loop is a 4 ms timer (250 fps setTimeout from the first tick); a packet that brings
+  the input a stalled game waits for runs the tick at once (pc_sched.c port_net_kick); every packet goes out a second
+  time ~8 ms later, keep-alive every 30 ms.
+- Time sync (GGPO-style frame advantage): packets carry the sender's retrace and its input margin (frames of the
+  other player's input held beyond the retrace run, ~0.5 s average). Every 250 ms the peer whose margin is smaller by
+  more than 0.3 frames (it runs ahead) asks pc_net.c port_net_slow for about half the difference: frame() takes that
+  wall time out of its 50 Hz backlog, at most 8 % of the elapsed time. The faster peer never speeds up. In every test
+  below the margins stayed balanced, so the slow-down was never needed after the send / tick fixes: it is a guard,
+  untested under a real clock drift.
+- Automatic input delay: the host pings the guest 12 times over 'ctl' before the session (under ?netsim with the same
+  latency / jitter), D = clamp(ceil((median RTT / 2 + (p90 - median) / 2) / 20 ms) + 1, 2, 8); the panel has an
+  "automatic" checkbox (default on) next to the manual field; both panels show "input delay N ms (auto)".
+- Hidden / covered page: Chrome throttles a hidden page's timers to ~1-2 wake-ups per second even with WebRTC. While
+  hidden, a dedicated Worker posts a tick every 4 ms (net.js N.background). Also fixed: a covered window never got
+  the first animation frame that started the main loop, and a hidden-page pause set before the session stuck.
+- Desync report: per-page hashes (4 KB pages + one per thread stack) are kept for the last 16 hash points; after a
+  desync the peers swap the vector over 'ctl' and both log / show the first differing page with the symbols in it
+  (conker_netsyms.txt from `net_regions.py --syms`). It names the page, not the byte.
+
+**Results** (netpair.sh: 2-player Total War from power-on in two windows of one headless Chrome; speed = retraces per
+second / 50 from 20 s to the end; "waits" = retraces that had to wait for input; H and S compared every retrace):
+
+| netsim | D | Before (P338) | After (P339) | Retraces identical |
+|---|---|---|---|---|
+| none | 3 | 100 % | 100 %, 0 waits | 7442 |
+| 40+0..20 ms, 5 % loss both ways | 3 | 79.2 % | 99.6 % (~40 % of retraces wait 6.5 ms mean, absorbed by the backlog) | 8397 |
+| 80+0..40 / 20+0..10 ms, 15 % loss | 3 | 65.7 % | 87.5 % (RTT ~135 ms > the 120 ms a D 3 window allows) | 5199 |
+| none | auto -> 2 (ping 0.8 ms) | | 100 %, 0 waits | 4911 |
+| 15+0..5 ms, 1 % loss | auto -> 3 (ping 36 ms) | | 100 %, 0 waits | 4922 |
+| 40+0..20 ms, 5 % loss | auto -> 4 (ping 94 ms) | | 100 %, 19 / 2 waits | 4914 |
+| 80+0..40 / 20+0..10 ms, 15 % loss | auto -> 5 (ping 134 ms) | | 100 %, 5 / 10 waits | 4909 |
+| none, normal background throttling, guest page covered from load and minimised 41..71 s | auto -> 2 | game never started (guest stuck at retrace 0) | 100 %, 0 waits | 5467 |
+| guest flips one byte (var70059904, N64 800B0CF4) at retrace 3000 | auto | | both panels: "Desync at retrace 3000" + hashes; report: page 6048 = N64 800B0000..800B0FFF, 1 page, no stack | until 3000 |
+
+**Left for later phases:** a real two-machine internet test; byte-level desync location (finer hashes of the
+differing page, or a memory dump exchange); room codes / 3-4 players (phase 2); the node CI peer (§7 divergence 2).
+
