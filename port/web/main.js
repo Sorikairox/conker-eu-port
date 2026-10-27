@@ -45,10 +45,10 @@ function toggle(name, on) {
   const b = $('t-' + name), p = $('p-' + name);
   on = on === undefined ? p.hidden : on;
   p.hidden = !on; b.setAttribute('aria-pressed', String(on));
-  $('side').hidden = ['controls', 'saves', 'options', 'debug'].every((n) => $('p-' + n).hidden);
+  $('side').hidden = ['controls', 'saves', 'options', 'online', 'debug'].every((n) => $('p-' + n).hidden);
   if (name === 'debug') { store.set('debug', on); if (on) out.scrollTop = out.scrollHeight; }
 }
-for (const n of ['controls', 'saves', 'options', 'debug']) $('t-' + n).onclick = () => toggle(n);
+for (const n of ['controls', 'saves', 'options', 'online', 'debug']) $('t-' + n).onclick = () => toggle(n);
 if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', false))) toggle('debug', true);
 
 // ---------------------------------------------------------------- options (P324)
@@ -58,6 +58,8 @@ if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', fals
 // original game, except where the user asked otherwise.
 // Test aid: ?opt=KEY:1,KEY:0 overrides options for this page load (not saved).
 const OPTIONS = [
+  { key: 'online', label: 'Online multiplayer (experimental)', def: false,
+    help: 'Shows the Online button: two players on two computers play a multiplayer match together (copy-paste connection codes, no server).' },
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,
@@ -608,7 +610,12 @@ function applyPause() {
 function setPaused(p) { userPaused = p; applyPause(); }
 $('pause').onclick = () => setPaused(!userPaused);
 document.addEventListener('visibilitychange', () => {
-  if (Q.get('nohidepause') || netCfg) return;  // dev flag: keep running in a background tab; P338: never pause a session
+  if (netCfg && M && M._port_net_background) {   // P338: never pause a session; a hidden tab gets no animation frames, so the
+    M._port_net_background(document.hidden ? 1 : 0);   // main loop switches to a timer while hidden
+    log(`[net] tab ${document.hidden ? 'hidden: timer main loop' : 'visible: animation-frame main loop'}`);
+    return;
+  }
+  if (Q.get('nohidepause')) return;  // dev flag: keep running in a background tab
   hiddenPaused = document.hidden; applyPause();
   log(`[page] tab ${document.hidden ? 'hidden: paused' : 'visible: resumed'}`);
 });
@@ -725,6 +732,40 @@ async function netLoad() {
     };
   }
 }
+// ---- the Online panel (shown by the option "Online multiplayer")
+const showOnlineButton = (on) => { $('t-online').hidden = !on; if (!on && !$('p-online').hidden) toggle('online', false); };
+optionChanged.online = showOnlineButton;
+showOnlineButton(opt('online') || !!Q.get('netpanel'));
+const netStatus = (s, cls) => { $('net-status').textContent = s; $('net-status').className = cls || ''; };
+const copyCode = (id) => { const t = $(id); t.select(); (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject()).catch(() => document.execCommand('copy')); };
+const netGuard = async (fn) => { try { await fn(); } catch (e) { netStatus(String(e.message || e), 'bad'); log('[net] ' + e, 'fail'); } };
+$('net-host').onclick = () => netGuard(async () => {
+  $('net-step-host').hidden = false; $('net-step-join').hidden = true; $('net-host').disabled = $('net-join').disabled = true;
+  $('net-offer').value = await window.__online.host();
+});
+$('net-join').onclick = () => { $('net-step-join').hidden = false; $('net-step-host').hidden = true; $('net-host').disabled = $('net-join').disabled = true; };
+$('net-answer-make').onclick = () => netGuard(async () => { $('net-answer-make').disabled = true; $('net-answer').value = await window.__online.join($('net-offer-in').value); });
+$('net-accept').onclick = () => netGuard(async () => { await window.__online.accept($('net-answer-in').value); $('net-accept').disabled = true; });
+$('net-offer-copy').onclick = () => copyCode('net-offer');
+$('net-answer-copy').onclick = () => copyCode('net-answer');
+$('net-leave').onclick = () => { window.__online.leave(); $('net-leave').hidden = true; };
+netEvents.status.push((s, cls) => { netStatus(s, cls); if (s === 'connected') { $('net-step-host').hidden = $('net-step-join').hidden = true; $('net-leave').hidden = false; } });
+let netWaitSince = 0;
+netEvents.tick.push((t) => {   // ~100 Hz from net.js
+  const now = performance.now();
+  if (!t.waiting) netWaitSince = 0; else if (!netWaitSince) netWaitSince = now;
+  $('netwait').hidden = !(netWaitSince && now - netWaitSince > 400);
+  if (now - (netEvents.lastInfo || 0) > 500) {
+    netEvents.lastInfo = now;
+    $('net-info').textContent = `retrace ${t.frame} · ping ${t.rtt ? Math.round(t.rtt) + ' ms' : '–'} · stalls ${t.stalls} · input delay ${netCfg ? netCfg.delay * 20 : '–'} ms`;
+  }
+});
+netEvents.desync.push((d) => {
+  const e = $('net-desync'); e.hidden = false;
+  e.textContent = `Desync at retrace ${d.frame}: this game ${d.mine.map((x) => (x >>> 0).toString(16)).join(' ')}, the other ${d.theirs.map((x) => (x >>> 0).toString(16)).join(' ')}. ` +
+    'The two games no longer show the same thing; please report it (open Debug for the log).';
+});
+netEvents.left.push(() => { $('netwait').hidden = true; $('net-leave').hidden = true; });
 window.__online = {
   ready: () => !!romBytes && !running,
   async host() {

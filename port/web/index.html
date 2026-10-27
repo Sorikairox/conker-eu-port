@@ -81,6 +81,17 @@
   #options label:first-child { border-top: 0; }
   #options input { accent-color: var(--accent); margin-top: 3px; }
   #options small { display: block; color: var(--muted); font-size: 12px; }
+  /* P338: Online panel */
+  .netstep label { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; }
+  .netstep textarea { width: 100%; box-sizing: border-box; background: var(--panel2); color: var(--fg); border: 1px solid var(--line);
+    border-radius: 4px; font: 11px ui-monospace, monospace; word-break: break-all; }
+  #net-status { margin-top: 8px; font-size: 13px; }
+  #net-status.ok { color: var(--accent); } #net-status.bad { color: #ff7b72; }
+  #net-info { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  #net-desync { margin-top: 6px; padding: 6px 8px; border: 1px solid #ff7b72; border-radius: 4px; color: #ff7b72; font-size: 12px; }
+  #netwait { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); padding: 4px 10px; border-radius: 4px;
+    background: rgba(0,0,0,.7); color: #fff; font-size: 13px; pointer-events: none; }
+  #netwait[hidden] { display: none; }
   .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   #pads { font-size: 12px; color: var(--muted); margin-top: 6px; }
   #console { background: #0b0c0f; border-radius: 4px; padding: 8px 10px; margin: 8px 0 0; height: 360px; overflow: auto;
@@ -135,6 +146,7 @@
   <span id="status">no ROM loaded</span>
   <button id="t-controls" aria-pressed="false">Controls</button>
   <button id="t-saves" aria-pressed="false">Saves</button>
+  <button id="t-online" aria-pressed="false" hidden title="Play with a friend over the internet (experimental)">Online</button>
   <button id="t-options" aria-pressed="false">Options</button>
   <button id="t-debug" aria-pressed="false">Debug</button>
 </header>
@@ -156,6 +168,7 @@
         <rect x="7" y="3.8" width="9" height="5" fill="var(--accent)"/><rect x="6.5" y="13" width="11" height="7" rx="1" fill="#fff"/></svg>
       <div id="latches" hidden></div>
       <div id="soundhint" hidden>click or press a key to enable sound</div>
+      <div id="netwait" hidden>waiting for the other player…</div>
     </div>
     <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>
   </div>
@@ -177,6 +190,31 @@
       <h3>Options</h3>
       <div id="options"></div>
       <p class="hint" style="text-align:left">Saved in this browser. Off = the original N64 behaviour.</p>
+    </section>
+    <section class="panel" id="p-online" hidden>
+      <h3>Online (experimental)</h3>
+      <p class="hint" style="text-align:left">Two players on two computers, each with their own ROM, in Chrome. Player 1 hosts and drives the
+        menus; player 2 joins with Start on the "press START" page of a multiplayer mode. Connect before pressing Start (reload the page first if
+        the game already runs). The session uses player 1's options and save.</p>
+      <div class="row"><button id="net-host">Host (player 1)</button><button id="net-join">Join (player 2)</button></div>
+      <div id="net-step-host" class="netstep" hidden>
+        <label>1. Send this code to player 2 <button id="net-offer-copy">Copy</button></label>
+        <textarea id="net-offer" readonly rows="3" placeholder="making the code…"></textarea>
+        <label>2. Paste player 2's answer code here</label>
+        <textarea id="net-answer-in" rows="3"></textarea>
+        <div class="row"><button id="net-accept" class="primary">Connect</button></div>
+      </div>
+      <div id="net-step-join" class="netstep" hidden>
+        <label>1. Paste player 1's code here</label>
+        <textarea id="net-offer-in" rows="3"></textarea>
+        <div class="row"><button id="net-answer-make" class="primary">Make my answer code</button></div>
+        <label>2. Send this answer code back to player 1 <button id="net-answer-copy">Copy</button></label>
+        <textarea id="net-answer" readonly rows="3"></textarea>
+      </div>
+      <div id="net-status">not connected</div>
+      <div id="net-info"></div>
+      <div id="net-desync" hidden></div>
+      <div class="row"><button id="net-leave" hidden>Leave the session</button></div>
     </section>
     <section class="panel" id="p-debug" hidden>
       <h3>Debug <span class="spacer"></span><button id="demo">Scheduler demo</button><button id="threads" disabled>Dump threads</button></h3>

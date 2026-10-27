@@ -119,6 +119,12 @@ EMSCRIPTEN_KEEPALIVE uintptr_t port_net_addr(int which) {
     }
 }
 EMSCRIPTEN_KEEPALIVE unsigned port_net_frame(void) { return port_frame_count; }   /* the last retrace run */
+/* a hidden tab gets no requestAnimationFrame: the page switches the main loop to a 10 ms timer while hidden, so the
+ * session does not stall for the other player (browsers may still slow timers in background tabs) */
+EMSCRIPTEN_KEEPALIVE void port_net_background(int hidden) {
+    if (hidden) emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 10);
+    else emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
+}
 /* the page's loopback peer and tests: the ?padf script's packed input of a channel at a frame */
 EMSCRIPTEN_KEEPALIVE uint32_t port_net_script_input(int ch, unsigned frame) {
     int b, x, y;

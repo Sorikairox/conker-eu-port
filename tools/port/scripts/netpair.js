@@ -2,6 +2,7 @@
 // WebRTC on this machine through the page's own Online code (window.__online in main.js: host / join / accept, the
 // same calls as the Online panel buttons; the copy-paste codes are passed by this driver).
 //   node tools/port/scripts/netpair.js URL_HOST URL_GUEST SECS OUTDIR
+//   env UI=1: exchange the codes through the Online panel's buttons and text boxes; SHOTS="S1 S2": screenshots (s)
 // Logs: OUTDIR/host.log, OUTDIR/guest.log (the page console). Prints a summary of the [net] lines.
 const { spawn } = require('child_process');
 const fs = require('fs'), os = require('os'), path = require('path');
@@ -10,7 +11,7 @@ const CH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'netpair-'));
 const port = 9300 + (process.pid % 500);
 const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debugging-port=${port}`, '--use-angle=metal',
-  '--mute-audio', '--autoplay-policy=no-user-gesture-required', '--window-size=900,800',
+  '--mute-audio', '--autoplay-policy=no-user-gesture-required', '--window-size=1500,900',
   '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
   'about:blank'], { stdio: 'ignore' });
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
@@ -42,7 +43,7 @@ async function connect(wsUrl, logFile) {
   const pages = {};
   for (const [name, url] of [['host', urlHost], ['guest', urlGuest]]) {
     fs.writeFileSync(path.join(out, name + '.log'), '');
-    const t = await br.call('Target.createTarget', { url: 'about:blank', newWindow: true });
+    const t = await br.call('Target.createTarget', { url: 'about:blank', newWindow: true, width: 1500, height: 900 });
     const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
     const pg = list.find((x) => x.id === t.result.targetId);
     pages[name] = await connect(pg.webSocketDebuggerUrl, path.join(out, name + '.log'));
@@ -53,15 +54,32 @@ async function connect(wsUrl, logFile) {
   const ready = async (p) => { for (let i = 0; i < 100; i++) { if (await p.ev('!!(window.__online && window.__online.ready())').catch(() => false)) return true; await sleep(300); } return false; };
   if (!(await ready(host)) || !(await ready(guest))) { console.log('netpair: pages not ready (ROM / net.js)'); return done(2); }
   const t0 = Date.now();
-  const offer = await host.ev('__online.host()');
-  const answer = await guest.ev(`__online.join(${JSON.stringify(offer)})`);
-  await host.ev(`__online.accept(${JSON.stringify(answer)})`);
+  let offer, answer;
+  const waitVal = async (p, id) => { for (let i = 0; i < 100; i++) { const v = await p.ev(`document.getElementById('${id}').value`); if (v) return v; await sleep(200); } throw new Error('no code in #' + id); };
+  if (process.env.UI) {   // through the Online panel: click the buttons, copy the textareas
+    for (const p of [host, guest]) await p.ev("document.getElementById('t-online').click()");
+    await host.ev("document.getElementById('net-host').click()");
+    offer = await waitVal(host, 'net-offer');
+    await guest.ev(`document.getElementById('net-join').click(); document.getElementById('net-offer-in').value = ${JSON.stringify(offer)}; document.getElementById('net-answer-make').click()`);
+    answer = await waitVal(guest, 'net-answer');
+    await host.ev(`document.getElementById('net-answer-in').value = ${JSON.stringify(answer)}; document.getElementById('net-accept').click()`);
+  } else {
+    offer = await host.ev('__online.host()');
+    answer = await guest.ev(`__online.join(${JSON.stringify(offer)})`);
+    await host.ev(`__online.accept(${JSON.stringify(answer)})`);
+  }
   console.log(`netpair: offer ${offer.length} chars, answer ${answer.length} chars, codes exchanged in ${Date.now() - t0} ms`);
   const t1 = Date.now();
   while (Date.now() - t1 < +secs * 1000) {
     await sleep(10000);
     const s = await Promise.all([host.ev('__online.stats()'), guest.ev('__online.stats()')]).catch((e) => [String(e), '']);
     console.log(`netpair ${Math.round((Date.now() - t1) / 1000)} s: host ${JSON.stringify(s[0])}  guest ${JSON.stringify(s[1])}`);
+    for (const t of (process.env.SHOTS || '').split(' ').filter(Boolean))   // SHOTS="60 120": screenshots of both windows
+      if (Math.abs((Date.now() - t1) / 1000 - +t) < 5) for (const [n, p] of [['host', host], ['guest', guest]]) {
+        await p.ev("document.getElementById('p-online').scrollIntoView()").catch(() => {});
+        const r = await p.call('Page.captureScreenshot', { format: 'png' });
+        if (r.result) fs.writeFileSync(path.join(out, `${n}_${t}s.png`), Buffer.from(r.result.data, 'base64'));
+      }
   }
   // optional: GUEST_LEAVE=1 closes the guest at the end and lets the host run on alone for 15 s
   if (process.env.GUEST_LEAVE) {
