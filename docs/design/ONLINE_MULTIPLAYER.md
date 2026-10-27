@@ -313,8 +313,10 @@ in H for all 8114 retraces. No desync was ever reported.
 1. Speed under latency: with one-way latency near D x 20 ms the game slows (79 % at 40 to 60 ms, D 3). Causes: no time
    sync (after a stall the backlog is clamped, so the stalled peer stays behind and the other one waits next), inputs
    leave on a 10 ms pump instead of right after the tick, and retraces only run on animation frames. D 5 removes the
-   stalls at the cost of 100 ms input lag. Part 2: frame-advantage time sync (design §4), send after every tick,
-   then maybe an automatic D from the measured ping.
+   stalls at the cost of 100 ms input lag. Tried and reverted: keeping 6 periods of backlog online so a peer catches up
+   after a stall: worse (73 % speed in the same netsim; the bursts use up the D margin). Part 2: frame-advantage time
+   sync (design §4: the peer that is ahead slows its period by about 1 %), send after every tick, then maybe an
+   automatic D from the measured ping.
 2. Not tested: two real machines over the internet (NAT / STUN path), a hidden tab during a session
    (`port_net_background`), a Firefox / Safari peer (cross-engine floats; this session used Chrome only, as briefed), a
    real desync report (none happened; the per-block hash exchange of §4 is not built).

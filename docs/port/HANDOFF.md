@@ -41,8 +41,11 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
-- Online multiplayer: phase 0 done (P337, docs/design/ONLINE_MULTIPLAYER.md §7); next is phase 1 (pc_net ring +
-  barrier, net.js WebRTC, copy-paste signaling). Node vs Chrome audio-arena divergence (§7 item 2) still open.
+- Online multiplayer: phase 1 part 1 done (P338, docs/design/ONLINE_MULTIPLAYER.md §8): 2-player lockstep over WebRTC
+  with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), tests netpair.sh. Part 2: time sync
+  (frame-advantage nudging) so links near the input delay do not slow the game, send right after each tick, a real
+  two-machine test (and a Firefox/Safari peer if the user enables one), hidden-tab timer loop test, per-block hash
+  exchange on desync, then phase 2 (room codes, 3-4 players). Node vs Chrome audio-arena divergence (§7 item 2) open.
 - Globals not renamed: 562 D_ symbols only declared in conker/include/variables.h (no C use), D_ names that appear
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
@@ -64,6 +67,27 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P338 (port-web, 2026-10-27): online multiplayer phase 1 part 1 (2-player online MVP)
+- 20c14399 game side: pc_net.c §4 input ring (256 x 4, frame tags; pc_net.o is outside the hash), port_net_session
+  (mask, local, D, K) before callMain (forces det, presence mask), local input for N + D sampled at retrace N (page
+  local pad, or ?padf with ?netscript=1), pc_pif controller read from the ring, pc_sched frame() barrier
+  (port_net_ready), port_net_drop, hash ring every 10 retraces. net.js ring access + ?netloop loopback peer
+  (&netlat/&netloss). main.js netCfg (host options / EEPROM image, sandboxed saves, no hidden-tab pause).
+  net_regions.py: p205_obj go_n / p240_steer.cfg excluded; conker_netx.txt has its own make rule; deploy ships
+  net.js + conker_netx.txt. 4-pad loopback (30 ms, 5 % loss) = offline ?padf run in H for 8114 retraces.
+- 156d900b net.js WebRTC: negotiated 'ctl' (reliable) + 'in' (unordered, 0 retransmits), public STUN only,
+  copy-paste codes CK1.+base64url(deflate-raw SDP) ~770 chars, hello (build id = SHA-256 of conker.wasm, ROM SHA-256),
+  host config, input packets repeating unacked inputs + ack + newest hash, ping, desync event, lost peer -> neutral.
+  ?netsim=lat,jit,loss. window.__online API. tools/port/scripts/netpair.sh/.js (two windows, one headless Chrome).
+  pc_sched frame() locals renamed (were mode/last/acc/per/now/dt/n).
+- 88c794a3 Online panel (option "Online multiplayer (experimental)", default off; ?netpanel=1 test aid): Host / Join,
+  codes + Copy, status, retrace / ping / stalls, "waiting for the other player…" overlay, desync box, Leave;
+  port_net_background (timer loop while the tab is hidden; untested).
+- 42b4cdd6 tests + input delay field: host vs guest identical (H and S) 9937 retraces (no netsim), 8448 (via panel
+  buttons), 6801 until the guest left (40 ms + 0..20 jitter + 5 % loss, D 3: ~79 % speed, host went on alone),
+  8432 with D 5 (~99 % speed), 3867 with asymmetric 80/20 ms + 15 % loss (~64 %); online host = offline 2-pad ?padf
+  run in H. No desync anywhere. Tried + reverted: 6-period backlog catch-up online (worse, 73 %).
+- Every commit: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps; deployed. Part 2 list: design §8 + Open items.
 ### P337 (port-web, 2026-10-27): online multiplayer phase 0 (determinism harness + measurements)
 - 73d4e325 `?netdet=1` forced online determinism (port/ultra/pc_net.c: det=2, flag whitelist, page writes no pads,
   default options once, blank sandboxed EEPROM) + `?padf1..3` / `?padmask` (pc_pif.c, the 4 channels share one table).
