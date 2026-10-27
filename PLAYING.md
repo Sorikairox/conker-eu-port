@@ -170,9 +170,10 @@ When the codes do not connect ("Could not connect: the two networks do not allow
 - **Test routes:** on the latest build the automated level 0x29 test route falls at one of the gaps before the lever, so the lever / Frying Pan part was not re-checked. It worked in testing on earlier builds. Playing it by hand should work.
 - **Newly converted code:** the last functions were converted just now and have only had a short browser test (intro, Race A). Parts of the game that weren't tested may draw or behave wrongly; please report them.
 - **Speed:** heavy scenes may run slower than full speed.
-- **Multiplayer weapons (Deathmatch / Total War):** walking over a floating weapon makes it disappear (the game's own
-  pickup code runs and plays its sound), but no weapon is given, so B / R / Z have nothing to draw or fire. Under
-  investigation (P340: the pickup code matches the original; what normally hands over the weapon is not found yet).
+- **Multiplayer weapons (Deathmatch / Total War):** fixed in P341 (a port bug in how some function calls passed small
+  numbers). Walking over a floating weapon now gives it to you: its icon appears top right, B takes it out, Z fires.
+  Tested offline through the Multi menu in Bunker; not yet confirmed in a real online Bunker game, so please report if
+  it still fails online.
 
 ## Reporting what you find
 

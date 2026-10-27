@@ -46,8 +46,9 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
-- MP weapons are never given (P340): floating pickups vanish, item / pad kinds stay 0 for every player in Deathmatch
-  (Bunker 0x34) and Total War. Probe ?p340, findings in the P340 entry.
+- MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls). Open: online 2-player Bunker proof (the
+  netmp route does not get pad 2 into Deathmatch; see P341), and event_query_world_object case 34 arg 0 reads +0x7C as
+  s32 where the asm reads it as f32 (lwc1 + trunc.w.s; game_eu_CC5F0.c), not fixed / not difftested.
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
   WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync + send at sampling
   + 4 ms session loop (99.6 % speed at 40+0..20 ms 5 % loss D 3), automatic input delay from the ping, hidden / covered
@@ -75,6 +76,37 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P341 (port-web, 2026-10-28): MP weapon pickups fixed (root cause in the port's signature tool)
+- Who gives the weapon: event_action_rail command 11 = rail_weapons_update (game_eu_B7840.c), run every game frame by
+  the MP level script. Pass 2 finds each pickup slot's world object with world_record_find((u8) +0xEF0[i]) (0x3001..
+  0x3010 -> ids 1..16), counts its respawn / hide timers and, when pickup_update wrote the taker (+0x80 = player + 1),
+  links the slot to that player (+0xEB0[r]); pass 1 then arms the player: context_action_lock -> pad kind = weapon |
+  0x80 (Bunker slots: 0x24 0x23 0x16 0x22 0x16 0x15 0x39 0x18 0x14 9 9 0x21 0x23 0x37 0x8AE 0x8AE; 0x8AE = +3 grenades),
+  B draws it (player_item_action -> player_try_begin_action), obj_setup_run gives the model while drawn. P340's ROM
+  scans missed it because the records are reached through world_record_find, not g_world_objs (whose EU address is
+  0x800DC324; the `was D_800DBEF4` comment is the US name).
+- Bug: game_eu_B7840.c declares world_record_find(s32), the definition takes u8. port/tools/sigs.py rewrote the call to
+  the canonical i8 but dropped the definition's zeroext; wasm leaves the extension to the caller and LLVM folded the
+  (u8) cast away, so the callee compared 0x300B with the id byte: never found, timers frozen at 1, taker never read.
+- bb60d4ed fix: sigdb entries keep ret / param zeroext / signext of narrow ints, rewritten calls + declares carry them,
+  extension-only mismatches are rewritten (1 site), narrow zeroext results widen with zext; 770 rewritten call sites
+  now extend narrow args (sprite2d_spawn 43, collision_floor_probe 33, mdl_particle_spawn 30, text_printf_at 23,
+  obj_send_hit 18, sound_pick_variant 18, world_record_find 7, ...), so other subtle bugs may be gone too.
+  vbe_build.py re-runs phase 2 when sigs.py changes (before, a sigs.py edit kept the old sigdb.json).
+- Proof (offline, real Multi menu route, port_work/p340/dm_pads2.sh + run.sh, ?p340 + teleport): pickup 22 taken at
+  6209, taker cleared by the slot code, pad kind 0x89 from 6249; B at 6400 -> item kind 9, phase 2, two guns in hand
+  (port_work/p340/p341i/s_130000ms.png, s_134000ms.png). Z firing not separately measured (shots counter added to the
+  ?p340 log afterwards). Before the fix: same route, pad kind stays 0.
+- 7e6194f0 test aid: ?p340 logs the rail weapon slots ([p341]) and shots; ?p341b=F begin-action conditions.
+- Checks: check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps; netpair (Total War, 180 s) IDENTICAL 8941 retraces,
+  100 % speed (no pickup taken in its random play, port_work/p340/p341pair).
+- NOT done (user asked for it): online 2-player Bunker proof. The netmp route only gets pad 1 into Deathmatch: on the
+  skull page pad 2's Start (5751 / 5800) or A (5800 / 5870) never joins (shots port_work/p340/p341m), the game is
+  single-view and the 2nd player (type 0x75) is CPU-like. Next: find how pad 2 joins Deathmatch (menu page shots
+  ~113..119 s wall = retraces ~5650..5900), add a Bunker option to netmp_pads.py / netpair.sh (an env to override
+  PADF0/PADF1), walk to a pickup by pad script (no probes under ?netdet; in the 1-human run the 2nd player spawns on
+  pickup 21 and takes it at 6229), then B / Z with screenshots. Also worth a look with the P342 debug build:
+  break in rail_weapons_update (game_eu_B7840.c, pass 2 `pick = world_record_find(...)`).
 ### P342 (port-web, 2026-10-27): source-level debugging (DWARF debug build + CLion compile_commands.json)
 - `tools/port/scripts/debug_build.sh` [build|serve|stop|cc]: rsyncs conker/ + port/ into port/build-dbg/tree and runs
   the normal `make -C port game web` there with `PORT_DBG_CFLAGS` (`-g` + `-fdebug-prefix-map` from the container path
