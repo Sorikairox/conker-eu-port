@@ -345,6 +345,13 @@ int port_volume_scale(int id, int v) {
     return (int)((long long)v * pct / 100);
 }
 
+/* P333 option "Inverted swimming": the stick y the swim code steers by. The N64 pitches Conker down (dives) on stick
+ * up and up on stick down, like a plane; with the option the sign flips (-128 -> 127), so up rises and down dives. */
+int port_swim_stick_y(int y) {
+    if (!port_options[PORT_OPT_SWIM_INVERT]) return y;
+    return y == -128 ? 127 : -y;
+}
+
 /* P321: hold-to-skip for cutscenes (user request; the game side is cutscene_can_skip under PORT). The game calls
  * port_skip_hold() every frame a cutscene may be skipped; it answers 1 once L was held for 3 s of
  * retraces (150 PAL / 180 NTSC) without a break. Counting retraces, not reading the clock, keeps ?det runs

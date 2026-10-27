@@ -613,7 +613,10 @@ f32 swim_water_physics(struct127 *p, f32 dt) {
     SWIM_U8(p, 0x110) = 0;
     if (p->stunned == 0 && p->health != 0 && SWIM_ST(p)[0x198] == 0) {
         turn = ((s8 *) g_cur_pad)[2];
-        dive = ((s8 *) g_cur_pad)[3];
+        dive = ((s8 *) g_cur_pad)[3]; /* stick up (> 0): target pitch dive * 2.25 > 0 = nose down, Conker dives */
+#ifdef PORT
+        dive = port_swim_stick_y(dive); /* P333 option "Inverted swimming": up rises, down dives */
+#endif
     } else {
         turn = 0;
     }

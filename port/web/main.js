@@ -72,6 +72,8 @@ const OPTIONS = [
     help: 'Conker is always drawn with his most detailed model. Off: as on the N64, he switches to simpler models once the camera is more than 500 units away (the normal follow camera is often 450 to 650 units behind him, more while running).' },
   { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
+  { key: 'swiminvert', label: 'Inverted swimming', def: false, game: 12,
+    help: 'Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. Off: as on the N64, which steers like a plane: up dives, down rises.' },
   // P332: sliders (range: true): the value 0..100 (%) goes to the game through the same port_set_option channel.
   { key: 'volmusic', label: 'Music volume', def: 100, range: true, game: 9,
     help: 'Volume of the music (the sequenced songs), 0 to 100 %. 100 % = as on the N64.' },

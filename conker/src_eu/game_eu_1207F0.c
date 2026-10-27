@@ -304,16 +304,17 @@ extern f32 g_swim_anim_speed_slope; /* was D_800A1D50 */
 extern f32 g_swim_anim_speed_base; /* was D_800A1D54 */
 
 /* was func_150F3A20 */
-f32 player_swim_anim_speed(s32 arg0, f32 arg1) {
-    f32 var_f2;
+f32 player_swim_anim_speed(s32 self_unused /* was arg0 */, f32 pitch_stick /* was arg1 */) {
+    f32 anim_speed; /* was var_f2 */
 
-    if (arg1 < -5.0f) {
-        var_f2 = (arg1 * g_swim_anim_speed_slope) + g_swim_anim_speed_base;
+    if (pitch_stick < -5.0f) {
+        anim_speed = (pitch_stick * g_swim_anim_speed_slope) + g_swim_anim_speed_base;
     } else {
-        var_f2 = 0.75f;
+        anim_speed = 0.75f;
     }
-    return var_f2;
+    return anim_speed;
 }
+
 
 extern u16 g_pad_pressed[]; /* was D_800BEB30 */
 extern u8 *g_cur_pad; /* controller: +0 buttons (u16), +2 stick x, +3 stick y (s8); was D_800CC6A4 */
@@ -325,6 +326,14 @@ u8 obj_turn_towards(struct127 *arg0, u8 arg1, u16 arg2);
 f32 obj_approach_speed(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
 void obj_state_common_update(struct127 *);
 void objev_spawn_helper_object(void);
+
+#ifdef PORT
+/* P333 option "Inverted swimming" (PORT_OPT_SWIM_INVERT): stick y as the swim code sees it, sign flipped with the
+ * option (port_swim_stick_y, pc_os.c). The N64 dives on stick up (> 0) and rises on stick down, like a plane. */
+#define SWIM_STICK_Y() port_swim_stick_y(((s8 *) g_cur_pad)[3])
+#else
+#define SWIM_STICK_Y() (((s8 *) g_cur_pad)[3])
+#endif
 
 // player_swim_update: player interaction state 0x15 handler (entry 21 of g_obj_interaction_state_fns, called as `(obj)` by
 // objects_run_state_handlers / cutscene_event_dispatch). Reads the controller (g_cur_pad, cleared when the g_hud_lens_state / g_hud_lens_zoom gate
@@ -433,7 +442,7 @@ void player_swim_update(struct127 *self) {
     if (60.0f < speed) {
         speed = 60.0f;
     }
-    stick = ((s8 *) g_cur_pad)[3] * 1.25f;
+    stick = SWIM_STICK_Y() * 1.25f; /* stick up (> 0) = pitch down / dive: gravity = stick * ..., y_velocity -= gravity */
     btn = *(u16 *) g_cur_pad & 0x10;
     if (btn) {
         stick = 0.0f;
@@ -538,7 +547,7 @@ void player_swim_update(struct127 *self) {
     if (*(u16 *) g_cur_pad & 0x10) {
         self->y_velocity = 0.0f;
         self->gravity = 0.0f;
-        self->unkB8 += ((f32) ((s8 *) g_cur_pad)[3] - self->unkB8) * 0.2f;
+        self->unkB8 += ((f32) SWIM_STICK_Y() - self->unkB8) * 0.2f; /* R held: stick y only tilts Conker */
     } else {
         self->unkB8 = (self->y_velocity - 0.0f) * -2.0f;
         if (40.0f < self->unkB8) {

@@ -43,6 +43,21 @@ void p326_probe(void) {
         }
     }
     w = vbe_ld8(r + 0xAD);
+    {   /* P333 TEST ?p326nofloat=1 (changes the game): while Conker is in water, clears the "float water" flags of the
+         * state block (+0x20 bit 0, +0x21) so the 0x29 river can be dived in. ?p333=1: every 20 retraces in water, logs
+         * the swim state (interaction_state +0, entry flag +0x102), y, y_velocity, gravity and body pitch +0xB8. */
+        static int nofloat = -1, swimlog = -1;
+        static unsigned last333;
+        unsigned char *st = (unsigned char *)(uintptr_t) * (const unsigned *)(r + 0x31C);
+        if (nofloat < 0) nofloat = port_flag("p326nofloat");
+        if (swimlog < 0) swimlog = port_flag("p333");
+        if (nofloat > 0 && w && st) { vbe_st8(st + 0x20, vbe_ld8(st + 0x20) & ~1u); vbe_st8(st + 0x21, 0); }
+        if (swimlog > 0 && w && port_frame_count - last333 >= 20) {
+            last333 = port_frame_count;
+            port_log("[p333] frame %u state %d e102 %d y %.1f vy %.2f grav %.3f pitch %.1f surf %.1f\n", port_frame_count,
+                     *(const int *)r, vbe_ld8(r + 0x102), F(r, 0x18), F(r, 0x20), F(r, 0x24), F(r, 0xB8), F(r, 0x118));
+        }
+    }
     h = vbe_ld8(r + 0x1CA);
     air = vbe_ld16(r + 0xB2);
     {

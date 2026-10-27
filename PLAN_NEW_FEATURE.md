@@ -20,7 +20,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 8 | Conker always full detail (LOD) | Done P331 |
 | 9 | Separate music / SFX / speech volume | Done P332 |
 | 10 | Underwater air meter | Done P332 |
-| 11 | Inverted swimming | To do |
+| 11 | Inverted swimming | Done P333 |
 | 12 | Rumble (browser gamepad) | To do |
 | 13 | Aiming crosshair | To do |
 | 14 | Language selector (EN/FR/DE in the EU ROM) | To do |
