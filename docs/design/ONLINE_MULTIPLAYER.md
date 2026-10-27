@@ -1,6 +1,6 @@
 # Online multiplayer for the Conker EU web port: design (P336)
 
-Status: design accepted (user decisions in §6); Phase 0 (determinism harness, measurements) done in P337, results in §7; Phase 1 part 1 (2-player online MVP: lockstep netcode, WebRTC with copy-paste codes, Online panel, two-peer tests) done in P338, results in §8. Diagram: `online_multiplayer_architecture.svg` (same folder).
+Status: design accepted (user decisions in §6); Phase 0 (determinism harness, measurements) done in P337, results in §7; Phase 1 part 1 (2-player online MVP: lockstep netcode, WebRTC with copy-paste codes, Online panel, two-peer tests) done in P338, results in §8; P339 part 2 in §9; phase 2a (3 to 4 players: mesh, host relay, star signaling) done in P344, results in §10. Diagram: `online_multiplayer_architecture.svg` (same folder).
 Evidence comes from branch port-web at the P334 head (2026-10-27). Citations are file:line or function names.
 
 ## TL;DR (recommendation)
@@ -10,8 +10,10 @@ Evidence comes from branch port-web at the P334 head (2026-10-27). Citations are
 - **Rollback (GGPO-style) is not in the MVP.** It is feasible in principle: the whole machine is wasm linear memory, roughly 10 to 12 MB of real game state per snapshot. But the renderer and audio run inside the retrace, and resimulation cost has not been measured. It is a Phase 4 option, gated on Phase 0 measurements. **Host video streaming is ruled out:** guests would play without a ROM, it adds 100 ms or more of latency, and it needs megabits of upload per guest.
 - **Session start:** every peer reboots into an "online" boot. The host dictates the build id, ROM SHA-256 (the hash only), options, the EEPROM image (2 KB of user save data, not ROM data) and the controller presence mask. From retrace 0, all peers run in lockstep. Player 1 drives the title and MP menus as on the N64, and the other players join at character select.
 - **Optional and off by default**, per the feature rule. The feature lives in an "Online" panel. Without it, the page and the game behave exactly as today.
-- **Status (P339):** phase 1 (2-player online, Chrome) is done: lockstep with time sync and automatic input delay,
-  copy-paste codes, hidden-tab safe, desync report (§8, §9). Next: a real two-machine test, then phase 2.
+- **Status (P344):** phase 1 (2-player online, Chrome) is done: lockstep with time sync and automatic input delay,
+  copy-paste codes, hidden-tab safe, desync report (§8, §9). Phase 2a (P344, §10): 2 to 4 players, full mesh with a
+  host relay for pairs that cannot connect, copy-paste through the host (star), lost players stand still. Next: room
+  codes (phase 2b), a real multi-machine internet test.
 - **Effort:** MVP for 2 players with copy-paste signaling is about 5 to 6 sessions (Phase 0 + 1). Room codes, 4 players and robustness add 2 to 3 more. The "my view only" crop adds 1 to 2. Rollback would be 4 to 6 more.
 
 ---
@@ -372,3 +374,65 @@ second / 50 from 20 s to the end; "waits" = retraces that had to wait for input;
 **Left for later phases:** a real two-machine internet test; byte-level desync location (finer hashes of the
 differing page, or a memory dump exchange); room codes / 3-4 players (phase 2); the node CI peer (§7 divergence 2).
 
+
+## 10. Phase 2a results: 3 to 4 players (P344, 2026-10-28)
+
+**What changed** (commits dd7c6c05, d70a52c1, d223e7e2, 00a3f949, 37283179; conker.wasm unchanged, the game side
+`pc_net.c` was 4-channel since P338: ring 256 x 4, barrier over the presence mask, per-channel `port_net_drop`):
+- **Slots.** The host is player 1 (channel 0). Each offer it makes names one guest slot (players 2..4) and the answer
+  carries it back; the presence mask is the set of joined slots when the host presses Start (gaps allowed).
+- **Signaling interface.** `N.signal` = `offer(ch)` (host) / `answer(offerPayload)` (guest) / `accept(answerPayload)`
+  (host) on plain payloads `{t: 'o'|'a', ch, sdp}`. The copy-paste codes (`CK1.` deflate + base64url, ~780 / ~660
+  characters) only wrap those payloads (`N.host`, `N.invite`, `N.join`, `N.accept`). A room-code signaler (phase 2b)
+  carries the same payloads through a server and calls the same three functions; nothing else depends on it.
+- **Star for the rest.** After a guest's link to the host is open, everything goes over the host's reliable 'ctl'
+  channels: hello (build id + ROM SHA-256 checked by the host for every guest), `N.start` -> `mesh` {roster}; each guest
+  offers to every higher-numbered guest and the host forwards offers / answers (`fwd`); each guest waits up to 8 s for
+  its direct links, pings every other guest (12 round trips, direct or relayed) and reports `meshdone` {links, pings};
+  the host pings every guest, picks D from the slowest pair, sends each guest its `config` (channel, mask, roster,
+  routes, D, options, EEPROM). The user only exchanges codes with the host.
+- **Mesh + host relay.** One RTCPeerConnection per pair. Input packets are made per receiver (ack, first frame and
+  the time-sync margin differ) and go directly, or, for a guest pair without a direct link, as `u8 4 | u8 receiver |
+  packet` to the host, which passes the inner packet on. Routing is per packet (direct when that link's 'in' channel
+  is open), so a mesh link that dies later falls back to the relay by itself. Pings carry the sender channel.
+- **Time sync, N players.** Each packet carries the sender's margin of the receiver's input; a peer slows down by half
+  the largest (theirs - mine) over all players (P339 rule per pair). Hashes are compared with every player; the
+  desync report (page vectors) is exchanged per pair and names the other player.
+- **Lost player, N players (decision 6).** The coordinator = the lowest channel among the players that are not lost
+  or silent (the host while it is there). It asks every remaining player for the lost player's inputs it holds
+  (`lost` -> `held` {first, top, inputs}, 2.5 s timeout), takes F = 1 + the newest frame anyone holds, and sends
+  `drop` {neutralFrom: F, inputs up to F - 1}; every remaining player fills the same inputs and calls
+  `port_net_drop(ch, F)`. A host loses a guest when its link closes or is silent for 5 s; a guest-guest link closing
+  is not a loss (relay). If the host leaves, player 2 coordinates (over the mesh; relayed pairs then break).
+- **Panel.** Host / Join (players 2 to 4); the host gets one box per invited player (code, answer, Connect, state:
+  invited / connecting / joined · ping / left / could not connect, "through player 1 with player N"), "Invite another
+  player", "Start the game (N players)" (hidden once started); in a session every panel shows "you are player N", each
+  other player's ping (relayed pairs marked), and the overlay names the players the game waits for.
+- **Tests.** `tools/port/scripts/netgroup.js` (was netpair.js) runs 2 to 4 windows in one headless Chrome;
+  `netpair.sh` gained `PLAYERS`, `NETSIM_GUEST3/4`, `NETFAIL=A-B` (`?netfailto`: ICE candidates removed from both SDPs
+  of that pair, so it must relay), `LEAVE=NAME`; `netmp_bunker.sh` joins pads 3 and 4 (Start at 5320 / 5340) and has
+  `NET_BUNKER_PLAY=SECS` (all pads play from retrace 6100).
+
+**Results** (real MULTI menu route into Bunker Deathmatch, gameplay from retrace 5947; H and S compared every retrace,
+host vs every guest; speed = retraces / s / 50 from 20 s to the end; logs and screenshots in port_work/p344, not
+committed):
+
+| Run | Players / netsim / relay | D (auto) | Speed | Retraces identical | Notes |
+|---|---|---|---|---|---|
+| b3a | 3, none | 2 | 100 % | 7928 | 3-way split screen, guest3_150s.png |
+| b3relay | 3, P2 40+0..20 ms 5 %, P3 20+0..10 2 %, P2-P3 relayed | 4 (82 ms) | 100 % | 9941 / 10687 | P2 leaves at the end: host + P3 drop it from 9941, stay identical |
+| b4relay | 4, P2 30+0..10 3 %, P4 20+0..10 2 %, P3-P4 relayed | 3 (65 ms) | 100 % | 9907 | host relayed 39722 packets; guest4_190s.png 4-way split |
+| b4ui | 4 through the panel buttons, netsim on all four, P3-P4 relayed | 3 (68 ms) | 99.6 % | 13173 (7200 in Bunker) | P4 leaves: everyone drops it from 12426; host_240s.png panel with slots / relay |
+| b4final (final code) | 4, netsim on all four, P2-P4 relayed | 3 (69 ms) | 98.9 % | 8812 | ~5 s of waits over 160 s (relayed pair 68 ms RTT at D 3) |
+| quick4 (final code) | 4, none | 2 | 100 % | 1864 | start (mesh + pings) 1.05 s |
+| hostleave4 | 4, P2 20+0..10 3 %, P4 30+0..10 2 % | 3 | 99.9 % | 3893, then guests 4640 | host leaves: P2 coordinates, P2..P4 drop P1 from 3894, identical among themselves |
+| ui3leave | 3 through the panel, host 15+0..5 1 % | 2 | 100 % | 5241 | P3 leaves (found the drop-frame bug fixed in d223e7e2) |
+| pair2ui (regression) | 2 through the panel, 40+0..20 5 % both | 4 | 100 % | 8428 | Total War |
+| bunker2demo (regression) | 2, NET_BUNKER_DEMO=1 | 2 | 100 % | 7458 | player 2 has the weapon, guest_140s.png |
+
+No desync in any run, no trap; hold-L 5789 / 0x29 at 5795; check.sh GREEN.
+
+**Left:** room codes (phase 2b: a signaler on Netlify Functions + Blobs carrying the same payloads); a real
+multi-machine internet test (all runs above are one machine, `?netsim` latency); when the host leaves, relayed guest
+pairs lose each other (they are then dropped after 5 s); the leaver's own game diverges from the frame it did not send
+(expected, it is out of the session); a late joiner / reconnect is not possible (design §6, fast-forward).

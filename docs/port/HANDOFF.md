@@ -50,11 +50,12 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   (netmp_bunker.sh). event_query_world_object fixed in P343 (it was converted with
   six mistakes, see P343).
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
-  WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync + send at sampling
-  + 4 ms session loop (99.6 % speed at 40+0..20 ms 5 % loss D 3), automatic input delay from the ping, hidden / covered
-  page ticks from a Worker, desync report naming the first different 4 KB page + symbols. Tests: netpair.sh (NETSIM_*,
-  NETD=auto, HIDE, REALBG, DESYNC_AT/OFF, UI). Next: a real two-machine internet test, then phase 2 (room codes, 3-4
-  players).
+  WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync, automatic input
+  delay, hidden page ticks from a Worker, desync report. Phase 2a done (P344, §10): 2 to 4 players, full mesh with a
+  host relay for guest pairs that cannot connect, copy-paste only with the host (star signaling for the mesh), the
+  signaler is an interface (N.signal payloads) ready for room codes, lost players stand still for N players (also the
+  host). Tests: netpair.sh (PLAYERS=2..4, NETFAIL=A-B, NETSIM_*, LEAVE, UI, PADS=netmp_bunker.sh NET_BUNKER_PLAY /
+  NET_BUNKER_DEMO). Next: phase 2b room codes (Netlify Function + Blobs signaler), a real multi-machine internet test.
 - Globals not renamed: 562 D_ symbols only declared in conker/include/variables.h (no C use), D_ names that appear
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
@@ -76,6 +77,29 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P344 (port-web, 2026-10-28): online multiplayer phase 2a (3 to 4 players: mesh, host relay, star signaling)
+- dd7c6c05 net.js for 2 to 4 players (design §10): host = player 1, each offer names a guest slot 2..4; signaling
+  interface N.signal {offer, answer, accept} on payloads {t, ch, sdp} (copy-paste codes wrap them; room codes plug in
+  there next); after a guest's link to the host is open, the host forwards the guests' mesh offers / answers over
+  'ctl' (star), guests report links + pings, the slowest pair sets D, per-guest config. Mesh: per-receiver packets,
+  direct or relayed by the host (type 4) when a guest pair has no direct link; per-pair time sync / hash check /
+  desync report; lost player: coordinator (host, else lowest remaining) collects held inputs, fixes F, everyone
+  port_net_drop(ch, F). Panel: per-slot boxes, Invite another player, Start the game (N players), per-player pings.
+  ?netfailto=P test aid. pc_net.c needed no change (4 channels since P338); conker.wasm unchanged.
+- d70a52c1 tools/port/scripts/netgroup.js (was netpair.js; 2..4 windows), netpair.sh PLAYERS / NETFAIL / NETSIM_GUEST3/4
+  / LEAVE, netmp_bunker.sh pads 3-4 join (5320 / 5340) + NET_BUNKER_PLAY. d223e7e2 fix: 'drop' frame field renamed
+  neutralFrom ('from' = sender, guests dropped from 0). 00a3f949 panel: hide invite/start row after start (.row
+  display beat [hidden]). 37283179 mesh wait re-checks on 'in' open (start 9 s -> 1 s).
+- Evidence (port_work/p344, real MULTI route into Bunker): 3 players 7928 identical (b3a); 3 with netsim + P2-P3
+  relayed 100 %, P2 leaves, 9941 / 10687 identical (b3relay); 4 with netsim + P3-P4 relayed 100 %, 9907 identical
+  (b4relay); 4 through the panel buttons, netsim on all, relay, 99.6 %, 13173 identical, P4 leaves (b4ui); final code
+  4 + netsim + P2-P4 relayed 98.9 %, 8812 identical (b4final); host leaves a 4-player session: P2 coordinates, guests
+  identical (hostleave4). Screens: b3a/guest3_150s.png (3-way), b4relay/guest4_190s.png, b4ui/host_240s.png (panel
+  slots + relay), b4ui/guest3_150s.png. Regressions: 2-player UI + 40 ms 5 % netsim 100 %, 8428 identical (pair2ui);
+  Bunker weapon demo 7458 identical, P2 holds the weapon (bunker2demo/guest_140s.png). check.sh GREEN, hold-L 5789 /
+  0x29 at 5795, no traps. No desync anywhere.
+- Left: room codes (phase 2b), a real multi-machine test, host loss breaks relayed guest pairs (dropped after 5 s, a
+  partition could make two coordinators), no late join / reconnect.
 ### P341 (port-web, 2026-10-28): MP weapon pickups fixed (root cause in the port's signature tool)
 - Who gives the weapon: event_action_rail command 11 = rail_weapons_update (game_eu_B7840.c), run every game frame by
   the MP level script. Pass 2 finds each pickup slot's world object with world_record_find((u8) +0xEF0[i]) (0x3001..
