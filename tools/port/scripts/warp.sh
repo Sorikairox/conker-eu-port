@@ -9,8 +9,8 @@
 #        PROBE_WEB=DIR serve another build directory (audprobe.sh, P347)
 # Logs: port_work/p327/NAME/chrome.log (+ s_<ms>ms.png). Gameplay on level 0x29 starts ~retrace 100 (about 7 s
 # wall time), against ~5800 retraces (~2 min at det=2, 4+ min with the new-game route) through the title + opening.
-cd ~/conker-wt/web || exit 1
-while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1   # P353: the worktree this script lives in
+[ -n "${PROBE_NOWAIT:-}" ] || while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
 D=port_work/p327/$1; rm -rf "$D"; mkdir -p "$D"
 T=${2:-40}; SHOTS=${SHOTS:-$(( (T - 3) * 1000 ))}
 S="${STEPS:-}"; for t in $SHOTS; do S="$S${S:+; }$t:shot:$D/s_${t}ms.png"; done

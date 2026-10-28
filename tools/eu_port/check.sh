@@ -7,8 +7,8 @@
 # Sequential on purpose (the selftest and the census both load the container). Logs: port_work/check/.
 # Prints one line per step (rc, seconds, key line) and a final GREEN / RED line; exit status 0 only when green.
 case ${1:---port} in --port) ;; *) sed -n '2,6p' "$0"; exit 2;; esac
-cd ~/conker-wt/web || exit 2
-eval "$(tools/eu_port/wt.sh env web)" || exit 2
+ROOT=$(git -C "$(dirname "$0")" rev-parse --show-toplevel) && cd "$ROOT" || exit 2   # P353: the worktree this script lives in
+eval "$(tools/eu_port/wt.sh env "$(basename "$ROOT")")" || exit 2
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH DIFFTEST_SLOTS=1
 D=port_work/check; mkdir -p $D
 red=0; T0=$(date +%s)

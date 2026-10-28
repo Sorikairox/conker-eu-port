@@ -3,7 +3,7 @@
 # session as netrun.sh: forced online determinism, 4 controllers, netmp_pads.py scripts, per-retrace [nethash] lines.
 #   [STOP=N] tools/port/scripts/netnode.sh NAME SECS  (STOP: pause after retrace N, dump to port_work/p337/NAME.mem.bin)
 #       (log port_work/p337/NAME.node.log; run node jobs one at a time)
-cd ~/conker-wt/web || exit 1
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1   # P353: the worktree this script lives in
 eval "$(python3 tools/port/scripts/netmp_pads.py)"
 mkdir -p port_work/p337
 [ -n "${STOP:-}" ] && export PORT_NETHASHSTOP=$STOP NETDUMP=/out/$1.mem.bin

@@ -6,8 +6,8 @@
 #        SHOTS         screenshot times in ms              THROTTLE=N  CDP CPU throttling (N x slower)
 #        DUMP=1        dump the hashed memory at the ?nethashstop retrace (port_work/p337/NAME/mem.bin)
 # Logs: port_work/p337/NAME/chrome.log ([nethash] lines: tools/port/nethash_diff.py A B). One Chrome at a time.
-cd ~/conker-wt/web || exit 1
-while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1   # P353: the worktree this script lives in
+[ -n "${PROBE_NOWAIT:-}" ] || while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
 D=port_work/p337/$1; rm -rf "$D"; mkdir -p "$D"
 T=${2:-200}
 if [ -z "${PADF0:-}" ]; then eval "$(python3 tools/port/scripts/netmp_pads.py)"; fi

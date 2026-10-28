@@ -24,14 +24,14 @@
 #                   NET_BUNKER_DEMO=1 player 2 takes a weapon, draws it and fires)
 # Logs: port_work/${NETDIR:-p339}/NAME/{host,guest,guest3,guest4}.log; [nethash] lines of every guest compared with
 # the host's by tools/port/nethash_diff.py.
-cd ~/conker-wt/web || exit 1
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1   # P353: the worktree this script lives in
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
-while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
+[ -n "${PROBE_NOWAIT:-}" ] || while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
 D=port_work/${NETDIR:-p339}/$1; rm -rf "$D"; mkdir -p "$D"
 T=${2:-120}; P=${PLAYERS:-2}
 eval "$(python3 tools/port/scripts/netmp_pads.py 7000 "${PLAY_SECS:-20}")"
 [ -n "${PADS:-}" ] && source "$PADS"   # P341: another pad script, e.g. tools/port/scripts/netmp_bunker.sh (Bunker)
-NAME=conker-web-pair-$$; PORT=$((8100 + $$ % 800))
+NAME=conker-web-pair-$$; PORT=${PROBE_PORT:-$((8100 + $$ % 800))}   # P353: PROBE_PORT pins the port
 docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$PWD/port/build/web":/www/app:ro \
   -v "$PWD/baserom.eu.z64":/www/dev/rom.z64:ro -w /www conker-emsdk python3 -m http.server 8000 >/dev/null
 RPID=

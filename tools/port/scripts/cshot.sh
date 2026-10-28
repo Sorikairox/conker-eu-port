@@ -6,8 +6,8 @@
 #   env: CANVAS=WxH drawing buffer (default 1920x1440), PADF pad script (frame:buttons hex:x:y,...), WEB=DIR build dir
 #        (default port/build/web), PROBE_STEPS extra audprobe steps
 # e.g. cshot.sh port_work/p349/hud.png 400 40 '&warp=29&opt=healthhud:1,cashhud:1'
-cd ~/conker-wt/web || exit 1
-while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1   # P353: the worktree this script lives in
+[ -n "${PROBE_NOWAIT:-}" ] || while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 10; done
 OUT=$1; STOP=$2; T=${3:-60}
 case $OUT in /*) ;; *) OUT=$PWD/$OUT;; esac
 mkdir -p "$(dirname "$OUT")"

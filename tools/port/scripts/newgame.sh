@@ -4,7 +4,7 @@
 # Waits for any other headless Chrome (P272 etc.) before starting: one Chrome run at a time.
 R=$(cd "$(dirname "$0")/../../.." && pwd); cd "$R" || exit 1
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
-while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 20; done
+[ -n "${PROBE_NOWAIT:-}" ] || while [ "$(ps -axo command | grep -v grep | grep -c 'headless=new')" -gt 0 ]; do sleep 20; done
 D=$1; T=${2:-260}; mkdir -p "$D"
 PADF=${PADF:-'3386:1000:0:0,3401:0:0:0,4458:1000:0:0,4473:0:0:0'}
 SHOTS="${SHOTS:-200000 220000 240000 250000}"
