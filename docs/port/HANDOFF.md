@@ -80,6 +80,28 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P349 (port-web, 2026-10-28): feature #16a Hi-res menus and 2D
+- 11199590 option "Hi-res menus and 2D" (hires2d; page-side, calls port_gfx_hires_2d in gfx_f3dex2.o = outside the
+  online hash, so each player's own choice; in Modern). Cause of the soft / offset 2D: texture rectangles sampled
+  s(x) = s + dsdx (x - ulx) per canvas pixel (the RDP's top-left-corner rule), i.e. half a texel shifted, blurred to
+  the right / down, and the outer half texel of each tile read past the N64's samples (tile seams: GAME 1's "E").
+  On: s / t - ds / 2 (canvas pixel centre = N64 pixel centre), rect_hires_axis clamp to the sampled range unless the
+  tile goes on by <= 1 texel (image_draw_tiled borders, clamp edge), shader uRHi 1 = 4-tap bilinear, 2 = crisp point
+  texels (copy mode / G_TF_POINT). Pause screen: zsnap_take snapshots the fbc canvas copy the pause copies into the z
+  image; z-image reads sample it via hx kind 3 (P335 uHiRes); ends on other draws into the z image / depth writes /
+  canvas resize. Offscreen N64-size images unchanged, 3D unchanged. ?p349log=F texrect log.
+- 3462d4b0 test aids: ?canvas=WxH, audprobe cshot step / PROBE_CSHOT, tools/port/scripts/cshot.sh (frame at a retrace
+  via ?nethashstop, pixel-comparable), pngtool.py diff / crop. port_work/p349/shots.sh = the evidence batch.
+- Evidence port_work/p349/ev (1280x960: menu, hud, legal, pause, mp _0/_1 + z_*.png crops), p349/b text6650_* (speech
+  bubble, hold-L route + autopilot, box opens at retrace 6581), p349/ev640, port_work/p327/p349_photo (2x PNG with hi-res
+  HUD). Off = HEAD pixel-identical; gfx CPU ms unchanged (p349/perf); netpair p327/p349_net guest on 11433 IDENTICAL;
+  check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps.
+- Found: the pause frozen frame was ~25 % darker than the frame (three RGBA5551 truncations); with the option it keeps
+  its colours (off path unchanged). A canvas read at 1920x1440 on the title menu hangs headless Chrome (Metal);
+  1280x960 works. ?warp=29 has no Birdy dialogue (needs the route's event state).
+- Limits: 2D drawn with triangles (3D-model HUD items such as the health chocolate and the pause screen buttons) is unchanged (3D path);
+  tile joins of borderless tiles show a step instead of a ramp over half an N64 pixel; G_TEXRECTFLIP still drawn
+  unflipped (as before); the canvas stays 640 x 480 for players (a resolution option would show more of the gain).
 ### P348 (port-web, 2026-10-28): feature #22 Photo mode (+ audio HLE fix)
 - a576c66c fix: aud_dram (port/audio/aud_abi.c) gave 24-bit audio operands a fixed 0x10 top byte; since P337's 12 MB
   fiber pools moved n64_rdram to 0x11711000 they pointed into the unused pools: ADPCM codebooks read as zeros, loop /
