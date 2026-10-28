@@ -48,3 +48,4 @@ build_nm/
 # P342 debug build (tools/port/scripts/debug_build.sh) and CLion compile database (gen_compile_commands.py)
 port/build-dbg/
 /compile_commands.json
+.idea/
