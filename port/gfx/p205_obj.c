@@ -31,6 +31,7 @@ void p205_obj_hook(void) {
     { extern void p248_mesh(void); p248_mesh(); }   /* P248 ?p248mesh=F world objects, areas 2/3, gate watch */
     { extern void p223_hit_tick(void); p223_hit_tick(); }   /* P223 ?p223hit: follow a hit target */
     { extern void p326_probe(void); p326_probe(); }   /* P326 ?p326=1 air / tail-spin probe */
+    { extern void p352_ledge_probe(void); p352_ledge_probe(); }   /* P352 ?p352=F ledge log, ?p352tpf teleport */
     if (f < 0) f = port_flag("p205obj");
     if (f <= 0 || port_frame_count < (unsigned)f) return;
     if (last != ~0u && port_frame_count - last < 250) return;
@@ -279,6 +280,7 @@ static int p240_steer(int *btn, int *sx, int *sy) {
     return 1;
 }
 void p205_goto_apply(int *btn, int *sx, int *sy) {
+    { extern int p352_pad_apply(int *, int *, int *); if (p352_pad_apply(btn, sx, sy)) return; }   /* P352 ?p352hang */
     if (p240_steer(btn, sx, sy)) return;
     const unsigned char *r;
     float x, z, dx, dz, d, cam, th;

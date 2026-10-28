@@ -1520,3 +1520,135 @@ void mtx_look_at_reflect(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     mtxf_look_at_reflect(sp38, (LookAt *) arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA);
     guMtxF2L(sp38, arg0);
 }
+
+#ifdef PORT
+/* ---- P352 option "Ledge grab everywhere" (PORT_OPT_LEDGE_GRAB) -------------------------------------------------------
+ * The N64 game already has the whole move: obj_state_walk catches a ledge when the wall pass's ledge probe
+ * (collision_ledge_probe -> nmw_ledge_triangle in nm_asm/D5E90.c) finds a flat triangle whose edge passes 64 units
+ * above Conker's feet while he falls against it; he then hangs (+0x137 = 1, animation 0x42) and
+ * obj_jump_swim_glide_update lets him pull up (A: animation 0x40, then objev_ledge_climb_up), hop up (stick
+ * forward: 0xEA) or let go (stick back: 0x38). But the probe only takes triangles the level marks with the flags
+ * 0x0E000000, and only a few levels mark any (none on the first level 0x29), so it is rarely seen.
+ * With the option, single player, Conker's record also takes every unmarked level triangle (static level geometry,
+ * areas 0 / 1; world objects such as doors, lifts and water surfaces keep the N64 rule), with these extra checks for an
+ * unmarked edge: Conker is not under the triangle (nmw_ledge_triangle), a wall pushed him this frame (he is against the
+ * wall under the edge, not passing an edge in mid-air or walking off it) and the floor below is at least 150 units
+ * under the edge (low steps are landed on, not hung from). Hanging, climbing and dropping are the N64 code; the option
+ * adds: Z lets go (as stick back does) and stick left / right shimmies along the edge (ledge_shimmy_step). */
+extern u16 g_obj_attached_world_obj[]; /* was D_800CC1C0 */
+extern f32 g_wall_ledge_grab_z; /* was D_800CC1B0 */
+extern f32 g_wall_ledge_angle_neg; /* was D_800CC1B4 */
+extern f32 g_wall_ledge_angle_pos; /* was D_800CC1B8 */
+extern s32 port_ledge_unmarked_neg, port_ledge_unmarked_pos;
+
+/* the option is on and rec is a player's record in single player */
+s32 ledge_grab_everywhere_for(u8 *rec) {
+    s32 idx = (struct127 *) rec - g_objects;
+    return port_option(PORT_OPT_LEDGE_GRAB) && g_mp_mode_active == 0 && idx >= 0 && idx < g_player_count;
+}
+
+/* Called by obj_state_walk after its wall pass, before it looks at the ledge results: drops a ledge found on an
+ * unmarked triangle unless walls moved the record this frame (wall_moves) and the floor under the record (+0x180) is at
+ * least 150 below the edge (edge = stored height + 54). Marked ledges are left alone (N64 behaviour). */
+void ledge_grab_unmarked_filter(struct127 *rec, s32 wall_moves) {
+    if (!ledge_grab_everywhere_for((u8 *) rec)) {
+        return;
+    }
+    if (g_wall_ledge_h_neg != -32768.0f && port_ledge_unmarked_neg &&
+        (wall_moves == 0 || g_wall_ledge_h_neg + 54.0f - rec->unk180 < 150.0f)) {
+        g_wall_ledge_h_neg = -32768.0f;
+    }
+    if (g_wall_ledge_h_pos != -32768.0f && port_ledge_unmarked_pos &&
+        (wall_moves == 0 || g_wall_ledge_h_pos + 54.0f - rec->unk180 < 150.0f)) {
+        g_wall_ledge_h_pos = -32768.0f;
+    }
+}
+
+/* Shimmy one step along the edge while hanging (+0x137 == 1): dir > 0 = to Conker's right (facing the wall), < 0 = left.
+ * The step (2.5 units per frame tick) is checked with the game's own ledge probe at the new place, with the probe
+ * window opened to +-20 units around the hang height (y + 79 = the edge): the edge must go on there, at about the
+ * same height (+-25) and direction (+-34 degrees: corners stop him), and the walls at hang height must not push him
+ * back along the step. Then the record snaps to the probe's grab point, height and heading exactly as the N64 grab
+ * does. Returns 1 when he moved. */
+s32 ledge_shimmy_step(struct127 *rec, s32 dir) {
+    s32 idx = rec - g_objects;
+    f32 x = rec->x_position, y = rec->y_position, z = rec->z_position;
+    f32 savedHn = g_wall_ledge_h_neg, savedHp = g_wall_ledge_h_pos;
+    u16 savedAttached = g_obj_attached_world_obj[idx];
+    s8 saved275 = *(s8 *) ((u8 *) rec + 0x275);
+    f32 dx, dz, dy, nx, nz, height, ang, along;
+    s32 area, side;
+    u16 heading;
+    s16 turn;
+    f32 nz_bits;
+
+    vec_from_yaw_pitch((u16) (rec->unk76 + (dir > 0 ? -0x4000 : 0x4000)), 2.5f * g_frame_delta, 0.0f, &dx, &dz, &dy);
+    nx = x + dx;
+    nz = z + dz;
+    /* probe: record at the new x / z, y - 5, "falling" from y + 35: the window holds edges at y + 59 .. y + 100 */
+    rec->x_position = nx;
+    rec->y_position = y - 5.0f;
+    rec->z_position = nz;
+    nz_bits = nz;
+    g_wall_ledge_h_neg = -32768.0f;
+    g_wall_ledge_h_pos = -32768.0f;
+    collision_set_obj_body_heights((u8 *) rec, nx, y + 35.0f, *(s32 *) &nz_bits);
+    for (area = 0; area < 3; area++) {
+        if ((&g_coll_area_enabled)[area] == 1) {
+            collision_select_area(area);
+            if (g_coll_quadtrees_built != 0) {
+                collision_ledge_probe(nx, y + 35.0f, *(s32 *) &nz_bits, (u8 *) rec, 0);
+            }
+        }
+    }
+    collision_select_area(0);
+    side = 0;
+    if (g_wall_ledge_h_neg != -32768.0f) {
+        side = 1;
+        height = g_wall_ledge_h_neg;
+        ang = ((rec->unk7A + 0x4000) * 0.005493164f + g_wall_ledge_angle_neg) - 90.0f;
+    } else if (g_wall_ledge_h_pos != -32768.0f) {
+        side = 2;
+        height = g_wall_ledge_h_pos;
+        ang = (rec->unk7A + 0x4000) * 0.005493164f + g_wall_ledge_angle_pos + 90.0f;
+    }
+    if (side != 0) {
+        heading = (u16) ((s16) (s32) (ang / 1.40625f) << 8);
+        turn = (s16) (heading - rec->unk76);
+        nx = g_wall_ledge_grab_x;
+        nz = g_wall_ledge_grab_z;
+        if (turn > 0x1800 || turn < -0x1800 || height - 25.0f - y > 25.0f || height - 25.0f - y < -25.0f) {
+            side = 0;
+        }
+    }
+    if (side != 0) {
+        /* walls at hang height: slide from the old place to the new one; a push back along the step blocks it */
+        rec->x_position = nx;
+        rec->y_position = height - 25.0f;
+        rec->z_position = nz;
+        nz_bits = z;
+        collision_obj_walls(x, height - 25.0f, *(s32 *) &nz_bits, (u8 *) rec, 1, 0);
+        along = (rec->x_position - nx) * dx + (rec->z_position - nz) * dz;
+        if (along < -0.5f * (2.5f * g_frame_delta)) {
+            side = 0;
+        }
+    }
+    g_wall_ledge_h_neg = savedHn;
+    g_wall_ledge_h_pos = savedHp;
+    *(s8 *) ((u8 *) rec + 0x275) = saved275;
+    if (side == 0) {
+        rec->x_position = x;
+        rec->y_position = y;
+        rec->z_position = z;
+        g_obj_attached_world_obj[idx] = savedAttached;
+        return 0;
+    }
+    rec->x_position = nx;
+    rec->y_position = height - 25.0f;
+    rec->z_position = nz;
+    rec->unk76 = heading;
+    rec->unk7A = heading;
+    rec->unk1CC = rec->y_position;
+    return 1;
+}
+#endif

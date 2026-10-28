@@ -32,7 +32,7 @@ ULTRA_CFLAGS := $(filter-out -O2 -g0,$(ULTRA_CFLAGS)) $(or $(PORT_DBG_OPT),-O0) 
 LINK_COMMON += -g
 endif
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/design/P6.md)
-GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c gfx/p69_checks.c gfx/p75_checks.c gfx/p81_checks.c gfx/p84_checks.c gfx/p103_boot.c gfx/p144_hits.c gfx/p165_hits.c gfx/p171_tb.c gfx/p174_ev.c gfx/p202_fx.c gfx/p205_obj.c gfx/p326_probe.c gfx/p223_hit.c gfx/p268_nodes.c
+GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c gfx/p69_checks.c gfx/p75_checks.c gfx/p81_checks.c gfx/p84_checks.c gfx/p103_boot.c gfx/p144_hits.c gfx/p165_hits.c gfx/p171_tb.c gfx/p174_ev.c gfx/p202_fx.c gfx/p205_obj.c gfx/p326_probe.c gfx/p352_ledge.c gfx/p223_hit.c gfx/p268_nodes.c
 GFX_OBJ := $(patsubst gfx/%.c,$(B)/gfx/%.o,$(GFX_SRC))
 # audio HLE (n_audio ABI interpreter) + SDL output (docs/port/design/P9.md)
 AUD_SRC := audio/aud_abi.c audio/aud_out.c

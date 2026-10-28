@@ -2698,7 +2698,7 @@ void obj_ctrl_floor_contact(struct127 *arg0, f32 arg1) {
         if (var_f2 < 0.0f) {
             sp63 = 0;
             if (arg0->in_water == 0) {
-                arg0->unk137 = 0;
+                arg0->ledge_state = 0;
                 arg0->gravity = 5.0f;
             }
             if (arg0->in_water == 0) {
@@ -3252,7 +3252,7 @@ u8 obj_apply_hit(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 
             rope_release((u8 *)obj);
         }
         obj->unk31C->unk54 = 0;
-        obj->unk137 = 0;
+        obj->ledge_state = 0;
         if (obj->unk65 != 0) {
             /* carried by object unk65 - 1: ids 0x8A / 0x23 only let go when the hit is hard enough */
             struct127 *carrier = &g_objects[(u8)(obj->unk65 - 1)];
@@ -4843,6 +4843,10 @@ s32 sfx_cb_follow_object_anim(struct_eu_sfx *, s32, s32 *, struct11 *, s32, s32 
  *      the helicopter glide (ctl +0x31: start 0xE9 with the sound 0x61E, then the spin-down counter); the
  *      animation; the sound of section 4 (obj_sfx_play); releasing A cuts a rising jump (gravity 6.2). */
 /* was func_1505F298 */
+#ifdef PORT
+s32 ledge_grab_everywhere_for(u8 *rec);             /* P352, game_eu_71E70.c */
+s32 ledge_shimmy_step(struct127 *rec, s32 dir);
+#endif
 void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
     struct126 *ctl;
     s32 sound = 0;         /* sp88: sound id resolved by sound_word_resolve */
@@ -4969,26 +4973,39 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
     }
 
     /* 3. hanging */
-    if (rec->unk137 == 1) {
+    if (rec->ledge_state == 1) {
         anim = 0;
-        if (ctl->pad53 == 0) {
+        if (ctl->ledge_stick_lock == 0) {
             if ((s8)pad[3] > 0x32) {
                 speed = 2.2f;
                 ctl->unk54 = 0xC;
                 anim = 0xEA;
-                rec->unk137 = 0;
+                rec->ledge_state = 0;
                 rec->disable_run = 0x10;
                 rec->unk81 = 1;
                 rec->gravity = 5.0f;
                 rec->y_velocity = 48.0f;
             } else if ((s8)pad[3] < -0x32) {
                 anim = 0x38;
-                rec->unk137 = 0;
+                rec->ledge_state = 0;
                 rec->gravity = 3.5f;
             }
         }
+#ifdef PORT
+        /* P352 option "Ledge grab everywhere": Z lets go like stick back; stick left / right (stick y within the
+         * dead zone) shimmies along the edge, in the hang pose (the game has no shimmy animation) */
+        if (anim == 0 && rec->ledge_state == 1 && ledge_grab_everywhere_for((u8 *) rec)) {
+            if (g_cur_buttons_pressed & 0x2000) {
+                anim = 0x38;
+                rec->ledge_state = 0;
+                rec->gravity = 3.5f;
+            } else if (((s8)pad[2] > 0x32 || (s8)pad[2] < -0x32) && (s8)pad[3] <= 0x32 && (s8)pad[3] >= -0x32) {
+                ledge_shimmy_step(rec, (s8)pad[2] > 0 ? 1 : -1);
+            }
+        }
+#endif
         if ((g_cur_buttons_pressed & 0x8000) || rec->unk31C->unk84 != 0) {
-            rec->unk137 = 2;
+            rec->ledge_state = 2;
             anim = 0x40;
             speed = 3.0f;
         }
@@ -5010,7 +5027,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
         }
     }
     if (ride != 0 || height <= 0.0f || rec->unk31C->unk55 != 0) {
-        rec->unk137 = 0;
+        rec->ledge_state = 0;
         jumped = 0;
         jump_v = 0.0f;
         if ((g_cur_buttons_pressed & 0x8000) && rec->unk31C->item_phase != 1 && rec->unk31C->item_phase != 3
@@ -5199,12 +5216,12 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
         rec->unk31C->unk54 = 0;
     } else if ((g_cur_buttons_pressed & 0x8000) && ctl->unk4E == 0) {
         /* high fall */
-        if (rec->unk84.uh != 0x3B && rec->unk84.uh != 0x3C && rec->unk137 == 0 && rec->unk13C == 0
+        if (rec->unk84.uh != 0x3B && rec->unk84.uh != 0x3C && rec->ledge_state == 0 && rec->unk13C == 0
             && ctl->unk95 == 0 && ctl->unk31 == 0 && height > 55.0f) {
             if (rec->unk118 != -10000.0f && rec->unk118 - rec->unk180 > 100.0f) {
                 rec->unk81 = 1;
                 rec->disable_run = 0x78;
-                rec->unk137 = 0;
+                rec->ledge_state = 0;
                 anim = 0x3B;
                 rec->gravity = 6.0f;
                 rec->unk1CC = rec->y_position;
@@ -5352,7 +5369,7 @@ void obj_ctrl_action_update(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 a
         if (temp_t0 == 0x2A) {
             var_s0 = 0x2A;
         }
-        if ((arg0->unk13C != 0) || (arg0->unk137 != 0)) {
+        if ((arg0->unk13C != 0) || (arg0->ledge_state != 0)) {
             if (arg4 == 0) {
                 var_s0 = 0;
             } else {

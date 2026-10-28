@@ -76,6 +76,16 @@ async function connect(wsUrl, logFile) {
   const t0 = Date.now();
   const waitVal = async (p, id) => { for (let i = 0; i < 100; i++) { const v = await p.ev(`(document.getElementById('${id}') || {}).value`); if (v) return v; await sleep(200); } throw new Error('no code in #' + id); };
   const sizes = [];
+  // P354: JOINSHOTS=1: screenshots of the host's page after the room / first code is made, after each guest joined and
+  // just before the start (OUTDIR/host_join0.png ...; the Online panel scrolled into view)
+  let joinShot = 0;
+  const hostShot = async () => {
+    if (!process.env.JOINSHOTS) return;
+    await sleep(600);
+    await host.ev("document.getElementById('p-online').scrollIntoView()").catch(() => {});
+    const r = await host.call('Page.captureScreenshot', { format: 'png' });
+    if (r.result) fs.writeFileSync(path.join(out, `host_join${joinShot++}.png`), Buffer.from(r.result.data, 'base64'));
+  };
   const evErr = (p, expr) => p.ev(`(${expr}).then(() => 'no error', (e) => 'error: ' + e.message)`);
   if (process.env.ROOM && process.env.ROOMCHECK) console.log(`netgroup: unknown code -> ${await evErr(pages[guests[0]], "__online.roomJoin('QQQQQ')")}`);
   if (process.env.ROOM) {   // P345: room code
@@ -86,12 +96,15 @@ async function connect(wsUrl, logFile) {
       for (let i = 0; i < 100 && !code; i++) { code = await host.ev("document.getElementById('net-room-show').textContent"); if (!code) await sleep(200); }
     } else code = await host.ev(`__online.roomCreate(${+process.env.ROOMMAX || 4})`);
     console.log(`netgroup: room ${code} (${Date.now() - t0} ms)`);
+    await hostShot();
     for (const g of guests) {
       const tj = Date.now();
       if (process.env.UI) {
         await pages[g].ev(`document.getElementById('net-room-code').value = ${JSON.stringify(code.toLowerCase())}; document.getElementById('net-room-join').click()`);
         for (let i = 0; i < 150; i++) { if (await pages[g].ev("/^(you are player|connected)/.test(document.getElementById('net-status').textContent)")) break; await sleep(200); }
       } else await pages[g].ev(`__online.roomJoin(${JSON.stringify(code)})`);
+      if (process.env.JOINSHOTS) for (let i = 0; i < 50; i++) { const sl = await host.ev('__online.slots()'); if (sl.filter((x) => x.state === 'joined').length > guests.indexOf(g)) break; await sleep(200); }
+      await hostShot();
       console.log(`netgroup: ${g} joined room ${code} as ${JSON.stringify(await pages[g].ev('__online.room()'))} in ${Date.now() - tj} ms; status: ${await pages[g].ev("document.getElementById('net-status').textContent")}`);
     }
   } else if (process.env.UI) {   // through the Online panel: click the buttons, copy the textareas
@@ -129,6 +142,7 @@ async function connect(wsUrl, logFile) {
     await br.call('Target.closeTarget', { targetId: t.result.targetId });
   }
   console.log(`netgroup: ${NAMES.length} players, codes ${sizes.join('/')} chars, all joined in ${Date.now() - t0} ms: ${JSON.stringify(slots)}`);
+  await hostShot();
   const ts = Date.now();
   if (process.env.UI) { await host.ev("document.getElementById('net-start').click()"); }
   else await host.ev('__online.start()');

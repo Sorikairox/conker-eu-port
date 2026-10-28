@@ -63,7 +63,7 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
 - port_cdata name strings (n64mem_tab.c) still print the original D_ names (n64mem.py, RENAMED_FROM).
-- P350 found: the game depends on the static memory layout. HEAD + 512 unused bytes of bss in gfx_f3dex2.o (shifts
+- P350 found (P352: probably fixed by a3dee099, the n64mem relocation of data words below 0x80029400): the game depends on the static memory layout.
   n64_rdram by 0x1000; an 8 MB shift only changes 1 pixel) changes the title menu's character shading and the MP game
   (camera / positions after the 4-pad script). Same build = same behaviour (online is safe), but any static change makes
   "identical to HEAD" checks fail on those scenes. Suspect a wasm pointer masked with 0x7FFFFF / KSEG and re-mapped
@@ -89,6 +89,58 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P354 (port-web, 2026-10-29): trailer "Conker's Good Fur Day" (tooling only, page unchanged)
+- 6ac09dd7 tools/port/trailer (outputs in port_work/trailer, gitignored, ROM-derived): final
+  port_work/trailer/conkers_good_fur_day_trailer.mp4 (43.07 s, 1920x1080, 60 fps, H.264 High ~13.4 Mbit/s + AAC 48 kHz
+  stereo), _contact_sheet.jpg, _shotlist.txt. Steps and how it works: header of tools/port/trailer/render.mjs.
+- Deterministic capture without page changes: shim.js (CDP addScriptToEvaluateOnNewDocument) queues requestAnimationFrame;
+  with ?det=1 each animation frame = one retrace, so the driver steps retrace by retrace (~30 pictures/s at 1920x1080);
+  60 fps from the 12.5 fps game through port_gfx_hfr_test(t). Audio: the wasm import __port_web_audio_open is replaced
+  (no AudioContext), the PCM ring is drained every retrace (exact, 22020 Hz). det=1 reproduces det=2 runs (P352 ledge log
+  identical). Photo mode shots step ticks instead (no retraces run).
+- Font: font 0 read from game memory (g_font_textures / g_font_metrics at 0x80085D20 / 24, chars 0x80085CC0; VBE bytes
+  ^3, odd rows ^4): 95 glyphs, upper case, digits, punctuation, accents (no lower case, no em dash / ellipsis).
+- Online: net4.sh = 4-window session with room code through the panel (JOINSHOTS=1 in netgroup.js: host screenshots after
+  create / each join / before Start), 8682 retraces identical on all peers. The smooth split-screen footage is a ?netdet +
+  ?padmask=F replay of the same pad scripts: static hash equal to the live session up to retrace 3385, differs from P1's
+  first Start (3386) on, also with the pads shifted by +-1 / +2 (cause not found: online input path vs ?padf path).
+- Found: in headless Chrome a VideoFrame made from a canvas encoded fine but <video> decodes draw black (verify.mjs uses
+  mp4box.js + VideoDecoder instead); VideoFrame from getImageData pixels is used for the encoder. ?netdet ignores ?opt
+  (page-side renderer switches are turned on with Module._port_gfx_* after boot). ?warp=29 near the pit (650, -2650)
+  locks Conker in a "can't get any further" thought bubble (fresh event state).
+### P352 (port-web, 2026-10-28): feature #21 Ledge grab (everywhere) + n64mem relocation fix
+- Finding: the N64 game already has the move. obj_state_walk's wall pass runs collision_ledge_probe (nmw_ledge_triangle):
+  a flat triangle (ny > 0.9) whose edge passes 64 above Conker's feet while he falls, within the grab circle (r 21) ->
+  he snaps 79 under the edge, faces the wall, struct127 ledge_state (was unk137) = 1, anim 0x42; obj_jump_swim_glide_update:
+  A = pull up (0x40, objev_ledge_climb_up: +70 and forward), stick to the wall = hop (0xEA, vy 48), stick back = drop
+  (0x38), after the stick is centred (struct126 ledge_stick_lock, was pad53). But only triangles flagged 0x0E000000 count:
+  20 on level 1, 22 on 0x1A, 1 on 7 / B, none on 0x29 and the other scanned levels (port_work/p352/scan.txt, tri*.txt).
+- a3dee099 fix: port/tools/n64mem.py relocated game_data words in [0x80000400, 0x80029400) as data pointers; all 20 were
+  false positives (s16 pairs 0x8000 0x8000 in effect tables, g_walk_dir_anims, g_aiscript_rad_to_binang, and the acos
+  table's first word 32768 32442 = 0x80007EBA). acos(x) for |x| < 0.03 gave 0.22 rad, so math_atan2f was wrong near the
+  axes (the N64 grab turned Conker 77 deg off a straight edge; the pull-up missed the top). Window now from 0x80029400.
+  These relocated values depended on the n64_rdram host address: probably the P350 / P351 layout dependence (open item):
+  option off vs base (+8 bytes of game globals, more code) is now pixel-identical on the moving 0x29 frame without padding.
+- 5e912b70 test aid port/gfx/p352_ledge.c: ?p352=F (per-frame player / ledge log, [p352ev] state changes, acos check),
+  ?p352tpf/tpx/tpy/tpz/yaw (teleport), ?p352hang=WAIT:BTN:SX:SY:DUR (pad script once hanging; p205_goto_apply calls it).
+- b4a4077b option "Ledge grab everywhere" (ledgegrab, PORT_OPT_LEDGE_GRAB 17, single player, not in Modern): ledge mode takes
+  unmarked level triangles (areas 0 / 1, not world objects), skipping one whose footprint holds Conker; unmarked ledges need
+  a wall push this frame and a 150+ drop to the floor (ledge_grab_unmarked_filter); hanging: Z drops, stick left / right =
+  ledge_shimmy_step (game probe at the new place, +-20 window, height +-25, turn +-34 deg, wall slide must not push back;
+  2.5 units / tick; hang pose slides, no shimmy animation).
+- Evidence port_work/p352 (run.sh, offcmp.sh, pixcmp.sh, *_sheet.png / *.gif): 0x39 wall 230 high: hang 304, A -> top 383
+  (p352L39climb), Z -> floor (p352L39drop), shimmy R / L 90 / 105 units, stops at the edge ends (p352L39shR / shL), off: jumps
+  against the wall, no grab (p352L39off); 0x13 crate edge 2084: hang + pull-up (p352L13climb); level 1 marked ledge (N64 rule,
+  option off): hang + pull-up onto 1105 (p327/p352L1A); level 1 door lintel 240 with the option (on2_sheet: pulls up, the
+  beam is narrow, he slips back and catches it again). Off vs base build (web_base = fix + test aid): traces of 0x29 moves /
+  0x39 wall / level 1 ledge identical, 640x480 frames identical; nethash H / S differ from retrace 1 because the static data
+  changed (not comparable across builds). check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps, off and on.
+- Limits: no shimmy animation; shimmy does not turn outer / inner corners; unmarked ledges need a wall push (falling
+  straight down beside a wall or walking slowly off an edge does not catch, marked ledges keep the N64 walk-off catch);
+  narrow tops (beams, wall tops) can be pulled onto and slipped off; tail-spin grabs not tested (the game does not exclude
+  them); 0x29 has few flat edges (its spiral pieces have rounded, sloped rims), so the option rarely matters there;
+  multiplayer unchanged (excluded, no netpair needed); the other 19 relocation false positives are now N64 values too (not
+  individually re-tested).
 ### P351 (port-web, 2026-10-28): feature #18 High frame rate (interpolated)
 - d9443be4 option "High frame rate (smooth motion)" (hfr; page-side, port_gfx_hfr in gfx_f3dex2.o = outside the online
   hash; in Modern). Recording: the game frame's task is drawn as always; each G_MTX keyed by hfr_sig (command address if

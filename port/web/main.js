@@ -81,6 +81,9 @@ const OPTIONS = [
     help: 'Conker can stay under water about twice as long before he starts to drown (the air meter empties at half speed). Off: the N64 air time.' },
   { key: 'longspin', label: 'Longer tail spin', def: false, game: 5,
     help: 'Holding A during the helicopter tail spin (A, then A again in the air) keeps Conker hovering about twice as long before he drops. Off: the N64 hover time.' },
+  // P352: game option 17. Not in Modern: it changes how the game plays (like the longer breath / tail spin).
+  { key: 'ledgegrab', label: 'Ledge grab everywhere', def: false, game: 17,
+    help: 'Single player: when Conker jumps or falls against a wall just short of its top, he catches the edge and hangs from it on any ledge, not only on the few the levels mark for it. Hanging: A pulls him up, stick towards the wall hops up, stick back or Z lets go, stick left / right shimmies along the edge (in the hang pose: the game has no shimmy animation). He does not catch edges less than about 150 units above the floor below, edges of moving objects or water, or anything in multiplayer. Off: as on the N64 (only marked ledges, no Z, no shimmy).' },
   { key: 'nodrunk', label: 'No motion blur / drunk sway', def: false, game: 6,
     help: 'Turns off the frame-blend motion blur (the hangover wake-up after the opening, a slow-motion camera cut) and the drunk camera sway and screen stretching (drunk Conker, the title menu). The under-water wobble stays. Off: as on the N64.' },
   { key: 'conkerlod', label: 'Conker always full detail', def: false, game: 7,
