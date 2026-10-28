@@ -8,7 +8,7 @@
 #   tools/port/trailer/net4.sh OUTDIR SECS        env SHOTS="10 60 ..." (default below), PLAY (s of random play, 40)
 # Then tools/port/nethash_diff.py OUTDIR/host.log OUTDIR/guestN.log; capture.mjs shot 'mp4' replays the same pads
 # under ?netdet=1 frame by frame (pictures) and its ?nethash lines can be compared with the host's.
-cd ~/conker-wt/web || exit 1
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1   # P353: the worktree this script lives in
 D=${1:?outdir}; T=${2:-200}; mkdir -p "$D"
 export NET_BUNKER_PLAY=${PLAY:-40}
 eval "$(python3 tools/port/scripts/netmp_pads.py 7000 20)"
