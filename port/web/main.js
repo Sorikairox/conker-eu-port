@@ -91,6 +91,9 @@ const OPTIONS = [
   // P350: page-side too (port_gfx_widescreen in the renderer, outside the online hash): each player's own choice online.
   { key: 'widescreen', label: 'Widescreen', def: false,
     help: 'The picture fills a wide window (16:9, 16:10, up to 21:9: the shape of the game area, or of the screen in fullscreen) and the 3D view sees further to the left and right, instead of a 4:3 picture with black bars. Nothing is stretched. Menus, text and the pause screen keep their N64 place in the middle, the health, cash and air meter move to the corners, fades and the pause background cover the whole width. The game itself still works with its 4:3 view (nothing plays differently, safe online): characters and some effects just outside the 4:3 view are only drawn once they come close to it. Off: the 4:3 N64 picture.' },
+  // P351: page-side (the canvas size; the renderer follows it), each player's own choice online.
+  { key: 'fullres', label: 'Full-resolution picture', def: false,
+    help: 'The game is drawn at the real resolution of its place on your screen (the size of the picture times the display\'s pixel ratio, at most 2560 x 1440), instead of 640 x 480 scaled up: sharper 3D edges and textures, and with Hi-res menus and 2D, sharper menus and text. Same picture otherwise. Needs a faster graphics card at large sizes. Off: 640 x 480 (or 480 rows high in widescreen).' },
   { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
   { key: 'rumble', label: 'Rumble (gamepad vibration)', def: false, game: 13,
@@ -122,7 +125,7 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // Modern = Classic + the options that add information or remove waiting without making the game easier or changing
 //   how it controls: skip intro, autosave icon, health / cash always visible, air meter, crosshair, full-detail Conker,
 //   rumble, (P349) hi-res menus and 2D (a sharper picture with the N64's layout and colours) and (P350) widescreen (more
-//   of the scene at the sides; the game logic keeps its 4:3 view). Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
+//   of the scene at the sides; the game logic keeps its 4:3 view) and (P351) the full-resolution picture. Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
 //   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes), free camera (P347: it changes
 //   what the right stick and IJKL do, a control choice like the toggles).
 // Custom = anything else. The preset shown is stored in 'opt.preset' (changing one option stores 'custom'); a stored
@@ -130,11 +133,11 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
 const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode').map((o) => o.key);
-const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'widescreen'];
+const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'widescreen', 'fullres'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
     values: (o) => (o.range ? 100 : o.key === 'skipcut') },
-  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D, widescreen.',
+  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D, widescreen, full-resolution picture.',
     values: (o) => (o.range ? 100 : PRESET_MODERN_ON.includes(o.key)) },
   custom: { label: 'Custom', help: 'Your own mix: pick Classic or Modern to set every option at once.' },
 };
@@ -878,6 +881,17 @@ function layoutScreen() {
     w = Math.round(h * ar / 2) * 2;
   }
   document.documentElement.style.setProperty('--ar', ar === 4 / 3 ? '4 / 3' : ar.toFixed(5));
+  // P351 option "Full-resolution picture": the drawing buffer = the canvas's size on the page times devicePixelRatio
+  // (the CSS box above, so after --ar), at most 2560 x 1440 pixels' worth, kept at the picture's aspect
+  if (!fixed && opt('fullres')) {
+    const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (r.width > 0 && r.height > 0) {
+      let fw = r.width * dpr, fh = fw / ar;
+      const k = Math.min(1, 2560 / fw, 1440 / fh);
+      fw *= k; fh *= k;
+      if (fh >= 240) { w = Math.round(fw / 2) * 2; h = Math.round(fh / 2) * 2; }
+    }
+  }
   if (c.width !== w || c.height !== h) {
     c.width = w; c.height = h;
     if (M && M._port_gfx_resize) M._port_gfx_resize(w, h);
@@ -888,8 +902,10 @@ function layoutScreen() {
 let layoutTimer = 0;
 const layoutSoon = () => { clearTimeout(layoutTimer); layoutTimer = setTimeout(layoutScreen, 150); };
 window.addEventListener('resize', layoutSoon);
+if (window.ResizeObserver && $('stage')) new ResizeObserver(layoutSoon).observe($('stage'));   // P351: the side panel opening / closing
 document.addEventListener('fullscreenchange', layoutSoon);
 optionChanged.widescreen = () => layoutScreen();
+optionChanged.fullres = () => layoutScreen();
 optionChanged.rumble = (on) => { if (!on) { rumbleStopAll(); rumbleMotor.fill(false); } };
 
 let userPaused = false, hiddenPaused = false;

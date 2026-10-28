@@ -1220,28 +1220,48 @@ static void fbc_check_timg(const unsigned char *t) {
                                     port_frame_count, (void *)t, i, (void *)dst, fbc[i].dirty, (void *)fbc_task_p);
         if (!fbc[i].dirty || dst == fbc_task_p) continue;
         fbc[i].dirty = 0;
-        if ((size_t)fbc[i].tw * fbc[i].th * 4 > sizeof px) continue;
+        /* P351: a canvas larger than px (the Full-resolution option) is first scaled down on the GPU (nearest) into
+         * fbc_small, and read at that size; the row / column mapping below works on the read size (rw x rh) */
+        int rw = fbc[i].tw, rh = fbc[i].th;
+        float rs = 1;
         flush();
         glBindFramebuffer(GL_FRAMEBUFFER, fbc[i].fbo);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbc[i].tex, 0);
-        glReadPixels(0, 0, fbc[i].tw, fbc[i].th, GL_RGBA, GL_UNSIGNED_BYTE, px);
+        if ((size_t)rw * rh * 4 > sizeof px) {
+            static GLuint fbc_small_tex, fbc_small_fbo; static int sw, sh;
+            rs = fminf(1280.0f / rw, 960.0f / rh); rw = (int)(rw * rs); rh = (int)(rh * rs);
+            if (!fbc_small_tex) { glGenTextures(1, &fbc_small_tex); glGenFramebuffers(1, &fbc_small_fbo); }
+            if (sw != rw || sh != rh) {
+                glBindTexture(GL_TEXTURE_2D, fbc_small_tex);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, rw, rh, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbc_small_fbo);
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbc_small_tex, 0);
+                sw = rw; sh = rh;
+            }
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, fbc[i].fbo);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbc_small_fbo);
+            glDisable(GL_SCISSOR_TEST);
+            glBlitFramebuffer(0, 0, fbc[i].tw, fbc[i].th, 0, 0, rw, rh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBindFramebuffer(GL_FRAMEBUFFER, fbc_small_fbo);
+        }
+        glReadPixels(0, 0, rw, rh, GL_RGBA, GL_UNSIGNED_BYTE, px);
         glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());   /* P335: or the hx image */
         if (port_net_gpu_write(dst, 2 * w * H)) memset(px, 0x5A, sizeof px);   /* P337 */
         for (y = 0; y < H; y++) {
-            float cy = (y + 0.5f - fbc[i].y0) * fbc[i].th / fbc[i].h;   /* canvas row from the top */
-            if (cy < 0 || cy >= fbc[i].th) continue;
-            const unsigned char *row = px + (size_t)(fbc[i].th - 1 - (int)cy) * fbc[i].tw * 4;
+            float cy = (y + 0.5f - fbc[i].y0) * rh / fbc[i].h;   /* canvas row from the top */
+            if (cy < 0 || cy >= rh) continue;
+            const unsigned char *row = px + (size_t)(rh - 1 - (int)cy) * rw * 4;
             for (x = 0; x < w; x++) {
-                const unsigned char *q = row + (fbc[i].bw > 0 ? (unsigned)(fbc[i].ox + (x + 0.5f) * fbc[i].bw / w) : (unsigned)((x + 0.5f) * fbc[i].tw / w)) * 4;   /* P350 */
+                const unsigned char *q = row + (fbc[i].bw > 0 ? (unsigned)(fbc[i].ox * rs + (x + 0.5f) * fbc[i].bw * rs / w) : (unsigned)((x + 0.5f) * rw / w)) * 4;   /* P350 */
                 unsigned v = (q[0] >> 3) << 11 | (q[1] >> 3) << 6 | (q[2] >> 3) << 1 | 1, k = 2 * (y * w + x);
                 *VBE8(dst + k) = v >> 8; *VBE8(dst + k + 1) = v & 0xFF;
             }
         }
         state_dirty = 1;
         { static unsigned n; unsigned long sum = 0; unsigned j;
-          for (j = 0; j < (unsigned)(fbc[i].tw * fbc[i].th); j++) sum += px[4 * j] + px[4 * j + 1] + px[4 * j + 2];
+          for (j = 0; j < (unsigned)(rw * rh); j++) sum += px[4 * j] + px[4 * j + 1] + px[4 * j + 2];
           if (n++ < 8) port_log("[p161] frame copy %p (%ux%u) written back for a texture read at +0x%X (frame %u), mean rgb %.1f\n",
-                                (void *)dst, w, H, (unsigned)(t - dst), port_frame_count, sum / 3.0 / (fbc[i].tw * fbc[i].th)); }
+                                (void *)dst, w, H, (unsigned)(t - dst), port_frame_count, sum / 3.0 / (rw * rh)); }
     }
 }
 
