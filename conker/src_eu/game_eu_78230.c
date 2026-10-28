@@ -198,7 +198,7 @@ block_8:
                 temp_a0 = var_a1->unk31C;
                 if (temp_a0 != NULL) {
                     temp_a2 = (u16 *) &g_obj_attached_world_obj + var_t0;
-                    if (var_a1->unk137 != 0) {
+                    if (var_a1->ledge_state != 0) {
                         temp_a3 = *temp_a2;
                         if (temp_a3 != 0) {
                             temp_v1 = (u8 *) g_world_objs + temp_a3 * 0xA0;
@@ -403,7 +403,7 @@ block_64:
 // //             temp_a0 = phi_a1->unk31C;
 // //             if (temp_a0 != 0) {
 // //                 temp_a2 = &D_800CBDA0 + (phi_t0 * 2);
-// //                 if (phi_a1->unk137 != 0) {
+// //                 if (phi_a1->ledge_state != 0) {
 // //                     temp_a3 = *temp_a2;
 // //                     if (temp_a3 != 0) {
 // //                         temp_v0_8 = g_world_objs + (temp_a3 * 0xA0);
@@ -1388,8 +1388,14 @@ extern s32 g_walk_buttons_pressed; /* was D_800CC6AC */
 extern s32 g_walk_buttons_held; /* was D_800CC6B0 */
 extern u8 g_walk_no_run; /* was D_800CC6D1 */
 
+#ifdef PORT
+void ledge_grab_unmarked_filter(struct127 *rec, s32 wall_moves); /* P352, game_eu_71E70.c */
+#endif
 /* was func_1504CB98 */
 void obj_state_walk(struct127 *arg0) {
+#ifdef PORT
+    s32 port_wall_moves = 0;
+#endif
     u16 sp1C6;
     u16 sp1C4;
     u8 sp1C2;
@@ -1426,8 +1432,8 @@ void obj_state_walk(struct127 *arg0) {
     f32 spC4;
     f32 spC0;
     f32 spBC;
-    s16 sp96;
-    f32 sp8C;
+    s16 ledge_heading_steps;   /* was sp96: heading in 1.40625-degree steps */
+    f32 ledge_height;          /* was sp8C */
     f32 sp88;
     s32 sp84;
     f32 *sp64;
@@ -1519,7 +1525,7 @@ void obj_state_walk(struct127 *arg0) {
     s32 var_v0_4;
     s32 var_v0_5;
     s32 var_v0_8;
-    s32 var_v0_9;
+    s32 ledge_side;            /* was var_v0_9: 1 = ledge found on the negative side, 2 = positive */
     s32 var_v1_6;
     s32 var_v1_8;
     s8 temp_a0_2;
@@ -1587,7 +1593,7 @@ void obj_state_walk(struct127 *arg0) {
     u16 temp_a2_2;
     u16 temp_a2_3;
     u16 temp_t1;
-    u16 temp_t4;
+    u16 ledge_heading;         /* was temp_t4 */
     u16 temp_t5;
     u16 temp_t5_2;
     u16 temp_t6;
@@ -2034,10 +2040,10 @@ block_197:
         var_f12 = sp1B0;
     }
     if (((struct49 *)g_cur_pad)->unk3 == 0) {
-        arg0->unk31C->pad53 = 0;
+        arg0->unk31C->ledge_stick_lock = 0;
     }
-    if (arg0->unk137 == 0xFF) {
-        arg0->unk137 = 0;
+    if (arg0->ledge_state == 0xFF) {
+        arg0->ledge_state = 0;
     }
     sp1C1 = 0xC;
     temp_t0_14 = arg0->unk31C;
@@ -2714,7 +2720,7 @@ block_197:
             spC0 = 15.0f;
         }
         temp_v0_35 = arg0->unkF8;
-        if ((temp_v0_35 & 4) && (temp_t0_29 = arg0->unk31C, (temp_t0_29->unk54 <= 0)) && (temp_t0_29->unk6B == 0) && (arg0->unk137 == 0) && (arg0->unk65 == 0) && ((temp_t0_29->unk84 == 0) || (arg0->old_x_position != arg0->x_position) || (arg0->old_y_position != temp_f0_12) || (arg0->old_z_position != arg0->z_position))) {
+        if ((temp_v0_35 & 4) && (temp_t0_29 = arg0->unk31C, (temp_t0_29->unk54 <= 0)) && (temp_t0_29->unk6B == 0) && (arg0->ledge_state == 0) && (arg0->unk65 == 0) && ((temp_t0_29->unk84 == 0) || (arg0->old_x_position != arg0->x_position) || (arg0->old_y_position != temp_f0_12) || (arg0->old_z_position != arg0->z_position))) {
             if (temp_v0_35 & 0x08000000) {
                 g_wall_coll_soft_edges = 1;
             }
@@ -2722,6 +2728,10 @@ block_197:
                 g_wall_coll_no_clamp = 1;
             }
             spBC = arg0->y_velocity;
+#ifdef PORT
+            /* P352 "Ledge grab everywhere": an unmarked ledge only counts when walls moved Conker this frame */
+            port_wall_moves =
+#endif
             collision_obj_walls(arg0->old_x_position, arg0->old_y_position, *(s32 *)&arg0->old_z_position, arg0, 1, 1);
             g_wall_coll_no_clamp = 0;
             g_wall_coll_soft_edges = 0;
@@ -2904,7 +2914,7 @@ block_593:
                         if ((temp_f14 - 80.0f) <= temp_f0_18) {
                             temp_t0_34 = arg0->unk31C;
                             if (!((u8) temp_t0_34->unk95 & 0x80)) {
-                                arg0->unk137 = 2;
+                                arg0->ledge_state = 2;
                                 var_f16_3 = 3.0f;
                                 var_v0_8 = 0x262;
                                 temp_t0_34->unk95 = 0;
@@ -2954,28 +2964,31 @@ block_593:
     temp_t0_36 = arg0->unk31C;
     temp_a2_4 = temp_t0_36->unk4E;
     if (temp_a2_4 == 0) {
-        if ((arg0->unk28 > 5.0f) && (arg0->unk137 == 0) && (arg0->disable_run == 0) && (temp_t0_36->item_kind == 0) && (temp_t0_36->pad17[0] == 0) && (arg0->stunned == 0) && ((*(s16 *)((u8 *)(temp_t0_36) + 0x46)) == 0) && (arg0->in_water == 0) && (arg0->unk13C == 0) && (arg0->unk180 != -10000.0f) && (arg0->health != 0) && ((s16) temp_t0_36->unk8 == 0) && (temp_a2_4 == 0) && (arg0->unk110 == 0) && ((arg0->unk1CC - arg0->y_position) < 450.0f)) {
-            var_v0_9 = 0;
+        if ((arg0->unk28 > 5.0f) && (arg0->ledge_state == 0) && (arg0->disable_run == 0) && (temp_t0_36->item_kind == 0) && (temp_t0_36->pad17[0] == 0) && (arg0->stunned == 0) && ((*(s16 *)((u8 *)(temp_t0_36) + 0x46)) == 0) && (arg0->in_water == 0) && (arg0->unk13C == 0) && (arg0->unk180 != -10000.0f) && (arg0->health != 0) && ((s16) temp_t0_36->unk8 == 0) && (temp_a2_4 == 0) && (arg0->unk110 == 0) && ((arg0->unk1CC - arg0->y_position) < 450.0f)) {
+            ledge_side = 0;
+#ifdef PORT
+            ledge_grab_unmarked_filter(arg0, port_wall_moves);   /* P352: no-op unless the option is on */
+#endif
             if (g_wall_ledge_h_neg != -32768.0f) {
-                sp8C = g_wall_ledge_h_neg;
-                var_v0_9 = 1;
-                sp96 = (s16) (s32) (((arg0->unk40 + g_wall_ledge_angle_neg) - 90.0f) / 1.40625f);
+                ledge_height = g_wall_ledge_h_neg;
+                ledge_side = 1;
+                ledge_heading_steps = (s16) (s32) (((arg0->unk40 + g_wall_ledge_angle_neg) - 90.0f) / 1.40625f);
             } else if ((g_wall_ledge_h_pos != -32768.0f) && (arg0->xz_velocity < 10.0f)) {
-                sp8C = g_wall_ledge_h_pos;
-                var_v0_9 = 2;
-                sp96 = (s16) (s32) ((arg0->unk40 + g_wall_ledge_angle_pos + 90.0f) / 1.40625f);
+                ledge_height = g_wall_ledge_h_pos;
+                ledge_side = 2;
+                ledge_heading_steps = (s16) (s32) ((arg0->unk40 + g_wall_ledge_angle_pos + 90.0f) / 1.40625f);
             }
-            if (var_v0_9 != 0) {
-                temp_t4 = sp96 << 8;
-                arg0->unk76 = temp_t4;
-                arg0->unk7A = temp_t4;
-                arg0->y_position = sp8C - 25.0f;
+            if (ledge_side != 0) {
+                ledge_heading = ledge_heading_steps << 8;
+                arg0->unk76 = ledge_heading;
+                arg0->unk7A = ledge_heading;
+                arg0->y_position = ledge_height - 25.0f;
                 arg0->x_position = g_wall_ledge_grab_x;
                 arg0->z_position = g_wall_ledge_grab_z;
-                temp_t0_36->pad53 = 1;
+                temp_t0_36->ledge_stick_lock = 1;
                 arg0->unk31C->unk55 = 0;
                 arg0->disable_run = 0xFF;
-                arg0->unk137 = 1;
+                arg0->ledge_state = 1;
                 arg0->unk81 = 1;
                 arg0->xz_velocity = 0.0f;
                 arg0->y_velocity = 0.0f;

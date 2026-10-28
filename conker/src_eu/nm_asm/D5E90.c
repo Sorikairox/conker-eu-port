@@ -604,6 +604,10 @@ typedef struct {
     TriPt tv[3];         /* 0x20C its vertices in the box frame */
     f32 ledgeLo, ledgeHi; /* 0x1E0 / 0x1E4 ledges: 64 / 65, the ledge height window */
     f32 ledgeBest;       /* 0x208 ledges: squared xz distance of the nearest ledge so far */
+#ifdef PORT
+    u32 portFlags;       /* P352 option "Ledge grab everywhere": the current triangle's flags */
+    s32 portAnyLedge;    /* P352: 1 = ledge mode takes every level triangle (the mask is 0), 0 = the N64 rule */
+#endif
 } NmwState;
 
 /* move_box (func_150AC6A4): the integer xz box from the position p to the target widened by the margin, y = rint(p y);
@@ -763,6 +767,9 @@ static s32 nmw_next_triangle(NmwState *w) {
             if ((flags & w->mask) != w->mask) {
                 continue;
             }
+#ifdef PORT
+            w->portFlags = flags;
+#endif
             w->noSlope = flags & 0x1000000;
             xz = *(s16 **) g_coll_tri_xz_bounds + t * 4;
             yr = *(s16 **) g_coll_tri_y_bounds;
@@ -992,6 +999,12 @@ static s32 nmw_wall_triangle(NmwState *w) {
  * has an end on each side of the record (x > 0 and x < 0) and |slope| < 4: the grab point is where the line meets
  * the circle of radius^2 g_nmw_ledge_grab_radius_sq (the root on the record's side), stored with the ledge height and the edge's
  * angle in g_wall_ledge_h_neg / g_wall_ledge_angle_neg (icept negative) or g_wall_ledge_h_pos / g_wall_ledge_angle_pos, and g_obj_attached_world_obj[record] = 1. */
+#ifdef PORT
+s32 ledge_grab_everywhere_for(u8 *rec); /* game_eu_71E70.c */
+/* P352 option "Ledge grab everywhere": 1 when the ledge stored on that side (g_wall_ledge_h_neg / _pos) came from a
+ * triangle the level did not mark as a ledge (flags 0x0E000000); obj_state_walk then asks ledge_grab_unmarked_ok. */
+s32 port_ledge_unmarked_neg, port_ledge_unmarked_pos;
+#endif
 static void nmw_ledge_triangle(NmwState *w) {
     u32 *tri = (u32 *) (*(u32 *) g_level_tri_table + w->tri * 12);
     f32 *v = &w->tv[0].x;
@@ -1006,6 +1019,19 @@ static void nmw_ledge_triangle(NmwState *w) {
     if (nmw_tri_misses_box(w->tv, w->half[0], w->half[1], w->half[2])) {
         return;
     }
+#ifdef PORT
+    /* P352 "Ledge grab everywhere": a triangle the level did not mark as a ledge is skipped when the record is under
+     * it (its xz footprint holds the record's x / z = the box origin): that is a floor above the record, not an edge
+     * in front of it. Edges of marked ledges keep the N64 rule. */
+    if (w->portAnyLedge && (w->portFlags & 0x0E000000) != 0x0E000000) {
+        f32 c0 = v[0] * v[5] - v[2] * v[3];
+        f32 c1 = v[3] * v[8] - v[5] * v[6];
+        f32 c2 = v[6] * v[2] - v[8] * v[0];
+        if ((c0 >= 0.0f && c1 >= 0.0f && c2 >= 0.0f) || (c0 <= 0.0f && c1 <= 0.0f && c2 <= 0.0f)) {
+            return;
+        }
+    }
+#endif
     nx = g_tri_plane_nx;
     ny = g_tri_plane_ny;
     nz = g_tri_plane_nz;
@@ -1124,9 +1150,15 @@ static void nmw_ledge_triangle(NmwState *w) {
     if (bestIcept.i < 0) {
         g_wall_ledge_h_neg = height;
         NMW_F32(g_wall_ledge_angle_neg) = ang;
+#ifdef PORT
+        port_ledge_unmarked_neg = (w->portFlags & 0x0E000000) != 0x0E000000;
+#endif
     } else {
         g_wall_ledge_h_pos = height;
         NMW_F32(g_wall_ledge_angle_pos) = ang;
+#ifdef PORT
+        port_ledge_unmarked_pos = (w->portFlags & 0x0E000000) != 0x0E000000;
+#endif
     }
     ((s16 *) g_obj_attached_world_obj)[(s32) (w->rec - (u8 *) g_objects) / NMW_REC_SIZE] = 1;
 }
@@ -1147,6 +1179,17 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
     z.u = zbits;
     w.rec = rec;
     w.mask = ledge ? 0x0E000000 : 0;
+#ifdef PORT
+    /* P352 option "Ledge grab everywhere": the N64 only lets a player catch the edges of triangles the level marks
+     * as ledges (flags 0x0E000000, on a few levels). With the option a single-player player record takes every
+     * level triangle (areas 0 / 1) in ledge mode; world objects (area 2: doors, lifts, water surfaces) keep the rule. */
+    w.portFlags = 0x0E000000;
+    w.portAnyLedge = 0;
+    if (ledge && g_collision_cur_area != 2 && ledge_grab_everywhere_for(rec)) {
+        w.mask = 0;
+        w.portAnyLedge = 1;
+    }
+#endif
     w.vbase = 0;
     w.moved = 0;
     w.mark = mark;

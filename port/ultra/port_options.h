@@ -21,6 +21,8 @@ enum {
     PORT_OPT_AIM_CROSSHAIR = 14, /* centred crosshair in first-person aim kinds that have no aim HUD (aim_hud_spawn_for_mode, P334) */
     PORT_OPT_FREE_CAMERA = 15,  /* right stick / IJKL / mouse orbit the follow camera (free_camera_update, P347); never online */
     PORT_OPT_PHOTO_MODE = 16,   /* photo mode: freeze, free camera, no HUD, PNG (pc_photo.c, P348); never online */
+    PORT_OPT_LEDGE_GRAB = 17,   /* single player: Conker catches any ledge, not only the ones the level marks; Z lets go,
+                                 * stick left / right shimmies (collision_ledge_probe, ledge_shimmy_step, P352) */
     /* P332 sliders: the value is a percentage 0..100 (default 100 = N64); game C scales with port_volume_scale */
     PORT_OPT_VOL_MUSIC = 9,     /* sequenced music: __n_vsVol */
     PORT_OPT_VOL_SFX = 10,      /* sound player effects: SND_VOL155 (n_sndp_handle_event) */

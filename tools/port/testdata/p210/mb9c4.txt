@@ -33,7 +33,7 @@ s/obj->unk31C->unk95 = 0;/;/
 s/obj->unk31C->unk6B = 0;/;/
 s/if (obj->unk31C->pad98\[0\] != 0) {/if (obj->unk31C->pad98[0] == 0) {/
 s/obj->unk31C->unk54 = 0;/;/
-s/        obj->unk137 = 0;/        ;/
+s/        obj->ledge_state = 0;/        ;/
 s/\&g_objects\[(u8)(obj->unk65 - 1)\]/\&g_objects[(u8)(obj->unk65)]/
 s/(id != 0x8A \&\& id != 0x23)/(id != 0x8A)/
 s/|| obj->health == 0 ||/||/

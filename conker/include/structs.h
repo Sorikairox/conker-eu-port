@@ -940,7 +940,7 @@ typedef struct {
     u8  unk4E;
     u8  pad4F[0x3];
     u8  unk52;
-    u8  pad53;
+    u8  ledge_stick_lock; /* was pad53: set when Conker catches a ledge, cleared once stick y is centred: the hang ignores the stick until then */
     s8  unk54;
     s8  unk55;
     u8  pad56;
@@ -1204,7 +1204,7 @@ struct struct127 {
     u8  unk134;
     u8  unk135;
     u8  unk136;
-    u8  unk137;
+    u8  ledge_state; /* was unk137: 0 none, 1 hanging from a ledge, 2 pulling up, 0xFF just landed from a pull-up */
     u8  unk138;
     u8  pad139;
     u8  unk13A;
