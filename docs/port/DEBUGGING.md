@@ -105,3 +105,13 @@ A is stored at `A ^ 3`, the halfword at `A ^ 2`. The debugger doesn't know this,
 - Five TUs are compiled from a patched copy (port/tools/srcfix.py). Their DWARF points at the original file with the
   same line numbers, but a patched line can look different from what runs.
 - Functions that only exist as asm stubs (`port/stubs/asm_stubs.c`) have no source.
+
+## Write watchpoint (P353)
+
+DevTools has no data watchpoints for wasm. `DBG_WATCH=1 tools/port/scripts/debug_build.sh build` makes every store of
+game code call `__port_wstore` first (port/tools/vbe.py `dbg_watch`, port/ultra/pc_nethash.c). Run the debug build with
+`?watch=ADDR` (hex; an N64 address `8xxxxxxx` or a wasm address) and optionally `&watchlen=N` (hex bytes, default 4)
+and `&watchmax=N` (hits, default 40): each store that touches the range logs `[watch] retrace R: n-byte store at A, old
+word W` and a JS stack with the C function names. Headless example (port 8753 is arbitrary):
+`WEB=$PWD/port/build-dbg/tree/port/build/web tools/port/scripts/cshot.sh out.png 450 200 '&watch=80145B8C'` then read
+`out.log`. PC-layer writes (audio HLE, renderer) are not instrumented.

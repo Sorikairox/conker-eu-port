@@ -190,8 +190,10 @@ allocator's arithmetic stays consistent. Three things break:
 1. **Integer constants that are addresses** in C (`0x80400000`, `(void *)0x80000400`). They need
    `port_n64_to_wasm()` or a macro wrapper (PLAN 3.2).
 2. **Masking a pointer**, as in `K0_TO_PHYS(p)` / `p & 0x1FFFFFFF` / `| 0xA0000000`. The mirror base
-   is not 0x80000000. The physical address of `p` is `port_wasm_to_n64(p) & 0x1FFFFFFF`. The PC
-   `osVirtualToPhysical` returns the wasm address, which is what the PC renderer and audio need.
+   is not 0x80000000. The physical address of `p` is `port_wasm_to_n64(p) & 0x1FFFFFFF`. Since P353 the PC
+   `osVirtualToPhysical` returns exactly that for a mirror pointer (N64 physical, 0..8 MB) and the wasm address for
+   anything else; the renderer (`phys`), the audio HLE (`aud_dram`) and the SI DMA map values below 8 MB back into
+   the mirror. See "Layout independence" below.
 3. **Writes through NULL.** Stubs return 0, so the game writes through null pointers. wasm
    addresses below 256 MB are kept free (`-sGLOBAL_BASE=256MB` since P8; it was 16 MB before) as a
    null zone, and `port_mem_null_report()` counts what landed in its first 16 MB. On the N64 these
@@ -277,7 +279,7 @@ rewrites each known site in the IR. Game `.c` files are not changed. Every site 
 | func_15002008 (game_eu_2F180, leaf lists) | `(u32)p < 0x80000001` → vertex = (0, 0, 0) | `(u32)p < 0x10000000` | `k0_ptr_sites` (P42) |
 | func_15002248 (game_eu_2F180, quadtree helper) | `(u32)p < 0x80000001` → vertex = (0, 0, 0) | `(u32)p < 0x10000000` | `k0_ptr_sites` (P42) |
 | func_15004CE0 (game_30E90, MOVEMEM 0x0E relocation) | `unk4 < 0x80000000` → add the base | `unk4 < 0x10000000` | `k0_ptr_sites` (P42); its caller func_150039E0 is still asm, so not run yet |
-| func_151F3C4C (libultra/audio game_21FC90, mixer read callback) | `p = dma(..) + 0x80000000` (PHYS_TO_K0) | `+ 0` (the PC dma proc returns the wasm address) | `k0_add_sites` (P185) |
+| func_151F3C4C (libultra/audio game_21FC90, mixer read callback) | `p = dma(..) + 0x80000000` (PHYS_TO_K0) | `+ n64_rdram` (the dma proc returns the N64 physical address since P353) | `#ifdef PORT` in the C (P353; was `k0_add_sites`, P185) |
 
 `k0_ptr_sites` is scoped by function name and logs a warning to stderr if the number of rewritten compares
 differs from the expected count (1 per function). Without the P42 rewrites, every level triangle would read as
@@ -287,7 +289,8 @@ Checked and **not** rewritten: func_15001460 (game_2DF70, level-DL triangle scan
 `(u32)verts[0] >= 0x100001`. Wasm pointers pass that test, and area-2 object vertex offsets (≤ 0x100000) fail it,
 as on the N64. Its G_VTX segment test `(addr >> 24) & 0xF` is 0 for every wasm address in the RDRAM mirror
 (0x105xxxxx..0x10Dxxxxx). Addresses at 0x11000000 and above would read as segments 1..15, so the mirror must stay
-below 0x11000000.
+below 0x11000000. (From P337 to P352 it was not: the fiber pools pushed it to 0x11711000, then 0x12058000. Since P353
+it is linked first and 8 MB aligned, at 0x10800000..0x10FFFFFF.)
 
 **Hardware reads with a computed address (P42):** `IO_READ(osRomBase | dev)` is `or x, 0xA0000000` → inttoptr →
 volatile load. `vbe.py rcp_io` now turns that load into `__port_io_read(x)` as well, and the register model
@@ -411,3 +414,46 @@ twice with different arity.
 fixed-size slot padded to a multiple of 4 bytes (`<{ T, [n x i8] }>`). So no two locals share a word. Before P185
 clang packed 1- / 2-byte locals into one word: a 32-bit store through a 2-aligned `s16 x[2]` passed as `s32 *`
 overwrote the neighbouring s16 parameter copy (P178, func_1509B8FC: every event struct had id 0).
+
+### Layout independence (session P353)
+
+**The bug.** Game behaviour depended on where wasm-ld placed `n64_rdram`: 512 unused bytes of bss in the renderer
+(mirror moved by 0x1000) changed the title menu's character shading and a scripted 4-player game; an unused 1 MB
+static changed Conker's tail on level 0x29. Three causes, all the "masking a pointer" class above:
+
+| cause | N64 | port before | fix |
+|---|---|---|---|
+| `n64mem.py` relocated 20 ROM data words in 0x80000400..0x80029400 that only look like KSEG0 addresses (u16 pairs; `g_acos_table_coarse[0..1]` = 32768, 32442 = 0x80007EBA) | plain numbers | host pointers: acos(0) = 4613 (high half of the pointer) and entry 1 = the pointer's low half, which depended on the mirror's address mod 64 KB: the light / facing angles of the menu characters, the tail, the MP cameras | P352 a3dee099: the window starts at 0x80029400 |
+| `heap_alloc_tagged` aligns block addresses up to 8 KB (`g_heap_align_mask`) | relative to RAM address 0 | relative to the wasm address of a 4 KB aligned mirror: the heap layout (every later allocation) moved with the mirror mod 8 KB | `HEAP_ALIGN` aligns the mirror offset (#ifdef PORT, init_3C40.c) |
+| `osVirtualToPhysical` / `K0_TO_PHYS` results kept as numbers: 24-bit audio ABI operands (ADPCM / RESAMPLE / ENVMIXER / POLEF states, books, loop states, LOADBUFF / SAVEBUFF), `audio_frame_build`'s `(end & 0x1FFF) == 0` | physical 0..8 MB | the wasm address (or its low 24 bits) | `osVirtualToPhysical` gives the N64 physical address of a mirror pointer; `n_adpcm_pull` / `n_adpcm_decode_chunk` use it instead of `& 0x1FFFFFFF`; consumers map < 8 MB into the mirror |
+
+**Structural fix.** `n64_rdram` is now 8 MB aligned (`.p2align 23`, n64mem.py) and its object is linked first
+(port/Makefile), so it sits at **0x10800000** in every build: no other static change can move it, a mirror pointer has
+the low 23 bits of its N64 address (alignment, masks up to 0x7FFFFF and stale pointer bytes behave as on the console),
+and `(addr >> 24) & 0xF` is 0 for mirror pointers again (collision_scan_level_dl's G_VTX segment test). Cost: the gap
+0x10044000..0x10800000 is reserved address space only (never written, no committed pages). The mirror stays there as
+long as .rodata + .data end below 0x10800000 (today 0x10044000).
+
+**Test knob.** `make RDRAM_SHIFT=N` (`port/web/run.sh build RDRAM_SHIFT=0x1000`; a multiple of 4 KB, at most
+RDRAM_SPAN = 16 MB) moves the mirror by N and nothing else: pads before and after it sum to a constant. `?layhash=F` logs a
+per-retrace hash ("R" mirrors, "G" other hashed globals, "S" thread stacks) in which a word that may point into a
+mirror counts as a marker + its low 12 bits; it is a quick indicator only, because a data word whose value happens to
+lie in one build's mirror range is hashed differently in the other (rodata constants such as 0x11000000). The verdict
+comes from memory dumps: `tools/port/layout_diff.py` compares two dumps word by word with mirror pointers paired by
+N64 offset (equal raw values are equal), and classifies what is left: **stale pointer fragments** (some byte-aligned window of at least 8 bits
+of the two words differs by exactly the mirror displacement, or that plus a carry, and the rest is equal: bytes of a freed heap block's
+next / prev pointers, or of an earlier stack frame, that the new owner never overwrote; on the N64 they hold N64
+address bytes), **address text** (ASCII hex of a pointer in a log buffer) and **real** differences.
+`tools/port/scripts/layout_cmp.sh` builds shifts, runs a route (menu, run29, mp, short) on each, and requires
+pixel-identical 640x480 canvas shots and no real difference; `layout_cmp.sh check` is the short regression
+(shifts 0x0 and 0x123000, title menu at retrace 300).
+
+**Write watchpoint.** `DBG_WATCH=1 tools/port/scripts/debug_build.sh build` instruments every store of game code
+(vbe.py `dbg_watch`); `?watch=ADDR` (N64 or wasm, hex) `&watchlen=N&watchmax=N` logs each store into the range with a
+JS stack. This found the stale fragments (`node_alloc` / `light_ctrl_alloc` filling only some bytes of a word that
+held a heap pointer, `n_csp_set_bank` copying an uninitialized stack event into the event queue).
+
+**What still depends on the layout (by design, harmless as far as tested).** Stale bytes of old pointers in heap
+blocks and stack frames, which the game overwrites before use (no picture or game-visible difference on the three
+routes); they could only matter for code that reads uninitialized memory, and with the fixed mirror address they are
+the same in every build.

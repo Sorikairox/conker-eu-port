@@ -63,13 +63,12 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
 - port_cdata name strings (n64mem_tab.c) still print the original D_ names (n64mem.py, RENAMED_FROM).
-- P350 found (P352: probably fixed by a3dee099, the n64mem relocation of data words below 0x80029400): the game depends on the static memory layout.
-  n64_rdram by 0x1000; an 8 MB shift only changes 1 pixel) changes the title menu's character shading and the MP game
-  (camera / positions after the 4-pad script). Same build = same behaviour (online is safe), but any static change makes
-  "identical to HEAD" checks fail on those scenes. Suspect a wasm pointer masked with 0x7FFFFF / KSEG and re-mapped
-  through the n64_rdram mirror. Repro: port_work/p350/headcmp (menu_v12 vs menu_head).
-  P351: Conker's tail pose after a scripted run also changes with the layout (HEAD + an unused 1 MB static); HEAD padded
-  so that n64_rdram sits at the same address gives pixel-identical frames (port_work/p351/headcmp), a useful method.
+- Layout dependence (P350 / P351 open item): closed in P353. Causes: a3dee099 (P352, ROM data words relocated as
+  pointers: acos table), heap 8 KB alignment relative to the wasm address, osVirtualToPhysical returning wasm
+  addresses; and n64_rdram now sits at a fixed 8 MB aligned address (0x10800000) whatever else changes. Regression:
+  `tools/eu_port/check.sh --layout` (or `tools/port/scripts/layout_cmp.sh check`); docs/port/MEMORY.md "Layout
+  independence". Left: stale pointer bytes in reused heap blocks / stack frames still differ between forced shifts
+  (unread as far as the three routes show; identical in every real build since the mirror no longer moves).
 - Single-retrace H blips in ?nethash runs (non-netdet) differ run to run, with or without options; netpair (netdet) shows
   none. Not explained.
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
@@ -89,6 +88,25 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P353 (eu-wt-layout, 2026-10-29): layout independence of the n64_rdram mirror
+- Test aids: `make RDRAM_SHIFT=N` (port/Makefile; moves only the mirror), `?layhash=F` (pc_nethash.c, indicator),
+  `tools/port/scripts/layout_cmp.sh build|run|check` (routes menu / run29 / mp / short; verdict = pixel-identical 640x480
+  shot + memory dump diff by tools/port/layout_diff.py: mirror pointers paired by N64 offset, leftovers classified as
+  stale pointer fragments / address text / REAL), `check.sh --layout`, debug write watchpoint
+  (`DBG_WATCH=1 debug_build.sh build`, `?watch=ADDR`, docs/port/DEBUGGING.md). Test scripts and check.sh now run in the
+  worktree they live in (they all did `cd ~/conker-wt/web`), PROBE_NOWAIT / PROBE_PORT.
+- Causes found (shift 0 vs 0x1000 / 0x2000 / 0x10000 / 0x100000 bisected the menu shading to the mirror address mod
+  64 KB): (1) acos table entries relocated as pointers (P352 a3dee099, cherry-picked); (2) 1aaa7504 heap_alloc_tagged
+  aligned 8 KB blocks on the wasm address (heap layout moved by 0x1000); (3) 6a07e72b osVirtualToPhysical / K0_TO_PHYS
+  gave wasm addresses to the audio command lists (hundreds of state words per frame); (4) 489d4576 the mirror is linked
+  first and 8 MB aligned at 0x10800000 (was 0x12058000: also broke the < 0x11000000 rule of collision_scan_level_dl).
+- Proof (merged tree, port_work/p353/full2.txt): shifts 0x1000, 0x123000, 0x800000 vs 0: title menu @450, warp 0x29 walk
+  @800, 4-player Bunker @7250 all pixel-identical, memory differences only stale pointer fragments (menu 248 / 250 / 34
+  words, run29 115 / 116 / 19, mp 203 / 204 / 28). Reverting the heap fix makes `layout_cmp.sh check` fail.
+- Which layout was right: neither. In HEAD the acos table's first two entries were the halves of a wasm pointer
+  (0x1205, 0xFEBA at mirror 0x12058000; 0x1206, 0x0EBA one page up) instead of 32768, 32442, so the menu shading and
+  the tail pose were wrong in every shipped layout; with the fixes the table is the ROM's.
+- check.sh --layout GREEN, hold-L 5789 / 0x29 at 5795 no traps, netpair 2 players 14944 retraces IDENTICAL.
 ### P354 (port-web, 2026-10-29): trailer "Conker's Good Fur Day" (tooling only, page unchanged)
 - 6ac09dd7 tools/port/trailer (outputs in port_work/trailer, gitignored, ROM-derived): final
   port_work/trailer/conkers_good_fur_day_trailer.mp4 (43.07 s, 1920x1080, 60 fps, H.264 High ~13.4 Mbit/s + AAC 48 kHz
