@@ -25,6 +25,16 @@ typedef struct HeapBlock {
 #define HEAP_FREE_HEAD (*(HeapBlock **)&g_heap_free_head)
 #define HEAP_FREE_TAIL (*(HeapBlock **)&g_heap_free_tail)
 #define HEAP_LAST      (*(HeapBlock **)&g_heap_head)
+#ifdef PORT
+/* P353: the N64 aligns a block address relative to RDRAM address 0 (alignment classes up to 8 KB, g_heap_align_mask[4]
+ * = 0xE000). The heap lives in the n64_rdram mirror, which is only 4 KB aligned in wasm memory, so aligning the wasm
+ * address put 8 KB-aligned blocks (and with them the whole heap layout) at N64 offsets that depended on where the
+ * linker placed the mirror. Align the offset inside the mirror instead: the same N64 addresses as on the console. */
+extern u8 n64_rdram[];
+#define HEAP_ALIGN(a, m) ((u32)n64_rdram + (((u32)(a) - (u32)n64_rdram) & (m)))
+#else
+#define HEAP_ALIGN(a, m) ((u32)(a) & (m))
+#endif
 extern s16 g_heap_align_add[5];   /* alignment: added to the data address; was D_8002AF74 */
 extern s16 g_heap_align_mask[5];   /* alignment: mask; was D_8002AF80 */
 extern struct54 *g_heap_free_tail; /* was D_8003841C */
@@ -82,7 +92,7 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             }
             return 0;
         }
-        aligned = ((u32)block + alignAdd + HEAP_HDR) & alignMask;
+        aligned = HEAP_ALIGN((u32)block + alignAdd + HEAP_HDR, alignMask);
         end = (u32)block + block->info + HEAP_HDR;
         if (end >= aligned + size) {
             break;
@@ -95,7 +105,7 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         rest = (HeapBlock *)((u32)newb + size + HEAP_HDR);
         restSize = ((u32)block + block->info) - ((u32)newb + size);
     } else {
-        newb = (HeapBlock *)(((((u32)block + block->info) - size + HEAP_HDR) & alignMask) - HEAP_HDR);
+        newb = (HeapBlock *)(HEAP_ALIGN(((u32)block + block->info) - size + HEAP_HDR, alignMask) - HEAP_HDR);
         rest = block->next;
         restSize = (u32)newb - (u32)block;
     }
@@ -165,7 +175,7 @@ s32 heap_alloc_tagged(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         block->info = restSize - HEAP_HDR;
     } else {
         /* take the whole block, aligned from its bottom */
-        newb = (HeapBlock *)((((u32)block + alignAdd + HEAP_HDR) & alignMask) - HEAP_HDR);
+        newb = (HeapBlock *)(HEAP_ALIGN((u32)block + alignAdd + HEAP_HDR, alignMask) - HEAP_HDR);
         newb->next = rest;
         newb->prev = prev;
         newb->info = (arg1 << 24) | (end - (u32)newb - HEAP_HDR);
