@@ -440,6 +440,7 @@ void port_retrace_once(void) { retrace(); }
  * node runs as fast as its setTimeout shim allows; the ?det clock advances 1/50 s per retrace for PAL). */
 #define VI_MAX_STEPS 4
 #define VI_TICK_MS 33.0
+void port_gfx_hfr_present(double pos, int net);   /* P351 option High frame rate (gfx_f3dex2.c) */
 int port_tv_type = 1; /* P147: osTvType as set at boot (port/boot/game_main.c; the scheduler demo stays NTSC) */
 double port_vi_period_ms(void) { return port_tv_type == 0 ? 20.0 : 1000.0 / 59.94; }
 static void frame(void) {
@@ -452,7 +453,8 @@ static void frame(void) {
     if (port_photo_state) { last_tick_ms = 0; port_photo_tick(); return; }
     /* P338 online: the frame barrier. Retrace N runs only when every peer's input for N is in the ring (pc_net.c);
      * otherwise the tick presents the last frame and the backlog waits (clamped below). */
-    if (!pacing_mode) { if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled(1); return; } retrace(); port_video_frame(); return; }
+    if (!pacing_mode) { if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled(1); return; } retrace(); port_video_frame();
+                        port_gfx_hfr_present(port_frame_count, port_net_on); return; }   /* P351: one tick = one retrace here */
     double now_ms = emscripten_get_now(), period_ms = port_vi_period_ms();
     if (!last_tick_ms) { last_tick_ms = now_ms - period_ms; backlog_ms = 0; }  /* first tick / after a pause: one retrace, no catch-up */
     double elapsed_ms = now_ms - last_tick_ms; last_tick_ms = now_ms;
@@ -467,6 +469,9 @@ static void frame(void) {
     }
     if (backlog_ms > 2 * period_ms) backlog_ms = 2 * period_ms;
     if (retraces_run) port_video_frame();
+    /* P351 High frame rate: the picture for this tick, between the last two game frames at the display time (retraces run +
+     * the part of the next retrace already elapsed); the renderer does nothing with the option off */
+    port_gfx_hfr_present(port_frame_count + backlog_ms / period_ms, port_net_on);
 }
 
 /* P339 online: net.js calls this when a packet brings the input a stalled session waits for, so the retrace runs at

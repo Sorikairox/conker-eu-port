@@ -94,6 +94,9 @@ const OPTIONS = [
   // P351: page-side (the canvas size; the renderer follows it), each player's own choice online.
   { key: 'fullres', label: 'Full-resolution picture', def: false,
     help: 'The game is drawn at the real resolution of its place on your screen (the size of the picture times the display\'s pixel ratio, at most 2560 x 1440), instead of 640 x 480 scaled up: sharper 3D edges and textures, and with Hi-res menus and 2D, sharper menus and text. Same picture otherwise. Needs a faster graphics card at large sizes. Off: 640 x 480 (or 480 rows high in widescreen).' },
+  // P351: page-side (port_gfx_hfr in the renderer, outside the online hash): each player's own choice online.
+  { key: 'hfr', label: 'High frame rate (smooth motion)', def: false,
+    help: 'The picture is redrawn at your display\'s refresh rate (60, 120, 144 Hz ...) instead of the game\'s 12 to 25 frames per second: the camera, Conker, characters and moving objects glide smoothly between two game frames. The game itself runs exactly as before. The picture runs up to one game frame (40 to 80 ms) behind, camera cuts and teleports jump as before, and the HUD, text, particles and shadows still move at the game\'s rate. Needs more graphics work (each picture is drawn again). Off: as on the N64, one picture per game frame.' },
   { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
   { key: 'rumble', label: 'Rumble (gamepad vibration)', def: false, game: 13,
@@ -125,7 +128,8 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // Modern = Classic + the options that add information or remove waiting without making the game easier or changing
 //   how it controls: skip intro, autosave icon, health / cash always visible, air meter, crosshair, full-detail Conker,
 //   rumble, (P349) hi-res menus and 2D (a sharper picture with the N64's layout and colours) and (P350) widescreen (more
-//   of the scene at the sides; the game logic keeps its 4:3 view) and (P351) the full-resolution picture. Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
+//   of the scene at the sides; the game logic keeps its 4:3 view), (P351) the full-resolution picture and (P351) the high
+//   frame rate (smooth motion between game frames; costs about one game frame of extra delay, which suits this game). Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
 //   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes), free camera (P347: it changes
 //   what the right stick and IJKL do, a control choice like the toggles).
 // Custom = anything else. The preset shown is stored in 'opt.preset' (changing one option stores 'custom'); a stored
@@ -133,11 +137,11 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
 const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode').map((o) => o.key);
-const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'widescreen', 'fullres'];
+const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'widescreen', 'fullres', 'hfr'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
     values: (o) => (o.range ? 100 : o.key === 'skipcut') },
-  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D, widescreen, full-resolution picture.',
+  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D, widescreen, full-resolution picture, high frame rate.',
     values: (o) => (o.range ? 100 : PRESET_MODERN_ON.includes(o.key)) },
   custom: { label: 'Custom', help: 'Your own mix: pick Classic or Modern to set every option at once.' },
 };
@@ -666,6 +670,7 @@ function pollInput() {
       if (mouseLook.dx || mouseLook.dy) { H[c + 2] += mouseLook.dx; H[c + 3] += mouseLook.dy; mouseLook.dx = mouseLook.dy = 0; }
     }
   }
+  if (M && M._port_gfx_hfr_vsync) M._port_gfx_hfr_vsync();   // P351: online the game loop is a 4 ms timer: one smooth picture per animation frame
   requestAnimationFrame(pollInput);
 }
 requestAnimationFrame(pollInput);
@@ -864,6 +869,7 @@ function portRumble(ch, on) {
 }
 function rumbleStopAll() { for (let ch = 0; ch < 4; ch++) if (rumbleMotor[ch]) rumbleSet(ch, false); }
 optionChanged.hires2d = (on) => { if (M && M._port_gfx_hires_2d) M._port_gfx_hires_2d(on ? 1 : 0); };   // P349: takes effect at the next frame
+optionChanged.hfr = (on) => { if (M && M._port_gfx_hfr) M._port_gfx_hfr(on ? 1 : 0); };   // P351: from the next game frame on
 // P350 option "Widescreen": the picture's aspect. Off: 4:3, canvas 640 x 480 (as before). On: the aspect of the space the
 // page gives the picture (the stage, or the screen in fullscreen), between 4:3 and 21:9 (64:27), with the canvas 480 rows
 // high and as wide as that aspect needs; the renderer (port_gfx_widescreen, gfx_f3dex2.c ws_calc) widens the 3D view to
@@ -1261,6 +1267,7 @@ async function start(app) {
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
   optionChanged.hires2d(opt('hires2d'));   // P349: the renderer's switch (page-side option)
+  optionChanged.hfr(opt('hfr'));           // P351: the renderer's switch (page-side option)
   layoutScreen();                          // P350: the renderer's widescreen switch
   optionsLocked = NETDET || !!netCfg;
   if (optionsLocked) showSessionOptions();   // P346: the panel shows the session's (the host's) options, disabled

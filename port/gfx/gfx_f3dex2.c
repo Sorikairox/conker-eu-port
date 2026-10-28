@@ -24,6 +24,16 @@ void port_log(const char *fmt, ...);
 GfxStats gfx_stats;
 int gfx_measure_only;
 unsigned gfx_tex_unresolved_segs; /* viewer: segments whose textures the engine would resolve */
+/* P351 option "High frame rate" (the hfr_* section before gfx_run_dl explains it): hfr_mode 0 = a normal task, 1 = a
+ * game frame's task being drawn and recorded, 2 = that task drawn again (a replay) with interpolated matrices;
+ * hfr_drop = during a replay, the colour image is not the screen (an offscreen / kept image): its draws are dropped. */
+static int hfr_opt, hfr_mode, hfr_drop;
+#include <emscripten/heap.h>
+static unsigned char *hfr_addr_ok(unsigned char *p) {   /* 0 for an address a read of up to 8 KB could take outside memory */
+    return p && (uintptr_t)p >= 0x1000 && (uintptr_t)p + 0x2000 <= emscripten_get_heap_size() ? p : 0;
+}
+static unsigned hfr_tgen0, hfr_tgen1;   /* tmem_gen before / after the recording */
+static int hfr_fx;   /* the recorded task used the screen / kept images as textures (motion blur, pause frame, lens): no replay */
 
 /* ------------------------------------------------------------------ addresses */
 static unsigned segtab[16], segset;
@@ -43,6 +53,13 @@ static unsigned char *phys(unsigned a) {
 
 static unsigned fr_ops[256], fr_seguse[16];  /* P23: per-frame opcode histogram and segment references */
 void *gfx_addr(unsigned a) {
+    if (hfr_mode == 2) {
+        unsigned char *gfx_addr_raw(unsigned a);
+        return hfr_addr_ok(gfx_addr_raw(a));
+    }
+    return gfx_addr_raw(a);
+}
+unsigned char *gfx_addr_raw(unsigned a) {
     if (a >= PORT_WASM_BASE) return phys(a);
     unsigned seg = a >> 24;
     if (seg < 16) fr_seguse[seg]++;
@@ -614,8 +631,10 @@ EMSCRIPTEN_KEEPALIVE void port_gfx_resize(int w, int h) {
  * 0 (alpha 0) and the ALPHA_CVG_SEL ground of level 0x29 (CI4 64x32 mips, cc 26A004/151092FF) was cut away where it
  * used level 1: the sky quad (first draw) showed through as a green patch. Now: a better mixed hash, 8-way probing,
  * and an entry bound by the current apply_state (stamp) is never evicted. ?p193oldtc=1 = the old direct-mapped cache. */
-typedef struct { unsigned key[6]; GLuint tex; unsigned stamp; } TexEnt;
-static TexEnt tcache[256];
+typedef struct { unsigned key[6]; GLuint tex; unsigned stamp, used; } TexEnt;   /* P351: used = last use (LRU victim with High frame rate) */
+/* P351: 2048 entries; 256 of them (the P193 cache) are used unless the High frame rate option is on: a game frame decodes
+ * a few hundred textures (every TMEM load is a new generation), and its replays find them only if they are still cached */
+static TexEnt tcache[2048];
 static unsigned tc_stamp = 1;   /* bumped by apply_state: entries bound for the pending draw carry it */
 static unsigned char texbuf[1024 * 1024 * 4 / 4];
 
@@ -690,16 +709,19 @@ static GLuint tex_for(int ti, unsigned *w, unsigned *h) {
     else {
         unsigned m = key[0];
         for (int i = 1; i < 4; i++) m = (m ^ key[i]) * 2654435761u, m ^= m >> 15;
-        hsh = m >> 24;
+        unsigned tmask = hfr_opt ? 2047 : 255;   /* P351 */
+        hsh = hfr_opt ? m >> 21 : m >> 24;
         TexEnt *victim = 0;
         e = 0;
-        for (unsigned i = 0; i < 8; i++) {
-            TexEnt *c = &tcache[(hsh + i) & 255];
+        static unsigned tc_clock;
+        for (unsigned i = 0; i < (hfr_opt ? 16u : 8u); i++) {
+            TexEnt *c = &tcache[(hsh + i) & tmask];
             if (c->tex && !memcmp(c->key, key, sizeof key)) { e = c; break; }
-            if (!victim && c->stamp != tc_stamp) victim = c;   /* first free / not used by the pending draw */
+            if (hfr_opt) { if (c->stamp != tc_stamp && (!victim || !c->tex || (victim->tex && c->used < victim->used))) victim = c; }   /* P351: least recently used */
+            else if (!victim && c->stamp != tc_stamp) victim = c;   /* first free / not used by the pending draw */
         }
         if (!e) e = victim ? victim : &tcache[hsh];
-        e->stamp = tc_stamp;
+        e->stamp = tc_stamp; e->used = ++tc_clock;
     }
     if (p193_k >= 0 && p193_k < 6) { p193_bind[p193_k][0] = ti; p193_bind[p193_k][2] = hsh; p193_bind[p193_k][5] = *w | *h << 16; }
     if (e->tex && !memcmp(e->key, key, sizeof key)) { if (p193_k >= 0 && p193_k < 6) { p193_bind[p193_k][1] = e->tex; p193_bind[p193_k][3] = 1; } return e->tex; }
@@ -983,6 +1005,7 @@ static void p78_density(void) {
                     nbatch / 3, n, tex_tile, dmin, ssum / n, dmax);
 }
 static void flush(void) {
+    if (hfr_drop) { nbatch = 0; return; }   /* P351: a replay draws only on the screen */
     if (draw_log && nbatch) draw_log_line();
     if (nbatch) p78_density();
     if (nbatch) p193_idx++;
@@ -1163,6 +1186,9 @@ static int hx_logging(void) { static int f = -1, n; if (f < 0) f = port_flag("p3
 #define FBC_N 4
 static struct { unsigned char *p; unsigned w, rows; GLuint tex, fbo; int tw, th, dirty; float y0, h; unsigned age; float ox, bw; } fbc[FBC_N];   /* P350: ox / bw the 4:3 picture in the copy */
 static unsigned char *fbc_task_p; static unsigned fbc_task_w, fbc_clock;
+/* P351: with the High frame rate option, fbc_task_end keeps the copy it replaces (what that image held before its last
+ * task: the picture the task started from, fbc_restore) for the replays of that task */
+static struct { GLuint tex; int tw, th; unsigned char *p; } fbc_pre[FBC_N];
 static int fbc_off = -1, fbc_log = -1;   /* ?p161log=F: log copies / hits from retrace F (200 lines) */
 static int fbc_logging(void) { static int n; if (fbc_log < 0) fbc_log = port_flag("p161log");
     return fbc_log > 0 && port_frame_count >= (unsigned)fbc_log && n++ < 200; }
@@ -1173,7 +1199,13 @@ static void fbc_task_end(void) {
     for (i = 0; i < FBC_N; i++) if (fbc[i].p == p) s = i;
     if (s < 0) { s = 0; for (i = 1; i < FBC_N; i++) if (fbc[i].age < fbc[s].age) s = i; fbc[s].p = p; }
     flush();
-    if (!fbc[s].tex) { glGenTextures(1, &fbc[s].tex); glGenFramebuffers(1, &fbc[s].fbo); }
+    if (hfr_opt && fbc[s].tex) {   /* P351: the copy the next task of this image starts from goes on in fbc_pre (replays start from it) */
+        GLuint tx = fbc_pre[s].tex; int tw = fbc_pre[s].tw, th = fbc_pre[s].th;
+        fbc_pre[s].tex = fbc[s].tex; fbc_pre[s].tw = fbc[s].tw; fbc_pre[s].th = fbc[s].th; fbc_pre[s].p = fbc[s].p;
+        fbc[s].tex = tx; fbc[s].tw = tw; fbc[s].th = th;
+    }
+    if (!fbc[s].fbo) glGenFramebuffers(1, &fbc[s].fbo);
+    if (!fbc[s].tex) { glGenTextures(1, &fbc[s].tex); fbc[s].tw = fbc[s].th = 0; }
     glBindTexture(GL_TEXTURE_2D, fbc[s].tex);
     if (fbc[s].tw != canvas_w || fbc[s].th != canvas_h) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, canvas_w, canvas_h, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
@@ -1198,10 +1230,15 @@ static void fbc_restore(const unsigned char *p) {
     if (norestore < 0) norestore = port_flag("p161norestore");
     if (norestore || !gl_ok || gfx_measure_only || fbc_off || off_on) return;
     for (i = 0; i < FBC_N; i++) {
-        if (fbc[i].p != p || !fbc[i].tex || fbc[i].tw != canvas_w || fbc[i].th != canvas_h) continue;
+        GLuint tex = fbc[i].tex; int tw = fbc[i].tw, th = fbc[i].th;
+        if (hfr_mode == 2) {   /* P351: a replay starts from what the recorded task started from */
+            if (fbc_pre[i].p != p) continue;
+            tex = fbc_pre[i].tex; tw = fbc_pre[i].tw; th = fbc_pre[i].th;
+        }
+        if (fbc[i].p != p || !tex || tw != canvas_w || th != canvas_h) continue;
         flush();
         glBindFramebuffer(GL_READ_FRAMEBUFFER, fbc[i].fbo);
-        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbc[i].tex, 0);
+        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glDisable(GL_SCISSOR_TEST);
         glBlitFramebuffer(0, 0, canvas_w, canvas_h, 0, 0, canvas_w, canvas_h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
@@ -1213,6 +1250,7 @@ static void fbc_restore(const unsigned char *p) {
 static void fbc_check_timg(const unsigned char *t) {
     static unsigned char px[1280 * 960 * 4];
     int i;
+    if (hfr_mode == 2) return;   /* P351: a replay changes no game memory */
     for (i = 0; i < FBC_N; i++) {
         unsigned char *dst = fbc[i].p; unsigned w = fbc[i].w, H = fbc[i].rows, x, y;
         if (!dst || t < dst || t >= dst + 2 * w * H) continue;
@@ -1220,6 +1258,7 @@ static void fbc_check_timg(const unsigned char *t) {
                                     port_frame_count, (void *)t, i, (void *)dst, fbc[i].dirty, (void *)fbc_task_p);
         if (!fbc[i].dirty || dst == fbc_task_p) continue;
         fbc[i].dirty = 0;
+        hfr_fx = 1;   /* P351 */
         /* P351: a canvas larger than px (the Full-resolution option) is first scaled down on the GPU (nearest) into
          * fbc_small, and read at that size; the row / column mapping below works on the read size (rw x rh) */
         int rw = fbc[i].tw, rh = fbc[i].th;
@@ -1313,6 +1352,7 @@ static void hx_begin(unsigned char *p, unsigned w) {
  * and is unused when the canvas size changed (photo mode capture). The N64-size copy is still made (option off later). */
 static void zsnap_take(int i) {
     zsnap.due = 0; zsnap.valid = 0;
+    hfr_fx = 1;   /* P351 */
     if (fbc[i].tw <= 0 || fbc[i].th <= 0) return;
     flush();
     if (!zsnap.tex) { glGenTextures(1, &zsnap.tex); glGenFramebuffers(1, &zsnap.fbo); }
@@ -1339,7 +1379,7 @@ static void zsnap_take(int i) {
 static void hx_settimg(void) {
     unsigned char *base = 0; unsigned w = 0;
     hx_src.kind = 0;
-    if (!timg.p || !gl_ok || gfx_measure_only || hx_disabled() || timg.siz != 2) return;
+    if (!timg.p || !gl_ok || gfx_measure_only || hx_disabled() || timg.siz != 2 || hfr_mode == 2) return;   /* P351: not in a replay */
     if ((hires_2d || ws_opt) && off_on && off_zimg) {   /* P349: drawing into the z image (pause): a copy of a screen image? */
         for (int i = 0; i < FBC_N; i++) {
             unsigned char *b = fbc[i].p;
@@ -1392,6 +1432,7 @@ static void hx_texrect(int ti, float ulx, float uly, float s, float t, float ds,
         hx_snap_due = 0; state_dirty = 1;
     }
     hxs_on = 1; hxs_tex = hx_load.kind == 1 ? hx_snap : hx_load.kind == 3 ? zsnap.tex : hx[hx_load.slot].tex;
+    hfr_fx = 1;   /* P351 */
     ws_calc();
     if (ws_on) hxs_ox = (sx - ulx) * ws_sx; else   /* P350 */
     hxs_ox = (sx - ulx) * canvas_w / cimg_width;
@@ -1798,6 +1839,399 @@ static void freecam_view(float m[4][4]) {
     m[0][3] = m[1][3] = m[2][3] = 0; m[3][3] = 1;
 }
 
+/* the game's two frame display-list buffers (g_gfx_dl_buffers[i], g_dl_capacity commands each). The game side
+ * (port/boot/pc_overrides.c) defines port_gfx_dl_buffer; this weak default serves sched_demo, which links the renderer
+ * without the game (P351: was weak data references in gfx_run_task_body). */
+__attribute__((weak)) unsigned port_gfx_dl_buffer(int i, unsigned *len) { (void)i; *len = 0; return 0; }
+static const unsigned char *gfx_dl_buffer(int i, unsigned *len) {
+    unsigned a = port_gfx_dl_buffer(i, len);
+    return a ? gfx_addr(a) : 0;
+}
+/* ------------------------------------------------------------------ P351 High frame rate (interpolated) */
+/* The option "High frame rate" (page key hfr, port_gfx_hfr). The game builds a frame every 2..4 retraces of its 50 Hz VI
+ * (12.5..25 frames per second); the canvas showed each one until the next. With the option, the renderer shows a new
+ * picture on every browser animation frame (60 / 120 / 144 Hz) and moves the camera and every object smoothly between
+ * the last two game frames. No game code runs for those pictures:
+ *  - Recording (hfr_mode 1). The game frame's gfx task is drawn as always. Each G_MTX gets a key that names "the same
+ *    matrix" in consecutive frames although the game keeps two copies of everything (one per display-list buffer, so
+ *    the addresses alternate): hfr_sig = the command's address when it lies in a model's own display list (bone
+ *    matrices: static model DL + segment-relative matrix), else 0 (the frame DL buffer alternates), the G_MTX flags, the
+ *    matrix address when segment-relative, and an anchor: the first G_DL / G_VTX target after it that is not in the
+ *    frame buffers (the model DL the matrix is for). key = sig + its occurrence count in the task (2 crates with the
+ *    same model: the first is the first). The matrix, its key, and its match in the previous frame are recorded
+ *    (hfr_m[set]), as is every G_CULLDL / G_BRANCH_Z decision (hfr_cull), the task record, and the P350 wide-copy /
+ *    HUD-anchor entries the task used.
+ *  - Matching and snapping (hfr_frame_end). Matched pairs are checked: rigid matrices (rotation x scale + translation)
+ *    that turn by more than 100 deg or move more than HFR_JUMP units in one game frame are drawn as recorded (a
+ *    teleport, a respawn, an object reused for another one); a view matrix (projection stack) that turns by more than
+ *    45 deg or whose eye moves more than HFR_JUMP is a camera cut: the whole frame is shown as drawn (snap), as is a
+ *    frame whose task read the screen or a kept picture back (motion blur ghost, pause frozen frame, lens effects:
+ *    hfr_fx), the first frame after a reset (level load, photo mode, option switch), two tasks in one retrace, a gap of
+ *    more than 8 retraces, a frame where fewer than half of the matrices match (a new scene), and a frame where no
+ *    matched matrix changed (menus, pause: nothing to interpolate, and the drawn frame is exact).
+ *  - Replay (hfr_mode 2, port_gfx_hfr_present from pc_sched.c frame() at the end of every main-loop tick). The display
+ *    time is pos = retraces run + the part of the next one already elapsed; t = (pos - retrace of the newest frame) /
+ *    the smoothed game-frame interval (hfr_ival), 0..1. The newest frame's task is drawn again from its display list,
+ *    which is still intact in game memory (the game builds the next frame into the other buffer), with every matched
+ *    matrix replaced by the interpolation between the previous and the newest frame (rotation slerp, scale and
+ *    translation lerp; for a view the eye position is interpolated; projections / non-rigid matrices element-wise),
+ *    the recorded cull decisions (so the command stream is the recorded one: keys stay in step, checked per G_MTX), the
+ *    texture generations of the recording (its GL textures are found in the cache: no decode / upload), and only the
+ *    screen drawn (offscreen shadow passes and kept images are dropped; their recorded results are in game memory /
+ *    the canvas copies). A replay writes no game memory and takes no GPU read-back.
+ *  So the picture runs up to one game frame behind the game (t = 0 shows the previous frame when the newest arrives):
+ *  about 40..80 ms more latency. 2D (texture rectangles: HUD, text, menus) and geometry the game moves itself on the CPU
+ *  (particles, shadows, trails) show the newest frame. Render-only and outside the online hash (gfx_f3dex2.o); the
+ *  replay runs between retraces on the main loop's stack, never on a game fiber. ?hfrlog=1 statistics every 2 s,
+ *  ?hfrtrace=F the first 150 presents from retrace F; port_gfx_hfr_test(t) redraws the newest frame at t (test aid). */
+#define HFR_NM 4096           /* matrices per game frame */
+#define HFR_HT 8192           /* hash slots (key -> older set index, occurrence counts) */
+#define HFR_NC 32768          /* cull / branch decisions per game frame */
+#define HFR_JUMP 1500.0f      /* units per game frame: a teleport / camera cut beyond this */
+typedef struct {
+    uint32_t sig, key;
+    float m[4][4];
+    int16_t old;              /* index of the matched matrix in the previous frame's set, -1 none */
+    uint8_t kind;             /* bit 0 projection stack (a view / projection), bit 1 rigid (q, s, tr valid) */
+    uint8_t ok;               /* interpolate with old (set by hfr_frame_end) */
+    float q[4], s[3], tr[3];  /* rigid: rotation quaternion, row scales, translation (projection stack: the eye) */
+} HfrMtx;
+static HfrMtx hfr_m[2][HFR_NM];
+static int hfr_mn[2], hfr_cur;                         /* hfr_cur: the newest frame's set */
+static int16_t hfr_ht[HFR_HT];                         /* key -> index in the older set (+1; 0 empty) */
+static uint32_t hfr_ht_key[HFR_HT];
+static struct { uint32_t sig, gen; int n; } hfr_occ[HFR_HT];
+static uint32_t hfr_occ_gen;
+static uint8_t hfr_cull[HFR_NC];
+static int hfr_nc, hfr_ci, hfr_mk;                     /* decisions recorded / replay cursors */
+static unsigned char hfr_task[64];                     /* the newest frame's OSTask (copied) */
+static uint32_t hfr_dl_hash;                           /* its top-level display list (data_ptr, data_size bytes) */
+static const unsigned char *hfr_rec_b[2];              /* the frame DL buffers when it was recorded */
+static int hfr_frames;                                 /* frames recorded since the last reset (0, 1, 2+) */
+static unsigned hfr_rnew, hfr_rold;                    /* retrace of the newest / previous game frame */
+static float hfr_ival = 2.5f;                          /* smoothed game-frame interval (retraces) */
+static int hfr_snap;                                   /* the newest frame is shown as drawn: HFR_SNAP_* reason */
+enum { HFR_SNAP_NONE, HFR_SNAP_FIRST, HFR_SNAP_CUT, HFR_SNAP_FX, HFR_SNAP_MULTI, HFR_SNAP_GAP, HFR_SNAP_SCENE, HFR_SNAP_STATIC, HFR_SNAP_N };
+static const char *const hfr_snap_name[HFR_SNAP_N] = {"none", "first", "cut", "fx", "multi", "gap", "scene", "static"};
+static float hfr_vi[2];                                /* vi_y0 / vi_h of the recording */
+static float hfr_t;                                    /* the replay's interpolation factor */
+static int hfr_bad, hfr_moving, hfr_matched;           /* replay key mismatches; moving / matched matrices of the newest frame */
+static float hfr_shown_t = -1; static unsigned hfr_shown_r;   /* what the canvas shows: frame retrace and t (1 = as drawn) */
+static const unsigned char *hfr_b[2]; static unsigned hfr_blen;   /* the frame DL buffers during a task */
+static unsigned hfr_vsync, hfr_vsync_seen;             /* online: one present per browser animation frame */
+/* the P350 widescreen entries the recorded task used (the live lists are dropped after a task) */
+static struct { const unsigned char *gs, *ge; uint32_t h; const unsigned char *pdl; } hfr_ws_sub[WS_SUB_N];
+static struct { const unsigned char *at; int tag; } hfr_ws_mark[WS_MARK_N];
+static int hfr_ws_sub_n, hfr_ws_mark_n;
+/* statistics (?hfrlog) */
+static struct { unsigned shown, drawn, kept, frames, snaps[HFR_SNAP_N], bad; double t_replay, t_replay_max, t_task, t0; unsigned uploads; } hfr_st;
+static int hfr_log = -1, hfr_trace = -1, hfr_trace_n;
+
+EMSCRIPTEN_KEEPALIVE void port_gfx_hfr(int on) {
+    hfr_opt = on != 0; hfr_frames = 0; hfr_shown_t = -1;
+    for (int i = 0; i < FBC_N; i++) fbc_pre[i].p = 0;
+    port_log("[hfr] high frame rate %s\n", hfr_opt ? "on" : "off");
+}
+EMSCRIPTEN_KEEPALIVE void port_gfx_hfr_vsync(void) { hfr_vsync++; }
+EMSCRIPTEN_KEEPALIVE unsigned port_gfx_hfr_frame(void) { return hfr_frames ? hfr_rnew : 0; }
+
+static inline uint32_t hfr_mix(uint32_t h, uint32_t v) { h ^= v; h *= 16777619u; h ^= h >> 13; return h; }
+static int hfr_in_dlbuf(const unsigned char *p) {
+    for (int i = 0; i < 2; i++) if (hfr_b[i] && p >= hfr_b[i] && p < hfr_b[i] + hfr_blen) return 1;
+    return 0;
+}
+/* the key's signature of the G_MTX at `at` (see above) */
+static uint32_t hfr_sig(const unsigned char *at, unsigned w0, unsigned w1) {
+    uint32_t h = 2166136261u;
+    h = hfr_mix(h, hfr_in_dlbuf(at) ? 0 : (uint32_t)(uintptr_t)at);
+    h = hfr_mix(h, w0 & 0xFF);
+    h = hfr_mix(h, w1 < PORT_WASM_BASE ? w1 : 0);
+    for (int k = 1; k <= 32; k++) {
+        const unsigned char *q = at + 8 * k;
+        unsigned op = rd32(q) >> 24, a = rd32(q + 4);
+        if (op == 0xDF) break;
+        if (op != 0xDE && op != 0x01) continue;
+        if (a < PORT_WASM_BASE && a >> 24) { h = hfr_mix(h, a); break; }   /* segment-relative */
+        const unsigned char *p = gfx_addr(a);
+        if (p && !hfr_in_dlbuf(p)) { h = hfr_mix(h, a); break; }
+    }
+    return h;
+}
+static int hfr_occ_next(uint32_t sig) {
+    unsigned i = (sig * 2654435761u) >> 19;   /* 13 bits */
+    for (unsigned n = 0; n < HFR_HT; n++, i = (i + 1) & (HFR_HT - 1)) {
+        if (hfr_occ[i].gen != hfr_occ_gen) { hfr_occ[i].gen = hfr_occ_gen; hfr_occ[i].sig = sig; hfr_occ[i].n = 1; return 0; }
+        if (hfr_occ[i].sig == sig) return hfr_occ[i].n++;
+    }
+    return 0;
+}
+/* rigid decomposition: rows = s_i * R_i (R orthonormal, det > 0) */
+static int hfr_rigid(HfrMtx *r) {
+    float (*m)[4] = r->m, R[3][3];
+    if (fabsf(m[0][3]) > 1e-5f || fabsf(m[1][3]) > 1e-5f || fabsf(m[2][3]) > 1e-5f || fabsf(m[3][3] - 1) > 1e-5f) return 0;
+    for (int i = 0; i < 3; i++) {
+        float l = sqrtf(m[i][0] * m[i][0] + m[i][1] * m[i][1] + m[i][2] * m[i][2]);
+        if (!(l > 1e-6f)) return 0;
+        r->s[i] = l; R[i][0] = m[i][0] / l; R[i][1] = m[i][1] / l; R[i][2] = m[i][2] / l;
+    }
+    for (int i = 0; i < 3; i++) for (int j = i + 1; j < 3; j++)
+        if (fabsf(R[i][0] * R[j][0] + R[i][1] * R[j][1] + R[i][2] * R[j][2]) > 0.02f) return 0;   /* sheared */
+    float det = R[0][0] * (R[1][1] * R[2][2] - R[1][2] * R[2][1]) - R[0][1] * (R[1][0] * R[2][2] - R[1][2] * R[2][0])
+              + R[0][2] * (R[1][0] * R[2][1] - R[1][1] * R[2][0]);
+    if (det < 0.9f) return 0;   /* mirrored */
+    float tr = R[0][0] + R[1][1] + R[2][2], *q = r->q;   /* quaternion of R (w, x, y, z) */
+    if (tr > 0) { float S = sqrtf(tr + 1) * 2; q[0] = 0.25f * S; q[1] = (R[2][1] - R[1][2]) / S; q[2] = (R[0][2] - R[2][0]) / S; q[3] = (R[1][0] - R[0][1]) / S; }
+    else if (R[0][0] > R[1][1] && R[0][0] > R[2][2]) { float S = sqrtf(1 + R[0][0] - R[1][1] - R[2][2]) * 2; q[0] = (R[2][1] - R[1][2]) / S; q[1] = 0.25f * S; q[2] = (R[0][1] + R[1][0]) / S; q[3] = (R[0][2] + R[2][0]) / S; }
+    else if (R[1][1] > R[2][2]) { float S = sqrtf(1 + R[1][1] - R[0][0] - R[2][2]) * 2; q[0] = (R[0][2] - R[2][0]) / S; q[1] = (R[0][1] + R[1][0]) / S; q[2] = 0.25f * S; q[3] = (R[1][2] + R[2][1]) / S; }
+    else { float S = sqrtf(1 + R[2][2] - R[0][0] - R[1][1]) * 2; q[0] = (R[1][0] - R[0][1]) / S; q[1] = (R[0][2] + R[2][0]) / S; q[2] = (R[1][2] + R[2][1]) / S; q[3] = 0.25f * S; }
+    if (r->kind & 1) {   /* a view: the eye = -T * R^T * S^-1 */
+        for (int j = 0; j < 3; j++)
+            r->tr[j] = -(m[3][0] * R[j][0] + m[3][1] * R[j][1] + m[3][2] * R[j][2]) / r->s[j];
+    } else { r->tr[0] = m[3][0]; r->tr[1] = m[3][1]; r->tr[2] = m[3][2]; }
+    return 1;
+}
+static float hfr_qdot(const float *a, const float *b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]; }
+static float hfr_dist(const float *a, const float *b) { float x = a[0] - b[0], y = a[1] - b[1], z = a[2] - b[2]; return sqrtf(x * x + y * y + z * z); }
+/* o = the matrix between a (t = 0) and b (t = 1) */
+static void hfr_interp(float o[4][4], const HfrMtx *a, const HfrMtx *b, float t) {
+    if ((a->kind & b->kind & 2)) {
+        float q[4], d = hfr_qdot(a->q, b->q), sb = 1, wa, wb;
+        if (d < 0) { d = -d; sb = -1; }
+        if (d > 0.9995f) { wa = 1 - t; wb = t; }
+        else { float th = acosf(d), sn = sinf(th); wa = sinf((1 - t) * th) / sn; wb = sinf(t * th) / sn; }
+        for (int i = 0; i < 4; i++) q[i] = wa * a->q[i] + wb * sb * b->q[i];
+        float l = sqrtf(hfr_qdot(q, q)); for (int i = 0; i < 4; i++) q[i] /= l;
+        float w = q[0], x = q[1], y = q[2], z = q[3], R[3][3] = {
+            {1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)},
+            {2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)},
+            {2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)}};
+        float s[3], tr[3];
+        for (int i = 0; i < 3; i++) { s[i] = a->s[i] + (b->s[i] - a->s[i]) * t; tr[i] = a->tr[i] + (b->tr[i] - a->tr[i]) * t; }
+        for (int i = 0; i < 3; i++) { for (int j = 0; j < 3; j++) o[i][j] = s[i] * R[i][j]; o[i][3] = 0; }
+        if (a->kind & 1) for (int j = 0; j < 3; j++) o[3][j] = -(tr[0] * o[0][j] + tr[1] * o[1][j] + tr[2] * o[2][j]);   /* T = -eye * S R */
+        else for (int j = 0; j < 3; j++) o[3][j] = tr[j];
+        o[3][3] = 1;
+        return;
+    }
+    for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) o[i][j] = a->m[i][j] + (b->m[i][j] - a->m[i][j]) * t;
+}
+/* G_MTX: record (mode 1) or replace m by the interpolated matrix (mode 2); prm = the G_MTX parameter bits */
+static void hfr_mtx(const unsigned char *at, unsigned w0, unsigned w1, unsigned prm, float m[4][4]) {
+    uint32_t sig = hfr_sig(at, w0, w1);
+    if (hfr_mode == 1) {
+        int n = hfr_mn[hfr_cur];
+        if (n >= HFR_NM) return;
+        HfrMtx *r = &hfr_m[hfr_cur][n];
+        r->sig = sig; r->key = hfr_mix(sig, (uint32_t)hfr_occ_next(sig) * 0x9E3779B9u + 1);
+        memcpy(r->m, m, sizeof r->m);
+        r->kind = prm & 4 ? 1 : 0; r->ok = 0; r->old = -1;
+        if (hfr_rigid(r)) r->kind |= 2;
+        if (hfr_frames > 0)
+            for (unsigned i = r->key >> 19, k = 0; k < HFR_HT && hfr_ht[i]; k++, i = (i + 1) & (HFR_HT - 1))
+                if (hfr_ht_key[i] == r->key) { r->old = hfr_ht[i] - 1; break; }
+        hfr_mn[hfr_cur] = n + 1;
+        return;
+    }
+    int k = hfr_mk++;
+    const HfrMtx *r = k < hfr_mn[hfr_cur] ? &hfr_m[hfr_cur][k] : 0;
+    if (!r || r->sig != sig) { hfr_bad++; return; }   /* the stream is not the recorded one: memory as it is */
+    if (r->ok) hfr_interp(m, &hfr_m[hfr_cur ^ 1][r->old], r, hfr_t);
+    else memcpy(m, r->m, sizeof r->m);
+}
+/* G_CULLDL / G_BRANCH_Z: record the decision (mode 1) or take the recorded one (mode 2) */
+static int hfr_decide(int d) {
+    if (hfr_mode == 1) { if (hfr_nc < HFR_NC) hfr_cull[hfr_nc++] = (uint8_t)d; return d; }
+    if (hfr_mode == 2 && hfr_ci < hfr_nc) return hfr_cull[hfr_ci++];
+    return d;
+}
+/* SETCIMG in a replay: only the screen is drawn (mirrors the SETCIMG case: off = an offscreen image, hx = a kept one) */
+static void hfr_setcimg(unsigned w0, unsigned w1) {
+    unsigned w = (w0 & 0xFFF) + 1, siz = w0 >> 19 & 3;
+    unsigned char *p = gfx_addr(w1);
+    int off = w >= 16 && w <= 256 && w1 != zimg_addr && p;
+    if (w1 == zimg_addr && w >= 16 && w <= 320 && siz == 2 && p) off = 1;
+    int screen = !off && w >= 256 && w1 != zimg_addr && siz == 2 && p &&
+                 !(!hx_disabled() && fbc_task_p && p != fbc_task_p && !hx_is_screen(p));
+    flush();
+    cimg_addr = w1; cimg_width = w; if (cimg_width < 64 && !off) cimg_width = 320;
+    hfr_drop = !screen;
+    if (screen) { if (!fbc_task_p) fbc_restore(p); fbc_task_p = p; fbc_task_w = w; }
+    state_dirty = 1;
+}
+/* hash of the recorded task's top-level display list as it is now in game memory (0 if it is not readable) */
+static uint32_t hfr_task_hash(void) {
+    unsigned data = rd32(hfr_task + 48), size = rd32(hfr_task + 52);
+    const unsigned char *p = gfx_addr_raw(data);
+    if (!p || size > 0x100000 || !hfr_addr_ok((unsigned char *)p + size)) return 0;
+    uint32_t h = 2166136261u;
+    for (unsigned i = 0; i + 4 <= size; i += 4) h = (h ^ rd32(p + i)) * 16777619u;
+    return h | 1;
+}
+/* is the newest frame still replayable: same DL buffers, its display list unchanged */
+static int hfr_valid(void) {
+    unsigned len;
+    if (gfx_dl_buffer(0, &len) != hfr_rec_b[0] || gfx_dl_buffer(1, &len) != hfr_rec_b[1]) return 0;
+    return hfr_task_hash() == hfr_dl_hash;
+}
+/* a game frame's task starts: the newest set becomes the older one (hash table), the recording starts */
+static void hfr_frame_begin(void) {
+    unsigned len;
+    hfr_b[0] = gfx_dl_buffer(0, &len); hfr_b[1] = gfx_dl_buffer(1, &hfr_blen);
+    if (hfr_frames > 0 && port_frame_count == hfr_rnew) {   /* a second task in the same retrace: not one game frame per task */
+        hfr_frames = 0; hfr_st.snaps[HFR_SNAP_MULTI]++;
+    }
+    hfr_cur ^= 1;
+    memset(hfr_ht, 0, sizeof hfr_ht);
+    if (hfr_frames > 0)
+        for (int i = 0; i < hfr_mn[hfr_cur ^ 1]; i++) {
+            unsigned h = hfr_m[hfr_cur ^ 1][i].key >> 19;
+            while (hfr_ht[h]) h = (h + 1) & (HFR_HT - 1);
+            hfr_ht[h] = (int16_t)(i + 1); hfr_ht_key[h] = hfr_m[hfr_cur ^ 1][i].key;
+        }
+    hfr_mn[hfr_cur] = 0; hfr_nc = 0; hfr_occ_gen++; hfr_fx = 0;
+    hfr_tgen0 = tmem_gen;
+    hfr_mode = 1;
+}
+/* the recording ends: checks, snap decision */
+static void hfr_frame_end(const void *task) {
+    hfr_mode = 0;
+    hfr_tgen1 = tmem_gen; hfr_vi[0] = vi_y0; hfr_vi[1] = vi_h;
+    memcpy(hfr_task, task, sizeof hfr_task);
+    hfr_dl_hash = hfr_task_hash(); hfr_rec_b[0] = hfr_b[0]; hfr_rec_b[1] = hfr_b[1];
+    memcpy(hfr_ws_sub, ws_sub, sizeof ws_sub); hfr_ws_sub_n = ws_sub_n;
+    memcpy(hfr_ws_mark, ws_mark, sizeof ws_mark); hfr_ws_mark_n = ws_mark_n;
+    unsigned gap = hfr_frames > 0 ? port_frame_count - hfr_rnew : 0;
+    hfr_rold = hfr_rnew; hfr_rnew = port_frame_count;
+    int cut = 0, n = hfr_mn[hfr_cur];
+    hfr_moving = hfr_matched = 0;
+    for (int i = 0; i < n; i++) {
+        HfrMtx *r = &hfr_m[hfr_cur][i];
+        if (r->old < 0 || hfr_frames == 0) continue;
+        const HfrMtx *a = &hfr_m[hfr_cur ^ 1][r->old];
+        hfr_matched++;
+        if (!memcmp(a->m, r->m, sizeof r->m)) continue;   /* the same matrix: nothing to do */
+        if ((a->kind ^ r->kind) & 1) continue;
+        if (a->kind & r->kind & 2) {
+            float d = fabsf(hfr_qdot(a->q, r->q)), ang = 2 * acosf(d > 1 ? 1 : d) * 57.29578f, mv = hfr_dist(a->tr, r->tr);
+            if (r->kind & 1) { if (ang > 45 || mv > HFR_JUMP) { if (!cut && hfr_log > 0) port_log("[hfr]   cut: view %d (old %d) turns %.1f deg, eye moves %.1f: %.3f %.3f %.3f %.3f / %.3f %.3f %.3f %.3f T %.1f %.1f %.1f / %.1f %.1f %.1f\n",
+                                   i, r->old, ang, mv, a->q[0], a->q[1], a->q[2], a->q[3], r->q[0], r->q[1], r->q[2], r->q[3], a->m[3][0], a->m[3][1], a->m[3][2], r->m[3][0], r->m[3][1], r->m[3][2]);
+                                   cut = 1; } else r->ok = 1; }
+            else if (ang <= 100 && mv <= HFR_JUMP) r->ok = 1;
+        } else if (!((a->kind | r->kind) & 2)) {   /* projections, sheared: element-wise unless very different */
+            float dd = 0, nn = 0;
+            for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) { float e = r->m[j][k] - a->m[j][k]; dd += e * e; nn += r->m[j][k] * r->m[j][k]; }
+            if (dd <= 4.0f * 4.0f * nn) r->ok = 1;   /* a perspective x view product: element-wise = the product with the view lerped */
+        }
+        hfr_moving += r->ok;
+    }
+    if (hfr_frames > 0 && gap > 0) hfr_ival += (((float)gap > 6 ? 6.0f : (float)gap) - hfr_ival) * 0.25f;
+    hfr_snap = hfr_frames == 0 ? HFR_SNAP_FIRST : hfr_fx ? HFR_SNAP_FX : cut ? HFR_SNAP_CUT : gap > 8 ? HFR_SNAP_GAP :
+               hfr_matched * 2 < n ? HFR_SNAP_SCENE : !hfr_moving ? HFR_SNAP_STATIC : HFR_SNAP_NONE;
+    hfr_st.frames++; hfr_st.snaps[hfr_snap]++;
+    if (hfr_log > 0 && hfr_snap != HFR_SNAP_NONE && hfr_snap != HFR_SNAP_STATIC) {
+        static unsigned nl; if (nl++ < 200) port_log("[hfr] frame at retrace %u: snap (%s), %d matrices, %d matched, %d interpolated\n",
+                                                      hfr_rnew, hfr_snap_name[hfr_snap], n, hfr_matched, hfr_moving); }
+    hfr_frames++;
+    hfr_shown_t = 1; hfr_shown_r = hfr_rnew;   /* the canvas shows the frame as drawn */
+}
+static void gfx_run_task_body(void *task);
+/* redraw the newest game frame at t (0 = the previous frame's matrices, 1 = as drawn) */
+static void hfr_replay(float t) {
+    GfxStats st = gfx_stats;
+    unsigned gen = tmem_gen;
+    int sub_n = ws_sub_n, mark_n = ws_mark_n; const unsigned char *skip = ws_sub_skip;
+    static struct { const unsigned char *gs, *ge; uint32_t h; const unsigned char *pdl; } sub[WS_SUB_N];
+    static struct { const unsigned char *at; int tag; } mark[WS_MARK_N];
+    memcpy(sub, ws_sub, sizeof sub); memcpy(mark, ws_mark, sizeof mark);
+    memcpy(ws_sub, hfr_ws_sub, sizeof ws_sub); ws_sub_n = hfr_ws_sub_n; ws_sub_bounds(); ws_sub_skip = 0;
+    memcpy(ws_mark, hfr_ws_mark, sizeof ws_mark); ws_mark_n = hfr_ws_mark_n;
+    uintptr_t mlo = ws_mark_lo, mhi = ws_mark_hi;
+    ws_mark_lo = ~(uintptr_t)0; ws_mark_hi = 0;
+    for (int i = 0; i < ws_mark_n; i++) {
+        if ((uintptr_t)ws_mark[i].at < ws_mark_lo) ws_mark_lo = (uintptr_t)ws_mark[i].at;
+        if ((uintptr_t)ws_mark[i].at > ws_mark_hi) ws_mark_hi = (uintptr_t)ws_mark[i].at;
+    }
+    float vy = vi_y0, vh = vi_h;
+    unsigned len;
+    hfr_b[0] = gfx_dl_buffer(0, &len); hfr_b[1] = gfx_dl_buffer(1, &hfr_blen);
+    hfr_mode = 2; hfr_t = t; hfr_ci = hfr_mk = 0; hfr_bad = 0; hfr_drop = 0;
+    tmem_gen = hfr_tgen0; vi_y0 = hfr_vi[0]; vi_h = hfr_vi[1];
+    gfx_run_task_body(hfr_task);
+    hfr_mode = 0; hfr_drop = 0;
+    tmem_gen = gen; vi_y0 = vy; vi_h = vh;
+    hfr_st.uploads += gfx_stats.tex_uploads - st.tex_uploads;
+    gfx_stats = st;
+    memcpy(ws_sub, sub, sizeof sub); ws_sub_n = sub_n; ws_sub_bounds(); ws_sub_skip = skip;
+    memcpy(ws_mark, mark, sizeof mark); ws_mark_n = mark_n; ws_mark_lo = mlo; ws_mark_hi = mhi;
+    if (hfr_bad) { hfr_st.bad++; hfr_snap = HFR_SNAP_SCENE; }   /* the display list changed under us: stop replaying this frame */
+}
+static void hfr_log_stats(double now) {
+    double el = (now - hfr_st.t0) / 1000;
+    if (hfr_log > 0 && el >= 2.0) {
+        unsigned d = hfr_st.drawn ? hfr_st.drawn : 1;
+        port_log("[hfr] %.2f s: %u shown (%.1f /s: %u redrawn between game frames, %u as drawn), %u game frames (%.1f /s, interval %.2f retraces); "
+                 "snaps first %u cut %u fx %u multi %u gap %u scene %u static %u; replay %.2f ms cpu (max %.2f), game task %.2f ms; "
+                 "key mismatches %u, uploads in replays %u; newest: %d matrices, %d matched, %d interpolated\n",
+                 el, hfr_st.shown, hfr_st.shown / el, hfr_st.drawn, hfr_st.kept, hfr_st.frames, hfr_st.frames / el, hfr_ival,
+                 hfr_st.snaps[1], hfr_st.snaps[2], hfr_st.snaps[3], hfr_st.snaps[4], hfr_st.snaps[5], hfr_st.snaps[6], hfr_st.snaps[7],
+                 hfr_st.t_replay / d, hfr_st.t_replay_max, hfr_st.frames ? hfr_st.t_task / hfr_st.frames : 0.0,
+                 hfr_st.bad, hfr_st.uploads, hfr_mn[hfr_cur], hfr_matched, hfr_moving);
+        memset(&hfr_st, 0, sizeof hfr_st);
+    }
+    if (!hfr_st.t0) hfr_st.t0 = now;
+}
+/* pc_sched.c frame(), at the end of every main-loop tick (not while paused / in photo mode): pos = the display time in
+ * retraces; online (net) only once per browser animation frame */
+void port_gfx_hfr_present(double pos, int net) {
+    if (!hfr_opt || !gl_ok || hfr_frames == 0) return;
+    if (net) { if (hfr_vsync == hfr_vsync_seen) return; hfr_vsync_seen = hfr_vsync; }
+    if (hfr_log < 0) { hfr_log = port_flag("hfrlog"); hfr_trace = port_flag("hfrtrace"); }
+    double now = emscripten_get_now();
+    hfr_log_stats(now);
+    hfr_st.shown++;
+    float t = hfr_snap ? 1.0f : (float)((pos - hfr_rnew) / hfr_ival);
+    if (t < 0) t = 0; if (t > 1) t = 1;
+    int draw = !hfr_snap && !(hfr_shown_r == hfr_rnew && fabsf(hfr_shown_t - t) < 0.002f);
+    if (hfr_trace > 0 && pos >= hfr_trace && hfr_trace_n < 150) { hfr_trace_n++;
+        port_log("[hfr] present pos %.3f: newest frame %u (previous %u, interval %.2f), t %.3f, %s\n", pos, hfr_rnew, hfr_rold, hfr_ival, t,
+                 draw ? "redrawn" : hfr_snap ? hfr_snap_name[hfr_snap] : "unchanged"); }
+    if (!draw) { hfr_st.kept++; return; }
+    if (!hfr_valid()) { hfr_snap = HFR_SNAP_SCENE; hfr_frames = 0; hfr_st.bad++; hfr_st.kept++; return; }   /* level change: the list is gone */
+    hfr_replay(t);
+    { static int fin = -1; if (fin < 0) fin = port_flag("hfrfinish"); if (fin) glFinish(); }   /* ?hfrfinish=1: the time includes the GPU's work */
+    double dt = emscripten_get_now() - now;
+    hfr_st.drawn++; hfr_st.t_replay += dt; if (dt > hfr_st.t_replay_max) hfr_st.t_replay_max = dt;
+    hfr_shown_r = hfr_rnew; hfr_shown_t = t;
+}
+/* test aid: redraw the newest frame at t (returns 0 when drawn, else the snap reason) */
+EMSCRIPTEN_KEEPALIVE int port_gfx_hfr_test(float t) {
+    if (!gl_ok || hfr_frames == 0) return -1;
+    if (hfr_snap) return hfr_snap;
+    if (!hfr_valid()) return -2;
+    hfr_replay(t < 0 ? 0 : t > 1 ? 1 : t);
+    hfr_shown_r = hfr_rnew; hfr_shown_t = t;
+    return 0;
+}
+
+/* P351 DIAGNOSTIC ?p351log=F: every G_MTX of 3 tasks from retrace F (where the command and the matrix live) */
+static int p351_logn = -1;
+static void p351_cls(const void *p, char *o) {
+    unsigned len;
+    for (int i = 0; i < 2; i++) {
+            const unsigned char *b = gfx_dl_buffer(i, &len);
+            if (b && (const unsigned char *)p >= b && (const unsigned char *)p < b + len) {
+                sprintf(o, "B%d+%05X", i, (unsigned)((const unsigned char *)p - b)); return; }
+        }
+    sprintf(o, "%08X", (unsigned)(uintptr_t)p);
+}
+static void p351_mtx_log(const unsigned char *at, unsigned w0, unsigned w1, const unsigned char *p, float m[4][4], int sp) {
+    char a[24], b[24], c[24] = "-";
+    p351_cls(at, a); p351_cls(p, b);
+    unsigned nx = 0;
+    for (int k = 1; k < 24; k++) { unsigned op = rd32(at + 8 * k) >> 24; if (op == 0xDE || op == 0x01 || op == 0xDF || op == 0xDA) { nx = rd32(at + 8 * k + 4); if (op == 0xDE || op == 0x01) { const unsigned char *q = gfx_addr(nx); if (q) p351_cls(q, c); } sprintf(c + strlen(c), "/%02X", op); break; } }
+    port_log("[p351] mtx sp%d at %s %08X %08X -> %s T %.1f %.1f %.1f r %.3f %.3f | next %08X %s\n", sp, a, w0, w1, b, m[3][0], m[3][1], m[3][2], m[0][0], m[0][1], nx, c);
+}
+
 void gfx_run_dl(const void *dl) {
     const unsigned char *stack[32], *pc = dl;
     int sp = 0, guard = 0;
@@ -1813,6 +2247,7 @@ void gfx_run_dl(const void *dl) {
             ws_calc();
             if (i >= 0 && ws_on) { stack[sp++] = ws_sub[i].ge; pc = ws_sub[i].pdl; ws_sub_stats[1]++; }
         }
+        if (hfr_mode == 2 && !hfr_addr_ok((unsigned char *)pc)) { hfr_bad++; break; }   /* P351: a replay never reads outside memory */
         unsigned w0 = rd32(pc), w1 = rd32(pc + 4), op = w0 >> 24;
         if (gfx_trace) port_log("[gfx]   %p: %08X %08X\n", (const void *)pc, w0, w1);
         pc += 8;
@@ -1854,7 +2289,7 @@ void gfx_run_dl(const void *dl) {
                 all &= c;
             }
             gfx_stats.culldl++;
-            if (all && a0 <= a1) { gfx_stats.culled++; pc = sp ? stack[--sp] : 0;
+            if (hfr_mode ? hfr_decide(all && a0 <= a1) : all && a0 <= a1) {   /* P351: a replay takes the recorded decision */ gfx_stats.culled++; pc = sp ? stack[--sp] : 0;
                 if (p61_depth >= 0 && sp <= p61_depth) { p61_depth = -1; if (p61_tr) { p61_tr = 0; gfx_trace = 0; } } }
             break;
         }
@@ -1866,7 +2301,7 @@ void gfx_run_dl(const void *dl) {
             float zs = v->w != 0 ? (v->z / v->w) * vp_scale[2] + vp_trans[2] : 0;
             double z16 = (double)zs * 65536.0;
             gfx_stats.branchz++;
-            if (v->w > 0 && z16 <= (double)(int)w1) {
+            if (hfr_mode ? hfr_decide(v->w > 0 && z16 <= (double)(int)w1) : v->w > 0 && z16 <= (double)(int)w1) {   /* P351 */
                 const unsigned char *t = gfx_addr(rdphalf1);
                 if (t) { pc = t; gfx_stats.branchz_taken++; }
             }
@@ -1901,6 +2336,8 @@ void gfx_run_dl(const void *dl) {
             unsigned prm = (w0 & 0xFF) ^ 1;                  /* ^ G_MTX_PUSH */
             float m[4][4];
             mtx_read(m, p);
+            if (p351_logn > 0) p351_mtx_log(pc - 8, w0, w1, p, m, sp);
+            if (hfr_mode) hfr_mtx(pc - 8, w0, w1, prm, m);   /* P351: recorded, or interpolated in a replay */
             if (p61_tr && p61_trn < 40) { p61_trn++;
                 port_log("[p61] G_MTX %08X %08X %s%s%s: %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.2f %.2f %.2f %.4f\n",
                          w0, w1, prm & 4 ? "P" : "MV", prm & 2 ? " load" : " mul", prm & 1 ? " push" : "",
@@ -2108,6 +2545,7 @@ void gfx_run_dl(const void *dl) {
             break;
         case 0xFE: zimg_addr = w1; break;
         case 0xFF: {
+            if (hfr_mode == 2) { hfr_setcimg(w0, w1); break; }   /* P351: a replay draws the screen only */
             static int nooff = -1; if (nooff < 0) nooff = port_flag("p137nooff");
             unsigned w = (w0 & 0xFFF) + 1;
             static int nozc = -1; if (nozc < 0) nozc = port_flag("p161nozc");
@@ -2192,6 +2630,7 @@ static __attribute__((noinline)) void gfx_run_task_body(void *task);   /* P350: 
 static unsigned char gfx_scrub_buf[GFX_SCRUB];
 void gfx_run_task(void *task) {
     int off = ws_flag(0, "p350noscrub");
+    hfr_mode = 0; hfr_drop = 0;   /* P351: a game task (never left in replay mode, even after a trap in one) */
     uintptr_t sp = emscripten_stack_get_current(), end = emscripten_stack_get_end();
     size_t n = sp > end ? sp - end : 0;
     if (n > GFX_SCRUB) n = GFX_SCRUB;
@@ -2203,6 +2642,21 @@ void gfx_run_task(void *task) {
 static __attribute__((noinline)) void gfx_run_task_body(void *task) {
     const unsigned char *t = task;
     unsigned ucode = rd32(t + 16), data = rd32(t + 48), size = rd32(t + 52);
+    if (hfr_mode == 2) {   /* P351: a replay of the newest game frame (hfr_replay): the drawing part only */
+        const void *dl = gfx_addr(data);
+        if (!dl) return;
+        int sv_trace = gfx_trace, sv_p78 = p78_on, sv_p158 = p158_on, sv_dlog = draw_log, sv_p61 = p61_depth, sv_log = p351_logn;
+        gfx_trace = p78_on = p158_on = draw_log = 0; p61_depth = -1; p351_logn = 0;
+        gfx_frame_begin(0, 0, 0);
+        ws_tag = 0; cur_ucode = ucode; cur_udata = rd32(t + 24);
+        dmem_seed(rd32(t + 24), rd32(t + 28));
+        gfx_run_dl(dl);
+        ws_tag = 0; hfr_drop = 0;
+        hx_task_end(); fbc_task_p = 0;
+        gfx_frame_end();
+        gfx_trace = sv_trace; p78_on = sv_p78; p158_on = sv_p158; draw_log = sv_dlog; p61_depth = sv_p61; p351_logn = sv_log;
+        return;
+    }
     gfx_stats.tasks++;
     vi_view_update(); /* P147 */
     if (gfx_stats.tasks <= 4)
@@ -2253,15 +2707,23 @@ static __attribute__((noinline)) void gfx_run_task_body(void *task) {
     if (p61_flag < 0) p61_flag = port_flag("p61model");
     p61_mtx = p61_dl = p61_tris = p61_verts = p61_imtx = p61_bad = p61_cmds = p61_vbad = 0; p61_depth = -1; p61_pend = 0;
     memset(p61_icls, 0, sizeof p61_icls); p61_mn[0] = p61_mn[1] = 1e30f; p61_mx[0] = p61_mx[1] = -1e30f;
+    { static int f = -1, left = 3; if (f < 0) f = port_flag("p351log");
+      p351_logn = f > 0 && port_frame_count >= (unsigned)f && left > 0 ? left-- : 0;
+      if (p351_logn) { char a[24]; p351_cls(dl, a); port_log("[p351] task %u frame %u dl %s size %u\n", gfx_stats.tasks, port_frame_count, a, size); } }
+    extern int port_photo_sandbox;   /* P348: photo frames are not game frames */
+    int hfr_rec = hfr_opt && gl_ok && !gfx_measure_only && !port_photo_sandbox;   /* P351: record this game frame */
+    double hfr_t0 = hfr_rec ? emscripten_get_now() : 0;
+    if (hfr_rec) hfr_frame_begin(); else if (port_photo_sandbox) hfr_frames = 0;
     gfx_run_dl(dl);
+    if (hfr_rec) { hfr_frame_end(task); hfr_st.t_task += emscripten_get_now() - hfr_t0; }
     {   /* P350: the wide copies of this task's display-list buffer are used up */
-        extern unsigned g_gfx_dl_buffers[2] __attribute__((weak)); extern int g_dl_capacity __attribute__((weak));
+        unsigned len;
         ws_tag = 0;
-        if ((ws_sub_n || ws_mark_n) && &g_gfx_dl_buffers && &g_dl_capacity)
+        if (ws_sub_n || ws_mark_n)
             for (int i = 0; i < 2; i++) {
-                const unsigned char *b = gfx_addr(g_gfx_dl_buffers[i]);
-                if (b && (const unsigned char *)dl >= b && (const unsigned char *)dl < b + 8u * (unsigned)g_dl_capacity) {
-                    ws_sub_drop_range(b, b + 8u * (unsigned)g_dl_capacity); ws_mark_drop_range(b, b + 8u * (unsigned)g_dl_capacity); }
+                const unsigned char *b = gfx_dl_buffer(i, &len);
+                if (b && (const unsigned char *)dl >= b && (const unsigned char *)dl < b + len) {
+                    ws_sub_drop_range(b, b + len); ws_mark_drop_range(b, b + len); }
             }
     }
     if (off_on) off_end();   /* P137 */

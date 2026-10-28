@@ -53,6 +53,7 @@ static const char *const net_flag_whitelist[] = {
     "netscript",   /* P338 test session: the local input comes from the ?padf scripts */
     "netdesync",   /* P339 test: flip one byte of game memory at that retrace (desync report test) */
     "netdesyncoff", /* P339 test: ... at this offset in n64_rdram (decimal; default 0x200000) */
+    "hfrlog",      /* P351: High frame rate statistics (the renderer, outside the game) */
     0 };
 int port_net_flag_allowed(const char *name) {
     for (int i = 0; net_flag_whitelist[i]; i++)

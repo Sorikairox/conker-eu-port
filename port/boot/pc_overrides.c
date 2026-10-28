@@ -81,6 +81,9 @@ extern unsigned char g_game_frame_state, g_game_paused, g_game_mode; /* was D_80
 extern unsigned g_gfx_dl_ptr, g_gfx_dl_frame_starts[2], g_gfx_dl_buffers[2]; /* was D_800BE9D0; was D_800BEDE8; was D_800BE9D8 */
 extern unsigned char g_dl_buf_index; /* u8 (P31: was short, read the wrong byte); was D_800BE9C0 */
 void port_cam_probe(unsigned task);
+/* P351: the frame display-list buffer i and its size in bytes, for the renderer (gfx_f3dex2.c gfx_dl_buffer) */
+extern int g_dl_capacity; /* was D_800BEFC4 */
+unsigned port_gfx_dl_buffer(int i, unsigned *len) { *len = 8u * (unsigned)g_dl_capacity; return g_gfx_dl_buffers[i & 1]; }
 void port_frame_probe(unsigned task) {
     port_glog("[probe] task %u: BEA35 %u BEAC0 %u E0B94 %u GDL %08X BE9D8 %08X %08X BEDE8 %08X %08X BE9C0 %d\n", task,
               g_game_frame_state, g_game_paused, g_game_mode, g_gfx_dl_ptr, g_gfx_dl_frame_starts[0], g_gfx_dl_frame_starts[1],
