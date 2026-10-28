@@ -68,6 +68,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   (camera / positions after the 4-pad script). Same build = same behaviour (online is safe), but any static change makes
   "identical to HEAD" checks fail on those scenes. Suspect a wasm pointer masked with 0x7FFFFF / KSEG and re-mapped
   through the n64_rdram mirror. Repro: port_work/p350/headcmp (menu_v12 vs menu_head).
+  P351: Conker's tail pose after a scripted run also changes with the layout (HEAD + an unused 1 MB static); HEAD padded
+  so that n64_rdram sits at the same address gives pixel-identical frames (port_work/p351/headcmp), a useful method.
 - Single-retrace H blips in ?nethash runs (non-netdet) differ run to run, with or without options; netpair (netdet) shows
   none. Not explained.
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
@@ -87,6 +89,32 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P351 (port-web, 2026-10-28): feature #18 High frame rate (interpolated)
+- d9443be4 option "High frame rate (smooth motion)" (hfr; page-side, port_gfx_hfr in gfx_f3dex2.o = outside the online
+  hash; in Modern). Recording: the game frame's task is drawn as always; each G_MTX keyed by hfr_sig (command address if
+  in a static model DL, flags, segment-relative matrix address, anchor = first G_DL / G_VTX target outside the frame DL
+  buffers) + occurrence; matrices, cull / branch-Z decisions, TMEM generations, task, P350 ws entries, top-level DL hash
+  recorded. Checks: rigid decomposition (quaternion, scales, translation / view eye); object > 100 deg or > 1500 units =
+  drawn as recorded; view > 45 deg or eye > 1500 = cut; snap (frame as drawn) on cut, fx (screen / kept-image reads:
+  blur ghost, pause frame), first, multi-task retrace, gap > 8, < 50 % matched, nothing moved. Replay: pc_sched.c frame()
+  -> port_gfx_hfr_present(pos) every tick (online once per rAF via port_gfx_hfr_vsync), t = (pos - newest) / smoothed
+  interval; the newest task redrawn with interpolated matrices, recorded decisions / textures (tcache 2048 LRU with the
+  option), screen only (hfr_drop), fbc_pre restore; DL buffers + DL hash checked first, replay addresses bounds-checked,
+  real tasks reset replay state (first version traced at the MP level load and desynced online).
+- 7ed3e26a test aid: audprobe hfrseq:PREFIX:G:K[:F] (pictures at t = k/K while paused). In the feature: ?hfrlog=1
+  (stats, netdet-allowed), ?hfrtrace=F, ?hfrfinish=1 (GPU-inclusive timing), ?p351log=F (G_MTX layout), port_gfx_hfr_test(t).
+- Numbers: 60 shown / 12.5 game fps (headless 60 Hz), 110 / s with ?timer=7; replay 1.2 ms avg CPU+GPU (max 2.9), same at
+  1920x1440; game task 8..17 ms as before. Evidence port_work/p351: seq1 (sheet, seq.gif, conker_g1: pan ~10 px per
+  picture, t=1 vs next t=0 0 px), cut (bar cutscene, cuts 3057 / 3061 snapped), feat (hud_sheet widescreen + HUD,
+  pause_on vs off: only the tail icon, photo_fc), headcmp, hash.sh / headcmp.sh / cutseq.sh / feat.sh.
+- Proof: nethash on vs off 1 H blip (noise); netpair guest on 14942 + 12953 IDENTICAL (split screen interpolated);
+  off vs HEAD hud / pause identical, moving frame differs only in Conker's tail = layout dependence (HEAD + 1 MB static
+  changes it; HEAD padded to the same n64_rdram address = pixel-identical). check.sh GREEN, hold-L 5789 / 0x29 at 5795,
+  no traps (also with the option on).
+- Limits: up to one game frame of extra latency; 2D, CPU-built geometry (particles, shadows, ripples, trails) and texture
+  animation at game rate (slightly ahead of interpolated objects); motion-blur scenes and multi-task frames not
+  interpolated; matching by occurrence can pair two same-model objects wrongly when the draw order changes (the jump
+  check catches big ones); headless Chrome only measured 60 Hz (rAF) / ~110 Hz (timer).
 ### P350 (port-web, 2026-10-28): feature #15 Widescreen without bars (+ option Full-resolution picture)
 - 36d94dd7 option "Widescreen" (widescreen; page-side, renderer port_gfx_widescreen in gfx_f3dex2.o = outside the online
   hash; in Modern). Canvas = the stage's / screen's aspect (4:3..64:27), 480 rows (?canvas=WxH fixes it). Renderer ws_*:
