@@ -81,6 +81,15 @@
   #options label:first-child { border-top: 0; }
   #options input { accent-color: var(--accent); margin-top: 3px; }
   #options small { display: block; color: var(--muted); font-size: 12px; }
+  #options label.locked { cursor: default; opacity: 0.6; }
+  /* P346: preset selector above the options: Classic / Modern / Custom as one segmented control */
+  #presets { display: flex; flex-wrap: wrap; align-items: center; gap: 0; padding: 0 0 8px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+  #presets > span { margin-right: 10px; font-size: 13px; }
+  #presets button { border-radius: 0; padding: 4px 12px; margin-left: -1px; }
+  #presets button:first-of-type { border-radius: 4px 0 0 4px; }
+  #presets button:last-of-type { border-radius: 0 4px 4px 0; }
+  #presets button[aria-checked="true"] { border-color: var(--accent); color: var(--accent); position: relative; z-index: 1; }
+  #presets small { flex-basis: 100%; color: var(--muted); font-size: 12px; margin-top: 6px; }
   /* P338: Online panel */
   .netstep label { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; }
   .netstep textarea { width: 100%; box-sizing: border-box; background: var(--panel2); color: var(--fg); border: 1px solid var(--line);
@@ -200,6 +209,13 @@
     </section>
     <section class="panel" id="p-options" hidden>
       <h3>Options</h3>
+      <div id="presets" role="radiogroup" aria-label="Preset">
+        <span>Preset</span>
+        <button id="preset-classic" role="radio" aria-checked="false">Classic</button>
+        <button id="preset-modern" role="radio" aria-checked="false">Modern</button>
+        <button id="preset-custom" role="radio" aria-checked="false">Custom</button>
+        <small id="preset-help"></small>
+      </div>
       <div id="options"></div>
       <p class="hint" style="text-align:left">Saved in this browser. Off = the original N64 behaviour.</p>
     </section>

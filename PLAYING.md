@@ -67,6 +67,14 @@ A gamepad works too; plug it in and press a button. **Controls** in the page let
 
 The **Options** button in the page header opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.
 
+**Presets.** At the top of the panel, **Classic / Modern / Custom** sets all the options at once (everything except *Online multiplayer*, which only shows the Online button):
+
+- **Classic**: the original game. Every option off and the three volumes at 100 %, except *Skippable cutscenes (hold L)*, which stays on: it does nothing unless you hold L, and it is on by default. A fresh browser starts as Classic.
+- **Modern**: Classic plus the extras that show more or make you wait less without making the game easier or changing the controls: *Skip intro*, *Autosave icon*, *Health always visible*, *Always show cash*, *Underwater air meter*, *Aiming crosshair*, *Conker always full detail* and *Rumble*. Left off on purpose: *Longer breath* and *Longer tail spin* (they make the game easier), the three toggles and *Inverted swimming* (a matter of taste), and *No motion blur / drunk sway* (the blur and sway are part of the story's scenes).
+- **Custom**: shown as soon as you change any single option (or a volume). Pick Classic or Modern again to reset every option to that preset.
+
+The choice is saved with the options. In an online game the host's options apply: the panel then shows the host's options and preset, greyed out.
+
 | Option | Default | What it does |
 |---|---|---|
 | Skippable cutscenes (hold L) | on | Hold L for 3 s to skip any cutscene, even one you have not seen (and Start skips the boot intro). Off: the original rules (only scenes you have seen, and L skips at once). |

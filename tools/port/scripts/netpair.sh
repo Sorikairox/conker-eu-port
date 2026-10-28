@@ -19,6 +19,7 @@
 #                     DESYNC_OFF=decimal offset in n64_rdram (default 0x200000)
 #        HIDE=AT:FOR  the guest's page is hidden from AT s for FOR s     REALBG=1  normal background throttling
 #        PLAY_SECS=N                  seconds of free play in the pad scripts (default 20)
+#        HOSTQ / GUESTQ  P346: extra query for the host's / player 2's page, e.g. HOSTQ='&preset=modern' GUESTQ='&panel=options'
 #        PADS=FILE  sourced after netmp_pads.py to replace PADF0..PADF3 (netmp_bunker.sh: Bunker Deathmatch,
 #                   NET_BUNKER_DEMO=1 player 2 takes a weapon, draws it and fires)
 # Logs: port_work/${NETDIR:-p339}/NAME/{host,guest,guest3,guest4}.log; [nethash] lines of every guest compared with
@@ -44,8 +45,8 @@ sleep 1.5
 B="http://localhost:$PORT/app/index.html?romurl=../dev/rom.z64&mute=1&p103boot=1&nethash=1&netscript=1&netpanel=1&padf=$PADF0&padf1=$PADF1&padf2=$PADF2&padf3=$PADF3${NETD:+&netd=$NETD}$ROOMQ"
 FA=${NETFAIL%-*}; FB=${NETFAIL#*-}
 fail() { [ -n "${NETFAIL:-}" ] && { [ "$1" = "$FA" ] && echo "&netfailto=$FB"; [ "$1" = "$FB" ] && echo "&netfailto=$FA"; }; }
-URLS=("$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}"
-      "$B${NETSIM_GUEST:+&netsim=$NETSIM_GUEST}${DESYNC_AT:+&netdesync=$DESYNC_AT}${DESYNC_OFF:+&netdesyncoff=$DESYNC_OFF}$(fail 2)"
+URLS=("$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}${HOSTQ:-}"
+      "$B${NETSIM_GUEST:+&netsim=$NETSIM_GUEST}${GUESTQ:-}${DESYNC_AT:+&netdesync=$DESYNC_AT}${DESYNC_OFF:+&netdesyncoff=$DESYNC_OFF}$(fail 2)"
       "$B${NETSIM_GUEST3:+&netsim=$NETSIM_GUEST3}$(fail 3)"
       "$B${NETSIM_GUEST4:+&netsim=$NETSIM_GUEST4}$(fail 4)")
 NAMES=(host guest guest3 guest4)

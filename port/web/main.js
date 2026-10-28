@@ -49,6 +49,7 @@ function toggle(name, on) {
   if (name === 'debug') { store.set('debug', on); if (on) out.scrollTop = out.scrollHeight; }
 }
 for (const n of ['controls', 'saves', 'options', 'online', 'debug']) $('t-' + n).onclick = () => toggle(n);
+if (['controls', 'saves', 'options', 'online'].includes(Q.get('panel'))) toggle(Q.get('panel'), true);   // P346 test aid: ?panel=options
 if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', false))) toggle('debug', true);
 
 // ---------------------------------------------------------------- options (P324)
@@ -105,6 +106,28 @@ for (const kv of (Q.get('opt') || '').split(',')) {
   const [k, v] = kv.split(':'), o = OPTIONS.find((x) => x.key === k);
   if (k) optOverride[k] = o && o.range ? Math.max(0, Math.min(100, parseInt(v, 10) || 0)) : v === '1';
 }
+// P346 presets. Every option except 'online' (it only shows the Online button) belongs to them.
+// Classic = the N64 game: every option off, volumes 100 %, except the hold-L cutscene skip, kept at its default (on):
+//   it changes nothing unless L is held, a fresh browser is then exactly Classic, and the user chose it on by default.
+// Modern = Classic + the options that add information or remove waiting without making the game easier or changing
+//   how it controls: skip intro, autosave icon, health / cash always visible, air meter, crosshair, full-detail Conker,
+//   rumble. Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
+//   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes).
+// Custom = anything else. The preset shown is stored in 'opt.preset' (changing one option stores 'custom'); a stored
+// Classic / Modern whose values no longer match (a ?opt override, an option added later) is shown as what matches.
+const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online').map((o) => o.key);
+const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble'];
+const PRESETS = {
+  classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
+    values: (o) => (o.range ? 100 : o.key === 'skipcut') },
+  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble.',
+    values: (o) => (o.range ? 100 : PRESET_MODERN_ON.includes(o.key)) },
+  custom: { label: 'Custom', help: 'Your own mix: pick Classic or Modern to set every option at once.' },
+};
+// P346 test aid: ?preset=classic|modern = that preset's values as ?opt overrides for this page load (not saved);
+// explicit ?opt pairs still win.
+if (Q.get('preset') === 'classic' || Q.get('preset') === 'modern')
+  for (const o of OPTIONS) if (PRESET_KEYS.includes(o.key) && !(o.key in optOverride)) optOverride[o.key] = PRESETS[Q.get('preset')].values(o);
 const optCache = {};   // opt() is read every animation frame by the input code: cache, refreshed on change
 const opt = (key) => {
   if (key in optCache) return optCache[key];
@@ -119,29 +142,82 @@ function sendOption(o) {
   if (o.game !== undefined && M && M._port_set_option) M._port_set_option(o.game, o.range ? opt(o.key) | 0 : opt(o.key) ? 1 : 0);
 }
 const optionChanged = {};   // key -> callback for page-side options that need to react at once
+// P346: one way to change an option, used by the panel's inputs and by the presets: drops a ?opt override, caches,
+// saves (unless `save` is false: a slider while dragging), sends game options to the game (sendOption, which does nothing
+// once a session's options are locked) and runs the option's page-side reaction.
+function setOption(o, value, save = true) {
+  delete optOverride[o.key]; optCache[o.key] = value;
+  if (save) store.set('opt.' + o.key, value);
+  sendOption(o);
+  if (optionChanged[o.key]) optionChanged[o.key](value);
+}
+// under a session only the game options (the host's) count: the page-side ones (autosave icon, toggles) stay each player's
+const presetMatches = (name) => PRESET_KEYS.every((k) => { const o = OPTIONS.find((x) => x.key === k); return (netCfg && o.game === undefined) || opt(k) === PRESETS[name].values(o); });
+const presetShown = () => {   // under a session the host's options decide: show what they match
+  const kept = netCfg || NETDET ? null : (Q.get('preset') || store.get('opt.preset', null));
+  if (kept === 'custom') return 'custom';
+  if (PRESETS[kept] && presetMatches(kept)) return kept;
+  return presetMatches('classic') ? 'classic' : presetMatches('modern') ? 'modern' : 'custom';
+};
+const optionInputs = {};   // key -> the panel's <input>, so presets and the host's session options can update it
+function showOptionValue(o) {   // the input (and slider percentage) shows opt(key)
+  const input = optionInputs[o.key];
+  if (o.range) { input.value = opt(o.key); input.nextPercent.textContent = ` ${input.value} %`; } else input.checked = opt(o.key);
+}
+function showPreset() {
+  const name = presetShown();
+  for (const n of Object.keys(PRESETS)) $('preset-' + n).setAttribute('aria-checked', String(n === name));
+  $('preset-help').textContent = PRESETS[name].help;
+  return name;
+}
+function applyPreset(name) {   // the selector: Classic / Modern set every preset option, Custom keeps them
+  if (optionsLocked) return;
+  store.set('opt.preset', name);
+  if (name !== 'custom') for (const k of PRESET_KEYS) {
+    const o = OPTIONS.find((x) => x.key === k), v = PRESETS[name].values(o);
+    if (opt(k) !== v || k in optOverride) setOption(o, v);
+    showOptionValue(o);
+  }
+  log(`[options] preset ${name}: ` + PRESET_KEYS.map((k) => `${k}=${+opt(k)}`).join(' '));
+  showPreset();
+}
+const optionPicked = (o) => { if (PRESET_KEYS.includes(o.key)) { store.set('opt.preset', 'custom'); showPreset(); } };
+for (const n of Object.keys(PRESETS)) $('preset-' + n).onclick = () => applyPreset(n);
+// P346: a session (netCfg: the host's game options) or ?netdet locks the game options: the panel shows the values the
+// game runs with, and their inputs and the presets are disabled (port_set_option would not take a change any more).
+function showSessionOptions() {
+  for (const o of OPTIONS) {
+    showOptionValue(o);
+    const locked = optionsLocked && o.game !== undefined;
+    optionInputs[o.key].disabled = locked;
+    optionInputs[o.key].parentElement.classList.toggle('locked', locked);
+    optionInputs[o.key].parentElement.title = locked ? (netCfg ? "Online: the game uses player 1's (the host's) options" : 'Fixed for this run') : '';
+  }
+  for (const n of Object.keys(PRESETS)) $('preset-' + n).disabled = optionsLocked;
+  log(`[options] session options (${netCfg ? "the host's" : 'fixed'}), preset ${showPreset()}: ` + OPTIONS.filter((o) => o.game !== undefined).map((o) => `${o.key}=${+opt(o.key)}`).join(' '));
+}
 (function renderOptions() {
   for (const o of OPTIONS) {
-    const l = document.createElement('label'), c = document.createElement('input'), t = document.createElement('span');
+    // P346: row / input / text (were l / c / t)
+    const row = document.createElement('label'), input = document.createElement('input'), text = document.createElement('span');
+    optionInputs[o.key] = input; input.id = 'opt-' + o.key;
     if (o.range) {   // P332 slider: 0..100 %, sent while dragging, saved on release
-      c.type = 'range'; c.min = 0; c.max = 100; c.step = 5; c.value = opt(o.key); c.id = 'opt-' + o.key;
-      const pct = document.createElement('b'); pct.textContent = ` ${c.value} %`;
-      c.oninput = () => { delete optOverride[o.key]; optCache[o.key] = +c.value; pct.textContent = ` ${c.value} %`; sendOption(o); };
-      c.onchange = () => { store.set('opt.' + o.key, +c.value); log(`[options] ${o.key} ${c.value}`); };
-      t.textContent = o.label; t.appendChild(pct);
-      const h = document.createElement('small'); h.textContent = o.help; t.appendChild(h);
-      l.append(t, c); $('options').appendChild(l);
-      continue;
+      input.type = 'range'; input.min = 0; input.max = 100; input.step = 5;
+      input.nextPercent = document.createElement('b');
+      input.oninput = () => { setOption(o, +input.value, false); input.nextPercent.textContent = ` ${input.value} %`; };
+      input.onchange = () => { setOption(o, +input.value); optionPicked(o); log(`[options] ${o.key} ${input.value}`); };
+      text.textContent = o.label; text.appendChild(input.nextPercent);
+    } else {
+      input.type = 'checkbox';
+      input.onchange = () => { setOption(o, input.checked); optionPicked(o); log(`[options] ${o.key} ${input.checked ? 'on' : 'off'}`); };
+      text.textContent = o.label;
     }
-    c.type = 'checkbox'; c.checked = opt(o.key); c.id = 'opt-' + o.key;
-    c.onchange = () => {
-      delete optOverride[o.key]; store.set('opt.' + o.key, c.checked); optCache[o.key] = c.checked;
-      sendOption(o); if (optionChanged[o.key]) optionChanged[o.key](c.checked);
-      log(`[options] ${o.key} ${c.checked ? 'on' : 'off'}`);
-    };
-    t.textContent = o.label;
-    const h = document.createElement('small'); h.textContent = o.help; t.appendChild(h);
-    l.append(c, t); $('options').appendChild(l);
+    showOptionValue(o);
+    const h = document.createElement('small'); h.textContent = o.help; text.appendChild(h);
+    if (o.range) row.append(text, input); else row.append(input, text);
+    $('options').appendChild(row);
   }
+  showPreset();
 })();
 
 // ---------------------------------------------------------------- IndexedDB (ROM cache, saves)
@@ -945,6 +1021,7 @@ async function start(app) {
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
   optionsLocked = NETDET || !!netCfg;
+  if (optionsLocked) showSessionOptions();   // P346: the panel shows the session's (the host's) options, disabled
   log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));
   if (app === 'game' && romBytes) {
     const p = M._malloc(romBytes.length);

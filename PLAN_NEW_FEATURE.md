@@ -10,6 +10,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 1 | Autosave icon | Done P324 |
 | 2 | Toggle crouch / R-Look / walk | Done P324 |
 | 3 | Skip intro | Done P324 |
+| 4 | Classic / Modern / Custom presets | Done P346 |
 | 5 | Health always visible | Done P325 |
 | 5 | Always show cash (pause-screen digits) | Done P325, P330 |
 | 5 | Show cash "on change" | Not needed: this is what the original game does |
@@ -29,7 +30,7 @@ One session is about 150 tool calls. The estimates take into account what exists
 
 | # | Feature | Effort | Notes |
 |---|---|---|---|
-| 4 | Classic / Modern / Custom presets | Small, ½ session | Page only (main.js): a preset sets a group of the 14 options; changing any option switches to Custom. |
+| 4 | Classic / Modern / Custom presets | **Done P346** | Page only (main.js, index.html): a preset sets every option but Online; changing any option switches to Custom. |
 | 14 | Language selector (skipped by the user) | Small, 1 session | The game already has `g_settings_language` (settings byte 10) and `text_bank_load` reloads text when it changes. Check which languages the EU ROM really has. It is saved in the EEPROM, so online it follows the host's save. |
 | 15 | Widescreen without bars | Medium, 2–3 sessions | Projection (`camera_build_view_matrix` is already wrapped) and culling (`camera_view_test_sphere`). The rest is the work: HUD anchoring, 2D sprites, split screen, framebuffer effects (ghost, lens warp). **Online risk:** `objects_update_visibility` feeds game logic, so a wider view could change what updates. It must be host-dictated, or visibility must stay at 4:3. |
 | 16 | Accurate graphics | Split in two | **16a hi-res menus/2D:** small to medium, 1 session, building on P335's `uHiRes` texrect path. **16b reflections and other missing effects:** unknown; needs a 1-session audit of what differs from the N64 first. |
