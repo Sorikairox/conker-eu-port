@@ -1193,6 +1193,9 @@ async function start(app) {
   const [js, factory] = app === 'demo' ? ['sched_demo.js', 'createSchedDemo'] : ['conker.js', 'createConker'];
   log(`-- loading ${js}`);
   await loadScript(js);
+  // P349 test aid: ?canvas=WxH sets the canvas's drawing buffer (default 640 x 480) before the renderer reads its size,
+  // e.g. ?canvas=1920x1440 to look at the 2D at a large resolution (the page box still scales it to fit)
+  { const m = /^(\d{2,4})x(\d{2,4})$/.exec(Q.get('canvas') || ''); if (m) { $('canvas').width = +m[1]; $('canvas').height = +m[2]; } }
   const Mod = await window[factory]({
     canvas: $('canvas'),
     print: (s) => log(s),

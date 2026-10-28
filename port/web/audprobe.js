@@ -75,7 +75,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   if (process.env.PROBE_THROTTLE) { await call('Emulation.setCPUThrottlingRate', { rate: +process.env.PROBE_THROTTLE }); console.log('cpu throttle', process.env.PROBE_THROTTLE); }
   let last = null; const t0 = Date.now();
   // P27: PROBE_STEPS="MS:click; MS:keydown:CODE; MS:keyup:CODE; MS:nav:QUERY; MS:eval:EXPR; MS:shot:PATH" (MS from now; shot: P49;
-  // P348: MS:png:PATH = the last photo-mode PNG).
+  // P348: MS:png:PATH = the last photo-mode PNG; P349: MS:cshot:PATH = the canvas drawing buffer).
   // Input goes through Input.dispatch*Event, so it counts as a real user gesture (audio resume test).
   // PROBE_NOAUTOPLAY=1 keeps Chrome's default autoplay policy (a context starts suspended).
   const keyInfo = (code) => {
@@ -100,6 +100,14 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         const b64 = r && r.result && r.result.result && r.result.result.value;
         if (b64) { require('fs').writeFileSync(arg, Buffer.from(b64, 'base64')); console.log('photo png:', arg); } else console.log('photo png: none', arg);
       }
+      else if (act === 'cshot') {  // P349: MS:cshot:PATH, the canvas's drawing buffer as a PNG (its own resolution, no page);
+        // the game is paused around the read (a read of the running canvas hung the page in headless Chrome)
+        await call('Runtime.evaluate', { expression: 'window.Module && Module._port_set_paused(1)' }); await sleep(300);
+        const r = await Promise.race([call('Runtime.evaluate', { expression: "document.getElementById('canvas').toDataURL('image/png')", returnByValue: true }), sleep(10000).then(() => null)]);
+        const u = r && r.result && r.result.result && r.result.result.value;
+        if (u) { require('fs').writeFileSync(arg, Buffer.from(u.split(',')[1], 'base64')); console.log('canvas shot:', arg); } else console.log('canvas shot: no answer', arg);
+        await call('Runtime.evaluate', { expression: 'window.Module && Module._port_set_paused(0)' });
+      }
       else if (act === 'shot') {  // P49: MS:shot:PATH, a real-time CDP screenshot during the run (frame sequences)
         const r = await Promise.race([call('Page.captureScreenshot', { format: 'png' }), sleep(10000).then(() => null)]);
         const b64 = r && (r.result ? r.result.data : r.data);
@@ -118,6 +126,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const b64 = r && (r.result ? r.result.data : r.data);
     if (b64) { require('fs').writeFileSync(process.env.PROBE_SHOT, Buffer.from(b64, 'base64')); console.log('screenshot:', process.env.PROBE_SHOT); }
     else console.log('screenshot: no answer');
+  }
+  if (process.env.PROBE_CSHOT) {  // P349: the canvas's drawing buffer at the end of the run (e.g. after ?nethashstop paused the game)
+    const r = await Promise.race([call('Runtime.evaluate', { expression: "document.getElementById('canvas').toDataURL('image/png')", returnByValue: true }), sleep(10000).then(() => null)]);
+    const u = r && r.result && r.result.result && r.result.result.value;
+    if (u) { fs.writeFileSync(process.env.PROBE_CSHOT, Buffer.from(u.split(',')[1], 'base64')); console.log('canvas shot:', process.env.PROBE_CSHOT); } else console.log('canvas shot: no answer');
   }
   // P21: PROBE_GREP=regex [PROBE_TAIL=n] selects which page console lines to print (default: audio lines)
   const grep = JSON.stringify(process.env.PROBE_GREP || '\\[aud|\\[audtest|\\[voicetest|fail');
