@@ -26,6 +26,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 19 | Free camera | Done P347 (single player, follow camera; never online) |
 | 22 | Photo mode | Done P348 (single player, cutscenes too; never online) |
 | 16a | Hi-res menus and 2D | Done P349 (render-only, each player's own choice online; in Modern) |
+| 15 | Widescreen without bars | Done P350 (render-only, logic keeps 4:3, each player's own choice online; in Modern; + option Full-resolution picture) |
 
 ## Remaining features: effort (reassessed 2026-10-28)
 
@@ -35,7 +36,7 @@ One session is about 150 tool calls. The estimates take into account what exists
 |---|---|---|---|
 | 4 | Classic / Modern / Custom presets | **Done P346** | Page only (main.js, index.html): a preset sets every option but Online; changing any option switches to Custom. |
 | 14 | Language selector (skipped by the user) | Small, 1 session | The game already has `g_settings_language` (settings byte 10) and `text_bank_load` reloads text when it changes. Check which languages the EU ROM really has. It is saved in the EEPROM, so online it follows the host's save. |
-| 15 | Widescreen without bars | Medium, 2–3 sessions | Projection (`camera_build_view_matrix` is already wrapped) and culling (`camera_view_test_sphere`). The rest is the work: HUD anchoring, 2D sprites, split screen, framebuffer effects (ghost, lens warp). **Online risk:** `objects_update_visibility` feeds game logic, so a wider view could change what updates. It must be host-dictated, or visibility must stay at 4:3. |
+| 15 | Widescreen without bars | **Done P350** | Option widescreen: canvas at the window's aspect (4:3..21:9); 3D clip x / k with k-times wider viewports (split screen included), 2D centred 4:3, corner HUD (health, cash, air meter) anchored via port_ws_hud_anchor marks, fills / ghost / pause snapshot to the edges. Logic visibility stays 4:3 (it gates object updates); level geometry and mesh culling are widened render-side (wrapper re-runs into a renderer arena, game memory and stack bytes restored). Proof: nethash on = off (harness blips only), netpair guest widescreen 17943 identical. Limits: characters / props / some effects just outside 4:3 appear late at the sides; sky box face culling not widened; MP per-view HUD stays at its 4:3 place. Also option Full-resolution picture (canvas = CSS size x DPR). |
 | 16 | Accurate graphics | Split in two | **16a hi-res menus/2D: Done P349** (texture rectangles centred on the N64 pixel, clamped to what the N64 samples, 4-tap bilinear / crisp point; pause frame snapshot through P335's `uHiRes` path). **16b reflections and other missing effects:** unknown; needs a 1-session audit of what differs from the N64 first. |
 | 17 | Texture packs | Medium, 2–3 sessions | The renderer already hashes textures (P193). Needed: a stable hash including palette/TLUT, a dump mode, and loading a pack (zip/IndexedDB) in the page. Render-only, so safe online. |
 | 18 | High frame rate (interpolated) | Hard, 3–5 sessions | Game logic stays at N64 rate; the renderer draws extra frames by interpolating matrices between two game frames. Hard parts: matching objects between frames and detecting camera cuts. Render-only, so lockstep is unaffected. |

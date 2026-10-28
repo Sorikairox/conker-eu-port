@@ -63,6 +63,13 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
 - port_cdata name strings (n64mem_tab.c) still print the original D_ names (n64mem.py, RENAMED_FROM).
+- P350 found: the game depends on the static memory layout. HEAD + 512 unused bytes of bss in gfx_f3dex2.o (shifts
+  n64_rdram by 0x1000; an 8 MB shift only changes 1 pixel) changes the title menu's character shading and the MP game
+  (camera / positions after the 4-pad script). Same build = same behaviour (online is safe), but any static change makes
+  "identical to HEAD" checks fail on those scenes. Suspect a wasm pointer masked with 0x7FFFFF / KSEG and re-mapped
+  through the n64_rdram mirror. Repro: port_work/p350/headcmp (menu_v12 vs menu_head).
+- Single-retrace H blips in ?nethash runs (non-netdet) differ run to run, with or without options; netpair (netdet) shows
+  none. Not explained.
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
 - The slow-motion camera cut's blur (camera_cut_fade_update, fb_ghost pass 2) was not reached in a test since the
   P335 fix; it uses the same draw as the wake-up blur (fixed), so it should be right.
@@ -80,6 +87,40 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P350 (port-web, 2026-10-28): feature #15 Widescreen without bars (+ option Full-resolution picture)
+- 36d94dd7 option "Widescreen" (widescreen; page-side, renderer port_gfx_widescreen in gfx_f3dex2.o = outside the online
+  hash; in Modern). Canvas = the stage's / screen's aspect (4:3..64:27), 480 rows (?canvas=WxH fixes it). Renderer ws_*:
+  N64 picture centred (ws_x2d); perspective draws: clip x / k, viewport k times wider around cx + (centre - cx) * k
+  (full-screen views keep every N64 point, split views get their share), G_CULLDL +-k w, scissor mapped likewise (edges
+  within 4 px of the screen edge -> canvas edge). 2D: centred 4:3 layout; untextured fills on the screen / view edge and
+  per-canvas-pixel full-frame copies (P335 ghost, P349 pause snapshot, now also without hires2d) reach the canvas edge.
+  HUD anchors: game C calls port_ws_hud_anchor(gdl, edge) (#ifdef PORT, no game memory change) around hud_health_draw
+  (left), air meter + bubbles, cash counter (right); render_player_hud = tag 3 (a player's fades / tint / scope follow
+  the widened view). MP per-view HUD (mp_hud_draw_views, text queue) stays centred.
+- Logic vs render visibility: objects_update_visibility / obj_update_visibility (camera_view_test_sphere with the 4:3
+  planes) gate the whole object update (game_eu_78230.c +0x2FA), animation, fades and model matrices: game state, kept at
+  4:3. World records (world_records_build_visible) too. Render-only culling widened without game memory change: wrappers of
+  level_dl_visibility_filter and (new) mesh_dl_cull_copy run a wide copy (zoom factor / k) into ws_arena, re-run the
+  game's call (same output + vis bytes / zone bits), restore the stack bytes (WS_SCRUB); gfx_run_dl substitutes the copy
+  (hash-validated ws_sub entries, dropped after the task).
+- gfx_run_task stack scrub (GFX_SCRUB 64 KB, ?p350noscrub=1): the renderer runs on the RCP scheduler fiber, whose whole
+  stack is hashed (S) and whose dead bytes game C may read as uninitialised locals; restoring them makes render options
+  invisible to game state. noinline body (an inlined body put its frame above the saved SP: S differed).
+- Proof: nethash warp 0x29 (moves + pause, 1120x480 + anchors) on vs off: equal except single-retrace H blips, which two
+  identical off runs show too (p327/p350fA, fB, fB2); netpair p327/p350_net guest widescreen 854x480, menus -> 4-player
+  split screen: 17943 retraces IDENTICAL. Off vs HEAD (p350/headcmp): hud / legal / pause / pause+hires2d identical;
+  title menu (34352 px, character shading) and MP (game diverged) differ, exactly as for HEAD + an unused 512-byte static
+  in gfx_f3dex2.o (menu_v12): see Open items. check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps.
+- Evidence port_work/p350: a/ (first shots, 21:9), b/ (hud_ws anchors, cut4900/5400/5700/6400/7600 intro + throne
+  cutscene, wake6200 ghost blur, wake6700 speech bubble, aim_ws/43 crosshair, photo_ws_2x 1708x960, mp_ws split), shots.sh
+  (ws vs 4:3 batch), headcmp.sh, hashcmp.py.
+- eb0a257a option "Full-resolution picture" (fullres, page-side, in Modern): canvas = CSS box x devicePixelRatio (<= 2560
+  x 1440), ResizeObserver on the stage; P161 write-back of canvases > 1280x960 now via a GPU downscale (was skipped:
+  stale pause background). c/pause_1600.png, c/fullres_pause.png.
+- Limits: characters, world props and some effects just outside the 4:3 view pop in at the sides (game logic does not
+  update them either); sky box faces culled by the game's 80 / 95 deg test may leave the far corners empty at 21:9 (not
+  seen); MP per-view HUD at its 4:3 place inside each wider view; letterbox bars not reached in a test (full-width
+  fills, so they extend).
 ### P349 (port-web, 2026-10-28): feature #16a Hi-res menus and 2D
 - 11199590 option "Hi-res menus and 2D" (hires2d; page-side, calls port_gfx_hires_2d in gfx_f3dex2.o = outside the
   online hash, so each player's own choice; in Modern). Cause of the soft / offset 2D: texture rectangles sampled
