@@ -80,6 +80,30 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P347 (port-web, 2026-10-28): feature #19 Free camera
+- 14fd1c2f option "Free camera" (freecam, PORT_OPT_FREE_CAMERA 15, PORT_OPT_COUNT 16 -> 24; not in Modern: a control
+  choice). Single player: right stick / IJKL / mouse (pointer lock) turn yaw (130 deg/s, +0x37C, so Conker steers by
+  it) and pitch (eye on the circle through the N64 eye, elevation -10..70) of the follow camera (mode 1 / 0x800,
+  free_camera_update in camera_follow_mode_update; hooks in camera_update_eye_orbit / camera_update_eye_height).
+  Walls: the N64 placement code after it (ray casts, freecam_auto_update, eye collision). Hand-back:
+  free_camera_allowed (MP, cutscene, pause / snap, not follow mode, look / aim, swim, ride kinds, scripted requests
+  other than 0 / 4 / 0xB / 0xD). Input: page -> port_cam_state; pc_pif.c gives the stick to the camera while engaged
+  (2-read time-out), else C bits as before (no C until centred after a hand-back). Inputs CAMZOOM (U / L3) and CAMBACK
+  (O / R3) = C-up / C-down with the option. ?padf F:BTN:X:Y:RX:RY. Online: forced off (page + port_net_on).
+- cc55a3c4 test aids: warp.sh STEPS (keys / click / eval steps), audprobe.sh PROBE_WEB (serve another build dir),
+  tools/port/scripts/shots_gif.py (GIF + contact sheet in pure Python). In the feature: ?freecamlog=N, ?p347mouse=1.
+- Evidence (port_work/p347, p327/p347_*): off vs HEAD build (port_work/p347/web_head) 213 camera frames identical
+  (cmpn_head2 / cmpn_off2); on without camera input identical; new game, stick held from 4500: 1738 camera frames
+  identical to off through the opening + wake-up cutscenes, first difference 6957 = free camera takes over
+  (cs_on / cs_off); evidence/show.gif + show_sheet.png (360 orbit, look up, top view, C-down recentre),
+  wall29_*.png (rock wall), corridor1e_sheet.png (level 0x1E corridor), look29_R_look_view_game_camera.png,
+  fixed13_* (level 0x13 pivot camera mode 0x40: stick = C-right, camera unchanged), mouse 600 px = 72 deg, keyboard
+  L / I / O; netpair p347_net 2p with ?opt=freecam:1: freecam=0, 5941 identical. check.sh GREEN, hold-L 5789 / 0x29
+  at 5795, no traps.
+- Seen, not this feature: ?warp=2A traps on the HEAD build too (memory access out of bounds at retrace 38).
+- Limits: swimming hand-back only checked in the code (no test route reaches water); ?padrec does not record
+  the camera stick; camera_follow_mode_update called twice in one frame (camera restore event) applies that frame's
+  input twice; headless Chrome gives no pointer lock (mouse tested through ?p347mouse).
 ### P346 (port-web, 2026-10-28): feature #4 Classic / Modern / Custom presets
 - 5a067a1c page-only (main.js, index.html; conker.wasm unchanged): segmented selector at the top of Options.
   Classic = every option off, volumes 100 %, hold-L skip kept on (its default; a fresh browser is Classic). Modern =
