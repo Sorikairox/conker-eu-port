@@ -80,6 +80,20 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P346 (port-web, 2026-10-28): feature #4 Classic / Modern / Custom presets
+- 5a067a1c page-only (main.js, index.html; conker.wasm unchanged): segmented selector at the top of Options.
+  Classic = every option off, volumes 100 %, hold-L skip kept on (its default; a fresh browser is Classic). Modern =
+  Classic + skipintro, saveicon, healthhud, cashhud, airbar, crosshair, conkerlod, rumble (off on purpose: longbreath,
+  longspin = easier; toggles, swiminvert = taste; nodrunk = story effect). Custom = anything else; 'online' is not in
+  the presets. All option changes now go through setOption (presets use the same path as a click); 'opt.preset' saved
+  ('custom' after any manual change). Online: at session start the panel shows the host's game options + preset,
+  disabled. Test aids ?preset=, ?panel=options, netpair.sh HOSTQ / GUESTQ.
+- Evidence (port_work/p346): panel/1_fresh (Classic) 2_modern 3_custom 4_reload_custom 5_classic 6_reload_classic
+  (state + localStorage evals in panel/out.txt); game_modern/s_36s.png level 0x29 with health pieces + $0 after
+  clicking Modern then Start, game_classic/s_36s.png none; preset/guest_45s.png online guest (fresh store) shows
+  Modern greyed, guest log "session options (the host's), preset modern", 2961 retraces identical; preset_classic
+  2459 identical. check.sh GREEN, hold-L 5789 / 0x29 at 5795, no traps.
+- Seen, not a preset issue: the MP "GAME 1" screen says INSERT RUMBLE PAK with rumble on or off (original screen).
 ### P345 (port-web, 2026-10-28): online multiplayer phase 2b (room codes)
 - 6ef0d56f Netlify Function /api/room (port/web/netlify/functions/room: core.mjs logic, room.mjs on Netlify Blobs
   store conker-rooms): create / join / host poll / offer / guest poll / answer / close; 5-char codes without
