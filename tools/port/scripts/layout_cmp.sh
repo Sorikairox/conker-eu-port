@@ -1,19 +1,20 @@
 #!/bin/bash
 # P353: does the game depend on where the n64_rdram mirror lands in wasm memory? (docs/port/MEMORY.md "Layout
 # independence"). Builds the game with the mirror moved by RDRAM_SHIFT (port/Makefile; nothing else moves), runs the
-# same scripted route on each build with ?layhash (pc_nethash.c: per-retrace hash of the game state with mirror
-# pointers taken as N64 addresses) and compares the hashes and a 640x480 canvas shot of the last retrace.
+# same scripted route on each build (muted, det=2, one headless Chrome at a time), and compares with the first shift:
+# the 640x480 canvas shot of the last retrace must be pixel-identical, and the memory dumps at that retrace must not
+# differ except for stale pointer fragments / address text (tools/port/layout_diff.py). The ?layhash line (first
+# retrace whose layout-normalized hash differs, R mirrors / G other globals / S stacks) is printed for information.
 #   layout_cmp.sh build SHIFT...         build each shift into port_work/layout/s_<SHIFT> (then rebuild the normal build)
-#   layout_cmp.sh run ROUTE SHIFT...     run ROUTE on each built shift and compare everything with the first shift
-#   layout_cmp.sh check                  the short regression: build 0x0 and 0x123000, run route "menu", exit 1 on a
-#                                        difference (~4 min; tools/eu_port/check.sh runs it with --layout)
+#   layout_cmp.sh run ROUTE SHIFT...     run ROUTE on each built shift and compare with the first shift; exit 1 on a difference
+#   layout_cmp.sh check                  the short regression: build 0x0 and 0x123000, route "short" (~4 min;
+#                                        tools/eu_port/check.sh --layout runs it)
 # Routes: menu (title menu after skipintro, retrace 450), run29 (?warp=29, a walk with camera turns, retrace 800),
-#         mp (4-player Bunker from the title menu, tools/port/scripts/netmp_pads.py, retrace 7250, ~5 min per shift)
-#         short (title menu at retrace 300, for `check`)
-# Env: OUT=DIR (default port_work/layout/<route>), STOPAT=N stop at retrace N instead, DUMP=1 also dumps the hashed memory at the stop
-#      (tools/port/layout_diff.py compares two dumps), PROBE_NOWAIT / PROBE_PORT as for cshot.sh / audprobe.sh.
-# Outputs: OUT/<route>_s<SHIFT>.{png,log,out}; prints the first differing retrace (R = mirrors, G = other globals,
-# S = thread stacks) and the pixel diff for each shift.
+#         mp (4-player Bunker from the title menu, tools/port/scripts/netmp_pads.py, retrace 7250, ~5 min per shift),
+#         short (title menu at retrace 300)
+# Env: OUT=DIR (default port_work/layout/<route>), STOPAT=N stop at retrace N instead, KEEP=1 keeps the memory dumps,
+#      PROBE_NOWAIT / PROBE_PORT as for cshot.sh / audprobe.sh.
+# Outputs: OUT/<route>_s<SHIFT>.{png,log,out}, OUT/<route>_s<A>_s<B>.diff (layout_diff.py --real).
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 eval "$(tools/eu_port/wt.sh env "$(basename "$PWD")")"
@@ -44,7 +45,7 @@ run_route() {
   local O=${OUT:-$L/$r}; mkdir -p "$O"
   for s in "$@"; do
     [ -d $L/s_$s ] || { echo "no build $L/s_$s (layout_cmp.sh build $s)"; return 1; }
-    env WEB=$PWD/$L/s_$s CANVAS=640x480 PADF=$PADF ${DUMP:+PROBE_DUMP=$PWD/$O/${r}_s$s.dump} \
+    env WEB=$PWD/$L/s_$s CANVAS=640x480 PADF=$PADF PROBE_DUMP=$PWD/$O/${r}_s$s.dump \
       tools/port/scripts/cshot.sh "$O/${r}_s$s.png" $STOP $SECS "$Q&layhash=1"
   done
   local a=$1 bad=0; shift
@@ -66,9 +67,13 @@ print(f"retraces {c[0]}..{c[-1]}: " + ('IDENTICAL' if not d else f"{len(d)} diff
 EOF
 )
     local px; px=$(python3 tools/port/scripts/pngtool.py diff "$O/${r}_s$a.png" "$O/${r}_s$s.png" | sed 's/.*: 640x480, //')
-    echo "$r s_$a vs s_$s: hash $line; picture $px"
-    case "$line$px" in *IDENTICAL*identical*) ;; *) bad=1;; esac
+    local st; st=$(python3 tools/port/layout_diff.py "$O/${r}_s$a.dump" $L/s_$a/conker.map "$O/${r}_s$s.dump" $L/s_$s/conker.map \
+      --real --max 20 > "$O/${r}_s${a}_s$s.diff" 2>&1; echo $?)
+    echo "$r s_$a vs s_$s @$STOP: picture $px; state: $(sed -n 2p "$O/${r}_s${a}_s$s.diff") (layhash $line)"
+    case "$px" in *identical*) ;; *) bad=1;; esac
+    [ "$st" = 0 ] || { bad=1; sed -n '3,12p' "$O/${r}_s${a}_s$s.diff"; }
   done
+  [ -n "${KEEP:-}" ] || rm -f "$O"/${r}_s*.dump
   return $bad
 }
 case $cmd in

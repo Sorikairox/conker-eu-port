@@ -5,7 +5,8 @@ builds that differ only in where the n64_rdram mirror is (port/Makefile RDRAM_SH
 Every aligned word that is a wasm pointer into the mirror (or n64_seg16) is compared as its N64 address, so only real
 differences of game state are listed, grouped into runs and named with the symbols of each build's conker.map
 (mirror offsets also with the N64 data symbol from port/symbols/symbols.tsv when there is one).
-  layout_diff.py A.dump A_conker.map B.dump B_conker.map [--max N] [--words]
+  layout_diff.py A.dump A_conker.map B.dump B_conker.map [--max N] [--real]
+Exit status 1 when a difference is not explained as a stale pointer fragment or address text.
 """
 import bisect
 import json
@@ -133,17 +134,45 @@ def main():
                 if cur and cur['reg'] == ia and k == cur['end'] + 1:
                     cur['end'] = k
                     cur['n'] += 1
+                    cur['all'].append((wa[k], wb[kb]))
                     if len(cur['w']) < 4: cur['w'].append((wa[k], wb[kb]))
                 else:
-                    cur = {'reg': ia, 'start': k, 'end': k, 'n': 1, 'addr': addr, 'w': [(wa[k], wb[kb])]}
+                    cur = {'reg': ia, 'start': k, 'end': k, 'n': 1, 'addr': addr, 'w': [(wa[k], wb[kb])], 'all': [(wa[k], wb[kb])]}
                     runs.append(cur)
-    print(f'{total} differing words in {len(runs)} runs')
+    # classify: a stale fragment of a mirror pointer (some byte-aligned window of the two words differs by exactly the
+    # mirror displacement, the rest is equal: bytes of a freed block's pointers that a new owner never overwrote), log
+    # text that prints an address (ASCII hex digits), or a real difference
+    d = (B[2] - A[2]) & 0xFFFFFFFF
+    def fragment(x, y):
+        for lo in (0, 8, 16):
+            for hi in (16, 24, 32):
+                if hi - lo < 8:
+                    continue
+                m = ((1 << (hi - lo)) - 1) << lo
+                k = (1 << (hi - lo)) - 1
+                # the window of p + d is the window of p plus d's window, plus a carry from the bits below it
+                if (x & ~m) == (y & ~m) and (((y & m) - (x & m)) >> lo) & k in ((d >> lo) & k, ((d >> lo) + 1) & k):
+                    return True
+        return False
+    def text(x, y):
+        hx = set(b'0123456789abcdefABCDEF')
+        return all(c in hx for c in x.to_bytes(4, 'little')) and all(c in hx for c in y.to_bytes(4, 'little'))
+    real = 0
+    for r in runs:
+        r['kind'] = ' '.join('frag' if fragment(x, y) else 'text' if text(x, y) else 'REAL' for x, y in r['w'])
+        r['real'] = any(not fragment(x, y) and not text(x, y) for x, y in r['all'])
+        real += r['real']
+    print(f'{total} differing words in {len(runs)} runs; {real} runs not explained as stale pointer fragments / '
+          f'address text: {"none" if not real else "see REAL below"}')
+    if '--real' in sys.argv:
+        runs = [r for r in runs if r['real']]
     for r in runs[:mx]:
         addr = r['addr']
         where = name(A, n64s, addr) if r['reg'] == 0 else f'stack region {r["reg"]} +0x{addr - [x for x in ra if x[0] == r["reg"]][0][1]:X}'
         ws = ' '.join(f'{x:08X}/{y:08X}' for x, y in r['w'])
-        print(f'  {addr:08X} {r["n"]:6d} words  {where}   A/B: {ws}')
+        print(f'  {addr:08X} {r["n"]:6d} words  {where}   A/B: {ws}  [{r["kind"]}]')
+    return real
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(1 if main() else 0)

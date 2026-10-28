@@ -4,9 +4,11 @@
 #   tools/eu_port/check.sh   implicit_scan (0 NM+float) + romabs_check + difftest selftest (reference code from the ROM,
 #                            port/symbols) + full census (every TU, 0 FAIL) + incremental web build.
 # (--port, the P328 name of this mode, is still accepted.)
+#   tools/eu_port/check.sh --layout   the same + the layout-independence check (P353, tools/port/scripts/layout_cmp.sh
+#                            check: two builds with n64_rdram moved, title menu route, ~4 min more; one headless Chrome)
 # Sequential on purpose (the selftest and the census both load the container). Logs: port_work/check/.
 # Prints one line per step (rc, seconds, key line) and a final GREEN / RED line; exit status 0 only when green.
-case ${1:---port} in --port) ;; *) sed -n '2,6p' "$0"; exit 2;; esac
+LAYOUT=; case ${1:---port} in --port) ;; --layout) LAYOUT=1;; *) sed -n '2,8p' "$0"; exit 2;; esac
 ROOT=$(git -C "$(dirname "$0")" rev-parse --show-toplevel) && cd "$ROOT" || exit 2   # P353: the worktree this script lives in
 eval "$(tools/eu_port/wt.sh env "$(basename "$ROOT")")" || exit 2
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH DIFFTEST_SLOTS=1
@@ -26,5 +28,9 @@ KEY='echo "$(grep -m1 "^TUs" $log), $(grep -c "FAIL$" port/build/census/files.ts
 step census '[ $rc = 0 ] && ! grep -q "FAIL$" port/build/census/files.tsv' port/web/run.sh census
 KEY='echo "$(grep -h "census --incremental\|^vbe_build:" $log | tr "\n" " ") $(grep -h "link warnings" $log)"'
 step build '[ $rc = 0 ]' port/web/run.sh build
+if [ -n "$LAYOUT" ] && [ $red = 0 ]; then
+  KEY='grep -h "^short\|LAYOUT" $log | tr "\n" " " | cut -c1-200'
+  step layout '[ $rc = 0 ]' tools/port/scripts/layout_cmp.sh check
+fi
 [ $red = 0 ] && echo "GREEN ($(( $(date +%s) - T0 ))s)" || echo "RED ($(( $(date +%s) - T0 ))s): see $D/<step>.log"
 exit $red
