@@ -91,6 +91,8 @@ const OPTIONS = [
     help: 'The game sees a Rumble Pak in each controller and your gamepad vibrates when the N64 one would (hits, explosions, heavy landings), if the browser supports gamepad vibration (Chrome / Edge with most Xbox and PlayStation pads). Takes effect at the next level or area load. Off: as now, no Rumble Pak. Saves are not affected.' },
   { key: 'crosshair', label: 'Aiming crosshair', def: false, game: 14,
     help: 'Shows the game\'s small crosshair in the middle of the screen in the first-person aim views that have none (R with the weapon kind 0x18), where the shots go. Takes effect the next time you aim. Off: as on the N64, no crosshair there; the other weapons keep their own reticles.' },
+  { key: 'freecam', label: 'Free camera', def: false, game: 15,
+    help: 'Single player: the right stick (or I J K L, or the mouse after a click on the picture) turns the camera freely around Conker: left / right orbits, up / down looks up / down, and Conker runs where the camera looks. The camera stays where you put it; C-down (pad B / circle, right stick click, or O) swings it back behind Conker, and the left stick click or U is C-up (camera distance). In cutscenes, look / aim views, swimming, vehicles, fixed camera spots and multiplayer the game\'s own camera runs and the right stick is the C buttons again. Never used online. Off: as on the N64, the right stick is the four C buttons.' },
   { key: 'swiminvert', label: 'Inverted swimming', def: false, game: 12,
     help: 'Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. Off: as on the N64, which steers like a plane: up dives, down rises.' },
   // P332: sliders (range: true): the value 0..100 (%) goes to the game through the same port_set_option channel.
@@ -112,7 +114,8 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // Modern = Classic + the options that add information or remove waiting without making the game easier or changing
 //   how it controls: skip intro, autosave icon, health / cash always visible, air meter, crosshair, full-detail Conker,
 //   rumble. Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
-//   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes).
+//   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes), free camera (P347: it changes
+//   what the right stick and IJKL do, a control choice like the toggles).
 // Custom = anything else. The preset shown is stored in 'opt.preset' (changing one option stores 'custom'); a stored
 // Classic / Modern whose values no longer match (a ?opt override, an option added later) is shown as what matches.
 const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online').map((o) => o.key);
@@ -133,6 +136,7 @@ const opt = (key) => {
   if (key in optCache) return optCache[key];
   const o = OPTIONS.find((x) => x.key === key);
   if (NETDET) return (optCache[key] = o.def);   // P337: the session's fixed options vector
+  if (netCfg && key === 'freecam') return (optCache[key] = false);   // P347: the camera stick is not in the lockstep input
   if (netCfg && o.game !== undefined) return (optCache[key] = netCfg.options && key in netCfg.options ? netCfg.options[key] : o.def);   // P338: the host's
   return (optCache[key] = key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def));
 };
@@ -307,13 +311,16 @@ const INPUTS = [  // [id, label]; stick directions are pseudo-buttons
   ['A', 'A'], ['B', 'B'], ['Z', 'Z'], ['L', 'L'], ['R', 'R'], ['START', 'Start'],
   ['CU', 'C up'], ['CD', 'C down'], ['CL', 'C left'], ['CR', 'C right'],
   ['DU', 'D-pad up'], ['DD', 'D-pad down'], ['DL', 'D-pad left'], ['DR', 'D-pad right'],
+  ['CAMZOOM', 'Free camera: C up (distance)'], ['CAMBACK', 'Free camera: C down (behind Conker)'],
 ];
 const DEFAULT_KEYS = { UP: 'KeyW', DOWN: 'KeyS', LEFT: 'KeyA', RIGHT: 'KeyD', HALF: 'ControlLeft',
   A: 'Space', B: 'KeyF', Z: 'KeyQ', L: 'KeyR', R: 'KeyE', START: 'Enter',
-  CU: 'KeyI', CD: 'KeyK', CL: 'KeyJ', CR: 'KeyL', DU: 'ArrowUp', DD: 'ArrowDown', DL: 'ArrowLeft', DR: 'ArrowRight' };
+  CU: 'KeyI', CD: 'KeyK', CL: 'KeyJ', CR: 'KeyL', DU: 'ArrowUp', DD: 'ArrowDown', DL: 'ArrowLeft', DR: 'ArrowRight',
+  CAMZOOM: 'KeyU', CAMBACK: 'KeyO' };
 // W3C Standard Gamepad: 0 A/cross, 1 B/circle, 2 X/square, 3 Y/triangle, 4 LB, 5 RB, 6 LT, 7 RT,
-// 8 back, 9 start, 12-15 d-pad. Left stick = N64 stick, right stick = C-buttons (always on).
-const DEFAULT_PAD = { A: 0, B: 2, Z: 6, L: 4, R: 5, START: 9, CD: 1, CL: 3, DU: 12, DD: 13, DL: 14, DR: 15 };
+// 8 back, 9 start, 10 / 11 stick clicks, 12-15 d-pad. Left stick = N64 stick, right stick = C-buttons (P347: or the
+// free camera's stick with that option on; CAMZOOM / CAMBACK only act with the option on).
+const DEFAULT_PAD = { A: 0, B: 2, Z: 6, L: 4, R: 5, START: 9, CD: 1, CL: 3, DU: 12, DD: 13, DL: 14, DR: 15, CAMZOOM: 10, CAMBACK: 11 };
 let keyMap = Object.assign({}, DEFAULT_KEYS, store.get('keys', {}));
 let padMap = Object.assign({}, DEFAULT_PAD, store.get('padbuttons', {}));
 const keysDown = new Set();
@@ -327,15 +334,24 @@ function octagon(x, y) {
   const k = m * STICK * (1 - 0.125 * Math.min(ax, ay) / mx) / mx;
   return [Math.round(x * k), Math.round(y * k)];
 }
+// P347 option "Free camera": the four C inputs (IJKL, the right stick) become one camera stick {cx, cy} (N64 counts,
+// y up) that goes to pc_pif.c (port_cam_state) instead of C bits; pc_pif.c gives it to the free camera, or turns it
+// back into C buttons wherever the free camera does not hold the camera. CAMZOOM / CAMBACK give C-up / C-down then.
+const C_BITS = N64.CU | N64.CD | N64.CL | N64.CR;
 function keyboardPad() {
-  let b = 0, x = 0, y = 0;
+  let b = 0, x = 0, y = 0, cx = 0, cy = 0;
   const on = (id) => keyMap[id] && keysDown.has(keyMap[id]);
   for (const [id] of INPUTS) if (N64[id] && on(id)) b |= N64[id];
   x = (on('RIGHT') ? 1 : 0) - (on('LEFT') ? 1 : 0);
   y = (on('UP') ? 1 : 0) - (on('DOWN') ? 1 : 0);
   let [sx, sy] = octagon(x, y);
   if (on('HALF') && !opt('togglewalk')) { sx = Math.round(sx / 2); sy = Math.round(sy / 2); }  // latched: see applyLatches
-  return { present: true, b, x: sx, y: sy, half: !!on('HALF') };
+  if (opt('freecam')) {
+    cx = ((b & N64.CR) ? STICK : 0) - ((b & N64.CL) ? STICK : 0);
+    cy = ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
+    b = (b & ~C_BITS) | (on('CAMZOOM') ? N64.CU : 0) | (on('CAMBACK') ? N64.CD : 0);
+  }
+  return { present: true, b, x: sx, y: sy, half: !!on('HALF'), cx, cy };
 }
 function gamepadPad(gp) {
   let b = 0;
@@ -346,6 +362,13 @@ function gamepadPad(gp) {
   let x = ax(0), y = -ax(1), m = Math.hypot(x, y);
   if (m < 0.15) { x = y = 0; } else { const s = Math.min(1, (m - 0.15) / 0.85) / m; x *= s; y *= s; }
   const [sx, sy] = octagon(x, y);
+  if (opt('freecam')) {   // P347: right stick -> the camera stick (radial dead zone 0.2, rescaled, 80 counts at full)
+    let rx = ax(2), ry = -ax(3), rm = Math.hypot(rx, ry);
+    if (rm < 0.2) { rx = ry = 0; } else { const s = Math.min(1, (rm - 0.2) / 0.8) / rm; rx *= s; ry *= s; }
+    // C buttons bound to pad buttons (C-down on B / circle, C-left on Y / triangle) stay buttons
+    b |= (padMap.CAMZOOM !== undefined && pressed(padMap.CAMZOOM) ? N64.CU : 0) | (padMap.CAMBACK !== undefined && pressed(padMap.CAMBACK) ? N64.CD : 0);
+    return { present: true, b, x: sx, y: sy, cx: Math.round(rx * STICK), cy: Math.round(ry * STICK) };
+  }
   // right stick -> C-buttons
   if (ax(2) > 0.5) b |= N64.CR; if (ax(2) < -0.5) b |= N64.CL;
   if (ax(3) > 0.5) b |= N64.CD; if (ax(3) < -0.5) b |= N64.CU;
@@ -439,6 +462,25 @@ function applyLatches(p, halfHeld) {
   return p;
 }
 
+// P347 option "Free camera": mouse look. With the option on, a click on the picture captures the mouse (pointer
+// lock; Esc releases it) and its movement turns the free camera (pc_pif.c sums it until the next controller read).
+const mouseLook = { dx: 0, dy: 0 };
+$('canvas').addEventListener('click', () => {
+  if (opt('freecam') && running === 'game' && !document.body.classList.contains('touch') && document.pointerLockElement !== $('canvas') && $('canvas').requestPointerLock) {
+    try { const r = $('canvas').requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (_) { /* not allowed here */ }
+  }
+});
+document.addEventListener('mousemove', (e) => {
+  // ?p347mouse=1 (test aid): count mouse movement without pointer lock (headless Chrome does not grant it)
+  if ((document.pointerLockElement === $('canvas') || Q.get('p347mouse')) && opt('freecam')) { mouseLook.dx += e.movementX | 0; mouseLook.dy += e.movementY | 0; }
+});
+const KEYHINT = $('keyhint').textContent;
+optionChanged.freecam = (on) => {
+  if (!on && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock();
+  $('keyhint').textContent = on ? KEYHINT.replace('IJKL C-buttons', 'IJKL / mouse free camera · U / O C-up / down') : KEYHINT;
+};
+optionChanged.freecam(opt('freecam'));
+
 const SKIP_ARC = 2 * Math.PI * 27;
 $('skiparc').style.strokeDasharray = String(SKIP_ARC);
 let lastPadText = '';
@@ -450,10 +492,10 @@ function pollInput() {
   // pad 0 = keyboard merged with the first gamepad; pads 1-3 = further gamepads
   const pads = [keyboardPad(), null, null, null];
   const halfHeld = pads[0].half;   // the half-tilt key (P324 walk toggle)
-  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y }; }
+  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y, cx: k.cx, cy: k.cy }; }
   gps.forEach((gp, i) => {
     const g = gamepadPad(gp);
-    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y }; }
+    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy }; }
     else if (i < 4) pads[i] = g;
   });
   applyLatches(pads[0], halfHeld);
@@ -471,6 +513,11 @@ function pollInput() {
       const d = pads[i];
       H[p + i * 4] = i === 0 || d ? 1 : 0;
       H[p + i * 4 + 1] = d ? d.b : 0; H[p + i * 4 + 2] = d ? d.x : 0; H[p + i * 4 + 3] = d ? d.y : 0;
+    }
+    if (M._port_cam_state) {   // P347 free camera: camera stick per pad, mouse movement added up until the game reads it
+      const c = M._port_cam_state() >> 2;
+      for (let i = 0; i < 4; i++) { const d = pads[i]; H[c + i * 4] = d && d.cx || 0; H[c + i * 4 + 1] = d && d.cy || 0; }
+      if (mouseLook.dx || mouseLook.dy) { H[c + 2] += mouseLook.dx; H[c + 3] += mouseLook.dy; mouseLook.dx = mouseLook.dy = 0; }
     }
   }
   requestAnimationFrame(pollInput);

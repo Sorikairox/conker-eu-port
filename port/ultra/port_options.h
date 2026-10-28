@@ -19,11 +19,12 @@ enum {
     PORT_OPT_SWIM_INVERT = 12,  /* swim state: stick y flipped, up rises / down dives (player_swim_update, P333) */
     PORT_OPT_RUMBLE = 13,       /* controllers report a Rumble Pak; motor start/stop -> gamepad vibration (pc_pif.c, P333) */
     PORT_OPT_AIM_CROSSHAIR = 14, /* centred crosshair in first-person aim kinds that have no aim HUD (aim_hud_spawn_for_mode, P334) */
+    PORT_OPT_FREE_CAMERA = 15,  /* right stick / IJKL / mouse orbit the follow camera (free_camera_update, P347); never online */
     /* P332 sliders: the value is a percentage 0..100 (default 100 = N64); game C scales with port_volume_scale */
     PORT_OPT_VOL_MUSIC = 9,     /* sequenced music: __n_vsVol */
     PORT_OPT_VOL_SFX = 10,      /* sound player effects: SND_VOL155 (n_sndp_handle_event) */
     PORT_OPT_VOL_SPEECH = 11,   /* MP3 voice streams: mp3_stream_update_vol_pan / the stream's first envelope */
-    PORT_OPT_COUNT = 16
+    PORT_OPT_COUNT = 24
 };
 int port_option(int id);
 /* P332: v * port_option(id) / 100 for the volume sliders; exactly v at 100 % (the default). */
@@ -35,5 +36,13 @@ int port_warp_scene(void);
 void port_set_option(int id, int value);
 /* P333: stick y for the swim controls, sign flipped when PORT_OPT_SWIM_INVERT is on, else y unchanged. */
 int port_swim_stick_y(int y);
+/* P347 free camera (pc_pif.c): the camera input of controller ch taken at the last controller read, while the free
+ * camera holds the camera stick: axis 0 / 1 = camera stick x / y (N64 counts -80..80, y > 0 = up), 2 / 3 = mouse
+ * movement x / y since the previous read (pixels, y > 0 = down). 0 when the option is off or online.
+ * port_free_camera_engage(ch): the game's free camera is in control of player ch's camera this frame, so the next
+ * controller reads give the camera stick to it instead of turning it into C buttons. */
+int port_free_camera_axis(int ch, int axis);
+int port_free_camera_enabled(void);   /* the option is on and no online session runs */
+void port_free_camera_engage(int ch);
 
 #endif

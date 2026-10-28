@@ -5,6 +5,10 @@
 
 void math_spring_approach(f32 *, f32, f32 *, f32, f32, f32);
 extern f32 g_camera_orbit_height; /* was D_800DC434 */
+#ifdef PORT
+f32 free_camera_wanted_height(u8 *cam, f32 h); /* P347 game_eu_1501C0.c */
+s32 free_camera_turning(u8 *cam);
+#endif
 
 /* P43: camera eye height. dy = eye.y (+0x2FC) - base (+0x354) eases (math_spring_approach) towards the target height h:
  * +0x348 (95.0 with flag 0x10 of +0x5F0 and of *+0x36C), x1.5 with flag 0x400, cut below a ceiling of the followed
@@ -47,6 +51,9 @@ void camera_update_eye_height(u8 *arg0) {
     if (crouch) {
         h *= 1.5f;
     }
+#ifdef PORT
+    h = free_camera_wanted_height(arg0, h);   /* P347 option "Free camera": the pitched eye's height; unchanged when off */
+#endif
     if (!(*(s32 *)(arg0 + 0x84) & 0x10)) {
         t = *(u8 **)(arg0 + 0x3D0);
         if (*(f32 *)(t + 0x180) < *(f32 *)(t + 0x17C)) {
@@ -94,6 +101,11 @@ void camera_update_eye_height(u8 *arg0) {
             }
         }
         fast = mode & 0x100;
+#ifdef PORT
+        if (free_camera_turning(arg0)) {
+            fast = 1;   /* P347: follow the player's pitch with the fast rates */
+        }
+#endif
         if (fast != 0 || ceiling != 0) {
             math_spring_approach(&dy, h, (f32 *)(arg0 + 0x25C), 5.0f, 9.0f, *(f32 *)(arg0 + 0x7B4));
         } else {

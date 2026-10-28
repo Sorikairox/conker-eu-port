@@ -63,6 +63,22 @@ grenades, the orange squares at the top left). On a gamepad the right stick give
 
 A gamepad works too; plug it in and press a button. **Controls** in the page lets you rebind keys and gamepad buttons, and **Defaults** resets them.
 
+**Free camera (option, off by default):** in single player the camera turns freely around Conker, like in modern 3D
+platformers. Off, the controls are exactly the N64's (the right stick and I J K L are the four C buttons).
+
+| Free camera | Gamepad | Keyboard / mouse |
+|---|---|---|
+| Orbit left / right | right stick left / right | J / L, or move the mouse sideways |
+| Look up / down (camera lower / higher) | right stick up / down | I / K, or move the mouse up / down |
+| Back behind Conker (C-down, the N64 button) | B / circle, or click the right stick | O |
+| Camera distance (C-up) | click the left stick | U |
+
+The mouse turns the camera after a click on the picture (the browser then hides the pointer; Esc gives it back). The
+camera stays where you put it and keeps following Conker the N64 way; Conker runs where the camera looks. The
+height you chose goes back to the normal one by itself after 2 s without camera input while Conker moves, or at
+once with C-down. In cutscenes, look and aim views (R), swimming, vehicles, fixed camera spots and multiplayer the
+game's own camera runs as on the N64, and the right stick / I J K L are the C buttons there.
+
 ## Options
 
 The **Options** button in the page header opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.
@@ -70,7 +86,7 @@ The **Options** button in the page header opens a panel of extras that are not i
 **Presets.** At the top of the panel, **Classic / Modern / Custom** sets all the options at once (everything except *Online multiplayer*, which only shows the Online button):
 
 - **Classic**: the original game. Every option off and the three volumes at 100 %, except *Skippable cutscenes (hold L)*, which stays on: it does nothing unless you hold L, and it is on by default. A fresh browser starts as Classic.
-- **Modern**: Classic plus the extras that show more or make you wait less without making the game easier or changing the controls: *Skip intro*, *Autosave icon*, *Health always visible*, *Always show cash*, *Underwater air meter*, *Aiming crosshair*, *Conker always full detail* and *Rumble*. Left off on purpose: *Longer breath* and *Longer tail spin* (they make the game easier), the three toggles and *Inverted swimming* (a matter of taste), and *No motion blur / drunk sway* (the blur and sway are part of the story's scenes).
+- **Modern**: Classic plus the extras that show more or make you wait less without making the game easier or changing the controls: *Skip intro*, *Autosave icon*, *Health always visible*, *Always show cash*, *Underwater air meter*, *Aiming crosshair*, *Conker always full detail* and *Rumble*. Left off on purpose: *Longer breath* and *Longer tail spin* (they make the game easier), the three toggles, *Inverted swimming* and *Free camera* (they change how the game controls: a matter of taste), and *No motion blur / drunk sway* (the blur and sway are part of the story's scenes).
 - **Custom**: shown as soon as you change any single option (or a volume). Pick Classic or Modern again to reset every option to that preset.
 
 The choice is saved with the options. In an online game the host's options apply: the panel then shows the host's options and preset, greyed out.
@@ -90,6 +106,7 @@ The choice is saved with the options. In an online game the host's options apply
 | No motion blur / drunk sway | off | Turns off the frame-blend motion blur (the blurred, smeared picture when Conker wakes up with his hangover after the opening, and in a slow-motion camera cut; with the option off it now looks as on the N64: a live, trailing blend of the last frames, no longer a frozen, blocky picture) and the drunk camera sway: the swaying camera and the slow stretching of the picture on the title menu (drunk Conker in the bar) and while Conker is drunk. Camera moves that are part of a cutscene's own camera path (the tilted view when Conker wakes up) and the wobble under water are unchanged. |
 | Conker always full detail | off | Conker is always drawn with his most detailed model. The original switches him to simpler models once the camera is more than 500 units away, which the follow camera often is while he runs (450 to 650 units). Other characters and objects keep the original level-of-detail rules. |
 | Underwater air meter | off | While Conker is under water, a bar at the top of the screen shows the air he has left: full when his head goes under, red in the last quarter, empty when he starts to drown. Works with Longer breath (the bar then empties half as fast). The original only shows the wobbling Conker-face meter on the right, which appears after about 2 s and stops changing at half the air. No bar in shallow water where you cannot run out of air. |
+| Free camera | off | Single player: the right stick, I J K L or the mouse turn the camera around Conker (orbit and look up / down; see *Free camera* under Controls above). Wherever the game uses another camera (cutscenes, look / aim views, swimming, vehicles, fixed camera spots, multiplayer) its own camera runs and the right stick is the C buttons again. Never used online: an online session always runs with it off. |
 | Inverted swimming | off | Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. The original steers like a plane: stick up tilts him head-down and dives, stick down tilts him up. Only the swimming controls change; walking, flying and aiming stay as they are. |
 | Aiming crosshair | off | In the first-person aim views that the original leaves bare, the game's own small crosshair (the one the other guns use) is drawn in the middle of the screen, which is exactly where the shots go there. In this ROM that is the aim kind 0x18 (hold R with that weapon); the scope, lens, bracket and turret views and the other guns already have their own reticles and are unchanged, and the third-person R-look with a held item gets nothing (its shots are aimed from the hand / mouth, not through a fixed screen point). Takes effect the next time you aim. |
 | Rumble (gamepad vibration) | off | The game sees a Rumble Pak in your controller and a connected gamepad vibrates whenever the N64 Rumble Pak would (explosions, hits, heavy effects; the game pulses it on and off by strength). Needs a browser with gamepad vibration (Chrome / Edge, most Xbox and PlayStation pads). Takes effect immediately: switching it on or off makes the game look for the Rumble Pak again at once (before, it waited for the next level or area load). Saves are not affected (they use the cartridge EEPROM). |

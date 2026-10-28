@@ -146,25 +146,34 @@ f32 g_scenery_texproj_k_35a8 = 999.0f; /* was D_800A35A8 */
 f32 999.0f = 999.0f;
 #endif
 
+#ifdef PORT
+void free_camera_frame(u8 *cam, s32 begin); /* P347 game_eu_1501C0.c */
+#endif
 /* was func_15122AE0 */
 void camera_update_all(void) {
-    struct108 *temp_s0;
+    struct108 *cam;   /* was temp_s0 */
     s16 i;
-    f32 temp_f20;
+    f32 frame_secs;   /* seconds since the last frame (50 Hz ticks * 0.02); was temp_f20 */
 
-    temp_f20 = g_frame_ticks_raw * 0.02f;
+    frame_secs = g_frame_ticks_raw * 0.02f;
 
     for (i = 0; i <= g_last_player_index; i++) {
-        temp_s0 = &g_player_views[i]; // ???
+        cam = &g_player_views[i];
         if (player_stat_get(i, 0) || (i == 0)) {
-            temp_s0->unk7B4 = temp_f20;
+            cam->unk7B4 = frame_secs;
+#ifdef PORT
+            free_camera_frame((u8 *)cam, 1);   /* P347 option "Free camera" (?freecamlog bookkeeping only) */
+#endif
             if ((g_game_paused == 0) || (g_cutscene_slot_state != 0) || (g_camera_timed_active != 0)) {
-                camera_pop_mode(temp_s0, 5);
-                camera_update_controller(temp_s0);
+                camera_pop_mode(cam, 5);
+                camera_update_controller(cam);
             } else {
-                camera_push_mode(temp_s0, 8192, 0, temp_s0->unk134, 5);
-                camera_build_view_matrix(temp_s0);
+                camera_push_mode(cam, 8192, 0, cam->unk134, 5);
+                camera_build_view_matrix(cam);
             }
+#ifdef PORT
+            free_camera_frame((u8 *)cam, 0);
+#endif
         }
     }
     g_camera_frame_count += 1;
@@ -724,27 +733,30 @@ s32 camera_pop_mode(struct108 *arg0, s32 arg1) {
  * can be turned toward the record's heading (pad button 4 of 0x36C, the 0x8E4 / 0x8E8 timer; the 0x3D4 object's
  * +0x95 flag), and spun by g_slowmo_divisor. Two ray casts (collision_ray_cast) from the target toward the eye shorten
  * 0x374 against walls (0x600 / 0x604 = hit and distance). 0x374 is restored to its entry value at the end. */
+#ifdef PORT
+f32 free_camera_wanted_distance(u8 *cam, f32 d); /* P347 game_eu_1501C0.c */
+#endif
 /* was func_15123A54 */
 void camera_update_eye_orbit(struct108 *arg0) {
     u8 *p = (u8 *)arg0;
     u8 *rec;
     u16 *pad;
-    f32 save;
+    f32 entry_dist; /* was save */
     f32 yaw;
     f32 d;
     s32 v0;
     s32 v1;
-    f32 sp104[3];
-    s16 tri[9];
-    f32 hitE4;
-    f32 hitE8;
-    f32 hitEC;
-    f32 hitE0;
-    s16 triC8[9];
-    f32 hit8C;
-    f32 hit90;
-    f32 hit94;
-    f32 hit88;
+    f32 ray_dir[3]; /* was sp104 */
+    s16 tri_hit[9]; /* was tri */
+    f32 hit_x; /* was hitE4 */
+    f32 hit_y; /* was hitE8 */
+    f32 hit_z; /* was hitEC */
+    f32 hit_dist; /* was hitE0 */
+    s16 tri_back[9]; /* was triC8 */
+    f32 back_x; /* was hit8C */
+    f32 back_y; /* was hit90 */
+    f32 back_z; /* was hit94 */
+    f32 back_dist; /* was hit88 */
     f32 bx;
     f32 bz;
     f32 va[3];
@@ -757,15 +769,15 @@ void camera_update_eye_orbit(struct108 *arg0) {
     f32 dx;
     f32 dz;
 
-    save = *(f32 *)(p + 0x374);
+    entry_dist = *(f32 *)(p + 0x374);
     p[0x600] = 0;
-    *(f32 *)(p + 0x604) = save;
+    *(f32 *)(p + 0x604) = entry_dist;
     if (g_cutscene_restart_transition != 0) {
         return;
     }
     d = *(f32 *)(p + 0x6F8);
     if (!(0.0f == d)) {
-        *(f32 *)(p + 0x374) = (d < save) ? d : save;
+        *(f32 *)(p + 0x374) = (d < entry_dist) ? d : entry_dist;
     }
     rec = *(u8 **)(p + 0x3D0);
     if (p[0x23C] != 0) {
@@ -856,46 +868,50 @@ void camera_update_eye_orbit(struct108 *arg0) {
     if (*(s32 *)(p + 0x2C) == 0x2000) {
         return;
     }
+#ifdef PORT
+    /* P347 option "Free camera": a pitched eye sits closer horizontally (same radius); unchanged when off */
+    *(f32 *)(p + 0x374) = free_camera_wanted_distance(p, *(f32 *)(p + 0x374));
+#endif
     dx = *(f32 *)(p + 0x2F8) - *(f32 *)(p + 0x2BC);
     dz = *(f32 *)(p + 0x300) - *(f32 *)(p + 0x2C4);
     *(f32 *)(p + 0x370) = sqrtf(dx * dx + dz * dz);
     rec = *(u8 **)(p + 0x3D0);
     if (*(s16 *)(p + 0x73C) != 0 || p[0x23C] != 0 || rec[0x102] != 0 ||
         !((*(s32 *)(p + 0x84) & 0x1000) || p[0x92C] != 0 || (*(s32 *)(p + 0x84) & 0x40000) || (*(s32 *)(p + 0x5F0) & 0x80))) {
-        sp104[0] = sinf(*(f32 *)(p + 0x39C));
-        sp104[1] = 0.0f;
-        sp104[2] = cosf(*(f32 *)(p + 0x39C));
-        if (collision_ray_cast(*(f32 *)(p + 0x2A4), *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC), sp104[0], sp104[1], sp104[2], 0, tri, &hitE4, &hitE8,
-                          &hitEC, &hitE0, 0, 0, *(f32 *)(p + 0x374) + 30.0f) != 0 &&
-            hitE0 < *(f32 *)(p + 0x374)) {
+        ray_dir[0] = sinf(*(f32 *)(p + 0x39C));
+        ray_dir[1] = 0.0f;
+        ray_dir[2] = cosf(*(f32 *)(p + 0x39C));
+        if (collision_ray_cast(*(f32 *)(p + 0x2A4), *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC), ray_dir[0], ray_dir[1], ray_dir[2], 0, tri_hit, &hit_x, &hit_y,
+                          &hit_z, &hit_dist, 0, 0, *(f32 *)(p + 0x374) + 30.0f) != 0 &&
+            hit_dist < *(f32 *)(p + 0x374)) {
             bx = sinf(*(f32 *)(p + 0x39C) + 3.14159274f) * *(f32 *)(p + 0x374);
             bz = cosf(*(f32 *)(p + 0x39C) + 3.14159274f) * *(f32 *)(p + 0x374);
-            va[0] = tri[0];
-            va[1] = tri[1];
-            va[2] = tri[2];
-            vb[0] = tri[3];
-            vb[1] = tri[4];
-            vb[2] = tri[5];
-            vc[0] = tri[6];
-            vc[1] = tri[7];
-            vc[2] = tri[8];
+            va[0] = tri_hit[0];
+            va[1] = tri_hit[1];
+            va[2] = tri_hit[2];
+            vb[0] = tri_hit[3];
+            vb[1] = tri_hit[4];
+            vb[2] = tri_hit[5];
+            vc[0] = tri_hit[6];
+            vc[1] = tri_hit[7];
+            vc[2] = tri_hit[8];
             vec3_diff((struct17 *)va, (struct17 *)vb, (struct17 *)e1);
             vec3_diff((struct17 *)va, (struct17 *)vc, (struct17 *)e2);
             vec3f_cross((u8 *)e2, (u8 *)e1, (u8 *)n);
             vec3_normalize((struct17 *)n, (struct17 *)n);
-            if (0.325322002f < vec3f_dot(sp104, n) &&
-                collision_ray_cast(*(f32 *)(p + 0x2A4) - bx, *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC) - bz, bx, 0.0f, bz, 0, triC8, &hit8C, &hit90,
-                              &hit94, &hit88, 0, 0, *(f32 *)(p + 0x374) + 30.0f) != 0) {
-                dx = hit8C - hitE4;
-                dz = hit94 - hitEC;
+            if (0.325322002f < vec3f_dot(ray_dir, n) &&
+                collision_ray_cast(*(f32 *)(p + 0x2A4) - bx, *(f32 *)(p + 0x2A8) + 140.0f, *(f32 *)(p + 0x2AC) - bz, bx, 0.0f, bz, 0, tri_back, &back_x, &back_y,
+                              &back_z, &back_dist, 0, 0, *(f32 *)(p + 0x374) + 30.0f) != 0) {
+                dx = back_x - hit_x;
+                dz = back_z - hit_z;
                 if (sqrtf(dx * dx + dz * dz) < 1.0f || (*(s32 *)(p + 0x5F0) & 0x10) || p[0x23E] == 0xC || p[0x23E] == 9 ||
                     p[0x23E] == 0x38 || p[0x23E] == 0x39 || p[0x23E] == 0x37 || p[0x23E] == 0x3B ||
                     p[0x23E] == 0x12 || p[0x23E] == 0x15 || p[0x23E] == 0x26 || p[0x23E] == 0x3A ||
                     p[0x23C] != 0) {
                     old = *(f32 *)(p + 0x374);
-                    d = hitE0 - ((*(s16 *)(p + 0x73C) != 0) ? 16.0f : 12.0f);
-                    hitE0 = (d < 50.0f) ? 50.0f : d;
-                    *(f32 *)(p + 0x374) = (hitE0 < *(f32 *)(p + 0x374)) ? hitE0 : *(f32 *)(p + 0x374);
+                    d = hit_dist - ((*(s16 *)(p + 0x73C) != 0) ? 16.0f : 12.0f);
+                    hit_dist = (d < 50.0f) ? 50.0f : d;
+                    *(f32 *)(p + 0x374) = (hit_dist < *(f32 *)(p + 0x374)) ? hit_dist : *(f32 *)(p + 0x374);
                     if (p[0x23E] == 3) {
                         *(f32 *)(p + 0x348) = *(f32 *)(p + 0x348) * (*(f32 *)(p + 0x374) / old);
                         if (*(s32 *)(p + 0x5F0) & 0x10) {
@@ -904,7 +920,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
                         }
                     }
                     p[0x600] = 1;
-                    *(f32 *)(p + 0x604) = hitE0;
+                    *(f32 *)(p + 0x604) = hit_dist;
                 }
             }
         }
@@ -986,7 +1002,7 @@ void camera_update_eye_orbit(struct108 *arg0) {
             *(u16 *)(p + 0x36A) = *(u16 *)(p + 0x36A) & 0xFFFC;
         }
     }
-    *(f32 *)(p + 0x374) = save;
+    *(f32 *)(p + 0x374) = entry_dist;
 }
 /* was func_15124770 */
 void camera_set_second_target(struct108 *arg0, s32 arg1) {

@@ -38,6 +38,68 @@ EMSCRIPTEN_KEEPALIVE int32_t *port_pad_state(void) { return &port_pads[0][0]; }
 static u32 pad0_delivered;
 int port_pad0_held(void) { return (int)pad0_delivered; }
 
+/* ---- P347 option "Free camera" (PORT_OPT_FREE_CAMERA). With the option on, the page sends the camera stick (gamepad
+ * right stick, or the IJKL keys as full deflection) here as an analog value instead of turning it into the four C
+ * buttons, plus the mouse movement under pointer lock (summed until the next controller read). At each controller
+ * read (osContStartReadData) this becomes what the game sees:
+ *  - while the game's free camera holds the player's camera (port_free_camera_engage, refreshed every camera frame by
+ *    free_camera_update in game_eu_1501C0.c: single player, normal follow camera, no cutscene / aim / look / swim / ride
+ *    ...), the stick and mouse go to the camera (port_free_camera_axis) and give no C buttons;
+ *  - anywhere else (menus, cutscenes, aim and look views, swimming, vehicles, multiplayer) the stick is the C buttons,
+ *    as the page made them with the option off (|axis| >= 40 counts = half deflection). A stick that is still deflected
+ *    when the free camera lets go gives no C button until it has been back in the centre (so an orbit held into a
+ *    cutscene does not turn into C presses).
+ * Off (the default) and in online sessions the page sends C bits as before and nothing here changes the pads.
+ * ?padf entries may carry the camera stick as F:BTN:X:Y:RX:RY. */
+static int32_t port_cam_pads[MAXCONTROLLERS][4];   /* page: camera stick x, y (N64 counts, y up), mouse dx, dy (summed) */
+EMSCRIPTEN_KEEPALIVE int32_t *port_cam_state(void) { return &port_cam_pads[0][0]; }
+static int cam_delivered[MAXCONTROLLERS][4];      /* what port_free_camera_axis answers until the next read */
+static int cam_engaged_ttl[MAXCONTROLLERS];       /* controller reads the free camera still holds the stick */
+static u8 cam_stick_wait_centre[MAXCONTROLLERS];  /* stick held over the end of the free camera: no C buttons yet */
+int port_free_camera_axis(int ch, int axis) { return ch >= 0 && ch < MAXCONTROLLERS && axis >= 0 && axis < 4 ? cam_delivered[ch][axis] : 0; }
+void port_free_camera_engage(int ch) { if (ch >= 0 && ch < MAXCONTROLLERS) cam_engaged_ttl[ch] = 2; }
+extern unsigned port_frame_count;
+int port_free_camera_enabled(void) { extern int port_net_on; return port_option(PORT_OPT_FREE_CAMERA) && !port_net_on; }
+/* test aid ?freecamlog=N: every Nth free camera frame, the yaw / pitch / horizontal distance / eye height it ended with */
+void port_free_camera_log(int ch, int engaged, float yaw, float pitch, float dist, float height) {
+    static int every = -1; static unsigned n;
+    if (every < 0) every = port_flag("freecamlog");
+    if (every > 0 && n++ % (unsigned)every == 0)
+        port_log("[freecam] retrace %u pad %d %s yaw %.1f pitch %+.1f dist %.0f height %.0f stick %d,%d mouse %d,%d\n", port_frame_count, ch + 1,
+                 engaged ? "free" : "game", yaw, pitch, dist, height, cam_delivered[ch & 3][0], cam_delivered[ch & 3][1], cam_delivered[ch & 3][2], cam_delivered[ch & 3][3]);
+}
+/* ?freecamlog: who holds the camera when it changes (free_camera_allowed's reason: 0 = the free camera) */
+void port_free_camera_note(int ch, int reason) {
+    static const char *why[] = { "free camera", "option off / online", "multiplayer", "cutscene", "paused / snap",
+                                 "not the follow camera", "look / aim view", "swimming", "riding / vehicle", "scripted camera" };
+    static int every = -1, last[MAXCONTROLLERS] = { -1, -1, -1, -1 };
+    if (every < 0) every = port_flag("freecamlog");
+    ch &= 3;
+    if (every > 0 && reason != last[ch])
+        port_log("[freecam] retrace %u pad %d: %s\n", port_frame_count, ch + 1, reason >= 0 && reason < 10 ? why[reason] : "?");
+    last[ch] = reason;
+}
+static void free_camera_pads(void) {
+    int on = port_free_camera_enabled();
+    for (int ch = 0; ch < MAXCONTROLLERS; ch++) {
+        int x = port_cam_pads[ch][0], y = port_cam_pads[ch][1], mx = port_cam_pads[ch][2], my = port_cam_pads[ch][3];
+        port_cam_pads[ch][2] = port_cam_pads[ch][3] = 0;   /* the mouse movement is used once */
+        memset(cam_delivered[ch], 0, sizeof cam_delivered[ch]);
+        if (!on) { cam_engaged_ttl[ch] = 0; cam_stick_wait_centre[ch] = 0; continue; }
+        int moved = x <= -40 || x >= 40 || y <= -40 || y >= 40;
+        if (cam_engaged_ttl[ch] > 0) {
+            cam_engaged_ttl[ch]--;
+            cam_delivered[ch][0] = x; cam_delivered[ch][1] = y; cam_delivered[ch][2] = mx; cam_delivered[ch][3] = my;
+            cam_stick_wait_centre[ch] = moved;
+            continue;
+        }
+        if (cam_stick_wait_centre[ch] && moved) continue;
+        cam_stick_wait_centre[ch] = 0;
+        int c = (x >= 40 ? 0x0001 : 0) | (x <= -40 ? 0x0002 : 0) | (y <= -40 ? 0x0004 : 0) | (y >= 40 ? 0x0008 : 0);
+        port_pads[ch][1] |= c;   /* CR CL CD CU, as main.js's gamepadPad makes them with the option off */
+    }
+}
+
 /* ---- P149: frame-based pad script for test runs (50 Hz retraces made wall-clock scripts drift).
  * ?padf=F:BTN:X:Y,F:BTN:X:Y,...  (node: PORT_PADF=...): from VI retrace F (port_frame_count) on, pad 0 reports
  * buttons BTN (hex N64 bits: START 1000, A 8000, B 4000, Z 2000) and stick X / Y (decimal, y > 0 = up) instead of the
@@ -57,7 +119,7 @@ EM_JS(int, __port_padf_char, (int ch, int i), {
     return v === null || i >= v.length ? 0 : v.charCodeAt(i);
 });
 #define PADF_MAX 16384 /* P154: 128 -> 2048 (long new-game scripts); P228: 16384 (human recordings, ?padrec); P337: all 4 channels */
-static struct { unsigned f; int b, x, y; } padf[PADF_MAX];
+static struct { unsigned f; int b, x, y, rx, ry; } padf[PADF_MAX];   /* P347: rx / ry = camera stick (free camera) */
 static int padf_n = -1;                                  /* entries of all channels; -1 = not parsed yet */
 static int padf_first[MAXCONTROLLERS], padf_end[MAXCONTROLLERS], padf_cur[MAXCONTROLLERS]; /* per channel: [first, end), current */
 static char padf_text[524288];                           /* P228: 64K -> 512K; was padf_apply's local s */
@@ -73,7 +135,10 @@ static void padf_parse_channel(int ch) {
         else if (*p == ':') { p++; while ((c = *p) && c != ':' && c != ',') { b = b * 16 + (c <= '9' ? c - '0' : (c | 0x20) - 'a' + 10); p++; } }
         if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') x = x * 10 + (*p++ - '0'); if (neg) x = -x; }
         if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') y = y * 10 + (*p++ - '0'); if (neg) y = -y; }
-        padf[padf_n].f = f; padf[padf_n].b = b; padf[padf_n].x = x; padf[padf_n].y = y; padf_n++;
+        int rx = 0, ry = 0;   /* P347: optional F:BTN:X:Y:RX:RY = the camera stick (right stick) for the free camera */
+        if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') rx = rx * 10 + (*p++ - '0'); if (neg) rx = -rx; }
+        if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') ry = ry * 10 + (*p++ - '0'); if (neg) ry = -ry; }
+        padf[padf_n].f = f; padf[padf_n].b = b; padf[padf_n].x = x; padf[padf_n].y = y; padf[padf_n].rx = rx; padf[padf_n].ry = ry; padf_n++;
         while (*p && *p != ',') p++;
         if (*p == ',') p++;
     }
@@ -118,7 +183,7 @@ static void padf_apply(void) {
         int k = padf_cur[ch] < 0 ? padf_first[ch] - 1 : padf_cur[ch];
         while (k + 1 < padf_end[ch] && padf[k + 1].f <= port_frame_count) k++;
         if (k < padf_first[ch]) continue;
-        if (k != padf_cur[ch]) { padf_cur[ch] = k; port_log("[padf] retrace %u: %sbuttons %X stick %d,%d\n", port_frame_count, ch ? (ch == 1 ? "pad 2 " : ch == 2 ? "pad 3 " : "pad 4 ") : "", padf[k].b, padf[k].x, padf[k].y); }
+        if (k != padf_cur[ch]) { padf_cur[ch] = k; port_log("[padf] retrace %u: %sbuttons %X stick %d,%d%s\n", port_frame_count, ch ? (ch == 1 ? "pad 2 " : ch == 2 ? "pad 3 " : "pad 4 ") : "", padf[k].b, padf[k].x, padf[k].y, padf[k].rx || padf[k].ry ? " + camera stick" : ""); if (padf[k].rx || padf[k].ry) port_log("[padf]   camera stick %d,%d\n", padf[k].rx, padf[k].ry); }
         /* P228 F:P entry: keyboard / gamepad from here on (record with ?padrec=1). Once a P entry has been reached the
          * ?p205goto autopilot is off for good, so a replay (prefix, F:P, then the recorded entries) is not disturbed by
          * the autopilot's after-arrival taps. */
@@ -126,6 +191,7 @@ static void padf_apply(void) {
         if (padf[k].b == -1) { if (!ch) handed = 1; continue; }
         if (pad_mask < 0) port_pads[ch][0] = 1;   /* a scripted pad is plugged in, unless ?padmask says otherwise */
         port_pads[ch][1] = padf[k].b; port_pads[ch][2] = padf[k].x; port_pads[ch][3] = padf[k].y;
+        port_cam_pads[ch][0] = padf[k].rx; port_cam_pads[ch][1] = padf[k].ry;   /* P347 camera stick */
         if (!ch && !handed) { extern void p205_goto_apply(int *, int *, int *); p205_goto_apply(&port_pads[0][1], &port_pads[0][2], &port_pads[0][3]); } /* P205 TEST ?p205goto */
     }
 }
@@ -306,6 +372,7 @@ s32 osContStartReadData(OSMesgQueue *mq) {
     pif_ram[63] = 1;
     if (port_net_on) { pads_apply_mask(); port_net_fill_pads(&port_pads[0][0]); }   /* P338 online: the input ring */
     else padf_apply();                                 /* P149 ?padf frame script */
+    free_camera_pads();                                /* P347 free camera: camera stick -> camera or C buttons */
     padrec_log();                                      /* P228 ?padrec=1 */
     pif_run();
     memcpy(cont_ram, pif_ram, sizeof cont_ram);         /* the RD64B DMA into libultra's __osContPifRam */
