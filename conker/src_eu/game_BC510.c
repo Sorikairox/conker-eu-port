@@ -522,14 +522,26 @@ u8 *hud_draw(u8 *arg0) {
         gdl = radar_draw(gdl, scale, table, 0x2C30, 1);
     }
     if (g_hud_health_pos != (f32)g_hud_health_pos_hidden) {
+#ifdef PORT
+        port_ws_hud_anchor(gdl, 1);   /* P350 widescreen: the health chocolate keeps to the left edge */
+#endif
         gdl = hud_health_draw(gdl, 0);
+#ifdef PORT
+        port_ws_hud_anchor(gdl, 0);
+#endif
     } else if (g_hud_health_piece_dl != 0) {
         shared_dl_release(0xB8);
         g_hud_health_piece_dl = 0;
     }
+#ifdef PORT
+    port_ws_hud_anchor(gdl, 2);   /* P350 widescreen: the air meter (face model) and its bubbles keep to the right edge */
+#endif
     gdl = hud_air_meter_draw(gdl);
     gdl = sprite_gfx_begin(gdl);
     gdl = hud_bubbles_draw(gdl);
+#ifdef PORT
+    port_ws_hud_anchor(gdl, 0);
+#endif
     gdl = sprite_gfx_begin_alt(gdl);
 #ifdef PORT
     gdl = hud_air_bar_draw(gdl);

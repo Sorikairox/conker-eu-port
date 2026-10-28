@@ -52,6 +52,10 @@ void port_free_camera_engage(int ch);
  * port_photo_scene_drawn: the game drew player 1's 3D scene this frame (photo mode may start). */
 extern int port_photo_sandbox, port_photo_nohud;
 int port_photo_camera(float *eye, float *at, float *roll, float *fov);
+/* P350 option "Widescreen" (renderer, gfx_f3dex2.c): the commands the game writes from display-list address gdl on belong to
+ * a HUD element in a screen corner, anchored to the left (edge 1) or right (2) edge of the wide picture, or again to the
+ * centred 4:3 layout (0). Only recorded on the renderer's side (no game memory changes), so the call is harmless online. */
+void port_ws_hud_anchor(void *gdl, int edge);
 void port_photo_camera_applied(void);
 void port_photo_scene_drawn(void);
 

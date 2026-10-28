@@ -664,17 +664,26 @@ Gfx *render_overlay_pass(u8 *arg0) {
 extern u16 g_player_out_mask; /* was D_800D1CC2 */
 void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);
 /* was func_15019BB8 */
-Gfx *render_player_hud(Gfx *gdl, s32 arg1) {
-    gSPViewport(gdl++, (u8 *)g_player_cams + arg1 * 0x180 + 0x40 + g_dl_buf_index * 0x10);
-    gdl = render_set_scissor(gdl, (s16)arg1, 0, 0, 0, 0);
-    gdl = screen_tint_draw(gdl, arg1);
-    gdl = screen_fade_draw(gdl, arg1);
-    gdl = hud_sniper_scope_draw(gdl, arg1);
-    if ((g_player_view_hidden_mask & (1 << arg1)) || (g_player_out_mask & (1 << arg1))) {
-        gdl = player_draw_out_overlay(gdl, arg1);
+Gfx *render_player_hud(Gfx *gdl, s32 player) {   /* player: was arg1 */
+    gSPViewport(gdl++, (u8 *)g_player_cams + player * 0x180 + 0x40 + g_dl_buf_index * 0x10);
+    gdl = render_set_scissor(gdl, (s16)player, 0, 0, 0, 0);
+#ifdef PORT
+    port_ws_hud_anchor(gdl, 3);   /* P350 widescreen: this player's overlays follow the (widened) view of the scissor box */
+#endif
+    gdl = screen_tint_draw(gdl, player);
+    gdl = screen_fade_draw(gdl, player);
+    gdl = hud_sniper_scope_draw(gdl, player);
+    if ((g_player_view_hidden_mask & (1 << player)) || (g_player_out_mask & (1 << player))) {
+        gdl = player_draw_out_overlay(gdl, player);
     }
-    gdl = node_render_layers_draw(gdl, 4, (s16)arg1, 0);
-    return node_render_layers_draw(gdl, 4, (s16)arg1, 1);
+    gdl = node_render_layers_draw(gdl, 4, (s16)player, 0);
+#ifdef PORT
+    gdl = node_render_layers_draw(gdl, 4, (s16)player, 1);
+    port_ws_hud_anchor(gdl, 0);
+    return gdl;
+#else
+    return node_render_layers_draw(gdl, 4, (s16)player, 1);
+#endif
 }
 // NON-MATCHING: need to figure out what is going on
 // void render_player_hud(struct14 *arg0, s32 arg1) {

@@ -1046,7 +1046,7 @@ u8 *hud_ingame_draw(u8 *arg0) {
         s32 u90;
     } sp;
     u8 *var_s0_2;
-    u8 *var_s0;
+    u8 *gdl;   /* the display-list pointer; was var_s0 */
     u8 *temp_v0_2;
     u8 *temp_s0_6;
     u8 *temp_s0_5;
@@ -1073,7 +1073,7 @@ u8 *hud_ingame_draw(u8 *arg0) {
     Gfx *sp34;
     s32 sp3C;
 
-    var_s0 = arg0;
+    gdl = arg0;
     temp_t9 = (g_save_progress_bits->unk19 & 4) != 0;
     sp3C = temp_t9;
     if (temp_t9 == 0) {
@@ -1081,7 +1081,7 @@ u8 *hud_ingame_draw(u8 *arg0) {
     }
     if ((g_mp_mode_active != 0) && (g_game_paused == 0) && (g_pause_open == 0)) {
         if ((mp_is_free_for_all() == 0) || ((*(s8 *)((u8 *)g_menu_state + 0x42)) == 1)) {
-            var_s0 = mp_hud_markers_draw(var_s0, 0, 0xFF);
+            gdl = mp_hud_markers_draw(gdl, 0, 0xFF);
         }
     } else {
         g_mp_hud_unk_10a8 = 0;
@@ -1120,13 +1120,13 @@ u8 *hud_ingame_draw(u8 *arg0) {
         if (g_pause_hud_delay < 5) {
             g_pause_hud_delay += 1;
         } else {
-            temp_s0 = var_s0 + 8;
+            temp_s0 = gdl + 8;
             g_hud_fade_alpha += 0x20;
             if (g_hud_fade_alpha >= 0x100) {
                 g_hud_fade_alpha = 0xFF;
             }
-            (*(s32 *)((u8 *)var_s0 + 0)) = 0xDE000000;
-            (*(Gfx **)((u8 *)var_s0 + 4)) = g_hud_sprite_setup_dl;
+            (*(s32 *)((u8 *)gdl + 0)) = 0xDE000000;
+            (*(Gfx **)((u8 *)gdl + 4)) = g_hud_sprite_setup_dl;
             (*(s32 *)((u8 *)temp_s0 + 0)) = 0xFB000000;
             temp_s0_2 = temp_s0 + 8;
             (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((g_hud_fade_alpha & 0xFF) | ~0xFF);
@@ -1219,7 +1219,7 @@ u8 *hud_ingame_draw(u8 *arg0) {
                 (*(Gfx **)((u8 *)var_s0_2 + 4)) = sp34;
                 (*(s32 *)((u8 *)temp_s0_5 + 0)) = 0xEF002C3F;
                 (*(s32 *)((u8 *)temp_s0_5 + 4)) = 0x504244;
-                var_s0 = temp_s0_5 + 8;
+                gdl = temp_s0_5 + 8;
                 if (sp3C != 0) {
                     temp_v0_3 = player_stat_get(0, 3);
                     var_a3 = temp_v0_3;
@@ -1229,28 +1229,30 @@ u8 *hud_ingame_draw(u8 *arg0) {
                     if (var_a3 >= 0x64) {
                         var_a3 = 0x63;
                     }
-                    (*(s32 *)((u8 *)var_s0 + 0)) = 0xFB000000;
-                    (*(s32 *)((u8 *)var_s0 + 4)) = (s32) ((g_hud_fade_alpha & 0xFF) | ~0xFF);
-                    var_s0 = hud_counter_digits_draw(var_s0 + 8, 0xEC, 0x1E, var_a3);
+                    (*(s32 *)((u8 *)gdl + 0)) = 0xFB000000;
+                    (*(s32 *)((u8 *)gdl + 4)) = (s32) ((g_hud_fade_alpha & 0xFF) | ~0xFF);
+                    gdl = hud_counter_digits_draw(gdl + 8, 0xEC, 0x1E, var_a3);
                 }
                 if (sp.u88 != 0) {
-                    (*(s32 *)((u8 *)var_s0 + 0)) = 0xE7000000;
-                    temp_s0_6 = var_s0 + 8;
-                    (*(s32 *)((u8 *)var_s0 + 4)) = 0;
+                    (*(s32 *)((u8 *)gdl + 0)) = 0xE7000000;
+                    temp_s0_6 = gdl + 8;
+                    (*(s32 *)((u8 *)gdl + 4)) = 0;
                     (*(s32 *)((u8 *)temp_s0_6 + 0)) = 0xFB000000;
                     (*(s32 *)((u8 *)temp_s0_6 + 4)) = (s32) ((g_hud_fade_alpha & 0xFF) | ~0xFF);
                     g_hud_sprite_desc = 0x7F6;
-                    var_s0 = hud_counter_digits_draw(hud_image_draw(temp_s0_6 + 8, &g_hud_sprite_desc, sp.u8C + 0xA5, 0xAA, 1, 1, 1.0f, 0), sp.u8C + 0xAD, 0x9B, sp.u90);
+                    gdl = hud_counter_digits_draw(hud_image_draw(temp_s0_6 + 8, &g_hud_sprite_desc, sp.u8C + 0xA5, 0xAA, 1, 1, 1.0f, 0), sp.u8C + 0xAD, 0x9B, sp.u90);
                 }
             } else {
-                var_s0 = mp_scoreboard_draw(hud_image_draw(temp_s0_2, &g_hud_sprite_desc, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, g_hud_fade_alpha, 1);
+                gdl = mp_scoreboard_draw(hud_image_draw(temp_s0_2, &g_hud_sprite_desc, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, g_hud_fade_alpha, 1);
             }
         }
     }
 #ifdef PORT
-    var_s0 = hud_cash_counter_draw(var_s0);
+    port_ws_hud_anchor(gdl, 2);   /* P350 widescreen: the cash counter keeps to the right edge */
+    gdl = hud_cash_counter_draw(gdl);
+    port_ws_hud_anchor(gdl, 0);
 #endif
-    return var_s0;
+    return gdl;
 }
 /* was func_151EC0E0 */
 s32 mp_scoreboard_draw_fading(s32 arg0) {

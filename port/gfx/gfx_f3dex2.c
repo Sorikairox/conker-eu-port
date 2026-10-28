@@ -244,6 +244,168 @@ static int state_dirty = 1;
 static int rect_mode;   /* 0 tris, 1 fill rect, 2 tex rect (screen-space quads) */
 static unsigned k4k5;   /* G_SETCONVERT K4 (bits 9..17) / K5 (bits 0..8) */
 
+/* P350 option "Widescreen" (page: Options, key widescreen; port_gfx_widescreen). The page gives the canvas the aspect of
+ * the window (wider than 4:3); the N64 picture (cimg_width x the VI rows, shown 4:3) keeps its size and sits in the middle
+ * of it, ws_ox canvas pixels from the left, ws_sx canvas pixels per N64 pixel across, and N64 x coordinates outside
+ * 0 .. cimg_width reach into the side strips. ws_k = canvas width / the 4:3 width.
+ *  - 3D (a perspective projection): the clip-space x is divided by ws_k and the viewport is ws_k times wider around its
+ *    centre, which moves to cx + (centre - cx) * ws_k (cx = the screen centre). A full-screen view keeps every point where
+ *    the N64 draws it and shows ws_k times more to the sides; a split-screen view gets its share of the wider screen.
+ *    G_CULLDL tests x against +-ws_k w. The scissor of a 3D draw is mapped like its viewport, edges within 4 N64 pixels
+ *    of the screen edge (the game's 2-pixel border) go to the canvas edge.
+ *  - 2D (texture / fill rectangles, orthographic triangles): the N64 position in the centred 4:3 picture, no stretch.
+ *    Untextured fills that touch the left / right screen edge (fades, cutscene letterbox bars, the scope mask) and
+ *    rectangles that copy a full frame per canvas pixel (P335 frame-blend ghost, P349 pause snapshot) are drawn on to
+ *    the canvas edge.
+ * ws_on: the mapping is active for this draw target (the option on, the canvas wider than 4:3, not an offscreen N64-size
+ * image). Off: ws_sx = canvas_w / cimg_width, ws_ox = 0, ws_k = 1 and the original code paths run. Render-only: this
+ * object is outside the online hash. */
+static float sc_box[4];   /* P35b: scissor in N64 pixels (ulx, uly, lrx, lry) (P350: declared here for ws_calc) */
+static int sc_on;
+static int ws_opt;                 /* the option (page) */
+static int ws_on;
+static float ws_k, ws_ox, ws_sx;   /* (zero-initialised: no .data, see ws_flag; set by ws_calc before use) */
+static int ws_tag;                 /* HUD anchor of the commands being run: 0 centred, 1 left edge, 2 right edge, 3 the view
+                                    * of the current scissor box (a player's own overlays in split screen; ws_mark) */
+static float ws_dx;                /* the anchor's shift in canvas pixels */
+static int proj_persp;             /* the current projection has a perspective divide (G_MTX P: m[2][3] != 0) */
+static int ws_log_on;              /* DIAGNOSTIC ?p350log=F: every rectangle / triangle state of the first gfx task at or after retrace F */
+/* P350 URL flags, read once (zero-initialised statics only, like the rest of P350's state here: no .data) */
+static int ws_flag_val[4]; static unsigned char ws_flag_read[4];
+static int ws_flag(int i, const char *name) { if (!ws_flag_read[i]) { ws_flag_read[i] = 1; ws_flag_val[i] = port_flag(name); } return ws_flag_val[i]; }
+EMSCRIPTEN_KEEPALIVE void port_gfx_widescreen(int on) { ws_opt = on != 0; state_dirty = 1; }
+static void ws_calc(void) {
+    float base = canvas_h * (4.0f / 3.0f);
+    ws_on = ws_opt && !off_on && cimg_width >= 256 && canvas_w > base + 0.5f;
+    if (ws_on) { ws_k = canvas_w / base; ws_ox = (canvas_w - base) * 0.5f; ws_sx = base / (float)cimg_width; }
+    else { ws_k = 1; ws_ox = 0; ws_sx = canvas_w / (float)cimg_width; }
+    ws_dx = !ws_on ? 0 : ws_tag == 1 ? -ws_ox : ws_tag == 2 ? ws_ox : 0;
+    if (ws_on && ws_tag == 3 && sc_on) {   /* the view's centre moves as its 3D does: (c - cx) * (k - 1) N64 pixels */
+        float c = (sc_box[0] + sc_box[2]) * 0.5f, cx = cimg_width * 0.5f;
+        ws_dx = (c - cx) * (ws_k - 1) * ws_sx;
+    }
+}
+static inline float ws_x2d(float x) { return ws_ox + x * ws_sx + ws_dx; }                      /* 2D: N64 x -> canvas x */
+static inline float ws_x3d(float x) { float c = cimg_width * 0.5f; return ws_ox + (c + (x - c) * ws_k) * ws_sx; }   /* 3D view edge */
+/* the edge of a view at N64 x: the canvas edge within 4 pixels of the screen edge (the game's 2-pixel border), else the
+ * widened view's edge */
+static inline float ws_edge(float x) { return x <= 4 ? 0 : x >= cimg_width - 4.0f ? (float)canvas_w : ws_x3d(x); }
+/* rect_ext bits for a rectangle x0 .. x1: an edge on the screen's edge, or (tag 3) on the view's (scissor box) edge */
+static int ws_rect_edges(float x0, float x1) {
+    float W = (float)cimg_width;
+    int e = (x0 <= 2.5f) | (x1 >= W - 2.5f) << 1;
+    if (ws_tag == 3 && sc_on) e |= (fabsf(x0 - sc_box[0]) <= 3) | (fabsf(x1 - sc_box[2]) <= 3) << 1;
+    return e;
+}
+/* P350: the widening the game side should cull for (the canvas, read while the game builds its display list) */
+static float ws_game_k(void) { float base = canvas_h * (4.0f / 3.0f); return ws_opt && canvas_w > base + 0.5f ? canvas_w / base : 1.0f; }
+
+/* P350 widescreen, render-side culling. The game culls level geometry against its 4:3 view while it builds the frame
+ * display list (level_dl_visibility_filter, mesh_dl_cull_copy), so the side strips of a wide picture would show holes.
+ * Their results are also kept in game memory (per-triangle / per-vertex visibility bytes, the zone tree's per-view bits),
+ * which game logic may read and which the online state hash covers, so the game's own output must stay as it is. The
+ * link-time wrappers of those functions (below) therefore run the function a second time for the wider view into
+ * ws_arena (renderer memory), run it once more with the game's own inputs (the same output into the game's list, and
+ * the game memory it writes back exactly as after the first call) and put back the stack bytes the extra calls used.
+ * ws_sub_add records "the game list [gs, ge) has a wide copy pdl"; gfx_run_dl, on reaching gs while the widescreen
+ * mapping is on, runs the copy instead and goes on at ge. Entries of a DL buffer are dropped when the renderer has run
+ * the task that uses it (and when a new entry overlaps them). */
+#define WS_ARENA_WORDS (2u << 20)   /* 8 MB ring */
+static uint32_t ws_arena[WS_ARENA_WORDS];
+static unsigned ws_arena_pos;
+#define WS_SUB_N 32
+static struct { const unsigned char *gs, *ge; uint32_t h; const unsigned char *pdl; } ws_sub[WS_SUB_N];
+static int ws_sub_n;
+static uintptr_t ws_sub_lo, ws_sub_hi;   /* used only while ws_sub_n > 0 */
+static unsigned ws_sub_stats[3];   /* added, used, dropped (stale) */
+static void ws_sub_bounds(void) {
+    ws_sub_lo = ~(uintptr_t)0; ws_sub_hi = 0;
+    for (int i = 0; i < ws_sub_n; i++) {
+        if ((uintptr_t)ws_sub[i].gs < ws_sub_lo) ws_sub_lo = (uintptr_t)ws_sub[i].gs;
+        if ((uintptr_t)ws_sub[i].gs > ws_sub_hi) ws_sub_hi = (uintptr_t)ws_sub[i].gs;
+    }
+}
+static void ws_sub_drop_range(const unsigned char *lo, const unsigned char *hi) {   /* entries starting in [lo, hi) */
+    int j = 0;
+    for (int i = 0; i < ws_sub_n; i++) if (ws_sub[i].gs < lo || ws_sub[i].gs >= hi) ws_sub[j++] = ws_sub[i];
+    ws_sub_n = j; ws_sub_bounds();
+}
+static uint32_t *ws_arena_get(unsigned words) {
+    if (words > WS_ARENA_WORDS / 4) return 0;
+    if (ws_arena_pos + words > WS_ARENA_WORDS) ws_arena_pos = 0;
+    uint32_t *p = ws_arena + ws_arena_pos;
+    ws_arena_pos += words;
+    return p;
+}
+/* an entry is used only while the game list still holds what it held when the entry was made: the four commands before
+ * gs (the caller's setup: matrix, segment, ... ) and the range itself are hashed (an empty range is valid too) */
+static uint32_t ws_sub_hash(const unsigned char *gs, const unsigned char *ge) {
+    uint32_t h = 2166136261u;
+    for (const unsigned char *q = gs - 32; q < ge; q += 4) h = (h ^ rd32(q)) * 16777619u;
+    return h;
+}
+static void ws_sub_add(const void *gs, const void *ge, const uint32_t *pdl) {
+    const unsigned char *s = gs, *e = ge;
+    int j = 0;
+    for (int i = 0; i < ws_sub_n; i++)   /* overlapping entries are from an older frame in the same buffer */
+        if (!(ws_sub[i].gs < e && ws_sub[i].ge > s) && ws_sub[i].gs != s) ws_sub[j++] = ws_sub[i];
+    ws_sub_n = j;
+    if (ws_sub_n == WS_SUB_N) { memmove(ws_sub, ws_sub + 1, sizeof ws_sub[0] * (WS_SUB_N - 1)); ws_sub_n--; }
+    ws_sub[ws_sub_n].gs = s; ws_sub[ws_sub_n].ge = e; ws_sub[ws_sub_n].pdl = (const unsigned char *)pdl;
+    ws_sub[ws_sub_n].h = ws_sub_hash(s, e);
+    ws_sub_n++; ws_sub_stats[0]++; ws_sub_bounds();
+}
+static const unsigned char *ws_sub_skip;   /* an empty range was just replaced here: run the game command at it once */
+static int ws_sub_find(const unsigned char *pc) {
+    if (pc == ws_sub_skip) { ws_sub_skip = 0; return -1; }
+    for (int i = 0; i < ws_sub_n; i++)
+        if (ws_sub[i].gs == pc) {
+            if (ws_sub[i].h != ws_sub_hash(ws_sub[i].gs, ws_sub[i].ge)) { ws_sub_stats[2]++; return -1; }
+            if (ws_sub[i].ge == pc) ws_sub_skip = pc;
+            return i;
+        }
+    return -1;
+}
+/* P350 HUD anchors: game C (#ifdef PORT, hud_draw / hud_overlay_draw_screen) calls port_ws_hud_anchor(gdl, edge) before and
+ * after the HUD elements that sit in a screen corner: from that display-list address on, the renderer shifts the 2D (and
+ * the HUD's own perspective models, such as the health chocolate) by the width of the side strip, so they keep their
+ * distance to the picture's edge instead of to the 4:3 picture's (edge 1 left, 2 right, 0 back to the centred layout).
+ * Renderer memory only (the game's list is not changed); used while the widescreen mapping is on. */
+#define WS_MARK_N 64
+static struct { const unsigned char *at; int tag; } ws_mark[WS_MARK_N];
+static int ws_mark_n;
+static uintptr_t ws_mark_lo, ws_mark_hi;
+void port_ws_hud_anchor(void *gdl, int edge) {
+    const unsigned char *a = gdl;
+    int j = 0;
+    if (!ws_opt || !a) return;
+    for (int i = 0; i < ws_mark_n; i++) if (ws_mark[i].at < a) ws_mark[j++] = ws_mark[i];   /* later ones: an older frame */
+    ws_mark_n = j;
+    if (ws_mark_n == WS_MARK_N) { memmove(ws_mark, ws_mark + 1, sizeof ws_mark[0] * (WS_MARK_N - 1)); ws_mark_n--; }
+    ws_mark[ws_mark_n].at = a; ws_mark[ws_mark_n].tag = edge; ws_mark_n++;
+    ws_mark_lo = ~(uintptr_t)0; ws_mark_hi = 0;
+    for (int i = 0; i < ws_mark_n; i++) {
+        if ((uintptr_t)ws_mark[i].at < ws_mark_lo) ws_mark_lo = (uintptr_t)ws_mark[i].at;
+        if ((uintptr_t)ws_mark[i].at > ws_mark_hi) ws_mark_hi = (uintptr_t)ws_mark[i].at;
+    }
+}
+static void ws_mark_drop_range(const unsigned char *lo, const unsigned char *hi) {
+    int j = 0;
+    for (int i = 0; i < ws_mark_n; i++) if (ws_mark[i].at < lo || ws_mark[i].at >= hi) ws_mark[j++] = ws_mark[i];
+    ws_mark_n = j;
+}
+
+/* the stack bytes below the caller's stack pointer, saved around the extra calls (see gfx_run_task's GFX_SCRUB); macros,
+ * so the stack pointer is the one of the function that uses them */
+#include <emscripten/stack.h>
+#define WS_SCRUB (64 * 1024)
+static unsigned char ws_scrub_buf[WS_SCRUB];
+static unsigned char *ws_scrub_lo; static size_t ws_scrub_n;
+#define WS_SCRUB_SAVE() do { uintptr_t sp_ = emscripten_stack_get_current(), end_ = emscripten_stack_get_end(); \
+    size_t n_ = sp_ > end_ ? sp_ - end_ : 0; if (n_ > WS_SCRUB) n_ = WS_SCRUB; \
+    ws_scrub_lo = (unsigned char *)(sp_ - n_); ws_scrub_n = n_; memcpy(ws_scrub_buf, ws_scrub_lo, n_); } while (0)
+#define WS_SCRUB_RESTORE() memcpy(ws_scrub_lo, ws_scrub_buf, ws_scrub_n)
+
 static const char *VS =
     "#version 300 es\n"
     "in vec4 aPos; in vec4 aCol; in vec2 aST; in float aFog;\n"
@@ -441,7 +603,7 @@ int gfx_init(void) {
 /* P348 photo mode: the page resized the canvas's drawing buffer (a capture at 2x the canvas resolution, then back);
  * every draw scales N64 pixels by canvas_w / cimg_width, and the framebuffer-copy textures follow the size. */
 EMSCRIPTEN_KEEPALIVE void port_gfx_resize(int w, int h) {
-    if (w > 0 && h > 0) { canvas_w = w; canvas_h = h; port_log("[gfx] canvas %dx%d\n", w, h); }
+    if (w > 0 && h > 0) { canvas_w = w; canvas_h = h; state_dirty = 1; port_log("[gfx] canvas %dx%d\n", w, h); }
 }
 
 /* ---- textures: decode a tile out of TMEM into RGBA8, cached by (TMEM generation, tile params) */
@@ -563,8 +725,6 @@ static void rgba(GLint u, unsigned c) {
     glUniform4f(u, (c >> 24) / 255.0f, (c >> 16 & 255) / 255.0f, (c >> 8 & 255) / 255.0f, (c & 255) / 255.0f);
 }
 
-static float sc_box[4];   /* P35b: scissor in N64 pixels (ulx, uly, lrx, lry) */
-static int sc_on;
 static int filt_mode = -1;   /* P35: 1 = RDP 3-point (default), 2 = ?filter4=1 4-tap bilinear, 0 = ?filter0=1 point */
 /* P35 blender (othermode L): cycle-1 selectors at bits 30/26/22/18, cycle-2 at 28/24/20/16 (P, A, M, B);
  * P/M: 0 IN, 1 MEM, 2 BLEND colour, 3 FOG colour; A: 0 IN alpha, 1 FOG alpha, 2 SHADE alpha, 3 zero;
@@ -597,6 +757,7 @@ static void blend_state(unsigned cyc, int mode) {
 
 static unsigned dl_st[10];   /* P193: see draw_log_line */
 static void apply_state(void) {
+    ws_calc();   /* P350 */
     unsigned cyc = oth_h >> 20 & 3; /* 0 1CYC, 1 2CYC, 2 COPY, 3 FILL */
     unsigned w0 = combine_w0, w1 = combine_w1;
     if (filt_mode < 0) filt_mode = port_flag("filter0") ? 0 : port_flag("filter4") ? 2 : 1;
@@ -662,7 +823,7 @@ static void apply_state(void) {
     unsigned tf = oth_h >> 12 & 3;   /* G_TF_POINT 0, G_TF_BILERP 2, G_TF_AVERAGE 3 */
     glUniform1i(u_filt, tf == 0 || cyc >= 2 ? 0 : filt_mode);
     { static int ol = -1; if (ol < 0) ol = port_flag("p78oldlod");   /* DIAGNOSTIC ?p78oldlod=1: the pre-P78 (inverted) scale */
-      glUniform1f(u_pixscale, ol ? (float)cimg_width / canvas_w : (float)canvas_w / cimg_width); }   /* P78: canvas px per N64 px */
+      glUniform1f(u_pixscale, ol ? (float)cimg_width / canvas_w : ws_on ? ws_sx : (float)canvas_w / cimg_width); }   /* P78: canvas px per N64 px (P350: of the 4:3 picture) */
     { static int lv = -1; if (lv < 0) lv = port_flag("p78lodviz"); glUniform1i(u_lodviz, lv); }
     { /* P193 DIAGNOSTIC ?p193dbg=F[&p193cc=W1hex]: from retrace F, draws with combiner 26A004/<W1> (default 15FC92F8) cycle
        * through views every 100 retraces: 0 normal, 1 T0, 2 shade, 3 magenta, 4 LOD_FRACTION, 5 (lt/4, texon/63, distant),
@@ -691,6 +852,28 @@ static void apply_state(void) {
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);  /* the blend factor goes through alpha; keep the canvas opaque */
     /* viewport */
     float sx = canvas_w / (float)cimg_width, sy = canvas_h / CIMG_H;
+    if (ws_log_on && !rect_mode) port_log("[p350] task %u tris persp %d vp %d %d %d %d sc %d %.1f,%.1f..%.1f,%.1f\n", gfx_stats.tasks, proj_persp, vp_scale[0], vp_scale[1], vp_trans[0], vp_trans[1],
+                                         sc_on, sc_box[0], sc_box[1], sc_box[2], sc_box[3]);
+    if (ws_on) {   /* P350: see ws_calc */
+        int is3d = !rect_mode && proj_persp;
+        float W = (float)cimg_width;
+        if (rect_mode) glViewport(0, 0, canvas_w, canvas_h);
+        else {
+            float w = 2 * vp_scale[0] / 4.0f, h = 2 * vp_scale[1] / 4.0f;
+            float x0 = (vp_trans[0] - vp_scale[0]) / 4.0f, y0 = (vp_trans[1] - vp_scale[1]) / 4.0f;
+            float d3 = ws_tag == 1 || ws_tag == 2 ? ws_dx : 0;   /* a corner HUD model (health chocolate) moves with its anchor */
+            float X0 = is3d ? ws_x3d(x0) + d3 : ws_x2d(x0), X1 = is3d ? ws_x3d(x0 + w) + d3 : ws_x2d(x0 + w);
+            glViewport((GLint)floorf(X0 + 0.5f), (GLint)(canvas_h - (y0 + h - VI_Y0) * sy), (GLint)floorf(X1 - X0 + 0.5f), (GLint)(h * sy));
+        }
+        if (sc_on) {
+            float X0, X1, full = sc_box[0] <= 4 && sc_box[2] >= W - 4;
+            if (is3d) { X0 = sc_box[0] <= 4 ? 0 : ws_x3d(sc_box[0]); X1 = sc_box[2] >= W - 4 ? canvas_w : ws_x3d(sc_box[2]); }
+            else { X0 = full ? 0 : ws_x2d(sc_box[0]); X1 = full ? canvas_w : ws_x2d(sc_box[2]); }
+            glEnable(GL_SCISSOR_TEST);
+            glScissor((GLint)floorf(X0 + 0.5f), (GLint)(canvas_h - (sc_box[3] - VI_Y0) * sy), (GLint)floorf(X1 - X0 + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
+        } else glDisable(GL_SCISSOR_TEST);
+        return;
+    }
     if (rect_mode) glViewport(0, 0, canvas_w, canvas_h);
     else {
         float w = 2 * vp_scale[0] / 4.0f, h = 2 * vp_scale[1] / 4.0f;
@@ -870,6 +1053,7 @@ static void tri(unsigned i0, unsigned i1, unsigned i2) {
     if (off_on && off_zimg) zsnap.valid = 0;   /* P349: the z image gets more than the copied frame */
     need_state(0);
     put(a, 1, 1); put(b, 1, 1); put(c, 1, 1);   /* P35: the tile shift is applied per tile in the shader */
+    if (ws_on && proj_persp) { float *o = batch + (nbatch - 3) * VF; o[0] /= ws_k; o[VF] /= ws_k; o[2 * VF] /= ws_k; }   /* P350 */
 }
 
 /* P337 (port/ultra/pc_nethash.c): every RDRAM range written from GPU pixels is reported before the write, so the
@@ -927,7 +1111,7 @@ static void off_begin(unsigned addr, unsigned w, unsigned siz) {
     canvas_w = w; canvas_h = OFF_FBO_H;
     off_on = 1; off_addr = addr; off_w = w; off_siz = siz; off_rows = w > OFF_FBO_H ? OFF_FBO_H : w; state_dirty = 1;
     off_drawn = 0; off_zimg = addr == zimg_addr;
-    if (off_zimg) { zsnap.valid = 0; zsnap.due = hires_2d; }   /* P349: a new picture in the z image */
+    if (off_zimg) { zsnap.valid = 0; zsnap.due = hires_2d || ws_opt; }   /* P349: a new picture in the z image (P350: widescreen too) */
     if (off_zimg) { unsigned r = (unsigned)(vi_y0 + (vi_h > 0 ? vi_h : w * 0.75f) + 0.999f); off_rows = r > OFF_FBO_H ? OFF_FBO_H : r; }
     { static unsigned n; if (n++ < 4) port_log("[p137] offscreen colour image %08X %u wide siz %u (frame %u)\n", addr, w, siz, port_frame_count); }
 }
@@ -977,7 +1161,7 @@ static int hx_logging(void) { static int f = -1, n; if (f < 0) f = port_flag("p3
  * it as RGBA5551 big-endian in the image's N64 pixel size (rows of the VI view, P147; rows outside left as they are).
  * ?p161nofb=1 turns it off (old behaviour). */
 #define FBC_N 4
-static struct { unsigned char *p; unsigned w, rows; GLuint tex, fbo; int tw, th, dirty; float y0, h; unsigned age; } fbc[FBC_N];
+static struct { unsigned char *p; unsigned w, rows; GLuint tex, fbo; int tw, th, dirty; float y0, h; unsigned age; float ox, bw; } fbc[FBC_N];   /* P350: ox / bw the 4:3 picture in the copy */
 static unsigned char *fbc_task_p; static unsigned fbc_task_w, fbc_clock;
 static int fbc_off = -1, fbc_log = -1;   /* ?p161log=F: log copies / hits from retrace F (200 lines) */
 static int fbc_logging(void) { static int n; if (fbc_log < 0) fbc_log = port_flag("p161log");
@@ -997,6 +1181,7 @@ static void fbc_task_end(void) {
         fbc[s].tw = canvas_w; fbc[s].th = canvas_h;
     }
     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, canvas_w, canvas_h);   /* default framebuffer (RGB8, no alpha) */
+    ws_calc(); fbc[s].ox = ws_on ? ws_ox : 0; fbc[s].bw = ws_on ? ws_sx * cimg_width : 0;   /* P350 */
     fbc[s].w = fbc_task_w; fbc[s].y0 = vi_y0; fbc[s].h = vi_h > 0 ? vi_h : fbc_task_w * 0.75f;
     fbc[s].rows = (unsigned)(fbc[s].y0 + fbc[s].h + 0.999f); if (fbc[s].rows > 288) fbc[s].rows = 288;
     fbc[s].dirty = 1; fbc[s].age = ++fbc_clock;
@@ -1047,7 +1232,7 @@ static void fbc_check_timg(const unsigned char *t) {
             if (cy < 0 || cy >= fbc[i].th) continue;
             const unsigned char *row = px + (size_t)(fbc[i].th - 1 - (int)cy) * fbc[i].tw * 4;
             for (x = 0; x < w; x++) {
-                const unsigned char *q = row + (unsigned)((x + 0.5f) * fbc[i].tw / w) * 4;
+                const unsigned char *q = row + (fbc[i].bw > 0 ? (unsigned)(fbc[i].ox + (x + 0.5f) * fbc[i].bw / w) : (unsigned)((x + 0.5f) * fbc[i].tw / w)) * 4;   /* P350 */
                 unsigned v = (q[0] >> 3) << 11 | (q[1] >> 3) << 6 | (q[2] >> 3) << 1 | 1, k = 2 * (y * w + x);
                 *VBE8(dst + k) = v >> 8; *VBE8(dst + k + 1) = v & 0xFF;
             }
@@ -1135,7 +1320,7 @@ static void hx_settimg(void) {
     unsigned char *base = 0; unsigned w = 0;
     hx_src.kind = 0;
     if (!timg.p || !gl_ok || gfx_measure_only || hx_disabled() || timg.siz != 2) return;
-    if (hires_2d && off_on && off_zimg) {   /* P349: drawing into the z image (pause): a copy of a screen image? */
+    if ((hires_2d || ws_opt) && off_on && off_zimg) {   /* P349: drawing into the z image (pause): a copy of a screen image? */
         for (int i = 0; i < FBC_N; i++) {
             unsigned char *b = fbc[i].p;
             if (!b || !fbc[i].tex || timg.p < b || timg.p >= b + 2 * fbc[i].w * fbc[i].rows) continue;
@@ -1150,7 +1335,7 @@ static void hx_settimg(void) {
     } else for (int i = 0; i < HX_N; i++)
         if (i != hx_cur && hx[i].p && hx[i].tex && gfx_stats.tasks - hx[i].task <= 4 && timg.p >= hx[i].p && timg.p < hx[i].p + 2 * hx[i].w * hx[i].rows) {
             hx_src.kind = 2; hx_src.slot = i; base = hx[i].p; w = hx[i].w; break; }
-    if (!hx_src.kind && hires_2d && zsnap.valid && timg.p >= zsnap.p && timg.p < zsnap.p + 2 * zsnap.w * zsnap.rows) {   /* P349 */
+    if (!hx_src.kind && (hires_2d || ws_opt) && zsnap.valid && timg.p >= zsnap.p && timg.p < zsnap.p + 2 * zsnap.w * zsnap.rows) {   /* P349 */
         hx_src.kind = 3; base = zsnap.p; w = zsnap.w; }
     if (hx_src.kind) { hx_src.p = base; hx_src.w = w; hx_src.idx = (unsigned)(timg.p - base) / 2; }
 }
@@ -1172,7 +1357,7 @@ static void hx_texrect(int ti, float ulx, float uly, float s, float t, float ds,
             fabsf(cx - ulx) > 0.01f || fabsf(cy - uly) > 0.01f) zsnap.valid = 0;
         return;
     }
-    if (hx_load.kind == 3 && (!zsnap.valid || !hires_2d || zsnap.tw != canvas_w || zsnap.th != canvas_h)) return;
+    if (hx_load.kind == 3 && (!zsnap.valid || !(hires_2d || ws_opt) || zsnap.tw != canvas_w || zsnap.th != canvas_h)) return;
     if (!hx_load.kind || hx_load.gen != tmem_gen || T->tmem != hx_load.tmem || fabsf(ds - 1) > 0.01f || fabsf(dt - 1) > 0.01f) return;
     if (hx_load.kind == 2 && (hx[hx_load.slot].p != hx_load.p || hx_load.slot == hx_cur)) return;
     float sx = hx_load.x + s - T->uls / 4.0f, sy = hx_load.y + t - T->ult / 4.0f;   /* source N64 pixel at (ulx, uly) */
@@ -1187,7 +1372,10 @@ static void hx_texrect(int ti, float ulx, float uly, float s, float t, float ds,
         hx_snap_due = 0; state_dirty = 1;
     }
     hxs_on = 1; hxs_tex = hx_load.kind == 1 ? hx_snap : hx_load.kind == 3 ? zsnap.tex : hx[hx_load.slot].tex;
-    hxs_ox = (sx - ulx) * canvas_w / cimg_width; hxs_oy = -(sy - uly) * canvas_h / CIMG_H;
+    ws_calc();
+    if (ws_on) hxs_ox = (sx - ulx) * ws_sx; else   /* P350 */
+    hxs_ox = (sx - ulx) * canvas_w / cimg_width;
+    hxs_oy = -(sy - uly) * canvas_h / CIMG_H;
     if (hx_load.kind <= 2) hx_nrect[hx_load.kind - 1]++;
 }
 static void hx_task_end(void) {
@@ -1198,14 +1386,24 @@ static void hx_task_end(void) {
     hx_nrect[0] = hx_nrect[1] = 0; hx_src.kind = 0; hx_load.kind = 0;
 }
 
-/* screen-space rectangle in N64 pixels (fill / texture rectangles) */
+/* screen-space rectangle in N64 pixels (fill / texture rectangles). P350: with the widescreen mapping (ws_on) the x
+ * coordinates go through ws_x2d; rect_ext bit 0 / 1 puts the left / right edge on the canvas edge instead (the caller
+ * decides, see ws_calc), and is cleared here. */
+static int rect_ext;
 static void rect(float x0, float y0, float x1, float y1, float s0, float t0, float s1, float t1, unsigned col, int rm) {
     need_state(rm);
     float W = cimg_width, H = CIMG_H;
     V q[4];
     float xs[4] = {x0, x1, x0, x1}, ys[4] = {y0, y0, y1, y1}, ss[4] = {s0, s1, s0, s1}, ts[4] = {t0, t0, t1, t1};
+    int ext = rect_ext;
+    rect_ext = 0;
+    if (ws_log_on) port_log("[p350] task %u rect rm %d %.1f,%.1f..%.1f,%.1f ext %d sc %d %.1f,%.1f..%.1f,%.1f vp %d %d %d %d oth %06X cc %06X/%08X timg %08X\n", gfx_stats.tasks, rm, x0, y0, x1, y1, ext,
+                            sc_on, sc_box[0], sc_box[1], sc_box[2], sc_box[3], vp_scale[0], vp_scale[1], vp_trans[0], vp_trans[1], oth_h, combine_w0, combine_w1, timg.raw);
     for (int i = 0; i < 4; i++) {
-        q[i].x = xs[i] / W * 2 - 1; q[i].y = 1 - (ys[i] - VI_Y0) / H * 2; q[i].z = 0; q[i].w = 1;
+        if (ws_on) { float X = (i & 1) ? ((ext & 2) ? ws_edge(xs[i]) : ws_x2d(xs[i])) : ((ext & 1) ? ws_edge(xs[i]) : ws_x2d(xs[i])); q[i].x = X / canvas_w * 2 - 1; }
+        else
+        q[i].x = xs[i] / W * 2 - 1;
+        q[i].y = 1 - (ys[i] - VI_Y0) / H * 2; q[i].z = 0; q[i].w = 1;
         q[i].r = (col >> 24) / 255.0f; q[i].g = (col >> 16 & 255) / 255.0f; q[i].b = (col >> 8 & 255) / 255.0f;
         q[i].a = (col & 255) / 255.0f; q[i].s = ss[i]; q[i].t = ts[i]; q[i].fog = 0;
     }
@@ -1585,6 +1783,16 @@ void gfx_run_dl(const void *dl) {
     int sp = 0, guard = 0;
     gfx_stats.dls++;
     while (pc && ++guard < 1000000) {
+        if (ws_mark_n && (uintptr_t)pc >= ws_mark_lo && (uintptr_t)pc <= ws_mark_hi) {   /* P350: a HUD anchor */
+            int t = -1;
+            for (int i = 0; i < ws_mark_n; i++) if (ws_mark[i].at == pc) t = ws_mark[i].tag;
+            if (t >= 0 && t != ws_tag) { flush(); ws_tag = t; state_dirty = 1; }
+        }
+        if (ws_sub_n && (uintptr_t)pc >= ws_sub_lo && (uintptr_t)pc <= ws_sub_hi && sp < 32) {   /* P350: a wide copy */
+            int i = ws_sub_find(pc);
+            ws_calc();
+            if (i >= 0 && ws_on) { stack[sp++] = ws_sub[i].ge; pc = ws_sub[i].pdl; ws_sub_stats[1]++; }
+        }
         unsigned w0 = rd32(pc), w1 = rd32(pc + 4), op = w0 >> 24;
         if (gfx_trace) port_log("[gfx]   %p: %08X %08X\n", (const void *)pc, w0, w1);
         pc += 8;
@@ -1616,10 +1824,12 @@ void gfx_run_dl(const void *dl) {
              * view volume (x, y against +-w, w <= 0 behind the eye, z > w beyond far). Vertices are those
              * already loaded (clip space, after the renderer's MVP, so freecam culls for its own view). */
             unsigned a0 = (w0 & 0xFFFF) / 2, a1 = (w1 & 0xFFFF) / 2, all = 0x7F;
+            ws_calc();
             if (a1 > 63) a1 = 63;
             for (unsigned i = a0; i <= a1; i++) {
                 const V *v = &vb[i];
-                unsigned c = (v->x < -v->w) | (v->x > v->w) << 1 | (v->y < -v->w) << 2 | (v->y > v->w) << 3 |
+                float xw = ws_on && proj_persp ? v->w * ws_k : v->w;   /* P350: the wider view */
+                unsigned c = (v->x < -xw) | (v->x > xw) << 1 | (v->y < -v->w) << 2 | (v->y > v->w) << 3 |
                              (v->w <= 0) << 4 | (v->z > v->w) << 5;
                 all &= c;
             }
@@ -1685,6 +1895,10 @@ void gfx_run_dl(const void *dl) {
             if (prm & 4) { if (prm & 2) memcpy(proj_game, m, sizeof m); else mtx_mul(proj_game, m, proj_game); }
             if ((prm & 6) == 4 && fc_on > 0 && fc_init) freecam_view(m); /* P33 ?freecam=1: the world view */
             if (prm & 4) { if (prm & 2) memcpy(proj, m, sizeof m); else mtx_mul(proj, m, proj); }
+            if (prm & 4) {   /* P350: perspective (widened with the option) or orthographic (2D-like) */
+                int pp = fabsf(proj[0][3]) > 1e-6f || fabsf(proj[1][3]) > 1e-6f || fabsf(proj[2][3]) > 1e-6f;
+                if (pp != proj_persp) { proj_persp = pp; state_dirty = 1; }
+            }
             else {
                 light_dirty = 1;
                 if ((prm & 1) && mvsp < 31) memcpy(mvstack[mvsp++], mv, sizeof mv);
@@ -1806,6 +2020,7 @@ void gfx_run_dl(const void *dl) {
                 rect_hires_setup(tex_tile, s, t, ds, dt, lrx - ulx, lry - uly, cyc);
                 sv -= 0.5f * ds; tv -= 0.5f * dt;
             }
+            if (hxs_on && ws_opt) { ws_calc(); if (ws_on) rect_ext = ws_rect_edges(ulx, lrx); }   /* P350: a full frame, per canvas pixel */
             if (!gfx_measure_only) rect(ulx, uly, lrx, lry, sv, tv, sv + ds * (lrx - ulx), tv + dt * (lry - uly), 0xFFFFFFFF, 2);
             tex_tile = saved_tile; hxs_on = 0; rect_hires_mode = 0; state_dirty = 1;
             break;
@@ -1849,6 +2064,7 @@ void gfx_run_dl(const void *dl) {
              * FORCE_BL alpha blend) covered the frame in opaque prim colour before */
             { static int nfr = -1; if (nfr < 0) nfr = port_flag("nofillrect");   /* diagnostic: skip them */
               if (cyc < 2 && nfr) break; }
+            if (ws_opt) { ws_calc(); if (ws_on) rect_ext = ws_rect_edges(ulx, lrx); }   /* P350: fills reach the canvas / view edge */
             if (cyc < 2) { (void)col; rect(ulx, uly, lrx, lry, 0, 0, 0, 0, 0, 2); }
             else rect(ulx, uly, lrx, lry, 0, 0, 0, 0, col, 1);
             break;
@@ -1916,7 +2132,7 @@ void gfx_frame_begin(float r, float g, float b) {
     memset(lbuf, 0, sizeof lbuf); light_nls = 0; light_dirty = 1; light_seen = 0;
     lbuf[0x90] = lbuf[0x91] = lbuf[0x92] = 0xFF;   /* M = 0: ambient = record 1 */
     memcpy(rare10, rare10_def, sizeof rare10);
-    state_dirty = 1; rect_mode = 0; nbatch = 0;
+    state_dirty = 1; rect_mode = 0; nbatch = 0; proj_persp = 0;
     gfx_stats.frames++;
     sc_on = 0;
     if (!gl_ok) return;
@@ -1945,7 +2161,26 @@ void gfx_overlay_begin(void) {
  * OSTask_t: type 0, flags 4, ucode_boot 8, ucode_boot_size 12, ucode 16, ucode_size 20,
  * ucode_data 24, ucode_data_size 28, dram_stack 32, dram_stack_size 36, output_buff 40,
  * output_buff_size 44, data_ptr 48, data_size 52, yield_data_ptr 56, yield_data_size 60. */
+static __attribute__((noinline)) void gfx_run_task_body(void *task);   /* P350: was gfx_run_task; noinline: its frame must lie below the scrubbed stack pointer */
+/* P350: the renderer runs on the game thread that submits the task (the RCP scheduler's fiber), and its stack frames
+ * leave bytes below that thread's stack pointer. The online state hash covers whole fiber stacks (pc_nethash.c), and
+ * game C reads stale stack bytes as uninitialised locals, so what the renderer does (an option such as Widescreen or
+ * Hi-res 2D on one player's side) must not show there: the GFX_SCRUB bytes below the stack pointer are saved before the
+ * task and put back after it, as if the renderer had used no stack. ?p350noscrub=1 turns it off (old behaviour). */
+#include <emscripten/stack.h>
+#define GFX_SCRUB (64 * 1024)
+static unsigned char gfx_scrub_buf[GFX_SCRUB];
 void gfx_run_task(void *task) {
+    int off = ws_flag(0, "p350noscrub");
+    uintptr_t sp = emscripten_stack_get_current(), end = emscripten_stack_get_end();
+    size_t n = sp > end ? sp - end : 0;
+    if (n > GFX_SCRUB) n = GFX_SCRUB;
+    unsigned char *lo = (unsigned char *)(sp - n);
+    if (!off) memcpy(gfx_scrub_buf, lo, n);
+    gfx_run_task_body(task);
+    if (!off) memcpy(lo, gfx_scrub_buf, n);
+}
+static __attribute__((noinline)) void gfx_run_task_body(void *task) {
     const unsigned char *t = task;
     unsigned ucode = rd32(t + 16), data = rd32(t + 48), size = rd32(t + 52);
     gfx_stats.tasks++;
@@ -1976,11 +2211,14 @@ void gfx_run_task(void *task) {
                    port_log("[p158] dump: task %u at frame %u\n", gfx_stats.tasks, port_frame_count); }
         p158_on = hit; }
     if (dlstat && gfx_stats.tasks % (unsigned)dlstat == 0) logf = 2;
+    { static int done; int f = ws_flag(1, "p350log");   /* P350 DIAGNOSTIC */
+      ws_log_on = f > 0 && !done && port_frame_count >= (unsigned)f; if (ws_log_on) done = 1; }
     memset(fr_ops, 0, sizeof fr_ops); memset(fr_seguse, 0, sizeof fr_seguse);
     freecam_update();
     { static int dlg = -1; if (dlg < 0) dlg = port_flag("drawlog"); draw_log = (dlg && gfx_stats.tasks == (unsigned)dlg) || p158_on; }
     gfx_bounds_reset();
     gfx_frame_begin(0, 0, 0);
+    ws_tag = 0;   /* P350 */
     cur_ucode = ucode; cur_udata = rd32(t + 24);
     if (port_flag("udump") && gfx_stats.tasks == 10) {   /* P35b ?udump=1: hex dump of the task ucode text + data */
         const unsigned char *a = gfx_addr(ucode), *d = gfx_addr(cur_udata);
@@ -1996,6 +2234,16 @@ void gfx_run_task(void *task) {
     p61_mtx = p61_dl = p61_tris = p61_verts = p61_imtx = p61_bad = p61_cmds = p61_vbad = 0; p61_depth = -1; p61_pend = 0;
     memset(p61_icls, 0, sizeof p61_icls); p61_mn[0] = p61_mn[1] = 1e30f; p61_mx[0] = p61_mx[1] = -1e30f;
     gfx_run_dl(dl);
+    {   /* P350: the wide copies of this task's display-list buffer are used up */
+        extern unsigned g_gfx_dl_buffers[2] __attribute__((weak)); extern int g_dl_capacity __attribute__((weak));
+        ws_tag = 0;
+        if ((ws_sub_n || ws_mark_n) && &g_gfx_dl_buffers && &g_dl_capacity)
+            for (int i = 0; i < 2; i++) {
+                const unsigned char *b = gfx_addr(g_gfx_dl_buffers[i]);
+                if (b && (const unsigned char *)dl >= b && (const unsigned char *)dl < b + 8u * (unsigned)g_dl_capacity) {
+                    ws_sub_drop_range(b, b + 8u * (unsigned)g_dl_capacity); ws_mark_drop_range(b, b + 8u * (unsigned)g_dl_capacity); }
+            }
+    }
     if (off_on) off_end();   /* P137 */
     hx_task_end();           /* P335 */
     fbc_task_end();          /* P161 */
@@ -2030,6 +2278,8 @@ void gfx_run_task(void *task) {
         port_log("[gfx] frame %u: %u DLs, %u commands, %u triangles, %u unknown commands; culldl %u (%u culled), branch_z %u (%u taken), lit %u, unlit-flag %u\n", gfx_stats.tasks,
                  gfx_stats.dls - d0, gfx_stats.cmds - c0, gfx_stats.tris - t0, gfx_stats.unknown_ops - u0,
                  gfx_stats.culldl, gfx_stats.culled, gfx_stats.branchz, gfx_stats.branchz_taken, gfx_stats.lit, gfx_stats.unlit_flag);
+    if (logf && ws_opt) port_log("[p350] widescreen k %.3f: wide copies added %u, used %u, stale %u, live %d, arena at %u words\n", ws_game_k(),
+                                 ws_sub_stats[0], ws_sub_stats[1], ws_sub_stats[2], ws_sub_n, ws_arena_pos);
     if (logf) {  /* P23: opcode histogram and segment use of this frame */
         char b[1024]; int n = 0;
         for (int i = 0; i < 256 && n < (int)sizeof b - 32; i++)
@@ -2062,6 +2312,52 @@ static int vis_tris(const uint32_t *p, const uint32_t *end, unsigned *ncmd) {
     if (ncmd) *ncmd = n;
     return t;
 }
+/* P350 widescreen: the level geometry for the wider view (see ws_sub_add): a second run with the horizontal zoom factor
+ * g_cam_zoom_factors[0] (the filter's side planes: |x'| * zoom <= depth) divided by the widening, into ws_arena, then a
+ * third with the game's inputs into the game's list (the same bytes; the per-triangle visibility bytes and the zone tree's
+ * bits for this view end as after the first run: the walk clears and rebuilds them from the inputs). Output <= 2 commands
+ * per input command (a state flush emits each deferred command once). */
+extern float g_cam_zoom_factors[2];   /* was D_800D3A00 */
+static int ws_noculls(void) { return ws_flag(2, "p350noculls"); }   /* DIAGNOSTIC: no wide copies */
+static __attribute__((noinline)) void ws_level_widen(int dl, uint32_t *gdl, uint32_t *r, unsigned char *mtx, int a3, int a4, int mask) {
+    const uint32_t *p = (const uint32_t *)(uintptr_t)dl;
+    unsigned n = 0;
+    while ((p[0] >> 24) != 0xDF && n < 400000) { p += 2; n++; }
+    uint32_t *buf = ws_arena_get(4 * n + 64), *we, *r2;
+    if (!buf) return;
+    float z0 = g_cam_zoom_factors[0];
+    g_cam_zoom_factors[0] = z0 / ws_game_k();
+    we = __real_level_dl_visibility_filter(dl, buf, mtx, a3, a4, mask);
+    g_cam_zoom_factors[0] = z0;
+    r2 = __real_level_dl_visibility_filter(dl, gdl, mtx, a3, a4, mask);
+    if (r2 != r || we > buf + 4 * n + 62) { static int nl; if (nl++ < 4) port_log("[p350] level copy dropped: %p != %p or %u words\n", (void *)r2, (void *)r, (unsigned)(we - buf)); return; }
+    we[0] = 0xDF000000; we[1] = 0;
+    ws_sub_add(gdl, r, buf);
+}
+/* P350 widescreen: mesh_dl_cull_copy (world objects with +0x70 & 2, game_eu_13DC30.c) drops the triangles of a mesh whose
+ * vertices are all outside the same side plane (|x'| * zoom > depth, the same zoom factor) or behind: the same three runs
+ * as the level (its per-vertex flags g_mesh_vtx_cull_flags are rebuilt by every G_VTX it copies). Output <= input. */
+uint32_t *__real_mesh_dl_cull_copy(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int base);
+static __attribute__((noinline)) void ws_mesh_widen(int dl, uint32_t *gdl, uint32_t *r, unsigned char *mtx, int a3, int a4, int base) {
+    const uint32_t *p = (const uint32_t *)(uintptr_t)dl;
+    unsigned n = 0;
+    while ((p[0] >> 24) != 0xDF && n < 400000) { p += 2; n++; }
+    uint32_t *buf = ws_arena_get(2 * n + 8), *we, *r2;
+    if (!buf) return;
+    float z0 = g_cam_zoom_factors[0];
+    g_cam_zoom_factors[0] = z0 / ws_game_k();
+    we = __real_mesh_dl_cull_copy(dl, buf, mtx, a3, a4, base);
+    g_cam_zoom_factors[0] = z0;
+    r2 = __real_mesh_dl_cull_copy(dl, gdl, mtx, a3, a4, base);
+    if (r2 != r || we > buf + 2 * n + 6) { static int nl; if (nl++ < 4) port_log("[p350] mesh copy dropped: %p != %p or %u words\n", (void *)r2, (void *)r, (unsigned)(we - buf)); return; }
+    we[0] = 0xDF000000; we[1] = 0;
+    ws_sub_add(gdl, r, buf);
+}
+uint32_t *__wrap_mesh_dl_cull_copy(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int base) {
+    uint32_t *r = __real_mesh_dl_cull_copy(dl, gdl, mtx, a3, a4, base);
+    if (dl && !gfx_measure_only && ws_game_k() > 1.001f && !ws_noculls()) { WS_SCRUB_SAVE(); ws_mesh_widen(dl, gdl, r, mtx, a3, a4, base); WS_SCRUB_RESTORE(); }
+    return r;
+}
 uint32_t *__wrap_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int mask) {
     static int dla = -1, vlog = -1, calls;
     uint32_t *r;
@@ -2088,6 +2384,7 @@ uint32_t *__wrap_level_dl_visibility_filter(int dl, uint32_t *gdl, unsigned char
         return gdl;
     }
     r = __real_level_dl_visibility_filter(dl, gdl, mtx, a3, a4, mask);
+    if (dl && !gfx_measure_only && ws_game_k() > 1.001f && !ws_noculls()) { WS_SCRUB_SAVE(); ws_level_widen(dl, gdl, r, mtx, a3, a4, mask); WS_SCRUB_RESTORE(); }   /* P350 */
     { /* P42: the first vlog calls of every (dl, tree) pair, so the level after the boot level is logged too */
         static int lastdl, lasttree;
         if (dl != lastdl || (int)g_zone_tree != lasttree) {

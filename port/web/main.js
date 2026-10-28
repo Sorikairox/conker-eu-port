@@ -88,6 +88,9 @@ const OPTIONS = [
   // P349: page-side (no `game` id): the renderer's own switch (port_gfx_hires_2d), each player's choice even online.
   { key: 'hires2d', label: 'Hi-res menus and 2D', def: false,
     help: 'Menus, HUD, text, title and pause screens and other flat pictures are drawn sharp at the picture\'s full resolution: each texel sits exactly where the N64 shows it (no half-texel blur), tiled pictures join without seams, scaled text and icons show the detail of their textures, blocky (unfiltered) pictures keep even, crisp texels, and the frozen game picture behind the pause menu stays at full resolution. Same layout and colours as the N64; 3D is not changed. Off: as before (2D sampled the N64 way, half a texel off at this resolution).' },
+  // P350: page-side too (port_gfx_widescreen in the renderer, outside the online hash): each player's own choice online.
+  { key: 'widescreen', label: 'Widescreen', def: false,
+    help: 'The picture fills a wide window (16:9, 16:10, up to 21:9: the shape of the game area, or of the screen in fullscreen) and the 3D view sees further to the left and right, instead of a 4:3 picture with black bars. Nothing is stretched. Menus, text and the pause screen keep their N64 place in the middle, the health, cash and air meter move to the corners, fades and the pause background cover the whole width. The game itself still works with its 4:3 view (nothing plays differently, safe online): characters and some effects just outside the 4:3 view are only drawn once they come close to it. Off: the 4:3 N64 picture.' },
   { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
   { key: 'rumble', label: 'Rumble (gamepad vibration)', def: false, game: 13,
@@ -118,7 +121,8 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 //   it changes nothing unless L is held, a fresh browser is then exactly Classic, and the user chose it on by default.
 // Modern = Classic + the options that add information or remove waiting without making the game easier or changing
 //   how it controls: skip intro, autosave icon, health / cash always visible, air meter, crosshair, full-detail Conker,
-//   rumble, and (P349) hi-res menus and 2D (a sharper picture with the N64's layout and colours). Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
+//   rumble, (P349) hi-res menus and 2D (a sharper picture with the N64's layout and colours) and (P350) widescreen (more
+//   of the scene at the sides; the game logic keeps its 4:3 view). Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
 //   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes), free camera (P347: it changes
 //   what the right stick and IJKL do, a control choice like the toggles).
 // Custom = anything else. The preset shown is stored in 'opt.preset' (changing one option stores 'custom'); a stored
@@ -126,11 +130,11 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
 const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode').map((o) => o.key);
-const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d'];
+const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'widescreen'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
     values: (o) => (o.range ? 100 : o.key === 'skipcut') },
-  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D.',
+  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D, widescreen.',
     values: (o) => (o.range ? 100 : PRESET_MODERN_ON.includes(o.key)) },
   custom: { label: 'Custom', help: 'Your own mix: pick Classic or Modern to set every option at once.' },
 };
@@ -857,6 +861,35 @@ function portRumble(ch, on) {
 }
 function rumbleStopAll() { for (let ch = 0; ch < 4; ch++) if (rumbleMotor[ch]) rumbleSet(ch, false); }
 optionChanged.hires2d = (on) => { if (M && M._port_gfx_hires_2d) M._port_gfx_hires_2d(on ? 1 : 0); };   // P349: takes effect at the next frame
+// P350 option "Widescreen": the picture's aspect. Off: 4:3, canvas 640 x 480 (as before). On: the aspect of the space the
+// page gives the picture (the stage, or the screen in fullscreen), between 4:3 and 21:9 (64:27), with the canvas 480 rows
+// high and as wide as that aspect needs; the renderer (port_gfx_widescreen, gfx_f3dex2.c ws_calc) widens the 3D view to
+// the canvas and keeps the 2D in the middle. ?canvas=WxH (test aid) fixes the canvas size, and then its aspect.
+// layoutScreen runs at start, on window resize / fullscreen changes and when the option changes.
+function layoutScreen() {
+  const c = $('canvas'), fixed = /^(\d{2,4})x(\d{2,4})$/.exec(Q.get('canvas') || '');
+  let ar = 4 / 3, w = 640, h = 480;
+  if (fixed) { w = +fixed[1]; h = +fixed[2]; ar = opt('widescreen') ? w / h : 4 / 3; }
+  else if (opt('widescreen')) {
+    const fs = document.fullscreenElement, st = $('stage');
+    const aw = fs ? window.innerWidth : (st ? st.clientWidth : window.innerWidth);
+    const ah = fs ? window.innerHeight : window.innerHeight - (document.body.classList.contains('touch') ? 60 : 140);
+    ar = Math.max(4 / 3, Math.min(64 / 27, ah > 0 ? aw / ah : 16 / 9));
+    w = Math.round(h * ar / 2) * 2;
+  }
+  document.documentElement.style.setProperty('--ar', ar === 4 / 3 ? '4 / 3' : ar.toFixed(5));
+  if (c.width !== w || c.height !== h) {
+    c.width = w; c.height = h;
+    if (M && M._port_gfx_resize) M._port_gfx_resize(w, h);
+    log(`[widescreen] canvas ${w} x ${h} (aspect ${ar.toFixed(3)})`);
+  }
+  if (M && M._port_gfx_widescreen) M._port_gfx_widescreen(opt('widescreen') ? 1 : 0);
+}
+let layoutTimer = 0;
+const layoutSoon = () => { clearTimeout(layoutTimer); layoutTimer = setTimeout(layoutScreen, 150); };
+window.addEventListener('resize', layoutSoon);
+document.addEventListener('fullscreenchange', layoutSoon);
+optionChanged.widescreen = () => layoutScreen();
 optionChanged.rumble = (on) => { if (!on) { rumbleStopAll(); rumbleMotor.fill(false); } };
 
 let userPaused = false, hiddenPaused = false;
@@ -1199,7 +1232,8 @@ async function start(app) {
   await loadScript(js);
   // P349 test aid: ?canvas=WxH sets the canvas's drawing buffer (default 640 x 480) before the renderer reads its size,
   // e.g. ?canvas=1920x1440 to look at the 2D at a large resolution (the page box still scales it to fit)
-  { const m = /^(\d{2,4})x(\d{2,4})$/.exec(Q.get('canvas') || ''); if (m) { $('canvas').width = +m[1]; $('canvas').height = +m[2]; } }
+  // P350: layoutScreen sets it (and the widescreen aspect) before the renderer reads it
+  layoutScreen();
   const Mod = await window[factory]({
     canvas: $('canvas'),
     print: (s) => log(s),
@@ -1211,6 +1245,7 @@ async function start(app) {
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
   optionChanged.hires2d(opt('hires2d'));   // P349: the renderer's switch (page-side option)
+  layoutScreen();                          // P350: the renderer's widescreen switch
   optionsLocked = NETDET || !!netCfg;
   if (optionsLocked) showSessionOptions();   // P346: the panel shows the session's (the host's) options, disabled
   log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));
