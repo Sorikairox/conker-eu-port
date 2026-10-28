@@ -30,7 +30,7 @@ One session is about 150 tool calls. The estimates take into account what exists
 | # | Feature | Effort | Notes |
 |---|---|---|---|
 | 4 | Classic / Modern / Custom presets | Small, ½ session | Page only (main.js): a preset sets a group of the 14 options; changing any option switches to Custom. |
-| 14 | Language selector | Small, 1 session | The game already has `g_settings_language` (settings byte 10) and `text_bank_load` reloads text when it changes. Check which languages the EU ROM really has. It is saved in the EEPROM, so online it follows the host's save. |
+| 14 | Language selector (skipped by the user) | Small, 1 session | The game already has `g_settings_language` (settings byte 10) and `text_bank_load` reloads text when it changes. Check which languages the EU ROM really has. It is saved in the EEPROM, so online it follows the host's save. |
 | 15 | Widescreen without bars | Medium, 2–3 sessions | Projection (`camera_build_view_matrix` is already wrapped) and culling (`camera_view_test_sphere`). The rest is the work: HUD anchoring, 2D sprites, split screen, framebuffer effects (ghost, lens warp). **Online risk:** `objects_update_visibility` feeds game logic, so a wider view could change what updates. It must be host-dictated, or visibility must stay at 4:3. |
 | 16 | Accurate graphics | Split in two | **16a hi-res menus/2D:** small to medium, 1 session, building on P335's `uHiRes` texrect path. **16b reflections and other missing effects:** unknown; needs a 1-session audit of what differs from the N64 first. |
 | 17 | Texture packs | Medium, 2–3 sessions | The renderer already hashes textures (P193). Needed: a stable hash including palette/TLUT, a dump mode, and loading a pack (zip/IndexedDB) in the page. Render-only, so safe online. |
@@ -40,4 +40,4 @@ One session is about 150 tool calls. The estimates take into account what exists
 | 21 | Ledge grab | Hardest, 4+ sessions, risky | This is a new move: it needs a fitting animation in the ROM, new player states and collision tests. Recommend dropping it unless an unused animation turns up. |
 | 22 | Photo mode | Medium, 1–2 sessions after #19 | Pause the simulation (page pause exists), free camera (#19), hide the HUD, save the canvas. |
 
-Suggested order: 4, 14 (quick wins), 16a, 17, 15, 19 → 22, 20, 18. Drop or defer 21.
+Order chosen by the user (2026-10-28): 4, 19, 22, 16a, 15, 18, 21. 14 skipped.
