@@ -40,11 +40,20 @@ static inline void d16w(unsigned a, int v) { a &= 0xFFE; dmem[a] = (uint8_t)(v >
 static inline int16_t clamp16(int32_t v) { return v > 32767 ? 32767 : v < -32768 ? -32768 : (int16_t)v; }
 
 /* A DRAM operand: the game builds them with osVirtualToPhysical (identity in the port) and often
- * masks them to 24 bits. Wasm data addresses are 0x10000000..0x15FFFFFF (GLOBAL_BASE=256MB) and
- * the audio heap, DMA buffers and synth state are in the n64_rdram mirror (0x102xxxxx..0x10Axxxxx),
- * so a 24-bit value is restored with the 0x10 top byte. */
+ * masks them to 24 bits (the per-voice states of ADPCM, RESAMPLE, ENVMIXER, FILTER, the loop state and
+ * the ADPCM book). The audio heap, DMA buffers and synth state are in the n64_rdram mirror, so a 24-bit
+ * value gets the top byte that puts it inside n64_rdram (8 MB, so only one of the two candidates can be).
+ * P348 fix: this was a fixed 0x10 top byte, right while the mirror sat at 0x102xxxxx..0x10Axxxxx. P337's
+ * fiber-stack pools (12 MB of .bss in pc_sched.o) moved the mirror to 0x11711000, and since then the
+ * voice states were read and written in the unused pool instead of the game's audio heap: the sound was
+ * the same (each state went back and forth to the same wrong place), but that memory is outside the game
+ * state the online hash and photo mode's snapshot cover. */
 static inline uint8_t *aud_dram(uint32_t a) {
-    if (a < 0x01000000u) a |= 0x10000000u;
+    if (a < 0x01000000u) {
+        uint32_t base = (uint32_t)(uintptr_t)n64_rdram;
+        a |= base & 0xFF000000u;
+        if (a < base) a += 0x01000000u;
+    }
     return (uint8_t *)(uintptr_t)a;
 }
 static inline int16_t m16(uint8_t *p) { return (int16_t)vbe_ld16(p); }
