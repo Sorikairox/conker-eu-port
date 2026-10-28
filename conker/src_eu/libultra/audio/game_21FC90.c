@@ -436,6 +436,9 @@ void mp3_stream_set_read_cb(s32 arg0) {
     g_mp3_stream_read_cb = arg0;
 }
 
+#ifdef PORT
+extern u8 n64_rdram[];
+#endif
 /* was func_151F3C4C */
 s32 mp3_stream_rom_read(s32 arg0, void *arg1, s32 arg2, s32 arg3) {
     s32 sp1C;
@@ -452,7 +455,14 @@ s32 mp3_stream_rom_read(s32 arg0, void *arg1, s32 arg2, s32 arg3) {
     if (sp1C == 0) {
         return 0;
     }
+#ifdef PORT
+    /* P353: PHYS_TO_K0. The dma proc returns osVirtualToPhysical(buffer), the buffer's N64 physical address (the audio
+     * DMA buffers are on the heap, in the n64_rdram mirror): physical -> mirror. Before P353 the port's
+     * osVirtualToPhysical returned the wasm address and vbe.py dropped this add (k0_add_sites, P185). */
+    sp1C += (s32)n64_rdram;
+#else
     sp1C += 0x80000000;
+#endif
     osInvalDCache((void *)sp1C, arg2);
     bcopy((void *)sp1C, arg1, arg2);
     g_mp3_stream_rom_pos += arg2;

@@ -559,7 +559,7 @@ def k0_ptr_sites(text, st):
 # game_21FC90, the mixer's read callback, installed by audio_fx_mixer_init since port P172) does `p = dma(...); p +=
 # 0x80000000; bcopy(p, ...)`: the dma proc returns osVirtualToPhysical(buf), which is the wasm address on the PC
 # (pc_os.c), so the add is dropped (+0). Without it the first mixer read traps (bcopy out of bounds, boot ~retrace 120).
-K0_ADD_SITES = {'mp3_stream_rom_read': 1}
+K0_ADD_SITES = {}   # P353: mp3_stream_rom_read's add is an #ifdef PORT in the C now (osVirtualToPhysical gives physical)
 
 
 def k0_add_sites(text, st):

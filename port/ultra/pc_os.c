@@ -309,7 +309,16 @@ void osWritebackDCacheAll(void) {}
 void osMapTLB(s32 i, OSPageMask m, void *v, u32 e, u32 o, s32 a) { (void)i; (void)m; (void)v; (void)e; (void)o; (void)a; }
 void osUnmapTLB(s32 i) { (void)i; }
 void osUnmapTLBAll(void) {}
-u32 osVirtualToPhysical(void *p) { return (u32)(uintptr_t)p; }
+/* P353: an address inside the n64_rdram mirror gives its N64 physical address (0..8 MB), as on the console: the game keeps
+ * these values as numbers (24-bit audio ABI operands, DMA addresses, alignment tests such as audio_frame_build's
+ * `(end & 0x1FFF) == 0`), and the wasm address made them depend on where the build placed the mirror. Every consumer
+ * maps a value below 8 MB back into the mirror (gfx_f3dex2.c phys, aud_abi.c aud_dram, the SI DMA below). Any other
+ * pointer (a C-defined object, the TLB segment mirror) is returned as the wasm address, as before. */
+u32 osVirtualToPhysical(void *p) {
+    uintptr_t x = (uintptr_t)p;
+    if (x - (uintptr_t)n64_rdram < 0x800000u) return (u32)(x - (uintptr_t)n64_rdram);
+    return (u32)x;
+}
 /* __osProbeTLB(vaddr): physical address of a TLB-mapped vaddr, or -1. The PC has no TLB: the mapped
  * 0x16000000 segment is relocated to the n64_seg16 mirror at load time, so every pointer the game
  * holds is already a final (wasm) address, as osVirtualToPhysical above assumes. */
@@ -557,7 +566,7 @@ void __port_io_write(u32 a, u32 v) {
     int i = io_slot(a, "write");
     if (i >= 0) io_val[i] = v;
     if (a == 0xA4800010 || a == 0xA4800004) {           /* SI_PIF_ADDR_WR64B / RD64B */
-        u8 *d = (u8 *)(uintptr_t)__port_io_read(0xA4800000);   /* SI_DRAM_ADDR: osVirtualToPhysical = wasm ptr */
+        u8 *d = (u8 *)(uintptr_t)__port_io_read(0xA4800000);   /* SI_DRAM_ADDR: osVirtualToPhysical (physical or wasm) */
         if ((uintptr_t)d < 0x10000000u) d = (u8 *)port_n64_to_wasm(0x80000000u | (u32)(uintptr_t)d);
         port_pif_dma(a == 0xA4800010, d);
         port_post_event(OS_EVENT_SI);

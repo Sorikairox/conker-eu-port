@@ -46,7 +46,13 @@ Acmd *n_adpcm_pull(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 		return ptr;
 	}
 
+#ifdef PORT
+	/* P353: K0_TO_PHYS of a heap pointer: its N64 physical address (osVirtualToPhysical, pc_os.c); the mask kept the
+	 * wasm address, a value that depended on where the build placed the n64_rdram mirror */
+	aLoadADPCM(ptr++, f->dc_bookSize, osVirtualToPhysical(f->dc_table->waveInfo.adpcmWave.book->book));
+#else
 	aLoadADPCM(ptr++, f->dc_bookSize, ((u32) f->dc_table->waveInfo.adpcmWave.book->book & 0x1FFFFFFF));
+#endif
 
 	looped = (outCount + f->dc_sample > f->dc_loop.end) && (f->dc_loop.count != 0);
 
@@ -213,39 +219,47 @@ s32 n_adpcm_load_param(N_PVoice *a, s32 paramID, void *param)
 	return 0;
 }
 
-/* was func_10021E4C */
-Acmd *n_adpcm_decode_chunk(Acmd *arg0, N_PVoice *arg1, s32 arg2, s32 arg3, s16 arg4, s16 arg5, s32 arg6) {
-    s32 sp2C;
-    s32 sp28;
-    Acmd *sp24;
-    Acmd *sp20;
-    Acmd *sp1C;
+/* was func_10021E4C; locals renamed in P353 (were sp1C..sp2C, arg0..arg6) */
+Acmd *n_adpcm_decode_chunk(Acmd *cmd, N_PVoice *pv, s32 nsam, s32 nbytes, s16 dmem_out, s16 dmem_in, s32 flags) {
+    s32 misalign;
+    s32 dma_addr;
+    Acmd *cmd_load;
+    Acmd *cmd_loop;
+    Acmd *cmd_adpcm;
 
-    if (arg3 > 0) {
-        sp28 = arg1->dc_dma(arg1->dc_memin, arg3, arg1->dc_dmaState);
-        if (sp28 == 0) {
-            arg1->em_first = 1;
-            arg1->em_volume = 0;
-            arg1->dc_first = 0;
-            return arg0;
+    if (nbytes > 0) {
+        dma_addr = pv->dc_dma(pv->dc_memin, nbytes, pv->dc_dmaState);
+        if (dma_addr == 0) {
+            pv->em_first = 1;
+            pv->em_volume = 0;
+            pv->dc_first = 0;
+            return cmd;
         }
-        sp2C = sp28 & 7;
-        arg3 += sp2C;
-        sp24 = arg0++;
-        sp24->words.w0 = ((((arg3 - (arg3 & 7)) + 8) & 0xFFF) << 0xC) | 0x04000000 | (arg5 & 0xFFF);
-        sp24->words.w1 = (s32) (sp28 - sp2C);
+        misalign = dma_addr & 7;
+        nbytes += misalign;
+        cmd_load = cmd++;
+        cmd_load->words.w0 = ((((nbytes - (nbytes & 7)) + 8) & 0xFFF) << 0xC) | 0x04000000 | (dmem_in & 0xFFF);
+        cmd_load->words.w1 = (s32) (dma_addr - misalign);
         ;
     } else {
-        sp2C = 0;
+        misalign = 0;
     }
-    if (arg6 & 2) {
-        sp20 = arg0++;
-        sp20->words.w0 = 0x0F000000;
-        sp20->words.w1 = (s32) ((s32) arg1->dc_lstate & 0x1FFFFFFF);
+    if (flags & 2) {
+        cmd_loop = cmd++;
+        cmd_loop->words.w0 = 0x0F000000;
+#ifdef PORT
+        cmd_loop->words.w1 = (s32) osVirtualToPhysical(pv->dc_lstate);   /* P353: K0_TO_PHYS = N64 physical */
+#else
+        cmd_loop->words.w1 = (s32) ((s32) pv->dc_lstate & 0x1FFFFFFF);
+#endif
     }
-    sp1C = arg0++;
-    sp1C->words.w0 = ((s32) arg1->dc_state & 0x1FFFFFFF & 0xFFFFFF) | 0x01000000;
-    sp1C->words.w1 = (s32) (((arg6 & 0xF) << 0x1C) | (((arg2 * 2) & 0xFFF) << 0x10) | ((sp2C & 0xF) << 0xC) | (arg4 & 0xFFF));
-    arg1->dc_first = 0;
-    return arg0;
+    cmd_adpcm = cmd++;
+#ifdef PORT
+    cmd_adpcm->words.w0 = (osVirtualToPhysical(pv->dc_state) & 0xFFFFFF) | 0x01000000;   /* P353: K0_TO_PHYS = N64 physical */
+#else
+    cmd_adpcm->words.w0 = ((s32) pv->dc_state & 0x1FFFFFFF & 0xFFFFFF) | 0x01000000;
+#endif
+    cmd_adpcm->words.w1 = (s32) (((flags & 0xF) << 0x1C) | (((nsam * 2) & 0xFFF) << 0x10) | ((misalign & 0xF) << 0xC) | (dmem_out & 0xFFF));
+    pv->dc_first = 0;
+    return cmd;
 }

@@ -39,7 +39,7 @@ static inline int16_t d16(unsigned a) { a &= 0xFFE; return (int16_t)(dmem[a] << 
 static inline void d16w(unsigned a, int v) { a &= 0xFFE; dmem[a] = (uint8_t)(v >> 8); dmem[a + 1] = (uint8_t)v; }
 static inline int16_t clamp16(int32_t v) { return v > 32767 ? 32767 : v < -32768 ? -32768 : (int16_t)v; }
 
-/* A DRAM operand: the game builds them with osVirtualToPhysical (identity in the port) and often
+/* A DRAM operand: the game builds them with osVirtualToPhysical (N64 physical for the mirror since P353) and often
  * masks them to 24 bits (the per-voice states of ADPCM, RESAMPLE, ENVMIXER, FILTER, the loop state and
  * the ADPCM book). The audio heap, DMA buffers and synth state are in the n64_rdram mirror, so a 24-bit
  * value gets the top byte that puts it inside n64_rdram (8 MB, so only one of the two candidates can be).
@@ -49,6 +49,10 @@ static inline int16_t clamp16(int32_t v) { return v > 32767 ? 32767 : v < -32768
  * the same (each state went back and forth to the same wrong place), but that memory is outside the game
  * state the online hash and photo mode's snapshot cover. */
 static inline uint8_t *aud_dram(uint32_t a) {
+    /* P353: osVirtualToPhysical now gives the N64 physical address of a mirror pointer (pc_os.c), so a 24-bit operand
+     * below 8 MB is exactly the console's value: RDRAM offset = mirror offset. The top-byte guess below is kept for
+     * anything else that is truncated to 24 bits. */
+    if (a < 0x800000u) return n64_rdram + a;
     if (a < 0x01000000u) {
         uint32_t base = (uint32_t)(uintptr_t)n64_rdram;
         a |= base & 0xFF000000u;
