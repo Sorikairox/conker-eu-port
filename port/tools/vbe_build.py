@@ -97,6 +97,8 @@ DBG_CFLAGS = os.environ.get('PORT_DBG_CFLAGS', '').split()
 if DBG_CFLAGS:
     census.BASE = [a for a in census.BASE if a != '-g0'] + DBG_CFLAGS
     O1_FLAGS = ['-c', os.environ.get('PORT_DBG_OPT', '-O0'), '-g', '-Wno-everything']
+    if os.environ.get('PORT_DBG_WATCH'):   # P353 store watch (vbe.py dbg_watch): part of the phase-3 key
+        O1_FLAGS.append('-DPORT_DBG_WATCH')
 
 
 def main():

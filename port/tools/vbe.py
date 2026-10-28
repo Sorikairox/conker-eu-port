@@ -736,6 +736,28 @@ def dbg_lanes(text):
     return text
 
 
+WATCH_STORE = re.compile(r'^(\s*)store (?:volatile )?(i8|i16|i32|i64|float|double|ptr) (%[\w.$"-]+|-?\d+|null|true|false|0x[0-9A-F]+|@[\w.$"-]+), '
+                         r'ptr (%[\w.$"-]+|@[\w.$"-]+)(?:, align \d+)?(, !dbg !\d+)?$')
+WATCH_SIZE = {'i8': 1, 'i16': 2, 'i32': 4, 'i64': 8, 'float': 4, 'double': 8, 'ptr': 4}
+
+
+def dbg_watch(text):
+    """P353, debug builds with PORT_DBG_WATCH=1 only (tools/port/scripts/debug_build.sh DBG_WATCH=1): every plain store
+    of game code calls __port_wstore(address, size) first (port/ultra/pc_nethash.c), which logs the stores that hit the
+    ?watch=ADDR range (N64 or wasm address) with a JS stack: a write watchpoint for game memory. Stores whose operands
+    are constant expressions are not instrumented."""
+    out, n = [], 0
+    for l in text.split('\n'):
+        m = WATCH_STORE.match(l)
+        if m:
+            out.append(f'{m[1]}call void @__port_wstore(ptr {m[4]}, i32 {WATCH_SIZE[m[2]]}){m[5] or ""}')
+            n += 1
+        out.append(l)
+    if n:
+        out.append('declare void @__port_wstore(ptr, i32)')
+    return '\n'.join(out)
+
+
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     st0 = collections.Counter()
@@ -760,6 +782,8 @@ def main():
     text = icall.epilogue(p.run(), need, regs)
     if os.environ.get('PORT_DBG_CFLAGS'):
         text = dbg_div(text)
+        if os.environ.get('PORT_DBG_WATCH'):
+            text = dbg_watch(text)
     open(dst, 'w').write(dbg_lanes(dbg_calls(text)))
     open(dst + '.isig', 'w').write(''.join(sorted({w + '\n' for _, w in regs})))
     print(src, ' '.join(f'{k}={v}' for k, v in p.st.items() if v))

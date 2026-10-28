@@ -103,9 +103,27 @@ $(GEN)/memtest_expect.h: tools/n64mem.py
 $(B)/stubs/%.o: $(GEN)/%.c ultra/pc_mem.h ultra/pc_icall.h
 	@mkdir -p $(@D)
 	emcc -O1 -g0 -Wno-incompatible-library-redeclaration -c $< -o $@
-$(B)/stubs/n64mem_labels.o: $(GEN)/n64mem_labels.s
+# P353 layout test knob: `make RDRAM_SHIFT=0x123000` moves the n64_rdram mirror up by that many bytes (a multiple of
+# 0x1000, at most RDRAM_SPAN) and nothing else: a zero pad of RDRAM_SHIFT bytes goes right before n64_rdram and one of
+# RDRAM_SPAN - RDRAM_SHIFT bytes right after it, so every other static object (n64_seg16, the C globals, the stacks
+# after the bss, the heap) keeps its address in all shifted builds. Two shifted builds therefore differ only in where
+# the mirror is (tools/port/scripts/layout_cmp.sh, docs/port/MEMORY.md "Layout independence"). Empty = the normal
+# build, no pads. The value is kept in $(B)/rdram_shift.cfg so that changing it relinks.
+RDRAM_SHIFT ?=
+RDRAM_SPAN  ?= 0x1000000
+$(B)/rdram_shift.cfg: FORCE
 	@mkdir -p $(@D)
-	emcc -c $< -o $@
+	@echo "$(RDRAM_SHIFT) $(RDRAM_SPAN)" > $@.tmp; if cmp -s $@.tmp $@; then rm -f $@.tmp; else mv $@.tmp $@; fi
+$(B)/stubs/n64mem_labels.o: $(GEN)/n64mem_labels.s $(B)/rdram_shift.cfg
+	@mkdir -p $(@D)
+	@if [ -z "$(RDRAM_SHIFT)" ]; then echo "emcc -c $< -o $@"; emcc -c $< -o $@; else \
+	  lo=$$(($(RDRAM_SHIFT))); hi=$$(($(RDRAM_SPAN) - $(RDRAM_SHIFT))); \
+	  if [ $$((lo % 4096)) != 0 ] || [ $$hi -lt 0 ]; then echo "RDRAM_SHIFT must be a multiple of 0x1000 <= RDRAM_SPAN"; exit 1; fi; \
+	  pad() { printf '\t.section\t.bss.%s,"",@\n\t.globl\t%s\n\t.p2align\t12\n%s:\n\t.skip\t%d\n\t.size\t%s, %d\n' $$1 $$1 $$1 $$2 $$1 $$2; }; \
+	  { pad port_rdram_pad_lo $$((lo + 4096)); sed '/^\t\.section\t\.bss\.n64_seg16,/,$$d' $<; \
+	    pad port_rdram_pad_hi $$((hi + 4096)); sed -n '/^\t\.section\t\.bss\.n64_seg16,/,$$p' $<; } > $(B)/stubs/n64mem_labels_shift.s; \
+	  echo "n64mem_labels.o: RDRAM_SHIFT=$(RDRAM_SHIFT) (pads $$((lo + 4096)) + $$((hi + 4096)))"; \
+	  emcc -c $(B)/stubs/n64mem_labels_shift.s -o $@; fi
 
 $(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/gen_stubs.py tools/n64mem.py symbols/symbols.tsv symbols/global_asm.tsv
 	cd .. && python3 port/tools/gen_stubs.py port/$(GEN) $(LIBDIR) $(addprefix port/,$(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ))

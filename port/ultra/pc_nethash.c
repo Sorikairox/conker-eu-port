@@ -126,6 +126,84 @@ static uint64_t net_hash_stacks(unsigned *bytes) {
     return h;
 }
 
+/* ---------------- 2b. P353 layout-independent state hash (?layhash=F) ----------------
+ * The game must not depend on where the n64_rdram mirror lands in wasm memory (docs/port/MEMORY.md "Layout
+ * independence"). ?layhash=F logs, from retrace F on, "[layhash] F R G S": R = the n64_rdram + n64_seg16 mirrors,
+ * G = the rest of the hashed static region (C globals, PC-layer state), S = the game-thread stacks. Same bytes as the H / S
+ * hashes, but every aligned word that is a wasm pointer into a mirror is hashed as a marker + its low 12 bits (the
+ * mirror is 4 KB aligned; a value is not known to be a pointer, so its N64 address cannot be used),
+ * and the pads of a `make RDRAM_SHIFT=` build (port/Makefile) are left out. Two builds that differ only in the mirror's
+ * address (RDRAM_SHIFT) must then log the same lines (tools/port/scripts/layout_cmp.sh). */
+extern unsigned char n64_rdram[], n64_seg16[];
+extern unsigned char port_rdram_pad_lo[] __attribute__((weak)), port_rdram_pad_hi[] __attribute__((weak));
+static int net_lay = -1;
+static uint64_t lay_mix(uint64_t h, const unsigned char *a, const unsigned char *b) {
+    const uint64_t K = 0x9E3779B97F4A7C15ull;
+    const uint32_t rd = (uint32_t)(uintptr_t)n64_rdram, sg = (uint32_t)(uintptr_t)n64_seg16;
+    while (a < b && ((uintptr_t)a & 3)) { h = (h ^ *a++) * K; h ^= h >> 29; }
+    for (; a + 4 <= b; a += 4) {
+        uint32_t w; memcpy(&w, a, 4);
+        /* a word that may point into a mirror counts as "a mirror pointer" + its low 12 bits: both stay the same when
+         * the mirror moves by a multiple of 4 KB, for pointers and for data that merely looks like one */
+        if (w - rd < 0x800000u || w - sg < 0x10000u) w = 0xFEED0000u | (w & 0xFFFu);
+        h = (h ^ w) * K; h ^= h >> 29;
+    }
+    while (a < b) { h = (h ^ *a++) * K; h ^= h >> 29; }
+    return h;
+}
+static void lay_hash(uint64_t *r, uint64_t *g, uint64_t *s) {
+    uintptr_t rd = (uintptr_t)n64_rdram, sg = (uintptr_t)n64_seg16;
+    /* left out: the shift pads (zero bss of different sizes in two shifted builds) */
+    uintptr_t xa = port_rdram_pad_lo ? (uintptr_t)port_rdram_pad_lo : rd, xb = rd;
+    uintptr_t ya = port_rdram_pad_hi ? rd + 0x800000u : sg, yb = sg;
+    uint64_t hr = 0x452821E638D01377ull, hg = 0xBE5466CF34E90C6Cull, hs = 0x13198A2E03707344ull;
+    for (int i = 0; i < net_nseg; i++) {
+        uintptr_t a = net_seg[i].a, b = net_seg[i].b;
+        while (a < b) {   /* split [a, b) at the mirror / pad boundaries */
+            uintptr_t cuts[] = { xa, xb, rd + 0x800000u, ya, yb, sg, sg + 0x10000u }, e = b;
+            for (unsigned k = 0; k < sizeof cuts / sizeof cuts[0]; k++) if (cuts[k] > a && cuts[k] < e) e = cuts[k];
+            if ((a >= xa && a < xb) || (a >= ya && a < yb)) { a = e; continue; }
+            int mir = (a - rd < 0x800000u) || (a - sg < 0x10000u);
+            if (mir) hr = lay_mix(hr, (const unsigned char *)a, (const unsigned char *)e);
+            else hg = lay_mix(hg, (const unsigned char *)a, (const unsigned char *)e);
+            a = e;
+        }
+    }
+    void *cs, *as; unsigned cl, al;
+    for (int i = 0; port_sched_stack(i, &cs, &cl, &as, &al) >= 0; i++) {
+        if (!cs) continue;
+        hs = lay_mix(hs ^ (uint64_t)i, cs, (const unsigned char *)cs + cl);
+        hs = lay_mix(hs, as, (const unsigned char *)as + al);
+    }
+    *r = hr; *g = hg; *s = hs;
+}
+
+/* P353 write watchpoint, debug builds with DBG_WATCH=1 only (tools/port/scripts/debug_build.sh; port/tools/vbe.py
+ * dbg_watch calls this before every store of game code): ?watch=ADDR (hex; an N64 address 0x80xxxxxx is taken through
+ * port_n64_to_wasm, anything else as a wasm address) [&watchlen=N hex bytes, default 4] [&watchmax=N decimal hits,
+ * default 40] logs each store that touches the range: retrace, address, old word, JS stack (function names). */
+void *port_n64_to_wasm(unsigned n64addr);
+int port_flag_hex(const char *name);
+void port_js_stack(int skip, int n);
+static int w_init, w_hits, w_max;
+static uintptr_t w_lo, w_hi;
+void __port_wstore(void *p, int n) {
+    if (!w_init) {
+        unsigned a = (unsigned)port_flag_hex("watch");
+        w_init = 1;
+        w_lo = a >= 0x80000000u ? (uintptr_t)port_n64_to_wasm(a) : a;
+        w_hi = w_lo + (port_flag_hex("watchlen") ? (unsigned)port_flag_hex("watchlen") : 4u);
+        w_max = port_flag("watchmax") > 0 ? port_flag("watchmax") : 40;
+        if (a) port_log("[watch] %08X..%08X (from %08X), at most %d hits\n", (unsigned)w_lo, (unsigned)w_hi, a, w_max);
+    }
+    uintptr_t a = (uintptr_t)p;
+    if (!w_lo || a + (unsigned)n <= w_lo || a >= w_hi || w_hits >= w_max) return;
+    w_hits++;
+    uint32_t old; memcpy(&old, (void *)(a & ~(uintptr_t)3), 4);
+    port_log("[watch] retrace %u: %d-byte store at %08X, old word %08X\n", port_frame_count, n, (unsigned)a, old);
+    port_js_stack(2, 8);
+}
+
 /* ---------------- 3. measurements ---------------- */
 int port_net_hooks;          /* pc_sched.c retrace() calls the begin / end hooks only when set (one test per retrace) */
 int port_net_nogfx = -1;     /* pc_os.c osSpTaskStartGo: skip the gfx task (?netnogfx) */
@@ -209,7 +287,8 @@ void port_net_init(void) {   /* pc_sched.c port_run, before boot */
     net_prof = port_flag("netprof");
     net_snap = port_flag("netsnap");
     port_net_nogfx = port_flag("netnogfx");
-    port_net_hooks = net_hash_from > 0 || net_stop_at > 0 || net_prof > 0 || net_snap > 0;
+    net_lay = port_flag("layhash");
+    port_net_hooks = net_hash_from > 0 || net_stop_at > 0 || net_prof > 0 || net_snap > 0 || net_lay > 0;
     if (port_net_det()) port_log("[netdet] forced online determinism: det clock, no frame budget, virtual AI queue, flags whitelisted\n");
     if (port_net_hooks) port_log("[nethash] from %d, stop %d, prof %d, snap %d, nogfx %d\n", net_hash_from, net_stop_at, net_prof, net_snap, port_net_nogfx);
 }
@@ -225,6 +304,12 @@ void port_net_retrace_end(void) {
         uint64_t h = net_hash_static(), s = net_hash_stacks(&stk);
         if (net_hash_from > 0 && port_frame_count >= (unsigned)net_hash_from)
             port_log("[nethash] %u %08X%08X %08X%08X\n", port_frame_count, (unsigned)(h >> 32), (unsigned)h, (unsigned)(s >> 32), (unsigned)s);
+    }
+    if (net_lay > 0 && port_frame_count >= (unsigned)net_lay) {
+        uint64_t r, g, t;
+        lay_hash(&r, &g, &t);
+        port_log("[layhash] %u %08X%08X %08X%08X %08X%08X\n", port_frame_count, (unsigned)(r >> 32), (unsigned)r,
+                 (unsigned)(g >> 32), (unsigned)g, (unsigned)(t >> 32), (unsigned)t);
     }
     if (net_snap > 0) net_snap_step();
     if (net_prof > 0) {

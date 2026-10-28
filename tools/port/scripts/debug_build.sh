@@ -9,7 +9,9 @@
 # stays as it is. -fdebug-prefix-map turns the container path of the copy into this worktree's host path, so DWARF
 # names the files you edit (file:///Users/.../conker/src_eu/x.c).
 # Env: PORT (8077), DBG_OPT (-O0; -Og to speed up), JOBS (all cores), DBG_REV (build a git revision, e.g. HEAD,
-# instead of the working files; DWARF still points at the worktree files, so keep them equal to that revision).
+# instead of the working files; DWARF still points at the worktree files, so keep them equal to that revision),
+# DBG_WATCH=1 (P353: every game store checks the ?watch=ADDR[&watchlen=N] write watchpoint, port/ultra/pc_nethash.c),
+# CONKER_DBG_SERVER (server container name).
 set -euo pipefail
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
@@ -36,7 +38,7 @@ build() {
   local map="-g -fdebug-prefix-map=$CT=$ROOT -fdebug-prefix-map=port/build/srcfix=conker/src_eu"
   map="$map -fdebug-prefix-map=$CT/port/build/srcfix=$ROOT/conker/src_eu"
   local s=$(date +%s) log=$DBG/build.log
-  docker run --rm -v "$ROOT":/src -w $CT -e PORT_DBG_CFLAGS="$map" -e PORT_DBG_OPT="${DBG_OPT:--O0}" "$IMG" \
+  docker run --rm -v "$ROOT":/src -w $CT -e PORT_DBG_CFLAGS="$map" -e PORT_DBG_OPT="${DBG_OPT:--O0}" -e PORT_DBG_WATCH="${DBG_WATCH:-}" "$IMG" \
     make -C port -j"${JOBS:-$(sysctl -n hw.ncpu)}" game web > "$log" 2>&1 || { tail -30 "$log"; echo "debug build FAILED ($log)"; exit 1; }
   local w=$TREE/port/build/web/conker.wasm
   echo "debug build ok in $(( $(date +%s) - s ))s: $(grep -h '^vbe_build:' "$log" | tail -1); $(grep -h 'link warnings' "$log" | tail -1)"
