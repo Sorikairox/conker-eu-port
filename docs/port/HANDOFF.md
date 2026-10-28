@@ -80,6 +80,39 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P348 (port-web, 2026-10-28): feature #22 Photo mode (+ audio HLE fix)
+- a576c66c fix: aud_dram (port/audio/aud_abi.c) gave 24-bit audio operands a fixed 0x10 top byte; since P337's 12 MB
+  fiber pools moved n64_rdram to 0x11711000 they pointed into the unused pools: ADPCM codebooks read as zeros, loop /
+  voice states (ADPCM, RESAMPLE, ENVMIXER, FILTER) kept outside game memory. Now the top byte that lands in n64_rdram.
+  HEAD vs fix: camera / positions identical, PCM differs (rms 22->29, 64->134, 62->113 in the first 1 s blocks),
+  audprobe PASS. Online determinism was not affected (same wrong place on both peers).
+- dba56ce1 option "Photo mode" (photomode, PORT_OPT_PHOTO_MODE 16; not in the presets, like Online). P / pad Back /
+  Photo button. port/ultra/pc_photo.c: snapshot of the hashed game state (pc_nethash.c port_state_save/restore/hash:
+  static region minus conker_netx.txt + live fiber stacks, 11.4 MB; the page now always loads conker_netx.txt); photo
+  mode on = frame() runs no game retraces, clock held (pc_os.c port_photo_clock); a photo frame = restore + retraces in a
+  sandbox until the game drew a frame built with the photo camera (photo_camera_apply in world_update at start and after
+  camera_update_all: view mtx both buffers + roll + camera record eye/at/dir + zoom via camera_projection_update, then
+  camera_matrices_refresh_all, so visibility / level culling / LOD follow) and no HUD (game_frame_step, render_overlay_pass);
+  no sound / rumble / EEPROM callback / padrec / nethash lines from the sandbox; exit = restore again. Start pose from
+  g_view_mtxf[0] (any camera: cutscenes work). 2x PNG: canvas buffer enlarged + port_gfx_resize + port_photo_render.
+  Page: photoPoll (pad 1 drives the camera, A save, B reset, L HUD, Start/P exit; held inputs masked after exit),
+  overlay #photo, toast, audio suspended. padf cursor can step back (pc_pif.c).
+- 1d5e3740 test aid: audprobe.js MS:png:PATH. In the feature: ?photoat=F (first possible retrace from F), ?photofor,
+  ?photomove=FWD:RIGHT:UP:YAW:PITCH:ROLL:ZOOM, ?photolog, ?photonodraw, ?photoscale, window.__photo.
+- Evidence (port_work/p348/evidence: normal frame, photo start without HUD, up + look down, zoom + roll, HUD toggled,
+  saved 1280x960 PNG, after exit, cutscene PNG of Conker on the throne + sheet; runs port_work/p327/p348_*):
+  ?nethash A (photo pause at 700, 150 moving frames) vs B: hash at exit = entry, game camera after = start pose, H equal
+  for 2132 retraces after the pause except 2 single-retrace blips (B vs B2 of identical runs: 6 such blips = harness
+  noise), S differs only by renderer dead bytes on the RCP scheduler stack (fixed-pattern overwrite after gfx tasks
+  made A = B in H and S; temporary test, not committed). Option off vs HEAD (+fix): camera, positions, PCM identical.
+  netpair p348_net 2p with ?opt=photomode:1: session photomode=0, 7445 IDENTICAL. check.sh GREEN, hold-L 5789 / 0x29 at
+  5795, no traps.
+- Lessons: a test-flag static in a hashed object (pc_os.o, aud_abi.o) changes the hash by its value (keep experiment
+  flags in pc_photo.o, excluded); a malloc'ed URL string shifts the heap and so the fiber stack addresses (hash);
+  exports that switch fibers (port_photo_render) return unreliable values to JS (asyncify).
+- Limits: photo frames are the game's next frame from the frozen state (one step on); the frame-blend ghost (hangover
+  blur) blends with the frozen frame's ghost image; no wall collision for the photo camera (3000-unit range);
+  single player only; touch has no dedicated button (header Photo button works); ~7-30 ms per photo frame redraw.
 ### P347 (port-web, 2026-10-28): feature #19 Free camera
 - 14fd1c2f option "Free camera" (freecam, PORT_OPT_FREE_CAMERA 15, PORT_OPT_COUNT 16 -> 24; not in Modern: a control
   choice). Single player: right stick / IJKL / mouse (pointer lock) turn yaw (130 deg/s, +0x37C, so Conker steers by
