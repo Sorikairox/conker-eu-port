@@ -74,7 +74,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // P337: PROBE_THROTTLE=N slows the page's CPU N times (determinism at another wall speed)
   if (process.env.PROBE_THROTTLE) { await call('Emulation.setCPUThrottlingRate', { rate: +process.env.PROBE_THROTTLE }); console.log('cpu throttle', process.env.PROBE_THROTTLE); }
   let last = null; const t0 = Date.now();
-  // P27: PROBE_STEPS="MS:click; MS:keydown:CODE; MS:keyup:CODE; MS:nav:QUERY; MS:eval:EXPR; MS:shot:PATH" (MS from now; shot: P49).
+  // P27: PROBE_STEPS="MS:click; MS:keydown:CODE; MS:keyup:CODE; MS:nav:QUERY; MS:eval:EXPR; MS:shot:PATH" (MS from now; shot: P49;
+  // P348: MS:png:PATH = the last photo-mode PNG).
   // Input goes through Input.dispatch*Event, so it counts as a real user gesture (audio resume test).
   // PROBE_NOAUTOPLAY=1 keeps Chrome's default autoplay policy (a context starts suspended).
   const keyInfo = (code) => {
@@ -94,6 +95,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         await call('Input.dispatchKeyEvent', { type: act === 'keydown' ? 'rawKeyDown' : 'keyUp', code: arg, key: k.key, windowsVirtualKeyCode: k.keyCode, nativeVirtualKeyCode: k.keyCode });
       } else if (act === 'nav') await call('Page.navigate', { url: url.replace(/\?.*$/, '?' + arg) });
       else if (act === 'eval') console.log('eval:', await ev(arg));
+      else if (act === 'png') {  // P348: MS:png:PATH writes the page's last photo-mode PNG (window.__photo.pngB64())
+        const r = await Promise.race([call('Runtime.evaluate', { expression: 'window.__photo ? window.__photo.pngB64() : ""', awaitPromise: true, returnByValue: true }), sleep(10000).then(() => null)]);
+        const b64 = r && r.result && r.result.result && r.result.result.value;
+        if (b64) { require('fs').writeFileSync(arg, Buffer.from(b64, 'base64')); console.log('photo png:', arg); } else console.log('photo png: none', arg);
+      }
       else if (act === 'shot') {  // P49: MS:shot:PATH, a real-time CDP screenshot during the run (frame sequences)
         const r = await Promise.race([call('Page.captureScreenshot', { format: 'png' }), sleep(10000).then(() => null)]);
         const b64 = r && (r.result ? r.result.data : r.data);
