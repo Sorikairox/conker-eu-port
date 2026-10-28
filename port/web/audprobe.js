@@ -108,6 +108,24 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         if (u) { require('fs').writeFileSync(arg, Buffer.from(u.split(',')[1], 'base64')); console.log('canvas shot:', arg); } else console.log('canvas shot: no answer', arg);
         await call('Runtime.evaluate', { expression: 'window.Module && Module._port_set_paused(0)' });
       }
+      else if (act === 'hfrseq') {  // P351: MS:hfrseq:PREFIX:G:K[:F] = (from retrace F) for G consecutive game frames, K pictures of the High frame
+        // rate option each (t = k / K between the previous and that frame), drawn while the game is paused: PREFIX_gG_kK.png
+        const [pre, G, K, F] = arg.split(':'); const val = async (e) => { const r = await call('Runtime.evaluate', { expression: e, returnByValue: true }); return r && r.result && r.result.result && r.result.result.value; };
+        if (F) for (let w = 0; w < 20000 && (await val('Module._port_net_frame()')) < +F; w++) await sleep(5);   // :F = from retrace F on
+        let last = await val('Module._port_gfx_hfr_frame()');
+        for (let g = 0; g < +G; g++) {
+          for (let w = 0; w < 400; w++) { const f = await val('Module._port_gfx_hfr_frame()'); if (f !== last) { last = f; break; } await sleep(5); }
+          await val('Module._port_set_paused(1)'); await sleep(50);
+          for (let k = 0; k <= +K; k++) {   // k = K: t = 1, the frame as drawn (the next frame's k = 0 must look the same in 3D)
+            const r = await val(`Module._port_gfx_hfr_test(${k / +K})`);
+            const u = await val("document.getElementById('canvas').toDataURL('image/png')");
+            const f = `${pre}_g${g}_k${k}.png`;
+            if (u) require('fs').writeFileSync(f, Buffer.from(u.split(',')[1], 'base64'));
+            console.log(`hfrseq frame ${last} t ${(k / +K).toFixed(3)} result ${r}: ${f}`);
+          }
+          await val('Module._port_set_paused(0)');
+        }
+      }
       else if (act === 'shot') {  // P49: MS:shot:PATH, a real-time CDP screenshot during the run (frame sequences)
         const r = await Promise.race([call('Page.captureScreenshot', { format: 'png' }), sleep(10000).then(() => null)]);
         const b64 = r && (r.result ? r.result.data : r.data);
