@@ -11,7 +11,8 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 Q=$1; SECS=${2:-12}
 NAME=conker-web-probe-$$; PORT=$((8100 + $$ % 800))
-docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$ROOT/port/build/web":/www/app:ro \
+# P347 test aid: PROBE_WEB=DIR serves another build directory (e.g. a copy of an older build to compare against)
+docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "${PROBE_WEB:-$ROOT/port/build/web}":/www/app:ro \
   -v "$ROOT/baserom.eu.z64":/www/dev/rom.z64:ro -w /www conker-emsdk python3 -m http.server 8000 >/dev/null
 trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
 sleep 1.5
