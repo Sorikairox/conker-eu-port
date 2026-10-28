@@ -197,14 +197,20 @@ def generate(outdir, defined_f, defined_d, stubbed, undef_data, addr):
 
 def classify(w, fstart, kseg_hi):
     """A word is a pointer if it is (a) exactly a function start, (b) inside the KSEG0 game RAM
-    window [0x80000400, kseg_hi) or its KSEG1 alias, or (c) inside the TLB-mapped debugger data.
+    window [0x80029400, kseg_hi) or its KSEG1 alias, or (c) inside the TLB-mapped debugger data.
+    P352: the window started at 0x80000400 before. Below 0x80029400 (init_data) the EU game has no data (that RAM
+    holds the init code, run through the TLB at 0x10001000), and the 20 game_data words there were all false
+    positives that the loader turned into host pointers (so their value depended on the wasm layout): u16 / s16
+    pairs such as 0x8000 0x8000 and, worst, the first word of the acos table g_acos_table_coarse (32768, 32442 =
+    0x80007EBA): acos(x) for |x| < 0.03 came out wrong (0.22 instead of pi/2), so math_atan2f was wrong for vectors
+    near an axis (e.g. the N64 ledge grab turned Conker 77 degrees off a straight edge).
     Code-range words that are not function starts are jump-table entries / code labels ('J').
-    False positives: floats in 0x8000_0400..0x8040_0000 are negative denormals (never real data);
+    False positives: floats in 0x8002_9400..0x8040_0000 are negative denormals (never real data);
     ints there are < -2^31+4M (no plausible counter/flag). Exact function starts in 0x10/0x15/0x16
     ranges as floats are ~1e-26..1e-29. The residual risk is bit masks such as 0x80000400 itself."""
     if w in fstart:
         return 'F'
-    if 0x80000400 <= w < kseg_hi or 0xA0000400 <= w < kseg_hi + 0x20000000:
+    if 0x80029400 <= w < kseg_hi or 0xA0029400 <= w < kseg_hi + 0x20000000:
         return 'D'
     if 0x16003700 <= w < 0x16004D58:
         return 'D'
