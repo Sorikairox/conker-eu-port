@@ -56,6 +56,7 @@ export async function launch(url, opt = {}) {
   const ch = spawn(CH, args, { stdio: 'ignore' });
   console.log(`chrome pid ${ch.pid}`);
   let closed = false;
+  process.on('exit', () => { if (!closed) try { ch.kill('SIGKILL'); } catch (e) {} });   // never leave a Chrome behind (a caller's uncaught error)
   const close = async () => { if (closed) return; closed = true; try { ch.kill('SIGKILL'); } catch (e) {} await sleep(300); fs.rmSync(dir, { recursive: true, force: true }); };
   let page;
   for (let i = 0; i < 60 && !page; i++) {
