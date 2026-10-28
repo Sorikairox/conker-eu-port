@@ -89,6 +89,25 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P354 (port-web, 2026-10-29): trailer "Conker's Good Fur Day" (tooling only, page unchanged)
+- 6ac09dd7 tools/port/trailer (outputs in port_work/trailer, gitignored, ROM-derived): final
+  port_work/trailer/conkers_good_fur_day_trailer.mp4 (43.07 s, 1920x1080, 60 fps, H.264 High ~13.4 Mbit/s + AAC 48 kHz
+  stereo), _contact_sheet.jpg, _shotlist.txt. Steps and how it works: header of tools/port/trailer/render.mjs.
+- Deterministic capture without page changes: shim.js (CDP addScriptToEvaluateOnNewDocument) queues requestAnimationFrame;
+  with ?det=1 each animation frame = one retrace, so the driver steps retrace by retrace (~30 pictures/s at 1920x1080);
+  60 fps from the 12.5 fps game through port_gfx_hfr_test(t). Audio: the wasm import __port_web_audio_open is replaced
+  (no AudioContext), the PCM ring is drained every retrace (exact, 22020 Hz). det=1 reproduces det=2 runs (P352 ledge log
+  identical). Photo mode shots step ticks instead (no retraces run).
+- Font: font 0 read from game memory (g_font_textures / g_font_metrics at 0x80085D20 / 24, chars 0x80085CC0; VBE bytes
+  ^3, odd rows ^4): 95 glyphs, upper case, digits, punctuation, accents (no lower case, no em dash / ellipsis).
+- Online: net4.sh = 4-window session with room code through the panel (JOINSHOTS=1 in netgroup.js: host screenshots after
+  create / each join / before Start), 8682 retraces identical on all peers. The smooth split-screen footage is a ?netdet +
+  ?padmask=F replay of the same pad scripts: static hash equal to the live session up to retrace 3385, differs from P1's
+  first Start (3386) on, also with the pads shifted by +-1 / +2 (cause not found: online input path vs ?padf path).
+- Found: in headless Chrome a VideoFrame made from a canvas encoded fine but <video> decodes draw black (verify.mjs uses
+  mp4box.js + VideoDecoder instead); VideoFrame from getImageData pixels is used for the encoder. ?netdet ignores ?opt
+  (page-side renderer switches are turned on with Module._port_gfx_* after boot). ?warp=29 near the pit (650, -2650)
+  locks Conker in a "can't get any further" thought bubble (fresh event state).
 ### P352 (port-web, 2026-10-28): feature #21 Ledge grab (everywhere) + n64mem relocation fix
 - Finding: the N64 game already has the move. obj_state_walk's wall pass runs collision_ledge_probe (nmw_ledge_triangle):
   a flat triangle (ny > 0.9) whose edge passes 64 above Conker's feet while he falls, within the grab circle (r 21) ->
