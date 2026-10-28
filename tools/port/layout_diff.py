@@ -144,7 +144,7 @@ def main():
     # text that prints an address (ASCII hex digits), or a real difference
     d = (B[2] - A[2]) & 0xFFFFFFFF
     def fragment(x, y):
-        for lo in (0, 8, 16):
+        for lo in (0, 8, 16, 24):
             for hi in (16, 24, 32):
                 if hi - lo < 8:
                     continue
