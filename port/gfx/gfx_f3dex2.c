@@ -143,6 +143,26 @@ static unsigned cimg_addr, zimg_addr, cimg_width = 320, prim_z;
 static int hxs_on;
 static unsigned hxs_tex;
 static float hxs_ox, hxs_oy;
+/* P349 option "Hi-res menus and 2D" (page: Options, key hires2d; port_gfx_hires_2d). The renderer draws every primitive
+ * at canvas resolution already, but texture rectangles (menus, HUD, text, sprites, title and pause screens) were sampled
+ * with the RDP's per-N64-pixel rule: pixel x reads s(x) = s + dsdx * (x - ulx), i.e. at the pixel's top-left corner. At a
+ * 1:1 rectangle the N64 so shows exact texels; per canvas pixel the same formula reads s(x) + 0.12 .. + 0.88 (at 4.4 canvas
+ * pixels per N64 pixel): the picture slid half a texel, every texel blurred into its right / lower neighbour, and the
+ * last half texel of a tile read past what the N64 rectangle samples (seams between tiles, the clamped edge texel, an
+ * atlas neighbour). With the option on, a rectangle's s / t move back by half a step (canvas pixel centre X reads
+ * s + dsdx * (X - 0.5 - ulx), exactly s(x) at the N64 pixel centre), the texture is clamped to what the N64 rectangle
+ * samples unless the tile's own texels go on past it (bordered tiles, the tile's clamp edge), filtering is 4-tap
+ * bilinear with full fractions (3-point with 5-bit fractions only ever shows its in-between values when magnified), and
+ * point-sampled / copy-mode rectangles become crisp texels of equal width. rect_hires_mode: 0 off, 1 bilinear, 2 point;
+ * rect_hires_clamp: tile-0 texel range (s lo, t lo, s hi, t hi). Render-only: this object is outside the online hash. */
+static int hires_2d;                       /* the option (page) */
+static int rect_hires_mode;                /* for the texture rectangle being drawn */
+static float rect_hires_clamp[4];
+EMSCRIPTEN_KEEPALIVE void port_gfx_hires_2d(int on) { hires_2d = on != 0; }
+/* P349: the pause screen's frozen frame kept at canvas resolution (zsnap_take, near hx_*): tex / fbo the snapshot, tw x th
+ * its size, src the screen image it copies, p / w / rows the z image that holds that copy on the N64. */
+static struct { GLuint tex, fbo; int tw, th, valid, due; unsigned char *src, *p; unsigned w, rows; } zsnap;
+static int hx_cur;   /* P335 (defined with hx[] below) */
 /* P137: offscreen colour image (render to texture, e.g. the P130 object shadow pass: SETCIMG RGBA16 64 wide).
  * While on, draws go to an FBO of cimg_width x cimg_width N64 pixels (1:1) and the canvas is that size; the FBO is
  * written back to RDRAM in the image's pixel size (8-bit: the red byte, as the RDP's 8-bit colour images; 16-bit:
@@ -213,7 +233,8 @@ static void mtx_ident(float m[4][4]) {
 /* ------------------------------------------------------------------ GL backend */
 static GLuint prog, vbo, vao;
 static GLint u_tex[6], u_tp[6], u_tm[6], u_ts[6], u_lodviz, u_splitx, u_c0, u_c1, u_a0, u_a1, u_2cyc, u_prim, u_env, u_fogc, u_blendc,
-    u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg, u_dbg, u_idx, u_hires;
+    u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg, u_dbg, u_idx, u_hires,
+    u_rhi, u_rclamp;
 static int gl_ok, canvas_w = 640, canvas_h = 480;
 #define VF 11
 #define BATCH_TRIS 4096
@@ -254,8 +275,9 @@ static const char *FS =
     "uniform highp sampler2D uT0, uT1, uT2, uT3, uT4, uT5; uniform vec4 uTP[6]; uniform ivec4 uTM[6], uTS[6]; uniform int uLodViz; uniform float uSplitX;\n"
     "uniform ivec4 uC0, uC1, uA0, uA1, uBl1, uBl2, uLod; uniform int u2cyc, uAcmp, uMode, uTexOn, uFilt, uBlFin, uCvg, uDbg, uIdx;\n"
     "uniform vec4 uPrim, uEnv, uFogC, uBlendC, uHiRes; uniform vec2 uK45; uniform float uPrimLod, uPixScale, uPrimZ;\n"
+    "uniform int uRHi; uniform vec4 uRClamp;\n"
     "out vec4 frag;\n"
-    "vec4 T0, T1, SH; float LF;\n"
+    "vec4 T0, T1, SH; float LF; vec2 RFW;\n"
     "int wrapc(int c, int cl, int mi, int mk, int mx) {\n"
     "  if (cl != 0) c = clamp(c, 0, mx);\n"
     "  if (mk > 0) { if (mi != 0 && ((c >> mk) & 1) != 0) c = ~c; c &= (1 << mk) - 1; }\n"
@@ -270,6 +292,16 @@ static const char *FS =
     "vec4 samp(int k) {\n"
     "  if (((uTexOn >> k) & 1) == 0) return vec4(1.0);\n"
     "  vec2 tc = vST * uTP[k].zw - uTP[k].xy;\n"
+    /* P349 option "Hi-res menus and 2D" (rect_hires_*): a texture rectangle at canvas resolution. The CPU moved vST back by
+     * half a texel step, so tc is the texel position this canvas pixel shows (texel i at tc = i, as the RDP samples it at
+     * an N64 pixel); uRClamp keeps tile 0 inside the texels the N64 rectangle reads (no bleeding from an atlas neighbour
+     * or a wrapped edge). uRHi 1: 4-tap bilinear with full fractions; 2 (copy mode / point filter): crisp texels whose
+     * edges are blended over one canvas pixel (RFW = texels per canvas pixel), so every texel gets the same width. */
+    "  if (uRHi != 0) {\n"
+    "    if (k == 0) tc = clamp(tc, uRClamp.xy, uRClamp.zw);\n"
+    "    vec2 b = floor(tc), f = tc - b; ivec2 i = ivec2(b);\n"
+    "    if (uRHi == 2) f = clamp((f - 0.5) / RFW + 0.5, 0.0, 1.0);\n"
+    "    return mix(mix(fetch(k, i), fetch(k, i + ivec2(1, 0)), f.x), mix(fetch(k, i + ivec2(0, 1)), fetch(k, i + ivec2(1, 1)), f.x), f.y); }\n"
     "  if (uFilt == 0 || uMode == 3) return fetch(k, ivec2(floor(tc)));\n"
     "  vec2 fl = floor(tc), f = floor((tc - fl) * 32.0) / 32.0; ivec2 b = ivec2(fl);\n"
     "  vec4 t00 = fetch(k, b), t10 = fetch(k, b + ivec2(1, 0)), t01 = fetch(k, b + ivec2(0, 1));\n"
@@ -298,7 +330,7 @@ static const char *FS =
     "float bA(int i, float a) { if (i == 0) return a; if (i == 1) return uFogC.a; if (i == 2) return SH.a; return 0.0; }\n"
     "float bB(int i, float a) { if (i == 0) return 1.0 - a; if (i == 3) return 0.0; return 1.0; }\n"
     "void main() {\n"
-    "  SH = vCol; LF = 0.0;\n"
+    "  SH = vCol; LF = 0.0; RFW = max(fwidth(vST * uTP[0].zw), vec2(1.0 / 256.0));\n"
     "  gl_FragDepth = uPrimZ >= 0.0 ? uPrimZ : gl_FragCoord.z;\n"
     /* P193 DIAGNOSTIC ?p193idx=F: draw index as colour (r = idx & 7, g = idx >> 3 & 7, b = idx >> 6 & 7, 32 per step + 16) */
     "  vec4 IC = vec4(vec3(float(uIdx & 7), float((uIdx >> 3) & 7), float((uIdx >> 6) & 7)) * 32.0 + 16.0, 255.0) / 255.0;\n"
@@ -390,6 +422,7 @@ int gfx_init(void) {
     U(u_env, "uEnv"); U(u_fogc, "uFogC"); U(u_blendc, "uBlendC"); U(u_primlod, "uPrimLod"); U(u_acmp, "uAcmp");
     U(u_mode, "uMode"); U(u_texon, "uTexOn"); U(u_filt, "uFilt"); U(u_lod, "uLod"); U(u_pixscale, "uPixScale"); U(u_lodviz, "uLodViz"); U(u_splitx, "uSplitX");
     U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg"); U(u_dbg, "uDbg"); U(u_idx, "uIdx"); U(u_hires, "uHiRes");
+    U(u_rhi, "uRHi"); U(u_rclamp, "uRClamp");
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -620,6 +653,11 @@ static void apply_state(void) {
         glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, hxs_tex);
         texon |= 1; glUniform4f(u_hires, hxs_ox, hxs_oy, 1, 0);
     } else glUniform4f(u_hires, 0, 0, 0, 0);
+    {   /* P349 */
+        int rh = rect_mode == 2 && !hxs_on ? rect_hires_mode : 0;
+        glUniform1i(u_rhi, rh);
+        if (rh) glUniform4f(u_rclamp, rect_hires_clamp[0], rect_hires_clamp[1], rect_hires_clamp[2], rect_hires_clamp[3]);
+    }
     glUniform1i(u_texon, texon);
     unsigned tf = oth_h >> 12 & 3;   /* G_TF_POINT 0, G_TF_BILERP 2, G_TF_AVERAGE 3 */
     glUniform1i(u_filt, tf == 0 || cyc >= 2 ? 0 : filt_mode);
@@ -642,6 +680,7 @@ static void apply_state(void) {
     int zcmp = (geom & G_ZBUFFER) && (oth_l & 0x10) && rect_mode == 0, zupd = (oth_l & 0x20) && rect_mode == 0;
     if (zcmp || zupd) { glEnable(GL_DEPTH_TEST); glDepthFunc(zcmp ? GL_LEQUAL : GL_ALWAYS); } else glDisable(GL_DEPTH_TEST);
     glDepthMask(zupd ? GL_TRUE : GL_FALSE);
+    if (zupd && !off_on && hx_cur < 0) zsnap.valid = 0;   /* P349: the RDP would write depth over the frozen frame */
     /* P158: overlays that compare z but do not write it (projected shadows, ZMODE_XLU, coplanar with the floor) get the
      * decal offset too: the RDP's depth compare has a dz tolerance, GL's LEQUAL on differently clipped coplanar
      * triangles z-fights (hatched floor patches under the shadow). ?p158nozofs=1: the old behaviour */
@@ -828,6 +867,7 @@ static void tri(unsigned i0, unsigned i1, unsigned i2) {
         if ((geom & G_CULL_FRONT) && cross <= 0) return;
         if ((geom & G_CULL_BACK) && cross >= 0) return;
     }
+    if (off_on && off_zimg) zsnap.valid = 0;   /* P349: the z image gets more than the copied frame */
     need_state(0);
     put(a, 1, 1); put(b, 1, 1); put(c, 1, 1);   /* P35: the tile shift is applied per tile in the shader */
 }
@@ -887,6 +927,7 @@ static void off_begin(unsigned addr, unsigned w, unsigned siz) {
     canvas_w = w; canvas_h = OFF_FBO_H;
     off_on = 1; off_addr = addr; off_w = w; off_siz = siz; off_rows = w > OFF_FBO_H ? OFF_FBO_H : w; state_dirty = 1;
     off_drawn = 0; off_zimg = addr == zimg_addr;
+    if (off_zimg) { zsnap.valid = 0; zsnap.due = hires_2d; }   /* P349: a new picture in the z image */
     if (off_zimg) { unsigned r = (unsigned)(vi_y0 + (vi_h > 0 ? vi_h : w * 0.75f) + 0.999f); off_rows = r > OFF_FBO_H ? OFF_FBO_H : r; }
     { static unsigned n; if (n++ < 4) port_log("[p137] offscreen colour image %08X %u wide siz %u (frame %u)\n", addr, w, siz, port_frame_count); }
 }
@@ -917,7 +958,8 @@ static void off_end(void) {
 static struct { unsigned char *p; unsigned w, rows; GLuint tex, fbo; int tw, th; unsigned task; } hx[HX_N];
 static int hx_cur = -1;                  /* slot bound as the colour image, -1 none */
 static GLuint hx_snap; static int hx_snap_w, hx_snap_h, hx_snap_due;
-/* texture source: kind 0 none, 1 the screen image (snapshot), 2 hx slot; idx = texel index of timg in the image */
+/* texture source: kind 0 none, 1 the screen image (snapshot), 2 hx slot, P349: 3 the z image holding the pause frame
+ * (zsnap), 4 a screen image copied into that z image; idx = texel index of timg in the image */
 static struct { int kind, slot; unsigned char *p; unsigned idx, w; } hx_src;
 static struct { int kind, slot; unsigned char *p; float x, y; unsigned tmem, gen; } hx_load;   /* source px of the first TMEM texel */
 static unsigned hx_nrect[2];
@@ -1056,16 +1098,60 @@ static void hx_begin(unsigned char *p, unsigned w) {
     { static unsigned n; if (n++ < 4 || hx_logging()) port_log("[p335] task %u frame %u: colour image %p (%u wide) kept at canvas resolution %dx%d (slot %d)\n",
                                                               gfx_stats.tasks, port_frame_count, (void *)p, w, canvas_w, canvas_h, s); }
 }
+/* P349 option "Hi-res menus and 2D": the pause screen (P161) copies the last frame's screen image 1:1 into the z image
+ * (LOADTILE strips, the z image as a colour image) on its first frame and draws that z image back as the background of
+ * every paused frame. The port keeps the copy at N64 size (offscreen FBO + RDRAM write-back, 15-bit colour), so the
+ * frozen picture was N64-resolution blocky behind the hi-res menu. With the option on, the first copy rectangle that
+ * reads a screen image with a canvas copy (fbc[]) takes a GPU snapshot of that copy; while the z image holds nothing
+ * but 1:1 copies of it, texture rectangles that read the z image 1:1 sample the snapshot per canvas pixel (hx kind 3,
+ * the P335 uHiRes path). It ends when the z image gets anything else (another rectangle, a triangle) or depth writes,
+ * and is unused when the canvas size changed (photo mode capture). The N64-size copy is still made (option off later). */
+static void zsnap_take(int i) {
+    zsnap.due = 0; zsnap.valid = 0;
+    if (fbc[i].tw <= 0 || fbc[i].th <= 0) return;
+    flush();
+    if (!zsnap.tex) { glGenTextures(1, &zsnap.tex); glGenFramebuffers(1, &zsnap.fbo); }
+    if (zsnap.tw != fbc[i].tw || zsnap.th != fbc[i].th) {
+        glBindTexture(GL_TEXTURE_2D, zsnap.tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, fbc[i].tw, fbc[i].th, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, zsnap.fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, zsnap.tex, 0);
+        zsnap.tw = fbc[i].tw; zsnap.th = fbc[i].th;
+    }
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbc[i].fbo);
+    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbc[i].tex, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, zsnap.fbo);
+    glDisable(GL_SCISSOR_TEST);
+    glBlitFramebuffer(0, 0, zsnap.tw, zsnap.th, 0, 0, zsnap.tw, zsnap.th, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());
+    zsnap.valid = 1; zsnap.src = fbc[i].p; zsnap.p = gfx_addr(off_addr); zsnap.w = off_w; zsnap.rows = off_rows;
+    state_dirty = 1;
+    { static unsigned n; if (n++ < 4) port_log("[p349] pause frame snapshot %dx%d of screen image %p for z image %p (frame %u)\n",
+                                               zsnap.tw, zsnap.th, (void *)zsnap.src, (void *)zsnap.p, port_frame_count); }
+}
 /* SETTIMG: is the texture image the screen image while an hx image is bound, or a recent hx image? */
 static void hx_settimg(void) {
     unsigned char *base = 0; unsigned w = 0;
     hx_src.kind = 0;
     if (!timg.p || !gl_ok || gfx_measure_only || hx_disabled() || timg.siz != 2) return;
+    if (hires_2d && off_on && off_zimg) {   /* P349: drawing into the z image (pause): a copy of a screen image? */
+        for (int i = 0; i < FBC_N; i++) {
+            unsigned char *b = fbc[i].p;
+            if (!b || !fbc[i].tex || timg.p < b || timg.p >= b + 2 * fbc[i].w * fbc[i].rows) continue;
+            if (zsnap.due) zsnap_take(i);
+            if (zsnap.valid && zsnap.src == b) { hx_src.kind = 4; hx_src.p = b; hx_src.w = fbc[i].w; hx_src.idx = (unsigned)(timg.p - b) / 2; }
+            break;
+        }
+        return;
+    }
     if (hx_cur >= 0 && fbc_task_p && timg.p >= fbc_task_p && timg.p < fbc_task_p + 2 * fbc_task_w * hx[hx_cur].rows) {
         hx_src.kind = 1; base = fbc_task_p; w = fbc_task_w;
     } else for (int i = 0; i < HX_N; i++)
         if (i != hx_cur && hx[i].p && hx[i].tex && gfx_stats.tasks - hx[i].task <= 4 && timg.p >= hx[i].p && timg.p < hx[i].p + 2 * hx[i].w * hx[i].rows) {
             hx_src.kind = 2; hx_src.slot = i; base = hx[i].p; w = hx[i].w; break; }
+    if (!hx_src.kind && hires_2d && zsnap.valid && timg.p >= zsnap.p && timg.p < zsnap.p + 2 * zsnap.w * zsnap.rows) {   /* P349 */
+        hx_src.kind = 3; base = zsnap.p; w = zsnap.w; }
     if (hx_src.kind) { hx_src.p = base; hx_src.w = w; hx_src.idx = (unsigned)(timg.p - base) / 2; }
 }
 /* LOADTILE / LOADBLOCK: remember which source pixel the first loaded texel is (texel index first = row * timg width + col) */
@@ -1080,6 +1166,13 @@ static void hx_loaded(const Tile *t, unsigned first) {
 static void hx_texrect(int ti, float ulx, float uly, float s, float t, float ds, float dt) {
     const Tile *T = &tiles[ti & 7];
     hxs_on = 0;
+    if (off_on && off_zimg && (zsnap.valid || hx_load.kind == 4)) {   /* P349: only 1:1 copies of the snapshot keep it */
+        float cx = hx_load.x + s - T->uls / 4.0f, cy = hx_load.y + t - T->ult / 4.0f;
+        if (hx_load.kind != 4 || hx_load.gen != tmem_gen || T->tmem != hx_load.tmem || fabsf(ds - 1) > 0.01f || fabsf(dt - 1) > 0.01f ||
+            fabsf(cx - ulx) > 0.01f || fabsf(cy - uly) > 0.01f) zsnap.valid = 0;
+        return;
+    }
+    if (hx_load.kind == 3 && (!zsnap.valid || !hires_2d || zsnap.tw != canvas_w || zsnap.th != canvas_h)) return;
     if (!hx_load.kind || hx_load.gen != tmem_gen || T->tmem != hx_load.tmem || fabsf(ds - 1) > 0.01f || fabsf(dt - 1) > 0.01f) return;
     if (hx_load.kind == 2 && (hx[hx_load.slot].p != hx_load.p || hx_load.slot == hx_cur)) return;
     float sx = hx_load.x + s - T->uls / 4.0f, sy = hx_load.y + t - T->ult / 4.0f;   /* source N64 pixel at (ulx, uly) */
@@ -1093,9 +1186,9 @@ static void hx_texrect(int ti, float ulx, float uly, float s, float t, float ds,
         glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());
         hx_snap_due = 0; state_dirty = 1;
     }
-    hxs_on = 1; hxs_tex = hx_load.kind == 1 ? hx_snap : hx[hx_load.slot].tex;
+    hxs_on = 1; hxs_tex = hx_load.kind == 1 ? hx_snap : hx_load.kind == 3 ? zsnap.tex : hx[hx_load.slot].tex;
     hxs_ox = (sx - ulx) * canvas_w / cimg_width; hxs_oy = -(sy - uly) * canvas_h / CIMG_H;
-    hx_nrect[hx_load.kind - 1]++;
+    if (hx_load.kind <= 2) hx_nrect[hx_load.kind - 1]++;
 }
 static void hx_task_end(void) {
     hx_end();
@@ -1118,6 +1211,31 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
     }
     put(&q[0], 1, 1); put(&q[1], 1, 1); put(&q[2], 1, 1);
     put(&q[1], 1, 1); put(&q[3], 1, 1); put(&q[2], 1, 1);
+}
+
+/* P349: the tile-0 texel range (tc = s * shift - ul, the shader's units) one axis of a hi-res texture rectangle may read.
+ * The N64 rectangle samples s0 at its first pixel and s0 + ds * (npix - 1) at its last; a canvas pixel in the outer half
+ * of an edge pixel reads up to half a step further. That is allowed only where the tile itself goes on by at most one
+ * texel (a 1-texel border that repeats the next tile, image_draw_tiled flags & 1, or the tile's clamp edge): the filter
+ * then joins the tiles or holds the edge texel. Where the tile goes on further (a font / icon atlas) the range stops at
+ * what the N64 reads, so no neighbour bleeds in; a wrapping (masked) tile never reads past its ends. */
+static void rect_hires_axis(float s0, float ds, float npix, const Tile *t, int axis, float *lo_out, float *hi_out) {
+    unsigned ul = axis ? t->ult : t->uls, lr = axis ? t->lrt : t->lrs, mask = axis ? t->maskt : t->masks, cm = axis ? t->cmt : t->cms;
+    float sh = shiftscale(axis ? t->shiftt : t->shifts), u0 = ul / 4.0f;
+    float a = s0 * sh - u0, b = (s0 + ds * (npix > 1 ? npix - 1 : 0)) * sh - u0;
+    float lo = a < b ? a : b, hi = a < b ? b : a;
+    int clamped = (cm & 2) || !mask, mirror = !clamped && (cm & 1);
+    int mx = (int)(lr >> 2) - (int)(ul >> 2);
+    float last = clamped ? (float)(mx < 0 ? 0 : mx) : (float)((1 << (mask > 10 ? 10 : mask)) - 1);
+    int wrap = !clamped && !mirror;
+    *lo_out = lo <= 1.0f ? (wrap ? 0.0f : -1e9f) : lo;
+    *hi_out = hi >= last - 1.0f ? (wrap ? last : 1e9f) : hi;
+}
+static void rect_hires_setup(int ti, float s0, float t0, float ds, float dt, float w, float h, unsigned cyc) {
+    const Tile *t = &tiles[ti & 7];
+    rect_hires_mode = cyc >= 2 || (oth_h >> 12 & 3) == 0 ? 2 : 1;   /* copy mode / G_TF_POINT: point sampling */
+    rect_hires_axis(s0, ds, w, t, 0, &rect_hires_clamp[0], &rect_hires_clamp[2]);
+    rect_hires_axis(t0, dt, h, t, 1, &rect_hires_clamp[1], &rect_hires_clamp[3]);
 }
 
 /* ------------------------------------------------------------------ RSP commands */
@@ -1669,17 +1787,27 @@ void gfx_run_dl(const void *dl) {
         }
         case 0xEF: oth_h = w0 & 0xFFFFFF; oth_l = w1; state_dirty = 1; break; /* G_RDPSETOTHERMODE */
         case 0xE4: case 0xE5: {                               /* G_TEXRECT(FLIP) + RDPHALF_1/_2 */
-            unsigned h1 = rd32(pc + 4), h2 = rd32(pc + 12);
+            unsigned st_word = rd32(pc + 4), dsdt_word = rd32(pc + 12);   /* RDPHALF_1 / _2 words; were h1, h2 */
             pc += 16;
             float lrx = (w0 >> 12 & 0xFFF) / 4.0f, lry = (w0 & 0xFFF) / 4.0f, ulx = (w1 >> 12 & 0xFFF) / 4.0f, uly = (w1 & 0xFFF) / 4.0f;
-            float s = (short)(h1 >> 16) / 32.0f, t = (short)h1 / 32.0f, ds = (short)(h2 >> 16) / 1024.0f, dt = (short)h2 / 1024.0f;
+            float s = (short)(st_word >> 16) / 32.0f, t = (short)st_word / 32.0f, ds = (short)(dsdt_word >> 16) / 1024.0f, dt = (short)dsdt_word / 1024.0f;
             unsigned cyc = oth_h >> 20 & 3;
             if (cyc >= 2) { lrx += 1; lry += 1; if (cyc == 2) ds /= 4; }
-            unsigned keep = tex_tile;
+            unsigned saved_tile = tex_tile;   /* was keep */
             tex_tile = w1 >> 24 & 7; state_dirty = 1;
+            { static int lf = -1, ln; if (lf < 0) lf = port_flag("p349log");   /* P349 DIAGNOSTIC ?p349log=F: texture rectangles from retrace F */
+              if (lf > 0 && port_frame_count >= (unsigned)lf && ln < 400) { const Tile *T = &tiles[tex_tile]; ln++;
+                port_log("[p349] task %u rect %.2f,%.2f..%.2f,%.2f s %.3f t %.3f ds %.4f dt %.4f cyc %u tf %u tile %u fmt %u siz %u cm %u/%u mask %u/%u ul %.2f,%.2f lr %.2f,%.2f oth %06X/%08X cc %06X/%08X\n",
+                         gfx_stats.tasks, ulx, uly, lrx, lry, s, t, ds, dt, cyc, oth_h >> 12 & 3, tex_tile, T->fmt, T->siz, T->cms, T->cmt, T->masks, T->maskt,
+                         T->uls / 4.0, T->ult / 4.0, T->lrs / 4.0, T->lrt / 4.0, oth_h, oth_l, combine_w0, combine_w1); } }
             hx_texrect(tex_tile, ulx, uly, s, t, ds, dt);   /* P335 */
-            if (!gfx_measure_only) rect(ulx, uly, lrx, lry, s, t, s + ds * (lrx - ulx), t + dt * (lry - uly), 0xFFFFFFFF, 2);
-            tex_tile = keep; hxs_on = 0; state_dirty = 1;
+            float sv = s, tv = t;   /* s / t at the rectangle's upper-left corner as the vertices carry them */
+            if (hires_2d && !off_on && !hxs_on) {   /* P349: centred on the N64 pixel (offscreen N64-size images stay as the RDP draws them) */
+                rect_hires_setup(tex_tile, s, t, ds, dt, lrx - ulx, lry - uly, cyc);
+                sv -= 0.5f * ds; tv -= 0.5f * dt;
+            }
+            if (!gfx_measure_only) rect(ulx, uly, lrx, lry, sv, tv, sv + ds * (lrx - ulx), tv + dt * (lry - uly), 0xFFFFFFFF, 2);
+            tex_tile = saved_tile; hxs_on = 0; rect_hires_mode = 0; state_dirty = 1;
             break;
         }
         case 0xE6: case 0xE7: case 0xE8: case 0xE9: break;   /* syncs */
@@ -1739,7 +1867,7 @@ void gfx_run_dl(const void *dl) {
             if (!timg.p) gfx_stats.tex_ids++;
             if (off_on && timg.p && timg.p == gfx_addr(off_addr)) off_writeback();   /* P137: texture = render target */
             hx_settimg();                                                           /* P335: a frame kept at canvas resolution */
-            if (timg.p && fbc_clock && !hx_src.kind) fbc_check_timg(timg.p);       /* P161: texture = an earlier frame */
+            if (timg.p && fbc_clock && (!hx_src.kind || hx_src.kind == 4)) fbc_check_timg(timg.p);   /* P161: texture = an earlier frame (P349: kind 4 too) */
             if (timg.width >= 256 && fbc_logging()) port_log("[p161] task %u: SETTIMG %08X -> %p width %u siz %u\n", gfx_stats.tasks, w1, (void *)timg.p, timg.width, timg.siz);
             break;
         case 0xFE: zimg_addr = w1; break;

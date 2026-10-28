@@ -85,6 +85,9 @@ const OPTIONS = [
     help: 'Turns off the frame-blend motion blur (the hangover wake-up after the opening, a slow-motion camera cut) and the drunk camera sway and screen stretching (drunk Conker, the title menu). The under-water wobble stays. Off: as on the N64.' },
   { key: 'conkerlod', label: 'Conker always full detail', def: false, game: 7,
     help: 'Conker is always drawn with his most detailed model. Off: as on the N64, he switches to simpler models once the camera is more than 500 units away (the normal follow camera is often 450 to 650 units behind him, more while running).' },
+  // P349: page-side (no `game` id): the renderer's own switch (port_gfx_hires_2d), each player's choice even online.
+  { key: 'hires2d', label: 'Hi-res menus and 2D', def: false,
+    help: 'Menus, HUD, text, title and pause screens and other flat pictures are drawn sharp at the picture\'s full resolution: each texel sits exactly where the N64 shows it (no half-texel blur), tiled pictures join without seams, scaled text and icons show the detail of their textures, blocky (unfiltered) pictures keep even, crisp texels, and the frozen game picture behind the pause menu stays at full resolution. Same layout and colours as the N64; 3D is not changed. Off: as before (2D sampled the N64 way, half a texel off at this resolution).' },
   { key: 'airbar', label: 'Underwater air meter', def: false, game: 8,
     help: 'While Conker is under water, a bar at the top of the screen shows the air he has left: full when he dives, red in the last quarter, empty when he starts to drown. Works with Longer breath. Off: as on the N64, only the wobbly air bubble meter, which appears after about 2 s and already looks empty at half the air.' },
   { key: 'rumble', label: 'Rumble (gamepad vibration)', def: false, game: 13,
@@ -115,7 +118,7 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 //   it changes nothing unless L is held, a fresh browser is then exactly Classic, and the user chose it on by default.
 // Modern = Classic + the options that add information or remove waiting without making the game easier or changing
 //   how it controls: skip intro, autosave icon, health / cash always visible, air meter, crosshair, full-detail Conker,
-//   rumble. Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
+//   rumble, and (P349) hi-res menus and 2D (a sharper picture with the N64's layout and colours). Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
 //   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes), free camera (P347: it changes
 //   what the right stick and IJKL do, a control choice like the toggles).
 // Custom = anything else. The preset shown is stored in 'opt.preset' (changing one option stores 'custom'); a stored
@@ -123,11 +126,11 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
 const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode').map((o) => o.key);
-const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble'];
+const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
     values: (o) => (o.range ? 100 : o.key === 'skipcut') },
-  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble.',
+  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D.',
     values: (o) => (o.range ? 100 : PRESET_MODERN_ON.includes(o.key)) },
   custom: { label: 'Custom', help: 'Your own mix: pick Classic or Modern to set every option at once.' },
 };
@@ -853,6 +856,7 @@ function portRumble(ch, on) {
   if (rumbleStats.logged++ < 40) log(`[rumble-page] ch ${ch} ${on ? 'start' : 'stop'}: gamepad ${rumbleGamepad(ch) ? 'yes' : 'none'}, effect ${played ? 'played' : 'not played'} (starts ${rumbleStats.start}, stops ${rumbleStats.stop}, played ${rumbleStats.played})`);
 }
 function rumbleStopAll() { for (let ch = 0; ch < 4; ch++) if (rumbleMotor[ch]) rumbleSet(ch, false); }
+optionChanged.hires2d = (on) => { if (M && M._port_gfx_hires_2d) M._port_gfx_hires_2d(on ? 1 : 0); };   // P349: takes effect at the next frame
 optionChanged.rumble = (on) => { if (!on) { rumbleStopAll(); rumbleMotor.fill(false); } };
 
 let userPaused = false, hiddenPaused = false;
@@ -1206,6 +1210,7 @@ async function start(app) {
   });
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
+  optionChanged.hires2d(opt('hires2d'));   // P349: the renderer's switch (page-side option)
   optionsLocked = NETDET || !!netCfg;
   if (optionsLocked) showSessionOptions();   // P346: the panel shows the session's (the host's) options, disabled
   log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));

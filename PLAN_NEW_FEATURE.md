@@ -25,6 +25,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 13 | Aiming crosshair | Done P334 (first-person aim kinds without a reticle: 0x18) |
 | 19 | Free camera | Done P347 (single player, follow camera; never online) |
 | 22 | Photo mode | Done P348 (single player, cutscenes too; never online) |
+| 16a | Hi-res menus and 2D | Done P349 (render-only, each player's own choice online; in Modern) |
 
 ## Remaining features: effort (reassessed 2026-10-28)
 
@@ -35,7 +36,7 @@ One session is about 150 tool calls. The estimates take into account what exists
 | 4 | Classic / Modern / Custom presets | **Done P346** | Page only (main.js, index.html): a preset sets every option but Online; changing any option switches to Custom. |
 | 14 | Language selector (skipped by the user) | Small, 1 session | The game already has `g_settings_language` (settings byte 10) and `text_bank_load` reloads text when it changes. Check which languages the EU ROM really has. It is saved in the EEPROM, so online it follows the host's save. |
 | 15 | Widescreen without bars | Medium, 2–3 sessions | Projection (`camera_build_view_matrix` is already wrapped) and culling (`camera_view_test_sphere`). The rest is the work: HUD anchoring, 2D sprites, split screen, framebuffer effects (ghost, lens warp). **Online risk:** `objects_update_visibility` feeds game logic, so a wider view could change what updates. It must be host-dictated, or visibility must stay at 4:3. |
-| 16 | Accurate graphics | Split in two | **16a hi-res menus/2D:** small to medium, 1 session, building on P335's `uHiRes` texrect path. **16b reflections and other missing effects:** unknown; needs a 1-session audit of what differs from the N64 first. |
+| 16 | Accurate graphics | Split in two | **16a hi-res menus/2D: Done P349** (texture rectangles centred on the N64 pixel, clamped to what the N64 samples, 4-tap bilinear / crisp point; pause frame snapshot through P335's `uHiRes` path). **16b reflections and other missing effects:** unknown; needs a 1-session audit of what differs from the N64 first. |
 | 17 | Texture packs | Medium, 2–3 sessions | The renderer already hashes textures (P193). Needed: a stable hash including palette/TLUT, a dump mode, and loading a pack (zip/IndexedDB) in the page. Render-only, so safe online. |
 | 18 | High frame rate (interpolated) | Hard, 3–5 sessions | Game logic stays at N64 rate; the renderer draws extra frames by interpolating matrices between two game frames. Hard parts: matching objects between frames and detecting camera cuts. Render-only, so lockstep is unaffected. |
 | 19 | Free camera | **Done P347** | Right stick / IJKL / mouse turn yaw and pitch of the N64 follow camera (camera_follow_mode_update); the game's own wall collision places the eye; any other camera (cutscene, look / aim, swim, ride, fixed, scripted, multiplayer) runs unchanged and the stick is the C buttons there. Off online (the camera stick is not in the lockstep input). |
