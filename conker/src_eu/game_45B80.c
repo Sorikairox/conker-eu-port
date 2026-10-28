@@ -174,6 +174,12 @@ s32 game_frame_step(void) {
             GDL = render_player_hud(GDL, g_cur_view_player);
         }
     }
+#ifdef PORT
+    /* P348 photo frame without the HUD (pc_photo.c; undone afterwards): no screen overlays, player HUD, texts */
+    if (port_photo_nohud) {
+        goto photo_no_hud;
+    }
+#endif
     GDL = render_final_overlay(GDL);
     if (g_game_paused == 0 && g_last_player_index == 0) {
         for (i = 0; i <= g_last_player_index; i++) {
@@ -183,6 +189,9 @@ s32 game_frame_step(void) {
     }
     GDL = hud_overlay_draw_post(GDL);
     GDL = text_queue_draw(GDL);
+#ifdef PORT
+photo_no_hud:
+#endif
     obj_hide_masked_joints_all();
     obj_mtx_buffer_flush();
     afterimage_clamp_spacing(0);
@@ -344,13 +353,21 @@ void screen_pulse_tick(void);
 void hud_lens_update(void);
 void anim_meshes_update(void);
 void afterimage_list_update(s32 arg0);
+#ifdef PORT
+void photo_camera_apply(void);   /* P348 game_eu_15A210.c */
+#endif
 
 /* was func_15019130 */
 s32 world_update(void) {
     s32 i;
     u8 j;
-    s32 *p;
+    s32 *counters; /* was p */
 
+#ifdef PORT
+    if (port_photo_sandbox) {
+        photo_camera_apply();   /* P348 photo frame: the photo camera before anything reads the view */
+    }
+#endif
     segment_override_clear();
     event_list_unload(0);
     event_list_run_phase(2);
@@ -378,6 +395,11 @@ s32 world_update(void) {
         rail_cameras_update();
     }
     camera_update_all();
+#ifdef PORT
+    if (port_photo_sandbox) {
+        photo_camera_apply();   /* P348 photo frame: the photo camera replaces the one camera_update_all made */
+    }
+#endif
     objects_update_tank_views();
     collision_select_area(0);
     for (i = 0; i <= g_last_player_index; i++) {
@@ -420,14 +442,14 @@ s32 world_update(void) {
     screen_pulse_tick();
     reflect_queue_objects_over_water();
     light_stub();
-    p = &g_frame_counter_block;
+    counters = &g_frame_counter_block;
     do {
-        p[1]++;
-        p[3]++;
-        p[5]++;
-        p[7]++;
-        p += 8;
-    } while (p != &g_audio_heap_arena);
+        counters[1]++;
+        counters[3]++;
+        counters[5]++;
+        counters[7]++;
+        counters += 8;
+    } while (counters != &g_audio_heap_arena);
     return 1;
 }
 /* was func_15019414 */
@@ -522,6 +544,11 @@ Gfx *render_player_scene(Gfx *arg0, s16 arg1) {
     if (screen_fade_is_opaque(player) != 0 || (g_player_view_hidden_mask & (1 << player))) {
         return gdl;
     }
+#ifdef PORT
+    if (player == 0) {
+        port_photo_scene_drawn();   /* P348: there is a 3D view to photograph */
+    }
+#endif
     if (g_last_player_index > 0) {
         gdl = view_dl_begin(gdl, player);
         gdl = light_setup_view(gdl, player);
@@ -570,56 +597,69 @@ u8 * fb_ghost_render(u8 *);
 extern s32 g_framebuffers_1; /* was D_8002AE20 */
 extern s8 g_pause_blur_step; /* was D_80083320 */
 
+/* Overlay pass after the 3D views: the frame-blend ghost (pass 1), the full-screen viewport and scissor, the paused
+ * game's blurred still (the frame copied into the z-buffer once, averaged over 5 frames, drawn back), lens flares,
+ * the screen flash and letterbox bars (unless the screen is faded out), the screen pulse, the HUD (not while paused or
+ * the pause menu is open) and the model layers of group 3. */
 /* was func_150198FC */
 Gfx *render_overlay_pass(u8 *arg0) {
-    s32 var_s0_3;
-    u8 *temp_s0;
-    u8 *temp_v0;
-    u8 *var_s0;
-    u8 *var_s0_2;
-    u8 *var_s0_4;
+    s32 gdl_s;      /* the DL pointer as an int (render_set_scissor's type); was var_s0_3 */
+    u8 *gdl_still;  /* was temp_s0 */
+    u8 *gdl_pulse;  /* was temp_v0 */
+    u8 *gdl;        /* was var_s0 */
+    u8 *gdl_vp;     /* was var_s0_2 */
+    u8 *gdl_hud;    /* was var_s0_4 */
 
-    var_s0 = arg0;
+    gdl = arg0;
     if (g_fb_ghost_pass == 1) {
-        var_s0 = fb_ghost_render(var_s0);
+        gdl = fb_ghost_render(gdl);
     }
     if (g_last_player_index != 0) {
         g_cur_view_player = g_last_player_index + 1;
-        (*(s32 *)((u8 *)var_s0 + 0)) = 0xDC080008;
-        (*(s32 *)((u8 *)var_s0 + 4)) = (s32) ((g_cur_view_player * 0x180) + g_player_cams + 0x40);
-        var_s0_2 = var_s0 + 8;
+        (*(s32 *)((u8 *)gdl + 0)) = 0xDC080008;
+        (*(s32 *)((u8 *)gdl + 4)) = (s32) ((g_cur_view_player * 0x180) + g_player_cams + 0x40);
+        gdl_vp = gdl + 8;
     } else {
-        (*(s32 *)((u8 *)var_s0 + 0)) = 0xDC080008;
-        var_s0_2 = var_s0 + 8;
-        (*(s32 *)((u8 *)var_s0 + 4)) = (s32) (g_player_cams + 0x40);
+        (*(s32 *)((u8 *)gdl + 0)) = 0xDC080008;
+        gdl_vp = gdl + 8;
+        (*(s32 *)((u8 *)gdl + 4)) = (s32) (g_player_cams + 0x40);
     }
-    var_s0_3 = render_set_scissor((s32) var_s0_2, 0xFF, 0, 0, 0, 0);
+    gdl_s = render_set_scissor((s32) gdl_vp, 0xFF, 0, 0, 0, 0);
     if (g_game_paused != 0) {
         if (g_pause_blur_step == 0) {
-            (*(s32 *)((u8 *)var_s0_3 + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFF100000);
-            temp_s0 = var_s0_3 + 8;
-            (*(s32 *)((u8 *)var_s0_3 + 4)) = (s32) g_zbuffer;
-            (*(s32 *)((u8 *)temp_s0 + 0)) = 0xED000000;
-            (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((((s32) ((f32) g_framebuffer_width * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) g_framebuffer_height * 4.0f) & 0xFFF));
-            var_s0_3 = render_set_color_image(fb_ghost_copy_draw(temp_s0 + 8, *(((s32 *)((u8 *)&g_framebuffers_1 + -(g_dl_buf_index * 4)))), 0, 1));
+            (*(s32 *)((u8 *)gdl_s + 0)) = (s32) (((g_framebuffer_width - 1) & 0xFFF) | 0xFF100000);
+            gdl_still = gdl_s + 8;
+            (*(s32 *)((u8 *)gdl_s + 4)) = (s32) g_zbuffer;
+            (*(s32 *)((u8 *)gdl_still + 0)) = 0xED000000;
+            (*(s32 *)((u8 *)gdl_still + 4)) = (s32) ((((s32) ((f32) g_framebuffer_width * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) g_framebuffer_height * 4.0f) & 0xFFF));
+            gdl_s = render_set_color_image(fb_ghost_copy_draw(gdl_still + 8, *(((s32 *)((u8 *)&g_framebuffers_1 + -(g_dl_buf_index * 4)))), 0, 1));
             g_pause_blur_step = 1;
         } else if (g_pause_blur_step < 5) {
             g_pause_blur_step += 1;
             fb_blur_average(g_zbuffer);
         }
-        var_s0_3 = fb_ghost_copy_draw((u8 *) var_s0_3, g_zbuffer, 0, 1);
+        gdl_s = fb_ghost_copy_draw((u8 *) gdl_s, g_zbuffer, 0, 1);
     } else {
         g_pause_blur_step = 0;
     }
     if (screen_fade_is_opaque(0) == 0) {
-        var_s0_3 = hud_letterbox_draw(screen_flash_overlay_draw(flare_nodes_draw(var_s0_3, g_level_id)));
+#ifdef PORT
+        if (port_photo_nohud) {   /* P348 photo frame without the HUD: lens flares and the flash, no letterbox bars */
+            gdl_s = screen_flash_overlay_draw(flare_nodes_draw(gdl_s, g_level_id));
+        } else
+#endif
+        gdl_s = hud_letterbox_draw(screen_flash_overlay_draw(flare_nodes_draw(gdl_s, g_level_id)));
     }
-    temp_v0 = screen_pulse_overlay_draw(var_s0_3);
-    var_s0_4 = temp_v0;
-    if ((g_game_paused == 0) && (g_pause_open == 0)) {
-        var_s0_4 = hud_draw(temp_v0);
+    gdl_pulse = screen_pulse_overlay_draw(gdl_s);
+    gdl_hud = gdl_pulse;
+    if ((g_game_paused == 0) && (g_pause_open == 0)
+#ifdef PORT
+        && !port_photo_nohud   /* P348 photo frame without the HUD */
+#endif
+    ) {
+        gdl_hud = hud_draw(gdl_pulse);
     }
-    return (Gfx *)sprite_gfx_begin_alt(node_render_layers_draw(node_render_layers_draw(var_s0_4, 3, 0, 0), 3, 0, 1));
+    return (Gfx *)sprite_gfx_begin_alt(node_render_layers_draw(node_render_layers_draw(gdl_hud, 3, 0, 0), 3, 0, 1));
 }
 extern u16 g_player_out_mask; /* was D_800D1CC2 */
 void emit_sparks_by_angles(u8 *arg0, s32 arg1, s32 arg2);

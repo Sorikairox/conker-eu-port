@@ -63,6 +63,20 @@
   #soundhint { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, .7); color: var(--muted);
                padding: 4px 10px; border-radius: 12px; font-size: 12px; pointer-events: none; }
   #soundhint[hidden] { display: none; }
+  /* P348 option "Photo mode": controls panel bottom left, toast, the shutter flash; page overlays hide while it is on */
+  #photo { position: absolute; left: 2%; bottom: 3%; max-width: 70%; padding: 6px 10px; border-radius: 6px; background: rgba(15, 16, 20, .72);
+           color: #fff; font: 12px/1.45 system-ui, sans-serif; pointer-events: none; }
+  #photo[hidden] { display: none; }
+  #photo b { color: var(--accent); letter-spacing: .08em; }
+  #photo .row { margin-top: 5px; pointer-events: auto; }
+  #photo-info { color: var(--muted); font-variant-numeric: tabular-nums; }
+  #photo-toast { position: absolute; left: 50%; top: 4%; transform: translateX(-50%); padding: 4px 12px; border-radius: 12px;
+                 background: rgba(0, 0, 0, .75); color: #fff; font-size: 13px; pointer-events: none; }
+  #photo-toast[hidden] { display: none; }
+  #photo-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  #photo-flash.go { animation: photoflash .35s ease-out; }
+  @keyframes photoflash { from { opacity: .7; } to { opacity: 0; } }
+  body.photo #latches, body.photo #skipring, body.photo #saveicon, body.photo #soundhint { display: none; }
   .hint { color: var(--muted); font-size: 12px; text-align: center; }
 
   aside { width: 360px; flex: none; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto; }
@@ -162,6 +176,7 @@
   <button id="pause" aria-pressed="false" disabled title="Pause (also automatic when the tab is hidden)">Pause</button>
   <button id="t-touch" aria-pressed="false" title="On-screen touch controls">Touch</button>
   <button id="fullscreen" title="Fullscreen (F11 or this button)">Fullscreen</button>
+  <button id="photo-btn" aria-pressed="false" hidden title="Photo mode (P or the gamepad's Back button): freeze the game, move the camera, save a PNG">Photo</button>
   <label class="vol" title="Volume">Vol <input id="volume" type="range" min="0" max="100" value="80"></label>
   <span class="spacer"></span>
   <span id="status">no ROM loaded</span>
@@ -190,6 +205,13 @@
       <div id="latches" hidden></div>
       <div id="soundhint" hidden>click or press a key to enable sound</div>
       <div id="netwait" hidden>waiting for the other players…</div>
+      <div id="photo-flash"></div>
+      <div id="photo" hidden><b>PHOTO MODE</b> · the game is frozen<br>
+        stick / WASD move · C / right stick / IJKL / mouse look · R Z / E Q up down · D-pad / arrows ← → roll, ↑ ↓ zoom (wheel too) ·
+        B / F the game's view · L / R HUD · A / Space save PNG · P / Start / Enter back to the game<br>
+        <span id="photo-info"></span>
+        <div class="row"><button id="photo-save">Save PNG</button> <button id="photo-exit">Exit</button></div></div>
+      <div id="photo-toast" hidden></div>
     </div>
     <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>
   </div>

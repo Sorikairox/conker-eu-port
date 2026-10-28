@@ -79,11 +79,34 @@ height you chose goes back to the normal one by itself after 2 s without camera 
 once with C-down. In cutscenes, look and aim views (R), swimming, vehicles, fixed camera spots and multiplayer the
 game's own camera runs as on the N64, and the right stick / I J K L are the C buttons there.
 
+**Photo mode (option, off by default):** press **P** (or the gamepad's **Back / View / Select** button, or the
+**Photo** button in the page header) to freeze the game. The HUD disappears and a free camera flies around the frozen
+moment; press P again (or Start, or **Exit**) and the game goes on exactly where it stopped. Works in cutscenes too.
+Single player only; never online.
+
+| Photo mode | Gamepad | Keyboard / mouse |
+|---|---|---|
+| Move forward / back / sideways | left stick | W A S D (Ctrl: half speed) |
+| Look around | right stick (or the C buttons) | I J K L, or click the picture and move the mouse |
+| Up / down | R / Z | E / Q |
+| Roll (tilt the picture) | D-pad left / right | arrow left / right |
+| Zoom (field of view) | D-pad up / down | arrow up / down, or the mouse wheel |
+| Back to the game's own view | B | F |
+| Show / hide the HUD | L | R |
+| Save the picture (PNG) | A | Space, or **Save PNG** |
+| Back to the game | Start or Back | P or Enter, or **Exit** |
+
+The picture is saved as a PNG file (`conker-photo-DATE-TIME.png`, through the browser's download) at twice the
+picture's resolution (1280 x 960), without the panel or any page overlay. The camera can go up to 3000 units from where
+it started; it does not collide with walls. The sound is paused while photo mode is on. The **Photo mode on / off**
+input can be rebound under Controls. A button or stick you still hold when you leave photo mode only reaches the game
+after you have let go of it.
+
 ## Options
 
 The **Options** button in the page header opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.
 
-**Presets.** At the top of the panel, **Classic / Modern / Custom** sets all the options at once (everything except *Online multiplayer*, which only shows the Online button):
+**Presets.** At the top of the panel, **Classic / Modern / Custom** sets all the options at once (everything except *Online multiplayer*, which only shows the Online button, and *Photo mode*, which only adds a key that freezes the game when you press it):
 
 - **Classic**: the original game. Every option off and the three volumes at 100 %, except *Skippable cutscenes (hold L)*, which stays on: it does nothing unless you hold L, and it is on by default. A fresh browser starts as Classic.
 - **Modern**: Classic plus the extras that show more or make you wait less without making the game easier or changing the controls: *Skip intro*, *Autosave icon*, *Health always visible*, *Always show cash*, *Underwater air meter*, *Aiming crosshair*, *Conker always full detail* and *Rumble*. Left off on purpose: *Longer breath* and *Longer tail spin* (they make the game easier), the three toggles, *Inverted swimming* and *Free camera* (they change how the game controls: a matter of taste), and *No motion blur / drunk sway* (the blur and sway are part of the story's scenes).
@@ -107,6 +130,7 @@ The choice is saved with the options. In an online game the host's options apply
 | Conker always full detail | off | Conker is always drawn with his most detailed model. The original switches him to simpler models once the camera is more than 500 units away, which the follow camera often is while he runs (450 to 650 units). Other characters and objects keep the original level-of-detail rules. |
 | Underwater air meter | off | While Conker is under water, a bar at the top of the screen shows the air he has left: full when his head goes under, red in the last quarter, empty when he starts to drown. Works with Longer breath (the bar then empties half as fast). The original only shows the wobbling Conker-face meter on the right, which appears after about 2 s and stops changing at half the air. No bar in shallow water where you cannot run out of air. |
 | Free camera | off | Single player: the right stick, I J K L or the mouse turn the camera around Conker (orbit and look up / down; see *Free camera* under Controls above). Wherever the game uses another camera (cutscenes, look / aim views, swimming, vehicles, fixed camera spots, multiplayer) its own camera runs and the right stick is the C buttons again. Never used online: an online session always runs with it off. |
+| Photo mode | off | P (or the gamepad's Back button, or the Photo button) freezes the game for a photo: the HUD goes away, a free camera moves around the frozen moment (move, look, up / down, roll, zoom), and A or Space saves a PNG at twice the picture's resolution. Leaving it continues the game exactly where it stopped. Works in cutscenes. See *Photo mode* under Controls above. Single player only; never used online (an online session always runs with it off). Off: as on the N64, no photo mode. |
 | Inverted swimming | off | Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. The original steers like a plane: stick up tilts him head-down and dives, stick down tilts him up. Only the swimming controls change; walking, flying and aiming stay as they are. |
 | Aiming crosshair | off | In the first-person aim views that the original leaves bare, the game's own small crosshair (the one the other guns use) is drawn in the middle of the screen, which is exactly where the shots go there. In this ROM that is the aim kind 0x18 (hold R with that weapon); the scope, lens, bracket and turret views and the other guns already have their own reticles and are unchanged, and the third-person R-look with a held item gets nothing (its shots are aimed from the hand / mouth, not through a fixed screen point). Takes effect the next time you aim. |
 | Rumble (gamepad vibration) | off | The game sees a Rumble Pak in your controller and a connected gamepad vibrates whenever the N64 Rumble Pak would (explosions, hits, heavy effects; the game pulses it on and off by strength). Needs a browser with gamepad vibration (Chrome / Edge, most Xbox and PlayStation pads). Takes effect immediately: switching it on or off makes the game look for the Rumble Pak again at once (before, it waited for the next level or area load). Saves are not affected (they use the cartridge EEPROM). |

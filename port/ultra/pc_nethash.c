@@ -294,3 +294,72 @@ EMSCRIPTEN_KEEPALIVE uintptr_t port_net_page_info(int which) {
     case 3: return NET_PAGE; default: return (uintptr_t)n64_rdram;
     }
 }
+
+/* ---------------- 5. P348 game-state snapshot (photo mode, pc_photo.c) ----------------
+ * The bytes the hash covers: the included segments of the static region (every game global, the N64 heap and data in
+ * the n64_rdram / n64_seg16 mirrors, the libultra / scheduler / PIF / timer / audio HLE / MP3 state; not the renderer,
+ * the Web Audio ring, wall time or this harness, conker_netx.txt) plus the C and asyncify stacks of every live game
+ * thread. Taken between retraces, when every fiber is suspended (pc_sched.c frame() runs on the scheduler context), it
+ * is the whole game at that point: restoring it puts the game back there byte for byte (P337: save / restore every
+ * retrace for 9975 retraces left the state hash identical). The thread table is part of it, so the set of live threads
+ * must be the same at the restore: each live slot's stack addresses are recorded and checked.
+ * Without the exclusion list (the page loads it before the game starts) the renderer's GL mirrors would be restored too:
+ * port_state_size() is then 0 and photo mode refuses to start. */
+#define SNAP_SLOTS 32
+typedef struct { void *cs, *as; unsigned cl, al; } SnapStack;
+typedef struct { size_t len; SnapStack st[SNAP_SLOTS]; } SnapHdr;
+static size_t snap_bytes(SnapHdr *h) {   /* fills the stack table of h (if given); returns the snapshot size */
+    size_t n = sizeof(SnapHdr);
+    for (int i = 0; i < net_nseg; i++) n += net_seg[i].b - net_seg[i].a;
+    void *cs, *as; unsigned cl, al;
+    for (int i = 0; i < SNAP_SLOTS && port_sched_stack(i, &cs, &cl, &as, &al) >= 0; i++) {
+        if (h) { h->st[i].cs = cs; h->st[i].as = as; h->st[i].cl = cs ? cl : 0; h->st[i].al = cs ? al : 0; }
+        if (cs) n += cl + al;
+    }
+    return n;
+}
+size_t port_state_size(void) {
+    if (!net_nexcl) return 0;
+    if (!net_page_hash) net_build_segments();
+    return snap_bytes(NULL);
+}
+/* save into buf (port_state_size() bytes); 0 = done */
+int port_state_save(unsigned char *buf, size_t cap) {
+    SnapHdr h;
+    memset(&h, 0, sizeof h);
+    if (!net_nexcl) return -1;
+    if (!net_page_hash) net_build_segments();
+    h.len = snap_bytes(&h);
+    if (h.len > cap) return -1;
+    size_t o = sizeof h;
+    for (int i = 0; i < net_nseg; i++) { size_t n = net_seg[i].b - net_seg[i].a; memcpy(buf + o, (void *)net_seg[i].a, n); o += n; }
+    for (int i = 0; i < SNAP_SLOTS; i++)
+        if (h.st[i].cs) { memcpy(buf + o, h.st[i].cs, h.st[i].cl); memcpy(buf + o + h.st[i].cl, h.st[i].as, h.st[i].al); o += h.st[i].cl + h.st[i].al; }
+    memcpy(buf, &h, sizeof h);
+    return 0;
+}
+/* restore a snapshot; -1 (nothing restored) when a live thread slot's stacks moved (a thread was created or reaped) */
+int port_state_restore(const unsigned char *buf) {
+    SnapHdr h, now;
+    memcpy(&h, buf, sizeof h);
+    memset(&now, 0, sizeof now);
+    snap_bytes(&now);
+    for (int i = 0; i < SNAP_SLOTS; i++)
+        if (h.st[i].cs && (now.st[i].cs != h.st[i].cs || now.st[i].as != h.st[i].as)) {
+            port_log("[photo] thread slot %d changed (stack %p -> %p): snapshot not restored\n", i, h.st[i].cs, now.st[i].cs);
+            return -1;
+        }
+    size_t o = sizeof h;
+    for (int i = 0; i < net_nseg; i++) { size_t n = net_seg[i].b - net_seg[i].a; memcpy((void *)net_seg[i].a, buf + o, n); o += n; }
+    for (int i = 0; i < SNAP_SLOTS; i++)
+        if (h.st[i].cs) { memcpy(h.st[i].cs, buf + o, h.st[i].cl); memcpy(h.st[i].as, buf + o + h.st[i].cl, h.st[i].al); o += h.st[i].cl + h.st[i].al; }
+    return 0;
+}
+/* P348: the H / S hashes of the state now (as ?nethash logs them, folded to 32 bits), without the desync ring */
+void port_state_hash(uint32_t *hash_static, uint32_t *hash_stacks) {
+    unsigned stk;
+    if (!net_page_hash) net_build_segments();
+    uint64_t h = net_hash_static(), s = net_hash_stacks(&stk);
+    *hash_static = (uint32_t)(h ^ (h >> 32));
+    *hash_stacks = (uint32_t)(s ^ (s >> 32));
+}

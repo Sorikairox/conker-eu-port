@@ -181,6 +181,7 @@ static void padf_apply(void) {
     for (int ch = 0; ch < MAXCONTROLLERS; ch++) {
         if (padf_end[ch] == padf_first[ch]) continue;
         int k = padf_cur[ch] < 0 ? padf_first[ch] - 1 : padf_cur[ch];
+        while (k >= padf_first[ch] && padf[k].f > port_frame_count) k--;   /* P348: photo frames ran retraces that were undone */
         while (k + 1 < padf_end[ch] && padf[k + 1].f <= port_frame_count) k++;
         if (k < padf_first[ch]) continue;
         if (k != padf_cur[ch]) { padf_cur[ch] = k; port_log("[padf] retrace %u: %sbuttons %X stick %d,%d%s\n", port_frame_count, ch ? (ch == 1 ? "pad 2 " : ch == 2 ? "pad 3 " : "pad 4 ") : "", padf[k].b, padf[k].x, padf[k].y, padf[k].rx || padf[k].ry ? " + camera stick" : ""); if (padf[k].rx || padf[k].ry) port_log("[padf]   camera stick %d,%d\n", padf[k].rx, padf[k].ry); }
@@ -264,7 +265,7 @@ static int rumble_pak_cmd(int ch, const u8 *c, int tx, u8 *r, int rx) {
             if (on != rumble_motor[ch]) {
                 rumble_motor[ch] = on;
                 if (rumble_events++ < 400) port_log("[rumble] frame %u ch %d motor %s\n", port_frame_count, ch, on ? "start" : "stop");
-                __port_rumble(ch, on);
+                if (!port_photo_sandbox) __port_rumble(ch, on);   /* P348: not from a photo frame (undone afterwards) */
             }
         } else return 0;
         r[0] = pak_data_crc(&c[3]);
@@ -310,7 +311,7 @@ static void pif_run(void) {
             else if (c[0] == 0x04 && tx >= 2) memcpy(r, &eeprom[(c[1] & 0xFF) * 8], rx < 8 ? rx : 8);
             else if (c[0] == 0x05 && tx >= 10) {
                 u8 *blk = &eeprom[(c[1] & 0xFF) * 8];
-                if (memcmp(blk, &c[2], 8)) { memcpy(blk, &c[2], 8); eep_writes++; if (!port_net_det()) __port_eep_dirty(); } /* P337: online saves stay in this session (sandbox) */
+                if (memcmp(blk, &c[2], 8)) { memcpy(blk, &c[2], 8); eep_writes++; if (!port_net_det() && !port_photo_sandbox) __port_eep_dirty(); } /* P337: online saves stay in this session (sandbox) */
                 if (rx) r[0] = 0;
             }
             else ok = 0;
@@ -373,7 +374,7 @@ s32 osContStartReadData(OSMesgQueue *mq) {
     if (port_net_on) { pads_apply_mask(); port_net_fill_pads(&port_pads[0][0]); }   /* P338 online: the input ring */
     else padf_apply();                                 /* P149 ?padf frame script */
     free_camera_pads();                                /* P347 free camera: camera stick -> camera or C buttons */
-    padrec_log();                                      /* P228 ?padrec=1 */
+    if (!port_photo_sandbox) padrec_log();             /* P228 ?padrec=1 (P348: not the photo frames' retraces) */
     pif_run();
     memcpy(cont_ram, pif_ram, sizeof cont_ram);         /* the RD64B DMA into libultra's __osContPifRam */
     s32 r = mq ? osSendMesg(mq, NULL, OS_MESG_NOBLOCK) : -1; /* SI transfer done at once */

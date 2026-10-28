@@ -15,6 +15,7 @@ extern unsigned port_frame_count; /* P46: for ?lvlcol */
 __attribute__((weak)) void port_frame_probe(unsigned task) { (void)task; }
 #include <math.h>
 #include <GLES3/gl3.h>
+#include <emscripten.h>
 #include "gfx.h"
 #include "../ultra/pc_mem.h"
 
@@ -403,6 +404,11 @@ int gfx_init(void) {
     gl_ok = 1;
     port_log("[gfx] F3DEX2 interpreter ready (canvas %dx%d)\n", canvas_w, canvas_h);
     return 0;
+}
+/* P348 photo mode: the page resized the canvas's drawing buffer (a capture at 2x the canvas resolution, then back);
+ * every draw scales N64 pixels by canvas_w / cimg_width, and the framebuffer-copy textures follow the size. */
+EMSCRIPTEN_KEEPALIVE void port_gfx_resize(int w, int h) {
+    if (w > 0 && h > 0) { canvas_w = w; canvas_h = h; port_log("[gfx] canvas %dx%d\n", w, h); }
 }
 
 /* ---- textures: decode a tile out of TMEM into RGBA8, cached by (TMEM generation, tile params) */

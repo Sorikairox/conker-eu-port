@@ -322,11 +322,24 @@ static double t0;
  * so timers do not all fire at once on resume. */
 int port_paused;
 static double pause_at, pause_total;
+/* P348 photo mode (pc_photo.c): while it is on, the game's clock stands still at the time photo mode started, plus one
+ * retrace period per retrace of the photo frame being drawn; afterwards it goes on from there (like a pause). The hold
+ * state lives in pc_photo.o, which the game-state snapshot leaves out. */
+extern int port_photo_clock_on, port_photo_sandbox;
+extern double port_photo_clock_at, port_photo_clock_ms;
 static double now_ms(void) {
     double t = emscripten_get_now();
     if (!t0) t0 = t;
+    if (port_photo_clock_on) return port_photo_clock_at + port_photo_clock_ms;
     if (port_paused) t = pause_at;
     return t - t0 - pause_total;
+}
+void port_photo_clock(int on) {
+    if (on && !port_photo_clock_on) { port_photo_clock_at = now_ms(); port_photo_clock_ms = 0; port_photo_clock_on = 1; }
+    else if (!on && port_photo_clock_on) {
+        port_photo_clock_on = 0;
+        pause_total = (port_paused ? pause_at : emscripten_get_now()) - t0 - port_photo_clock_at;   /* now_ms() = the held time */
+    }
 }
 EMSCRIPTEN_KEEPALIVE void port_set_paused(int p) {
     double t = emscripten_get_now();
@@ -633,7 +646,8 @@ void osSpTaskStartGo(OSTask *tp) {
                  (unsigned)(uintptr_t)tp->t.ucode, (unsigned)(uintptr_t)tp->t.data_ptr, (unsigned)tp->t.data_size);
     { extern int port_net_hooks, port_net_nogfx; extern double port_net_task_ms[2];   /* P337 ?netprof / ?netnogfx (pc_nethash.c) */
       double t = port_net_hooks ? emscripten_get_now() : 0;
-      if (type == M_GFXTASK) { if (port_net_nogfx <= 0) gfx_run_task(tp); port_gfx_frame_tasks++; }
+      if (type == M_GFXTASK) { if (port_net_nogfx <= 0) gfx_run_task(tp); port_gfx_frame_tasks++;
+                               if (port_photo_sandbox) { void port_photo_gfx_task(void); port_photo_gfx_task(); } }   /* P348 */
       if (type == M_AUDTASK) aud_run_alist((const uint32_t *)tp->t.data_ptr, (uint32_t)tp->t.data_size); /* port/audio */
       if (port_net_hooks) port_net_task_ms[type == M_AUDTASK] += emscripten_get_now() - t; }
     port_post_event(OS_EVENT_SP);
@@ -650,7 +664,10 @@ OSYieldResult osSpTaskYielded(OSTask *tp) { (void)tp; return 0; }
 void osDpSetStatus(u32 s) { (void)s; }
 /* AI: the buffer (interleaved BE s16 stereo in game memory) goes to the SDL ring (port/audio/aud_out.c) */
 static int ai_rate = 22020;
-s32 osAiSetNextBuffer(void *p, u32 n) { aud_out_open(ai_rate); aud_out_push_game(p, n / 4); return 0; }
+s32 osAiSetNextBuffer(void *p, u32 n) {
+    if (port_photo_sandbox) return 0;   /* P348: a photo frame (undone afterwards) makes no sound */
+    aud_out_open(ai_rate); aud_out_push_game(p, n / 4); return 0;
+}
 u32 osAiGetStatus(void) { return 0; }
 u32 osAiGetLength(void) { return aud_out_ai_len() * 4; }
 s32 osAiSetFrequency(u32 f) { ai_rate = (int)f; return (s32)f; }

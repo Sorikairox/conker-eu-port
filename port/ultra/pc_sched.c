@@ -406,18 +406,26 @@ void port_net_stalled(int slots);
 void port_net_retrace_start(void);
 void port_net_retrace_done(void);
 double port_net_take_slow_ms(double elapsed_ms);   /* P339 time sync */
+extern int port_photo_state, port_photo_watch;   /* P348 photo mode (pc_photo.c) */
+void port_photo_tick(void);
+void port_photo_retrace_end(void);
 static void retrace(void) {
     port_frame_count++;
     if (port_net_on) port_net_retrace_start();   /* P338: sample the local input for retrace N + D */
     if (port_frame_hook) port_frame_hook();
-    if (port_net_hooks) port_net_retrace_begin();
+    extern int port_photo_sandbox;   /* P348: a photo frame's retraces are not game retraces (undone): no hash / measurements */
+    int net_hooks = port_net_hooks && !port_photo_sandbox;
+    if (net_hooks) port_net_retrace_begin();
     port_vi_retrace();
     if (frame_mq_init) osSendMesg(&frame_mq, NULL, OS_MESG_NOBLOCK);
     port_sched_run();
-    if (port_net_hooks) port_net_retrace_end();
+    if (net_hooks) port_net_retrace_end();
     if (port_net_on) port_net_retrace_done();    /* P338: desync-check hash every K retraces */
     { extern void port_pace_report(void) __attribute__((weak)); if (port_pace_report) port_pace_report(); } /* P147 ?p147pace */
+    if (port_photo_watch) port_photo_retrace_end();   /* P348 ?photoat test aid */
 }
+/* P348 photo mode: one retrace of a photo frame (pc_photo.c runs them inside its sandbox) */
+void port_retrace_once(void) { retrace(); }
 
 /* P147: VI pacing. The EU ROM is PAL (osTvType 0): its VI retraces at 50 Hz, and game logic, cutscene timers
  * and the audio task (one audio frame every 2 retraces, init_8F90.c) are counted in retraces. Before P147 one
@@ -440,6 +448,8 @@ static void frame(void) {
      * so Chrome route runs keep their real-time screenshot timing and still replay identically (?det=1 = one retrace per tick) */
     if (pacing_mode < 0) pacing_mode = port_flag("det") == 1 || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
     if (port_paused) { last_tick_ms = 0; return; }
+    /* P348 photo mode: no game retraces; the tick draws photo frames (pc_photo.c). No catch-up afterwards, as after a pause */
+    if (port_photo_state) { last_tick_ms = 0; port_photo_tick(); return; }
     /* P338 online: the frame barrier. Retrace N runs only when every peer's input for N is in the ring (pc_net.c);
      * otherwise the tick presents the last frame and the backlog waits (clamped below). */
     if (!pacing_mode) { if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled(1); return; } retrace(); port_video_frame(); return; }
@@ -450,7 +460,7 @@ static void frame(void) {
     backlog_ms += elapsed_ms;
     if (port_net_on) backlog_ms -= port_net_take_slow_ms(elapsed_ms);   /* P339: this peer is ahead of the other one: run a bit later */
     int retraces_run = 0;   /* P339 name: was steps */
-    while (backlog_ms >= period_ms && retraces_run < VI_MAX_STEPS && !port_paused) {   /* P337: ?nethashstop pauses right after its retrace */
+    while (backlog_ms >= period_ms && retraces_run < VI_MAX_STEPS && !port_paused && !port_photo_state) {   /* P348: photo mode starts after this retrace */   /* P337: ?nethashstop pauses right after its retrace */
         if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled((int)(backlog_ms / period_ms)); break; }   /* P338 */
         retrace(); retraces_run++; backlog_ms -= period_ms;
         if (emscripten_get_now() - now_ms > VI_TICK_MS) break;
@@ -486,6 +496,7 @@ void port_run(port_boot_fn boot) {
     { int pad = port_flag("mallocpad"); if (pad) port_log("[sched] mallocpad %d at %p\n", pad, malloc(pad)); } /* P21 test aid: shift the malloc layout */
     port_video_init();
     { void port_net_init(void); port_net_init(); }   /* P337 online-multiplayer harness flags (pc_nethash.c) */
+    { void port_photo_init(void); port_photo_init(); }   /* P348 photo mode test aid flags (pc_photo.c) */
     boot();
     in_main_loop = 1;
     /* P339: an online session's loop is a 4 ms timer from the first tick (250 per second, pc_net.c section 4). Switching

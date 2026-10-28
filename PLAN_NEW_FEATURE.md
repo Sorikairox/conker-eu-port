@@ -24,6 +24,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 12 | Rumble (browser gamepad) | Done P333 |
 | 13 | Aiming crosshair | Done P334 (first-person aim kinds without a reticle: 0x18) |
 | 19 | Free camera | Done P347 (single player, follow camera; never online) |
+| 22 | Photo mode | Done P348 (single player, cutscenes too; never online) |
 
 ## Remaining features: effort (reassessed 2026-10-28)
 
@@ -40,6 +41,6 @@ One session is about 150 tool calls. The estimates take into account what exists
 | 19 | Free camera | **Done P347** | Right stick / IJKL / mouse turn yaw and pitch of the N64 follow camera (camera_follow_mode_update); the game's own wall collision places the eye; any other camera (cutscene, look / aim, swim, ride, fixed, scripted, multiplayer) runs unchanged and the stick is the C buttons there. Off online (the camera stick is not in the lockstep input). |
 | 20 | Twin-stick / mouse / gyro aim, lock-on | Twin-stick and mouse: medium, 2 sessions. Gyro: +1. Lock-on: hard, 2+ | Aim kinds are known (P334, P341: R aims, Z fires). Mouse needs aim angles written directly, because the N64 stick is 8-bit. Online it must go through the input stream, so mouse aim needs extra input bytes in the netcode. |
 | 21 | Ledge grab | Hardest, 4+ sessions, risky | This is a new move: it needs a fitting animation in the ROM, new player states and collision tests. Recommend dropping it unless an unused animation turns up. |
-| 22 | Photo mode | Medium, 1–2 sessions after #19 | Pause the simulation (page pause exists), free camera (#19), hide the HUD, save the canvas. |
+| 22 | Photo mode | **Done P348** | P / gamepad Back / Photo button. Freeze = a snapshot of the hashed game state (P337's region list + fiber stacks); each photo frame restores it and lets the game build the next frame with the photo camera written into the view (so culling and LOD follow it) and no HUD; leaving restores it again (nethash identical to a run without the pause). PNG at 2x the canvas. Not in the presets (a tool, like Online). Off online. Found on the way: the audio HLE read voice states / ADPCM books from the wrong memory since P337 (fixed). |
 
 Order chosen by the user (2026-10-28): 4, 19, 22, 16a, 15, 18, 21. 14 skipped.

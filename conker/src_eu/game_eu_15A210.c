@@ -338,3 +338,92 @@ void camera_track_update(u8 *arg0) {
 /* was func_1512D8D8 */
 void camera_track_noop(s32 arg0) {
 }
+
+#ifdef PORT
+/* P348 option "Photo mode" (port/ultra/pc_photo.c): the game side of the photo camera. Both functions run only while
+ * photo mode is on: photo_game_camera when it starts (it only reads), photo_camera_apply inside the photo frames, whose
+ * every change to game memory is undone by pc_photo.c's snapshot restore. */
+extern f32 g_view_mtxf[][4][4];   /* per player: the view matrix as floats (camera_matrices_refresh_all); was D_800DA030 */
+extern f32 g_camera_fov_extra;    /* was D_800C3A6C */
+extern u8 g_game_frame_state;     /* was D_800BEA35 */
+extern s16 g_scene_render_suspend; /* was D_80084810 */
+void camera_projection_update(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width);
+void camera_matrices_refresh_all(void);
+
+/* The start pose: player 1's view on screen, taken from the view matrix itself (g_view_mtxf[0], refreshed every frame),
+ * so it is right for every camera (follow, cutscene, look / aim, fixed). out: eye (0..2), forward direction (3..5),
+ * field of view x / y (6, 7: camera record +0x74 / +0x78, degrees). The matrix is a guLookAt (row vectors): rows 0..2
+ * of columns 0..2 are the right / up / -forward axes, row 3 is -(eye . axis). Returns 1, or minus a mask of what rules
+ * a photo out (1 split screen, 2 paused, 4 pause menu open, 8 mode change, 0x10 scene drawing suspended, 0x20 / 0x40
+ * cameras / view matrices not set up). */
+s32 photo_game_camera(f32 *out) {
+    f32 (*m)[4] = g_view_mtxf[0];
+    s32 j;
+
+    s32 why = (g_last_player_index != 0) | (g_game_paused != 0) << 1 | (g_pause_open != 0) << 2 | (g_game_frame_state != 0) << 3 |
+              (g_scene_render_suspend != 0) << 4 | (g_player_views == NULL || g_player_cams == 0) << 5 |
+              (g_view_mtx_bufs[0] == NULL || g_view_mtx_bufs[1] == NULL) << 6;
+
+    if (why != 0) {
+        return -why;
+    }
+    for (j = 0; j < 3; j++) {
+        out[j] = -(m[3][0] * m[j][0] + m[3][1] * m[j][1] + m[3][2] * m[j][2]);
+        out[3 + j] = -m[j][2];
+    }
+    out[6] = *(f32 *)((u8 *)g_player_cams + 0x74);
+    out[7] = *(f32 *)((u8 *)g_player_cams + 0x78);
+    return 1;
+}
+
+/* Called at the start of world_update and after camera_update_all in a photo frame: the photo camera replaces player
+ * 1's view in both DL buffers' view matrices (look-at with the reflection LookAt, as camera_build_view_matrix makes it,
+ * then the roll about the view axis), the eye / target / direction the camera record keeps for the rest of the frame
+ * (+0x3D4 record: +0x13C eye, +0x148 target, +0x130 direction), and with a zoom the field of view of the projection.
+ * camera_matrices_refresh_all then derives the float view, view-projection and frustum planes from it, so the object
+ * visibility test, the level triangle culling and the draw all use the photo camera. */
+void photo_camera_apply(void) {
+    f32 eye[3];
+    f32 at[3];
+    f32 dir[3];
+    f32 fov[2];
+    f32 roll;
+    Mtx roll_mtx;
+    Mtx *view;
+    u8 *p = (u8 *)g_player_views;   /* player 1's camera controller */
+    u8 *rec = (u8 *)g_player_cams;  /* player 1's camera record (projection) */
+    u8 *obj;
+    s32 buf;
+
+    if (!port_photo_camera(eye, at, &roll, fov)) {
+        return;
+    }
+    for (buf = 0; buf < 2; buf++) {
+        view = (Mtx *)((u8 *)g_view_mtx_bufs[buf] + p[0x23D] * 0x40);
+        mtx_look_at_reflect(view, (s32)(g_cam_lookat_bufs + buf * 0x20), eye[0], eye[1], eye[2], at[0], at[1], at[2], 0.0f, 1.0f, 0.0f);
+        if (roll != 0.0f) {
+            mtx_rotate_xyz_deg_fixed(&roll_mtx, 0.0f, 0.0f, roll);
+            guMtxCatL(view, &roll_mtx, view);
+        }
+    }
+    obj = *(u8 **)(p + 0x3D4);
+    if (obj != NULL) {
+        vec3_dir_to((struct17 *)eye, (struct17 *)at, (struct17 *)dir);
+        *(f32 *)(obj + 0x13C) = eye[0];
+        *(f32 *)(obj + 0x140) = eye[1];
+        *(f32 *)(obj + 0x144) = eye[2];
+        *(f32 *)(obj + 0x148) = at[0];
+        *(f32 *)(obj + 0x14C) = at[1];
+        *(f32 *)(obj + 0x150) = at[2];
+        *(f32 *)(obj + 0x130) = dir[0];
+        *(f32 *)(obj + 0x134) = dir[1];
+        *(f32 *)(obj + 0x138) = dir[2];
+    }
+    if (fov[0] > 0.0f) {   /* camera_projection_update adds the base +0x6C / +0x70 and g_camera_fov_extra itself */
+        camera_projection_update(0, fov[0] - *(f32 *)(rec + 0x6C) - g_camera_fov_extra,
+                                 fov[1] - *(f32 *)(rec + 0x70) - g_camera_fov_extra, *(f32 *)(rec + 0x84), 0.0f);
+    }
+    camera_matrices_refresh_all();
+    port_photo_camera_applied();
+}
+#endif

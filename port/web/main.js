@@ -93,6 +93,8 @@ const OPTIONS = [
     help: 'Shows the game\'s small crosshair in the middle of the screen in the first-person aim views that have none (R with the weapon kind 0x18), where the shots go. Takes effect the next time you aim. Off: as on the N64, no crosshair there; the other weapons keep their own reticles.' },
   { key: 'freecam', label: 'Free camera', def: false, game: 15,
     help: 'Single player: the right stick (or I J K L, or the mouse after a click on the picture) turns the camera freely around Conker: left / right orbits, up / down looks up / down, and Conker runs where the camera looks. The camera stays where you put it; C-down (pad B / circle, right stick click, or O) swings it back behind Conker, and the left stick click or U is C-up (camera distance). In cutscenes, look / aim views, swimming, vehicles, fixed camera spots and multiplayer the game\'s own camera runs and the right stick is the C buttons again. Never used online. Off: as on the N64, the right stick is the four C buttons.' },
+  { key: 'photomode', label: 'Photo mode', def: false, game: 16,
+    help: 'P (or the gamepad\'s Back / View button, or the Photo button above the picture) freezes the game and frees the camera, and hides the HUD. Move with the stick (WASD), look with the C buttons / right stick (IJKL) or the mouse (click the picture), R / Z (E / Q) up / down, D-pad left / right (arrows) roll, D-pad up / down (arrows) or the mouse wheel zoom, B (F) back to the game\'s view, L (R) shows the HUD. A (Space) or the Save button saves a PNG at twice the picture\'s resolution. P, Start (Enter) or Exit go back to the game exactly where it was. Works in cutscenes. Single player only, never online. Off: as on the N64, no photo mode.' },
   { key: 'swiminvert', label: 'Inverted swimming', def: false, game: 12,
     help: 'Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. Off: as on the N64, which steers like a plane: up dives, down rises.' },
   // P332: sliders (range: true): the value 0..100 (%) goes to the game through the same port_set_option channel.
@@ -118,7 +120,9 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 //   what the right stick and IJKL do, a control choice like the toggles).
 // Custom = anything else. The preset shown is stored in 'opt.preset' (changing one option stores 'custom'); a stored
 // Classic / Modern whose values no longer match (a ?opt override, an option added later) is shown as what matches.
-const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online').map((o) => o.key);
+// P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
+// photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
+const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode').map((o) => o.key);
 const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
@@ -137,6 +141,7 @@ const opt = (key) => {
   const o = OPTIONS.find((x) => x.key === key);
   if (NETDET) return (optCache[key] = o.def);   // P337: the session's fixed options vector
   if (netCfg && key === 'freecam') return (optCache[key] = false);   // P347: the camera stick is not in the lockstep input
+  if (netCfg && key === 'photomode') return (optCache[key] = false);   // P348: a frozen game would stall every other player
   if (netCfg && o.game !== undefined) return (optCache[key] = netCfg.options && key in netCfg.options ? netCfg.options[key] : o.def);   // P338: the host's
   return (optCache[key] = key in optOverride ? optOverride[key] : store.get('opt.' + key, o.def));
 };
@@ -312,15 +317,16 @@ const INPUTS = [  // [id, label]; stick directions are pseudo-buttons
   ['CU', 'C up'], ['CD', 'C down'], ['CL', 'C left'], ['CR', 'C right'],
   ['DU', 'D-pad up'], ['DD', 'D-pad down'], ['DL', 'D-pad left'], ['DR', 'D-pad right'],
   ['CAMZOOM', 'Free camera: C up (distance)'], ['CAMBACK', 'Free camera: C down (behind Conker)'],
+  ['PHOTO', 'Photo mode on / off'],   // P348: page input, not an N64 button
 ];
 const DEFAULT_KEYS = { UP: 'KeyW', DOWN: 'KeyS', LEFT: 'KeyA', RIGHT: 'KeyD', HALF: 'ControlLeft',
   A: 'Space', B: 'KeyF', Z: 'KeyQ', L: 'KeyR', R: 'KeyE', START: 'Enter',
   CU: 'KeyI', CD: 'KeyK', CL: 'KeyJ', CR: 'KeyL', DU: 'ArrowUp', DD: 'ArrowDown', DL: 'ArrowLeft', DR: 'ArrowRight',
-  CAMZOOM: 'KeyU', CAMBACK: 'KeyO' };
+  CAMZOOM: 'KeyU', CAMBACK: 'KeyO', PHOTO: 'KeyP' };
 // W3C Standard Gamepad: 0 A/cross, 1 B/circle, 2 X/square, 3 Y/triangle, 4 LB, 5 RB, 6 LT, 7 RT,
 // 8 back, 9 start, 10 / 11 stick clicks, 12-15 d-pad. Left stick = N64 stick, right stick = C-buttons (P347: or the
 // free camera's stick with that option on; CAMZOOM / CAMBACK only act with the option on).
-const DEFAULT_PAD = { A: 0, B: 2, Z: 6, L: 4, R: 5, START: 9, CD: 1, CL: 3, DU: 12, DD: 13, DL: 14, DR: 15, CAMZOOM: 10, CAMBACK: 11 };
+const DEFAULT_PAD = { A: 0, B: 2, Z: 6, L: 4, R: 5, START: 9, CD: 1, CL: 3, DU: 12, DD: 13, DL: 14, DR: 15, CAMZOOM: 10, CAMBACK: 11, PHOTO: 8 };
 let keyMap = Object.assign({}, DEFAULT_KEYS, store.get('keys', {}));
 let padMap = Object.assign({}, DEFAULT_PAD, store.get('padbuttons', {}));
 const keysDown = new Set();
@@ -351,7 +357,7 @@ function keyboardPad() {
     cy = ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
     b = (b & ~C_BITS) | (on('CAMZOOM') ? N64.CU : 0) | (on('CAMBACK') ? N64.CD : 0);
   }
-  return { present: true, b, x: sx, y: sy, half: !!on('HALF'), cx, cy };
+  return { present: true, b, x: sx, y: sy, half: !!on('HALF'), cx, cy, photo: !!on('PHOTO') };
 }
 function gamepadPad(gp) {
   let b = 0;
@@ -362,17 +368,22 @@ function gamepadPad(gp) {
   let x = ax(0), y = -ax(1), m = Math.hypot(x, y);
   if (m < 0.15) { x = y = 0; } else { const s = Math.min(1, (m - 0.15) / 0.85) / m; x *= s; y *= s; }
   const [sx, sy] = octagon(x, y);
+  // P348 photo mode: its on / off button and the right stick as an analog look stick (N64 counts, y up)
+  const photo = padMap.PHOTO !== undefined && pressed(padMap.PHOTO);
+  let lx = ax(2), ly = -ax(3), lm = Math.hypot(lx, ly);
+  if (lm < 0.2) { lx = ly = 0; } else { const s = Math.min(1, (lm - 0.2) / 0.8) / lm; lx *= s; ly *= s; }
+  const look = { rx: Math.round(lx * STICK), ry: Math.round(ly * STICK) };
   if (opt('freecam')) {   // P347: right stick -> the camera stick (radial dead zone 0.2, rescaled, 80 counts at full)
     let rx = ax(2), ry = -ax(3), rm = Math.hypot(rx, ry);
     if (rm < 0.2) { rx = ry = 0; } else { const s = Math.min(1, (rm - 0.2) / 0.8) / rm; rx *= s; ry *= s; }
     // C buttons bound to pad buttons (C-down on B / circle, C-left on Y / triangle) stay buttons
     b |= (padMap.CAMZOOM !== undefined && pressed(padMap.CAMZOOM) ? N64.CU : 0) | (padMap.CAMBACK !== undefined && pressed(padMap.CAMBACK) ? N64.CD : 0);
-    return { present: true, b, x: sx, y: sy, cx: Math.round(rx * STICK), cy: Math.round(ry * STICK) };
+    return { present: true, b, x: sx, y: sy, cx: Math.round(rx * STICK), cy: Math.round(ry * STICK), photo, ...look };
   }
   // right stick -> C-buttons
   if (ax(2) > 0.5) b |= N64.CR; if (ax(2) < -0.5) b |= N64.CL;
   if (ax(3) > 0.5) b |= N64.CD; if (ax(3) < -0.5) b |= N64.CU;
-  return { present: true, b, x: sx, y: sy };
+  return { present: true, b, x: sx, y: sy, photo, ...look };
 }
 // ---------------------------------------------------------------- touch controls (phones / tablets)
 // Floating stick: the first touch in the left zone sets the centre, dragging up to STICK_PX gives full tilt.
@@ -466,13 +477,15 @@ function applyLatches(p, halfHeld) {
 // lock; Esc releases it) and its movement turns the free camera (pc_pif.c sums it until the next controller read).
 const mouseLook = { dx: 0, dy: 0 };
 $('canvas').addEventListener('click', () => {
-  if (opt('freecam') && running === 'game' && !document.body.classList.contains('touch') && document.pointerLockElement !== $('canvas') && $('canvas').requestPointerLock) {
+  if ((opt('freecam') || photo.state === 2) && running === 'game' && !document.body.classList.contains('touch') && document.pointerLockElement !== $('canvas') && $('canvas').requestPointerLock) {
     try { const r = $('canvas').requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (_) { /* not allowed here */ }
   }
 });
 document.addEventListener('mousemove', (e) => {
   // ?p347mouse=1 (test aid): count mouse movement without pointer lock (headless Chrome does not grant it)
-  if ((document.pointerLockElement === $('canvas') || Q.get('p347mouse')) && opt('freecam')) { mouseLook.dx += e.movementX | 0; mouseLook.dy += e.movementY | 0; }
+  const locked = document.pointerLockElement === $('canvas') || Q.get('p347mouse');
+  if (locked && photo.state === 2) { photo.mx += e.movementX | 0; photo.my += e.movementY | 0; }   // P348 photo camera
+  else if (locked && opt('freecam')) { mouseLook.dx += e.movementX | 0; mouseLook.dy += e.movementY | 0; }
 });
 const KEYHINT = $('keyhint').textContent;
 optionChanged.freecam = (on) => {
@@ -480,6 +493,127 @@ optionChanged.freecam = (on) => {
   $('keyhint').textContent = on ? KEYHINT.replace('IJKL C-buttons', 'IJKL / mouse free camera · U / O C-up / down') : KEYHINT;
 };
 optionChanged.freecam(opt('freecam'));
+
+// ---------------------------------------------------------------- P348 option "Photo mode" (port/ultra/pc_photo.c)
+// The PHOTO input (P, the gamepad's Back button, the Photo button) asks the game to freeze (port_photo_request); the
+// game answers through port_photo_status (2 = on). While it is on, pad 1's input does not go to the game: it moves the
+// photo camera (port_photo_input, every animation frame, in world units and degrees), and A saves the picture. The
+// game draws photo frames from its frozen state with that camera (pc_photo.c). Leaving it (PHOTO, Start, Exit) puts
+// the game back exactly where it was; buttons or a stick still held then reach the game only after they were released.
+// Mouse: a click on the picture captures it (pointer lock) to look around; the wheel zooms.
+const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, wheel: 0, last: 0, busy: false,
+  maskB: 0, maskStick: false, toastTimer: null, scale: Math.max(1, Math.min(4, +(Q.get('photoscale') || 2))), png: null };
+const PHOTO_WHY = { 1: 'Photo mode is off in Options', 2: 'no photo mode online', 3: 'photo mode needs the 3D view of a single-player game (not a menu, the pause screen, split screen or loading)',
+  4: 'photo mode is not available (conker_netx.txt did not load)', 5: 'not enough memory for photo mode' };
+function photoToast(text) {
+  $('photo-toast').textContent = text; $('photo-toast').hidden = false;
+  clearTimeout(photo.toastTimer); photo.toastTimer = setTimeout(() => { $('photo-toast').hidden = true; }, 2500);
+}
+function photoRequest(on) {
+  if (!M || !M._port_photo_request || running !== 'game') return;
+  if (on && (!opt('photomode') || netCfg || NETDET || userPaused)) return;
+  const r = M._port_photo_request(on ? 1 : 0);
+  log(`[photo] ${on ? 'start' : 'leave'} requested (state ${r})`);
+  if (on) photo.asked = performance.now();
+}
+function photoShow(on) {
+  document.body.classList.toggle('photo', on);
+  $('photo').hidden = !on;
+  $('photo-btn').setAttribute('aria-pressed', String(on));
+  if (!on && document.pointerLockElement && document.exitPointerLock && !opt('freecam')) document.exitPointerLock();
+  applyPause();   // the sound is off while photo mode is on
+}
+// one animation frame of pad 1 while photo mode may be on; true = photo mode has the input (do not send it to the game)
+function photoPoll(d) {
+  if (!M || !M._port_photo_status || running !== 'game') return false;
+  const st = M._port_photo_status(), was = photo.state, now = performance.now();
+  if (d.photo && !photo.prevKey && !userPaused) photoRequest(!(st === 2 || st === 1));
+  photo.prevKey = !!d.photo;
+  photo.state = st;
+  if (st === 2 && was !== 2) { photo.hud = false; photo.mx = photo.my = photo.wheel = 0; photo.prevB = d.b; photo.last = now; rumbleStopAll(); photoShow(true); log('[photo] on'); }
+  if (st !== 2 && was === 2) { photo.maskB = d.b; photo.maskStick = true; photoShow(false); log('[photo] off'); }
+  if (st < 0 && photo.asked) { photoToast(PHOTO_WHY[-st] || 'photo mode did not start'); log(`[photo] not started: ${PHOTO_WHY[-st]}`); photo.asked = 0; }
+  if (st === 2) photo.asked = 0;
+  if (st !== 2) return st === 1 || st === 3;
+  const dt = Math.min(0.1, (now - photo.last) / 1000), b = d.b, fresh = b & ~photo.prevB;
+  photo.last = now; photo.prevB = b;
+  if (fresh & N64.START) { photoRequest(false); return true; }
+  if (fresh & N64.A) photoCapture();
+  let flags = 0;
+  if (fresh & N64.B) flags |= 2;                   // back to the game's view
+  if (fresh & N64.L) photo.hud = !photo.hud;
+  if (photo.hud) flags |= 1;
+  // look: the free camera's stick (IJKL / right stick with that option), else the analog right stick, else the C buttons
+  const lx = d.cx || d.rx || ((b & N64.CR) ? STICK : 0) - ((b & N64.CL) ? STICK : 0);
+  const ly = d.cy || d.ry || ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
+  const fwd = d.y / STICK * 500 * dt, right = d.x / STICK * 500 * dt;
+  const up = (((b & N64.R) ? 1 : 0) - ((b & N64.Z) ? 1 : 0)) * 350 * dt;
+  const dyaw = lx / STICK * 90 * dt + photo.mx * 0.15, dpitch = ly / STICK * 60 * dt - photo.my * 0.15;
+  const droll = (((b & N64.DR) ? 1 : 0) - ((b & N64.DL) ? 1 : 0)) * 45 * dt;
+  const zoom = Math.exp((((b & N64.DD) ? 1 : 0) - ((b & N64.DU) ? 1 : 0)) * 0.9 * dt) * Math.pow(1.1, photo.wheel / 100);
+  photo.mx = photo.my = photo.wheel = 0;
+  M._port_photo_input(fwd, right, up, dyaw, dpitch, droll, zoom, flags);
+  if (now - (photo.infoAt || 0) > 200) {
+    photo.infoAt = now;
+    const I = (i) => M._port_photo_info(i);
+    $('photo-info').textContent = `field of view ${I(7).toFixed(0)}° · roll ${I(5).toFixed(0)}° · ${I(8).toFixed(0)} units from the start · HUD ${photo.hud ? 'shown' : 'hidden'}`;
+  }
+  return true;
+}
+function photoMaskAfter(d) {   // after photo mode: held buttons / a deflected stick stay off until released
+  if (photo.maskB) { photo.maskB &= d.b; d.b &= ~photo.maskB; }
+  if (photo.maskStick) {
+    if (Math.abs(d.x) < 10 && Math.abs(d.y) < 10 && !d.cx && !d.cy) photo.maskStick = false;
+    else { d.x = d.y = 0; d.cx = d.cy = 0; }
+  }
+}
+// A / Save: the picture as a PNG at photo.scale times the canvas resolution (default 2: 1280 x 960). The canvas's drawing
+// buffer is enlarged, the photo frame drawn again at that size (the renderer scales every N64 pixel), copied, and the
+// canvas set back. Test aid: ?photoscale=N (1..4); window.__photo.pngB64() = the last PNG as base64.
+async function photoCapture() {
+  if (photo.busy || photo.state !== 2) return;
+  photo.busy = true;
+  const c = $('canvas'), w0 = c.width, h0 = c.height, k = photo.scale;
+  let blob = null;
+  try {
+    if (k !== 1) { c.width = w0 * k; c.height = h0 * k; M._port_gfx_resize(c.width, c.height); }
+    M._port_photo_render();   // switches fibers (asyncify): its return value is not reliable, ask port_photo_info(9)
+    const drawn = M._port_photo_info(9) > 0, ms = M._port_photo_info(10);
+    blob = await new Promise((res) => c.toBlob(res, 'image/png'));
+    log(`[photo] picture ${c.width} x ${c.height}${drawn ? '' : ' (no new frame drawn)'} in ${ms.toFixed(0)} ms: ${blob ? blob.size : 0} bytes`);
+  } finally {
+    if (k !== 1) { c.width = w0; c.height = h0; M._port_gfx_resize(w0, h0); M._port_photo_render(); }
+    photo.busy = false;
+  }
+  if (!blob) { photoToast('the picture could not be saved'); return; }
+  photo.png = blob;
+  const t = new Date(), p2 = (n) => String(n).padStart(2, '0');
+  const name = `conker-photo-${t.getFullYear()}${p2(t.getMonth() + 1)}${p2(t.getDate())}-${p2(t.getHours())}${p2(t.getMinutes())}${p2(t.getSeconds())}.png`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  $('photo-flash').classList.remove('go'); void $('photo-flash').offsetWidth; $('photo-flash').classList.add('go');
+  photoToast(`saved ${name} (${w0 * k} x ${h0 * k})`);
+}
+window.__photo = {
+  status: () => (M && M._port_photo_status ? M._port_photo_status() : 0),
+  enter: () => photoRequest(true), leave: () => photoRequest(false), capture: () => photoCapture(),
+  info: () => (M ? [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => +M._port_photo_info(i).toFixed(2)) : null),
+  pngB64: () => new Promise((res) => {
+    if (!photo.png) return res('');
+    const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.readAsDataURL(photo.png);
+  }),
+};
+$('photo-btn').onclick = () => photoRequest(!(photo.state === 2 || photo.state === 1));
+$('photo-save').onclick = () => { $('canvas').focus(); photoCapture(); };   // focus back: Space must not press the button again
+$('photo-exit').onclick = () => { $('canvas').focus(); photoRequest(false); };
+$('canvas').addEventListener('wheel', (e) => { if (photo.state === 2) { e.preventDefault(); photo.wheel += e.deltaY; } }, { passive: false });
+optionChanged.photomode = (on) => {
+  $('photo-btn').hidden = !on || !!netCfg;
+  if (!on && photo.state === 2) photoRequest(false);
+};
+optionChanged.photomode(opt('photomode'));
 
 const SKIP_ARC = 2 * Math.PI * 27;
 $('skiparc').style.strokeDasharray = String(SKIP_ARC);
@@ -492,12 +626,14 @@ function pollInput() {
   // pad 0 = keyboard merged with the first gamepad; pads 1-3 = further gamepads
   const pads = [keyboardPad(), null, null, null];
   const halfHeld = pads[0].half;   // the half-tilt key (P324 walk toggle)
-  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y, cx: k.cx, cy: k.cy }; }
+  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y, cx: k.cx, cy: k.cy, photo: k.photo }; }
   gps.forEach((gp, i) => {
     const g = gamepadPad(gp);
-    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy }; }
+    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy, photo: k.photo || g.photo, rx: g.rx, ry: g.ry }; }
     else if (i < 4) pads[i] = g;
   });
+  if (photoPoll(pads[0])) { requestAnimationFrame(pollInput); return; }   // P348: photo mode takes pad 1's input
+  photoMaskAfter(pads[0]);   // P348: inputs still held from photo mode reach the game only once released
   applyLatches(pads[0], halfHeld);
   const txt = gps.length ? gps.map((g, i) => `pad ${i + 1}: ${g.id.slice(0, 40)}${g.mapping === 'standard' ? '' : ' (non-standard mapping)'}`).join('\n') : 'no gamepad (press a button on it to connect)';
   if (txt !== lastPadText) { $('pads').textContent = txt; lastPadText = txt; }
@@ -724,8 +860,8 @@ function applyPause() {
   const p = userPaused || hiddenPaused;
   if (M && M._port_set_paused) M._port_set_paused(p ? 1 : 0);
   if (p) rumbleStopAll();   // P333: no vibration while the page is paused
-  const a = window.portAudio;
-  if (a && a.ctx) { if (p) a.ctx.suspend().catch(() => {}); else if (gestured) a.ctx.resume().catch(() => {}); }
+  const a = window.portAudio, quiet = p || photo.state === 2;   // P348: no sound in photo mode either
+  if (a && a.ctx) { if (quiet) a.ctx.suspend().catch(() => {}); else if (gestured) a.ctx.resume().catch(() => {}); }
   $('paused').hidden = !p || running !== 'game';
   $('pause').setAttribute('aria-pressed', String(userPaused));
   $('pause').textContent = userPaused ? 'Resume' : 'Pause';
@@ -788,7 +924,7 @@ function onGesture() {
   gestured = true;
   unlockIosAudio();
   const a = window.portAudio;
-  if (a && a.ctx && a.ctx.state !== 'running' && !(userPaused || hiddenPaused)) {
+  if (a && a.ctx && a.ctx.state !== 'running' && !(userPaused || hiddenPaused) && photo.state !== 2) {
     a.ctx.resume().then(() => log('[audio] context resumed by user gesture: ' + a.ctx.state)).catch(() => {});
   }
   updateSoundHint();
@@ -796,7 +932,7 @@ function onGesture() {
 for (const ev of ['pointerdown', 'pointerup', 'keydown', 'touchend', 'click']) window.addEventListener(ev, onGesture, true);
 function updateSoundHint() {
   const a = window.portAudio;
-  $('soundhint').hidden = !(a && a.ctx && a.ctx.state !== 'running' && !(userPaused || hiddenPaused));
+  $('soundhint').hidden = !(a && a.ctx && a.ctx.state !== 'running' && !(userPaused || hiddenPaused) && photo.state !== 2);
 }
 window.portAudioReady = (ctx) => {
   log(`[audio] context created: ${ctx.state}${gestured ? ' (after a gesture)' : ''}`);
@@ -1087,7 +1223,7 @@ async function start(app) {
   // &audonly=1 (P14, audprobe.sh): data segments only, no game threads; for the audio tests
   if (Q.get('audonly')) log('audonly: game memory ' + (M._port_audio_prepare() > 0 ? 'loaded' : 'FAILED') + ', game not started');
   else {
-    if (netCfg || /[?&](nethash|nethashstop|netsnap)=/.test(location.search)) await netLoadExclusions(M);   // P337
+    await netLoadExclusions(M);   // P337 state hash; P348 photo mode's snapshot needs the same list (nothing else uses it)
     if (netCfg) PortNet.begin(M, netCfg, log);   // P338: session before the first retrace
     try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
   }

@@ -20,6 +20,7 @@ enum {
     PORT_OPT_RUMBLE = 13,       /* controllers report a Rumble Pak; motor start/stop -> gamepad vibration (pc_pif.c, P333) */
     PORT_OPT_AIM_CROSSHAIR = 14, /* centred crosshair in first-person aim kinds that have no aim HUD (aim_hud_spawn_for_mode, P334) */
     PORT_OPT_FREE_CAMERA = 15,  /* right stick / IJKL / mouse orbit the follow camera (free_camera_update, P347); never online */
+    PORT_OPT_PHOTO_MODE = 16,   /* photo mode: freeze, free camera, no HUD, PNG (pc_photo.c, P348); never online */
     /* P332 sliders: the value is a percentage 0..100 (default 100 = N64); game C scales with port_volume_scale */
     PORT_OPT_VOL_MUSIC = 9,     /* sequenced music: __n_vsVol */
     PORT_OPT_VOL_SFX = 10,      /* sound player effects: SND_VOL155 (n_sndp_handle_event) */
@@ -44,5 +45,14 @@ int port_swim_stick_y(int y);
 int port_free_camera_axis(int ch, int axis);
 int port_free_camera_enabled(void);   /* the option is on and no online session runs */
 void port_free_camera_engage(int ch);
+/* P348 photo mode (pc_photo.c): port_photo_sandbox is 1 while a photo frame's retraces run (the game is frozen; each
+ * photo frame starts from the same snapshot and is undone), port_photo_nohud 1 while that frame is built without the
+ * HUD. port_photo_camera fills the photo camera (eye, look-at point, roll in degrees, wanted fields of view x / y or 0)
+ * and returns 1 inside a photo frame; port_photo_camera_applied: the game wrote it into the view;
+ * port_photo_scene_drawn: the game drew player 1's 3D scene this frame (photo mode may start). */
+extern int port_photo_sandbox, port_photo_nohud;
+int port_photo_camera(float *eye, float *at, float *roll, float *fov);
+void port_photo_camera_applied(void);
+void port_photo_scene_drawn(void);
 
 #endif
