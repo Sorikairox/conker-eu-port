@@ -13,6 +13,7 @@
 // import __port_web_audio_open is replaced, so no AudioContext opens and the game's PCM ring is drained every retrace.
 // P354 trailer: run the compositor (compose.html / compose.js) in headless Chrome.
 //   node tools/port/trailer/render.mjs                 the MP4 -> port_work/trailer/out/trailer.mp4
+//   node tools/port/trailer/render.mjs small           4.5 Mbit/s copy (~25 MB) -> out/trailer_small.mp4
 //   node tools/port/trailer/render.mjs preview F,F,..  only these frames (60 fps timeline) -> out/key_NNNNN.jpg
 // Needs: mp4-muxer installed under port_work/trailer/npm (npm install mp4-muxer@5.2.2, local tooling, not committed),
 // the shots (capture.mjs), pages (pagecap.mjs), net4/ (net4.sh) and font/font.json (fontdump.mjs).
@@ -26,7 +27,8 @@ const outDir = path.resolve('port_work/trailer/out'); fs.mkdirSync(outDir, { rec
 const port = 8670 + (process.pid % 10);
 const srv = await serve({ '/t/': 'tools/port/trailer', '/w/': 'port_work/trailer',
   '/npm/mp4-muxer.js': 'port_work/trailer/npm/node_modules/mp4-muxer/build/mp4-muxer.js' }, port, outDir);
-const q = process.argv[2] === 'preview' ? `?preview=${process.argv[3]}` : '';
+const q = process.argv[2] === 'preview' ? `?preview=${process.argv[3]}`
+  : process.argv[2] === 'small' ? '?br=4500000&out=trailer_small.mp4' : '';
 const b = await launch(`http://127.0.0.1:${port}/t/compose.html${q}`, { log: path.join(outDir, 'compose.log') });
 try {
   for (let i = 0; i < 100; i++) { if (await b.ev('typeof window.__run === "function"').catch(() => false)) break; await sleep(200); }

@@ -10,6 +10,7 @@
 'use strict';
 const W = 1920, H = 1080, FPS = 60, DUR = 43.0, NFR = Math.round(DUR * FPS);
 const Q = new URLSearchParams(location.search);
+const OUT = Q.get('out') || 'trailer.mp4';   // ?br=BITS&out=NAME.mp4: a smaller copy
 const logEl = document.getElementById('log');
 const log = (s) => { console.log(s); const d = document.createElement('div'); d.textContent = s; logEl.appendChild(d); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -265,74 +266,34 @@ seg(T.spin, T.online + 0.25, 0.25, 0.25, async (g, lt) => {
   caption(g, lt - 0.1, 5.2 + 0.25 - 0.1, 'LONGER TAIL SPIN', 'HOVER TWICE AS LONG', { y: 878 });
 });
 
-// F. online: the Online panel of the host's page (real 4-window session: room code, players 2 to 4 join), then the
-// 4-player split screen
+// F. online: the 4-player split screen of a real online session (Bunker)
 seg(T.online, T.more + 0.25, 0.25, 0.25, async (g, lt) => {
-  const tp = 2.6;
-  if (lt < tp) {
-    g.fillStyle = '#0d0e11'; g.fillRect(0, 0, W, H);
-    g.filter = 'blur(10px) brightness(0.35)'; g.drawImage(await shotPic('mp4', 0), -40, -20, W + 80, H + 40); g.filter = 'none';
-    const k = Math.min(3, Math.floor(lt / 0.62)), pic = await img(`/w/net4/host_join${k}.png`);
-    const sx = 1124, sy = 236, sw = 361, sh = 330, s = 2.3, dw = sw * s, dh = sh * s, dx = W - dw - 150, dy = (H - dh) / 2 - 40;
-    g.save(); g.shadowColor = 'rgba(0,0,0,0.7)'; g.shadowBlur = 40; g.fillStyle = '#1b1e24'; roundRect(g, dx - 18, dy - 18, dw + 36, dh + 36, 16); g.fill(); g.restore();
-    g.drawImage(pic, sx, sy, sw, sh, dx, dy, dw, dh);
-    text(g, 'CREATE A ROOM', 130, 300, 6, { fill: '#fff', alpha: clamp(lt / 0.3) });
-    text(g, 'SHARE THE CODE', 130, 420, 6, { fill: '#fff', alpha: clamp((lt - 0.6) / 0.3) });
-    text(g, 'FRIENDS JOIN', 130, 540, 6, { fill: ACCENT, alpha: clamp((lt - 1.2) / 0.3) });
-  } else {
-    g.drawImage(await shotPic('mp4', 30 + (lt - tp) * 60), 0, 0, W, H);
-  }
-  caption(g, lt - tp - 0.1, 7.2 + 0.25 - tp - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { y: 800 });
+  g.drawImage(await shotPic('mp4', 30 + lt * 60), 0, 0, W, H);
+  caption(g, lt - 0.1, T.more - T.online + 0.25 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { y: 800 });
 });
 
-// G. and more: quick cuts (high frame rate, hi-res 2D, photo mode, free camera, presets)
+// G. and more: a list of the other options over a dimmed, blurred run, the lines coming in one by one
 const MORE = [
-  { name: 'HIGH FRAME RATE', sub: 'SMOOTH 60 FPS MOTION', draw: async (g, lt) => {
-    const i = 560 + lt * 60;
-    g.drawImage(await shotPic('run29_30', i), 0, 0, W / 2, H, 0, 0, W / 2, H);
-    g.drawImage(await shotPic('run29', i), W / 2, 0, W / 2, H, W / 2, 0, W / 2, H);
-    g.fillStyle = ACCENT; g.fillRect(W / 2 - 3, 0, 6, H);
-    label(g, 'GAME FRAMES', W / 4, 40, 3, { align: 'center', fill: '#fff' });
-    label(g, 'HIGH FRAME RATE', 3 * W / 4, 40, 3, { align: 'center', fill: ACCENT });
-  } },
-  { name: 'HI-RES MENUS AND 2D', sub: 'PAUSE SCREEN, TEXT, HUD', draw: async (g, lt) => {
-    const lo = await shotPic('pause_lo', 40), hi = await shotPic('pause_hi', 40);
-    // zoom into the middle of the pause screen, the original half (left) against the option (right)
-    const z = 1.0 + 0.5 * ease(lt / 1.1), cw = W / z, ch = H / z, cx = (W - cw) / 2, cy = (H - ch) / 2 - 60 * (z - 1);
-    g.save(); g.beginPath(); g.rect(0, 0, W / 2, H); g.clip(); g.imageSmoothingEnabled = true; g.drawImage(lo, cx * lo.width / W, cy * lo.height / H, cw * lo.width / W, ch * lo.height / H, 0, 0, W, H); g.restore();
-    g.save(); g.beginPath(); g.rect(W / 2, 0, W / 2, H); g.clip(); g.drawImage(hi, cx, cy, cw, ch, 0, 0, W, H); g.restore();
-    g.fillStyle = ACCENT; g.fillRect(W / 2 - 3, 0, 6, H);
-    label(g, 'ORIGINAL', W / 4, 40, 3, { align: 'center', fill: '#fff' });
-    label(g, 'HI-RES 2D', 3 * W / 4, 40, 3, { align: 'center', fill: ACCENT });
-  } },
-  { name: 'PHOTO MODE', sub: 'FREEZE, FLY, SNAP', draw: async (g, lt) => {
-    g.drawImage(await shotPic('photo', 20 + lt * 60), 0, 0, W, H);
-    // viewfinder corners
-    g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 5;
-    for (const [x, y, dx, dy] of [[70, 70, 1, 1], [W - 70, 70, -1, 1], [70, H - 70, 1, -1], [W - 70, H - 70, -1, -1]]) { g.beginPath(); g.moveTo(x, y + dy * 70); g.lineTo(x, y); g.lineTo(x + dx * 70, y); g.stroke(); }
-    if (lt > 0.85 && lt < 1.05) { g.fillStyle = `rgba(255,255,255,${0.8 * (1 - (lt - 0.85) / 0.2)})`; g.fillRect(0, 0, W, H); }
-  } },
-  { name: 'FREE CAMERA', sub: 'RIGHT STICK OR MOUSE', draw: async (g, lt) => { g.drawImage(await shotPic('freecam', 30 + lt * 90), 0, 0, W, H); } },
-  { name: 'CLASSIC / MODERN PRESETS', sub: 'EVERY EXTRA IS OPTIONAL', draw: async (g, lt) => {
-    const page = await img('/w/pages/options/still_2_running.jpg');   // 1600 x 900
-    // from the whole page (1600 x 900 -> 1920 x 1080) towards the Options panel and its preset buttons
-    const k = ease(lt / 1.1), zEnd = 1.6, fx = 1400, fy = 330;
-    const s2 = 1.2 + (zEnd - 1.2) * k, x0 = (W * 0.6 - fx * zEnd) * k, y0 = (H * 0.42 - fy * zEnd) * k;
-    g.fillStyle = '#121418'; g.fillRect(0, 0, W, H);
-    g.drawImage(page, x0, y0, 1600 * s2, 900 * s2);
-  } },
+  'HIGH FRAME RATE', 'HI-RES MENUS AND 2D', 'PHOTO MODE', 'FREE CAMERA', 'CLASSIC / MODERN PRESETS',
+  'SKIP CUTSCENES', 'HEALTH AND CASH ALWAYS ON', 'AIR METER', 'SEPARATE VOLUMES', 'GAMEPAD RUMBLE',
+  'TOUCH CONTROLS', 'SAVE IMPORT / EXPORT',
 ];
-{
-  const step = (T.end - T.more) / MORE.length;
-  MORE.forEach((m, k) => seg(T.more + k * step, T.more + (k + 1) * step + (k === MORE.length - 1 ? 0.25 : 0.06), 0.06, 0.06, async (g, lt) => {
-    await m.draw(g, lt);
-    const gr = g.createLinearGradient(0, H - 300, 0, H); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,0.75)');
-    g.fillStyle = gr; g.fillRect(0, H - 300, W, 300);
-    text(g, 'AND MORE...', 90, H - 230, 4, { fill: '#e9e3d6' });
-    text(g, m.name, 90, H - 170, 6.5, { fill: ['#fff7d6', ACCENT, ORANGE] });
-    text(g, m.sub, 92, H - 78, 3, { fill: '#f4efe6', alpha: clamp((lt - 0.1) / 0.2) });
-  }));
-}
+seg(T.more, T.end + 0.25, 0.25, 0.25, async (g, lt) => {
+  g.filter = 'blur(9px) brightness(0.32) saturate(1.1)';
+  g.drawImage(await shotPic('run29', 400 + lt * 40), -40, -22, W + 80, H + 44);
+  g.filter = 'none'; vignette(g, 0.7);
+  const a = clamp(lt / 0.3);
+  text(g, 'AND MORE...', W / 2, 120, 7.5, { align: 'center', fill: ['#fff7d6', ACCENT, ORANGE], alpha: a });
+  const rows = MORE.length / 2, x = [210, 1010], y0 = 330, dy = 100, step = 0.22;
+  MORE.forEach((m, k) => {
+    const col = Math.floor(k / rows), row = k % rows, t = lt - 0.35 - (row * 2 + col) * step, ak = clamp(t / 0.25);
+    if (ak <= 0) return;
+    const sx = (1 - easeOut(t / 0.35)) * -40, y = y0 + row * dy;
+    g.fillStyle = ACCENT; g.globalAlpha = ak; g.fillRect(x[col] + sx, y + 10, 18, 18); g.globalAlpha = 1;
+    text(g, m, x[col] + 44 + sx, y, 3.6, { fill: '#f4efe6', alpha: ak });
+  });
+  text(g, 'ALL OPTIONAL - TURN ON WHAT YOU LIKE', W / 2, 960, 3, { align: 'center', fill: ACCENT, alpha: clamp((lt - 2.2) / 0.4) });
+});
 
 // H. end card
 seg(T.end, DUR, 0.35, 0, async (g, lt) => {
@@ -401,8 +362,7 @@ async function buildAudio() {
     gn.gain.setValueAtTime(1.0, DUR - 2.6); gn.gain.linearRampToValueAtTime(0.0, DUR - 0.2);
     src.start(0, 0.78); }
   // sound effects of the shots under their segments: [shot, timeline start, duration, first picture, gain]
-  const SFX = [['run29', T.wide, T.ledge - T.wide, 300, 0.55], ['ledge13', T.ledge, T.spin - T.ledge, 36, 0.8], ['spin_on', T.spin, T.online - T.spin, 90, 0.6],
-    ['photo', T.more + 2 * (T.end - T.more) / 5, 0.0, 0, 0], ['freecam', T.more + 3 * (T.end - T.more) / 5, (T.end - T.more) / 5, 30, 0.5]];
+  const SFX = [['run29', T.wide, T.ledge - T.wide, 300, 0.55], ['ledge13', T.ledge, T.spin - T.ledge, 36, 0.8], ['spin_on', T.spin, T.online - T.spin, 90, 0.6]];
   for (const [shot, t0, dur, pic, gain] of SFX) {
     if (dur <= 0 || gain <= 0) continue;
     const { b, m } = await pcmBuffer(ctx, shot);
@@ -440,7 +400,7 @@ async function encode() {
     video: { codec: 'avc', width: W, height: H, frameRate: FPS }, audio: { codec: 'aac', numberOfChannels: 2, sampleRate: 48000 } });
   let verr = null;
   const venc = new VideoEncoder({ output: (c, m) => muxer.addVideoChunk(c, m), error: (e) => { verr = e; } });
-  venc.configure({ codec: 'avc1.640032', width: W, height: H, bitrate: 14_000_000, framerate: FPS, latencyMode: 'quality', avc: { format: 'avc' } });
+  venc.configure({ codec: 'avc1.640032', width: W, height: H, bitrate: Number(Q.get('br') || 14_000_000), framerate: FPS, latencyMode: 'quality', avc: { format: 'avc' } });
   const aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => { verr = e; } });
   aenc.configure({ codec: 'mp4a.40.2', numberOfChannels: 2, sampleRate: 48000, bitrate: 192000 });
   // audio first (small), in 1024-frame planar chunks
@@ -465,8 +425,8 @@ async function encode() {
   await venc.flush();
   muxer.finalize();
   const buf = muxer.target.buffer;
-  await upload('trailer.mp4', buf);
-  return `trailer.mp4 ${(buf.byteLength / 1e6).toFixed(1)} MB, ${NFR} frames, ${((performance.now() - t0) / 1000).toFixed(0)} s`;
+  await upload(OUT, buf);
+  return `${OUT} ${(buf.byteLength / 1e6).toFixed(1)} MB, ${NFR} frames, ${((performance.now() - t0) / 1000).toFixed(0)} s`;
 }
 window.__run = () => (Q.get('preview') ? preview(Q.get('preview').split(',').map(Number)) : encode());
 window.__segments = () => T;
