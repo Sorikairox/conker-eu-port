@@ -148,6 +148,7 @@ The choice is saved with the options. In an online game the host's options apply
 | Inverted swimming | off | Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. The original steers like a plane: stick up tilts him head-down and dives, stick down tilts him up. Only the swimming controls change; walking, flying and aiming stay as they are. |
 | Aiming crosshair | off | In the first-person aim views that the original leaves bare, the game's own small crosshair (the one the other guns use) is drawn in the middle of the screen, which is exactly where the shots go there. In this ROM that is the aim kind 0x18 (hold R with that weapon); the scope, lens, bracket and turret views and the other guns already have their own reticles and are unchanged, and the third-person R-look with a held item gets nothing (its shots are aimed from the hand / mouth, not through a fixed screen point). Takes effect the next time you aim. |
 | Rumble (gamepad vibration) | off | The game sees a Rumble Pak in your controller and a connected gamepad vibrates whenever the N64 Rumble Pak would (explosions, hits, heavy effects; the game pulses it on and off by strength). Needs a browser with gamepad vibration (Chrome / Edge, most Xbox and PlayStation pads). Takes effect immediately: switching it on or off makes the game look for the Rumble Pak again at once (before, it waited for the next level or area load). Saves are not affected (they use the cartridge EEPROM). |
+| Input recorder (for testing) | off | Shows the **Record** button in the page header: records a play session from power-on (your save and options included) into a small `.ckrec` file that the developers replay automatically as a regression test (see "Recording a chapter for the tests" below). Not part of the presets. |
 | Online multiplayer (experimental) | off | Shows the **Online** button in the page header: play a multiplayer match with up to three friends on other computers, joining with a room code (see Online below). |
 | Music / Sound effects / Speech volume | 100 % | Three sliders (0 to 100 %, steps of 5) that set the volume of the music, the sound effects and the spoken dialogue separately. 100 % is the original volume. A change to the speech volume applies from the next spoken line. The page's Vol slider still sets the overall volume. |
 
@@ -266,7 +267,22 @@ Easiest is to tell Claude what you did and what happened, ideally with a screens
 - **Errors:** anything red in Chrome's DevTools console (View → Developer → JavaScript Console).
 - **The build:** `BUILD.txt` from your `~/conker-play/build-*` folder.
 
-## Recording your inputs for a test route
+## Recording a chapter for the tests
+
+The **Input recorder** (Options) records everything you press, from power-on, so the developers can replay your
+playthrough on every new version and see the first point where the game behaves differently. Step by step (one
+recording per chapter, chapter 1 first; details in docs/port/E2E.md):
+
+1. Options → tick **Input recorder (for testing)**; optionally Saves → Export .eep as a backup.
+2. **Record** → name it (e.g. `chapter 1`) → **Start recording**. The game restarts from power-on; **● REC** shows under
+   the picture.
+3. Go to the chapter with the game's chapter select (**Chapters** in the main menu; on a fresh save, New game for
+   chapter 1) and play it normally. Pausing, switching tabs, fullscreen and the picture options are fine; the game
+   options are fixed and free camera / photo mode are off while recording. The game still saves as usual.
+4. At the end of the chapter: **Record** → **Stop and save**. The `.ckrec` file downloads (a few KB per minute) and the
+   last 10 also stay in the panel. Reload the page before playing on normally; start the next chapter with step 2.
+
+## Recording your inputs for a test route (old way)
 
 You can record your inputs so the tests can replay the route you played:
 

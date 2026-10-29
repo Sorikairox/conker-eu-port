@@ -88,6 +88,28 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P357 (port-web, 2026-10-29): input recorder + end-to-end replay tests (docs/port/E2E.md)
+- 34a42bea option "Input recorder (for testing)" (tool, not in presets): Record button / panel, ?record=1. Recording =
+  single-player online session with no input delay (pc_net.c section 5 port_rec_session): det clock, no frame budget,
+  virtual AI queue, static stacks, wall-paced 50 Hz VI (interactive, sound); pad 1 sampled at each retrace start ->
+  Module.recInput; game options locked + recorded, EEPROM at power-on recorded, saves still persisted (pc_pif.c), free
+  camera / photo off. Fingerprints: G every 10 retraces (build-independent: g_random_seed, level, mode, obj count,
+  g_objects heads), checkpoint every 50 + level / mode change + Stop (G + H / S, ~6.5 ms). .ckrec = gzip JSON (E2E.md),
+  ~3 KB/min keyboard, <= ~13 KB/min analog. IndexedDB v3 store 'recordings' (last 10, draft every 10 s / on hide).
+- Replay ?replay=URL (fast: 40 ms bursts in pc_sched.c frame), compare in main.js (e2eCheck / e2eG; H / S only same
+  build), pause at the first difference. tools/port/scripts/e2e_replay.sh [file|dir] (default tests/e2e/recordings),
+  e2e_replay.js, e2e_report.py; pictures actual / expected (port_work/e2e/ref_web via SAVE_REF=1) in port_work only.
+  e2e_record.sh / .js: test recordings through the page's buttons with real-time CDP key events, Pause button, hidden
+  window. tests/e2e/recordings/p357-newgame-holdL-walk29.ckrec (7700 retraces, 8 KB).
+- Evidence port_work/e2e_rec/evidence (summary.txt): 3 replays identical (163/163 checkpoints, 770 G, H / S; 14-15 s for
+  154 s of game time, ~10x); hidden twice (6.5 s + 4.5 s) + 3 s paused recording, and widescreen + hfr + hires2d +
+  smoothfont + fullres recording: inputs and all checkpoints byte-identical to the plain one, replays identical (also
+  with those options on in the replay); deliberate pad_stick_speed clamp 35 -> 34 (not committed): FAIL at retrace 6980
+  (first stick input 6950), actual / expected pictures. check.sh GREEN, hold-L 5789 / 0x29 at 5795 no traps, netpair
+  8920 IDENTICAL.
+- Found: ?p103boot (whitelisted under netdet) changes H (its statics are hashed): no test flags in e2e URLs. A CDP
+  Escape key hid the headless tab (test driver uses the Pause button instead).
+- Open: only controller 1 recorded; no recordings of chapters yet (user to record); other browsers untested.
 ### P356 (port-web, 2026-10-29): feature #16c Smooth font
 - 2b637ccc option smoothfont (page-side, port_gfx_smooth_font, default off, in Modern; each player's own choice online).
   Glyph rectangles = G_TEXRECT with an I 8-bit tile whose last SETTIMG lies in [g_font_textures[0], g_font_metrics[0])
