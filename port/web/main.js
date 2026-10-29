@@ -685,14 +685,64 @@ const PHOTO_ANIM_NAMES = {
   0x283: 'crouch (Z)?', 0x28E: 'turn 3', 0x297: 'ledge drop down', 0x2C6: 'walk carrying (kind 0x16) 2', 0x2D4: 'death (kind 11)',
   0x2D6: 'death (kind 12)', 0x2D8: 'death (kind 13)', 0x302: 'walk (2)', 0x303: 'run (2)', 0x34F: 'idle (end)?',
 };
-// models of his skeleton group (g_anim_bank_group_lists), by eye on level 0x29 (P358)
-const PHOTO_MODEL_NAMES = { 0: 'Conker', 1: 'Conker, detail 2', 2: 'Conker, detail 3', 3: 'Conker, detail 4', 4: 'Conker, detail 5',
-  59: 'thin character in black', 130: 'mech suit', 136: 'beaked character, red vest', 144: 'beaked character, sunglasses', 150: 'Conker, black coat (Heist)',
-  152: 'Berri? (black suit)', 156: 'weasel, hat and moustache', 157: 'weasel, glasses, red jacket', 159: 'weasel, black jacket',
-  160: 'weasel, purple', 176: 'green camouflage with blade', 177: 'teddy bear', 178: 'Grim Reaper', 117: 'teddy bear 2', 180: 'skeleton' };
-// models outside his skeleton group (their own skeleton and animations), by eye on level 0x29 (P358); the rest by number
-const PHOTO_OTHER_MODEL_NAMES = { 5: 'wasp', 173: 'wasp 2', 174: 'wasp 3', 175: 'wasp 4', 21: 'crate creature', 58: 'imp (red)', 61: 'imp (black)',
-  90: 'Tediz', 95: 'Tediz (soldier)', 116: 'Tediz 2', 141: 'Tediz (medic)', 154: 'bat', 155: 'bat 2', 6: 'Rare logo', 134: 'camouflage soldier' };
+// all 187 models (object types), named in P359 from the code (functions that test the type), the levels whose setup
+// lists / loaded models hold them, and photo-mode renders looked at one by one; '(guess)' = not certain
+// (docs/port/photo_models.tsv: confidence and evidence per model)
+const PHOTO_MODEL_NAMES = {
+  0: 'Conker', 1: 'Conker, detail 2', 2: 'Conker, detail 3', 3: 'Conker, detail 4', 4: 'Conker, detail 5', 5: 'wasp',
+  6: 'Rare logo', 7: 'bee with crown (guess)', 8: 'Bullfish', 9: 'dark slab (water / rock piece) (guess)',
+  10: 'catfish', 11: 'unknown (no animation bank)', 12: 'claw on a pole (guess)', 13: 'hay pile with eyes',
+  14: 'corn sack with eyes', 15: 'spiky ball creature, purple', 16: 'rolling boulder',
+  17: 'spearman, purple vest (guess)', 18: 'gun turret with searchlight', 19: 'beehive, small',
+  20: 'spearman with flag (guess)', 21: 'wooden crate with eyes', 22: 'caveman', 23: 'hedgehog (big face) (guess)',
+  24: 'metal crate with face, angry', 25: 'paper scroll (guess)', 26: 'black spiky creature, purple stripes (guess)',
+  27: 'green leaf / shard (guess)', 28: 'metal pipe', 29: 'grey cord (guess)',
+  30: 'metal crate with face, eyelashes', 31: 'wooden pallet', 32: 'cheese with eyes', 33: 'bull',
+  34: 'Marvin the mouse', 35: 'beehive, large', 36: 'water surface', 37: 'dung ball', 38: 'pincer on a bone (guess)',
+  39: 'conker (chestnut) shell (guess)', 40: 'tank', 41: 'frog in armour (guess)', 42: 'unknown (no animation bank)',
+  43: 'furnace / boiler (guess)', 44: 'paint pot with eyes', 45: 'paint brush', 46: 'dark boulder (guess)',
+  47: 'white rope / cord (guess)', 48: 'metal plate (guess)', 49: 'big brown creature (guess)',
+  50: 'red hexagonal ring (guess)', 51: 'lava rock (explosive) (guess)',
+  52: 'blue gremlin carrying a barrel (guess)', 53: 'white bones / claws (guess)', 54: 'raptor, purple',
+  55: 'unknown (draws nothing here)', 56: 'rock bouncer (bow tie)', 57: 'wooden tower, striped legs (guess)',
+  58: 'fire imp', 59: 'thin figure in black (guess)', 60: 'checkered pickup with eyes (guess)', 61: 'imp, black',
+  62: 'pink worm (guess)', 63: 'green leaf (guess)', 64: 'skull and debris (guess)', 65: 'small wooden peg (guess)',
+  66: 'blue gremlin in black armour with gun (guess)', 67: 'faint mesh / web (guess)', 68: 'dung beetle',
+  69: 'Haybot', 70: 'spiky ball creature, blue', 71: 'robot spider (guess)', 72: 'unknown (no animation bank)',
+  73: 'wooden trough / frame (guess)', 74: 'periscope gun turret (guess)', 75: 'Haybot robot core (guess)',
+  76: 'spiky ball creature, green', 77: 'grenade', 78: 'two black pipes (guess)', 79: 'missile with eyes (guess)',
+  80: 'bat, brown (hanging)', 81: 'pedestal with wires (guess)', 82: 'spiky mine with cigar',
+  83: 'baby dinosaur (big jaws) (guess)', 84: 'caveman, big (stone club)', 85: 'empty slot', 86: 'N64 logo piece',
+  87: 'money bag', 88: 'SHC squirrel soldier', 89: 'red pelt / cloth (guess)', 90: 'Tediz',
+  91: 'SHC squirrel soldier, goggles', 92: 'wire strands (guess)', 93: 'black block (guess)',
+  94: 'Experiment (xenomorph)', 95: 'Tediz pieces (guess)', 96: 'metal weight on chain',
+  97: 'metal weight on chain 2', 98: 'unknown (no animation bank)', 99: 'small blue and red bits (guess)',
+  100: 'caveman with bone club', 101: 'small red head on blue (guess)', 102: 'wooden crate with eyes, dark',
+  103: 'bomber plane', 104: 'unknown (no animation bank)', 105: 'cavewoman (guess)', 106: 'bone',
+  107: 'blue tusked fish (guess)', 108: 'sunflower', 109: 'queen bee head (honeycomb) (guess)',
+  110: 'grey cord 2 (guess)', 111: 'N64 logo', 112: 'Gregg the Grim Reaper', 113: 'money bag, dark',
+  114: 'Berri (purple bikini)', 115: 'long dark pipe (guess)', 116: 'Tediz 2', 117: 'teddy bear 2 (his skeleton)',
+  118: 'Panther King (guess)', 119: 'tank 2', 120: 'olive creature (big head) (guess)', 121: 'cow',
+  122: 'Tediz variant (no animation bank) (guess)', 123: 'Tediz buzzsaw spider', 124: 'small bird (guess)',
+  125: 'stick / match (guess)', 126: 'torch (guess)', 127: 'barrel', 128: 'Conker, army helmet',
+  129: 'iris hatch (guess)', 130: 'mech suit', 131: 'missile', 132: 'red button (guess)',
+  133: 'red-cross sign (guess)', 134: 'weasel henchman, sunglasses', 135: 'SHC Sergeant',
+  136: 'caveman, red pelt (his skeleton) (guess)', 137: 'bomb', 138: 'cannon robot (guess)',
+  139: 'Birdy the scarecrow', 140: 'key with eyes', 141: 'Tediz nurse', 142: 'gargoyle', 143: 'raptor',
+  144: 'caveman (his skeleton)', 145: 'fat cave woman (guess)', 146: 'Great Mighty Poo', 147: 'sweetcorn with eyes',
+  148: 'unknown small shard (guess)', 149: 'tree branch hand (guess)', 150: 'Conker, black coat (Heist)',
+  151: 'Berri (Heist catsuit)', 152: 'Heist lobby guard (guess)', 153: 'Professor von Kriplespac',
+  154: 'bat, green eyes', 155: 'bat, yellow eyes', 156: 'villager, hat and moustache (guess)',
+  157: 'villager, glasses and red jacket (guess)', 158: 'spiky dome mine (guess)',
+  159: 'villager, black jacket (guess)', 160: 'villager woman, purple dress (guess)', 161: 'small red top (guess)',
+  162: 'black spikes (guess)', 163: 'unknown (draws nothing here)', 164: 'Count Batula',
+  165: 'dinosaur, orange (guess)', 166: 'stalk with eyes (guess)', 167: 'Conker wrapped up (guess)',
+  168: 'striped flag \'2\' (guess)', 169: 'red cloth (guess)', 170: 'lightning bolt', 171: 'dinosaur egg',
+  172: 'rolling ball, orange', 173: 'wasp 2', 174: 'wasp 3', 175: 'wasp 4',
+  176: 'officer in green uniform (his skeleton) (guess)', 177: 'teddy bear (his skeleton)',
+  178: 'Grim Reaper (his skeleton)', 179: 'mouse, spotted (guess)', 180: 'skeleton',
+  181: 'grey brute in white shirt (guess)', 182: 'bloody teeth (guess)', 183: 'weasel band: double bass',
+  184: 'weasel band: saxophone', 185: 'weasel band: drums', 186: 'bomb, grey (guess)' };
 // setup command lists (held items / gear), by eye on Conker at level 0x29; the others show nothing on him there
 const PHOTO_ITEM_NAMES = { 2: 'big blade', 4: 'cloth (cyan)', 20: 'nuclear warhead', 22: 'pistol', 23: 'gas mask', 24: 'striped bazooka',
   25: 'big gun barrel', 33: 'bone club', 35: 'green cap', 37: 'black mask', 40: 'machete', 41: 'throwing knives', 46: 'chain',
@@ -725,7 +775,7 @@ function lookSave() { try { sessionStorage.setItem('photo.look', JSON.stringify(
 const lkInfo = (w, i) => (M && M._port_photo_look_info ? M._port_photo_look_info(w, i || 0) : 0);
 const hex3 = (n) => '0x' + n.toString(16).toUpperCase().padStart(3, '0');
 function animLabel(i) { const n = PHOTO_ANIM_NAMES[i]; return hex3(i) + (n ? ' ' + n : ''); }
-function modelLabel(m) { return (PHOTO_MODEL_NAMES[m] || 'model') + ' (' + m + ')'; }
+function modelLabel(m) { return m + ' ' + (PHOTO_MODEL_NAMES[m] || 'model'); }
 function itemLabel(n) {
   const k = lkInfo(LR.ITEM_KIND, n), a = lkInfo(LR.ITEM_ASSET, n);
   return (PHOTO_ITEM_NAMES[n] || ((k & 1) ? 'object ' : 'model ') + a) + ' (list ' + n + ')';
@@ -801,7 +851,7 @@ function lookBuild() {
   for (let i = 0; i < lkInfo(LR.GROUP_N); i++) g.push(lkInfo(LR.GROUP, i));
   const own = lkInfo(LR.MODEL);
   const others = [];   // models with a skeleton of their own: drawn with their own animation bank (ids of the pose list differ)
-  for (let m = 0; m < 187; m++) if (!g.includes(m)) others.push([m, '(own skeleton) ' + (PHOTO_OTHER_MODEL_NAMES[m] || 'model') + ' (' + m + ')']);
+  for (let m = 0; m < 187; m++) if (!g.includes(m)) others.push([m, modelLabel(m) + ' (own skeleton)']);
   P.append(row('model', selectOf([[-1, 'his own: ' + modelLabel(own)], ...g.filter((m) => m !== own).map((m) => [m, modelLabel(m)]), ...others], look.model,
     (v) => { look.model = v; look.dlHide = look.dlShow = 0; lookChanged(); }, 'Models that share Conker\'s skeleton and animations (loaded from the ROM for the photo only)')));
   // items (setup lists)

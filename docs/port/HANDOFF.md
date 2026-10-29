@@ -88,6 +88,24 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P359 (port-web, 2026-10-29): photo mode: all 187 models named
+- main.js PHOTO_MODEL_NAMES now holds all 187 models (one table; PHOTO_OTHER_MODEL_NAMES gone); the dropdown shows
+  "id name", "(own skeleton)" kept as a suffix for models outside his skeleton group, "(guess)" on uncertain names.
+  docs/port/photo_models.tsv: id, name, confidence, evidence. Counts: 12 by code, 86 by look, 80 guesses, 9 unknown.
+- How: (1) code: every comparison / switch case on the object type byte (+4) in conker/src_eu mapped to its function
+  (tank_update 40 / 119, rolling_object_update 16 / 37 / 172, tail_update_conker + pickup voice lines 128 = army-helmet
+  Conker, obj_get_hit_kind / obj_kind_can_take_hit Tediz group 90 / 95 / 116 / 117 / 122; 85 has no type data).
+  The HUD air meter 0xB9 / clock 0xBA and water model 9 in names.tsv are another asset table (asset type 9), not these.
+  (2) levels: a temporary ?p359mdl diagnostic (not committed) logged each warp level's loaded models and level-setup
+  entry types (g_setup_entries +4) for levels 0..0x4F (chapter hints: 1 barn, 2/14/31/32 Uga Buga, 7 Bats Tower,
+  13/23/26/2F It's War, 35 Poo's cavern, 36/39/3A/40 Heist, 3C Spooky, 21 boot logos). (3) look: every model rendered
+  in photo mode on level 6 (bright Windy hub) with a temporary camera helper that aims at Conker from a distance /
+  azimuth / height (window.A, using a temporary p359_pos export), 3 views each plus close-ups, far views and other
+  animations (Tediz draw nothing with anim 0: anim 1 shows them). Renders + contact sheet in port_work/p359 (ROM-derived,
+  not committed).
+- Limits: 11 42 72 98 104 122 have no animation bank (anim_bank_load returns 4, no skeleton group) and cannot be posed
+  in photo mode (they show nothing); 55 / 148 / 163 draw nothing visible; many props are small and named as what they
+  look like. The swap error was reported as err 1 by P358 too ("all 187 load" was not right).
 ### P358 (port-web, 2026-10-29): photo mode Pose & Outfit (feature #22 extension)
 - 79c6cdd8 photo mode panel POSE & OUTFIT (right side; Reset, fold; choices in sessionStorage 'photo.look', re-applied
   at every photo start; gamepad / keyboard: O = right stick click gives the panel the D-pad + A). The page chooses

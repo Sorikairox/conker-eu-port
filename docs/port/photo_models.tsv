@@ -1,0 +1,190 @@
+# P359 photo-mode model names (object type = model id). confidence: code = a game function identifies it, look = by its
+# render, guess = uncertain, unknown = could not be seen / named. Levels = hex level ids whose setup list or loaded models hold it.
+id	name	confidence	evidence
+0	Conker	code	player model (his part list), skeleton group 0
+1	Conker, detail 2	code	LOD 2 of his part list (skeleton group 0)
+2	Conker, detail 3	code	LOD 3 of his part list
+3	Conker, detail 4	code	LOD 4 of his part list
+4	Conker, detail 5	code	LOD 5 of his part list; loaded on every level
+5	wasp	look	black-yellow wasp; levels 6 (Windy), C, 27 (hive, 25 of them)
+6	Rare logo	look	RAREWARE badge; level 21 (boot logos)
+7	bee with crown	guess	small yellow bee wearing a crown; levels 6, 27 (hive)
+8	Bullfish	look	grey bulldog-faced fish with fins; levels 7 (water), F
+9	dark slab (water / rock piece)	guess	flat dark shape; level 7
+10	catfish	look	black and white cat-headed fish; levels 7 (5 of them), 41
+11	unknown (no animation bank)	unknown	model_header_load ok, anim_bank_load fails (4): cannot be posed in photo mode
+12	claw on a pole	guess	orange pole with a black grabber claw; levels 1, 10, 18
+13	hay pile with eyes	look	haystack with eyes peeking out; level 1 (barn, 12 of them)
+14	corn sack with eyes	look	sack printed CORN with eyes
+15	spiky ball creature, purple	look	spiked ball with a face; level 18
+16	rolling boulder	code	rolling_object_update type 0x10; lumpy blue-grey rock; levels 2, 31 (Uga Buga)
+17	spearman, purple vest	guess	lanky goggled character with a staff; levels 18, 37
+18	gun turret with searchlight	look	green box with twin barrels and a light beam; level E
+19	beehive, small	look	yellow hive; levels 6, 27
+20	spearman with flag	guess	squat character with spear and torn flag; levels 18, 37
+21	wooden crate with eyes	look	wooden crate creature; level C
+22	caveman	look	blue animal-skin hood, spotted pelt; levels 2 (24 of them), 14, 43 (Uga Buga)
+23	hedgehog (big face)	guess	spiky grey dome with eyes and moustache
+24	metal crate with face, angry	look	riveted metal box with eyes and red mouth; level C
+25	paper scroll	guess	white sheet between two wooden handles; level 22
+26	black spiky creature, purple stripes	guess	dark spiky body; level 7
+27	green leaf / shard	guess	tiny green piece
+28	metal pipe	look	ribbed metal column; level 7
+29	grey cord	guess	small squiggle (same shape as 110)
+30	metal crate with face, eyelashes	look	riveted metal box with eyes; level C
+31	wooden pallet	look	wooden slatted platform; level 7
+32	cheese with eyes	look	cheese wedge creature; levels C (16 of them), D, 18 (Marvin's cheese)
+33	bull	look	black bull with horns and red eyes; levels 0, 2C
+34	Marvin the mouse	look	brown mouse; level C with the cheese (32)
+35	beehive, large	look	big yellow hive; levels 6, 27
+36	water surface	look	flat water sheet; levels 6, 3B (Windy river)
+37	dung ball	code	rolling_object_update / player_swim_update type 0x25; brown ball; levels 35, 37 (dung)
+38	pincer on a bone	guess	white claws on a bone stick; level C
+39	conker (chestnut) shell	guess	brown/white half shell; level C
+40	tank	code	tank_update / tank_set_track_speeds type 0x28, player record (setup_entry_spawn); levels E, 23
+41	frog in armour	guess	green frog in a riveted steel suit and spiked helmet; levels 6, 7, A, C, 12
+42	unknown (no animation bank)	unknown	anim_bank_load fails (4): cannot be posed in photo mode
+43	furnace / boiler	guess	copper stove on legs; level A (fire)
+44	paint pot with eyes	look	PAINT tin creature; levels 1, 18
+45	paint brush	look	brush with blue bristles; levels 1, 18
+46	dark boulder	guess	dark blue rounded rock; level F
+47	white rope / cord	guess	tiny white squiggle
+48	metal plate	guess	flat grey slab
+49	big brown creature	guess	large crouching brown/red body; levels 1, 2, 43
+50	red hexagonal ring	guess	big red hoop / tunnel ring; level 2
+51	lava rock (explosive)	guess	glowing orange rock; type 0x33 = bomb in debris_obj_remove_explode; levels 2, A
+52	blue gremlin carrying a barrel	guess	blue creature holding a barrel over its head; level 13 (It's War)
+53	white bones / claws	unknown	white bony limbs; setup entry 5 of every level
+54	raptor, purple	look	purple clawed dinosaur; levels 2, 43 (Uga Buga)
+55	unknown (draws nothing here)	unknown	only a shadow in photo mode; level 1
+56	rock bouncer (bow tie)	look	big blue rock man with a bow tie; levels 2, 31, 38 (Rock Solid club)
+57	wooden tower, striped legs	guess	large wooden frame; level E
+58	fire imp	look	red imp; level A (7 of them, fire level)
+59	thin figure in black	guess	Conker-skeleton character in black; levels 1A (multiplayer Heist arena), 38
+60	checkered pickup with eyes	guess	pink-purple checkered cylinder with eyes; 17 levels
+61	imp, black	look	black imp with yellow eyes
+62	pink worm	guess	pink segmented worm (seen with its own animations); level 6
+63	green leaf	guess	tiny leaf; levels 2, 42
+64	skull and debris	guess	small skull with fragments; levels 6, 7, 12, 31, 32, 37, 40
+65	small wooden peg	guess	small brown block; level C
+66	blue gremlin in black armour with gun	guess	black suit, dial face, gun; level 1E (6 of them)
+67	faint mesh / web	guess	almost transparent; level 40
+68	dung beetle	look	red beetle; levels 6, 2C, 35 (dung)
+69	Haybot	look	hay-covered robot with one eye; level 1 (barn)
+70	spiky ball creature, blue	look	same model family as 15 / 76
+71	robot spider	guess	black-yellow spider robot; levels 13, 1A, 1B, 1C, 23, 28
+72	unknown (no animation bank)	unknown	anim_bank_load fails (4); in setups of levels 14, 22, 32, 3C
+73	wooden trough / frame	guess	U-shaped wooden frame; levels 4, 13
+74	periscope gun turret	guess	pot with periscope and twin guns; levels 13, 23
+75	Haybot robot core	guess	striped robot with red eye on a base; levels 10, 18
+76	spiky ball creature, green	look	same model family as 15 / 70
+77	grenade	look	green grenade with checker band; levels 4, 1C (war)
+78	two black pipes	guess	pair of pipes / barrels; level 13
+79	missile with eyes	guess	red finned shape with goggles; levels 10, 23
+80	bat, brown (hanging)	look	brown bat hanging upside down; levels 1, 18
+81	pedestal with wires	guess	metal base with cables; level 10
+82	spiky mine with cigar	look	grey spiked ball with face and cigar
+83	baby dinosaur (big jaws)	guess	green toothy dinosaur; levels F, 14 (Uga Buga)
+84	caveman, big (stone club)	look	muscular caveman with stone; levels F, 14
+85	empty slot	code	model_header_load returns 2 and g_type_descs stays NULL: no type data
+86	N64 logo piece	look	blue 'N' block; level 21 (boot logos)
+87	money bag	look	sack with $; level 1A (multiplayer Heist)
+88	SHC squirrel soldier	look	squirrel in green helmet with gun; levels 4, 6, 13, 1C, 2F
+89	red pelt / cloth	guess	red torn cloth; level 14
+90	Tediz	look	teddy bear soldier (shown with its own animation 1); levels 4, 6, E, 1B, 1C, 1E, 26; hit kind 2 group
+91	SHC squirrel soldier, goggles	look	squirrel in green helmet with goggles; levels 4, E, 13, 18, 1C, 23, 3B
+92	wire strands	guess	thin lines; levels 4, 1C
+93	black block	guess	tall black box; level 13
+94	Experiment (xenomorph)	look	black alien with teeth and tail; levels 18, 40 (Heist ending)
+95	Tediz pieces	guess	brown teddy chunks (4 display lists); levels E, 26; Tediz hit kind group
+96	metal weight on chain	look	riveted box on a chain; level 13
+97	metal weight on chain 2	look	riveted box; level 13
+98	unknown (no animation bank)	unknown	anim_bank_load fails (4)
+99	small blue and red bits	guess	tiny pieces; level 18
+100	caveman with bone club	look	caveman (as 22) holding a bone; level 14 (Uga Buga)
+101	small red head on blue	guess	small figure; level 14
+102	wooden crate with eyes, dark	look	black wooden crate creature; level 13
+103	bomber plane	look	propeller aircraft; level 13 (It's War)
+104	unknown (no animation bank)	unknown	anim_bank_load fails (4)
+105	cavewoman	guess	tan female figure with brown hair; level 14 (Uga Buga)
+106	bone	look	big white bone; level 14
+107	blue tusked fish	guess	blue crested creature with tusks; level 13
+108	sunflower	look	flower with yellow petals; levels C, 1
+109	queen bee head (honeycomb)	guess	bee face with crown in a hexagon; levels 1, C
+110	grey cord 2	guess	same shape as 29
+111	N64 logo	look	green 'N' logo; level 21 (boot logos)
+112	Gregg the Grim Reaper	look	grim reaper with scythe; levels 22, 41
+113	money bag, dark	look	dark sack; level 18
+114	Berri (purple bikini)	look	female squirrel, blonde hair, purple bikini; levels 18, 31, 38
+115	long dark pipe	guess	big bent pipe; level 4
+116	Tediz 2	look	teddy bear soldier (anim 1); Tediz hit kind group
+117	teddy bear 2 (his skeleton)	look	teddy on Conker's skeleton; Tediz hit kind group
+118	Panther King	guess	big black clawed figure in a purple robe; levels 18, 40 (ending)
+119	tank 2	code	tank_update / setup_entry_spawn type 0x77; tank by look
+120	olive creature (big head)	guess	large olive / yellow head; level 6
+121	cow	look	cow with lipstick; level 0 setup (3 of them)
+122	Tediz variant (no animation bank)	guess	type 0x7A grouped with Tediz (obj_kind_can_take_hit 0x5A / 0x74 / 0x7A, obj_get_hit_kind 2); anim_bank_load fails
+123	Tediz buzzsaw spider	look	teddy head on spider legs with a buzzsaw; level 23
+124	small bird	guess	tiny yellow-blue thing; level 23
+125	stick / match	guess	tiny stick; level 10
+126	torch	guess	black handle with silver tip; levels E, 1C, 23, 29
+127	barrel	look	wooden barrel; levels 6, 3C, 3D, 41
+128	Conker, army helmet	code	tail_update_conker + walk_select_move_anim + pickup voice lines (type 0x80); SHC helmet by look
+129	iris hatch	guess	black octagonal shutter floor; level 23
+130	mech suit	look	yellow-black mech (his skeleton); level 40 (Heist ending)
+131	missile	look	striped rocket; level 23
+132	red button	guess	small red button; level 23
+133	red-cross sign	guess	wooden sign with a red cross; level A
+134	weasel henchman, sunglasses	look	small weasel in black suit; levels 1A, 38, 39, 40 (Heist)
+135	SHC Sergeant	look	grey squirrel officer in green uniform; levels 4, 6, 13
+136	caveman, red pelt (his skeleton)	guess	Conker-skeleton caveman with red pelt
+137	bomb	look	black round bomb with fuse; levels 2, 38, 42, 43
+138	cannon robot	guess	blue robot with cannon and coils; level 26
+139	Birdy the scarecrow	look	straw scarecrow in a red jacket; levels 6, 29
+140	key with eyes	look	golden key creature; levels 2E, 3C
+141	Tediz nurse	look	Tediz in white apron with red cross (anim 1); levels 26, 2F (13 of them)
+142	gargoyle	look	big blue stone gargoyle; level 29 (start)
+143	raptor	look	teal raptor; level 32 (Uga Buga)
+144	caveman (his skeleton)	look	Conker-skeleton caveman, spotted pelt; levels 31, 32 (8 of them)
+145	fat cave woman	guess	big blue-skinned figure with blonde hair; level 31 (8 of them)
+146	Great Mighty Poo	look	brown poo mound with arms; level 35
+147	sweetcorn with eyes	look	corn kernel creature; level 35 (8 of them, Poo's cavern)
+148	unknown small shard	unknown	tiny blue piece; level 10 (6 of them)
+149	tree branch hand	guess	wooden hand-shaped branch; level 35 (6 of them)
+150	Conker, black coat (Heist)	look	player on Heist levels 36, 39, 3A, 40 (his skeleton)
+151	Berri (Heist catsuit)	look	female squirrel in black catsuit; levels 36, 39, 3A, 40
+152	Heist lobby guard	guess	thin black-suited figure with big hair (his skeleton); level 36 (12 of them)
+153	Professor von Kriplespac	look	scientist in a wheelchair; levels 18, 40
+154	bat, green eyes	look	black bat; level 3C
+155	bat, yellow eyes	look	black bat; level 3C (7 of them)
+156	villager, hat and moustache	guess	his skeleton; levels 6, 3C (Spooky villagers)
+157	villager, glasses and red jacket	guess	his skeleton; level 3C
+158	spiky dome mine	guess	dark spiked dome with green light
+159	villager, black jacket	guess	his skeleton; levels 3C, 41
+160	villager woman, purple dress	guess	his skeleton, blonde hair; levels 3C, 41
+161	small red top	guess	tiny red and black piece
+162	black spikes	guess	spike pieces; level 3C
+163	unknown (draws nothing here)	unknown	no visible geometry in photo mode; level 3C
+164	Count Batula	look	vampire with grey hair and red cape; level 3C
+165	dinosaur, orange	guess	orange toothy dinosaur; level 19 (4 of them)
+166	stalk with eyes	guess	blue stalk / periscope creature; levels 3C, 3D (7 of them)
+167	Conker wrapped up	guess	grey wrapped figure wearing Conker's shoes; level 18
+168	striped flag '2'	guess	green-white striped sheet with a number 2
+169	red cloth	guess	flat red piece
+170	lightning bolt	look	yellow zigzag; level 38
+171	dinosaur egg	look	green-spotted egg
+172	rolling ball, orange	code	rolling_object_update type 0xAC; orange ball; level A
+173	wasp 2	look	levels 6, 27
+174	wasp 3	look	levels 6, 27
+175	wasp 4	look	levels 6, 27
+176	officer in green uniform (his skeleton)	guess	grey head, tall hat, green coat; tail_update_conker type 0xB0
+177	teddy bear (his skeleton)	look	teddy on Conker's skeleton
+178	Grim Reaper (his skeleton)	look	hooded skeleton
+179	mouse, spotted	guess	spotted mouse like Marvin; level 18
+180	skeleton	look	skeleton on his skeleton
+181	grey brute in white shirt	guess	big grey bulldog-like character
+182	bloody teeth	guess	gums with white teeth; level 0 setup
+183	weasel band: double bass	look	weasel playing a double bass (with 184 / 185, anim_state_snapshot cases)
+184	weasel band: saxophone	look	weasel in suit playing a horn
+185	weasel band: drums	look	drum kit labelled 'The Weasels'
+186	bomb, grey	guess	grey round bomb with fuse
