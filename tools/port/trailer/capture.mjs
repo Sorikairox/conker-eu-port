@@ -1,7 +1,7 @@
 // P354 trailer: capture one gameplay shot from the port, frame by frame (deterministic, independent of wall time).
 //   node tools/port/trailer/capture.mjs SHOT [more shots...]      (shots: tools/port/trailer/shots.mjs)
 //   env OUT=dir (default port_work/trailer/shots), ONLYSTILL=1 (one JPEG at the shot's start, to frame a shot),
-//       FRAMES=N (capture only the first N pictures)
+//       FRAMES=N (capture only the first N pictures), MAXWALL=S (give up after S s wall, e.g. a level that traps)
 // The game page (port/build/web, unchanged) is served with the ROM at /dev/rom.z64 and opened with ?det=1 (one VI
 // retrace per animation frame) + the shot's query; shim.js takes over requestAnimationFrame and the audio sink.
 // Output per shot in OUT/NAME/: f00000.jpg ... (fps pictures per second; with hfr the High frame rate option's
@@ -16,6 +16,7 @@ import { SHOTS } from './shots.mjs';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../..');
 process.chdir(ROOT);
 const OUT = process.env.OUT || 'port_work/trailer/shots';
+const MAXWALL = +(process.env.MAXWALL || 0);   // seconds: give up (and close Chrome) when the game stops advancing
 const SHIM = fs.readFileSync('tools/port/trailer/shim.js', 'utf8');
 
 async function captureShot(name) {
@@ -51,7 +52,10 @@ async function captureShot(name) {
       while (true) {
         const next = steps.length && steps[0].at <= f ? steps[0].at : f;
         let cur;
-        do { cur = await b.ev(`__trailer.runTo(${next}, 40)`); } while (cur < next);
+        do {
+          cur = await b.ev(`__trailer.runTo(${next}, 40)`);
+          if (MAXWALL && Date.now() - t0 > MAXWALL * 1000) throw new Error(`${name}: MAXWALL ${MAXWALL} s reached at retrace ${cur}`);
+        } while (cur < next);
         if (steps.length && steps[0].at <= cur && steps[0].at <= f) { const st = steps.shift(); console.log(`  step @${cur}: ${st.eval.slice(0, 80)} -> ${JSON.stringify(await b.ev(st.eval))}`); continue; }
         if (cur >= f) return cur;
       }

@@ -13,7 +13,19 @@ const NOHUD = 'healthhud:0,cashhud:0';
 // level 0x29 (the first level), Conker runs along the river from the warp start (same pads in run29* shots)
 const RUN29 = '&warp=29&padf=100:0:0:0,130:0:0:80,250:0:30:80,330:8000:30:80,338:0:30:80,420:0:-50:70,520:0:0:80,600:8000:0:80,608:0:0:80,700:0:60:60,800:0:0:80,900:0:-60:60,1000:0:0:0';
 const SPIN13 = '&warp=13&padf=100:0:0:0&p352tpf=200&p352tpx=790&p352tpy=1900&p352tpz=-3572&p352yaw=180&p205goto=262:20:0:h-1100:-3572&p326hcycle=900&p326=1';
+// P355: the new game's opening cutscene (Start at the title, Start on the save slot): credits, then Conker on the throne
+// with his monologue from retrace ~8450 ("Well... there I am.") to ~10290 ("...a bad fur day."); the game's own
+// "Conker's Bad Fur Day" logo follows at ~10300 and is never shown. Three runs of the same frames: the pictures (with the
+// music and effects, no speech), the speech alone (music and effects off) and the full mix (for checking the sum).
+const NEWGAME = '&padf=3386:1000:0:0,3401:0:0:0,4458:1000:0:0,4473:0:0:0';
+const INTRO = { start: 8240, secs: 42, audioFrom: 60 };
 export const SHOTS = {
+  // the features part's game music (P355 pick by measurement, musicstat.mjs: loud, steady ~97 BPM loop): level 0x0C with
+  // the effects and speech off, Conker standing still
+  music_0c: { query: '&warp=0C&opt=volsfx:0,volspeech:0&padf=100:0:0:0', start: 150, secs: 60, fps: 0.5, hfr: false, canvas: '480x270' },
+  intro: { query: `${NEWGAME}&opt=hires2d:1,widescreen:1,fullres:1,hfr:1,volspeech:0`, ...INTRO, hfr: true },
+  intro_speech: { query: `${NEWGAME}&opt=widescreen:1,volmusic:0,volsfx:0`, ...INTRO, fps: 2, hfr: false, canvas: '480x270' },
+  intro_full: { query: `${NEWGAME}&opt=widescreen:1`, ...INTRO, fps: 2, hfr: false, canvas: '480x270' },
   // music: the title sequence from power-on with Skip intro (rain, Conker walks into the pub, title menu), sound effects off
   music: { query: '&opt=hires2d:1,widescreen:1,skipintro:1,volsfx:0,volspeech:0', start: 40, secs: 70, fps: 4, hfr: false, out: [960, 540] },
   // Conker on level 0x29: modern (16:9, full resolution, hi-res 2D, high frame rate), the same without the high frame
