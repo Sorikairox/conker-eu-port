@@ -388,7 +388,7 @@ function keyboardPad() {
     cy = ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
     b = (b & ~C_BITS) | (on('CAMZOOM') ? N64.CU : 0) | (on('CAMBACK') ? N64.CD : 0);
   }
-  return { present: true, b, x: sx, y: sy, half: !!on('HALF'), cx, cy, photo: !!on('PHOTO') };
+  return { present: true, b, x: sx, y: sy, half: !!on('HALF'), cx, cy, photo: !!on('PHOTO'), nav: !!on('CAMBACK') };   // P358 nav: photo panel focus
 }
 function gamepadPad(gp) {
   let b = 0;
@@ -401,6 +401,7 @@ function gamepadPad(gp) {
   const [sx, sy] = octagon(x, y);
   // P348 photo mode: its on / off button and the right stick as an analog look stick (N64 counts, y up)
   const photo = padMap.PHOTO !== undefined && pressed(padMap.PHOTO);
+  const nav = padMap.CAMBACK !== undefined && pressed(padMap.CAMBACK);   // P358: photo panel focus (right stick click)
   let lx = ax(2), ly = -ax(3), lm = Math.hypot(lx, ly);
   if (lm < 0.2) { lx = ly = 0; } else { const s = Math.min(1, (lm - 0.2) / 0.8) / lm; lx *= s; ly *= s; }
   const look = { rx: Math.round(lx * STICK), ry: Math.round(ly * STICK) };
@@ -409,12 +410,12 @@ function gamepadPad(gp) {
     if (rm < 0.2) { rx = ry = 0; } else { const s = Math.min(1, (rm - 0.2) / 0.8) / rm; rx *= s; ry *= s; }
     // C buttons bound to pad buttons (C-down on B / circle, C-left on Y / triangle) stay buttons
     b |= (padMap.CAMZOOM !== undefined && pressed(padMap.CAMZOOM) ? N64.CU : 0) | (padMap.CAMBACK !== undefined && pressed(padMap.CAMBACK) ? N64.CD : 0);
-    return { present: true, b, x: sx, y: sy, cx: Math.round(rx * STICK), cy: Math.round(ry * STICK), photo, ...look };
+    return { present: true, b, x: sx, y: sy, cx: Math.round(rx * STICK), cy: Math.round(ry * STICK), photo, nav, ...look };
   }
   // right stick -> C-buttons
   if (ax(2) > 0.5) b |= N64.CR; if (ax(2) < -0.5) b |= N64.CL;
   if (ax(3) > 0.5) b |= N64.CD; if (ax(3) < -0.5) b |= N64.CU;
-  return { present: true, b, x: sx, y: sy, photo, ...look };
+  return { present: true, b, x: sx, y: sy, photo, nav, ...look };
 }
 // ---------------------------------------------------------------- touch controls (phones / tablets)
 // Floating stick: the first touch in the left zone sets the centre, dragging up to STICK_PX gives full tilt.
@@ -550,6 +551,7 @@ function photoRequest(on) {
 function photoShow(on) {
   document.body.classList.toggle('photo', on);
   $('photo').hidden = !on;
+  lookShow(on);   // P358
   $('photo-btn').setAttribute('aria-pressed', String(on));
   if (!on && document.pointerLockElement && document.exitPointerLock && !opt('freecam')) document.exitPointerLock();
   applyPause();   // the sound is off while photo mode is on
@@ -566,8 +568,11 @@ function photoPoll(d) {
   if (st < 0 && photo.asked) { photoToast(PHOTO_WHY[-st] || 'photo mode did not start'); log(`[photo] not started: ${PHOTO_WHY[-st]}`); photo.asked = 0; }
   if (st === 2) photo.asked = 0;
   if (st !== 2) return st === 1 || st === 3;
-  const dt = Math.min(0.1, (now - photo.last) / 1000), b = d.b, fresh = b & ~photo.prevB;
+  const dt = Math.min(0.1, (now - photo.last) / 1000);
+  let b = d.b, fresh = b & ~photo.prevB;
   photo.last = now; photo.prevB = b;
+  const panel = lookTick(dt, d, fresh);   // P358 Pose / Outfit panel; with its focus on it has the D-pad and A
+  b &= ~panel; fresh &= ~panel;
   if (fresh & N64.START) { photoRequest(false); return true; }
   if (fresh & N64.A) photoCapture();
   let flags = 0;
@@ -631,6 +636,17 @@ window.__photo = {
   status: () => (M && M._port_photo_status ? M._port_photo_status() : 0),
   enter: () => photoRequest(true), leave: () => photoRequest(false), capture: () => photoCapture(),
   info: () => (M ? [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => +M._port_photo_info(i).toFixed(2)) : null),
+  // P358 test aids: the look (pose / outfit) as the page sets it, and the game's reports (pc_photo.c LK_* / R_*)
+  move: (fwd, right, up, yaw, pitch, zoom) => { M._port_photo_input(fwd, right, up, yaw || 0, pitch || 0, 0, zoom || 1, 0); },
+  // P358: the page's own look (what the panel shows): patch = fields of the look (mats: {model: {key: {hide, tint, amt, tex}}}); null = Reset
+  lookPage: (patch) => { if (patch === null) Object.assign(look, LOOK_DEFAULT()); else { const m = patch.mats; delete patch.mats; Object.assign(look, patch);
+    for (const mo in m || {}) { look.mats[mo] = look.mats[mo] || {}; for (const k in m[mo]) look.mats[mo][k] = Object.assign({ hide: false, tint: '#ff3030', amt: 0, tex: -1 }, look.mats[mo][k], m[mo][k]); } }
+    lookPush(); lookBuild(); return JSON.stringify(look).slice(0, 300); },
+  lookSet: (k, i, v) => { M._port_photo_look_set(k, i, v); }, lookInfo: (w, i) => M._port_photo_look_info(w, i || 0),
+  lookDump: () => { const I = (w, i) => M._port_photo_look_info(w, i || 0), r = (w, n) => [...Array(n).keys()].map((i) => I(w, i));
+    return `model ${I(3)} anims ${I(0)} (bad ${r(1, I(0)).reduce((a, b) => a + b, 0)}) playing ${I(20)} @${I(21) / 100} group [${r(4, I(5))}] own att [${r(8, I(9)).map((k) => (k >> 8) + '/' + (k & 255))}] items ${[...Array(63).keys()].map((i) => (i + 1) + ':' + I(6, i + 1) + '/' + I(7, i + 1)).join(' ')}`; },
+  lookState: () => { const I = (w, i) => M._port_photo_look_info(w, i || 0), r = (w, n) => [...Array(n).keys()].map((i) => I(w, i));
+    return `drawn ${I(10)} dls ${I(11)} mask ${I(12)} frames ${I(2)} err ${I(22)} face [${r(19, 4)}] mats ${r(14, I(13)).map((k, i) => k + ':' + I(15, i)).join(' ')} tex ${r(17, I(16)).map((id, i) => i + '=' + id + '/' + (I(18, i) >> 16) + 'x' + (I(18, i) & 0xFFFF)).join(' ')}`; },
   pngB64: () => new Promise((res) => {
     if (!photo.png) return res('');
     const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.readAsDataURL(photo.png);
@@ -645,6 +661,258 @@ optionChanged.photomode = (on) => {
   if (!on && photo.state === 2) photoRequest(false);
 };
 optionChanged.photomode(opt('photomode'));
+// P358: names of what Conker's data holds, as far as identified (docs: PLAYING.md photo mode). Animation ids of his bank
+// (model 0 and the models of his skeleton group), models of that group, item lists (g_setup_cmd_lists), materials.
+// Animation names come from the code that starts them (player_move_animation, obj_jump_swim_glide_update,
+// player_swim_update, player_hit_reaction, player_idle_animation, ...); '?' = the code's context, not checked by eye.
+const PHOTO_ANIM_NAMES = {
+  0x000: 'default', 0x002: 'item idle', 0x005: 'put down', 0x007: 'hurt (kind 2)', 0x00C: 'walk', 0x00E: 'idle variant',
+  0x00F: 'stand (idle)', 0x011: 'swim fast', 0x013: 'hurt (kind 1)', 0x014: 'step to grab', 0x016: 'walk (slow)?',
+  0x017: 'swim carrying', 0x018: 'float under water', 0x019: 'walk (slow)', 0x01E: 'hurt (kind 14)', 0x01F: 'swim backwards',
+  0x021: 'stop', 0x022: 'swim stroke', 0x024: 'hurt (kind 4/5, drowning?)', 0x025: 'idle variant', 0x028: 'hurt (kind 3)',
+  0x02B: 'run (chased)', 0x02C: 'idle variant', 0x02F: 'hurt (kind 10)', 0x032: 'jump', 0x037: 'double jump', 0x038: 'fall / let go',
+  0x03A: 'idle (holding)', 0x03B: 'high fall', 0x03E: 'idle variant', 0x040: 'ledge pull-up', 0x042: 'ledge hang', 0x043: 'jump (from glide)?',
+  0x044: 'idle (holding)', 0x04B: 'land', 0x04E: 'walk (state 0x17)?', 0x058: 'hurt (kind 0)', 0x065: 'push', 0x066: 'push 2',
+  0x06D: 'swim (surface)', 0x07E: 'walk carrying (kind 9)', 0x07F: 'knocked down', 0x0A5: 'slide push', 0x0CB: 'tread water carrying',
+  0x0CC: 'tread water (surface)', 0x0CE: 'swim stroke 2', 0x0D0: 'turn', 0x0D1: 'tread water', 0x0D6: 'drop', 0x0E8: 'walk carrying (kind 0x16)',
+  0x0E9: 'helicopter tail spin', 0x0EA: 'ledge climb', 0x0EB: 'long jump (Z)', 0x0EC: 'walk carrying', 0x0ED: 'walk carrying (kind 0x15)',
+  0x0F8: 'run carrying', 0x101: 'turn 2', 0x111: 'walk (kind 0x19)', 0x112: 'run (kind 0x19)', 0x123: 'walk (kind 0x21)', 0x124: 'run (kind 0x21)',
+  0x158: 'walk (kind 0x24)', 0x159: 'run (kind 0x24)', 0x15B: 'walk (kind 0x22)', 0x15C: 'run (kind 0x22)', 0x161: 'walk (kind 0x23)',
+  0x162: 'run (kind 0x23)', 0x16F: 'hurt (kind 7)', 0x170: 'hurt (kind 6/8/15)', 0x178: 'walk (kind 0x26)', 0x179: 'run (kind 0x26)',
+  0x19E: 'jump holding (kind 0x21)', 0x1B0: 'run (kind 0x2D)', 0x1B1: 'walk (kind 0x2D)', 0x1E1: 'walk (kind 0x38)', 0x1E2: 'run (kind 0x38)',
+  0x1EC: 'walk (kind 0x39)', 0x1ED: 'run (kind 0x39)', 0x1F5: 'walk (kind 0x37)', 0x1F6: 'run (kind 0x37)', 0x1FB: 'walk (kind 0x3A)',
+  0x221: 'hit reaction', 0x223: 'walk (kind 0x3B)', 0x224: 'run (kind 0x3B)', 0x22C: 'run carrying (kind 9)', 0x279: 'high jump',
+  0x283: 'crouch (Z)?', 0x28E: 'turn 3', 0x297: 'ledge drop down', 0x2C6: 'walk carrying (kind 0x16) 2', 0x2D4: 'death (kind 11)',
+  0x2D6: 'death (kind 12)', 0x2D8: 'death (kind 13)', 0x302: 'walk (2)', 0x303: 'run (2)', 0x34F: 'idle (end)?',
+};
+// models of his skeleton group (g_anim_bank_group_lists), by eye on level 0x29 (P358)
+const PHOTO_MODEL_NAMES = { 0: 'Conker', 1: 'Conker, detail 2', 2: 'Conker, detail 3', 3: 'Conker, detail 4', 4: 'Conker, detail 5',
+  59: 'thin character in black', 130: 'mech suit', 136: 'beaked character, red vest', 144: 'beaked character, sunglasses', 150: 'Conker, black coat (Heist)',
+  152: 'Berri? (black suit)', 156: 'weasel, hat and moustache', 157: 'weasel, glasses, red jacket', 159: 'weasel, black jacket',
+  160: 'weasel, purple', 176: 'green camouflage with blade', 177: 'teddy bear', 178: 'Grim Reaper', 117: 'teddy bear 2', 180: 'skeleton' };
+// models outside his skeleton group (their own skeleton and animations), by eye on level 0x29 (P358); the rest by number
+const PHOTO_OTHER_MODEL_NAMES = { 5: 'wasp', 173: 'wasp 2', 174: 'wasp 3', 175: 'wasp 4', 21: 'crate creature', 58: 'imp (red)', 61: 'imp (black)',
+  90: 'Tediz', 95: 'Tediz (soldier)', 116: 'Tediz 2', 141: 'Tediz (medic)', 154: 'bat', 155: 'bat 2', 6: 'Rare logo', 134: 'camouflage soldier' };
+// setup command lists (held items / gear), by eye on Conker at level 0x29; the others show nothing on him there
+const PHOTO_ITEM_NAMES = { 2: 'big blade', 4: 'cloth (cyan)', 20: 'nuclear warhead', 22: 'pistol', 23: 'gas mask', 24: 'striped bazooka',
+  25: 'big gun barrel', 33: 'bone club', 35: 'green cap', 37: 'black mask', 40: 'machete', 41: 'throwing knives', 46: 'chain',
+  48: 'sunglasses', 49: 'scythe and cloak', 50: 'black hat', 51: 'net', 54: 'crate with a blade', 55: 'red cape', 60: 'yellow helmet',
+  62: 'leaf crown' };
+// materials (texture entries, face slots, untextured groups) of model 0, by hiding each one (P358)
+const PHOTO_MAT_NAMES = { 0: { 13: 'fur (head, tail)', 5: 'hoodie (side)', 6: 'hoodie (front)', 1: 'shoes', 4: 'legs', 2: 'muzzle',
+  83: 'mouth', 64: 'eyelids 1', 65: 'eyelids 2', 66: 'eye 1', 67: 'eye 2' } };
+
+// ---------------------------------------------------------------- P358 photo mode: Pose and Outfit (the "look")
+// The page only chooses; pc_photo.c keeps the choice (port_photo_look_set) and the game applies it inside the photo
+// frames (game_eu_15A210.c photo_look_*), so it never reaches the game itself: leaving photo mode restores the game
+// exactly as it was (the snapshot), whatever was chosen here. What Conker is made of comes back as reports
+// (port_photo_look_info). The choices are remembered for this browser session (sessionStorage 'photo.look') and
+// applied again whenever photo mode starts. Gamepad / keyboard: O (the right stick click) gives the panel the D-pad:
+// up / down choose a control, left / right change it, A presses it; O again gives the D-pad back to the camera.
+const LK = { ANIM: 0, FRAME: 1, MODEL: 2, ITEM: 3, ATT_HIDE: 4, DL_HIDE: 5, DL_SHOW: 6, FACE: 7, MAT_HIDE: 8, MAT_TINT: 9, MAT_TEX: 10 };
+const LR = { ANIM_COUNT: 0, ANIM_BAD: 1, FRAMES: 2, MODEL: 3, GROUP: 4, GROUP_N: 5, ITEM_KIND: 6, ITEM_ASSET: 7, ATT: 8, ATT_N: 9,
+  DRAWN_MODEL: 10, DL_N: 11, DL_MASK: 12, MAT_N: 13, MAT_KEY: 14, MAT_TRIS: 15, TEX_N: 16, TEX_ID: 17, TEX_WH: 18, FACE: 19,
+  ANIM_GAME: 20, FRAME_GAME: 21, ERR: 22 };
+const LOOK_FPS = 25;   // animation frames per second when playing (the game steps about one frame per PAL field pair x 1.2)
+const LOOK_DEFAULT = () => ({ anim: -1, frame: 0, play: false, speed: 1, model: -1, items: [0, 0, 0, 0], attHide: [], dlHide: 0, dlShow: 0,
+  face: [-1, -1, -1, -1], mats: {}, min: false });
+const look = (() => {
+  try { const v = JSON.parse(sessionStorage.getItem('photo.look') || 'null'); if (v && typeof v === 'object') return Object.assign(LOOK_DEFAULT(), v); } catch (e) { /* no storage */ }
+  return LOOK_DEFAULT();
+})();
+const lookUi = { built: false, drawn: -2, matSig: '', nav: false, focus: 0, prevNav: false, lastInfo: 0, frames: 0 };
+function lookSave() { try { sessionStorage.setItem('photo.look', JSON.stringify(look)); } catch (e) { /* ignore */ } }
+const lkInfo = (w, i) => (M && M._port_photo_look_info ? M._port_photo_look_info(w, i || 0) : 0);
+const hex3 = (n) => '0x' + n.toString(16).toUpperCase().padStart(3, '0');
+function animLabel(i) { const n = PHOTO_ANIM_NAMES[i]; return hex3(i) + (n ? ' ' + n : ''); }
+function modelLabel(m) { return (PHOTO_MODEL_NAMES[m] || 'model') + ' (' + m + ')'; }
+function itemLabel(n) {
+  const k = lkInfo(LR.ITEM_KIND, n), a = lkInfo(LR.ITEM_ASSET, n);
+  return (PHOTO_ITEM_NAMES[n] || ((k & 1) ? 'object ' : 'model ') + a) + ' (list ' + n + ')';
+}
+function matLabel(model, key) {
+  const named = (PHOTO_MAT_NAMES[model] || {})[key];
+  if (named) return named;
+  if (key >= 80) return 'untextured ' + (key - 79);
+  if (key >= 64) return ['eyelids 1', 'eyelids 2', 'eye 1', 'eye 2'][key - 64];
+  return 'texture ' + lkInfo(LR.TEX_ID, key);
+}
+// everything chosen -> pc_photo.c (the next photo frame shows it)
+function lookPush() {
+  if (!M || !M._port_photo_look_set) return;
+  const S = (k, i, v) => M._port_photo_look_set(k, i, v);
+  S(-1, 0, 0);
+  if (look.anim >= 0) { S(LK.ANIM, 0, look.anim); S(LK.FRAME, 0, Math.round(look.frame * 100)); }
+  if (look.model >= 0) S(LK.MODEL, 0, look.model);
+  look.items.forEach((v, i) => v && S(LK.ITEM, i, v));
+  look.attHide.slice(0, 16).forEach((v, i) => S(LK.ATT_HIDE, i, v));
+  if (look.dlHide) S(LK.DL_HIDE, 0, look.dlHide);
+  if (look.dlShow) S(LK.DL_SHOW, 0, look.dlShow);
+  look.face.forEach((v, i) => v >= 0 && S(LK.FACE, i, v));
+  const mats = look.mats[lkInfo(LR.DRAWN_MODEL)] || {};
+  for (const key in mats) {
+    const m = mats[key];
+    if (m.hide) S(LK.MAT_HIDE, +key, 1);
+    if (m.amt > 0) { const c = parseInt((m.tint || '#ff0000').slice(1), 16); S(LK.MAT_TINT, +key, ((c << 8) | Math.round(m.amt * 2.55)) >>> 0 | 0); }
+    if (m.tex >= 0) S(LK.MAT_TEX, +key, m.tex);
+  }
+  lookSave();
+}
+function lookChanged() { lookPush(); lookRefreshValues(); }
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in attrs || {}) { if (k === 'on') for (const ev in attrs.on) e.addEventListener(ev, attrs.on[ev]); else if (k in e) e[k] = attrs[k]; else e.setAttribute(k, attrs[k]); }
+  for (const c of kids) if (c != null) e.append(c);
+  return e;
+}
+function row(label, ...kids) { return el('div', { className: 'lk-row' }, label != null ? el('span', {}, label) : null, ...kids); }
+function selectOf(options, value, onchange, title) {
+  const s = el('select', { title: title || '', on: { change: () => onchange(+s.value) } });
+  for (const [v, t] of options) s.append(el('option', { value: String(v), textContent: t }));
+  s.value = String(value);
+  return s;
+}
+// the whole panel (photo mode starts, Reset, or the drawn model changed)
+function lookBuild() {
+  const P = $('photo-look');
+  P.textContent = '';
+  P.classList.toggle('min', !!look.min);
+  P.append(el('div', { className: 'lk-head' }, el('b', { textContent: 'POSE & OUTFIT' }),
+    el('span', {}, el('button', { textContent: 'Reset', title: 'Back to the game\'s own pose and outfit', on: { click: () => { const m = look.min; Object.assign(look, LOOK_DEFAULT(), { min: m }); lookPush(); lookBuild(); } } }),
+      ' ', el('button', { textContent: look.min ? '+' : '–', title: 'Show / hide this panel', on: { click: () => { look.min = !look.min; lookSave(); lookBuild(); } } }))));
+  // Pose
+  const n = lkInfo(LR.ANIM_COUNT), opts = [[-1, 'original pose (' + animLabel(lkInfo(LR.ANIM_GAME)) + ')']];
+  for (let i = 0; i < n; i++) if (!lkInfo(LR.ANIM_BAD, i)) opts.push([i, animLabel(i)]);
+  const animSel = selectOf(opts, look.anim, (v) => { look.anim = v; look.frame = 0; lookChanged(); }, 'Conker\'s animation (' + (opts.length - 1) + ' with data)');
+  animSel.id = 'lk-anim';
+  const step = (d) => { const i = opts.findIndex((o) => o[0] === look.anim); const j = Math.max(0, Math.min(opts.length - 1, i + d)); look.anim = opts[j][0]; look.frame = 0; lookChanged(); };
+  P.append(el('h4', { textContent: 'POSE' }),
+    row('animation', animSel),
+    row(null, el('button', { textContent: '◀ anim', on: { click: () => step(-1) } }), el('button', { textContent: 'anim ▶', on: { click: () => step(1) } }),
+      el('button', { id: 'lk-play', textContent: look.play ? 'pause' : 'play', title: 'Play the animation in a loop', on: { click: () => { look.play = !look.play; lookSave(); lookRefreshValues(); } } })),
+    row('frame', el('input', { type: 'range', id: 'lk-frame', min: '0', max: '1', step: '1', value: String(Math.floor(look.frame)),
+      on: { input: (e) => { look.frame = +e.target.value; look.play = false; lookChanged(); } } }), el('span', { id: 'lk-frame-n', className: 'lk-note' })),
+    row(null, el('button', { textContent: '◀ frame', on: { click: () => { look.frame = Math.max(0, Math.floor(look.frame) - 1); look.play = false; lookChanged(); } } }),
+      el('button', { textContent: 'frame ▶', on: { click: () => { look.frame = Math.floor(look.frame) + 1; if (lookUi.frames && look.frame >= lookUi.frames) look.frame = 0; look.play = false; lookChanged(); } } }),
+      el('span', {}, 'speed'), selectOf([[0.25, '¼'], [0.5, '½'], [1, '1×'], [2, '2×']], look.speed, (v) => { look.speed = v; lookSave(); })));
+  // Outfit: model
+  P.append(el('h4', { textContent: 'OUTFIT' }));
+  const g = [];
+  for (let i = 0; i < lkInfo(LR.GROUP_N); i++) g.push(lkInfo(LR.GROUP, i));
+  const own = lkInfo(LR.MODEL);
+  const others = [];   // models with a skeleton of their own: drawn with their own animation bank (ids of the pose list differ)
+  for (let m = 0; m < 187; m++) if (!g.includes(m)) others.push([m, '(own skeleton) ' + (PHOTO_OTHER_MODEL_NAMES[m] || 'model') + ' (' + m + ')']);
+  P.append(row('model', selectOf([[-1, 'his own: ' + modelLabel(own)], ...g.filter((m) => m !== own).map((m) => [m, modelLabel(m)]), ...others], look.model,
+    (v) => { look.model = v; look.dlHide = look.dlShow = 0; lookChanged(); }, 'Models that share Conker\'s skeleton and animations (loaded from the ROM for the photo only)')));
+  // items (setup lists)
+  const items = [[0, '—']];
+  for (let i = 1; i <= 63; i++) if (lkInfo(LR.ITEM_KIND, i)) items.push([i, itemLabel(i)]);
+  for (let s = 0; s < 4; s++) P.append(row(s ? '' : 'items', selectOf(items, look.items[s], (v) => { look.items[s] = v; lookChanged(); }, 'Held items / gear: the game\'s attachment lists, put on Conker for the photo')));
+  // his own attachments
+  const na = lkInfo(LR.ATT_N);
+  if (na) for (let i = 0; i < na; i++) {
+    const key = lkInfo(LR.ATT, i);
+    const cb = el('input', { type: 'checkbox', checked: !look.attHide.includes(key), on: { change: () => { look.attHide = look.attHide.filter((k) => k !== key); if (!cb.checked) look.attHide.push(key); lookChanged(); } } });
+    P.append(row(i ? '' : 'he carries', cb, el('span', { className: 'lk-note' }, 'model ' + (key >> 8) + ' (list ' + (key & 255) + ')')));
+  }
+  // display lists of the drawn model (the game's own part mask)
+  const drawn = lkInfo(LR.DRAWN_MODEL), ndl = lkInfo(LR.DL_N);
+  if (ndl > 1) {
+    const r = row('parts');
+    for (let k = 0; k < ndl && k < 32; k++) {
+      const hiddenByGame = (lkInfo(LR.DL_MASK) >> k) & 1;
+      const cb = el('input', { type: 'checkbox', title: 'display list ' + k + (hiddenByGame ? ' (the game hides it)' : ''),
+        checked: hiddenByGame ? !!((look.dlShow >> k) & 1) : !((look.dlHide >> k) & 1),
+        on: { change: () => { const b = 1 << k; if (hiddenByGame) look.dlShow = cb.checked ? look.dlShow | b : look.dlShow & ~b; else look.dlHide = cb.checked ? look.dlHide & ~b : look.dlHide | b; lookChanged(); } } });
+      r.append(cb);
+    }
+    P.append(r);
+  }
+  // face textures (segments 6 / 7 / 0xA / 0xB)
+  const ntex = lkInfo(LR.TEX_N), tex = [];
+  for (let i = 0; i < ntex; i++) tex.push({ i, id: lkInfo(LR.TEX_ID, i), w: lkInfo(LR.TEX_WH, i) >> 16, h: lkInfo(LR.TEX_WH, i) & 0xFFFF });
+  ['eyelids 1', 'eyelids 2', 'eye 1', 'eye 2'].forEach((name, s) => {
+    const cur = lkInfo(LR.FACE, s), t = tex[cur];
+    const same = tex.filter((x) => !t || (x.w === t.w && x.h === t.h));
+    P.append(row(name, selectOf([[-1, 'the game\'s (texture ' + (t ? t.id : '?') + ')'], ...same.map((x) => [x.i, 'texture ' + x.id + ' (' + x.w + '×' + x.h + ')'])], look.face[s],
+      (v) => { look.face[s] = v; lookChanged(); }, 'The face texture the game puts into this slot every frame')));
+  });
+  // materials of the drawn model: shown / tint colour + strength / texture
+  const nm = lkInfo(LR.MAT_N);
+  if (nm) {
+    P.append(el('h4', { textContent: 'MATERIALS · ' + modelLabel(drawn) }), el('div', { className: 'lk-note', textContent: 'shown · texture · tint colour · tint %' }));
+    const mats = (look.mats[drawn] = look.mats[drawn] || {});
+    for (let i = 0; i < nm; i++) {
+      const key = lkInfo(LR.MAT_KEY, i), m = (mats[key] = mats[key] || { hide: false, tint: '#ff3030', amt: 0, tex: -1 });
+      const t = key < 64 ? tex[key] : null;
+      const texOpts = [[-1, matLabel(drawn, key) + ' · ' + lkInfo(LR.MAT_TRIS, i) + ' tris']];
+      if (t) for (const x of tex) if (x.i !== key && x.w === t.w && x.h === t.h) texOpts.push([x.i, '→ texture ' + x.id]);
+      P.append(el('div', { className: 'lk-mat' },
+        el('input', { type: 'checkbox', checked: !m.hide, title: 'shown', on: { change: (e) => { m.hide = !e.target.checked; lookChanged(); } } }),
+        selectOf(texOpts, m.tex, (v) => { m.tex = v; lookChanged(); }, t ? 'Draw it with another texture of the same size' : 'Face slots and untextured parts keep their texture'),
+        el('input', { type: 'color', value: m.tint, title: 'tint colour', on: { input: (e) => { m.tint = e.target.value; if (!m.amt) m.amt = 60; lookChanged(); } } }),
+        el('input', { type: 'range', min: '0', max: '100', step: '5', value: String(m.amt), title: 'tint strength (0 = none)', style: 'width: 44px', on: { input: (e) => { m.amt = +e.target.value; lookChanged(); } } })));
+    }
+  }
+  if (lkInfo(LR.ERR)) P.append(el('div', { className: 'lk-note', textContent: ['', 'that model could not be loaded here', 'that animation could not start', ''][lkInfo(LR.ERR)] || '' }));
+  lookUi.built = true; lookUi.drawn = drawn;
+  lookUi.matSig = drawn + ':' + nm + ':' + ntex + ':' + lkInfo(LR.DL_N) + ':' + na;
+  lookRefreshValues();
+}
+function lookRefreshValues() {
+  const f = $('lk-frame'), fr = lkInfo(LR.FRAMES);
+  lookUi.frames = look.anim >= 0 ? fr : 0;
+  if (f) { f.max = String(Math.max(0, lookUi.frames - 1)); f.value = String(Math.floor(look.frame)); f.disabled = look.anim < 0; }
+  if ($('lk-frame-n')) $('lk-frame-n').textContent = look.anim >= 0 ? Math.floor(look.frame) + ' / ' + Math.max(0, lookUi.frames - 1) : '—';
+  if ($('lk-play')) $('lk-play').textContent = look.play ? 'pause' : 'play';
+  if ($('lk-anim') && +$('lk-anim').value !== look.anim) $('lk-anim').value = String(look.anim);
+}
+// photo mode on: every animation frame (photoPoll). Plays the animation, rebuilds the panel when the game reports
+// another model / material set (a frame after a model change), and runs the gamepad / keyboard panel focus.
+function lookTick(dt, d, fresh) {
+  if (!lookUi.built) { lookPush(); lookBuild(); }
+  const now = performance.now();
+  if (now - lookUi.lastInfo > 250) {
+    lookUi.lastInfo = now;
+    const sig = lkInfo(LR.DRAWN_MODEL) + ':' + lkInfo(LR.MAT_N) + ':' + lkInfo(LR.TEX_N) + ':' + lkInfo(LR.DL_N) + ':' + lkInfo(LR.ATT_N);
+    if (sig !== lookUi.matSig) { lookPush(); lookBuild(); }
+    else lookRefreshValues();
+  }
+  if (look.play && look.anim >= 0 && lookUi.frames > 1) {
+    look.frame = (look.frame + dt * LOOK_FPS * look.speed) % (lookUi.frames - 1);
+    M._port_photo_look_set(LK.FRAME, 0, Math.round(look.frame * 100));
+    if ($('lk-frame')) { $('lk-frame').value = String(Math.floor(look.frame)); $('lk-frame-n').textContent = Math.floor(look.frame) + ' / ' + (lookUi.frames - 1); }
+  }
+  // panel focus: O / right stick click toggles; the D-pad and A then work the panel (returned mask: bits the camera must not see)
+  if (d.nav && !lookUi.prevNav) { lookUi.nav = !lookUi.nav; $('photo-look').classList.toggle('nav', lookUi.nav); if (lookUi.nav && look.min) { look.min = false; lookBuild(); } lookFocus(0); }
+  lookUi.prevNav = !!d.nav;
+  if (!lookUi.nav) { document.querySelectorAll('#photo-look .nav-focus').forEach((e) => e.classList.remove('nav-focus')); return 0; }
+  if (fresh & N64.DD) lookFocus(1);
+  if (fresh & N64.DU) lookFocus(-1);
+  const e = lookFocusEl();
+  if (e && (fresh & (N64.DL | N64.DR))) {
+    const dir = (fresh & N64.DR) ? 1 : -1;
+    if (e.tagName === 'SELECT') { e.selectedIndex = Math.max(0, Math.min(e.options.length - 1, e.selectedIndex + dir)); e.dispatchEvent(new Event('change')); }
+    else if (e.type === 'range') { e.value = String(+e.value + dir * (+e.step || 1)); e.dispatchEvent(new Event('input')); }
+    else if (e.type === 'checkbox') { e.checked = !e.checked; e.dispatchEvent(new Event('change')); }
+    lookFocus(0);
+  }
+  if (e && (fresh & N64.A)) { if (e.type === 'checkbox') { e.checked = !e.checked; e.dispatchEvent(new Event('change')); } else if (e.tagName === 'BUTTON') e.click(); lookFocus(0); }
+  return N64.DU | N64.DD | N64.DL | N64.DR | N64.A;
+}
+function lookFocusables() { return Array.from($('photo-look').querySelectorAll('select, input, button')).filter((e) => e.offsetParent !== null && e.type !== 'color'); }
+function lookFocusEl() { const l = lookFocusables(); return l[Math.max(0, Math.min(l.length - 1, lookUi.focus))]; }
+function lookFocus(d) {
+  const l = lookFocusables();
+  if (!l.length) return;
+  lookUi.focus = (lookUi.focus + d + l.length) % l.length;
+  l.forEach((e, i) => e.classList.toggle('nav-focus', i === lookUi.focus));
+  l[lookUi.focus].scrollIntoView({ block: 'nearest' });
+}
+function lookShow(on) {
+  $('photo-look').hidden = !on;
+  if (on) { lookUi.built = false; lookUi.nav = false; $('photo-look').classList.remove('nav'); }
+}
 
 const SKIP_ARC = 2 * Math.PI * 27;
 $('skiparc').style.strokeDasharray = String(SKIP_ARC);
@@ -657,10 +925,10 @@ function pollInput() {
   // pad 0 = keyboard merged with the first gamepad; pads 1-3 = further gamepads
   const pads = [keyboardPad(), null, null, null];
   const halfHeld = pads[0].half;   // the half-tilt key (P324 walk toggle)
-  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y, cx: k.cx, cy: k.cy, photo: k.photo }; }
+  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y, cx: k.cx, cy: k.cy, photo: k.photo, nav: k.nav }; }
   gps.forEach((gp, i) => {
     const g = gamepadPad(gp);
-    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy, photo: k.photo || g.photo, rx: g.rx, ry: g.ry }; }
+    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy, photo: k.photo || g.photo, nav: k.nav || g.nav, rx: g.rx, ry: g.ry }; }
     else if (i < 4) pads[i] = g;
   });
   if (photoPoll(pads[0])) { requestAnimationFrame(pollInput); return; }   // P348: photo mode takes pad 1's input

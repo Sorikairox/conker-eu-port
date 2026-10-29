@@ -1011,7 +1011,7 @@ obj_effect_players_impact	game_eu_981C0.c	0
 obj_effect_run_handler	game_eu_981C0.c	0
 obj_electrify_fx_update	game_eu_E30C0.c	0
 obj_face_selector_target	game_eu_595D0.c	0
-obj_face_selectors_step	game_eu_595D0.c	0
+obj_eyelid_selectors_step	game_eu_595D0.c	0
 obj_fade_command	game_83300.c	0
 obj_fade_update	game_83300.c	0
 obj_find_by_setup_id	game_eu_AF2A0.c	0
@@ -1087,7 +1087,7 @@ obj_select_lod	game_eu_595D0.c	0
 obj_send_hit	game_83300.c	0
 obj_set_kind_look_flags	game_eu_692C0.c	0
 obj_set_type	game_eu_AF2A0.c	0
-obj_set_vertex_segments	game_eu_595D0.c	0
+obj_set_face_texture_segments	game_eu_595D0.c	0
 obj_setup_run	game_eu_AF2A0.c	0
 obj_setup_undo	game_eu_AF2A0.c	0
 obj_sfx_play_attached	game_83300.c	0

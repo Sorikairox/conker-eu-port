@@ -4193,8 +4193,8 @@ func_1502ED88	obj_tint_set_flash	(med) Sets an object's tint to kind 6 (colour f
 func_1502EDEC	obj_tint_update	Per-frame step of an object's tint block (+0xA4 kind): fades, pulses and flashes
 func_1502EF24	obj_tint_get_colour	Returns the colour and alpha of a model's tint block by its kind
 func_1502F17C	obj_face_selector_target	Returns object arg0's selector mode byte +0x6A + arg1 folded to 0..2
-func_1502F1E4	obj_face_selectors_step	(med) Steps the two vertex-block selectors (+0x6C/+0x6D) of object arg0 toward their modes, then refreshes it
-func_1502F30C	obj_set_vertex_segments	Sets segment 6 vertex block offsets of an object's model from its two selector bytes
+func_1502F1E4	obj_eyelid_selectors_step	Steps the two eyelid texture selectors (+0x6C / +0x6D: open, half, closed; P358 photo mode) of object arg0 toward their modes (blinking), then refreshes the face hide mask (P358: was obj_face_selectors_step)
+func_1502F30C	obj_set_face_texture_segments	Emits the model texture entries of an object into segments 6 / 7 (eyelids, by the blink selectors +0x6C / +0x6D) and 0xA / 0xB (eyes, +0x68 / +0x69) (P358: was named obj_set_vertex_segments)
 func_1502F554	obj_follow_parent	Moves object arg0 attached to its parent to the parent's (joint) position and heading
 func_1502F6B8	objects_update_carried	Moves objects standing on another object along with their carrier triangle
 func_1502F780	obj_carry_point	Carries a point along with a triangle of the carrier object's animated model

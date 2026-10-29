@@ -154,6 +154,12 @@ static int bany;
 /* RDP state */
 static unsigned oth_h, oth_l, combine_w0, combine_w1;
 static unsigned prim_col, env_col, fog_col, blend_col, fill_col, prim_lod;
+/* P358 photo mode outfit tint: a G_NOOP whose w0 is PHOTO_TINT_MARK sets the tint of the following draws (w1 = RGBA, A =
+ * strength, 0 = none). Only the game's photo frames write it (game_eu_15A210.c photo_look_patch_model, in Conker's model
+ * display list inside the sandbox, undone with it); every task starts without a tint. */
+#define PHOTO_TINT_MARK 0x0050544Eu
+static unsigned look_tint;
+static GLint u_tint;
 static unsigned cimg_addr, zimg_addr, cimg_width = 320, prim_z;
 /* P335: set for one texture rectangle that reads a full-frame image the port keeps at canvas resolution (hx_*, below):
  * the GL texture and the offset (canvas pixels, GL orientation) from the drawn pixel to the texel it reads. */
@@ -468,6 +474,7 @@ static const char *FS =
     "uniform ivec4 uC0, uC1, uA0, uA1, uBl1, uBl2, uLod; uniform int u2cyc, uAcmp, uMode, uTexOn, uFilt, uBlFin, uCvg, uDbg, uIdx;\n"
     "uniform vec4 uPrim, uEnv, uFogC, uBlendC, uHiRes; uniform vec2 uK45; uniform float uPrimLod, uPixScale, uPrimZ;\n"
     "uniform int uRHi; uniform vec4 uRClamp;\n"
+    "uniform vec4 uTint;\n"
     "out vec4 frag;\n"
     "vec4 T0, T1, SH; float LF; vec2 RFW;\n"
     "int wrapc(int c, int cl, int mi, int mk, int mx) {\n"
@@ -569,6 +576,10 @@ static const char *FS =
     "    c1 = (cA(uC1.x, c) - cB(uC1.y, c)) * cC(uC1.z, c, a) + cD(uC1.w, c);\n"
     "    a1 = (aX(uA1.x, a) - aX(uA1.y, a)) * aC(uA1.z, a) + aX(uA1.w, a); }\n"
     "  c1 = clamp(c1, 0.0, 1.0); a1 = clamp(a1, 0.0, 1.0);\n"
+    /* P358 photo mode outfit tint (PHOTO_TINT_MARK below): the combined colour takes the tint's hue at its own brightness
+     * (luminance kept), mixed in by the tint's alpha */
+    "  if (uTint.a > 0.0) { float l = dot(c1, vec3(0.299, 0.587, 0.114)), lt = max(dot(uTint.rgb, vec3(0.299, 0.587, 0.114)), 0.08);\n"
+    "    c1 = mix(c1, clamp(uTint.rgb * (l / lt), 0.0, 1.0), uTint.a); }\n"
     /* P193 DIAGNOSTIC ?p193dbg=F: views of one material (see apply_state) */
     "  if (uDbg == 8) discard;\n"
     "  if (uDbg != 0) { frag = vec4(uDbg == 1 ? T0.rgb : uDbg == 2 ? SH.rgb : uDbg == 3 ? vec3(1.0, 0.0, 1.0) : uDbg == 4 ? vec3(LF) :"
@@ -628,7 +639,7 @@ int gfx_init(void) {
     U(u_env, "uEnv"); U(u_fogc, "uFogC"); U(u_blendc, "uBlendC"); U(u_primlod, "uPrimLod"); U(u_acmp, "uAcmp");
     U(u_mode, "uMode"); U(u_texon, "uTexOn"); U(u_filt, "uFilt"); U(u_lod, "uLod"); U(u_pixscale, "uPixScale"); U(u_lodviz, "uLodViz"); U(u_splitx, "uSplitX");
     U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg"); U(u_dbg, "uDbg"); U(u_idx, "uIdx"); U(u_hires, "uHiRes");
-    U(u_rhi, "uRHi"); U(u_rclamp, "uRClamp");
+    U(u_rhi, "uRHi"); U(u_rclamp, "uRClamp"); U(u_tint, "uTint");
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -816,6 +827,7 @@ static void apply_state(void) {
     glUniform4i(u_a1, w1 >> 21 & 7, w1 >> 3 & 7, w1 >> 18 & 7, w1 & 7);
     glUniform1i(u_2cyc, cyc == 1);
     rgba(u_prim, prim_col); rgba(u_env, env_col); rgba(u_fogc, fog_col); rgba(u_blendc, blend_col);
+    rgba(u_tint, look_tint);   /* P358 */
     glUniform1f(u_primlod, prim_lod / 255.0f);
     glUniform2f(u_k45, (float)(signed char)(k4k5 >> 9 & 0xFF) / 255.0f, (k4k5 & 0x1FF) / 255.0f);
     glUniform1f(u_primz, (oth_l & 4) && rect_mode == 0 ? (prim_z & 0x7FFF) / 32767.0f : -1.0f);
@@ -2303,7 +2315,7 @@ void gfx_run_dl(const void *dl) {
             continue;
         }
         switch (op) {
-        case 0x00: break;                                     /* G_NOOP */
+        case 0x00: if (w0 == PHOTO_TINT_MARK && w1 != look_tint) { look_tint = w1; state_dirty = 1; } break;   /* G_NOOP (P358: or the photo tint) */
         case 0x01: load_vtx(w0, w1); break;                   /* G_VTX */
         case 0x02: {                                          /* G_MODIFYVTX */
             V *v = &vb[(w0 & 0xFFFF) / 2 & 63];
@@ -2623,6 +2635,7 @@ int gfx_bounds(float mn[3], float mx[3]) {
 }
 
 void gfx_frame_begin(float r, float g, float b) {
+    if (look_tint) { look_tint = 0; state_dirty = 1; }   /* P358 */
     mtx_ident(mv); mtx_ident(proj); mtx_ident(mp); mtx_ident(proj_game); mtx_ident(mp_game); mvsp = 0;
     segset = 0; geom = 0; oth_h = oth_l = 0; tex_on = 0;
     normal_base = 0; memset(nbuf, 0, sizeof nbuf);

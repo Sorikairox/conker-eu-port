@@ -110,6 +110,32 @@ it started; it does not collide with walls. The sound is paused while photo mode
 input can be rebound under Controls. A button or stick you still hold when you leave photo mode only reaches the game
 after you have let go of it.
 
+**Pose & outfit (photo mode, P358).** The **POSE & OUTFIT** panel on the right of the picture changes Conker for the
+photo only: nothing of it reaches the game, and leaving photo mode puts the game back exactly as it was (same state,
+byte for byte). The choices are remembered while the tab stays open and come back the next time photo mode starts;
+**Reset** goes back to the game's own pose and outfit, **–** folds the panel.
+
+- **Pose:** any of Conker's 857 animations (the list shows the ones with a name found in the game's code, e.g. 0x032
+  jump, 0x037 double jump, 0x0E9 helicopter tail spin, 0x042 ledge hang, 0x040 pull-up, 0x011 swim, hurt and death
+  reactions, walks and runs while carrying things; the rest by number), **◀ anim / anim ▶**, the **frame** slider and
+  **◀ frame / frame ▶**, **play** / **pause** (loops the animation at ¼ to 2× speed). *original pose* = what he was doing.
+- **Model:** any model that shares Conker's skeleton and animations (20 in the game: his 5 detail levels, Conker in a
+  black coat from the Heist, the mech suit, the multiplayer characters: weasels, teddy bears, Grim Reaper, skeleton,
+  ...). They are loaded from the ROM for the photo, so they work in every level. Below them, every other model of the
+  game "(own skeleton)": the bat, the Tediz, wasps, imps, creatures and props; they move with their own animations,
+  so the pose numbers then mean that model's animations.
+- **Items:** up to 4 of the game's 63 attachment lists (held items and gear: pistol, gas mask, bazooka, machete,
+  sunglasses, helmets, cape, ...); a list made for another character may sit at an odd place on him. **he carries**:
+  hide what he holds himself.
+- **parts** (only for models made of several display lists): show / hide each one.
+- **Eyelids / eyes:** any texture of the model with the same size in the four face slots (Conker's eyelid and eye
+  textures: blink states, looks).
+- **Materials:** every texture of the model, plus its untextured parts, one row each: shown on / off, drawn with another
+  texture of the same size, a tint colour and strength (it keeps the shading: the hoodie in red, the fur in purple ...).
+
+With a gamepad (or the keyboard), **right stick click / O** gives the panel the D-pad: up / down choose a control,
+left / right change it, A presses it; press it again to give the D-pad back to the camera.
+
 ## Options
 
 The **Options** button in the page header opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.
@@ -144,7 +170,7 @@ The choice is saved with the options. In an online game the host's options apply
 | Conker always full detail | off | Conker is always drawn with his most detailed model. The original switches him to simpler models once the camera is more than 500 units away, which the follow camera often is while he runs (450 to 650 units). Other characters and objects keep the original level-of-detail rules. |
 | Underwater air meter | off | While Conker is under water, a bar at the top of the screen shows the air he has left: full when his head goes under, red in the last quarter, empty when he starts to drown. Works with Longer breath (the bar then empties half as fast). The original only shows the wobbling Conker-face meter on the right, which appears after about 2 s and stops changing at half the air. No bar in shallow water where you cannot run out of air. |
 | Free camera | off | Single player: the right stick, I J K L or the mouse turn the camera around Conker (orbit and look up / down; see *Free camera* under Controls above). Wherever the game uses another camera (cutscenes, look / aim views, swimming, vehicles, fixed camera spots, multiplayer) its own camera runs and the right stick is the C buttons again. Never used online: an online session always runs with it off. |
-| Photo mode | off | P (or the gamepad's Back button, or the Photo button) freezes the game for a photo: the HUD goes away, a free camera moves around the frozen moment (move, look, up / down, roll, zoom), and A or Space saves a PNG at twice the picture's resolution. Leaving it continues the game exactly where it stopped. Works in cutscenes. See *Photo mode* under Controls above. Single player only; never used online (an online session always runs with it off). Off: as on the N64, no photo mode. |
+| Photo mode | off | P (or the gamepad's Back button, or the Photo button) freezes the game for a photo: the HUD goes away, a free camera moves around the frozen moment (move, look, up / down, roll, zoom), and A or Space saves a PNG at twice the picture's resolution. Leaving it continues the game exactly where it stopped. Works in cutscenes. Its POSE & OUTFIT panel changes Conker's animation / frame, model, items, face textures and per-material visibility, texture and tint for the photo only (P358). See *Photo mode* under Controls above. Single player only; never used online (an online session always runs with it off). Off: as on the N64, no photo mode. |
 | Inverted swimming | off | Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. The original steers like a plane: stick up tilts him head-down and dives, stick down tilts him up. Only the swimming controls change; walking, flying and aiming stay as they are. |
 | Aiming crosshair | off | In the first-person aim views that the original leaves bare, the game's own small crosshair (the one the other guns use) is drawn in the middle of the screen, which is exactly where the shots go there. In this ROM that is the aim kind 0x18 (hold R with that weapon); the scope, lens, bracket and turret views and the other guns already have their own reticles and are unchanged, and the third-person R-look with a held item gets nothing (its shots are aimed from the hand / mouth, not through a fixed screen point). Takes effect the next time you aim. |
 | Rumble (gamepad vibration) | off | The game sees a Rumble Pak in your controller and a connected gamepad vibrates whenever the N64 Rumble Pak would (explosions, hits, heavy effects; the game pulses it on and off by strength). Needs a browser with gamepad vibration (Chrome / Edge, most Xbox and PlayStation pads). Takes effect immediately: switching it on or off makes the game look for the Rumble Pak again at once (before, it waited for the next level or area load). Saves are not affected (they use the cartridge EEPROM). |

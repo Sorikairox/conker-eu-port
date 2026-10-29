@@ -3788,7 +3788,7 @@ attachment_undo_kind_effects	15031F04	218	func	global	.game	game	13913
 D_eu_800C3682	800C3682	0	none	global	abs	game_data	8544
 D_eu_8009031C	8009031C	0	none	global	abs	game_data	8362
 D_800A1998	800A1998	0	none	global	abs	game_data	3742
-obj_face_selectors_step	1502F1E4	128	func	global	.game	game	13887
+obj_eyelid_selectors_step	1502F1E4	128	func	global	.game	game	13887
 g_obj_mtx_arena_start	800C42AC	0	data	global	abs	game_data	6828
 event_action_music	1509EC10	170	func	global	.game	game	14322
 dldump_rdphalf_1	15040AC8	C	func	global	.game	game	9663
@@ -12138,7 +12138,7 @@ light_spawn_kind8	15161978	8C	func	global	.game	game	10607
 g_rspboot_text_end	100294D0	0	data	global	abs	abs	50
 emit_sparks_by_angles_b	151534E0	328	func	global	.game	game	12450
 D_eu_800DDDD8	800DDDD8	0	none	global	abs	game_data	8772
-obj_set_vertex_segments	1502F30C	248	func	global	.game	game	13888
+obj_set_face_texture_segments	1502F30C	248	func	global	.game	game	13888
 puff_ground_chip_update	1517ADBC	10C	func	global	.game	game	12730
 face_blink_allowed	1507EA98	84	func	global	.game	game	14122
 D_800A1FC0	800A1FC0	0	none	global	abs	game_data	3909

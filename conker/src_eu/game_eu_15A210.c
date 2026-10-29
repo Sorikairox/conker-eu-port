@@ -426,4 +426,396 @@ void photo_camera_apply(void) {
     camera_matrices_refresh_all();
     port_photo_camera_applied();
 }
+
+/* ---- P358 photo mode: Conker's pose and outfit (the "look"; port/ultra/pc_photo.c keeps the choices, LK_* / R_* ids).
+ * Everything below runs only inside a photo frame (port_photo_look_active), so every change to game memory is undone
+ * by the snapshot restore like the photo camera, except photo_look_scan, which only reads when photo mode starts.
+ *
+ * What the game's data allows (P358 findings):
+ *  - Pose: Conker's object (g_objects[0]) plays one animation of his model's animation bank (g_model_anim_banks[model],
+ *    8-byte entries {u16 file, u16 callback, s32 events}; 857 on model 0, all with data) on the animation state +0x2D0
+ *    (struct_eu_anim: +4 id | hold 0x8000, +8 frame, +0x10 speed, +0x18 frame count). photo_look_pose restarts it with
+ *    anim_start_entry (no blend, speed 0, hold) after the state handlers ran and before objects_update_all builds the
+ *    joint matrices, so the skeleton is drawn in exactly that frame.
+ *  - Model: he is one display list (model 0 has 1; the game's per-list hide mask +0x94 therefore has nothing to split
+ *    on him) plus his level-of-detail models 1..4 and the extras of his part list +0x2C4. Models that share his
+ *    skeleton and animations are listed in g_anim_bank_group_lists (group of model 0: 20 models); any of them can be
+ *    drawn in his place (photo_look_swap_model: loaded from the ROM into the sandbox heap, his part list pointed at it,
+ *    fresh vertex blocks), with his pose.
+ *  - Materials: his display list loads one texture after the other (G_SETTIMG with the address of a texture entry of
+ *    the model, g_model_tex_entries; or segment 6 / 7 / 0xA / 0xB, the face textures the game picks per frame) and
+ *    draws triangles with it (Rare's 4-triangle commands 0x10..0x1F); runs without a texture are untextured groups.
+ *    Per material: hidden (its triangle commands become G_NOOP), tinted (a renderer marker, gfx_f3dex2.c
+ *    PHOTO_TINT_MARK, in place of the G_RDPPIPESYNC before it), or drawn with another texture entry of the same size.
+ *  - Face: the game fills segments 6 / 7 (eyes, entries 25..27 by the blink selectors +0x6C / +0x6D) and 0xA / 0xB
+ *    (mouth, +0x68 / +0x69) from the model's texture entries (obj_set_face_texture_segments); any entry can be put there.
+ *  - Items: the 63 setup command lists (g_setup_cmd_lists, obj_setup_run) attach models to joints (held items, gear);
+ *    up to 4 can be run on him. His own attachments (the g_attachment_list records he owns) can be hidden (+5 = 0). */
+int port_photo_look_active(void);
+int port_photo_look_get(int key, int i);
+int port_photo_look_once(int tag);
+void port_photo_look_report(int what, int i, int value);
+s32 anim_start_entry(struct127 *obj, s32 entry_addr, u8 *anim_addr, s32 unused, s32 restart, s32 id, s32 set,
+                     f32 speed, f32 blend, f32 frame, f32 loop_start, s32 hold);
+s32 model_header_load(s32 arg0, s32 arg1);
+s32 anim_bank_load(s32 arg0, s32 arg1);
+void obj_set_type(s32 slot, s32 type, s32 arg2);
+void *allocate_memory(s32, s32, s32, s32);
+extern s32 g_setup_cmd_lists;          /* was D_80087064: 63 lists {commands, count} */
+extern s32 g_anim_bank_group_lists;    /* was D_800847A0: models sharing an animation bank */
+extern u8 g_anim_bank_group_sizes;     /* was D_80098C38: their sizes, 0 terminated */
+extern u16 g_model_dl_counts[];        /* was D_800C4B98 */
+extern s32 g_model_dl_tables[];        /* was D_800C48A8 */
+extern s32 g_model_tex_entries;        /* was D_800C5758: per model, 12-byte texture entries {address, id, u16 w, u16 h} */
+extern s32 g_model_tex_counts;         /* was D_800C5A48: u16 per model */
+enum { LK_ANIM, LK_FRAME, LK_MODEL, LK_ITEM, LK_ATT_HIDE, LK_DL_HIDE, LK_DL_SHOW, LK_FACE, LK_MAT_HIDE, LK_MAT_TINT, LK_MAT_TEX };
+enum { R_ANIM_COUNT, R_ANIM_BAD, R_FRAMES, R_MODEL, R_GROUP, R_GROUP_N, R_ITEM_KIND, R_ITEM_ASSET, R_ATT, R_ATT_N,
+       R_DRAWN_MODEL, R_DL_N, R_DL_MASK, R_MAT_N, R_MAT_KEY, R_MAT_TRIS, R_TEX_N, R_TEX_ID, R_TEX_WH, R_FACE,
+       R_ANIM_GAME, R_FRAME_GAME, R_ERR };
+#define PHOTO_TINT_MARK 0x0050544E   /* gfx_f3dex2.c: G_NOOP with this w0 = tint of the following draws (w1 RGBA) */
+#define PHOTO_MAT_FACE 64            /* material keys: 0..63 texture entry, 64..67 face segment 6 / 7 / 0xA / 0xB, */
+#define PHOTO_MAT_PLAIN 80           /* 80..95 untextured groups in display-list order */
+
+/* When photo mode starts (read-only): Conker's animation count and which have data, the animation he plays, the models
+ * of his skeleton group, the 63 item lists, his own attachments. */
+void photo_look_scan(void) {
+    u8 *o = (u8 *)&g_objects[0];
+    struct_eu_anim *anim = (struct_eu_anim *)g_objects[0].unk2D0;
+    s32 type = o[4];
+    s32 i, k, g, n, found;
+    u16 *bank;
+    u8 *l;
+    u8 *a;
+
+    if (*(s32 *)o == 0 || type == 0xFF) {
+        return;
+    }
+    port_photo_look_report(R_MODEL, 0, type);
+    n = (u16)g_model_anim_counts[type];
+    bank = (u16 *)g_model_anim_banks[type];
+    port_photo_look_report(R_ANIM_COUNT, 0, n);
+    for (i = 0; i < n && i < 1024; i++) {
+        port_photo_look_report(R_ANIM_BAD, i, bank == NULL || bank[i * 4] == 999 || bank[i * 4] >= 30000);
+    }
+    port_photo_look_report(R_ANIM_GAME, 0, g_objects[0].unk84.uh);
+    port_photo_look_report(R_FRAME_GAME, 0, anim != NULL ? (s32)(anim->unk8 * 100.0f) : 0);
+    found = 0;
+    for (g = 0; g < 8 && (&g_anim_bank_group_sizes)[g] != 0 && !found; g++) {
+        l = ((u8 **)&g_anim_bank_group_lists)[g];
+        for (k = 0; k < (&g_anim_bank_group_sizes)[g]; k++) {
+            if (l[k] == type) {
+                found = 1;
+            }
+        }
+        if (found) {   /* the group's models, each once */
+            n = 0;
+            for (k = 0; k < (&g_anim_bank_group_sizes)[g]; k++) {
+                for (i = 0; i < k && l[i] != l[k]; i++) {
+                }
+                if (i == k) {
+                    port_photo_look_report(R_GROUP, n++, l[k]);
+                }
+            }
+            port_photo_look_report(R_GROUP_N, 0, n);
+        }
+    }
+    if (!found) {
+        port_photo_look_report(R_GROUP, 0, type);
+        port_photo_look_report(R_GROUP_N, 0, 1);
+    }
+    for (i = 0; i < 63; i++) {
+        l = *(u8 **)((u8 *)&g_setup_cmd_lists + i * 8);
+        n = ((u8 *)&g_setup_cmd_lists)[i * 8 + 4];
+        g = 0;
+        for (k = 0; k < n; k++) {
+            g |= 1 << (l[k * 16 + 3] > 2 ? 2 : l[k * 16 + 3]);
+        }
+        port_photo_look_report(R_ITEM_KIND, i + 1, g);
+        port_photo_look_report(R_ITEM_ASSET, i + 1, n > 0 ? l[0] : 0);
+    }
+    n = 0;
+    for (a = (u8 *)g_attachment_list; a != NULL && n < 16; a = *(u8 **)(a + 0x54)) {
+        if (a[0] == o[0x3B]) {
+            port_photo_look_report(R_ATT, n++, a[1] << 8 | a[6]);
+        }
+    }
+    port_photo_look_report(R_ATT_N, 0, n);
+}
+
+/* Model m (of his skeleton group) in place of Conker's: its header and animation bank loaded, every entry of his part
+ * list (levels of detail) pointed at it with fresh vertex blocks (+0x28C, two words per entry: obj_model_vertex_blocks_get
+ * makes them for m), the type set (obj_set_type). The display list and textures load when it is drawn (model_make_ready). */
+static void photo_look_swap_model(struct127 *obj, s32 m) {
+    u8 *o = (u8 *)obj;
+    u8 *list;
+    s32 n, i;
+
+    if (model_header_load(m, 0) != 0 || g_type_descs[m] == NULL || anim_bank_load(m, 0) != 0) {
+        port_photo_look_report(R_ERR, 0, 1);
+        return;
+    }
+    n = o[0x2C9];
+    if (n == 0) {
+        n = 1;
+    }
+    list = (u8 *)allocate_memory(8, 1, 0, 2);
+    if (list == NULL) {
+        port_photo_look_report(R_ERR, 0, 1);
+        return;
+    }
+    for (i = 0; i < n && i < 7; i++) {
+        list[i] = m;
+        *(u32 *)(o + 0x28C + i * 8) = 0;
+        *(u32 *)(o + 0x290 + i * 8) = 0;
+    }
+    *(u8 **)(o + 0x2C4) = list;
+    o[0x1C9] = 0;
+    obj_set_type(0, m, 0);
+}
+
+/* The pose: animation id of Conker's bank at frame `frame`, held (speed 0, no blend). Restarted only when he plays
+ * another one, so a frame's second world update only moves the frame. */
+static void photo_look_pose(struct127 *obj, s32 id, f32 frame) {
+    s32 type = ((u8 *)obj)[4];
+    u16 *bank = (u16 *)g_model_anim_banks[type];
+    struct_eu_anim *anim = (struct_eu_anim *)obj->unk2D0;
+    u16 *e;
+    f32 last;
+
+    if (bank == NULL || anim == NULL || id >= (u16)g_model_anim_counts[type]) {
+        port_photo_look_report(R_ERR, 0, 2);
+        return;
+    }
+    e = bank + id * 4;
+    if (*e == 999 || *e >= 30000) {
+        port_photo_look_report(R_ERR, 0, 2);
+        return;
+    }
+    if ((anim->unk4 & 0x7FFF) != id || obj->unk84.uh != id || anim->unk28 == 0) {
+        anim_start_entry(obj, (s32)e, (u8 *)anim, 0, 1, id, 0, 0.0f, 0.0f, frame, 0.0f, 1);
+    }
+    last = anim->unk18 - 1.0f;
+    if (frame > last) {
+        frame = last;
+    }
+    if (frame < 0.0f) {
+        frame = 0.0f;
+    }
+    anim->unk8 = frame;
+    anim->unk10 = 0.0f;
+    anim->unk3C = 0;
+    obj->animation_speed = 0.0f;
+    port_photo_look_report(R_FRAMES, 0, (s32)anim->unk18);
+}
+
+/* world_update, after the state handlers and before objects_update_all (game_45B80.c): model, items, pose */
+void photo_look_apply(void) {
+    struct127 *obj = &g_objects[0];
+    u8 *o = (u8 *)obj;
+    s32 m, i, v;
+
+    if (!port_photo_look_active() || *(s32 *)o == 0 || o[4] == 0xFF) {
+        return;
+    }
+    if (port_photo_look_once(1)) {
+        m = port_photo_look_get(LK_MODEL, 0);
+        if (m >= 0 && m < 0xBB && m != o[4]) {
+            photo_look_swap_model(obj, m);
+        }
+        for (i = 0; i < 4; i++) {
+            v = port_photo_look_get(LK_ITEM, i);
+            if (v >= 1 && v <= 63) {
+                obj_setup_run(obj, v, 1.0f, 0);
+            }
+        }
+    }
+    v = port_photo_look_get(LK_ANIM, 0);
+    if (v >= 0) {
+        photo_look_pose(obj, v, port_photo_look_get(LK_FRAME, 0) * 0.01f);
+    }
+}
+
+/* the material key of a G_SETTIMG address for model `model`: a texture entry (0..63), a face segment (64..67), or -1
+ * (a palette, or another address) */
+static s32 photo_look_tex_key(s32 model, u32 addr) {
+    u8 *t = ((u8 **)&g_model_tex_entries)[model];
+    s32 n = ((u16 *)&g_model_tex_counts)[model];
+    s32 i;
+    u32 seg = addr >> 24;
+
+    if ((addr & 0xFFFFFF) == 0) {
+        if (seg == 6 || seg == 7) {
+            return PHOTO_MAT_FACE + seg - 6;
+        }
+        if (seg == 0xA || seg == 0xB) {
+            return PHOTO_MAT_FACE + seg - 8;
+        }
+    }
+    for (i = 0; t != NULL && i < n && i < 64; i++) {
+        if (*(u32 *)(t + i * 12) == addr) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/* Walks the model's display lists once per photo frame: reports its materials (key, triangle count) and its texture
+ * entries, and makes the chosen changes in the (sandboxed) display list itself: triangles of a hidden material ->
+ * G_NOOP, the G_RDPPIPESYNC in front of each material -> the tint marker (when any tint is chosen), the image (and its
+ * palette, at the same distance) of a material drawn with another texture. */
+static void photo_look_patch_model(s32 model) {
+    u8 *t = ((u8 **)&g_model_tex_entries)[model];
+    s32 ntex = ((u16 *)&g_model_tex_counts)[model];
+    s32 tris[96];
+    s8 order[96];
+    s32 norder = 0, nplain = 0, anytint = 0;
+    s32 k, i, key, plain, swap, cnt, istri;
+    u32 *c, *sync, w0, w1, img_old, img_new;
+    u8 op;
+
+    for (i = 0; i < ntex && i < 64; i++) {
+        port_photo_look_report(R_TEX_ID, i, *(s32 *)(t + i * 12 + 4));
+        port_photo_look_report(R_TEX_WH, i, *(u16 *)(t + i * 12 + 8) << 16 | *(u16 *)(t + i * 12 + 10));
+    }
+    port_photo_look_report(R_TEX_N, 0, ntex < 64 ? ntex : 64);
+    for (i = 0; i < 96; i++) {
+        tris[i] = 0;
+        anytint |= port_photo_look_get(LK_MAT_TINT, i) != 0;
+    }
+    for (k = 0; k < g_model_dl_counts[model]; k++) {
+        c = ((u32 **)g_model_dl_tables[model])[k];
+        key = -1;
+        plain = 0;
+        swap = 0;
+        sync = NULL;
+        img_old = img_new = 0;
+        for (cnt = 0; c != NULL && cnt < 20000; cnt++, c += 2) {
+            w0 = c[0];
+            w1 = c[1];
+            op = w0 >> 24;
+            if (op == 0xDF || (op == 0xDE && ((w0 >> 16) & 0xFF) == 1)) {
+                break;
+            }
+            if (op == 0xE7 || (op == 0 && w0 == PHOTO_TINT_MARK)) {
+                sync = c;
+                continue;
+            }
+            if (op == 0xFC) {
+                plain = 1;
+                continue;
+            }
+            istri = op == 0x05 || op == 0x06 || op == 0x07 || (op >= 0x10 && op <= 0x1F);
+            if (op == 0xFD) {
+                i = photo_look_tex_key(model, w1);
+                if (i < 0) {
+                    if (swap) {   /* the palette after the image: at the same distance from the new image */
+                        c[1] = img_new + (w1 - img_old);
+                        swap = 0;
+                    }
+                    continue;
+                }
+                key = i;
+                plain = 0;
+                swap = 0;
+                if (key < 64) {
+                    i = port_photo_look_get(LK_MAT_TEX, key);
+                    if (i >= 0 && i < ntex && i != key) {
+                        img_old = w1;
+                        img_new = *(u32 *)(t + i * 12);
+                        c[1] = img_new;
+                        swap = 1;
+                    }
+                }
+            } else if (istri && plain) {
+                key = PHOTO_MAT_PLAIN + (nplain < 15 ? nplain : 15);
+                nplain++;
+                plain = 0;
+            } else if (!istri) {
+                continue;
+            } else {
+                goto tri;
+            }
+            /* a new material starts here: note it, put its tint marker in place of the sync in front of it */
+            for (i = 0; i < norder && order[i] != key; i++) {
+            }
+            if (i == norder && norder < 96) {
+                order[norder++] = key;
+            }
+            if (anytint && sync != NULL) {
+                sync[0] = PHOTO_TINT_MARK;
+                sync[1] = port_photo_look_get(LK_MAT_TINT, key);
+                sync = NULL;
+            }
+            if (!istri) {
+                continue;
+            }
+        tri:
+            if (key >= 0) {
+                tris[key] += op == 0x05 ? 1 : op < 0x10 ? 2 : 4;
+                if (port_photo_look_get(LK_MAT_HIDE, key)) {
+                    c[0] = 0;
+                    c[1] = 0;
+                }
+            }
+            sync = NULL;
+        }
+    }
+    for (i = 0; i < norder; i++) {
+        port_photo_look_report(R_MAT_KEY, i, order[i]);
+        port_photo_look_report(R_MAT_TRIS, i, tris[(u8)order[i]]);
+    }
+    port_photo_look_report(R_MAT_N, 0, norder);
+}
+
+/* obj_draw_model_dl, Conker in a photo frame: reports what is drawn, patches the display list (once per frame) and
+ * returns the display-list hide mask to use */
+u32 photo_look_draw_begin(s32 model, u32 hide) {
+    port_photo_look_report(R_DRAWN_MODEL, 0, model);
+    port_photo_look_report(R_DL_N, 0, g_model_dl_counts[model]);
+    port_photo_look_report(R_DL_MASK, 0, hide);
+    if (port_photo_look_once(0x100 + model)) {
+        photo_look_patch_model(model);
+    }
+    return (hide | (u32)port_photo_look_get(LK_DL_HIDE, 0)) & ~(u32)port_photo_look_get(LK_DL_SHOW, 0);
+}
+
+/* world_update after objects_update_all (attachment_update_all marked the attachments it placed as shown, +5):
+ * Conker's own attachments the page hides are not drawn this frame */
+void photo_look_after_update(void) {
+    u8 *o = (u8 *)&g_objects[0];
+    u8 *a;
+    s32 i, key;
+
+    if (!port_photo_look_active() || *(s32 *)o == 0) {
+        return;
+    }
+    for (a = (u8 *)g_attachment_list; a != NULL; a = *(u8 **)(a + 0x54)) {
+        if (a[0] != o[0x3B]) {
+            continue;
+        }
+        key = a[1] << 8 | a[6];
+        for (i = 0; i < 16; i++) {
+            if (port_photo_look_get(LK_ATT_HIDE, i) == key) {
+                a[5] = 0;
+            }
+        }
+    }
+}
+
+/* obj_set_face_texture_segments, Conker in a photo frame: the face textures (segment 6 / 7 / 0xA / 0xB entries) */
+void photo_look_face(u8 *sel, u8 *mouth) {
+    s32 i, v;
+
+    for (i = 0; i < 4; i++) {
+        port_photo_look_report(R_FACE, i, i < 2 ? sel[i] : mouth[i - 2]);
+        v = port_photo_look_get(LK_FACE, i);
+        if (v >= 0 && v < 64) {
+            if (i < 2) {
+                sel[i] = v;
+            } else {
+                mouth[i - 2] = v;
+            }
+        }
+    }
+}
 #endif

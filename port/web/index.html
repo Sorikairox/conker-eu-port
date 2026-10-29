@@ -69,6 +69,7 @@
   #photo { position: absolute; left: 2%; bottom: 3%; max-width: 70%; padding: 6px 10px; border-radius: 6px; background: rgba(15, 16, 20, .72);
            color: #fff; font: 12px/1.45 system-ui, sans-serif; pointer-events: none; }
   #photo[hidden] { display: none; }
+  body.photo #photo { max-width: calc(97% - 310px); }   /* P358: beside the Pose / Outfit panel */
   #photo b { color: var(--accent); letter-spacing: .08em; }
   #photo .row { margin-top: 5px; pointer-events: auto; }
   #photo-info { color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -78,6 +79,24 @@
   #photo-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
   #photo-flash.go { animation: photoflash .35s ease-out; }
   @keyframes photoflash { from { opacity: .7; } to { opacity: 0; } }
+  /* P358 photo mode: the Pose / Outfit panel (right side, scrolls; gamepad: O / right stick click = panel focus) */
+  #photo-look { position: absolute; right: 1.5%; top: 3%; width: 290px; max-height: 88%; overflow: auto; padding: 6px 9px;
+                border-radius: 6px; background: rgba(15, 16, 20, .8); color: #fff; font: 12px/1.4 system-ui, sans-serif; }
+  #photo-look[hidden] { display: none; }
+  #photo-look.min > :not(.lk-head) { display: none; }
+  #photo-look h4 { margin: 7px 0 3px; color: var(--accent); font-size: 12px; letter-spacing: .06em; }
+  #photo-look .lk-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  #photo-look .lk-row { display: flex; align-items: center; gap: 4px; margin: 2px 0; }
+  #photo-look .lk-row > span { flex: 0 0 74px; color: var(--muted); }
+  #photo-look select { flex: 1; min-width: 0; font-size: 12px; }
+  #photo-look input[type=range] { flex: 1; min-width: 0; }
+  #photo-look input[type=color] { width: 26px; height: 18px; padding: 0; border: 0; }
+  #photo-look button { font-size: 12px; padding: 1px 6px; }
+  #photo-look .lk-mat { display: grid; grid-template-columns: 18px 1fr 26px 44px; gap: 3px; align-items: center; margin: 1px 0; }
+  #photo-look .lk-mat select { width: 100%; }
+  #photo-look .lk-note { color: var(--muted); font-size: 11px; }
+  #photo-look .nav-focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  #photo-look.nav { box-shadow: 0 0 0 2px var(--accent); }
   body.photo #latches, body.photo #skipring, body.photo #saveicon, body.photo #soundhint { display: none; }
   .hint { color: var(--muted); font-size: 12px; text-align: center; }
 
@@ -223,6 +242,7 @@
         B / F the game's view · L / R HUD · A / Space save PNG · P / Start / Enter back to the game<br>
         <span id="photo-info"></span>
         <div class="row"><button id="photo-save">Save PNG</button> <button id="photo-exit">Exit</button></div></div>
+      <div id="photo-look" hidden></div>
       <div id="photo-toast" hidden></div>
     </div>
     <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>

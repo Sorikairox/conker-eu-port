@@ -355,6 +355,8 @@ void anim_meshes_update(void);
 void afterimage_list_update(s32 arg0);
 #ifdef PORT
 void photo_camera_apply(void);   /* P348 game_eu_15A210.c */
+void photo_look_apply(void);     /* P358 game_eu_15A210.c */
+void photo_look_after_update(void);
 #endif
 
 /* was func_15019130 */
@@ -418,7 +420,17 @@ s32 world_update(void) {
         node_run_global_hooks();
         node_lists_run_update2();
     }
+#ifdef PORT
+    if (port_photo_sandbox) {
+        photo_look_apply();   /* P358 photo frame: Conker's chosen model, items and pose, before his skeleton is built */
+    }
+#endif
     objects_update_all();
+#ifdef PORT
+    if (port_photo_sandbox) {
+        photo_look_after_update();   /* P358 photo frame: his hidden attachments (their matrices were just made) */
+    }
+#endif
     if (g_mp_mode_active == 0) {
         trigger_reflect_queue_objects();
     }

@@ -11,7 +11,7 @@ void obj_bounds_from_skeleton(struct127 *arg0);
 void obj_postprocess_joints(s32 arg0);
 void look_aim_head_eyes(struct127 *arg0);
 void breakable_update_slot(s32 arg0);
-void obj_face_selectors_step(s32 arg0);
+void obj_eyelid_selectors_step(s32 arg0);
 void obj_follow_parent(s32 arg0);
 void obj_tint_update(struct127 *arg0);
 void obj_floor_mesh_update(struct127 *arg0);
@@ -162,7 +162,7 @@ void obj_update_one(struct127 *arg0, s32 arg1) {
     if (*(s32 *)obj == 0) {
         return;
     }
-    obj_face_selectors_step(arg1);
+    obj_eyelid_selectors_step(arg1);
     obj_follow_parent(arg1);
     if (obj[0xA4] != 0) {
         obj_tint_update(arg0);
@@ -569,7 +569,7 @@ void obj_unpack_light_colours(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4,
 
 u8 *obj_model_special_dl(u8 *arg0, s32 arg1);
 void model_keep_resident(u8 *arg0);
-u8 *obj_set_vertex_segments(u8 *, s32);
+u8 *obj_set_face_texture_segments(u8 *, s32);
 s32 model_make_ready(struct127 *, s32, s32, s32);
 u8 obj_current_part_model_idx(struct127 *, s32 *);
 Gfx *light_apply_object_lights(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
@@ -587,6 +587,13 @@ extern u8 **g_model_dl2_tables[]; /* was D_800C4D10 */
 extern u8 g_point_light_ptrs[]; /* was D_800DA248 */
 extern u8 g_fog_state[]; /* was D_800DD714 */
 
+#ifdef PORT
+/* P358 photo mode look (game_eu_15A210.c) */
+#define PHOTO_TINT_MARK 0x0050544E   /* gfx_f3dex2.c: G_NOOP with this w0 = tint of the following draws (w1 RGBA, 0 none) */
+int port_photo_look_active(void);
+u32 photo_look_draw_begin(s32 model, u32 hide);
+void photo_look_face(u8 *sel, u8 *mouth);
+#endif
 /* obj_draw_model_dl (P57): the model display list of object arg1, part arg2. arg3 = model (segment 6 base, from
  * +0x1D4 or g_afterimage_mtx), arg4 = alpha, color = colour block (obj_unpack_light_colours unpacks it), arg6 = mode (0 normal,
  * 3 / 4 / 5 special; 3 draws the g_model_dl2_tables DLs without matrix), arg7: wrap in g_obj_draw_begin_dl / g_obj_draw_end_dl.
@@ -605,6 +612,10 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     s32 c0, c1, c2, c3, c4, c5, c6, c7, c8, c9;
     s32 lit, mode, k, n, fl, a;
     u16 *cnt;
+#ifdef PORT
+    u32 hide = *(u32 *)(o + 0x94);   /* the display lists of the model not drawn (bit k) */
+    s32 look = arg1 == 0 && arg6 != 3 && arg6 != 4 && arg6 != 5 && port_photo_look_active();   /* P358: Conker drawn in a photo frame with a chosen look (not his shadow / afterimage) */
+#endif
 
     model = o[4];
     if (arg6 == 3 || arg6 == 4 || arg6 == 5) {
@@ -626,7 +637,7 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
         g[1] = 0;
     }
     g += 2;
-    g = (u32 *)obj_model_special_dl(obj_set_vertex_segments((u8 *)g, arg1), arg1);
+    g = (u32 *)obj_model_special_dl(obj_set_face_texture_segments((u8 *)g, arg1), arg1);
     g[0] = 0xDB06000C;
     g[1] = arg3;
     g[2] = 0xDB060004;
@@ -682,8 +693,17 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     cnt = &g_model_dl_counts[model];
     n = *cnt;
     mode = -1;
+#ifdef PORT
+    if (look) {
+        hide = photo_look_draw_begin(model, hide);   /* P358: materials patched in the display list, the hide mask chosen */
+    }
+#endif
     for (k = 0; k < n; k++) {
+#ifdef PORT
+        if (hide & (1 << k)) continue;
+#else
         if (*(u32 *)(o + 0x94) & (1 << k)) continue;
+#endif
         if (!(*(u32 *)(o + 0x98) & (1 << k))) {
             if (mode != 0) {
                 g[0] = 0xE7000000;
@@ -735,6 +755,13 @@ Gfx *obj_draw_model_dl(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *co
     }
     model_keep_resident(o);
     o[0x2FE] = 1;
+#ifdef PORT
+    if (look) {
+        g[0] = PHOTO_TINT_MARK;   /* P358: the tint of his materials ends with his model */
+        g[1] = 0;
+        g += 2;
+    }
+#endif
     if (arg6 == 0) {
         g = (u32 *)attachment_draw_for_object((s32)g, o, arg2, 1);
     }
@@ -1506,7 +1533,7 @@ s32 obj_face_selector_target(s32, s32);
 void face_update_hide_mask(struct127 *);
 
 /* was func_1502F1E4 */
-void obj_face_selectors_step(s32 arg0) {
+void obj_eyelid_selectors_step(s32 arg0) {
     s32 temp_v1;
     s32 var_s1;
     struct127 *var_s0;
@@ -1539,16 +1566,20 @@ void obj_face_selectors_step(s32 arg0) {
 }
 u8 *face_anim_entry_get(u8 *, s32);
 extern s32 g_model_tex_entries; /* was D_800C5758 */
-/* obj_set_vertex_segments (P57): segments 6 +0x18 / +0x1C / +0x28 / +0x2C of object arg1's model: vertex blocks
- * g_model_tex_entries[type][k * 12] for k = the two selector bytes +0x6C / +0x6D (>= 10: k = byte - 10; else the model
+/* obj_set_face_texture_segments (P57; P358: was obj_set_vertex_segments, they are textures): segments 6 / 7 / 0xA / 0xB
+ * (G_MOVEWORD offsets 0x18 / 0x1C / 0x28 / 0x2C) of object arg1's model, the face textures its display list loads from
+ * there (Conker: eyelids 6 / 7, eyes 0xA / 0xB): texture entries g_model_tex_entries[type][k * 12] for k = the two selector bytes +0x6C / +0x6D (>= 10: k = byte - 10; else the model
  * header table (g_type_descs[type])[i * 3 + byte + 8], overridden by face_anim_entry_get(obj, +0x6F)'s
  * pair when that matches the table's +0xA entry or the byte is 0) and the bytes +0x68 / +0x69. */
 /* was func_1502F30C */
-u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
+u8 *obj_set_face_texture_segments(u8 *gdl, s32 arg1) {
     u8 *o = (u8 *)&g_objects[arg1];
     s32 type = o[4];
     u8 *ov = NULL;
     u8 sel[2];
+#ifdef PORT
+    u8 mouth[2];   /* P358: the entries for segments 0xA / 0xB (+0x68 / +0x69) */
+#endif
     s32 pr[2];
     s32 i;
     s32 v;
@@ -1572,6 +1603,13 @@ u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
             sel[i] = v;
         }
     }
+#ifdef PORT
+    mouth[0] = o[0x68];
+    mouth[1] = o[0x69];
+    if (arg1 == 0 && port_photo_look_active()) {
+        photo_look_face(sel, mouth);   /* P358 photo frame: the chosen eye / mouth textures */
+    }
+#endif
     p = ((u8 **)&g_model_tex_entries)[o[4]];
     if (p != NULL) {
         u32 *g = (u32 *)gdl;
@@ -1580,9 +1618,15 @@ u8 *obj_set_vertex_segments(u8 *gdl, s32 arg1) {
         g[2] = 0xDB06001C;
         g[3] = *(u32 *)(p + sel[1] * 12);
         g[4] = 0xDB060028;
+#ifdef PORT
+        g[5] = *(u32 *)(p + mouth[0] * 12);
+        g[6] = 0xDB06002C;
+        g[7] = *(u32 *)(p + mouth[1] * 12);
+#else
         g[5] = *(u32 *)(p + o[0x68] * 12);
         g[6] = 0xDB06002C;
         g[7] = *(u32 *)(p + o[0x69] * 12);
+#endif
         gdl += 0x20;
     }
     return gdl;

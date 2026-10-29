@@ -57,6 +57,7 @@ void port_state_hash(uint32_t *hash_static, uint32_t *hash_stacks);
 void port_photo_clock(int on);       /* pc_os.c */
 /* game C (game_eu_15A210.c); weak: the scheduler demo links the PC layer without the game */
 int photo_game_camera(float *out) __attribute__((weak));
+void photo_look_scan(void) __attribute__((weak));   /* P358 game_eu_15A210.c: what Conker is made of (read-only) */
 
 /* ---- state shared with pc_sched.c / pc_os.c / pc_pif.c and the game hooks. This object is left out of the snapshot
  * and the state hash (port/tools/net_regions.py), so restoring the game never resets photo mode itself. */
@@ -76,6 +77,63 @@ static struct {
     int hud;                               /* 1 = draw the HUD in photo frames */
 } ph;
 static int ph_dirty, ph_cam_applied, ph_drawn, ph_renders, ph_reason;
+
+/* ---- P358 pose and outfit (the "look"). The page picks them (port_photo_look_set); the game applies them inside the
+ * photo frames only (game_eu_15A210.c photo_look_apply and the draw hooks), so they vanish with the sandbox like the
+ * photo camera. What the game reports about Conker (port_photo_look_report) is kept here, outside the snapshot.
+ * Keys of the look (port_photo_look_set / port_photo_look_get, same numbers in main.js): */
+enum {
+    LK_ANIM = 0,       /* animation id, -1 = the game's own pose */
+    LK_FRAME = 1,      /* frame within it (x 100, so the page can pass fractions) */
+    LK_MODEL = 2,      /* model id from Conker's skeleton group, -1 = the game's model */
+    LK_ITEM = 3,       /* i = 0..3: setup command list 1..63 run on Conker (held items / attachments), 0 = none */
+    LK_ATT_HIDE = 4,   /* i = 0..15: key (asset << 8 | slot) of one of Conker's own attachments to hide, 0 = none */
+    LK_DL_HIDE = 5,    /* bit k: hide display list k of the model (the game's own part mask, obj +0x94) */
+    LK_DL_SHOW = 6,    /* bit k: show display list k although the game hides it */
+    LK_FACE = 7,       /* i = 0..3: texture entry for segment 6 / 7 / 0xA / 0xB (eyes, mouth), -1 = the game's */
+    LK_MAT_HIDE = 8,   /* i = material key (0..95): 1 = its triangles are not drawn */
+    LK_MAT_TINT = 9,   /* i = material key: RGBA tint, A = strength (0 = none) */
+    LK_MAT_TEX = 10,   /* i = material key: texture entry drawn instead, -1 = its own */
+    LK_COUNT
+};
+#define LK_KEYS 96
+static struct {
+    int anim, frame100, model, item[4], att_hide[16], face[4], mat_tex[LK_KEYS];
+    unsigned dl_hide, dl_show, mat_tint[LK_KEYS];
+    unsigned char mat_hide[LK_KEYS];
+} lk;
+static int lk_any;   /* anything but the game's look is chosen */
+static unsigned lk_serial;   /* photo frame number: port_photo_look_once */
+static unsigned lk_once_tag[8], lk_once_serial[8];
+/* reports (port_photo_look_report / port_photo_look_info). R_* ids, same numbers in main.js. */
+enum {
+    R_ANIM_COUNT = 0,  /* Conker's animation count */
+    R_ANIM_BAD = 1,    /* i: 1 = animation i has no data (table entry 999 / >= 30000) */
+    R_FRAMES = 2,      /* frame count of the animation the last photo frame showed */
+    R_MODEL = 3,       /* Conker's model at entry */
+    R_GROUP = 4,       /* i: the models sharing his skeleton and animations (i = 0..R_GROUP_N-1) */
+    R_GROUP_N = 5,
+    R_ITEM_KIND = 6,   /* i = list 1..63: command kinds (bit 0 attached object, bit 1 attachment, bit 2 animated attachment), 0 = empty */
+    R_ITEM_ASSET = 7,  /* i = list: the first command's model / object id */
+    R_ATT = 8,         /* i: key of Conker's own attachment i at entry (asset << 8 | slot) */
+    R_ATT_N = 9,
+    R_DRAWN_MODEL = 10,/* the model the last photo frame drew for Conker */
+    R_DL_N = 11,       /* its display list count */
+    R_DL_MASK = 12,    /* the game's hide mask (+0x94) in that frame */
+    R_MAT_N = 13,      /* materials of that model: count */
+    R_MAT_KEY = 14,    /* i: key of material i (0..63 texture entry, 64..67 face slot 6 / 7 / 0xA / 0xB, 80.. untextured group) */
+    R_MAT_TRIS = 15,   /* i: its triangle count */
+    R_TEX_N = 16,      /* texture entries of that model */
+    R_TEX_ID = 17,     /* i: texture id */
+    R_TEX_WH = 18,     /* i: width << 16 | height */
+    R_FACE = 19,       /* i = 0..3: the texture entry the game put into segment 6 / 7 / 0xA / 0xB */
+    R_ANIM_GAME = 20,  /* the animation Conker plays at entry */
+    R_FRAME_GAME = 21, /* its frame at entry (x 100) */
+    R_ERR = 22,        /* i: last problem (1 model did not load, 2 animation failed, 3 item failed) */
+    R_COUNT
+};
+#define R_SLOTS 1024
+static int rep_val[R_COUNT][R_SLOTS];
 static unsigned ph_enter_retrace, ph_ticks;
 static uint32_t ph_hash[2];
 #define PH_RANGE 3000.0f   /* the camera stays within this distance (world units) of where it started */
@@ -149,6 +207,10 @@ static void photo_enter(void) {
     port_state_hash(&ph_hash[0], &ph_hash[1]);
     port_log("[photo] on after retrace %u: snapshot %u KB, state hash %08X %08X\n", port_frame_count, (unsigned)(n >> 10), ph_hash[0], ph_hash[1]);
     log_pose("start (the game's view)");
+    memset(rep_val, 0, sizeof rep_val);
+    if (photo_look_scan) photo_look_scan();   /* P358: Conker's animations, models, items as the game has them now */
+    port_log("[photo] look: model %d, %d animations (playing %d), %d models in his group, %d own attachments\n",
+             rep_val[R_MODEL][0], rep_val[R_ANIM_COUNT][0], rep_val[R_ANIM_GAME][0], rep_val[R_GROUP_N][0], rep_val[R_ATT_N][0]);
     port_photo_state = 2; ph_dirty = 1; t_done = 1;
 }
 static void photo_leave(void) {
@@ -175,6 +237,8 @@ static int photo_render(void) {
     int k;
     port_photo_sandbox = 1; port_photo_nohud = !ph.hud;
     ph_cam_applied = ph_drawn = 0;
+    lk_serial++;   /* P358: a new photo frame (port_photo_look_once); its reports of the pose start empty */
+    rep_val[R_FRAMES][0] = 0; rep_val[R_ERR][0] = 0;
     for (k = 1; k <= 12 && !ph_drawn; k++) { port_photo_clock_ms = k * period; port_retrace_once(); }
     port_photo_sandbox = 0; port_photo_nohud = 0; port_photo_clock_ms = 0;
     port_video_frame();
@@ -182,6 +246,59 @@ static int photo_render(void) {
     ph_render_ms = emscripten_get_now() - t0;
     if (ph_renders <= 3 || !ph_drawn) port_log("[photo] frame %u: %d retraces, %.1f ms, %s\n", ph_renders, k - 1, ph_render_ms, ph_drawn ? "drawn" : "NOT drawn (the game built no frame)");
     return ph_drawn;
+}
+
+/* ---- P358 look: game side (game_eu_15A210.c). All of it only answers inside a photo frame of an active photo mode. */
+/* 1 inside a photo frame: the game reports what Conker is made of and applies the chosen look (with nothing chosen
+ * every hook leaves the frame as P348 drew it: the look's defaults change nothing) */
+int port_photo_look_active(void) { return port_photo_sandbox && port_photo_state == 2; }
+/* one value of the look (LK_*), index i for the arrays; the game's defaults when nothing is chosen */
+int port_photo_look_get(int key, int i) {
+    switch (key) {
+    case LK_ANIM: return lk.anim;
+    case LK_FRAME: return lk.frame100;
+    case LK_MODEL: return lk.model;
+    case LK_ITEM: return i >= 0 && i < 4 ? lk.item[i] : 0;
+    case LK_ATT_HIDE: return i >= 0 && i < 16 ? lk.att_hide[i] : 0;
+    case LK_DL_HIDE: return (int)lk.dl_hide;
+    case LK_DL_SHOW: return (int)lk.dl_show;
+    case LK_FACE: return i >= 0 && i < 4 ? lk.face[i] : -1;
+    case LK_MAT_HIDE: return i >= 0 && i < LK_KEYS ? lk.mat_hide[i] : 0;
+    case LK_MAT_TINT: return i >= 0 && i < LK_KEYS ? (int)lk.mat_tint[i] : 0;
+    case LK_MAT_TEX: return i >= 0 && i < LK_KEYS ? lk.mat_tex[i] : -1;
+    }
+    return 0;
+}
+/* 1 the first time it is asked with this tag in the current photo frame (a frame's retraces may update the world
+ * more than once: things that must happen once, e.g. adding an item or patching a display list, ask this) */
+int port_photo_look_once(int tag) {
+    int k, free_k = -1;
+    for (k = 0; k < 8; k++) {
+        if (lk_once_tag[k] == (unsigned)tag && lk_once_serial[k] == lk_serial) return 0;
+        if (lk_once_serial[k] != lk_serial && free_k < 0) free_k = k;
+    }
+    if (free_k < 0) return 0;
+    lk_once_tag[free_k] = (unsigned)tag; lk_once_serial[free_k] = lk_serial;
+    return 1;
+}
+/* the game tells what Conker is made of (R_*; kept here, outside the snapshot) */
+void port_photo_look_report(int what, int i, int value) {
+    if (what >= 0 && what < R_COUNT && i >= 0 && i < R_SLOTS) rep_val[what][i] = value;
+}
+static void lk_reset(void) {
+    int k;
+    memset(&lk, 0, sizeof lk);
+    lk.anim = -1; lk.model = -1;
+    for (k = 0; k < 4; k++) lk.face[k] = -1;
+    for (k = 0; k < LK_KEYS; k++) lk.mat_tex[k] = -1;
+    lk_any = 0;
+}
+static void lk_update_any(void) {
+    int k;
+    lk_any = lk.anim >= 0 || lk.model >= 0 || lk.dl_hide || lk.dl_show;
+    for (k = 0; k < 4; k++) lk_any |= lk.item[k] != 0 || lk.face[k] >= 0;
+    for (k = 0; k < 16; k++) lk_any |= lk.att_hide[k] != 0;
+    for (k = 0; k < LK_KEYS; k++) lk_any |= lk.mat_hide[k] || lk.mat_tint[k] || lk.mat_tex[k] >= 0;
 }
 
 /* ---- test aid: ?photoat / ?photofor / ?photomove / ?photolog (t_* declared above photo_enter) */
@@ -277,5 +394,32 @@ EMSCRIPTEN_KEEPALIVE float port_photo_info(int i) {
     }
     return 0;
 }
+/* P358 page API of the look. port_photo_look_set(key, i, value): one choice (LK_*); key -1 = back to the game's own
+ * look (everything). The next photo frame shows it. port_photo_look_info(what, i): a report (R_*). */
+EMSCRIPTEN_KEEPALIVE void port_photo_look_set(int key, int i, int v) {
+    static int init;
+    if (!init) { lk_reset(); init = 1; }
+    switch (key) {
+    case -1: lk_reset(); break;
+    case LK_ANIM: lk.anim = v; break;
+    case LK_FRAME: lk.frame100 = v < 0 ? 0 : v; break;
+    case LK_MODEL: lk.model = v; break;
+    case LK_ITEM: if (i >= 0 && i < 4) lk.item[i] = v; break;
+    case LK_ATT_HIDE: if (i >= 0 && i < 16) lk.att_hide[i] = v; break;
+    case LK_DL_HIDE: lk.dl_hide = (unsigned)v; break;
+    case LK_DL_SHOW: lk.dl_show = (unsigned)v; break;
+    case LK_FACE: if (i >= 0 && i < 4) lk.face[i] = v; break;
+    case LK_MAT_HIDE: if (i >= 0 && i < LK_KEYS) lk.mat_hide[i] = v != 0; break;
+    case LK_MAT_TINT: if (i >= 0 && i < LK_KEYS) lk.mat_tint[i] = (unsigned)v; break;
+    case LK_MAT_TEX: if (i >= 0 && i < LK_KEYS) lk.mat_tex[i] = v; break;
+    default: return;
+    }
+    lk_update_any();
+    ph_dirty = 1;
+}
+EMSCRIPTEN_KEEPALIVE int port_photo_look_info(int what, int i) {
+    return what >= 0 && what < R_COUNT && i >= 0 && i < R_SLOTS ? rep_val[what][i] : 0;
+}
+
 /* pc_sched.c port_run: arms the ?photoat test aid */
-void port_photo_init(void) { test_init(); port_photo_watch = t_at > 0; if (port_photo_watch) port_log("[photo] test aid: enter after retrace %d for %d ticks\n", t_at, t_for); }
+void port_photo_init(void) { if (!lk_any && lk.anim == 0 && lk.model == 0) lk_reset(); test_init(); port_photo_watch = t_at > 0; if (port_photo_watch) port_log("[photo] test aid: enter after retrace %d for %d ticks\n", t_at, t_for); }
