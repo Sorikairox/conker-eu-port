@@ -230,7 +230,7 @@ const seg = (a, b, fin, fout, draw) => SEG.push({ a, b, fin, fout, draw });
 //   13.0 after "King of all the land."                      PLAY ANYWHERE
 //   17.8 after "...I hear you say."                         + ON ANYTHING WITH A BROWSER
 //   22.6 after "...that surround my throne?"                NOT AFFILIATED
-//   39.60 "a GOOD" / 40.63 "FUR" / 41.03 "DAY"               CONKER'S GOOD FUR DAY, word by word on his words
+//   38.45 CONKER'S BAD FUR DAY; 39.60 "GOOD": BAD struck out, GOOD handwritten in red; FUR 40.63 / DAY 41.03 pulse
 const CARDS = [
   { at: 7.3, out: 12.6, lines: ['FAN MADE PORT'] },
   { at: 13.0, out: 22.3, lines: ['PLAY ANYWHERE', 'ON ANYTHING WITH A BROWSER'], at2: 17.8 },
@@ -251,27 +251,86 @@ function card(g, t, c) {
     text(g, c.lines[1], W / 2, y + 120, 4.4 * pop2, { align: 'center', fill: '#fff', alpha: b });
   }
 }
+// P355 follow-up: the title says CONKER'S BAD FUR DAY first (in the pause after "It's what I call..."); on his "good" a red
+// hand-drawn line strikes BAD out and GOOD is written above it in red, stroke by stroke like a pen; FUR and DAY pulse on
+// his words. The game's only red hand lettering is the scrawled "Conker's" of its 3-D logo (a model texture, not a font:
+// no G / D, and the game has a single text font, set 0), so GOOD and the strike are drawn as pen strokes in that red
+// (canvas paths, a little jitter and pressure-like width), with the logo lettering's dark rim.
+const TITLE_IN = 38.45, PEN_RED = '#e3261d', PEN_RIM = '#2a0806';
+const STRIKE_AT = W_GOOD, WRITE_AT = W_GOOD + 0.16, WRITE_DUR = 0.55;
+// smooth deterministic wobble (sum of sines), for a hand-drawn look that is the same in every frame
+const wob = (u, k) => 0.5 * Math.sin(u * 7.1 + k * 1.7) + 0.3 * Math.sin(u * 13.3 + k * 4.1) + 0.2 * Math.sin(u * 23.9 + k * 2.3);
+function ellipsePts(cx, cy, rx, ry, a0, a1, n = 48) { const p = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; p.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); } return p; }
+const D = Math.PI / 180;
+// "Good" in a unit box (cap height 1, y down), one array of points per pen stroke, in writing order
+const GOOD_STROKES = [
+  [...ellipsePts(0.42, 0.5, 0.42, 0.5, -40 * D, -340 * D, 60), [0.84, 0.52], [0.58, 0.53]],   // G: round, then the bar
+  ellipsePts(1.16, 0.69, 0.23, 0.31, -80 * D, -440 * D, 40),                                  // o
+  ellipsePts(1.68, 0.69, 0.23, 0.31, -80 * D, -440 * D, 40),                                  // o
+  ellipsePts(2.18, 0.69, 0.22, 0.30, -25 * D, -385 * D, 40),                                  // d: bowl
+  [[2.42, -0.05], [2.41, 0.4], [2.40, 0.8], [2.42, 0.98], [2.52, 0.9]],                        // d: stem + flick
+];
+const STRIKES = [[[-0.02, 0.60], [0.35, 0.52], [0.7, 0.48], [0.97, 0.40]], [[0.03, 0.40], [0.5, 0.47], [0.95, 0.57]]];
+// draw the first `prog` (0..1, by length) of a set of strokes, mapped by `map` (unit -> canvas), pen width w (px)
+function penStrokes(g, strokes, prog, map, w, seed) {
+  const segs = [];
+  strokes.forEach((st, k) => {
+    const pts = [];   // densify, wobble
+    for (let i = 0; i < st.length - 1; i++) for (let j = 0; j < 8; j++) { const t = j / 8; pts.push([st[i][0] + (st[i + 1][0] - st[i][0]) * t, st[i][1] + (st[i + 1][1] - st[i][1]) * t]); }
+    pts.push(st[st.length - 1]);
+    let len = 0; const L = [0];
+    for (let i = 1; i < pts.length; i++) { len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(len); }
+    for (let i = 1; i < pts.length; i++) {
+      const u = L[i] / len, q = (p) => { const [x, y] = map(p[0], p[1]); const n = wob(L[i] * 1.3, k + seed); return [x + n * w * 0.16, y + wob(L[i] * 1.3 + 9, k + seed) * w * 0.16]; };
+      segs.push({ a: q(pts[i - 1]), b: q(pts[i]), len: L[i] - L[i - 1], width: w * (0.65 + 0.45 * Math.sin(Math.PI * Math.min(1, u * 1.15)) + 0.12 * wob(u * 5, k + seed)) });
+    }
+  });
+  const total = segs.reduce((a, s2) => a + s2.len, 0); let acc = 0; const vis = [];
+  for (const s2 of segs) { if (acc >= prog * total) break; vis.push(s2); acc += s2.len; }
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  for (const [col, extra] of [[PEN_RIM, 0.55 * w], [PEN_RED, 0]]) {
+    g.strokeStyle = col;
+    for (const s2 of vis) { g.lineWidth = s2.width + extra; g.beginPath(); g.moveTo(s2.a[0], s2.a[1]); g.lineTo(s2.b[0], s2.b[1]); g.stroke(); }
+  }
+  // a little highlight on the red, like the logo's glossy lettering
+  g.strokeStyle = 'rgba(255,170,150,0.22)';
+  for (const s2 of vis) { g.lineWidth = s2.width * 0.25; g.beginPath(); g.moveTo(s2.a[0] - s2.width * 0.12, s2.a[1] - s2.width * 0.18); g.lineTo(s2.b[0] - s2.width * 0.12, s2.b[1] - s2.width * 0.18); g.stroke(); }
+  g.restore();
+}
 seg(0, TF, 1.0, 0, async (g, lt) => {
-  const pic = Math.min(FREEZE, lt * 60), frozen = Math.max(0, lt - FREEZE / 60);
-  if (frozen > 0) {   // the frozen frame slowly pushes in and darkens under the big title
-    const z = 1 + 0.05 * ease(frozen / 3), d = ease((lt - W_GOOD) / 0.6);
-    g.filter = `blur(${(4 * d).toFixed(2)}px) brightness(${(1 - 0.5 * d).toFixed(3)})`;
-    g.drawImage(await shotPic('intro', FREEZE), W / 2 - W * z / 2, H / 2 - H * z / 2, W * z, H * z);
-    g.filter = 'none';
-  } else g.drawImage(await shotPic('intro', pic), 0, 0, W, H);
+  const pic = Math.min(FREEZE, lt * 60), frozen = Math.max(0, lt - FREEZE / 60), d = ease((lt - TITLE_IN) / 0.6);
+  const z = 1 + 0.05 * ease(frozen / 3);
+  if (d > 0) g.filter = `blur(${(4 * d).toFixed(2)}px) brightness(${(1 - 0.5 * d).toFixed(3)})`;
+  // the frozen frame slowly pushes in under the title
+  g.drawImage(await shotPic('intro', pic), W / 2 - W * z / 2, H / 2 - H * z / 2, W * z, H * z);
+  g.filter = 'none';
   vignette(g, 0.45);
   for (const c of CARDS) card(g, lt, c);
-  if (lt >= W_GOOD - 0.02) {   // the big title on his words
-    const word = (t0) => clamp((lt - t0) / 0.12), pop = (t0) => 1 + 0.18 * (1 - easeOut((lt - t0) / 0.3));
-    const s = 10.5, y = 470, f = ['#fff4c2', ACCENT, ORANGE];
+  if (lt >= TITLE_IN) {   // the big title
+    const inA = clamp((lt - TITLE_IN) / 0.25), popIn = 1 + 0.12 * (1 - easeOut((lt - TITLE_IN) / 0.35));
+    const pulse = (t0) => 1 + 0.16 * Math.exp(-Math.pow((lt - t0 - 0.06) / 0.11, 2));   // FUR / DAY pulse on his words
+    const s = 10.5, y = 560, f = ['#fff4c2', ACCENT, ORANGE];
     const inner = (w) => textW(w, s, 1) - 6 * s, sp = 7 * s;   // a word's ink width (textW includes 2 x 3 font px of margin)
-    const wG = inner('GOOD') + sp, wF = inner('FUR') + sp, wD = inner('DAY'), x0 = W / 2 - (wG + wF + wD) / 2;
-    text(g, "CONKER'S", W / 2, 330, 6.2 * pop(W_GOOD), { align: 'center', fill: '#fff', alpha: word(W_GOOD) });
-    const big = (str, x, t0, w) => text(g, str, x + w / 2, y + 6.5 * s * (1 - pop(t0)), s * pop(t0), { align: 'center', fill: f, alpha: word(t0), spacing: 1 });
-    big('GOOD', x0, W_GOOD, wG - sp);
-    big('FUR', x0 + wG, W_FUR, wF - sp);
-    big('DAY', x0 + wG + wF, W_DAY, wD);
-    text(g, 'A FAN-MADE BROWSER PORT', W / 2, 700, 3.8, { align: 'center', fill: '#e9e3d6', alpha: clamp((lt - W_DAY - 0.5) / 0.4) });
+    const wB = inner('BAD') + sp, wF = inner('FUR') + sp, wD = inner('DAY'), x0 = W / 2 - (wB + wF + wD) / 2;
+    text(g, "CONKER'S", W / 2, 250, 6.2 * popIn, { align: 'center', fill: '#fff', alpha: inA });
+    const big = (str, x, w, k, fill = f) => text(g, str, x + w / 2, y + 6.5 * s * (1 - k), s * k, { align: 'center', fill, alpha: inA, spacing: 1 });
+    const badDim = clamp((lt - STRIKE_AT - 0.2) / 0.4);
+    big('BAD', x0, wB - sp, popIn, badDim > 0 ? ['#d8d0c0', '#b0a690', '#8a806c'] : f);
+    big('FUR', x0 + wB, wF - sp, popIn * pulse(W_FUR));
+    big('DAY', x0 + wB + wF, wD, popIn * pulse(W_DAY));
+    // the strike over BAD: two quick pen lines
+    if (lt >= STRIKE_AT) {
+      const bx = x0 - 10, bw = wB - sp + 20, by = y - 10, bh = 13 * s;
+      const map = (u, v) => [bx + u * bw, by + v * bh];
+      penStrokes(g, STRIKES, clamp((lt - STRIKE_AT) / 0.2), map, 17, 3);
+    }
+    // GOOD written above BAD, tilted a little
+    if (lt >= WRITE_AT) {
+      const ch = 165, gx = x0 + (wB - sp) / 2 - 1.27 * ch, gy = y - 0.95 * ch, rot = -7 * D;
+      const map = (u, v) => { const px = u * ch, py = v * ch; return [gx + px * Math.cos(rot) - py * Math.sin(rot), gy + px * Math.sin(rot) + py * Math.cos(rot)]; };
+      penStrokes(g, GOOD_STROKES, clamp((lt - WRITE_AT) / WRITE_DUR), map, 19, 11);
+    }
+    text(g, 'A FAN-MADE BROWSER PORT', W / 2, 780, 3.8, { align: 'center', fill: '#e9e3d6', alpha: clamp((lt - W_DAY - 0.5) / 0.4) });
   }
 });
 
@@ -449,7 +508,7 @@ function pcmTime(m, pic) {
 // stressed pitch of the line's own words is 128 - 147 Hz), level-matched per channel to the captured "bad", with a short
 // synthetic room tail like the recording's own ring (~-22 dB, 0.6 s).
 const GOOD_CLIP = { offset: 0x1723cfd, length: 13839 };   // "Oh my giddy aunt. This is not good." (clip 100 of the ROM scan)
-const GOOD_RATE = +(Q.get("goodrate") || 0.88), GOOD_GAIN = +(Q.get("goodgain") || 1.15), GOOD_DELAY = +(Q.get("gooddelay") || 0.05), BAD_PCM = [40.55, 41.66], GOOD_PCM = 40.582;
+const GOOD_RATE = +(Q.get("goodrate") || 0.88), GOOD_GAIN = +(Q.get("goodgain") || 1.15), GOOD_DELAY = +(Q.get("gooddelay") || 0.05), BAD_PCM = [40.55, 41.58], GOOD_PCM = 40.582;
 function bufRms(b, ch, t0, t1, voicedOnly) {
   const d = b.getChannelData(ch), r = b.sampleRate, hop = Math.round(r / 100), fr = [];
   for (let i = Math.round(t0 * r); i + hop <= Math.min(d.length, Math.round(t1 * r)); i += hop) { let e = 0; for (let k = i; k < i + hop; k++) e += d[k] * d[k]; fr.push(e / hop); }
@@ -494,25 +553,57 @@ function roomIR(ctx, secs = 0.6) {   // decaying noise, -60 dB at `secs`, a litt
     for (let i = 0; i < n; i++) { seed = (seed * 1103515245 + 12345) & 0x7fffffff; const x = seed / 0x3fffffff - 1; lp += (x - lp) * (0.5 - 0.35 * i / n); d[i] = lp * Math.pow(10, -3 * i / n); } }
   return b;
 }
-// the edited speech into `dest`, timeline start t0 (seconds), returns { gainL, gainR } for the log
+// The line's own background under the splice (P355 follow-up: the clip's noise did not blend): between words this
+// recording carries a slowly decaying room ring, not a flat hiss (measured per band, bands.mjs-style: ~-30 dB right
+// after a word, ~-39 dB half a second later, ~-46 dB floor). So only "bad" and its ring are taken out, and the hole is
+// refilled with the ring that follows "a" in the same line (pcm FILL_PCM, the same room, the same take), looped with
+// equal-power crossfades and shaped to the original ring's measured decay (FILL_DB at the hole's start -> end); the
+// "good" clip is gated to its voiced part (its own MP3 noise floor below 12 % of its peak is faded out) and gets a
+// short room tail. Result measured in the speech-only render (render.mjs audio speech) against the original track.
+const FILL_PCM = [40.30, 40.55], FILL_DB = [+(Q.get("filldb0") || 0.5), +(Q.get("filldb1") || -0.5)];
+function loopFill(src, r, a, z, n) {   // n frames from src[a, z) looped, 60 ms equal-power crossfades, per channel
+  const L = z - a, X = Math.round(0.06 * r), step = L - X, out = [];
+  for (let c = 0; c < src.numberOfChannels; c++) {
+    const d = src.getChannelData(c), o = new Float32Array(n);
+    for (let s0 = 0, j = 0; s0 < n; s0 += step, j++)
+      for (let i = 0; i < L && s0 + i < n; i++) {
+        const win = (j && i < X ? Math.sin(i / X * Math.PI / 2) : 1) * (i >= L - X ? Math.cos((i - (L - X)) / X * Math.PI / 2) : 1);
+        o[s0 + i] += d[a + i] * win;
+      }
+    out.push(o);
+  }
+  return out;
+}
+// the edited speech into `dest`, timeline start t0 (seconds)
 async function speechInto(ctx, dest, t0) {
   const { b, m } = await pcmBuffer(ctx, 'intro_speech');
   const r = b.sampleRate, gL = bufRms(b, 0, GOOD_PCM, GOOD_PCM + 0.5, true), gR = bufRms(b, 1, GOOD_PCM, GOOD_PCM + 0.5, true);
-  for (let c = 0; c < 2; c++) {   // mute "bad" and its ring, 15 ms ramps
-    const d = b.getChannelData(c), a = Math.round(BAD_PCM[0] * r), z = Math.round(BAD_PCM[1] * r), f = Math.round(0.015 * r);
-    for (let i = a - f; i < z + f; i++) d[i] *= i < a ? (a - i) / f : i >= z ? (i - z) / f : 0;
+  const a = Math.round(BAD_PCM[0] * r), z = Math.round(BAD_PCM[1] * r), f = Math.round(0.03 * r), n = z - a + 2 * f;
+  const fill = loopFill(b, r, Math.round(FILL_PCM[0] * r), Math.round(FILL_PCM[1] * r), n);
+  for (let c = 0; c < 2; c++) {   // crossfade (equal power, 60 ms, ending before "fur") from the line into the shaped fill and back
+    const d = b.getChannelData(c), fl = fill[c];
+    for (let k = 0; k < n; k++) {
+      const i = a - f + k, w = k < 2 * f ? k / (2 * f) : k > n - 2 * f ? (n - k) / (2 * f) : 1;
+      const g = Math.pow(10, (FILL_DB[0] + (FILL_DB[1] - FILL_DB[0]) * k / n) / 20);
+      d[i] = d[i] * Math.cos(w * Math.PI / 2) + fl[k] * g * Math.sin(w * Math.PI / 2);
+    }
   }
   const src = ctx.createBufferSource(); src.buffer = b; src.connect(dest); src.start(t0, pcmTime(m, 0));
-  const good = await goodWord(ctx), gw = bufRms(good, 0, 0, good.duration, true);
+  const good = await goodWord(ctx), gd = good.getChannelData(0), gr = good.sampleRate, hop = Math.round(gr / 100);
+  // gate: 10 ms frames under 12 % of the clip's peak frame are faded down (smoothly), so its own noise floor goes
+  const fr = []; for (let i = 0; i < gd.length; i += hop) { let e = 0; const e1 = Math.min(gd.length, i + hop); for (let k = i; k < e1; k++) e += gd[k] * gd[k]; fr.push(Math.sqrt(e / (e1 - i))); }
+  const mx = Math.max(...fr), gate = fr.map((v) => clamp((v / mx - 0.06) / 0.06));
+  for (let i = 0; i < gd.length; i++) { const x = i / hop - 0.5, k = Math.max(0, Math.min(fr.length - 1, Math.floor(x))), t = clamp(x - k); gd[i] *= gate[k] * (1 - t) + gate[Math.min(fr.length - 1, k + 1)] * t; }
+  const gw = bufRms(good, 0, 0, good.duration, true);
   const st = ctx.createBuffer(2, good.length, good.sampleRate);
-  st.getChannelData(0).set(good.getChannelData(0).map((v) => v * GOOD_GAIN * gL / gw)); st.getChannelData(1).set(good.getChannelData(0).map((v) => v * GOOD_GAIN * gR / gw));
+  st.getChannelData(0).set(gd.map((v) => v * GOOD_GAIN * gL / gw)); st.getChannelData(1).set(gd.map((v) => v * GOOD_GAIN * gR / gw));
   const gs = ctx.createBufferSource(); gs.buffer = st; gs.playbackRate.value = GOOD_RATE;
   const conv = ctx.createConvolver(); conv.normalize = true; conv.buffer = roomIR(ctx);
-  const wet = ctx.createGain(); wet.gain.value = +(Q.get("goodwet") || 0.6);
+  const wet = ctx.createGain(); wet.gain.value = +(Q.get('goodwet') || 0.35);
   gs.connect(dest); gs.connect(conv); conv.connect(wet); wet.connect(dest);
   const at = t0 + GOOD_PCM - pcmTime(m, 0) + GOOD_DELAY;
   gs.start(at);
-  log(`speech: "bad" muted pcm ${BAD_PCM.join('-')}, "good" at timeline ${at.toFixed(3)} (rate ${GOOD_RATE}), gain L ${(gL / gw).toFixed(3)} R ${(gR / gw).toFixed(3)}`);
+  log(`speech: "bad" + ring replaced pcm ${BAD_PCM.join('-')} by the line's room ring (pcm ${FILL_PCM.join('-')}, ${FILL_DB.join(' -> ')} dB), "good" at timeline ${at.toFixed(3)} (rate ${GOOD_RATE}), gain L ${(gL / gw).toFixed(3)} R ${(gR / gw).toFixed(3)}`);
 }
 async function musicBuffer(ctx) {
   if (!MUSIC) return (await pcmBuffer(ctx, 'music_0c')).b;
@@ -523,7 +614,7 @@ async function buildAudio(only) {
   const master = ctx.createGain(), comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -20; comp.knee.value = 8; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.2;
   master.connect(comp); comp.connect(ctx.destination);
-  if (only === 'speech') { await speechInto(ctx, master, 0); }
+  if (only === 'speech') { master.disconnect(); master.connect(ctx.destination); await speechInto(ctx, master, 0); return ctx.startRendering(); }
   else {
     // part 1: the cutscene's music and effects + the edited speech, out at the cut
     const intro = await pcmBuffer(ctx, 'intro');
