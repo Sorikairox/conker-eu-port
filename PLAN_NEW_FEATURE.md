@@ -26,6 +26,7 @@ The source list is the ConkerBFDReloaded comparison (2026-10-26). Agent brief: `
 | 19 | Free camera | Done P347 (single player, follow camera; never online) |
 | 22 | Photo mode | Done P348 (single player, cutscenes too; never online) |
 | 16a | Hi-res menus and 2D | Done P349 (render-only, each player's own choice online; in Modern) |
+| 16c | Smooth font | Done P356 (font 0 glyph rectangles: bicubic intensity + smoothstep outline in the shader; render-only, each player's own choice online; in Modern) |
 | 15 | Widescreen without bars | Done P350 (render-only, logic keeps 4:3, each player's own choice online; in Modern; + option Full-resolution picture) |
 | 18 | High frame rate (interpolated) | Done P351 (render-only replays of the last game frame with interpolated matrices; each player's own choice online; in Modern) |
 | 21 | Ledge grab | Done P352: the N64 game already has the move (hang anim 0x42, pull-up 0x40, hop, let go) but only on edges the levels mark (flags 0x0E000000, few levels); option "Ledge grab everywhere" (single player, not in Modern) takes every flat static edge, + Z lets go, + shimmy (hang pose). Found on the way: n64mem relocated the acos table's first word (wrong atan2 near axes), fixed |

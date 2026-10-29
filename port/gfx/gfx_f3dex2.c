@@ -176,6 +176,19 @@ static int hires_2d;                       /* the option (page) */
 static int rect_hires_mode;                /* for the texture rectangle being drawn */
 static float rect_hires_clamp[4];
 EMSCRIPTEN_KEEPALIVE void port_gfx_hires_2d(int on) { hires_2d = on != 0; }
+/* P356 option "Smooth font" (page: Options, key smoothfont; port_gfx_smooth_font). The game's text (text_draw_string:
+ * speech bubbles and dialogue, menu lines, the legal page, subtitles; words drawn as pictures are not text) is one
+ * texture rectangle per glyph from font 0, an I8 bitmap with 16 intensity levels (glyph_rle_to_texture), drawn
+ * with colour = PRIM and alpha = PRIM alpha x the glyph's intensity. Magnified, each glyph pixel becomes a big square
+ * with a blurred edge. With the option on, a glyph rectangle is centred on the N64 pixels like P349's hi-res 2D (hi-res
+ * 2D itself may be off) and the shader treats the glyph's intensity as a sampled shape (rect_hires_mode 3): a
+ * Catmull-Rom (bicubic) filter reads it at the canvas pixel, a smoothstep around 0.45 of full scale turns that into a
+ * sharp outline about one canvas pixel soft, and the result is scaled to the glyph's own full intensity (0xF0), so the
+ * inside, the colour and the alpha are the original ones. Only rectangles whose texture image lies inside font 0's
+ * glyph buffer get it (text_glyph_rect); icons, HUD pictures and every other 2D are untouched.
+ * Render-only: this object is outside the online hash. */
+static int smooth_font;                    /* the option (page) */
+EMSCRIPTEN_KEEPALIVE void port_gfx_smooth_font(int on) { smooth_font = on != 0; }
 /* P349: the pause screen's frozen frame kept at canvas resolution (zsnap_take, near hx_*): tex / fbo the snapshot, tw x th
  * its size, src the screen image it copies, p / w / rows the z image that holds that copy on the N64. */
 static struct { GLuint tex, fbo; int tw, th, valid, due; unsigned char *src, *p; unsigned w, rows; } zsnap;
@@ -476,6 +489,20 @@ static const char *FS =
      * an N64 pixel); uRClamp keeps tile 0 inside the texels the N64 rectangle reads (no bleeding from an atlas neighbour
      * or a wrapped edge). uRHi 1: 4-tap bilinear with full fractions; 2 (copy mode / point filter): crisp texels whose
      * edges are blended over one canvas pixel (RFW = texels per canvas pixel), so every texel gets the same width. */
+    /* P356 option "Smooth font" (uRHi 3, tile 0 = a font glyph, I8): the glyph's intensity is a sampled shape. Catmull-Rom
+     * (bicubic) at this canvas pixel, texels outside the tile count as empty; then a smoothstep around 0.45 whose width is
+     * about one canvas pixel of the value's slope (fwidth), so the outline is round and sharp at any magnification and
+     * falls back to a plain ramp near 1:1. Scaled to the glyph's full intensity 0xF0, the inside stays as the N64 draws it. */
+    "  if (uRHi == 3 && k == 0) {\n"
+    "    vec2 b = floor(tc), f = tc - b; ivec2 i = ivec2(b); ivec2 mx = uTS[0].zw; float v = 0.0;\n"
+    "    vec4 wx = 0.5 * vec4(f.x * (-1.0 + f.x * (2.0 - f.x)), 2.0 + f.x * f.x * (-5.0 + 3.0 * f.x), f.x * (1.0 + f.x * (4.0 - 3.0 * f.x)), f.x * f.x * (f.x - 1.0));\n"
+    "    vec4 wy = 0.5 * vec4(f.y * (-1.0 + f.y * (2.0 - f.y)), 2.0 + f.y * f.y * (-5.0 + 3.0 * f.y), f.y * (1.0 + f.y * (4.0 - 3.0 * f.y)), f.y * f.y * (f.y - 1.0));\n"
+    "    for (int y = 0; y < 4; y++) { float r = 0.0;\n"
+    "      for (int x = 0; x < 4; x++) { ivec2 c = i + ivec2(x - 1, y - 1);\n"
+    "        r += wx[x] * (any(lessThan(c, ivec2(0))) || any(greaterThan(c, mx)) ? 0.0 : texelFetch(uT0, c, 0).a); }\n"
+    "      v += wy[y] * r; }\n"
+    "    float e = max(0.5 * length(vec2(dFdx(v), dFdy(v))), 0.02);\n"
+    "    return vec4(smoothstep(0.45 - e, 0.45 + e, v) * (240.0 / 255.0)); }\n"
     "  if (uRHi != 0) {\n"
     "    if (k == 0) tc = clamp(tc, uRClamp.xy, uRClamp.zw);\n"
     "    vec2 b = floor(tc), f = tc - b; ivec2 i = ivec2(b);\n"
@@ -1496,6 +1523,18 @@ static void rect_hires_setup(int ti, float s0, float t0, float ds, float dt, flo
     rect_hires_axis(s0, ds, w, t, 0, &rect_hires_clamp[0], &rect_hires_clamp[2]);
     rect_hires_axis(t0, dt, h, t, 1, &rect_hires_clamp[1], &rect_hires_clamp[3]);
 }
+/* P356: is the texture rectangle about to be drawn a glyph of the game's text font? Font 0 is the I8 glyph buffer
+ * g_font_textures[0] (0xE0 bytes per glyph), directly followed by its metrics g_font_metrics[0] (the game allocates both
+ * in one block), so [textures, metrics) is the glyph range; the rectangle's tile must be I 8-bit and the last texture
+ * image (text_draw_string's gDPSetTextureImage of that glyph) inside the range. */
+extern unsigned g_font_textures[] __attribute__((weak));   /* was D_80085D20 (weak: sched_demo has no game) */
+extern unsigned g_font_metrics[] __attribute__((weak));    /* was D_80085D24 */
+static int text_glyph_rect(int ti) {
+    const Tile *t = &tiles[ti & 7];
+    if (!g_font_textures || !g_font_metrics || !timg.p || t->fmt != 4 || t->siz != 1) return 0;
+    const unsigned char *lo = phys(g_font_textures[0]), *hi = phys(g_font_metrics[0]);
+    return lo && hi > lo && hi - lo <= 0x10000 && timg.p >= lo && timg.p < hi;
+}
 
 /* ------------------------------------------------------------------ RSP commands */
 /* Conker lighting (P14, rewritten in P35 from the ROM's F3DEX2 lighting overlay).
@@ -2473,8 +2512,10 @@ void gfx_run_dl(const void *dl) {
                          T->uls / 4.0, T->ult / 4.0, T->lrs / 4.0, T->lrt / 4.0, oth_h, oth_l, combine_w0, combine_w1); } }
             hx_texrect(tex_tile, ulx, uly, s, t, ds, dt);   /* P335 */
             float sv = s, tv = t;   /* s / t at the rectangle's upper-left corner as the vertices carry them */
-            if (hires_2d && !off_on && !hxs_on) {   /* P349: centred on the N64 pixel (offscreen N64-size images stay as the RDP draws them) */
+            int glyph = smooth_font && !off_on && !hxs_on && text_glyph_rect(tex_tile);   /* P356 */
+            if ((hires_2d || glyph) && !off_on && !hxs_on) {   /* P349: centred on the N64 pixel (offscreen N64-size images stay as the RDP draws them) */
                 rect_hires_setup(tex_tile, s, t, ds, dt, lrx - ulx, lry - uly, cyc);
+                if (glyph) rect_hires_mode = 3;   /* P356: smooth font */
                 sv -= 0.5f * ds; tv -= 0.5f * dt;
             }
             if (hxs_on && ws_opt) { ws_calc(); if (ws_on) rect_ext = ws_rect_edges(ulx, lrx); }   /* P350: a full frame, per canvas pixel */

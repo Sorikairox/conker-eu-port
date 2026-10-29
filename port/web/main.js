@@ -91,6 +91,9 @@ const OPTIONS = [
   // P349: page-side (no `game` id): the renderer's own switch (port_gfx_hires_2d), each player's choice even online.
   { key: 'hires2d', label: 'Hi-res menus and 2D', def: false,
     help: 'Menus, HUD, text, title and pause screens and other flat pictures are drawn sharp at the picture\'s full resolution: each texel sits exactly where the N64 shows it (no half-texel blur), tiled pictures join without seams, scaled text and icons show the detail of their textures, blocky (unfiltered) pictures keep even, crisp texels, and the frozen game picture behind the pause menu stays at full resolution. Same layout and colours as the N64; 3D is not changed. Off: as before (2D sampled the N64 way, half a texel off at this resolution).' },
+  // P356: page-side (port_gfx_smooth_font in the renderer, outside the online hash): each player's own choice online.
+  { key: 'smoothfont', label: 'Smooth font', def: false,
+    help: 'The game\'s text (speech bubbles and dialogue, menu lines, the legal page, subtitles and other printed text) is drawn with smooth, clean curved edges at the picture\'s full resolution instead of big blurred pixels: each letter keeps the game font\'s shape, size, place and colours. Only the font\'s letters change; words drawn as pictures (GAME 1, PAUSED, the HUD digits), icons and other pictures stay as they are. Best with Full-resolution picture. Off: the N64 font pixels, magnified.' },
   // P350: page-side too (port_gfx_widescreen in the renderer, outside the online hash): each player's own choice online.
   { key: 'widescreen', label: 'Widescreen', def: false,
     help: 'The picture fills a wide window (16:9, 16:10, up to 21:9: the shape of the game area, or of the screen in fullscreen) and the 3D view sees further to the left and right, instead of a 4:3 picture with black bars. Nothing is stretched. Menus, text and the pause screen keep their N64 place in the middle, the health, cash and air meter move to the corners, fades and the pause background cover the whole width. The game itself still works with its 4:3 view (nothing plays differently, safe online): characters and some effects just outside the 4:3 view are only drawn once they come close to it. Off: the 4:3 N64 picture.' },
@@ -130,7 +133,8 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 //   it changes nothing unless L is held, a fresh browser is then exactly Classic, and the user chose it on by default.
 // Modern = Classic + the options that add information or remove waiting without making the game easier or changing
 //   how it controls: skip intro, autosave icon, health / cash always visible, air meter, crosshair, full-detail Conker,
-//   rumble, (P349) hi-res menus and 2D (a sharper picture with the N64's layout and colours) and (P350) widescreen (more
+//   rumble, (P349) hi-res menus and 2D (a sharper picture with the N64's layout and colours), (P356) smooth font (the
+//   same letters with clean edges instead of magnified pixels: picture only) and (P350) widescreen (more
 //   of the scene at the sides; the game logic keeps its 4:3 view), (P351) the full-resolution picture and (P351) the high
 //   frame rate (smooth motion between game frames; costs about one game frame of extra delay, which suits this game). Left off on purpose: longer breath / tail spin (easier), toggle crouch / R-Look / walk and inverted
 //   swimming (control tastes), no motion blur / drunk sway (part of the story's scenes), free camera (P347: it changes
@@ -140,11 +144,11 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
 const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode').map((o) => o.key);
-const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'widescreen', 'fullres', 'hfr'];
+const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'smoothfont', 'widescreen', 'fullres', 'hfr'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
     values: (o) => (o.range ? 100 : o.key === 'skipcut') },
-  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D, widescreen, full-resolution picture, high frame rate.',
+  modern: { label: 'Modern', help: 'Classic plus extras that show more or wait less without making the game easier: skip intro, autosave icon, health and cash always visible, underwater air meter, aiming crosshair, Conker always full detail, rumble, hi-res menus and 2D, smooth font, widescreen, full-resolution picture, high frame rate.',
     values: (o) => (o.range ? 100 : PRESET_MODERN_ON.includes(o.key)) },
   custom: { label: 'Custom', help: 'Your own mix: pick Classic or Modern to set every option at once.' },
 };
@@ -872,6 +876,7 @@ function portRumble(ch, on) {
 }
 function rumbleStopAll() { for (let ch = 0; ch < 4; ch++) if (rumbleMotor[ch]) rumbleSet(ch, false); }
 optionChanged.hires2d = (on) => { if (M && M._port_gfx_hires_2d) M._port_gfx_hires_2d(on ? 1 : 0); };   // P349: takes effect at the next frame
+optionChanged.smoothfont = (on) => { if (M && M._port_gfx_smooth_font) M._port_gfx_smooth_font(on ? 1 : 0); };   // P356: from the next frame on
 optionChanged.hfr = (on) => { if (M && M._port_gfx_hfr) M._port_gfx_hfr(on ? 1 : 0); };   // P351: from the next game frame on
 // P350 option "Widescreen": the picture's aspect. Off: 4:3, canvas 640 x 480 (as before). On: the aspect of the space the
 // page gives the picture (the stage, or the screen in fullscreen), between 4:3 and 21:9 (64:27), with the canvas 480 rows
@@ -1270,6 +1275,7 @@ async function start(app) {
   window.Module = M = Mod;
   for (const o of OPTIONS) sendOption(o);   // before callMain: the game reads them from its first frame
   optionChanged.hires2d(opt('hires2d'));   // P349: the renderer's switch (page-side option)
+  optionChanged.smoothfont(opt('smoothfont'));   // P356: the renderer's switch (page-side option)
   optionChanged.hfr(opt('hfr'));           // P351: the renderer's switch (page-side option)
   layoutScreen();                          // P350: the renderer's widescreen switch
   optionsLocked = NETDET || !!netCfg;
