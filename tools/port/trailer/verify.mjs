@@ -10,7 +10,7 @@ import { launch, serve, sleep } from './cdp.mjs';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../..');
 process.chdir(ROOT);
 const file = path.resolve(process.argv[2] || 'port_work/trailer/out/trailer.mp4');
-const times = (process.argv[3] || '2,8,15,19.5,24,39.7,41.6,44,49,51.5,54,58,63,68,73,75.5').split(',').map(Number);
+const times = (process.argv[3] || '2,8,15,19.5,24,38.9,39.7,40.6,44,45.4,47,52,57,61,66,71,76,78.5').split(',').map(Number);
 const dir = path.dirname(file);
 const port = 8680 + (process.pid % 10);
 const srv = await serve({ '/v.mp4': file, '/t/': 'tools/port/trailer', '/npm/mp4box.js': 'port_work/trailer/npm/node_modules/mp4box/dist/mp4box.all.js' }, port, dir);

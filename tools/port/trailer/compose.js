@@ -20,7 +20,7 @@ const Q = new URLSearchParams(location.search);
 //   "day" 41.03 - 41.43; the game's own "Bad Fur Day" logo fades in from picture ~2390 (retrace ~10232): part 1 ramps the
 //   static shot before it so the logo is in on "good", then holds the settled logo (introPic, LOGO_HOLD).
 const BEAT = 0.6182;                 // features music: 97.06 BPM (music_0c, musicstat.mjs --beats)
-const TF = 42.6;                     // the cut to the features, on a downbeat of the features music
+const TF = 45.6;                     // the cut to the features, on a downbeat of the features music (the logo holds ~6 s)
 const T = { browser: TF, wide: TF + 8 * BEAT, ledge: TF + 16 * BEAT, spin: TF + 23 * BEAT, online: TF + 30 * BEAT,
   more: TF + 38 * BEAT, end: TF + 46 * BEAT };
 const DUR = +(TF + 54 * BEAT + 0.4).toFixed(2), NFR = Math.round(DUR * FPS);
@@ -307,9 +307,10 @@ const BAD_BOX = { x: 715, y: 170, w: 500, h: 175 }, GOOD_AT = { x: 1240, y: 72, 
 const LOGO_STRIKES = [[[-0.02, 0.72], [0.35, 0.62], [0.7, 0.52], [0.99, 0.40]], [[0.02, 0.42], [0.5, 0.54], [0.98, 0.70]]];
 const introPic = (lt) => Math.min(LOGO_HOLD, lt * 60 + LOGO_SKIP * ease((lt - RAMP[0]) / (RAMP[1] - RAMP[0])));
 seg(0, TF, 1.0, 0, async (g, lt) => {
+  // during the hold on LOGO_HOLD a very slow push-in (4 % over the hold), the pen strokes ride with the picture
+  const hold0 = (LOGO_HOLD - LOGO_SKIP) / 60, zk = 1 + 0.04 * ease((lt - hold0) / (TF - hold0));
+  g.save(); g.translate(W / 2, H * 0.42); g.scale(zk, zk); g.translate(-W / 2, -H * 0.42);
   g.drawImage(await shotPic('intro', introPic(lt)), 0, 0, W, H);
-  vignette(g, 0.45);
-  for (const c of CARDS) card(g, lt, c);
   if (lt >= STRIKE_AT) {   // the strike over the logo's "Bad": two quick pen lines across the box
     const map = (u, v) => [BAD_BOX.x + u * BAD_BOX.w, BAD_BOX.y + v * BAD_BOX.h];
     penStrokes(g, LOGO_STRIKES, clamp((lt - STRIKE_AT) / 0.2), map, 30, 3);
@@ -319,6 +320,9 @@ seg(0, TF, 1.0, 0, async (g, lt) => {
     const map = (u, v) => { const px = u * ch, py = v * ch; return [x + px * Math.cos(rot) - py * Math.sin(rot), y + px * Math.sin(rot) + py * Math.cos(rot)]; };
     penStrokes(g, GOOD_STROKES, clamp((lt - WRITE_AT) / WRITE_DUR), map, 19, 11);
   }
+  g.restore();
+  vignette(g, 0.45);
+  for (const c of CARDS) card(g, lt, c);
   const fa = clamp((lt - W_DAY - 0.5) / 0.4);
   if (fa > 0) {
     const gr = g.createLinearGradient(0, H - 150, 0, H); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${0.75 * fa})`);
@@ -610,7 +614,7 @@ async function buildAudio(only) {
   if (only === 'speech') { master.disconnect(); master.connect(ctx.destination); await speechInto(ctx, master, 0); return ctx.startRendering(); }
   else {
     // part 1: the cutscene's music and effects + the edited speech, out at the cut
-    const intro = await pcmBuffer(ctx, 'intro');
+    const intro = await pcmBuffer(ctx, 'intro_audio');   // = 'intro' audio (identical samples), captured longer for the hold
     const bus = ctx.createGain(); bus.connect(master);
     bus.gain.setValueAtTime(0, 0); bus.gain.linearRampToValueAtTime(1, 0.6);
     bus.gain.setValueAtTime(1, TF - 0.5); bus.gain.linearRampToValueAtTime(0, TF + 0.05);

@@ -24,6 +24,8 @@ export const SHOTS = {
   // the effects and speech off, Conker standing still
   music_0c: { query: '&warp=0C&opt=volsfx:0,volspeech:0&padf=100:0:0:0', start: 150, secs: 60, fps: 0.5, hfr: false, canvas: '480x270' },
   intro: { query: `${NEWGAME}&opt=hires2d:1,widescreen:1,fullres:1,hfr:1,volspeech:0`, ...INTRO, hfr: true },
+  // the same run's music + effects, longer (past the logo, for holding it): audio only, tiny pictures
+  intro_audio: { query: `${NEWGAME}&opt=widescreen:1,volspeech:0`, ...INTRO, secs: 48, fps: 1, hfr: false, canvas: '480x270' },
   intro_speech: { query: `${NEWGAME}&opt=widescreen:1,volmusic:0,volsfx:0`, ...INTRO, fps: 2, hfr: false, canvas: '480x270' },
   intro_full: { query: `${NEWGAME}&opt=widescreen:1`, ...INTRO, fps: 2, hfr: false, canvas: '480x270' },
   // music: the title sequence from power-on with Skip intro (rain, Conker walks into the pub, title menu), sound effects off

@@ -13,7 +13,7 @@
 // import __port_web_audio_open is replaced, so no AudioContext opens and the game's PCM ring is drained every retrace.
 // P354 trailer: run the compositor (compose.html / compose.js) in headless Chrome.
 //   node tools/port/trailer/render.mjs                 the MP4 -> port_work/trailer/out/trailer.mp4
-//   node tools/port/trailer/render.mjs small           2.8 Mbit/s copy (~28 MB for 76 s) -> out/trailer_small.mp4
+//   node tools/port/trailer/render.mjs small           2.6 Mbit/s copy (~28 MB for 79 s) -> out/trailer_small.mp4
 //   node tools/port/trailer/render.mjs preview F,F,..  only these frames (60 fps timeline) -> out/key_NNNNN.jpg
 //   node tools/port/trailer/render.mjs audio speech|1  only the edited speech / the whole soundtrack -> out/speech.wav, audio.wav
 //   env Q='&k=v...' adds compositor options: pixelfont=1 (the old blocky titles), music=FILE (port_work/trailer/music/FILE,
@@ -35,7 +35,7 @@ const srv = await serve({ '/t/': 'tools/port/trailer', '/w/': 'port_work/trailer
   '/npm/mp4-muxer.js': 'port_work/trailer/npm/node_modules/mp4-muxer/build/mp4-muxer.js' }, port, outDir);
 const q = (process.argv[2] === 'preview' ? `?preview=${process.argv[3]}`
   : process.argv[2] === 'audio' ? `?audio=${process.argv[3] || 1}`
-  : process.argv[2] === 'small' ? '?br=2800000&out=trailer_small.mp4' : '?') + (process.env.Q || '');
+  : process.argv[2] === 'small' ? '?br=2600000&out=trailer_small.mp4' : '?') + (process.env.Q || '');
 const b = await launch(`http://127.0.0.1:${port}/t/compose.html${q}`, { log: path.join(outDir, 'compose.log') });
 try {
   for (let i = 0; i < 100; i++) { if (await b.ev('typeof window.__run === "function"').catch(() => false)) break; await sleep(200); }
