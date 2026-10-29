@@ -88,6 +88,19 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P356 (port-web, 2026-10-29): feature #16c Smooth font
+- 2b637ccc option smoothfont (page-side, port_gfx_smooth_font, default off, in Modern; each player's own choice online).
+  Glyph rectangles = G_TEXRECT with an I 8-bit tile whose last SETTIMG lies in [g_font_textures[0], g_font_metrics[0])
+  (font 0's glyph buffer, followed by its metrics; text_glyph_rect in gfx_f3dex2.c, no game C change). Those are centred
+  like hi-res 2D and drawn with shader uRHi 3: 4x4 Catmull-Rom of the glyph intensity, smoothstep at 0.45 with a
+  half-width of half the per-pixel change, x 0xF0/0xFF (inside, colour, alpha, combiner unchanged).
+- Evidence port_work/p356/ev (shots.sh: menu / legal / hud / pause / text box x hires2d x smoothfont at 1280x960;
+  ws_text_* widescreen 1706x960; c640_legal_* 640x480; z_*.png crops). Off = HEAD pixel-identical; logos, GAME 1, HUD and
+  pause frames identical with it on (those words are pictures). netpair p356/net_guest_on 16443 IDENTICAL; check GREEN;
+  hold-L OK.
+- Open: the (c) glyph's 1-texel ring shows steps at its corners (corner texels 3/16, under the cut). Other text-like
+  words in the game (GAME 1, PAUSED, QUIT / CONT.., HUD digits) are pictures: a smooth version would need texture packs
+  (#17) or a separate filter.
 ### P353 (eu-wt-layout, 2026-10-29): layout independence of the n64_rdram mirror
 - Test aids: `make RDRAM_SHIFT=N` (port/Makefile; moves only the mirror), `?layhash=F` (pc_nethash.c, indicator),
   `tools/port/scripts/layout_cmp.sh build|run|check` (routes menu / run29 / mp / short; verdict = pixel-identical 640x480
