@@ -17,11 +17,10 @@ const Q = new URLSearchParams(location.search);
 // P355 edit: part 1 = the game's opening monologue (shot 'intro', start retrace 8240), part 2 = the features cut on the beat
 // of the features music. Times measured from the captures (musicstat.mjs, the speech envelope of 'intro_speech'):
 //   speech pcm second p plays at timeline p - 1.05 (pcmTime of picture 0); "a" 39.0, "bad" 39.53 - 40.07, "fur" 40.63,
-//   "day" 41.03 - 41.43; the game's own "Bad Fur Day" logo fades in from retrace ~10225 (timeline 39.7): part 1 freezes on
-//   picture FREEZE before it.
+//   "day" 41.03 - 41.43; the game's own "Bad Fur Day" logo fades in from picture ~2390 (retrace ~10232): part 1 ramps the
+//   static shot before it so the logo is in on "good", then holds the settled logo (introPic, LOGO_HOLD).
 const BEAT = 0.6182;                 // features music: 97.06 BPM (music_0c, musicstat.mjs --beats)
 const TF = 42.6;                     // the cut to the features, on a downbeat of the features music
-const FREEZE = 2370;                 // last 'intro' picture used (retrace 10215)
 const T = { browser: TF, wide: TF + 8 * BEAT, ledge: TF + 16 * BEAT, spin: TF + 23 * BEAT, online: TF + 30 * BEAT,
   more: TF + 38 * BEAT, end: TF + 46 * BEAT };
 const DUR = +(TF + 54 * BEAT + 0.4).toFixed(2), NFR = Math.round(DUR * FPS);
@@ -230,7 +229,7 @@ const seg = (a, b, fin, fout, draw) => SEG.push({ a, b, fin, fout, draw });
 //   13.0 after "King of all the land."                      PLAY ANYWHERE
 //   17.8 after "...I hear you say."                         + ON ANYTHING WITH A BROWSER
 //   22.6 after "...that surround my throne?"                NOT AFFILIATED
-//   38.45 CONKER'S BAD FUR DAY; 39.60 "GOOD": BAD struck out, GOOD handwritten in red; FUR 40.63 / DAY 41.03 pulse
+//   ~38.5-39.4 the game's logo fades in; 39.60 "GOOD": the logo's Bad struck out, Good handwritten in red
 const CARDS = [
   { at: 7.3, out: 12.6, lines: ['FAN MADE PORT'] },
   { at: 13.0, out: 22.3, lines: ['PLAY ANYWHERE', 'ON ANYTHING WITH A BROWSER'], at2: 17.8 },
@@ -251,13 +250,12 @@ function card(g, t, c) {
     text(g, c.lines[1], W / 2, y + 120, 4.4 * pop2, { align: 'center', fill: '#fff', alpha: b });
   }
 }
-// P355 follow-up: the title says CONKER'S BAD FUR DAY first (in the pause after "It's what I call..."); on his "good" a red
-// hand-drawn line strikes BAD out and GOOD is written above it in red, stroke by stroke like a pen; FUR and DAY pulse on
-// his words. The game's only red hand lettering is the scrawled "Conker's" of its 3-D logo (a model texture, not a font:
+// P355 follow-up: on his "good" a red hand-drawn line strikes out the "Bad" of the game's own logo and "Good" is written
+// beside it in red, stroke by stroke like a pen. The game's only red hand lettering is the scrawled "Conker's" of its 3-D logo (a model texture, not a font:
 // no G / D, and the game has a single text font, set 0), so GOOD and the strike are drawn as pen strokes in that red
 // (canvas paths, a little jitter and pressure-like width), with the logo lettering's dark rim.
-const TITLE_IN = 38.45, PEN_RED = '#e3261d', PEN_RIM = '#2a0806';
-const STRIKE_AT = W_GOOD, WRITE_AT = W_GOOD + 0.16, WRITE_DUR = 0.55;
+const PEN_RED = '#e3261d', PEN_RIM = '#2a0806';
+const STRIKE_AT = W_GOOD, WRITE_AT = W_GOOD + 0.18, WRITE_DUR = 0.55;
 // smooth deterministic wobble (sum of sines), for a hand-drawn look that is the same in every frame
 const wob = (u, k) => 0.5 * Math.sin(u * 7.1 + k * 1.7) + 0.3 * Math.sin(u * 13.3 + k * 4.1) + 0.2 * Math.sin(u * 23.9 + k * 2.3);
 function ellipsePts(cx, cy, rx, ry, a0, a1, n = 48) { const p = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; p.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); } return p; }
@@ -297,40 +295,35 @@ function penStrokes(g, strokes, prog, map, w, seed) {
   for (const s2 of vis) { g.lineWidth = s2.width * 0.25; g.beginPath(); g.moveTo(s2.a[0] - s2.width * 0.12, s2.a[1] - s2.width * 0.18); g.lineTo(s2.b[0] - s2.width * 0.12, s2.b[1] - s2.width * 0.18); g.stroke(); }
   g.restore();
 }
+// P355 (user): the game's own logo instead of a game-font title. The cutscene's "Conker's Bad Fur Day" logo fades in
+// from picture ~2390 and has settled by ~2442 (then the side doors start closing). The near-static wide shot before it
+// is played a little faster (a smooth ramp skipping LOGO_SKIP pictures between RAMP[0] and RAMP[1], audio untouched),
+// so the logo is fully in just before his "good" (39.6); the picture then holds on LOGO_HOLD. On "good" the red pen
+// strikes the logo's "Bad" (its box measured on picture 2448: x 715-1215, y 170-345, BAD_BOX) and "Good" is written
+// to its upper right, in the stone wall beside "Conker's", tilted like a correction.
+const LOGO_SKIP = 78, RAMP = [36.9, 38.5], LOGO_HOLD = 2448;
+const BAD_BOX = { x: 715, y: 170, w: 500, h: 175 }, GOOD_AT = { x: 1240, y: 72, ch: 138, rot: -9 };
+// two strokes through the middle of the logo's Bad (u, v in BAD_BOX)
+const LOGO_STRIKES = [[[-0.02, 0.72], [0.35, 0.62], [0.7, 0.52], [0.99, 0.40]], [[0.02, 0.42], [0.5, 0.54], [0.98, 0.70]]];
+const introPic = (lt) => Math.min(LOGO_HOLD, lt * 60 + LOGO_SKIP * ease((lt - RAMP[0]) / (RAMP[1] - RAMP[0])));
 seg(0, TF, 1.0, 0, async (g, lt) => {
-  const pic = Math.min(FREEZE, lt * 60), frozen = Math.max(0, lt - FREEZE / 60), d = ease((lt - TITLE_IN) / 0.6);
-  const z = 1 + 0.05 * ease(frozen / 3);
-  if (d > 0) g.filter = `blur(${(4 * d).toFixed(2)}px) brightness(${(1 - 0.5 * d).toFixed(3)})`;
-  // the frozen frame slowly pushes in under the title
-  g.drawImage(await shotPic('intro', pic), W / 2 - W * z / 2, H / 2 - H * z / 2, W * z, H * z);
-  g.filter = 'none';
+  g.drawImage(await shotPic('intro', introPic(lt)), 0, 0, W, H);
   vignette(g, 0.45);
   for (const c of CARDS) card(g, lt, c);
-  if (lt >= TITLE_IN) {   // the big title
-    const inA = clamp((lt - TITLE_IN) / 0.25), popIn = 1 + 0.12 * (1 - easeOut((lt - TITLE_IN) / 0.35));
-    const pulse = (t0) => 1 + 0.16 * Math.exp(-Math.pow((lt - t0 - 0.06) / 0.11, 2));   // FUR / DAY pulse on his words
-    const s = 10.5, y = 560, f = ['#fff4c2', ACCENT, ORANGE];
-    const inner = (w) => textW(w, s, 1) - 6 * s, sp = 7 * s;   // a word's ink width (textW includes 2 x 3 font px of margin)
-    const wB = inner('BAD') + sp, wF = inner('FUR') + sp, wD = inner('DAY'), x0 = W / 2 - (wB + wF + wD) / 2;
-    text(g, "CONKER'S", W / 2, 250, 6.2 * popIn, { align: 'center', fill: '#fff', alpha: inA });
-    const big = (str, x, w, k, fill = f) => text(g, str, x + w / 2, y + 6.5 * s * (1 - k), s * k, { align: 'center', fill, alpha: inA, spacing: 1 });
-    const badDim = clamp((lt - STRIKE_AT - 0.2) / 0.4);
-    big('BAD', x0, wB - sp, popIn, badDim > 0 ? ['#d8d0c0', '#b0a690', '#8a806c'] : f);
-    big('FUR', x0 + wB, wF - sp, popIn * pulse(W_FUR));
-    big('DAY', x0 + wB + wF, wD, popIn * pulse(W_DAY));
-    // the strike over BAD: two quick pen lines
-    if (lt >= STRIKE_AT) {
-      const bx = x0 - 10, bw = wB - sp + 20, by = y - 10, bh = 13 * s;
-      const map = (u, v) => [bx + u * bw, by + v * bh];
-      penStrokes(g, STRIKES, clamp((lt - STRIKE_AT) / 0.2), map, 17, 3);
-    }
-    // GOOD written above BAD, tilted a little
-    if (lt >= WRITE_AT) {
-      const ch = 165, gx = x0 + (wB - sp) / 2 - 1.27 * ch, gy = y - 0.95 * ch, rot = -7 * D;
-      const map = (u, v) => { const px = u * ch, py = v * ch; return [gx + px * Math.cos(rot) - py * Math.sin(rot), gy + px * Math.sin(rot) + py * Math.cos(rot)]; };
-      penStrokes(g, GOOD_STROKES, clamp((lt - WRITE_AT) / WRITE_DUR), map, 19, 11);
-    }
-    text(g, 'A FAN-MADE BROWSER PORT', W / 2, 780, 3.8, { align: 'center', fill: '#e9e3d6', alpha: clamp((lt - W_DAY - 0.5) / 0.4) });
+  if (lt >= STRIKE_AT) {   // the strike over the logo's "Bad": two quick pen lines across the box
+    const map = (u, v) => [BAD_BOX.x + u * BAD_BOX.w, BAD_BOX.y + v * BAD_BOX.h];
+    penStrokes(g, LOGO_STRIKES, clamp((lt - STRIKE_AT) / 0.2), map, 30, 3);
+  }
+  if (lt >= WRITE_AT) {   // "Good" written in red beside it
+    const { x, y, ch } = GOOD_AT, rot = GOOD_AT.rot * D;
+    const map = (u, v) => { const px = u * ch, py = v * ch; return [x + px * Math.cos(rot) - py * Math.sin(rot), y + px * Math.sin(rot) + py * Math.cos(rot)]; };
+    penStrokes(g, GOOD_STROKES, clamp((lt - WRITE_AT) / WRITE_DUR), map, 19, 11);
+  }
+  const fa = clamp((lt - W_DAY - 0.5) / 0.4);
+  if (fa > 0) {
+    const gr = g.createLinearGradient(0, H - 150, 0, H); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${0.75 * fa})`);
+    g.fillStyle = gr; g.fillRect(0, H - 150, W, 150);
+    text(g, 'A FAN-MADE BROWSER PORT', W / 2, 1012, 3.6, { align: 'center', fill: '#e9e3d6', alpha: fa });
   }
 });
 
