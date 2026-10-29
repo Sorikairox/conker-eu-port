@@ -88,6 +88,41 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P358 (port-web, 2026-10-29): photo mode Pose & Outfit (feature #22 extension)
+- 79c6cdd8 photo mode panel POSE & OUTFIT (right side; Reset, fold; choices in sessionStorage 'photo.look', re-applied
+  at every photo start; gamepad / keyboard: O = right stick click gives the panel the D-pad + A). The page chooses
+  (pc_photo.c port_photo_look_set, LK_* keys, kept outside the snapshot); the game applies it only inside photo frames
+  (game_eu_15A210.c photo_look_*), so the P348 snapshot restore undoes it:
+  - pose: photo_look_apply in world_update after the state handlers, before objects_update_all: anim_start_entry
+    (restart, no blend, speed 0, hold) + frame clamp, so the skeleton is built in that frame; play loop in the page.
+  - model: photo_look_swap_model: model_header_load + anim_bank_load (ROM -> sandbox heap), part list +0x2C4 -> a new
+    list of m, vertex blocks +0x28C cleared, obj_set_type. 20 models share his skeleton (g_anim_bank_group_lists group 0:
+    LODs 0-4, 59, 130 mech suit, 136, 144, 150 black-coat Conker, 152, 156/157/159/160 weasels, 176, 177/117 teddy,
+    178 Grim Reaper, 180 skeleton); all 187 models load (others with their own skeleton / bank: bat 154/155, Tediz ...).
+  - items: obj_setup_run of up to 4 of the 63 g_setup_cmd_lists; his own attachments hidden (+5 = 0) after
+    objects_update_all (photo_look_after_update).
+  - display lists: obj_draw_model_dl's hide mask +0x94 | hide & ~show (Conker has 1 DL; 130 / 150 / 159 have 4-11).
+  - face: obj_set_face_texture_segments (was obj_set_vertex_segments: they are textures): segments 6 / 7 = eyelids
+    (entries 25-27 blink, 25-35 eyelid set), 0xA / 0xB = eyes (+0x68 / +0x69, entries 14, 36-43).
+  - materials: photo_look_patch_model walks his DL once per photo frame: key = texture entry of each G_SETTIMG (or face
+    slot, or untextured run after a G_SETCOMBINE); hide = tri commands (05/06/07, Rare 10-1F) -> G_NOOP, texture swap =
+    G_SETTIMG image + palette (same distance), tint = G_RDPPIPESYNC before the material -> G_NOOP with w0 0x0050544E,
+    w1 RGBA (gfx_f3dex2.c PHOTO_TINT_MARK: uTint, luminance-keeping colourize). Model 0: 23 materials (13 fur head+tail,
+    5/6 hoodie, 1 shoes, 4 legs, 2 muzzle, 83 mouth, 64-67 face, ...).
+  - names: 96 animation ids named from the code that starts them (main.js PHOTO_ANIM_NAMES), group models, 21 item lists
+    and model-0 materials named by eye. Renamed obj_face_selectors_step -> obj_eyelid_selectors_step.
+- Test aid: tools/port/scripts/photolook.sh NAME LEVEL AT 'P({...})' ... (CAM=camera moves): one PNG per look +
+  the game's reports; window.__photo.lookPage / lookState / lookDump / move.
+- Evidence (port_work/p358/evidence): level 0x29 hang pose, fur / shoes tints, material-hide sheet, the 20 group models,
+  items sheets, bat; level 0x13 jump, black-coat Conker in tail spin, pistol + red hoodie + no shoes, Grim Reaper
+  hanging, eye swap + purple fur; panel screenshots. Restore: ?nethash run with photo pause at 300 and 148 photo frames
+  of looks (pose, model 150, items, face, tints, bat, play loop), exit hash = entry hash, and all 1432 retraces equal
+  (H and S) to a run without photo mode. check.sh GREEN, hold-L 5789 / 0x29 at 5795 no traps, e2e_replay PASS (7700
+  retraces identical). Online: photo mode stays off (unchanged).
+- Not possible / limits: Conker is a single display list (no game-side parts to split); materials are per texture,
+  so a texture used twice goes together (fur = head + tail); no army / caveman Conker model exists (his chapter looks
+  are attachments); tints act on the combined colour (luminance kept); the pose list's names are for his own bank
+  (an own-skeleton model uses its own numbers); item lists made for other characters can sit at odd joints.
 ### P357 (port-web, 2026-10-29): input recorder + end-to-end replay tests (docs/port/E2E.md)
 - 34a42bea option "Input recorder (for testing)" (tool, not in presets): Record button / panel, ?record=1. Recording =
   single-player online session with no input delay (pc_net.c section 5 port_rec_session): det clock, no frame budget,
