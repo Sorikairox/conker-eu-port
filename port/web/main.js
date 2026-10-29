@@ -16,6 +16,10 @@ const NETDET = /[?&]netdet(=1)?(&|$)/.test(location.search);
 // loop: loopback test peer {lat, loss} }. Test aid: ?netloop=1[&netmask=HEX][&netd=D][&netlat=MS][&netloss=PCT] runs a
 // session against a loopback peer in this page that plays the ?padf1..3 scripts (with &netscript=1 pad 1 plays ?padf).
 let netCfg = null;
+// P357 input recorder: recCfg = the recording / replay this page boots into (port/ultra/pc_net.c section 5), or null.
+// { mode: 'record' | 'replay', options: the game options {key: value} (fixed for the run), name, ... } (see "input recorder" below)
+let recCfg = null;
+const e2e = { ended: false };   // P357 replay state (filled by e2eBegin); ended = the replay is over: the game stays paused
 if (Q.get('netloop')) netCfg = { mask: parseInt(Q.get('netmask') || 'F', 16), local: 1, delay: +(Q.get('netd') || 3), hashEvery: 10,
   options: null, eeprom: null, loop: { lat: +(Q.get('netlat') || 0), loss: +(Q.get('netloss') || 0) } };
 const out = $('console');
@@ -45,11 +49,11 @@ function toggle(name, on) {
   const b = $('t-' + name), p = $('p-' + name);
   on = on === undefined ? p.hidden : on;
   p.hidden = !on; b.setAttribute('aria-pressed', String(on));
-  $('side').hidden = ['controls', 'saves', 'options', 'online', 'debug'].every((n) => $('p-' + n).hidden);
+  $('side').hidden = ['controls', 'saves', 'options', 'online', 'rec', 'debug'].every((n) => $('p-' + n).hidden);
   if (name === 'debug') { store.set('debug', on); if (on) out.scrollTop = out.scrollHeight; }
 }
-for (const n of ['controls', 'saves', 'options', 'online', 'debug']) $('t-' + n).onclick = () => toggle(n);
-if (['controls', 'saves', 'options', 'online'].includes(Q.get('panel'))) toggle(Q.get('panel'), true);   // P346 test aid: ?panel=options
+for (const n of ['controls', 'saves', 'options', 'online', 'rec', 'debug']) $('t-' + n).onclick = () => toggle(n);
+if (['controls', 'saves', 'options', 'online', 'rec'].includes(Q.get('panel'))) toggle(Q.get('panel'), true);   // P346 test aid: ?panel=options
 if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', false))) toggle('debug', true);
 
 // ---------------------------------------------------------------- options (P324)
@@ -61,6 +65,9 @@ if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', fals
 const OPTIONS = [
   { key: 'online', label: 'Online multiplayer (experimental)', def: false,
     help: 'Shows the Online button: 2 to 4 players on their own computers play a multiplayer match together (player 1 makes a room, the others join with its code; manual copy-paste codes also work).' },
+  // P357: a tool like Online / Photo mode (not in the presets): shows the Record button (docs/port/E2E.md)
+  { key: 'recorder', label: 'Input recorder (for testing)', def: false,
+    help: 'Shows the Record button: records everything you press from power-on (with your save and options) into a small file that the developers replay automatically to find the first point where a new version of the port plays differently. While recording, the game runs in the same exact-timing mode as online play; free camera and photo mode are off and the game options are fixed.' },
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,
@@ -143,7 +150,7 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // Classic / Modern whose values no longer match (a ?opt override, an option added later) is shown as what matches.
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
-const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode').map((o) => o.key);
+const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode' && o.key !== 'recorder').map((o) => o.key);   // P357: recorder = a tool
 const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'smoothfont', 'widescreen', 'fullres', 'hfr'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
@@ -161,6 +168,8 @@ const opt = (key) => {
   if (key in optCache) return optCache[key];
   const o = OPTIONS.find((x) => x.key === key);
   if (NETDET) return (optCache[key] = o.def);   // P337: the session's fixed options vector
+  if (recCfg && (key === 'freecam' || key === 'photomode')) return (optCache[key] = false);   // P357: not part of the recorded input
+  if (recCfg && o.game !== undefined) return (optCache[key] = key in recCfg.options ? recCfg.options[key] : o.def);   // P357: fixed for the recording
   if (netCfg && key === 'freecam') return (optCache[key] = false);   // P347: the camera stick is not in the lockstep input
   if (netCfg && key === 'photomode') return (optCache[key] = false);   // P348: a frozen game would stall every other player
   if (netCfg && o.game !== undefined) return (optCache[key] = netCfg.options && key in netCfg.options ? netCfg.options[key] : o.def);   // P338: the host's
@@ -184,7 +193,7 @@ function setOption(o, value, save = true) {
 // under a session only the game options (the host's) count: the page-side ones (autosave icon, toggles) stay each player's
 const presetMatches = (name) => PRESET_KEYS.every((k) => { const o = OPTIONS.find((x) => x.key === k); return (netCfg && o.game === undefined) || opt(k) === PRESETS[name].values(o); });
 const presetShown = () => {   // under a session the host's options decide: show what they match
-  const kept = netCfg || NETDET ? null : (Q.get('preset') || store.get('opt.preset', null));
+  const kept = netCfg || NETDET || recCfg ? null : (Q.get('preset') || store.get('opt.preset', null));
   if (kept === 'custom') return 'custom';
   if (PRESETS[kept] && presetMatches(kept)) return kept;
   return presetMatches('classic') ? 'classic' : presetMatches('modern') ? 'modern' : 'custom';
@@ -221,10 +230,10 @@ function showSessionOptions() {
     const locked = optionsLocked && o.game !== undefined;
     optionInputs[o.key].disabled = locked;
     optionInputs[o.key].parentElement.classList.toggle('locked', locked);
-    optionInputs[o.key].parentElement.title = locked ? (netCfg ? "Online: the game uses player 1's (the host's) options" : 'Fixed for this run') : '';
+    optionInputs[o.key].parentElement.title = locked ? (netCfg ? "Online: the game uses player 1's (the host's) options" : recCfg ? 'Fixed while recording (reload the page to change it)' : 'Fixed for this run') : '';
   }
   for (const n of Object.keys(PRESETS)) $('preset-' + n).disabled = optionsLocked;
-  log(`[options] session options (${netCfg ? "the host's" : 'fixed'}), preset ${showPreset()}: ` + OPTIONS.filter((o) => o.game !== undefined).map((o) => `${o.key}=${+opt(o.key)}`).join(' '));
+  log(`[options] session options (${netCfg ? "the host's" : recCfg ? 'recording' : 'fixed'}), preset ${showPreset()}: ` + OPTIONS.filter((o) => o.game !== undefined).map((o) => `${o.key}=${+opt(o.key)}`).join(' '));
 }
 (function renderOptions() {
   for (const o of OPTIONS) {
@@ -254,11 +263,12 @@ function showSessionOptions() {
 let dbp = null;
 function db() {
   if (!dbp) dbp = new Promise((res, rej) => {
-    const r = indexedDB.open('conker-port', 2);
+    const r = indexedDB.open('conker-port', 3);   // P357: version 3 adds 'recordings'
     r.onupgradeneeded = () => {
       const d = r.result;
       if (!d.objectStoreNames.contains('rom')) d.createObjectStore('rom');
       if (!d.objectStoreNames.contains('saves')) d.createObjectStore('saves');
+      if (!d.objectStoreNames.contains('recordings')) d.createObjectStore('recordings');   // P357 input recordings
     };
     r.onerror = () => rej(r.error);
     r.onsuccess = () => res(r.result);
@@ -532,7 +542,7 @@ function photoToast(text) {
 }
 function photoRequest(on) {
   if (!M || !M._port_photo_request || running !== 'game') return;
-  if (on && (!opt('photomode') || netCfg || NETDET || userPaused)) return;
+  if (on && (!opt('photomode') || netCfg || NETDET || recCfg || userPaused)) return;
   const r = M._port_photo_request(on ? 1 : 0);
   log(`[photo] ${on ? 'start' : 'leave'} requested (state ${r})`);
   if (on) photo.asked = performance.now();
@@ -664,6 +674,7 @@ function pollInput() {
     if (ring.hasAttribute('hidden') !== !(pr > 0)) ring.toggleAttribute('hidden', !(pr > 0));  // SVG: no .hidden property
   }
   if (netCfg && window.PortNet && PortNet.M) PortNet.setLocalPad(pads[0].b, pads[0].x, pads[0].y);   // P338: this peer's pad -> the ring
+  else if (recCfg) { if (recCfg.mode === 'record' && M && M._port_net_addr) recSetPad(pads[0]); }   // P357: the recorded pad (a replay plays the file)
   else if (M && M._port_pad_state && !NETDET) {   // P337: under ?netdet the pads come only from the frame-indexed scripts
     const p = M._port_pad_state() >> 2, H = M.HEAP32;
     for (let i = 0; i < 4; i++) {
@@ -924,7 +935,7 @@ optionChanged.rumble = (on) => { if (!on) { rumbleStopAll(); rumbleMotor.fill(fa
 
 let userPaused = false, hiddenPaused = false;
 function applyPause() {
-  const p = userPaused || hiddenPaused;
+  const p = userPaused || hiddenPaused || e2e.ended;   // P357: a finished replay stays paused
   if (M && M._port_set_paused) M._port_set_paused(p ? 1 : 0);
   if (p) rumbleStopAll();   // P333: no vibration while the page is paused
   const a = window.portAudio, quiet = p || photo.state === 2;   // P348: no sound in photo mode either
@@ -1242,6 +1253,279 @@ window.__online = {
   },
 };
 
+
+// ---------------------------------------------------------------- P357 input recorder (end-to-end tests)
+// docs/port/E2E.md. The option "Input recorder" shows the Record button and panel. "Start recording" boots the game from
+// power-on (a running game: the page reloads first) as a single-player session of the online machinery with no input
+// delay (port/ultra/pc_net.c section 5): forced determinism (det clock, no wall-time frame budget, virtual audio queue,
+// static thread stacks), the 50 Hz VI still paced by the wall clock, so the player plays at full speed with sound. At the
+// start of every retrace the game samples pad 1 (written here every animation frame, recSetPad) and hands the value to
+// recOnInput; at the end of retraces it hands fingerprints: G (build-independent game digest) every 10 retraces, and a
+// checkpoint (G + the online hash H / S + level / mode / Conker's position) every 50 retraces and at every level / game
+// mode change. Pausing (Esc, the Pause button, a hidden tab) stops the retraces, not the recording; the game options
+// are fixed, free camera and photo mode are off; the game's saves are kept as usual. "Stop and save" adds the last
+// checkpoint and downloads the recording; the last 10 also stay in this browser (a draft is stored every 10 s, so a
+// crash or a reload keeps all but the last seconds).
+// File (.ckrec): gzip of one JSON object { format 'conker-e2e-recording', version 1, name, created, build (SHA-256 of
+// conker.wasm, 16 hex), rom_sha1, start 'power-on', slot, eeprom (base64 of the 2048-byte EEPROM image at power-on:
+// the player's save data, not ROM data), options {game option: value}, view {page-side options, information only},
+// check_every 50, g_every 10, retraces N, inputs (base64: runs of u32 LE packed input buttons << 16 | (u8)x << 8 | (u8)y
+// + LEB128 count, retrace 1 first), g (base64: u32 LE G of retraces 10, 20, ...), checks [[retrace, H, S, G, level,
+// mode, kind 0 periodic / 1 level or mode change / 2 last, x, y, z], ...], complete, wall_s, paused_s, gaps, user_agent }.
+// Replay (?replay=URL, tools/port/scripts/e2e_replay.sh): the same session fed from the file, fast (?replayspeed=real
+// for 50 Hz), compared checkpoint by checkpoint (H / S only for the same build); window.__e2e.status() for the driver.
+const REC_FORMAT = 'conker-e2e-recording', REC_CHECK_EVERY = 50, REC_G_EVERY = 10, REC_KEEP = 10;
+const rec = { active: false, runs: [], lastV: -1, frames: 0, g: [], checks: [], gaps: 0, header: null, id: '', t0: 0,
+  pausedMs: 0, pauseSince: 0, draftTimer: null, uiTimer: null, drafting: false, level: 0 };
+const b64enc = (u8) => { let t = ''; for (let i = 0; i < u8.length; i += 32768) t += String.fromCharCode.apply(null, u8.subarray(i, i + 32768)); return btoa(t); };
+const b64dec = (t) => { const b = atob(t || ''), u8 = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u8[i] = b.charCodeAt(i); return u8; };
+function recEncodeRuns(runs) {   // [[value, count], ...] -> u32 LE value + LEB128 count per run
+  const out = new Uint8Array(runs.length * 9); let o = 0;
+  for (const [v, n] of runs) {
+    out[o++] = v & 255; out[o++] = (v >>> 8) & 255; out[o++] = (v >>> 16) & 255; out[o++] = (v >>> 24) & 255;
+    let k = n; while (k >= 128) { out[o++] = (k & 127) | 128; k = Math.floor(k / 128); } out[o++] = k;
+  }
+  return out.subarray(0, o);
+}
+function recDecodeRuns(u8, total) {   // -> Uint32Array of every retrace's input (retrace 1 first)
+  const out = new Uint32Array(total); let o = 0, i = 0;
+  while (i + 4 <= u8.length) {
+    const v = (u8[i] | u8[i + 1] << 8 | u8[i + 2] << 16 | u8[i + 3] << 24) >>> 0; i += 4;
+    let n = 0, m = 1, c; do { c = u8[i++]; n += (c & 127) * m; m *= 128; } while (c & 128);
+    for (let k = 0; k < n && o < total; k++) out[o++] = v;
+  }
+  return out;
+}
+const u32enc = (arr) => { const b = new Uint8Array(arr.length * 4), d = new DataView(b.buffer); arr.forEach((v, i) => d.setUint32(i * 4, v >>> 0, true)); return b; };
+const u32dec = (u8) => { const d = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), out = []; for (let i = 0; i + 4 <= u8.length; i += 4) out.push(d.getUint32(i, true)); return out; };
+let wasmBuildId = null;
+async function recBuildId() {
+  if (!wasmBuildId) try { wasmBuildId = (await sha256hex(await (await fetch('conker.wasm')).arrayBuffer())).slice(0, 16); } catch (e) { wasmBuildId = 'unknown'; }
+  return wasmBuildId;
+}
+async function recPack(doc) {   // the recording object -> a gzip Blob (plain JSON if this browser cannot compress)
+  const json = new Blob([JSON.stringify(doc)], { type: 'application/json' });
+  if (!window.CompressionStream) return json;
+  return new Response(json.stream().pipeThrough(new CompressionStream('gzip'))).blob();
+}
+async function recUnpack(buf) {   // ArrayBuffer (gzip or plain JSON) -> the recording object
+  let u8 = new Uint8Array(buf);
+  if (u8[0] === 0x1f && u8[1] === 0x8b) u8 = new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  const doc = JSON.parse(new TextDecoder().decode(u8));
+  if (doc.format !== REC_FORMAT) throw new Error('not a Conker input recording');
+  return doc;
+}
+function recDocument(complete) {
+  const now = performance.now(), paused = rec.pausedMs + (rec.pauseSince ? now - rec.pauseSince : 0);
+  return Object.assign({}, rec.header, { retraces: rec.frames, inputs: b64enc(recEncodeRuns(rec.runs)), g: b64enc(u32enc(rec.g)),
+    checks: rec.checks, complete, gaps: rec.gaps, wall_s: Math.round((now - rec.t0) / 100) / 10, paused_s: Math.round(paused / 100) / 10 });
+}
+const recFileName = (h) => {
+  const t = new Date(h.created), p2 = (n) => String(n).padStart(2, '0');
+  const slug = (h.name || 'recording').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'recording';
+  return `conker-rec-${slug}-${t.getFullYear()}${p2(t.getMonth() + 1)}${p2(t.getDate())}-${p2(t.getHours())}${p2(t.getMinutes())}${p2(t.getSeconds())}.ckrec`;
+};
+async function recStore(doc, blob) {   // keep it in this browser (IndexedDB 'recordings'), the newest REC_KEEP only
+  const entry = { id: rec.id, name: doc.name, created: doc.created, retraces: doc.retraces, complete: doc.complete, size: blob.size, file: recFileName(doc), blob };
+  await idb('recordings', 'readwrite', (st) => st.put(entry, rec.id));
+  const all = await recList();
+  for (const old of all.slice(REC_KEEP)) await idb('recordings', 'readwrite', (st) => st.delete(old.id));
+}
+async function recList() {   // newest first
+  const all = await idb('recordings', 'readonly', (st) => st.getAll()).catch(() => []) || [];
+  return all.sort((a, b) => (a.created < b.created ? 1 : -1));
+}
+function recDownload(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 20000);
+}
+async function recSaveDraft() {   // every 10 s while recording (and when the tab is hidden): a crash or reload keeps it
+  if (!rec.active || rec.drafting) return;
+  rec.drafting = true;
+  try { const doc = recDocument(false); await recStore(doc, await recPack(doc)); } catch (e) { log('[rec] draft not stored: ' + e, 'fail'); }
+  rec.drafting = false;
+}
+function recSetPad(p) {   // every animation frame while recording: pad 1 as the game will sample it at the next retrace
+  const H = M.HEAP32, a = M._port_net_addr(3) >> 2;
+  H[a] = 1; H[a + 1] = p.b; H[a + 2] = p.x; H[a + 3] = p.y;
+}
+function recOnInput(f, v) {   // pc_net.c: retrace f's input, sampled at its start
+  if (!rec.active) return;
+  if (f !== rec.frames + 1) { rec.gaps++; if (rec.gaps < 5) log(`[rec] input of retrace ${f} after ${rec.frames}`, 'fail'); }
+  rec.frames = f;
+  if (v === rec.lastV && rec.runs.length) rec.runs[rec.runs.length - 1][1]++; else { rec.runs.push([v, 1]); rec.lastV = v; }
+}
+const recPaused = () => userPaused || hiddenPaused;
+function recUi() {
+  const on = rec.active, txt = $('rec-status');
+  $('rec-start').disabled = on || (!!running && (!!netCfg || !!recCfg)); $('rec-stop').disabled = !on;
+  $('rec-badge').hidden = !on; $('t-rec').classList.toggle('rec-on', on);
+  if (!on) return;
+  const now = performance.now();
+  if (recPaused() && !rec.pauseSince) rec.pauseSince = now;
+  if (!recPaused() && rec.pauseSince) { rec.pausedMs += now - rec.pauseSince; rec.pauseSince = 0; }
+  const secs = rec.frames / 50, mm = Math.floor(secs / 60), ss = Math.floor(secs % 60);
+  txt.textContent = `Recording "${rec.header.name}": ${mm}:${String(ss).padStart(2, '0')} of game time (retrace ${rec.frames}), level ${rec.level.toString(16).toUpperCase()}` +
+    `, ${rec.checks.length} checkpoints${recPaused() ? ' · paused (the recording waits)' : ''}`;
+  txt.className = 'ok';
+}
+async function recShowList() {
+  const box = $('rec-list'); if (!box) return;
+  const all = await recList();
+  box.textContent = all.length ? '' : 'none yet';
+  for (const r of all) {
+    const row = document.createElement('div'); row.className = 'recrow';
+    const secs = (r.retraces || 0) / 50;
+    const t = document.createElement('span');
+    t.textContent = `${r.name || 'recording'} · ${new Date(r.created).toLocaleString()} · ${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, '0')} · ${Math.max(1, Math.round(r.size / 1024))} KB${r.complete ? '' : ' · unfinished (the page closed while recording)'}`;
+    const dl = document.createElement('button'); dl.textContent = 'Download'; dl.onclick = () => recDownload(r.blob, r.file);
+    const del = document.createElement('button'); del.textContent = 'Delete';
+    del.onclick = async () => { if (rec.active && r.id === rec.id) return; await idb('recordings', 'readwrite', (st) => st.delete(r.id)); recShowList(); };
+    row.append(t, dl, del); box.appendChild(row);
+  }
+}
+// "Start recording": from power-on. A running game is reloaded first (sessionStorage carries the name over).
+function recArm(name) {
+  if (!romOk) { $('rec-status').textContent = 'Load the ROM first.'; return; }
+  if (running) { try { sessionStorage.setItem('conker.recArm', name || ''); } catch (e) { /* no storage */ } location.reload(); return; }
+  const options = {};
+  for (const o of OPTIONS) if (o.game !== undefined) options[o.key] = opt(o.key);
+  options.freecam = false; options.photomode = false;   // not part of the recorded input
+  recCfg = { mode: 'record', name: name || 'recording', options };
+  for (const k of Object.keys(optCache)) delete optCache[k];
+  start('game');
+}
+async function recStop() {
+  if (!rec.active) return;
+  M._port_rec_checkpoint_now();   // the last checkpoint: the state after the last recorded retrace
+  rec.active = false;
+  clearInterval(rec.draftTimer);
+  const doc = recDocument(true), blob = await recPack(doc), name = recFileName(doc);
+  try { await recStore(doc, blob); } catch (e) { log('[rec] not stored in this browser: ' + e, 'fail'); }
+  recDownload(blob, name);
+  window.__rec.last = { doc, blob, name };
+  log(`[rec] stopped after retrace ${doc.retraces} (${doc.checks.length} checkpoints, ${M._port_rec_checkpoint_ms().toFixed(2)} ms each; ${rec.runs.length} input runs): ${name}, ${blob.size} bytes`);
+  recUi();
+  $('rec-status').textContent = `Saved ${name} (${Math.max(1, Math.round(blob.size / 1024))} KB): it was downloaded and is listed below. ` +
+    'The game goes on without recording (still in the recording mode); reload the page to play normally.';
+  recShowList();
+}
+// before callMain (start): the session
+async function recBegin(Mod) {
+  Mod.recInput = recOnInput;
+  Mod.recG = (f, g) => { if (recCfg.mode === 'record') { if (rec.active) rec.g.push(g); } else e2eG(f, g); };
+  Mod.recCheck = (f, h, s, g, level, mode, kind, x, y, z) => {
+    const c = [f, h, s, g, level, mode, kind, +x.toFixed(3), +y.toFixed(3), +z.toFixed(3)];
+    if (recCfg.mode === 'record') { if (rec.active) { rec.checks.push(c); rec.level = level; } } else e2eCheck(c);
+  };
+  Mod.recEnd = (f) => e2eEnd(f);
+  if (recCfg.mode === 'replay') return e2eBegin(Mod);
+  const view = {};
+  for (const o of OPTIONS) if (o.game === undefined && !['online', 'recorder'].includes(o.key)) view[o.key] = opt(o.key);
+  rec.header = { format: REC_FORMAT, version: 1, name: recCfg.name, created: new Date().toISOString(), build: await recBuildId(),
+    rom_sha1: romSha1, start: 'power-on', slot, eeprom: b64enc(eepBytes()), options: recCfg.options, view,
+    check_every: REC_CHECK_EVERY, g_every: REC_G_EVERY, user_agent: navigator.userAgent };
+  rec.id = 'rec-' + rec.header.created;
+  Mod._port_rec_session(1, REC_CHECK_EVERY, REC_G_EVERY, 0, 0, 0, 0);
+  rec.active = true; rec.t0 = performance.now();
+  rec.draftTimer = setInterval(recSaveDraft, 10000);
+  rec.uiTimer = setInterval(recUi, 500);
+  log(`[rec] recording "${recCfg.name}" from power-on: build ${rec.header.build}, save of slot ${slot}, options ` +
+      Object.entries(recCfg.options).map(([k, v]) => `${k}=${+v}`).join(' '));
+  recUi();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && rec.active) recSaveDraft(); });
+window.addEventListener('beforeunload', (e) => { if (rec.active) { e.preventDefault(); e.returnValue = ''; } });   // "leave the page?" while recording
+const showRecButton = (on) => { $('t-rec').hidden = !on && !rec.active; if (!on && !rec.active && !$('p-rec').hidden) toggle('rec', false); };
+optionChanged.recorder = showRecButton;
+showRecButton(opt('recorder') || !!Q.get('record'));
+$('rec-start').onclick = () => recArm($('rec-name').value.trim());
+$('rec-stop').onclick = () => recStop();
+$('t-rec').addEventListener('click', () => recShowList());
+if (opt('recorder')) recShowList();
+window.__rec = {   // tests (tools/port/scripts/e2e_record.js) and the DevTools console
+  arm: (name) => recArm(name), stop: () => recStop(), status: () => ({ active: rec.active, frames: rec.frames, checks: rec.checks.length, gaps: rec.gaps, runs: rec.runs.length }),
+  last: null, list: () => recList().then((l) => l.map(({ blob, ...r }) => r)),
+  draftB64: async () => { const all = await recList(); return all[0] ? b64enc(new Uint8Array(await all[0].blob.arrayBuffer())) : ''; },
+  lastB64: async () => (window.__rec.last ? b64enc(new Uint8Array(await window.__rec.last.blob.arrayBuffer())) : ''),
+};
+
+// ---- replay (?replay=URL[&replayspeed=real][&replaystop=F][&replaykeep=1]): compare the run with the recording
+// e2e.status() = { state: loading / running / done / mismatch / error, frame, total, checks matched, digests matched,
+// first: the first difference, sameBuild, level, mode, ms }
+Object.assign(e2e, { state: 'idle', doc: null, ci: 0, gi: 0, matchedChecks: 0, matchedG: 0, first: null, mismatches: 0, sameBuild: false,
+  t0: 0, endFrame: 0, lastGood: 0, level: 0, mode: 0, keep: !!Q.get('replaykeep') });
+const KIND = ['periodic', 'level / mode change', 'end'];
+function e2eMismatch(m) {
+  e2e.mismatches++;
+  if (e2e.first) return;
+  e2e.first = Object.assign({ lastGood: e2e.lastGood }, m);
+  log(`[e2e] FIRST DIFFERENCE at retrace ${m.f}: ${m.what}`, 'fail');
+  if (!e2e.keep) { e2e.state = 'mismatch'; e2e.ended = true; M._port_set_paused(1); }
+}
+function e2eG(f, g) {
+  const want = e2e.g[f / e2e.doc.g_every - 1];
+  if (want === undefined) return;   // past the recording's end
+  if ((want >>> 0) === (g >>> 0)) { e2e.matchedG++; e2e.lastGood = Math.max(e2e.lastGood, f); return; }
+  e2eMismatch({ f, field: 'G', what: `game digest G ${(g >>> 0).toString(16)}, the recording has ${(want >>> 0).toString(16)} (RNG, level / mode, character records)`, level: e2e.level, mode: e2e.mode });
+}
+function e2eCheck(c) {
+  const [f, h, s, g, level, mode, kind, x, y, z] = c, exp = e2e.doc.checks[e2e.ci++];
+  e2e.level = level; e2e.mode = mode;
+  if (!exp) { if (e2e.doc.complete) e2eMismatch({ f, field: 'extra', what: `a ${KIND[kind]} checkpoint the recording does not have (level ${level.toString(16)}, mode ${mode})`, level, mode }); return; }
+  const [ef, eh, es, eg, el, em, ek, ex, ey, ez] = exp;
+  const pos = `Conker at ${x}, ${y}, ${z} (recording ${ex}, ${ey}, ${ez})`;
+  let what = null, field = null;
+  if (ef !== f) { field = 'frame'; what = `${KIND[kind]} checkpoint at retrace ${f} (level ${level.toString(16)} mode ${mode}), the recording's next one is a ${KIND[ek]} at retrace ${ef} (level ${el.toString(16)} mode ${em})`; }
+  else if (el !== level || em !== mode) { field = 'level'; what = `level ${level.toString(16)} mode ${mode}, the recording has level ${el.toString(16)} mode ${em}; ${pos}`; }
+  else if ((eg >>> 0) !== (g >>> 0)) { field = 'G'; what = `game digest G ${(g >>> 0).toString(16)}, the recording has ${(eg >>> 0).toString(16)}; ${pos}`; }
+  else if (e2e.sameBuild && (eh >>> 0) !== (h >>> 0)) { field = 'H'; what = `static memory hash H ${(h >>> 0).toString(16)}, the recording has ${(eh >>> 0).toString(16)} (same build); ${pos}`; }
+  else if (e2e.sameBuild && (es >>> 0) !== (s >>> 0)) { field = 'S'; what = `thread stack hash S ${(s >>> 0).toString(16)}, the recording has ${(es >>> 0).toString(16)} (same build)`; }
+  if (what) e2eMismatch({ f: Math.min(f, ef), field, what, level, mode, expected: exp, actual: c });
+  else { e2e.matchedChecks++; e2e.lastGood = Math.max(e2e.lastGood, f); }
+}
+function e2eEnd(f) {
+  e2e.endFrame = f; e2e.ended = true;
+  if (e2e.state === 'mismatch') return;
+  const left = e2e.doc.checks.length - e2e.ci;
+  if (!e2e.first && left > 0 && !Q.get('replaystop')) e2eMismatch({ f, field: 'missing', what: `${left} checkpoint(s) of the recording never came (the replay ended at retrace ${f})`, level: e2e.level, mode: e2e.mode });
+  e2e.state = e2e.first ? 'mismatch' : 'done';
+  log(`[e2e] replay ended at retrace ${f} of ${e2e.doc.retraces}: ${e2e.first ? 'DIFFERENT' : 'IDENTICAL'}; ${e2e.matchedChecks} checkpoints and ${e2e.matchedG} digests matched` +
+      ` in ${((performance.now() - e2e.t0) / 1000).toFixed(1)} s (checkpoints ${M._port_rec_checkpoint_ms().toFixed(2)} ms each)`);
+}
+async function e2eBegin(Mod) {
+  const doc = e2e.doc, n = doc.retraces, inputs = recDecodeRuns(b64dec(doc.inputs), n);
+  e2e.g = u32dec(b64dec(doc.g));
+  e2e.sameBuild = doc.build === await recBuildId();
+  const p = Mod._malloc(Math.max(4, n * 4));
+  Mod.HEAPU8.set(new Uint8Array(inputs.buffer), p);
+  const fast = Q.get('replayspeed') !== 'real', stop = +(Q.get('replaystop') || 0);
+  Mod._port_rec_session(2, doc.check_every, doc.g_every, p, n, fast ? 1 : 0, stop);
+  e2e.state = 'running'; e2e.t0 = performance.now();
+  log(`[e2e] replay of "${doc.name}" (${n} retraces, ${doc.checks.length} checkpoints, recorded with build ${doc.build}, this build ${wasmBuildId}: ` +
+      `${e2e.sameBuild ? 'same build, H / S compared' : 'other build, only G / level / mode compared'})${fast ? ', fast' : ''}`);
+}
+async function e2eLoad(url) {   // ?replay=URL: fetch, check, boot
+  try {
+    e2e.state = 'loading';
+    const doc = await recUnpack(await (await fetch(url)).arrayBuffer());
+    if (romSha1 && doc.rom_sha1 && doc.rom_sha1 !== romSha1) throw new Error(`the recording was made with ROM SHA-1 ${doc.rom_sha1}, this ROM is ${romSha1}`);
+    e2e.doc = doc;
+    recCfg = { mode: 'replay', name: doc.name, options: doc.options, eeprom: b64dec(doc.eeprom) };
+    for (const k of Object.keys(optCache)) delete optCache[k];
+    log(`[e2e] loaded ${url}: "${doc.name}", ${doc.retraces} retraces, created ${doc.created}${doc.complete ? '' : ' (unfinished draft)'}`);
+    start('game');
+  } catch (e) { e2e.state = 'error'; e2e.error = String(e.message || e); log('[e2e] ' + e2e.error, 'fail'); }
+}
+window.__e2e = {
+  status: () => ({ state: e2e.state, error: e2e.error || null, frame: M && M._port_net_frame ? M._port_net_frame() >>> 0 : 0, total: e2e.doc ? e2e.doc.retraces : 0,
+    checks: e2e.doc ? e2e.doc.checks.length : 0, matchedChecks: e2e.matchedChecks, matchedG: e2e.matchedG, mismatches: e2e.mismatches, first: e2e.first,
+    sameBuild: e2e.sameBuild, level: e2e.level, mode: e2e.mode, endFrame: e2e.endFrame, ms: e2e.t0 ? Math.round(performance.now() - e2e.t0) : 0,
+    name: e2e.doc ? e2e.doc.name : '', build: wasmBuildId, recBuild: e2e.doc ? e2e.doc.build : '' }),
+};
+
 // ---------------------------------------------------------------- wasm apps
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -1278,7 +1562,7 @@ async function start(app) {
   optionChanged.smoothfont(opt('smoothfont'));   // P356: the renderer's switch (page-side option)
   optionChanged.hfr(opt('hfr'));           // P351: the renderer's switch (page-side option)
   layoutScreen();                          // P350: the renderer's widescreen switch
-  optionsLocked = NETDET || !!netCfg;
+  optionsLocked = NETDET || !!netCfg || !!recCfg;
   if (optionsLocked) showSessionOptions();   // P346: the panel shows the session's (the host's) options, disabled
   log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));
   if (app === 'game' && romBytes) {
@@ -1290,6 +1574,10 @@ async function start(app) {
       saveBlocked = true;
       if (netCfg.eeprom) M.HEAPU8.set(netCfg.eeprom.subarray(0, M._port_eeprom_size()), M._port_eeprom_ptr());
       log(`[net] ${netCfg.eeprom ? "host's" : 'blank'} EEPROM, saves stay in this session`);
+    } else if (recCfg && recCfg.mode === 'replay') {   // P357: the recording's EEPROM image; nothing is saved
+      saveBlocked = true;
+      M.HEAPU8.set(recCfg.eeprom.subarray(0, M._port_eeprom_size()), M._port_eeprom_ptr());
+      log(`[rec] replay: the recording's EEPROM (${recCfg.eeprom.length} bytes), saves stay in this session`);
     } else await loadEeprom(M);
   }
   $('threads').disabled = false;
@@ -1300,6 +1588,7 @@ async function start(app) {
   else {
     await netLoadExclusions(M);   // P337 state hash; P348 photo mode's snapshot needs the same list (nothing else uses it)
     if (netCfg) PortNet.begin(M, netCfg, log);   // P338: session before the first retrace
+    if (recCfg) await recBegin(M);                // P357: recording / replay session before the first retrace
     try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
   }
   if (app === 'game') status('running', 'ok');
@@ -1390,6 +1679,10 @@ $('start').onclick = () => start('game');
   }
   // &dump=MS: dump threads + the ranked stub-hit list after MS milliseconds
   if (Q.get('dump')) setTimeout(() => window.Module && window.Module._port_dump_threads(), +Q.get('dump'));
+  // P357: ?replay=URL (an input recording, e2e_replay.sh) / ?record=1 or a "Start recording" that reloaded the page
+  let armed = null; try { armed = sessionStorage.getItem('conker.recArm'); sessionStorage.removeItem('conker.recArm'); } catch (e) { /* no storage */ }
+  if (Q.get('replay') && romBytes) return e2eLoad(Q.get('replay'));
+  if ((armed !== null || Q.get('record')) && romOk) { showRecButton(true); toggle('rec', true); return recArm(armed || Q.get('recname') || ''); }
   const app = Q.get('app');
   if (app === 'demo' || (app === 'game' && romBytes)) start(app);
 })();

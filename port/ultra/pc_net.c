@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "pc_mem.h"
 
 void port_log(const char *fmt, ...);
 int port_flag(const char *name);
@@ -89,6 +90,9 @@ static int net_hash_every = 10;
 static int net_script;            /* ?netscript=1: local input from the ?padf script (tests) */
 
 void port_padf_value(int ch, unsigned frame, int *buttons, int *stick_x, int *stick_y);   /* pc_pif.c */
+extern int port_rec_mode;                                                                  /* P357 section 5 */
+static uint32_t rec_input(unsigned f, uint32_t live);
+static void rec_retrace_done(void);
 void port_pads_set_mask(int mask);                                                         /* pc_pif.c */
 void port_net_hash_now(uint32_t *hash_static, uint32_t *hash_stacks);                      /* pc_nethash.c */
 static uint32_t net_pack(int buttons, int stick_x, int stick_y) {
@@ -145,6 +149,7 @@ static int net_has(unsigned f, int ch) {
 }
 /* the frame barrier (pc_sched.c frame): may retrace f run? */
 EMSCRIPTEN_KEEPALIVE int port_net_ready(unsigned f) {
+    if (port_rec_mode) return 1;   /* P357: a recording / replay has no remote channel (the input is sampled in the retrace) */
     for (int ch = 0; ch < 4; ch++)
         if ((net_mask >> ch & 1) && !net_has(f, ch)) return 0;
     return 1;
@@ -191,10 +196,11 @@ void port_net_retrace_start(void) {
         if (!(net_local_mask >> ch & 1)) continue;
         int b = net.local_pad[1], x = net.local_pad[2], y = net.local_pad[3];
         if (net_script) port_padf_value(ch, f, &b, &x, &y);
-        net.input[slot][ch] = net_pack(b, x, y);
+        net.input[slot][ch] = rec_input(f, net_pack(b, x, y));   /* P357: a replay's input comes from the recording */
         net.frame[slot][ch] = f;
+        if (port_rec_mode == 1) EM_ASM({ if (Module['recInput']) Module['recInput']($0, $1 >>> 0); }, f, net.input[slot][ch]);
     }
-    if (net_local_mask) net_send_now();   /* P339 */
+    if (net_local_mask && !port_rec_mode) net_send_now();   /* P339 */
 }
 /* pc_pif.c osContStartReadData: this retrace's buttons / sticks for every session channel ([present, b, x, y] x 4) */
 void port_net_fill_pads(int32_t *pads) {
@@ -219,8 +225,112 @@ void port_net_retrace_done(void) {
         port_log("[net] test: flipped one byte of game memory (n64_rdram + 0x%X, N64 %08X) at retrace %u\n", desync_off,
                  0x80000000u + (unsigned)desync_off, port_frame_count);
     }
+    if (port_rec_mode) rec_retrace_done();   /* P357 fingerprints / end of a replay */
     if (net_hash_every <= 0 || port_frame_count % (unsigned)net_hash_every) return;
     uint32_t *e = net.hash[(port_frame_count / (unsigned)net_hash_every) % NET_HASHES];
     port_net_hash_now(&e[1], &e[2]);
     e[0] = port_frame_count;
+}
+
+
+/* ---------------- 5. P357 input recorder / replay (end-to-end tests, docs/port/E2E.md) ----------------
+ * A recording is a single-player session of the lockstep machinery above with one local channel and no input delay:
+ * the page (main.js "Record inputs") calls port_rec_session(1, ...) before callMain, so the game runs under forced
+ * online determinism (det clock, no wall-time frame budget, virtual AI queue, static fiber stacks, whitelisted flags)
+ * while the 50 Hz VI stays wall paced (interactive, with sound). Retrace N's input is sampled at the start of retrace N
+ * from the page's local pad (port_net_addr(3)) into the ring, and handed to the page (Module.recInput) which keeps the
+ * whole list. Replay (port_rec_session(2, ...), e2e_replay.sh) takes retrace N's input from the recording instead, at any
+ * speed (rec_fast: pc_sched.c runs retraces back to back). The game cannot tell the two apart: the same retraces run
+ * with the same inputs from the same EEPROM image and options.
+ * Fingerprints (both modes, at the end of a retrace, same rule so record and replay produce them at the same retraces):
+ *   G  (every rec_g_every retraces, cheap): rec_game_digest, a hash of build-independent game state: the RNG state
+ *      g_random_seed, level / mode, g_world_obj_count and the pointer-free head (0x00..0x3B: state, id, position,
+ *      velocity, old position, unique id) of the 26 character records g_objects; comparable across builds.
+ *   checkpoint (every rec_check_every retraces, at every level / game mode change, and when the page asks): G plus the
+ *      online hash H / S (port_net_hash_now: all hashed static memory / the game threads' stacks; exact, but only
+ *      comparable within one build: any change of the static data layout changes H), level, mode, record 0's position.
+ * The page compares them in replay (main.js recCompare). All state here lives in pc_net.o, outside the hash. */
+/* game data (labels in the n64_rdram mirror; the scheduler demo links empty ones from sched_demo/demo_stubs.c) */
+extern unsigned char g_objects[];        /* struct127 [26], 0x32C bytes each; was D_800CC2D0 */
+extern unsigned char g_game_mode;        /* u8; was D_800E0B94 */
+extern int g_level_id;                   /* was D_800BE9F0 */
+extern int g_world_obj_count;            /* was D_800DC320 */
+extern long long g_random_seed;          /* s64, two vbe words; was D_80088950 */
+void port_set_paused(int p);
+int port_rec_mode;                 /* 0 off, 1 record, 2 replay (pc_pif.c: a recording persists the EEPROM) */
+int port_rec_fast;                 /* replay: pc_sched.c frame() runs retraces back to back */
+static unsigned rec_check_every = 50, rec_g_every = 10;
+static uint32_t *rec_inputs;       /* replay: packed input of retrace f at [f - 1] (malloc'd by the page) */
+static unsigned rec_ninputs, rec_stop_at;
+static int rec_last_level = -1, rec_last_mode = -1;
+static int rec_ended;
+static double rec_hash_ms; static unsigned rec_hash_count;   /* checkpoint cost (wall time), for the page's log */
+EMSCRIPTEN_KEEPALIVE double port_rec_checkpoint_ms(void) { return rec_hash_count ? rec_hash_ms / rec_hash_count : 0; }
+
+/* mode 1 = record, 2 = replay; check_every / g_every in retraces; replay: inputs = wasm address of n packed inputs (u32,
+ * retrace 1 first), fast = 1 for back-to-back retraces, stop_at = pause after that retrace (0 = after the last input). */
+EMSCRIPTEN_KEEPALIVE void port_rec_session(int mode, int check_every, int g_every, uintptr_t inputs, unsigned n, int fast, unsigned stop_at) {
+    port_net_session(1, 1, 1, 0);   /* channel 1 only, local, no desync-check hash ring; forces online determinism */
+    net_delay = 0;                  /* retrace N reads the input sampled at its own start (no input delay) */
+    port_rec_mode = mode;
+    rec_check_every = check_every > 0 ? (unsigned)check_every : 50;
+    rec_g_every = g_every > 0 ? (unsigned)g_every : 10;
+    rec_inputs = (uint32_t *)inputs; rec_ninputs = n;
+    port_rec_fast = mode == 2 && fast;
+    rec_stop_at = stop_at;
+    port_log("[rec] %s session: checkpoint every %u retraces, digest every %u%s\n", mode == 1 ? "recording" : "replay",
+             rec_check_every, rec_g_every, mode == 2 ? (port_rec_fast ? ", fast" : ", real time") : "");
+    if (mode == 2) port_log("[rec] replay of %u retraces%s\n", n, stop_at ? " (stops early)" : "");
+}
+/* the retrace's local input: replay = the recording's (neutral after its end), record = the page's pad */
+static uint32_t rec_input(unsigned f, uint32_t live) {
+    if (port_rec_mode != 2) return live;
+    return f >= 1 && f <= rec_ninputs ? rec_inputs[f - 1] : 0;
+}
+static uint64_t rec_mix(uint64_t h, uint32_t w) { h = (h ^ w) * 0x9E3779B97F4A7C15ull; return h ^ (h >> 29); }
+/* G: build-independent game state digest (see the section comment) */
+static uint32_t port_rec_game_digest(void) {
+    uint64_t h = 0x6A09E667F3BCC908ull;
+    const uint32_t *seed = (const uint32_t *)(const void *)&g_random_seed;
+    h = rec_mix(h, seed[0]); h = rec_mix(h, seed[1]);
+    h = rec_mix(h, (uint32_t)g_level_id); h = rec_mix(h, vbe_ld8(&g_game_mode)); h = rec_mix(h, (uint32_t)g_world_obj_count);
+    for (int i = 0; i < 26; i++) {
+        const uint32_t *r = (const uint32_t *)(const void *)(g_objects + i * 0x32C);
+        for (int k = 0; k < 0x3C / 4; k++) h = rec_mix(h, r[k]);
+    }
+    return (uint32_t)(h ^ (h >> 32));
+}
+static void rec_checkpoint(unsigned f, int kind) {   /* kind 0 periodic, 1 level / mode change, 2 the recording's last retrace */
+    double hash_start_ms = emscripten_get_now();
+    uint32_t h, s, g = port_rec_game_digest();
+    int level = g_level_id, mode = (int)vbe_ld8(&g_game_mode);
+    port_net_hash_now(&h, &s);
+    rec_hash_ms += emscripten_get_now() - hash_start_ms; rec_hash_count++;
+    float x = 0, y = 0, z = 0;
+    memcpy(&x, g_objects + 0x14, 4); memcpy(&y, g_objects + 0x18, 4); memcpy(&z, g_objects + 0x1C, 4);
+    EM_ASM({ if (Module['recCheck']) Module['recCheck']($0, $1 >>> 0, $2 >>> 0, $3 >>> 0, $4, $5, $6, $7, $8, $9); },
+           f, h, s, g, level, mode, kind, (double)x, (double)y, (double)z);
+}
+/* Stop in the recorder: the checkpoint of the last retrace run. The page calls it between two main-loop ticks, i.e. right
+ * after a retrace's end (also while paused), so a replay's checkpoint at the end of its last input's retrace sees the
+ * same state. */
+EMSCRIPTEN_KEEPALIVE void port_rec_checkpoint_now(void) { rec_checkpoint(port_frame_count, 2); }
+/* end of retrace N (port_net_retrace_done): digests, checkpoints, end of a replay */
+static void rec_retrace_done(void) {
+    unsigned f = port_frame_count;
+    int level = g_level_id, mode = (int)vbe_ld8(&g_game_mode);
+    int changed = rec_last_level >= 0 && (level != rec_last_level || mode != rec_last_mode);
+    rec_last_level = level; rec_last_mode = mode;
+    if (f % rec_g_every == 0) {
+        uint32_t g = port_rec_game_digest();
+        EM_ASM({ if (Module['recG']) Module['recG']($0, $1 >>> 0); }, f, g);
+    }
+    if (changed || f % rec_check_every == 0) rec_checkpoint(f, changed ? 1 : 0);
+    if (port_rec_mode == 2 && f == rec_ninputs) rec_checkpoint(f, 2);
+    if (port_rec_mode == 2 && !rec_ended && f >= (rec_stop_at ? rec_stop_at : rec_ninputs)) {
+        rec_ended = 1;
+        port_set_paused(1);   /* frame() stops running retraces; the page reads the result */
+        port_log("[rec] replay paused after retrace %u\n", f);
+        EM_ASM({ if (Module['recEnd']) Module['recEnd']($0); }, f);
+    }
 }

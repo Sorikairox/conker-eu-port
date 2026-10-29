@@ -121,6 +121,14 @@
   #netwait { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); padding: 4px 10px; border-radius: 4px;
     background: rgba(0,0,0,.7); color: #fff; font-size: 13px; pointer-events: none; }
   #netwait[hidden] { display: none; }
+  /* P357 input recorder */
+  #rec-badge { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,.6); color: #ff5f56;
+    font: 600 12px system-ui, sans-serif; pointer-events: none; }
+  #rec-badge[hidden] { display: none; }
+  #t-rec.rec-on { color: #ff5f56; border-color: #ff5f56; }
+  #rec-status { margin-top: 8px; font-size: 13px; } #rec-status.ok { color: var(--accent); }
+  #rec-list { font-size: 12px; color: var(--muted); }
+  .recrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 4px; } .recrow span { flex: 1 1 60%; }
   #net-host-actions[hidden] { display: none; }
   /* P345: room codes */
   #net-room-code { width: 8em; text-transform: uppercase; letter-spacing: 2px; font: 16px ui-monospace, monospace; background: var(--panel2);
@@ -185,6 +193,7 @@
   <button id="t-controls" aria-pressed="false">Controls</button>
   <button id="t-saves" aria-pressed="false">Saves</button>
   <button id="t-online" aria-pressed="false" hidden title="Play with a friend over the internet (experimental)">Online</button>
+  <button id="t-rec" aria-pressed="false" hidden title="Input recorder: record a play session from power-on for the automatic replay tests">Record</button>
   <button id="t-options" aria-pressed="false">Options</button>
   <button id="t-debug" aria-pressed="false">Debug</button>
 </header>
@@ -207,6 +216,7 @@
       <div id="latches" hidden></div>
       <div id="soundhint" hidden>click or press a key to enable sound</div>
       <div id="netwait" hidden>waiting for the other players…</div>
+      <div id="rec-badge" hidden title="The input recorder is on">● REC</div>
       <div id="photo-flash"></div>
       <div id="photo" hidden><b>PHOTO MODE</b> · the game is frozen<br>
         stick / WASD move · C / right stick / IJKL / mouse look · R Z / E Q up down · D-pad / arrows ← → roll, ↑ ↓ zoom (wheel too) ·
@@ -277,6 +287,20 @@
       <div id="net-peers"></div>
       <div id="net-desync" hidden></div>
       <div class="row"><button id="net-leave" hidden>Leave the session</button></div>
+    </section>
+    <section class="panel" id="p-rec" hidden>
+      <h3>Input recorder</h3>
+      <p class="hint" style="text-align:left">Records everything you press from power-on, with your save (this slot) and your options, into a
+        small file the developers replay automatically to find the first point where a new version plays differently (docs/port/E2E.md).
+        Start recording boots the game again from the start (a running game is restarted). Then play normally: menus, chapter select and
+        gameplay are all recorded. Pausing or switching tabs is fine. Free camera and photo mode are off and the game options are fixed
+        while recording; the game still saves as usual. When you are done, press Stop and save: the file downloads and also stays below.</p>
+      <label class="netdelay">Name <input id="rec-name" placeholder="e.g. chapter 1" maxlength="60" style="width:12em"></label>
+      <div class="row" style="margin-top:8px"><button id="rec-start" class="primary">Start recording</button>
+        <button id="rec-stop" disabled>Stop and save</button></div>
+      <div id="rec-status">not recording</div>
+      <h4 style="margin:10px 0 4px">Recordings in this browser (last 10)</h4>
+      <div id="rec-list">none yet</div>
     </section>
     <section class="panel" id="p-debug" hidden>
       <h3>Debug <span class="spacer"></span><button id="demo">Scheduler demo</button><button id="threads" disabled>Dump threads</button></h3>

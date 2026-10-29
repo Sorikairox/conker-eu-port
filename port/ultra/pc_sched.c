@@ -451,6 +451,15 @@ static void frame(void) {
     if (port_paused) { last_tick_ms = 0; return; }
     /* P348 photo mode: no game retraces; the tick draws photo frames (pc_photo.c). No catch-up afterwards, as after a pause */
     if (port_photo_state) { last_tick_ms = 0; port_photo_tick(); return; }
+    /* P357 fast replay of an input recording (pc_net.c section 5, e2e_replay.sh): retraces back to back for up to 40 ms of
+     * wall time per tick, then one picture. Only when retraces run changes, never what they compute (det clock) */
+    { extern int port_rec_fast;
+      if (port_rec_fast) {
+          double burst_start_ms = emscripten_get_now(); int burst_retraces = 0;
+          while (!port_paused && !port_photo_state && emscripten_get_now() - burst_start_ms < 40.0) { retrace(); burst_retraces++; }
+          if (burst_retraces) port_video_frame();
+          return;
+      } }
     /* P338 online: the frame barrier. Retrace N runs only when every peer's input for N is in the ring (pc_net.c);
      * otherwise the tick presents the last frame and the backlog waits (clamped below). */
     if (!pacing_mode) { if (port_net_on && !port_net_ready(port_frame_count + 1)) { port_net_stalled(1); return; } retrace(); port_video_frame();

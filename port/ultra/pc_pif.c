@@ -111,6 +111,7 @@ static void free_camera_pads(void) {
 extern unsigned port_frame_count;
 int port_net_det(void);
 extern int port_net_on;                       /* P338 pc_net.c: an online (lockstep) session runs */
+extern int port_rec_mode;                     /* P357 pc_net.c: 1 = an input recording runs (its saves are kept) */
 void port_net_fill_pads(int32_t *pads);       /* P338 pc_net.c: buttons / sticks of this retrace from the input ring */
 EM_JS(int, __port_padf_char, (int ch, int i), {
     var v = null, k = ch ? 'padf' + ch : 'padf';
@@ -311,7 +312,7 @@ static void pif_run(void) {
             else if (c[0] == 0x04 && tx >= 2) memcpy(r, &eeprom[(c[1] & 0xFF) * 8], rx < 8 ? rx : 8);
             else if (c[0] == 0x05 && tx >= 10) {
                 u8 *blk = &eeprom[(c[1] & 0xFF) * 8];
-                if (memcmp(blk, &c[2], 8)) { memcpy(blk, &c[2], 8); eep_writes++; if (!port_net_det() && !port_photo_sandbox) __port_eep_dirty(); } /* P337: online saves stay in this session (sandbox) */
+                if (memcmp(blk, &c[2], 8)) { memcpy(blk, &c[2], 8); eep_writes++; if ((!port_net_det() || port_rec_mode == 1) && !port_photo_sandbox) __port_eep_dirty(); } /* P337: online saves stay in this session (sandbox); P357: a recording keeps the player's saves */
                 if (rx) r[0] = 0;
             }
             else ok = 0;
