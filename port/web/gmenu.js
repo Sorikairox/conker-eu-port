@@ -557,6 +557,27 @@ const GMenu = (() => {
     setTimeout(tryOpen, 1000 * +Q.get('gmenuopen'));
   }
 
+  // test aid ?gmenupad=S (P362): S seconds after load a fake standard gamepad holds Back (the photo button) 40 frames
+  // (the hold entry opens the menu), goes to Controls > Gamepad buttons, back twice, and closes the menu with a Back
+  // press; each step is logged. netpair GUESTQ='&opt=nativemenu:1&gmenupad=70' runs it on a guest online (page-only:
+  // with ?netscript the lockstep input comes from the pad scripts, so the session proves nothing hashed changed).
+  if (Q.get('gmenupad')) setTimeout(() => {
+    const fp = { id: 'gmenupad test pad', index: 0, connected: true, mapping: 'standard', axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 })) };
+    navigator.getGamepads = () => [fp];
+    const seq = [[8, 40], [13, 6], [13, 6], [13, 6], [13, 6], [0, 6], [13, 6], [0, 6], [1, 6], [1, 6], [8, 6]];
+    let i = 0, f = 0;
+    const st = () => JSON.stringify({ open: U.open, page: U.open ? page().id : null, sel: U.open ? page().sel : -1 });
+    log(`[gmenu] gmenupad start ${st()}`);
+    const pump = () => {
+      const q = seq[i];
+      fp.buttons.forEach((b, j) => { b.pressed = !!q && f < q[1] && j === q[0]; b.value = b.pressed ? 1 : 0; });
+      if (!q) { log(`[gmenu] gmenupad done ${st()}`); return; }
+      if (++f >= q[1] + 30) { i++; f = 0; log(`[gmenu] gmenupad step ${i} (button ${q[0]}): ${st()}`); }
+      requestAnimationFrame(pump);
+    };
+    pump();
+  }, 1000 * +Q.get('gmenupad'));
+
   return { open, close, back, poll, key, wanted, note, get isOpen() { return U.open; }, state: () => ({ open: U.open, page: U.open ? page().id : null, sel: U.open ? page().sel : -1, item: U.open ? (itemsOf(page())[page().sel] || {}).label : null }) };
 })();
 window.GMenu = GMenu;
