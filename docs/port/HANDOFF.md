@@ -88,6 +88,40 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P367 (port-web, 2026-10-30): the game's menu sounds + SETTINGS row on the game's title OPTIONS page (native menus)
+- 1871945a (option `nativemenu`, still default off): gmenu.js GSound plays the game's own menu sounds for GMenu, GPhoto
+  and GNet: move 0x62D, choose 0x500, change 0x4FF (the only three the game's menus use; B is silent there), back = 0x500
+  -500 cents, error = 0x4FF -1000 cents. Not through sound_play_2d (voices / event queue / sound bank cache are hashed
+  game memory; the game's AudioContext is suspended while the page pauses for the menu): port/ultra/pc_sfx.c
+  port_sfx_decode(id, cents) reads g_sound_bank0 (0x8003E708) -> instrument 0 (+0xC) -> slot id-1 (+0x10; bit 0 = packed
+  ROM ref: addr (ref >> 5) & ~7, size (ref & 0xFF) + 1; else SndCacheEntry, romRef at +8) -> ALSound record from the ROM
+  (envelope / key map / wave table / book / loop offsets relative to the record), samples at wave base + g_sndp_player
+  (0x8002BD7C) +0x54; VADPCM decoded like aud_abi.c, envelope, volume = sampleVol x env x g_sndp_group_volumes
+  [keyMin & 0x1F] x 0.707, rate 22020 x base pitch x cents (0x62D / 0x500 / 0x4FF: 15934 Hz, 0.34 / 0.19 / 0.08 s).
+  Read-only; pc_sfx.o excluded from the hash (net_regions.py). Page: own AudioContext, gain = portVolume (?mute=1 / 0 =
+  nothing decoded), max 4 voices, silent with netCfg / PortNet.t.role / recCfg / NETDET ("[gsound] silent (...)").
+  ?audprobe: AnalyserNode, "[gsound] play / heard ... output peak".
+- cd5e471d title_press_start_page (`#ifdef PORT`): fourth row SETTINGS under settings_list_draw's column (font 0 via the
+  new shared port_menu_text_row_draw, the port rows' greens), the game's joystick cursor pictures (text id 0x1A) drawn by
+  port_title_settings_row_draw with settings_list_draw's own slide; list untouched (g_settings_sel stays 0x19, input bits
+  0x1F cleared while selected, showCursor = 0). Ring: down from 0x19 / up from 9 in, up back to 0x19, down wraps to 9
+  (g_settings_arrow_row = 3 on leaving). A -> request 2 + sfx 0x500. Renamed settings_list_draw params (arg1..4 ->
+  ringLayout / showCursor / alphaArg / fadeValues). difftest --self EQUIV: title_press_start_page, settings_list_draw,
+  game_pause_update, title_slot_page, menu_mode_select_page.
+- aadf10e9 tests: tools/port/scripts/menu_sound_probe.sh OUTDIR [local|muted|both]; title_options_shots.sh flow
+  `settings`; audprobe.sh PROBE_PAGEVOL=1 (page volume on, Chrome still muted).
+- Evidence port_work/p367: sound/local.log (27 sounds played and measured: move peak 0.089, choose 0.260, change 0.213,
+  back 0.196, error 0.284; roughness 0.41-0.58 = tones, not noise), sound/muted.log (0 played, 27 muted), sound/*.png;
+  title/wo0..wo10 (1280x720) and fo0..fo10 (1920x1080 widescreen + fullres + smooth + hi-res 2D): OPTIONS page with
+  SETTINGS, cursor sliding, selected, menu over it, closed back on SETTINGS, up, wrap, up from first, left the page;
+  e2e_off / e2e_on (p357 7700 IDENTICAL both), e2e_menu (menu driven during the replay: "[gsound] silent (replay)",
+  PASS), net_ui_sound_final (netpair UI=1, nativemenu both, guest gmenupad: 8925 IDENTICAL, guest "silent (online
+  session)"), net_gmenu_sound (ROOM=1 UI=gmenu SESSIONMENU=guest:60: 9938 IDENTICAL, silent online room / session).
+  check GREEN. Deployed.
+- Not done: no real ears on the sounds (headless measured only; the pitched back / error variants are a choice, easy to
+  change in GSound KIND); no real gamepad / phone test; chapter page (titlePage 2) has no row.
+- P368 needs: NATIVE_MENUS.md section 7 "Next" P368 (drawer to developer tools, touch controls styled, first-run screens
+  with title art from a cached ROM, ask the user to try sounds / real gamepad / phone, decide nativemenu's default).
 ### P366 (port-web, 2026-10-30): photo mode in the game's style (native menus)
 - 24a101bf (option `nativemenu`, still default off): gmenu.js GPhoto draws photo mode's HUD (bottom left: PHOTO MODE,
   VIEW / ROLL / UNITS AWAY / HUD, controls paged, footer A SAVE, B VIEW, L HUD, S EXIT, [O] POSE & OUTFIT, [H] HIDE
