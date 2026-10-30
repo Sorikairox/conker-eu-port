@@ -254,6 +254,66 @@ const GFace = {
   },
 };
 
+// ---------------------------------------------------------------- P368 touch controls in the game's style
+// With the game-style menu on and the game's font at hand (the running game's, or the copy kept for this ROM before boot),
+// the on-screen buttons get the faces of GMenu's footer (GFace): the N64's blue A, green B, yellow C buttons with their
+// arrows, red Start, grey shoulder caps, letters in the game's font with a hard drop shadow; the stick a dark ring with
+// a grey knob. Translucent at rest, bright while held. Only the look changes: each .tb div keeps its size, place and
+// pointer handlers (main.js initTouch), a canvas inside it (pointer-events: none) carries the face. body.gtouch switches
+// the page's CSS faces off. Option off or no font: the page's own faces, as before. Re-drawn when the option, the font,
+// the Smooth font look or the screen's pixel ratio change (checked twice a second; nothing is drawn per frame).
+const GTouch = (() => {
+  let sig = '';
+  const BLUE = 'rgb(40,90,230)', GREEN = 'rgb(30,160,60)', YELLOW = 'rgb(235,190,25)', RED = 'rgb(200,40,40)', GREY = 'rgb(95,95,95)';
+  // id -> [label, fill, shape, arrow direction for C buttons]
+  const FACES = { A: ['A', BLUE, 'round'], B: ['B', GREEN, 'round'], CU: ['', YELLOW, 'round', 'u'], CD: ['', YELLOW, 'round', 'd'],
+    CL: ['', YELLOW, 'round', 'l'], CR: ['', YELLOW, 'round', 'r'], START: ['START', RED, 'pill'], L: ['L', GREY, 'cap'], Z: ['Z', GREY, 'cap'], R: ['R', GREY, 'cap'] };
+  const fontOk = () => GameFont.load() || (typeof romSha1 !== 'undefined' && !!romSha1 && GameFont.restore(romSha1));
+  function face(el, [label, fill, shape, arrow], smooth, dpr) {
+    let cv = el.querySelector('canvas.gt');
+    if (!cv) { cv = document.createElement('canvas'); cv.className = 'gt'; el.appendChild(cv); }
+    const w = Math.round(el.clientWidth * dpr), h = Math.round(el.clientHeight * dpr);
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d'), lw = Math.max(1.5, 2 * dpr);
+    ctx.clearRect(0, 0, w, h);
+    ctx.beginPath();
+    if (shape === 'round') ctx.arc(w / 2, h / 2, Math.min(w, h) / 2 - lw, 0, 2 * Math.PI);
+    else { const r = shape === 'pill' ? h / 2 - lw : Math.min(w, h) * 0.28; if (ctx.roundRect) ctx.roundRect(lw, lw, w - 2 * lw, h - 2 * lw, r); else ctx.rect(lw, lw, w - 2 * lw, h - 2 * lw); }
+    ctx.fillStyle = fill; ctx.fill();
+    const g = ctx.createLinearGradient(0, 0, 0, h);   // the plastic's sheen: lighter on top, darker below
+    g.addColorStop(0, 'rgba(255,255,255,0.28)'); g.addColorStop(0.5, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(0,0,0,0.25)');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.lineWidth = lw; ctx.strokeStyle = 'rgba(0,0,0,0.65)'; ctx.stroke();
+    if (arrow) {   // the C buttons' arrows (the game's font has no triangles)
+      const c = Math.min(w, h) / 2, a = c * 0.42, b = c * 0.3;
+      const pts = { u: [[0, -a], [-b, a * 0.45], [b, a * 0.45]], d: [[0, a], [-b, -a * 0.45], [b, -a * 0.45]], l: [[-a, 0], [a * 0.45, -b], [a * 0.45, b]], r: [[a, 0], [-a * 0.45, -b], [-a * 0.45, b]] }[arrow];
+      for (const [col, off] of [['rgba(0,0,0,0.8)', lw], ['rgb(60,45,0)', 0]]) {
+        ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, w / 2 + x + off, h / 2 + y + off)); ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+      }
+      return;
+    }
+    // the label in the game's font, white with the game's hard black drop shadow, about 45 % of the face's height
+    const k = (h * (shape === 'pill' ? 0.42 : 0.4)) / 11, cx = w / 2 / k, ty = (h / 2) / k - 6;
+    const sc = shape === 'pill' ? Math.min(1, (w * 0.8 / k) / Math.max(1, GameFont.measure(label, 1))) : 1;
+    GameFont.draw(ctx, label, cx + 0.8, ty + 0.8 + (1 - sc) * 6, k, { scale: sc, color: '#000', alpha: 0.85, align: 'center', smooth });
+    GameFont.draw(ctx, label, cx, ty + (1 - sc) * 6, k, { scale: sc, color: '#fff', align: 'center', smooth });
+  }
+  function check() {
+    const on = typeof opt === 'function' && !!opt('nativemenu') && !$('touch').hidden && fontOk();
+    const dpr = Math.min(3, window.devicePixelRatio || 1), smooth = on && !!opt('smoothfont');
+    const nsig = on ? `${smooth}:${dpr}:${GameFont.count}:${innerWidth}x${innerHeight}` : 'off';
+    if (nsig === sig) return;
+    sig = nsig;
+    document.body.classList.toggle('gtouch', on);
+    if (!on) return;
+    for (const [id, f] of Object.entries(FACES)) { const el = $('tk-' + id); if (el) face(el, f, smooth, dpr); }
+    log(`[gtouch] game-style touch controls (${smooth ? 'smooth' : 'pixel'} font, dpr ${dpr})`);
+  }
+  setInterval(check, 500);
+  return { check };
+})();
+window.GTouch = GTouch;
+
 // ---------------------------------------------------------------- P367 the game's menu sounds (GMenu, GPhoto, GNet)
 // The game's own menus have three sounds (game_eu_20B730.c): 0x62D the pause menu's / save slot pages' cursor, 0x500
 // choose, 0x4FF the settings list's move / value change (B is silent there). GSound plays them for the game-style
