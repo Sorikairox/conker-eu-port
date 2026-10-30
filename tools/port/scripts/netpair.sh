@@ -51,7 +51,7 @@ B="http://localhost:$PORT/app/index.html?romurl=../dev/rom.z64&mute=1&p103boot=1
 FA=${NETFAIL%-*}; FB=${NETFAIL#*-}
 fail() { [ -n "${NETFAIL:-}" ] && { [ "$1" = "$FA" ] && echo "&netfailto=$FB"; [ "$1" = "$FB" ] && echo "&netfailto=$FA"; }; }
 GH=; GG=
-[ "${UI:-}" = gmenu ] && { GH="&gmenutest=1&opt=nativemenu:1${GOPT_HOST:+,$GOPT_HOST}"; GG="&gmenutest=1&opt=nativemenu:1${GOPT_GUEST:+,$GOPT_GUEST}"; }   # P365
+[ "${UI:-}" = gmenu ] && { GH="&gmenutest=1${GOPT_HOST:+&opt=$GOPT_HOST}"; GG="&gmenutest=1${GOPT_GUEST:+&opt=$GOPT_GUEST}"; }   # P365
 URLS=("$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}${HOSTQ:-}$GH"
       "$B${NETSIM_GUEST:+&netsim=$NETSIM_GUEST}${GUESTQ:-}${DESYNC_AT:+&netdesync=$DESYNC_AT}${DESYNC_OFF:+&netdesyncoff=$DESYNC_OFF}$(fail 2)$GG"
       "$B${NETSIM_GUEST3:+&netsim=$NETSIM_GUEST3}$(fail 3)$GG"

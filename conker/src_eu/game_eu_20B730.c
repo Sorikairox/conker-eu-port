@@ -129,9 +129,9 @@ void game_pause_update(void) {
     s8 stickY;
     s32 litItem;   /* the item drawn selected (P363: -1 while the port's OPTIONS row is selected) */
 #ifdef PORT
-    /* DELIBERATE PORT CHANGE (P363, native menus; docs/design/NATIVE_MENUS.md): an "OPTIONS" row in this pause menu that
-     * opens the page's game-style menu (port/web/gmenu.js). Shown only while port_gmenu_row_shown() (the page's option
-     * "Game-style menu" is on and the game is local: never online, in a recording / replay or under ?netdet, where this
+    /* DELIBERATE PORT CHANGE (P363, native menus; docs/design/NATIVE_MENUS.md): a CUSTOMISATION SETTINGS row (P369; was "OPTIONS") in this pause menu that
+     * opens the page's game-style menu (port/web/gmenu.js). Shown only while port_gmenu_row_shown() (P369: always while the
+     * game is local: never online, in a recording / replay or under ?netdet, where this
      * menu's state is hashed) and not in the one-item pause (g_pause_simple / level 0x22); otherwise every line below
      * runs exactly as on the N64. The row sits under the item row (story: centred under PAUSED, between QUIT and CONT..;
      * multiplayer: under CONTINUE), drawn with font 0 like the game's other texts (text_printf_at, drop shadow) in
@@ -143,7 +143,7 @@ void game_pause_update(void) {
      * any item. port_pause_on_options = OPTIONS is selected (a port variable, outside game memory). */
     static s32 port_pause_on_options;
     s32 optionsRow;   /* the OPTIONS row is shown this frame */
-    void port_pause_options_row_draw(s32 selected, s32 count, s32 yOff);   /* after this function */
+    void port_pause_customisation_row_draw(s32 selected, s32 count, s32 yOff);   /* after this function; was port_pause_options_row_draw */
 #endif
 
     g_screen_fade_alpha = 0;
@@ -309,7 +309,7 @@ void game_pause_update(void) {
             text_printf((s32) g_str_pause_quit, (sel == litItem) + 0xE);
 #ifdef PORT
             if (optionsRow) {
-                port_pause_options_row_draw(port_pause_on_options, count, yOff);
+                port_pause_customisation_row_draw(port_pause_on_options, count, yOff);
             }
 #endif
         }
@@ -394,20 +394,29 @@ void game_pause_update(void) {
 
 void screen_fade_update(void);
 #ifdef PORT
-/* P363 / P364: the port's "OPTIONS" row in the game's own menus (pause menu: game_pause_update; title menu:
- * title_slot_page, menu_mode_select_page): font 0 text through the game's text queue, in the item pictures' greens
- * (bright when selected, dark otherwise), drop shadow, scale 1.2, centred at centreX, top at y, with the page's alpha.
+/* P363 / P364: the port's row in the game's own menus (pause menu: game_pause_update; title menu: title_slot_page,
+ * menu_mode_select_page), P369: labelled CUSTOMISATION SETTINGS (was "OPTIONS"; the page's menu is called the
+ * customisation settings since the game-style menus are always on), or CUSTOMISATION where the full label would not fit
+ * the 320-unit picture with a 16-unit margin at centreX (the multiplayer pause menu and the MULTI page, centred near
+ * 233). Font 0 text through the game's text queue, in the item pictures' greens (bright when selected, dark otherwise),
+ * drop shadow, scale 1.2, centred at centreX, top at y, with the page's alpha.
  * centreX / y are where the row should appear, in the units the item pictures are placed in (the 320 x 240 picture):
  * a text node lands about 1.1 x further right and 1.125 x further down than a picture node with the same numbers
  * (measured on the screenshots: P363's row, placed at the pictures' numbers, sat about 12 units right of PAUSED), so
  * the numbers are divided by that here. Flag 0x40 keeps text_queue_draw from also multiplying the position by
  * g_hud_scale_x / _y (pictures never get that), 0x80 adds the drop shadow; the queue's own centring (flag 1) is not
- * used (it subtracts half the scaled width from the scaled x). "OPTIONS" is 57 units wide at scale 1 (68 at 1.2).
- * Leaves the text colour white with that alpha and the scale as it was. */
-void port_menu_options_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha) {
+ * used (it subtracts half the scaled width from the scaled x). Widths at scale 1.2 in these units (the page's
+ * GameFont.measure x 1.1, as "OPTIONS" measured 57 at scale 1): CUSTOMISATION SETTINGS 210, CUSTOMISATION 128.
+ * Font 0 has every letter of both (checked with the page's glyph map). Leaves the text colour white with that alpha
+ * and the scale as it was. */
+void port_menu_customisation_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha) { /* was port_menu_options_row_draw */
     void port_menu_text_row_draw(const char *label, s32 width, f32 scale, s32 selected, s32 centreX, s32 y, s32 alpha);
 
-    port_menu_text_row_draw("OPTIONS", 68, 1.2f, selected, centreX, y, alpha);
+    if (centreX - 210 / 2 >= 16 && centreX + 210 / 2 <= 320 - 16) {
+        port_menu_text_row_draw("CUSTOMISATION SETTINGS", 210, 1.2f, selected, centreX, y, alpha);
+    } else {
+        port_menu_text_row_draw("CUSTOMISATION", 128, 1.2f, selected, centreX, y, alpha);
+    }
 }
 /* P367: the same for any label: width = its width in units at that scale (centred at centreX). */
 void port_menu_text_row_draw(const char *label, s32 width, f32 scale, s32 selected, s32 centreX, s32 y, s32 alpha) {
@@ -423,12 +432,12 @@ void port_menu_text_row_draw(const char *label, s32 width, f32 scale, s32 select
     text_set_scale(oldScale);
     text_set_color(0xFF, 0xFF, 0xFF, alpha);
 }
-/* P363: the pause menu's row (see game_pause_update). */
-void port_pause_options_row_draw(s32 selected, s32 count, s32 yOff) {
+/* P363: the pause menu's row (see game_pause_update); P369: CUSTOMISATION SETTINGS in story, CUSTOMISATION in multiplayer. */
+void port_pause_customisation_row_draw(s32 selected, s32 count, s32 yOff) { /* was port_pause_options_row_draw */
     /* multiplayer: centred at 233, under the CONTINUE picture (drawn from x 0xD5, its centre near 233); story: centred
      * at 162, under PAUSED, between QUIT and CONT..; under the item row (yOff + 0x73; the pictures reach about
      * yOff + 0x96) */
-    port_menu_options_row_draw(selected, count == 3 ? 233 : 162, yOff + 0x9C, g_menu_prompt_alpha_lo);
+    port_menu_customisation_row_draw(selected, count == 3 ? 233 : 162, yOff + 0x9C, g_menu_prompt_alpha_lo);
 }
 static s32 port_intro_skipped; /* P324 "Skip intro": done once per boot (the attract loop also returns to level 0x21) */
 static s32 port_warp_started;  /* P327 ?warp: done once per boot */
@@ -891,14 +900,13 @@ void title_press_start_page(void) {
     s8 sy;
     u16 in;
 #ifdef PORT
-    /* DELIBERATE PORT CHANGE (P367, native menus; docs/design/NATIVE_MENUS.md): a fourth row "SETTINGS" on this page
+    /* DELIBERATE PORT CHANGE (P367, native menus; docs/design/NATIVE_MENUS.md): a fourth row CUSTOMISATION (P369; was "SETTINGS") on this page
      * (the game's own OPTIONS page: sound / language, cheats, screen position, drawn by settings_list_draw as a column)
      * that opens the page's game-style menu (port/web/gmenu.js), like the OPTIONS rows of the pause menu (P363) and of
-     * the save slot / MULTI pages (P364). Shown only while port_gmenu_row_shown() (the page's option "Game-style menu" is
-     * on and the game is local: never online, in a recording / replay or under ?netdet, where this menu's state is
+     * the save slot / MULTI pages (P364). Shown only while port_gmenu_row_shown() (always while the game is local (P369: no page option any more): never online, in a recording / replay or under ?netdet, where this menu's state is
      * hashed); otherwise every line below runs exactly as on the N64. It sits one row under the last item (the column's
      * spacing, 0x22), with the game's own cursor (the two joystick pictures, text id 0x1A) sliding to it like
-     * settings_list_draw's (port_title_settings_row_draw, after this function); settings_list_draw draws no cursor
+     * settings_list_draw's (port_title_customisation_row_draw, after this function); settings_list_draw draws no cursor
      * meanwhile (its arg2 = 0), so the list's slide state (g_settings_arrow_row / g_menu_slide_phase) stands still.
      * The 28-item list itself is unchanged: the row is not a g_settings item, the selection g_settings_sel stays on the
      * screen-position item (0x19) and the list sees no direction / accept input while the row is selected.
@@ -914,7 +922,7 @@ void title_press_start_page(void) {
     static f32 port_title_settings_slide;   /* 0..1 */
     s32 settingsRow;   /* the SETTINGS row is shown this frame */
     extern s16 g_settings_value_fade;
-    void port_title_settings_row_draw(s32 selected, s32 fromRow, f32 slide, s32 alpha);
+    void port_title_customisation_row_draw(s32 selected, s32 fromRow, f32 slide, s32 alpha); /* was port_title_settings_row_draw */
 #endif
 
     obj = obj_find_by_setup_id(9);
@@ -993,7 +1001,7 @@ void title_press_start_page(void) {
         }
         settings_list_draw(0x02200200, 0, !port_title_on_settings, alpha & 0xFF, 1);
         if (settingsRow) {
-            port_title_settings_row_draw(port_title_on_settings, port_title_settings_from, port_title_settings_slide, alpha & 0xFF);
+            port_title_customisation_row_draw(port_title_on_settings, port_title_settings_from, port_title_settings_slide, alpha & 0xFF);
             if (port_title_on_settings && port_title_settings_slide < 1.0f) {
                 port_title_settings_slide += 0.1f * (f32) g_frame_ticks;
             }
@@ -1103,7 +1111,7 @@ void title_press_start_page(void) {
  * fits between the two cursor pictures), one column step (0x22) under the screen-position item, and while selected
  * the game's cursor: the two joystick pictures (text id 0x1A) left and right of the row, sliding from row fromRow with
  * settings_list_draw's own motion (x 50 + 20 sin(slide pi) from the centre 0x94, y linear) over slide 0..1. */
-void port_title_settings_row_draw(s32 selected, s32 fromRow, f32 slide, s32 alpha) {
+void port_title_customisation_row_draw(s32 selected, s32 fromRow, f32 slide, s32 alpha) { /* was port_title_settings_row_draw */
     extern u8 g_str_settings_arrow_r[];
     extern u8 g_str_settings_arrow_l[];
     void port_menu_text_row_draw(const char *label, s32 width, f32 scale, s32 selected, s32 centreX, s32 y, s32 alpha);
@@ -1113,12 +1121,14 @@ void port_title_settings_row_draw(s32 selected, s32 fromRow, f32 slide, s32 alph
 
     /* centred like the item pictures (drawn at 0x94 with the centring flag, they land centred near 162), vertically in
      * the middle of the row's cursor pictures (about 33 units high from the row's top, 0x46 + 3 * 0x22 = 0xAC) */
-    port_menu_text_row_draw("SETTINGS", 65, 1.0f, selected, 162, 0xAC + 11, alpha);
+    port_menu_text_row_draw("CUSTOMISATION", 107, 1.0f, selected, 162, 0xAC + 11, alpha);
     if (selected) {
         if (slide > 1.0f) {
             slide = 1.0f;
         }
-        arrowX = (s32) (50.0f + 20.0f * sinf(slide * 3.1415f));
+        /* P369: CUSTOMISATION (107 units) is wider than the game's items (about 65): the cursor pictures move out by
+         * half the difference as they slide in, so they frame the row like the game's items */
+        arrowX = (s32) (50.0f + 20.0f * sinf(slide * 3.1415f) + 21.0f * slide);
         arrowY = (s32) ((f32) (fromRow * 0x22 + 0x46) + slide * (f32) ((3 - fromRow) * 0x22));
         text_set_color(0xFF, 0xFF, 0xFF, alpha);
         text_printf_at(arrowX + 0x94, arrowY, 1, (s32) g_str_settings_arrow_r, 0x1A);
@@ -1483,9 +1493,9 @@ void title_slot_page(void) {
     s32 y;
     u16 in;
 #ifdef PORT
-    /* DELIBERATE PORT CHANGE (P364, native menus; docs/design/NATIVE_MENUS.md): an "OPTIONS" row on this save slot page
+    /* DELIBERATE PORT CHANGE (P364, native menus; docs/design/NATIVE_MENUS.md): a CUSTOMISATION SETTINGS row (P369; was "OPTIONS") on this save slot page
      * that opens the page's game-style menu (port/web/gmenu.js), like the pause menu's row (P363, game_pause_update).
-     * Shown only while port_gmenu_row_shown() (the page's option "Game-style menu" is on and the game is local: never
+     * Shown only while port_gmenu_row_shown() (always while the game is local (P369: no page option any more): never
      * online, in a recording / replay or under ?netdet, where this menu's state is hashed) and not during the erase
      * question (g_menu_cursor 2 / 3); otherwise every line below runs exactly as on the N64. It sits under the slot's
      * items (empty slot: under NEW GAME; used slot: under CONTINUE / ERASE), centred, in the item pictures' greens.
@@ -1498,7 +1508,7 @@ void title_slot_page(void) {
      * the game's own item. port_slot_on_options = OPTIONS is selected (a port variable, outside game memory). */
     static s32 port_slot_on_options;
     s32 optionsRow;   /* the OPTIONS row is shown this frame */
-    void port_menu_options_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha);
+    void port_menu_customisation_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha); /* was port_menu_options_row_draw */
 #endif
 
     alpha = g_menu_alpha;
@@ -1578,7 +1588,7 @@ void title_slot_page(void) {
     if (optionsRow) {
         /* centred on the page (NEW GAME's picture and the joystick between PLAY / ERASE are centred at 162), under NEW
          * GAME (its picture reaches about y 137) / under PLAY / ERASE (they reach about 210) */
-        port_menu_options_row_draw(port_slot_on_options, 162, save->stamp >= 0 ? 0xD4 : 0x8E, alpha);
+        port_menu_customisation_row_draw(port_slot_on_options, 162, save->stamp >= 0 ? 0xD4 : 0x8E, alpha);
     }
     if (port_slot_on_options && (rec->input & 0x10)) {
         port_gmenu_request_title();   /* A / START on OPTIONS: the page opens its menu over the title */
@@ -1680,10 +1690,9 @@ void menu_mode_select_page(void) {
     s8 code;
     s32 setupLit;   /* SET-UP is drawn lit when selected (P364: 0 while the port's OPTIONS row is selected) */
 #ifdef PORT
-    /* DELIBERATE PORT CHANGE (P364, native menus; docs/design/NATIVE_MENUS.md): an "OPTIONS" row on this MULTI mode
+    /* DELIBERATE PORT CHANGE (P364, native menus; docs/design/NATIVE_MENUS.md): a CUSTOMISATION row (P369; was "OPTIONS") on this MULTI mode
      * page, under SET-UP (shown on the page whichever item is selected), that opens the page's game-style menu (port/web/gmenu.js), like the pause menu's row (P363) and
-     * the save slot pages' (title_slot_page). Shown only while port_gmenu_row_shown() (the page's option "Game-style menu"
-     * is on and the game is local: never online, in a recording / replay or under ?netdet, where this menu's state is
+     * the save slot pages' (title_slot_page). Shown only while port_gmenu_row_shown() (always while the game is local (P369: no page option any more): never online, in a recording / replay or under ?netdet, where this menu's state is
      * hashed; the page also switches it off as soon as an online session is being set up); otherwise every line below
      * runs exactly as on the N64. Stick down from SET-UP (g_menu_cursor 1, where up / down did nothing) reaches it,
      * stick up goes back to SET-UP; left / right do nothing there. A or START on it plays the choose sound (0x500), asks
@@ -1694,7 +1703,7 @@ void menu_mode_select_page(void) {
      * memory). */
     static s32 port_modes_on_options;
     s32 optionsRow;   /* the OPTIONS row is shown this frame */
-    void port_menu_options_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha);
+    void port_menu_customisation_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha); /* was port_menu_options_row_draw */
 #endif
 
     rec = (MenuState *) g_menu_state;
@@ -1767,7 +1776,7 @@ void menu_mode_select_page(void) {
 #ifdef PORT
     if (optionsRow) {
         /* under SET-UP (drawn from x 0xD5, its centre near 234; the picture reaches about y 155) */
-        port_menu_options_row_draw(port_modes_on_options, 234, 0xA0, textAlpha);
+        port_menu_customisation_row_draw(port_modes_on_options, 234, 0xA0, textAlpha);
     }
     if (port_modes_on_options && textAlpha == 0xFF && (((MenuState *) g_menu_state)->input & 0x10)) {
         port_gmenu_request_title();   /* A / START on OPTIONS: the page opens its menu over the title */

@@ -1,7 +1,7 @@
 #!/bin/bash
 # P367: evidence that the game-style menus play the game's menu sounds (gmenu.js GSound, port/ultra/pc_sfx.c) locally
 # and nothing when muted. Muted headless Chrome (--mute-audio: nothing reaches the host's speakers) on level 0x29 with
-# option nativemenu, driven by JS key events (no user activation: Fullscreen refuses = the error sound):
+# the customisation settings, driven by JS key events (no user activation: Fullscreen refuses = the error sound):
 #   GMenu: Esc opens (choose), Right on Preset (change), Down x7 (move) to Fullscreen, Right (error: needs a key press),
 #          Up x6 to Picture, Enter (choose), Esc (back), Esc (back: closes);
 #   GPhoto: P starts photo mode, O focuses the panel (choose), Down x2 (move) to Frame, Right (error: no animation
@@ -34,7 +34,7 @@ run() {   # $1 = local | muted
   S+=("raw:$t:eval:$STATS"); at 1500
   S+=("$t:${1}_5_end")
   local env=(); [ "$1" = local ] && env=(PROBE_PAGEVOL=1)
-  env "${env[@]}" tools/port/scripts/pageshot.sh "$OUT" 1280,720 $((t / 1000 + 4)) "app=game&warp=29&opt=nativemenu:1,photomode:1" "${S[@]}" >/dev/null
+  env "${env[@]}" tools/port/scripts/pageshot.sh "$OUT" 1280,720 $((t / 1000 + 4)) "app=game&warp=29&opt=photomode:1" "${S[@]}" >/dev/null
   mv "$OUT/pageshot_1280,720.log" "$OUT/$1.log"
   echo "== $1: $(grep -c '\[gsound\] play' "$OUT/$1.log") sounds played, $(grep -c '\[gsound\] heard' "$OUT/$1.log") measured"
   grep -E '\[gsound\]|^stats|\[gmenu\] (open|close)|\[gphoto\] (panel|game-style)|\[photo\] (start|off|leave)' "$OUT/$1.log" | cut -c1-200

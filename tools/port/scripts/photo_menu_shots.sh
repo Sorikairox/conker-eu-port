@@ -1,11 +1,11 @@
 #!/bin/bash
-# P366: screenshots of photo mode in the game's style (option nativemenu: gmenu.js GPhoto), driven by keys like a player:
+# P366: screenshots of photo mode in the game's style (gmenu.js GPhoto), driven by keys like a player:
 #   P starts photo mode (the HUD bottom left, the Pose & Outfit panel right, unfocused), O gives the panel the focus,
 #   Enter on Animation opens the animation list (857 entries: Page Down, held Down speeds up), Enter picks one, Down /
 #   Enter toggles Play, the Model list, Item 1's list, the Materials page with a tint, H hides every menu (and shows them
 #   again), He carries (his own attachment) hidden, Esc goes back / unfocuses / leaves photo mode, then W walks (play goes
 #   on where it was).
-#   tools/port/scripts/photo_menu_shots.sh OUTDIR [720|1080|both|pad|mouse|off] [LEVEL] [EXTRA_OPTS]
+#   tools/port/scripts/photo_menu_shots.sh OUTDIR [720|1080|both|pad|mouse] [LEVEL] [EXTRA_OPTS]
 #   720 = 1280x720; 1080 = 1920x1080 widescreen + full resolution + smooth font + hi-res 2D. Muted headless Chrome, one at
 #   a time (PROBE_NOWAIT=1 on a shared machine). Log lines "mark {...}" = window.__gphoto.state(); "[p205obj]" = positions.
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1
@@ -40,7 +40,7 @@ run() {   # $1 = W,H  $2 = options  $3 = prefix
   k KeyO; k Escape 500; shot 17_unfocused
   k Escape 1500; shot 18_left_photo
   S+=("raw:$t:keydown:KeyW"); at 2000; S+=("raw:$t:keyup:KeyW"); at 500; shot 19_walked; at 6000
-  tools/port/scripts/pageshot.sh "$OUT" "$1" $((t / 1000 + 3)) "app=game&warp=$LEVEL&p205obj=50&opt=nativemenu:1,photomode:1$2" "${S[@]}"
+  tools/port/scripts/pageshot.sh "$OUT" "$1" $((t / 1000 + 3)) "app=game&warp=$LEVEL&p205obj=50&opt=photomode:1$2" "${S[@]}"
   mv "$OUT/pageshot_$1.log" "$OUT/$p.log"
   grep -E '^mark|\[gphoto\]|\[photo\]' "$OUT/$p.log" | cut -c1-260 | head -60
   grep -E '\[p205obj\] frame|\[p205obj\]   rec  ?[0-9]+ ' "$OUT/$p.log" | awk '/frame/ {f=$3; p=$5; next} {r=$3+0; if (r==p) print "  player pos @" f ": " $11, $12, $13}' | tail -4
@@ -61,7 +61,7 @@ padrun() {
   pb 2; shot 5_x_unfocused
   pb 9 1500; shot 6_start_left
   S+=("raw:$t:keydown:KeyW"); at 2000; S+=("raw:$t:keyup:KeyW"); at 500; shot 7_walked; at 6000
-  tools/port/scripts/pageshot.sh "$OUT" 1280,720 $((t / 1000 + 3)) "app=game&warp=$LEVEL&p205obj=50&gmenutest=1&opt=nativemenu:1,photomode:1$EXTRA" "${S[@]}"
+  tools/port/scripts/pageshot.sh "$OUT" 1280,720 $((t / 1000 + 3)) "app=game&warp=$LEVEL&p205obj=50&gmenutest=1&opt=photomode:1$EXTRA" "${S[@]}"
   mv "$OUT/pageshot_1280,720.log" "$OUT/$p.log"
 }
 # mouse: clicks at 1280x720 (4:3 picture at x 160..1120): the Model row (focus + its list), an entry (130 mech suit),
@@ -84,23 +84,9 @@ mouserun() {
   ck 450,681 900; shot 4_hidden
   S+=("raw:$t:eval:JK('KeyH')"); at 600; shot 5_shown
   ck 520,649 1500; shot 6_exit_clicked
-  tools/port/scripts/pageshot.sh "$OUT" 1280,720 $((t / 1000 + 3)) "app=game&warp=$LEVEL&opt=nativemenu:1,photomode:1$EXTRA" "${S[@]}"
+  tools/port/scripts/pageshot.sh "$OUT" 1280,720 $((t / 1000 + 3)) "app=game&warp=$LEVEL&opt=photomode:1$EXTRA" "${S[@]}"
   mv "$OUT/pageshot_1280,720.log" "$OUT/$p.log"
 }
-# off: the option off: photo mode exactly as before (the page's HUD box and Pose & Outfit panel, O = its focus)
-offrun() {
-  local p=off t=19000 S=()
-  at() { t=$((t + $1)); }
-  k() { S+=("raw:$t:eval:JK('$1')"); at "${2:-400}"; }
-  shot() { S+=("$t:$p$1" "raw:$((t + 50)):eval:console.log('mark gphoto=' + JSON.stringify(window.__gphoto.state().active) + ' bodyclass=' + document.body.className + ' photoHidden=' + document.getElementById('photo').hidden + ' lookHidden=' + document.getElementById('photo-look').hidden)"); at 700; }
-  S+=("raw:12000:eval:$JK")
-  k KeyP 1500; shot 0_photo
-  k KeyO; k ArrowDown; k ArrowRight 1500; shot 1_panel_nav
-  k KeyH 600; shot 2_h_does_nothing
-  k KeyP 1500; shot 3_left
-  tools/port/scripts/pageshot.sh "$OUT" 1280,720 $((t / 1000 + 3)) "app=game&warp=$LEVEL&opt=nativemenu:0,photomode:1$EXTRA" "${S[@]}"
-  mv "$OUT/pageshot_1280,720.log" "$OUT/$p.log"
-}
-case $WHICH in pad) padrun; exit;; mouse) mouserun; exit;; off) offrun; exit;; esac
+case $WHICH in pad) padrun; exit;; mouse) mouserun; exit;; esac
 if [ "$WHICH" = 720 ] || [ "$WHICH" = both ]; then run 1280,720 "$EXTRA" w; fi
 if [ "$WHICH" = 1080 ] || [ "$WHICH" = both ]; then run 1920,1080 ",widescreen:1,fullres:1,smoothfont:1,hires2d:1$EXTRA" f; fi

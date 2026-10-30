@@ -1,5 +1,5 @@
 #!/bin/bash
-# P368: the last native-menus step (docs/design/NATIVE_MENUS.md), option nativemenu: the developer drawer, the game-style
+# P368: the last native-menus step (docs/design/NATIVE_MENUS.md), the developer drawer, the game-style
 # touch controls (with real CDP touch taps) and the boot screens, at one window size per run.
 #   tools/port/scripts/boot_shots.sh OUTDIR [720|1080|800|844|all]
 #   720 = 1280x720; 1080 = 1920x1080 widescreen + full resolution + smooth font; 800 = 800x1000 portrait touch;
@@ -21,12 +21,10 @@ JK="window.JK = (c, k) => (dispatchEvent(new KeyboardEvent('keydown', { code: c,
 MARK="console.log('mark ' + JSON.stringify(GMenu.state()) + ' body=' + document.body.className + ' drawer=' + drawerOpen() + ' running=' + running)"
 TB="console.log('tb b=' + touch.b.toString(16) + ' x=' + touch.x + ' y=' + touch.y + ' gtouch=' + document.body.classList.contains('gtouch'))"
 WRONG="takeFile(new File([new Uint8Array([0x80, 0x37, 0x12, 0x40]), new Uint8Array(65532)], 'not-conker.z64'))"
-OPTOFF="setOption(OPTIONS.find((o) => o.key === 'nativemenu'), false), console.log('mark nativemenu off')"
-OPTON="setOption(OPTIONS.find((o) => o.key === 'nativemenu'), true), console.log('mark nativemenu on')"
 run() {   # $1 = W,H  $2 = extra options  $3 = prefix  $4 = touch (1 / 0)
   local W=${1%,*} H=${1#*,} p=$3 tc=$4 t steps=()
   # A: no ROM
-  tools/port/scripts/pageshot.sh "$OUT" "$1" 9 "romurl=none&opt=nativemenu:1$2&touch=$tc" \
+  tools/port/scripts/pageshot.sh "$OUT" "$1" 9 "romurl=none${2:+&opt=${2#,}}&touch=$tc" \
     "4000:${p}a_first_run" "raw:4500:eval:$WRONG" "6500:${p}b_error_wrong_file"
   mv "$OUT/pageshot_$1.log" "$OUT/${p}A.log"
   # B: ROM
@@ -47,13 +45,12 @@ run() {   # $1 = W,H  $2 = extra options  $3 = prefix  $4 = touch (1 / 0)
   steps+=("raw:$t:eval:JK('Escape')" "$((t + 900)):${p}h_gmenu" "raw:$((t + 1000)):eval:$MARK"
           "raw:$((t + 1300)):eval:JK('ArrowUp')" "raw:$((t + 1600)):eval:JK('ArrowUp')" "raw:$((t + 1900)):eval:JK('Enter')" "$((t + 2900)):${p}i_drawer_dev" "raw:$((t + 3000)):eval:$MARK"
           "raw:$((t + 3200)):eval:\$('drawer-all').click()" "$((t + 3900)):${p}j_drawer_all" "raw:$((t + 4000)):eval:JK('Escape')"
-          "raw:$((t + 4600)):eval:$OPTOFF" "$((t + 5800)):${p}k_off_play" "raw:$((t + 5900)):eval:JK('Escape')" "$((t + 6900)):${p}l_off_drawer" "raw:$((t + 7000)):eval:$MARK"
-          "raw:$((t + 7300)):eval:JK('Escape')" "raw:$((t + 7600)):eval:$OPTON" "raw:$((t + 8000)):eval:location.reload()"
+          "raw:$((t + 8000)):eval:location.reload()"
           "raw:$((t + 13000)):eval:$JK" "$((t + 14000)):${p}m_ready_font" "raw:$((t + 14100)):eval:$MARK" "raw:$((t + 14500)):eval:JK('Escape')")
   t=$((t + 15000))
   for i in 1 2 3 4 5; do steps+=("raw:$((t + 300 * i)):eval:JK('ArrowUp')"); done
   t=$((t + 2000)); steps+=("raw:$t:eval:JK('Enter')" "$((t + 1200)):${p}n_online_backdrop" "raw:$((t + 1300)):eval:$MARK")
-  tools/port/scripts/pageshot.sh "$OUT" "$1" $(( t / 1000 + 4 )) "opt=nativemenu:1$2&warp=29&p205obj=50&touch=$tc" "${steps[@]}"
+  tools/port/scripts/pageshot.sh "$OUT" "$1" $(( t / 1000 + 4 )) "warp=29&p205obj=50&touch=$tc${2:+&opt=${2#,}}" "${steps[@]}"
   mv "$OUT/pageshot_$1.log" "$OUT/${p}B.log"
   grep -E '^mark|^tb |\[gboot\]|\[gtouch\]|\[gmenu\] (open|close)|Aborted|Uncaught' "$OUT/${p}B.log" | cut -c1-260
   # Conker's position before / after the stick hold (p205obj: the player record's x y z)

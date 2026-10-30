@@ -73,14 +73,14 @@ if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', fals
 // resumes the game if the drawer paused it and gives the keyboard focus back to the canvas.
 const drawerOpen = () => $('drawer').classList.contains('open');
 let drawerPaused = false;
-// P368 (option "Game-style menu"): once the game-style menu can open (gmenu.js GMenu.available: the game runs, or a good
+// P368: once the game-style menu (P369: the customisation settings, always on) can open (gmenu.js GMenu.available: the game runs, or a good
 // ROM before boot, and the game's font is there), every player-facing control lives in it, so the drawer opens as the
 // developer menu: Pause, the status line, the debug console, the input recorder's panel and the manual (copy-paste)
 // online codes. body.devdrawer hides the rest with CSS (the elements stay: test drivers .click() them as before).
-// Its "All page controls" button shows everything again until the drawer closes (recovery). Option off, or the game-
-// style menu cannot open yet (first visit, no font kept): the drawer is the whole menu, exactly as before.
+// Its "All page controls" button shows everything again until the drawer closes (recovery). While the customisation
+// settings cannot open yet (before the first boot in this browser: no font kept), the drawer is the whole menu (fallback).
 let drawerAll = false;
-const drawerDev = () => !drawerAll && !!(window.GMenu && GMenu.wanted() && GMenu.available());
+const drawerDev = () => !drawerAll && !!(window.GMenu && GMenu.available());
 function drawerDevSet() {
   const dev = drawerDev();
   document.body.classList.toggle('devdrawer', dev);
@@ -105,7 +105,7 @@ function drawerSet(on) {
   }
   idleKick();
 }
-$('menu-btn').onclick = () => { if (!(window.GMenu && GMenu.wanted() && GMenu.open())) drawerSet(true); };   // P361: the game-style menu when that option is on
+$('menu-btn').onclick = () => { if (!(window.GMenu && GMenu.open())) drawerSet(true); };   // P361: the customisation settings (P369: always; the drawer only while they cannot open yet)
 $('drawer-close').onclick = () => drawerSet(false);
 $('drawer-all').onclick = () => { drawerAll = true; drawerDevSet(); };   // P368: the developer drawer shows every page control again
 $('drawer-shade').onclick = () => drawerSet(false);   // a click on the picture beside the drawer closes it
@@ -139,10 +139,6 @@ const OPTIONS = [
   // P357: a tool like Online / Photo mode (not in the presets): shows the Record button (docs/port/E2E.md)
   { key: 'recorder', label: 'Input recorder (for testing)', def: false,
     help: 'Shows the Record button: records everything you press from power-on (with your save and options) into a small file that the developers replay automatically to find the first point where a new version of the port plays differently. While recording, the game runs in the same exact-timing mode as online play; free camera and photo mode are off and the game options are fixed.' },
-  // P361: page-side, a tool like the ones above (not in the presets): Esc / the corner button open the game-style menu
-  // (port/web/gmenu.js) instead of the page menu drawer. Default off (NATIVE_MENUS.md step P361); the drawer stays.
-  { key: 'nativemenu', label: 'Game-style menu (Esc)', def: false,
-    help: 'Esc, the corner button, holding the gamepad\'s Back / Select button (its Photo mode button) for half a second, or its Home button where the browser passes it, open the options as a menu drawn over the game in the game\'s own font (smooth with Smooth font), driven like the game\'s menus: D-pad, stick or arrows move, left / right change a value, A, Start, Enter or Space choose, B, Esc or Backspace go back; the mouse and touch work too. It has everything a player needs: all options, key and button bindings, master volume, fullscreen, saves, photo mode, online and the recorder; its "Developer tools" line opens this page menu, which then keeps only the developer tools (debug console, recorder details, manual online codes). Online and while recording the game keeps running behind it and the host\'s game options are shown locked. With it on, a short press of the gamepad\'s Back button starts photo mode when released. Off: Esc opens this page menu.' },
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,
@@ -205,6 +201,7 @@ const OPTIONS = [
   { key: 'volspeech', label: 'Speech volume', def: 100, range: true, game: 11,
     help: 'Volume of the spoken dialogue (the MP3 voice streams), 0 to 100 %. 100 % = as on the N64.' },
 ];
+try { localStorage.removeItem('opt.nativemenu'); } catch (e) { /* P369: the old option "Game-style menu" is gone (always on); a stored value is dropped */ }
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) {
   const [k, v] = kv.split(':'), o = OPTIONS.find((x) => x.key === k);
@@ -225,7 +222,7 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // Classic / Modern whose values no longer match (a ?opt override, an option added later) is shown as what matches.
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
-const PRESET_KEYS = OPTIONS.filter((o) => !['online', 'photomode', 'recorder', 'nativemenu'].includes(o.key)).map((o) => o.key);   // P357: recorder = a tool; P361: nativemenu too
+const PRESET_KEYS = OPTIONS.filter((o) => !['online', 'photomode', 'recorder'].includes(o.key)).map((o) => o.key);   // P357: recorder = a tool
 const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'smoothfont', 'widescreen', 'fullres', 'hfr'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
@@ -395,7 +392,7 @@ async function takeFile(f) {
     if (ok) await idb('rom', 'readwrite', (s) => s.put(romBytes, 'eu')).catch(() => {});
   } catch (err) { status('ROM: ' + err.message, 'bad'); log('ROM: ' + err.message, 'fail'); dropError(`This file is not an N64 ROM (${err.message}).`); }
 }
-// P368: the drop zone's own error line (shown with the game-style menu option: body.gboot; else the toast alone, as before)
+// P368: the drop zone's own error line (body.gboot, always since P369)
 function dropError(s) { const e = $('drop-err'); e.textContent = s; e.hidden = !s; }
 $('rom').addEventListener('change', (e) => takeFile(e.target.files[0]));
 // iOS greys out files whose extension has no known type (.z64 / .n64 / .eep), so no filter there;
@@ -428,7 +425,7 @@ const INPUTS = [  // [id, label]; stick directions are pseudo-buttons
   ['DU', 'D-pad up'], ['DD', 'D-pad down'], ['DL', 'D-pad left'], ['DR', 'D-pad right'],
   ['CAMZOOM', 'Free camera: C up (distance)'], ['CAMBACK', 'Free camera: C down (behind Conker)'],
   ['PHOTO', 'Photo mode on / off'],   // P348: page input, not an N64 button
-  ['PHOTOUI', 'Photo mode: hide / show the menus'],   // P366: page input (game-style photo mode, option nativemenu)
+  ['PHOTOUI', 'Photo mode: hide / show the menus'],   // P366: page input (game-style photo mode)
 ];
 const DEFAULT_KEYS = { UP: 'KeyW', DOWN: 'KeyS', LEFT: 'KeyA', RIGHT: 'KeyD', HALF: 'ControlLeft',
   A: 'Space', B: 'KeyF', Z: 'KeyQ', L: 'KeyR', R: 'KeyE', START: 'Enter',
@@ -624,7 +621,7 @@ const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, wh
 const PHOTO_WHY = { 1: 'Photo mode is off in Options', 2: 'no photo mode online', 3: 'photo mode needs the 3D view of a single-player game (not a menu, the pause screen, split screen or loading)',
   4: 'photo mode is not available (conker_netx.txt did not load)', 5: 'not enough memory for photo mode' };
 function photoToast(text) {
-  if (window.GPhoto && GPhoto.toast(text)) return;   // P366: game-style (option nativemenu): in the game's font
+  if (window.GPhoto && GPhoto.toast(text)) return;   // P366: game-style: in the game's font
   $('photo-toast').textContent = text; $('photo-toast').hidden = false;
   clearTimeout(photo.toastTimer); photo.toastTimer = setTimeout(() => { $('photo-toast').hidden = true; }, 2500);
 }
@@ -639,7 +636,7 @@ function photoShow(on) {
   document.body.classList.toggle('photo', on);
   $('photo').hidden = !on;
   lookShow(on);   // P358
-  if (window.GPhoto) GPhoto.show(on);   // P366: the game-style HUD and panel (option nativemenu; else nothing changes)
+  if (window.GPhoto) GPhoto.show(on);   // P366: the game-style HUD and panel (no font yet: the page's boxes)
   $('photo-btn').setAttribute('aria-pressed', String(on));
   if (!on && document.pointerLockElement && document.exitPointerLock && !opt('freecam')) document.exitPointerLock();
   applyPause();   // the sound is off while photo mode is on
@@ -1022,7 +1019,7 @@ function lookTick(dt, d, fresh) {
     M._port_photo_look_set(LK.FRAME, 0, Math.round(look.frame * 100));
     if ($('lk-frame')) { $('lk-frame').value = String(Math.floor(look.frame)); $('lk-frame-n').textContent = Math.floor(look.frame) + ' / ' + (lookUi.frames - 1); }
   }
-  // P366: the game-style panel (option nativemenu) takes the focus, the D-pad, A and B itself (gmenu.js GPhoto)
+  // P366: the game-style panel takes the focus, the D-pad, A and B itself (gmenu.js GPhoto)
   if (window.GPhoto && GPhoto.active()) return GPhoto.input(d, fresh, dt);
   // panel focus: O / right stick click toggles; the D-pad and A then work the panel (returned mask: bits the camera must not see)
   if (d.nav && !lookUi.prevNav) { lookUi.nav = !lookUi.nav; $('photo-look').classList.toggle('nav', lookUi.nav); if (lookUi.nav && look.min) { look.min = false; lookBuild(); } lookFocus(0); }
@@ -1109,7 +1106,7 @@ window.addEventListener('keydown', (e) => {
   if (listening && listening[0] === 'key') { e.preventDefault(); if (e.code !== 'Escape') finishListen(e.code); else finishListen(null); return; }
   if (window.GMenu && GMenu.key(e)) { e.preventDefault(); return; }   // P361: Esc / Backspace go back in the game-style menu
   if (window.GPhoto && GPhoto.key(e)) { e.preventDefault(); return; }   // P366: the game-style photo panel / Esc in photo mode
-  if (e.code === 'Escape' && !drawerOpen() && !document.fullscreenElement && window.GMenu && GMenu.wanted() && GMenu.open()) { e.preventDefault(); return; }
+  if (e.code === 'Escape' && !drawerOpen() && !document.fullscreenElement && window.GMenu && GMenu.open()) { e.preventDefault(); return; }
   // P360: Esc opens / closes the menu drawer (in real fullscreen the browser takes Esc to leave it: the corner button then)
   if (e.code === 'Escape' && (drawerOpen() || !document.fullscreenElement)) { e.preventDefault(); drawerSet(!drawerOpen()); return; }
   if (typing(e)) return;
@@ -1994,7 +1991,7 @@ async function start(app) {
     print: (s) => log(s),
     printErr: (s) => log(s, 'fail'),
     onAbort: (w) => { log('Aborted: ' + w, 'fail'); status('crashed (open Debug)', 'bad');
-      if (window.GNet && opt('nativemenu')) GNet.show('THE GAME STOPPED', 'Something went wrong. Reload the page to play again (Developer tools > Debug has the details).', 3.6e6); },   // P368: in the game's font
+      if (window.GNet && GNet.wanted()) GNet.show('THE GAME STOPPED', 'Something went wrong. Reload the page to play again (Developer tools > Debug has the details).', 3.6e6); },   // P368: in the game's font
     portRumble: (ch, on) => portRumble(ch, on),   // P333 option "Rumble" (pc_pif.c)
     portEepDirty: () => { eepWrites++; if (!eepTimer) eepTimer = setTimeout(persistEeprom, 400); flashSaveIcon(); },
   });

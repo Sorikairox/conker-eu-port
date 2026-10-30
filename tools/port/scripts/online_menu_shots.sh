@@ -1,5 +1,5 @@
 #!/bin/bash
-# P365: screenshots of the game-style ONLINE pages before boot (option nativemenu; port/web/gmenu.js), keys only:
+# P365: screenshots of the game-style ONLINE pages before boot (port/web/gmenu.js), keys only:
 # Enter on the Press Start screen boots the game once (so the page keeps font 0), the page reloads, Esc opens the menu on the Press Start screen,
 # ArrowUp x5 + Enter = Online, Enter on Create room (no room server behind this test server: the error shows), Join
 # room = the letter picker, typed on the keyboard (k 7 u, an O that room codes do not have, Backspace, 4 9), Esc x3
@@ -22,7 +22,7 @@ run() {   # $1 = W,H  $2 = options  $3 = prefix
   t=$((t + 1800)); steps+=("raw:$t:eval:JK('KeyK', 'k')" "raw:$((t + 300)):eval:JK('Digit7', '7')" "raw:$((t + 600)):eval:JK('KeyU', 'u')" "raw:$((t + 900)):eval:JK('KeyO', 'o')" "$((t + 1800)):${p}5_typed_refused_O")
   t=$((t + 2200)); steps+=("raw:$t:eval:JK('Backspace')" "raw:$((t + 300)):eval:JK('Digit4', '4')" "raw:$((t + 600)):eval:JK('Digit9', '9')" "raw:$((t + 900)):eval:JK('Digit3', '3')" "$((t + 1800)):${p}6_typed_full" "raw:$((t + 1900)):eval:$MARK")
   t=$((t + 2300)); steps+=("raw:$t:eval:JK('Escape')" "raw:$((t + 400)):eval:JK('Escape')" "raw:$((t + 800)):eval:JK('Escape')" "$((t + 1800)):${p}7_back_on_press_start" "raw:$((t + 1900)):eval:$MARK")
-  tools/port/scripts/pageshot.sh "$OUT" "$1" $(( t / 1000 + 6 )) "opt=nativemenu:1$2" "${steps[@]}"
+  tools/port/scripts/pageshot.sh "$OUT" "$1" $(( t / 1000 + 6 )) "${2:+opt=${2#,}}" "${steps[@]}"
   mv "$OUT/pageshot_$1.log" "$OUT/$p.log"
   grep -E '^mark|\[gmenu\]' "$OUT/$p.log" | head -20
 }

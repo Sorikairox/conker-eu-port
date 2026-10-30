@@ -262,7 +262,7 @@ async function connect(wsUrl, logFile0) {
       `${on && coverId ? ' (a tab in front of it)' : ''}, visibilityState ${await guest.ev('document.visibilityState')}, frame ${await guest.ev('__online.stats().frame')}`);
   };
   const t1 = Date.now(), speed = [];   // [seconds, stats per page] every 10 s
-  // P365 the in-session messages (game-style with the option nativemenu): KILL=NAME:AT closes that page's window AT s into
+  // P365 the in-session messages (game-style): KILL=NAME:AT closes that page's window AT s into
   // the match without a goodbye (as a crashed browser or a pulled cable): the others first wait for it, then drop it;
   // screenshots of the remaining pages 2, 5 and 12 s later (OUTDIR/<page>_kill_<s>s.png). DESYNCSHOTS=1: a screenshot
   // of every page 2 and 10 s after its page reports a desync (OUTDIR/<page>_desync_<s>s.png).

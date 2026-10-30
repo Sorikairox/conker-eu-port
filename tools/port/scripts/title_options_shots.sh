@@ -1,5 +1,5 @@
 #!/bin/bash
-# P364: screenshots of the title menu's "OPTIONS" rows (option nativemenu; title_slot_page / menu_mode_select_page in
+# P364: screenshots of the title menu's CUSTOMISATION (SETTINGS) rows (P364 "OPTIONS"; P369 renamed; title_slot_page / menu_mode_select_page in
 # conker/src_eu/game_eu_20B730.c, gameRows() in port/web/gmenu.js), driven by keys like a player (Skip intro on):
 #   slot  the save slot page GAME1 (empty): Space zooms in (NEW GAME + OPTIONS), S selects OPTIONS (NEW GAME faded),
 #         Space opens the game-style menu over the running title, ArrowDown / Enter open Picture, Esc / Esc close it
@@ -25,7 +25,7 @@ key() { echo "raw:$1:keydown:$2" "raw:$(($1 + 150)):keyup:$2"; }
 slot() {   # $1 = W,H  $2 = options  $3 = prefix
   local p=$3
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" "$1" 44 "app=game&opt=skipintro:1,nativemenu:1$2" \
+  tools/port/scripts/pageshot.sh "$OUT" "$1" 44 "app=game&opt=skipintro:1$2" \
     "raw:20000:eval:$JK" '23000:'"$p"'0_title' \
     $(key 23300 Space) '25800:'"$p"'1_slot_with_options' "raw:25900:eval:$MARK" \
     $(key 26200 KeyS) '27200:'"$p"'2_options_selected' \
@@ -40,7 +40,7 @@ slot() {   # $1 = W,H  $2 = options  $3 = prefix
 multi() {
   local p=$3
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" "$1" 46 "app=game&opt=skipintro:1,nativemenu:1$2" \
+  tools/port/scripts/pageshot.sh "$OUT" "$1" 46 "app=game&opt=skipintro:1$2" \
     "raw:12000:eval:$JK" "raw:12100:eval:$POKE" "raw:21000:eval:PK()" "raw:23000:eval:PK()" \
     $(key 23300 Space) "raw:24500:eval:PK()" '25800:'"$p"'0_used_slot_with_options' \
     $(key 26100 KeyS) '27100:'"$p"'1_used_slot_options_selected' \
@@ -56,7 +56,7 @@ multi() {
 settings() {   # P367: the game's own title OPTIONS page (title_press_start_page) with its fourth row SETTINGS
   local p=$3
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" "$1" 46 "app=game&opt=skipintro:1,nativemenu:1$2" \
+  tools/port/scripts/pageshot.sh "$OUT" "$1" 46 "app=game&opt=skipintro:1$2" \
     "raw:20000:eval:$JK" $(key 23300 KeyD) $(key 25300 KeyD) '27000:'"$p"'0_options_place' \
     $(key 27300 Space) '30000:'"$p"'1_options_page_with_settings' $(key 30300 KeyS) $(key 31300 KeyS) \
     '32300:'"$p"'2_screen_position_selected' $(key 32600 KeyS) '33000:'"$p"'3_cursor_sliding' '34000:'"$p"'4_settings_selected' \

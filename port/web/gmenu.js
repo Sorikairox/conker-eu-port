@@ -165,7 +165,7 @@ const GameFont = (() => {
       return true;
     } catch (e) { return false; }
   }
-  return { load, ready, measure, draw, wrap, glyphsOf, save, restore, get count() { return F.n; } };
+  return { load, ready, measure, draw, wrap, glyphsOf, save, restore, get count() { return F.n; }, get sig() { return F.sig; } };
 })();
 
 // ---------------------------------------------------------------- the menu model (one source: main.js OPTIONS)
@@ -177,7 +177,7 @@ const MenuModel = (() => {
     { id: 'gameplay', label: 'Gameplay', help: 'Cutscene skipping, intro, breath, tail spin, ledges, motion blur, detail.', keys: ['skipcut', 'skipintro', 'longbreath', 'longspin', 'ledgegrab', 'nodrunk', 'conkerlod'] },
     { id: 'controls', label: 'Controls', help: 'Keyboard keys and gamepad buttons, touch controls, toggles for crouch, R-Look and walk, swimming direction, free camera, rumble.', keys: ['togglecrouch', 'togglerlook', 'togglewalk', 'swiminvert', 'freecam', 'rumble'] },
     { id: 'sound', label: 'Sound', help: 'Master volume, music, sound effects and speech volumes.', keys: ['volmusic', 'volsfx', 'volspeech'] },
-    { id: 'tools', label: 'Tools', help: 'Online play, the input recorder, photo mode and this menu.', keys: ['online', 'recorder', 'photomode', 'nativemenu'] },
+    { id: 'tools', label: 'Tools', help: 'Online play, the input recorder and photo mode.', keys: ['online', 'recorder', 'photomode'] },
   ];
   const TOOL_KEYS = ['online', 'recorder', 'photomode'];
   const optByKey = (k) => OPTIONS.find((o) => o.key === k);
@@ -260,7 +260,7 @@ const GFace = {
 // arrows, red Start, grey shoulder caps, letters in the game's font with a hard drop shadow; the stick a dark ring with
 // a grey knob. Translucent at rest, bright while held. Only the look changes: each .tb div keeps its size, place and
 // pointer handlers (main.js initTouch), a canvas inside it (pointer-events: none) carries the face. body.gtouch switches
-// the page's CSS faces off. Option off or no font: the page's own faces, as before. Re-drawn when the option, the font,
+// the page's CSS faces off. No font yet: the page's own faces. Re-drawn when the font,
 // the Smooth font look or the screen's pixel ratio change (checked twice a second; nothing is drawn per frame).
 const GTouch = (() => {
   let sig = '';
@@ -299,7 +299,7 @@ const GTouch = (() => {
     GameFont.draw(ctx, label, cx, ty + (1 - sc) * 6, k, { scale: sc, color: '#fff', align: 'center', smooth });
   }
   function check() {
-    const on = typeof opt === 'function' && !!opt('nativemenu') && !$('touch').hidden && fontOk();
+    const on = !$('touch').hidden && fontOk();   // P369: the game-style menus are always on (no option)
     const dpr = Math.min(3, window.devicePixelRatio || 1), smooth = on && !!opt('smoothfont');
     const nsig = on ? `${smooth}:${dpr}:${GameFont.count}:${innerWidth}x${innerHeight}` : 'off';
     if (nsig === sig) return;
@@ -329,18 +329,17 @@ const GBoot = (() => {
   const cv = document.getElementById('gboot');
   const B = { raf: 0, t0: performance.now(), hits: [], sel: 0, mode: '' };
   const C = { title: 'rgb(255,50,50)', on: 'rgb(255,255,0)', text: '#ffffff', dim: 'rgb(170,170,170)' };
-  const wanted = () => typeof opt === 'function' && !!opt('nativemenu');
   const sha = () => (typeof romSha1 !== 'undefined' ? romSha1 : null);
   const fontOk = () => GameFont.ready() || (!!sha() && GameFont.restore(sha()));
   // which screen: 'ready' (the Press Start screen), 'menu' (the game-style menu before boot: only the backdrop), ''
   function mode() {
-    if (!wanted() || running || typeof romOk === 'undefined' || !romOk || !fontOk()) return '';
+    if (running || typeof romOk === 'undefined' || !romOk || !fontOk()) return '';
     if (window.GMenu && GMenu.isOpen) return 'menu';
     return !$('ready').hidden ? 'ready' : '';
   }
   function tick() {
     const m = mode();
-    document.body.classList.toggle('gboot', wanted());
+    document.body.classList.add('gboot');   // P369: always (was: option nativemenu)
     document.body.classList.toggle('gbootfont', m === 'ready');
     if (m !== B.mode) { B.mode = m; cv.hidden = !m; if (m) { B.t0 = performance.now(); log(`[gboot] ${m === 'ready' ? 'Press Start' : 'menu backdrop'} in the game's style`); } }
     if (m && !B.raf) B.raf = requestAnimationFrame(draw);
@@ -446,7 +445,7 @@ const GSound = (() => {
     }, 25);
   }
   function play(kind) {
-    if (!KIND[kind] || !opt('nativemenu')) return;
+    if (!KIND[kind]) return;
     const why = silentWhy();
     if (why) { if (S.n.silent++ < 3) log(`[gsound] silent (${why}): ${kind}`); return; }
     if (!(window.portVolume > 0)) { S.n.muted++; return; }   // ?mute=1 / master volume 0: nothing is decoded or played
@@ -486,7 +485,7 @@ const GMenu = (() => {
   const U = { open: false, t0: 0, closing: 0, stack: [], hits: [], raf: 0, paused: false,
     prev: 0, repeatAt: 0, held: 0, helpPage: 0, helpAt: 0, helpSel: '', homePrev: false, mx: -1, my: -1,
     cap: null, note: '', noteAt: 0, eh: false, ehT: 0, ehUsed: false, from: '', row: -1,
-    pre: false, saved: false, busy: '', err: '', errAt: 0, pick: { code: '', cx: 0, cy: 0 } };   // P365: pre = opened before boot; busy / err / pick: the ONLINE pages
+    pre: false, saved: false, keepAt: 0, keepSig: '', busy: '', err: '', errAt: 0, pick: { code: '', cx: 0, cy: 0 } };   // P365: pre = opened before boot; busy / err / pick: the ONLINE pages
   const cv = document.getElementById('gmenu');
   const ROW = 15, ROWS = 8, TOP = 46, X0 = 34, X1 = 286;   // row spacing / visible rows / list top / label x / value right edge (units)
   // P363 / P364: opened from an OPTIONS row in the game's own menus: the last row of the main page goes back there
@@ -495,7 +494,6 @@ const GMenu = (() => {
     pre: ['Back to the start screen', 'Close this menu (B, Esc or Start on this line); then Start boots the game.'] };
   const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
   const smooth = () => !!opt('smoothfont');
-  const wanted = () => !!opt('nativemenu');
   const page = () => U.stack[U.stack.length - 1];
 
   // pages: main (preset, sections, saves, fullscreen, photo / online / record, tools, page menu, back to game), one per
@@ -568,7 +566,7 @@ const GMenu = (() => {
     if (p.id === 'pick') return [];
     if (p.id === 'keys') return bindItems('key');
     if (p.id === 'pad') return [padsItem()].concat(bindItems('pad'));   // P368: the connected pads (were: the drawer's Controls panel)
-    const backRow = { kind: 'action', label: 'Back', help: 'Back to the options.', act: () => back() };
+    const backRow = { kind: 'action', label: 'Back', help: 'Back to the customisation settings.', act: () => back() };
     if (p.id === 'saves') return [
       { kind: 'action', label: 'Export save', help: 'Download your save as a file (conker-eu-slot0.eep) to keep it or move it to another browser.', act: () => $('eep-export').click() },
       { kind: 'action', label: 'Import save', help: 'Replace this browser\'s save with a .eep file (the game restarts to read it). ' + GESTURE.replace('this', 'the file picker'),
@@ -591,7 +589,7 @@ const GMenu = (() => {
     ];
     return pre.concat(s.items, [backRow]);
   }
-  const TITLES = { main: 'Options', keys: 'Keyboard keys', pad: 'Gamepad buttons', saves: 'Saves', online: 'Online', pick: 'Join room' };
+  const TITLES = { main: 'Customisation settings', keys: 'Keyboard keys', pad: 'Gamepad buttons', saves: 'Saves', online: 'Online', pick: 'Join room' };
   const titleOf = (p) => TITLES[p.id] || MenuModel.sections().find((x) => x.id === p.id).label;
   // a short message in the help box (save export / import results, gesture hints)
   function note(s) { U.note = String(s || ''); U.noteAt = performance.now(); }
@@ -654,8 +652,8 @@ const GMenu = (() => {
   }
   function fail(e) { U.err = String((e && e.message) || e || ''); U.errAt = performance.now(); U.helpSel = ''; snd('error'); log(`[gmenu] online: ${U.err}`); }
   async function reloadInto(step) {   // during a game: restart the page into the ONLINE page's step
-    if (!GameFont.save(romSha1)) { note('This browser keeps no data for this page: reload it, then open the menu (Esc) before pressing Start.'); return; }
-    try { sessionStorage.setItem('gmenu.online', step); } catch (e) { note('This browser keeps no data for this page: reload it, then open the menu (Esc) before pressing Start.'); return; }
+    if (!GameFont.save(romSha1)) { note('This browser keeps no data for this page: reload it, then open the customisation settings (Esc) before pressing Start.'); return; }
+    try { sessionStorage.setItem('gmenu.online', step); } catch (e) { note('This browser keeps no data for this page: reload it, then open the customisation settings (Esc) before pressing Start.'); return; }
     U.busy = 'reload'; note('Restarting the game for the online match…');
     log(`[gmenu] online: reloading the page into the ONLINE page (${step})`);
     if (typeof eepTimer !== 'undefined' && eepTimer) { clearTimeout(eepTimer); try { await persistEeprom(); } catch (e) { /* logged */ } }   // a save still waiting to be written
@@ -707,7 +705,7 @@ const GMenu = (() => {
       } };
   }
   function onlineItems() {
-    const st = onlineState(), t = NT(), backRow = { kind: 'action', label: 'Back', help: 'Back to the options (a room stays open).', act: () => back() };
+    const st = onlineState(), t = NT(), backRow = { kind: 'action', label: 'Back', help: 'Back to the customisation settings (a room stays open).', act: () => back() };
     const busy = (what) => () => (U.busy === what ? 'One moment…' : U.busy ? 'One moment…' : '');
     if (st === 'setup') {
       const ingame = !!running;
@@ -860,7 +858,7 @@ const GMenu = (() => {
   // closes it. The keyboard's Photo key keeps its own behaviour.
   const HOLD_MS = 500;
   function entry(d, raw, now) {
-    const eb = padMap.PHOTO, eh = eb !== undefined && raw(eb), on = wanted() && photo.state !== 2;
+    const eb = padMap.PHOTO, eh = eb !== undefined && raw(eb), on = photo.state !== 2;
     if (eh && !U.eh) U.ehT = now;
     if (U.open) { if (eh && !U.eh && !U.ehUsed && !U.cap) { U.ehUsed = true; snd('back'); close(); } }
     else if (on && eh && !U.ehUsed && now - U.ehT >= HOLD_MS) { U.ehUsed = true; if (open('hold')) log('[gmenu] opened by holding the pad\'s photo button'); }
@@ -872,7 +870,7 @@ const GMenu = (() => {
   }
   // P363: the "OPTIONS" row in the game's own pause menu (game_pause_update, game_eu_20B730.c); P364: the same row on
   // the title menu's save slot pages (title_slot_page) and MULTI mode pages (menu_mode_select_page). The page switches
-  // the rows on (port_set_gmenu_row) only while this menu's option is on and the game is local: never online, while an
+  // the rows on (port_set_gmenu_row) only while the game is local (P369: no option any more): never online, while an
   // online session is being set up (a room / invite exists: PortNet.t.role), while recording or replaying, or under
   // ?netdet (the menus' state is hashed there; the C side checks the same again). Choosing a row leaves a request
   // (port_gmenu_take_request: 1 = pause menu, 2 = title menu) that opens this menu over the game's own menu; the A
@@ -880,15 +878,27 @@ const GMenu = (() => {
   const netBusy = () => !!(window.PortNet && PortNet.t && PortNet.t.role);
   function gameRows() {
     if (typeof M === 'undefined' || !M || !M._port_set_gmenu_row) return;
-    const on = wanted() && running === 'game' && !netCfg && !recCfg && !NETDET && !netBusy() ? 1 : 0;
-    if (on !== U.row) { U.row = on; M._port_set_gmenu_row(on); log(`[gmenu] game menu OPTIONS rows ${on ? 'on' : 'off'}`); }
+    const on = running === 'game' && !netCfg && !recCfg && !NETDET && !netBusy() ? 1 : 0;
+    if (on !== U.row) { U.row = on; M._port_set_gmenu_row(on); log(`[gmenu] game menu customisation rows ${on ? 'on' : 'off'}`); }
     const req = M._port_gmenu_take_request();
     if (req && on && !U.open) {
       const how = req === 2 ? 'title' : 'pause';
-      if (open(how)) log(`[gmenu] opened from the ${how} menu's OPTIONS row`);
+      if (open(how)) log(`[gmenu] opened from the ${how} menu's customisation row`);
     }
   }
+  // P369: keep the game's font for this ROM as soon as the game has booted once (P365 kept it on the first menu open), so
+  // the customisation settings open on the Press Start screen of the next visit too, even for a first-time player who
+  // never opened them. Checked once a second while the game runs; saved when the font reads the same twice in a row
+  // (fully decoded), once per page load.
+  function fontKeep(now) {
+    if (U.saved || typeof running === 'undefined' || running !== 'game' || now < U.keepAt) return;
+    U.keepAt = now + 1000;
+    if (!GameFont.load()) { U.keepSig = ''; return; }
+    if (GameFont.sig === U.keepSig && (U.saved = GameFont.save(romSha1))) log('[gmenu] game font kept for this ROM (the customisation settings can open before boot from now on)');
+    U.keepSig = GameFont.sig;
+  }
   function poll(d) {
+    fontKeep(performance.now());
     gameRows();
     if (U.open && U.pre && running) close();   // P365: the game boots (an online match starts): the pages are done
     pendingOnline();
@@ -896,7 +906,7 @@ const GMenu = (() => {
     const raw = (i) => !!(gp && gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > 0.5));
     const now = performance.now();
     const home = raw(16);
-    if (home && !U.homePrev && !U.cap) { U.homePrev = true; if (U.open) { snd('back'); close(); } else if (wanted()) open(); return U.open; }
+    if (home && !U.homePrev && !U.cap) { U.homePrev = true; if (U.open) { snd('back'); close(); } else open(); return U.open; }
     U.homePrev = home;
     entry(d, raw, now);
     if (!U.open) return false;
@@ -1159,7 +1169,7 @@ const GMenu = (() => {
   cv.addEventListener('wheel', (e) => { e.preventDefault(); if (page().id === 'pick') pickMove(0, e.deltaY > 0 ? 1 : -1); else moveSel(e.deltaY > 0 ? 1 : -1); }, { passive: false });
 
   // test aid ?gmenuopen=S: open the menu S seconds after the game started (page-only: nothing hashed changes; netpair
-  // GUESTQ='&opt=nativemenu:1&gmenuopen=40' keeps it open on a guest during an online session)
+  // GUESTQ='&gmenuopen=40' keeps it open on a guest during an online session)
   if (Q.get('gmenuopen')) {
     const at = performance.now() + 1000 * +Q.get('gmenuopen');
     const tryOpen = () => { if (performance.now() >= at && open()) log('[gmenu] opened by ?gmenuopen'); else setTimeout(tryOpen, 500); };
@@ -1168,7 +1178,7 @@ const GMenu = (() => {
 
   // test aid ?gmenupad=S (P362): S seconds after load a fake standard gamepad holds Back (the photo button) 40 frames
   // (the hold entry opens the menu), goes to Controls > Gamepad buttons, back twice, and closes the menu with a Back
-  // press; each step is logged. netpair GUESTQ='&opt=nativemenu:1&gmenupad=70' runs it on a guest online (page-only:
+  // press; each step is logged. netpair GUESTQ='&gmenupad=70' runs it on a guest online (page-only:
   // with ?netscript the lockstep input comes from the pad scripts, so the session proves nothing hashed changed).
   if (Q.get('gmenupad')) setTimeout(() => {
     const fp = { id: 'gmenupad test pad', index: 0, connected: true, mapping: 'standard', axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 })) };
@@ -1220,13 +1230,13 @@ const GMenu = (() => {
   // P368: would open() work now (the game runs, or before boot with a good ROM, and the font is there)? main.js makes the
   // page drawer the developer menu only then (else the drawer stays the whole menu: the fallback)
   const available = () => typeof running !== 'undefined' && (running ? running === 'game' : romOk) && photo.state !== 2 && fontOk();
-  return { open, close, back, poll, key, wanted, note, available, get isOpen() { return U.open; },
+  return { open, close, back, poll, key, note, available, get isOpen() { return U.open; },
     state: () => ({ open: U.open, pre: U.pre, from: U.from, page: U.open ? page().id : null, sel: U.open ? page().sel : -1, item: U.open ? (itemsOf(page())[page().sel] || {}).label : null,
       online: onlineState(), code: NT() && NT().room ? NT().room.code : '', typed: U.pick.code, cursor: pickCell(U.pick.cx, U.pick.cy), joined: joinedCount(), busy: U.busy, err: U.err }) };
 })();
 window.GMenu = GMenu;
 
-// ---------------------------------------------------------------- P365 online messages over the game (option nativemenu)
+// ---------------------------------------------------------------- P365 online messages over the game
 // The lockstep session's messages in the game's font instead of page text: "waiting for player 2…" while the game waits
 // for a player's input (main.js's tick handler decides when, as for the page's #netwait), a player who left, the desync
 // report, and other connection problems during the session. A canvas over the picture that takes no input; drawn only
@@ -1235,7 +1245,8 @@ const GNet = (() => {
   const cv = document.getElementById('gnet');
   const S = { wait: '', box: null, raf: 0, desync: '' };
   const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', dim: 'rgb(170,170,170)' };
-  const wanted = () => !!opt('nativemenu');
+  // P369: the game-style menus are always on; GNet draws whenever the game's font is at hand (else the page's #netwait)
+  const wanted = () => GameFont.ready() || GameFont.load();
   const kick = () => { if (!S.raf) S.raf = requestAnimationFrame(draw); };
   function wait(t) { if (t !== S.wait) { S.wait = t; kick(); } }
   function show(title, text, ms, color) { S.box = { title, text, until: performance.now() + ms, color: color || C.title, t0: performance.now() }; kick(); snd('error'); log(`[gnet] ${title}: ${text}`); }   // P367: the error sound (silent online: GSound)
@@ -1279,7 +1290,7 @@ const GNet = (() => {
     });
     netEvents.desync.push((d) => {
       if (!wanted() || S.desync) return;
-      S.desync = `DESYNC AT RETRACE ${d.frame}: OPTIONS > ONLINE`;
+      S.desync = `DESYNC AT RETRACE ${d.frame}: CUSTOMISATION SETTINGS > ONLINE`;
       show('DESYNC', `At retrace ${d.frame} this game and player ${(d.ch || 0) + 1}'s no longer match: they show different things from here. Please report it (the page menu's Debug log has the details).`, 15000);
     });
     netEvents.status.push((s, cls) => {   // other problems during the session (before it, the ONLINE page shows them)
@@ -1291,11 +1302,11 @@ const GNet = (() => {
 })();
 window.GNet = GNet;
 
-// ---------------------------------------------------------------- P366 photo mode in the game's style (option nativemenu)
+// ---------------------------------------------------------------- P366 photo mode in the game's style
 // With the game-style menu on, photo mode's HUD (bottom left), its Pose & Outfit panel (right) and its messages are drawn
 // on the canvas #gphoto in the game's font, with GMenu's look (dark bands, the red title, the selected row on a red band
 // with a pulsing ">", ON / values in the game's yellow, the footer's button faces) instead of the page's boxes (#photo,
-// #photo-look and #photo-toast hide: body.gphoto). The option off (or no font yet): photo mode is exactly as before.
+// #photo-look and #photo-toast hide: body.gphoto). No font yet: the page's own photo boxes (P369: no option any more).
 //
 // Same choices, same path: every row changes main.js's `look` (P358) and calls lookChanged() / lookSave() like the
 // page panel's inputs did, so pc_photo.c gets the same port_photo_look_set calls; the page panel is still built (hidden)
@@ -1317,9 +1328,8 @@ const GPhoto = (() => {
   const S = { shown: false, focus: false, hidden: false, hidAt: 0, stack: [], hits: [], raf: 0, prevBits: -1, repeatAt: 0, holdT: 0,
     prevNav: true, prevHide: true, toast: '', toastAt: 0, helpSig: '', helpAt: 0, helpPage: 0, hudAt: 0, hudPage: 0, cache: null,
     rowsVis: 12, drag: null, downHit: false, keyHold: { code: '', t: 0 }, info: '', infoAt: 0, t0: 0 };
-  const wanted = () => !!opt('nativemenu');
   const fontOk = () => GameFont.ready() || GameFont.load();
-  const active = () => S.shown && wanted() && photo.state === 2 && fontOk();
+  const active = () => S.shown && photo.state === 2 && fontOk();
   const page = () => S.stack[S.stack.length - 1];
   const smooth = () => !!opt('smoothfont');
   const MASK = N64.DU | N64.DD | N64.DL | N64.DR | N64.A | N64.B;
@@ -1867,14 +1877,14 @@ const GPhoto = (() => {
       S.shown = true; S.focus = false; S.hidden = false; S.stack = [{ id: 'main', sel: 1, top: 0 }]; S.cache = null;
       S.prevNav = S.prevHide = true; S.prevBits = -1; S.t0 = performance.now(); S.toast = ''; S.drag = null;
       if (!S.raf) S.raf = requestAnimationFrame(frame);
-      if (wanted()) log('[gphoto] game-style photo mode');
+      log('[gphoto] game-style photo mode');
     } else { S.shown = false; S.focus = false; document.body.classList.remove('gphoto'); cv.hidden = true; }
   }
   // a message: true = shown here (photo mode in the game's style), else the page shows it (GNet, in the game's font,
   // when the game-style menu is on and photo mode did not start)
   function toast(text) {
     if (active()) { S.toast = String(text); S.toastAt = performance.now(); snd(/^saved /.test(S.toast) ? 'choose' : 'error'); log(`[gphoto] ${text}`); return true; }
-    if (wanted() && window.GNet && fontOk() && photo.state !== 2) { GNet.show('PHOTO MODE', String(text), 3500, C.on); return true; }
+    if (window.GNet && fontOk() && photo.state !== 2) { GNet.show('PHOTO MODE', String(text), 3500, C.on); return true; }
     return false;
   }
   window.__gphoto = {   // test aid (tools/port/scripts/photo_menu_shots.sh)
@@ -1883,7 +1893,7 @@ const GPhoto = (() => {
         item: l ? (l.opts[p.sel] || [])[1] : it && it.label, look: { anim: look.anim, frame: look.frame, play: look.play, model: look.model, items: look.items, attHide: look.attHide, face: look.face, dlHide: look.dlHide, dlShow: look.dlShow } }; },
     go: (id) => { setFocus(true); go(id); },
   };
-  return { show, input, key, toast, active, wanted };
+  return { show, input, key, toast, active };
 })();
 window.GPhoto = GPhoto;
 window.GameFont = GameFont;

@@ -1,5 +1,5 @@
 #!/bin/bash
-# P361: screenshots of the game-style menu (option nativemenu, port/web/gmenu.js) driven like a player would:
+# P361: screenshots of the game-style menu (P369: the customisation settings, always on; port/web/gmenu.js) driven like a player would:
 #   title  1280x720: Esc (JS key event: a CDP Escape hides the headless tab, P357) opens it over the title menu, real CDP
 #          arrow / Enter keys move, open a section and change an option, Esc goes back and closes.
 #   play   1920x1080 widescreen + smooth font, ?warp=29 gameplay: a fake gamepad (navigator.getGamepads) opens it with
@@ -22,7 +22,7 @@ ST="console.log('gmstate ' + JSON.stringify(GMenu.state()))"
 key() { echo "raw:$1:keydown:$2" "raw:$(($1 + 120)):keyup:$2"; }
 if [ "$WHICH" = title ] || [ "$WHICH" = all ]; then
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" 1280,720 40 'app=game&opt=skipintro:1,nativemenu:1' \
+  tools/port/scripts/pageshot.sh "$OUT" 1280,720 40 'app=game&opt=skipintro:1' \
     "raw:20000:eval:$JK" '23000:t0_title' "23700:t1_open:JK('Escape')" \
     $(key 24200 ArrowDown) $(key 24500 ArrowDown) '25400:t2_sel_hud' \
     $(key 25700 Enter) '26600:t3_hud_page' $(key 26900 ArrowDown) $(key 27200 ArrowRight) "raw:27500:eval:$ST" '28200:t4_hud_health_on' \
@@ -34,7 +34,7 @@ if [ "$WHICH" = title ] || [ "$WHICH" = all ]; then
 fi
 if [ "$WHICH" = play ] || [ "$WHICH" = all ]; then
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" 1920,1080 36 'app=game&warp=29&opt=nativemenu:1,widescreen:1,fullres:1,smoothfont:1,hires2d:1' \
+  tools/port/scripts/pageshot.sh "$OUT" 1920,1080 36 'app=game&warp=29&opt=widescreen:1,fullres:1,smoothfont:1,hires2d:1' \
     "raw:12000:eval:$FP" '24000:p0_play' "raw:24200:eval:PB(16)" '25000:p1_open_pad' \
     "raw:25200:eval:PB(13)" "raw:25600:eval:PB(0)" '26400:p2_picture_page' "raw:26500:eval:$ST" \
     "raw:26700:eval:PB(13)" "raw:27100:eval:PB(13)" "raw:27500:eval:PB(13)" "raw:27900:eval:PB(13)" '28800:p3_smoothfont_row' \
@@ -62,7 +62,7 @@ if [ "$WHICH" = keys ] || [ "$WHICH" = all ]; then
   # tab: the page paused itself)
   w0=$((t + 1000)); t0=$((w0 + 7000))
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" 1280,720 $(((t0 + 9000) / 1000)) 'app=game&warp=29&p205obj=50&opt=nativemenu:1' \
+  tools/port/scripts/pageshot.sh "$OUT" 1280,720 $(((t0 + 9000) / 1000)) 'app=game&warp=29&p205obj=50' \
     "raw:12000:eval:$JK" '22000:k0_play' "raw:22500:eval:JK('Escape')" '23300:k1_open_main' "${steps[@]}" \
     "raw:$((w0 - 100)):eval:console.log('mark hold W')" "raw:$w0:eval:JKD('KeyW')" "raw:$((w0 + 6000)):eval:JKU('KeyW')" "$((w0 + 6500)):k10_after_W" \
     "raw:$((t0 - 100)):eval:console.log('mark hold T')" "raw:$t0:eval:JKD('KeyT')" "raw:$((t0 + 6000)):eval:JKU('KeyT')" "$((t0 + 6500)):k11_after_T" \
@@ -86,7 +86,7 @@ if [ "$WHICH" = pad ] || [ "$WHICH" = all ]; then
   b 8 6 2500; s s11_photo_by_tap; steps+=("raw:$t:eval:$MARK")
   b 9 "" 1500; s s12_photo_left; steps+=("raw:$t:eval:$MARK")
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" 1920,1080 $(((t + 3000) / 1000)) 'app=game&warp=29&opt=nativemenu:1,photomode:1,widescreen:1,fullres:1,smoothfont:1,hires2d:1' \
+  tools/port/scripts/pageshot.sh "$OUT" 1920,1080 $(((t + 3000) / 1000)) 'app=game&warp=29&opt=photomode:1,widescreen:1,fullres:1,smoothfont:1,hires2d:1' \
     "raw:12000:eval:$FH" '22000:s0_play' "raw:22200:eval:PH(8, 40)" "raw:22500:eval:$MARK" '23500:s1_open_by_hold' "raw:23600:eval:$MARK" "${steps[@]}"
   mv "$OUT/pageshot_1920,1080.log" "$OUT/pad.log"
 fi

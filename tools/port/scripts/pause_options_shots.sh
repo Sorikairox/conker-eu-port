@@ -1,5 +1,5 @@
 #!/bin/bash
-# P363: screenshots of the game's own pause menu with the port's "OPTIONS" row (option nativemenu; game_pause_update in
+# P363: screenshots of the game's own pause menu with the port's CUSTOMISATION SETTINGS row (P363 "OPTIONS"; P369 renamed; game_pause_update in
 # conker/src_eu/game_eu_20B730.c, gameRows() in port/web/gmenu.js), driven by keys like a player:
 #   Start (Enter) pauses, stick down (S) selects OPTIONS, A (Space) opens the game-style menu over the game's pause,
 #   arrows / Enter move in it, Esc goes back and closes it (back on the pause menu, OPTIONS still selected), stick up
@@ -15,7 +15,7 @@ key() { echo "raw:$1:keydown:$2" "raw:$(($1 + 150)):keyup:$2"; }
 run() {   # $1 = W,H  $2 = options  $3 = prefix
   local p=$3
   # shellcheck disable=SC2046
-  tools/port/scripts/pageshot.sh "$OUT" "$1" 36 "app=game&warp=29&p205obj=50&opt=nativemenu:1$2" \
+  tools/port/scripts/pageshot.sh "$OUT" "$1" 36 "app=game&warp=29&p205obj=50&opt=skipintro:0$2" \
     "raw:12000:eval:$JK" '19500:'"$p"'0_play' \
     $(key 20000 Enter) '21800:'"$p"'1_pause_with_options' "raw:21900:eval:$MARK" \
     $(key 22200 KeyS) '23200:'"$p"'2_options_selected' \

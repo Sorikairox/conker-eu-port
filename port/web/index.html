@@ -228,7 +228,7 @@
   body.touch #stage { touch-action: none; }
   body.touch #keyhint { display: none; }
   body.drawer #touch { display: none; }   /* P360: no stray game input while the menu is open */
-  /* P361 option "Game-style menu": the options drawn over the picture in the game's font (gmenu.js); while it is open the
+  /* P361 game-style menu (P369: always on, called "Customisation settings"): the options drawn over the picture in the game's font (gmenu.js); while it is open the
      PAUSED label, the corner button and the touch controls hide (the menu has the pad and takes taps itself) */
   #screen canvas#gmenu { z-index: 4; touch-action: none; }
   #gmenu[hidden] { display: none !important; }
@@ -244,7 +244,7 @@
   #screen canvas#gphoto { z-index: 3; pointer-events: none; }
   #gphoto[hidden] { display: none !important; }
   body.gphoto #photo, body.gphoto #photo-look, body.gphoto #photo-toast, body.gphoto #menu-btn { display: none !important; }
-  /* P368: the boot screens with the game-style menu on (gmenu.js GBoot). body.gboot: the option is on; the page's own
+  /* P368: the boot screens in the game's style (gmenu.js GBoot). body.gboot: always since P369; the page's own
      first-run screens (no ROM yet, or no game font kept for it) are clean and dark, and a wrong file says so in the drop
      zone. body.gbootfont: the Press Start screen is drawn on #gboot in the game's font over the title art; #ready stays
      over the window only to take clicks / taps (its own elements hide) */
@@ -276,7 +276,7 @@
                          box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .5), 0 0 0 2px rgba(0, 0, 0, .45); }
   body.gtouch #tk-knob { background: radial-gradient(circle at 40% 35%, rgb(190, 190, 190), rgb(110, 110, 110) 55%, rgb(60, 60, 60));
                          border: 2px solid rgba(0, 0, 0, .6); opacity: .75; }
-  /* P368: with the game-style menu on (and able to open) the drawer is the developer menu: Pause, the status line, the
+  /* P368: while the customisation settings can open the drawer is the developer menu: Pause, the status line, the
      debug console, the recorder's panel and the manual online codes; everything a player needs is in the game-style
      menu. "All page controls" (#drawer-all) shows the rest again until the drawer closes */
   #drawer .dev { display: none; }
@@ -314,7 +314,7 @@
       <canvas id="gboot" hidden aria-hidden="true"></canvas>
       <canvas id="gphoto" hidden aria-label="Photo mode"></canvas>
       <canvas id="gnet" hidden aria-hidden="true"></canvas>
-      <canvas id="gmenu" hidden aria-label="Options menu"></canvas>
+      <canvas id="gmenu" hidden aria-label="Customisation settings"></canvas>
     </div>
   </div>
 <div id="drop" class="overlay fullover">
@@ -325,21 +325,21 @@
   <p id="drop-err" hidden></p>
   <p class="private">Your ROM never leaves this browser: it is read locally and kept only in this browser's storage (IndexedDB).
     Nothing is uploaded.</p>
-  <p>Esc or the ☰ button: options, controls, saves, online.</p>
+  <p>Esc or the ☰ button: customisation settings (options, controls, saves, online).</p>
 </div>
 <div id="ready" class="overlay fullover" hidden>
   <h1 class="gtitle">Conker's Bad Fur Day</h1>
   <button id="ready-start" class="primary">Press Start</button>
-  <p>Enter, a click or the gamepad's Start. Esc or the ☰ button (top left) opens the menu: options, controls, saves, online, photo mode.</p>
+  <p>Enter, a click or the gamepad's Start. Esc or the ☰ button (top left) opens the customisation settings: options, controls, saves, online, photo mode.</p>
   <div class="row"><button id="ready-rom" title="Pick another ROM file">Another ROM…</button></div>
 </div>
 <div id="toast" class="out"></div>
-<button id="menu-btn" title="Menu: options, controls, saves, online (Esc)" aria-label="Menu" aria-expanded="false">☰</button>
+<button id="menu-btn" title="Customisation settings: options, controls, saves, online (Esc)" aria-label="Customisation settings" aria-expanded="false">☰</button>
 <div id="drawer-shade" hidden></div>
 <div id="drawer" role="dialog" aria-label="Menu">
   <header>
     <h1>Conker <small class="all">browser port · menu</small><small class="dev">browser port · developer tools</small></h1>
-    <button id="drawer-all" class="dev" title="Show every page control here again (the game-style menu has them all)">All page controls</button>
+    <button id="drawer-all" class="dev" title="Show every page control here again (the customisation settings have them all)">All page controls</button>
     <button id="drawer-close" title="Close the menu and go back to the game (Esc)">Back to game ✕</button>
     <div class="bar">
       <button id="start" class="primary" disabled>Start</button>
