@@ -490,6 +490,15 @@ flash, controller pak).
     quarter of its width): position added text at a computed x and check the picture.
 39. Menu labels that look like text can be pictures (Conker's pause items are text ids drawn as images): a row added in
     the bitmap font can match their colours and spacing, not their frames; say so instead of faking it.
+40. A game's text path and picture path can map the same coordinates to different screen places (Conker: a text node
+    lands ~1.1 x / ~1.125 x further from the corner than a picture node; P363's row sat 12 units off centre). Measure
+    both on a screenshot and place added text by the pictures.
+41. Port-only state in a shared expression (`(sel == 0 && lit) + id`) can change the compiler's register use in the
+    non-port build: difftest flagged the garbage a3 of a varargs call. Keep the original line under `#else` so the
+    non-port code is unchanged, and difftest every function you touched with --self.
+42. A picture drawn through a text queue may ignore the text colour (Conker forces icon nodes to white: only alpha
+    survives), and a lit picture may have no dark twin (NEW GAME 0x31; 0x30 is BUNKER): check the picture id on screen
+    before using it, dim with alpha instead.
 
 ---
 

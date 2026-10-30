@@ -88,6 +88,35 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P364 (port-web, 2026-10-30): "OPTIONS" row in the title menu (save slot pages + MULTI pages; native menus step 4)
+- e0c9b622 (option `nativemenu`, still default off): title_slot_page (GAME1..3, `#ifdef PORT`) draws OPTIONS under NEW
+  GAME (empty slot) / under PLAY / ERASE (used slot), not during the erase question; menu_mode_select_page (MULTI, each
+  mode group's page) draws it under SET-UP. Stick down / up enter / leave it (MULTI: only from SET-UP, where up / down
+  did nothing); while selected the game's item is unlit (PLAY / ERASE / SET-UP dark pictures; NEW GAME has no dark
+  picture, so it is drawn at half alpha); A / START -> port_gmenu_request_title() (request 2) + sfx 0x500 and the accept
+  bit is cleared from rec->input (no game start, no camera zoom); B zooms out as usual; selection forgotten while the page
+  is not fully shown. State = function-local statics; shared helper port_menu_options_row_draw after game_pause_update.
+  Page: gameRows() (was pauseRow) also needs no online session being set up (PortNet.t.role); open('title') = no page
+  pause (title music / animation run on, pad 1 idle, A masked, held buttons masked after close), last row "Back to
+  title". Renamed struct_eu_BE818 -> SaveSlotSummary (playTime, score, stamp, resumeLevel, progressCount, eepArea).
+- Placement finding: a text-queue node lands ~1.1 x right / ~1.125 x down of a picture node with the same numbers, so
+  the helper takes picture coordinates and divides (flag 0xC0 = no g_hud_scale + shadow). P363's pause row moved with it:
+  now centred under PAUSED (it sat ~12 units right) and a bit closer to the items.
+- 18252ed0 tools/port/scripts/title_options_shots.sh OUTDIR [720|1080|both] [slot|multi|all]; the multi flow pokes the
+  three slot summaries in the mirror (0x10800000 + 0xBE818, 16 bytes each) to show a used slot (nothing is saved).
+- Evidence port_work/p364: final/ws0..ws8 (1280x720 slot: title, slot with OPTIONS, selected, menu over the title,
+  Picture page, back on OPTIONS, NEW GAME selected, new game started, opening), final/wm0..wm7 (used slot with OPTIONS,
+  selected, MULTI page with OPTIONS, SET-UP, OPTIONS selected, menu, closed, SET-UP again), final/fs*, fm* (same at
+  1920x1080 widescreen + fullres + smooth + hi-res 2D); pause/w*, f* (P363 flow with the moved row: resumed and walked);
+  e2e_off / e2e_on (p357 7700 IDENTICAL both), net_ui_row (netpair UI=1, nativemenu on both peers: 8423 IDENTICAL, rows
+  never on). difftest --self EQUIV: title_slot_page, menu_mode_select_page, game_pause_update, save_slots_reset,
+  frontend_menu_draw. check GREEN. Deployed.
+- Not done: the game's own title OPTIONS page (title_press_start_page = titlePage 1, settings_list_draw mask 0x02200200:
+  language / info / screen position) has no port row: settings_list_draw only knows the 28 g_settings items; a row there
+  would be the most native spot (bigger job). Chapter page (titlePage 2) has no row. Attract mode was not checked with
+  the menu open for a long time (an idle pad on the title may start the demo as on the N64).
+- P365 needs: see NATIVE_MENUS.md section 7 "Next" (proposed: P365 Online overlay, P366 photo mode restyle, P367 menu
+  sounds + game OPTIONS page row, P368 cleanup / default decision).
 ### P363 (port-web, 2026-10-30): "OPTIONS" row in the game's own pause menu (native menus step 3)
 - a58c5a00 (option `nativemenu`, still default off): game_pause_update (game_eu_20B730.c, `#ifdef PORT`) draws a row
   OPTIONS under the item row (story: centred under PAUSED below QUIT / CONT..; MP: under CONTINUE) with font 0 through

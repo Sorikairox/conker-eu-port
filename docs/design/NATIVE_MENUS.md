@@ -218,11 +218,30 @@ single source of truth (`OPTIONS`).
     check (!port_net_on && !port_rec_mode && !port_net_det()). Off = N64: e2e p357 IDENTICAL off and on, netpair UI=1
     with the option on both peers 7923 retraces IDENTICAL (row never on).
   - Tests: tools/port/scripts/pause_options_shots.sh (keys; 1280x720 and 1920x1080 widescreen); evidence port_work/p363.
-- **Next: P364** (section 6 item 4): a "PORT OPTIONS" entry in the title flow. P363 findings: the title menu is
-  g_menu_state's menu 0 (titlePage 1 press start, 2 chapter select, 3..5 save slots: title_slot_page) and menu 1
-  (mainPage 0 mode select, 2 = main_settings_page = the multiplayer settings list of the chosen mode, 1 / 3 / 4 / 5 the
-  other MP pages); the dispatch is the switch in the menu update before title_press_start_page (game_eu_20B730.c ~line
-  780). Cheapest native entry: one more font-0 row on title_slot_page (story) or under the mode list (MULTI) using the
-  same port_gmenu_row_shown() / port_gmenu_request_open() pair, the page opening GMenu with open('pause')-style rules
-  (the title has no game pause: decide whether the page pauses). A real C-drawn options page (settings_list_draw with
-  port items) is bigger: settings_list_draw takes an item mask over the game's own 28 g_settings entries.
+- **P364 done** (commits e0c9b622 feature, 18252ed0 test script; still option `nativemenu`, default off):
+  - Title menu rows, drawn and gated like P363's: **save slot pages** (title_slot_page, GAME1..3: under NEW GAME for an
+    empty slot, under PLAY / ERASE for a used one; hidden during the erase question) and **MULTI mode pages**
+    (menu_mode_select_page: under SET-UP, reached from SET-UP). Both are reachable by the stick like the game's own items,
+    so both were done. Choosing one sends request 2; the page opens GMenu with open('title'): no page pause (title music,
+    animation and 3D keep running, pad 1 idle), A masked, "Back to title"; closing returns to the page with OPTIONS
+    selected. The game's item is unlit meanwhile (NEW GAME has no dark picture: half alpha).
+  - Online: the page also switches the rows off while an online session is being set up (PortNet.t.role), besides
+    netCfg / recCfg / NETDET; C keeps its own check. netpair UI=1 (which drives the MULTI pages) 8423 IDENTICAL with the
+    option on; e2e p357 IDENTICAL off and on.
+  - Finding: text nodes land ~1.1 x / ~1.125 x further from the top-left corner than picture nodes with the same
+    numbers; the shared helper port_menu_options_row_draw takes picture coordinates (P363's pause row is now centred).
+  - Not done: a row inside the game's own title OPTIONS page (title_press_start_page / settings_list_draw, titlePage 1),
+    which would be the most native place but needs a port item in settings_list_draw's 28-item model; the chapter page.
+- **Next** (the original P365 "Controls + Saves overlays" was done in P362; proposed new order):
+  1. **P365 Online overlay**: the Online row opens a game-style ONLINE page instead of the drawer: Create room / Join
+     room, a pad letter picker for the 5-character room code (unambiguous alphabet), status / players / ping, Start,
+     Leave, the desync report and the "waiting for players" overlay in the game font. Must stay page-only (no game
+     memory), as sessions start before boot.
+  2. **P366 photo mode restyle**: photo HUD + Pose & Outfit panel drawn with GameText in the overlay style (keep the pad
+     navigation and the hashed-state restore).
+  3. **P367 sounds + game OPTIONS page row**: menu move / choose sounds for GMenu (local only: through a port hook that
+     plays the game's 0x62D / 0x500 when no session is hashed, silent online), and an "OPTIONS" (port) item in the
+     game's own title OPTIONS page (title_press_start_page) if settings_list_draw can take a port row cleanly.
+  4. **P368 cleanup + default**: drawer reduced to developer tools (Debug, Recorder, manual codes); touch controls
+     styled; first-run screens with title art from a cached ROM; PLAYING.md; ask the user to try a real gamepad / phone
+     and decide nativemenu's default.

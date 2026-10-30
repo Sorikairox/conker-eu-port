@@ -46,7 +46,11 @@ key press or click (a browser rule: a gamepad press does not count), the menu sa
 game keeps running behind it. Turn it off under Tools in that menu (or in the page menu's Options). **P363:** with this option on, the game's own pause
 menu (Start) in a game on this computer has a new row **OPTIONS** under QUIT / CONT.. (multiplayer: under CONTINUE):
 push the stick down to it, press A, and the menu opens over the paused game; close it (B / Esc) and you are back in the
-pause menu on OPTIONS; Start or B there resumes. The row never appears online, while recording or replaying.
+pause menu on OPTIONS; Start or B there resumes. The row never appears online, while recording or replaying. **P364:** the title
+menu has the same row: on a save slot page (GAME 1 / 2 / 3) under NEW GAME or under PLAY / ERASE, and on each MULTI mode
+page under SET-UP. Push the stick down to it (on MULTI: from SET-UP) and press A: the menu opens over the title, which
+keeps playing (music, Conker); close it and you are back on OPTIONS; stick up returns to the game's own item. Not shown
+online, while an online room is being set up, while recording or replaying.
 
 1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
 2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.
