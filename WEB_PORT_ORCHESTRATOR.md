@@ -499,6 +499,15 @@ flash, controller pak).
 42. A picture drawn through a text queue may ignore the text colour (Conker forces icon nodes to white: only alpha
     survives), and a lit picture may have no dark twin (NEW GAME 0x31; 0x30 is BUNKER): check the picture id on screen
     before using it, dim with alpha instead.
+43. A game-style page that must run before the game boots (online rooms start from power-on) has no game memory to
+    read the font from: keep a copy in browser storage keyed by the ROM hash once the game decoded it, and fall back to
+    page text when there is none yet.
+44. Test drivers across a page reload: CDP evaluations throw while the page navigates (treat that as "not ready", don't
+    fail), page test aids must reinstall themselves on load (URL flags survive location.reload()), and split the log at
+    the reload so a single-player boot before it does not pollute the session's hash lines.
+45. A test URL that autostarts the game (?app=game) never shows the pre-boot screens: drive the Press Start screen.
+46. A menu where you type letters must consume letter keys before the game's key bindings: with WASD bound to the
+    stick, typing "D" also moved the cursor; and keep Start apart from A where Start has its own meaning (JOIN).
 
 ---
 

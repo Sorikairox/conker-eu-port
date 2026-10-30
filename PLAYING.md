@@ -39,8 +39,8 @@ it still starts photo mode, on release) or the gamepad's Home button (where the 
 over the game in the game's own font (smooth with *Smooth font*). It has everything a player needs: Preset, Picture,
 HUD, Gameplay, **Controls** (re-bind every keyboard key and gamepad button: choose a line, then press the new key or
 button; Esc cancels, Backspace unbinds a key), **Sound** (master volume + the game's three volumes), **Saves** (export /
-import), **Fullscreen**, **Photo mode**, **Online** and **Record** (these two open their page panels: the room code is
-typed there), Tools, and *Page menu (developer)* for the old page menu. D-pad, stick or arrows move, left / right change
+import), **Fullscreen**, **Photo mode**, **Online** (P365: game-style ONLINE pages, see *Online* below) and **Record** (opens its page panel),
+Tools, and *Page menu (developer)* for the old page menu. D-pad, stick or arrows move, left / right change
 a value, A / Start / Enter choose, B / Esc / Backspace go back; mouse and touch work too. Fullscreen and Import need a
 key press or click (a browser rule: a gamepad press does not count), the menu says so. Online and while recording the
 game keeps running behind it. Turn it off under Tools in that menu (or in the page menu's Options). **P363:** with this option on, the game's own pause
@@ -234,6 +234,23 @@ close when the game starts and expire after 10 minutes.)
 5. Player 1 uses the menus as on an N64 (Multi, a mode...). The other players press Start on the "press START" join
    page and pick a character like a second, third or fourth controller. From then on each of you controls your own
    Conker in split screen (two players: top / bottom; three or four: four quarters).
+
+**With the game-style menu (P365, option *Game-style menu (Esc)*):** everything above can be done in the game's own
+look with a gamepad. During a game: Esc (or hold the gamepad's Back), **Online**, then **Create room** or **Join room**:
+the page restarts (an online match starts from power-on; your save is kept) and the ONLINE page opens by itself on the
+Press Start screen. (After the first game with this option the menu also opens on the Press Start screen directly: Esc.)
+- **Create room**: the code shows in big yellow letters with players 1 to 4 (*YOU*, *PING 23 MS*, *CONNECTING…*,
+  *FREE*). When your friends have joined, choose **Start the game (N players)**. **Input delay** (AUTOMATIC or 2 to 8
+  frames) and **Leave the room** are there too.
+- **Join room**: a letter picker with the 23 letters room codes use: move with the D-pad or stick, **A** types a
+  letter, **B** deletes, **Start** (or the JOIN line) joins. On a keyboard just type the code (O, I, 0, 1 ... are not
+  in room codes and are refused), Backspace deletes, Enter joins; Ctrl+V pastes. Then *Joined as player N: waiting for
+  player 1 to start the game*.
+- During the match the messages are in the game's font over the picture: *WAITING FOR PLAYER 2…* when the game waits
+  for someone, *PLAYER 2 LEFT* (their controller stands still, the match goes on) and a *DESYNC* box if the games ever
+  stop matching (please report it). Esc, **Online** shows everyone's ping and **Leave the session**; the match never
+  pauses behind the menu.
+- *Manual codes (page menu)* opens the page panel's copy-paste codes below.
 
 Room messages: *No room with the code …* (a typo, or the room was closed / expired: ask player 1 for a new code),
 *Room … is full* (the room already has 4 players), *Player 1 runs a different version of the game* (reload both pages),

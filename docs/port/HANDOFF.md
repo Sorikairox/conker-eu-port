@@ -88,6 +88,38 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P365 (port-web, 2026-10-30): game-style ONLINE pages + in-session messages in the game font (native menus)
+- c98b1699 (option `nativemenu`, still default off): the game-style menu's Online row opens ONLINE pages (gmenu.js):
+  setup (Create room / Join room / Input delay / Manual codes (page menu) / Back), host room page (big code, players
+  1..4 with PING / CONNECTING / LEFT / FREE, Start the game, Input delay, Leave the room), guest room page, session page
+  (players + pings, input delay, desync line, Leave the session) and a letter picker (ACDEFHJKMNPQRTUVWXY3479 in 3 x 8
+  + DEL + JOIN; pad D-pad / A / B delete / Start join, keyboard typing with refused letters, Backspace, Enter, Ctrl+V,
+  mouse). Sessions still start before boot: chosen in a game, the step goes to sessionStorage 'gmenu.online', a
+  pending EEPROM write is flushed and the page reloads; pendingOnline() (GMenu.poll) opens the page on the Press Start
+  screen. GMenu.open works before boot (U.pre: no pause, #ready hidden, readyPoll ignores Start). Font before boot:
+  GameFont.save / restore (localStorage 'gmenu.font0', keyed by ROM SHA-1; saved on the first in-game open and before
+  the reload). Shared path: main.js netRoomCreate / netRoomJoin / netStartGame / netLeave (the panel's handlers moved
+  there; netGuard returns the error). GNet (#gnet canvas): WAITING FOR PLAYER N (main.js tick handler; #netwait hidden
+  with the option on), PLAYER N LEFT, DESYNC box + line, other bad statuses in session. Test aid ?gmenutest=1 (fake pad
+  queue window.__gmenuTest.press / idle / pickPath). JS only, no TU recompiled.
+- 16b310f8 tests: netpair.sh ROOM=1 UI=gmenu (netgroup.js: boot by pad Start, hold Back, Online, Create / Join, reload,
+  picker by fake pad or GMENU_KEYS=1 keyboard, GMENU_BADCODE=1, host Start; GSHOTS=1, VIEWPORTS=, GOPT_HOST / GUEST),
+  KILL=NAME:AT, DESYNCSHOTS=1, SESSIONMENU=NAME:AT; tools/port/scripts/online_menu_shots.sh (pre-boot pages by keys).
+- Evidence port_work/p365 (local room server only): final2a (2p, host 1280x720 / guest 1920x1080 ws, unknown code
+  AAAAA refused on the picker, then CD3KK picked: 8959 retraces IDENTICAL), final2b (2p, host 1920x1080 ws + smooth /
+  guest 1280x720 typing on the keyboard: 8953 IDENTICAL), final4 (4p through the pages: 9912 IDENTICAL x3, 4-way split
+  guest4_170s.png), kill3final (3p, guest opens the ONLINE page mid-match by Esc + pad, host window closed at 80 s:
+  waiting then PLAYER 1 LEFT on both guests; host vs guests 3896, guest vs guest3 5152 IDENTICAL), desync2 (DESYNC_AT
+  2500: the DESYNC box on both pages), menu/w*, f* (pre-boot pages by keys at both sizes: menu, ONLINE, create without
+  a room server = error, picker, refused O, typed code, back on Press Start), attract/ (P364's question: menu open
+  150 s over the title slot page: no attract demo, back on OPTIONS after closing), panel2 (drawer panel regression after
+  the handler move: 4430 IDENTICAL). e2e p357 7700 IDENTICAL off and with nativemenu on. check GREEN (conkerdev-web had
+  exited 137; restarted). Deployed.
+- Not done: the pre-boot backdrop is black (title art from a cached ROM is P368's); manual copy-paste codes stay in the
+  drawer (the row opens it, after a reload in a game); no real gamepad / phone / multi-machine test.
+- P366 needs: see NATIVE_MENUS.md section 7 "Next" (P366 photo mode restyle: photo HUD + Pose & Outfit drawn with
+  GameText in the overlay style, keep pad navigation and the hashed-state restore). GNet is the place for any other
+  in-game page message (it is a free canvas layer over the picture that takes no input).
 ### P364 (port-web, 2026-10-30): "OPTIONS" row in the title menu (save slot pages + MULTI pages; native menus step 4)
 - e0c9b622 (option `nativemenu`, still default off): title_slot_page (GAME1..3, `#ifdef PORT`) draws OPTIONS under NEW
   GAME (empty slot) / under PLAY / ERASE (used slot), not during the erase question; menu_mode_select_page (MULTI, each

@@ -232,11 +232,29 @@ single source of truth (`OPTIONS`).
     numbers; the shared helper port_menu_options_row_draw takes picture coordinates (P363's pause row is now centred).
   - Not done: a row inside the game's own title OPTIONS page (title_press_start_page / settings_list_draw, titlePage 1),
     which would be the most native place but needs a port item in settings_list_draw's 28-item model; the chapter page.
+- **P365 done** (commits c98b1699 feature, 16b310f8 tests; still option `nativemenu`, default off):
+  - The Online row opens game-style ONLINE pages: setup (Create room, Join room, Input delay, Manual codes (page menu),
+    Back), host room page (big code, players 1..4 with ping / state, Start the game, Input delay, Leave), guest room page
+    (code, HOST / YOU, Leave), session page (players + pings / LEFT, input delay, desync line, Leave the session), and a
+    letter picker for the code (the server's 23-letter alphabet in 3 x 8 + DEL + JOIN; pad: D-pad / A / B delete /
+    Start join; keyboard typing with refused letters, Backspace, Enter, Ctrl+V; mouse).
+  - Sessions still start before boot: chosen in a game, the step is kept in sessionStorage and the page reloads; the
+    menu now opens before boot (Press Start screen hidden, pad Start there does nothing while it is open) with font 0
+    kept in localStorage per ROM SHA-1 (GameFont.save / restore; saved the first time the menu opens in a game).
+  - Same path as the panel: main.js netRoomCreate / netRoomJoin / netStartGame / netLeave (the panel's handlers were
+    moved into them). netpair.sh UI=1 (panel) 4430 IDENTICAL after the move.
+  - In-session messages: GNet canvas (#gnet) in the game font: waiting for player N, player N left, desync box + line,
+    other bad statuses during the session; the page's #netwait stays hidden with the option on.
+  - Tests: netpair.sh ROOM=1 UI=gmenu (boot, hold Back, Online, Create / Join, reload, letter picker by fake pad or
+    keyboard, Start): 2 players 8959 and 8953 retraces IDENTICAL, 4 players 9912 IDENTICAL, 3 players with the guest's
+    menu open mid-match + host killed 3896 / 5152 IDENTICAL; desync test reported in the game font;
+    online_menu_shots.sh (pre-boot pages by keys); e2e p357 IDENTICAL off and on.
+  - P364's question answered: the title menu's OPTIONS row with the menu left open 150 s on the slot page: no attract
+    demo started (still on the slot page, OPTIONS selected, after closing). Nothing to fix.
+  - Not done: the pre-boot backdrop is black (no game picture before boot; P368's title art from a cached ROM could
+    go there); the manual copy-paste codes stay in the drawer (long text; the row opens it).
 - **Next** (the original P365 "Controls + Saves overlays" was done in P362; proposed new order):
-  1. **P365 Online overlay**: the Online row opens a game-style ONLINE page instead of the drawer: Create room / Join
-     room, a pad letter picker for the 5-character room code (unambiguous alphabet), status / players / ping, Start,
-     Leave, the desync report and the "waiting for players" overlay in the game font. Must stay page-only (no game
-     memory), as sessions start before boot.
+  1. ~~P365 Online overlay~~ (done, above).
   2. **P366 photo mode restyle**: photo HUD + Pose & Outfit panel drawn with GameText in the overlay style (keep the pad
      navigation and the hashed-state restore).
   3. **P367 sounds + game OPTIONS page row**: menu move / choose sounds for GMenu (local only: through a port hook that
