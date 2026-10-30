@@ -519,6 +519,19 @@ flash, controller pak).
 50. A test helper defined in one eval step (window.JK = ...) with a syntax error fails that step quietly, and every later
     step that uses it does nothing: check the first step's result before reading the rest. A page-only toggle key is
     also safer on the key event itself than polled once per frame (a short tap can fall between two polls).
+51. Menu sounds for a page overlay played through the game's own sound player change hashed game state (voices, the
+    event queue, an on-demand sound bank cache) and stop when the page pauses the game (its AudioContext is suspended).
+    Decode the sample in a read-only port function instead (Conker: g_sound_bank0 -> instrument 0 -> sound slot = a
+    packed ROM reference, or a cache entry that keeps it -> ALSound record + VADPCM from the ROM) and play it on the
+    page's own small AudioContext; stay silent online / in recordings anyway.
+52. Every new port C object's statics land in the hashed static region (net_regions.py hashes all but listed objects):
+    exclude page-only buffers (pc_sfx.o's PCM) there, or the first write to them is a desync.
+53. Adding a row to a game's generic list widget (settings_list_draw: 28 items by mask) without touching the widget: in
+    the page function that calls it, take the row's input out of the menu input before the call (directions / accept
+    while it is selected), switch the widget's own cursor off through its argument, draw a copy of that cursor at the row
+    with the same motion, and on leaving set the widget's "cursor was at" row to yours so its own slide starts there.
+54. JS-dispatched key events carry no user activation: they test the refusal path (fullscreen refused = error sound)
+    for free; use real CDP key events when the action itself must succeed.
 
 ---
 

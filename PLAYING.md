@@ -51,6 +51,14 @@ menu has the same row: on a save slot page (GAME 1 / 2 / 3) under NEW GAME or un
 page under SET-UP. Push the stick down to it (on MULTI: from SET-UP) and press A: the menu opens over the title, which
 keeps playing (music, Conker); close it and you are back on OPTIONS; stick up returns to the game's own item. Not shown
 online, while an online room is being set up, while recording or replaying.
+**P367:** the game's own **OPTIONS** page of the title menu (the fireplace: sound, CHEATS, screen position) has a fourth
+row **SETTINGS**: push the stick down past the screen-position item (or up from the first item); the game's two joystick
+cursors slide to it; A opens the menu over the title, closing it brings you back on SETTINGS. Same rules as the other
+rows (never online / recording / replaying). **Menu sounds (P367):** the game-style menu, the game-style photo mode and
+the game-font messages play the game's own menu sounds (cursor 0x62D on a move, 0x500 when you choose, 0x4FF when a value
+changes, lower versions of them for back and for a refused action). They follow the master volume (silent at 0 and in
+test runs with `?mute=1`) and the game's sound-effects volume. They are silent during an online session (also while a
+room is being set up), while recording or replaying an input recording, and under `?netdet`.
 
 1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
 2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.

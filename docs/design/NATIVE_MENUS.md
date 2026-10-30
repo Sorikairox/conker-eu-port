@@ -175,7 +175,7 @@ single source of truth (`OPTIONS`).
     the game's red title, selected row on a red band with a pulsing `>` cursor, others dimmed (like
     `settings_list_draw`), ON in the game's yellow, paged help, footer. Esc / ☰ / pad Home open it; pad 1 goes to the
     menu (the game gets an idle pad); single player pauses like the drawer; online / recording / replay never pause.
-  - Not done: the game's menu sounds (they would go through the game's hashed sound state; none played), the game's
+  - Not done: the game's menu sounds (done in P367: GSound, decoded by the page, never through the game's sound state), the game's
     button icons (A / B / Start pictures are sprites, not font glyphs: the footer spells the buttons), menu frame
     textures (the game's options page has none: text over the 3D scene, so a dark band stands in for it).
   - Tests: tools/port/scripts/gmenu_shots.sh (keys at 1280x720 on the title, fake pad at 1920x1080 widescreen in
@@ -275,12 +275,33 @@ single source of truth (`OPTIONS`).
     photomode=0 (still refused online). JS only: conker.wasm unchanged.
   - Not done: the game's menu sounds (P367); the panel covers about 40 % of a 4:3 picture while shown (fold it, or hide
     the menus); the period glyph sits a little high at the small sizes (GameFont's tiny-glyph minimum, P362).
+- **P367 done** (commits: see HANDOFF P367; still option `nativemenu`, default off):
+  - **Menu sounds** for GMenu, GPhoto and GNet (gmenu.js GSound): the game's own menu sounds, found in the game's menus
+    (game_eu_20B730.c): move = 0x62D (pause menu / save slot cursor), choose = 0x500, change = 0x4FF (settings list move /
+    value change); the game has no back or error sound (B is silent), so back = 0x500 five semitones lower, error = 0x4FF
+    ten semitones lower. Not through sound_play_2d (its voices / event queue / bank cache are hashed game memory, and the
+    game's AudioContext is suspended while the page pauses the game for the menu): port/ultra/pc_sfx.c port_sfx_decode
+    walks g_sound_bank0 -> instrument 0 -> sound slot (packed ROM reference, or the sound cache entry's copy of it),
+    reads the ALSound record and the VADPCM samples from the player's ROM (read-only), decodes like the audio HLE,
+    applies the envelope and the game's volume (sample volume, envelope, sound group volume = the game's / port's SFX
+    level), rate = 22020 Hz x key-map base pitch x cents. The page plays the float PCM on its own AudioContext through
+    the master volume; ?mute=1 / volume 0 = nothing decoded or played. pc_sfx.o is excluded from the state hash
+    (net_regions.py). Silent whenever netCfg / an online room (PortNet.t.role) / recCfg (record or replay) / NETDET.
+    Hooks: GMenu moveSel / change (error when refused or nothing moved) / choose / back / pad and Home close / open
+    (not from a game row: the game played 0x500) / letter picker / capture; GPhoto focus / moves / change / choose /
+    pick / back / hide / toasts (saved = choose, else error); GNet.show = error.
+  - **SETTINGS row in the game's own title OPTIONS page** (title_press_start_page, `#ifdef PORT`): a fourth row under
+    the column of settings_list_draw (sound / CHEATS / screen position), font 0 "SETTINGS" in the port rows' greens, the
+    game's joystick cursor pictures (text id 0x1A) sliding to it with settings_list_draw's own motion; the 28-item list
+    is untouched (g_settings_sel stays 0x19, no direction / accept input reaches the list while the row is selected,
+    settings_list_draw's cursor off by its showCursor argument). Ring: down from 0x19 / up from 9 reach it, up returns
+    to 0x19, down wraps on to 9 through the list's own wrap. A -> port_gmenu_request_title (request 2), sound 0x500.
+    Same gate as P363 / P364. difftest --self EQUIV (title_press_start_page, settings_list_draw, game_pause_update,
+    title_slot_page, menu_mode_select_page).
 - **Next** (the original P365 "Controls + Saves overlays" was done in P362; proposed new order):
   1. ~~P365 Online overlay~~ (done, above).
   2. ~~P366 photo mode restyle~~ (done, above).
-  3. **P367 sounds + game OPTIONS page row**: menu move / choose sounds for GMenu (local only: through a port hook that
-     plays the game's 0x62D / 0x500 when no session is hashed, silent online), and an "OPTIONS" (port) item in the
-     game's own title OPTIONS page (title_press_start_page) if settings_list_draw can take a port row cleanly.
+  3. ~~P367 sounds + game OPTIONS page row~~ (done, above).
   4. **P368 cleanup + default**: drawer reduced to developer tools (Debug, Recorder, manual codes); touch controls
      styled; first-run screens with title art from a cached ROM; PLAYING.md; ask the user to try a real gamepad / phone
      and decide nativemenu's default.
