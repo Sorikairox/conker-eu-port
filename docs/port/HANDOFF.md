@@ -88,6 +88,30 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P361 (port-web, 2026-10-30): game-style options menu in the game's font (native menus step 2)
+- f23baadd option "Game-style menu (Esc)" (`nativemenu`, page-side, default off, not in presets; port/web/gmenu.js,
+  loaded after main.js as a classic script using its globals). Font: `port_font_info(0/1/2)` = wasm address of font 0's
+  glyph textures / metrics / count and `port_font_glyph(c)` = the game's text_char_to_glyph (gfx_f3dex2.c, read-only,
+  weak like text_glyph_rect). The page reads glyphs at address ^ 3 (big-endian mirror), odd rows x ^ 4 (TMEM swap),
+  rows 1..h, columns 0..w-1, advance w - 1, space 4 (as text_draw_string); colour + alpha = intensity; bilinear pixel
+  look, or P356's smooth cut (8x atlas) with Smooth font. MenuModel over OPTIONS (sections, toggles, sliders, preset,
+  help, lock reasons; changes via setOption / applyPreset, drawer refreshed). GMenu overlay canvas #gmenu over #screen
+  (240 units high, 320-unit column, widescreen aware): OPTIONS page (preset, 6 sections, Page menu = the drawer, Back
+  to game) + section pages. Input in pollInput: pad 1 to the menu (game gets an idle pad; online / recording too),
+  D-pad / stick / arrows with repeat, left / right values, A / Start / Enter / Space choose, B / Esc / Backspace back,
+  pad Home toggles, mouse hover / click / wheel / right click; held buttons masked until released. Single player
+  pauses like the drawer; never online / recording / replay. No game sounds (hashed sound state). Test aid
+  ?gmenuopen=S. Makefile + deploy_web.sh ship gmenu.js.
+- 89823bde pageshot.sh `raw:MS:ACT:ARG` steps (real CDP keys / clicks); tools/port/scripts/gmenu_shots.sh OUTDIR
+  [title|play|all] (keys at 1280x720 on the title, frame-queued fake pad at 1920x1080 widescreen + smooth in ?warp=29).
+- Evidence port_work/p361: final/t0..t8 (title: open by Esc, HUD page, Health always visible on, preset Classic, mouse
+  click opens Gameplay, closed), final/p0..p6 (play: Home opens, Picture page, Smooth font row, pixel font, back, closed),
+  net_ui_gmenu/ (netpair UI=1, menu open on the guest at 75 s / 110 s: 5930 retraces IDENTICAL, game ran on, host's
+  options locked), e2e_gmenu/ (replay with the menu open: PASS). check GREEN, e2e_replay PASS (7700 identical).
+  fontdump*.txt: the font probe (glyph metrics / intensity maps; ROM-derived, port_work only).
+- Next (P362, NATIVE_MENUS.md section 7): Controls bindings / Volume / Fullscreen / tools as overlay pages, a pad
+  entry that works everywhere (Home is often taken by the OS), larger help text in the pixel look, ask the user about
+  making it the default.
 ### P360 (port-web, 2026-10-30): full-window game + menu drawer (native menus step 1)
 - b7b32847 the game fills the whole window (index.html #stage fixed, black; #screen = min(100vw, 100dvh x --ar),
   centred: 4:3 pillar / letterbox, the window's aspect with Widescreen; layoutScreen takes the stage = window). No

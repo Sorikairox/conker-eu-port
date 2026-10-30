@@ -465,6 +465,13 @@ flash, controller pak).
     element still sliding in (visibility transition) cannot take focus yet (focus it after the transition).
 28. Waiting for "no headless Chrome running" on a shared machine: other projects' test browsers block it forever;
     serialize your own runs instead (PROBE_NOWAIT=1).
+29. Reading game data from the page: the N64 memory mirror keeps big-endian words, so a byte at N64 address a is at
+    wasm address a ^ 3 (and textures may carry their own TMEM swaps, e.g. odd rows x ^ 4). Raw HEAPU8 reads look like
+    shuffled garbage until you apply it.
+30. Page test drivers that split steps on ';' (pageshot.sh) silently drop an eval whose JS contains ';' (the rest
+    becomes another, bogus step): write such evals as comma expressions.
+31. Fake gamepads in tests: a press held for a fixed wall time can be merged or missed when the driver's timers bunch
+    up under load; queue presses and hold them for N animation frames instead.
 
 ---
 

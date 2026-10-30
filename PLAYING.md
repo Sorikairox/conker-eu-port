@@ -33,6 +33,13 @@ left corner (it hides while you play; move the mouse to see it). The menu pauses
 a click on the picture closes it and the game goes on. In fullscreen the browser uses Esc to leave fullscreen, so use
 the ☰ button there.
 
+**Game-style menu (P361, try it):** in the menu, Options, tick **Game-style menu (Esc)**. From then on, while the game
+runs, Esc (or the ☰ button, or a gamepad's Home button where the browser passes it) opens the options as a menu drawn
+over the game in the game's own font (smooth with *Smooth font*): D-pad, stick or arrows move, left / right change a
+value, A / Start / Enter / Space choose, B / Esc / Backspace go back; mouse and touch work too. Its *Page menu* line
+opens the page menu (bindings, saves, online, recorder). Online and while recording the game keeps running behind it.
+Turn it off under Tools in that menu (or in the page menu's Options).
+
 1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
 2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.
 3. Play. In the menu, **Fullscreen** goes full screen, and **Pause** pauses. The game also pauses by itself when the tab is hidden.

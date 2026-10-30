@@ -143,7 +143,7 @@ single source of truth (`OPTIONS`).
 
 ## 6. Proposed order of sessions
 
-1. **P361 overlay renderer + font from the ROM**: `port_asset_font` export (font 0 glyphs + metrics as RGBA from the
+1. **P361 overlay renderer + font from the ROM** (DONE, commits f23baadd, 89823bde; see "Status" below): `port_asset_font` export (font 0 glyphs + metrics as RGBA from the
    wasm, never saved), a page `GameText` canvas layer (bitmap text, colours, drop shadow, scale), the menu-model layer
    over `OPTIONS`, pad / keyboard navigation module. Restyle the drawer's look with it (titles in the game font).
 2. **P362 in-game Options overlay**: a game-styled OPTIONS overlay (pages: Picture, HUD, Gameplay, Controls toggles,
@@ -159,3 +159,31 @@ single source of truth (`OPTIONS`).
 7. **P367 photo mode restyle**: photo HUD and Pose & Outfit in the overlay style (pad navigation kept).
 8. **P368 cleanup**: drawer reduced to developer tools (Debug, Recorder, fallback); touch controls styled; first-run
    screens use title art from a cached ROM; PLAYING.md updated.
+
+## 7. Status
+
+- **P361 done** (option *Game-style menu (Esc)*, key `nativemenu`, default off, not in the presets; port/web/gmenu.js):
+  - Font: read from the running game (`port_font_info` / `port_font_glyph` in port/gfx/gfx_f3dex2.c, read-only) rather
+    than a separate ROM decode: the game already decoded font 0 from the player's ROM at boot. 95 glyphs, I8 with 16
+    levels, upper case + digits + punctuation + Latin-1 accents (lower case maps to upper case). Bytes sit at
+    address ^ 3 in the mirror; odd glyph rows carry the TMEM x ^ 4 swap. Pixel look (bilinear, like the N64 picture)
+    or smooth (P356's Catmull-Rom + smoothstep cut, 8x atlas) following the *Smooth font* option.
+  - Menu model (`MenuModel`): sections Picture / HUD and information / Gameplay / Controls / Sound / Tools over
+    `OPTIONS` (an unlisted option lands in Tools), toggles, sliders (5 % steps), the Classic / Modern preset, help,
+    lock reasons. Changes go through `setOption` / `applyPreset` and refresh the drawer.
+  - Overlay (`GMenu`): OPTIONS page (preset, sections, Page menu = the drawer, Back to game) + one page per section;
+    the game's red title, selected row on a red band with a pulsing `>` cursor, others dimmed (like
+    `settings_list_draw`), ON in the game's yellow, paged help, footer. Esc / ☰ / pad Home open it; pad 1 goes to the
+    menu (the game gets an idle pad); single player pauses like the drawer; online / recording / replay never pause.
+  - Not done: the game's menu sounds (they would go through the game's hashed sound state; none played), the game's
+    button icons (A / B / Start pictures are sprites, not font glyphs: the footer spells the buttons), menu frame
+    textures (the game's options page has none: text over the 3D scene, so a dark band stands in for it).
+  - Tests: tools/port/scripts/gmenu_shots.sh (keys at 1280x720 on the title, fake pad at 1920x1080 widescreen in
+    play); `?gmenuopen=S` test aid; netpair UI=1 with the menu open on the guest IDENTICAL; e2e replay PASS with the
+    menu open during the replay.
+- **Next: P362** (section 6 item 2): make the overlay the full Options experience and the default way in: Controls
+  bindings page (key capture + pad capture), the master Volume and Fullscreen rows (Volume is page-side; under tests
+  ?mute=1 keep it untouched), photo / online / record entries as actions, a pad entry button that works on every
+  browser (Home is often taken by the OS: e.g. hold Start + Select / Back for 1 s), slightly larger help text in the
+  pixel look (a "." at help scale 0.62 nearly vanishes), and decide with the user whether the option becomes default
+  on.
