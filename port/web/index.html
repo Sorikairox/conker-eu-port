@@ -224,6 +224,9 @@
   #tk-knob { position: absolute; width: 54px; height: 54px; margin: -27px 0 0 -27px; left: 50%; top: 50%; border-radius: 50%;
              background: rgba(255, 255, 255, .45); }
   @media (orientation: portrait) { #tk-START { bottom: calc(200px + env(safe-area-inset-bottom)); } }
+  /* P369: a phone held upright: the 4:3 picture sits at the top (under the notch / status bar inset) and the touch
+     controls take the space below it (P360 centred it, so on a short screen the controls' top row covered its bottom) */
+  @media (orientation: portrait) { body.touch #stage { align-items: flex-start; padding-top: env(safe-area-inset-top); } }
   body.touch { overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
   body.touch #stage { touch-action: none; }
   body.touch #keyhint { display: none; }

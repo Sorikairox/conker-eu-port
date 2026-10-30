@@ -548,7 +548,13 @@ const capture = (el, e) => { try { el.setPointerCapture(e.pointerId); } catch (_
   zone.addEventListener('pointermove', move);
   const end = (e) => { if (e.pointerId !== touch.stickId) return; touch.stickId = null; touch.x = touch.y = 0; rest(); };
   for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) zone.addEventListener(ev, end);
-  window.addEventListener('resize', () => { if (touch.stickId === null) rest(); });
+  // P369 fix: the resting stick is placed from the zone's box, which is empty while the layer is display: none (the page
+  // drawer open; P368 also the game-style menu): a phone turned with a menu open put the ring at (90, -80) of nothing,
+  // over the picture, after the menu closed. A ResizeObserver on the zone also fires when it is laid out again (or the
+  // window turns), so the ring is placed from a real box; an empty box is skipped.
+  const restIfShown = () => { if (touch.stickId === null && zone.getBoundingClientRect().width > 0) rest(); };
+  window.addEventListener('resize', restIfShown);
+  if (window.ResizeObserver) new ResizeObserver(restIfShown).observe(zone);
   $('touch').addEventListener('contextmenu', (e) => e.preventDefault());
   $('t-touch').onclick = () => { setTouch($('touch').hidden); if (!$('touch').hidden) rest(); };
   const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;

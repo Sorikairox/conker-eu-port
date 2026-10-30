@@ -298,15 +298,26 @@ const GTouch = (() => {
     GameFont.draw(ctx, label, cx + 0.8, ty + 0.8 + (1 - sc) * 6, k, { scale: sc, color: '#000', alpha: 0.85, align: 'center', smooth });
     GameFont.draw(ctx, label, cx, ty + (1 - sc) * 6, k, { scale: sc, color: '#fff', align: 'center', smooth });
   }
+  // P369 fix: the faces are drawn at each button's laid-out size, so never while the layer is not laid out (display: none
+  // while the page drawer is open; P368 also hid it under the game-style menu). Before, a redraw there (a phone turned
+  // from landscape to portrait with the menu open changes innerWidth x innerHeight, part of the signature) sized the
+  // canvases 0 x 0 (the A button's 0-size canvas then threw in drawImage and the loop stopped), the signature was
+  // stored anyway, and after the menu closed the buttons stayed invisible (body.gtouch makes their own face
+  // transparent) until the next size change: turning back to landscape. Now a hidden layer waits ('wait' is never
+  // stored as drawn) and each face is drawn on its own.
   function check() {
     const on = !$('touch').hidden && fontOk();   // P369: the game-style menus are always on (no option)
+    const shown = on && $('tk-A').clientWidth > 0;   // laid out (not display: none)
     const dpr = Math.min(3, window.devicePixelRatio || 1), smooth = on && !!opt('smoothfont');
     const nsig = on ? `${smooth}:${dpr}:${GameFont.count}:${innerWidth}x${innerHeight}` : 'off';
-    if (nsig === sig) return;
-    sig = nsig;
     document.body.classList.toggle('gtouch', on);
+    if (nsig === sig || (on && !shown)) return;
+    sig = nsig;
     if (!on) return;
-    for (const [id, f] of Object.entries(FACES)) { const el = $('tk-' + id); if (el) face(el, f, smooth, dpr); }
+    for (const [id, f] of Object.entries(FACES)) {
+      const el = $('tk-' + id);
+      if (el) try { face(el, f, smooth, dpr); } catch (e) { sig = ''; log(`[gtouch] face ${id}: ${e.message}`); }   // drawn again at the next check
+    }
     log(`[gtouch] game-style touch controls (${smooth ? 'smooth' : 'pixel'} font, dpr ${dpr})`);
   }
   setInterval(check, 500);
