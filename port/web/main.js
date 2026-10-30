@@ -381,6 +381,7 @@ async function setRom(bytes, from) {
   const mb = (romBytes.length / 1048576).toFixed(0);
   if (romOk) status(`ROM: Conker EU, SHA-1 ok (${mb} MB, ${from})`, 'ok');
   else status(`ROM SHA-1 ${romSha1.slice(0, 12)}… is not the EU ROM (${from})`, 'bad');
+  dropError(romOk ? '' : `This file is not the PAL (EU) Conker ROM (SHA-1 ${romSha1.slice(0, 12)}…). Try another dump.`);
   $('drop').hidden = romOk;
   $('ready').hidden = !romOk || !!running;   // P360: the Press Start screen
   $('start').disabled = !!running || !romOk;
@@ -392,8 +393,10 @@ async function takeFile(f) {
   try {
     const ok = await setRom(new Uint8Array(await f.arrayBuffer()), f.name);
     if (ok) await idb('rom', 'readwrite', (s) => s.put(romBytes, 'eu')).catch(() => {});
-  } catch (err) { status('ROM: ' + err.message, 'bad'); log('ROM: ' + err.message, 'fail'); }
+  } catch (err) { status('ROM: ' + err.message, 'bad'); log('ROM: ' + err.message, 'fail'); dropError(`This file is not an N64 ROM (${err.message}).`); }
 }
+// P368: the drop zone's own error line (shown with the game-style menu option: body.gboot; else the toast alone, as before)
+function dropError(s) { const e = $('drop-err'); e.textContent = s; e.hidden = !s; }
 $('rom').addEventListener('change', (e) => takeFile(e.target.files[0]));
 // iOS greys out files whose extension has no known type (.z64 / .n64 / .eep), so no filter there;
 // the ROM is checked by SHA-1 anyway
@@ -1990,7 +1993,8 @@ async function start(app) {
     canvas: $('canvas'),
     print: (s) => log(s),
     printErr: (s) => log(s, 'fail'),
-    onAbort: (w) => { log('Aborted: ' + w, 'fail'); status('crashed (open Debug)', 'bad'); },
+    onAbort: (w) => { log('Aborted: ' + w, 'fail'); status('crashed (open Debug)', 'bad');
+      if (window.GNet && opt('nativemenu')) GNet.show('THE GAME STOPPED', 'Something went wrong. Reload the page to play again (Developer tools > Debug has the details).', 3.6e6); },   // P368: in the game's font
     portRumble: (ch, on) => portRumble(ch, on),   // P333 option "Rumble" (pc_pif.c)
     portEepDirty: () => { eepWrites++; if (!eepTimer) eepTimer = setTimeout(persistEeprom, 400); flashSaveIcon(); },
   });

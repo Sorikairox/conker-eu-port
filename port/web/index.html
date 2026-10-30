@@ -244,6 +244,26 @@
   #screen canvas#gphoto { z-index: 3; pointer-events: none; }
   #gphoto[hidden] { display: none !important; }
   body.gphoto #photo, body.gphoto #photo-look, body.gphoto #photo-toast, body.gphoto #menu-btn { display: none !important; }
+  /* P368: the boot screens with the game-style menu on (gmenu.js GBoot). body.gboot: the option is on; the page's own
+     first-run screens (no ROM yet, or no game font kept for it) are clean and dark, and a wrong file says so in the drop
+     zone. body.gbootfont: the Press Start screen is drawn on #gboot in the game's font over the title art; #ready stays
+     over the window only to take clicks / taps (its own elements hide) */
+  #screen canvas#gboot { z-index: 2; pointer-events: none; }
+  #gboot[hidden] { display: none !important; }
+  body.gboot #drop, body.gboot #ready { background: #000; }
+  body.gboot #drop { border: 1px solid rgba(255, 255, 255, .14); border-radius: 10px; }
+  body.gboot #drop.over { border-color: rgba(255, 255, 255, .5); background: #0b0b0b; }
+  body.gboot .gtitle { font: 600 clamp(20px, 4vw, 36px)/1.15 system-ui, -apple-system, "Segoe UI", sans-serif; color: #f2f2f2; text-shadow: none; letter-spacing: .04em; }
+  body.gboot #drop h2 { font: 500 17px system-ui, -apple-system, "Segoe UI", sans-serif; color: #bbb; text-shadow: none; }
+  body.gboot #drop p, body.gboot #ready p { color: #8a8a8a; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body.gboot #drop .private { color: #7fae7f; }
+  body.gboot #drop label.btn, body.gboot #ready button { background: #161616; border-color: #333; color: #eee; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body.gboot #ready-start { background: #eee; color: #111; border-color: #fff; animation: none; }
+  body.gboot #drop-err:not([hidden]) { color: #ff6b5a; font: 600 14px system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 460px;
+                                        border: 1px solid rgba(255, 107, 90, .45); border-radius: 8px; padding: 8px 12px; }
+  #drop-err { display: none; } body.gboot #drop-err:not([hidden]) { display: block; }
+  body.gbootfont #ready { background: transparent; cursor: default; }
+  body.gbootfont #ready > * { display: none; }
   /* P368: touch controls in the game's style (gmenu.js GTouch, option nativemenu + the game's font): each button's face is
      a canvas inside it (the N64's colours, the game's font); translucent at rest, bright while held; the stick is a dark
      ring with a grey knob. Sizes, places and touch handling stay the page's */
@@ -291,6 +311,7 @@
         <div class="row"><button id="photo-save">Save PNG</button> <button id="photo-exit">Exit</button></div></div>
       <div id="photo-look" hidden></div>
       <div id="photo-toast" hidden></div>
+      <canvas id="gboot" hidden aria-hidden="true"></canvas>
       <canvas id="gphoto" hidden aria-label="Photo mode"></canvas>
       <canvas id="gnet" hidden aria-hidden="true"></canvas>
       <canvas id="gmenu" hidden aria-label="Options menu"></canvas>
@@ -301,6 +322,7 @@
   <h2>Drop your ROM here</h2>
   <p>PAL (EU) cartridge dump, .z64 / .n64 / .v64. It is checked by SHA-1.</p>
   <label class="btn">Choose ROM file… <input id="rom" type="file" accept=".z64,.n64,.v64,.rom,.bin"></label>
+  <p id="drop-err" hidden></p>
   <p class="private">Your ROM never leaves this browser: it is read locally and kept only in this browser's storage (IndexedDB).
     Nothing is uploaded.</p>
   <p>Esc or the ☰ button: options, controls, saves, online.</p>

@@ -314,6 +314,97 @@ const GTouch = (() => {
 })();
 window.GTouch = GTouch;
 
+// ---------------------------------------------------------------- P368 boot screens in the game's style
+// With the game-style menu on, the screens before the game boots look like the game: once this browser has the game's
+// font for the cached ROM (GameFont.save: kept when a game-style menu first opened in a game), the Press Start screen is
+// drawn on #gboot (inside the picture box, under the menus) in the game's font: CONKER'S in the game's yellow, BAD FUR
+// DAY in its red, PRESS START pulsing, ANOTHER ROM, the footer's button faces, over a warm dark backdrop. The same
+// backdrop (without the texts) is behind the ONLINE pages before boot (body.gmenu, P365), which were drawn over black.
+// No title art: P368 found no cheap, reliable moment to take a clean picture of the title from the game's canvas (the
+// menu record g_menu_state's page byte already reads "slot page" during the intro cutscene and its fade word read 0, and
+// on the slot page the game draws its own texts into the same frame); decoding the title's models from the ROM is not
+// cheap, and nothing ROM-derived may ship. Without the font (first visit, another browser) the page's own
+// screens stay, clean and dark by CSS (body.gboot). Page-only: nothing here touches the game.
+const GBoot = (() => {
+  const cv = document.getElementById('gboot');
+  const B = { raf: 0, t0: performance.now(), hits: [], sel: 0, mode: '' };
+  const C = { title: 'rgb(255,50,50)', on: 'rgb(255,255,0)', text: '#ffffff', dim: 'rgb(170,170,170)' };
+  const wanted = () => typeof opt === 'function' && !!opt('nativemenu');
+  const sha = () => (typeof romSha1 !== 'undefined' ? romSha1 : null);
+  const fontOk = () => GameFont.ready() || (!!sha() && GameFont.restore(sha()));
+  // which screen: 'ready' (the Press Start screen), 'menu' (the game-style menu before boot: only the backdrop), ''
+  function mode() {
+    if (!wanted() || running || typeof romOk === 'undefined' || !romOk || !fontOk()) return '';
+    if (window.GMenu && GMenu.isOpen) return 'menu';
+    return !$('ready').hidden ? 'ready' : '';
+  }
+  function tick() {
+    const m = mode();
+    document.body.classList.toggle('gboot', wanted());
+    document.body.classList.toggle('gbootfont', m === 'ready');
+    if (m !== B.mode) { B.mode = m; cv.hidden = !m; if (m) { B.t0 = performance.now(); log(`[gboot] ${m === 'ready' ? 'Press Start' : 'menu backdrop'} in the game's style`); } }
+    if (m && !B.raf) B.raf = requestAnimationFrame(draw);
+  }
+  function draw() {
+    B.raf = 0;
+    if (!B.mode) return;
+    B.raf = requestAnimationFrame(draw);
+    const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const k = h / 240, W = w / k, ox = (W - 320) / 2, ctx = cv.getContext('2d'), now = performance.now();
+    const fade = Math.min(1, (now - B.t0) / 300);
+    const T = (s, x, y, o) => GameFont.draw(ctx, s, ox + x, y, k, Object.assign({ smooth: !!opt('smoothfont') }, o, { alpha: (o && o.alpha !== undefined ? o.alpha : 1) * fade }));
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+    {   // a warm glow in the middle, like the game's firelit title (no picture of it: see above)
+      const g = ctx.createRadialGradient(w / 2, h * 0.45, 0, w / 2, h * 0.45, h * 0.75);
+      g.addColorStop(0, `rgba(70,40,12,${0.9 * fade})`); g.addColorStop(1, 'rgba(0,0,0,1)'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    }
+    B.hits = [];
+    if (B.mode !== 'ready') return;
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0, 0, w, h);
+    const band = (y, hh, a) => {
+      const g = ctx.createLinearGradient((ox + 10) * k, 0, (ox + 310) * k, 0);
+      g.addColorStop(0, 'rgba(20,10,4,0)'); g.addColorStop(0.15, `rgba(20,10,4,${a * fade})`); g.addColorStop(0.85, `rgba(20,10,4,${a * fade})`); g.addColorStop(1, 'rgba(20,10,4,0)');
+      ctx.fillStyle = g; ctx.fillRect((ox + 10) * k, y * k, 300 * k, hh * k);
+    };
+    band(14, 50, 0.6);
+    T("CONKER'S", 160, 18, { scale: 1.2, color: C.on, align: 'center' });
+    T('BAD FUR DAY', 160, 34, { scale: 2, color: C.title, align: 'center' });
+    const pulse = 0.55 + 0.45 * Math.sin(now / 260);
+    band(142, 22, 0.55);
+    T('PRESS START', 160, 146, { scale: 1.4, color: C.on, align: 'center', alpha: pulse });
+    B.hits.push({ act: 'start', x0: ox + 70, x1: ox + 250, y0: 140, y1: 166 });
+    const aw = GameFont.measure('ANOTHER ROM', 0.75), hov = B.sel === 1;
+    if (hov) { ctx.fillStyle = `rgba(255,60,30,${0.28 * fade})`; ctx.fillRect((ox + 160 - aw / 2 - 8) * k, 176 * k, (aw + 16) * k, 12 * k); }
+    T('ANOTHER ROM', 160, 178, { scale: 0.75, color: hov ? C.text : C.dim, align: 'center' });
+    B.hits.push({ act: 'rom', x0: ox + 160 - aw / 2 - 8, x1: ox + 160 + aw / 2 + 8, y0: 174, y1: 190 });
+    // footer: the buttons, as on the game-style menu's (not with the touch controls: their shoulder buttons and Start
+    // lie over the picture's bottom edge there, and a tap on PRESS START plays)
+    if (document.body.classList.contains('touch')) return;
+    const FY = 222, FS = 0.55;
+    ctx.fillStyle = `rgba(0,0,0,${0.4 * fade})`; ctx.fillRect((ox + 20) * k, (FY - 4) * k, 280 * k, 15 * k);
+    GFace.round(ctx, T, k, ox, 34, FY, 'S', 'rgb(200,40,40)', fade); T('PLAY', 42, FY + 1, { scale: FS, color: C.dim });
+    T('ESC OR HOLD BACK: OPTIONS', 290, FY + 1, { scale: FS, color: C.dim, align: 'right' });
+  }
+  // mouse / touch on the Press Start screen (#ready lies over the window: its own elements are hidden, gbootfont)
+  function hit(e) {
+    const r = cv.getBoundingClientRect(); if (!r.height) return null;
+    const k = r.height / 240, x = (e.clientX - r.left) / k, y = (e.clientY - r.top) / k;
+    return B.hits.find((t) => x >= t.x0 && x <= t.x1 && y >= t.y0 && y <= t.y1) || null;
+  }
+  $('ready').addEventListener('click', (e) => {
+    if (B.mode !== 'ready') return;
+    const t = hit(e);
+    if (t && t.act === 'rom') { snd('choose'); $('ready-rom').click(); }
+    else if (t) start('game');
+  });
+  $('ready').addEventListener('pointermove', (e) => { if (B.mode === 'ready') { const t = hit(e); B.sel = t && t.act === 'rom' ? 1 : 0; $('ready').style.cursor = t ? 'pointer' : ''; } });
+  setInterval(tick, 250);
+  return { tick, get mode() { return B.mode; } };
+})();
+window.GBoot = GBoot;
+
 // ---------------------------------------------------------------- P367 the game's menu sounds (GMenu, GPhoto, GNet)
 // The game's own menus have three sounds (game_eu_20B730.c): 0x62D the pause menu's / save slot pages' cursor, 0x500
 // choose, 0x4FF the settings list's move / value change (B is silent there). GSound plays them for the game-style
