@@ -86,6 +86,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       ArrowLeft: { key: 'ArrowLeft', keyCode: 37 }, ArrowUp: { key: 'ArrowUp', keyCode: 38 }, ArrowRight: { key: 'ArrowRight', keyCode: 39 },
       ArrowDown: { key: 'ArrowDown', keyCode: 40 }, ControlLeft: { key: 'Control', keyCode: 17 } }[code] || { key: code, keyCode: 0 };
   };
+  let touchOn = false; const touches = new Map();   // P368: touch steps
   for (const st of (process.env.PROBE_STEPS || '').split(';').map((x) => x.trim()).filter(Boolean)) {
     const [ms, act, ...rest] = st.split(':'); const arg = rest.join(':');
     setTimeout(async () => {
@@ -94,6 +95,14 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         const [cx, cy] = arg ? arg.split(',').map(Number) : [300, 300];   // P366: MS:click:X,Y (CSS pixels; default 300,300)
         await call('Input.dispatchMouseEvent', { type: 'mouseMoved', x: cx, y: cy });
         for (const type of ['mousePressed', 'mouseReleased']) await call('Input.dispatchMouseEvent', { type, x: cx, y: cy, button: 'left', clickCount: 1 });
+      } else if (act === 'touchdown' || act === 'touchmove' || act === 'touchup') {
+        // P368: MS:touchdown:X,Y[,ID] / touchmove / touchup = real CDP touch events (pointerType 'touch'), several fingers
+        // by ID (default 0); touch emulation is switched on at the first one
+        if (!touchOn) { touchOn = true; await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }); }
+        const [tx, ty, tid = 0] = arg.split(',').map(Number);
+        if (act === 'touchup') touches.delete(tid); else touches.set(tid, { x: tx, y: ty, id: tid, radiusX: 4, radiusY: 4, force: 1 });
+        const type = act === 'touchdown' ? 'touchStart' : act === 'touchmove' ? 'touchMove' : 'touchEnd';
+        await call('Input.dispatchTouchEvent', { type, touchPoints: [...touches.values()] });   // touchEnd: the fingers still down
       } else if (act === 'keydown' || act === 'keyup') {
         const k = keyInfo(arg);
         await call('Input.dispatchKeyEvent', { type: act === 'keydown' ? 'rawKeyDown' : 'keyUp', code: arg, key: k.key, windowsVirtualKeyCode: k.keyCode, nativeVirtualKeyCode: k.keyCode });
