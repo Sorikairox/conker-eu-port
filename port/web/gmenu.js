@@ -103,10 +103,13 @@ const GameFont = (() => {
     }
     return out;
   }
+  // P362: "." and "," (at most 3 x 3 texels) advance only 2 units after a 1-unit offset, so a dot between two digits sat
+  // inside the next digit's lower-left curve ("1.5" read "15"); they get TINY_PAD units more
+  const TINY_PAD = 1.5, tiny = (gl) => gl.w <= 3 && gl.h <= 3;
   // width in N64 units at text scale `scale` (1 = the game's normal text)
   function measure(s, scale = 1) {
     let x = 0;
-    for (const g of glyphsOf(s)) { if (g === 0x60 || g < 0) x += 4; else { const gl = F.glyphs[g]; x += gl.xo + gl.w - 1; } }
+    for (const g of glyphsOf(s)) { if (g === 0x60 || g < 0) x += 4; else { const gl = F.glyphs[g]; x += gl.xo + gl.w - 1 + (tiny(gl) ? TINY_PAD : 0); } }
     return x * scale;
   }
   // draw s at (x, y) N64 units (top of the line), k = canvas pixels per unit
@@ -119,8 +122,12 @@ const GameFont = (() => {
     for (const g of glyphsOf(s)) {
       if (g === 0x60 || g < 0) { x += 4 * scale; continue; }
       const gl = F.glyphs[g]; x += gl.xo * scale;
-      ctx.drawImage(A, (g % 16) * CELL * sk, Math.floor(g / 16) * CELL * sk, gl.w * sk, gl.h * sk, x * k, (y + gl.yo * scale) * k, gl.w * scale * k, gl.h * scale * k);
-      x += (gl.w - 1) * scale;
+      // P362: a tiny glyph drawn below 0.85 x is drawn at 0.85 x, bottom-aligned, at its own centre, so it does not
+      // fade into the bilinear filter at the help text's size
+      const ts = !smooth && tiny(gl) && scale < 0.85 ? 0.85 : scale;
+      const dx = (gl.w * (scale - ts)) / 2, dy = gl.h * (scale - ts);
+      ctx.drawImage(A, (g % 16) * CELL * sk, Math.floor(g / 16) * CELL * sk, gl.w * sk, gl.h * sk, (x + dx) * k, (y + gl.yo * scale + dy) * k, gl.w * ts * k, gl.h * ts * k);
+      x += (gl.w - 1 + (tiny(gl) ? TINY_PAD : 0)) * scale;
     }
     ctx.restore();
     return wdt;
@@ -483,20 +490,42 @@ const GMenu = (() => {
     const helpText = (head ? head + ' ' : '') + (it && !U.cap && !U.note ? (typeof it.help === 'function' ? it.help() : it.help || '') : '');
     const sig = p.id + ':' + p.sel + ':' + helpText;
     if (sig !== U.helpSel) { U.helpSel = sig; U.helpPage = 0; U.helpAt = now; }
-    const HS = 0.62;
-    let lines = GameFont.wrap(helpText, 268, HS);
-    if (lines.length > 4) lines = GameFont.wrap(helpText, 250, HS);   // leave room for the page counter
+    // P362: help at 0.7 (P361: 0.62, where the 3 x 3 "." of the pixel look nearly vanished: "1.5 S" read "15 S"); tiny
+    // glyphs also get a minimum size in GameFont.draw
+    const HS = 0.7;
+    let lines = GameFont.wrap(helpText, 272, HS);
+    if (lines.length > 4) lines = GameFont.wrap(helpText, 256, HS);   // leave room for the page counter
     const pages = Math.max(1, Math.ceil(lines.length / 4));
     if (now - U.helpAt > 5000) { U.helpAt = now; U.helpPage = (U.helpPage + 1) % pages; }
     ctx.fillStyle = `rgba(0,0,0,${0.35 * fade})`; ctx.fillRect((ox + 20) * k, 170 * k, 280 * k, 46 * k);
-    lines.slice(U.helpPage * 4, U.helpPage * 4 + 4).forEach((l, j) => T(l, 26, 174 + j * 10, { scale: HS, color: head && j === 0 && U.helpPage === 0 ? C.head : C.text, alpha: 0.9 }));
+    lines.slice(U.helpPage * 4, U.helpPage * 4 + 4).forEach((l, j) => T(l, 24, 173 + j * 10.5, { scale: HS, color: head && j === 0 && U.helpPage === 0 ? C.head : C.text, alpha: 0.92 }));
     if (pages > 1) T(`${U.helpPage + 1}/${pages}`, 296, 207, { scale: 0.5, color: C.dim, align: 'right' });
-    // footer: what the buttons do (B / CLOSE are also mouse / touch targets)
-    const FS = 0.55;
-    T('A CHOOSE', 26, 224, { scale: FS, color: C.dim });
-    const bw = T(U.stack.length > 1 ? 'B BACK' : 'B CLOSE', 160, 224, { scale: FS, color: C.dim, align: 'center' });
-    U.hits.push({ act: 'back', x0: ox + 160 - bw / 2 - 4, x1: ox + 160 + bw / 2 + 4, y0: 220, y1: 236 });
-    T('< > CHANGE', 294, 224, { scale: FS, color: C.dim, align: 'right' });
+    // footer: what the buttons do, with the N64's button faces drawn as shapes (blue A, green B; the D-pad's arrows) and
+    // the letters in the game's font (B / CLOSE is also a mouse / touch target)
+    const FS = 0.55, FY = 224;
+    const btn = (x, letter, fill) => {
+      ctx.save(); ctx.globalAlpha = 0.95 * fade;
+      ctx.beginPath(); ctx.arc((ox + x) * k, (FY + 3.4) * k, 5.2 * k, 0, 2 * Math.PI); ctx.fillStyle = fill; ctx.fill();
+      ctx.lineWidth = Math.max(1, 0.7 * k); ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.stroke(); ctx.restore();
+      T(letter, x, FY + 0.6, { scale: 0.5, color: '#fff', align: 'center' });
+      return 7;
+    };
+    const arrows = (x) => {   // a small D-pad cross with left / right arms lit
+      const cy = FY + 3.4;
+      ctx.save(); ctx.globalAlpha = 0.95 * fade; ctx.fillStyle = 'rgb(85,85,85)'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = Math.max(1, 0.5 * k);
+      ctx.beginPath(); ctx.rect((ox + x - 5.4) * k, (cy - 1.9) * k, 10.8 * k, 3.8 * k); ctx.rect((ox + x - 1.9) * k, (cy - 5.4) * k, 3.8 * k, 10.8 * k); ctx.stroke(); ctx.fill();
+      ctx.fillStyle = 'rgb(240,240,240)';
+      for (const sx of [-1, 1]) { ctx.beginPath(); ctx.moveTo((ox + x + sx * 4.9) * k, cy * k); ctx.lineTo((ox + x + sx * 2.5) * k, (cy - 1.4) * k); ctx.lineTo((ox + x + sx * 2.5) * k, (cy + 1.4) * k); ctx.fill(); }
+      ctx.restore();
+      return 7;
+    };
+    const bText = U.stack.length > 1 ? 'BACK' : 'CLOSE';
+    btn(30, 'A', 'rgb(40,90,230)'); T('CHOOSE', 38, FY, { scale: FS, color: C.dim });
+    const bw = GameFont.measure(bText, FS) + 14, bx = 160 - bw / 2;
+    btn(bx + 5, 'B', 'rgb(30,160,60)'); T(bText, bx + 13, FY, { scale: FS, color: C.dim });
+    U.hits.push({ act: 'back', x0: ox + bx - 4, x1: ox + bx + bw + 4, y0: 218, y1: 236 });
+    const cw = GameFont.measure('CHANGE', FS);
+    arrows(290 - cw - 8); T('CHANGE', 290, FY, { scale: FS, color: C.dim, align: 'right' });
   }
 
   // ---- mouse / touch
