@@ -106,7 +106,7 @@ for (const ev of ['mousemove', 'pointerdown', 'touchstart']) window.addEventList
 let readyPrev = true;
 function readyPoll(p) {
   const st = (p.b & N64.START) !== 0;
-  if (st && !readyPrev && !running && romOk && !$('ready').hidden && !drawerOpen()) start('game');
+  if (st && !readyPrev && !running && romOk && !$('ready').hidden && !drawerOpen() && !(window.GMenu && GMenu.isOpen)) start('game');   // P365: not while the game-style menu is open before boot
   readyPrev = st;
 }
 $('ready-start').onclick = () => start('game');
@@ -1476,7 +1476,7 @@ optionChanged.online = showOnlineButton;
 showOnlineButton(opt('online') || !!Q.get('netpanel'));
 const netStatus = (s, cls) => { $('net-status').textContent = s; $('net-status').className = cls || ''; };
 const copyCode = (id) => { const t = $(id); t.select(); (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject()).catch(() => document.execCommand('copy')); };
-const netGuard = async (fn) => { try { await fn(); } catch (e) { netStatus(String(e.message || e), 'bad'); log('[net] ' + e, 'fail'); } };
+const netGuard = async (fn) => { try { await fn(); return null; } catch (e) { netStatus(String(e.message || e), 'bad'); log('[net] ' + e, 'fail'); return e; } };   // P365: returns the error (the game-style ONLINE pages show it)
 $('net-delay').value = store.get('netdelay', 3);
 $('net-delay').onchange = () => store.set('netdelay', Math.max(1, Math.min(16, +$('net-delay').value | 0)));
 $('net-delay-auto').checked = store.get('netdelayauto', true);   // P339: automatic input delay from the measured ping
@@ -1493,23 +1493,31 @@ $('net-host').onclick = () => netGuard(async () => {
 const netLockStart = () => { for (const id of ['net-host', 'net-join', 'net-room-create', 'net-room-join', 'net-manual']) $(id).disabled = true; };
 const netUnlockStart = () => { for (const id of ['net-host', 'net-join', 'net-room-create', 'net-room-join', 'net-manual']) $(id).disabled = false; };
 $('net-manual').onchange = () => { $('net-manual-box').hidden = !$('net-manual').checked; };
-$('net-room-create').onclick = () => netGuard(async () => {
+// P365: the room steps are functions shared by the panel's buttons and the game-style ONLINE pages (gmenu.js), so both
+// take exactly the same path through window.__online / net.js (and the panel shows what the game-style pages did)
+async function netRoomCreate() {   // host: make the room; returns its code
   netNeedRom();
   netLockStart();
   try { $('net-room-show').textContent = await window.__online.roomCreate(); } catch (e) { netUnlockStart(); throw e; }
   $('net-room-box').hidden = false; $('net-room-start').hidden = true;
   $('net-step-host').hidden = false; $('net-invite').hidden = true;
-});
-$('net-room-copy').onclick = () => { const c = $('net-room-show').textContent; (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).catch(() => {}); };
-$('net-room-join').onclick = () => netGuard(async () => {
+  return $('net-room-show').textContent;
+}
+async function netRoomJoin(code) {   // guest: join the room with this code
   netNeedRom();
   netLockStart();
-  try { await window.__online.roomJoin($('net-room-code').value); } catch (e) { if (!window.PortNet || !PortNet.t.role) netUnlockStart(); throw e; }
+  $('net-room-code').value = code;
+  try { await window.__online.roomJoin(code); } catch (e) { if (!window.PortNet || !PortNet.t.role) netUnlockStart(); throw e; }
   $('net-room-start').hidden = true;
-});
+}
+async function netStartGame() { $('net-start').disabled = $('net-invite').disabled = true; await window.__online.start(); }   // host
+function netLeave() { window.__online.leave(); $('net-leave').hidden = true; }
+$('net-room-create').onclick = () => netGuard(netRoomCreate);
+$('net-room-copy').onclick = () => { const c = $('net-room-show').textContent; (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).catch(() => {}); };
+$('net-room-join').onclick = () => netGuard(() => netRoomJoin($('net-room-code').value));
 $('net-room-code').onkeydown = (e) => { if (e.key === 'Enter') $('net-room-join').click(); };
 $('net-invite').onclick = () => netGuard(async () => { $('net-invite').disabled = true; try { netShowSlot(await window.__online.invite()); } finally { $('net-invite').disabled = false; } });
-$('net-start').onclick = () => netGuard(async () => { $('net-start').disabled = $('net-invite').disabled = true; await window.__online.start(); });
+$('net-start').onclick = () => netGuard(netStartGame);
 function netSlotBox(ch) {
   let e = $('net-slot-' + (ch + 1));
   if (e) return e;
@@ -1551,7 +1559,7 @@ netEvents.roster.push((slots) => {   // host
 $('net-join').onclick = () => { $('net-step-join').hidden = false; $('net-step-host').hidden = true; netLockStart(); };
 $('net-answer-make').onclick = () => netGuard(async () => { netNeedRom(); $('net-answer-make').disabled = true; $('net-answer').value = await window.__online.join($('net-offer-in').value); });
 $('net-answer-copy').onclick = () => copyCode('net-answer');
-$('net-leave').onclick = () => { window.__online.leave(); $('net-leave').hidden = true; };
+$('net-leave').onclick = netLeave;
 netEvents.status.push((s, cls) => {
   netStatus(s, cls);
   if (/^(connected|joined as)/.test(s) || (window.PortNet && PortNet.t.started)) { $('net-step-join').hidden = true; $('net-room-start').hidden = true; $('net-leave').hidden = false; }
@@ -1560,11 +1568,13 @@ let netWaitSince = 0;
 netEvents.tick.push((t) => {   // ~100 Hz from net.js
   const now = performance.now();
   if (!t.waiting) netWaitSince = 0; else if (!netWaitSince) netWaitSince = now;
-  $('netwait').hidden = !(netWaitSince && now - netWaitSince > 400);
-  if (!$('netwait').hidden) {   // P344: name the players the game waits for
-    const w = (t.peers || []).filter((p) => p.waiting).map((p) => 'player ' + (p.ch + 1));
-    $('netwait').textContent = `waiting for ${w.length ? w.join(', ') : 'the other players'}…`;
-  }
+  const waitShown = !!(netWaitSince && now - netWaitSince > 400);
+  const w = (t.peers || []).filter((p) => p.waiting).map((p) => 'player ' + (p.ch + 1));   // P344: name the players the game waits for
+  const waitText = waitShown ? `waiting for ${w.length ? w.join(', ') : 'the other players'}…` : '';
+  const gnet = !!(window.GNet && GNet.wanted());   // P365: with the game-style menu on, the message is drawn in the game's font
+  $('netwait').hidden = !waitShown || gnet;
+  if (waitShown && !gnet) $('netwait').textContent = waitText;
+  if (gnet) GNet.wait(waitText);
   if (now - (netEvents.lastInfo || 0) > 500) {
     netEvents.lastInfo = now;
     $('net-info').textContent = `you are player ${PortNet.t.myCh + 1} · retrace ${t.frame} · waits ${t.stalls} · input delay ${netCfg ? netCfg.delay * 20 + ' ms' + (netCfg.autoDelay ? ' (auto)' : '') : '–'}`;
