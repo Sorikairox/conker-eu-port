@@ -508,6 +508,17 @@ flash, controller pak).
 45. A test URL that autostarts the game (?app=game) never shows the pre-boot screens: drive the Press Start screen.
 46. A menu where you type letters must consume letter keys before the game's key bindings: with WASD bound to the
     stick, typing "D" also moved the cursor; and keep Start apart from A where Start has its own meaning (JOIN).
+47. An overlay that must let clicks through to the game (here: a click on the picture captures the mouse for the photo
+    camera): give the canvas `pointer-events: none` and hit-test its drawn rows in capture-phase window listeners. Swallow
+    the whole family (pointerdown, mousedown, mouseup, click, dblclick, contextmenu, wheel): preventDefault on
+    pointerdown does not stop the click that follows, and the click then reaches the game's canvas.
+48. Footer buttons whose label changes with the state ("CAMERA" / "POSE & OUTFIT") move every button after them: a
+    click aimed at the next one misses. Keep footer labels fixed.
+49. A bitmap font may lack common marks ('*' drew as '"' in Conker's font 0): draw markers (current entry, bullets) as
+    shapes, and check every symbol you print against the font's map.
+50. A test helper defined in one eval step (window.JK = ...) with a syntax error fails that step quietly, and every later
+    step that uses it does nothing: check the first step's result before reading the rest. A page-only toggle key is
+    also safer on the key event itself than polled once per frame (a short tap can fall between two polls).
 
 ---
 

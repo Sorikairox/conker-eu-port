@@ -161,6 +161,22 @@ byte for byte). The choices are remembered while the tab stays open and come bac
 With a gamepad (or the keyboard), **right stick click / O** gives the panel the D-pad: up / down choose a control,
 left / right change it, A presses it; press it again to give the D-pad back to the camera.
 
+**Photo mode with the game-style menu (P366, option *Game-style menu (Esc)*):** the photo HUD (bottom left) and the
+POSE & OUTFIT panel (right) are drawn in the game's own font and colours, like the game-style menu, with the N64 button
+faces in their footers; every control of the page panel is there. **O / right stick click** gives the panel the
+D-pad (as before; the cap on the panel shows the key or button): up / down choose a row, left / right change it, **A**
+(Space, Enter) chooses, **B** (F, Esc, Backspace) goes back, and on the first page gives the D-pad back to the camera.
+The stick, C buttons, R / Z, L and Start keep working the camera, the HUD and leaving. **Animation**, **Model** and
+**Item 1-4** open their whole list as a page (858 animations, 187 models, 64 item lists): left / right turn a page,
+holding up / down speeds up (5, then 25 rows a step), Page Up / Down, Home / End, the mouse wheel and the scroll bar
+work too; A picks, B goes back unchanged. **Parts** and **Materials** are pages; each material has Shown, Texture, Tint %,
+a Colour palette and Red / Green / Blue. **Fold when not editing** shows only the panel's title while the camera has
+the controls. **H / the gamepad's RT** (*Photo mode: hide / show the menus*, rebindable under Controls) hides every menu
+for a clean view, and shows them again (O or Esc also bring them back). **Esc** with the panel not in use leaves photo
+mode. The mouse clicks rows (on a value: its left / right half steps it), the footer's SAVE / VIEW / HUD / EXIT /
+POSE & OUTFIT / HIDE MENUS, and right-click goes back; a click on the picture still captures the mouse to look around.
+Saved PNGs never contain any menu.
+
 ## Options
 
 The **Options** button in the menu (Esc) opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.

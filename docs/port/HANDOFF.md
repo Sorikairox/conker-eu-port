@@ -88,6 +88,38 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P366 (port-web, 2026-10-30): photo mode in the game's style (native menus)
+- 24a101bf (option `nativemenu`, still default off): gmenu.js GPhoto draws photo mode's HUD (bottom left: PHOTO MODE,
+  VIEW / ROLL / UNITS AWAY / HUD, controls paged, footer A SAVE, B VIEW, L HUD, S EXIT, [O] POSE & OUTFIT, [H] HIDE
+  MENUS) and the Pose & Outfit panel (right) on canvas #gphoto in the game's font with GMenu's look; body.gphoto hides
+  #photo, #photo-look, #photo-toast and #menu-btn. Pages: POSE & OUTFIT (Animation, Play, Frame, Speed, Model, Item
+  1-4, He carries rows, Eyelids / Eyes, Parts, Materials, Reset, Fold when not editing, Done), list pages (858
+  animations, 187 models, 64 item lists: N OF M + PAGE, current = yellow diamond, left / right a page, held up / down
+  5 then 25 rows a step, Page Up / Down, Home / End, wheel, scroll bar), PARTS, MATERIALS, one page per material
+  (Shown, Texture, Tint %, Colour palette, Red / Green / Blue in steps of 15). Rows change main.js `look` and call
+  lookChanged() / lookSave() exactly like the page panel (still built, hidden), so pc_photo.c and the snapshot restore
+  are unchanged. Input: lookTick hands pad 1 to GPhoto.input (O / RS focus, D-pad, A, B; mask), keydown -> GPhoto.key
+  (arrows / Enter / Esc / Backspace / Page / Home / End with the focus; Esc unfocused = show menus or leave photo mode;
+  PHOTOUI on the key event). Mouse by capture-phase hit-testing (#gphoto has pointer-events none). New page input
+  PHOTOUI (INPUTS row "Photo mode: hide / show the menus", H / pad 7 = RT; dropped if a saved binding uses H / RT).
+  photoToast -> GPhoto (active) or GNet (game font) else the page toast. photo.viewReq = the footer's VIEW. GFace = the
+  footer faces shared with GMenu (round buttons, D-pad cross, key cap). JS only (conker.wasm e44686be... unchanged).
+- 0ddaf82e tools/port/scripts/photo_menu_shots.sh OUTDIR [720|1080|both|pad|mouse|off] [LEVEL]; audprobe.js
+  `MS:click:X,Y`.
+- Evidence port_work/p366/final: w00..w19 (1280x720 keys: HUD, focus, animation list, fast scroll to 223 of 858, pick,
+  play, model list, teddy 177, item list, item on, He carries hidden, lower rows, materials, tint 100 % yellow, hidden,
+  hidden later, shown, unfocused, left, walked 2149,1926 -> 1583,1840), f00..f19 (same at 1920x1080 widescreen + fullres
+  + smooth + hi-res 2D), pad0..7 (fake pad: RS, D-pad, A, RT hide / show, X, Start; RS / RT caps), mouse0..6 (Model row,
+  130 mech suit, Parts page part 0 hidden, footer SAVE -> 1280x960 PNG + message, Play, HIDE MENUS, H, EXIT), off0..3
+  (option off: page panels as before, H does nothing). Every run: "[photo] off: ... state hash X (same as at entry)".
+  e2e_off / e2e_on: p357 7700 IDENTICAL both. net_ui_photo (port_work/p366): netpair UI=1, nativemenu + photomode on
+  both, ?photoat=3000 on the guest: 8425 IDENTICAL, session photomode=0 on the guest (photo mode still off online).
+  check GREEN. Deployed. No decomp symbols touched (nothing to rename).
+- Not done: game menu sounds (P367); the shown panel covers ~40 % of a 4:3 picture (fold / hide); the period glyph sits
+  high at small sizes (GameFont tiny-glyph minimum from P362); no real gamepad / phone test.
+- P367 needs: NATIVE_MENUS.md section 7 "Next" (menu sounds through a local-only port hook, silent online; an OPTIONS
+  item in the game's own title OPTIONS page if settings_list_draw can take a port row). GPhoto / GMenu / GNet share
+  GameFont and GFace; a sound hook would serve all three.
 ### P365 (port-web, 2026-10-30): game-style ONLINE pages + in-session messages in the game font (native menus)
 - c98b1699 (option `nativemenu`, still default off): the game-style menu's Online row opens ONLINE pages (gmenu.js):
   setup (Create room / Join room / Input delay / Manual codes (page menu) / Back), host room page (big code, players

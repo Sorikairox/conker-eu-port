@@ -52,7 +52,7 @@ in-game overlay "waiting for the other players".
 ### F. Input recorder panel
 Name, Start recording (reboots), Stop and save, the last 10 recordings (download / delete), REC badge over the game.
 
-### G. Photo mode (in-game overlays already)
+### G. Photo mode (in-game overlays already; game-style since P366 with the option on)
 Photo HUD (help, info, Save PNG, Exit), Pose & Outfit panel (pose, animation, frame, speed, model, items, face,
 materials: hide / texture / tint), toast, flash. Gamepad navigation exists (right stick click = panel focus).
 
@@ -253,10 +253,31 @@ single source of truth (`OPTIONS`).
     demo started (still on the slot page, OPTIONS selected, after closing). Nothing to fix.
   - Not done: the pre-boot backdrop is black (no game picture before boot; P368's title art from a cached ROM could
     go there); the manual copy-paste codes stay in the drawer (long text; the row opens it).
+- **P366 done** (commits 24a101bf feature, 0ddaf82e tests; still option `nativemenu`, default off):
+  - Photo mode in the game's style (gmenu.js GPhoto, canvas #gphoto; body.gphoto hides #photo, #photo-look,
+    #photo-toast and the corner button): HUD bottom left (PHOTO MODE, VIEW / ROLL / UNITS AWAY / HUD, the controls
+    paged, footer A SAVE, B VIEW, L HUD, S EXIT, [O] POSE & OUTFIT, [H] HIDE MENUS) and the Pose & Outfit panel right
+    (pages POSE & OUTFIT, list pages for animations / models / item lists, PARTS, MATERIALS, one page per material with
+    Shown / Texture / Tint % / Colour palette / Red / Green / Blue). Footer faces shared with GMenu (GFace).
+  - Same choices, same path: the rows change main.js's `look` and call lookChanged() / lookSave() like the page panel
+    (still built, hidden), so pc_photo.c gets the same calls; nothing writes game memory: "state hash ... same as at
+    entry" in every run, Conker walks on after leaving.
+  - Input as GMenu and the old panel: O / right stick click = focus, D-pad / arrows move and change (held: 90 ms repeat,
+    5 then 25 rows a step on lists), A / Enter choose, B / Esc / Backspace back (first page: unfocus), Page Up / Down,
+    Home / End; mouse rows / values / footer / wheel / scroll bar by capture-phase hit-testing (clicks elsewhere still
+    capture the mouse for the camera). Esc unfocused leaves photo mode (no page drawer from photo mode).
+  - Hide all menus: new page input PHOTOUI (H, gamepad RT = 7; rebindable; unbound if a saved binding already uses
+    them), handled on the key event itself; a 1.8 s fading hint tells how to get them back.
+  - Messages (saved PNG, refusals) in the game's font: GPhoto's top line while active, GNet when photo mode did not
+    start.
+  - Tests: tools/port/scripts/photo_menu_shots.sh (720 / 1080 widescreen keys, pad, mouse, off); e2e p357 IDENTICAL off
+    and on; netpair UI=1 with nativemenu + photomode on both peers and ?photoat on the guest: 8425 IDENTICAL, session
+    photomode=0 (still refused online). JS only: conker.wasm unchanged.
+  - Not done: the game's menu sounds (P367); the panel covers about 40 % of a 4:3 picture while shown (fold it, or hide
+    the menus); the period glyph sits a little high at the small sizes (GameFont's tiny-glyph minimum, P362).
 - **Next** (the original P365 "Controls + Saves overlays" was done in P362; proposed new order):
   1. ~~P365 Online overlay~~ (done, above).
-  2. **P366 photo mode restyle**: photo HUD + Pose & Outfit panel drawn with GameText in the overlay style (keep the pad
-     navigation and the hashed-state restore).
+  2. ~~P366 photo mode restyle~~ (done, above).
   3. **P367 sounds + game OPTIONS page row**: menu move / choose sounds for GMenu (local only: through a port hook that
      plays the game's 0x62D / 0x500 when no session is hashed, silent online), and an "OPTIONS" (port) item in the
      game's own title OPTIONS page (title_press_start_page) if settings_list_draw can take a port row cleanly.
