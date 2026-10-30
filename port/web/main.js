@@ -1091,7 +1091,8 @@ window.addEventListener('keyup', (e) => { keysDown.delete(e.code); });
 window.addEventListener('blur', () => keysDown.clear());
 
 // remap panel
-const keyName = (c) => !c ? '—' : c.replace(/^(Key|Digit)/, '').replace(/^Arrow/, 'Arrow ');
+const keyName = (c) => !c ? '—' : c.replace(/^(Key|Digit)/, '').replace(/^Arrow/, 'Arrow ')
+  .replace(/^(Control|Shift|Alt|Meta)(Left|Right)$/, (_, m, side) => `${m === 'Control' ? 'Ctrl' : m} ${side.toLowerCase()}`).replace(/^Numpad/, 'Num ');   // P362: 'Ctrl left', not 'ControlLeft'
 const padName = (i) => i === undefined || i === null ? '—' : ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'Back', 'Start', 'LS', 'RS', 'D↑', 'D↓', 'D←', 'D→', 'Home'][i] || 'btn ' + i;
 function renderBinds() {
   const tb = $('binds');
@@ -1120,17 +1121,24 @@ function startListen(kind, id, btn) {
 function finishListen(v) {
   const [kind, id] = listening;
   listening = null;
+  bindSet(kind, id, v);
+}
+// one binding change (the drawer's Controls tab and, P362, the game-style menu's Controls pages): kind 'key' (v = a
+// KeyboardEvent.code) or 'pad' (v = a standard-gamepad button index); v null = unbound. One input per key / button.
+function bindSet(kind, id, v) {
   if (kind === 'key') {
     for (const k in keyMap) if (v && keyMap[k] === v) delete keyMap[k];   // one N64 input per key
     if (v) keyMap[id] = v; else delete keyMap[id];
     store.set('keys', diff(keyMap, DEFAULT_KEYS));
   } else {
-    for (const k in padMap) if (padMap[k] === v) delete padMap[k];
-    padMap[id] = v;
+    for (const k in padMap) if (v !== null && padMap[k] === v) delete padMap[k];
+    if (v !== null) padMap[id] = v; else delete padMap[id];
     store.set('padbuttons', diff(padMap, DEFAULT_PAD));
   }
+  log(`[binds] ${kind} ${id} = ${kind === 'key' ? keyName(v) : padName(v)}`);
   renderBinds();
 }
+function bindReset() { keyMap = Object.assign({}, DEFAULT_KEYS); padMap = Object.assign({}, DEFAULT_PAD); store.set('keys', {}); store.set('padbuttons', {}); renderBinds(); log('[binds] defaults'); }
 function diff(m, d) {  // stored = differences from the defaults (null = unbound)
   const o = {};
   for (const k of new Set([...Object.keys(m), ...Object.keys(d)])) if (m[k] !== d[k]) o[k] = m[k] === undefined ? null : m[k];
@@ -1138,14 +1146,14 @@ function diff(m, d) {  // stored = differences from the defaults (null = unbound
 }
 function cleanMap(m) { for (const k in m) if (m[k] === null) delete m[k]; return m; }
 cleanMap(keyMap); cleanMap(padMap);
-$('bind-reset').onclick = () => { keyMap = Object.assign({}, DEFAULT_KEYS); padMap = Object.assign({}, DEFAULT_PAD); store.set('keys', {}); store.set('padbuttons', {}); renderBinds(); };
+$('bind-reset').onclick = bindReset;
 renderBinds();
 
 // ---------------------------------------------------------------- EEPROM saves
 const slot = Q.get('slot') || '0';
 const saveKey = () => `${romSha1}/eeprom/${slot}`;
 let eepTimer = null, eepWrites = 0;
-const eepStatus = (s) => { $('eep-status').textContent = s; };
+const eepStatus = (s) => { $('eep-status').textContent = s; if (window.GMenu) GMenu.note(s); };   // P362: also shown in the game-style menu's Saves page
 function eepBytes() {
   const n = M._port_eeprom_size(), p = M._port_eeprom_ptr();
   return M.HEAPU8.slice(p, p + n);
@@ -1344,12 +1352,19 @@ document.addEventListener('visibilitychange', () => {
 window.portVolume = store.get('volume', 80) / 100;
 if (Q.get('mute')) window.portVolume = 0;  // P271: test runs pass ?mute=1 (audprobe.sh does by default): gain 0
 $('volume').value = Math.round(window.portVolume * 100);
-$('volume').addEventListener('input', (e) => {
-  window.portVolume = e.target.value / 100;
-  store.set('volume', +e.target.value);
+// master volume (page-side gain, 0..100) from the drawer's slider or (P362) the game-style menu; under ?mute=1 (tests) it
+// stays 0 and untouched
+function setVolume(v) {
+  if (Q.get('mute')) return false;
+  v = Math.max(0, Math.min(100, Math.round(v)));
+  window.portVolume = v / 100;
+  store.set('volume', v);
+  $('volume').value = v;
   const a = window.portAudio;
   if (a && a.gain) a.gain.gain.value = window.portVolume;
-});
+  return true;
+}
+$('volume').addEventListener('input', (e) => setVolume(+e.target.value));
 
 // Browsers start an AudioContext only after a user gesture. The game opens its context at the first
 // audio buffer (port/audio/aud_out.c); the first click / key press resumes it, and a context opened

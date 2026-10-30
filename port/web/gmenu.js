@@ -145,8 +145,8 @@ const MenuModel = (() => {
     { id: 'picture', label: 'Picture', help: 'Widescreen, resolution, smooth motion, sharp menus and font.', keys: ['widescreen', 'fullres', 'hfr', 'hires2d', 'smoothfont'] },
     { id: 'hud', label: 'HUD and information', help: 'What the screen shows during play: save icon, health, cash, air meter, crosshair.', keys: ['saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair'] },
     { id: 'gameplay', label: 'Gameplay', help: 'Cutscene skipping, intro, breath, tail spin, ledges, motion blur, detail.', keys: ['skipcut', 'skipintro', 'longbreath', 'longspin', 'ledgegrab', 'nodrunk', 'conkerlod'] },
-    { id: 'controls', label: 'Controls', help: 'Toggles for crouch, R-Look and walk, swimming direction, free camera, rumble. Key and pad bindings: page menu.', keys: ['togglecrouch', 'togglerlook', 'togglewalk', 'swiminvert', 'freecam', 'rumble'] },
-    { id: 'sound', label: 'Sound', help: 'Music, sound effects and speech volumes.', keys: ['volmusic', 'volsfx', 'volspeech'] },
+    { id: 'controls', label: 'Controls', help: 'Keyboard keys and gamepad buttons, touch controls, toggles for crouch, R-Look and walk, swimming direction, free camera, rumble.', keys: ['togglecrouch', 'togglerlook', 'togglewalk', 'swiminvert', 'freecam', 'rumble'] },
+    { id: 'sound', label: 'Sound', help: 'Master volume, music, sound effects and speech volumes.', keys: ['volmusic', 'volsfx', 'volspeech'] },
     { id: 'tools', label: 'Tools', help: 'Online play, the input recorder, photo mode and this menu.', keys: ['online', 'recorder', 'photomode', 'nativemenu'] },
   ];
   const TOOL_KEYS = ['online', 'recorder', 'photomode'];
@@ -192,7 +192,8 @@ const MenuModel = (() => {
 // ---------------------------------------------------------------- the overlay
 const GMenu = (() => {
   const U = { open: false, t0: 0, closing: 0, stack: [], hits: [], raf: 0, paused: false,
-    prev: 0, repeatAt: 0, held: 0, helpPage: 0, helpAt: 0, helpSel: '', homePrev: false, mx: -1, my: -1 };
+    prev: 0, repeatAt: 0, held: 0, helpPage: 0, helpAt: 0, helpSel: '', homePrev: false, mx: -1, my: -1,
+    cap: null, note: '', noteAt: 0 };
   const cv = document.getElementById('gmenu');
   const ROW = 15, ROWS = 8, TOP = 46, X0 = 34, X1 = 286;   // row spacing / visible rows / list top / label x / value right edge (units)
   const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
@@ -200,25 +201,90 @@ const GMenu = (() => {
   const wanted = () => !!opt('nativemenu');
   const page = () => U.stack[U.stack.length - 1];
 
-  // pages: main (preset, sections, page menu, back to game) and one per section
+  // pages: main (preset, sections, saves, fullscreen, photo / online / record, tools, page menu, back to game), one per
+  // section (Controls and Sound get page-side rows too) and P362's Keyboard keys / Gamepad buttons / Saves pages
+  const activated = () => !navigator.userActivation || navigator.userActivation.isActive;   // file pickers and fullscreen need a key press or click (a gamepad press is no user gesture)
+  const GESTURE = 'The browser allows this only right after a key press or a click: press Enter or click this line.';
+  // a tool row: turns its option on if needed, then opens its panel / flow (lockReason: online, recording)
+  // (lock: a function giving the reason it cannot open now, default the option's lockReason)
+  function toolAction(key, label, help, go, lock) {
+    const o = OPTIONS.find((x) => x.key === key);
+    const why = lock || (() => (o ? MenuModel.lockReason(o) : ''));
+    return { kind: 'action', label, help, locked: why,
+      act: () => {
+        if (why()) return;
+        if (o && !opt(key)) { setOption(o, true); optionPicked(o); showOptionValue(o); log(`[options] ${key} on (game menu)`); }
+        close(); go();
+      } };
+  }
   function mainItems() {
-    return [MenuModel.presetItem()].concat(MenuModel.sections().map((s) => ({ kind: 'link', label: s.label, help: s.help, section: s.id })), [
-      { kind: 'action', label: 'Page menu (all settings)', help: 'The page menu: key and pad bindings, saves, online, the input recorder, fullscreen and debug.', act: () => { close(); drawerSet(true); toggle('options', true); } },
+    return [MenuModel.presetItem()].concat(MenuModel.sections().filter((s) => s.id !== 'tools').map((s) => ({ kind: 'link', label: s.label, help: s.help, page: s.id })), [
+      { kind: 'link', label: 'Saves', help: 'Your save is kept in this browser automatically. Export it to a file or import one.', page: 'saves' },
+      { kind: 'toggle', label: 'Fullscreen', help: 'The whole screen (also F11, Alt+F or a double click on the picture). In fullscreen Esc leaves fullscreen: open this menu with the corner button or the gamepad.',
+        get: () => !!document.fullscreenElement, set: () => { if (!activated()) { note(GESTURE); return false; } fullscreen(); return true; } },
+      toolAction('photomode', 'Photo mode', 'Freeze the game and move a free camera; A saves a picture, Start leaves (P or the gamepad\'s Back button also start it). Single player only.', () => setTimeout(() => photoRequest(true), 50)),
+      toolAction('online', 'Online', 'Play a multiplayer match with friends on their own computers: make a room or join one with its code (opens the page panel: the room code is typed there).', () => { drawerSet(true); toggle('online', true); },
+        () => (recCfg || (NETDET && !netCfg) ? 'Not during a recording.' : '')),   // during a session: its status / Leave
+      toolAction('recorder', 'Record', 'The input recorder: record a play session from power-on for the developers\' automatic replay tests (opens the page panel).', () => { drawerSet(true); toggle('rec', true); recShowList(); },
+        () => (netCfg ? 'Not during an online session.' : '')),   // while recording: Stop and save
+      { kind: 'link', label: 'Tools', help: MenuModel.sections().find((s) => s.id === 'tools').help, page: 'tools' },
+      { kind: 'action', label: 'Page menu (developer)', help: 'The page\'s own menu: the same settings plus manual online codes, the debug console and developer tools.', act: () => { close(); drawerSet(true); toggle('options', true); } },
       { kind: 'action', label: 'Back to game', help: 'Close this menu (B, Esc or Start on this line).', act: () => close() },
+    ]);
+  }
+  // key / button binding rows (INPUTS, keyMap, padMap, keyName, padName, bindSet, bindReset: main.js)
+  const STICK_IDS = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'HALF'];
+  function bindItems(kind) {
+    const rows = INPUTS.map(([id, label]) => {
+      const stick = kind === 'pad' && STICK_IDS.includes(id);
+      return { kind: 'bind', bkind: kind, id, label,
+        help: stick ? 'The gamepad\'s left stick (half tilt: tilt it less).'
+          : kind === 'key' ? 'Choose, then press the new key: Esc cancels, Backspace leaves it unbound. A key does one thing: it leaves its old input.'
+          : 'Choose, then press the new button on the gamepad (nothing for 6 s, or Esc: cancel). A button does one thing: it leaves its old input.',
+        locked: () => (stick ? 'The left stick.' : ''),
+        value: () => (stick ? (id === 'HALF' ? '-' : 'LEFT STICK') : kind === 'key' ? keyName(keyMap[id]) : padName(padMap[id])) };
+    });
+    return rows.concat([
+      { kind: 'action', label: 'Defaults (keys and buttons)', help: 'Every key and gamepad button back to its default.', act: () => { bindReset(); note('Keys and buttons are back to the defaults.'); } },
+      { kind: 'action', label: 'Back', help: 'Back to the controls.', act: () => back() },
     ]);
   }
   function itemsOf(p) {
     if (p.id === 'main') return mainItems();
+    if (p.id === 'keys' || p.id === 'pad') return bindItems(p.id === 'keys' ? 'key' : 'pad');
+    const backRow = { kind: 'action', label: 'Back', help: 'Back to the options.', act: () => back() };
+    if (p.id === 'saves') return [
+      { kind: 'action', label: 'Export save', help: 'Download your save as a file (conker-eu-slot0.eep) to keep it or move it to another browser.', act: () => $('eep-export').click() },
+      { kind: 'action', label: 'Import save', help: 'Replace this browser\'s save with a .eep file (the game restarts to read it). ' + GESTURE.replace('this', 'the file picker'),
+        locked: () => (netCfg || recCfg || NETDET ? 'Not during an online session or a recording.' : ''),
+        act: () => { if (netCfg || recCfg || NETDET) return; if (!activated()) { note(GESTURE); return; } $('eep-import').click(); } },
+      backRow,
+    ];
     const s = MenuModel.sections().find((x) => x.id === p.id);
-    return s.items.concat([{ kind: 'action', label: 'Back', help: 'Back to the options.', act: () => back() }]);
+    let pre = [];
+    if (p.id === 'controls') pre = [
+      { kind: 'link', label: 'Keyboard keys', help: 'Which key does what.', page: 'keys' },
+      { kind: 'link', label: 'Gamepad buttons', help: 'Which gamepad button does what (the left stick is the N64 stick, the right stick the C buttons or the free camera).', page: 'pad' },
+      { kind: 'toggle', label: 'Touch controls', help: 'On-screen stick and buttons for phones and tablets (they show by themselves on a touch screen).',
+        get: () => !$('touch').hidden, set: () => { $('t-touch').click(); return true; } },
+    ];
+    else if (p.id === 'sound') pre = [
+      { kind: 'range', label: 'Master volume', help: 'The volume of everything (this browser only; online each player has their own).',
+        locked: () => (Q.get('mute') ? 'Muted for this test run (?mute=1).' : ''),
+        get: () => Math.round(window.portVolume * 100), set: (v) => setVolume(Math.round(v / 5) * 5) },
+    ];
+    return pre.concat(s.items, [backRow]);
   }
-  const titleOf = (p) => (p.id === 'main' ? 'Options' : MenuModel.sections().find((x) => x.id === p.id).label);
+  const TITLES = { main: 'Options', keys: 'Keyboard keys', pad: 'Gamepad buttons', saves: 'Saves' };
+  const titleOf = (p) => TITLES[p.id] || MenuModel.sections().find((x) => x.id === p.id).label;
+  // a short message in the help box (save export / import results, gesture hints)
+  function note(s) { U.note = String(s || ''); U.noteAt = performance.now(); }
 
-  function open() {
+  function open(how) {
     if (U.open || typeof running === 'undefined' || running !== 'game') return false;
     if (photo.state === 2 || !GameFont.load()) return false;   // photo mode has the pad; no font yet: the drawer instead
     U.open = true; U.t0 = performance.now(); U.closing = 0; U.stack = [{ id: 'main', sel: 0, top: 0 }];
-    U.prev = -1; U.held = 0; U.helpSel = '';
+    U.prev = -1; U.held = 0; U.helpSel = ''; U.cap = null; U.note = '';
     document.body.classList.add('gmenu'); cv.hidden = false;
     // single player: pause like the drawer (never online, never while recording or replaying)
     if (!netCfg && !recCfg && !NETDET && !userPaused) { U.paused = true; setPaused(true); }
@@ -229,7 +295,7 @@ const GMenu = (() => {
   }
   function close() {
     if (!U.open) return;
-    U.open = false;
+    U.open = false; U.cap = null;
     document.body.classList.remove('gmenu'); cv.hidden = true;
     if (U.paused && userPaused) setPaused(false);
     U.paused = false;
@@ -238,7 +304,7 @@ const GMenu = (() => {
     $('canvas').focus();
     log('[gmenu] close');
   }
-  function back() { if (U.stack.length > 1) { U.stack.pop(); U.helpSel = ''; } else close(); }
+  function back() { U.note = ''; if (U.stack.length > 1) { U.stack.pop(); U.helpSel = ''; } else close(); }
 
   // ---- actions on the selected item
   function moveSel(d) {
@@ -253,9 +319,24 @@ const GMenu = (() => {
   }
   function choose(item) {
     if (!item) return;
-    if (item.kind === 'link') { U.stack.push({ id: item.section, sel: 0, top: 0 }); U.helpSel = ''; }
+    if (item.kind === 'link') { U.stack.push({ id: item.page, sel: 0, top: 0 }); U.helpSel = ''; U.note = ''; }
+    else if (item.kind === 'bind') capture(item);
     else if (item.kind === 'action') item.act();
     else change(item, 1);
+  }
+
+  // ---- P362 key / button capture for a binding row: U.cap = { kind, id, t0, armed } until a key / button comes
+  function capture(item) {
+    if (item.locked && item.locked()) return;
+    U.cap = { kind: item.bkind, id: item.id, t0: performance.now(), armed: false };
+    log(`[gmenu] capture ${item.bkind} ${item.id}`);
+  }
+  function captureDone(v) {   // undefined = cancelled, null = unbound
+    const c = U.cap; U.cap = null;
+    if (!c || v === undefined) { note('Not changed.'); return; }
+    bindSet(c.kind, c.id, v);
+    note(v === null ? 'Unbound.' : `Now: ${c.kind === 'key' ? keyName(v) : padName(v)}.`);
+    U.prev = -1;   // the capturing press does nothing in the menu
   }
 
   // ---- input: one call per animation frame from pollInput with pad 1 (keyboard + first gamepad + touch); true = the
@@ -263,11 +344,22 @@ const GMenu = (() => {
   function poll(d) {
     const gp = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find((g) => g && g.connected);
     const raw = (i) => !!(gp && gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > 0.5));
+    const now = performance.now();
     const home = raw(16);
-    if (home && !U.homePrev) { U.homePrev = true; if (U.open) close(); else if (wanted()) open(); return U.open; }
+    if (home && !U.homePrev && !U.cap) { U.homePrev = true; if (U.open) close(); else if (wanted()) open(); return U.open; }
     U.homePrev = home;
     if (!U.open) return false;
-    const b = d.b | 0, now = performance.now();
+    if (U.cap) {   // binding capture: the menu does not move meanwhile
+      if (U.cap.kind === 'pad') {
+        const down = gp ? gp.buttons.map((_, i) => raw(i)) : [];
+        if (!U.cap.armed) U.cap.armed = !down.some(Boolean);   // first every button up (the press that chose the row)
+        else { const i = down.findIndex(Boolean); if (i >= 0) { captureDone(i); return true; } }
+      }
+      if (U.cap && now - U.cap.t0 > 6000) captureDone(undefined);
+      U.prev = -1;
+      return true;
+    }
+    const b = d.b | 0;
     let bits = 0;
     if ((b & N64.DU) || d.y > 40) bits |= 1;
     if ((b & N64.DD) || d.y < -40) bits |= 2;
@@ -288,11 +380,25 @@ const GMenu = (() => {
     else if (fresh & 32) back();
     return true;
   }
-  // keys the pad mapping does not cover (main.js keydown calls this first while the menu is open); true = used
+  // keys while the menu is open (main.js keydown calls this first); true = used. The arrows, Enter, Esc and Backspace
+  // always work here, whatever the bindings (P362: so a rebinding can never lock the keyboard out of the menu); other
+  // bound keys (WASD, Space, F ...) reach the menu through pad 1. During a capture every key goes to the capture.
   function key(e) {
     if (!U.open) return false;
-    if (e.code === 'Escape' || e.code === 'Backspace') { back(); return true; }
-    return false;
+    if (U.cap) {
+      if (U.cap.kind === 'key' && !e.repeat) { if (e.code === 'Escape') captureDone(undefined); else if (e.code === 'Backspace') captureDone(null); else captureDone(e.code); }
+      else if (e.code === 'Escape') captureDone(undefined);
+      return true;
+    }
+    if (e.code === 'Escape' || e.code === 'Backspace') { if (!e.repeat) back(); return true; }
+    const item = itemsOf(page())[page().sel];
+    if (e.code === 'ArrowUp') moveSel(-1);
+    else if (e.code === 'ArrowDown') moveSel(1);
+    else if (e.code === 'ArrowLeft') change(item, -1);
+    else if (e.code === 'ArrowRight') change(item, 1);
+    else if (e.code === 'Enter' || e.code === 'NumpadEnter') { if (!e.repeat) choose(item); }
+    else return false;
+    return true;
   }
 
   // ---- drawing
@@ -339,6 +445,12 @@ const GMenu = (() => {
       else if (it.kind === 'range') { v = it.get() + '%'; vc = lock ? C.lock : sel ? C.on : C.off; }
       else if (it.kind === 'choice') { v = it.names(it.get()); vc = lock ? C.lock : C.on; }
       else if (it.kind === 'link') v = '>';
+      else if (it.kind === 'bind') {
+        const cap = U.cap && U.cap.id === it.id && U.cap.kind === it.bkind;
+        v = cap ? (it.bkind === 'key' ? 'PRESS A KEY' : 'PRESS A BUTTON') : it.value();
+        vc = cap ? C.on : lock ? C.lock : sel ? C.text : C.dim;
+        if (cap) { T(v, X1, y, { color: vc, scale: 0.85, align: 'right', alpha: pulse }); v = ''; }
+      }
       if (v) {
         if (sel && !lock && (it.kind === 'range' || it.kind === 'choice')) { T('<', X1 - GameFont.measure(v, 0.85) - 9, y, { color: vc, scale: 0.85, alpha: pulse }); T('>', X1 + 4, y, { color: vc, scale: 0.85, alpha: pulse }); }
         T(v, X1, y, { color: vc, scale: 0.85, align: 'right' });
@@ -348,7 +460,9 @@ const GMenu = (() => {
     if (p.top + ROWS < items.length) T('V', 160, TOP + ROWS * ROW - 2, { color: C.dim, align: 'center', scale: 0.6 });
     // help for the selected line (pages of 4 lines, turning every 5 s)
     const it = items[p.sel], lock = it && it.locked ? it.locked() : '';
-    const helpText = (lock ? lock + ' ' : '') + (it ? (typeof it.help === 'function' ? it.help() : it.help || '') : '');
+    if (U.note && now - U.noteAt > 4000) U.note = '';
+    const head = U.cap ? (U.cap.kind === 'key' ? 'Press the new key (Esc: cancel, Backspace: unbound).' : 'Press the new gamepad button (Esc or 6 s: cancel).') : U.note || lock;
+    const helpText = (head ? head + ' ' : '') + (it && !U.cap && !U.note ? (typeof it.help === 'function' ? it.help() : it.help || '') : '');
     const sig = p.id + ':' + p.sel + ':' + helpText;
     if (sig !== U.helpSel) { U.helpSel = sig; U.helpPage = 0; U.helpAt = now; }
     const HS = 0.62;
@@ -357,7 +471,7 @@ const GMenu = (() => {
     const pages = Math.max(1, Math.ceil(lines.length / 4));
     if (now - U.helpAt > 5000) { U.helpAt = now; U.helpPage = (U.helpPage + 1) % pages; }
     ctx.fillStyle = `rgba(0,0,0,${0.35 * fade})`; ctx.fillRect((ox + 20) * k, 170 * k, 280 * k, 46 * k);
-    lines.slice(U.helpPage * 4, U.helpPage * 4 + 4).forEach((l, j) => T(l, 26, 174 + j * 10, { scale: HS, color: lock && j === 0 && U.helpPage === 0 ? C.head : C.text, alpha: 0.9 }));
+    lines.slice(U.helpPage * 4, U.helpPage * 4 + 4).forEach((l, j) => T(l, 26, 174 + j * 10, { scale: HS, color: head && j === 0 && U.helpPage === 0 ? C.head : C.text, alpha: 0.9 }));
     if (pages > 1) T(`${U.helpPage + 1}/${pages}`, 296, 207, { scale: 0.5, color: C.dim, align: 'right' });
     // footer: what the buttons do (B / CLOSE are also mouse / touch targets)
     const FS = 0.55;
@@ -396,7 +510,7 @@ const GMenu = (() => {
     setTimeout(tryOpen, 1000 * +Q.get('gmenuopen'));
   }
 
-  return { open, close, back, poll, key, wanted, get isOpen() { return U.open; }, state: () => ({ open: U.open, page: U.open ? page().id : null, sel: U.open ? page().sel : -1, item: U.open ? (itemsOf(page())[page().sel] || {}).label : null }) };
+  return { open, close, back, poll, key, wanted, note, get isOpen() { return U.open; }, state: () => ({ open: U.open, page: U.open ? page().id : null, sel: U.open ? page().sel : -1, item: U.open ? (itemsOf(page())[page().sel] || {}).label : null }) };
 })();
 window.GMenu = GMenu;
 window.GameFont = GameFont;
