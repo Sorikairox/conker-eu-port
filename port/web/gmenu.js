@@ -395,7 +395,7 @@ const GBoot = (() => {
     const FY = 222, FS = 0.55;
     ctx.fillStyle = `rgba(0,0,0,${0.4 * fade})`; ctx.fillRect((ox + 20) * k, (FY - 4) * k, 280 * k, 15 * k);
     GFace.round(ctx, T, k, ox, 34, FY, 'S', 'rgb(200,40,40)', fade); T('PLAY', 42, FY + 1, { scale: FS, color: C.dim });
-    T('ESC OR HOLD BACK: OPTIONS', 290, FY + 1, { scale: FS, color: C.dim, align: 'right' });
+    T('ESC OR HOLD BACK: CUSTOMISATION SETTINGS', 290, FY + 1, { scale: FS, color: C.dim, align: 'right' });
   }
   // mouse / touch on the Press Start screen (#ready lies over the window: its own elements are hidden, gbootfont)
   function hit(e) {
