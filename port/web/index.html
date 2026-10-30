@@ -238,6 +238,12 @@
   #gnet[hidden] { display: none !important; }
   body.gmenu #ready { display: none; }
   body.gmenu #paused, body.gmenu #touch, body.gmenu #menu-btn, body.gmenu #photo-toast { display: none; }
+  /* P366: game-style photo mode (gmenu.js GPhoto): its HUD, Pose & Outfit panel and messages are drawn on #gphoto in the
+     game's font; the page's own photo boxes hide. #gphoto takes no pointer events itself: gmenu.js hit-tests clicks on
+     its rows before they reach the picture (a click elsewhere still captures the mouse to look around) */
+  #screen canvas#gphoto { z-index: 3; pointer-events: none; }
+  #gphoto[hidden] { display: none !important; }
+  body.gphoto #photo, body.gphoto #photo-look, body.gphoto #photo-toast, body.gphoto #menu-btn { display: none !important; }
   /* P360: the touch controls lie over the full-window picture (fullscreen = the whole page, so they stay visible) */
 </style>
 </head>
@@ -262,6 +268,7 @@
         <div class="row"><button id="photo-save">Save PNG</button> <button id="photo-exit">Exit</button></div></div>
       <div id="photo-look" hidden></div>
       <div id="photo-toast" hidden></div>
+      <canvas id="gphoto" hidden aria-label="Photo mode"></canvas>
       <canvas id="gnet" hidden aria-hidden="true"></canvas>
       <canvas id="gmenu" hidden aria-label="Options menu"></canvas>
     </div>

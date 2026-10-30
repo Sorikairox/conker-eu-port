@@ -219,6 +219,41 @@ const MenuModel = (() => {
   return { sections, presetItem, lockReason };
 })();
 
+// ---------------------------------------------------------------- P366 footer button faces (GMenu and GPhoto)
+// The N64's round buttons (blue A, green B, red Start ...) and the D-pad cross as shapes: the game's own button icons are
+// sprites, not font glyphs (P361). x, y in N64 units relative to ox (y = the top of the footer's text line); T draws text
+// (GameFont.draw bound to the canvas). Each returns the width it took.
+const GFace = {
+  round(ctx, T, k, ox, x, y, letter, fill, fade) {
+    ctx.save(); ctx.globalAlpha = 0.95 * fade;
+    ctx.beginPath(); ctx.arc((ox + x) * k, (y + 3.4) * k, 5.2 * k, 0, 2 * Math.PI); ctx.fillStyle = fill; ctx.fill();
+    ctx.lineWidth = Math.max(1, 0.7 * k); ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.stroke(); ctx.restore();
+    T(letter, x, y + 0.6, { scale: 0.5, color: '#fff', align: 'center' });
+    return 7;
+  },
+  // arms: 'lr' (left / right lit), 'ud' (up / down lit), 'all'
+  dpad(ctx, k, ox, x, y, arms, fade) {
+    const cy = y + 3.4;
+    ctx.save(); ctx.globalAlpha = 0.95 * fade; ctx.fillStyle = 'rgb(85,85,85)'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = Math.max(1, 0.5 * k);
+    ctx.beginPath(); ctx.rect((ox + x - 5.4) * k, (cy - 1.9) * k, 10.8 * k, 3.8 * k); ctx.rect((ox + x - 1.9) * k, (cy - 5.4) * k, 3.8 * k, 10.8 * k); ctx.stroke(); ctx.fill();
+    ctx.fillStyle = 'rgb(240,240,240)';
+    if (arms !== 'ud') for (const sx of [-1, 1]) { ctx.beginPath(); ctx.moveTo((ox + x + sx * 4.9) * k, cy * k); ctx.lineTo((ox + x + sx * 2.5) * k, (cy - 1.4) * k); ctx.lineTo((ox + x + sx * 2.5) * k, (cy + 1.4) * k); ctx.fill(); }
+    if (arms !== 'lr') for (const sy of [-1, 1]) { ctx.beginPath(); ctx.moveTo((ox + x) * k, (cy + sy * 4.9) * k); ctx.lineTo((ox + x - 1.4) * k, (cy + sy * 2.5) * k); ctx.lineTo((ox + x + 1.4) * k, (cy + sy * 2.5) * k); ctx.fill(); }
+    ctx.restore();
+    return 7;
+  },
+  // a page input (a key or a gamepad button the N64 never had: O, H, RS, RT ...): a grey key cap with its name
+  cap(ctx, T, k, ox, x, y, name, fade) {
+    const w = Math.max(9, GameFont.measure(name, 0.45) + 5);
+    ctx.save(); ctx.globalAlpha = 0.95 * fade; ctx.fillStyle = 'rgb(85,85,85)'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = Math.max(1, 0.5 * k);
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect((ox + x) * k, (y - 1.2) * k, w * k, 9.2 * k, 2 * k); else ctx.rect((ox + x) * k, (y - 1.2) * k, w * k, 9.2 * k);
+    ctx.fill(); ctx.stroke(); ctx.restore();
+    T(name, x + w / 2, y + 0.8, { scale: 0.45, color: '#fff', align: 'center' });
+    return w;
+  },
+};
+
 // ---------------------------------------------------------------- the overlay
 const GMenu = (() => {
   const U = { open: false, t0: 0, closing: 0, stack: [], hits: [], raf: 0, paused: false,
@@ -759,22 +794,8 @@ const GMenu = (() => {
     // footer: what the buttons do, with the N64's button faces drawn as shapes (blue A, green B; the D-pad's arrows) and
     // the letters in the game's font (B / CLOSE is also a mouse / touch target)
     const FS = 0.55, FY = 224;
-    const btn = (x, letter, fill) => {
-      ctx.save(); ctx.globalAlpha = 0.95 * fade;
-      ctx.beginPath(); ctx.arc((ox + x) * k, (FY + 3.4) * k, 5.2 * k, 0, 2 * Math.PI); ctx.fillStyle = fill; ctx.fill();
-      ctx.lineWidth = Math.max(1, 0.7 * k); ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.stroke(); ctx.restore();
-      T(letter, x, FY + 0.6, { scale: 0.5, color: '#fff', align: 'center' });
-      return 7;
-    };
-    const arrows = (x) => {   // a small D-pad cross with left / right arms lit
-      const cy = FY + 3.4;
-      ctx.save(); ctx.globalAlpha = 0.95 * fade; ctx.fillStyle = 'rgb(85,85,85)'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = Math.max(1, 0.5 * k);
-      ctx.beginPath(); ctx.rect((ox + x - 5.4) * k, (cy - 1.9) * k, 10.8 * k, 3.8 * k); ctx.rect((ox + x - 1.9) * k, (cy - 5.4) * k, 3.8 * k, 10.8 * k); ctx.stroke(); ctx.fill();
-      ctx.fillStyle = 'rgb(240,240,240)';
-      for (const sx of [-1, 1]) { ctx.beginPath(); ctx.moveTo((ox + x + sx * 4.9) * k, cy * k); ctx.lineTo((ox + x + sx * 2.5) * k, (cy - 1.4) * k); ctx.lineTo((ox + x + sx * 2.5) * k, (cy + 1.4) * k); ctx.fill(); }
-      ctx.restore();
-      return 7;
-    };
+    const btn = (x, letter, fill) => GFace.round(ctx, T, k, ox, x, FY, letter, fill, fade);   // P366: shared with GPhoto
+    const arrows = (x) => GFace.dpad(ctx, k, ox, x, FY, 'lr', fade);   // a small D-pad cross with left / right arms lit
     const pk = p.id === 'pick';   // P365: the letter picker's buttons
     const bText = pk ? 'DELETE' : U.stack.length > 1 ? 'BACK' : 'CLOSE';
     btn(30, 'A', 'rgb(40,90,230)'); T(pk ? 'TYPE' : 'CHOOSE', 38, FY, { scale: FS, color: C.dim });
@@ -1014,5 +1035,591 @@ const GNet = (() => {
   return { wanted, wait, show };
 })();
 window.GNet = GNet;
+
+// ---------------------------------------------------------------- P366 photo mode in the game's style (option nativemenu)
+// With the game-style menu on, photo mode's HUD (bottom left), its Pose & Outfit panel (right) and its messages are drawn
+// on the canvas #gphoto in the game's font, with GMenu's look (dark bands, the red title, the selected row on a red band
+// with a pulsing ">", ON / values in the game's yellow, the footer's button faces) instead of the page's boxes (#photo,
+// #photo-look and #photo-toast hide: body.gphoto). The option off (or no font yet): photo mode is exactly as before.
+//
+// Same choices, same path: every row changes main.js's `look` (P358) and calls lookChanged() / lookSave() like the
+// page panel's inputs did, so pc_photo.c gets the same port_photo_look_set calls; the page panel is still built (hidden)
+// and keeps the material records and lookUi's signature. Nothing here touches game memory: the hashed-state snapshot
+// taken when photo mode starts is restored on leaving it as before (pc_photo.c), whatever was chosen.
+//
+// Input, like GMenu's and the old panel's: O / the right stick click (CAMBACK, "nav") gives the panel the focus; then
+// the D-pad (arrows) moves (hold: repeats, faster after a second), left / right change a value (on a list: a page), A
+// (Space, Enter) chooses, B (F, Esc, Backspace) goes back (on the first page: the camera gets the D-pad again); the stick,
+// C buttons, R / Z, L and Start keep working the camera, the HUD and leaving photo mode. Long lists (857 animations,
+// 187 models, 63 item lists) open as their own page: one page per left / right, Page Up / Down, Home / End, held
+// up / down speeds up to 5 then 25 rows a step, the mouse wheel, and the scroll bar (click or drag). The mouse: a click on
+// a row chooses it (on a value: its left / right half steps it), right click goes back; clicks elsewhere still capture
+// the mouse for looking around. H / the gamepad's RT (PHOTOUI, rebindable) hides every menu for a clean view; the same
+// button (or Esc, or O) shows them again. Esc with the panel unfocused and the menus shown leaves photo mode.
+const GPhoto = (() => {
+  const cv = document.getElementById('gphoto');
+  const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
+  const S = { shown: false, focus: false, hidden: false, hidAt: 0, stack: [], hits: [], raf: 0, prevBits: -1, repeatAt: 0, holdT: 0,
+    prevNav: true, prevHide: true, toast: '', toastAt: 0, helpSig: '', helpAt: 0, helpPage: 0, hudAt: 0, hudPage: 0, cache: null,
+    rowsVis: 12, drag: null, downHit: false, keyHold: { code: '', t: 0 }, info: '', infoAt: 0, t0: 0 };
+  const wanted = () => !!opt('nativemenu');
+  const fontOk = () => GameFont.ready() || GameFont.load();
+  const active = () => S.shown && wanted() && photo.state === 2 && fontOk();
+  const page = () => S.stack[S.stack.length - 1];
+  const smooth = () => !!opt('smoothfont');
+  const MASK = N64.DU | N64.DD | N64.DL | N64.DR | N64.A | N64.B;
+  // the name of a page input's key or button: the gamepad's when one is connected, else the keyboard's
+  const padOn = () => (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).some((g) => g && g.connected);
+  const inputName = (id) => {
+    const v = padOn() ? padMap[id] : keyMap[id];
+    if (v === undefined || v === null) return '-';
+    return padOn() ? padName(v).replace('D↑', 'D-UP').replace('D↓', 'D-DOWN').replace('D←', 'D-LEFT').replace('D→', 'D-RIGHT') : keyName(v);
+  };
+
+  // ---- what Conker's data offers (main.js lkInfo / animLabel / modelLabel / itemLabel), cached until it changes
+  function lists() {
+    const sig = [lookUi.matSig, lkInfo(LR.ANIM_COUNT), lkInfo(LR.ANIM_GAME), lkInfo(LR.MODEL), lkInfo(LR.GROUP_N), lkInfo(LR.DRAWN_MODEL)].join('|');
+    if (S.cache && S.cache.sig === sig) return S.cache;
+    const anims = [[-1, 'original pose (' + animLabel(lkInfo(LR.ANIM_GAME)) + ')']];
+    for (let i = 0, n = lkInfo(LR.ANIM_COUNT); i < n; i++) if (!lkInfo(LR.ANIM_BAD, i)) anims.push([i, animLabel(i)]);
+    const g = []; for (let i = 0; i < lkInfo(LR.GROUP_N); i++) g.push(lkInfo(LR.GROUP, i));
+    const own = lkInfo(LR.MODEL), models = [[-1, 'his own: ' + modelLabel(own)]];
+    for (const m of g) if (m !== own) models.push([m, modelLabel(m)]);
+    for (let m = 0; m < 187; m++) if (!g.includes(m)) models.push([m, modelLabel(m) + ' (own skeleton)']);
+    const items = [[0, 'none']];
+    for (let i = 1; i <= 63; i++) if (lkInfo(LR.ITEM_KIND, i)) items.push([i, itemLabel(i)]);
+    const tex = [];
+    for (let i = 0, n = lkInfo(LR.TEX_N); i < n; i++) tex.push({ i, id: lkInfo(LR.TEX_ID, i), w: lkInfo(LR.TEX_WH, i) >> 16, h: lkInfo(LR.TEX_WH, i) & 0xFFFF });
+    const att = []; for (let i = 0, n = lkInfo(LR.ATT_N); i < n; i++) att.push(lkInfo(LR.ATT, i));
+    const mats = []; for (let i = 0, n = lkInfo(LR.MAT_N); i < n; i++) mats.push({ key: lkInfo(LR.MAT_KEY, i), tris: lkInfo(LR.MAT_TRIS, i) });
+    return (S.cache = { sig, anims, models, items, tex, att, mats, drawn: lkInfo(LR.DRAWN_MODEL), ndl: lkInfo(LR.DL_N) });
+  }
+  const labelOf = (opts, v) => (opts.find((o) => o[0] === v) || opts[0] || [0, ''])[1];
+  function step(opts, v, d) {   // the next / previous entry of a choice (wraps)
+    if (!opts.length) return v;
+    const i = opts.findIndex((o) => o[0] === v);
+    return opts[((i < 0 ? 0 : i) + d + opts.length) % opts.length][0];
+  }
+  const faceOpts = (L, s) => {   // a face slot: the game's texture, or another of the same size (as the page panel)
+    const cur = lkInfo(LR.FACE, s), t = L.tex[cur];
+    return [[-1, 'the game\'s (texture ' + (t ? t.id : '?') + ')'], ...L.tex.filter((x) => !t || (x.w === t.w && x.h === t.h)).map((x) => [x.i, 'texture ' + x.id + ' (' + x.w + 'x' + x.h + ')'])];
+  };
+  const matRec = (drawn, key) => {
+    const mats = (look.mats[drawn] = look.mats[drawn] || {});
+    return (mats[key] = mats[key] || { hide: false, tint: '#ff3030', amt: 0, tex: -1 });
+  };
+  const PALETTE = [['RED', '#ff3030'], ['ORANGE', '#ff8000'], ['YELLOW', '#ffe000'], ['GREEN', '#30d030'], ['CYAN', '#00d0d0'], ['BLUE', '#3050ff'],
+    ['PURPLE', '#a040ff'], ['PINK', '#ff60c0'], ['BROWN', '#8b5a2b'], ['WHITE', '#ffffff'], ['GREY', '#808080'], ['BLACK', '#000000']];
+  const hex2 = (n) => n.toString(16).padStart(2, '0');
+
+  // ---- the pages' rows. kind: head (a section title, not selectable), toggle, choice (opts; list: A opens it as a page),
+  // range (change(d), text), link (a page), action. value() = [text, colour]; help; locked() = why not now ('' = can)
+  function itemsOf(p) {
+    const L = lists();
+    const backRow = { kind: 'action', label: 'Back', help: 'Back to the previous page (B).', act: () => back() };
+    if (p.id === 'main') {
+      const it = [{ kind: 'head', label: 'Pose' },
+        { kind: 'choice', tall: true, label: 'Animation', list: 'anims', opts: () => L.anims, get: () => look.anim,
+          set: (v) => { look.anim = v; look.frame = 0; lookChanged(); },
+          help: `Conker's animation (${L.anims.length - 1} with data). Left / right: the previous / next one; A: the whole list.` },
+        { kind: 'toggle', label: 'Play', get: () => look.play, set: (v) => { look.play = v; lookSave(); lookRefreshValues(); }, names: ['PAUSED', 'PLAYING'],
+          locked: () => (look.anim < 0 ? 'Choose an animation first.' : ''), help: 'Play the animation in a loop (at the speed below).' },
+        { kind: 'range', label: 'Frame', text: () => (look.anim >= 0 ? `${Math.floor(look.frame)} / ${Math.max(0, lookUi.frames - 1)}` : '-'),
+          change: (d) => {
+            if (d > 0) { look.frame = Math.floor(look.frame) + d; if (lookUi.frames && look.frame >= lookUi.frames) look.frame = d > 1 ? lookUi.frames - 1 : 0; }
+            else look.frame = Math.max(0, Math.floor(look.frame) + d);
+            look.play = false; lookChanged();
+          },
+          locked: () => (look.anim < 0 ? 'Choose an animation first.' : ''), help: 'The animation frame: left / right one frame (hold: faster); stops playing. A plays / pauses.',
+          act: () => { look.play = !look.play; lookSave(); lookRefreshValues(); } },
+        { kind: 'choice', label: 'Speed', opts: () => [[0.25, '1/4 X'], [0.5, '1/2 X'], [1, '1 X'], [2, '2 X']], get: () => look.speed, set: (v) => { look.speed = v; lookSave(); },
+          help: 'How fast Play runs the animation.' },
+        { kind: 'head', label: 'Outfit' },
+        { kind: 'choice', tall: true, label: 'Model', list: 'models', opts: () => L.models, get: () => look.model,
+          set: (v) => { look.model = v; look.dlHide = look.dlShow = 0; lookChanged(); },
+          help: 'Models that share Conker\'s skeleton and animations come first (loaded from the ROM for the photo only); "own skeleton" models move with their own animation numbers.' }];
+      for (let s = 0; s < 4; s++) it.push({ kind: 'choice', tall: true, label: 'Item ' + (s + 1), list: 'items:' + s, opts: () => L.items, get: () => look.items[s],
+        set: (v) => { look.items[s] = v; lookChanged(); }, help: 'Held items / gear: the game\'s attachment lists, put on Conker for the photo (up to 4).' });
+      if (L.att.length) it.push({ kind: 'head', label: 'He carries' });
+      L.att.forEach((key) => it.push({ kind: 'toggle', label: `Model ${key >> 8} (list ${key & 255})`, names: ['HIDDEN', 'SHOWN'],
+        get: () => !look.attHide.includes(key),
+        set: (v) => { look.attHide = look.attHide.filter((x) => x !== key); if (!v) look.attHide.push(key); lookChanged(); },
+        help: 'What he carries in the game right now (an attachment): show or hide it in the photo.' }));
+      it.push({ kind: 'head', label: 'Face and parts' });
+      ['Eyelids 1', 'Eyelids 2', 'Eye 1', 'Eye 2'].forEach((label, s) => it.push({ kind: 'choice', label, opts: () => faceOpts(L, s), get: () => look.face[s],
+        set: (v) => { look.face[s] = v; lookChanged(); }, help: 'The face texture the game puts into this slot every frame, or another of the same size.' }));
+      if (L.ndl > 1) it.push({ kind: 'link', label: 'Parts', page: 'parts', help: 'The drawn model\'s display lists (parts): show or hide each, also the ones the game hides.',
+        text: () => { let n = 0; for (let k = 0; k < L.ndl && k < 32; k++) if (dlShown(k)) n++; return `${n} OF ${Math.min(32, L.ndl)}`; } });
+      if (L.mats.length) it.push({ kind: 'link', label: 'Materials', page: 'mats', help: 'Each material (texture) of ' + modelLabel(L.drawn) + ': show / hide, another texture, a tint.',
+        text: () => String(L.mats.length) });
+      it.push({ kind: 'head', label: '' },
+        { kind: 'action', label: 'Reset', help: 'Back to the game\'s own pose and outfit.', act: () => { const m = look.min; Object.assign(look, LOOK_DEFAULT(), { min: m }); lookPush(); lookBuild(); S.cache = null; log('[gphoto] reset'); } },
+        { kind: 'toggle', label: 'Fold when not editing', get: () => !!look.min, set: (v) => { look.min = v; lookSave(); lookBuild(); },
+          help: 'While the camera has the controls, show only this panel\'s title.' },
+        { kind: 'action', label: 'Done', help: 'Give the D-pad back to the camera (also B on this page, or O / the right stick click).', act: () => setFocus(false) });
+      return it;
+    }
+    if (p.id === 'parts') {
+      const it = [];
+      for (let k = 0; k < L.ndl && k < 32; k++) {
+        const byGame = (lkInfo(LR.DL_MASK) >> k) & 1;
+        it.push({ kind: 'toggle', label: 'Part ' + k + (byGame ? ' (game hides)' : ''), names: ['HIDDEN', 'SHOWN'], get: () => dlShown(k),
+          set: (v) => { const b = 1 << k; if (byGame) look.dlShow = v ? look.dlShow | b : look.dlShow & ~b; else look.dlHide = v ? look.dlHide & ~b : look.dlHide | b; lookChanged(); },
+          help: 'Display list ' + k + ' of ' + modelLabel(L.drawn) + (byGame ? ': the game hides it; show it for the photo.' : '.') });
+      }
+      return it.concat([backRow]);
+    }
+    if (p.id === 'mats') return L.mats.map(({ key, tris }) => ({ kind: 'link', label: matLabel(L.drawn, key), page: 'mat:' + key, help: `${tris} triangles. A: show / hide it, another texture, a tint.`,
+      text: () => { const m = matRec(L.drawn, key); return [m.hide ? 'HIDDEN' : '', m.tex >= 0 ? 'TEX' : '', m.amt > 0 ? `TINT ${m.amt}%` : ''].filter(Boolean).join(' ') || '>'; } })).concat([backRow]);
+    if (p.id.startsWith('mat:')) {
+      const key = +p.id.slice(4), m = matRec(L.drawn, key), t = key < 64 ? L.tex[key] : null;
+      const texOpts = [[-1, 'its own (' + matLabel(L.drawn, key) + ')']];
+      if (t) for (const x of L.tex) if (x.i !== key && x.w === t.w && x.h === t.h) texOpts.push([x.i, 'texture ' + x.id]);
+      const rgb = () => parseInt((m.tint || '#ff3030').slice(1), 16);
+      const setRgb = (c) => { m.tint = '#' + hex2((c >> 16) & 255) + hex2((c >> 8) & 255) + hex2(c & 255); if (!m.amt) m.amt = 60; lookChanged(); };   // as the colour input: a colour with no tint gets 60 %
+      const chan = (label, sh) => ({ kind: 'range', label, text: () => String((rgb() >> sh) & 255),
+        change: (d) => { const v = Math.max(0, Math.min(255, ((rgb() >> sh) & 255) + d * 15)); setRgb((rgb() & ~(255 << sh)) | (v << sh)); },
+        help: 'The tint colour\'s ' + label.toLowerCase() + ' (0 to 255; hold for bigger steps).' });
+      return [
+        { kind: 'toggle', label: 'Shown', get: () => !m.hide, set: (v) => { m.hide = !v; lookChanged(); }, help: 'Draw this material or leave it out.' },
+        { kind: 'choice', label: 'Texture', opts: () => texOpts, get: () => m.tex, set: (v) => { m.tex = v; lookChanged(); },
+          locked: () => (texOpts.length < 2 ? (t ? 'No other texture has its size.' : 'Face slots and untextured parts keep their texture.') : ''),
+          help: 'Draw it with another texture of the same size.' },
+        { kind: 'range', label: 'Tint', text: () => m.amt + '%', change: (d) => { m.amt = Math.max(0, Math.min(100, m.amt + 5 * Math.sign(d) * Math.min(4, Math.abs(d)))); lookChanged(); },
+          help: 'How strongly the tint colour colours it (0 = not at all); its light and shade stay.' },
+        { kind: 'choice', label: 'Colour', opts: () => { const cur = (m.tint || '').toLowerCase(), o = PALETTE.map(([n, c]) => [c, n]); if (!o.some((x) => x[0] === cur)) o.unshift([cur, cur.toUpperCase()]); return o; },
+          get: () => (m.tint || '').toLowerCase(), set: (v) => { m.tint = v; if (!m.amt) m.amt = 60; lookChanged(); }, help: 'The tint colour (or set red, green and blue below).' },
+        chan('Red', 16), chan('Green', 8), chan('Blue', 0),
+        backRow];
+    }
+    return [backRow];
+  }
+  const dlShown = (k) => { const byGame = (lkInfo(LR.DL_MASK) >> k) & 1; return byGame ? !!((look.dlShow >> k) & 1) : !((look.dlHide >> k) & 1); };
+  // a list page: { title, opts, get, set }
+  function listOf(p) {
+    const L = lists();
+    if (p.id === 'anims') return { title: 'Animations', opts: L.anims, get: () => look.anim, set: (v) => { look.anim = v; look.frame = 0; lookChanged(); } };
+    if (p.id === 'models') return { title: 'Models', opts: L.models, get: () => look.model, set: (v) => { look.model = v; look.dlHide = look.dlShow = 0; lookChanged(); } };
+    if (p.id.startsWith('items:')) { const s = +p.id.slice(6); return { title: 'Item ' + (s + 1), opts: L.items, get: () => look.items[s], set: (v) => { look.items[s] = v; lookChanged(); } }; }
+    return null;
+  }
+  const TITLES = { main: 'Pose & outfit', parts: 'Parts', mats: 'Materials' };
+  const titleOf = (p) => (listOf(p) ? listOf(p).title : p.id.startsWith('mat:') ? matLabel(lists().drawn, +p.id.slice(4)) : TITLES[p.id] || '');
+  const selectable = (it) => it && it.kind !== 'head';
+  const lockOf = (it) => (it && it.locked ? it.locked() : '');
+
+  // ---- actions
+  function setFocus(on) {
+    if (S.focus === on) return;
+    S.focus = on; S.prevBits = -1; S.helpSig = '';
+    if (!on) S.stack = [S.stack[0]];
+    log(`[gphoto] panel ${on ? 'focus (the D-pad works the panel)' : 'unfocused (the D-pad works the camera)'}`);
+  }
+  function setHidden(on) {
+    S.hidden = on; S.hidAt = performance.now();
+    if (on) setFocus(false);
+    log(`[gphoto] menus ${on ? 'hidden' : 'shown'}`);
+  }
+  function go(id) {
+    const p = { id, sel: 0, top: 0 };
+    const l = listOf(p);
+    if (l) { p.sel = Math.max(0, l.opts.findIndex((o) => o[0] === l.get())); p.top = Math.max(0, p.sel - 5); }
+    else { const it = itemsOf(p); while (p.sel < it.length - 1 && !selectable(it[p.sel])) p.sel++; }
+    S.stack.push(p); S.helpSig = '';
+    log(`[gphoto] page ${id}`);
+  }
+  function back() { if (S.stack.length > 1) { S.stack.pop(); S.helpSig = ''; } else setFocus(false); }
+  function moveSel(d, clamp) {
+    const p = page(), l = listOf(p);
+    if (l) {
+      const n = l.opts.length; if (!n) return;
+      p.sel = clamp || Math.abs(d) > 1 ? Math.max(0, Math.min(n - 1, p.sel + d)) : (p.sel + d + n) % n;
+      return;
+    }
+    const it = itemsOf(p), n = it.length; if (!n) return;
+    let i = p.sel;
+    for (let c = 0; c < Math.min(n, Math.abs(d)); c++) {
+      let j = i;
+      for (let t = 0; t < n; t++) { j = clamp ? Math.max(0, Math.min(n - 1, j + Math.sign(d))) : (j + Math.sign(d) + n) % n; if (selectable(it[j])) break; }
+      if (selectable(it[j])) i = j;
+    }
+    p.sel = i;
+  }
+  function change(it, d) {
+    if (!it || lockOf(it)) return;
+    if (it.kind === 'toggle') it.set(!it.get());
+    else if (it.kind === 'choice') it.set(step(it.opts(), it.get(), Math.sign(d)));
+    else if (it.kind === 'range') it.change(d);
+  }
+  function choose(it) {
+    if (!it || !selectable(it)) return;
+    if (it.kind === 'link') { go(it.page); return; }
+    if (it.kind === 'action') { it.act(); return; }
+    if (lockOf(it)) return;
+    if (it.kind === 'choice' && it.list) { go(it.list); return; }
+    if (it.kind === 'range') { if (it.act) it.act(); return; }
+    change(it, 1);
+  }
+  function pick(i) {   // a list page's entry: chosen, back to the row
+    const p = page(), l = listOf(p);
+    if (!l || !l.opts[i]) return;
+    l.set(l.opts[i][0]);
+    log(`[gphoto] picked ${p.id}: ${l.opts[i][1]}`);
+    back();
+  }
+  function chooseSel() { const p = page(); if (listOf(p)) pick(p.sel); else choose(itemsOf(p)[p.sel]); }
+  // a direction (1 up, 2 down, 4 left, 8 right) taken mult times (held: 5, 25)
+  function nav(dir, mult) {
+    const p = page(), l = listOf(p);
+    if (dir & 1) moveSel(-mult, mult > 1); else if (dir & 2) moveSel(mult, mult > 1);
+    if (l) { if (dir & 4) moveSel(-S.rowsVis, true); else if (dir & 8) moveSel(S.rowsVis, true); return; }
+    const it = itemsOf(p)[p.sel];
+    if (dir & 12) change(it, ((dir & 8) ? 1 : -1) * (it && it.kind === 'range' ? mult : 1));
+  }
+  const holdMult = (held) => (held > 2200 ? 25 : held > 900 ? 5 : 1);
+
+  // ---- pad 1 while photo mode is on (main.js lookTick from photoPoll): the bits the camera must not see
+  function input(d, fresh, dt) {
+    const now = performance.now(), b = d.b | 0;
+    if (d.hide && !S.prevHide) setHidden(!S.hidden);
+    S.prevHide = !!d.hide;
+    if (d.nav && !S.prevNav) { if (S.hidden) { setHidden(false); setFocus(true); } else setFocus(!S.focus); if (S.focus && look.min) { /* folded: opens while focused */ } }
+    S.prevNav = !!d.nav;
+    if (!S.focus) return 0;
+    const bits = ((b & N64.DU) ? 1 : 0) | ((b & N64.DD) ? 2 : 0) | ((b & N64.DL) ? 4 : 0) | ((b & N64.DR) ? 8 : 0) | ((b & N64.A) ? 16 : 0) | ((b & N64.B) ? 32 : 0);
+    if (S.prevBits < 0) { S.prevBits = bits; return MASK; }   // what was held when the focus came does nothing here
+    const fr = bits & ~S.prevBits;
+    let dir = fr & 15, mult = 1;
+    if ((bits & 15) && (bits & 15) === (S.prevBits & 15)) { if (now >= S.repeatAt) { dir = bits & 15; S.repeatAt = now + 90; mult = holdMult(now - S.holdT); } }
+    else { S.repeatAt = now + 380; S.holdT = now; }
+    S.prevBits = bits;
+    if (dir) nav(dir, mult);
+    if (fr & 16) chooseSel(); else if (fr & 32) back();
+    return MASK;
+  }
+  // keys (main.js keydown, after GMenu.key): with the focus on the panel the arrows, Enter, Esc, Backspace, Page Up /
+  // Down, Home and End work it whatever the bindings (they never reach the camera then); Esc otherwise shows the hidden
+  // menus or leaves photo mode
+  function key(e) {
+    if (!active()) return false;
+    const c = e.code;
+    if (c === keyMap.PHOTOUI) { if (!e.repeat) setHidden(!S.hidden); return true; }   // on the key event itself (a short tap can fall between two polled frames)
+    if (!S.focus) {
+      if (c !== 'Escape') return false;
+      if (!e.repeat) { if (S.hidden) setHidden(false); else { log('[gphoto] Esc: leave photo mode'); photoRequest(false); } }
+      return true;
+    }
+    if (c === 'Escape' || c === 'Backspace') { if (!e.repeat) back(); return true; }
+    if (c === 'Enter' || c === 'NumpadEnter') { if (!e.repeat) chooseSel(); return true; }
+    const AR = { ArrowUp: 1, ArrowDown: 2, ArrowLeft: 4, ArrowRight: 8 };
+    if (AR[c]) {
+      const now = performance.now();
+      if (!e.repeat || S.keyHold.code !== c) S.keyHold = { code: c, t: now };
+      nav(AR[c], e.repeat ? holdMult(now - S.keyHold.t) : 1);
+      return true;
+    }
+    if (c === 'PageUp' || c === 'PageDown') { const d = c === 'PageUp' ? -1 : 1; moveSel(d * (listOf(page()) ? S.rowsVis : 5), true); return true; }
+    if (c === 'Home' || c === 'End') { moveSel(c === 'Home' ? -1e6 : 1e6, true); return true; }
+    return false;
+  }
+
+  // ---- drawing (units: the picture is 240 high; W = its width in units, 320 at 4:3, more with Widescreen)
+  const PW = 132, RH = 9.5, RS = 0.55;
+  function layout() {
+    const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const k = h / 240;
+    return { k, W: w / k };
+  }
+  function fit(s, w, scale) {   // s cut to w units (with "...")
+    s = String(s);
+    if (GameFont.measure(s, scale) <= w) return s;
+    while (s.length > 1 && GameFont.measure(s + '...', scale) > w) s = s.slice(0, -1);
+    return s.trimEnd() + '...';
+  }
+  // a dark band fading out at the ends (GMenu's backdrop band, horizontal fades at the given ends)
+  function band(ctx, k, x, y, w, h, a, fl, fr) {
+    const g = ctx.createLinearGradient(x * k, 0, (x + w) * k, 0);
+    g.addColorStop(0, fl ? 'rgba(20,10,4,0)' : `rgba(20,10,4,${a})`); g.addColorStop(fl ? 0.08 : 0, `rgba(20,10,4,${a})`);
+    g.addColorStop(fr ? 0.92 : 1, `rgba(20,10,4,${a})`); g.addColorStop(1, fr ? 'rgba(20,10,4,0)' : `rgba(20,10,4,${a})`);
+    ctx.fillStyle = g; ctx.fillRect(x * k, y * k, w * k, h * k);
+  }
+  function selBand(ctx, k, x, y, w, h, fade) {   // the selected row: GMenu's red band
+    const hb = ctx.createLinearGradient(x * k, 0, (x + w) * k, 0);
+    hb.addColorStop(0, 'rgba(255,60,30,0)'); hb.addColorStop(0.15, `rgba(255,60,30,${0.3 * fade})`); hb.addColorStop(0.85, `rgba(255,60,30,${0.3 * fade})`); hb.addColorStop(1, 'rgba(255,60,30,0)');
+    ctx.fillStyle = hb; ctx.fillRect(x * k, y * k, w * k, h * k);
+  }
+  function frame() {
+    S.raf = 0;
+    if (!S.shown || photo.state !== 2) { document.body.classList.remove('gphoto'); cv.hidden = true; return; }
+    S.raf = requestAnimationFrame(frame);
+    const on = active();
+    document.body.classList.toggle('gphoto', on);
+    cv.hidden = !on;
+    if (on) draw();
+  }
+  function draw() {
+    const ctx = cv.getContext('2d'), { k, W } = layout(), now = performance.now();
+    const fade = Math.min(1, (now - S.t0) / 160), pulse = 0.75 + 0.25 * Math.sin(now / 160);
+    const T = (s, x, y, o) => GameFont.draw(ctx, s, x, y, k, Object.assign({ smooth: smooth() }, o, { alpha: (o && o.alpha !== undefined ? o.alpha : 1) * fade }));
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    S.hits = [];
+    if (S.toast && now - S.toastAt > 2600) S.toast = '';
+    if (S.toast) {   // a message (saved picture, ...) at the top, like the page's toast: centred left of the panel
+      const a = Math.min(1, (2600 - (now - S.toastAt)) / 300), right = S.hidden ? W : W - PW - 6;
+      const tw = Math.min(260, right - 12), cx = right / 2, lines = GameFont.wrap(S.toast.toUpperCase(), tw - 16, 0.55).slice(0, 2);
+      ctx.globalAlpha = a; band(ctx, k, cx - tw / 2, 5, tw, 6 + lines.length * 9, 0.72, true, true); ctx.globalAlpha = 1;
+      lines.forEach((l, j) => T(l, cx, 8 + j * 9, { scale: 0.55, color: C.text, align: 'center', alpha: a }));
+    }
+    if (S.hidden) {   // a clean view: only a short hint how to get the menus back, fading out
+      const a = 1 - (now - S.hidAt) / 1800;
+      if (a > 0) T(`${inputName('PHOTOUI')}: SHOW THE MENUS`, W - 8, 8, { scale: 0.5, color: C.dim, align: 'right', alpha: a });
+      return;
+    }
+    const folded = !S.focus && look.min;
+    const px = W - PW - 6;
+    drawPanel(ctx, T, k, px, fade, pulse, now, folded);
+    drawHud(ctx, T, k, W, folded ? W - 12 : px - 12, fade, now);
+  }
+  function drawPanel(ctx, T, k, px, fade, pulse, now, folded) {
+    const p = page(), l = listOf(p), focus = S.focus;
+    const bottom = folded ? 22 : 234;
+    band(ctx, k, px, 6, PW, bottom - 6, focus ? 0.7 : 0.5, true, false);
+    S.hits.push({ act: 'title', x0: px, x1: px + PW, y0: 6, y1: 20 });
+    T(fit(titleOf(p).toUpperCase(), PW - (focus ? 14 : 36), 0.75), px + 8, 9, { scale: 0.75, color: C.title, alpha: focus ? 1 : 0.85 });
+    if (!focus) {   // how to get the focus
+      const nm = inputName('CAMBACK'), w = GameFont.measure(nm, 0.45) + 5;
+      GFace.cap(ctx, T, k, 0, px + PW - 24 - w, 9.5, nm, fade); T('EDIT', px + PW - 4, 10, { scale: 0.45, color: C.dim, align: 'right' });
+    }
+    if (folded) { S.hits.push({ act: 'bg', x0: px, x1: px + PW, y0: 6, y1: bottom }); return; }
+    const top = 23, listBottom = focus ? 172 : 230;
+    if (l) drawList(ctx, T, k, px, top, listBottom, l, p, fade, pulse);
+    else drawRows(ctx, T, k, px, top, listBottom, p, fade, pulse);
+    if (focus) {
+      drawDetail(ctx, T, k, px, now, l, p);
+      // footer: A CHOOSE, B BACK / DONE, the D-pad CHANGE / PAGE (GMenu's faces)
+      const FY = 222, FS = 0.45;
+      let x = px + 10;
+      GFace.round(ctx, T, k, 0, x, FY, 'A', 'rgb(40,90,230)', fade); T('CHOOSE', x + 8, FY + 1, { scale: FS, color: C.dim });
+      x += 44;
+      const bt = S.stack.length > 1 ? 'BACK' : 'DONE';
+      GFace.round(ctx, T, k, 0, x, FY, 'B', 'rgb(30,160,60)', fade); T(bt, x + 8, FY + 1, { scale: FS, color: C.dim });
+      S.hits.push({ act: 'back', x0: x - 6, x1: x + 10 + GameFont.measure(bt, FS), y0: FY - 3, y1: FY + 10 });
+      x += 36;
+      GFace.dpad(ctx, k, 0, x, FY, l ? 'all' : 'lr', fade); T(l ? 'PAGE' : 'CHANGE', x + 8, FY + 1, { scale: FS, color: C.dim });
+    }
+    S.hits.push({ act: 'bg', x0: px, x1: px + PW, y0: 6, y1: bottom });
+  }
+  function drawRows(ctx, T, k, px, top, bottom, p, fade, pulse) {
+    const it = itemsOf(p), focus = S.focus;
+    if (p.sel >= it.length) p.sel = Math.max(0, it.length - 1);
+    if (!selectable(it[p.sel])) moveSel(1);
+    const hOf = (x) => (x.tall ? 2 * RH - 1 : x.kind === 'head' ? RH - 0.5 : RH);
+    // scroll: the selected row (and a head above it) visible; unfocused, the panel shows its first rows
+    if (!focus) p.top = 0;
+    else if (p.sel < p.top) p.top = p.sel;
+    if (p.top > 0 && p.top === p.sel && it[p.top - 1] && it[p.top - 1].kind === 'head') p.top--;
+    for (; focus;) { let y = top; for (let i = p.top; i <= p.sel; i++) y += hOf(it[i]); if (y <= bottom || p.top >= p.sel) break; p.top++; }
+    let y = top, last = p.top;
+    for (let i = p.top; i < it.length; i++) {
+      const x = it[i], h = hOf(x);
+      if (y + h > bottom) break;
+      last = i;
+      const sel = focus && i === p.sel, lock = lockOf(x);
+      if (x.kind === 'head') { if (x.label) T(x.label.toUpperCase(), px + 8, y + 1.5, { scale: 0.45, color: C.head, alpha: 0.9 }); y += h; continue; }
+      S.hits.push({ act: 'row', i, x0: px, x1: px + PW, y0: y - 1, y1: y + h - 1, xv: px + PW * 0.55 });
+      if (sel) { selBand(ctx, k, px + 2, y - 1.5, PW - 4, h, 1); T('>', px + 3, y, { color: C.on, alpha: pulse, scale: RS }); }
+      const lc = lock ? C.lock : sel ? C.text : focus ? C.dim : C.off;
+      let v = '', vc = sel ? C.text : C.dim;
+      if (x.kind === 'toggle') { const on = !!x.get(); v = x.names ? x.names[on ? 1 : 0] : on ? 'ON' : 'OFF'; vc = lock ? C.lock : on ? C.on : C.off; }
+      else if (x.kind === 'choice') { v = labelOf(x.opts(), x.get()); vc = lock ? C.lock : x.get() === -1 || x.get() === 0 && x.list ? (sel ? C.text : C.dim) : C.on; }
+      else if (x.kind === 'range') { v = x.text(); vc = lock ? C.lock : sel ? C.on : C.off; }
+      else if (x.kind === 'link') v = x.text ? x.text() : '>';
+      const arrows = sel && !lock && (x.kind === 'choice' || x.kind === 'range');
+      if (x.tall) {   // the label, then the value on its own line (long names)
+        T(x.label.toUpperCase(), px + 10, y, { scale: RS, color: lc });
+        const vw = PW - 22 - (arrows ? 10 : 0);
+        T(fit(v.toUpperCase(), vw, 0.5), px + 14 + (arrows ? 6 : 0), y + RH - 0.5, { scale: 0.5, color: vc });
+        if (arrows) { T('<', px + 12, y + RH - 0.5, { scale: 0.5, color: vc, alpha: pulse }); T('>', px + PW - 8, y + RH - 0.5, { scale: 0.5, color: vc, alpha: pulse }); }
+      } else {
+        const lw = GameFont.measure(x.label.toUpperCase(), RS);
+        T(fit(x.label.toUpperCase(), PW - 20, RS), px + 10, y, { scale: RS, color: lc });
+        if (v) {
+          const right = px + PW - (arrows ? 10 : 5), vw = Math.max(16, right - (px + 10 + lw + 6) - (arrows ? 8 : 0));
+          const vt = fit(v.toUpperCase(), vw, 0.5);
+          if (arrows) { T('<', right - GameFont.measure(vt, 0.5) - 7, y + 0.5, { scale: 0.5, color: vc, alpha: pulse }); T('>', right + 3, y + 0.5, { scale: 0.5, color: vc, alpha: pulse }); }
+          T(vt, right, y + 0.5, { scale: 0.5, color: vc, align: 'right' });
+        }
+      }
+      y += h;
+    }
+    const more = (s, yy) => T(s, px + PW / 2, yy, { color: C.dim, align: 'center', scale: 0.5 });
+    if (p.top > 0) more('^', top - 4);
+    if (last < it.length - 1) more('V', bottom - 3);
+  }
+  function drawList(ctx, T, k, px, top, bottom, l, p, fade, pulse) {
+    const n = l.opts.length, LH = 9, rows = Math.max(1, Math.floor((bottom - top - 8) / LH)), cur = l.get();
+    S.rowsVis = rows;
+    p.sel = Math.max(0, Math.min(n - 1, p.sel));
+    if (p.sel < p.top) p.top = p.sel;
+    if (p.sel >= p.top + rows) p.top = p.sel - rows + 1;
+    p.top = Math.max(0, Math.min(Math.max(0, n - rows), p.top));
+    T(`${p.sel + 1} OF ${n}   PAGE ${Math.floor(p.sel / rows) + 1}/${Math.ceil(n / rows)}`, px + 10, top, { scale: 0.42, color: C.dim });
+    const y0 = top + 8;
+    for (let i = p.top; i < Math.min(n, p.top + rows); i++) {
+      const y = y0 + (i - p.top) * LH, sel = i === p.sel, isCur = l.opts[i][0] === cur;
+      S.hits.push({ act: 'entry', i, x0: px, x1: px + PW - 8, y0: y - 1, y1: y + LH - 1 });
+      if (sel) { selBand(ctx, k, px + 2, y - 1.5, PW - 10, LH, 1); T('>', px + 3, y, { color: C.on, alpha: pulse, scale: 0.5 }); }
+      if (isCur) { ctx.fillStyle = `rgba(255,255,0,${fade})`; ctx.beginPath(); ctx.moveTo((px + 11) * k, (y + 3) * k); ctx.lineTo((px + 13.5) * k, (y + 0.5) * k); ctx.lineTo((px + 16) * k, (y + 3) * k); ctx.lineTo((px + 13.5) * k, (y + 5.5) * k); ctx.fill(); }   // the current one: a yellow diamond (font 0 has no '*')
+      T(fit(l.opts[i][1].toUpperCase(), PW - 28, 0.5), px + (isCur ? 18 : 10), y, { scale: 0.5, color: isCur ? C.on : sel ? C.text : C.dim });
+    }
+    // the scroll bar (click / drag)
+    const bx = px + PW - 7, by = y0 - 1, bh = rows * LH;
+    ctx.fillStyle = `rgba(255,255,255,${0.12 * fade})`; ctx.fillRect(bx * k, by * k, 2.5 * k, bh * k);
+    const th = Math.max(6, bh * Math.min(1, rows / n)), ty = by + (n > rows ? (bh - th) * (p.top / (n - rows)) : 0);
+    ctx.fillStyle = `rgba(255,200,60,${0.85 * fade})`; ctx.fillRect(bx * k, ty * k, 2.5 * k, th * k);
+    S.hits.push({ act: 'bar', x0: bx - 3, x1: bx + 6, y0: by, y1: by + bh, by, bh });
+  }
+  // below the rows: the selected row's whole value (yellow) or why it cannot change, the game's report, then its help
+  function drawDetail(ctx, T, k, px, now, l, p) {
+    const y0 = 175, HS = 0.45;
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect((px + 4) * k, y0 * k, (PW - 8) * k, 41 * k);
+    let head = '', help = '';
+    const err = ['', 'That model could not be loaded here.', 'That animation could not start.', ''][lkInfo(LR.ERR)] || '';
+    if (l) { const o = l.opts[p.sel]; head = o ? o[1] : ''; help = 'A: choose. Left / right: a page. Hold up / down to go faster.'; }
+    else {
+      const it = itemsOf(p)[p.sel];
+      if (it) {
+        const lock = lockOf(it);
+        head = lock || (it.kind === 'choice' ? labelOf(it.opts(), it.get()) : '');
+        help = typeof it.help === 'function' ? it.help() : it.help || '';
+      }
+    }
+    if (err) head = err + (head ? ' ' + head : '');
+    const text = (head ? head + (/[.!?:]$/.test(head) ? ' ' : '. ') : '') + help;
+    const lines = GameFont.wrap(text, PW - 14, HS), per = lines.length > 4 ? 3 : 4, pages = Math.max(1, Math.ceil(lines.length / per));   // paged: 3 lines + the counter
+    const sig = p.id + ':' + p.sel + ':' + text;
+    if (sig !== S.helpSig) { S.helpSig = sig; S.helpPage = 0; S.helpAt = now; }
+    if (now - S.helpAt > 5000) { S.helpAt = now; S.helpPage = (S.helpPage + 1) % pages; }
+    const hl = head ? GameFont.wrap(head + (/[.!?:]$/.test(head) ? ' ' : '. '), PW - 14, HS).length : 0;
+    lines.slice(S.helpPage * per, S.helpPage * per + per).forEach((t, j) => T(t, px + 8, y0 + 2.5 + j * 9.5, { scale: HS, color: S.helpPage * per + j < hl ? (err && j === 0 && S.helpPage === 0 ? C.title : C.head) : C.text, alpha: 0.92 }));
+    if (pages > 1) T(`${S.helpPage + 1}/${pages}`, px + PW - 6, y0 + 34, { scale: 0.4, color: C.dim, align: 'right' });
+  }
+  // the photo HUD (bottom left): title, the camera's numbers, the controls (paged), the buttons (also mouse targets)
+  const HELP = 'Stick / WASD move. C buttons / right stick / IJKL / mouse look. R Z / E Q up and down. D-pad / arrows: left right roll, up down zoom (wheel too). B / F the game\'s view. L / R the game\'s HUD. A / Space save a PNG. P / Start / Enter back to the game.';
+  function drawHud(ctx, T, k, W, maxW, fade, now) {
+    const HW = Math.max(150, Math.min(232, maxW)), x0 = 6, HH = 64, y0 = 234 - HH;
+    band(ctx, k, x0, y0, HW, HH, 0.62, false, true);
+    S.hits.push({ act: 'bg', x0, x1: x0 + HW, y0, y1: y0 + HH });
+    T('PHOTO MODE', x0 + 6, y0 + 4, { scale: 0.85, color: C.title });
+    T('THE GAME IS FROZEN', x0 + HW - 10, y0 + 6, { scale: 0.42, color: C.dim, align: 'right' });
+    if (now - S.infoAt > 200 && M && M._port_photo_info) {
+      S.infoAt = now;
+      const I = (i) => M._port_photo_info(i);
+      S.info = `VIEW ${I(7).toFixed(0)}   ROLL ${I(5).toFixed(0)}   ${I(8).toFixed(0)} UNITS AWAY   HUD ${photo.hud ? 'ON' : 'OFF'}`;
+    }
+    T(fit(S.info, HW - 14, 0.48), x0 + 6, y0 + 17, { scale: 0.48, color: C.text });
+    const lines = GameFont.wrap(HELP, HW - 18, 0.42), pages = Math.max(1, Math.ceil(lines.length / 2));
+    if (now - S.hudAt > 5000) { S.hudAt = now; S.hudPage = (S.hudPage + 1) % pages; }
+    S.hudPage %= pages;
+    lines.slice(S.hudPage * 2, S.hudPage * 2 + 2).forEach((t, j) => T(t, x0 + 6, y0 + 26.5 + j * 8, { scale: 0.42, color: C.dim }));
+    if (pages > 1) T(`${S.hudPage + 1}/${pages}`, x0 + HW - 10, y0 + 34.5, { scale: 0.38, color: C.dim, align: 'right' });
+    // buttons: A SAVE, B VIEW, L HUD, START EXIT; then the panel's and the hide button's keys
+    const FS = 0.45, F1 = y0 + 43, F2 = y0 + 54;
+    let x = x0 + 12;
+    const entry = (face, label, act, fy) => {
+      const w0 = face(x, fy), lw = GameFont.measure(label, FS);
+      T(label, x + w0 + 1, fy + 1, { scale: FS, color: C.dim });
+      S.hits.unshift({ act: 'foot', fn: act, x0: x - 6, x1: x + w0 + 2 + lw, y0: fy - 3, y1: fy + 10 });
+      x += w0 + lw + 9;
+    };
+    const round = (letter, fill) => (xx, fy) => GFace.round(ctx, T, k, 0, xx, fy, letter, fill, fade) + 1;
+    const cap = (id) => (xx, fy) => GFace.cap(ctx, T, k, 0, xx - 4, fy, inputName(id), fade) - 2;
+    entry(round('A', 'rgb(40,90,230)'), 'SAVE', () => photoCapture(), F1);
+    entry(round('B', 'rgb(30,160,60)'), 'VIEW', () => { photo.viewReq = true; }, F1);
+    entry(round('L', 'rgb(110,110,110)'), 'HUD', () => { photo.hud = !photo.hud; }, F1);
+    entry(round('S', 'rgb(200,40,40)'), 'EXIT', () => photoRequest(false), F1);
+    x = x0 + 12;
+    entry(cap('CAMBACK'), 'POSE & OUTFIT', () => setFocus(!S.focus), F2);   // the same label either way: the buttons never move
+    entry(cap('PHOTOUI'), 'HIDE MENUS', () => setHidden(true), F2);
+  }
+
+  // ---- mouse / touch: the overlay takes no pointer events itself (a click on the picture captures the mouse to look
+  // around); these capture-phase listeners take the events that land on its rows first
+  function unitXY(e) { const r = cv.getBoundingClientRect(); const k = r.height / 240; return { x: (e.clientX - r.left) / k, y: (e.clientY - r.top) / k }; }
+  const hitAt = (x, y) => S.hits.find((h) => x >= h.x0 && x <= h.x1 && y >= h.y0 && y <= h.y1);
+  function dragTo(y) {
+    const h = S.drag, p = page(), l = listOf(p);
+    if (!h || !l) return;
+    const n = l.opts.length, f = Math.max(0, Math.min(1, (y - h.by) / h.bh));
+    p.sel = Math.round(f * (n - 1)); p.top = Math.max(0, p.sel - Math.floor(S.rowsVis / 2));
+  }
+  function click(h, x, button) {
+    if (button === 2) { if (S.focus) back(); return; }
+    if (h.act === 'foot') { h.fn(); return; }
+    if (h.act === 'title') { setFocus(!S.focus); return; }
+    if (h.act === 'back') { back(); return; }
+    if (h.act === 'bg') return;
+    setFocus(true);
+    if (h.act === 'bar') { S.drag = h; dragTo(unitXYLast.y); return; }
+    if (h.act === 'entry') { page().sel = h.i; pick(h.i); return; }
+    if (h.act === 'row') {
+      const p = page(), it = itemsOf(p)[h.i];
+      p.sel = h.i;
+      if ((it.kind === 'choice' || it.kind === 'range') && x > h.xv && !it.tall) change(it, x < h.xv + (h.x1 - h.xv) / 2 ? -1 : 1);
+      else choose(it);
+    }
+  }
+  let unitXYLast = { x: 0, y: 0 };
+  function onPointer(e) {
+    if (!active() || S.hidden || document.pointerLockElement) return;
+    const u = unitXY(e); unitXYLast = u;
+    if (e.type === 'pointermove') {
+      if (S.drag) { dragTo(u.y); e.stopPropagation(); return; }
+      const h = hitAt(u.x, u.y);
+      if (S.focus && h && (e.movementX || e.movementY)) { if (h.act === 'row' || h.act === 'entry') page().sel = h.i; }
+      return;
+    }
+    if (e.type === 'pointerup') { if (S.drag) { S.drag = null; e.stopPropagation(); } return; }
+    const h = hitAt(u.x, u.y);
+    if (e.type === 'pointerdown') { S.downHit = !!h; if (!h) return; e.preventDefault(); e.stopPropagation(); click(h, u.x, e.button); return; }
+    if (h || (S.downHit && e.type === 'click')) { e.preventDefault(); e.stopPropagation(); if (e.type === 'click') S.downHit = false; }
+  }
+  for (const t of ['pointerdown', 'pointermove', 'pointerup', 'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu']) window.addEventListener(t, onPointer, true);
+  window.addEventListener('wheel', (e) => {
+    if (!active() || S.hidden || document.pointerLockElement) return;
+    const u = unitXY(e), h = hitAt(u.x, u.y);
+    if (!h || h.act === 'foot') return;
+    e.preventDefault(); e.stopPropagation();
+    if (!S.focus) setFocus(true);
+    moveSel((e.deltaY > 0 ? 1 : -1) * (listOf(page()) ? 3 : 1), true);
+  }, { capture: true, passive: false });
+
+  // ---- main.js hooks
+  function show(on) {
+    if (on) {
+      S.shown = true; S.focus = false; S.hidden = false; S.stack = [{ id: 'main', sel: 1, top: 0 }]; S.cache = null;
+      S.prevNav = S.prevHide = true; S.prevBits = -1; S.t0 = performance.now(); S.toast = ''; S.drag = null;
+      if (!S.raf) S.raf = requestAnimationFrame(frame);
+      if (wanted()) log('[gphoto] game-style photo mode');
+    } else { S.shown = false; S.focus = false; document.body.classList.remove('gphoto'); cv.hidden = true; }
+  }
+  // a message: true = shown here (photo mode in the game's style), else the page shows it (GNet, in the game's font,
+  // when the game-style menu is on and photo mode did not start)
+  function toast(text) {
+    if (active()) { S.toast = String(text); S.toastAt = performance.now(); log(`[gphoto] ${text}`); return true; }
+    if (wanted() && window.GNet && fontOk() && photo.state !== 2) { GNet.show('PHOTO MODE', String(text), 3500, C.on); return true; }
+    return false;
+  }
+  window.__gphoto = {   // test aid (tools/port/scripts/photo_menu_shots.sh)
+    state: () => { const p = S.stack.length ? page() : null, l = p && listOf(p), it = p && !l ? itemsOf(p)[p.sel] : null;
+      return { active: active(), focus: S.focus, hidden: S.hidden, page: p && p.id, sel: p && p.sel, top: p && p.top,
+        item: l ? (l.opts[p.sel] || [])[1] : it && it.label, look: { anim: look.anim, frame: look.frame, play: look.play, model: look.model, items: look.items, attHide: look.attHide, face: look.face, dlHide: look.dlHide, dlShow: look.dlShow } }; },
+    go: (id) => { setFocus(true); go(id); },
+  };
+  return { show, input, key, toast, active, wanted };
+})();
+window.GPhoto = GPhoto;
 window.GameFont = GameFont;
 window.MenuModel = MenuModel;

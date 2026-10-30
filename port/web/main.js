@@ -410,17 +410,23 @@ const INPUTS = [  // [id, label]; stick directions are pseudo-buttons
   ['DU', 'D-pad up'], ['DD', 'D-pad down'], ['DL', 'D-pad left'], ['DR', 'D-pad right'],
   ['CAMZOOM', 'Free camera: C up (distance)'], ['CAMBACK', 'Free camera: C down (behind Conker)'],
   ['PHOTO', 'Photo mode on / off'],   // P348: page input, not an N64 button
+  ['PHOTOUI', 'Photo mode: hide / show the menus'],   // P366: page input (game-style photo mode, option nativemenu)
 ];
 const DEFAULT_KEYS = { UP: 'KeyW', DOWN: 'KeyS', LEFT: 'KeyA', RIGHT: 'KeyD', HALF: 'ControlLeft',
   A: 'Space', B: 'KeyF', Z: 'KeyQ', L: 'KeyR', R: 'KeyE', START: 'Enter',
   CU: 'KeyI', CD: 'KeyK', CL: 'KeyJ', CR: 'KeyL', DU: 'ArrowUp', DD: 'ArrowDown', DL: 'ArrowLeft', DR: 'ArrowRight',
-  CAMZOOM: 'KeyU', CAMBACK: 'KeyO', PHOTO: 'KeyP' };
+  CAMZOOM: 'KeyU', CAMBACK: 'KeyO', PHOTO: 'KeyP', PHOTOUI: 'KeyH' };
 // W3C Standard Gamepad: 0 A/cross, 1 B/circle, 2 X/square, 3 Y/triangle, 4 LB, 5 RB, 6 LT, 7 RT,
 // 8 back, 9 start, 10 / 11 stick clicks, 12-15 d-pad. Left stick = N64 stick, right stick = C-buttons (P347: or the
 // free camera's stick with that option on; CAMZOOM / CAMBACK only act with the option on).
-const DEFAULT_PAD = { A: 0, B: 2, Z: 6, L: 4, R: 5, START: 9, CD: 1, CL: 3, DU: 12, DD: 13, DL: 14, DR: 15, CAMZOOM: 10, CAMBACK: 11, PHOTO: 8 };
+const DEFAULT_PAD = { A: 0, B: 2, Z: 6, L: 4, R: 5, START: 9, CD: 1, CL: 3, DU: 12, DD: 13, DL: 14, DR: 15, CAMZOOM: 10, CAMBACK: 11, PHOTO: 8, PHOTOUI: 7 };
 let keyMap = Object.assign({}, DEFAULT_KEYS, store.get('keys', {}));
 let padMap = Object.assign({}, DEFAULT_PAD, store.get('padbuttons', {}));
+// P366: PHOTOUI is newer than saved bindings: if the player already gave its default key / button (H / RT) to another
+// input, that input keeps it (one input per key / button) and PHOTOUI starts unbound
+for (const [m, d, saved] of [[keyMap, DEFAULT_KEYS, store.get('keys', {})], [padMap, DEFAULT_PAD, store.get('padbuttons', {})]]) {
+  if (!('PHOTOUI' in saved) && Object.keys(m).some((k) => k !== 'PHOTOUI' && m[k] === d.PHOTOUI)) delete m.PHOTOUI;
+}
 const keysDown = new Set();
 let listening = null; // [kind, id, button] while remapping
 
@@ -449,7 +455,7 @@ function keyboardPad() {
     cy = ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
     b = (b & ~C_BITS) | (on('CAMZOOM') ? N64.CU : 0) | (on('CAMBACK') ? N64.CD : 0);
   }
-  return { present: true, b, x: sx, y: sy, half: !!on('HALF'), cx, cy, photo: !!on('PHOTO'), nav: !!on('CAMBACK') };   // P358 nav: photo panel focus
+  return { present: true, b, x: sx, y: sy, half: !!on('HALF'), cx, cy, photo: !!on('PHOTO'), nav: !!on('CAMBACK'), hide: !!on('PHOTOUI') };   // P358 nav: photo panel focus; P366 hide: photo menus
 }
 function gamepadPad(gp) {
   let b = 0;
@@ -463,6 +469,7 @@ function gamepadPad(gp) {
   // P348 photo mode: its on / off button and the right stick as an analog look stick (N64 counts, y up)
   const photo = padMap.PHOTO !== undefined && pressed(padMap.PHOTO);
   const nav = padMap.CAMBACK !== undefined && pressed(padMap.CAMBACK);   // P358: photo panel focus (right stick click)
+  const hide = padMap.PHOTOUI !== undefined && pressed(padMap.PHOTOUI);   // P366: game-style photo mode: hide / show its menus
   let lx = ax(2), ly = -ax(3), lm = Math.hypot(lx, ly);
   if (lm < 0.2) { lx = ly = 0; } else { const s = Math.min(1, (lm - 0.2) / 0.8) / lm; lx *= s; ly *= s; }
   const look = { rx: Math.round(lx * STICK), ry: Math.round(ly * STICK) };
@@ -471,12 +478,12 @@ function gamepadPad(gp) {
     if (rm < 0.2) { rx = ry = 0; } else { const s = Math.min(1, (rm - 0.2) / 0.8) / rm; rx *= s; ry *= s; }
     // C buttons bound to pad buttons (C-down on B / circle, C-left on Y / triangle) stay buttons
     b |= (padMap.CAMZOOM !== undefined && pressed(padMap.CAMZOOM) ? N64.CU : 0) | (padMap.CAMBACK !== undefined && pressed(padMap.CAMBACK) ? N64.CD : 0);
-    return { present: true, b, x: sx, y: sy, cx: Math.round(rx * STICK), cy: Math.round(ry * STICK), photo, nav, ...look };
+    return { present: true, b, x: sx, y: sy, cx: Math.round(rx * STICK), cy: Math.round(ry * STICK), photo, nav, hide, ...look };
   }
   // right stick -> C-buttons
   if (ax(2) > 0.5) b |= N64.CR; if (ax(2) < -0.5) b |= N64.CL;
   if (ax(3) > 0.5) b |= N64.CD; if (ax(3) < -0.5) b |= N64.CU;
-  return { present: true, b, x: sx, y: sy, photo, nav, ...look };
+  return { present: true, b, x: sx, y: sy, photo, nav, hide, ...look };
 }
 // ---------------------------------------------------------------- touch controls (phones / tablets)
 // Floating stick: the first touch in the left zone sets the centre, dragging up to STICK_PX gives full tilt.
@@ -599,6 +606,7 @@ const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, wh
 const PHOTO_WHY = { 1: 'Photo mode is off in Options', 2: 'no photo mode online', 3: 'photo mode needs the 3D view of a single-player game (not a menu, the pause screen, split screen or loading)',
   4: 'photo mode is not available (conker_netx.txt did not load)', 5: 'not enough memory for photo mode' };
 function photoToast(text) {
+  if (window.GPhoto && GPhoto.toast(text)) return;   // P366: game-style (option nativemenu): in the game's font
   $('photo-toast').textContent = text; $('photo-toast').hidden = false;
   clearTimeout(photo.toastTimer); photo.toastTimer = setTimeout(() => { $('photo-toast').hidden = true; }, 2500);
 }
@@ -613,6 +621,7 @@ function photoShow(on) {
   document.body.classList.toggle('photo', on);
   $('photo').hidden = !on;
   lookShow(on);   // P358
+  if (window.GPhoto) GPhoto.show(on);   // P366: the game-style HUD and panel (option nativemenu; else nothing changes)
   $('photo-btn').setAttribute('aria-pressed', String(on));
   if (!on && document.pointerLockElement && document.exitPointerLock && !opt('freecam')) document.exitPointerLock();
   applyPause();   // the sound is off while photo mode is on
@@ -637,7 +646,8 @@ function photoPoll(d) {
   if (fresh & N64.START) { photoRequest(false); return true; }
   if (fresh & N64.A) photoCapture();
   let flags = 0;
-  if (fresh & N64.B) flags |= 2;                   // back to the game's view
+  if ((fresh & N64.B) || photo.viewReq) flags |= 2;   // back to the game's view (P366 viewReq: the game-style footer's VIEW)
+  photo.viewReq = false;
   if (fresh & N64.L) photo.hud = !photo.hud;
   if (photo.hud) flags |= 1;
   // look: the free camera's stick (IJKL / right stick with that option), else the analog right stick, else the C buttons
@@ -650,7 +660,7 @@ function photoPoll(d) {
   const zoom = Math.exp((((b & N64.DD) ? 1 : 0) - ((b & N64.DU) ? 1 : 0)) * 0.9 * dt) * Math.pow(1.1, photo.wheel / 100);
   photo.mx = photo.my = photo.wheel = 0;
   M._port_photo_input(fwd, right, up, dyaw, dpitch, droll, zoom, flags);
-  if (now - (photo.infoAt || 0) > 200) {
+  if (now - (photo.infoAt || 0) > 200 && !(window.GPhoto && GPhoto.active())) {   // P366: the game-style HUD reads port_photo_info itself
     photo.infoAt = now;
     const I = (i) => M._port_photo_info(i);
     $('photo-info').textContent = `field of view ${I(7).toFixed(0)}° · roll ${I(5).toFixed(0)}° · ${I(8).toFixed(0)} units from the start · HUD ${photo.hud ? 'shown' : 'hidden'}`;
@@ -994,6 +1004,8 @@ function lookTick(dt, d, fresh) {
     M._port_photo_look_set(LK.FRAME, 0, Math.round(look.frame * 100));
     if ($('lk-frame')) { $('lk-frame').value = String(Math.floor(look.frame)); $('lk-frame-n').textContent = Math.floor(look.frame) + ' / ' + (lookUi.frames - 1); }
   }
+  // P366: the game-style panel (option nativemenu) takes the focus, the D-pad, A and B itself (gmenu.js GPhoto)
+  if (window.GPhoto && GPhoto.active()) return GPhoto.input(d, fresh, dt);
   // panel focus: O / right stick click toggles; the D-pad and A then work the panel (returned mask: bits the camera must not see)
   if (d.nav && !lookUi.prevNav) { lookUi.nav = !lookUi.nav; $('photo-look').classList.toggle('nav', lookUi.nav); if (lookUi.nav && look.min) { look.min = false; lookBuild(); } lookFocus(0); }
   lookUi.prevNav = !!d.nav;
@@ -1036,10 +1048,10 @@ function pollInput() {
   // pad 0 = keyboard merged with the first gamepad; pads 1-3 = further gamepads
   const pads = [keyboardPad(), null, null, null];
   const halfHeld = pads[0].half;   // the half-tilt key (P324 walk toggle)
-  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y, cx: k.cx, cy: k.cy, photo: k.photo, nav: k.nav }; }
+  if (touch.b || touch.x || touch.y) { const k = pads[0]; pads[0] = { present: true, b: k.b | touch.b, x: k.x || touch.x, y: k.y || touch.y, cx: k.cx, cy: k.cy, photo: k.photo, nav: k.nav, hide: k.hide }; }
   gps.forEach((gp, i) => {
     const g = gamepadPad(gp);
-    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy, photo: k.photo || g.photo, nav: k.nav || g.nav, rx: g.rx, ry: g.ry }; }
+    if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy, photo: k.photo || g.photo, nav: k.nav || g.nav, hide: k.hide || g.hide, rx: g.rx, ry: g.ry }; }
     else if (i < 4) pads[i] = g;
   });
   readyPoll(pads[0]);   // P360: Start on the Press Start screen
@@ -1078,6 +1090,7 @@ const typing = (e) => /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.ta
 window.addEventListener('keydown', (e) => {
   if (listening && listening[0] === 'key') { e.preventDefault(); if (e.code !== 'Escape') finishListen(e.code); else finishListen(null); return; }
   if (window.GMenu && GMenu.key(e)) { e.preventDefault(); return; }   // P361: Esc / Backspace go back in the game-style menu
+  if (window.GPhoto && GPhoto.key(e)) { e.preventDefault(); return; }   // P366: the game-style photo panel / Esc in photo mode
   if (e.code === 'Escape' && !drawerOpen() && !document.fullscreenElement && window.GMenu && GMenu.wanted() && GMenu.open()) { e.preventDefault(); return; }
   // P360: Esc opens / closes the menu drawer (in real fullscreen the browser takes Esc to leave it: the corner button then)
   if (e.code === 'Escape' && (drawerOpen() || !document.fullscreenElement)) { e.preventDefault(); drawerSet(!drawerOpen()); return; }
