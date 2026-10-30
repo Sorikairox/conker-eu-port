@@ -43,7 +43,10 @@ import), **Fullscreen**, **Photo mode**, **Online** and **Record** (these two op
 typed there), Tools, and *Page menu (developer)* for the old page menu. D-pad, stick or arrows move, left / right change
 a value, A / Start / Enter choose, B / Esc / Backspace go back; mouse and touch work too. Fullscreen and Import need a
 key press or click (a browser rule: a gamepad press does not count), the menu says so. Online and while recording the
-game keeps running behind it. Turn it off under Tools in that menu (or in the page menu's Options).
+game keeps running behind it. Turn it off under Tools in that menu (or in the page menu's Options). **P363:** with this option on, the game's own pause
+menu (Start) in a game on this computer has a new row **OPTIONS** under QUIT / CONT.. (multiplayer: under CONTINUE):
+push the stick down to it, press A, and the menu opens over the paused game; close it (B / Esc) and you are back in the
+pause menu on OPTIONS; Start or B there resumes. The row never appears online, while recording or replaying.
 
 1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
 2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.

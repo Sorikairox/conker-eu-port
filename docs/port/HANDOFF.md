@@ -88,6 +88,28 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P363 (port-web, 2026-10-30): "OPTIONS" row in the game's own pause menu (native menus step 3)
+- a58c5a00 (option `nativemenu`, still default off): game_pause_update (game_eu_20B730.c, `#ifdef PORT`) draws a row
+  OPTIONS under the item row (story: centred under PAUSED below QUIT / CONT..; MP: under CONTINUE) with font 0 through
+  text_printf_at (flag 0x80 shadow, scale 1.2, left-aligned at a computed x: the queue's centring flag moved it only a
+  quarter width), bright / dark green; stick down / up enter / leave it (MP: down only from CONTINUE); while selected
+  no item is lit (local litItem) and g_menu_cursor keeps its item; A -> port_gmenu_request_open + sfx 0x500; B / START
+  resume. State port_pause_on_options = function-local static; helper port_pause_options_row_draw defined after the
+  function (a helper before it broke difftest's splice: 6 selftest CERRs). PC: pc_os.c port_set_gmenu_row /
+  port_gmenu_take_request (exported, KEEPALIVE) / port_gmenu_row_shown (= switch && !port_net_on && !port_rec_mode &&
+  !port_net_det). Page: gmenu.js pauseRow() in GMenu.poll switches the row (option on, running game, no netCfg /
+  recCfg / NETDET) and opens GMenu with open('pause'): no page pause, "Back to pause" row, U.prev = -1 masks the A,
+  pad 1 idle, photo.maskB after close. 54c1b6c0 tools/port/scripts/pause_options_shots.sh OUTDIR [720|1080|both].
+- Evidence port_work/p363: final/w0..w7 (1280x720) and final/f0..f7 (1920x1080 widescreen + fullres + smooth + hi-res
+  2D): play, pause with OPTIONS, OPTIONS selected (CONT.. unlit), menu over the pause (page pause stays false), Picture
+  page, closed back to the pause on OPTIONS, CONT.. selected again, resumed and walked (2149,1926 -> 1583,1840).
+  e2e_off / e2e_on (p357 7700 IDENTICAL both, row off in the replay), net_ui_row (netpair UI=1 HOSTQ / GUESTQ
+  nativemenu:1: 7923 IDENTICAL, row never on). base/ = the pause menu before the change. check GREEN.
+- Not done: multiplayer layout not screenshotted (local MP needs the ~6000-retrace menu route of netmp_bunker.sh with
+  4 pad scripts in one tab; positions are estimated from the story layout). No real gamepad test.
+- P364 (title-menu PORT OPTIONS) needs: see NATIVE_MENUS.md section 7 "Next: P364" (menu 0 / menu 1 page map, the
+  cheapest entry = one font-0 row on title_slot_page or under the MULTI mode list reusing port_gmenu_row_shown /
+  port_gmenu_request_open; decide the page-pause rule on the title, which has no game pause).
 ### P362 (port-web, 2026-10-30): game-style menu covers everything a player needs + pad entry for every browser
 - c287ee42 gmenu.js pages (option `nativemenu`, still default off): main = Preset, Picture, HUD, Gameplay, Controls,
   Sound, Saves, Fullscreen, Photo mode, Online, Record, Tools, Page menu (developer) = the drawer, Back to game.

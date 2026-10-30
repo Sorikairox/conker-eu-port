@@ -206,5 +206,23 @@ single source of truth (`OPTIONS`).
   - Readiness (P362's view): ready to become the default once the user has tried it with a real gamepad (only fake
     pads in headless Chrome so far) and on a phone (touch: pointer events, not tested on a device). Gaps: no game
     sounds; Online room-code entry and Record still open the drawer.
-- **Next: P363** (section 6 item 3): an "OPTIONS" row in the game's pause menu (`game_pause_update`) that opens this
-  overlay in single player (see HANDOFF P362 for what it needs).
+- **P363 done** (commits a58c5a00 feature, 54c1b6c0 test script; still option `nativemenu`, default off):
+  - The game's own pause menu (game_pause_update, `#ifdef PORT`) has an **OPTIONS** row: font 0 through the game's text
+    queue (text_printf_at, drop shadow, scale 1.2), bright / dark green like the item pictures (QUIT / CONT.. are
+    pictures, text ids through "#", so only their colours can be matched). Story: centred under PAUSED below QUIT /
+    CONT..; multiplayer: under CONTINUE (not screenshotted: the local MP route is ~6000 retraces of menu pad scripts).
+    Stick down reaches it, up leaves it; A asks the page (port_gmenu_request_open -> port_gmenu_take_request) to open
+    GMenu with open('pause'): no page pause on top, "Back to pause" row, chosen A masked, pad 1 idle, held buttons masked
+    after close, so the pause menu is back exactly as it was (OPTIONS still selected).
+  - Gate: the page's switch port_set_gmenu_row (option on, game running, no netCfg / recCfg / NETDET) AND C's own
+    check (!port_net_on && !port_rec_mode && !port_net_det()). Off = N64: e2e p357 IDENTICAL off and on, netpair UI=1
+    with the option on both peers 7923 retraces IDENTICAL (row never on).
+  - Tests: tools/port/scripts/pause_options_shots.sh (keys; 1280x720 and 1920x1080 widescreen); evidence port_work/p363.
+- **Next: P364** (section 6 item 4): a "PORT OPTIONS" entry in the title flow. P363 findings: the title menu is
+  g_menu_state's menu 0 (titlePage 1 press start, 2 chapter select, 3..5 save slots: title_slot_page) and menu 1
+  (mainPage 0 mode select, 2 = main_settings_page = the multiplayer settings list of the chosen mode, 1 / 3 / 4 / 5 the
+  other MP pages); the dispatch is the switch in the menu update before title_press_start_page (game_eu_20B730.c ~line
+  780). Cheapest native entry: one more font-0 row on title_slot_page (story) or under the mode list (MULTI) using the
+  same port_gmenu_row_shown() / port_gmenu_request_open() pair, the page opening GMenu with open('pause')-style rules
+  (the title has no game pause: decide whether the page pauses). A real C-drawn options page (settings_list_draw with
+  port items) is bigger: settings_list_draw takes an item mask over the game's own 28 g_settings entries.

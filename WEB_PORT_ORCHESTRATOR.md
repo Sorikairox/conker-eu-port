@@ -483,6 +483,13 @@ flash, controller pak).
     glyph and vanish. Dump the rendered alpha of the exact string before blaming filtering or scale.
 36. Menu entries on a pad: Home / Guide is often taken by the OS or the browser; use a long hold of a button that is
     never a game input (here the page-only Photo button), not a chord with a game button (the first button leaks).
+37. Port code added in a game TU right before a converted function: the difftest splice (top-level items around the
+    function) can pick up the TU's typedefs twice and the IDO candidate stops compiling (selftest RED). Keep `#ifdef
+    PORT` helpers after the function and declare them / keep their state (function-local static) inside its body.
+38. A game's own "centred" text flag may not centre a new string as expected (Conker's text queue moved "OPTIONS" by a
+    quarter of its width): position added text at a computed x and check the picture.
+39. Menu labels that look like text can be pictures (Conker's pause items are text ids drawn as images): a row added in
+    the bitmap font can match their colours and spacing, not their frames; say so instead of faking it.
 
 ---
 
