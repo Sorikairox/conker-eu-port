@@ -22,7 +22,7 @@ const Q = new URLSearchParams(location.search);
 const BEAT = 0.6182;                 // features music: 97.06 BPM (music_0c, musicstat.mjs --beats)
 const TF = 45.6;                     // the cut to the features, on a downbeat of the features music (the logo holds ~6 s)
 // P370 v2: the features part shows the game-style menus (customisation settings, boot screens, ONLINE pages, photo
-// mode, touch controls on a phone); 72 beats (was 54): browser 8, customisation settings 8, widescreen 8, ledge 6,
+// mode, touch controls on a phone); 72 beats (was 54); v3: v1's widescreen shot back after the customisation beat: browser 8, customisation settings 8, widescreen 8, ledge 6,
 // spin 6, online 10, photo 6, phone 6, and more 6, end card 8
 const T = { browser: TF, custom: TF + 8 * BEAT, wide: TF + 16 * BEAT, ledge: TF + 24 * BEAT, spin: TF + 30 * BEAT, online: TF + 36 * BEAT,
   photo: TF + 46 * BEAT, phone: TF + 52 * BEAT, more: TF + 58 * BEAT, end: TF + 64 * BEAT };
@@ -365,33 +365,33 @@ seg(T.browser, T.custom + 0.1, 0.06, 0.1, async (g, lt) => {
 // C. customisation settings (P370, new): the 'custom' shot as one take, the window as a player sees it: Conker runs
 // (4:3), Start = the game's pause menu, its CUSTOMISATION SETTINGS row, the menu in the game's font over the pause,
 // down through the pages, Picture, Widescreen OFF -> ON. Pictures (60 / s): pause up ~150, menu ~186, Picture page 282,
-// ON ~312, back to the pause 396, play resumes 444 (still 4:3: the paused frame), 16:9 from 468.
-const CUSTOM_PIC0 = 60;
+// ON ~312 (v3: the beat ends here, ~0.4 s after the flip; the cut to v1's widescreen shot shows what it does).
+const CUSTOM_PIC0 = 39;   // v3: the take ends on the Picture page just after Widescreen flips ON (picture 312 at lt 4.55), cut on the beat to the widescreen shot
 seg(T.custom, T.wide + 0.1, 0.06, 0.1, async (g, lt) => {
   g.drawImage(await shotPic('custom', CUSTOM_PIC0 + lt * 60), 0, 0, W, H);
   // the big caption while Conker runs and the pause menu comes up; once the menu is open (picture 186, lt 2.1) its own
   // title and help say it, so the caption moves to a small tag top left, off the menu's text
-  caption(g, lt - 0.1, 2.0, 'CUSTOMISATION SETTINGS', 'IN THE GAME\'S OWN STYLE - FROM THE PAUSE MENU', { y: 878, s: 6.2 });
-  const tg = clamp((lt - 2.0) / 0.25) * clamp((T.wide - T.custom + 0.05 - lt) / 0.2);
-  if (tg > 0) label(g, lt < 4.3 ? 'CUSTOMISATION SETTINGS' : 'WIDESCREEN: ON', 30, 30, 3, { fill: lt < 4.3 ? '#fff' : ACCENT, alpha: tg });   // ON lands at picture ~312 (lt 4.2)
+  caption(g, lt - 0.1, 1.85, 'CUSTOMISATION SETTINGS', 'IN THE GAME\'S OWN STYLE - FROM THE PAUSE MENU', { y: 878, s: 6.2 });
+  const tg = clamp((lt - 1.85) / 0.25) * clamp((T.wide - T.custom + 0.05 - lt) / 0.2);
+  if (tg > 0) label(g, lt < 4.55 ? 'CUSTOMISATION SETTINGS' : 'WIDESCREEN: ON', 30, 30, 3, { fill: lt < 4.55 ? '#fff' : ACCENT, alpha: tg });   // ON lands at picture ~312 (lt 4.55)
 });
-// D. widescreen: the same take on: back in the pause menu (shown at double speed), Start, play resumes in 4:3, then the
-// picture widens to the whole 16:9 window (picture 468: drawn as a reveal from the 4:3 frame outwards over 0.3 s)
-const WIDE_FAST = 1.0;   // seconds of the widescreen beat at double speed (the way back from the menu)
-const widePic = (lt) => { const p0 = CUSTOM_PIC0 + (T.wide - T.custom) * 60; return lt < WIDE_FAST ? p0 + lt * 120 : p0 + WIDE_FAST * 120 + (lt - WIDE_FAST) * 60; };
+// D. widescreen (P370 v3: v1's shot back, user request): the original 4:3 picture (640 x 480, every option off), then the same moment in 16:9, full resolution
 seg(T.wide, T.ledge + 0.1, 0.06, 0.1, async (g, lt) => {
-  const dur = T.ledge - T.wide, i = widePic(lt), tWide = (468 - (CUSTOM_PIC0 + (T.wide - T.custom) * 60)) / 120;
+  const i = 300 + lt * 60, tw = 4 * BEAT, tr = 0.6, dur = T.ledge - T.wide;
+  const p = ease((lt - tw) / tr);
   g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
-  const p = ease((lt - tWide) / 0.3);
-  if (lt < tWide || p >= 1) g.drawImage(await shotPic('custom', i), 0, 0, W, H);
-  else {   // reveal: the 16:9 picture inside a widening window, the last 4:3 picture fading over it
-    const halfW = 720 + (W / 2 - 720) * p;
-    g.save(); g.beginPath(); g.rect(W / 2 - halfW, 0, 2 * halfW, H); g.clip(); g.drawImage(await shotPic('custom', i), 0, 0, W, H); g.restore();
-    g.fillStyle = `rgba(242,178,51,${0.9 * (1 - p)})`; g.fillRect(W / 2 - halfW - 3, 0, 6, H); g.fillRect(W / 2 + halfW - 3, 0, 6, H);
+  // the modern picture under, revealed from the 4:3 frame outwards
+  const modern = await shotPic('run29', i), old = await shotPic('run29_n64', i);
+  const halfW = 720 + (W / 2 - 720) * p;
+  if (p > 0) { g.save(); g.beginPath(); g.rect(W / 2 - halfW, 0, 2 * halfW, H); g.clip(); g.drawImage(modern, 0, 0, W, H); g.restore(); }
+  if (p < 1) {
+    g.save(); g.globalAlpha = 1 - clamp((lt - tw - tr * 0.5) / (tr * 0.5)); g.imageSmoothingEnabled = true;
+    g.drawImage(old, 240, 0, 1440, 1080); g.restore();
   }
-  if (lt < tWide + 0.15) label(g, 'ORIGINAL: 4:3', 280, 40, 3, { fill: '#fff', alpha: clamp(lt / 0.3) * clamp((tWide + 0.15 - lt) / 0.2) });
-  else label(g, 'PORT: 16:9, 1920 X 1080', 60, 40, 3, { fill: ACCENT, alpha: clamp((lt - tWide - 0.35) / 0.3) });
-  caption(g, lt - tWide - 0.1, dur + 0.1 - tWide - 0.1, 'WIDESCREEN', 'FULL RESOLUTION - SHARP HI-RES 2D');
+  if (p > 0 && p < 1) { g.fillStyle = `rgba(242,178,51,${0.9 * (1 - p)})`; g.fillRect(W / 2 - halfW - 3, 0, 6, H); g.fillRect(W / 2 + halfW - 3, 0, 6, H); }
+  if (lt < tw + 0.2) label(g, 'ORIGINAL: 4:3, 640 X 480', 260, 40, 3, { fill: '#fff', alpha: clamp(lt / 0.3) * clamp((tw + 0.2 - lt) / 0.2) });
+  else label(g, 'PORT: 16:9, 1920 X 1080', 60, 40, 3, { fill: ACCENT, alpha: clamp((lt - tw - 0.4) / 0.3) });
+  caption(g, lt - tw - 0.15, dur + 0.1 - tw - 0.15, 'WIDESCREEN', 'FULL RESOLUTION - SHARP HI-RES 2D');
 });
 
 // E. ledge grab (level 0x13 crates): jump, catch the edge, hang, pull up
@@ -687,7 +687,7 @@ async function buildAudio(only) {
     // sound effects of the shots under their segments: [shot, timeline start, duration, first picture, gain]
     // P370 v2: the customisation take's own sound (the game's pause sounds; the menu's sounds are the page's own, not in
     // the captured ring) under its real-time part, and from the widescreen beat's real-time part on
-    const SFX = [['custom', T.custom, T.wide - T.custom, CUSTOM_PIC0, 0.5], ['custom', T.wide + WIDE_FAST, T.ledge - T.wide - WIDE_FAST, widePic(WIDE_FAST), 0.45],
+    const SFX = [['custom', T.custom, T.wide - T.custom, CUSTOM_PIC0, 0.5], ['run29', T.wide, T.ledge - T.wide, 300, 0.45],   // v3: v1's widescreen shot and its sound
       ['ledge13', T.ledge, T.spin - T.ledge, 66, 0.7], ['spin_on', T.spin, T.online - T.spin, 110, 0.5]];
     for (const [shot, t0, dur, pic, gain] of SFX) {
       const { b, m } = await pcmBuffer(ctx, shot);
