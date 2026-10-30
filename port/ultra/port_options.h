@@ -68,5 +68,7 @@ void port_photo_scene_drawn(void);
  * Choosing the row calls port_gmenu_request_open(); the page takes the request with port_gmenu_take_request(). */
 int port_gmenu_row_shown(void);
 void port_gmenu_request_open(void);
+/* P364: the same row on the title menu's save slot pages and MULTI mode pages; the request reads 2 instead of 1. */
+void port_gmenu_request_title(void);
 
 #endif

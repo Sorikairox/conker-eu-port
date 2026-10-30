@@ -384,6 +384,9 @@ int port_gmenu_row_shown(void) {
     return port_gmenu_row && !port_net_on && !port_rec_mode && !port_net_det();
 }
 void port_gmenu_request_open(void) { port_gmenu_request = 1; }
+/* P364: the same row in the title menu (save slot pages: title_slot_page; MULTI mode pages: menu_mode_select_page).
+ * The request says where it came from (1 = the pause menu, 2 = the title menu) so the page labels its way back. */
+void port_gmenu_request_title(void) { port_gmenu_request = 2; }
 int port_volume_scale(int id, int v) {
     int pct = port_option(id);
     if (pct >= 100) return v; /* the default: the N64 value, untouched */

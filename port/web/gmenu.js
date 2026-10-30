@@ -200,9 +200,12 @@ const MenuModel = (() => {
 const GMenu = (() => {
   const U = { open: false, t0: 0, closing: 0, stack: [], hits: [], raf: 0, paused: false,
     prev: 0, repeatAt: 0, held: 0, helpPage: 0, helpAt: 0, helpSel: '', homePrev: false, mx: -1, my: -1,
-    cap: null, note: '', noteAt: 0, eh: false, ehT: 0, ehUsed: false, fromPause: false, row: -1 };
+    cap: null, note: '', noteAt: 0, eh: false, ehT: 0, ehUsed: false, from: '', row: -1 };
   const cv = document.getElementById('gmenu');
   const ROW = 15, ROWS = 8, TOP = 46, X0 = 34, X1 = 286;   // row spacing / visible rows / list top / label x / value right edge (units)
+  // P363 / P364: opened from an OPTIONS row in the game's own menus: the last row of the main page goes back there
+  const BACK = { pause: ['Back to pause', 'Close this menu and go back to the game\'s pause menu (B, Esc or Start on this line).'],
+    title: ['Back to title', 'Close this menu and go back to the title menu (B, Esc or Start on this line).'] };
   const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
   const smooth = () => !!opt('smoothfont');
   const wanted = () => !!opt('nativemenu');
@@ -236,7 +239,7 @@ const GMenu = (() => {
         () => (netCfg ? 'Not during an online session.' : '')),   // while recording: Stop and save
       { kind: 'link', label: 'Tools', help: MenuModel.sections().find((s) => s.id === 'tools').help, page: 'tools' },
       { kind: 'action', label: 'Page menu (developer)', help: 'The page\'s own menu: the same settings plus manual online codes, the debug console and developer tools.', act: () => { close(); drawerSet(true); toggle('options', true); } },
-      { kind: 'action', get label() { return U.fromPause ? 'Back to pause' : 'Back to game'; }, get help() { return U.fromPause ? 'Close this menu and go back to the game\'s pause menu (B, Esc or Start on this line).' : 'Close this menu (B, Esc or Start on this line).'; }, act: () => close() },
+      { kind: 'action', get label() { return BACK[U.from] ? BACK[U.from][0] : 'Back to game'; }, get help() { return BACK[U.from] ? BACK[U.from][1] : 'Close this menu (B, Esc or Start on this line).'; }, act: () => close() },
     ]);
   }
   // key / button binding rows (INPUTS, keyMap, padMap, keyName, padName, bindSet, bindReset: main.js)
@@ -292,14 +295,15 @@ const GMenu = (() => {
     if (photo.state === 2 || !GameFont.load()) return false;   // photo mode has the pad; no font yet: the drawer instead
     U.open = true; U.t0 = performance.now(); U.closing = 0; U.stack = [{ id: 'main', sel: 0, top: 0 }];
     U.prev = -1; U.held = 0; U.helpSel = ''; U.cap = null; U.note = '';
-    U.fromPause = how === 'pause';
+    U.from = BACK[how] ? how : '';
     document.body.classList.add('gmenu'); cv.hidden = false;
     // single player: pause like the drawer (never online, never while recording or replaying). P363: opened from the
     // game's own pause menu (its OPTIONS row) the game is paused already and keeps running its pause menu underneath
-    // (with an idle pad 1), so the page does not pause on top
-    if (!U.fromPause && !netCfg && !recCfg && !NETDET && !userPaused) { U.paused = true; setPaused(true); }
+    // (with an idle pad 1), so the page does not pause on top. P364: opened from the title menu's OPTIONS row the page
+    // does not pause either: the title (music, Conker's animation, the 3D scene) keeps running with an idle pad 1
+    if (!U.from && !netCfg && !recCfg && !NETDET && !userPaused) { U.paused = true; setPaused(true); }
     if (document.pointerLockElement && document.exitPointerLock) document.exitPointerLock();
-    log(`[gmenu] open${U.fromPause ? ' (from the game\'s pause menu)' : ''}`);
+    log(`[gmenu] open${U.from ? ` (from the game's ${U.from} menu)` : ''}`);
     frame();
     return true;
   }
@@ -368,19 +372,26 @@ const GMenu = (() => {
     if (!eh) U.ehUsed = false;
     U.eh = eh;
   }
-  // P363: the "OPTIONS" row in the game's own pause menu (game_pause_update, game_eu_20B730.c). The page switches it on
-  // (port_set_gmenu_row) only while this menu's option is on and the game is local: never online, while recording or
-  // replaying, or under ?netdet (the pause menu's state is hashed there; the C side checks the same again). Choosing it
-  // leaves a request (port_gmenu_take_request) that opens this menu over the game's pause; the A press that chose it
-  // is masked by U.prev = -1 (the first poll after open only records the held buttons).
-  function pauseRow() {
+  // P363: the "OPTIONS" row in the game's own pause menu (game_pause_update, game_eu_20B730.c); P364: the same row on
+  // the title menu's save slot pages (title_slot_page) and MULTI mode pages (menu_mode_select_page). The page switches
+  // the rows on (port_set_gmenu_row) only while this menu's option is on and the game is local: never online, while an
+  // online session is being set up (a room / invite exists: PortNet.t.role), while recording or replaying, or under
+  // ?netdet (the menus' state is hashed there; the C side checks the same again). Choosing a row leaves a request
+  // (port_gmenu_take_request: 1 = pause menu, 2 = title menu) that opens this menu over the game's own menu; the A
+  // press that chose it is masked by U.prev = -1 (the first poll after open only records the held buttons).
+  const netBusy = () => !!(window.PortNet && PortNet.t && PortNet.t.role);
+  function gameRows() {
     if (typeof M === 'undefined' || !M || !M._port_set_gmenu_row) return;
-    const on = wanted() && running === 'game' && !netCfg && !recCfg && !NETDET ? 1 : 0;
-    if (on !== U.row) { U.row = on; M._port_set_gmenu_row(on); log(`[gmenu] pause menu row ${on ? 'on' : 'off'}`); }
-    if (M._port_gmenu_take_request() && on && !U.open) { if (open('pause')) log('[gmenu] opened from the pause menu\'s OPTIONS row'); }
+    const on = wanted() && running === 'game' && !netCfg && !recCfg && !NETDET && !netBusy() ? 1 : 0;
+    if (on !== U.row) { U.row = on; M._port_set_gmenu_row(on); log(`[gmenu] game menu OPTIONS rows ${on ? 'on' : 'off'}`); }
+    const req = M._port_gmenu_take_request();
+    if (req && on && !U.open) {
+      const how = req === 2 ? 'title' : 'pause';
+      if (open(how)) log(`[gmenu] opened from the ${how} menu's OPTIONS row`);
+    }
   }
   function poll(d) {
-    pauseRow();
+    gameRows();
     const gp = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find((g) => g && g.connected);
     const raw = (i) => !!(gp && gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > 0.5));
     const now = performance.now();
@@ -593,7 +604,7 @@ const GMenu = (() => {
     pump();
   }, 1000 * +Q.get('gmenupad'));
 
-  return { open, close, back, poll, key, wanted, note, get isOpen() { return U.open; }, state: () => ({ open: U.open, page: U.open ? page().id : null, sel: U.open ? page().sel : -1, item: U.open ? (itemsOf(page())[page().sel] || {}).label : null }) };
+  return { open, close, back, poll, key, wanted, note, get isOpen() { return U.open; }, state: () => ({ open: U.open, from: U.from, page: U.open ? page().id : null, sel: U.open ? page().sel : -1, item: U.open ? (itemsOf(page())[page().sel] || {}).label : null }) };
 })();
 window.GMenu = GMenu;
 window.GameFont = GameFont;

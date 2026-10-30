@@ -1536,7 +1536,7 @@ Gfx *frontend_menu_draw(Gfx *gdl) {
     s32 v;
     s32 k;
     s32 t;
-    struct_eu_BE818 *e;
+    SaveSlotSummary *e;
 
     if (g_cutscene_slot_state == 1) {
         g_menu_fade_alpha = 0;
@@ -1585,8 +1585,8 @@ Gfx *frontend_menu_draw(Gfx *gdl) {
     if (0.5f <= p->x8) {
         if (p->x2C >= 3) {
             e = &g_save_slot_summaries[p->x2C - 3];
-            if (e->unk8 != -1) {
-                gdl = save_screen_frame_draw(gdl, e->padC[0]);
+            if (e->stamp != -1) {
+                gdl = save_screen_frame_draw(gdl, e->resumeLevel);
             }
         }
     }

@@ -522,10 +522,10 @@ void save_slots_reset(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        g_save_slot_summaries[i].unk8 = -1;
+        g_save_slot_summaries[i].stamp = -1;
     }
     for (i = 0; i < 3; i++) {
-        g_save_slot_summaries[i].unkE = -1;
+        g_save_slot_summaries[i].eepArea = -1;
     }
     g_save_best_slot_score = -1;
     g_save_final_scene_unlock = 0;

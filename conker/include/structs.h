@@ -3561,13 +3561,17 @@ typedef struct {
     u8  unk58[0xA8 - 0x58];
     struct_eu_2062D0_f_sub unkA8;
 } struct_eu_2062D0_f;
+/* P364: a save slot's summary for the title menu's slot pages (g_save_slot_summaries, written by save_slot_load /
+ * save_slot_write in game_33990.c); was struct_eu_BE818 */
 typedef struct {
-    u8  pad0[8];
-    s32 unk8;
-    u8  padC[2];
-    s8  unkE;
+    u32 playTime;       /* 0x0: play time in seconds (shown h:mm:ss); was pad0[0..3] */
+    u32 score;          /* 0x4: g_save_stat9 (0x7D00 is shown as 1000000); was pad0[4..7] */
+    s32 stamp;          /* 0x8: save time stamp, -1 = empty slot; was unk8 */
+    u8  resumeLevel;    /* 0xC: g_save_resume_level; was padC[0] */
+    u8  progressCount;  /* 0xD: set bits of g_save_progress_bits; was padC[1] */
+    s8  eepArea;        /* 0xE: the EEPROM slot area holding it (save_request_slot_load); was unkE */
     u8  padF;
-} struct_eu_BE818;
+} SaveSlotSummary;
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;

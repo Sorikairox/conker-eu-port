@@ -1,6 +1,6 @@
 #!/bin/bash
 # P363: screenshots of the game's own pause menu with the port's "OPTIONS" row (option nativemenu; game_pause_update in
-# conker/src_eu/game_eu_20B730.c, pauseRow() in port/web/gmenu.js), driven by keys like a player:
+# conker/src_eu/game_eu_20B730.c, gameRows() in port/web/gmenu.js), driven by keys like a player:
 #   Start (Enter) pauses, stick down (S) selects OPTIONS, A (Space) opens the game-style menu over the game's pause,
 #   arrows / Enter move in it, Esc goes back and closes it (back on the pause menu, OPTIONS still selected), stick up
 #   (W) back to CONT.., Start resumes, W walks.

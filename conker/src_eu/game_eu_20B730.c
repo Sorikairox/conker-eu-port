@@ -394,28 +394,35 @@ void game_pause_update(void) {
 
 void screen_fade_update(void);
 #ifdef PORT
-/* P363: the pause menu's "OPTIONS" row (see game_pause_update): font 0 text in the item pictures' greens. */
-void port_pause_options_row_draw(s32 selected, s32 count, s32 yOff) {
+/* P363 / P364: the port's "OPTIONS" row in the game's own menus (pause menu: game_pause_update; title menu:
+ * title_slot_page, menu_mode_select_page): font 0 text through the game's text queue, in the item pictures' greens
+ * (bright when selected, dark otherwise), drop shadow, scale 1.2, centred at centreX, top at y, with the page's alpha.
+ * centreX / y are where the row should appear, in the units the item pictures are placed in (the 320 x 240 picture):
+ * a text node lands about 1.1 x further right and 1.125 x further down than a picture node with the same numbers
+ * (measured on the screenshots: P363's row, placed at the pictures' numbers, sat about 12 units right of PAUSED), so
+ * the numbers are divided by that here. Flag 0x40 keeps text_queue_draw from also multiplying the position by
+ * g_hud_scale_x / _y (pictures never get that), 0x80 adds the drop shadow; the queue's own centring (flag 1) is not
+ * used (it subtracts half the scaled width from the scaled x). "OPTIONS" is 57 units wide at scale 1 (68 at 1.2).
+ * Leaves the text colour white with that alpha and the scale as it was. */
+void port_menu_options_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha) {
     f32 scale = g_text_scale;
-    s32 x, y;
 
-    /* left-aligned at a fixed x: "OPTIONS" is 57 units wide at scale 1 (68 at 1.2). The text queue's own centring (flag
-     * 1) moves a string by only a quarter of its width here, so it is not used. */
-    if (count == 3) {
-        x = 0xC7;           /* centred at 233, under the CONTINUE picture (drawn from x 0xD5, its centre near 233) */
-    } else {
-        x = 0x7F;           /* centred at 161, under PAUSED, between QUIT and CONT.. */
-    }
-    y = yOff + 0x97;        /* under the item row (yOff + 0x73; the pictures reach about yOff + 0x91) */
     if (selected) {
-        text_set_color(0x8C, 0xFF, 0x10, g_menu_prompt_alpha_lo);   /* like the lit item pictures */
+        text_set_color(0x8C, 0xFF, 0x10, alpha);   /* like the lit item pictures */
     } else {
-        text_set_color(0x2A, 0x6A, 0x1A, g_menu_prompt_alpha_lo);   /* like the dark ones */
+        text_set_color(0x2A, 0x6A, 0x1A, alpha);   /* like the dark ones */
     }
     text_set_scale(1.2f);
-    text_printf_at(x, y, 0x80, (s32) "OPTIONS"); /* 0x80: drop shadow */
+    text_printf_at((centreX - 34) * 10 / 11, y * 8 / 9, 0xC0, (s32) "OPTIONS"); /* 0x40: position not scaled, 0x80: drop shadow */
     text_set_scale(scale);
-    text_set_color(0xFF, 0xFF, 0xFF, g_menu_prompt_alpha_lo);
+    text_set_color(0xFF, 0xFF, 0xFF, alpha);
+}
+/* P363: the pause menu's row (see game_pause_update). */
+void port_pause_options_row_draw(s32 selected, s32 count, s32 yOff) {
+    /* multiplayer: centred at 233, under the CONTINUE picture (drawn from x 0xD5, its centre near 233); story: centred
+     * at 162, under PAUSED, between QUIT and CONT..; under the item row (yOff + 0x73; the pictures reach about
+     * yOff + 0x96) */
+    port_menu_options_row_draw(selected, count == 3 ? 233 : 162, yOff + 0x9C, g_menu_prompt_alpha_lo);
 }
 static s32 port_intro_skipped; /* P324 "Skip intro": done once per boot (the attract loop also returns to level 0x21) */
 static s32 port_warp_started;  /* P327 ?warp: done once per boot */
@@ -1363,7 +1370,7 @@ void text_printf(s32, ...);
 /* was func_151E06D0 */
 void title_slot_page(void) {
     MenuState *rec;
-    struct_eu_BE818 *save;
+    SaveSlotSummary *save;
     u8 alpha;
     s32 slot;
     s32 sfx;
@@ -1371,12 +1378,42 @@ void title_slot_page(void) {
     u32 v;
     s32 y;
     u16 in;
+#ifdef PORT
+    /* DELIBERATE PORT CHANGE (P364, native menus; docs/design/NATIVE_MENUS.md): an "OPTIONS" row on this save slot page
+     * that opens the page's game-style menu (port/web/gmenu.js), like the pause menu's row (P363, game_pause_update).
+     * Shown only while port_gmenu_row_shown() (the page's option "Game-style menu" is on and the game is local: never
+     * online, in a recording / replay or under ?netdet, where this menu's state is hashed) and not during the erase
+     * question (g_menu_cursor 2 / 3); otherwise every line below runs exactly as on the N64. It sits under the slot's
+     * items (empty slot: under NEW GAME; used slot: under CONTINUE / ERASE), centred, in the item pictures' greens.
+     * Stick down reaches it, stick up goes back to the item it came from (g_menu_cursor keeps it, but no item is lit
+     * meanwhile); left / right do nothing there. A or START on it plays the choose sound (0x500), asks the page to open
+     * its menu (port_gmenu_request_title) and is taken out of this frame's menu input, so it neither starts the game
+     * nor reaches the menu camera. The title keeps running underneath (the page gives the game an idle pad 1), so
+     * closing that menu comes back here with OPTIONS still selected. B zooms out as from any item. The selection is
+     * forgotten whenever the page is not fully shown (g_menu_alpha < 0xFF: zooming in or out), so every visit starts on
+     * the game's own item. port_slot_on_options = OPTIONS is selected (a port variable, outside game memory). */
+    static s32 port_slot_on_options;
+    s32 optionsRow;   /* the OPTIONS row is shown this frame */
+    void port_menu_options_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha);
+#endif
 
     alpha = g_menu_alpha;
     rec = (MenuState *) g_menu_state;
     sfx = 0;
     slot = rec->titlePage - 3;
     sel = (s8) g_menu_cursor;
+#ifdef PORT
+    optionsRow = sel < 2 && port_gmenu_row_shown();
+    if (!optionsRow || alpha != 0xFF) {
+        port_slot_on_options = 0;
+    }
+    if (optionsRow && alpha == 0xFF && (rec->input & (port_slot_on_options ? 1 : 2))) {
+        port_slot_on_options = !port_slot_on_options;   /* stick down to OPTIONS, stick up back to the item */
+        sfx = 0x62D;
+    } else if (port_slot_on_options) {
+        /* on OPTIONS left / right do nothing */
+    } else
+#endif
     if (sel < 2) {
         if (rec->input & 0xC) {
             g_menu_cursor = 1 - sel;
@@ -1388,7 +1425,7 @@ void title_slot_page(void) {
     }
     text_set_pos(0x94, 0x46);
     save = &g_save_slot_summaries[slot];
-    if (save->unk8 == -1) {
+    if (save->stamp == -1) {
         g_menu_cursor = 0;
     }
     if (slot == 2) {
@@ -1398,8 +1435,8 @@ void title_slot_page(void) {
     } else {
         text_set_color(0x20, 0x55, 0xFF, alpha);
     }
-    if (save->unk8 != -1) {
-        v = ((u32 *) save)[1];
+    if (save->stamp != -1) {
+        v = save->score;
         y = 0;
         if (v == 0x7D00) {
             v = 1000000;
@@ -1408,27 +1445,52 @@ void title_slot_page(void) {
         }
         text_printf_at(0x70, y + 0x33, 0, (s32) g_str_slot_score_fmt, v);
         text_set_scale(1.0f);
-        v = ((u32 *) save)[0];
+        v = save->playTime;
         text_printf_at(0xA4, 0x33, 0, (s32) g_str_slot_time_fmt, v / 60 / 60, v / 60 % 60, v % 60);
     }
     text_set_color(0xFF, 0xFF, 0xFF, alpha);
-    if (save->unk8 >= 0) {
+    if (save->stamp >= 0) {
         text_printf_at(0x94, 0xAF, 1, (s32) g_str_slot_title, 0x1A);
         text_set_pos(0x58, 0xAF);
         sel = (s8) g_menu_cursor;
         if (sel < 2) {
+#ifdef PORT
+            text_printf((s32) g_str_slot_continue, (sel == 0 && !port_slot_on_options) + 0x16, 1);   /* unlit on OPTIONS */
+#else
             text_printf((s32) g_str_slot_continue, (sel == 0) + 0x16, 1);
+#endif
         } else {
             text_printf_at(0x94, 0x91, 1, (s32) g_str_slot_erase_ask, 0x19);
         }
     } else {
+#ifdef PORT
+        if (port_slot_on_options) {
+            text_set_color(0xFF, 0xFF, 0xFF, alpha >> 1);   /* NEW GAME has no dark picture: half faded while OPTIONS is selected */
+        }
+#endif
         text_printf_at(0x94, 0x6E, 1, (s32) g_str_slot_start, 0x31);
     }
+#ifdef PORT
+    if (optionsRow) {
+        /* centred on the page (NEW GAME's picture and the joystick between PLAY / ERASE are centred at 162), under NEW
+         * GAME (its picture reaches about y 137) / under PLAY / ERASE (they reach about 210) */
+        port_menu_options_row_draw(port_slot_on_options, 162, save->stamp >= 0 ? 0xD4 : 0x8E, alpha);
+    }
+    if (port_slot_on_options && (rec->input & 0x10)) {
+        port_gmenu_request_title();   /* A / START on OPTIONS: the page opens its menu over the title */
+        sfx = 0x500;
+        ((MenuState *) g_menu_state)->input &= ~0x10;
+    }
+#endif
     text_set_pos(0xD0, 0xAF);
     sel = (s8) g_menu_cursor;
     if (sel < 2) {
-        if (save->unk8 >= 0) {
+        if (save->stamp >= 0) {
+#ifdef PORT
+            text_printf((s32) g_str_slot_erase, (sel != 0 && !port_slot_on_options) + 0x18, 1);   /* unlit on OPTIONS */
+#else
             text_printf((s32) g_str_slot_erase, (sel != 0) + 0x18, 1);
+#endif
             sel = (s8) g_menu_cursor;
         }
         if (sel == 0) {
@@ -1439,7 +1501,7 @@ void title_slot_page(void) {
                 g_save_cur_slot = slot;
                 g_save_best_slot_score = -1;
                 g_save_slot_refresh = 0;
-                save_request_slot_load(save->unkE);
+                save_request_slot_load(save->eepArea);
                 sfx = 0x500;
             }
         } else if (((MenuState *) g_menu_state)->input & 0x10) {
@@ -1459,9 +1521,9 @@ void title_slot_page(void) {
                 g_save_restart_entry = 0;
                 g_save_stat9 = 0;
                 level_state_clear();
-                save->padC[0] = 0x18;
-                ((u32 *) save)[1] = 0;
-                save->unk8 = -1;
+                save->resumeLevel = 0x18;
+                save->score = 0;
+                save->stamp = -1;
                 rec = (MenuState *) g_menu_state;
                 g_menu_setup_step = 0;
             } else {
@@ -1512,6 +1574,24 @@ void menu_mode_select_page(void) {
     s8 *tab;
     f32 step;
     s8 code;
+    s32 setupLit;   /* SET-UP is drawn lit when selected (P364: 0 while the port's OPTIONS row is selected) */
+#ifdef PORT
+    /* DELIBERATE PORT CHANGE (P364, native menus; docs/design/NATIVE_MENUS.md): an "OPTIONS" row on this MULTI mode
+     * page, under SET-UP (shown on the page whichever item is selected), that opens the page's game-style menu (port/web/gmenu.js), like the pause menu's row (P363) and
+     * the save slot pages' (title_slot_page). Shown only while port_gmenu_row_shown() (the page's option "Game-style menu"
+     * is on and the game is local: never online, in a recording / replay or under ?netdet, where this menu's state is
+     * hashed; the page also switches it off as soon as an online session is being set up); otherwise every line below
+     * runs exactly as on the N64. Stick down from SET-UP (g_menu_cursor 1, where up / down did nothing) reaches it,
+     * stick up goes back to SET-UP; left / right do nothing there. A or START on it plays the choose sound (0x500), asks
+     * the page to open its menu (port_gmenu_request_title) and is taken out of this frame's menu input, so it does not
+     * open SET-UP. The menu keeps running underneath (idle pad 1), so closing that menu comes back here with OPTIONS
+     * still selected. B zooms out as from any item. The selection is forgotten whenever the page is not fully shown
+     * (textAlpha < 0xFF: fading in or out). port_modes_on_options = OPTIONS is selected (a port variable, outside game
+     * memory). */
+    static s32 port_modes_on_options;
+    s32 optionsRow;   /* the OPTIONS row is shown this frame */
+    void port_menu_options_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha);
+#endif
 
     rec = (MenuState *) g_menu_state;
     if (rec->titlePage == 0) {
@@ -1554,14 +1634,43 @@ void menu_mode_select_page(void) {
     g_menu_team_size_shift = 0;
     g_menu_chars_changeable = 0;
     n = g_menu_group_mode_counts[rec->titlePage - 1];
+#ifdef PORT
+    optionsRow = port_gmenu_row_shown();
+    if (!optionsRow || textAlpha != 0xFF || (s8) g_menu_cursor != 1) {
+        port_modes_on_options = 0;
+    }
+    if (optionsRow && textAlpha == 0xFF && (s8) g_menu_cursor == 1 && (rec->input & (port_modes_on_options ? 1 : 2))) {
+        port_modes_on_options = !port_modes_on_options;   /* stick down from SET-UP to OPTIONS, stick up back */
+        sound_play_2d(0x62D, 0x4650, 0x40, 0, 0);
+    } else if (port_modes_on_options) {
+        /* on OPTIONS left / right do nothing */
+    } else
+#endif
     if (rec->input & 0xC) {
         g_menu_cursor = 1 - (s8) g_menu_cursor;
         sound_play_2d(0x62D, 0x4650, 0x40, 0, 0);
     }
+    setupLit = 1;
+#ifdef PORT
+    if (port_modes_on_options) {
+        setupLit = 0;
+    }
+#endif
     text_set_color(0xFF, 0xFF, 0xFF, alpha);
     text_printf_at(0x94, 0x7E, 1, (s32) g_str_modes_title, 0x1A);
     text_set_color(0xFF, 0xFF, 0xFF, textAlpha);
-    text_printf_at(0xD5, 0x7E, 1, (s32) g_str_modes_choice, ((s8) g_menu_cursor == 1) + 0x1B);
+    text_printf_at(0xD5, 0x7E, 1, (s32) g_str_modes_choice, ((s8) g_menu_cursor == 1 && setupLit) + 0x1B);
+#ifdef PORT
+    if (optionsRow) {
+        /* under SET-UP (drawn from x 0xD5, its centre near 234; the picture reaches about y 155) */
+        port_menu_options_row_draw(port_modes_on_options, 234, 0xA0, textAlpha);
+    }
+    if (port_modes_on_options && textAlpha == 0xFF && (((MenuState *) g_menu_state)->input & 0x10)) {
+        port_gmenu_request_title();   /* A / START on OPTIONS: the page opens its menu over the title */
+        sound_play_2d(0x500, 0x4650, 0x40, 0, 0);
+        ((MenuState *) g_menu_state)->input &= ~0x10;
+    }
+#endif
     if (textAlpha == 0xFF && (s8) g_menu_cursor == 0 && (n != 5 || g_menu_slide_phase == 0.0f)) {
         rec = (MenuState *) g_menu_state;
         if (rec->input & 1) {
