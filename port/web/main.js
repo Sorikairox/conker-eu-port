@@ -38,7 +38,17 @@ function log(s, cls) {
   if (!$('p-debug').hidden) out.scrollTop = out.scrollHeight;
   console.log(s);
 }
-const status = (s, cls) => { const e = $('status'); e.textContent = s; e.className = cls || ''; };
+// P360: the status line lives in the menu drawer; while the drawer is closed, a message that matters (an error, or anything
+// before the game runs) also shows for a few seconds as a toast over the picture (it never moves the picture)
+let toastTimer = 0;
+function toast(s, cls, ms = 3500) {
+  const t = $('toast'); t.textContent = s; t.className = cls || '';
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('out'), ms);
+}
+const status = (s, cls) => {
+  const e = $('status'); e.textContent = s; e.className = cls || '';
+  if ((cls === 'bad' || !running) && !document.body.classList.contains('drawer')) toast(s, cls, cls === 'bad' ? 8000 : 3500);
+};
 const store = {   // localStorage can throw (private mode, blocked storage): never required
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } },
@@ -53,8 +63,54 @@ function toggle(name, on) {
   if (name === 'debug') { store.set('debug', on); if (on) out.scrollTop = out.scrollHeight; }
 }
 for (const n of ['controls', 'saves', 'options', 'online', 'rec', 'debug']) $('t-' + n).onclick = () => toggle(n);
-if (['controls', 'saves', 'options', 'online', 'rec'].includes(Q.get('panel'))) toggle(Q.get('panel'), true);   // P346 test aid: ?panel=options
+if (['controls', 'saves', 'options', 'online', 'rec'].includes(Q.get('panel'))) { toggle(Q.get('panel'), true); setTimeout(() => drawerSet(true), 0); }   // P346 test aid: ?panel=options (P360: opens the menu)
 if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', false))) toggle('debug', true);
+
+// ---------------------------------------------------------------- P360 menu drawer
+// The game fills the window; every page control lives in #drawer, a translucent panel over the left of the picture,
+// opened by Esc or the corner button #menu-btn (which fades out with the mouse cursor after a few idle seconds of play).
+// Opening it pauses a single-player game (like a pause menu; never an online session, never a replay); closing it
+// resumes the game if the drawer paused it and gives the keyboard focus back to the canvas.
+const drawerOpen = () => $('drawer').classList.contains('open');
+let drawerPaused = false;
+function drawerSet(on) {
+  if (on === drawerOpen()) return;
+  $('drawer').classList.toggle('open', on);
+  document.body.classList.toggle('drawer', on);
+  $('drawer-shade').hidden = !on;
+  $('menu-btn').setAttribute('aria-expanded', String(on));
+  if (on) {
+    if (running === 'game' && !netCfg && !userPaused && !(recCfg && recCfg.mode === 'replay')) { drawerPaused = true; setPaused(true); }
+    setTimeout(() => { if (drawerOpen()) $('drawer-close').focus({ preventScroll: true }); }, 200);   // after the slide-in (hidden until then)
+    if (document.pointerLockElement && document.exitPointerLock) document.exitPointerLock();
+  } else {
+    if (drawerPaused && userPaused) setPaused(false);
+    drawerPaused = false;
+    keysDown.clear();
+    $('canvas').focus();
+  }
+  idleKick();
+}
+$('menu-btn').onclick = () => drawerSet(true);
+$('drawer-close').onclick = () => drawerSet(false);
+$('drawer-shade').onclick = () => drawerSet(false);   // a click on the picture beside the drawer closes it
+// the corner button and the cursor hide after 2.5 s without mouse movement while the game runs (shown again on movement)
+let idleTimer = 0;
+function idleKick() {
+  document.body.classList.remove('idle');
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => { if (running === 'game' && !drawerOpen() && !document.body.classList.contains('touch')) document.body.classList.add('idle'); }, 2500);
+}
+for (const ev of ['mousemove', 'pointerdown', 'touchstart']) window.addEventListener(ev, idleKick, { passive: true });
+// Start (key, gamepad or touch button) on the Press Start screen starts the game
+let readyPrev = true;
+function readyPoll(p) {
+  const st = (p.b & N64.START) !== 0;
+  if (st && !readyPrev && !running && romOk && !$('ready').hidden && !drawerOpen()) start('game');
+  readyPrev = st;
+}
+$('ready-start').onclick = () => start('game');
+$('ready-rom').onclick = () => { $('ready').hidden = true; $('drop').hidden = false; };
 
 // ---------------------------------------------------------------- options (P324)
 // Every port-only feature is optional. One row per option: key (localStorage 'opt.KEY'), label, default, help text,
@@ -307,6 +363,7 @@ async function setRom(bytes, from) {
   if (romOk) status(`ROM: Conker EU, SHA-1 ok (${mb} MB, ${from})`, 'ok');
   else status(`ROM SHA-1 ${romSha1.slice(0, 12)}… is not the EU ROM (${from})`, 'bad');
   $('drop').hidden = romOk;
+  $('ready').hidden = !romOk || !!running;   // P360: the Press Start screen
   $('start').disabled = !!running || !romOk;
   $('eep-export').disabled = !romOk;
   return romOk;
@@ -652,7 +709,7 @@ window.__photo = {
     const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.readAsDataURL(photo.png);
   }),
 };
-$('photo-btn').onclick = () => photoRequest(!(photo.state === 2 || photo.state === 1));
+$('photo-btn').onclick = () => { const on = !(photo.state === 2 || photo.state === 1); drawerSet(false); photoRequest(on); };   // P360: from the menu drawer
 $('photo-save').onclick = () => { $('canvas').focus(); photoCapture(); };   // focus back: Space must not press the button again
 $('photo-exit').onclick = () => { $('canvas').focus(); photoRequest(false); };
 $('canvas').addEventListener('wheel', (e) => { if (photo.state === 2) { e.preventDefault(); photo.wheel += e.deltaY; } }, { passive: false });
@@ -981,6 +1038,7 @@ function pollInput() {
     if (i === 0) { const k = pads[0]; pads[0] = { present: true, b: k.b | g.b, x: k.x || g.x, y: k.y || g.y, cx: k.cx || g.cx, cy: k.cy || g.cy, photo: k.photo || g.photo, nav: k.nav || g.nav, rx: g.rx, ry: g.ry }; }
     else if (i < 4) pads[i] = g;
   });
+  readyPoll(pads[0]);   // P360: Start on the Press Start screen
   if (photoPoll(pads[0])) { requestAnimationFrame(pollInput); return; }   // P348: photo mode takes pad 1's input
   photoMaskAfter(pads[0]);   // P348: inputs still held from photo mode reach the game only once released
   applyLatches(pads[0], halfHeld);
@@ -1014,9 +1072,11 @@ const boundCodes = () => new Set(Object.values(keyMap));
 const typing = (e) => /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.target.type !== 'range';
 window.addEventListener('keydown', (e) => {
   if (listening && listening[0] === 'key') { e.preventDefault(); if (e.code !== 'Escape') finishListen(e.code); else finishListen(null); return; }
+  // P360: Esc opens / closes the menu drawer (in real fullscreen the browser takes Esc to leave it: the corner button then)
+  if (e.code === 'Escape' && (drawerOpen() || !document.fullscreenElement)) { e.preventDefault(); drawerSet(!drawerOpen()); return; }
   if (typing(e)) return;
   if (e.code === 'F11' || (e.code === 'KeyF' && e.altKey)) { e.preventDefault(); fullscreen(); return; }
-  if (e.code === 'Escape' && running === 'game' && !document.fullscreenElement) { setPaused(!userPaused); return; }
+  if (!running && romOk && !$('ready').hidden && !drawerOpen() && e.code === 'Enter') { e.preventDefault(); start('game'); return; }   // P360 Press Start
   keysDown.add(e.code);
   if (running && boundCodes().has(e.code)) e.preventDefault();  // no page scrolling on Space / arrows
 });
@@ -1148,8 +1208,8 @@ $('eep-import').addEventListener('change', (e) => importEep(e.target.files[0]));
 
 // ---------------------------------------------------------------- fullscreen, pause, volume, audio
 function fullscreen() {
-  // with touch controls on, the whole page goes fullscreen (the controls live outside #screen)
-  const s = document.body.classList.contains('touch') ? document.documentElement : $('screen');
+  // P360: always the whole page (the picture already fills it; the menu drawer and the touch controls live outside #screen)
+  const s = document.documentElement;
   if (document.fullscreenElement) document.exitFullscreen();
   else if (s.requestFullscreen) {
     s.requestFullscreen().then(() => {
@@ -1208,7 +1268,7 @@ optionChanged.hires2d = (on) => { if (M && M._port_gfx_hires_2d) M._port_gfx_hir
 optionChanged.smoothfont = (on) => { if (M && M._port_gfx_smooth_font) M._port_gfx_smooth_font(on ? 1 : 0); };   // P356: from the next frame on
 optionChanged.hfr = (on) => { if (M && M._port_gfx_hfr) M._port_gfx_hfr(on ? 1 : 0); };   // P351: from the next game frame on
 // P350 option "Widescreen": the picture's aspect. Off: 4:3, canvas 640 x 480 (as before). On: the aspect of the space the
-// page gives the picture (the stage, or the screen in fullscreen), between 4:3 and 21:9 (64:27), with the canvas 480 rows
+// page gives the picture (P360: the whole window), between 4:3 and 21:9 (64:27), with the canvas 480 rows
 // high and as wide as that aspect needs; the renderer (port_gfx_widescreen, gfx_f3dex2.c ws_calc) widens the 3D view to
 // the canvas and keeps the 2D in the middle. ?canvas=WxH (test aid) fixes the canvas size, and then its aspect.
 // layoutScreen runs at start, on window resize / fullscreen changes and when the option changes.
@@ -1217,9 +1277,8 @@ function layoutScreen() {
   let ar = 4 / 3, w = 640, h = 480;
   if (fixed) { w = +fixed[1]; h = +fixed[2]; ar = opt('widescreen') ? w / h : 4 / 3; }
   else if (opt('widescreen')) {
-    const fs = document.fullscreenElement, st = $('stage');
-    const aw = fs ? window.innerWidth : (st ? st.clientWidth : window.innerWidth);
-    const ah = fs ? window.innerHeight : window.innerHeight - (document.body.classList.contains('touch') ? 60 : 140);
+    const st = $('stage');   // P360: the stage is the whole window (in fullscreen too)
+    const aw = st && st.clientWidth || window.innerWidth, ah = st && st.clientHeight || window.innerHeight;
     ar = Math.max(4 / 3, Math.min(64 / 27, ah > 0 ? aw / ah : 16 / 9));
     w = Math.round(h * ar / 2) * 2;
   }
@@ -1245,7 +1304,7 @@ function layoutScreen() {
 let layoutTimer = 0;
 const layoutSoon = () => { clearTimeout(layoutTimer); layoutTimer = setTimeout(layoutScreen, 150); };
 window.addEventListener('resize', layoutSoon);
-if (window.ResizeObserver && $('stage')) new ResizeObserver(layoutSoon).observe($('stage'));   // P351: the side panel opening / closing
+if (window.ResizeObserver && $('stage')) new ResizeObserver(layoutSoon).observe($('stage'));   // P351 (P360: the stage = the window)
 document.addEventListener('fullscreenchange', layoutSoon);
 optionChanged.widescreen = () => layoutScreen();
 optionChanged.fullres = () => layoutScreen();
@@ -1856,7 +1915,8 @@ async function start(app) {
   if (running) { location.search = '?app=' + app; return; } // one module per page
   running = app;
   $('demo').disabled = $('start').disabled = true;
-  $('drop').hidden = true;
+  $('drop').hidden = true; $('ready').hidden = true;   // P360
+  drawerSet(false);                                     // P360: the game starts with the menu closed
   status(app === 'game' ? 'starting…' : 'scheduler demo', 'ok');
   if (netCfg && app === 'game' && !window.PortNet) await loadScript('net.js');   // P338 (the Online panel loaded it already)
   const [js, factory] = app === 'demo' ? ['sched_demo.js', 'createSchedDemo'] : ['conker.js', 'createConker'];

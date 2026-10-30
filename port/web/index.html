@@ -5,19 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Conker Port</title>
 <style>
-  :root { --bg: #111317; --panel: #1b1e24; --panel2: #23272f; --line: #343a45; --fg: #d8dde6; --muted: #8a93a3;
-          --accent: #e0a63a; --ok: #6cc070; --bad: #e06060; }
+  /* P360: the game fills the whole window (black, 4:3 centred, or the window's aspect with Widescreen); every page control
+     lives in the menu drawer (#drawer: Esc or the corner button #menu-btn), dark translucent and styled like the game's
+     own menus (warm yellow titles with a hard drop shadow, rounded bold type). docs/design/NATIVE_MENUS.md: next steps. */
+  :root { --bg: #000; --panel: rgba(22, 18, 12, .72); --panel2: rgba(48, 40, 26, .78); --line: rgba(255, 214, 140, .18); --fg: #f1e9d8;
+          --muted: #b3a88f; --accent: #f2c14e; --ok: #8fd36a; --bad: #ff7a5c;
+          --gfont: "Trebuchet MS", "Arial Rounded MT Bold", "Verdana", system-ui, sans-serif; --gshadow: 2px 2px 0 rgba(0, 0, 0, .85); }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 system-ui, sans-serif; display: flex; flex-direction: column; }
-  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
-  header h1 { font-size: 16px; margin: 0 8px 0 0; color: var(--accent); }
+  body { margin: 0; background: #000; color: var(--fg); font: 14px/1.45 var(--gfont); overflow: hidden; overscroll-behavior: none; }
   .spacer { flex: 1; }
-  button, label.btn { background: var(--panel2); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 5px 10px;
-                      cursor: pointer; font: inherit; white-space: nowrap; }
-  button:hover:not(:disabled), label.btn:hover { border-color: var(--muted); }
+  button, label.btn { background: var(--panel2); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px;
+                      cursor: pointer; font: inherit; font-weight: 600; white-space: nowrap; }
+  button:hover:not(:disabled), label.btn:hover, button:focus-visible { border-color: var(--accent); color: #fff; outline: none; }
   button:disabled { opacity: .45; cursor: default; }
-  button.primary { background: var(--accent); color: #1a1408; border-color: var(--accent); font-weight: 600; }
+  button.primary { background: linear-gradient(#f7d36e, #d99a26); color: #2a1a04; border-color: #ffe39a; font-weight: 700; }
   button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
   input[type=file] { display: none; }
   .vol { display: flex; align-items: center; gap: 6px; color: var(--muted); }
@@ -25,25 +27,60 @@
   #status { color: var(--muted); font-size: 13px; }
   #status.ok { color: var(--ok); } #status.bad { color: var(--bad); }
 
-  main { flex: 1; display: flex; gap: 16px; padding: 16px; min-height: 0; }
-  #stage { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  /* aspect-correct 4:3 box, as large as the stage allows (P350: --ar, the picture's aspect: 4:3, or the window's with the
-     Widescreen option, set by main.js layoutScreen) */
+  /* the stage = the whole window, black; the picture box (#screen) is as large as fits at the picture's aspect, centred
+     (P350: --ar, 4:3 or the window's aspect with the Widescreen option, set by main.js layoutScreen) */
+  #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #000; }
   :root { --ar: 4 / 3; }
-  #screen { position: relative; width: min(100%, calc((100vh - 140px) * var(--ar))); aspect-ratio: var(--ar); background: #000; border-radius: 4px; overflow: hidden; }
+  #screen { position: relative; width: min(100vw, calc(100vh * var(--ar))); aspect-ratio: var(--ar); background: #000; overflow: hidden; }
+  @supports (height: 100dvh) { #screen { width: min(100vw, calc(100dvh * var(--ar))); } }
   #screen canvas:focus { outline: none; }
   #screen canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; image-rendering: auto; }
-  #screen:fullscreen { width: 100vw; height: 100vh; border-radius: 0; display: flex; align-items: center; justify-content: center; }
-  #screen:fullscreen canvas { position: static; width: min(100vw, calc(100vh * var(--ar))); height: auto; aspect-ratio: var(--ar); }
+  body.idle #stage, body.idle #stage * { cursor: none; }
   .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-             text-align: center; padding: 24px; background: rgba(10, 11, 14, .88); }
+             text-align: center; padding: 24px; background: rgba(6, 5, 3, .86); }
   .overlay[hidden] { display: none; }
-  #drop { border: 2px dashed var(--line); border-radius: 8px; margin: 18px; inset: 0; transition: border-color .15s, background .15s; }
+  /* first-run screens (ROM picker, Press Start): the whole window */
+  .fullover { position: fixed; z-index: 5; }
+  .gtitle { margin: 0; font: 700 clamp(22px, 4.5vw, 44px)/1.1 var(--gfont); color: var(--accent); text-shadow: 3px 3px 0 #000, 0 0 18px rgba(242, 193, 78, .25); letter-spacing: .02em; }
+  #drop { border: 2px dashed var(--line); border-radius: 12px; margin: 18px; transition: border-color .15s, background .15s; }
   #drop.over { border-color: var(--accent); background: rgba(40, 32, 14, .9); }
-  #drop h2 { margin: 0; font-size: 20px; }
+  #drop h2 { margin: 0; font-size: 22px; color: var(--accent); text-shadow: var(--gshadow); }
   #drop p { margin: 0; color: var(--muted); max-width: 440px; }
   #drop .private { color: var(--ok); font-size: 13px; }
-  #paused { pointer-events: none; font-size: 22px; letter-spacing: .1em; background: rgba(0, 0, 0, .55); }
+  #ready { background: radial-gradient(ellipse at center, rgba(60, 40, 10, .55), rgba(0, 0, 0, .95) 70%); gap: 18px; }
+  #ready-start { font-size: 22px; padding: 10px 34px; border-radius: 30px; letter-spacing: .08em; text-transform: uppercase;
+                 animation: readypulse 1.6s ease-in-out infinite alternate; }
+  @keyframes readypulse { from { box-shadow: 0 0 0 0 rgba(242, 193, 78, .0); } to { box-shadow: 0 0 22px 4px rgba(242, 193, 78, .45); } }
+  #ready p { margin: 0; color: var(--muted); max-width: 520px; font-size: 13px; }
+  #ready .row { justify-content: center; }
+  /* status / messages over the game (they never move the picture) */
+  #toast { position: fixed; z-index: 15; left: 50%; top: 14px; transform: translateX(-50%); max-width: calc(100vw - 120px); padding: 5px 14px;
+           border-radius: 14px; background: rgba(0, 0, 0, .78); color: var(--fg); font: 600 13px var(--gfont); text-shadow: var(--gshadow);
+           pointer-events: none; transition: opacity .4s; }
+  #toast.bad { color: var(--bad); } #toast.ok { color: var(--ok); }
+  #toast.out { opacity: 0; }
+  /* the menu: corner button + drawer over the left of the window */
+  #menu-btn { position: fixed; z-index: 20; left: calc(10px + env(safe-area-inset-left)); top: calc(10px + env(safe-area-inset-top));
+              width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 20px; line-height: 1; background: rgba(0, 0, 0, .55);
+              border-color: rgba(255, 255, 255, .25); color: #fff; transition: opacity .5s; }
+  body.idle #menu-btn { opacity: 0; pointer-events: none; }
+  body.drawer #menu-btn { opacity: 0; pointer-events: none; }
+  #drawer { position: fixed; z-index: 30; left: 0; top: 0; bottom: 0; width: min(440px, 100vw); overflow: auto; overscroll-behavior: contain;
+            padding: calc(10px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+            background: linear-gradient(90deg, rgba(14, 11, 6, .93), rgba(14, 11, 6, .84)); border-right: 2px solid rgba(242, 193, 78, .35);
+            box-shadow: 8px 0 30px rgba(0, 0, 0, .6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            transition: transform .18s ease-out, visibility .18s; }
+  #drawer:not(.open) { transform: translateX(-105%); visibility: hidden; }
+  #drawer header { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; padding: 0 0 10px; }
+  #drawer h1 { font: 700 22px/1.1 var(--gfont); margin: 0; color: var(--accent); text-shadow: var(--gshadow); letter-spacing: .02em; }
+  #drawer h1 small { display: block; font-size: 11px; color: var(--muted); text-shadow: none; letter-spacing: .12em; text-transform: uppercase; }
+  #drawer .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%; }
+  #drawer .tabs { padding-top: 8px; margin-top: 2px; border-top: 1px solid var(--line); }
+  #drawer-close { margin-left: auto; }
+  #drawer-shade { position: fixed; z-index: 25; inset: 0; background: rgba(0, 0, 0, .25); }
+  #drawer-shade[hidden] { display: none; }
+  #drawer #keyhint { text-align: left; margin: 0 0 10px; }
+  #paused { pointer-events: none; font: 700 26px var(--gfont); letter-spacing: .14em; color: var(--accent); text-shadow: 3px 3px 0 #000; background: rgba(0, 0, 0, .5); }
   /* P321: hold L to skip a cutscene: ring around an L badge, bottom right of the game picture */
   #skipring { position: absolute; right: 3%; bottom: 4%; width: 11%; max-width: 72px; min-width: 40px; pointer-events: none; }
   #skipring[hidden] { display: none; }
@@ -100,9 +137,10 @@
   body.photo #latches, body.photo #skipring, body.photo #saveicon, body.photo #soundhint { display: none; }
   .hint { color: var(--muted); font-size: 12px; text-align: center; }
 
-  aside { width: 360px; flex: none; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto; }
+  aside { display: flex; flex-direction: column; gap: 12px; }
   aside[hidden] { display: none; }
-  section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+  section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  section.panel h3 { color: var(--accent) !important; text-shadow: var(--gshadow); }
   section.panel[hidden] { display: none; }
   section.panel h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
   section.panel h3 .spacer { flex: 1; }
@@ -187,46 +225,16 @@
              background: rgba(255, 255, 255, .45); }
   @media (orientation: portrait) { #tk-START { bottom: calc(200px + env(safe-area-inset-bottom)); } }
   body.touch { overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
-  body.touch #screen { touch-action: none; }
+  body.touch #stage { touch-action: none; }
   body.touch #keyhint { display: none; }
-  body.touch main { padding: 4px 0; }
-  body.touch #screen { width: min(100%, calc((100dvh - 60px) * var(--ar))); border-radius: 0; }
-  /* touch fullscreen (whole page, so the controls stay visible): game only, as large as fits */
-  body.touch.fs header, body.touch.fs aside { display: none; }
-  body.touch.fs main { padding: 0; align-items: center; }
-  body.touch.fs #screen { width: min(100vw, calc(100dvh * var(--ar))); }
-  @media (max-width: 900px) { main { flex-direction: column; padding: 16px; } aside { width: 100%; } #screen { width: 100%; } }
+  body.drawer #touch { display: none; }   /* P360: no stray game input while the menu is open */
+  /* P360: the touch controls lie over the full-window picture (fullscreen = the whole page, so they stay visible) */
 </style>
 </head>
 <body>
-<header>
-  <h1>Conker port</h1>
-  <button id="start" class="primary" disabled>Start</button>
-  <button id="pause" aria-pressed="false" disabled title="Pause (also automatic when the tab is hidden)">Pause</button>
-  <button id="t-touch" aria-pressed="false" title="On-screen touch controls">Touch</button>
-  <button id="fullscreen" title="Fullscreen (F11 or this button)">Fullscreen</button>
-  <button id="photo-btn" aria-pressed="false" hidden title="Photo mode (P or the gamepad's Back button): freeze the game, move the camera, save a PNG">Photo</button>
-  <label class="vol" title="Volume">Vol <input id="volume" type="range" min="0" max="100" value="80"></label>
-  <span class="spacer"></span>
-  <span id="status">no ROM loaded</span>
-  <button id="t-controls" aria-pressed="false">Controls</button>
-  <button id="t-saves" aria-pressed="false">Saves</button>
-  <button id="t-online" aria-pressed="false" hidden title="Play with a friend over the internet (experimental)">Online</button>
-  <button id="t-rec" aria-pressed="false" hidden title="Input recorder: record a play session from power-on for the automatic replay tests">Record</button>
-  <button id="t-options" aria-pressed="false">Options</button>
-  <button id="t-debug" aria-pressed="false">Debug</button>
-</header>
-<main>
   <div id="stage">
     <div id="screen">
       <canvas id="canvas" width="640" height="480" tabindex="0"></canvas>
-      <div id="drop" class="overlay">
-        <h2>Drop your Conker's Bad Fur Day ROM here</h2>
-        <p>PAL (EU) cartridge dump, .z64 / .n64 / .v64. It is checked by SHA-1.</p>
-        <label class="btn">Choose ROM file… <input id="rom" type="file" accept=".z64,.n64,.v64,.rom,.bin"></label>
-        <p class="private">Your ROM never leaves this browser: it is read locally and kept only in this browser's storage (IndexedDB).
-          Nothing is uploaded.</p>
-      </div>
       <div id="paused" class="overlay" hidden>PAUSED</div>
       <svg id="skipring" viewBox="0 0 64 64" hidden><circle cx="32" cy="32" r="27" class="track"/><circle id="skiparc" cx="32" cy="32" r="27" class="arc"/>
         <circle cx="32" cy="32" r="20" class="badge"/><text x="32" y="38.5" text-anchor="middle">L</text></svg>
@@ -245,9 +253,49 @@
       <div id="photo-look" hidden></div>
       <div id="photo-toast" hidden></div>
     </div>
-    <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>
   </div>
-  <aside id="side" hidden>
+<div id="drop" class="overlay fullover">
+  <h1 class="gtitle">Conker's Bad Fur Day</h1>
+  <h2>Drop your ROM here</h2>
+  <p>PAL (EU) cartridge dump, .z64 / .n64 / .v64. It is checked by SHA-1.</p>
+  <label class="btn">Choose ROM file… <input id="rom" type="file" accept=".z64,.n64,.v64,.rom,.bin"></label>
+  <p class="private">Your ROM never leaves this browser: it is read locally and kept only in this browser's storage (IndexedDB).
+    Nothing is uploaded.</p>
+  <p>Esc or the ☰ button: options, controls, saves, online.</p>
+</div>
+<div id="ready" class="overlay fullover" hidden>
+  <h1 class="gtitle">Conker's Bad Fur Day</h1>
+  <button id="ready-start" class="primary">Press Start</button>
+  <p>Enter, a click or the gamepad's Start. Esc or the ☰ button (top left) opens the menu: options, controls, saves, online, photo mode.</p>
+  <div class="row"><button id="ready-rom" title="Pick another ROM file">Another ROM…</button></div>
+</div>
+<div id="toast" class="out"></div>
+<button id="menu-btn" title="Menu: options, controls, saves, online (Esc)" aria-label="Menu" aria-expanded="false">☰</button>
+<div id="drawer-shade" hidden></div>
+<div id="drawer" role="dialog" aria-label="Menu">
+  <header>
+    <h1>Conker <small>browser port · menu</small></h1>
+    <button id="drawer-close" title="Close the menu and go back to the game (Esc)">Back to game ✕</button>
+    <div class="bar">
+      <button id="start" class="primary" disabled>Start</button>
+      <button id="pause" aria-pressed="false" disabled title="Pause (also automatic when the tab is hidden)">Pause</button>
+      <button id="fullscreen" title="Fullscreen (F11, Alt+F, a double click on the picture or this button)">Fullscreen</button>
+      <button id="t-touch" aria-pressed="false" title="On-screen touch controls">Touch</button>
+      <button id="photo-btn" aria-pressed="false" hidden title="Photo mode (P or the gamepad's Back button): freeze the game, move the camera, save a PNG">Photo</button>
+      <label class="vol" title="Volume">Vol <input id="volume" type="range" min="0" max="100" value="80"></label>
+    </div>
+    <div class="bar"><span id="status">no ROM loaded</span></div>
+    <div class="bar tabs">
+      <button id="t-options" aria-pressed="false">Options</button>
+      <button id="t-controls" aria-pressed="false">Controls</button>
+      <button id="t-saves" aria-pressed="false">Saves</button>
+      <button id="t-online" aria-pressed="false" hidden title="Play with a friend over the internet (experimental)">Online</button>
+      <button id="t-rec" aria-pressed="false" hidden title="Input recorder: record a play session from power-on for the automatic replay tests">Record</button>
+      <button id="t-debug" aria-pressed="false">Debug</button>
+    </div>
+  </header>
+  <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>
+  <aside id="side">
     <section class="panel" id="p-controls" hidden>
       <h3>Controls <span class="spacer"></span><button id="bind-reset">Defaults</button></h3>
       <table class="binds"><thead><tr><td>N64</td><td>Key</td><td>Gamepad</td></tr></thead><tbody id="binds"></tbody></table>
@@ -327,7 +375,7 @@
       <pre id="console"></pre>
     </section>
   </aside>
-</main>
+</div>
 <div id="touch" hidden>
   <div id="tk-stick"><div id="tk-base"><div id="tk-knob"></div></div></div>
   <div class="tb" id="tk-A">A</div><div class="tb" id="tk-B">B</div>

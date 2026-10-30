@@ -11,7 +11,7 @@ const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debu
   '--enable-unsafe-swiftshader',
   // P271 (user request): muted by default so runs never play sound on the host; the Web Audio graph still runs
   // (the probe's pull counts are unchanged). PROBE_UNMUTE=1 to hear it.
-  ...(process.env.PROBE_UNMUTE ? [] : ['--mute-audio']), ...(process.env.PROBE_NOAUTOPLAY ? [] : ['--autoplay-policy=no-user-gesture-required']), '--window-size=1000,900', url], { stdio: 'ignore' });
+  ...(process.env.PROBE_UNMUTE ? [] : ['--mute-audio']), ...(process.env.PROBE_NOAUTOPLAY ? [] : ['--autoplay-policy=no-user-gesture-required']), `--window-size=${process.env.PROBE_WINDOW || '1000,900'}`, url], { stdio: 'ignore' });   // P360: PROBE_WINDOW=W,H (page layout shots)
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
 setTimeout(() => { console.log('audprobe: timeout'); done(2); }, (+secs + 90) * 1000);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -55,6 +55,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     done(3);
   };
   if (process.env.PROBE_LOG) { fs.writeFileSync(process.env.PROBE_LOG, ''); call('Runtime.enable', {}); }
+  // P360: PROBE_VIEWPORT=W,H sets the page's exact viewport (CSS pixels, scale 1); --window-size includes browser chrome
+  if (process.env.PROBE_VIEWPORT) { const [w, h] = process.env.PROBE_VIEWPORT.split(',').map(Number); await call('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false }); }
   // P21: PROBE_PROFILE=MS: CPU profile of the first MS ms, top self-time functions (waits for a busy page)
   if (process.env.PROBE_PROFILE) {
     await call('Profiler.enable', {}); await call('Profiler.setSamplingInterval', { interval: 1000 }); await call('Profiler.start', {});
