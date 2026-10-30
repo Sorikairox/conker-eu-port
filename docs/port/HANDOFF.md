@@ -126,6 +126,13 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   the intro captures are the P355 files; the new shots only add their effects). Likely on the playback side (phone
   silent switch / in-app player muted by default); v1's 25 MB copy was actually 27.8 MB, so it may never have been
   played the same way. v3 has the same sound.
+- **v4** (user: "Remove the customisation setting part, it doesn't fit."): conkers_good_fur_day_trailer_v4.mp4 (85.63 s,
+  148 MB) / _v4_25mb.mp4 (22.5 MB) / _v4_contact_sheet.jpg / _v4_shotlist.txt. The CUSTOMISATION SETTINGS beat is gone:
+  browser 45.60 -> widescreen (v1's shot) 50.55 -> ledge 55.49 -> spin 59.20 -> online 62.91 -> photo 69.09 -> phone 72.80
+  -> and more 76.51 -> end card 80.22 - 85.63 (64 beats). The features music is laid as one continuous piece, so the
+  removal moved only the pictures (v4 = v3 sample for sample on the same timeline); the end card now spans beats 56-64,
+  8-beat phrase boundaries, fade-out 83.4 - 85.5. AAC decoded by afconvert: -15 to -17 dBFS per section, no dip at the
+  cut. The 'custom' shot stays in shots.mjs (it captures fine; not in the edit).
 ### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
 - User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
   the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
