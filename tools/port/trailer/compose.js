@@ -21,12 +21,13 @@ const Q = new URLSearchParams(location.search);
 //   static shot before it so the logo is in on "good", then holds the settled logo (introPic, LOGO_HOLD).
 const BEAT = 0.6182;                 // features music: 97.06 BPM (music_0c, musicstat.mjs --beats)
 const TF = 45.6;                     // the cut to the features, on a downbeat of the features music (the logo holds ~6 s)
-// P370 v2: the features part shows the game-style menus (customisation settings, boot screens, ONLINE pages, photo
-// mode, touch controls on a phone); 72 beats (was 54); v3: v1's widescreen shot back after the customisation beat: browser 8, customisation settings 8, widescreen 8, ledge 6,
-// spin 6, online 10, photo 6, phone 6, and more 6, end card 8
-const T = { browser: TF, custom: TF + 8 * BEAT, wide: TF + 16 * BEAT, ledge: TF + 24 * BEAT, spin: TF + 30 * BEAT, online: TF + 36 * BEAT,
-  photo: TF + 46 * BEAT, phone: TF + 52 * BEAT, more: TF + 58 * BEAT, end: TF + 64 * BEAT };
-const DUR = +(TF + 72 * BEAT + 0.4).toFixed(2), NFR = Math.round(DUR * FPS);
+// P370 v2: the features part shows the game-style menus (boot screen, ONLINE pages, photo mode, touch controls on a
+// phone); v4 (user): the customisation settings beat removed, v1's widescreen shot follows the browser beat; 64 beats
+// (v1 54): browser 8, widescreen 8, ledge 6, spin 6, online 10, photo 6, phone 6, and more 6, end card 8 (the end card
+// starts and ends on 8-beat phrase boundaries of the features music: beats 56 and 64)
+const T = { browser: TF, wide: TF + 8 * BEAT, ledge: TF + 16 * BEAT, spin: TF + 22 * BEAT, online: TF + 28 * BEAT,
+  photo: TF + 38 * BEAT, phone: TF + 44 * BEAT, more: TF + 50 * BEAT, end: TF + 56 * BEAT };
+const DUR = +(TF + 64 * BEAT + 0.4).toFixed(2), NFR = Math.round(DUR * FPS);
 // the features music: a captured game track (default) or an open-licensed file (?music=FILE under port_work/trailer/music/,
 // &credit=TEXT for the end card). MUSIC_DOWNBEAT: the pcm second of a downbeat, placed on TF.
 const MUSIC = Q.get('music') || '', MUSIC_CREDIT = Q.get('credit') || '';
@@ -341,10 +342,10 @@ function urlPill(g, x, y, chars, a) {   // the address bar, magnified: lock + th
 }
 const BOOT_START = 75, BOOT_GAME = 175, BOOT_CUT = 3 * BEAT;   // 'boot': Start pressed at picture 75; the title sequence from ~160
 async function bootPic(lt) { return shotPic('boot', lt < BOOT_CUT ? Math.min(BOOT_START + 3, 22 + lt * 30) : BOOT_GAME + (lt - BOOT_CUT) * 50); }
-seg(T.browser, T.custom + 0.1, 0.06, 0.1, async (g, lt) => {
+seg(T.browser, T.wide + 0.1, 0.06, 0.1, async (g, lt) => {
   const bg = g.createRadialGradient(W / 2, H * 0.55, 100, W / 2, H * 0.55, 1100); bg.addColorStop(0, '#2b2517'); bg.addColorStop(1, '#0b0b0d');
   g.fillStyle = bg; g.fillRect(0, 0, W, H);
-  const dur = T.custom - T.browser;
+  const dur = T.wide - T.browser;
   const ww = 1360, wx = (W - ww) / 2, wy = 150;
   const r = browserWindow(g, await bootPic(lt), wx, wy, ww, Math.floor(lt * 30));
   // the pad's Start: a small red S face pressed over the PRESS START line, just before the cut
@@ -362,19 +363,6 @@ seg(T.browser, T.custom + 0.1, 0.06, 0.1, async (g, lt) => {
   if (b > 0) text(g, 'JUST BRING YOUR OWN ROM', W / 2, 1022, 3.4, { align: 'center', fill: '#fff', alpha: b });
 });
 
-// C. customisation settings (P370, new): the 'custom' shot as one take, the window as a player sees it: Conker runs
-// (4:3), Start = the game's pause menu, its CUSTOMISATION SETTINGS row, the menu in the game's font over the pause,
-// down through the pages, Picture, Widescreen OFF -> ON. Pictures (60 / s): pause up ~150, menu ~186, Picture page 282,
-// ON ~312 (v3: the beat ends here, ~0.4 s after the flip; the cut to v1's widescreen shot shows what it does).
-const CUSTOM_PIC0 = 39;   // v3: the take ends on the Picture page just after Widescreen flips ON (picture 312 at lt 4.55), cut on the beat to the widescreen shot
-seg(T.custom, T.wide + 0.1, 0.06, 0.1, async (g, lt) => {
-  g.drawImage(await shotPic('custom', CUSTOM_PIC0 + lt * 60), 0, 0, W, H);
-  // the big caption while Conker runs and the pause menu comes up; once the menu is open (picture 186, lt 2.1) its own
-  // title and help say it, so the caption moves to a small tag top left, off the menu's text
-  caption(g, lt - 0.1, 1.85, 'CUSTOMISATION SETTINGS', 'IN THE GAME\'S OWN STYLE - FROM THE PAUSE MENU', { y: 878, s: 6.2 });
-  const tg = clamp((lt - 1.85) / 0.25) * clamp((T.wide - T.custom + 0.05 - lt) / 0.2);
-  if (tg > 0) label(g, lt < 4.55 ? 'CUSTOMISATION SETTINGS' : 'WIDESCREEN: ON', 30, 30, 3, { fill: lt < 4.55 ? '#fff' : ACCENT, alpha: tg });   // ON lands at picture ~312 (lt 4.55)
-});
 // D. widescreen (P370 v3: v1's shot back, user request): the original 4:3 picture (640 x 480, every option off), then the same moment in 16:9, full resolution
 seg(T.wide, T.ledge + 0.1, 0.06, 0.1, async (g, lt) => {
   const i = 300 + lt * 60, tw = 4 * BEAT, tr = 0.6, dur = T.ledge - T.wide;
@@ -685,9 +673,7 @@ async function buildAudio(only) {
     mg.gain.setValueAtTime(MV, DUR - 2.2); mg.gain.linearRampToValueAtTime(0, DUR - 0.1);
     { const src = ctx.createBufferSource(); src.buffer = mb; src.connect(mg); src.start(TF - lead, Math.max(0, MUSIC_DOWNBEAT - lead)); }
     // sound effects of the shots under their segments: [shot, timeline start, duration, first picture, gain]
-    // P370 v2: the customisation take's own sound (the game's pause sounds; the menu's sounds are the page's own, not in
-    // the captured ring) under its real-time part, and from the widescreen beat's real-time part on
-    const SFX = [['custom', T.custom, T.wide - T.custom, CUSTOM_PIC0, 0.5], ['run29', T.wide, T.ledge - T.wide, 300, 0.45],   // v3: v1's widescreen shot and its sound
+    const SFX = [['run29', T.wide, T.ledge - T.wide, 300, 0.45],   // v1's widescreen shot and its sound (v4: the customisation take is gone)
       ['ledge13', T.ledge, T.spin - T.ledge, 66, 0.7], ['spin_on', T.spin, T.online - T.spin, 110, 0.5]];
     for (const [shot, t0, dur, pic, gain] of SFX) {
       const { b, m } = await pcmBuffer(ctx, shot);
