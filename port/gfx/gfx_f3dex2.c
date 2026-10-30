@@ -1547,6 +1547,22 @@ static int text_glyph_rect(int ti) {
     const unsigned char *lo = phys(g_font_textures[0]), *hi = phys(g_font_metrics[0]);
     return lo && hi > lo && hi - lo <= 0x10000 && timg.p >= lo && timg.p < hi;
 }
+/* P361 native menus (docs/design/NATIVE_MENUS.md): the page's game-styled menu overlay (port/web/gmenu.js) draws its
+ * text with the game's own font 0, read from the running game's memory, where the game decoded it from the player's
+ * ROM (glyph_rle_to_texture). Read-only: nothing here writes game memory, so it is safe online, in recordings and while
+ * paused. port_font_info(0) = wasm address of the glyph textures (0xE0 bytes per glyph: I8 rows of (w + 7) & ~7
+ * bytes, odd rows with the TMEM word swap x ^ 4, row 0 and column 0 blank), (1) = wasm address of the metrics (4 bytes
+ * per glyph: width + 1, height + 1, x offset, y offset), (2) = number of glyphs (the metrics follow the textures in
+ * one block); 0 while the font is not loaded. port_font_glyph(c) = the game's text_char_to_glyph(c) (character code ->
+ * glyph index; 0x60 = space, codes it does not know come back unchanged), -1 without the game (sched_demo). */
+int text_char_to_glyph(int c) __attribute__((weak));   /* game C: s32 text_char_to_glyph(s32) */
+EMSCRIPTEN_KEEPALIVE int port_font_info(int what) {
+    if (!g_font_textures || !g_font_metrics) return 0;
+    const unsigned char *lo = phys(g_font_textures[0]), *hi = phys(g_font_metrics[0]);
+    if (!lo || !hi || hi <= lo || hi - lo > 0x10000) return 0;
+    return what == 0 ? (int) (uintptr_t) lo : what == 1 ? (int) (uintptr_t) hi : what == 2 ? (int) ((hi - lo) / 0xE0) : 0;
+}
+EMSCRIPTEN_KEEPALIVE int port_font_glyph(int c) { return text_char_to_glyph ? text_char_to_glyph(c & 0xFF) : -1; }
 
 /* ------------------------------------------------------------------ RSP commands */
 /* Conker lighting (P14, rewritten in P35 from the ROM's F3DEX2 lighting overlay).

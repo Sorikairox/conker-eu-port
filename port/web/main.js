@@ -91,7 +91,7 @@ function drawerSet(on) {
   }
   idleKick();
 }
-$('menu-btn').onclick = () => drawerSet(true);
+$('menu-btn').onclick = () => { if (!(window.GMenu && GMenu.wanted() && GMenu.open())) drawerSet(true); };   // P361: the game-style menu when that option is on
 $('drawer-close').onclick = () => drawerSet(false);
 $('drawer-shade').onclick = () => drawerSet(false);   // a click on the picture beside the drawer closes it
 // the corner button and the cursor hide after 2.5 s without mouse movement while the game runs (shown again on movement)
@@ -124,6 +124,10 @@ const OPTIONS = [
   // P357: a tool like Online / Photo mode (not in the presets): shows the Record button (docs/port/E2E.md)
   { key: 'recorder', label: 'Input recorder (for testing)', def: false,
     help: 'Shows the Record button: records everything you press from power-on (with your save and options) into a small file that the developers replay automatically to find the first point where a new version of the port plays differently. While recording, the game runs in the same exact-timing mode as online play; free camera and photo mode are off and the game options are fixed.' },
+  // P361: page-side, a tool like the ones above (not in the presets): Esc / the corner button open the game-style menu
+  // (port/web/gmenu.js) instead of the page menu drawer. Default off (NATIVE_MENUS.md step P361); the drawer stays.
+  { key: 'nativemenu', label: 'Game-style menu (Esc)', def: false,
+    help: 'Esc, the corner button (or a gamepad\'s Home button, where the browser passes it) open the options as a menu drawn over the game in the game\'s own font (smooth with Smooth font), driven like the game\'s menus: D-pad, stick or arrows move, left / right change a value, A, Start, Enter or Space choose, B, Esc or Backspace go back; the mouse and touch work too. Its "Page menu" line opens this page menu (bindings, saves, online, recorder). Online and while recording the game keeps running behind it and the host\'s game options are shown locked. Off: Esc opens this page menu.' },
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,
@@ -206,7 +210,7 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // Classic / Modern whose values no longer match (a ?opt override, an option added later) is shown as what matches.
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
-const PRESET_KEYS = OPTIONS.filter((o) => o.key !== 'online' && o.key !== 'photomode' && o.key !== 'recorder').map((o) => o.key);   // P357: recorder = a tool
+const PRESET_KEYS = OPTIONS.filter((o) => !['online', 'photomode', 'recorder', 'nativemenu'].includes(o.key)).map((o) => o.key);   // P357: recorder = a tool; P361: nativemenu too
 const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'smoothfont', 'widescreen', 'fullres', 'hfr'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
@@ -1039,6 +1043,7 @@ function pollInput() {
     else if (i < 4) pads[i] = g;
   });
   readyPoll(pads[0]);   // P360: Start on the Press Start screen
+  if (window.GMenu && GMenu.poll(pads[0])) pads[0] = { present: true, b: 0, x: 0, y: 0, cx: 0, cy: 0 };   // P361: the game-style menu has pad 1: the game (and online the lockstep, the recorder) gets an idle pad
   if (photoPoll(pads[0])) { requestAnimationFrame(pollInput); return; }   // P348: photo mode takes pad 1's input
   photoMaskAfter(pads[0]);   // P348: inputs still held from photo mode reach the game only once released
   applyLatches(pads[0], halfHeld);
@@ -1072,6 +1077,8 @@ const boundCodes = () => new Set(Object.values(keyMap));
 const typing = (e) => /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.target.type !== 'range';
 window.addEventListener('keydown', (e) => {
   if (listening && listening[0] === 'key') { e.preventDefault(); if (e.code !== 'Escape') finishListen(e.code); else finishListen(null); return; }
+  if (window.GMenu && GMenu.key(e)) { e.preventDefault(); return; }   // P361: Esc / Backspace go back in the game-style menu
+  if (e.code === 'Escape' && !drawerOpen() && !document.fullscreenElement && window.GMenu && GMenu.wanted() && GMenu.open()) { e.preventDefault(); return; }
   // P360: Esc opens / closes the menu drawer (in real fullscreen the browser takes Esc to leave it: the corner button then)
   if (e.code === 'Escape' && (drawerOpen() || !document.fullscreenElement)) { e.preventDefault(); drawerSet(!drawerOpen()); return; }
   if (typing(e)) return;

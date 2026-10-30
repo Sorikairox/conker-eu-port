@@ -6,9 +6,9 @@ set -euo pipefail
 cd ~/conker-wt/web
 B=port/build/web
 [ -f $B/conker.wasm ] || { echo "no build at $B"; exit 1; }
-cmp -s $B/main.js port/web/main.js && cmp -s $B/net.js port/web/net.js && cmp -s $B/index.html port/web/index.html || { echo "build/web page files differ from port/web: rebuild first"; exit 1; }
+cmp -s $B/main.js port/web/main.js && cmp -s $B/net.js port/web/net.js && cmp -s $B/gmenu.js port/web/gmenu.js && cmp -s $B/index.html port/web/index.html || { echo "build/web page files differ from port/web: rebuild first"; exit 1; }
 S=~/conker-site; mkdir -p $S
-cp $B/conker.js $B/conker.wasm $B/conker_netx.txt $B/conker_netsyms.txt $B/index.html $B/main.js $B/net.js $S/
+cp $B/conker.js $B/conker.wasm $B/conker_netx.txt $B/conker_netsyms.txt $B/index.html $B/main.js $B/net.js $B/gmenu.js $S/
 git log -1 --format='%h %ad %s' --date=format:'%Y-%m-%d %H:%M' > $S/BUILD.txt
 # P345: the room-code server (Netlify Function /api/room on Netlify Blobs). Its source is port/web/netlify; it is
 # bundled from ~/conker-netlify-fn (outside the published dir, so node_modules is never published as static files),

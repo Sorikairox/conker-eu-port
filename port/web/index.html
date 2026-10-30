@@ -228,6 +228,11 @@
   body.touch #stage { touch-action: none; }
   body.touch #keyhint { display: none; }
   body.drawer #touch { display: none; }   /* P360: no stray game input while the menu is open */
+  /* P361 option "Game-style menu": the options drawn over the picture in the game's font (gmenu.js); while it is open the
+     PAUSED label, the corner button and the touch controls hide (the menu has the pad and takes taps itself) */
+  #screen canvas#gmenu { z-index: 4; touch-action: none; }
+  #gmenu[hidden] { display: none !important; }
+  body.gmenu #paused, body.gmenu #touch, body.gmenu #menu-btn, body.gmenu #photo-toast { display: none; }
   /* P360: the touch controls lie over the full-window picture (fullscreen = the whole page, so they stay visible) */
 </style>
 </head>
@@ -252,6 +257,7 @@
         <div class="row"><button id="photo-save">Save PNG</button> <button id="photo-exit">Exit</button></div></div>
       <div id="photo-look" hidden></div>
       <div id="photo-toast" hidden></div>
+      <canvas id="gmenu" hidden aria-label="Options menu"></canvas>
     </div>
   </div>
 <div id="drop" class="overlay fullover">
@@ -384,5 +390,6 @@
   <div class="tb" id="tk-START">START</div>
 </div>
 <script src="main.js"></script>
+<script src="gmenu.js"></script>
 </body>
 </html>

@@ -153,7 +153,7 @@ $(WEB)/conker_netsyms.txt: $(WEB)/conker.js tools/net_regions.py ../port/symbols
 	python3 tools/net_regions.py --syms $(B)/conker.map > $@
 
 # ---- page
-web: $(WEB)/index.html $(WEB)/main.js $(WEB)/net.js
+web: $(WEB)/index.html $(WEB)/main.js $(WEB)/net.js $(WEB)/gmenu.js
 $(WEB)/%: web/%
 	@mkdir -p $(@D)
 	cp $< $@
