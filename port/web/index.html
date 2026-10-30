@@ -244,6 +244,17 @@
   #screen canvas#gphoto { z-index: 3; pointer-events: none; }
   #gphoto[hidden] { display: none !important; }
   body.gphoto #photo, body.gphoto #photo-look, body.gphoto #photo-toast, body.gphoto #menu-btn { display: none !important; }
+  /* P368: with the game-style menu on (and able to open) the drawer is the developer menu: Pause, the status line, the
+     debug console, the recorder's panel and the manual online codes; everything a player needs is in the game-style
+     menu. "All page controls" (#drawer-all) shows the rest again until the drawer closes */
+  #drawer .dev { display: none; }
+  body.devdrawer #drawer .dev { display: revert; }
+  body.devdrawer #drawer h1 small.dev { display: block; }
+  body.devdrawer #drawer .all, body.devdrawer #start, body.devdrawer #fullscreen, body.devdrawer #t-touch, body.devdrawer #photo-btn,
+  body.devdrawer #drawer .vol, body.devdrawer #t-options, body.devdrawer #t-controls, body.devdrawer #t-saves, body.devdrawer #keyhint,
+  body.devdrawer #p-options, body.devdrawer #p-controls, body.devdrawer #p-saves,
+  body.devdrawer #net-room-start > .row:not(#net-manual-box), body.devdrawer #net-room-box, body.devdrawer .netmanual { display: none !important; }
+  body.devdrawer #net-manual-box[hidden] { display: flex; }   /* the manual codes are what the developer drawer is for */
   /* P360: the touch controls lie over the full-window picture (fullscreen = the whole page, so they stay visible) */
 </style>
 </head>
@@ -293,7 +304,8 @@
 <div id="drawer-shade" hidden></div>
 <div id="drawer" role="dialog" aria-label="Menu">
   <header>
-    <h1>Conker <small>browser port · menu</small></h1>
+    <h1>Conker <small class="all">browser port · menu</small><small class="dev">browser port · developer tools</small></h1>
+    <button id="drawer-all" class="dev" title="Show every page control here again (the game-style menu has them all)">All page controls</button>
     <button id="drawer-close" title="Close the menu and go back to the game (Esc)">Back to game ✕</button>
     <div class="bar">
       <button id="start" class="primary" disabled>Start</button>

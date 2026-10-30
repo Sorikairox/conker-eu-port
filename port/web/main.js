@@ -73,8 +73,22 @@ if (Q.get('debug') === '1' || (Q.get('debug') !== '0' && store.get('debug', fals
 // resumes the game if the drawer paused it and gives the keyboard focus back to the canvas.
 const drawerOpen = () => $('drawer').classList.contains('open');
 let drawerPaused = false;
+// P368 (option "Game-style menu"): once the game-style menu can open (gmenu.js GMenu.available: the game runs, or a good
+// ROM before boot, and the game's font is there), every player-facing control lives in it, so the drawer opens as the
+// developer menu: Pause, the status line, the debug console, the input recorder's panel and the manual (copy-paste)
+// online codes. body.devdrawer hides the rest with CSS (the elements stay: test drivers .click() them as before).
+// Its "All page controls" button shows everything again until the drawer closes (recovery). Option off, or the game-
+// style menu cannot open yet (first visit, no font kept): the drawer is the whole menu, exactly as before.
+let drawerAll = false;
+const drawerDev = () => !drawerAll && !!(window.GMenu && GMenu.wanted() && GMenu.available());
+function drawerDevSet() {
+  const dev = drawerDev();
+  document.body.classList.toggle('devdrawer', dev);
+  if (dev && ['online', 'rec', 'debug'].every((n) => $('p-' + n).hidden || $('t-' + n).hidden)) toggle('debug', true);   // something to show
+}
 function drawerSet(on) {
   if (on === drawerOpen()) return;
+  if (on) drawerDevSet(); else drawerAll = false;
   $('drawer').classList.toggle('open', on);
   document.body.classList.toggle('drawer', on);
   $('drawer-shade').hidden = !on;
@@ -93,6 +107,7 @@ function drawerSet(on) {
 }
 $('menu-btn').onclick = () => { if (!(window.GMenu && GMenu.wanted() && GMenu.open())) drawerSet(true); };   // P361: the game-style menu when that option is on
 $('drawer-close').onclick = () => drawerSet(false);
+$('drawer-all').onclick = () => { drawerAll = true; drawerDevSet(); };   // P368: the developer drawer shows every page control again
 $('drawer-shade').onclick = () => drawerSet(false);   // a click on the picture beside the drawer closes it
 // the corner button and the cursor hide after 2.5 s without mouse movement while the game runs (shown again on movement)
 let idleTimer = 0;
@@ -127,7 +142,7 @@ const OPTIONS = [
   // P361: page-side, a tool like the ones above (not in the presets): Esc / the corner button open the game-style menu
   // (port/web/gmenu.js) instead of the page menu drawer. Default off (NATIVE_MENUS.md step P361); the drawer stays.
   { key: 'nativemenu', label: 'Game-style menu (Esc)', def: false,
-    help: 'Esc, the corner button, holding the gamepad\'s Back / Select button (its Photo mode button) for half a second, or its Home button where the browser passes it, open the options as a menu drawn over the game in the game\'s own font (smooth with Smooth font), driven like the game\'s menus: D-pad, stick or arrows move, left / right change a value, A, Start, Enter or Space choose, B, Esc or Backspace go back; the mouse and touch work too. It has everything a player needs: all options, key and button bindings, master volume, fullscreen, saves, photo mode, online and the recorder; its "Page menu" line opens this page menu (for developers). Online and while recording the game keeps running behind it and the host\'s game options are shown locked. With it on, a short press of the gamepad\'s Back button starts photo mode when released. Off: Esc opens this page menu.' },
+    help: 'Esc, the corner button, holding the gamepad\'s Back / Select button (its Photo mode button) for half a second, or its Home button where the browser passes it, open the options as a menu drawn over the game in the game\'s own font (smooth with Smooth font), driven like the game\'s menus: D-pad, stick or arrows move, left / right change a value, A, Start, Enter or Space choose, B, Esc or Backspace go back; the mouse and touch work too. It has everything a player needs: all options, key and button bindings, master volume, fullscreen, saves, photo mode, online and the recorder; its "Developer tools" line opens this page menu, which then keeps only the developer tools (debug console, recorder details, manual online codes). Online and while recording the game keeps running behind it and the host\'s game options are shown locked. With it on, a short press of the gamepad\'s Back button starts photo mode when released. Off: Esc opens this page menu.' },
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,

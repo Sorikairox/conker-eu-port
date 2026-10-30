@@ -76,7 +76,7 @@ if [ "$WHICH" = pad ] || [ "$WHICH" = all ]; then
   s() { t=$((t + 500)); steps+=("$t:$1"); t=$((t + 300)); }
   for i in 1 2 3 4; do b 13; done; b 0; s s2_controls_page
   b 13; b 0; s s3_pad_page
-  for i in 1 2 3 4 5; do b 13; done; s s4_pad_row_A
+  for i in 1 2 3 4 5 6; do b 13; done; s s4_pad_row_A   # P368: row 0 is Connected gamepads
   b 0; s s5_capture_prompt
   b 3 "" 600; s s6_A_is_Y; steps+=("raw:$t:eval:$MARK")
   b 1; b 1; b 13; b 0; s s7_sound_page

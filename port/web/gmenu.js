@@ -380,7 +380,8 @@ const GMenu = (() => {
       toolAction('recorder', 'Record', 'The input recorder: record a play session from power-on for the developers\' automatic replay tests (opens the page panel).', () => { drawerSet(true); toggle('rec', true); recShowList(); },
         () => (netCfg ? 'Not during an online session.' : '')),   // while recording: Stop and save
       { kind: 'link', label: 'Tools', help: MenuModel.sections().find((s) => s.id === 'tools').help, page: 'tools' },
-      { kind: 'action', label: 'Page menu (developer)', help: 'The page\'s own menu: the same settings plus manual online codes, the debug console and developer tools.', act: () => { close(); drawerSet(true); toggle('options', true); } },
+      // P368: the page drawer is the developer menu now (debug console, recorder details, manual online codes)
+      { kind: 'action', label: 'Developer tools', help: 'The page\'s developer menu: the debug console, the input recorder\'s details and the manual (copy-paste) online codes. Players never need it.', act: () => { close(); drawerSet(true); } },
       { kind: 'action', get label() { return BACK[backKey()] ? BACK[backKey()][0] : 'Back to game'; }, get help() { return BACK[backKey()] ? BACK[backKey()][1] : 'Close this menu (B, Esc or Start on this line).'; }, act: () => { snd('back'); close(); } },
     ]);
   }
@@ -401,13 +402,21 @@ const GMenu = (() => {
       { kind: 'action', label: 'Back', help: 'Back to the controls.', act: () => back() },
     ]);
   }
+  // P368: which gamepads the browser sees (the drawer's Controls panel listed them): an information row, no action
+  function padsItem() {
+    const gps = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter((g) => g && g.connected);
+    return { kind: 'info', label: 'Connected gamepads', value: () => (gps.length ? String(gps.length) : 'NONE'),
+      help: gps.length ? gps.map((g, i) => `Pad ${i + 1}: ${g.id.replace(/\s*\(.*$/, '').slice(0, 40)}${g.mapping === 'standard' ? '' : ' (non-standard mapping: rebind its buttons here)'}.`).join(' ')
+        : 'No gamepad yet: connect one and press a button on it (browsers only show a gamepad after a press).' };
+  }
   const backKey = () => (U.pre ? 'pre' : U.from);
   const go = (id) => { U.stack.push({ id, sel: 0, top: 0 }); U.helpSel = ''; U.note = ''; U.err = ''; };
   function itemsOf(p) {
     if (p.id === 'main') return mainItems();
     if (p.id === 'online') return onlineItems();
     if (p.id === 'pick') return [];
-    if (p.id === 'keys' || p.id === 'pad') return bindItems(p.id === 'keys' ? 'key' : 'pad');
+    if (p.id === 'keys') return bindItems('key');
+    if (p.id === 'pad') return [padsItem()].concat(bindItems('pad'));   // P368: the connected pads (were: the drawer's Controls panel)
     const backRow = { kind: 'action', label: 'Back', help: 'Back to the options.', act: () => back() };
     if (p.id === 'saves') return [
       { kind: 'action', label: 'Export save', help: 'Download your save as a file (conker-eu-slot0.eep) to keep it or move it to another browser.', act: () => $('eep-export').click() },
@@ -558,7 +567,7 @@ const GMenu = (() => {
         { kind: 'action', label: 'Join room', help: 'Join a friend\'s room with the 5-letter code they give you (pick the letters with the pad or type them).' + restart,
           locked: busy('join'), act: () => (ingame ? reloadInto('join') : (U.pick = { code: '', cx: 0, cy: 0 }, go('pick'))) },
         delayItem(),
-        { kind: 'action', label: 'Manual codes (page menu)', help: 'Advanced: connect without the room server by copying long codes between the players (the page menu\'s Online panel).' + restart,
+        { kind: 'action', label: 'Manual codes (developer tools)', help: 'Advanced: connect without the room server by copying long codes between the players (the Online panel of the page\'s developer tools).' + restart,   // P368: was "Manual codes (page menu)"
           locked: busy('x'), act: () => {
             if (ingame) { reloadInto('manual'); return; }
             close(); drawerSet(true); toggle('online', true); $('net-manual').checked = true; $('net-manual').onchange();
@@ -667,7 +676,7 @@ const GMenu = (() => {
     if (item.kind === 'choice') { const i = item.choices.indexOf(item.get()); return item.set(item.choices[((i < 0 ? (d > 0 ? -1 : 0) : i) + d + item.choices.length) % item.choices.length]); }
   }
   function choose(item) {
-    if (!item) return;
+    if (!item || item.kind === 'info') return;   // P368: an information row does nothing
     // P367: the choose sound (error if locked); a Back row sounds like going back (its back() plays it; "Back to game" closes)
     if (/^Back/.test(item.label)) { /* its act plays the back sound */ }
     else if (item.kind !== 'toggle' && item.kind !== 'range' && item.kind !== 'choice') snd(item.locked && item.locked() ? 'error' : 'choose');
@@ -848,6 +857,7 @@ const GMenu = (() => {
       else if (it.kind === 'range') { v = it.get() + '%'; vc = lock ? C.lock : sel ? C.on : C.off; }
       else if (it.kind === 'choice') { v = it.names(it.get()); vc = lock ? C.lock : C.on; }
       else if (it.kind === 'link') v = '>';
+      else if (it.kind === 'info') v = it.value();   // P368
       else if (it.kind === 'bind') {
         const cap = U.cap && U.cap.id === it.id && U.cap.kind === it.bkind;
         v = cap ? (it.bkind === 'key' ? 'PRESS A KEY' : 'PRESS A BUTTON') : it.value();
@@ -1056,7 +1066,10 @@ const GMenu = (() => {
     log('[gmenu] ?gmenutest: fake gamepad installed');
   }
 
-  return { open, close, back, poll, key, wanted, note, get isOpen() { return U.open; },
+  // P368: would open() work now (the game runs, or before boot with a good ROM, and the font is there)? main.js makes the
+  // page drawer the developer menu only then (else the drawer stays the whole menu: the fallback)
+  const available = () => typeof running !== 'undefined' && (running ? running === 'game' : romOk) && photo.state !== 2 && fontOk();
+  return { open, close, back, poll, key, wanted, note, available, get isOpen() { return U.open; },
     state: () => ({ open: U.open, pre: U.pre, from: U.from, page: U.open ? page().id : null, sel: U.open ? page().sel : -1, item: U.open ? (itemsOf(page())[page().sel] || {}).label : null,
       online: onlineState(), code: NT() && NT().room ? NT().room.code : '', typed: U.pick.code, cursor: pickCell(U.pick.cx, U.pick.cy), joined: joinedCount(), busy: U.busy, err: U.err }) };
 })();
