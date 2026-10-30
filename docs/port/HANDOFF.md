@@ -88,6 +88,32 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P370 (port-web, 2026-10-30): trailer v2 "Conker's Good Fur Day" with the game-style menus (tooling only, page unchanged)
+- User request: "Redo Conker's trailer with the new UI and showcase it." Outputs (port_work/trailer, gitignored,
+  ROM-derived): conkers_good_fur_day_trailer_v2.mp4 (90.58 s, 1920x1080 60 fps, H.264 ~13.7 Mbit/s + AAC), _v2_25mb.mp4
+  (23.8 MB, 1.9 Mbit/s), _v2_contact_sheet.jpg, _v2_shotlist.txt (times + what each beat shows). v1 files kept.
+- Edit (compose.js): Part 1 unchanged. Part 2 = 72 beats (v1 54): PLAYS IN YOUR BROWSER now shows the page's game-style
+  Press Start screen (v1: the old ROM drop page); NEW CUSTOMISATION SETTINGS beat (pause menu row -> menu -> Picture ->
+  Widescreen ON) running on into WIDESCREEN in the same take (the picture widens when play resumes); ONLINE opens on the
+  game-style room-code pages of a real 4-player room before the split screen; PHOTO MODE in the game style (model list ->
+  Heist black coat, H hides the menus); NEW ON YOUR PHONE TOO (phone frame inset, touch opens the menu, HEALTH ALWAYS
+  VISIBLE ON, health shows); AND MORE list updated; ledge / spin 6 beats each. verify.mjs: both MP4s decode, loudness
+  11-23 % RMS per second; contact frames checked: no page UI, no black frames.
+- Capture (commits 848a428c, 4c9cd7a4, 680f351e): capture.mjs screen shots = CDP screenshots of the whole viewport (the
+  overlays are page canvases, not in the WebGL canvas); shim.js ?trailerclock=1 makes performance.now follow the stepped
+  clock (GMenu fades, cursor pulse, key repeat, GBoot, GPhoto are deterministic) and hides #toast; fake pad =
+  ?gmenutest's __gmenuTest.press + its axes set directly; preBoot shots (no ?app=game) step ticks from the Press Start
+  screen; prepare hooks boot once first so the game font is kept (GBoot / touch faces need it); real CDP touches for the
+  phone. net4.sh NETUI=gmenu: the room through the ONLINE pages (GSHOTS, 1920x1080 viewports), 5355 retraces IDENTICAL.
+- Found: (1) GMenu opened by Esc / the corner button pauses the page in single player: no retraces run, so a
+  retrace-stepped capture hangs; open it from the pause row (the game keeps running) or step ticks (ticksPerPic).
+  (2) Two CDP touchMove events to nearly the same point on the touch stick: the second read as the opposite direction
+  (y +79 after -80; the knob jumped up) -- one move per push avoids it; not checked whether a real finger can trigger it
+  (pointer events coalesced per animation frame). (3) Widescreen switched on in the pause menu does not widen the frozen
+  pause picture; the picture widens when play resumes. (4) The menus' sounds (GSound) are the page's own AudioContext,
+  not in the game's PCM ring: silent in the trailer.
+- Not shown: the first-visit ROM drop page (plain page UI); the title-menu CUSTOMISATION rows and fireplace OPTIONS row
+  (the pause row is shown); menu sounds.
 ### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
 - User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
   the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
