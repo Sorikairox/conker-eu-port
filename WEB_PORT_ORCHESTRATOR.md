@@ -547,6 +547,18 @@ flash, controller pak).
     one, skip the picture rather than store a wrong one.
 59. Custom faces drawn on a canvas inside an existing touch button: give the canvas pointer-events: none, or it takes the
     pointerdown and the button's setPointerCapture / press handlers never run.
+60. Removing a function from a JS module written as an IIFE: a leftover name in its `return { ... }` throws a
+    ReferenceError when the file loads, and every global assigned after it in the same file (`window.X = ...`) is never
+    set. Grep the module's return list (and other modules' calls into it), and grep the run's log for "Uncaught".
+61. Drawing or measuring inside a layer that is display: none gives 0 x 0 boxes; caching "already drawn for this
+    size" at that moment leaves the controls invisible once the layer shows again. A phone turned while a menu hides
+    the layer is the classic trigger. Skip hidden layers (clientWidth 0) without storing the cache key, and re-place
+    from a ResizeObserver, which also fires when an element is laid out again.
+62. Phone tests in headless Chrome: start on about:blank, set mobile metrics (mobile: true, DPR 3, orientation), touch
+    emulation and a phone user agent, then navigate; a page that loads first and is emulated later saw a desktop on its
+    first load (and may have stored what it detected). A ?touch=1 style override never runs the auto-detection at all.
+63. Do not store an auto-detected default as if the user chose it: one wrong detection then sticks forever. Store only
+    explicit choices and detect again at every load.
 
 ---
 

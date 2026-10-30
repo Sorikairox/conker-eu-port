@@ -33,50 +33,48 @@ left corner (it hides while you play; move the mouse to see it). The menu pauses
 a click on the picture closes it and the game goes on. In fullscreen the browser uses Esc to leave fullscreen, so use
 the ☰ button there.
 
-**Game-style menu (P361 / P362, try it):** in the menu, Options, tick **Game-style menu (Esc)**. From then on, while the
-game runs, Esc, the ☰ button, **holding the gamepad's Back / Select button for half a second** (P362; a short press of
-it still starts photo mode, on release) or the gamepad's Home button (where the browser passes it) open a menu drawn
-over the game in the game's own font (smooth with *Smooth font*). It has everything a player needs: Preset, Picture,
-HUD, Gameplay, **Controls** (re-bind every keyboard key and gamepad button: choose a line, then press the new key or
-button; Esc cancels, Backspace unbinds a key), **Sound** (master volume + the game's three volumes), **Saves** (export /
-import), **Fullscreen**, **Photo mode**, **Online** (P365: game-style ONLINE pages, see *Online* below) and **Record** (opens its page panel),
-Tools, and *Developer tools* (P368: the page menu, which then only keeps the developer tools). D-pad, stick or arrows move, left / right change
-a value, A / Start / Enter choose, B / Esc / Backspace go back; mouse and touch work too. Fullscreen and Import need a
-key press or click (a browser rule: a gamepad press does not count), the menu says so. Online and while recording the
-game keeps running behind it. Turn it off under Tools in that menu (or in the page menu's Options). **P363:** with this option on, the game's own pause
-menu (Start) in a game on this computer has a new row **OPTIONS** under QUIT / CONT.. (multiplayer: under CONTINUE):
-push the stick down to it, press A, and the menu opens over the paused game; close it (B / Esc) and you are back in the
-pause menu on OPTIONS; Start or B there resumes. The row never appears online, while recording or replaying. **P364:** the title
-menu has the same row: on a save slot page (GAME 1 / 2 / 3) under NEW GAME or under PLAY / ERASE, and on each MULTI mode
-page under SET-UP. Push the stick down to it (on MULTI: from SET-UP) and press A: the menu opens over the title, which
-keeps playing (music, Conker); close it and you are back on OPTIONS; stick up returns to the game's own item. Not shown
-online, while an online room is being set up, while recording or replaying.
-**P367:** the game's own **OPTIONS** page of the title menu (the fireplace: sound, CHEATS, screen position) has a fourth
-row **SETTINGS**: push the stick down past the screen-position item (or up from the first item); the game's two joystick
-cursors slide to it; A opens the menu over the title, closing it brings you back on SETTINGS. Same rules as the other
-rows (never online / recording / replaying). **Menu sounds (P367):** the game-style menu, the game-style photo mode and
-the game-font messages play the game's own menu sounds (cursor 0x62D on a move, 0x500 when you choose, 0x4FF when a value
-changes, lower versions of them for back and for a refused action). They follow the master volume (silent at 0 and in
-test runs with `?mute=1`) and the game's sound-effects volume. They are silent during an online session (also while a
-room is being set up), while recording or replaying an input recording, and under `?netdet`.
-**P368 (the rest of the page in the game's style, same option):**
-- **The page menu is now the developer menu.** With the option on, Esc / ☰ open the game-style menu; its last but one
-  row, **Developer tools**, opens the page's menu, which then only shows Pause, the status line, the debug console, the
-  input recorder's panel and the manual copy-paste online codes (everything else is in the game-style menu). Its
-  **All page controls** button shows the whole old menu again (until it closes). Before the game-style menu can open
-  (first visit, no ROM, or this browser has not kept the game's font yet: that happens the first time the game-style
-  menu opens in a game) the page menu is still the whole menu. *Controls > Gamepad buttons* starts with
-  **Connected gamepads** (how many; the help names them), which only the page menu showed before.
-- **Touch controls** look like the game: the N64's blue A, green B, yellow C buttons, red Start, grey L / Z / R, the
-  letters in the game's font, half see-through, bright while you hold them; the stick is a dark ring with a grey knob.
-  Same places and sizes as before (phone portrait and landscape). They switch to this look once the game's font is
-  known (see above).
-- **Boot screens:** with a ROM and the game's font kept in this browser, the Press Start screen is drawn in the game's
-  font (CONKER'S BAD FUR DAY, PRESS START, ANOTHER ROM; click or tap PRESS START, or Enter / the pad's Start). The
-  game-style ONLINE pages before boot get the same warm dark backdrop instead of black. The very first visit (no ROM)
-  keeps a plain dark page; a wrong file says so in the drop zone. If the game ever stops, *THE GAME STOPPED* shows in the
-  game's font. There is no title picture: none could be taken cheaply and cleanly from the game, and nothing from the
-  ROM may be shipped with the page.
+**Customisation settings (P369: always on; the old option *Game-style menu* is gone and cannot be turned off).**
+While the game runs (and, once this browser has seen the game's font, on the Press Start screen too), Esc, the ☰
+button, **holding the gamepad's Back / Select button for half a second** (a short press of it still starts photo mode,
+on release), the gamepad's Home button (where the browser passes it) or, on a phone, the ☰ button open the
+**CUSTOMISATION SETTINGS**: a menu drawn over the game in the game's own font (smooth with *Smooth font*) with the
+game's menu sounds. It has everything a player needs: Preset, Picture, HUD, Gameplay, **Controls** (re-bind every
+keyboard key and gamepad button: choose a line, then press the new key or button; Esc cancels, Backspace unbinds a key;
+*Gamepad buttons* starts with **Connected gamepads**), **Sound** (master volume + the game's three volumes), **Saves**
+(export / import), **Fullscreen**, **Photo mode**, **Online** (game-style ONLINE pages, see *Online* below), **Record**,
+Tools, and *Developer tools* (the page menu, which then only keeps the developer tools: Pause, status, debug console,
+the recorder's panel, the manual online codes; *All page controls* shows the whole old page menu again). D-pad, stick
+or arrows move, left / right change a value, A / Start / Enter choose, B / Esc / Backspace go back; mouse and touch
+work too. Fullscreen and Import need a key press or click (a browser rule: a gamepad press does not count), the menu
+says so. A single-player game pauses behind it; online and while recording the game keeps running. The game's font is
+kept in this browser automatically about a second after the game first boots (P369), so from the next visit on the
+customisation settings also open on the Press Start screen; only before that very first boot does Esc open the plain
+page menu instead.
+
+**Rows in the game's own menus** (never online, while an online room is being set up, while recording or replaying):
+- the **pause menu** (Start): **CUSTOMISATION SETTINGS** under QUIT / CONT.. (multiplayer: **CUSTOMISATION** under
+  CONTINUE). Push the stick down to it and press A: the menu opens over the paused game; close it (B / Esc) and you are
+  back in the pause menu on that row; Start or B there resumes.
+- the **title menu**: **CUSTOMISATION SETTINGS** on the save slot pages (GAME 1 / 2 / 3, under NEW GAME or PLAY / ERASE),
+  **CUSTOMISATION** on each MULTI mode page under SET-UP (from SET-UP). The title keeps playing behind the menu.
+- the game's own **OPTIONS** page (the fireplace: sound, CHEATS, screen position): a fourth row **CUSTOMISATION**; push
+  the stick down past the screen-position item (or up from the first item) and the game's two joystick cursors slide
+  to it; A opens the menu.
+
+**Touch controls (phones and tablets):** they come up by themselves on a touch screen (☰ > Controls > *Touch
+controls*, or the page menu's Touch button, switch them). They look like the game's (the N64's blue A, green B, yellow
+C buttons, red Start, grey L / Z / R, letters in the game's font, half see-through, bright while held; the stick a dark
+ring with a grey knob) once the game's font is known. **Upright (portrait)** the picture sits at the top and the
+controls below it; sideways (landscape) they lie over the picture's sides. **P369:** they stay on inside the
+customisation settings and work like a pad there: the stick moves (up / down) and changes values (left / right), A or
+Start chooses, B goes back and closes (the C buttons and L / Z / R hide there; sideways, A / B / Start move to the
+right edge beside the picture). Nothing you press there reaches the game. Turning the phone while a menu is open no
+longer leaves buttons missing afterwards (P369 fix).
+
+**Boot screens:** with a ROM and the game's font kept in this browser, the Press Start screen is drawn in the game's
+font (CONKER'S BAD FUR DAY, PRESS START, ANOTHER ROM; click or tap PRESS START, or Enter / the pad's Start). The
+game-style ONLINE pages before boot get the same warm dark backdrop. The very first visit (no ROM) keeps a plain dark
+page; a wrong file says so in the drop zone. If the game ever stops, *THE GAME STOPPED* shows in the game's font.
 
 1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
 2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.
@@ -187,7 +185,7 @@ byte for byte). The choices are remembered while the tab stays open and come bac
 With a gamepad (or the keyboard), **right stick click / O** gives the panel the D-pad: up / down choose a control,
 left / right change it, A presses it; press it again to give the D-pad back to the camera.
 
-**Photo mode with the game-style menu (P366, option *Game-style menu (Esc)*):** the photo HUD (bottom left) and the
+**Photo mode in the game's style (P366; always since P369):** the photo HUD (bottom left) and the
 POSE & OUTFIT panel (right) are drawn in the game's own font and colours, like the game-style menu, with the N64 button
 faces in their footers; every control of the page panel is there. **O / right stick click** gives the panel the
 D-pad (as before; the cap on the panel shows the key or button): up / down choose a row, left / right change it, **A**
@@ -277,10 +275,10 @@ close when the game starts and expire after 10 minutes.)
    page and pick a character like a second, third or fourth controller. From then on each of you controls your own
    Conker in split screen (two players: top / bottom; three or four: four quarters).
 
-**With the game-style menu (P365, option *Game-style menu (Esc)*):** everything above can be done in the game's own
+**In the customisation settings (P365):** everything above can be done in the game's own
 look with a gamepad. During a game: Esc (or hold the gamepad's Back), **Online**, then **Create room** or **Join room**:
 the page restarts (an online match starts from power-on; your save is kept) and the ONLINE page opens by itself on the
-Press Start screen. (After the first game with this option the menu also opens on the Press Start screen directly: Esc.)
+Press Start screen. (After the first game in this browser the menu also opens on the Press Start screen directly: Esc.)
 - **Create room**: the code shows in big yellow letters with players 1 to 4 (*YOU*, *PING 23 MS*, *CONNECTING…*,
   *FREE*). When your friends have joined, choose **Start the game (N players)**. **Input delay** (AUTOMATIC or 2 to 8
   frames) and **Leave the room** are there too.
@@ -299,7 +297,7 @@ Room messages: *No room with the code …* (a typo, or the room was closed / exp
 *Your ROM is not the same as player 1's* (everyone needs the EU ROM). If the room server cannot be reached, use the
 manual codes.
 
-**Manual codes (no room server):** tick *manual codes* in the Online panel (P368: in the developer menu of the game-style menu option the Host / Join buttons show without it). Player 1 presses **Host (player 1)**: a
+**Manual codes (no room server):** tick *manual codes* in the Online panel (P368: in the developer menu the Host / Join buttons show without it). Player 1 presses **Host (player 1)**: a
 box *Player 2* appears with a long code to **Copy** and send to player 2 (**Invite another player** makes the code for
 players 3 and 4). Each friend presses **Join (players 2 to 4)**, pastes the code, presses **Make my answer code** and
 sends that answer back; player 1 pastes it into that player's box and presses **Connect player N**. Then continue at

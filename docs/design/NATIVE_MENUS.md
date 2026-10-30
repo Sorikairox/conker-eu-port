@@ -4,8 +4,10 @@ User goal: "make all of our menus and options feel native to the game, rather th
 page-added menu, option and panel should end up inside the game's own look, opened from the game's own pause / title
 flow (or one key / button), and driven with the pad like the game's menus.
 
-**Status (P368): every step of this plan is done**, behind the option `nativemenu` (default off until the user has tried
-it on a real gamepad and phone); section 7 lists the leftovers. Step 1 is done (P360, commit b7b32847): the game fills the whole window (4:3 centred, letter / pillarboxed; the window's
+**Status (P369): every step of this plan is done and always on.** The user asked for it (P369: "Make in game options on
+by default. It cannot be toggled off. Call them customisation settings."), overriding the repo's "features optional"
+rule: the option `nativemenu` is gone (no toggle, no ?opt switch, a stored value is dropped) and the player-facing name
+is **Customisation settings**. Section 7 lists the leftovers. (P368: behind `nativemenu`, default off.) Step 1 is done (P360, commit b7b32847): the game fills the whole window (4:3 centred, letter / pillarboxed; the window's
 aspect with Widescreen), and every page control moved into one translucent menu drawer (Esc or the corner button),
 lightly styled like the game. This document is the plan for the rest.
 
@@ -331,6 +333,22 @@ single source of truth (`OPTIONS`).
     port hook in the title page handler, or a ROM decode of the title scene); the chapter page row; the drawer's room
     panel still exists hidden (netpair UI=1 drives it); the game's button sprites (the faces are shapes); real-device
     checks (gamepad, phone, ears for the sounds); then flipping `nativemenu`'s default (the user's call).
+- **P369 done: always on, renamed "Customisation settings", touch controls in the menu** (commits 55440d57 always on +
+  rename, 3b920673 touch faces / portrait fix, 850fcc4d touch in the menu, 4156ffc4 phone tests, 788b405c labels,
+  c01deee4 touch detection; HANDOFF P369):
+  - No option: every `opt('nativemenu')` gate removed (GMenu, GTouch, GBoot, GSound, GNet = font at hand, GPhoto). The
+    page drawer is only the fallback before the game font is known (first boot in a browser); the font is now kept
+    automatically ~1 s after the first boot (GMenu fontKeep), so the next Press Start screen already has the menu.
+    Before, `opt()` returned the default (off) under ?netdet, so netdet runs had none of this; now they do (rows /
+    sounds still off there).
+  - Labels: GMenu title CUSTOMISATION SETTINGS; C rows: pause (story) and save slot pages CUSTOMISATION SETTINGS
+    (210 units at 1.2), multiplayer pause and MULTI page CUSTOMISATION (128; the full label does not fit at x 233), the
+    fireplace OPTIONS page CUSTOMISATION at scale 1 with the joystick cursors 21 units further out; Press Start footer
+    ESC OR HOLD BACK: CUSTOMISATION SETTINGS; drawer tab Customisation. Font 0 has every glyph.
+  - Touch: shown inside GMenu (stick / A / B / Start = a pad; C, L, Z, R hidden; landscape A / B / Start in the right
+    margin; stick zone 180 px), nothing reaches the game (pad 1 idle). Fixed: faces drawn 0 x 0 while #touch was
+    display: none (a phone turned with a menu open lost its A button until turned back) and the stick ring placed from
+    an empty box; portrait puts the picture at the top, controls below. The detected touch default is no longer stored.
 - **Next** (the original P365 "Controls + Saves overlays" was done in P362; proposed new order):
   1. ~~P365 Online overlay~~ (done, above).
   2. ~~P366 photo mode restyle~~ (done, above).

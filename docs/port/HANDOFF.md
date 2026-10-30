@@ -88,6 +88,61 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
+- User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
+  the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
+  explicitly overrides the repo's "every feature optional" rule for the game-style menus**: no toggle, no URL switch,
+  a stored `opt.nativemenu` is removed at load.
+- 55440d57 always on + rename: OPTIONS row `nativemenu` removed (main.js), every `opt('nativemenu')` gate removed in
+  gmenu.js (GTouch, GBoot + body.gboot always, GSound, GMenu rows / hold-Back / Home, GPhoto; GNet.wanted() = font at
+  hand, else #netwait). Esc / ☰ try GMenu.open() first; the drawer is only the fallback while no font is known. GMenu
+  fontKeep: font saved (GameFont.save, per ROM SHA-1) when the running game's font reads the same twice 1 s apart
+  (was: first menu open). Names: GMenu title CUSTOMISATION SETTINGS, help / back texts, Press Start + ROM screen
+  hints, ☰ title / aria, desync hint. C (game_eu_20B730.c, #ifdef PORT): port_menu_customisation_row_draw (was
+  port_menu_options_row_draw) picks CUSTOMISATION SETTINGS (210 units at 1.2) when it fits 16..304 at the row's
+  centre, else CUSTOMISATION (128); port_pause_customisation_row_draw (was port_pause_options_row_draw);
+  port_title_customisation_row_draw (was port_title_settings_row_draw): CUSTOMISATION at 1.0 (107), cursors +21 x
+  slide. Labels: story pause = CUSTOMISATION SETTINGS, save slot pages (empty + used) = CUSTOMISATION SETTINGS, MULTI
+  page = CUSTOMISATION, multiplayer pause = CUSTOMISATION (by the rule; not screenshotted, as in P363), fireplace
+  OPTIONS page = CUSTOMISATION. Font 0 glyph check: every letter of both labels maps (GameFont.glyphsOf, no -1).
+  Scripts: no `opt=nativemenu` left (netpair UI=gmenu, all *_shots.sh, menu_sound_probe); boot_shots lost its
+  option-off steps, photo_menu_shots its `off` mode. (The first version returned the deleted `wanted` from GPhoto's
+  IIFE: "Uncaught ReferenceError" at load, GPhoto / GameFont / MenuModel globals missing; folded into this commit
+  before anything was pushed. Trap 60.)
+- 3b920673 symptom 1 (portrait): not reproducible on a fresh emulated phone (portrait shows the controls); reproduced
+  by play in landscape -> open the menu -> turn to portrait -> close: A gone, stick ring over the picture, back only
+  after turning to landscape. Root cause: GTouch redrew faces on the signature change (innerWidth x innerHeight) while
+  #touch was display: none (body.gmenu / body.drawer): 0 x 0 canvases, A's drawImage threw and stopped the loop, the
+  signature was stored, body.gtouch keeps the CSS face transparent; and main.js rest() placed the stick ring from an
+  empty box on resize. Fix: no redraw while not laid out, per-face try; rest only from a real box + ResizeObserver on
+  the zone. Portrait with touch: picture at the top (+ safe-area inset), controls below.
+- 850fcc4d symptom 2 (menu): the CSS rule body.gmenu #touch {display: none} (by design since P361) removed. Touch
+  already merged into pad 1 and GMenu.poll reads it (stick moves / changes, A / Start choose, B back / close) and makes
+  pollInput hand the game an idle pad; photo.maskB / maskStick after close. In the menu: C buttons + L / Z / R hidden,
+  stick zone min(45vw, 180px), landscape A / B / START in the right margin. Drawer still hides them.
+- 4156ffc4 tests: audprobe PROBE_MOBILE=ios|android (about:blank, mobile metrics DPR 3 + orientation, touch emulation,
+  mobile UA, then navigate) + MS:orient:W,H; tools/port/scripts/phone_shots.sh OUTDIR ios|android W,H PREFIX [TURN].
+- 788b405c labels: GBoot footer ESC OR HOLD BACK: CUSTOMISATION SETTINGS; drawer tab Customisation / panel heading
+  Customisation settings (ids unchanged).
+- c01deee4 touch default: setTouch(on, save) - the detected default is no longer stored at load (one wrong detection
+  used to stick forever); detection = pointer: coarse, or touch points on an iOS / Android / Mobi browser.
+- Evidence port_work/p369: pause/ (w* 1280x720, f* 1920x1080 ws + fullres + smooth + hi-res 2D: w2 CUSTOMISATION
+  SETTINGS selected, f3 menu title), title/ (ws* / fs* slot, wm* / fm* used slot + MULTI, wo* / fo* fireplace page),
+  boot/ (w* / f*: d drawer fallback with Customisation tab, h menu, i developer drawer, m Press Start footer),
+  repro/ (rm = the bug: rm_closed_portrait A missing; rm1 = fixed; ios_p* / and_rot*), phone/ (ip = iPhone 390x844
+  turned to 844x390, ap = Android 412x915, al = Android 844x390 turned to 412x915: a play, b menu with touch, c Picture
+  page by stick + A, d closed, e walk, f menu turned, g closed turned, h walk; marks: stick held y -80 / A held 0x8000
+  in the menu -> game pad 0 0 0; Conker 2149,1926 -> 1582,1843 after closing), photo/ (GPhoto active), e2e/ (p357 7700
+  IDENTICAL), net_ui (netpair UI=1, guest gmenupad + touch: 9924 IDENTICAL), net_gmenu (ROOM=1 UI=gmenu
+  SESSIONMENU=guest:60, guest touch: 9939 IDENTICAL), check*.txt GREEN. difftest --self EQUIV: title_press_start_page,
+  game_pause_update, title_slot_page, menu_mode_select_page. e2e / netpair ran on the build before 788b405c / c01deee4
+  (page-only label and touch-default changes, nothing hashed). Deployed (c01deee4).
+- For the user's phone: portrait upright (controls below the picture), turn with the menu open and close it, menu by ☰
+  then stick / A / B / Start, the first visit (Esc = page menu before the first boot, game-style from the next visit),
+  a real iOS Safari bottom toolbar (headless cannot emulate it), and whether CUSTOMISATION on the MULTI page / the
+  fireplace page reads well.
+- Not done: multiplayer pause row screenshot (local MP route); chapter page row; title art (P368 leftovers).
+
 ### P368 (port-web, 2026-10-30): drawer = developer menu, game-style touch controls and boot screens (native menus, last step)
 - bd144a59 developer drawer (option `nativemenu`, still default off): main.js drawerSet asks GMenu.available() (game
   running or good ROM before boot + font at hand); then body.devdrawer hides every player control of the drawer (CSS
