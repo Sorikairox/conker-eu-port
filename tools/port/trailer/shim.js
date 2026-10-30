@@ -11,6 +11,15 @@
 //    the capture server (cdp.mjs serve, /upload/NAME).
 (() => {
   const T = window.__trailer = { manual: true, q: [], now: 0, ticks: 0, aud: null, pcm: [], pcmFrames: 0, capAudio: false };
+  // P370 ?trailerclock=1: performance.now() follows the stepped clock (20 ms per animation frame = one retrace), so the
+  // page's own animations and timers read through it (customisation settings fade / cursor pulse / key repeat, boot
+  // screens, photo mode HUD) move with the game, frame by frame, whatever the wall time of the capture
+  if (/[?&]trailerclock=1/.test(location.search)) {
+    const realNow = performance.now.bind(performance), clockBase = realNow();
+    performance.now = () => clockBase + T.now;
+    // the page's status toasts ("ROM: Conker EU, SHA-1 ok ...") are page messages, not the game's look: hidden in the film
+    document.addEventListener('DOMContentLoaded', () => { const st = document.createElement('style'); st.textContent = '#toast { display: none !important; }'; document.head.appendChild(st); });
+  }
   const realRAF = window.requestAnimationFrame.bind(window);
   window.requestAnimationFrame = (cb) => { if (!T.manual) return realRAF(cb); T.q.push(cb); return T.q.length; };
   window.cancelAnimationFrame = () => {};

@@ -56,7 +56,8 @@ export async function launch(url, opt = {}) {
   const ch = spawn(CH, args, { stdio: 'ignore' });
   console.log(`chrome pid ${ch.pid}`);
   let closed = false;
-  process.on('exit', () => { if (!closed) try { ch.kill('SIGKILL'); } catch (e) {} });   // never leave a Chrome behind (a caller's uncaught error)
+  process.on('exit', () => { if (!closed) try { ch.kill('SIGKILL'); } catch (e) {} });
+  for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP']) process.once(sig, () => process.exit(128));   // P370: a kill of the driver runs the exit handler too   // never leave a Chrome behind (a caller's uncaught error)
   const close = async () => { if (closed) return; closed = true; try { ch.kill('SIGKILL'); } catch (e) {} await sleep(300); fs.rmSync(dir, { recursive: true, force: true }); };
   let page;
   for (let i = 0; i < 60 && !page; i++) {
@@ -89,7 +90,8 @@ export async function launch(url, opt = {}) {
   };
   await call('Runtime.enable');
   await call('Page.enable');
-  if (opt.viewport) await call('Emulation.setDeviceMetricsOverride', { width: opt.viewport[0], height: opt.viewport[1], deviceScaleFactor: opt.dpr || 1, mobile: false });
+  if (opt.viewport) await call('Emulation.setDeviceMetricsOverride', { width: opt.viewport[0], height: opt.viewport[1], deviceScaleFactor: opt.dpr || 1, mobile: !!opt.mobile });
+  if (opt.mobile) await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });   // P370: a phone (touch screen) for the page's touch detection
   if (opt.init) await call('Page.addScriptToEvaluateOnNewDocument', { source: opt.init });
   if (url) await call('Page.navigate', { url });
   const screenshot = async (file, params = {}) => {
@@ -98,5 +100,7 @@ export async function launch(url, opt = {}) {
   };
   const key = async (type, code, key, keyCode) => call('Input.dispatchKeyEvent', { type, code, key, windowsVirtualKeyCode: keyCode, nativeVirtualKeyCode: keyCode });
   const click = async (x, y) => { for (const type of ['mousePressed', 'mouseReleased']) await call('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 }); };
-  return { call, ev, close, screenshot, key, click, pid: ch.pid, on: (f) => listeners.push(f) };
+  // P370: one touch point down / move / up at (x, y) CSS pixels (Input.dispatchTouchEvent, real touch events)
+  const touch = async (type, x, y, id = 1) => call('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id, radiusX: 8, radiusY: 8, force: 1 }] });
+  return { call, ev, close, screenshot, key, click, touch, pid: ch.pid, on: (f) => listeners.push(f) };
 }

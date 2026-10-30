@@ -8,6 +8,10 @@
 // interpolation between game frames), audio.pcm (stereo s16 at the game's rate from 'audioFrom' retraces before the
 // first picture), meta.json (per picture: retrace, t; audio map retrace -> pcm frames, rate).
 // Muted (no audio device is opened at all), one headless Chrome. Never commit the output (ROM-derived pictures).
+// P370 screen shots (shot field screen: [w, h, dpr?]): the page is opened at that viewport without ?canvas (the game
+// fills the window as a player sees it) and with ?trailerclock=1 (shim.js: the page's clock follows the steps), and every
+// picture is a CDP screenshot of the whole viewport, so the page's game-style overlays (customisation settings, boot
+// screens, photo mode HUD, touch controls) are in it. mobile: true emulates a touch phone (shot field touch too).
 import fs from 'node:fs';
 import path from 'node:path';
 import { launch, serve, sleep } from './cdp.mjs';
@@ -19,12 +23,14 @@ const OUT = process.env.OUT || 'port_work/trailer/shots';
 const MAXWALL = +(process.env.MAXWALL || 0);   // seconds: give up (and close Chrome) when the game stops advancing
 const SHIM = fs.readFileSync('tools/port/trailer/shim.js', 'utf8');
 
-async function captureShot(name) {
+async function captureShotFrames(name) {   // was captureShot
   // adhoc[_TAG]: a trial shot from the environment (SHOTQ query, SHOTSTART, SHOTSECS, SHOTCANVAS, SHOTHFR=0, SHOTFPS)
   const s = name.startsWith('adhoc') ? { query: process.env.SHOTQ, start: +(process.env.SHOTSTART || 215), secs: +(process.env.SHOTSECS || 8),
     canvas: process.env.SHOTCANVAS, hfr: process.env.SHOTHFR !== '0', fps: +(process.env.SHOTFPS || 60) } : { ...SHOTS[name] };
   if (s && process.env.PADSHIFT) s.padShift = +process.env.PADSHIFT;   // trials
   if (s && process.env.START) s.start = +process.env.START;
+  if (s && process.env.FPS) s.fps = +process.env.FPS;   // P370: quick low-rate previews of a shot
+  if (s && process.env.SECS) s.secs = +process.env.SECS;
   if (!s) throw new Error('unknown shot ' + name + ' (shots.mjs: ' + Object.keys(SHOTS).join(' ') + ')');
   const dir = path.join(OUT, name); fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
   const port = 8590 + (process.pid % 50);
@@ -39,11 +45,21 @@ async function captureShot(name) {
     const sh = (v) => v.split(',').map((e) => { const p = e.split(':'); p[0] = String(+p[0] + (s.padShift || 0)); return p.join(':'); }).join(',');
     padq = `&padf=${sh(env.PADF0)}&padf1=${sh(env.PADF1)}&padf2=${sh(env.PADF2)}&padf3=${sh(env.PADF3)}`;
   }
-  const url = `http://127.0.0.1:${port}/app/index.html?app=game&det=1&p103boot=1&mute=1&romurl=../dev/rom.z64&canvas=${cw}x${ch}${s.query}${padq}`;
+  const screen = s.screen;   // P370: [w, h, dpr]: screenshots of the viewport instead of the canvas
+  const canvasq = screen ? (s.canvas ? `&canvas=${s.canvas}` : '') + '&trailerclock=1' : `&canvas=${cw}x${ch}`;
+  const url = `http://127.0.0.1:${port}/app/index.html?${s.preBoot ? '' : 'app=game&'}det=1${s.noAutoBoot ? '' : '&p103boot=1'}&mute=1&romurl=../dev/rom.z64${canvasq}${s.query}${padq}`;
   const log = path.join(dir, 'chrome.log');
-  const b = await launch(url, { init: SHIM, log, width: 1400, height: 1000 });
+  const b = await launch(url, screen ? { init: SHIM, log, width: screen[0], height: screen[1], viewport: [screen[0], screen[1]], dpr: screen[2] || 1, mobile: !!s.mobile }
+    : { init: SHIM, log, width: 1400, height: 1000 });
+  const shotJpeg = async (file) => {   // P370: the viewport as the player sees it
+    const r = await b.call('Page.captureScreenshot', { format: 'jpeg', quality: Math.round(100 * (s.quality || 0.92)) });
+    fs.writeFileSync(path.join(dir, file), Buffer.from(r.result.data, 'base64'));
+    return r.result.data.length * 0.75;
+  };
+  if (s.prepare) await s.prepare(b, { sleep, url, dir, shotJpeg, log: (m) => console.log(`  ${name}: ${m}`) });   // P370: e.g. a first boot that keeps the game font, then a reload
   const t0 = Date.now();
   try {
+    if (s.preBoot) return await preBootFrames(b, s, dir, n, fps, shotJpeg, name, t0, log);
     for (let i = 0; i < 200; i++) { if ((await b.ev('__trailer.q.length && __trailer.frame() >= 0 ? 1 : 0')) === 1) break; await sleep(250); }
     const start = s.start, audioFrom = start - (s.audioFrom ?? 40);
     // run to the audio start, then to the first picture (with any scripted page actions on the way)
@@ -56,7 +72,12 @@ async function captureShot(name) {
           cur = await b.ev(`__trailer.runTo(${next}, 40)`);
           if (MAXWALL && Date.now() - t0 > MAXWALL * 1000) throw new Error(`${name}: MAXWALL ${MAXWALL} s reached at retrace ${cur}`);
         } while (cur < next);
-        if (steps.length && steps[0].at <= cur && steps[0].at <= f) { const st = steps.shift(); console.log(`  step @${cur}: ${st.eval.slice(0, 80)} -> ${JSON.stringify(await b.ev(st.eval))}`); continue; }
+        if (steps.length && steps[0].at <= cur && steps[0].at <= f) {   // P370: a step is page JS (eval) or a real touch (touch: [type, x, y, id])
+          const st = steps.shift();
+          const res = st.touch ? (await b.touch(...st.touch), 'touch') : await b.ev(st.eval);
+          console.log(`  step @${cur}: ${(st.eval || 'touch ' + st.touch.join(' ')).slice(0, 80)} -> ${JSON.stringify(res)}`);
+          continue;
+        }
         if (cur >= f) return cur;
       }
     };
@@ -69,7 +90,13 @@ async function captureShot(name) {
     for (let i = 0; i < n; i++) {
       const pos = start + i * k;
       if (!s.ticksPerPic) while (steps.length && steps[0].at <= Math.floor(pos)) { await runTo(steps[0].at); }
-      const r = await b.ev(`__trailer.step(${pos}, ${s.hfr ? 1 : 0}, '/upload/f${String(i).padStart(5, '0')}.jpg', ${ow}, ${oh}, ${s.quality || 0.92}, ${i && s.ticksPerPic ? s.ticksPerPic : 0})`);
+      const file = `f${String(i).padStart(5, '0')}.jpg`;
+      if (s.ticksPerPic && s.tickSteps) for (const ts of s.tickSteps) if (ts.pic === i) {   // P370: page JS or a real touch
+        const res = ts.touch ? (await b.touch(...ts.touch), 'touch') : await b.ev(ts.eval);
+        console.log(`  tick step @pic ${i}: ${(ts.eval || 'touch ' + ts.touch.join(' ')).slice(0, 80)} -> ${JSON.stringify(res)}`);
+      }
+      const r = await b.ev(`__trailer.step(${pos}, ${s.hfr ? 1 : 0}, ${screen ? 'null' : `'/upload/${file}'`}, ${ow}, ${oh}, ${s.quality || 0.92}, ${i && s.ticksPerPic ? s.ticksPerPic : 0})`);
+      if (screen) r.size = await shotJpeg(file);
       meta.frames.push([r.frame, r.t, r.res]);
       if (i % 60 === 0) console.log(`  pic ${i}/${n} retrace ${r.frame} t ${r.t} res ${r.res} ${(r.size / 1024).toFixed(0)} KB (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
     }
@@ -85,5 +112,29 @@ async function captureShot(name) {
   } finally { await b.close(); srv.close(); srv.closeAllConnections?.(); }
 }
 
-for (const name of process.argv.slice(2)) await captureShot(name);
+// P370 preBoot shots: the page opened without ?app=game, so it stops on its Press Start screen (the game-style boot
+// screen once the game font is kept: shot.prepare boots once first); no retraces run before Start, so every picture
+// steps ticksPerPic animation frames (20 ms of the page's clock each, shim.js ?trailerclock); tickSteps [{ pic, eval }]
+// act at a picture (e.g. Start on the fake pad), after which the game boots and runs one retrace per tick (det=1).
+async function preBootFrames(b, s, dir, n, fps, shotJpeg, name, t0, log) {
+  for (let i = 0; i < 100; i++) { if (await b.ev("document.readyState === 'complete' && typeof running !== 'undefined'").catch(() => false)) break; await sleep(200); }
+  await sleep(+(s.settleMs || 3000));   // the ROM fetch + SHA-1, the font restore
+  await b.ev('__trailer.capAudio = true; 1');
+  const meta = { name, fps, screen: s.screen, preBoot: true, ticksPerPic: s.ticksPerPic, query: s.query, frames: [] };
+  for (let i = 0; i < n; i++) {
+    for (const ts of s.tickSteps || []) if (ts.pic === i) console.log(`  tick step @pic ${i}: ${ts.eval.slice(0, 80)} -> ${JSON.stringify(await b.ev(ts.eval))}`);
+    const r = await b.ev(`__trailer.step(0, 0, null, 0, 0, 0, ${s.ticksPerPic})`);
+    await shotJpeg(`f${String(i).padStart(5, '0')}.jpg`);
+    meta.frames.push([r.frame, -1, null]);
+    if (i % 60 === 0) console.log(`  pic ${i}/${n} retrace ${r.frame} (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
+  }
+  const a = JSON.parse(await b.ev(`(async () => { const p = __trailer.takePcm(); await __trailer.upload('/upload/audio.pcm', p.buffer);
+    return JSON.stringify({ rate: __trailer.aud ? __trailer.aud.rate : 0, map: __trailer.audMap }); })()`));
+  meta.audio = { rate: a.rate, map: a.map };
+  fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(meta));
+  const traps = fs.readFileSync(log, 'utf8').split('\n').filter((l) => /Aborted|RuntimeError|EXCEPTION/.test(l));
+  console.log(`${name}: done, ${n} pictures (pre-boot), traps ${traps.length}, ${((Date.now() - t0) / 1000).toFixed(0)} s wall`);
+}
+
+for (const name of process.argv.slice(2)) await captureShotFrames(name);
 process.exit(0);
