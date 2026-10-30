@@ -114,6 +114,18 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   not in the game's PCM ring: silent in the trailer.
 - Not shown: the first-visit ROM drop page (plain page UI); the title-menu CUSTOMISATION rows and fireplace OPTIONS row
   (the pause row is shown); menu sounds.
+- **v3** (user feedback on v2): conkers_good_fur_day_trailer_v3.mp4 / _v3_25mb.mp4 / _v3_contact_sheet.jpg /
+  _v3_shotlist.txt (90.58 s, same length). v1's WIDESCREEN shot is back at 55.49 - 60.44 (Conker running in 4:3 for 4
+  beats, growing to 16:9 at 57.96 while he runs, v1's labels and sound); the CUSTOMISATION SETTINGS beat now ends on the
+  Picture page ~0.4 s after Widescreen flips ON, cut on the beat to it (reads as "switch it on, here is what it does");
+  the double-speed return through the pause menu is dropped. Everything else as v2.
+- "No music" report on v2_25mb (watched on a phone): not reproduced. The file has one AAC-LC track, 48 kHz stereo,
+  esds / AudioSpecificConfig 1190 byte-identical to v1's; decoded by CoreAudio (afconvert, the iOS decoder) and Chrome
+  the music is there at -15 to -17 dBFS RMS in every section (the AND MORE section, music only, -15.5) and is
+  sample-identical to v1's mix where the edits share it (correlation 1.0). No v2 code path touched the mix (music_0c and
+  the intro captures are the P355 files; the new shots only add their effects). Likely on the playback side (phone
+  silent switch / in-app player muted by default); v1's 25 MB copy was actually 27.8 MB, so it may never have been
+  played the same way. v3 has the same sound.
 ### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
 - User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
   the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
