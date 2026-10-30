@@ -16,6 +16,7 @@ hashed, except what is port-only and may legitimately differ between peers:
              scheduler context: its stack depth depends on whether rAF or setTimeout called frame()), pc_video.o (GL
              context handle; port_gfx_frame_tasks resets per presented frame, i.e. per rAF tick)
   photo mode pc_photo.o (P348: the photo camera and the clock hold; photo mode restores the hashed state, not itself)
+  menu sound pc_sfx.o (P367: the game-style menus' sound decoder output; the page never decodes during a session)
   harness    pc_net.o, pc_nethash.o (this hash itself), pc_pif.o padf* / padrec* (each peer's script text and table)
              p205_obj.o go_n / p240_steer.cfg (test autopilots, set by the ?padf path only; P338)
   libc       dlmalloc state (_gm_, mparams: mparams.magic is seeded from time()), sbrk_val (heap top: moves with page /
@@ -26,7 +27,8 @@ The main C stack (__data_end .. __heap_base) and the heap are outside the static
 import sys
 
 EXCLUDE_OBJ = {'gfx_f3dex2.o': 'renderer', 'gfx_demo.o': 'renderer', 'pc_net.o': 'harness', 'pc_nethash.o': 'harness',
-               'pc_photo.o': 'photo mode'}   # P348: photo mode's own state (pose, clock hold) survives the snapshot restores
+               'pc_photo.o': 'photo mode',   # P348: photo mode's own state (pose, clock hold) survives the snapshot restores
+               'pc_sfx.o': 'menu sounds'}    # P367: the page's menu sound decoder (its PCM buffer; never used online)
 KEEP_IN_AUD_OUT = {'det_vq', 'det_vf', 'det_on', 'game_rate'}
 EXCLUDE_SYM = {
     'pc_os.o': {'port_vi_view.full': 'renderer flag cache', 't0': 'wall time', 'pause_at': 'wall time', 'pause_total': 'wall time', 'port_paused': 'page pause'},

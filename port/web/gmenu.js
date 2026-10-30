@@ -20,8 +20,8 @@
 // Online rule (NATIVE_MENUS.md section 5): the overlay never writes game memory. While it is open, pad 1 gives the game
 // "no buttons" (pollInput zeroes it; online the lockstep gets an idle pad, in a recording the recorder records an idle
 // pad), it never pauses an online session or a recording / replay (single player: it pauses like the drawer), and the
-// host's game options are shown locked. No game sounds: playing the game's menu sound would go through the game's
-// sound state (hashed online), so the overlay is silent.
+// host's game options are shown locked. P367: the game's own menu sounds through GSound (decoded from the ROM by the
+// page, never through the game's hashed sound state; silent online, in recordings / replays and under ?netdet).
 'use strict';
 
 const GameFont = (() => {
@@ -254,6 +254,82 @@ const GFace = {
   },
 };
 
+// ---------------------------------------------------------------- P367 the game's menu sounds (GMenu, GPhoto, GNet)
+// The game's own menus have three sounds (game_eu_20B730.c): 0x62D the pause menu's / save slot pages' cursor, 0x500
+// choose, 0x4FF the settings list's move / value change (B is silent there). GSound plays them for the game-style
+// menus: move = 0x62D, choose = 0x500, change = 0x4FF; back and error, which the game never needed, are the same
+// sounds lower (back = choose 5 semitones down, error = the change blip 10 semitones down).
+// Not through the game's sound player (sound_play_2d): its voices, event queue and bank cache are game memory, hashed
+// online, checked by replays and restored by photo mode; and the game's AudioContext is suspended while the page pauses
+// the game for this menu. Instead port/ultra/pc_sfx.c port_sfx_decode reads the sound's record and VADPCM samples from
+// the player's ROM (read-only: nothing in game memory changes; decoded again for every sound, kept nowhere) and hands
+// the page float PCM with the game's volume (sample / envelope / the sound group's level = the game's and the port's
+// sound-effects volume); the page plays it on its own small AudioContext through the master volume (window.portVolume:
+// the drawer slider / Sound > Master volume; ?mute=1 keeps it 0 = no sound at all).
+// Silent (and never decoding) during an online session or while one is set up, a recording / replay and under
+// ?netdet, whatever the option says, so those runs cannot change through it; also before the game runs (no bank).
+// Test aid: with ?audprobe=1 an AnalyserNode after the gain measures each sound's output peak ("[gsound] heard ...").
+const GSound = (() => {
+  const KIND = { move: [0x62D, 0x5DC0, 0], choose: [0x500, 0x5DC0, 0], change: [0x4FF, 0x4650, 0],
+    back: [0x500, 0x4650, -500], error: [0x4FF, 0x5DC0, -1000] };   // [game sound id, play volume (of 0x7FFF), cents]
+  const S = { ctx: null, gain: null, an: null, live: [], n: { played: 0, silent: 0, muted: 0, none: 0 }, last: '' };
+  const silentWhy = () => (netCfg ? 'online session' : window.PortNet && PortNet.t && PortNet.t.role ? 'online room'
+    : recCfg ? (recCfg.mode === 'replay' ? 'replay' : 'recording') : NETDET ? 'netdet' : '');
+  function buffer(kind) {
+    const [id, vol, cents] = KIND[kind];
+    const n = M._port_sfx_decode(id, cents);   // every time (a few thousand frames): follows the sound-effects volume
+    if (!n) return null;   // the bank is not loaded yet (boot): try again next time
+    const inf = new Float32Array(M.HEAPU8.buffer, M._port_sfx_info(), 4), pcm = new Float32Array(M.HEAPU8.buffer, M._port_sfx_pcm(), n);
+    const b = S.ctx.createBuffer(1, n, Math.max(3000, Math.min(96000, Math.round(inf[0]))));
+    const d = b.getChannelData(0), g = vol / 0x7FFF;
+    for (let i = 0; i < n; i++) d[i] = pcm[i] * g;
+    return b;
+  }
+  function measure(kind, t0) {   // ?audprobe: the loudest output sample over the sound's length
+    const a = new Float32Array(S.an.fftSize);
+    let peak = 0, polls = 0;
+    const id = setInterval(() => {
+      S.an.getFloatTimeDomainData(a);
+      for (const v of a) peak = Math.max(peak, Math.abs(v));
+      if (++polls >= 16) { clearInterval(id); log(`[gsound] heard ${kind}: output peak ${peak.toFixed(3)} (context ${S.ctx.state}, ${Math.round(performance.now() - t0)} ms)`); }
+    }, 25);
+  }
+  function play(kind) {
+    if (!KIND[kind] || !opt('nativemenu')) return;
+    const why = silentWhy();
+    if (why) { if (S.n.silent++ < 3) log(`[gsound] silent (${why}): ${kind}`); return; }
+    if (!(window.portVolume > 0)) { S.n.muted++; return; }   // ?mute=1 / master volume 0: nothing is decoded or played
+    if (typeof M === 'undefined' || !M || !M._port_sfx_decode || running !== 'game') { S.n.none++; return; }
+    try {
+      if (!S.ctx) {
+        const C = window.AudioContext || window.webkitAudioContext;
+        S.ctx = new C(); S.gain = S.ctx.createGain(); S.gain.connect(S.ctx.destination);
+        if (window.audprobe) { S.an = S.ctx.createAnalyser(); S.an.fftSize = 2048; S.gain.disconnect(); S.gain.connect(S.an); S.an.connect(S.ctx.destination); }
+      }
+      if (S.ctx.state !== 'running') S.ctx.resume().catch(() => {});
+      const b = buffer(kind);
+      if (!b) { S.n.none++; return; }
+      S.gain.gain.value = window.portVolume;
+      S.live = S.live.filter((x) => !x.done);
+      if (S.live.length >= 4) { const o = S.live.shift(); try { o.stop(); } catch (e) { /* ended */ } }   // never a pile of clicks
+      const src = S.ctx.createBufferSource();
+      src.buffer = b; src.connect(S.gain); src.onended = () => { src.done = true; };
+      src.start(); S.live.push(src);
+      S.n.played++; S.last = kind;
+      if (window.audprobe) {   // + roughness = mean |x[i] - x[i-1]| / mean |x| (white noise ~1.4, a decoded tone far less)
+        const d = b.getChannelData(0); let sa = 0, sd = 0;
+        for (let i = 1; i < d.length; i++) { sa += Math.abs(d[i]); sd += Math.abs(d[i] - d[i - 1]); }
+        log(`[gsound] play ${kind} 0x${KIND[kind][0].toString(16).toUpperCase()} (${b.length} frames at ${b.sampleRate} Hz, volume ${window.portVolume}, roughness ${(sd / (sa || 1)).toFixed(2)})`);
+        measure(kind, performance.now());
+      }
+    } catch (e) { if (S.n.none++ < 3) log(`[gsound] ${e}`); }
+  }
+  const stats = () => Object.assign({ last: S.last, ctx: S.ctx ? S.ctx.state : 'none' }, S.n);
+  return { play, stats, silentWhy };
+})();
+window.GSound = GSound;
+const snd = (kind) => GSound.play(kind);
+
 // ---------------------------------------------------------------- the overlay
 const GMenu = (() => {
   const U = { open: false, t0: 0, closing: 0, stack: [], hits: [], raf: 0, paused: false,
@@ -305,7 +381,7 @@ const GMenu = (() => {
         () => (netCfg ? 'Not during an online session.' : '')),   // while recording: Stop and save
       { kind: 'link', label: 'Tools', help: MenuModel.sections().find((s) => s.id === 'tools').help, page: 'tools' },
       { kind: 'action', label: 'Page menu (developer)', help: 'The page\'s own menu: the same settings plus manual online codes, the debug console and developer tools.', act: () => { close(); drawerSet(true); toggle('options', true); } },
-      { kind: 'action', get label() { return BACK[backKey()] ? BACK[backKey()][0] : 'Back to game'; }, get help() { return BACK[backKey()] ? BACK[backKey()][1] : 'Close this menu (B, Esc or Start on this line).'; }, act: () => close() },
+      { kind: 'action', get label() { return BACK[backKey()] ? BACK[backKey()][0] : 'Back to game'; }, get help() { return BACK[backKey()] ? BACK[backKey()][1] : 'Close this menu (B, Esc or Start on this line).'; }, act: () => { snd('back'); close(); } },
     ]);
   }
   // key / button binding rows (INPUTS, keyMap, padMap, keyName, padName, bindSet, bindReset: main.js)
@@ -381,6 +457,7 @@ const GMenu = (() => {
     if (!U.from && !pre && !netCfg && !recCfg && !NETDET && !userPaused) { U.paused = true; setPaused(true); }
     if (document.pointerLockElement && document.exitPointerLock) document.exitPointerLock();
     log(`[gmenu] open${U.from ? ` (from the game's ${U.from} menu)` : ''}${pre ? ' (before boot)' : ''}`);
+    if (!U.from) snd('choose');   // P367 (from a game row the game played its own choose sound)
     frame();
     return true;
   }
@@ -395,7 +472,7 @@ const GMenu = (() => {
     $('canvas').focus();
     log('[gmenu] close');
   }
-  function back() { U.note = ''; if (U.stack.length > 1) { U.stack.pop(); U.helpSel = ''; } else close(); }
+  function back() { U.note = ''; snd('back'); if (U.stack.length > 1) { U.stack.pop(); U.helpSel = ''; } else close(); }
 
   // ---- P365 the ONLINE pages (docs/design/NATIVE_MENUS.md section 7, docs/design/ONLINE_MULTIPLAYER.md section 11).
   // Every step calls the same functions as the page panel's buttons (main.js netRoomCreate / netRoomJoin / netStartGame
@@ -415,7 +492,7 @@ const GMenu = (() => {
     if (t && t.role) return t.role;
     return 'setup';
   }
-  function fail(e) { U.err = String((e && e.message) || e || ''); U.errAt = performance.now(); U.helpSel = ''; log(`[gmenu] online: ${U.err}`); }
+  function fail(e) { U.err = String((e && e.message) || e || ''); U.errAt = performance.now(); U.helpSel = ''; snd('error'); log(`[gmenu] online: ${U.err}`); }
   async function reloadInto(step) {   // during a game: restart the page into the ONLINE page's step
     if (!GameFont.save(romSha1)) { note('This browser keeps no data for this page: reload it, then open the menu (Esc) before pressing Start.'); return; }
     try { sessionStorage.setItem('gmenu.online', step); } catch (e) { note('This browser keeps no data for this page: reload it, then open the menu (Esc) before pressing Start.'); return; }
@@ -515,20 +592,21 @@ const GMenu = (() => {
     const P = U.pick;
     if (U.busy) return;
     U.err = '';
-    if (P.code.length >= 5) { P.cx = 0; P.cy = PROWS; return; }
-    P.code += c;
+    if (P.code.length >= 5) { P.cx = 0; P.cy = PROWS; snd('error'); return; }
+    P.code += c; snd('choose');
     if (P.code.length === 5) { P.cx = 0; P.cy = PROWS; }   // the code is complete: on JOIN
   }
-  function pickDelete() { if (U.busy) return false; U.err = ''; if (!U.pick.code) return false; U.pick.code = U.pick.code.slice(0, -1); return true; }
+  function pickDelete() { if (U.busy) return false; U.err = ''; if (!U.pick.code) return false; U.pick.code = U.pick.code.slice(0, -1); snd('back'); return true; }
   function pickChoose() {
     const c = pickCell(U.pick.cx, U.pick.cy);
     if (Q.get('gmenutest')) log(`[gmenu] picker: ${c} (code ${U.pick.code})`);
     if (c === 'JOIN') onlineJoin(); else if (c === 'DEL') pickDelete(); else pickType(c);
   }
   function pickMove(dx, dy) {
-    const P = U.pick;
+    const P = U.pick, was = P.cx + ',' + P.cy;
     if (dy) P.cy = (P.cy + dy + PROWS + 1) % (PROWS + 1);
     if (dx && P.cy < PROWS) P.cx = (P.cx + dx + PCOLS) % PCOLS;
+    if (P.cx + ',' + P.cy !== was) snd('move');
   }
   function pickKey(e) {   // keyboard on the picker: letters / digits type (others are refused), Backspace deletes
     const k = e.key && e.key.length === 1 ? e.key.toUpperCase() : '';
@@ -570,16 +648,29 @@ const GMenu = (() => {
   function moveSel(d) {
     const p = page(), n = itemsOf(p).length;
     if (!n) return;   // P365: the letter picker has no rows
+    const was = p.sel;
     p.sel = (p.sel + d + n) % n;
+    if (p.sel !== was) snd('move');
   }
   function change(item, d) {   // left / right
-    if (!item || item.locked && item.locked()) return;
-    if (item.kind === 'toggle') item.set(!item.get());
-    else if (item.kind === 'range') item.set(item.get() + d * 5);
-    else if (item.kind === 'choice') { const i = item.choices.indexOf(item.get()); item.set(item.choices[((i < 0 ? (d > 0 ? -1 : 0) : i) + d + item.choices.length) % item.choices.length]); }
+    if (!item) return;
+    if (item.locked && item.locked()) { if (item.get) snd('error'); return; }
+    if (!item.get) return;
+    const was = item.get(), r = changeValue(item, d);
+    // P367: refused (set returned false: fullscreen without a key press) or nothing moved (a slider at its end) = error;
+    // true = done although the value shows later (fullscreen is asynchronous)
+    snd(r === false || (r !== true && item.get() === was) ? 'error' : 'change');
+  }
+  function changeValue(item, d) {
+    if (item.kind === 'toggle') return item.set(!item.get());
+    if (item.kind === 'range') return item.set(item.get() + d * 5);
+    if (item.kind === 'choice') { const i = item.choices.indexOf(item.get()); return item.set(item.choices[((i < 0 ? (d > 0 ? -1 : 0) : i) + d + item.choices.length) % item.choices.length]); }
   }
   function choose(item) {
     if (!item) return;
+    // P367: the choose sound (error if locked); a Back row sounds like going back (its back() plays it; "Back to game" closes)
+    if (/^Back/.test(item.label)) { /* its act plays the back sound */ }
+    else if (item.kind !== 'toggle' && item.kind !== 'range' && item.kind !== 'choice') snd(item.locked && item.locked() ? 'error' : 'choose');
     if (item.kind === 'link') { U.stack.push({ id: item.page, sel: 0, top: 0 }); U.helpSel = ''; U.note = ''; }
     else if (item.kind === 'bind') capture(item);
     else if (item.kind === 'action') item.act();
@@ -594,8 +685,8 @@ const GMenu = (() => {
   }
   function captureDone(v) {   // undefined = cancelled, null = unbound
     const c = U.cap; U.cap = null;
-    if (!c || v === undefined) { note('Not changed.'); return; }
-    bindSet(c.kind, c.id, v);
+    if (!c || v === undefined) { note('Not changed.'); snd('back'); return; }
+    bindSet(c.kind, c.id, v); snd('choose');
     note(v === null ? 'Unbound.' : `Now: ${c.kind === 'key' ? keyName(v) : padName(v)}.` + (c.kind === 'pad' && padMap.PHOTO === undefined ? ' Photo mode now has no gamepad button (holding it opened this menu): give it one again.' : ''));
     U.prev = -1;   // the capturing press does nothing in the menu
   }
@@ -611,7 +702,7 @@ const GMenu = (() => {
   function entry(d, raw, now) {
     const eb = padMap.PHOTO, eh = eb !== undefined && raw(eb), on = wanted() && photo.state !== 2;
     if (eh && !U.eh) U.ehT = now;
-    if (U.open) { if (eh && !U.eh && !U.ehUsed && !U.cap) { U.ehUsed = true; close(); } }
+    if (U.open) { if (eh && !U.eh && !U.ehUsed && !U.cap) { U.ehUsed = true; snd('back'); close(); } }
     else if (on && eh && !U.ehUsed && now - U.ehT >= HOLD_MS) { U.ehUsed = true; if (open('hold')) log('[gmenu] opened by holding the pad\'s photo button'); }
     else if (on && !eh && U.eh && !U.ehUsed && now - U.ehT < HOLD_MS) d.photo = true;   // a short press: photo mode (one frame's press)
     // the held pad button is no photo press (yet), also on the frame whose press closed the menu (pad 1 reaches photoPoll then)
@@ -645,7 +736,7 @@ const GMenu = (() => {
     const raw = (i) => !!(gp && gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > 0.5));
     const now = performance.now();
     const home = raw(16);
-    if (home && !U.homePrev && !U.cap) { U.homePrev = true; if (U.open) close(); else if (wanted()) open(); return U.open; }
+    if (home && !U.homePrev && !U.cap) { U.homePrev = true; if (U.open) { snd('back'); close(); } else if (wanted()) open(); return U.open; }
     U.homePrev = home;
     entry(d, raw, now);
     if (!U.open) return false;
@@ -983,7 +1074,7 @@ const GNet = (() => {
   const wanted = () => !!opt('nativemenu');
   const kick = () => { if (!S.raf) S.raf = requestAnimationFrame(draw); };
   function wait(t) { if (t !== S.wait) { S.wait = t; kick(); } }
-  function show(title, text, ms, color) { S.box = { title, text, until: performance.now() + ms, color: color || C.title, t0: performance.now() }; kick(); log(`[gnet] ${title}: ${text}`); }
+  function show(title, text, ms, color) { S.box = { title, text, until: performance.now() + ms, color: color || C.title, t0: performance.now() }; kick(); snd('error'); log(`[gnet] ${title}: ${text}`); }   // P367: the error sound (silent online: GSound)
   function draw() {
     S.raf = 0;
     const now = performance.now();
@@ -1209,15 +1300,17 @@ const GPhoto = (() => {
   const lockOf = (it) => (it && it.locked ? it.locked() : '');
 
   // ---- actions
-  function setFocus(on) {
+  function setFocus(on, quiet) {
     if (S.focus === on) return;
+    if (!quiet) snd(on ? 'choose' : 'back');   // P367
     S.focus = on; S.prevBits = -1; S.helpSig = '';
     if (!on) S.stack = [S.stack[0]];
     log(`[gphoto] panel ${on ? 'focus (the D-pad works the panel)' : 'unfocused (the D-pad works the camera)'}`);
   }
   function setHidden(on) {
     S.hidden = on; S.hidAt = performance.now();
-    if (on) setFocus(false);
+    snd('change');   // P367
+    if (on) setFocus(false, true);
     log(`[gphoto] menus ${on ? 'hidden' : 'shown'}`);
   }
   function go(id) {
@@ -1228,8 +1321,13 @@ const GPhoto = (() => {
     S.stack.push(p); S.helpSig = '';
     log(`[gphoto] page ${id}`);
   }
-  function back() { if (S.stack.length > 1) { S.stack.pop(); S.helpSig = ''; } else setFocus(false); }
-  function moveSel(d, clamp) {
+  function back() { if (S.stack.length > 1) { snd('back'); S.stack.pop(); S.helpSig = ''; } else setFocus(false); }
+  function moveSel(d, clamp) {   // P367: the move sound when the selection moved
+    const was = page().sel;
+    moveSelBy(d, clamp);
+    if (page().sel !== was) snd('move');
+  }
+  function moveSelBy(d, clamp) {
     const p = page(), l = listOf(p);
     if (l) {
       const n = l.opts.length; if (!n) return;
@@ -1246,18 +1344,21 @@ const GPhoto = (() => {
     p.sel = i;
   }
   function change(it, d) {
-    if (!it || lockOf(it)) return;
+    if (!it || !(it.kind === 'toggle' || it.kind === 'choice' || it.kind === 'range')) return;
+    if (lockOf(it)) { snd('error'); return; }
+    const val = () => (it.text ? it.text() : it.get ? it.get() : null), was = val();   // P367: change, or error if nothing moved
     if (it.kind === 'toggle') it.set(!it.get());
     else if (it.kind === 'choice') it.set(step(it.opts(), it.get(), Math.sign(d)));
     else if (it.kind === 'range') it.change(d);
+    snd(val() !== was ? 'change' : 'error');
   }
   function choose(it) {
     if (!it || !selectable(it)) return;
-    if (it.kind === 'link') { go(it.page); return; }
-    if (it.kind === 'action') { it.act(); return; }
-    if (lockOf(it)) return;
-    if (it.kind === 'choice' && it.list) { go(it.list); return; }
-    if (it.kind === 'range') { if (it.act) it.act(); return; }
+    if (it.kind === 'link') { snd('choose'); go(it.page); return; }
+    if (it.kind === 'action') { if (lockOf(it)) snd('error'); else if (!/^(Back|Done)$/.test(it.label)) snd('choose'); it.act(); return; }   // Back / Done: their own back sound
+    if (lockOf(it)) { snd('error'); return; }
+    if (it.kind === 'choice' && it.list) { snd('choose'); go(it.list); return; }
+    if (it.kind === 'range') { if (it.act) { snd('choose'); it.act(); } return; }
     change(it, 1);
   }
   function pick(i) {   // a list page's entry: chosen, back to the row
@@ -1265,7 +1366,7 @@ const GPhoto = (() => {
     if (!l || !l.opts[i]) return;
     l.set(l.opts[i][0]);
     log(`[gphoto] picked ${p.id}: ${l.opts[i][1]}`);
-    back();
+    snd('choose'); S.stack.pop(); S.helpSig = '';   // back to the row (one sound)
   }
   function chooseSel() { const p = page(); if (listOf(p)) pick(p.sel); else choose(itemsOf(p)[p.sel]); }
   // a direction (1 up, 2 down, 4 left, 8 right) taken mult times (held: 5, 25)
@@ -1283,7 +1384,7 @@ const GPhoto = (() => {
     const now = performance.now(), b = d.b | 0;
     if (d.hide && !S.prevHide) setHidden(!S.hidden);
     S.prevHide = !!d.hide;
-    if (d.nav && !S.prevNav) { if (S.hidden) { setHidden(false); setFocus(true); } else setFocus(!S.focus); if (S.focus && look.min) { /* folded: opens while focused */ } }
+    if (d.nav && !S.prevNav) { if (S.hidden) { setHidden(false); setFocus(true, true); } else setFocus(!S.focus); if (S.focus && look.min) { /* folded: opens while focused */ } }
     S.prevNav = !!d.nav;
     if (!S.focus) return 0;
     const bits = ((b & N64.DU) ? 1 : 0) | ((b & N64.DD) ? 2 : 0) | ((b & N64.DL) ? 4 : 0) | ((b & N64.DR) ? 8 : 0) | ((b & N64.A) ? 16 : 0) | ((b & N64.B) ? 32 : 0);
@@ -1561,7 +1662,7 @@ const GPhoto = (() => {
     if (h.act === 'title') { setFocus(!S.focus); return; }
     if (h.act === 'back') { back(); return; }
     if (h.act === 'bg') return;
-    setFocus(true);
+    setFocus(true, true);   // P367: the row's own sound follows
     if (h.act === 'bar') { S.drag = h; dragTo(unitXYLast.y); return; }
     if (h.act === 'entry') { page().sel = h.i; pick(h.i); return; }
     if (h.act === 'row') {
@@ -1592,7 +1693,7 @@ const GPhoto = (() => {
     const u = unitXY(e), h = hitAt(u.x, u.y);
     if (!h || h.act === 'foot') return;
     e.preventDefault(); e.stopPropagation();
-    if (!S.focus) setFocus(true);
+    if (!S.focus) setFocus(true, true);
     moveSel((e.deltaY > 0 ? 1 : -1) * (listOf(page()) ? 3 : 1), true);
   }, { capture: true, passive: false });
 
@@ -1608,7 +1709,7 @@ const GPhoto = (() => {
   // a message: true = shown here (photo mode in the game's style), else the page shows it (GNet, in the game's font,
   // when the game-style menu is on and photo mode did not start)
   function toast(text) {
-    if (active()) { S.toast = String(text); S.toastAt = performance.now(); log(`[gphoto] ${text}`); return true; }
+    if (active()) { S.toast = String(text); S.toastAt = performance.now(); snd(/^saved /.test(S.toast) ? 'choose' : 'error'); log(`[gphoto] ${text}`); return true; }
     if (wanted() && window.GNet && fontOk() && photo.state !== 2) { GNet.show('PHOTO MODE', String(text), 3500, C.on); return true; }
     return false;
   }
