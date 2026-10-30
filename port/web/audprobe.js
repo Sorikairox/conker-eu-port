@@ -11,7 +11,7 @@ const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debu
   '--enable-unsafe-swiftshader',
   // P271 (user request): muted by default so runs never play sound on the host; the Web Audio graph still runs
   // (the probe's pull counts are unchanged). PROBE_UNMUTE=1 to hear it.
-  ...(process.env.PROBE_UNMUTE ? [] : ['--mute-audio']), ...(process.env.PROBE_NOAUTOPLAY ? [] : ['--autoplay-policy=no-user-gesture-required']), `--window-size=${process.env.PROBE_WINDOW || '1000,900'}`, url], { stdio: 'ignore' });   // P360: PROBE_WINDOW=W,H (page layout shots)
+  ...(process.env.PROBE_UNMUTE ? [] : ['--mute-audio']), ...(process.env.PROBE_NOAUTOPLAY ? [] : ['--autoplay-policy=no-user-gesture-required']), `--window-size=${process.env.PROBE_WINDOW || '1000,900'}`, process.env.PROBE_MOBILE ? 'about:blank' : url], { stdio: 'ignore' });   // P360: PROBE_WINDOW=W,H (page layout shots)
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
 setTimeout(() => { console.log('audprobe: timeout'); done(2); }, (+secs + 90) * 1000);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -56,7 +56,23 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   };
   if (process.env.PROBE_LOG) { fs.writeFileSync(process.env.PROBE_LOG, ''); call('Runtime.enable', {}); }
   // P360: PROBE_VIEWPORT=W,H sets the page's exact viewport (CSS pixels, scale 1); --window-size includes browser chrome
-  if (process.env.PROBE_VIEWPORT) { const [w, h] = process.env.PROBE_VIEWPORT.split(',').map(Number); await call('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false }); }
+  // P369: PROBE_MOBILE=ios|android emulates a real phone instead: mobile viewport (meta viewport, overlay scroll bars),
+  // device scale factor 3, the screen orientation from W,H, touch emulation (pointer: coarse, ontouchstart,
+  // maxTouchPoints 5) and the phone's user agent, then loads the page (Chrome starts on about:blank), so its very first
+  // load sees the phone (main.js keeps what its first load found, e.g. the touch controls' default). The step MS:orient:W,H turns the phone (new viewport + orientation) mid-run.
+  const MOBILE_UA = { ios: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+    android: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36' }[process.env.PROBE_MOBILE || ''];
+  const metrics = (w, h) => call('Emulation.setDeviceMetricsOverride', MOBILE_UA
+    ? { width: w, height: h, deviceScaleFactor: 3, mobile: true, screenWidth: w, screenHeight: h, screenOrientation: h > w ? { type: 'portraitPrimary', angle: 0 } : { type: 'landscapePrimary', angle: 90 } }
+    : { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+  if (process.env.PROBE_VIEWPORT) { const [w, h] = process.env.PROBE_VIEWPORT.split(',').map(Number); await metrics(w, h); }
+  if (MOBILE_UA) {
+    await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+    await call('Emulation.setEmitTouchEventsForMouse', { enabled: true, configuration: 'mobile' });
+    await call('Emulation.setUserAgentOverride', { userAgent: MOBILE_UA, platform: process.env.PROBE_MOBILE === 'ios' ? 'iPhone' : 'Linux armv8l' });
+    await call('Page.navigate', { url }); await sleep(800);   // (Chrome started on about:blank: the page's first load already sees the phone)
+    console.log(`audprobe: mobile emulation ${process.env.PROBE_MOBILE}: ` + await ev("JSON.stringify({ coarse: matchMedia('(pointer: coarse)').matches, ontouchstart: 'ontouchstart' in window, mtp: navigator.maxTouchPoints, portrait: matchMedia('(orientation: portrait)').matches, w: innerWidth, h: innerHeight, dpr: devicePixelRatio, ua: navigator.userAgent.slice(0, 40) })"));
+  }
   // P21: PROBE_PROFILE=MS: CPU profile of the first MS ms, top self-time functions (waits for a busy page)
   if (process.env.PROBE_PROFILE) {
     await call('Profiler.enable', {}); await call('Profiler.setSamplingInterval', { interval: 1000 }); await call('Profiler.start', {});
@@ -98,11 +114,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       } else if (act === 'touchdown' || act === 'touchmove' || act === 'touchup') {
         // P368: MS:touchdown:X,Y[,ID] / touchmove / touchup = real CDP touch events (pointerType 'touch'), several fingers
         // by ID (default 0); touch emulation is switched on at the first one
-        if (!touchOn) { touchOn = true; await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }); }
+        if (!touchOn && !MOBILE_UA) { touchOn = true; await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }); }
         const [tx, ty, tid = 0] = arg.split(',').map(Number);
         if (act === 'touchup') touches.delete(tid); else touches.set(tid, { x: tx, y: ty, id: tid, radiusX: 4, radiusY: 4, force: 1 });
         const type = act === 'touchdown' ? 'touchStart' : act === 'touchmove' ? 'touchMove' : 'touchEnd';
         await call('Input.dispatchTouchEvent', { type, touchPoints: [...touches.values()] });   // touchEnd: the fingers still down
+      } else if (act === 'orient') {   // P369: MS:orient:W,H turns the (emulated) phone
+        const [ow, oh] = arg.split(',').map(Number); await metrics(ow, oh);
       } else if (act === 'keydown' || act === 'keyup') {
         const k = keyInfo(arg);
         await call('Input.dispatchKeyEvent', { type: act === 'keydown' ? 'rawKeyDown' : 'keyUp', code: arg, key: k.key, windowsVirtualKeyCode: k.keyCode, nativeVirtualKeyCode: k.keyCode });
