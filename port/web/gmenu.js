@@ -358,10 +358,10 @@ const GMenu = (() => {
     const eb = padMap.PHOTO, eh = eb !== undefined && raw(eb), on = wanted() && photo.state !== 2;
     if (eh && !U.eh) U.ehT = now;
     if (U.open) { if (eh && !U.eh && !U.ehUsed && !U.cap) { U.ehUsed = true; close(); } }
-    else if (on && eh) {
-      d.photo = !!(keyMap.PHOTO && keysDown.has(keyMap.PHOTO));   // the held pad button is not a photo press (yet)
-      if (!U.ehUsed && now - U.ehT >= HOLD_MS) { U.ehUsed = true; if (open('hold')) log('[gmenu] opened by holding the pad\'s photo button'); }
-    } else if (on && !eh && U.eh && !U.ehUsed && now - U.ehT < HOLD_MS) d.photo = true;   // a short press: photo mode (one frame's press)
+    else if (on && eh && !U.ehUsed && now - U.ehT >= HOLD_MS) { U.ehUsed = true; if (open('hold')) log('[gmenu] opened by holding the pad\'s photo button'); }
+    else if (on && !eh && U.eh && !U.ehUsed && now - U.ehT < HOLD_MS) d.photo = true;   // a short press: photo mode (one frame's press)
+    // the held pad button is no photo press (yet), also on the frame whose press closed the menu (pad 1 reaches photoPoll then)
+    if (on && eh && !U.open) d.photo = !!(keyMap.PHOTO && keysDown.has(keyMap.PHOTO));
     if (!eh) U.ehUsed = false;
     U.eh = eh;
   }
