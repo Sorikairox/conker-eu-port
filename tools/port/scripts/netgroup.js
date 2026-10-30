@@ -28,7 +28,8 @@ const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debu
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
 setTimeout(() => { console.log('netgroup: timeout'); done(2); }, (+secs + 240) * 1000);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function connect(wsUrl, logFile) {
+async function connect(wsUrl, logFile0) {
+  let logFile = logFile0;   // P365: setLog switches the file (UI=gmenu: the run before the page's reload goes to NAME.pre.log)
   const ws = new WebSocket(wsUrl);
   await new Promise((r) => ws.addEventListener('open', r));
   let id = 0; const pending = new Map();
@@ -44,7 +45,7 @@ async function connect(wsUrl, logFile) {
     if (r.result?.exceptionDetails) throw new Error(expr + ': ' + JSON.stringify(r.result.exceptionDetails).slice(0, 400));
     return r.result?.result?.value;
   };
-  return { call, ev };
+  return { call, ev, setLog: (f) => { logFile = f; if (f) fs.writeFileSync(f, ''); } };
 }
 (async () => {
   let ver;
@@ -61,6 +62,9 @@ async function connect(wsUrl, logFile) {
     targetIds[name] = t.result.targetId;
     pages[name] = await connect(pg.webSocketDebuggerUrl, path.join(out, name + '.log'));
     await pages[name].call('Runtime.enable', {});
+    const vp = (process.env.VIEWPORTS || '').split(',')[i];   // P365: VIEWPORTS=1280x720,1920x1080: each page's exact CSS viewport
+    if (vp) { const [w, h] = vp.split('x').map(Number); await pages[name].call('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false }); }
+    if (process.env.UI === 'gmenu') pages[name].setLog(path.join(out, name + '.pre.log'));
     await pages[name].call('Page.navigate', { url: urls[i] });
   }
   if (process.env.ROMFILE) for (const n of NAMES) {   // P345: the ROM through the page's file picker (stays on this machine)
@@ -88,7 +92,93 @@ async function connect(wsUrl, logFile) {
   };
   const evErr = (p, expr) => p.ev(`(${expr}).then(() => 'no error', (e) => 'error: ' + e.message)`);
   if (process.env.ROOM && process.env.ROOMCHECK) console.log(`netgroup: unknown code -> ${await evErr(pages[guests[0]], "__online.roomJoin('QQQQQ')")}`);
-  if (process.env.ROOM) {   // P345: room code
+  // P365 UI=gmenu (with ROOM=1): everything through the game-style ONLINE pages, as a player does it with a gamepad
+  // (?gmenutest=1's fake pad: window.__gmenuTest in port/web/gmenu.js): each page boots the game (Start on the Press Start
+  // screen), holds Back to open the menu, chooses Online and Create room (host) / Join room (guests): the page reloads
+  // into the ONLINE page; the host's page makes the room and shows its code, each guest picks the code's letters on the
+  // letter picker with the D-pad and A and joins with Start (GMENU_BADCODE=1: first a code that does not exist;
+  // GMENU_KEYS=1: typed on the keyboard instead, Enter joins); the host
+  // chooses "Start the game". GSHOTS=1 saves screenshots of every step (OUTDIR/<page>_g<N>_<what>.png).
+  const gm = { st: (p) => p.ev('GMenu.state()'), shot: async (n, what) => {
+    if (!process.env.GSHOTS) return;
+    await sleep(700);
+    const r = await pages[n].call('Page.captureScreenshot', { format: 'png' });
+    if (r.result) fs.writeFileSync(path.join(out, `${n}_g${gm.k[n] = (gm.k[n] || 0) + 1}_${what}.png`), Buffer.from(r.result.data, 'base64'));
+  }, k: {} };
+  gm.press = async (p, seq) => { await p.ev(`__gmenuTest.press(${JSON.stringify(seq)})`); for (let i = 0; i < 600; i++) { if (await p.ev('__gmenuTest.idle()').catch(() => true)) return; await sleep(50); } throw new Error('fake pad queue stuck'); };
+  gm.until = async (p, fn, what, tries = 300) => { for (let i = 0; i < tries; i++) { const s = await gm.st(p).catch(() => null); if (s && fn(s)) return s; await sleep(200); } throw new Error('gmenu: no ' + what + ': ' + JSON.stringify(await gm.st(p).catch(() => null))); };
+  gm.choose = async (p, label) => {   // D-pad down until the row, then A
+    for (let i = 0; i < 40; i++) { const s = await gm.st(p); if (s.item && s.item.startsWith(label)) { await gm.press(p, [[0, 4]]); return; } await gm.press(p, [[13, 4]]); }
+    throw new Error('gmenu: no row ' + label);
+  };
+  gm.toOnline = async (n, step) => {   // boot, open the menu, Online, Create / Join room (the page reloads)
+    const p = pages[n];
+    await gm.press(p, [[9, 4]]);   // Start on the Press Start screen
+    for (let i = 0; i < 300; i++) { if (await p.ev("running === 'game' && GameFont.load()").catch(() => false)) break; await sleep(200); }
+    await sleep(+(process.env.GMENU_BOOT_MS || 12000));   // the title on screen behind the menu
+    await gm.press(p, [[8, 45, 20]]);   // hold Back: the menu opens
+    await gm.until(p, (s) => s.open && s.page === 'main', 'menu');
+    for (let i = 0; i < 40; i++) { const s = await gm.st(p); if (s.item === 'Online') break; await gm.press(p, [[13, 4]]); }
+    await gm.shot(n, 'menu_online_row');
+    await gm.press(p, [[0, 4]]);
+    await gm.until(p, (s) => s.page === 'online', 'online page');
+    for (let i = 0; i < 10; i++) { const s = await gm.st(p); if (s.item === step) break; await gm.press(p, [[13, 4]]); }
+    await gm.shot(n, 'online_' + step.split(' ')[0].toLowerCase());
+    p.setLog(path.join(out, n + '.log'));   // the session's page load starts now
+    await gm.press(p, [[0, 4]]);
+    for (let i = 0; i < 300; i++) { await sleep(300); if (await p.ev('!!(window.__online && window.__online.ready()) && GMenu.state().open').catch(() => false)) return; }
+    throw new Error(`gmenu: ${n} did not reload into the ONLINE page`);
+  };
+  if (process.env.UI === 'gmenu') {
+    const tg = Date.now();
+    await Promise.all(NAMES.map((n) => gm.toOnline(n, n === 'host' ? 'Create room' : 'Join room')));
+    console.log(`netgroup: gmenu: every page reloaded into its ONLINE page (${Date.now() - tg} ms)`);
+    const hs = await gm.until(host, (s) => s.code && s.online === 'host', 'room code');
+    const code = hs.code;
+    console.log(`netgroup: gmenu: room ${code} shown on the host's ONLINE page (${Date.now() - t0} ms)`);
+    await gm.shot('host', 'room_made');
+    for (const g of guests) {
+      const p = pages[g], tj = Date.now();
+      await gm.until(p, (s) => s.page === 'pick', 'letter picker');
+      await gm.shot(g, 'picker');
+      if (process.env.GMENU_BADCODE && g === guests[0]) {   // a code that does not exist: the error on the picker
+        const bad = code === 'AAAAA' ? 'CCCCC' : 'AAAAA';
+        await gm.press(p, await p.ev(`__gmenuTest.pickPath(${JSON.stringify(bad)})`));
+        const s = await gm.until(p, (x) => x.err && !x.busy, 'error for the unknown code');
+        console.log(`netgroup: gmenu: ${g} picked ${bad} -> ${s.err}`);
+        await gm.shot(g, 'picker_unknown_code');
+        await gm.press(p, Array.from({ length: 5 }, () => [1, 4]));   // B deletes
+        await gm.press(p, [[12, 4]]);   // off JOIN, back to the letters (the path starts where the cursor is)
+      }
+      // GMENU_KEYS=1: the guests type the code on the keyboard (lower case, real CDP key events) and press Enter
+      const typeKeys = async (str) => { for (const c of str) {
+        const code = /[0-9]/.test(c) ? 'Digit' + c : 'Key' + c.toUpperCase();
+        await p.call('Input.dispatchKeyEvent', { type: 'keyDown', key: c, code, text: c, windowsVirtualKeyCode: c.toUpperCase().charCodeAt(0) });
+        await p.call('Input.dispatchKeyEvent', { type: 'keyUp', key: c, code, windowsVirtualKeyCode: c.toUpperCase().charCodeAt(0) });
+        await sleep(250);
+      } };
+      if (process.env.GMENU_KEYS) await typeKeys(code.slice(0, 3).toLowerCase());
+      else await gm.press(p, await p.ev(`__gmenuTest.pickPath(${JSON.stringify(code.slice(0, 3))}, false)`));
+      await gm.shot(g, 'picker_typing');
+      if (process.env.GMENU_KEYS) await typeKeys(code.slice(3).toLowerCase());
+      else await gm.press(p, await p.ev(`__gmenuTest.pickPath(${JSON.stringify(code.slice(3))}, false)`));
+      const s = await gm.st(p);
+      console.log(`netgroup: gmenu: ${g} ${process.env.GMENU_KEYS ? 'typed' : 'picked'} ${s.typed}, cursor on ${s.cursor}`);
+      await gm.shot(g, 'picker_full');
+      if (process.env.GMENU_KEYS) { await p.call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); await p.call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); }
+      else await gm.press(p, [[9, 4]]);   // Start: JOIN
+      await gm.until(p, (x) => x.online === 'guest' && x.page === 'online' && !x.busy, 'guest lobby');
+      for (let i = 0; i < 100; i++) { const sl = await host.ev('__online.slots()'); if (sl.filter((x) => x.state === 'joined').length > guests.indexOf(g)) break; await sleep(200); }
+      console.log(`netgroup: gmenu: ${g} joined room ${code} as ${JSON.stringify(await p.ev('__online.room()'))} in ${Date.now() - tj} ms; status: ${await p.ev('PortNet.t.state')}`);
+      await sleep(1500);
+      await gm.shot(g, 'room_joined');
+    }
+    await sleep(2500);   // the pings
+    await gm.shot('host', 'lobby');
+    await gm.until(host, (s) => s.joined === guests.length, 'every guest joined');
+    await gm.choose(host, 'Start the game');
+    console.log(`netgroup: gmenu: host chose Start (${(await gm.st(host)).item})`);
+  } else if (process.env.ROOM) {   // P345: room code
     let code;
     if (process.env.UI) {
       for (const n of NAMES) await pages[n].ev("document.getElementById('t-online').click()");
@@ -144,7 +234,8 @@ async function connect(wsUrl, logFile) {
   console.log(`netgroup: ${NAMES.length} players, codes ${sizes.join('/')} chars, all joined in ${Date.now() - t0} ms: ${JSON.stringify(slots)}`);
   await hostShot();
   const ts = Date.now();
-  if (process.env.UI) { await host.ev("document.getElementById('net-start').click()"); }
+  if (process.env.UI === 'gmenu') { /* started on the host's ONLINE page */ }
+  else if (process.env.UI) { await host.ev("document.getElementById('net-start').click()"); }
   else await host.ev('__online.start()');
   console.log(`netgroup: started (${Date.now() - ts} ms), routes ${JSON.stringify(await host.ev('PortNet.t.routes'))}; visibility ` +
     (await Promise.all(NAMES.map((n) => pages[n].ev('document.visibilityState')))).join(' '));
@@ -171,16 +262,56 @@ async function connect(wsUrl, logFile) {
       `${on && coverId ? ' (a tab in front of it)' : ''}, visibilityState ${await guest.ev('document.visibilityState')}, frame ${await guest.ev('__online.stats().frame')}`);
   };
   const t1 = Date.now(), speed = [];   // [seconds, stats per page] every 10 s
+  // P365 the in-session messages (game-style with the option nativemenu): KILL=NAME:AT closes that page's window AT s into
+  // the match without a goodbye (as a crashed browser or a pulled cable): the others first wait for it, then drop it;
+  // screenshots of the remaining pages 2, 5 and 12 s later (OUTDIR/<page>_kill_<s>s.png). DESYNCSHOTS=1: a screenshot
+  // of every page 2 and 10 s after its page reports a desync (OUTDIR/<page>_desync_<s>s.png).
+  const shotOf = async (n, name) => { const r = await pages[n].call('Page.captureScreenshot', { format: 'png' }).catch(() => ({})); if (r.result) fs.writeFileSync(path.join(out, `${n}_${name}.png`), Buffer.from(r.result.data, 'base64')); };
+  const alive = new Set(NAMES);
+  if (process.env.KILL) (async () => {
+    const [kn, kat] = process.env.KILL.split(':');
+    await sleep(+kat * 1000);
+    if (!targetIds[kn]) return;
+    alive.delete(kn);
+    console.log(`netgroup ${kat} s: closing ${kn}'s window (no goodbye)`);
+    await br.call('Target.closeTarget', { targetId: targetIds[kn] });
+    for (const dt of [2, 5, 12]) { await sleep((dt - (dt === 2 ? 0 : dt === 5 ? 2 : 5)) * 1000); for (const n of alive) await shotOf(n, `kill_${dt}s`); }
+  })();
+  // SESSIONMENU=NAME:AT (UI=gmenu pages): Esc opens that page's game-style menu AT s into the match, the fake pad goes to
+  // Online (the session's players / pings / Leave): OUTDIR/<page>_session_menu.png; Esc twice closes it again
+  if (process.env.SESSIONMENU) (async () => {
+    const [sn, sat] = process.env.SESSIONMENU.split(':'), p = pages[sn];
+    await sleep(+sat * 1000);
+    const esc = "dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', key: 'Escape' })), setTimeout(() => dispatchEvent(new KeyboardEvent('keyup', { code: 'Escape', key: 'Escape' })), 100)";
+    try {
+      await p.ev(esc); await sleep(600);
+      await gm.choose(p, 'Online');
+      await sleep(2500); await shotOf(sn, 'session_menu');
+      console.log(`netgroup: ${sn}'s ONLINE page during the match: ${JSON.stringify(await gm.st(p))}`);
+      await p.ev(esc); await sleep(400); await p.ev(esc);
+    } catch (e) { console.log('netgroup: SESSIONMENU ' + e.message); }
+  })();
+  if (process.env.DESYNCSHOTS) (async () => {
+    const seen = {};
+    while (Date.now() - t1 < +secs * 1000) {
+      await sleep(1000);
+      for (const n of alive) {
+        if (seen[n]) continue;
+        const d = await pages[n].ev('__online.stats() && __online.stats().desync').catch(() => null);
+        if (d) { seen[n] = true; console.log(`netgroup: ${n} reports a desync at retrace ${d.frame}`); (async () => { await sleep(2000); await shotOf(n, 'desync_2s'); await sleep(8000); await shotOf(n, 'desync_10s'); })(); }
+      }
+    }
+  })();
   while (Date.now() - t1 < +secs * 1000) {
     await sleep(10000);
-    const s = await Promise.all(NAMES.map((n) => pages[n].ev('__online.stats()'))).catch((e) => NAMES.map(() => null));
+    const s = await Promise.all(NAMES.map((n) => (alive.has(n) ? pages[n].ev('__online.stats()') : null))).catch((e) => NAMES.map(() => null));
     const el = (Date.now() - t1) / 1000;
     if (hideAt && hideState === 0 && el >= hideAt) { hideState = 1; await hideGuest(true); }
     else if (hideAt && hideState === 1 && el >= hideAt + hideFor) { hideState = 2; await hideGuest(false); }
-    if (s.every((x) => x && x.frame)) speed.push([el, s]);
+    if (s.every((x, i) => (x && x.frame) || !alive.has(NAMES[i]))) speed.push([el, s]);
     console.log(`netgroup ${Math.round(el)} s: ` + NAMES.map((n, i) => `${n} ${JSON.stringify(s[i])}`).join('  '));
     for (const t of (process.env.SHOTS || '').split(' ').filter(Boolean))   // SHOTS="60 120": screenshots of every window
-      if (Math.abs(el - +t) < 5) for (const n of NAMES) {
+      if (Math.abs(el - +t) < 5) for (const n of NAMES.filter((x) => alive.has(x))) {
         await pages[n].ev("document.getElementById('p-online').scrollIntoView()").catch(() => {});
         const r = await pages[n].call('Page.captureScreenshot', { format: 'png' });
         if (r.result) fs.writeFileSync(path.join(out, `${n}_${t}s.png`), Buffer.from(r.result.data, 'base64'));
@@ -189,7 +320,7 @@ async function connect(wsUrl, logFile) {
   // P339: game speed = retraces per second / 50 from the first sample with the game running (>= 20 s) to the end
   const a = speed.find((x) => x[0] >= 20 && x[1][0].frame > 100), z = speed[speed.length - 1];
   if (a && z && z !== a) console.log(`netgroup speed ${a[0].toFixed(0)}..${z[0].toFixed(0)} s: ` + NAMES.map((n, i) =>
-    `${n} ${((z[1][i].frame - a[1][i].frame) / (z[0] - a[0]) / 50 * 100).toFixed(1)} % (${z[1][i].waits - a[1][i].waits} waits, ${z[1][i].waitMs - a[1][i].waitMs} ms)`).join(', '));
+    !z[1][i] || !a[1][i] ? `${n} gone` : `${n} ${((z[1][i].frame - a[1][i].frame) / (z[0] - a[0]) / 50 * 100).toFixed(1)} % (${z[1][i].waits - a[1][i].waits} waits, ${z[1][i].waitMs - a[1][i].waitMs} ms)`).join(', '));
   // optional: LEAVE=NAME (or GUEST_LEAVE=1: guest) closes that page's session at the end; the others run on for 15 s
   const leave = process.env.LEAVE || (process.env.GUEST_LEAVE ? 'guest' : '');
   if (leave && pages[leave]) {

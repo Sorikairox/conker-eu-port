@@ -15,6 +15,11 @@
 #                function's core.mjs on a Map; never the production function), ROOMCHECK=1 also checks an unknown
 #                code and a full room (ROOMMAX=N room size; netgroup.js)
 #        UI=1  codes (or the room code) through the Online panel's buttons     SHOTS="60 150"  screenshots of every window
+#        UI=gmenu (with ROOM=1)  P365: through the game-style ONLINE pages with a fake gamepad (netgroup.js): boot, hold Back,
+#                Online, Create / Join room (the page reloads), the room code picked on the letter picker, Start the game;
+#                GOPT_HOST / GOPT_GUEST more options for the pages (e.g. widescreen:1,fullres:1), GSHOTS=1 screenshots of
+#                every step, GMENU_BADCODE=1 player 2 first tries a code that does not exist,
+#                VIEWPORTS=1280x720,1920x1080 each page's exact viewport (also without UI=gmenu)
 #        DESYNC_AT=N  test: the guest flips one byte of game memory at retrace N (?netdesync, desync report);
 #                     DESYNC_OFF=decimal offset in n64_rdram (default 0x200000)
 #        HIDE=AT:FOR  the guest's page is hidden from AT s for FOR s     REALBG=1  normal background throttling
@@ -45,10 +50,12 @@ sleep 1.5
 B="http://localhost:$PORT/app/index.html?romurl=../dev/rom.z64&mute=1&p103boot=1&nethash=1&netscript=1&netpanel=1&padf=$PADF0&padf1=$PADF1&padf2=$PADF2&padf3=$PADF3${NETD:+&netd=$NETD}$ROOMQ"
 FA=${NETFAIL%-*}; FB=${NETFAIL#*-}
 fail() { [ -n "${NETFAIL:-}" ] && { [ "$1" = "$FA" ] && echo "&netfailto=$FB"; [ "$1" = "$FB" ] && echo "&netfailto=$FA"; }; }
-URLS=("$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}${HOSTQ:-}"
-      "$B${NETSIM_GUEST:+&netsim=$NETSIM_GUEST}${GUESTQ:-}${DESYNC_AT:+&netdesync=$DESYNC_AT}${DESYNC_OFF:+&netdesyncoff=$DESYNC_OFF}$(fail 2)"
-      "$B${NETSIM_GUEST3:+&netsim=$NETSIM_GUEST3}$(fail 3)"
-      "$B${NETSIM_GUEST4:+&netsim=$NETSIM_GUEST4}$(fail 4)")
+GH=; GG=
+[ "${UI:-}" = gmenu ] && { GH="&gmenutest=1&opt=nativemenu:1${GOPT_HOST:+,$GOPT_HOST}"; GG="&gmenutest=1&opt=nativemenu:1${GOPT_GUEST:+,$GOPT_GUEST}"; }   # P365
+URLS=("$B${NETSIM_HOST:+&netsim=$NETSIM_HOST}${HOSTQ:-}$GH"
+      "$B${NETSIM_GUEST:+&netsim=$NETSIM_GUEST}${GUESTQ:-}${DESYNC_AT:+&netdesync=$DESYNC_AT}${DESYNC_OFF:+&netdesyncoff=$DESYNC_OFF}$(fail 2)$GG"
+      "$B${NETSIM_GUEST3:+&netsim=$NETSIM_GUEST3}$(fail 3)$GG"
+      "$B${NETSIM_GUEST4:+&netsim=$NETSIM_GUEST4}$(fail 4)$GG")
 NAMES=(host guest guest3 guest4)
 s=$(date +%s)
 node tools/port/scripts/netgroup.js "$T" "$D" "${URLS[@]:0:$P}" | tee "$D/driver.out" | tail -$((P + 4))
