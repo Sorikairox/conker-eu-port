@@ -40,7 +40,7 @@ over the game in the game's own font (smooth with *Smooth font*). It has everyth
 HUD, Gameplay, **Controls** (re-bind every keyboard key and gamepad button: choose a line, then press the new key or
 button; Esc cancels, Backspace unbinds a key), **Sound** (master volume + the game's three volumes), **Saves** (export /
 import), **Fullscreen**, **Photo mode**, **Online** (P365: game-style ONLINE pages, see *Online* below) and **Record** (opens its page panel),
-Tools, and *Page menu (developer)* for the old page menu. D-pad, stick or arrows move, left / right change
+Tools, and *Developer tools* (P368: the page menu, which then only keeps the developer tools). D-pad, stick or arrows move, left / right change
 a value, A / Start / Enter choose, B / Esc / Backspace go back; mouse and touch work too. Fullscreen and Import need a
 key press or click (a browser rule: a gamepad press does not count), the menu says so. Online and while recording the
 game keeps running behind it. Turn it off under Tools in that menu (or in the page menu's Options). **P363:** with this option on, the game's own pause
@@ -59,6 +59,24 @@ the game-font messages play the game's own menu sounds (cursor 0x62D on a move, 
 changes, lower versions of them for back and for a refused action). They follow the master volume (silent at 0 and in
 test runs with `?mute=1`) and the game's sound-effects volume. They are silent during an online session (also while a
 room is being set up), while recording or replaying an input recording, and under `?netdet`.
+**P368 (the rest of the page in the game's style, same option):**
+- **The page menu is now the developer menu.** With the option on, Esc / ☰ open the game-style menu; its last but one
+  row, **Developer tools**, opens the page's menu, which then only shows Pause, the status line, the debug console, the
+  input recorder's panel and the manual copy-paste online codes (everything else is in the game-style menu). Its
+  **All page controls** button shows the whole old menu again (until it closes). Before the game-style menu can open
+  (first visit, no ROM, or this browser has not kept the game's font yet: that happens the first time the game-style
+  menu opens in a game) the page menu is still the whole menu. *Controls > Gamepad buttons* starts with
+  **Connected gamepads** (how many; the help names them), which only the page menu showed before.
+- **Touch controls** look like the game: the N64's blue A, green B, yellow C buttons, red Start, grey L / Z / R, the
+  letters in the game's font, half see-through, bright while you hold them; the stick is a dark ring with a grey knob.
+  Same places and sizes as before (phone portrait and landscape). They switch to this look once the game's font is
+  known (see above).
+- **Boot screens:** with a ROM and the game's font kept in this browser, the Press Start screen is drawn in the game's
+  font (CONKER'S BAD FUR DAY, PRESS START, ANOTHER ROM; click or tap PRESS START, or Enter / the pad's Start). The
+  game-style ONLINE pages before boot get the same warm dark backdrop instead of black. The very first visit (no ROM)
+  keeps a plain dark page; a wrong file says so in the drop zone. If the game ever stops, *THE GAME STOPPED* shows in the
+  game's font. There is no title picture: none could be taken cheaply and cleanly from the game, and nothing from the
+  ROM may be shipped with the page.
 
 1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
 2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.
@@ -274,14 +292,14 @@ Press Start screen. (After the first game with this option the menu also opens o
   for someone, *PLAYER 2 LEFT* (their controller stands still, the match goes on) and a *DESYNC* box if the games ever
   stop matching (please report it). Esc, **Online** shows everyone's ping and **Leave the session**; the match never
   pauses behind the menu.
-- *Manual codes (page menu)* opens the page panel's copy-paste codes below.
+- *Manual codes (developer tools)* opens the page panel's copy-paste codes below.
 
 Room messages: *No room with the code …* (a typo, or the room was closed / expired: ask player 1 for a new code),
 *Room … is full* (the room already has 4 players), *Player 1 runs a different version of the game* (reload both pages),
 *Your ROM is not the same as player 1's* (everyone needs the EU ROM). If the room server cannot be reached, use the
 manual codes.
 
-**Manual codes (no room server):** tick *manual codes* in the Online panel. Player 1 presses **Host (player 1)**: a
+**Manual codes (no room server):** tick *manual codes* in the Online panel (P368: in the developer menu of the game-style menu option the Host / Join buttons show without it). Player 1 presses **Host (player 1)**: a
 box *Player 2* appears with a long code to **Copy** and send to player 2 (**Invite another player** makes the code for
 players 3 and 4). Each friend presses **Join (players 2 to 4)**, pastes the code, presses **Make my answer code** and
 sends that answer back; player 1 pastes it into that player's box and presses **Connect player N**. Then continue at

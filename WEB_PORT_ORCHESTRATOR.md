@@ -532,6 +532,21 @@ flash, controller pak).
     with the same motion, and on leaving set the widget's "cursor was at" row to yours so its own slide starts there.
 54. JS-dispatched key events carry no user activation: they test the refusal path (fullscreen refused = error sound)
     for free; use real CDP key events when the action itself must succeed.
+55. Test drivers written in zsh: `"raw:$t:eval:..."` silently becomes `raw:<t>val:...` (`:e` is a zsh history modifier on
+    `$t`), and the step vanishes. Write `${t}` before a colon (bash scripts are safe).
+56. Touch tests in headless Chrome: Input.dispatchTouchEvent does nothing useful until
+    Emulation.setTouchEmulationEnabled is on; then the page gets real pointer events of type touch (pointer capture,
+    several fingers by id). touchEnd lists the fingers still down (empty for the last one).
+57. Turning a page menu into a "developer only" menu: hide the player controls with a body class + CSS instead of
+    removing them (JS .click() test drivers keep working), and only when the replacement menu can really open now
+    (font loaded, game running or a ROM before boot); otherwise the fallback menu would be empty. Keep a "show all"
+    escape hatch.
+58. A game's menu record says which page is selected, not what is on screen: Conker's g_menu_state titlePage already
+    reads the save slot page during the intro cutscene, and the slot page draws its texts into the same frame. A
+    "clean title picture" grab from the canvas needs a signal from the page handler itself (or a ROM decode); without
+    one, skip the picture rather than store a wrong one.
+59. Custom faces drawn on a canvas inside an existing touch button: give the canvas pointer-events: none, or it takes the
+    pointerdown and the button's setPointerCapture / press handlers never run.
 
 ---
 

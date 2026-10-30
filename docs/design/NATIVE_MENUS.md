@@ -4,7 +4,8 @@ User goal: "make all of our menus and options feel native to the game, rather th
 page-added menu, option and panel should end up inside the game's own look, opened from the game's own pause / title
 flow (or one key / button), and driven with the pad like the game's menus.
 
-Step 1 is done (P360, commit b7b32847): the game fills the whole window (4:3 centred, letter / pillarboxed; the window's
+**Status (P368): every step of this plan is done**, behind the option `nativemenu` (default off until the user has tried
+it on a real gamepad and phone); section 7 lists the leftovers. Step 1 is done (P360, commit b7b32847): the game fills the whole window (4:3 centred, letter / pillarboxed; the window's
 aspect with Widescreen), and every page control moved into one translucent menu drawer (Esc or the corner button),
 lightly styled like the game. This document is the plan for the rest.
 
@@ -298,10 +299,40 @@ single source of truth (`OPTIONS`).
     to 0x19, down wraps on to 9 through the list's own wrap. A -> port_gmenu_request_title (request 2), sound 0x500.
     Same gate as P363 / P364. difftest --self EQUIV (title_press_start_page, settings_list_draw, game_pause_update,
     title_slot_page, menu_mode_select_page).
+- **P368 done: the plan is complete** (commits bd144a59 developer drawer, 1b4911c7 touch controls, the boot screens
+  commit and the tests commit after it: see HANDOFF P368; still option `nativemenu`, default off until the user has
+  tried a real gamepad and a phone):
+  - **Drawer = developer menu.** Item-by-item check of the drawer against GMenu: every player-facing control has a
+    game-style row (Start = the Press Start screen; Fullscreen, Touch, Photo, Volume, all options, presets, bindings,
+    Defaults, Saves, Online rooms = GMenu rows); the one missing, the connected-gamepad list, was ported (Controls >
+    Gamepad buttons > Connected gamepads, new 'info' row kind). With the option on and GMenu able to open
+    (GMenu.available: game running or good ROM before boot, font at hand), main.js drawerSet sets body.devdrawer: the
+    drawer shows only Back to game, Pause, the status line, Online (manual copy-paste codes), Record (recorder details)
+    and Debug; "All page controls" shows the rest until it closes. GMenu's row is now "Developer tools". Option off or
+    GMenu cannot open (first visit / no font): the whole drawer, as before.
+  - **Touch controls** (GTouch): faces drawn into a canvas inside each .tb div in GFace's colours with the game's font,
+    translucent, bright while held; stick = dark ring + grey knob. Layout and handlers untouched. Tested with real CDP
+    touch events at 800x1000 and 844x390 (audprobe touchdown / touchmove / touchup steps): A bit, stick y 80 and Conker
+    walking, Start = the game's pause.
+  - **Boot screens** (GBoot): with a font kept for the ROM the Press Start screen is drawn in the game's font on #gboot
+    (inside the picture box); the pre-boot ONLINE pages get the same warm backdrop; first visit / no font: the page's
+    screens restyled plain and dark (body.gboot); a wrong file is reported in the drop zone (#drop-err); a crash shows
+    THE GAME STOPPED through GNet. **No title art:** no cheap, reliable "clean title on screen" moment was found
+    (g_menu_state's titlePage reads the slot page already during the intro cutscene and its fade word read 0 in the
+    port; the slot page draws GAME 1 / INSERT RUMBLE PAK into the same frame); a ROM decode of the title scene is not
+    cheap. Nothing ROM-derived is committed or deployed.
+  - **Chapter page row (titlePage 2): not done.** title_chapter_select_page's scene list wraps around in both directions
+    (a wrapped copy above and below, scroll animation), so there is no "past the last item" place for a row as on the
+    slot / MULTI / OPTIONS pages; it would need a new input (a C button) or a change to the list model. Its players
+    reach the menu with Esc / ☰ / hold Back anyway.
+  - No game C touched; conker.wasm unchanged (e2e p357 IDENTICAL off and on; netpair UI=1 and ROOM=1 UI=gmenu
+    IDENTICAL; see HANDOFF P368).
+  - **Leftovers** (for later sessions, none blocking): title art (needs a real "title shown" signal from game C, e.g. a
+    port hook in the title page handler, or a ROM decode of the title scene); the chapter page row; the drawer's room
+    panel still exists hidden (netpair UI=1 drives it); the game's button sprites (the faces are shapes); real-device
+    checks (gamepad, phone, ears for the sounds); then flipping `nativemenu`'s default (the user's call).
 - **Next** (the original P365 "Controls + Saves overlays" was done in P362; proposed new order):
   1. ~~P365 Online overlay~~ (done, above).
   2. ~~P366 photo mode restyle~~ (done, above).
   3. ~~P367 sounds + game OPTIONS page row~~ (done, above).
-  4. **P368 cleanup + default**: drawer reduced to developer tools (Debug, Recorder, manual codes); touch controls
-     styled; first-run screens with title art from a cached ROM; PLAYING.md; ask the user to try a real gamepad / phone
-     and decide nativemenu's default.
+  4. ~~**P368 cleanup**~~ (done, above; the default stays off until the user's real gamepad / phone try).

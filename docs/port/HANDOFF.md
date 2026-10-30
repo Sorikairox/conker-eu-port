@@ -88,6 +88,40 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P368 (port-web, 2026-10-30): drawer = developer menu, game-style touch controls and boot screens (native menus, last step)
+- bd144a59 developer drawer (option `nativemenu`, still default off): main.js drawerSet asks GMenu.available() (game
+  running or good ROM before boot + font at hand); then body.devdrawer hides every player control of the drawer (CSS
+  only: .click() drivers still work) and keeps Back to game, Pause, status, Online (manual codes box shown directly),
+  Record, Debug; "All page controls" (#drawer-all) shows the rest until close. Option off / GMenu cannot open: whole
+  drawer as before. Item-by-item check: everything player-facing had a GMenu row except the connected-pad list -> new
+  'info' row kind, Controls > Gamepad buttons > Connected gamepads. Rows renamed: "Page menu (developer)" -> "Developer
+  tools", "Manual codes (page menu)" -> "Manual codes (developer tools)". gmenu_shots.sh pad flow: +1 down for row A.
+- 1b4911c7 touch controls: gmenu.js GTouch (500 ms check) draws faces into canvas.gt inside each #touch .tb (GFace
+  colours, game font, sheen, outline; C buttons drawn arrows), body.gtouch CSS: translucent .55, held .95 + brightness,
+  latched yellow ring, stick dark ring + grey knob. Layout / handlers untouched.
+- 7f4663c0 boot screens: gmenu.js GBoot (250 ms check). body.gboot (option on): first-run screens plain dark CSS, wrong
+  file reported in the drop zone (#drop-err, main.js dropError). Font kept for the ROM: Press Start drawn on #gboot
+  (picture box, z 2) in the game's font (CONKER'S / BAD FUR DAY / PRESS START / ANOTHER ROM / footer faces, no footer
+  with touch), #ready only takes clicks (gbootfont). Pre-boot GMenu: same warm backdrop. onAbort: GNet THE GAME STOPPED.
+  **No title art** (tried: a read-only port_title_state export of g_menu_state; titlePage already reads 5 = slot page
+  during the intro cutscene, the record's floats read 0, the slot page's texts share the frame; reverted, wasm
+  unchanged). See trap 58.
+- 2237f61a tests: audprobe touch steps (touchdown / touchmove / touchup, CDP Input.dispatchTouchEvent after
+  Emulation.setTouchEmulationEnabled); tools/port/scripts/boot_shots.sh OUTDIR [720|1080|800|844|all].
+- Not done: chapter page row (title_chapter_select_page's list wraps both ways: no "past the end" place; needs a new
+  input or list change); title art; no decomp symbol touched, so nothing to rename.
+- Evidence port_work/p368: boot/ (prefix w = 1280x720, f = 1920x1080 ws + fullres + smooth, p = 800x1000 touch, l =
+  844x390 touch; a_first_run, b_error_wrong_file, c_ready_nofont, d_drawer_fallback, e_play, f_touch_A_held,
+  f2_touch_stick_held, g_touch_start_pause, h_gmenu, i_drawer_dev, j_drawer_all, k_off_play, l_off_drawer,
+  m_ready_font, n_online_backdrop; logs *A.log / *B.log: touch A = bit 8000, stick y 80, Conker 2149,1926 ->
+  1582,1553 in 4 s at both touch sizes), gmenu_pad/ (pad flow, A bound to Y), e2e_off / e2e_on (p357 7700 IDENTICAL,
+  on = nativemenu + touch), net_ui (UI=1, nativemenu both, guest gmenupad + touch: 9922 IDENTICAL), net_gmenu (ROOM=1
+  UI=gmenu SESSIONMENU=guest:60, guest touch: 9936 IDENTICAL), check1.txt GREEN (selftest 152/152). conker.wasm
+  unchanged (JS / HTML only). Deployed.
+- Readiness for flipping `nativemenu` (user's call, see the report): real gamepad (hold Back entry, D-pad / A / B,
+  rebinding, pause-menu / title OPTIONS rows, photo mode), real phone portrait + landscape (taps, stick, menu by ☰,
+  first boot needs one game-style menu open to keep the font), ears on the menu sounds.
+
 ### P367 (port-web, 2026-10-30): the game's menu sounds + SETTINGS row on the game's title OPTIONS page (native menus)
 - 1871945a (option `nativemenu`, still default off): gmenu.js GSound plays the game's own menu sounds for GMenu, GPhoto
   and GNet: move 0x62D, choose 0x500, change 0x4FF (the only three the game's menus use; B is silent there), back = 0x500
