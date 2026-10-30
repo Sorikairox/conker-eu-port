@@ -127,6 +127,24 @@ void game_pause_update(void) {
     u8 pad;
     s8 stickX;
     s8 stickY;
+    s32 litItem;   /* the item drawn selected (P363: -1 while the port's OPTIONS row is selected) */
+#ifdef PORT
+    /* DELIBERATE PORT CHANGE (P363, native menus; docs/design/NATIVE_MENUS.md): an "OPTIONS" row in this pause menu that
+     * opens the page's game-style menu (port/web/gmenu.js). Shown only while port_gmenu_row_shown() (the page's option
+     * "Game-style menu" is on and the game is local: never online, in a recording / replay or under ?netdet, where this
+     * menu's state is hashed) and not in the one-item pause (g_pause_simple / level 0x22); otherwise every line below
+     * runs exactly as on the N64. The row sits under the item row (story: centred under PAUSED, between QUIT and CONT..;
+     * multiplayer: under CONTINUE), drawn with font 0 like the game's other texts (text_printf_at, drop shadow) in
+     * the item pictures' greens: bright when selected, dark otherwise. Stick down reaches it (story: from either item;
+     * multiplayer: from CONTINUE, whose up / down did nothing), stick up leaves it; while it is selected
+     * g_menu_cursor keeps the item it came from but no item is lit. A on it plays the choose sound (0x500) and asks the
+     * page to open its menu (port_gmenu_request_open); the game's pause stays as it is meanwhile (the page gives the game
+     * an idle pad 1), so closing that menu comes back here with OPTIONS still selected. B / START resume the game as from
+     * any item. port_pause_on_options = OPTIONS is selected (a port variable, outside game memory). */
+    static s32 port_pause_on_options;
+    s32 optionsRow;   /* the OPTIONS row is shown this frame */
+    void port_pause_options_row_draw(s32 selected, s32 count, s32 yOff);   /* after this function */
+#endif
 
     g_screen_fade_alpha = 0;
     sfx = 0;
@@ -156,6 +174,9 @@ void game_pause_update(void) {
                 g_rumble_stop_request = 1;
                 g_pause_pad = i;
                 g_menu_cursor = 0;
+#ifdef PORT
+                port_pause_on_options = 0;
+#endif
                 g_pause_last_stick_x = g_cont_pads[i].stickY;
                 g_pause_input_delay = 10;
             }
@@ -213,6 +234,20 @@ void game_pause_update(void) {
     }
     stickX = g_cont_pads[pad].stickX;
     stickY = g_cont_pads[pad].stickY;
+#ifdef PORT
+    optionsRow = !simple && port_gmenu_row_shown();
+    if (!optionsRow) {
+        port_pause_on_options = 0;
+    }
+    if ((s8) g_menu_cursor < count && optionsRow
+        && (port_pause_on_options ? (g_pause_last_stick_y < 31 && stickY >= 31)
+                                  : ((count == 2 || (s8) g_menu_cursor == 0) && g_pause_last_stick_y >= -30 && stickY < -30))) {
+        port_pause_on_options = !port_pause_on_options;   /* stick down to OPTIONS, stick up back to the item */
+        sfx = 0x62D;
+    } else if ((s8) g_menu_cursor < count && port_pause_on_options) {
+        /* on OPTIONS the other stick moves do nothing */
+    } else
+#endif
     if ((s8) g_menu_cursor < count) {
         if ((g_pause_last_stick_x < 31 && stickX >= 31) || (g_pause_last_stick_x >= -30 && stickX < -30)) {
             if ((s8) g_menu_cursor == 2) {
@@ -238,6 +273,12 @@ void game_pause_update(void) {
     g_pause_last_stick_x = stickX;
     g_pause_last_stick_y = stickY;
     text_set_color(0xFF, 0xFF, 0xFF, g_menu_prompt_alpha_lo);
+    litItem = (s8) g_menu_cursor;
+#ifdef PORT
+    if (port_pause_on_options) {
+        litItem = -1;
+    }
+#endif
     y = yOff + 0x73;
     if (simple) {
         g_menu_cursor = 0;
@@ -245,7 +286,7 @@ void game_pause_update(void) {
     } else {
         text_printf_at(0x94, y, 1, (s32) g_str_pause_title, 0x1A);
         if ((s8) g_menu_cursor < count) {
-            text_printf_at(0xD5, y, 1, (s32) g_str_pause_continue, ((s8) g_menu_cursor == 0) + 0xC);
+            text_printf_at(0xD5, y, 1, (s32) g_str_pause_continue, (litItem == 0) + 0xC);
         }
         text_set_pos(0x94, yOff + 0x55);
         if (count == (s8) g_menu_cursor) {
@@ -261,12 +302,28 @@ void game_pause_update(void) {
             sel = 1;
             if (count == 3) {
                 text_set_pos(0x53, yOff + 0x63);
-                text_printf((s32) g_str_pause_restart, ((s8) g_menu_cursor == 1) + 0x21);
+                text_printf((s32) g_str_pause_restart, (litItem == 1) + 0x21);
                 sel = 2;
                 text_set_pos(0x53, yOff + 0x82);
             }
-            text_printf((s32) g_str_pause_quit, (sel == (s8) g_menu_cursor) + 0xE);
+            text_printf((s32) g_str_pause_quit, (sel == litItem) + 0xE);
+#ifdef PORT
+            if (optionsRow) {
+                port_pause_options_row_draw(port_pause_on_options, count, yOff);
+            }
+#endif
         }
+#ifdef PORT
+        if (port_pause_on_options && !(g_menu_pressed & 0x1000)) {
+            if (g_menu_pressed & 0x8000) {
+                port_gmenu_request_open();   /* A on OPTIONS: the page opens its menu over this pause */
+                sfx = 0x500;
+            } else if (g_menu_pressed & 0x4000) {
+                g_pause_unpause_timer = 5;   /* B resumes, as from the items */
+                g_pause_input_delay = 10;
+            }
+        } else
+#endif
         if (g_menu_pressed & 0x1000) {
             g_pause_unpause_timer = 5;
             g_pause_input_delay = 10;
@@ -337,6 +394,29 @@ void game_pause_update(void) {
 
 void screen_fade_update(void);
 #ifdef PORT
+/* P363: the pause menu's "OPTIONS" row (see game_pause_update): font 0 text in the item pictures' greens. */
+void port_pause_options_row_draw(s32 selected, s32 count, s32 yOff) {
+    f32 scale = g_text_scale;
+    s32 x, y;
+
+    /* left-aligned at a fixed x: "OPTIONS" is 57 units wide at scale 1 (68 at 1.2). The text queue's own centring (flag
+     * 1) moves a string by only a quarter of its width here, so it is not used. */
+    if (count == 3) {
+        x = 0xC7;           /* centred at 233, under the CONTINUE picture (drawn from x 0xD5, its centre near 233) */
+    } else {
+        x = 0x7F;           /* centred at 161, under PAUSED, between QUIT and CONT.. */
+    }
+    y = yOff + 0x97;        /* under the item row (yOff + 0x73; the pictures reach about yOff + 0x91) */
+    if (selected) {
+        text_set_color(0x8C, 0xFF, 0x10, g_menu_prompt_alpha_lo);   /* like the lit item pictures */
+    } else {
+        text_set_color(0x2A, 0x6A, 0x1A, g_menu_prompt_alpha_lo);   /* like the dark ones */
+    }
+    text_set_scale(1.2f);
+    text_printf_at(x, y, 0x80, (s32) "OPTIONS"); /* 0x80: drop shadow */
+    text_set_scale(scale);
+    text_set_color(0xFF, 0xFF, 0xFF, g_menu_prompt_alpha_lo);
+}
 static s32 port_intro_skipped; /* P324 "Skip intro": done once per boot (the attract loop also returns to level 0x21) */
 static s32 port_warp_started;  /* P327 ?warp: done once per boot */
 void port_warp_game_start(s32 level, s32 scene);

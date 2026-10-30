@@ -61,4 +61,12 @@ void port_ws_hud_anchor(void *gdl, int edge);
 void port_photo_camera_applied(void);
 void port_photo_scene_drawn(void);
 
+/* P363 native menus: an "OPTIONS" row in the game's own pause menu (game_pause_update) that opens the page's game-style
+ * menu (port/web/gmenu.js). The page turns the row on with port_set_gmenu_row(1) only when its option "Game-style
+ * menu" (nativemenu) is on and the game is local (no online session, recording, replay or ?netdet: the pause menu's
+ * state is hashed there); port_gmenu_row_shown() also says 0 whenever an online / recorded session or netdet runs.
+ * Choosing the row calls port_gmenu_request_open(); the page takes the request with port_gmenu_take_request(). */
+int port_gmenu_row_shown(void);
+void port_gmenu_request_open(void);
+
 #endif

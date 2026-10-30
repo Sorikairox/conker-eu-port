@@ -200,7 +200,7 @@ const MenuModel = (() => {
 const GMenu = (() => {
   const U = { open: false, t0: 0, closing: 0, stack: [], hits: [], raf: 0, paused: false,
     prev: 0, repeatAt: 0, held: 0, helpPage: 0, helpAt: 0, helpSel: '', homePrev: false, mx: -1, my: -1,
-    cap: null, note: '', noteAt: 0, eh: false, ehT: 0, ehUsed: false };
+    cap: null, note: '', noteAt: 0, eh: false, ehT: 0, ehUsed: false, fromPause: false, row: -1 };
   const cv = document.getElementById('gmenu');
   const ROW = 15, ROWS = 8, TOP = 46, X0 = 34, X1 = 286;   // row spacing / visible rows / list top / label x / value right edge (units)
   const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
@@ -236,7 +236,7 @@ const GMenu = (() => {
         () => (netCfg ? 'Not during an online session.' : '')),   // while recording: Stop and save
       { kind: 'link', label: 'Tools', help: MenuModel.sections().find((s) => s.id === 'tools').help, page: 'tools' },
       { kind: 'action', label: 'Page menu (developer)', help: 'The page\'s own menu: the same settings plus manual online codes, the debug console and developer tools.', act: () => { close(); drawerSet(true); toggle('options', true); } },
-      { kind: 'action', label: 'Back to game', help: 'Close this menu (B, Esc or Start on this line).', act: () => close() },
+      { kind: 'action', get label() { return U.fromPause ? 'Back to pause' : 'Back to game'; }, get help() { return U.fromPause ? 'Close this menu and go back to the game\'s pause menu (B, Esc or Start on this line).' : 'Close this menu (B, Esc or Start on this line).'; }, act: () => close() },
     ]);
   }
   // key / button binding rows (INPUTS, keyMap, padMap, keyName, padName, bindSet, bindReset: main.js)
@@ -292,11 +292,14 @@ const GMenu = (() => {
     if (photo.state === 2 || !GameFont.load()) return false;   // photo mode has the pad; no font yet: the drawer instead
     U.open = true; U.t0 = performance.now(); U.closing = 0; U.stack = [{ id: 'main', sel: 0, top: 0 }];
     U.prev = -1; U.held = 0; U.helpSel = ''; U.cap = null; U.note = '';
+    U.fromPause = how === 'pause';
     document.body.classList.add('gmenu'); cv.hidden = false;
-    // single player: pause like the drawer (never online, never while recording or replaying)
-    if (!netCfg && !recCfg && !NETDET && !userPaused) { U.paused = true; setPaused(true); }
+    // single player: pause like the drawer (never online, never while recording or replaying). P363: opened from the
+    // game's own pause menu (its OPTIONS row) the game is paused already and keeps running its pause menu underneath
+    // (with an idle pad 1), so the page does not pause on top
+    if (!U.fromPause && !netCfg && !recCfg && !NETDET && !userPaused) { U.paused = true; setPaused(true); }
     if (document.pointerLockElement && document.exitPointerLock) document.exitPointerLock();
-    log('[gmenu] open');
+    log(`[gmenu] open${U.fromPause ? ' (from the game\'s pause menu)' : ''}`);
     frame();
     return true;
   }
@@ -365,7 +368,19 @@ const GMenu = (() => {
     if (!eh) U.ehUsed = false;
     U.eh = eh;
   }
+  // P363: the "OPTIONS" row in the game's own pause menu (game_pause_update, game_eu_20B730.c). The page switches it on
+  // (port_set_gmenu_row) only while this menu's option is on and the game is local: never online, while recording or
+  // replaying, or under ?netdet (the pause menu's state is hashed there; the C side checks the same again). Choosing it
+  // leaves a request (port_gmenu_take_request) that opens this menu over the game's pause; the A press that chose it
+  // is masked by U.prev = -1 (the first poll after open only records the held buttons).
+  function pauseRow() {
+    if (typeof M === 'undefined' || !M || !M._port_set_gmenu_row) return;
+    const on = wanted() && running === 'game' && !netCfg && !recCfg && !NETDET ? 1 : 0;
+    if (on !== U.row) { U.row = on; M._port_set_gmenu_row(on); log(`[gmenu] pause menu row ${on ? 'on' : 'off'}`); }
+    if (M._port_gmenu_take_request() && on && !U.open) { if (open('pause')) log('[gmenu] opened from the pause menu\'s OPTIONS row'); }
+  }
   function poll(d) {
+    pauseRow();
     const gp = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find((g) => g && g.connected);
     const raw = (i) => !!(gp && gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > 0.5));
     const now = performance.now();

@@ -370,6 +370,20 @@ EMSCRIPTEN_KEEPALIVE void port_set_option(int id, int value) {
     if (id >= 0 && id < PORT_OPT_COUNT) port_options[id] = value;
 }
 int port_option(int id) { return id >= 0 && id < PORT_OPT_COUNT ? port_options[id] : 0; }
+/* P363 native menus: the pause menu's "OPTIONS" row (game_pause_update, game_eu_20B730.c; port_options.h).
+ * port_gmenu_row = the page's switch (port_set_gmenu_row: option nativemenu on and a local game), port_gmenu_request =
+ * the row was chosen and the page has not opened its menu yet (port_gmenu_take_request reads and clears it). Neither
+ * lives in game memory. The row is never shown in an online session, a recording / replay (port_rec_mode) or
+ * under ?netdet, whatever the page says: there the pause menu's state is part of the hashed game state. */
+static int port_gmenu_row, port_gmenu_request;
+EMSCRIPTEN_KEEPALIVE void port_set_gmenu_row(int on) { port_gmenu_row = on != 0; }
+EMSCRIPTEN_KEEPALIVE int port_gmenu_take_request(void) { int r = port_gmenu_request; port_gmenu_request = 0; return r; }
+int port_gmenu_row_shown(void) {
+    extern int port_net_on, port_rec_mode;
+    int port_net_det(void);
+    return port_gmenu_row && !port_net_on && !port_rec_mode && !port_net_det();
+}
+void port_gmenu_request_open(void) { port_gmenu_request = 1; }
 int port_volume_scale(int id, int v) {
     int pct = port_option(id);
     if (pct >= 100) return v; /* the default: the N64 value, untouched */
