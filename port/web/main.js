@@ -505,11 +505,11 @@ function gamepadPad(gp) {
 // Buttons hold their bit while touched; each uses its own pointer, so several can be held at once.
 const touch = { b: 0, x: 0, y: 0, stickId: null, cx: 0, cy: 0 };
 const STICK_PX = 50;
-function setTouch(on) {
+function setTouch(on, save = true) {
   $('touch').hidden = !on;
   document.body.classList.toggle('touch', on);
   $('t-touch').setAttribute('aria-pressed', String(on));
-  store.set('touch', on);
+  if (save) store.set('touch', on);   // P369: only the player's own choice is kept (see initTouch)
   if (!on) { touch.b = touch.x = touch.y = 0; touch.stickId = null; }
 }
 const capture = (el, e) => { try { el.setPointerCapture(e.pointerId); } catch (_) { /* synthetic or already gone */ } };
@@ -557,8 +557,12 @@ const capture = (el, e) => { try { el.setPointerCapture(e.pointerId); } catch (_
   if (window.ResizeObserver) new ResizeObserver(restIfShown).observe(zone);
   $('touch').addEventListener('contextmenu', (e) => e.preventDefault());
   $('t-touch').onclick = () => { setTouch($('touch').hidden); if (!$('touch').hidden) rest(); };
-  const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
-  setTouch(Q.get('touch') ? Q.get('touch') === '1' : store.get('touch', coarse));
+  // P369: a touch screen = a coarse primary pointer, or touch points on a phone / tablet browser (some report a fine
+  // pointer, e.g. with a stylus or "desktop site"; a touch laptop with a desktop browser keeps its keyboard look). The detected default is no longer stored: before, the first load saved it, so
+  // one visit where detection said "no" (or a test with ?touch) kept the controls off on that browser for good; now
+  // only the Touch button / the menu's Touch controls row store a choice.
+  const coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches) || ((navigator.maxTouchPoints > 0 || 'ontouchstart' in window) && (IOS || /Android|Mobi/i.test(navigator.userAgent)));
+  setTouch(Q.get('touch') ? Q.get('touch') === '1' : store.get('touch', coarse), false);
   rest();
 })();
 
