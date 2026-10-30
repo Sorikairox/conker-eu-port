@@ -405,16 +405,22 @@ void screen_fade_update(void);
  * used (it subtracts half the scaled width from the scaled x). "OPTIONS" is 57 units wide at scale 1 (68 at 1.2).
  * Leaves the text colour white with that alpha and the scale as it was. */
 void port_menu_options_row_draw(s32 selected, s32 centreX, s32 y, s32 alpha) {
-    f32 scale = g_text_scale;
+    void port_menu_text_row_draw(const char *label, s32 width, f32 scale, s32 selected, s32 centreX, s32 y, s32 alpha);
+
+    port_menu_text_row_draw("OPTIONS", 68, 1.2f, selected, centreX, y, alpha);
+}
+/* P367: the same for any label: width = its width in units at that scale (centred at centreX). */
+void port_menu_text_row_draw(const char *label, s32 width, f32 scale, s32 selected, s32 centreX, s32 y, s32 alpha) {
+    f32 oldScale = g_text_scale;
 
     if (selected) {
         text_set_color(0x8C, 0xFF, 0x10, alpha);   /* like the lit item pictures */
     } else {
         text_set_color(0x2A, 0x6A, 0x1A, alpha);   /* like the dark ones */
     }
-    text_set_scale(1.2f);
-    text_printf_at((centreX - 34) * 10 / 11, y * 8 / 9, 0xC0, (s32) "OPTIONS"); /* 0x40: position not scaled, 0x80: drop shadow */
     text_set_scale(scale);
+    text_printf_at((centreX - width / 2) * 10 / 11, y * 8 / 9, 0xC0, (s32) label); /* 0x40: position not scaled, 0x80: drop shadow */
+    text_set_scale(oldScale);
     text_set_color(0xFF, 0xFF, 0xFF, alpha);
 }
 /* P363: the pause menu's row (see game_pause_update). */
@@ -884,6 +890,32 @@ void title_press_start_page(void) {
     s8 sx;
     s8 sy;
     u16 in;
+#ifdef PORT
+    /* DELIBERATE PORT CHANGE (P367, native menus; docs/design/NATIVE_MENUS.md): a fourth row "SETTINGS" on this page
+     * (the game's own OPTIONS page: sound / language, cheats, screen position, drawn by settings_list_draw as a column)
+     * that opens the page's game-style menu (port/web/gmenu.js), like the OPTIONS rows of the pause menu (P363) and of
+     * the save slot / MULTI pages (P364). Shown only while port_gmenu_row_shown() (the page's option "Game-style menu" is
+     * on and the game is local: never online, in a recording / replay or under ?netdet, where this menu's state is
+     * hashed); otherwise every line below runs exactly as on the N64. It sits one row under the last item (the column's
+     * spacing, 0x22), with the game's own cursor (the two joystick pictures, text id 0x1A) sliding to it like
+     * settings_list_draw's (port_title_settings_row_draw, after this function); settings_list_draw draws no cursor
+     * meanwhile (its arg2 = 0), so the list's slide state (g_settings_arrow_row / g_menu_slide_phase) stands still.
+     * The 28-item list itself is unchanged: the row is not a g_settings item, the selection g_settings_sel stays on the
+     * screen-position item (0x19) and the list sees no direction / accept input while the row is selected.
+     * Moves, as a ring with the game's own wrap: down from the last item (0x19) or up from the first (9) reaches the
+     * row; up goes back to 0x19, down on to 9 (through the list's own wrap); g_settings_arrow_row = 3 on leaving makes
+     * the game's cursor slide from the row. Sound 0x4FF on every move (the list's own), 0x500 when A / START chooses it:
+     * that asks the page to open its menu (port_gmenu_request_title) and is taken out of this frame's input, so the
+     * screen-position page does not open. B leaves the page as from any item. The selection is forgotten whenever the
+     * page is not fully shown (fading to the info / screen-position screens or out of the page). State =
+     * function-local statics (port variables, outside game memory). */
+    static s32 port_title_on_settings;      /* SETTINGS is selected */
+    static s32 port_title_settings_from;    /* the cursor slides from this row (0..2) to the row (3) */
+    static f32 port_title_settings_slide;   /* 0..1 */
+    s32 settingsRow;   /* the SETTINGS row is shown this frame */
+    extern s16 g_settings_value_fade;
+    void port_title_settings_row_draw(s32 selected, s32 fromRow, f32 slide, s32 alpha);
+#endif
 
     obj = obj_find_by_setup_id(9);
     if (g_menu_pending_page != (u8) -1) {
@@ -926,7 +958,49 @@ void title_press_start_page(void) {
     }
 
     if (!g_title_info_screen && !g_title_screen_adjust) {
+#ifdef PORT
+        settingsRow = port_gmenu_row_shown();
+        if (!settingsRow || alpha != 0xFF) {
+            port_title_on_settings = 0;
+        }
+        in = ((MenuState *) g_menu_state)->input;
+        if (settingsRow && alpha == 0xFF && g_menu_slide_phase == 0.0f && g_settings_value_fade == 0xFF) {
+            if (!port_title_on_settings) {
+                if (((in & 2) && g_settings_sel == 0x19) || ((in & 1) && g_settings_sel == 9)) {
+                    port_title_on_settings = 1;   /* down from the last item / up from the first: to SETTINGS */
+                    port_title_settings_from = g_settings_arrow_row;
+                    port_title_settings_slide = 0.0f;
+                    g_settings_sel = 0x19;
+                    ((MenuState *) g_menu_state)->input &= ~3;
+                    sound_play_2d(0x4FF, 0x4650, 0x40, 0, 0);
+                }
+            } else if (port_title_settings_slide >= 1.0f) {
+                if (in & 3) {
+                    port_title_on_settings = 0;   /* up: back to 0x19; down: the list wraps on to 9 (its own sound) */
+                    g_settings_arrow_row = 3;
+                    if (in & 1) {
+                        ((MenuState *) g_menu_state)->input &= ~1;
+                        sound_play_2d(0x4FF, 0x4650, 0x40, 0, 0);
+                    }
+                } else if (in & 0x10) {
+                    port_gmenu_request_title();   /* A / START on SETTINGS: the page opens its menu over the title */
+                    sound_play_2d(0x500, 0x4650, 0x40, 0, 0);
+                }
+            }
+        }
+        if (port_title_on_settings) {
+            ((MenuState *) g_menu_state)->input &= ~0x1F;   /* the list and the accept below see nothing; B still leaves */
+        }
+        settings_list_draw(0x02200200, 0, !port_title_on_settings, alpha & 0xFF, 1);
+        if (settingsRow) {
+            port_title_settings_row_draw(port_title_on_settings, port_title_settings_from, port_title_settings_slide, alpha & 0xFF);
+            if (port_title_on_settings && port_title_settings_slide < 1.0f) {
+                port_title_settings_slide += 0.1f * (f32) g_frame_ticks;
+            }
+        }
+#else
         settings_list_draw(0x02200200, 0, 1, alpha & 0xFF, 1);
+#endif
         if (g_settings_sel == 9 && (((MenuState *) g_menu_state)->input & 0xC)) {
             settings_apply_sound_mode();
             music_stop_song(g_menu_song, 0);
@@ -1022,6 +1096,36 @@ void title_press_start_page(void) {
         ((MenuState *) g_menu_state)->input &= ~0x20;
     }
 }
+
+#ifdef PORT
+/* P367: title_press_start_page's SETTINGS row (see there): the label in font 0 through the text queue (the shared
+ * port_menu_text_row_draw: the port rows' greens, drop shadow; scale 1, about the width of the CHEATS picture so it
+ * fits between the two cursor pictures), one column step (0x22) under the screen-position item, and while selected
+ * the game's cursor: the two joystick pictures (text id 0x1A) left and right of the row, sliding from row fromRow with
+ * settings_list_draw's own motion (x 50 + 20 sin(slide pi) from the centre 0x94, y linear) over slide 0..1. */
+void port_title_settings_row_draw(s32 selected, s32 fromRow, f32 slide, s32 alpha) {
+    extern u8 g_str_settings_arrow_r[];
+    extern u8 g_str_settings_arrow_l[];
+    void port_menu_text_row_draw(const char *label, s32 width, f32 scale, s32 selected, s32 centreX, s32 y, s32 alpha);
+    f32 sinf(f32);
+    s32 arrowX;
+    s32 arrowY;
+
+    /* centred like the item pictures (drawn at 0x94 with the centring flag, they land centred near 162), vertically in
+     * the middle of the row's cursor pictures (about 33 units high from the row's top, 0x46 + 3 * 0x22 = 0xAC) */
+    port_menu_text_row_draw("SETTINGS", 65, 1.0f, selected, 162, 0xAC + 11, alpha);
+    if (selected) {
+        if (slide > 1.0f) {
+            slide = 1.0f;
+        }
+        arrowX = (s32) (50.0f + 20.0f * sinf(slide * 3.1415f));
+        arrowY = (s32) ((f32) (fromRow * 0x22 + 0x46) + slide * (f32) ((3 - fromRow) * 0x22));
+        text_set_color(0xFF, 0xFF, 0xFF, alpha);
+        text_printf_at(arrowX + 0x94, arrowY, 1, (s32) g_str_settings_arrow_r, 0x1A);
+        text_printf_at(0x94 - arrowX, arrowY, 1, (s32) g_str_settings_arrow_l, 0x1A);
+    }
+}
+#endif
 
 extern s8 g_chapter_scene_counts[];         /* scenes per chapter (9 chapters); was D_800ABC00 */
 extern u8 g_str_chapter_title[];         /* "#": text id (chapter title); was D_800ABC0C */
@@ -3086,16 +3190,16 @@ extern u8 g_str_settings_arrow_r[];         /* "#"; was D_800ABCC0 */
 extern u8 g_str_settings_arrow_l[];         /* "#"; was D_800ABCC4 */
 
 // settings_list_draw: draws and edits the settings list (28 items, bit i of mask = item i shown; values g_settings[i],
-// clamped to g_settings_min / g_settings_max[i]). arg1 != 0: the items sit on a rotating ring (Catmull-Rom over 2 columns,
+// clamped to g_settings_min / g_settings_max[i]). ringLayout != 0: the items sit on a rotating ring (Catmull-Rom over 2 columns,
 // x 74 / 148 / 222, scrolled by g_settings_scroll), up / down change the value and left / right move the selection;
-// arg1 == 0: a plain column at x 0x94 from y 0x46 (0x22 apart), left / right change the value and up / down move.
-// The selection g_settings_sel skips hidden items; a changed value fades in from its old value when arg4 != 0
-// (g_settings_value_fade / g_settings_old_value). arg2 != 0 draws the "#" cursor arrows that slide to the selected row
-// (g_settings_arrow_row / g_menu_slide_phase). arg3 = alpha.
+// ringLayout == 0: a plain column at x 0x94 from y 0x46 (0x22 apart), left / right change the value and up / down move.
+// The selection g_settings_sel skips hidden items; a changed value fades in from its old value when fadeValues != 0
+// (g_settings_value_fade / g_settings_old_value). showCursor != 0 draws the "#" cursor arrows that slide to the selected row
+// (g_settings_arrow_row / g_menu_slide_phase). alphaArg = alpha.
 /* was func_151E3AE4 */
-void settings_list_draw(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    u8 alpha = arg3;
-    s8 fadeIn = arg4;
+void settings_list_draw(s32 mask, s32 ringLayout, s32 showCursor, s32 alphaArg, s32 fadeValues) {   /* params were arg1..arg4 (P367) */
+    u8 alpha = alphaArg;
+    s8 fadeIn = fadeValues;
     MenuState *rec;
     /* The ring points: y has only 14 slots and x follows it in one frame block, so with 13 or more shown items
        y[14..] lands on x[0..] (y[count + 1] = y[1] overwrites x[0] after the wrap). Kept as in the game. */
@@ -3137,11 +3241,11 @@ void settings_list_draw(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
     half = count >> 1;
     ring = half;
-    if (arg2 != 0 && g_menu_slide_phase != 0.0f) {
+    if (showCursor != 0 && g_menu_slide_phase != 0.0f) {
         ((MenuState *) g_menu_state)->input &= ~3;
     }
     pos = 0x46;
-    if (arg1 != 0) {
+    if (ringLayout != 0) {
         /* ring layout: column x per slot (148 top, 222 right side going down, 148 bottom, 74 left side going up) */
         a = half;
         if (count >= 4 && (count & 1)) {
@@ -3257,7 +3361,7 @@ void settings_list_draw(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             if (i == g_settings_sel) {
                 cursorRow = drawn;
             }
-            if (arg1 != 0) {
+            if (ringLayout != 0) {
                 px = (s32) catmull_rom_eval((s32) x, ring, t);
                 py = (s32) catmull_rom_eval((s32) y, ring, t);
                 ring--;
@@ -3366,7 +3470,7 @@ void settings_list_draw(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     if (g_settings_scroll <= 0.0f) {
         changed = 0;
         rec = (MenuState *) g_menu_state;
-        if (arg1 != 0) {
+        if (ringLayout != 0) {
             if (rec->input & 1) {
                 *p = old + 1;
                 g_settings_changed = 1;
@@ -3463,7 +3567,7 @@ void settings_list_draw(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
     g_settings_sel = sel;
 
-    if (arg2 != 0) {
+    if (showCursor != 0) {
         /* cursor arrows left and right of the selected row */
         arrowX = (s32) ((100.0f + g_menu_slide_phase * (f32) 0) * 0.5f);
         arrowY = (s32) ((f32) (g_settings_arrow_row * 0x22 + 0x46) + g_menu_slide_phase * (f32) ((cursorRow - g_settings_arrow_row) * 0x22));
