@@ -5,6 +5,8 @@
 // 2. tools/port/trailer/net4.sh port_work/trailer/net4 210    real 4-player online session: panel shots + pads.env
 // 3. node tools/port/trailer/capture.mjs music run29 run29_30 run29_n64 ledge13 spin_off spin_on pause_hi pause_lo freecam photo mp4
 // 4. node tools/port/trailer/pagecap.mjs site ; node tools/port/trailer/pagecap.mjs options
+// P370 v2 (the game-style menus): NETUI=gmenu tools/port/trailer/net4.sh port_work/trailer/net4g 120 (ONLINE page shots);
+//    node tools/port/trailer/capture.mjs boot custom photo2 phone   (screen shots: the whole window as a player sees it)
 // 5. node tools/port/trailer/render.mjs [preview F,F,...]      edit + encode (compose.js) -> out/trailer.mp4
 // 6. node tools/port/trailer/verify.mjs [mp4] [times]          demux + decode check, contact frames, loudness
 // Capture (shim.js, injected before the page's scripts; page and conker.wasm unchanged): with ?det=1 the main loop runs one

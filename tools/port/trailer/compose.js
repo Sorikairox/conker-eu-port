@@ -21,9 +21,12 @@ const Q = new URLSearchParams(location.search);
 //   static shot before it so the logo is in on "good", then holds the settled logo (introPic, LOGO_HOLD).
 const BEAT = 0.6182;                 // features music: 97.06 BPM (music_0c, musicstat.mjs --beats)
 const TF = 45.6;                     // the cut to the features, on a downbeat of the features music (the logo holds ~6 s)
-const T = { browser: TF, wide: TF + 8 * BEAT, ledge: TF + 16 * BEAT, spin: TF + 23 * BEAT, online: TF + 30 * BEAT,
-  more: TF + 38 * BEAT, end: TF + 46 * BEAT };
-const DUR = +(TF + 54 * BEAT + 0.4).toFixed(2), NFR = Math.round(DUR * FPS);
+// P370 v2: the features part shows the game-style menus (customisation settings, boot screens, ONLINE pages, photo
+// mode, touch controls on a phone); 72 beats (was 54): browser 8, customisation settings 8, widescreen 8, ledge 6,
+// spin 6, online 10, photo 6, phone 6, and more 6, end card 8
+const T = { browser: TF, custom: TF + 8 * BEAT, wide: TF + 16 * BEAT, ledge: TF + 24 * BEAT, spin: TF + 30 * BEAT, online: TF + 36 * BEAT,
+  photo: TF + 46 * BEAT, phone: TF + 52 * BEAT, more: TF + 58 * BEAT, end: TF + 64 * BEAT };
+const DUR = +(TF + 72 * BEAT + 0.4).toFixed(2), NFR = Math.round(DUR * FPS);
 // the features music: a captured game track (default) or an open-licensed file (?music=FILE under port_work/trailer/music/,
 // &credit=TEXT for the end card). MUSIC_DOWNBEAT: the pcm second of a downbeat, placed on TF.
 const MUSIC = Q.get('music') || '', MUSIC_CREDIT = Q.get('credit') || '';
@@ -169,8 +172,9 @@ function caption(g, lt, dur, title, sub, { x = 90, y = 862, s = 7, s2 = 3.2 } = 
 }
 function label(g, str, x, y, s = 3, opts = {}) {   // a small tag on a dark pill
   const w = textW(str, s) + 26, h = 13 * s + 14;
-  g.fillStyle = 'rgba(12,12,14,0.72)'; roundRect(g, x - (opts.align === 'center' ? w / 2 : 0), y, w, h, 10); g.fill();
-  text(g, str, x + (opts.align === 'center' ? 0 : 13), y + 9, s, { ...opts, shadow: false });
+  const x0 = x - (opts.align === 'center' ? w / 2 : opts.align === 'right' ? w : 0);   // P370: align right too
+  g.save(); g.globalAlpha *= opts.alpha ?? 1; g.fillStyle = 'rgba(12,12,14,0.72)'; roundRect(g, x0, y, w, h, 10); g.fill(); g.restore();
+  text(g, str, x0 + 13, y + 9, s, { ...opts, align: 'left', shadow: false });
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
 // a desktop Chrome window (dark theme) around a page picture: tab strip, address bar with the site's URL
@@ -205,20 +209,6 @@ function browserWindow(g, page, x, y, w, urlChars = 1e9) {
   return { x, y: y + bar, w, h: ph, k: w / page.width };
 }
 let performanceNow = 0;   // the timeline time of the frame being drawn (for blinking carets)
-function cursor(g, x, y, s = 1) {
-  g.save(); g.translate(x, y); g.scale(s, s);
-  g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 26); g.lineTo(7, 20); g.lineTo(12, 31); g.lineTo(17, 29); g.lineTo(12, 18); g.lineTo(21, 18); g.closePath();
-  g.fillStyle = '#fff'; g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1.5; g.stroke(); g.restore();
-}
-function fileChip(g, x, y, a = 1) {
-  g.save(); g.globalAlpha = a;
-  g.fillStyle = '#2b2f37'; g.strokeStyle = ACCENT; g.lineWidth = 2; roundRect(g, x, y, 230, 54, 10); g.fill(); g.stroke();
-  g.fillStyle = '#e8eaed'; g.fillRect(x + 14, y + 10, 26, 34); g.fillStyle = '#2b2f37'; g.fillRect(x + 32, y + 10, 8, 8);
-  g.fillStyle = '#e8eaed'; g.font = '600 17px system-ui, sans-serif'; g.fillText('your-game.z64', x + 52, y + 26);
-  g.fillStyle = '#9aa0a6'; g.font = '13px system-ui, sans-serif'; g.fillText('64 MB · your own ROM', x + 52, y + 44);
-  g.restore();
-}
-
 // ---------------------------------------------------------------- the edit (seconds on the timeline)
 // Each segment draws itself into its own layer; layers overlap for the cross-fades (fade in / out seconds).
 const SEG = [];
@@ -331,7 +321,10 @@ seg(0, TF, 1.0, 0, async (g, lt) => {
   }
 });
 
-// B. plays in your browser: the real page in a Chrome window: drop screen, the ROM picked, the game running
+// B. plays in your browser (P370 v2: the page as it is now, the game-style boot screens): a Chrome window around the
+// 'boot' shot (CDP screenshots of the whole window, 50 pictures/s of the page's clock): the Press Start screen in the
+// game's font with the URL being typed, Start on the pad, then (jump cut on the beat past the boot and the "for mature
+// audiences" card) the game's title sequence running in the page
 function urlPill(g, x, y, chars, a) {   // the address bar, magnified: lock + the site's URL being typed
   if (a <= 0) return;
   g.save(); g.globalAlpha = a;
@@ -346,61 +339,69 @@ function urlPill(g, x, y, chars, a) {   // the address bar, magnified: lock + th
   if (chars < url.length || Math.floor(performanceNow * 2.5) % 2 === 0) { const w2 = g.measureText(shown).width; g.fillRect(x + 74 + w2, y + 17, 3, 34); }
   g.restore();
 }
-seg(T.browser, T.wide + 0.1, 0.06, 0.1, async (g, lt) => {
+const BOOT_START = 75, BOOT_GAME = 175, BOOT_CUT = 3 * BEAT;   // 'boot': Start pressed at picture 75; the title sequence from ~160
+async function bootPic(lt) { return shotPic('boot', lt < BOOT_CUT ? Math.min(BOOT_START + 3, 22 + lt * 30) : BOOT_GAME + (lt - BOOT_CUT) * 50); }
+seg(T.browser, T.custom + 0.1, 0.06, 0.1, async (g, lt) => {
   const bg = g.createRadialGradient(W / 2, H * 0.55, 100, W / 2, H * 0.55, 1100); bg.addColorStop(0, '#2b2517'); bg.addColorStop(1, '#0b0b0d');
   g.fillStyle = bg; g.fillRect(0, 0, W, H);
-  const tDrop = 1.55, tRom = 1.95, dur = T.wide - T.browser;
-  let page;
-  if (lt < tDrop) page = await img('/w/pages/site/still_0_drop.jpg');
-  else if (lt < tRom) page = await img('/w/pages/site/still_1_rom.jpg');
-  else page = await img(`/w/pages/site/f${pad5(Math.min(299, Math.round((lt - tRom) * 60)))}.jpg`);
+  const dur = T.custom - T.browser;
   const ww = 1360, wx = (W - ww) / 2, wy = 150;
-  const r = browserWindow(g, page, wx, wy, ww, Math.floor(lt * 30));
-  // the ROM file dragged onto the page's drop zone, then the cursor clicks Start
-  const cx = r.x + 640 * r.k, cy = r.y + 330 * r.k;
-  if (lt < tDrop + 0.1) {
-    const p = easeOut((lt - 0.45) / 0.85), fx = 1700 - p * (1700 - (cx - 115)), fy = 1060 - p * (1060 - (cy - 27));
-    if (p > 0.97) { g.strokeStyle = ACCENT; g.lineWidth = 4; g.setLineDash([14, 10]); roundRect(g, r.x + 18 * r.k, r.y + 18 * r.k, 1228 * r.k, 544 * r.k, 10); g.stroke(); g.setLineDash([]); }
-    fileChip(g, fx, fy, clamp((lt - 0.35) / 0.2) * clamp((tDrop + 0.1 - lt) / 0.15));
-    cursor(g, fx + 150, fy + 34, 1.4);
-  } else if (lt < tRom + 0.25) {
-    const sx = r.x + 150 * r.k, sy = r.y + 26 * r.k, p = easeOut((lt - tDrop) / 0.45);
-    cursor(g, cx + (sx - cx) * p, cy + (sy - cy) * p, 1.4);
+  const r = browserWindow(g, await bootPic(lt), wx, wy, ww, Math.floor(lt * 30));
+  // the pad's Start: a small red S face pressed over the PRESS START line, just before the cut
+  const ps = clamp((lt - (BOOT_CUT - 0.75)) / 0.12) * clamp((BOOT_CUT - lt) / 0.1);
+  if (ps > 0) {
+    const cx = r.x + 960 * r.k, cy = r.y + 600 * r.k, sc = 1 + 0.25 * (1 - clamp((lt - (BOOT_CUT - 0.5)) / 0.1));
+    g.save(); g.globalAlpha = ps; g.fillStyle = '#c62828'; g.strokeStyle = '#2a0806'; g.lineWidth = 5;
+    g.beginPath(); g.arc(cx + 300 * r.k, cy, 42 * sc, 0, 7); g.fill(); g.stroke(); g.restore();
+    text(g, 'S', cx + 300 * r.k, cy - 20 * sc, 3.4 * sc, { align: 'center', fill: '#fff', alpha: ps, shadow: false });
   }
   caption(g, lt, dur + 0.1, 'PLAYS IN YOUR BROWSER', null, { x: 70, y: 40, s: 6 });
   urlPill(g, 1150, 42, Math.floor((lt - 0.15) * 30), clamp((lt - 0.1) / 0.25) * clamp((2.0 - lt) / 0.3));
-  const b = clamp((lt - tRom) / 0.3) * clamp((dur + 0.1 - lt) / 0.25);
+  const b = clamp((lt - BOOT_CUT) / 0.3) * clamp((dur + 0.1 - lt) / 0.25);
   if (b > 0) { text(g, 'NO INSTALL', 1240, 58, 5.4, { fill: ['#fff7d6', ACCENT], alpha: b }); }
   if (b > 0) text(g, 'JUST BRING YOUR OWN ROM', W / 2, 1022, 3.4, { align: 'center', fill: '#fff', alpha: b });
 });
 
-// C. widescreen: the original 4:3 picture (640 x 480, every option off), then the same moment in 16:9, full resolution
+// C. customisation settings (P370, new): the 'custom' shot as one take, the window as a player sees it: Conker runs
+// (4:3), Start = the game's pause menu, its CUSTOMISATION SETTINGS row, the menu in the game's font over the pause,
+// down through the pages, Picture, Widescreen OFF -> ON. Pictures (60 / s): pause up ~150, menu ~186, Picture page 282,
+// ON ~312, back to the pause 396, play resumes 444 (still 4:3: the paused frame), 16:9 from 468.
+const CUSTOM_PIC0 = 60;
+seg(T.custom, T.wide + 0.1, 0.06, 0.1, async (g, lt) => {
+  g.drawImage(await shotPic('custom', CUSTOM_PIC0 + lt * 60), 0, 0, W, H);
+  // the big caption while Conker runs and the pause menu comes up; once the menu is open (picture 186, lt 2.1) its own
+  // title and help say it, so the caption moves to a small tag top left, off the menu's text
+  caption(g, lt - 0.1, 2.0, 'CUSTOMISATION SETTINGS', 'IN THE GAME\'S OWN STYLE - FROM THE PAUSE MENU', { y: 878, s: 6.2 });
+  const tg = clamp((lt - 2.0) / 0.25) * clamp((T.wide - T.custom + 0.05 - lt) / 0.2);
+  if (tg > 0) label(g, lt < 4.3 ? 'CUSTOMISATION SETTINGS' : 'WIDESCREEN: ON', 30, 30, 3, { fill: lt < 4.3 ? '#fff' : ACCENT, alpha: tg });   // ON lands at picture ~312 (lt 4.2)
+});
+// D. widescreen: the same take on: back in the pause menu (shown at double speed), Start, play resumes in 4:3, then the
+// picture widens to the whole 16:9 window (picture 468: drawn as a reveal from the 4:3 frame outwards over 0.3 s)
+const WIDE_FAST = 1.0;   // seconds of the widescreen beat at double speed (the way back from the menu)
+const widePic = (lt) => { const p0 = CUSTOM_PIC0 + (T.wide - T.custom) * 60; return lt < WIDE_FAST ? p0 + lt * 120 : p0 + WIDE_FAST * 120 + (lt - WIDE_FAST) * 60; };
 seg(T.wide, T.ledge + 0.1, 0.06, 0.1, async (g, lt) => {
-  const i = 300 + lt * 60, tw = 4 * BEAT, tr = 0.6, dur = T.ledge - T.wide;
-  const p = ease((lt - tw) / tr);
+  const dur = T.ledge - T.wide, i = widePic(lt), tWide = (468 - (CUSTOM_PIC0 + (T.wide - T.custom) * 60)) / 120;
   g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
-  // the modern picture under, revealed from the 4:3 frame outwards
-  const modern = await shotPic('run29', i), old = await shotPic('run29_n64', i);
-  const halfW = 720 + (W / 2 - 720) * p;
-  if (p > 0) { g.save(); g.beginPath(); g.rect(W / 2 - halfW, 0, 2 * halfW, H); g.clip(); g.drawImage(modern, 0, 0, W, H); g.restore(); }
-  if (p < 1) {
-    g.save(); g.globalAlpha = 1 - clamp((lt - tw - tr * 0.5) / (tr * 0.5)); g.imageSmoothingEnabled = true;
-    g.drawImage(old, 240, 0, 1440, 1080); g.restore();
+  const p = ease((lt - tWide) / 0.3);
+  if (lt < tWide || p >= 1) g.drawImage(await shotPic('custom', i), 0, 0, W, H);
+  else {   // reveal: the 16:9 picture inside a widening window, the last 4:3 picture fading over it
+    const halfW = 720 + (W / 2 - 720) * p;
+    g.save(); g.beginPath(); g.rect(W / 2 - halfW, 0, 2 * halfW, H); g.clip(); g.drawImage(await shotPic('custom', i), 0, 0, W, H); g.restore();
+    g.fillStyle = `rgba(242,178,51,${0.9 * (1 - p)})`; g.fillRect(W / 2 - halfW - 3, 0, 6, H); g.fillRect(W / 2 + halfW - 3, 0, 6, H);
   }
-  if (p > 0 && p < 1) { g.fillStyle = `rgba(242,178,51,${0.9 * (1 - p)})`; g.fillRect(W / 2 - halfW - 3, 0, 6, H); g.fillRect(W / 2 + halfW - 3, 0, 6, H); }
-  if (lt < tw + 0.2) label(g, 'ORIGINAL: 4:3, 640 X 480', 260, 40, 3, { fill: '#fff', alpha: clamp(lt / 0.3) * clamp((tw + 0.2 - lt) / 0.2) });
-  else label(g, 'PORT: 16:9, 1920 X 1080', 60, 40, 3, { fill: ACCENT, alpha: clamp((lt - tw - 0.4) / 0.3) });
-  caption(g, lt - tw - 0.15, dur + 0.1 - tw - 0.15, 'WIDESCREEN', 'FULL RESOLUTION - SHARP HI-RES 2D');
+  if (lt < tWide + 0.15) label(g, 'ORIGINAL: 4:3', 280, 40, 3, { fill: '#fff', alpha: clamp(lt / 0.3) * clamp((tWide + 0.15 - lt) / 0.2) });
+  else label(g, 'PORT: 16:9, 1920 X 1080', 60, 40, 3, { fill: ACCENT, alpha: clamp((lt - tWide - 0.35) / 0.3) });
+  caption(g, lt - tWide - 0.1, dur + 0.1 - tWide - 0.1, 'WIDESCREEN', 'FULL RESOLUTION - SHARP HI-RES 2D');
 });
 
-// D. ledge grab (level 0x13 crates): jump, catch the edge, hang, pull up
+// E. ledge grab (level 0x13 crates): jump, catch the edge, hang, pull up
 seg(T.ledge, T.spin + 0.1, 0.06, 0.1, async (g, lt) => {
   g.drawImage(await shotPic('ledge13', 66 + lt * 60), 0, 0, W, H);
   vignette(g, 0.35);
   caption(g, lt - 0.15, T.spin - T.ledge - 0.15 + 0.1, 'LEDGE GRAB', 'CATCH THE EDGE - PULL YOURSELF UP');
 });
 
-// E. longer tail spin: the same jump with the option off (left) and on (right)
+// F. longer tail spin: the same jump with the option off (left) and on (right)
 seg(T.spin, T.online + 0.1, 0.06, 0.1, async (g, lt) => {
   g.fillStyle = '#0c0c0f'; g.fillRect(0, 0, W, H);
   const i = 110 + lt * 60, w = 940, h = w * 9 / 16, y = 250;
@@ -412,17 +413,74 @@ seg(T.spin, T.online + 0.1, 0.06, 0.1, async (g, lt) => {
   caption(g, lt - 0.1, T.online - T.spin + 0.1 - 0.1, 'LONGER TAIL SPIN', 'HOVER TWICE AS LONG', { y: 878 });
 });
 
-// F. online: the 4-player split screen of a real online session (Bunker)
-seg(T.online, T.more + 0.1, 0.06, 0.1, async (g, lt) => {
-  g.drawImage(await shotPic('mp4', 30 + lt * 60), 0, 0, W, H);
-  caption(g, lt - 0.1, T.more - T.online + 0.1 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { y: 800 });
+// G. online (P370 v2): the game-style ONLINE pages of a real 4-player session (net4.sh NETUI=gmenu: 1920 x 1080
+// screenshots): the host's room code, a guest picking it on the letter picker, the host's room with all four players,
+// one beat each with a slow push-in, then the 4-player split screen of the match (Bunker, the P354 session's replay)
+const ONLINE_STILLS = ['host_g3_room_made', 'guest_g4_picker_typing', 'guest_g5_picker_full', 'host_g4_lobby'];
+const ONLINE_PAGES = ONLINE_STILLS.length * BEAT;
+seg(T.online, T.photo + 0.1, 0.06, 0.1, async (g, lt) => {
+  const dur = T.photo - T.online;
+  if (lt < ONLINE_PAGES) {
+    const k = Math.min(ONLINE_STILLS.length - 1, Math.floor(lt / BEAT)), u = (lt - k * BEAT) / BEAT, z = 0.8 + 0.03 * u;
+    const pg = await img(`/w/net4g/${ONLINE_STILLS[k]}.png`);
+    g.fillStyle = '#0d0a07'; g.fillRect(0, 0, W, H);
+    // the page a little smaller and lower, so the caption above does not cover its title
+    g.save(); g.translate(W / 2, H * 0.6); g.scale(z, z); g.translate(-W / 2, -H * 0.4);
+    g.drawImage(pg, 0, 0, W, H);
+    g.drawImage(pg, 760, 52, 400, 38, 760, 6, 400, 46);   // the page's ROM toast (a page message, top middle) covered with the backdrop below it
+    g.restore();
+    if (k === 0) label(g, 'PLAYER 1 MAKES A ROOM', 1860, 60, 3, { align: 'right', fill: '#fff', alpha: clamp(lt / 0.2) });
+    else if (k < 3) label(g, 'FRIENDS ENTER THE CODE', 1860, 60, 3, { align: 'right', fill: '#fff' });
+    else label(g, '4 PLAYERS IN', 1860, 60, 3, { align: 'right', fill: ACCENT });
+  } else {
+    g.drawImage(await shotPic('mp4', 30 + (lt - ONLINE_PAGES) * 60), 0, 0, W, H);
+  }
+  caption(g, lt - 0.1, dur + 0.1 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { x: 90, y: 60 });
 });
 
-// G. and more: a list of the other options over a dimmed, blurred run, the lines coming in one by one
+// H. photo mode in the game's style (P370 v2: 'photo2', 50 pictures / s of ticks): the HUD and the POSE & OUTFIT
+// panel in the game's font while the photo camera circles Conker; the model list (fast), Conker in the Heist's black
+// coat; H hides every menu: the clean picture. Jump cuts on the beats.
+const photoPic = (lt) => (lt < 2 * BEAT ? 10 + lt * 50 : lt < 4 * BEAT ? 140 + (lt - 2 * BEAT) * 100 : 335 + (lt - 4 * BEAT) * 50);
+seg(T.photo, T.phone + 0.1, 0.06, 0.1, async (g, lt) => {
+  g.drawImage(await shotPic('photo2', photoPic(lt)), 0, 0, W, H);
+  caption(g, lt - 0.1, T.phone - T.photo + 0.1 - 0.1, 'PHOTO MODE', 'POSE AND DRESS CONKER - SAVE THE PICTURE', { x: 70, y: 40, s: 6 });
+});
+
+// I. on a phone (P370, new): 'phone' (390 x 844 at 3x, upright, CDP touch events, 50 pictures / s of ticks): the
+// picture on top, the game-style touch controls below; the corner button opens the customisation settings, the touch
+// stick moves, A opens HUD AND INFORMATION, Health always visible ON, B B: Conker's health shows. A phone frame inset,
+// the touches marked with soft dots (where and when the capture touched).
+const PHONE_TOUCH = [[100, 30, 30], [140, 90, 794], [165, 90, 794], [195, 238, 790], [228, 90, 794], [258, 120, 764], [298, 186, 720], [326, 186, 720]];
+const phonePic = (lt) => (lt < BEAT ? 55 + lt * 50 : 100 + (lt - BEAT) * 90);
+seg(T.phone, T.more + 0.1, 0.06, 0.1, async (g, lt) => {
+  g.filter = 'blur(14px) brightness(0.35) saturate(1.1)';
+  g.drawImage(await shotPic('run29', 500 + lt * 40), -40, -22, W + 80, H + 44);
+  g.filter = 'none'; vignette(g, 0.6);
+  const pi = phonePic(lt), ph = await shotPic('phone', pi);
+  const sh = 960, sw = sh * ph.width / ph.height, bez = 16, x = 1180, y = (H - sh) / 2;
+  g.save(); g.shadowColor = 'rgba(0,0,0,0.7)'; g.shadowBlur = 50; g.shadowOffsetY = 14;
+  g.fillStyle = '#111214'; roundRect(g, x - bez, y - bez, sw + 2 * bez, sh + 2 * bez, 58); g.fill(); g.restore();
+  g.strokeStyle = '#3a3b40'; g.lineWidth = 3; roundRect(g, x - bez, y - bez, sw + 2 * bez, sh + 2 * bez, 58); g.stroke();
+  g.save(); roundRect(g, x, y, sw, sh, 44); g.clip(); g.drawImage(ph, x, y, sw, sh);
+  const k = sw / 390;
+  for (const [p, tx, ty] of PHONE_TOUCH) {   // a soft dot where the thumb is, while it touches
+    const a = clamp((pi - p) / 3) * clamp((p + 14 - pi) / 4);
+    if (a > 0) { g.fillStyle = `rgba(255,255,255,${0.35 * a})`; g.beginPath(); g.arc(x + tx * k, y + ty * k, 22, 0, 7); g.fill(); g.strokeStyle = `rgba(255,255,255,${0.7 * a})`; g.lineWidth = 3; g.stroke(); }
+  }
+  g.restore();
+  g.fillStyle = '#2a2b30'; g.beginPath(); g.arc(x + sw / 2, y - bez / 2, 4, 0, 7); g.fill();   // the front camera, in the bezel (a notch covered the menu's title)
+  const a = clamp(lt / 0.35) * clamp((T.more - T.phone + 0.1 - lt) / 0.3), sl = (1 - easeOut(lt / 0.45)) * -60;
+  text(g, 'ON YOUR PHONE TOO', 110 + sl, 380, 6.4, { fill: ['#fff7d6', ACCENT, ORANGE], alpha: a });
+  text(g, 'TOUCH CONTROLS IN THE GAME\'S STYLE', 110 + sl * 0.6, 500, 3.2, { fill: '#f4efe6', alpha: clamp((lt - 0.25) / 0.35) * a });
+  text(g, 'THE MENUS WORK BY TOUCH', 110 + sl * 0.6, 560, 3.2, { fill: '#f4efe6', alpha: clamp((lt - 0.45) / 0.35) * a });
+});
+
+// J. and more: a list of the other options over a dimmed, blurred run, the lines coming in one by one
+// (P370 v2: the current options, everything shown before taken out; all in the customisation settings)
 const MORE = [
-  'HIGH FRAME RATE', 'HI-RES MENUS AND 2D', 'PHOTO MODE', 'FREE CAMERA', 'CLASSIC / MODERN PRESETS',
-  'SKIP CUTSCENES', 'HEALTH AND CASH ALWAYS ON', 'AIR METER', 'SEPARATE VOLUMES', 'GAMEPAD RUMBLE',
-  'TOUCH CONTROLS', 'SAVE IMPORT / EXPORT',
+  'HIGH FRAME RATE', 'SMOOTH FONT', 'FREE CAMERA', 'SKIP ANY CUTSCENE', 'CLASSIC / MODERN PRESETS', 'REBIND KEYS AND BUTTONS',
+  'GAMEPAD RUMBLE', 'SEPARATE VOLUMES', 'HEALTH AND CASH ALWAYS ON', 'AIR METER AND CROSSHAIR', 'SAVE EXPORT / IMPORT', 'FULLSCREEN',
 ];
 seg(T.more, T.end + 0.1, 0.06, 0.1, async (g, lt) => {
   g.filter = 'blur(9px) brightness(0.32) saturate(1.1)';
@@ -432,13 +490,13 @@ seg(T.more, T.end + 0.1, 0.06, 0.1, async (g, lt) => {
   text(g, 'AND MORE...', W / 2, 120, 7.5, { align: 'center', fill: ['#fff7d6', ACCENT, ORANGE], alpha: a });
   const rows = MORE.length / 2, x = [210, 1010], y0 = 330, dy = 100, step = BEAT / 4;
   MORE.forEach((m, k) => {
-    const col = Math.floor(k / rows), row = k % rows, t = lt - 0.35 - (row * 2 + col) * step, ak = clamp(t / 0.25);
+    const col = Math.floor(k / rows), row = k % rows, t = lt - 0.2 - (row * 2 + col) * step, ak = clamp(t / 0.25);
     if (ak <= 0) return;
     const sx = (1 - easeOut(t / 0.35)) * -40, y = y0 + row * dy;
     g.fillStyle = ACCENT; g.globalAlpha = ak; g.fillRect(x[col] + sx, y + 10, 18, 18); g.globalAlpha = 1;
     text(g, m, x[col] + 44 + sx, y, 3.6, { fill: '#f4efe6', alpha: ak });
   });
-  text(g, 'ALL OPTIONAL - TURN ON WHAT YOU LIKE', W / 2, 960, 3, { align: 'center', fill: ACCENT, alpha: clamp((lt - 6 * BEAT) / 0.3) });
+  text(g, 'ALL OPTIONAL - IN THE CUSTOMISATION SETTINGS', W / 2, 960, 3, { align: 'center', fill: ACCENT, alpha: clamp((lt - 4 * BEAT) / 0.3) });
 });
 
 // H. end card
@@ -627,7 +685,10 @@ async function buildAudio(only) {
     mg.gain.setValueAtTime(MV, DUR - 2.2); mg.gain.linearRampToValueAtTime(0, DUR - 0.1);
     { const src = ctx.createBufferSource(); src.buffer = mb; src.connect(mg); src.start(TF - lead, Math.max(0, MUSIC_DOWNBEAT - lead)); }
     // sound effects of the shots under their segments: [shot, timeline start, duration, first picture, gain]
-    const SFX = [['run29', T.wide, T.ledge - T.wide, 300, 0.45], ['ledge13', T.ledge, T.spin - T.ledge, 66, 0.7], ['spin_on', T.spin, T.online - T.spin, 110, 0.5]];
+    // P370 v2: the customisation take's own sound (the game's pause sounds; the menu's sounds are the page's own, not in
+    // the captured ring) under its real-time part, and from the widescreen beat's real-time part on
+    const SFX = [['custom', T.custom, T.wide - T.custom, CUSTOM_PIC0, 0.5], ['custom', T.wide + WIDE_FAST, T.ledge - T.wide - WIDE_FAST, widePic(WIDE_FAST), 0.45],
+      ['ledge13', T.ledge, T.spin - T.ledge, 66, 0.7], ['spin_on', T.spin, T.online - T.spin, 110, 0.5]];
     for (const [shot, t0, dur, pic, gain] of SFX) {
       const { b, m } = await pcmBuffer(ctx, shot);
       const src = ctx.createBufferSource(), gn = ctx.createGain(); src.buffer = b; src.connect(gn); gn.connect(master);
