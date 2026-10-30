@@ -88,6 +88,43 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P362 (port-web, 2026-10-30): game-style menu covers everything a player needs + pad entry for every browser
+- c287ee42 gmenu.js pages (option `nativemenu`, still default off): main = Preset, Picture, HUD, Gameplay, Controls,
+  Sound, Saves, Fullscreen, Photo mode, Online, Record, Tools, Page menu (developer) = the drawer, Back to game.
+  Controls > Keyboard keys / Gamepad buttons (every INPUTS row + Defaults) with capture (U.cap: key = next keydown, Esc
+  cancels, Backspace unbinds; pad = first button after all were up, Esc / 6 s cancel), Touch controls toggle; Sound >
+  Master volume (main.js setVolume, shared with the slider; ?mute=1: 0 and locked); Saves > Export / Import (no delete:
+  the drawer has none); Fullscreen toggle; Photo / Online / Record rows turn their tool option on, then photoRequest or
+  the drawer's panel (Online allowed during a session for status / Leave; Record allowed while recording for Stop).
+  Fullscreen / file picker need user activation: navigator.userActivation.isActive, else a note. main.js: finishListen
+  -> bindSet / bindReset (both menus), keyName "Ctrl left", eepStatus also GMenu.note. The arrows / Enter / Esc /
+  Backspace act on keydown in GMenu.key whatever the bindings.
+- d805bb0a pad entry: hold padMap.PHOTO (Back / Select) 500 ms (entry() in GMenu.poll). A page input, never an N64 one,
+  so nothing leaks into the game / lockstep / recording (Start + Back would leak Start). With the option on, a short
+  press starts photo mode on release; a press in the menu closes it. bdff9f8c fix: the closing press leaked into
+  photoPoll on the same frame (photo mode started after closing).
+- d8f6ca34 legibility: "." / "," advance 1.5 units more (the font's 2-unit advance put the dot into the next digit's
+  curve: alpha dump of "1.5"), min 0.85 x in the pixel look; help 0.7 x; footer A / B / D-pad faces drawn as shapes.
+- 5c8aa3ca gmenu_shots.sh keys / pad modes (per-mode logs title / play / keys / pad .log); 26eee655 ?gmenupad=S test aid
+  (fake pad: hold Back, navigate, Back closes; logs every step).
+- Evidence port_work/p362: final/t*, p* (P361 flows, unchanged results), final/k* (1280x720 keys: Controls, Keyboard
+  keys, capture prompt, Stick up = T, Sound with the ?mute lock, Saves, lower rows, closed; W held: Conker stays at
+  2149,1926; T held: walks to 1649,904), final/s* (1920x1080 widescreen fake pad: opened by holding Back, Gamepad
+  buttons, capture, A = Y, Sound, Saves, lower rows, closed by Back, photo mode by a short tap, left with Start);
+  net_ui_gmenupad/ (netpair UI=1, guest GUESTQ='&opt=nativemenu:1&gmenupad=70': hold entry online, 7473 retraces
+  IDENTICAL, host's preset locked on the guest); e2e/ and e2e_gmenupad/ (replay PASS 7700 identical, also with the
+  menu driven during the replay). check GREEN, wasm unchanged (JS only).
+- Readiness: recommend default-on after the user tries it once with a real gamepad and a phone (headless used fake
+  pads only). Gaps: no game sounds; Online room code + Record still in the drawer (text entry / file lists).
+- P363 (pause-menu OPTIONS row) needs: an `#ifdef PORT` row in game_pause_update (game_eu_20B730.c; cursor
+  g_menu_cursor over 2 story / 3 multiplayer items, quit confirmation past the last, sfx 0x62D) drawn through the
+  game's text path (text_printf_at; check font 0 has the glyphs of "OPTIONS"), gated so that option off = N64 bytes
+  (prove with e2e + nethash). nativemenu is page-side, not in the option vector, so the row must never appear online /
+  recording / netdet (hashed menu state): gate on a port flag the page sets only in single player (e.g. a new
+  port_set_gmenu_row export read by C; never in netCfg / recCfg / NETDET). Choosing it: C sets a request word the page
+  polls (e.g. port_gmenu_request), the page opens GMenu over the game's own pause (do not page-pause on top; on close
+  leave the game's pause menu as it was); mask the A that chose the row (GMenu's U.prev = -1 does) and keep pad 1 idle
+  while the overlay is open. Rename every touched function / variable with /* was ... */.
 ### P361 (port-web, 2026-10-30): game-style options menu in the game's font (native menus step 2)
 - f23baadd option "Game-style menu (Esc)" (`nativemenu`, page-side, default off, not in presets; port/web/gmenu.js,
   loaded after main.js as a classic script using its globals). Font: `port_font_info(0/1/2)` = wasm address of font 0's

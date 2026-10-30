@@ -33,12 +33,17 @@ left corner (it hides while you play; move the mouse to see it). The menu pauses
 a click on the picture closes it and the game goes on. In fullscreen the browser uses Esc to leave fullscreen, so use
 the ☰ button there.
 
-**Game-style menu (P361, try it):** in the menu, Options, tick **Game-style menu (Esc)**. From then on, while the game
-runs, Esc (or the ☰ button, or a gamepad's Home button where the browser passes it) opens the options as a menu drawn
-over the game in the game's own font (smooth with *Smooth font*): D-pad, stick or arrows move, left / right change a
-value, A / Start / Enter / Space choose, B / Esc / Backspace go back; mouse and touch work too. Its *Page menu* line
-opens the page menu (bindings, saves, online, recorder). Online and while recording the game keeps running behind it.
-Turn it off under Tools in that menu (or in the page menu's Options).
+**Game-style menu (P361 / P362, try it):** in the menu, Options, tick **Game-style menu (Esc)**. From then on, while the
+game runs, Esc, the ☰ button, **holding the gamepad's Back / Select button for half a second** (P362; a short press of
+it still starts photo mode, on release) or the gamepad's Home button (where the browser passes it) open a menu drawn
+over the game in the game's own font (smooth with *Smooth font*). It has everything a player needs: Preset, Picture,
+HUD, Gameplay, **Controls** (re-bind every keyboard key and gamepad button: choose a line, then press the new key or
+button; Esc cancels, Backspace unbinds a key), **Sound** (master volume + the game's three volumes), **Saves** (export /
+import), **Fullscreen**, **Photo mode**, **Online** and **Record** (these two open their page panels: the room code is
+typed there), Tools, and *Page menu (developer)* for the old page menu. D-pad, stick or arrows move, left / right change
+a value, A / Start / Enter choose, B / Esc / Backspace go back; mouse and touch work too. Fullscreen and Import need a
+key press or click (a browser rule: a gamepad press does not count), the menu says so. Online and while recording the
+game keeps running behind it. Turn it off under Tools in that menu (or in the page menu's Options).
 
 1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
 2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.

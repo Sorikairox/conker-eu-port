@@ -472,6 +472,17 @@ flash, controller pak).
     becomes another, bogus step): write such evals as comma expressions.
 31. Fake gamepads in tests: a press held for a fixed wall time can be merged or missed when the driver's timers bunch
     up under load; queue presses and hold them for N animation frames instead.
+32. A gamepad press is not a user gesture: fullscreen, file pickers (and audio unlock) started from a pad-driven menu
+    fail silently. Check `navigator.userActivation.isActive` and tell the player to press a key or click.
+33. An overlay that closes on a button press: the frame whose press closed it no longer belongs to the overlay, so the
+    same press flows on to the next consumer (photo mode started right after the menu closed). Mask the held button
+    until it is released.
+34. Headless CDP key events held for seconds (like Escape) can hide the tab and the page pauses itself: use
+    JS-dispatched KeyboardEvents for long holds.
+35. A bitmap font's advances are tuned for the game's own texts: punctuation between digits ("1.5") can touch the next
+    glyph and vanish. Dump the rendered alpha of the exact string before blaming filtering or scale.
+36. Menu entries on a pad: Home / Guide is often taken by the OS or the browser; use a long hold of a button that is
+    never a game input (here the page-only Photo button), not a chord with a game button (the first button leaks).
 
 ---
 

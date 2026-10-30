@@ -181,9 +181,30 @@ single source of truth (`OPTIONS`).
   - Tests: tools/port/scripts/gmenu_shots.sh (keys at 1280x720 on the title, fake pad at 1920x1080 widescreen in
     play); `?gmenuopen=S` test aid; netpair UI=1 with the menu open on the guest IDENTICAL; e2e replay PASS with the
     menu open during the replay.
-- **Next: P362** (section 6 item 2): make the overlay the full Options experience and the default way in: Controls
-  bindings page (key capture + pad capture), the master Volume and Fullscreen rows (Volume is page-side; under tests
-  ?mute=1 keep it untouched), photo / online / record entries as actions, a pad entry button that works on every
-  browser (Home is often taken by the OS: e.g. hold Start + Select / Back for 1 s), slightly larger help text in the
-  pixel look (a "." at help scale 0.62 nearly vanishes), and decide with the user whether the option becomes default
-  on.
+- **P362 done** (commits c287ee42, d805bb0a, d8f6ca34, bdff9f8c, 5c8aa3ca, the ?gmenupad test aid; still option
+  `nativemenu`, default off):
+  - The overlay covers everything a player needs: main page Preset / Picture / HUD / Gameplay / Controls / Sound /
+    Saves / Fullscreen / Photo mode / Online / Record / Tools / Page menu (developer) / Back to game.
+  - Controls: Keyboard keys and Gamepad buttons pages (every INPUTS row, Defaults) with capture: keyboard = the next
+    keydown (Esc cancels, Backspace unbinds), pad = the first button pressed after every button was up (Esc / 6 s
+    cancel); shared with the drawer through main.js bindSet / bindReset. Touch controls toggle. The arrows, Enter, Esc
+    and Backspace always drive the menu whatever the bindings.
+  - Sound: Master volume (page gain, main.js setVolume shared with the drawer slider; ?mute=1 keeps it at 0 and locked).
+    Saves: Export / Import (the drawer has no delete). Fullscreen toggle. Photo mode / Online / Record rows turn their
+    tool option on and start photo mode or open the drawer's panel (room codes need text entry: still the drawer).
+  - Browser rule: fullscreen and file pickers need a key press or click (a gamepad press is no user activation); the
+    menu checks navigator.userActivation.isActive and says "press Enter or click this line" instead of failing.
+  - Pad entry for every browser: hold the pad's Photo button (Back / Select by default) 500 ms. It is a page input,
+    never an N64 one, so it cannot leak into the game, the lockstep input or a recording (Start + Back would leak
+    Start). With the option on, a short press starts photo mode on release; a press in the menu closes it.
+  - Legibility: "." / "," get 1.5 units more advance (the font's 2-unit advance put the dot into the next digit:
+    "1.5" read "15"), and are drawn at least 0.85 x in the pixel look; help text 0.7 x; footer button faces drawn as
+    shapes (blue A, green B, a D-pad cross).
+  - Tests: gmenu_shots.sh keys (rebinding Stick up to T, then W does not move Conker and T walks him 1000+ units) and
+    pad (hold-Back entry, A = Y capture, Back closes, tap = photo mode) at 1280x720 / 1920x1080 widescreen; netpair UI=1
+    with ?gmenupad on the guest (hold entry online) 7473 retraces IDENTICAL; e2e replay PASS, also with ?gmenupad.
+  - Readiness (P362's view): ready to become the default once the user has tried it with a real gamepad (only fake
+    pads in headless Chrome so far) and on a phone (touch: pointer events, not tested on a device). Gaps: no game
+    sounds; Online room-code entry and Record still open the drawer.
+- **Next: P363** (section 6 item 3): an "OPTIONS" row in the game's pause menu (`game_pause_update`) that opens this
+  overlay in single player (see HANDOFF P362 for what it needs).
