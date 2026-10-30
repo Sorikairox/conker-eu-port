@@ -232,7 +232,7 @@
   body.touch #keyhint { display: none; }
   body.drawer #touch { display: none; }   /* P360: no stray game input while the menu is open */
   /* P361 game-style menu (P369: always on, called "Customisation settings"): the options drawn over the picture in the game's font (gmenu.js); while it is open the
-     PAUSED label, the corner button and the touch controls hide (the menu has the pad and takes taps itself) */
+     PAUSED label and the corner button hide (the menu has the pad and takes taps itself; P369: touch controls stay) */
   #screen canvas#gmenu { z-index: 4; touch-action: none; }
   #gmenu[hidden] { display: none !important; }
   /* P365: online messages in the game's font over the picture (gmenu.js GNet); before boot the ONLINE pages replace the
@@ -240,7 +240,19 @@
   #screen canvas#gnet { z-index: 3; pointer-events: none; }
   #gnet[hidden] { display: none !important; }
   body.gmenu #ready { display: none; }
-  body.gmenu #paused, body.gmenu #touch, body.gmenu #menu-btn, body.gmenu #photo-toast { display: none; }
+  body.gmenu #paused, body.gmenu #menu-btn, body.gmenu #photo-toast { display: none; }
+  /* P369: the touch controls stay on while the game-style menu is open: on a phone they are its pad (stick moves, A
+     chooses, B goes back, Start chooses; GMenu.poll reads them with pad 1 and the game gets an idle pad). The stick's
+     zone shrinks to the corner so taps on the menu's rows in landscape reach the menu, not the stick */
+  body.gmenu #tk-stick { width: min(45vw, 180px); }
+  /* the C buttons and L / Z / R do nothing in the menu: hidden there; in landscape A, B and START move into the right
+     margin beside the 4:3 picture (where the C buttons were), so they cover neither the menu's values nor its footer */
+  body.gmenu #touch .tb.c, body.gmenu #tk-L, body.gmenu #tk-Z, body.gmenu #tk-R { display: none; }
+  @media (orientation: landscape) {
+    body.gmenu #tk-A { right: calc(18px + env(safe-area-inset-right)); bottom: calc(30px + env(safe-area-inset-bottom)); }
+    body.gmenu #tk-B { right: calc(96px + env(safe-area-inset-right)); bottom: calc(100px + env(safe-area-inset-bottom)); }
+    body.gmenu #tk-START { left: auto; transform: none; right: calc(24px + env(safe-area-inset-right)); bottom: calc(190px + env(safe-area-inset-bottom)); }
+  }
   /* P366: game-style photo mode (gmenu.js GPhoto): its HUD, Pose & Outfit panel and messages are drawn on #gphoto in the
      game's font; the page's own photo boxes hide. #gphoto takes no pointer events itself: gmenu.js hit-tests clicks on
      its rows before they reach the picture (a click elsewhere still captures the mouse to look around) */
