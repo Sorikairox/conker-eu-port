@@ -8,7 +8,10 @@
 #         shows PLAY / ERASE + OPTIONS, S selects it; F zooms out, D / Space go to MULTI (main menu), D / Space open the
 #         next mode group's page, D selects SET-UP, S selects OPTIONS under it, Space opens the menu, Esc closes it, W
 #         back on SET-UP.
-#   tools/port/scripts/title_options_shots.sh OUTDIR [720|1080|both] [slot|multi|all]
+#   settings (P367) the game's own OPTIONS page (D, D, Space from GAME1): S x3 reaches its fourth row SETTINGS (the game's
+#         cursor slides to it), Space opens the game-style menu, Esc closes it (back on SETTINGS), W back to the
+#         screen-position item, S S wraps to the first item, W from there reaches SETTINGS again, F leaves the page.
+#   tools/port/scripts/title_options_shots.sh OUTDIR [720|1080|both] [slot|multi|settings|all]
 #   720 = 1280x720; 1080 = 1920x1080 widescreen + full resolution + smooth font + hi-res 2D. Muted headless Chrome, one at
 #   a time (PROBE_NOWAIT=1 on a shared machine). Log lines "mark {...}" = GMenu state (open / from / page) + page pause.
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1
@@ -50,9 +53,24 @@ multi() {
   mv "$OUT/pageshot_$1.log" "$OUT/$p.log"
   grep -E '^mark|\[gmenu\]' "$OUT/$p.log" | head -12
 }
+settings() {   # P367: the game's own title OPTIONS page (title_press_start_page) with its fourth row SETTINGS
+  local p=$3
+  # shellcheck disable=SC2046
+  tools/port/scripts/pageshot.sh "$OUT" "$1" 46 "app=game&opt=skipintro:1,nativemenu:1$2" \
+    "raw:20000:eval:$JK" $(key 23300 KeyD) $(key 25300 KeyD) '27000:'"$p"'0_options_place' \
+    $(key 27300 Space) '30000:'"$p"'1_options_page_with_settings' $(key 30300 KeyS) $(key 31300 KeyS) \
+    '32300:'"$p"'2_screen_position_selected' $(key 32600 KeyS) '33000:'"$p"'3_cursor_sliding' '34000:'"$p"'4_settings_selected' \
+    $(key 34300 Space) '35500:'"$p"'5_menu_over_options' "raw:35600:eval:$MARK" \
+    "raw:36000:eval:JK('Escape')" '37000:'"$p"'6_closed_back_on_settings' "raw:37100:eval:$MARK" \
+    $(key 37300 KeyW) '38500:'"$p"'7_up_screen_position' $(key 38800 KeyS) $(key 39800 KeyS) '41000:'"$p"'8_down_wraps_to_first' \
+    $(key 41300 KeyW) '42500:'"$p"'9_up_from_first_to_settings' $(key 42800 KeyF) '44500:'"$p"'10_left_the_page'
+  mv "$OUT/pageshot_$1.log" "$OUT/$p.log"
+  grep -E '^mark|\[gmenu\]' "$OUT/$p.log" | head -12
+}
 for r in 720 1080; do
   [ "$WHICH" = "$r" ] || [ "$WHICH" = both ] || continue
   if [ $r = 720 ]; then W=1280,720; O="$EXTRA"; P=w; else W=1920,1080; O=",widescreen:1,fullres:1,smoothfont:1,hires2d:1$EXTRA"; P=f; fi
   if [ "$FLOWS" = slot ] || [ "$FLOWS" = all ]; then slot "$W" "$O" ${P}s; fi
   if [ "$FLOWS" = multi ] || [ "$FLOWS" = all ]; then multi "$W" "$O" ${P}m; fi
+  if [ "$FLOWS" = settings ] || [ "$FLOWS" = all ]; then settings "$W" "$O" ${P}o; fi
 done

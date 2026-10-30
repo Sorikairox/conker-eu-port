@@ -17,6 +17,9 @@ docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "${PROBE_WEB:-$ROOT
 trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
 sleep 1.5
 MUTE="&mute=1"; [ -n "${PROBE_UNMUTE:-}" ] && MUTE=""   # P271: silent by default (user request); PROBE_UNMUTE=1 to hear
+# P367: PROBE_PAGEVOL=1 drops the page's ?mute=1 (page volume as saved, 80 % by default) but keeps Chrome's --mute-audio:
+# the Web Audio graph runs at that volume (probes measure it) and nothing reaches the host's speakers
+[ -n "${PROBE_PAGEVOL:-}" ] && MUTE=""
 URL="http://localhost:$PORT/app/index.html?$Q&audprobe=1$MUTE&romurl=../dev/rom.z64"
 # P27: PROBE_STEPS that navigate (nav:QUERY) get the same romurl appended
 [ -n "${PROBE_STEPS:-}" ] && export PROBE_STEPS=$(echo "$PROBE_STEPS" | sed -E 's#(nav:[^;]*)#\1\&romurl=../dev/rom.z64#g')
