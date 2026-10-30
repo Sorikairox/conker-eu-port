@@ -91,7 +91,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     setTimeout(async () => {
       console.log(`step t=${((Date.now() - t0) / 1000).toFixed(1)}s ${act} ${arg}`);
       if (act === 'click') {
-        for (const type of ['mousePressed', 'mouseReleased']) await call('Input.dispatchMouseEvent', { type, x: 300, y: 300, button: 'left', clickCount: 1 });
+        const [cx, cy] = arg ? arg.split(',').map(Number) : [300, 300];   // P366: MS:click:X,Y (CSS pixels; default 300,300)
+        await call('Input.dispatchMouseEvent', { type: 'mouseMoved', x: cx, y: cy });
+        for (const type of ['mousePressed', 'mouseReleased']) await call('Input.dispatchMouseEvent', { type, x: cx, y: cy, button: 'left', clickCount: 1 });
       } else if (act === 'keydown' || act === 'keyup') {
         const k = keyInfo(arg);
         await call('Input.dispatchKeyEvent', { type: act === 'keydown' ? 'rawKeyDown' : 'keyUp', code: arg, key: k.key, windowsVirtualKeyCode: k.keyCode, nativeVirtualKeyCode: k.keyCode });
