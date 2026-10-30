@@ -27,9 +27,15 @@ Your copy is frozen. The working sessions keep rebuilding their own build and se
 
 In the page:
 
-1. **First time only:** drag the ROM file onto the page, or use the file picker. The status line should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
-2. Click **Start**. Sound only begins after this click; that's a browser rule.
-3. Play. **Fullscreen** goes full screen, and **Pause** pauses. The game also pauses by itself when the tab is hidden.
+The game fills the whole browser window (P360): 4:3 with black bars at the sides or top, or the window's whole shape
+with the Widescreen option. Every page control is in the **menu**: press **Esc** or the round **☰** button in the top
+left corner (it hides while you play; move the mouse to see it). The menu pauses the game (not an online game); Esc again, **Back to game** or
+a click on the picture closes it and the game goes on. In fullscreen the browser uses Esc to leave fullscreen, so use
+the ☰ button there.
+
+1. **First time only:** drag the ROM file onto the page, or use the file picker. A message should say `ROM: Conker EU, SHA-1 ok`. The ROM is then remembered, so later visits skip this step.
+2. Press **Start** on the *Press Start* screen (Enter, a click, or the gamepad's / touch Start). Sound only begins after this; that's a browser rule.
+3. Play. In the menu, **Fullscreen** goes full screen, and **Pause** pauses. The game also pauses by itself when the tab is hidden.
 
 Other commands:
 
@@ -88,7 +94,7 @@ also lets go and **stick left / right** moves him sideways along the edge until 
 in the hang pose: the game has no shimmy animation).
 
 **Photo mode (option, off by default):** press **P** (or the gamepad's **Back / View / Select** button, or the
-**Photo** button in the page header) to freeze the game. The HUD disappears and a free camera flies around the frozen
+**Photo** button in the menu) to freeze the game. The HUD disappears and a free camera flies around the frozen
 moment; press P again (or Start, or **Exit**) and the game goes on exactly where it stopped. Works in cutscenes too.
 Single player only; never online.
 
@@ -138,7 +144,7 @@ left / right change it, A presses it; press it again to give the D-pad back to t
 
 ## Options
 
-The **Options** button in the page header opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.
+The **Options** button in the menu (Esc) opens a panel of extras that are not in the original game. Each one is a checkbox, saved in this browser. Off means the game behaves exactly like the N64 original. All of them are off at first except the cutscene skip.
 
 **Presets.** At the top of the panel, **Classic / Modern / Custom** sets all the options at once (everything except *Online multiplayer*, which only shows the Online button, and *Photo mode*, which only adds a key that freezes the game when you press it):
 
@@ -165,7 +171,7 @@ The choice is saved with the options. In an online game the host's options apply
 | Hi-res menus and 2D | off | Menus, the HUD (cash, icons), text and speech bubbles, the title and legal pages, the pause screen and other flat pictures are drawn sharp at the picture's full resolution: each texel sits exactly where the N64 shows it (before, the port sampled them the N64 way per canvas pixel, so they were half a texel off, blurred to one side, and tiled pictures had seams such as the cut in the "E" of GAME 1), scaled text and icons show the full detail of their textures, unfiltered (blocky) pictures keep crisp texels of equal width, and the frozen game picture behind the pause menu stays at full resolution and in its true colours (it was a 292 x 216, slightly darkened copy). Same layout and colours as the N64; 3D is not changed. Render-only: each player chooses it for themselves, also online. In the Modern preset. |
 | Smooth font | off | The game's text (speech bubbles and dialogue boxes, menu and title-screen lines such as INSERT RUMBLE PAK, the legal page, subtitles and other printed text) is drawn with smooth, clean curved edges at the picture's full resolution instead of magnified, blurred font pixels. Each letter keeps the game font's shape, size, place, colour and shadow: the renderer reads the glyph's 16-level bitmap with a smooth (bicubic) filter and cuts a sharp outline at about half intensity, about one screen pixel soft. Only the font's letters change; words that are pictures (GAME 1, PAUSED, QUIT / CONT.. on the pause screen, the HUD digits), button icons and every other 2D picture stay as they are (works with or without *Hi-res menus and 2D*). Best with *Full-resolution picture*. Render-only: each player chooses it for themselves, also online. In the Modern preset. |
 | Widescreen | off | The picture takes the shape of the space the page gives it (16:9, 16:10, up to 21:9; in fullscreen the shape of the screen) and the 3D view sees further to the left and right, instead of a 4:3 picture with black bars. Nothing is stretched: in the middle you see exactly the N64 picture, the sides are extra view. Menus, text, speech bubbles and the pause screen keep their N64 place and size in the middle; the health chocolate, the cash counter and the underwater face meter move to the corners of the wide picture; fades, the scope mask, the pause background and the motion blur cover the whole width; in split screen each player's view is wider (the per-player HUD stays in its N64 place inside the view). The game itself still works with its 4:3 view, so nothing plays differently and it is safe online (each player chooses it for themselves): the level is drawn at the sides, but characters and some effects just outside the 4:3 view are only drawn once they come close to it (on the N64 they would be off screen, and the game does not move them either). Off: the 4:3 N64 picture. In the Modern preset. |
-| Full-resolution picture | off | The game is drawn at the real resolution of its place on your screen (the picture's size times the display's pixel ratio, up to 2560 x 1440) instead of 640 x 480 scaled up: sharper 3D edges and textures, and with *Hi-res menus and 2D* sharp menus and text too. It follows the window size, fullscreen and the side panel. Needs a faster graphics card at large sizes. Render-only, each player's own choice online. In the Modern preset. |
+| Full-resolution picture | off | The game is drawn at the real resolution of its place on your screen (the picture's size times the display's pixel ratio, up to 2560 x 1440) instead of 640 x 480 scaled up: sharper 3D edges and textures, and with *Hi-res menus and 2D* sharp menus and text too. It follows the window size and fullscreen. Needs a faster graphics card at large sizes. Render-only, each player's own choice online. In the Modern preset. |
 | High frame rate (smooth motion) | off | The picture is redrawn at your display's refresh rate (60, 120, 144 Hz ...) instead of once per game frame (the game makes 12 to 25 frames per second): the camera, Conker, the other characters and moving objects glide smoothly from one game frame to the next. The game itself runs exactly as before; between two game frames the last frame is drawn again with every camera and object position in between (no game code runs for it). The picture shows the game up to one game frame (about 40 to 80 ms) late. Camera cuts in cutscenes, teleports and respawns jump as before (no blending), as do the motion-blur scenes, the pause screen's first frame, level loads and menus without 3D movement (shown as the game draws them). The HUD, text, particles, Conker's ground shadow, water ripples and texture animations still change at the game's rate. Each extra picture costs about 1 to 3 ms (this Mac, also at 1920 x 1440). Render-only, each player's own choice online. Works with Widescreen, Hi-res 2D, Photo mode and Free camera. In the Modern preset. |
 | Conker always full detail | off | Conker is always drawn with his most detailed model. The original switches him to simpler models once the camera is more than 500 units away, which the follow camera often is while he runs (450 to 650 units). Other characters and objects keep the original level-of-detail rules. |
 | Underwater air meter | off | While Conker is under water, a bar at the top of the screen shows the air he has left: full when his head goes under, red in the last quarter, empty when he starts to drown. Works with Longer breath (the bar then empties half as fast). The original only shows the wobbling Conker-face meter on the right, which appears after about 2 s and stops changing at half the air. No bar in shallow water where you cannot run out of air. |
@@ -174,8 +180,8 @@ The choice is saved with the options. In an online game the host's options apply
 | Inverted swimming | off | Under water, pushing the stick up makes Conker swim up and pulling it down makes him dive. The original steers like a plane: stick up tilts him head-down and dives, stick down tilts him up. Only the swimming controls change; walking, flying and aiming stay as they are. |
 | Aiming crosshair | off | In the first-person aim views that the original leaves bare, the game's own small crosshair (the one the other guns use) is drawn in the middle of the screen, which is exactly where the shots go there. In this ROM that is the aim kind 0x18 (hold R with that weapon); the scope, lens, bracket and turret views and the other guns already have their own reticles and are unchanged, and the third-person R-look with a held item gets nothing (its shots are aimed from the hand / mouth, not through a fixed screen point). Takes effect the next time you aim. |
 | Rumble (gamepad vibration) | off | The game sees a Rumble Pak in your controller and a connected gamepad vibrates whenever the N64 Rumble Pak would (explosions, hits, heavy effects; the game pulses it on and off by strength). Needs a browser with gamepad vibration (Chrome / Edge, most Xbox and PlayStation pads). Takes effect immediately: switching it on or off makes the game look for the Rumble Pak again at once (before, it waited for the next level or area load). Saves are not affected (they use the cartridge EEPROM). |
-| Input recorder (for testing) | off | Shows the **Record** button in the page header: records a play session from power-on (your save and options included) into a small `.ckrec` file that the developers replay automatically as a regression test (see "Recording a chapter for the tests" below). Not part of the presets. |
-| Online multiplayer (experimental) | off | Shows the **Online** button in the page header: play a multiplayer match with up to three friends on other computers, joining with a room code (see Online below). |
+| Input recorder (for testing) | off | Shows the **Record** button in the menu: records a play session from power-on (your save and options included) into a small `.ckrec` file that the developers replay automatically as a regression test (see "Recording a chapter for the tests" below). Not part of the presets. |
+| Online multiplayer (experimental) | off | Shows the **Online** button in the menu: play a multiplayer match with up to three friends on other computers, joining with a room code (see Online below). |
 | Music / Sound effects / Speech volume | 100 % | Three sliders (0 to 100 %, steps of 5) that set the volume of the music, the sound effects and the spoken dialogue separately. 100 % is the original volume. A change to the speech volume applies from the next spoken line. The page's Vol slider still sets the overall volume. |
 
 While a toggle is latched, a small label (Crouch, R-Look, Walk) shows at the top left of the picture, and the touch Z or R button gets a ring.
@@ -197,7 +203,7 @@ between your computers. (The room server only passes the connection details betw
 close when the game starts and expire after 10 minutes.)
 
 1. Everyone: open https://conker-web-port.netlify.app, load the ROM, but do **not** press Start. In **Options**, switch
-   on *Online multiplayer (experimental)*; an **Online** button appears in the header. Open it.
+   on *Online multiplayer (experimental)*; an **Online** button appears in the menu (Esc). Open it.
 2. Player 1: press **Create room (player 1)**. A code like **K7QXM** appears in big letters (**Copy** copies it): tell
    it to your friends.
 3. Players 2 to 4: type the code into the box under it (upper or lower case) and press **Join room**. You get the

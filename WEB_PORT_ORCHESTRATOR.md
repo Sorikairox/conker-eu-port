@@ -432,7 +432,7 @@ flash, controller pak).
 
 ---
 
-## 14. Top 25 traps (quick list)
+## 14. Top traps (quick list)
 
 1. Relocating data words that only look like pointers (u16 pairs, masks) — silent, months-long bugs.
 2. Game behaviour depending on the mirror's wasm address (alignment, physical addresses, masks) — fix the address.
@@ -459,6 +459,12 @@ flash, controller pak).
 23. URL test flags changing hashed state (keep test flags out of recordings and sessions).
 24. Committing ROM-derived files (screenshots, extracted audio, fonts) — keep them in a gitignored work folder.
 25. Deploying a build that skipped its browser test.
+26. Page layout tests at the default headless window: `--window-size` includes browser chrome; set the viewport with
+    `Emulation.setDeviceMetricsOverride` (PROBE_VIEWPORT) to test exact sizes (1280x720, 800x1000, 1920x1080).
+27. Moving page controls into a hidden drawer: JS `.click()` drivers keep working, CDP mouse clicks do not; and an
+    element still sliding in (visibility transition) cannot take focus yet (focus it after the transition).
+28. Waiting for "no headless Chrome running" on a shared machine: other projects' test browsers block it forever;
+    serialize your own runs instead (PROBE_NOWAIT=1).
 
 ---
 

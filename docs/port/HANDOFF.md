@@ -88,6 +88,30 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P360 (port-web, 2026-10-30): full-window game + menu drawer (native menus step 1)
+- b7b32847 the game fills the whole window (index.html #stage fixed, black; #screen = min(100vw, 100dvh x --ar),
+  centred: 4:3 pillar / letterbox, the window's aspect with Widescreen; layoutScreen takes the stage = window). No
+  header / side panel / margins. fullres, ?canvas=WxH and ResizeObserver unchanged in effect.
+- Every page control is in #drawer (left, translucent, game-ish style): Esc or the corner button #menu-btn opens it
+  (Esc used to toggle Pause); Esc, "Back to game" or a click on the picture closes it. Opening pauses single player
+  (never online / replay) and closing resumes only what it paused, clears held keys, focuses the canvas. Corner button
+  + cursor hide after 2.5 s idle while playing (not in touch mode); touch controls hidden while open; Photo closes it.
+  Fullscreen = documentElement always (the browser takes Esc there: use the corner button). First run: full-window
+  ROM picker and a new Press Start screen (#ready: Enter / click / pad or touch Start, "Another ROM..."). Status =
+  toast over the picture while the drawer is closed. JS test drivers (.click() on #pause, #t-online, #t-options ...)
+  work unchanged (elements exist, just inside the drawer). The old layout is not kept as an option.
+- Test aids: audprobe.js PROBE_WINDOW / PROBE_VIEWPORT (exact CSS viewport via Emulation.setDeviceMetricsOverride);
+  tools/port/scripts/pageshot.sh OUTDIR W,H SECS QUERY 'MS:NAME[:EVAL]' ... (page screenshots; EVAL can call
+  drawerSet(true), toggle("options",true), photoRequest(true)); steps split on ';' so use ',' inside EVAL.
+- Evidence port_work/p360: w1280_* (title + gameplay pillarboxed, drawer with Options / Saves / Online, Esc / button /
+  shade checks), w800_* (ready, drop, letterboxed title with touch controls, drawer Controls), w1920_ws_* (widescreen
+  + fullres 1920 x 1080 canvas, drawer, photo mode panels), net_ui/ (netpair UI=1). wasm md5 unchanged
+  (ac8ecd53...), check GREEN, e2e_replay PASS (7700 identical), netpair UI=1 4920 IDENTICAL.
+- docs/design/NATIVE_MENUS.md: inventory, target per group, rendering (C menu pages vs overlay with ROM-decoded
+  font at run time), input, online rules, session order (P361 overlay renderer + ROM font, P362 Options overlay, ...).
+- Not tested: real fullscreen (needs a user gesture; headless), phones (only an 800 x 1000 touch layout in headless).
+  Other headless Chrome processes (GoldenEye sessions) block the "wait for headless" loop of the test scripts:
+  PROBE_NOWAIT=1 and run your own one at a time.
 ### P359 (port-web, 2026-10-29): photo mode: all 187 models named
 - main.js PHOTO_MODEL_NAMES now holds all 187 models (one table; PHOTO_OTHER_MODEL_NAMES gone); the dropdown shows
   "id name", "(own skeleton)" kept as a suffix for models outside his skeleton group, "(guess)" on uncertain names.
