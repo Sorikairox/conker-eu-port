@@ -193,7 +193,7 @@ const MenuModel = (() => {
 const GMenu = (() => {
   const U = { open: false, t0: 0, closing: 0, stack: [], hits: [], raf: 0, paused: false,
     prev: 0, repeatAt: 0, held: 0, helpPage: 0, helpAt: 0, helpSel: '', homePrev: false, mx: -1, my: -1,
-    cap: null, note: '', noteAt: 0 };
+    cap: null, note: '', noteAt: 0, eh: false, ehT: 0, ehUsed: false };
   const cv = document.getElementById('gmenu');
   const ROW = 15, ROWS = 8, TOP = 46, X0 = 34, X1 = 286;   // row spacing / visible rows / list top / label x / value right edge (units)
   const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
@@ -222,7 +222,7 @@ const GMenu = (() => {
       { kind: 'link', label: 'Saves', help: 'Your save is kept in this browser automatically. Export it to a file or import one.', page: 'saves' },
       { kind: 'toggle', label: 'Fullscreen', help: 'The whole screen (also F11, Alt+F or a double click on the picture). In fullscreen Esc leaves fullscreen: open this menu with the corner button or the gamepad.',
         get: () => !!document.fullscreenElement, set: () => { if (!activated()) { note(GESTURE); return false; } fullscreen(); return true; } },
-      toolAction('photomode', 'Photo mode', 'Freeze the game and move a free camera; A saves a picture, Start leaves (P or the gamepad\'s Back button also start it). Single player only.', () => setTimeout(() => photoRequest(true), 50)),
+      toolAction('photomode', 'Photo mode', 'Freeze the game and move a free camera; A saves a picture, Start leaves (P or a short press of the gamepad\'s Back button also start it). Single player only.', () => setTimeout(() => photoRequest(true), 50)),
       toolAction('online', 'Online', 'Play a multiplayer match with friends on their own computers: make a room or join one with its code (opens the page panel: the room code is typed there).', () => { drawerSet(true); toggle('online', true); },
         () => (recCfg || (NETDET && !netCfg) ? 'Not during a recording.' : '')),   // during a session: its status / Leave
       toolAction('recorder', 'Record', 'The input recorder: record a play session from power-on for the developers\' automatic replay tests (opens the page panel).', () => { drawerSet(true); toggle('rec', true); recShowList(); },
@@ -240,7 +240,7 @@ const GMenu = (() => {
       return { kind: 'bind', bkind: kind, id, label,
         help: stick ? 'The gamepad\'s left stick (half tilt: tilt it less).'
           : kind === 'key' ? 'Choose, then press the new key: Esc cancels, Backspace leaves it unbound. A key does one thing: it leaves its old input.'
-          : 'Choose, then press the new button on the gamepad (nothing for 6 s, or Esc: cancel). A button does one thing: it leaves its old input.',
+          : 'Choose, then press the new button on the gamepad (nothing for 6 s, or Esc: cancel). A button does one thing: it leaves its old input.' + (id === 'PHOTO' ? ' Holding this button for half a second also opens this menu.' : ''),
         locked: () => (stick ? 'The left stick.' : ''),
         value: () => (stick ? (id === 'HALF' ? '-' : 'LEFT STICK') : kind === 'key' ? keyName(keyMap[id]) : padName(padMap[id])) };
     });
@@ -335,12 +335,29 @@ const GMenu = (() => {
     const c = U.cap; U.cap = null;
     if (!c || v === undefined) { note('Not changed.'); return; }
     bindSet(c.kind, c.id, v);
-    note(v === null ? 'Unbound.' : `Now: ${c.kind === 'key' ? keyName(v) : padName(v)}.`);
+    note(v === null ? 'Unbound.' : `Now: ${c.kind === 'key' ? keyName(v) : padName(v)}.` + (c.kind === 'pad' && padMap.PHOTO === undefined ? ' Photo mode now has no gamepad button (holding it opened this menu): give it one again.' : ''));
     U.prev = -1;   // the capturing press does nothing in the menu
   }
 
   // ---- input: one call per animation frame from pollInput with pad 1 (keyboard + first gamepad + touch); true = the
   // menu has pad 1 (the game gets no buttons)
+  // P362 pad entry that works in every browser (Home is often taken by the OS or the browser): hold the gamepad button
+  // bound to Photo mode (Back / Select by default) for half a second. That button is a page input, never an N64 one
+  // (one input per button), so holding it cannot reach the game, its lockstep input online or a recording. With this
+  // menu on, a short press of it starts photo mode on release instead of on press; a press while the menu is open
+  // closes it. The keyboard's Photo key keeps its own behaviour.
+  const HOLD_MS = 500;
+  function entry(d, raw, now) {
+    const eb = padMap.PHOTO, eh = eb !== undefined && raw(eb), on = wanted() && photo.state !== 2;
+    if (eh && !U.eh) U.ehT = now;
+    if (U.open) { if (eh && !U.eh && !U.ehUsed && !U.cap) { U.ehUsed = true; close(); } }
+    else if (on && eh) {
+      d.photo = !!(keyMap.PHOTO && keysDown.has(keyMap.PHOTO));   // the held pad button is not a photo press (yet)
+      if (!U.ehUsed && now - U.ehT >= HOLD_MS) { U.ehUsed = true; if (open('hold')) log('[gmenu] opened by holding the pad\'s photo button'); }
+    } else if (on && !eh && U.eh && !U.ehUsed && now - U.ehT < HOLD_MS) d.photo = true;   // a short press: photo mode (one frame's press)
+    if (!eh) U.ehUsed = false;
+    U.eh = eh;
+  }
   function poll(d) {
     const gp = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find((g) => g && g.connected);
     const raw = (i) => !!(gp && gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > 0.5));
@@ -348,12 +365,13 @@ const GMenu = (() => {
     const home = raw(16);
     if (home && !U.homePrev && !U.cap) { U.homePrev = true; if (U.open) close(); else if (wanted()) open(); return U.open; }
     U.homePrev = home;
+    entry(d, raw, now);
     if (!U.open) return false;
     if (U.cap) {   // binding capture: the menu does not move meanwhile
       if (U.cap.kind === 'pad') {
         const down = gp ? gp.buttons.map((_, i) => raw(i)) : [];
         if (!U.cap.armed) U.cap.armed = !down.some(Boolean);   // first every button up (the press that chose the row)
-        else { const i = down.findIndex(Boolean); if (i >= 0) { captureDone(i); return true; } }
+        else { const i = down.findIndex(Boolean); if (i >= 0) { U.ehUsed = true; captureDone(i); return true; } }   // ehUsed: the captured press (maybe the new entry button) must not close the menu
       }
       if (U.cap && now - U.cap.t0 > 6000) captureDone(undefined);
       U.prev = -1;
