@@ -867,21 +867,26 @@ void aim_fbfx_on_message(struct102 *arg0, u8 **arg1, u8 arg2) {
     }
 }
 
+/* P373: sprite2d update handler (g_sprite2d_update_fns [4], called by sprite2d_update as s32 (u8 *); 0 = the sprite
+ * is done and goes). The asm returns with v0 = sprite + 0x70 (the pointer it used for its block), never 0. The C used
+ * to be void, and the port's indirect call of a void function reads 0, so this aim-HUD sprite was dropped in its first
+ * update. Returns that pointer (as the asm), so the caller sees non-zero. */
 /* was func_151CBAC0 */
-void aim_hud_fade_update(u8 *arg0) {
+s32 aim_hud_fade_update(u8 *sprite) { /* sprite was arg0 */
     f32 target;
-    u8 *t;
-    u8 *p;
+    u8 *owner; /* was t */
+    u8 *blk; /* was p */
 
-    p = arg0 + 0x70;
-    t = *(u8 **)p;
-    if ((**(u16 **)(t + 0x36C) & 0x2000) && *(u16 *)(*(u8 **)(t + 0x3D4) + 0x19E) == 0) {
-        target = *(f32 *)(p + 8);
+    blk = sprite + 0x70;
+    owner = *(u8 **)blk;
+    if ((**(u16 **)(owner + 0x36C) & 0x2000) && *(u16 *)(*(u8 **)(owner + 0x3D4) + 0x19E) == 0) {
+        target = *(f32 *)(blk + 8);
     } else {
         target = 0.0f;
     }
-    *(f32 *)(p + 4) += (target - *(f32 *)(p + 4)) * 0.4f;
-    arg0[0x2E] = *(f32 *)(p + 4);
+    *(f32 *)(blk + 4) += (target - *(f32 *)(blk + 4)) * 0.4f;
+    sprite[0x2E] = *(f32 *)(blk + 4);
+    return (s32) blk;
 }
 
 /* sprite2d_spawn's sprite spec (0x58 bytes). */
@@ -1629,16 +1634,21 @@ void aim_hud_slot_rows_spawn(u8 *obj, u8 wide, s8 arg2, u8 group) {
 }
 f32 aim_hud_gauge_value(u8 *);
 typedef struct { u8 pad0[0xD]; u8 unkD; u8 padE[0xA]; f32 unk18; f32 unk1C; f32 unk20; } SubCD;
+/* P373: sprite2d update handler (g_sprite2d_update_fns [11], called by sprite2d_update as s32 (u8 *); 0 = the sprite
+ * is done and goes). The asm returns with v0 = sprite + 0x70 (the pointer it used for its block), never 0. The C used
+ * to be void, and the port's indirect call of a void function reads 0, so this aim-HUD sprite was dropped in its first
+ * update. Returns that pointer (as the asm), so the caller sees non-zero. */
 /* was func_151CD7D4 */
-void aim_hud_slot_row_update(u8 *arg0) {
-    f32 k;
-    SubCD *v;
+s32 aim_hud_slot_row_update(u8 *sprite) { /* sprite was arg0 */
+    f32 offset; /* was k */
+    SubCD *blk; /* was v */
 
-    v = (SubCD *)(arg0 + 0x70);
-    k = (1.0f - ((aim_hud_gauge_value(arg0) - v->unk18) * v->unk20)) * 75.0f;
-    if (v->unkD == 5) {
-        *(f32 *)(arg0 + 0x14) = 92.0f + k;
-    } else if (v->unkD == 4) {
-        *(f32 *)(arg0 + 0x14) = -92.0f - k;
+    blk = (SubCD *)(sprite + 0x70);
+    offset = (1.0f - ((aim_hud_gauge_value(sprite) - blk->unk18) * blk->unk20)) * 75.0f;
+    if (blk->unkD == 5) {
+        *(f32 *)(sprite + 0x14) = 92.0f + offset;
+    } else if (blk->unkD == 4) {
+        *(f32 *)(sprite + 0x14) = -92.0f - offset;
     }
+    return (s32) blk;
 }
