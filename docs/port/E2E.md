@@ -92,6 +92,15 @@ FAIL conker-rec-base-...ckrec: first difference at retrace 6980 (2:19 of game ti
 A difference after a deliberate gameplay change (a bug fix that changes how the game plays) is expected: check the
 pictures, then re-record that chapter with the new build.
 
+When the fix changes only the random numbers or memory (G / H), not where the player goes, the recording's pad input
+still fits and only its reference values are stale. `REBASE=1 REBASE_WHY='reason' tools/port/scripts/e2e_replay.sh
+FILE.ckrec` (P373) replays it to the end and compares the route: every checkpoint's retrace, kind, level, mode and
+Conker's position must equal the recording's. If they do, `tools/port/scripts/e2e_rebase.py` writes this build's G
+digests, checkpoints (H / S / G) and build id into the file, keeps the input, save and options, and appends
+`{date, from_build, to_build, why, changed_digests}` to its `rebased` list; the next replay with this build is then
+IDENTICAL with H / S compared. If any checkpoint differs, it prints the first ones and leaves the file alone: the input
+no longer fits the game and the chapter has to be recorded again (by a person).
+
 ## How it works
 
 - Recording = a single-player session of the online lockstep machinery (`port/ultra/pc_net.c` sections 1, 4, 5;
@@ -128,6 +137,7 @@ gzip of one JSON object:
 | `g` | base64 of u32 LE G of retraces 10, 20, 30, ... |
 | `checks` | `[retrace, H, S, G, level, mode, kind, x, y, z]`; kind 0 periodic, 1 level / mode change, 2 the last retrace (Stop) |
 | `complete`, `gaps`, `wall_s`, `paused_s` | false for an unfinished draft; input gaps (0); wall / paused seconds |
+| `rebased` | (optional, P373) list of `{date, from_build, to_build, why, changed_digests}`: reference values replaced by `e2e_rebase.py` |
 
 Size: ~3 KB per minute with the keyboard (the 2.5-minute test route is 8 KB), at most ~13 KB per minute with an analog
 stick that moves every retrace (~0.8 MB per hour).

@@ -12,6 +12,10 @@
 #        OUT=DIR        output folder (default port_work/e2e); per recording OUT/<name>/{chrome.log,result.json,actual.png,expected.png}
 #        TIMEOUT=S      per recording (default 3600)
 #        EXTRA_Q=...    more page query, e.g. '&opt=widescreen:1,hfr:1' (render-only options must not change the result)
+#        REBASE=1       P373: replay to the end (KEEP) and, if the recorded pad input still plays the same route (every
+#                       checkpoint's retrace, kind, level, mode and Conker position as recorded), write this build's G
+#                       digests and checkpoints into the .ckrec (tools/port/scripts/e2e_rebase.py; REBASE_WHY='reason'
+#                       is stored in the file). For a deliberate gameplay fix that changes RNG / memory but not the route.
 # No test flags in the page URL: the online hash H covers the static state of the port's test aids too (?p103boot's
 # mode / level cache, for example), and a player's recording is made without any.
 # Pictures are ROM-derived: they stay in port_work (never commit them). The recordings and their hashes may be committed.
@@ -30,11 +34,12 @@ docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$WEB":/www/app:ro 
   -v "$RECDIR":/www/rec:ro ${REF:+-v "$REF":/www/ref:ro} -w /www conker-emsdk python3 -m http.server 8000 >/dev/null || exit 1
 trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
 sleep 1.5
+[ -n "${REBASE:-}" ] && KEEP=1
 Q="romurl=../dev/rom.z64&mute=1${KEEP:+&replaykeep=1}${SPEED:+&replayspeed=$SPEED}${STOP:+&replaystop=$STOP}${EXTRA_Q:-}"
 FAILS=0
 for F in $FILES; do
   N=${F%.ckrec}; D=$OUTD/$N; rm -rf "$D"; mkdir -p "$D"
-  node tools/port/scripts/e2e_replay.js "http://localhost:$PORT/app/index.html?$Q&replay=../rec/$F" "$D" "${TIMEOUT:-3600}" > "$D/driver.out" 2>&1
+  E2E_REBASE=${REBASE:-} node tools/port/scripts/e2e_replay.js "http://localhost:$PORT/app/index.html?$Q&replay=../rec/$F" "$D" "${TIMEOUT:-3600}" > "$D/driver.out" 2>&1
   RC=$?
   FIRST=$(python3 -c "import json,sys; r=json.load(open('$D/result.json')); print((r.get('first') or {}).get('f') or '')" 2>/dev/null)
   if [ "$RC" -ne 0 ] && [ -n "$FIRST" ] && [ -n "$REF" ]; then   # the reference build's picture at the first difference
@@ -43,6 +48,7 @@ for F in $FILES; do
     [ -f "$D/expected.png" ] && [ -f "$D/actual.png" ] && python3 tools/port/scripts/pngtool.py diff "$D/actual.png" "$D/expected.png" > "$D/pixdiff.txt" 2>&1
   fi
   python3 tools/port/scripts/e2e_report.py "$D" "$F" || FAILS=$((FAILS + 1))
+  if [ -n "${REBASE:-}" ]; then python3 tools/port/scripts/e2e_rebase.py "$D/rebase.json" "$RECDIR/$F" "${REBASE_WHY:-}" || FAILS=$((FAILS + 1)); fi
   # P373: a void function called through a value-returning pointer that port/tools/icall_void_audit.tsv does not list
   if grep -q '^\[icall\] UNAUDITED' "$D/chrome.log" 2>/dev/null; then
     echo "FAIL $F: unaudited void indirect-call targets (port/tools/icall_void_audit.tsv):"; grep '^\[icall\] UNAUDITED' "$D/chrome.log" | head -5

@@ -57,6 +57,10 @@ setTimeout(() => { console.log(JSON.stringify({ state: 'timeout' })); done(2); }
     const u = await ev("document.getElementById('canvas').toDataURL('image/png')");
     if (u) { fs.writeFileSync(path.join(out, 'actual.png'), Buffer.from(u.split(',')[1], 'base64')); st.shot = path.join(out, 'actual.png'); }
   }
+  if (process.env.E2E_REBASE) {   // P373: this build's digests / checkpoints and the gameplay comparison (e2e_rebase.py)
+    const rb = await ev('window.__e2e.rebase ? window.__e2e.rebase() : null', 60000);
+    if (rb) fs.writeFileSync(path.join(out, 'rebase.json'), JSON.stringify(rb));
+  }
   fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(st, null, 1));
   console.log(JSON.stringify(st));
   done(st.state === 'done' ? 0 : 1);

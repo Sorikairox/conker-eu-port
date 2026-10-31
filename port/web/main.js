@@ -1919,12 +1919,14 @@ function e2eMismatch(m) {
   if (!e2e.keep) { e2e.state = 'mismatch'; e2e.ended = true; M._port_set_paused(1); }
 }
 function e2eG(f, g) {
+  (e2e.actG || (e2e.actG = [])).push(g >>> 0);   // P373: this build's digests, for __e2e.rebase()
   const want = e2e.g[f / e2e.doc.g_every - 1];
   if (want === undefined) return;   // past the recording's end
   if ((want >>> 0) === (g >>> 0)) { e2e.matchedG++; e2e.lastGood = Math.max(e2e.lastGood, f); return; }
   e2eMismatch({ f, field: 'G', what: `game digest G ${(g >>> 0).toString(16)}, the recording has ${(want >>> 0).toString(16)} (RNG, level / mode, character records)`, level: e2e.level, mode: e2e.mode });
 }
 function e2eCheck(c) {
+  (e2e.actChecks || (e2e.actChecks = [])).push(Array.from(c));   // P373: this build's checkpoints, for __e2e.rebase()
   const [f, h, s, g, level, mode, kind, x, y, z] = c, exp = e2e.doc.checks[e2e.ci++];
   e2e.level = level; e2e.mode = mode;
   if (!exp) { if (e2e.doc.complete) e2eMismatch({ f, field: 'extra', what: `a ${KIND[kind]} checkpoint the recording does not have (level ${level.toString(16)}, mode ${mode})`, level, mode }); return; }
@@ -1977,6 +1979,19 @@ window.__e2e = {
     checks: e2e.doc ? e2e.doc.checks.length : 0, matchedChecks: e2e.matchedChecks, matchedG: e2e.matchedG, mismatches: e2e.mismatches, first: e2e.first,
     sameBuild: e2e.sameBuild, level: e2e.level, mode: e2e.mode, endFrame: e2e.endFrame, ms: e2e.t0 ? Math.round(performance.now() - e2e.t0) : 0,
     name: e2e.doc ? e2e.doc.name : '', build: wasmBuildId, recBuild: e2e.doc ? e2e.doc.build : '' }),
+  // P373 (tools/port/scripts/e2e_replay.sh REBASE=1): after a whole replay (?replaykeep=1), this build's G digests and
+  // checkpoints, and `gameplay`: every checkpoint whose retrace, kind, level, mode or Conker position differs from the
+  // recording's (empty = the recorded pad input still plays the same route; only RNG / memory digests differ).
+  rebase: () => {
+    const exp = e2e.doc ? e2e.doc.checks : [], act = e2e.actChecks || [], gameplay = [];
+    for (let i = 0; i < Math.max(exp.length, act.length); i++) {
+      const a = act[i], e = exp[i];
+      if (!a || !e) { gameplay.push({ i, actual: a || null, expected: e || null }); continue; }
+      if ([0, 4, 5, 6, 7, 8, 9].some((k) => a[k] !== e[k])) gameplay.push({ i, actual: a, expected: e });
+    }
+    return { build: wasmBuildId, ended: e2e.ended, endFrame: e2e.endFrame, nG: (e2e.actG || []).length, g: b64enc(u32enc(e2e.actG || [])),
+      checks: act, gameplay };
+  },
 };
 
 // ---------------------------------------------------------------- wasm apps
