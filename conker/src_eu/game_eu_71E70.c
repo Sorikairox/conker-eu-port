@@ -319,18 +319,22 @@ s32 timedfx_player_in_box(u8 *arg0) {
     return var_v0;
 }
 /* was func_15044FD4 */
-void timedfx_track_and_test(u8 *arg0) {
-    s16 *temp_v0 = *(s16 **)(arg0 + 0x18);
-    s16 temp_t0;
+/* P373: timed-effect update hook (g_timedfx_update_fns [1], called by timedfx_update_all as s32 (TimedFx *); non-zero
+ * runs the entry's done hook, g_timedfx_done_fns: timedfx_hit_player_*). The asm tail-calls timedfx_player_in_box and
+ * returns with its v0 untouched. The C used to be void, and the port's indirect call of a void function reads 0, so a
+ * tracking box never fired its done hook (the player standing in it was never hit). */
+s32 timedfx_track_and_test(u8 *entry) { /* entry was arg0 */
+    s16 *centre = *(s16 **)(entry + 0x18); /* was temp_v0 */
+    s16 half; /* was temp_t0 */
 
-    *(s16 *)(arg0 + 6) = temp_v0[0];
-    *(s16 *)(arg0 + 8) = temp_v0[1];
-    *(s16 *)(arg0 + 0xA) = temp_v0[2];
-    temp_t0 = **(s16 **)(arg0 + 0x1C) / 32;
-    *(s16 *)(arg0 + 0x10) = temp_t0;
-    *(s16 *)(arg0 + 0x12) = temp_t0;
-    *(s16 *)(arg0 + 0x14) = temp_t0;
-    timedfx_player_in_box(arg0);
+    *(s16 *)(entry + 6) = centre[0];
+    *(s16 *)(entry + 8) = centre[1];
+    *(s16 *)(entry + 0xA) = centre[2];
+    half = **(s16 **)(entry + 0x1C) / 32;
+    *(s16 *)(entry + 0x10) = half;
+    *(s16 *)(entry + 0x12) = half;
+    *(s16 *)(entry + 0x14) = half;
+    return timedfx_player_in_box(entry);
 }
 
 s32 collision_override_floor(u8 *, f32, u8 *);
