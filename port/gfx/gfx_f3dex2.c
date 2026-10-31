@@ -454,9 +454,9 @@ static unsigned char *ws_scrub_lo; static size_t ws_scrub_n;
  *    3D scenes, fades, scopes) and HUD pieces that lie inside another player's view rectangle are dropped;
  *  - the multiplayer HUD (mp_hud_draw_views, the text queue: drawn with the full-screen scissor, each view's pieces placed
  *    relative to its view rectangle) is put on the full picture: a piece inside the local view is scaled by ov_h (3/4
- *    of the view's zoom: 1.5) and keeps its distance to the view's nearest edge (its centre in the first 40 %: left /
- *    top, in the last 40 %: right / bottom, else the centre), so the health at the top left stays at the top left; the
- *    shared pieces across the middle of the screen (team scores, the clock: they straddle the views) move to the top
+ *    of the view's zoom: 1.5) and keeps its distance to the view's nearest edge (x: the centre in the first / last
+ *    30 %: left / right; y: 40 %: top / bottom; else the centre); a text line moves as one (ov_group); the shared
+ *    pieces across the middle of the screen (team scores, the clock: they straddle the views) move to the bottom
  *    centre; the split lines are dropped;
  *  - paused (the game draws no views then): the overlays as drawn; the paused frame behind the pause menu is the copy of
  *    the own view the canvas held (a GPU read-back: outside the hash like every pause frame).
@@ -473,13 +473,30 @@ static int ov_rcls;         /* the class of the rectangle being drawn (rect() se
 static float ov_z, ov_cx, ov_cy;   /* zoom about the local view's centre (canvas pixels, y down) */
 static float ov_h, ov_split;       /* HUD scale; the y between the view rows (N64), 0 = none */
 static int ov_logged;
+/* P371 fix: the HUD group being drawn (a text line: "0 (1st)" is the score, "(", the place digit, the "st" picture, ")" as
+ * separate rectangles): every piece of a group takes the anchor of its first piece, so the line moves as one; a piece
+ * joins the group when it continues the same row (vertical overlap, at most 10 N64 pixels after the group's right end) */
+static int ov_g_on;
+static float ov_g[4], ov_gex, ov_gey;   /* the group's box (N64) and the centre its anchors come from */
+static void ov_group(float x0, float y0, float x1, float y1, float *ex, float *ey) {
+    float oy = fminf(y1, ov_g[3]) - fmaxf(y0, ov_g[1]), hmin = fminf(y1 - y0, ov_g[3] - ov_g[1]);
+    if (ov_g_on && oy >= 0.5f * hmin && x0 >= ov_g[0] - 1 && x0 <= ov_g[2] + 10) {
+        if (x1 > ov_g[2]) ov_g[2] = x1;
+        if (y0 < ov_g[1]) ov_g[1] = y0;
+        if (y1 > ov_g[3]) ov_g[3] = y1;
+    } else {
+        ov_g_on = 1; ov_g[0] = x0; ov_g[1] = y0; ov_g[2] = x1; ov_g[3] = y1;
+        ov_gex = (x0 + x1) * 0.5f; ov_gey = (y0 + y1) * 0.5f;
+    }
+    *ex = ov_gex; *ey = ov_gey;
+}
 EMSCRIPTEN_KEEPALIVE void port_gfx_ownview(int ch) { ov_ch1 = ch >= 0 && ch < 4 ? ch + 1 : 0; state_dirty = 1; }
 EMSCRIPTEN_KEEPALIVE int port_gfx_ownview_state(void) { return ov_on ? 1 + ov_p : 0; }   /* tests: 0 off, else 1 + the view drawn */
 static void ov_task_begin(void) {
     static int flag_read;
     if (!flag_read) { int f = port_flag("ownview"); flag_read = 1; if (f >= 1 && f <= 4 && !ov_ch1) ov_ch1 = f; }
     int was = ov_on ? 1 + ov_p : 0;
-    ov_on = 0; ov_cls = ov_rcls = 0;
+    ov_on = 0; ov_cls = ov_rcls = 0; ov_g_on = 0;
     if (ov_ch1 && port_ownview_views && !off_on) {
         float r[16]; int n = 0, paused = 0;
         int p = port_ownview_views(r, ov_ch1 - 1, &n, &paused);
@@ -560,7 +577,7 @@ static float ov_hud_x(float x, float ex) {
     const float *r = ov_r[ov_p];
     float s = (ws_on ? ws_sx : canvas_w / (float)cimg_width) * ov_h, w = r[2] - r[0], u = (ex - r[0]) / w;
     if (fabsf(w * s - canvas_w) < 1) return (x - r[0]) * s;
-    return u < 0.4f ? (x - r[0]) * s : u > 0.6f ? canvas_w - (r[2] - x) * s : canvas_w * 0.5f + (x - (r[0] + r[2]) * 0.5f) * s;
+    return u < 0.3f ? (x - r[0]) * s : u > 0.7f ? canvas_w - (r[2] - x) * s : canvas_w * 0.5f + (x - (r[0] + r[2]) * 0.5f) * s;
 }
 static float ov_hud_y(float y, float ey) {
     const float *r = ov_r[ov_p];
@@ -1646,7 +1663,11 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
         int c = ov_rect_class(x0, y0, x1, y1, rm);
         if (c != ov_rcls) { ov_rcls = c; state_dirty = 1; }
         if (c == 3) { rect_ext = 0; return; }
-        if (c == 4) { y0 += 14 - ov_split; y1 += 14 - ov_split; }   /* the band across the middle -> the top */
+        if (c == 4) {   /* the band across the middle (team scores, clock) -> the bottom centre: the top centre holds the
+                         * local view's own score line ("0 (1st)" in Deathmatch) */
+            float dy = VI_Y0 + CIMG_H - 4 - (ov_split + 8);
+            y0 += dy; y1 += dy;
+        }
     }
     need_state(rm);
     float W = cimg_width, H = CIMG_H;
@@ -1656,6 +1677,8 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
     rect_ext = 0;
     if (ws_log_on) port_log("[p350] task %u rect rm %d %.1f,%.1f..%.1f,%.1f ext %d sc %d %.1f,%.1f..%.1f,%.1f vp %d %d %d %d oth %06X cc %06X/%08X timg %08X\n", gfx_stats.tasks, rm, x0, y0, x1, y1, ext,
                             sc_on, sc_box[0], sc_box[1], sc_box[2], sc_box[3], vp_scale[0], vp_scale[1], vp_trans[0], vp_trans[1], oth_h, combine_w0, combine_w1, timg.raw);
+    float gex = 0, gey = 0;
+    if (ov_cls == 2) ov_group(x0, y0, x1, y1, &gex, &gey);   /* P371: the anchors of the piece's group */
     for (int i = 0; i < 4; i++) {
         if (ws_on) { float X = (i & 1) ? ((ext & 2) ? ws_edge(xs[i]) : ws_x2d(xs[i])) : ((ext & 1) ? ws_edge(xs[i]) : ws_x2d(xs[i])); q[i].x = X / canvas_w * 2 - 1; }
         else
@@ -1665,7 +1688,7 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
             float X = (q[i].x + 1) * 0.5f * canvas_w, Y = (1 - q[i].y) * 0.5f * canvas_h;
             q[i].x = (canvas_w * 0.5f + (X - ov_cx) * ov_z) / canvas_w * 2 - 1; q[i].y = 1 - (canvas_h * 0.5f + (Y - ov_cy) * ov_z) / canvas_h * 2;
         } else if (ov_cls == 2) {   /* P371: a local HUD piece on the full picture */
-            q[i].x = ov_hud_x(xs[i], (x0 + x1) * 0.5f) / canvas_w * 2 - 1; q[i].y = 1 - ov_hud_y(ys[i], (y0 + y1) * 0.5f) / canvas_h * 2;
+            q[i].x = ov_hud_x(xs[i], gex) / canvas_w * 2 - 1; q[i].y = 1 - ov_hud_y(ys[i], gey) / canvas_h * 2;
         }
         q[i].r = (col >> 24) / 255.0f; q[i].g = (col >> 16 & 255) / 255.0f; q[i].b = (col >> 8 & 255) / 255.0f;
         q[i].a = (col & 255) / 255.0f; q[i].s = ss[i]; q[i].t = ts[i]; q[i].fog = 0;
