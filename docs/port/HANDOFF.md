@@ -133,6 +133,12 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   removal moved only the pictures (v4 = v3 sample for sample on the same timeline); the end card now spans beats 56-64,
   8-beat phrase boundaries, fade-out 83.4 - 85.5. AAC decoded by afconvert: -15 to -17 dBFS per section, no dip at the
   cut. The 'custom' shot stays in shots.mjs (it captures fine; not in the edit).
+- **v5** (user: "show the logo on the line with the bad already crossed out"): conkers_good_fur_day_trailer_v5.mp4 /
+  _v5_25mb.mp4 / _v5_contact_sheet.jpg / _v5_shotlist.txt (85.63 s, as v4). The throne room now plays in real time to
+  Conker's "good" (39.60, picture 2376; the game's logo starts fading in at ~2392), then the settled logo (picture 2448)
+  with BAD struck out and Good written comes in by a 0.12 s fade, no pen animation; the clean logo is never on screen
+  (checked 37.0 - 42.0 every 0.2 s). Fade chosen over a hard cut: the side doors stand further in on the logo picture.
+  Sound = v4 (decoded PCM identical but 779 samples +-1 LSB at 39.8 s: the offline render of the "good" splice).
 ### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
 - User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
   the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
