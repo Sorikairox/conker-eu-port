@@ -72,9 +72,14 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   (unread as far as the three routes show; identical in every real build since the mirror no longer moves).
 - Single-retrace H blips in ?nethash runs (non-netdet) differ run to run, with or without options; netpair (netdet) shows
   none. Not explained.
-- e2e recording p357 (tests/e2e/recordings) differs from retrace 5830 since P372 (flames now live, RNG differs; expected):
-  re-record it with the current build. Void-declared functions called through int-returning pointers (P372 list): audit
-  which callers use the result.
+- Void functions called through value-returning pointers: audited in P373 (port/tools/icall_void_audit.tsv; 18 fixed in
+  P372 / P373, 238 ok, 3 open: the event-VM natives event_effect_stop / rail_script_nop / rail_script_set_ease return the
+  VM's stale v0, which g_event_vm_result stores; harmless unless a script reads the value of such a call). A new one
+  shows as "[icall] UNAUDITED" (hold-L / e2e fail). Not covered: direct calls to a void function through a non-void
+  prototype (sigs.py converts them to 0 too; implicit_scan / kindclash may list them) and the debugger page tables.
+- The P373 fixes (5 particle update handlers, 2 aim-HUD sprites, timedfx_track_and_test, 8 display-list callbacks) are not
+  reached by hold-L, e2e p357 or the Bunker Deathmatch: find a route that shows them (bouncing debris particles, the
+  aim HUD slot row, a tracking damage box, screen-tint / flash-blade / beam / puff render layers) and look at it.
 - Widescreen: the MP death picture (black + skull) covers only the 4:3 middle of a view (P371 finding, not looked into).
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
 - The slow-motion camera cut's blur (camera_cut_fade_update, fb_ghost pass 2) was not reached in a test since the
@@ -93,6 +98,58 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P373 (port-web-b, 2026-10-31): audit of void functions called through value-returning pointers; e2e p357 rebased
+- Method: (1) run-time census: pc_icall.c logs every void target reached through a non-void icall site (e2e replay,
+  hold-L, offline 4p Deathmatch netrun NET_BUNKER_PLAY=120: 31 distinct targets, all with callers that ignore the value);
+  (2) static: every icall site in the game IR whose result is used (port_work/p373/irscan.py: 191 of 391 sites) x the
+  ROM function tables it loads from x the C return type (sigdb) x the asm's v0 at return (retv0.py: forward data flow
+  over the ROM code) + the render-layer fields of g_node_type_table; (3) asm check of the dispatchers (v0use.py: does the
+  caller read v0 after the jalr, or return it on: then its callers, prop.py). Tools in port_work/p373 (not committed).
+- Verdicts (full list: port/tools/icall_void_audit.tsv, 259 rows):
+
+| function | caller uses result? | asm v0 at return | verdict | fix commit |
+|---|---|---|---|---|
+| flame_flicker, flame_flicker_b | effect3d_update: 0 ends the effect | flame_flicker_update (1) | bug | d47fa32c (P372) |
+| particle_follow_owner_update | particle_sprite_update: 0 = dies | particle_upd_damp_vel | bug | 451db65f |
+| dust_cloud_bob_update | same | impact_dust_cloud_wobble | bug | 451db65f |
+| particle_check_surface_hit, particle_upd_damp_hit, particle_upd_damp_xz_hit | same | particle_surface_hit_dispatch | bug | 451db65f |
+| aim_hud_fade_update, aim_hud_slot_row_update | sprite2d_update: 0 = done | sprite + 0x70 (never 0) | bug | 23184c39 |
+| timedfx_track_and_test | timedfx_update_all: != 0 runs the done hook (timedfx_hit_player_*) | timedfx_player_in_box | bug | c260fecd |
+| mdl_particle_emit_tex_seg_a / _b | mdl_particle_draw: gdl | gfx_emit_sprite_tex_segment (gdl) | bug | fafddeb0 |
+| banner_sprite_draw | anim_model_fx_draw: gdl | anim_model_fx_load_screen_mtx (gdl) | bug | fafddeb0 |
+| screen_tint_draw_dispatch, screen_tint_draw_fill | node_render_layers_draw draw: gdl | the fill's gfx_other_mode_cached (gdl) | bug | fafddeb0 |
+| layer_pre_flash_texture | node_render_layers_draw pre: gdl | sprite_load_texture (gdl) | bug | fafddeb0 |
+| beam_effect_handler_stub, puff_view_dl_begin | node_render_layers_draw post: gdl | beam_effect_stub / view_dl_begin (gdl) | bug | fafddeb0 |
+| event_effect_stop, rail_script_nop, rail_script_set_ease | event_native_stop/start_cmd -> event_vm_run stores it in g_event_vm_result | entry v0 = the VM's stale v0 | open (no C form; scripts likely ignore) | - |
+| effect_handle_message, effect3d_msg_stub (+8 more g_effect3d_msg_fns) | effect3d_on_msg returns it, node_broadcast_* ignore it | various | ok | - |
+| bone_sparks_on_message, bone_sparks_light_on_event | attach_ctrl / light_ctrl_handle_message return it, broadcasters ignore it | various | ok | - |
+| point_spark_spawn, segment_debris_spawn | obj_point_effect_emitter_update ignores it | various | ok | - |
+| level_obj_init_lights_sfx77, level_fire_emitters_create, level_obj_init_area_points (37 init fns) | level_objects_init ignores it | various | ok | - |
+| watch_attach_effect_start | obj_effect_dispatch ignores it (returns 1) | - | ok | - |
+| emitter_sound_noop | emitter_path_update ignores it (also the boot self-test's deliberate void -> 0 call) | entry v0 | ok | - |
+| snd_cache_entry_unref | n_alSynFreeVoice (N_ALSynth.dma) ignores it | entry v0 | ok | - |
+| objev_* (156 g_anim_event_fns entries: objev_play_sound, objev_stop_sound, objev_set_d0_114, objev_141a7c, objev_start_anim_cmd, objev_7c8e0, objev_192800, objev_trail_start_or_stop, objev_sound_alt_300_1800, objev_level_screen_effect, ...) | anim_events_run ignores it | various | ok | - |
+| impact_tinted_particle_spawn (12), arc_spark_spawn (7) table entries | dispatchers ignore it | various | ok | - |
+
+- Effects of the 16 new bugs (none is reached by the three test routes, so no picture; by the code): those particle
+  kinds vanished after one frame (owner-following particles, bobbing dust clouds, particles that bounce / stop on a
+  surface); the aim HUD's fading piece and weapon slot row were dropped at once; a tracking damage box never hit the
+  player (gameplay); and eight display-list callbacks made their caller write the rest of that display list at wasm
+  address 0 (screen-tint fill, flash-blades layer, beam / puff layers, model-particle texture segments, banner sprites):
+  those draws were lost and low memory overwritten whenever such a node was on screen.
+- Safeguard f2580cb0: port/tools/icall_void_audit.tsv -> icall_gen.py -> port_icall_void_audited(); pc_icall.c logs
+  "[icall] UNAUDITED void target fn #N ... at retrace R" + JS stack once per function (slow path only, log only);
+  holdl.sh / e2e_replay.sh fail on it, netrun / netpair print the count; build error for a stale ok row or a fixed
+  function that is void again (tried: reverting the P372 fix stops the build). port/tools/wasm_fn_name.py N names fn #N.
+- e2e: the pad input of p357 still fits: replayed to its end on the fixed build, all 163 checkpoints have the recorded
+  retrace, kind, level, mode and Conker position; only G differs (188 of 770 digests, all from 5830: the live flame's
+  random numbers). New REBASE=1 mode of e2e_replay.sh (18d7a135, e2e_rebase.py, docs/port/E2E.md) replaced only the
+  reference values (63cc6c58, `rebased` entry in the file). The flame of this route is a light flicker: frames 5830 /
+  5900 / 6000 differ from the no-fix build by at most 2..5 per channel over the whole picture (no sprite visible).
+- Tests (final build, wasm dcdf556b): check.sh GREEN (selftest 152/152); difftest --self EQUIV ret=int for all 16;
+  hold-L 5789 / 0x29 at 5795, no traps, 0 unaudited; e2e p357 on the rebased file 7700 IDENTICAL (163/163, 770 digests,
+  H / S compared); netpair 2p 9953 IDENTICAL; netpair 4p Bunker Deathmatch NET_BUNKER_PLAY=120 16421 retraces IDENTICAL
+  x3, no traps, 0 unaudited, no DESYNC. Not merged, not deployed.
 ### P372 (port-web-b, 2026-10-31): fix of the 4-player Deathmatch trap in heap_age_tagged_blocks (P371 open item)
 - Cause (port bug, not on the N64): flame_flicker / flame_flicker_b (effect3d update-2 handlers g_effect3d_update2_fns
   [0x23] / [0x24]) were C `void`, but the asm returns flame_flicker_update's v0 (1) untouched. effect3d_update calls them
