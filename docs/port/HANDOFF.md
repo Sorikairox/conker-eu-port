@@ -58,7 +58,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   NET_BUNKER_DEMO). Phase 2b done (P345, §11): room codes (Create room / Join room) through the Netlify Function
   /api/room on Netlify Blobs (source port/web/netlify, shipped by deploy_web.sh from ~/conker-netlify-fn), manual
   copy-paste codes under "manual codes"; local tests use tools/port/scripts/roomserver.mjs (netpair.sh ROOM=1), never
-  the production function. Next: a real multi-machine internet test; maybe a host "kick" for a stranger in the room.
+  the production function. P371: room setting Screen (own view by default: each player sees only their own view, the
+  renderer drops the others; §12). Next: a real multi-machine internet test; maybe a host "kick" for a stranger in the room.
 - Globals not renamed: 562 D_ symbols only declared in conker/include/variables.h (no C use), D_ names that appear
   only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
   identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
@@ -88,6 +89,34 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P371 (port-web-b, 2026-10-31): online "own view": each player sees only their own view (no screen peeking)
+- User request: "do online multiplayer but without split screen so people can't see other people position". Design and
+  results: docs/design/ONLINE_MULTIPLAYER.md §12.
+- 162b18d3 renderer (render-only, outside the hash): every peer still runs and *builds* every view (culling, LOD,
+  animation, caches are game state, so the game is untouched); gfx_f3dex2.c "P371 own view" draws only the local
+  player's view: its viewport + scissor zoomed about the view's centre to fill the canvas at full resolution (quadrants
+  x2, the 2-player strip zoomed by height and cut at the sides, Widescreen uses the widened view; scissor edges near the
+  canvas edge snapped), other views' draws dropped (by scissor box / by position for full-screen-scissor HUD pieces),
+  local HUD pieces scaled 1.5 and anchored to the nearest view edge, team scores + clock (straddling the split) moved to
+  the top centre, split lines dropped; paused = as drawn (the pause frame is the own view). Local player = the player
+  whose g_player_pad_map entry is this peer's channel, read per gfx task by port_ownview_views (port/boot/pc_overrides.c,
+  vbe TU, read-only). Export port_gfx_ownview(ch) / port_gfx_ownview_state(); test aid ?ownview=N (whitelisted under
+  netdet with p350log: render-only).
+- 61ef58c3 room setting: host chooses "Screen: OWN VIEW / SPLIT SCREEN" on the game-style ONLINE pages (setup + host room
+  page) or the drawer panel's "Screen" select (stored netview, default own view); netSessionConfig adds view, net.js
+  sends it to every guest in the config, main.js calls port_gfx_ownview at boot on every peer (a guest cannot switch
+  alone); session page line SCREEN; ?netview=own|split test override. Local split screen unchanged.
+- Evidence port_work/p371 (local room server only): own2 / split2 (2p: host = guest 8982; own = split 8964), own4g (4p
+  through the ONLINE pages, guests widescreen 1920x1080 / 1600x900: 9907 IDENTICAL x3, host_g4_lobby.png shows the
+  SCREEN row, *_185s.png each player's own view), split4 (own4g = split4 on 9907 for all 4 pages), pause2own /
+  pause2split (P1 pauses 7600-7800: own = split 9452), panel2 (ROOM=1 UI=1, guest widescreen: 8445 IDENTICAL), offline
+  (port_work/p371/offline/ov1p: 4p own view + pause scoreboard; port_work/p337/hov3ws = split hash 2225, ov2p 2p + pause),
+  roundend (timer shortened from the page: round ends into the WAR results normally). check GREEN, e2e p357 IDENTICAL.
+- Why a host setting: it applies to everyone, so nobody sees the split screen by accident; it is not anti-cheat (every
+  peer simulates everyone; positions are in every peer's memory).
+- Not done: real multi-machine players; 3-player layout and race / map HUD not reached in a test; container
+  conkerdev-web2 was created for check.sh (selftest). Not merged into port-web, not deployed (the user merges after the
+  trailer work).
 ### P370 (port-web, 2026-10-30): trailer v2 "Conker's Good Fur Day" with the game-style menus (tooling only, page unchanged)
 - User request: "Redo Conker's trailer with the new UI and showcase it." Outputs (port_work/trailer, gitignored,
   ROM-derived): conkers_good_fur_day_trailer_v2.mp4 (90.58 s, 1920x1080 60 fps, H.264 ~13.7 Mbit/s + AAC), _v2_25mb.mp4

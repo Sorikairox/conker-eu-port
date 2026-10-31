@@ -418,6 +418,8 @@
       <label class="netdelay" title="Each player's input reaches the game this many frames (20 ms each) late, so the network has time to bring it to the other computer. Automatic: the host measures the ping before the game starts and picks 2 to 8 frames. Untick it and raise the number if the game often waits for the other player.">Input delay
         <input id="net-delay-auto" type="checkbox" checked> automatic, or
         <input id="net-delay" type="number" min="1" max="16" value="3"> frames (host)</label>
+      <label class="netdelay" title="Own view: each player sees only their own player's view on the full screen, so nobody can look where the others are (P371). Split screen: everyone sees every player's view, as on one console. Player 1 (the host) chooses; it applies to every player in the room.">Screen
+        <select id="net-view"><option value="own">own view (no peeking)</option><option value="split">split screen</option></select> (host)</label>
       <div id="net-step-host" class="netstep" hidden>
         <div id="net-slots"></div>
         <div id="net-host-actions" class="row" style="margin-top:8px"><button id="net-invite" title="Make a code for one more player (4 players at most)">Invite another player</button>

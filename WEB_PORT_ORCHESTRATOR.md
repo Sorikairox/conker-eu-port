@@ -376,6 +376,10 @@ Prove it offline first: the same 4-pad script run twice gives identical per-retr
 - Render-only options may differ per player; anything that touches game C must come from the host.
 - Prove online multiplayer with a **real multiplayer session**, not a warp into the level: the warp skipped the code
   path that had the bug.
+- "Own view" (no screen peeking, Conker P371): never make the game skip drawing the other players' views (the draw
+  passes run culling, LOD, animation and caches: game state). Let the game build every view and have the renderer drop
+  the other views (by their scissor box / position) and zoom the local view's viewport + scissor to the canvas. It is
+  casual anti-peeking only: every peer simulates everyone, so the positions are in every peer's memory.
 
 ---
 
@@ -559,6 +563,13 @@ flash, controller pak).
     first load (and may have stored what it detected). A ?touch=1 style override never runs the auto-detection at all.
 63. Do not store an auto-detected default as if the user chose it: one wrong detection then sticks forever. Store only
     explicit choices and detect again at every load.
+64. A game global declared as a plain integer can hold the *address* of the real table (Conker's g_player_cams: the
+    code does `g_player_cams + p * 0x180`): reading through `&sym` reads the pointer's own word and gives zeros.
+65. Port objects linked into a test program without the game (Conker's sched_demo) cannot take weak references to game
+    data symbols (undefined at link). Read game memory through a small function in a game-side port file (Conker: a
+    vbe-compiled boot TU, which also gets the big-endian layout right) and declare that function weak in the renderer.
+66. Zooming one split-screen view to the canvas: the game's 2-pixel border at the screen edge becomes a ~13-pixel black
+    strip unless scissor edges near the canvas edge are snapped to it.
 
 ---
 

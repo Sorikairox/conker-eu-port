@@ -415,7 +415,7 @@
       T.myCh = m.ch; T.roster = m.roster; T.started = true; T.routes = m.routes || {};
       if (m.ping) T.rtt = m.ping;
       emit('config', { mask: m.mask, local: 1 << m.ch, delay: m.delay, autoDelay: m.autoDelay, ping: m.ping, hashEvery: m.hashEvery,
-        options: m.options, eeprom: m.eeprom ? unb64(m.eeprom) : null, ch: m.ch, roster: m.roster });
+        options: m.options, eeprom: m.eeprom ? unb64(m.eeprom) : null, ch: m.ch, roster: m.roster, view: m.view });
     } else if (m.t === 'refuse') status('the host refused: ' + m.why, 'bad');
     else if (m.t === 'bye') {
       N.log(`[net] ${pn(from)} left the session`);
@@ -475,7 +475,7 @@
     cfg.ping = worst ? Math.round(worst.median) : 0;
     for (const g of guests)
       sendCtlTo(g, { t: 'config', mask, delay: cfg.delay, autoDelay: cfg.autoDelay, ping: cfg.ping, hashEvery: cfg.hashEvery, options: cfg.options,
-        eeprom: cfg.eeprom ? b64(cfg.eeprom) : null, ch: g, roster: T.roster, routes: T.routes });
+        eeprom: cfg.eeprom ? b64(cfg.eeprom) : null, ch: g, roster: T.roster, routes: T.routes, view: cfg.view });   // P371 view: the SCREEN setting
     emit('roster', N.slots());
     emit('config', Object.assign({}, cfg, { local: 1, ch: 0, roster: T.roster }));
   };

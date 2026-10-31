@@ -715,6 +715,15 @@ const GMenu = (() => {
         return true;
       } };
   }
+  function screenItem() {   // P371: the room's SCREEN setting (the panel's select), read by netSessionConfig at Start
+    const CH = ['own', 'split'];
+    return { kind: 'choice', label: 'Screen', choices: CH, all: CH,
+      help: 'Own view: each player sees only their own player on the full screen, so nobody can look where the others are. Split screen: everyone sees every player, as on one console. Player 1 chooses for the whole room.',
+      locked: () => (onlineState() === 'guest' || onlineState() === 'session' ? 'Player 1 (the host) chooses the screen.' : ''),
+      get: () => ($('net-view').value === 'split' ? 'split' : 'own'),
+      names: (v) => (v === 'split' ? 'SPLIT SCREEN' : 'OWN VIEW'),
+      set: (v) => { $('net-view').value = v; $('net-view').onchange(); return true; } };
+  }
   function onlineItems() {
     const st = onlineState(), t = NT(), backRow = { kind: 'action', label: 'Back', help: 'Back to the customisation settings (a room stays open).', act: () => back() };
     const busy = (what) => () => (U.busy === what ? 'One moment…' : U.busy ? 'One moment…' : '');
@@ -726,6 +735,7 @@ const GMenu = (() => {
           locked: busy('create'), act: () => (ingame ? reloadInto('create') : onlineCreate()) },
         { kind: 'action', label: 'Join room', help: 'Join a friend\'s room with the 5-letter code they give you (pick the letters with the pad or type them).' + restart,
           locked: busy('join'), act: () => (ingame ? reloadInto('join') : (U.pick = { code: '', cx: 0, cy: 0 }, go('pick'))) },
+        screenItem(),
         delayItem(),
         { kind: 'action', label: 'Manual codes (developer tools)', help: 'Advanced: connect without the room server by copying long codes between the players (the Online panel of the page\'s developer tools).' + restart,   // P368: was "Manual codes (page menu)"
           locked: busy('x'), act: () => {
@@ -741,6 +751,7 @@ const GMenu = (() => {
         { kind: 'action', get label() { return n ? `Start the game (${n + 1} players)` : 'Start the game'; },
           help: 'Everyone in the room boots the game together; player 1 leads the menus. Nobody can join after this.',
           locked: () => (U.busy === 'start' ? 'Starting…' : !n ? 'Wait until another player joined the room.' : ''), act: onlineStart },
+        screenItem(),
         delayItem(),
         { kind: 'action', label: 'Leave the room', help: 'Close the room (the players in it are told) and start over.', act: onlineLeave },
         backRow,
@@ -1118,7 +1129,8 @@ const GMenu = (() => {
       const v = ch === me ? ['YOU', C.on] : pe && pe.lost ? ['LEFT (STANDS STILL)', C.title] : [pe && pe.rtt ? `PING ${Math.round(pe.rtt)} MS` : 'PING -', C.text];
       line(y, `PLAYER ${ch + 1}`, v[0], C.text, v[1]); y += 10;
     }
-    if (netCfg) { line(y + 2, 'INPUT DELAY', `${netCfg.delay} (${netCfg.delay * 20} MS${netCfg.autoDelay ? ', AUTO' : ''})`, C.dim, C.dim); y += 12; }
+    if (netCfg) { line(y + 2, 'INPUT DELAY', `${netCfg.delay} (${netCfg.delay * 20} MS${netCfg.autoDelay ? ', AUTO' : ''})`, C.dim, C.dim); y += 10; }
+    if (netCfg) { line(y + 2, 'SCREEN', netCfg.view === 'own' ? 'OWN VIEW' : 'SPLIT SCREEN', C.dim, C.dim); y += 12; }   // P371
     if (t && t.desync) { T(`DESYNC AT RETRACE ${t.desync.frame}`, 160, y + 2, { scale: S, color: C.title, align: 'center', alpha: pulse }); y += 12; }
     return Math.max(y + 6, 92);
   }

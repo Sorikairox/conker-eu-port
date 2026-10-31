@@ -497,3 +497,62 @@ per function instance; a room code is guessable by brute force in principle (6.4
 per instance), and a stranger who guesses one only takes a slot the host can see before pressing Start (no kick
 button yet); a guest whose link to the host fails keeps its room slot (reload and make a new room); no TURN.
 
+
+## 12. Own view: no screen peeking (P371, 2026-10-31)
+
+User request: "do online multiplayer but without split screen so people can't see other people position". Every peer
+still runs the whole game; only the local player's view reaches the canvas, full size.
+
+- **Where it happens: the renderer, not the game.** §4 already noted that making the game *draw* one view is unsafe: the
+  per-view draw passes run culling, LOD, animation, effects and the model / texture caches, all hashed game state. So
+  the game keeps building the display list of every view and the renderer (`port/gfx/gfx_f3dex2.c`, "P371 own view",
+  outside the hash like Widescreen) decides what reaches the canvas:
+  - **3D of the local view:** its GL viewport and scissor are scaled about the view's centre by
+    `ov_z = max(canvas / view)` per axis (quadrants 4:3 fill exactly, x2; a 2-player strip, 232 x 106 N64 pixels, is
+    zoomed by its height and cut at its sides; with Widescreen the widened view is zoomed). The scene is rasterised at
+    full canvas resolution (no blit of a quarter). Scissor edges that land within 4 N64 pixels of the canvas edge go to
+    it (the game's 2-pixel screen border would otherwise be a ~13-pixel black strip).
+  - **Other views:** triangles and rectangles drawn with another player's view as scissor (their scenes, fades, scope,
+    "out" picture) are dropped; so are HUD pieces drawn with the full-screen scissor that lie inside another view.
+  - **HUD** (`mp_hud_draw_views` + the text queue: full-screen scissor, each view's pieces placed relative to its view
+    rectangle): a piece inside the local view is scaled by 3/4 of the zoom (1.5) and anchored to the nearest edge of the
+    view (centre in the first / last 40 % of the view: left / right, top / bottom; else centred), so health top left,
+    radar top right. Pieces that straddle views across the horizontal split (team flags + scores, the clock) move up by
+    `split - 14` N64 pixels to the top centre; the split lines (thin full-width / full-height fill rectangles) are
+    dropped. Paused: everything as drawn (the game draws no views then; the frozen frame behind the pause menu is the
+    canvas copy = the own view, a GPU read-back outside the hash like every pause frame); the pause scoreboard shows
+    every player's stats, as on the N64.
+  - The local player = the player whose controller `g_player_pad_map[p]` is this peer's channel, read each gfx task by
+    `port_ownview_views` (port/boot/pc_overrides.c, a vbe TU: read-only, no statics) with the view rectangles
+    (`g_player_cams` records +0x24..0x30) and the pause state. Outside a multiplayer split screen (menus, results,
+    1 view) nothing changes.
+- **Setting: a room setting chosen by the host** (ONLINE pages: "Screen: OWN VIEW / SPLIT SCREEN", drawer panel: "Screen"
+  select; stored as `netview`, default own view). netSessionConfig puts `view` into the session config; net.js sends it
+  to every guest with the rest of the config, and main.js calls `port_gfx_ownview(ch)` (or -1) on each peer at boot, so
+  a player cannot switch to the split screen alone from the menus. The session page shows "SCREEN: OWN VIEW". Local
+  split-screen play (one machine) never calls it. Test aids: `?netview=own|split` (host page, wins over the setting),
+  `?ownview=N` (any page, controller N; whitelisted under netdet because it is render-only).
+- **Why a host setting and not anti-cheat:** every peer simulates every player (lockstep), so a determined player can
+  always read the others' positions from memory or patch the page. The setting removes casual peeking (the split screen
+  that is simply on screen), which is what the request is about.
+
+**Results** (logs / screenshots in port_work/p371, not committed; Total War route from power-on unless noted):
+
+| Run | Setup | Retraces identical | Notes |
+|---|---|---|---|
+| own2 | 2 players, copy-paste codes, own view | 8982 host = guest | host_150s.png (Conker, player 1), guest_150s.png (Tediz, player 2), each full window |
+| split2 | same, `HOSTQ=&netview=split` | 8964 host = guest; own2 = split2 on 8964 (host and guest) | the split screen as before |
+| own4g | 4 players, ROOM=1 UI=gmenu (room through the ONLINE pages), own view; guests widescreen; viewports 1280x720 / 1920x1080 / 1280x720 / 1600x900 | 9907 x 3 | host_g4_lobby.png (SCREEN: OWN VIEW row), *_185s.png each player's own view, 16:9 on the guests |
+| split4 | 4 players, copy-paste, split | 9919 x 3; own4g = split4 on 9907 for all four pages | |
+| pause2own / pause2split | 2 players, P1 pauses at 7600 and resumes at 7800 | 9481 / 9452; own = split on 9452 (host and guest) | the pause frame is the own view; play goes on after it |
+| panel2 | 2 players, ROOM=1 UI=1 (drawer panel buttons), guest widescreen 1280x720 | 8445 | guest_150s.png: 16:9 own view |
+| offline (netrun, one page, netdet) | 4 pads, `?ownview=3` + nethash vs split | 2225 (6000..8224) | p337/hov3ws; `?ownview=1` + pause (ov1p), `?ownview=2` 2 players + pause (ov2p) |
+| roundend (offline) | timer set to 6 s at 140 s | | the round ends normally into the WAR results page (own view off outside the level) |
+
+check.sh GREEN, e2e p357 7700 IDENTICAL. Commits 162b18d3 (renderer), 61ef58c3 (room setting).
+
+**Left / limits:** not tried with real players on several machines; a 3-player session (three quadrants) and race /
+map modes (lap times, the overview map 0x1000) were not reached in a test (the code is generic over the view
+rectangles); per-view texts are anchored glyph by glyph, so a long text centred in a view that straddles the 40 % /
+60 % lines could be split (none seen); the radar shows what the N64 radar shows (other players' dots), as in split
+screen.
