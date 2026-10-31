@@ -516,9 +516,10 @@ still runs the whole game; only the local player's view reaches the canvas, full
     "out" picture) are dropped; so are HUD pieces drawn with the full-screen scissor that lie inside another view.
   - **HUD** (`mp_hud_draw_views` + the text queue: full-screen scissor, each view's pieces placed relative to its view
     rectangle): a piece inside the local view is scaled by 3/4 of the zoom (1.5) and anchored to the nearest edge of the
-    view (centre in the first / last 40 % of the view: left / right, top / bottom; else centred), so health top left,
-    radar top right. Pieces that straddle views across the horizontal split (team flags + scores, the clock) move up by
-    `split - 14` N64 pixels to the top centre; the split lines (thin full-width / full-height fill rectangles) are
+    view (x: centre in the first / last 30 %: left / right; y: 40 %: top / bottom; else centred; a text line is one group
+    that takes its first piece's anchor, efd90471), so health top left, radar top right, the Deathmatch score line
+    "0 (1st)" top centre. Pieces that straddle views across the horizontal split (team flags + scores, the clock) move
+    to the bottom centre; the split lines (thin full-width / full-height fill rectangles) are
     dropped. Paused: everything as drawn (the game draws no views then; the frozen frame behind the pause menu is the
     canvas copy = the own view, a GPU read-back outside the hash like every pause frame); the pause scoreboard shows
     every player's stats, as on the N64.

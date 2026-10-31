@@ -117,6 +117,19 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - Not done: real multi-machine players; 3-player layout and race / map HUD not reached in a test; container
   conkerdev-web2 was created for check.sh (selftest). Not merged into port-web, not deployed (the user merges after the
   trailer work).
+- **Fix efd90471** (coordinator report from the trailer's ?ownview=1 replay, Bunker Deathmatch): the score line
+  "0 (4th)" was torn ("0 (4      th)") because each rectangle took its own edge anchor (the "st"/"th" picture's centre
+  is at 63 % of a quadrant -> right edge), and the clock (shared band, moved to the top) sat on the score line. Now a HUD
+  text line is one group (ov_group: rectangles continuing the same row take the first piece's anchor), the x centre
+  zone is 30-70 %, and the shared band (clock, team scores) goes to the bottom centre. Evidence port_work/p371fix:
+  kill4own (4p Deathmatch with the trailer's kill pads; host 1920x1080 widescreen "0 (4th)" + death skull, guest 4:3
+  "0 (1st)": 7929 IDENTICAL x3), dm4own / dm4split (4p Deathmatch random play: own = split up to 9092), dm2own (2p
+  Deathmatch, host widescreen / guest 4:3: 7964 IDENTICAL), tw2own / tw2split (2p Total War, flags + clock at the
+  bottom: 7975 IDENTICAL, own = split 7943), offline p337/dmov1. check GREEN, e2e p357 IDENTICAL.
+- Found (not caused by P371, not fixed): 4p Bunker Deathmatch with NET_BUNKER_PLAY=60 traps on every page at retrace
+  ~9093 in heap_age_tagged_blocks (memory access out of bounds, world_update), in split screen too (dm4split); after it
+  the fiber stacks differ (DESYNC). Also P350 widescreen: the death "out" picture (black + skull) covers only the 4:3
+  part of a view, the widened sides show the 3D (same in split screen, kill4own/host_150s.png).
 ### P370 (port-web, 2026-10-30): trailer v2 "Conker's Good Fur Day" with the game-style menus (tooling only, page unchanged)
 - User request: "Redo Conker's trailer with the new UI and showcase it." Outputs (port_work/trailer, gitignored,
   ROM-derived): conkers_good_fur_day_trailer_v2.mp4 (90.58 s, 1920x1080 60 fps, H.264 ~13.7 Mbit/s + AAC), _v2_25mb.mp4
