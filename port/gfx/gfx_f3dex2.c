@@ -334,6 +334,22 @@ static void ws_view_clip(float *left, float *right) {
     *left = sc_box[0] <= 4 ? 0 : ws_x3d(sc_box[0]);
     *right = sc_box[2] >= W - 4 ? (float)canvas_w : ws_x3d(sc_box[2]);
 }
+/* P374: rect_ext for a texture rectangle among a player's own overlays (tag 3) whose colour reads no texel (a solid
+ * colour, or a shape cut out by the texture's alpha: the iris / lens quarters, black outside the circle) and whose tile
+ * clamps in s: the edges at (or past) the view's 4:3 edge reach the widened view's edge, the texture coordinate carried
+ * on (rect_ext bit 2), so the clamped edge texels cover the side strip. Nothing is stretched. 0: leave it as it is. */
+static int ws_mask_rect_edges(unsigned tile, float x0, float x1) {
+    unsigned w0 = combine_w0, w1 = combine_w1, in[8] = {w0 >> 20 & 15, w1 >> 28 & 15, w0 >> 15 & 31, w1 >> 15 & 7,
+                                                      w0 >> 5 & 15, w1 >> 24 & 15, w0 & 31, w1 >> 6 & 7};
+    for (int i = 0; i < 8; i++) {
+        unsigned v = in[i], c = (i & 3) == 2;   /* c input: 8 / 9 = TEXEL0 / TEXEL1 alpha too */
+        if (v == 1 || v == 2 || (c && (v == 8 || v == 9))) return 0;
+    }
+    if (!(tiles[tile].cms & 2) && tiles[tile].masks) return 0;   /* wraps in s: carrying on would repeat the picture */
+    float b0 = sc_on ? sc_box[0] : 0, b1 = sc_on ? sc_box[2] : (float)cimg_width;
+    int e = (x0 <= b0 + 3) | (x1 >= b1 - 3) << 1;
+    return e ? e | 4 : 0;
+}
 /* rect_ext bits for a rectangle x0 .. x1: an edge on the screen's edge, or (tag 3) on the view's (scissor box) edge */
 static int ws_rect_edges(float x0, float x1) {
     float W = (float)cimg_width;
@@ -1686,12 +1702,20 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
     float xs[4] = {x0, x1, x0, x1}, ys[4] = {y0, y0, y1, y1}, ss[4] = {s0, s1, s0, s1}, ts[4] = {t0, t0, t1, t1};
     int ext = rect_ext;
     rect_ext = 0;
+    float ext_xl = 0, ext_xr = 0;   /* P374: rect_ext bit 2, the canvas x of the left / right edge, s carried on */
+    if (ws_on && (ext & 4)) {
+        float a = ws_x2d(x0), b = ws_x2d(x1), cl, cr;
+        ws_view_clip(&cl, &cr);
+        ext_xl = (ext & 1) && cl < a ? cl : a; ext_xr = (ext & 2) && cr > b ? cr : b;
+        if (b > a) { float sa = s0 + (s1 - s0) * (ext_xl - a) / (b - a), sb = s0 + (s1 - s0) * (ext_xr - a) / (b - a); ss[0] = ss[2] = sa; ss[1] = ss[3] = sb; }
+    }
     if (ws_log_on) port_log("[p350] task %u rect rm %d %.1f,%.1f..%.1f,%.1f ext %d sc %d %.1f,%.1f..%.1f,%.1f vp %d %d %d %d oth %06X cc %06X/%08X timg %08X\n", gfx_stats.tasks, rm, x0, y0, x1, y1, ext,
                             sc_on, sc_box[0], sc_box[1], sc_box[2], sc_box[3], vp_scale[0], vp_scale[1], vp_trans[0], vp_trans[1], oth_h, combine_w0, combine_w1, timg.raw);
     float gex = 0, gey = 0;
     if (ov_cls == 2) ov_group(x0, y0, x1, y1, &gex, &gey);   /* P371: the anchors of the piece's group */
     for (int i = 0; i < 4; i++) {
-        if (ws_on) { float X = (i & 1) ? ((ext & 2) ? ws_edge(xs[i]) : ws_x2d(xs[i])) : ((ext & 1) ? ws_edge(xs[i]) : ws_x2d(xs[i])); q[i].x = X / canvas_w * 2 - 1; }
+        if (ws_on) { float X = (ext & 4) ? ((i & 1) ? ext_xr : ext_xl)
+                             : (i & 1) ? ((ext & 2) ? ws_edge(xs[i]) : ws_x2d(xs[i])) : ((ext & 1) ? ws_edge(xs[i]) : ws_x2d(xs[i])); q[i].x = X / canvas_w * 2 - 1; }
         else
         q[i].x = xs[i] / W * 2 - 1;
         q[i].y = 1 - (ys[i] - VI_Y0) / H * 2; q[i].z = 0; q[i].w = 1;
@@ -2744,6 +2768,11 @@ void gfx_run_dl(const void *dl) {
                 sv -= 0.5f * ds; tv -= 0.5f * dt;
             }
             if (hxs_on && ws_opt) { ws_calc(); if (ws_on) rect_ext = ws_rect_edges(ulx, lrx); }   /* P350: a full frame, per canvas pixel */
+            else if (ws_opt) {   /* P374 (hi-res 2D: s runs past what the N64 reads, the tile's clamp holds the edge texel) */
+                ws_calc();
+                if (ws_on && ws_tag == 3) rect_ext = ws_mask_rect_edges(tex_tile, ulx, lrx);
+                if ((rect_ext & 4) && rect_hires_mode) { rect_hires_clamp[0] = -1e9f; rect_hires_clamp[2] = 1e9f; }
+            }
             if (!gfx_measure_only) rect(ulx, uly, lrx, lry, sv, tv, sv + ds * (lrx - ulx), tv + dt * (lry - uly), 0xFFFFFFFF, 2);
             tex_tile = saved_tile; hxs_on = 0; rect_hires_mode = 0; state_dirty = 1;
             break;
