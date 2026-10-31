@@ -209,6 +209,12 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   zooms a 16:9 quadrant by 2 about its centre = x2 from the corner); the HUD does not (P371 scales it by 1.5 and anchors
   it), so the last third of the zoom cross-fades. Seen in the own-view footage (P371, not changed here): the place
   suffix of the score is drawn apart from its number ("1 (1      ST)") and the clock sits on top of the score.
+- **v8** (user: subtitles of LEDGE GRAB / TAIL SPIN not useful; own view more visible, as an option):
+  conkers_good_fur_day_trailer_v8.mp4 / _v8_25mb.mp4 / _v8_contact_sheet.jpg / _v8_shotlist.txt (85.63 s, same beats).
+  LEDGE GRAB and LONGER TAIL SPIN keep only their titles (ORIGINAL / WITH THE OPTION stay). In the ONLINE beat the title
+  slot says ONLINE MULTIPLAYER over the split screen and, as the zoom lands (66.62), OWN VIEW ONLY MODE - NO PEEKING /
+  OPTIONAL - SET BY THE HOST (title size, colours and band; was a small tag). mpkill_own recaptured with the P371 HUD
+  fix (efd90471): the score reads "1 (1ST)", the clock is at the bottom centre, clear of the title (P2 still dies at 6692).
 ### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
 - User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
   the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
