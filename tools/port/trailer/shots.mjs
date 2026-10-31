@@ -162,3 +162,6 @@ SHOTS.mpbot = { ...SHOTS.mpkill, padsEnv: 'port_work/trailer/mpkill/handoff.env'
     { at: 5981, eval: `__mpctl.start(${process.env.MPCFG || '{}'})` },
     ...Array.from({ length: 120 }, (_, k) => ({ at: 5990 + 25 * k, eval: `JSON.stringify(__mpctl.log.slice(-2)) + ' ' + ${MPLOG_EVAL}` })),
     { at: +(process.env.MPEND || 7000), eval: '__mpctl.dump()' }] };
+// P370 v7: the same replay with P371's own view (?ownview=1: the renderer draws only player 1's view, full screen at full
+// resolution; render-only, so the game runs the same and the pictures line up retrace for retrace with 'mpkill')
+SHOTS.mpkill_own = { ...SHOTS.mpkill, query: SHOTS.mpkill.query + '&ownview=1', secs: +(process.env.MPSECS || 10.8) };

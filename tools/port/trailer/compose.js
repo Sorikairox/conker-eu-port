@@ -23,7 +23,7 @@ const BEAT = 0.6182;                 // features music: 97.06 BPM (music_0c, mus
 const TF = 45.6;                     // the cut to the features, on a downbeat of the features music (the logo holds ~6 s)
 // P370 v2: the features part shows the game-style menus (boot screen, ONLINE pages, photo mode, touch controls on a
 // phone); v4 (user): the customisation settings beat removed, v1's widescreen shot follows the browser beat; 64 beats
-// (v1 54): browser 8, widescreen 8, ledge 6, spin 6, online 10 (v6: the kill), photo 6, phone 6, and more 6, end card 8 (the end card
+// (v1 54): browser 8, widescreen 8, ledge 6, spin 6, online 10 (v6: the kill; v7: split -> own view), photo 6, phone 6, and more 6, end card 8 (the end card
 // starts and ends on 8-beat phrase boundaries of the features music: beats 56 and 64)
 const T = { browser: TF, wide: TF + 8 * BEAT, ledge: TF + 16 * BEAT, spin: TF + 22 * BEAT, online: TF + 28 * BEAT,
   photo: TF + 38 * BEAT, phone: TF + 44 * BEAT, more: TF + 50 * BEAT, end: TF + 56 * BEAT };
@@ -407,24 +407,31 @@ seg(T.spin, T.online + 0.1, 0.06, 0.1, async (g, lt) => {
   caption(g, lt - 0.1, T.online - T.spin + 0.1 - 0.1, 'LONGER TAIL SPIN', 'HOVER TWICE AS LONG', { y: 878 });
 });
 
-// G. online (P370 v6, user: "Remove the lobby part, just show 4 player gameplay. Get one player to kill another."): the
-// 4-player Bunker split screen of shot 'mpkill' (the ?netdet replay, pads: tools/port/trailer/mpctl.js's bot recorded
-// as ?padf scripts, mpkill.py). Two parts of 5 beats, a jump cut on the beat between them: (1) P1 (top left, green
-// helmet) walks up to P2 (the bear, top right: P1 comes into his view), faces him and throws a grenade (pictures
-// 70 - 255, retrace 6338 - 6492); (2) the blast at the bear (picture ~495, retrace 6692), the bear's view sprayed and
-// irised out, P1's score 0 -> 1 (pictures 455 - 640), with a slow push-in on the top half.
-const MP_A = [70, 255], MP_B0 = 455, MP_BLAST = 495;
+// G. online (P370 v6 / v7). v6 (user: "Remove the lobby part, just show 4 player gameplay. Get one player to kill
+// another."): the 4-player Bunker split screen of shot 'mpkill' (the ?netdet replay of tools/port/trailer/mpctl.js's
+// bot, recorded as ?padf scripts by mpkill.py). v7 (user: "transitioning from split to non split right before the
+// kill"): the same replay with P371's own view ('mpkill_own', ?ownview=1: player 1's view full screen at full
+// resolution; render-only, the same retraces). 10 beats:
+//   beats 0-4  split: P1 (top left) walks up to the bear (top right), faces him, throws (pictures 95 - 243)
+//   beats 4-5  jump cut on the beat to just before the blast, still split (pictures 400 - 437)
+//   beats 5-6  P1's quarter grows to fill the screen (anchored top left, x1 -> x2 = exactly the own view's zoom of a
+//              16:9 quadrant), the own-view picture of the same retrace fading in over its last third (437 - 474)
+//   beats 6-10 own view: the blast at the bear (picture ~495, retrace 6692), the score 0 -> 1, KILL! (474 - 622)
+const MP_A = [95, 243], MP_B0 = 400, MP_BLAST = 495, MP_OWN_LABEL = 'OWN VIEW - NO SCREEN PEEKING';
 seg(T.online, T.photo + 0.1, 0.06, 0.1, async (g, lt) => {
-  const dur = T.photo - T.online, half = 5 * BEAT;
-  const i = lt < half ? MP_A[0] + lt * 60 : MP_B0 + (lt - half) * 60;
-  if (lt < half) g.drawImage(await shotPic('mpkill', i), 0, 0, W, H);
-  else {   // push in on the top half (P1 and the bear) from the cut on
-    const z = 1 + 0.3 * ease((lt - half) / 1.2);
-    g.save(); g.translate(W / 2, 0); g.scale(z, z); g.translate(-W / 2, 0);
-    g.drawImage(await shotPic('mpkill', i), 0, 0, W, H); g.restore();
-  }
+  const dur = T.photo - T.online, b = lt / BEAT;
+  const i = b < 4 ? MP_A[0] + lt * 60 : MP_B0 + (lt - 4 * BEAT) * 60;
+  if (b < 5) g.drawImage(await shotPic('mpkill', i), 0, 0, W, H);
+  else if (b < 6) {   // the zoom: P1's quarter (0, 0, W / 2, H / 2) grows to the whole frame
+    const u = ease(b - 5), z = 1 + u;
+    g.drawImage(await shotPic('mpkill', i), 0, 0, W * z, H * z);
+    const fa = clamp((b - 5.62) / 0.38);
+    if (fa > 0) { g.save(); g.globalAlpha = fa; g.drawImage(await shotPic('mpkill_own', i), 0, 0, W, H); g.restore(); }
+  } else g.drawImage(await shotPic('mpkill_own', i), 0, 0, W, H);
+  const oa = clamp((b - 6.1) / 0.4) * clamp((dur + 0.05 - lt) / 0.2);
+  if (oa > 0) label(g, MP_OWN_LABEL, 1860, 975, 3, { align: 'right', fill: '#fff', alpha: oa });
   const ka = clamp((i - MP_BLAST - 6) / 8) * clamp((dur + 0.05 - lt) / 0.2);
-  if (lt >= half && ka > 0) label(g, 'KILL!', 60, 470, 4.4, { fill: ACCENT, alpha: ka });
+  if (b >= 6 && ka > 0) label(g, 'KILL!', 60, 190, 4.4, { fill: ACCENT, alpha: ka });
   caption(g, lt - 0.1, dur + 0.1 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { y: 860 });
 });
 
@@ -676,7 +683,7 @@ async function buildAudio(only) {
     { const src = ctx.createBufferSource(); src.buffer = mb; src.connect(mg); src.start(TF - lead, Math.max(0, MUSIC_DOWNBEAT - lead)); }
     // sound effects of the shots under their segments: [shot, timeline start, duration, first picture, gain]
     const SFX = [['run29', T.wide, T.ledge - T.wide, 300, 0.45],
-      ['mpkill', T.online, 5 * BEAT, MP_A[0], 0.5], ['mpkill', T.online + 5 * BEAT, T.photo - T.online - 5 * BEAT, MP_B0, 0.75],   // v6: the match, the blast   // v1's widescreen shot and its sound (v4: the customisation take is gone)
+      ['mpkill', T.online, 4 * BEAT, MP_A[0], 0.5], ['mpkill', T.online + 4 * BEAT, T.photo - T.online - 4 * BEAT, MP_B0, 0.75],   // the match, the blast (v7: the cut at beat 4)   // v1's widescreen shot and its sound (v4: the customisation take is gone)
       ['ledge13', T.ledge, T.spin - T.ledge, 66, 0.7], ['spin_on', T.spin, T.online - T.spin, 110, 0.5]];
     for (const [shot, t0, dur, pic, gain] of SFX) {
       const { b, m } = await pcmBuffer(ctx, shot);
