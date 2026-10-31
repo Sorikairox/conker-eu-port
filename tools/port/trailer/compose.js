@@ -246,7 +246,6 @@ function card(g, t, c) {
 // no G / D, and the game has a single text font, set 0), so GOOD and the strike are drawn as pen strokes in that red
 // (canvas paths, a little jitter and pressure-like width), with the logo lettering's dark rim.
 const PEN_RED = '#e3261d', PEN_RIM = '#2a0806';
-const STRIKE_AT = W_GOOD, WRITE_AT = W_GOOD + 0.18, WRITE_DUR = 0.55;
 // smooth deterministic wobble (sum of sines), for a hand-drawn look that is the same in every frame
 const wob = (u, k) => 0.5 * Math.sin(u * 7.1 + k * 1.7) + 0.3 * Math.sin(u * 13.3 + k * 4.1) + 0.2 * Math.sin(u * 23.9 + k * 2.3);
 function ellipsePts(cx, cy, rx, ry, a0, a1, n = 48) { const p = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; p.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); } return p; }
@@ -287,29 +286,36 @@ function penStrokes(g, strokes, prog, map, w, seed) {
   g.restore();
 }
 // P355 (user): the game's own logo instead of a game-font title. The cutscene's "Conker's Bad Fur Day" logo fades in
-// from picture ~2390 and has settled by ~2442 (then the side doors start closing). The near-static wide shot before it
-// is played a little faster (a smooth ramp skipping LOGO_SKIP pictures between RAMP[0] and RAMP[1], audio untouched),
-// so the logo is fully in just before his "good" (39.6); the picture then holds on LOGO_HOLD. On "good" the red pen
-// strikes the logo's "Bad" (its box measured on picture 2448: x 715-1215, y 170-345, BAD_BOX) and "Good" is written
-// to its upper right, in the stone wall beside "Conker's", tilted like a correction.
-const LOGO_SKIP = 78, RAMP = [36.9, 38.5], LOGO_HOLD = 2448;
+// from picture ~2390 and has settled by ~2442 (then the side doors start closing); the picture holds on LOGO_HOLD.
+// The red pen's strike over the logo's "Bad" (its box measured on picture 2448: x 715-1215, y 170-345, BAD_BOX) and
+// "Good" to its upper right, in the stone wall beside "Conker's", tilted like a correction (v5: shown complete).
+const LOGO_HOLD = 2448;   // v5: was LOGO_SKIP = 78, RAMP = [36.9, 38.5] (the speed-up to the game's logo, gone)
 const BAD_BOX = { x: 715, y: 170, w: 500, h: 175 }, GOOD_AT = { x: 1240, y: 72, ch: 138, rot: -9 };
 // two strokes through the middle of the logo's Bad (u, v in BAD_BOX)
 const LOGO_STRIKES = [[[-0.02, 0.72], [0.35, 0.62], [0.7, 0.52], [0.99, 0.40]], [[0.02, 0.42], [0.5, 0.54], [0.98, 0.70]]];
-const introPic = (lt) => Math.min(LOGO_HOLD, lt * 60 + LOGO_SKIP * ease((lt - RAMP[0]) / (RAMP[1] - RAMP[0])));
+// P370 v5 (user): the clean logo is never seen. The throne room plays in real time up to Conker's "good" (picture
+// 2376 at 39.6; the game's own logo starts fading in at ~2392, so CLEAN_LAST clamps just before it); on "good" the
+// logo appears already corrected: the settled logo picture (LOGO_HOLD) with BAD struck out and Good written in red,
+// in by a LOGO_IN-second fade (?logoin=cut: a hard cut on the word). No strike / write-on animation any more.
+// (v1-v4: LOGO_SKIP / RAMP sped the wide shot up so the game's own logo faded in before the line, then the pen drew.)
+const CLEAN_LAST = 2388, LOGO_IN = Q.get('logoin') === 'cut' ? 0 : 0.12;
+const introPic = (lt) => (lt < W_GOOD ? Math.min(CLEAN_LAST, lt * 60) : LOGO_HOLD);   // was: the ramp to the game's logo
+function logoCorrected(g) {   // the struck-out Bad and the handwritten Good, complete, on the logo picture
+  penStrokes(g, LOGO_STRIKES, 1, (u, v) => [BAD_BOX.x + u * BAD_BOX.w, BAD_BOX.y + v * BAD_BOX.h], 30, 3);
+  const { x, y, ch } = GOOD_AT, rot = GOOD_AT.rot * D;
+  penStrokes(g, GOOD_STROKES, 1, (u, v) => { const px = u * ch, py = v * ch; return [x + px * Math.cos(rot) - py * Math.sin(rot), y + px * Math.sin(rot) + py * Math.cos(rot)]; }, 19, 11);
+}
 seg(0, TF, 1.0, 0, async (g, lt) => {
-  // during the hold on LOGO_HOLD a very slow push-in (4 % over the hold), the pen strokes ride with the picture
-  const hold0 = (LOGO_HOLD - LOGO_SKIP) / 60, zk = 1 + 0.04 * ease((lt - hold0) / (TF - hold0));
+  // from "good" on a very slow push-in (4 % up to the cut), the pen strokes ride with the picture
+  const zk = 1 + 0.04 * ease((lt - W_GOOD) / (TF - W_GOOD));
   g.save(); g.translate(W / 2, H * 0.42); g.scale(zk, zk); g.translate(-W / 2, -H * 0.42);
-  g.drawImage(await shotPic('intro', introPic(lt)), 0, 0, W, H);
-  if (lt >= STRIKE_AT) {   // the strike over the logo's "Bad": two quick pen lines across the box
-    const map = (u, v) => [BAD_BOX.x + u * BAD_BOX.w, BAD_BOX.y + v * BAD_BOX.h];
-    penStrokes(g, LOGO_STRIKES, clamp((lt - STRIKE_AT) / 0.2), map, 30, 3);
-  }
-  if (lt >= WRITE_AT) {   // "Good" written in red beside it
-    const { x, y, ch } = GOOD_AT, rot = GOOD_AT.rot * D;
-    const map = (u, v) => { const px = u * ch, py = v * ch; return [x + px * Math.cos(rot) - py * Math.sin(rot), y + px * Math.sin(rot) + py * Math.cos(rot)]; };
-    penStrokes(g, GOOD_STROKES, clamp((lt - WRITE_AT) / WRITE_DUR), map, 19, 11);
+  const la = LOGO_IN ? clamp((lt - W_GOOD) / LOGO_IN) : (lt >= W_GOOD ? 1 : 0);
+  if (la < 1) g.drawImage(await shotPic('intro', Math.min(CLEAN_LAST, lt * 60)), 0, 0, W, H);
+  if (la > 0) {
+    g.save(); g.globalAlpha = la;
+    g.drawImage(await shotPic('intro', LOGO_HOLD), 0, 0, W, H);
+    logoCorrected(g);
+    g.restore();
   }
   g.restore();
   vignette(g, 0.45);
