@@ -4,8 +4,12 @@
 
 u8 *gfx_other_mode_cached(u8 *, s32, s32, s8 *);
 
+/* P373: screen-tint draw (g_screen_tint_fx_draw_fns [0], through screen_tint_draw_dispatch, the render-layer draw callback
+ * of node type 0x5A: node_render_layers_draw does gdl = draw(gdl, node, view)). The asm ends with a call of
+ * gfx_other_mode_cached and returns with its v0 (the advanced display-list pointer) untouched; the C used to be void, so the
+ * port's render layer went on at display-list address 0. Now it returns that pointer, as the asm. */
 /* was func_151A5720 */
-void screen_tint_draw_fill(u8 *arg0, u8 *arg1, s16 arg2) {
+u8 *screen_tint_draw_fill(u8 *arg0, u8 *arg1, s16 arg2) {
     struct {
         s8 uAB;
         s32 uAC;
@@ -139,7 +143,7 @@ block_7:
     }
     (*(s32 *)((u8 *)var_a0 + 0)) = 0xE7000000;
     (*(s32 *)((u8 *)var_a0 + 4)) = 0;
-    gfx_other_mode_cached(var_a0 + 8, 0x2C00, 0x0F0A4004, &sp.uAB);
+    return gfx_other_mode_cached(var_a0 + 8, 0x2C00, 0x0F0A4004, &sp.uAB);
 }
 /* was func_151A5B84 */
 void screen_tint_handle_msg(u8 *arg0, s32 arg1, u8 arg2) {

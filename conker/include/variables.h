@@ -1649,7 +1649,7 @@ extern u8   g_rumble_bcast_types[]; /* was D_800AB6E0 */
 extern s8   g_human_player_count; /* was D_80090130 */
 extern u8  *g_menu_state; /* was D_80090174 */
 extern s16  g_hud_fade_alpha; /* was D_8009016C */
-extern void (*g_screen_tint_fx_draw_fns[])(s32, void *, s16); /* was D_8008FCA0 */
+extern s32 (*g_screen_tint_fx_draw_fns[])(s32, void *, s16); /* was D_8008FCA0; P373: returns the display-list pointer */
 extern void (*g_screen_tint_fx_msg_fns[])(s32, void *, u8); /* was D_8008FCA4 */
 extern s32  D_800A9150;
 extern s32  D_80088FF8[2];

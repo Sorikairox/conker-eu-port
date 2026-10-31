@@ -448,9 +448,13 @@ void beam_effect_spawn_attached_ex(struct127 *arg0, u8 arg1, s16 arg2, s32 arg3,
     beam_effect_spawn(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, arg10, 0.0f, argD, argE, (s32) argC, 0x27, 1, (s32) argA, (s32) argB, arg0, (s32) arg1, (s32) arg2, arg3, 0, (s32) argF, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
+/* P373: render-layer `post` callback (RenderLayer +0x20) of the beam-effect layer. Its caller uses the result as the display-list pointer (node_render_layers_draw: gdl = layer->post(gdl, ...)). The asm
+ * tail-calls beam_effect_stub (which returns its first argument) and returns with its v0 (the advanced display-list pointer) untouched. The C used to be void,
+ * and the port's indirect call of a void function reads 0, so the caller went on writing its display list at address 0.
+ * Now it returns that pointer, as the asm. */
 /* was func_150E3510 */
-void beam_effect_handler_stub(s32 arg0, s32 arg1, s16 arg2) {
-    beam_effect_stub(arg0, arg2);
+s32 beam_effect_handler_stub(s32 gdl, s32 arg1, s16 view) { /* gdl was arg0, view was arg2 */
+    return beam_effect_stub(gdl, view);
 }
 
 /* was func_150E3540 */

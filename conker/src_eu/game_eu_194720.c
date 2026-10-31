@@ -144,12 +144,16 @@ extern u8 *g_layer_tex; /* was D_800DD658 */
 extern s32 g_layer_tex_scroll; /* was D_800DD650 */
 extern s32 g_layer_tex_mode; /* was D_800DD654 */
 extern u8 g_layer_tex_sprite[]; /* was D_800DD660 */
+/* P373: render-layer `pre` callback (RenderLayer +0x14). Its caller uses the result as the display-list pointer (node_render_layers_draw: gdl = layer->pre(gdl, ...)). The asm
+ * tail-calls sprite_load_texture and returns with its v0 (the advanced display-list pointer) untouched. The C used to be void,
+ * and the port's indirect call of a void function reads 0, so the caller went on writing its display list at address 0.
+ * Now it returns that pointer, as the asm. */
 /* was func_151674DC */
-void layer_pre_flash_texture(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 **p = &g_layer_tex;
+s32 layer_pre_flash_texture(s32 gdl, s32 arg1, s32 arg2, s32 arg3) { /* gdl was arg0 */
+    u8 **tex = &g_layer_tex; /* was p */
 
-    *p = g_flash_blades_texture;
-    sprite_load_texture(arg0, *p, g_layer_tex_scroll, g_layer_tex_sprite, 0, 0, 0, g_layer_tex_mode, 3);
+    *tex = g_flash_blades_texture;
+    return sprite_load_texture(gdl, *tex, g_layer_tex_scroll, g_layer_tex_sprite, 0, 0, 0, g_layer_tex_mode, 3);
 }
 
 /* was func_15167548 */

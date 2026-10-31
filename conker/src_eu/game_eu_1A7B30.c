@@ -344,7 +344,11 @@ void puff_ground_chips_burst(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 
 }
 
+/* P373: render-layer `post` callback (RenderLayer +0x20) of the puff layers. Its caller uses the result as the display-list pointer (node_render_layers_draw: gdl = layer->post(gdl, ...)). The asm
+ * tail-calls view_dl_begin and returns with its v0 (the advanced display-list pointer) untouched. The C used to be void,
+ * and the port's indirect call of a void function reads 0, so the caller went on writing its display list at address 0.
+ * Now it returns that pointer, as the asm. */
 /* was func_1517B0EC */
-void puff_view_dl_begin(s32 arg0, s32 arg1, s16 arg2) {
-    view_dl_begin(arg0, arg2);
+s32 puff_view_dl_begin(s32 gdl, s32 arg1, s16 view) { /* gdl was arg0, view was arg2 */
+    return (s32) view_dl_begin(gdl, view);
 }

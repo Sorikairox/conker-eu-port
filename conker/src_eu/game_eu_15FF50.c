@@ -857,14 +857,19 @@ void mdl_particle_broadcast(s32 arg0, u8 arg1) {
     node_broadcast_types(&sp18, 2, arg0, arg1);
 }
 
+/* P373: model-particle draw hook (g_mdl_particle_draw_fns [0]). Its caller uses the result as the display-list pointer (mdl_particle_draw: var_s1 = hook(gdl, ...)). The asm
+ * tail-calls gfx_emit_sprite_tex_segment and returns with its v0 (the advanced display-list pointer) untouched. The C used to be void,
+ * and the port's indirect call of a void function reads 0, so the caller went on writing its display list at address 0.
+ * Now it returns that pointer, as the asm. */
 /* was func_151343F4 */
-void mdl_particle_emit_tex_seg_a(s32 arg0, u8 *arg1, s32 arg2) {
-    gfx_emit_sprite_tex_segment(arg0, *(u16 *)(arg1 + 0x170), arg1[0x172], *(s32 *)(arg1 + 0x174));
+s32 mdl_particle_emit_tex_seg_a(s32 gdl, u8 *particle, s32 unused) { /* gdl was arg0, particle was arg1, unused was arg2 */
+    return (s32) gfx_emit_sprite_tex_segment(gdl, *(u16 *)(particle + 0x170), particle[0x172], *(s32 *)(particle + 0x174));
 }
 
+/* P373: as mdl_particle_emit_tex_seg_a, for g_mdl_particle_draw_fns [1] (the second texture segment at +0x174). */
 /* was func_15134428 */
-void mdl_particle_emit_tex_seg_b(s32 arg0, u8 *arg1, s32 arg2) {
-    gfx_emit_sprite_tex_segment(arg0, *(u16 *)(arg1 + 0x174), arg1[0x176], *(s32 *)(arg1 + 0x178));
+s32 mdl_particle_emit_tex_seg_b(s32 gdl, u8 *particle, s32 unused) { /* gdl was arg0, particle was arg1, unused was arg2 */
+    return (s32) gfx_emit_sprite_tex_segment(gdl, *(u16 *)(particle + 0x174), particle[0x176], *(s32 *)(particle + 0x178));
 }
 
 s32 texture_cache_lookup(s32, s32 *, s32, s32);

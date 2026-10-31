@@ -901,9 +901,13 @@ s32 score_banner_model_update(u8 *arg0) {
 }
 s32 anim_model_fx_load_screen_mtx(s32, s32, s32, s32, s32);
 s32 banner_sprite_set_segment(s32, s32, s32, s32, s32);
+/* P373: animated-model effect matrix hook (g_anim_model_fx_mtx_fns [2]). Its caller uses the result as the display-list pointer (anim_model_fx_draw: var_s1 = hook(gdl, ...)). The asm
+ * tail-calls anim_model_fx_load_screen_mtx and returns with its v0 (the advanced display-list pointer) untouched. The C used to be void,
+ * and the port's indirect call of a void function reads 0, so the caller went on writing its display list at address 0.
+ * Now it returns that pointer, as the asm. */
 /* was func_150FB768 */
-void banner_sprite_draw(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    anim_model_fx_load_screen_mtx(banner_sprite_set_segment(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
+s32 banner_sprite_draw(s32 gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4) { /* gdl was arg0 */
+    return anim_model_fx_load_screen_mtx(banner_sprite_set_segment(gdl, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
 }
 
 /* was func_150FB7C0 */
