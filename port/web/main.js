@@ -1503,7 +1503,7 @@ async function netLoad() {
     PortNet.t.on.config = (cfg) => {   // both peers: boot the game into the session
       netCfg = cfg;
       for (const k of Object.keys(optCache)) delete optCache[k];
-      log(`[net] session config: channels ${cfg.mask} (players ${(cfg.roster || []).map((c) => c + 1).join(' ')}), mine ${cfg.local}, delay ${cfg.delay}${cfg.autoDelay ? ` (auto, ping ${cfg.ping} ms)` : ''}, EEPROM ${cfg.eeprom ? 'host image' : 'blank'}`);
+      log(`[net] session config: channels ${cfg.mask} (players ${(cfg.roster || []).map((c) => c + 1).join(' ')}), mine ${cfg.local}, delay ${cfg.delay}${cfg.autoDelay ? ` (auto, ping ${cfg.ping} ms)` : ''}, EEPROM ${cfg.eeprom ? 'host image' : 'blank'}, screen ${cfg.view === 'own' ? 'own view' : 'split'}`);
       start('game');
     };
   }
@@ -1517,6 +1517,9 @@ const copyCode = (id) => { const t = $(id); t.select(); (navigator.clipboard ? n
 const netGuard = async (fn) => { try { await fn(); return null; } catch (e) { netStatus(String(e.message || e), 'bad'); log('[net] ' + e, 'fail'); return e; } };   // P365: returns the error (the game-style ONLINE pages show it)
 $('net-delay').value = store.get('netdelay', 3);
 $('net-delay').onchange = () => store.set('netdelay', Math.max(1, Math.min(16, +$('net-delay').value | 0)));
+// P371: the room's SCREEN setting (host): 'own' = each player sees only their own view (default), 'split' = the split screen
+$('net-view').value = store.get('netview', 'own') === 'split' ? 'split' : 'own';
+$('net-view').onchange = () => store.set('netview', $('net-view').value === 'split' ? 'split' : 'own');
 $('net-delay-auto').checked = store.get('netdelayauto', true);   // P339: automatic input delay from the measured ping
 $('net-delay').disabled = $('net-delay-auto').checked;
 $('net-delay-auto').onchange = () => { store.set('netdelayauto', $('net-delay-auto').checked); $('net-delay').disabled = $('net-delay-auto').checked; };
@@ -1650,7 +1653,10 @@ async function netSessionConfig({ ping, mask }) {   // ping: {n, min, median, p9
   // ?netd=D / ?netd=auto (tests) wins
   const auto = Q.get('netd') ? Q.get('netd') === 'auto' : $('net-delay-auto').checked;
   const d = auto ? PortNet.autoDelay(ping) : +(Q.get('netd') || $('net-delay').value || 3);
-  return { mask, delay: Math.max(1, Math.min(16, d | 0)), autoDelay: auto, hashEvery: 10, options, eeprom };
+  // P371: the SCREEN setting (render-only, but the host's for every player: nobody switches to the split screen alone);
+  // ?netview=own|split (tests) wins
+  const view = (Q.get('netview') || $('net-view').value) === 'split' ? 'split' : 'own';
+  return { mask, delay: Math.max(1, Math.min(16, d | 0)), autoDelay: auto, hashEvery: 10, options, eeprom, view };
 }
 window.__online = {
   ready: () => !!romBytes && !running,
@@ -2011,6 +2017,9 @@ async function start(app) {
   optionChanged.smoothfont(opt('smoothfont'));   // P356: the renderer's switch (page-side option)
   optionChanged.hfr(opt('hfr'));           // P351: the renderer's switch (page-side option)
   layoutScreen();                          // P350: the renderer's widescreen switch
+  // P371: the room's SCREEN setting: own view = the renderer draws only this player's multiplayer view (port_gfx_ownview,
+  // gfx_f3dex2.c; render-only, the game still runs every view); local play keeps the split screen
+  if (M && M._port_gfx_ownview) M._port_gfx_ownview(netCfg && netCfg.view === 'own' ? netCfg.ch | 0 : -1);
   optionsLocked = NETDET || !!netCfg || !!recCfg;
   if (optionsLocked) showSessionOptions();   // P346: the panel shows the session's (the host's) options, disabled
   log('[options] ' + OPTIONS.map((o) => `${o.key}=${o.range ? opt(o.key) : opt(o.key) ? 1 : 0}`).join(' '));
