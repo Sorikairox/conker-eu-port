@@ -23,7 +23,7 @@ const BEAT = 0.6182;                 // features music: 97.06 BPM (music_0c, mus
 const TF = 45.6;                     // the cut to the features, on a downbeat of the features music (the logo holds ~6 s)
 // P370 v2: the features part shows the game-style menus (boot screen, ONLINE pages, photo mode, touch controls on a
 // phone); v4 (user): the customisation settings beat removed, v1's widescreen shot follows the browser beat; 64 beats
-// (v1 54): browser 8, widescreen 8, ledge 6, spin 6, online 10, photo 6, phone 6, and more 6, end card 8 (the end card
+// (v1 54): browser 8, widescreen 8, ledge 6, spin 6, online 10 (v6: the kill), photo 6, phone 6, and more 6, end card 8 (the end card
 // starts and ends on 8-beat phrase boundaries of the features music: beats 56 and 64)
 const T = { browser: TF, wide: TF + 8 * BEAT, ledge: TF + 16 * BEAT, spin: TF + 22 * BEAT, online: TF + 28 * BEAT,
   photo: TF + 38 * BEAT, phone: TF + 44 * BEAT, more: TF + 50 * BEAT, end: TF + 56 * BEAT };
@@ -407,29 +407,25 @@ seg(T.spin, T.online + 0.1, 0.06, 0.1, async (g, lt) => {
   caption(g, lt - 0.1, T.online - T.spin + 0.1 - 0.1, 'LONGER TAIL SPIN', 'HOVER TWICE AS LONG', { y: 878 });
 });
 
-// G. online (P370 v2): the game-style ONLINE pages of a real 4-player session (net4.sh NETUI=gmenu: 1920 x 1080
-// screenshots): the host's room code, a guest picking it on the letter picker, the host's room with all four players,
-// one beat each with a slow push-in, then the 4-player split screen of the match (Bunker, the P354 session's replay)
-const ONLINE_STILLS = ['host_g3_room_made', 'guest_g4_picker_typing', 'guest_g5_picker_full', 'host_g4_lobby'];
-const ONLINE_PAGES = ONLINE_STILLS.length * BEAT;
+// G. online (P370 v6, user: "Remove the lobby part, just show 4 player gameplay. Get one player to kill another."): the
+// 4-player Bunker split screen of shot 'mpkill' (the ?netdet replay, pads: tools/port/trailer/mpctl.js's bot recorded
+// as ?padf scripts, mpkill.py). Two parts of 5 beats, a jump cut on the beat between them: (1) P1 (top left, green
+// helmet) walks up to P2 (the bear, top right: P1 comes into his view), faces him and throws a grenade (pictures
+// 70 - 255, retrace 6338 - 6492); (2) the blast at the bear (picture ~495, retrace 6692), the bear's view sprayed and
+// irised out, P1's score 0 -> 1 (pictures 455 - 640), with a slow push-in on the top half.
+const MP_A = [70, 255], MP_B0 = 455, MP_BLAST = 495;
 seg(T.online, T.photo + 0.1, 0.06, 0.1, async (g, lt) => {
-  const dur = T.photo - T.online;
-  if (lt < ONLINE_PAGES) {
-    const k = Math.min(ONLINE_STILLS.length - 1, Math.floor(lt / BEAT)), u = (lt - k * BEAT) / BEAT, z = 0.8 + 0.03 * u;
-    const pg = await img(`/w/net4g/${ONLINE_STILLS[k]}.png`);
-    g.fillStyle = '#0d0a07'; g.fillRect(0, 0, W, H);
-    // the page a little smaller and lower, so the caption above does not cover its title
-    g.save(); g.translate(W / 2, H * 0.6); g.scale(z, z); g.translate(-W / 2, -H * 0.4);
-    g.drawImage(pg, 0, 0, W, H);
-    g.drawImage(pg, 760, 52, 400, 38, 760, 6, 400, 46);   // the page's ROM toast (a page message, top middle) covered with the backdrop below it
-    g.restore();
-    if (k === 0) label(g, 'PLAYER 1 MAKES A ROOM', 1860, 60, 3, { align: 'right', fill: '#fff', alpha: clamp(lt / 0.2) });
-    else if (k < 3) label(g, 'FRIENDS ENTER THE CODE', 1860, 60, 3, { align: 'right', fill: '#fff' });
-    else label(g, '4 PLAYERS IN', 1860, 60, 3, { align: 'right', fill: ACCENT });
-  } else {
-    g.drawImage(await shotPic('mp4', 30 + (lt - ONLINE_PAGES) * 60), 0, 0, W, H);
+  const dur = T.photo - T.online, half = 5 * BEAT;
+  const i = lt < half ? MP_A[0] + lt * 60 : MP_B0 + (lt - half) * 60;
+  if (lt < half) g.drawImage(await shotPic('mpkill', i), 0, 0, W, H);
+  else {   // push in on the top half (P1 and the bear) from the cut on
+    const z = 1 + 0.3 * ease((lt - half) / 1.2);
+    g.save(); g.translate(W / 2, 0); g.scale(z, z); g.translate(-W / 2, 0);
+    g.drawImage(await shotPic('mpkill', i), 0, 0, W, H); g.restore();
   }
-  caption(g, lt - 0.1, dur + 0.1 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { x: 90, y: 60 });
+  const ka = clamp((i - MP_BLAST - 6) / 8) * clamp((dur + 0.05 - lt) / 0.2);
+  if (lt >= half && ka > 0) label(g, 'KILL!', 60, 470, 4.4, { fill: ACCENT, alpha: ka });
+  caption(g, lt - 0.1, dur + 0.1 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { y: 860 });
 });
 
 // H. photo mode in the game's style (P370 v2: 'photo2', 50 pictures / s of ticks): the HUD and the POSE & OUTFIT
@@ -679,7 +675,8 @@ async function buildAudio(only) {
     mg.gain.setValueAtTime(MV, DUR - 2.2); mg.gain.linearRampToValueAtTime(0, DUR - 0.1);
     { const src = ctx.createBufferSource(); src.buffer = mb; src.connect(mg); src.start(TF - lead, Math.max(0, MUSIC_DOWNBEAT - lead)); }
     // sound effects of the shots under their segments: [shot, timeline start, duration, first picture, gain]
-    const SFX = [['run29', T.wide, T.ledge - T.wide, 300, 0.45],   // v1's widescreen shot and its sound (v4: the customisation take is gone)
+    const SFX = [['run29', T.wide, T.ledge - T.wide, 300, 0.45],
+      ['mpkill', T.online, 5 * BEAT, MP_A[0], 0.5], ['mpkill', T.online + 5 * BEAT, T.photo - T.online - 5 * BEAT, MP_B0, 0.75],   // v6: the match, the blast   // v1's widescreen shot and its sound (v4: the customisation take is gone)
       ['ledge13', T.ledge, T.spin - T.ledge, 66, 0.7], ['spin_on', T.spin, T.online - T.spin, 110, 0.5]];
     for (const [shot, t0, dur, pic, gain] of SFX) {
       const { b, m } = await pcmBuffer(ctx, shot);
