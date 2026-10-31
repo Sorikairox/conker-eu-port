@@ -392,7 +392,7 @@ seg(T.wide, T.ledge + 0.1, 0.06, 0.1, async (g, lt) => {
 seg(T.ledge, T.spin + 0.1, 0.06, 0.1, async (g, lt) => {
   g.drawImage(await shotPic('ledge13', 66 + lt * 60), 0, 0, W, H);
   vignette(g, 0.35);
-  caption(g, lt - 0.15, T.spin - T.ledge - 0.15 + 0.1, 'LEDGE GRAB', 'CATCH THE EDGE - PULL YOURSELF UP');
+  caption(g, lt - 0.15, T.spin - T.ledge - 0.15 + 0.1, 'LEDGE GRAB', null);   // v8 (user): no subtitle (was CATCH THE EDGE - PULL YOURSELF UP)
 });
 
 // F. longer tail spin: the same jump with the option off (left) and on (right)
@@ -404,7 +404,7 @@ seg(T.spin, T.online + 0.1, 0.06, 0.1, async (g, lt) => {
   g.drawImage(await shotPic('spin_on', i), cx, cy, cw, chh, W - 13 - w, y, w, h);
   text(g, 'ORIGINAL', 13 + w / 2, y - 64, 4, { align: 'center', fill: '#e9e3d6' });
   text(g, 'WITH THE OPTION', W - 13 - w / 2, y - 64, 4, { align: 'center', fill: ACCENT });
-  caption(g, lt - 0.1, T.online - T.spin + 0.1 - 0.1, 'LONGER TAIL SPIN', 'HOVER TWICE AS LONG', { y: 878 });
+  caption(g, lt - 0.1, T.online - T.spin + 0.1 - 0.1, 'LONGER TAIL SPIN', null, { y: 878 });   // v8 (user): no subtitle (was HOVER TWICE AS LONG)
 });
 
 // G. online (P370 v6 / v7). v6 (user: "Remove the lobby part, just show 4 player gameplay. Get one player to kill
@@ -416,8 +416,10 @@ seg(T.spin, T.online + 0.1, 0.06, 0.1, async (g, lt) => {
 //   beats 4-5  jump cut on the beat to just before the blast, still split (pictures 400 - 437)
 //   beats 5-6  P1's quarter grows to fill the screen (anchored top left, x1 -> x2 = exactly the own view's zoom of a
 //              16:9 quadrant), the own-view picture of the same retrace fading in over its last third (437 - 474)
-//   beats 6-10 own view: the blast at the bear (picture ~495, retrace 6692), the score 0 -> 1, KILL! (474 - 622)
-const MP_A = [95, 243], MP_B0 = 400, MP_BLAST = 495, MP_OWN_LABEL = 'OWN VIEW - NO SCREEN PEEKING';
+//   beats 6-10 own view: the blast at the bear (picture ~495, retrace 6692), the score 0 -> 1, KILL! (474 - 622);
+//              v8: the title slot says OWN VIEW ONLY MODE - NO PEEKING / OPTIONAL - SET BY THE HOST
+const MP_A = [95, 243], MP_B0 = 400, MP_BLAST = 495;
+const MP_OWN_TITLE = 'OWN VIEW ONLY MODE - NO PEEKING', MP_OWN_SUB = 'OPTIONAL - SET BY THE HOST';   // v8; was MP_OWN_LABEL = 'OWN VIEW - NO SCREEN PEEKING' (a small tag)
 seg(T.online, T.photo + 0.1, 0.06, 0.1, async (g, lt) => {
   const dur = T.photo - T.online, b = lt / BEAT;
   const i = b < 4 ? MP_A[0] + lt * 60 : MP_B0 + (lt - 4 * BEAT) * 60;
@@ -428,11 +430,15 @@ seg(T.online, T.photo + 0.1, 0.06, 0.1, async (g, lt) => {
     const fa = clamp((b - 5.62) / 0.38);
     if (fa > 0) { g.save(); g.globalAlpha = fa; g.drawImage(await shotPic('mpkill_own', i), 0, 0, W, H); g.restore(); }
   } else g.drawImage(await shotPic('mpkill_own', i), 0, 0, W, H);
-  const oa = clamp((b - 6.1) / 0.4) * clamp((dur + 0.05 - lt) / 0.2);
-  if (oa > 0) label(g, MP_OWN_LABEL, 1860, 975, 3, { align: 'right', fill: '#fff', alpha: oa });
   const ka = clamp((i - MP_BLAST - 6) / 8) * clamp((dur + 0.05 - lt) / 0.2);
   if (b >= 6 && ka > 0) label(g, 'KILL!', 60, 190, 4.4, { fill: ACCENT, alpha: ka });
-  caption(g, lt - 0.1, dur + 0.1 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { y: 860 });
+  // v8 (user: "Make the own view, no peeking more visible and highlight that it's an option"): the title slot says
+  // ONLINE MULTIPLAYER over the split screen, then, as the zoom lands on the own view (beat 6), OWN VIEW ONLY MODE -
+  // NO PEEKING (title colours, sized to fit) + OPTIONAL - SET BY THE HOST (the room's Screen setting, P371)
+  const t6 = 6 * BEAT;
+  caption(g, lt - 0.1, t6 - 0.1, 'ONLINE MULTIPLAYER', 'UP TO 4 PLAYERS - ROOM CODES', { y: 860 });
+  const os = Math.min(7, 1760 / textW(MP_OWN_TITLE, 1));
+  caption(g, lt - t6 + 0.05, dur + 0.1 - t6 + 0.05, MP_OWN_TITLE, MP_OWN_SUB, { y: 860, s: os });
 });
 
 // H. photo mode in the game's style (P370 v2: 'photo2', 50 pictures / s of ticks): the HUD and the POSE & OUTFIT
