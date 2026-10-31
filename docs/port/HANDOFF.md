@@ -80,7 +80,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - The P373 fixes (5 particle update handlers, 2 aim-HUD sprites, timedfx_track_and_test, 8 display-list callbacks) are not
   reached by hold-L, e2e p357 or the Bunker Deathmatch: find a route that shows them (bouncing debris particles, the
   aim HUD slot row, a tracking damage box, screen-tint / flash-blade / beam / puff render layers) and look at it.
-- Widescreen: the MP death picture (black + skull) covers only the 4:3 middle of a view (P371 finding, not looked into).
+- Widescreen MP death picture: fixed in P374. Not reached in a test: a genuine 2-player split death (see P374), the
+  sniper scope lens / screen tint in widescreen (same tag-3 path, should now fill the widened view).
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
 - The slow-motion camera cut's blur (camera_cut_fade_update, fb_ghost pass 2) was not reached in a test since the
   P335 fix; it uses the same draw as the wake-up blur (fixed), so it should be right.
@@ -98,6 +99,38 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P374 (port-web-b, 2026-10-31): widescreen death picture covers the whole view (MP black + skull, iris)
+- User request: "Fix the widescreen death screen so it covers everything" (P371 / P372 / P373 open item).
+- Cause: render_player_hud tags a player's overlays ws_tag 3 (port_ws_hud_anchor). The death picture is
+  player_draw_out_overlay (iris quarters + skull texrect, centred on the view) plus screen_view_fill_colour (the fade to
+  black: 1-cycle G_FILLRECT, combiner PRIM) over the camera box = the scissor box. Those fills already got rect_ext (edges
+  on the view edge -> widened edge), but apply_state mapped the GL scissor of every 2D draw with ws_x2d = the 4:3 box,
+  so the extension was cut back to 4:3 and the side strips showed the 3D.
+- 71407bb8 renderer: tag-3 draws clip to the widened view of the scissor box (ws_view_clip = the mapping the view's 3D
+  uses). Positions stay ws_x2d: skull / HUD centred, not stretched.
+- 7b4ea70d renderer: the iris is 4 texture rectangles (colour constant black, alpha TEXEL0, tile clamped); when large,
+  the game clamps them at N64 x = 0 = the 4:3 edge, so the strip corners outside the circle showed the 3D (SP level start
+  left strip; split views at the quarter's outer edge). ws_mask_rect_edges: a tag-3 texrect whose colour reads no texel and
+  whose tile clamps in s, with an edge at / past the view's 4:3 edge, gets that edge on the widened edge with s carried on
+  (rect_ext bit 2; with Hi-res 2D the per-rect texel range is opened, the tile clamp holds the edge texel). Circle round.
+- Single player checked (diagnostic gap logger, not committed: every rectangle >= 90 % of its clip width that does not
+  reach the clip's canvas edges): new-game route to 12965 (title, opening cutscenes, letterbox, fades, hold-L) and warp
+  0x29: only the iris quarters (fixed above) and a 2-row boot-screen strip at retrace 19 / 53 (invisible). Fades / tint /
+  pulse / sun flash / letterbox are fills over the view or the full screen (already extended). SP death / game over not
+  reached: a forced player_lose_life under ?warp asks for transition 2 but ?warp never runs it (no mode change).
+- Tests (final wasm 5603790298a4): check.sh GREEN (each commit); e2e p357 7700 IDENTICAL (also with
+  widescreen + hires2d); hold-L 5789 / 0x29 at 5795; netpair 2p 9949 IDENTICAL; netpair 4p Bunker Deathmatch with the
+  trailer kill pads (mpkill/pads.env), host 1920x1080 widescreen: own view 9933 and split (&netview=split) 9939
+  retraces IDENTICAL x3, no traps, 0 unaudited, no DESYNC; P1 dies (0 (4th)) in both.
+- Screenshots port_work/p374 (canvas shots, offline netdet = kill pads in one page, Module._port_gfx_widescreen(1)):
+  split4/c_136000 (blast), c_139000 (iris), c_150000 (skull) at 854x480; own169/c_150000 1920x1080 own view;
+  split43/c_150000 4:3 (unchanged); kill4own/host_150s.png and kill4split/host_150s.png (live, 1920x1080);
+  p327/p374irisB200/stop_200.png (SP level-start iris, left strip now black outside the circle) vs p374iris200 (before).
+- 2-player split death not reached: the kill pads do not kill anyone in a 2-player match (other spawns), a self-grenade /
+  health 0 hook did not kill. Same code path (scissor = fill = camera box -> ext 3 -> widened view = the 3D's width);
+  the 2-player strips' dark side panels are the game's side art, identical on HEAD (split2base vs split2).
+- Tools: scratchpad kill.sh (offline 4p DM with the kill pads + canvas shots; WS=0 for 4:3, PADS / PADMASK); a temporary
+  ?p374freeze=F (renderer stops drawing after frame F) gave exact-frame shots; ?nethashstop does not stop at that count.
 ### P373 (port-web-b, 2026-10-31): audit of void functions called through value-returning pointers; e2e p357 rebased
 - Method: (1) run-time census: pc_icall.c logs every void target reached through a non-void icall site (e2e replay,
   hold-L, offline 4p Deathmatch netrun NET_BUNKER_PLAY=120: 34 distinct targets, all with callers that ignore the value);
