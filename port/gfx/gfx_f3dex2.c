@@ -326,6 +326,14 @@ static inline float ws_x3d(float x) { float c = cimg_width * 0.5f; return ws_ox 
 /* the edge of a view at N64 x: the canvas edge within 4 pixels of the screen edge (the game's 2-pixel border), else the
  * widened view's edge */
 static inline float ws_edge(float x) { return x <= 4 ? 0 : x >= cimg_width - 4.0f ? (float)canvas_w : ws_x3d(x); }
+/* P374: the canvas x range a player's own overlays (tag 3) are clipped to: the widened view of the scissor box, as its
+ * 3D (edges within 4 N64 pixels of the screen edge -> the canvas edge) */
+static void ws_view_clip(float *left, float *right) {
+    float W = (float)cimg_width;
+    if (!sc_on) { *left = 0; *right = (float)canvas_w; return; }
+    *left = sc_box[0] <= 4 ? 0 : ws_x3d(sc_box[0]);
+    *right = sc_box[2] >= W - 4 ? (float)canvas_w : ws_x3d(sc_box[2]);
+}
 /* rect_ext bits for a rectangle x0 .. x1: an edge on the screen's edge, or (tag 3) on the view's (scissor box) edge */
 static int ws_rect_edges(float x0, float x1) {
     float W = (float)cimg_width;
@@ -1095,7 +1103,10 @@ static void apply_state(void) {
         }
         if (sc_on) {
             float X0, X1, full = sc_box[0] <= 4 && sc_box[2] >= W - 4;
-            if (is3d) { X0 = sc_box[0] <= 4 ? 0 : ws_x3d(sc_box[0]); X1 = sc_box[2] >= W - 4 ? canvas_w : ws_x3d(sc_box[2]); }
+            /* P374: a player's own 2D overlays (tag 3: fades, tint, scope, the MP death iris / black + skull) clip to the
+             * widened view as its 3D does; with the 4:3 box their fills (rect_ext, extended to the view's edges) left the
+             * side strips showing the 3D. Their positions stay ws_x2d (nothing is stretched). */
+            if (is3d || ws_tag == 3) ws_view_clip(&X0, &X1);
             else { X0 = full ? 0 : ws_x2d(sc_box[0]); X1 = full ? canvas_w : ws_x2d(sc_box[2]); }
             glEnable(GL_SCISSOR_TEST);
             ov_scissor((GLint)floorf(X0 + 0.5f), (GLint)(canvas_h - (sc_box[3] - VI_Y0) * sy), (GLint)floorf(X1 - X0 + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
