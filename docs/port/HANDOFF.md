@@ -100,7 +100,7 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 ## Sessions
 ### P373 (port-web-b, 2026-10-31): audit of void functions called through value-returning pointers; e2e p357 rebased
 - Method: (1) run-time census: pc_icall.c logs every void target reached through a non-void icall site (e2e replay,
-  hold-L, offline 4p Deathmatch netrun NET_BUNKER_PLAY=120: 31 distinct targets, all with callers that ignore the value);
+  hold-L, offline 4p Deathmatch netrun NET_BUNKER_PLAY=120: 34 distinct targets, all with callers that ignore the value);
   (2) static: every icall site in the game IR whose result is used (port_work/p373/irscan.py: 191 of 391 sites) x the
   ROM function tables it loads from x the C return type (sigdb) x the asm's v0 at return (retv0.py: forward data flow
   over the ROM code) + the render-layer fields of g_node_type_table; (3) asm check of the dispatchers (v0use.py: does the
