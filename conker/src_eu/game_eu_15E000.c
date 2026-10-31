@@ -629,8 +629,12 @@ void vec_damp_xyz_per_tick(f32 *arg0, f32 arg1) {
 s32 particle_surface_hit_dispatch(); // callers pass s32 / pointers; the NM definition below takes (u8 *, u8 *, u8 *)
 
 /* was func_15131F14 */
-void particle_check_surface_hit(s32 arg0, s32 arg1) {
-    particle_surface_hit_dispatch(arg0, arg1, arg0 + 0xA8);
+/* P373: particle update handler (g_particle_update_fns [27], called by particle_sprite_update as s32 (particle, old
+ * position); 0 = the particle dies and its death handler runs). The asm tail-calls particle_surface_hit_dispatch and returns with its
+ * v0 untouched. The C used to be void, and the port's indirect call of a void function reads 0, so every particle
+ * of this kind died in its first update (same class as P372's flame_flicker). */
+s32 particle_check_surface_hit(s32 particle, s32 old_pos) { /* particle was arg0, old_pos was arg1 */
+    return particle_surface_hit_dispatch(particle, old_pos, particle + 0xA8);
 }
 
 extern s32 (*g_particle_hit_fns[])(u8 *, s32, u8 *, u8 *); /* was D_80089C14 */ // only entry 0: particle_hit_bounce (reads cfg as arg3)
@@ -669,15 +673,23 @@ s32 particle_surface_hit_dispatch(u8 *obj, u8 *other, u8 *cfg) {
 }
 
 /* was func_1513206C */
-void particle_upd_damp_hit(struct_eu_15E000 *arg0, s32 arg1) {
-    vec_damp_xyz_per_tick(arg0->unk58, arg0->unkA8);
-    particle_surface_hit_dispatch(arg0, arg1, (u8 *)arg0 + 0xB0);
+/* P373: particle update handler (g_particle_update_fns [28], called by particle_sprite_update as s32 (particle, old
+ * position); 0 = the particle dies and its death handler runs). The asm tail-calls particle_surface_hit_dispatch and returns with its
+ * v0 untouched. The C used to be void, and the port's indirect call of a void function reads 0, so every particle
+ * of this kind died in its first update (same class as P372's flame_flicker). */
+s32 particle_upd_damp_hit(struct_eu_15E000 *particle, s32 old_pos) { /* particle was arg0, old_pos was arg1 */
+    vec_damp_xyz_per_tick(particle->unk58, particle->unkA8);
+    return particle_surface_hit_dispatch(particle, old_pos, (u8 *)particle + 0xB0);
 }
 
 /* was func_151320AC */
-void particle_upd_damp_xz_hit(struct_eu_15E000 *arg0, s32 arg1) {
-    vec_damp_xz_per_tick(arg0->unk58, arg0->unkA8);
-    particle_surface_hit_dispatch(arg0, arg1, (u8 *)arg0 + 0xB0);
+/* P373: particle update handler (g_particle_update_fns [29], called by particle_sprite_update as s32 (particle, old
+ * position); 0 = the particle dies and its death handler runs). The asm tail-calls particle_surface_hit_dispatch and returns with its
+ * v0 untouched. The C used to be void, and the port's indirect call of a void function reads 0, so every particle
+ * of this kind died in its first update (same class as P372's flame_flicker). */
+s32 particle_upd_damp_xz_hit(struct_eu_15E000 *particle, s32 old_pos) { /* particle was arg0, old_pos was arg1 */
+    vec_damp_xz_per_tick(particle->unk58, particle->unkA8);
+    return particle_surface_hit_dispatch(particle, old_pos, (u8 *)particle + 0xB0);
 }
 
 /* was func_151320EC */

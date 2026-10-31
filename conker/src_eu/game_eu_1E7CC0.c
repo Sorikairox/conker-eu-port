@@ -1744,17 +1744,21 @@ f32 bone_emitter_timer_step(s16 *arg0) {
 
 s32 particle_upd_damp_vel();
 
+/* P373: particle update handler (g_particle_update_fns [19], called by particle_sprite_update as s32 (particle, old
+ * position); 0 = the particle dies and its death handler runs). The asm tail-calls particle_upd_damp_vel and returns with its
+ * v0 untouched. The C used to be void, and the port's indirect call of a void function reads 0, so every particle
+ * of this kind died in its first update (same class as P372's flame_flicker). */
 /* was func_151BDD4C */
-void particle_follow_owner_update(u8 *arg0, s32 arg1) {   /* P76: a0 / a1 pass through to particle_upd_damp_vel */
-    u8 *temp_v0;
+s32 particle_follow_owner_update(u8 *particle, s32 old_pos) {   /* particle was arg0, old_pos was arg1; P76: both pass through to particle_upd_damp_vel */
+    u8 *owner; /* was temp_v0 */
 
-    temp_v0 = (*(u8 **)((u8 *)arg0 + 0xB0));
-    if (((*(s32 *)temp_v0) != 0) && ((*(u8 *)((u8 *)temp_v0 + 4)) != 0xFF)) {
-        (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x14));
-        (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x18));
-        (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x1C));
+    owner = (*(u8 **)((u8 *)particle + 0xB0));
+    if (((*(s32 *)owner) != 0) && ((*(u8 *)((u8 *)owner + 4)) != 0xFF)) {
+        (*(f32 *)((u8 *)particle + 0x4C)) = (f32) (*(f32 *)((u8 *)owner + 0x14));
+        (*(f32 *)((u8 *)particle + 0x50)) = (f32) (*(f32 *)((u8 *)owner + 0x18));
+        (*(f32 *)((u8 *)particle + 0x54)) = (f32) (*(f32 *)((u8 *)owner + 0x1C));
     }
-    particle_upd_damp_vel(arg0, arg1);
+    return particle_upd_damp_vel(particle, old_pos);
 }
 
 /* was func_151BDDA4 */

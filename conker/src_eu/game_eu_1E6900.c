@@ -13,13 +13,17 @@ s32 fx_bob_y_drift_update(f32 *arg0) {
     return 1;
 }
 
+/* P373: particle update handler (g_particle_update_fns [23], called by particle_sprite_update as s32 (particle, old
+ * position); 0 = the particle dies and its death handler runs). The asm tail-calls impact_dust_cloud_wobble and returns with its
+ * v0 untouched. The C used to be void, and the port's indirect call of a void function reads 0, so every particle
+ * of this kind died in its first update (same class as P372's flame_flicker). */
 /* was func_151B9190 */
-void dust_cloud_bob_update(f32 *arg0, s32 arg1)
-{
-  arg0[0x44 / 4] = arg0[0x5C / 4] + (arg0[0x64 / 4] * sinf(arg0[0x58 / 4]));
-  arg0[0x58 / 4] += arg0[0x60 / 4] * g_frame_step_f;
-  arg0[0x58 / 4] = wrap_angle_rad(arg0[0x58 / 4]);
-  impact_dust_cloud_wobble(arg0, arg1);
+s32 dust_cloud_bob_update(f32 *cloud, s32 old_pos)
+{ /* cloud was arg0, old_pos was arg1 */
+  cloud[0x44 / 4] = cloud[0x5C / 4] + (cloud[0x64 / 4] * sinf(cloud[0x58 / 4]));
+  cloud[0x58 / 4] += cloud[0x60 / 4] * g_frame_step_f;
+  cloud[0x58 / 4] = wrap_angle_rad(cloud[0x58 / 4]);
+  return impact_dust_cloud_wobble(cloud, old_pos);
 }
 
 /* was func_151B9204 */
