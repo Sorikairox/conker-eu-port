@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 // P354 trailer shot list for capture.mjs. Each shot: query (appended to ?app=game&det=1&p103boot=1&mute=1&canvas=...),
 // canvas 'WxH' (drawing buffer; with the widescreen option its aspect), start (retrace of the first picture), secs,
 // fps (default 60), hfr (interpolate with the High frame rate option), out [w, h] (JPEG size, default the canvas),
@@ -137,3 +138,27 @@ SHOTS.phone = { query: `${RUN29P}&touch=1&opt=hires2d:1,fullres:1,hfr:1,smoothfo
   // B, B: the game goes on with Conker's health shown
   tickSteps: [...PTAP(...T_MENU, 100), ...PSTICK(60, 140), ...PSTICK(60, 165), ...PTAP(...T_A, 195),
     ...PSTICK(60, 228), ...PSTICK(0, 258, 10, 2, 60), ...PTAP(...T_B, 298), ...PTAP(...T_B, 326)] };
+// P370 v6 (user: "just show 4 player gameplay. Get one player to kill another"): the 4-player Bunker match replayed
+// frame by frame under ?netdet (as 'mp4') with scripted pads for the kill. MPPADS = the pads.env to play (the net4
+// session's menu route + the kill script, tools/port/trailer/mpkill.py). How the kill was made (no memory writes in the
+// game): MPCFG='{"hunter":0,"prey":1}' capture.mjs mpbot (P1 walks to the bear, both move, P1 turns to face him and
+// presses C-down twice), python3 mpkill.py pads.env --bot DUMP.json 5992 -2, then capture.mjs mpkill replays it.
+// Players: objects 0..3 at N64 0x800CC6F0 (0x32C each). MPLOG = log the players (object index, state,
+// type, position, +0x40 = facing in degrees, 0 = +z, atan2(dx, dz)) every 25 retraces from 5940 to the end (exploring the placement).
+const MPLOG_EVAL = `(() => { const b = Module._port_net_page_info(4) >>> 0, f = new Float32Array(Module.HEAPU8.buffer), u = new Uint32Array(Module.HEAPU8.buffer), u8 = Module.HEAPU8, out = [];
+  for (let j = 0; j < 25; j++) { const q = b + 0xCC6F0 + j * 0x32C; if (!u[q >> 2]) continue; const t = u8[(q + 4) ^ 3];
+    out.push([j, u[q >> 2], t.toString(16), Math.round(f[(q + 0x14) >> 2]), Math.round(f[(q + 0x18) >> 2]), Math.round(f[(q + 0x1C) >> 2]), Math.round(f[(q + 0x40) >> 2])]); }
+  return __trailer.frame() + ' ' + JSON.stringify(out); })()`;
+SHOTS.mpkill = { query: '&netdet=1&padmask=F&nethash=1', padsEnv: process.env.MPPADS || 'port_work/trailer/mpkill/pads.env', padShift: 2,
+  start: +(process.env.MPSTART || 6280), secs: +(process.env.MPSECS || 10.6), hfr: true,   // the kill: P1 faces P2 at 6398, grenade, the blast at the bear ~6692, P2 dead (state 5), P1 scores
+  steps: [{ at: 2, eval: 'Module._port_gfx_widescreen(1), Module._port_gfx_hires_2d(1), Module._port_gfx_hfr(1), 1' },
+    ...(process.env.MPLOG ? Array.from({ length: 120 }, (_, k) => ({ at: 5940 + 25 * k, eval: MPLOG_EVAL })) : [])] };
+// mpbot: 'mpkill' (?netdet) with every pad handed to the page at 5990 (handoff.env: base + F:P) and
+// tools/port/trailer/mpctl.js writing the pad buffer from then on (a hunter steers to a prey and attacks); MPCFG = JSON for __mpctl.start; the log every 25 retraces and __mpctl.dump() at MPEND
+// print the bot's phases and the recorded ?padf scripts
+const MPCTL = fs.readFileSync(new URL('./mpctl.js', import.meta.url), 'utf8');
+SHOTS.mpbot = { ...SHOTS.mpkill, padsEnv: 'port_work/trailer/mpkill/handoff.env',
+  steps: [SHOTS.mpkill.steps[0], { at: 5980, eval: MPCTL + '; __mpctl.install()' },
+    { at: 5981, eval: `__mpctl.start(${process.env.MPCFG || '{}'})` },
+    ...Array.from({ length: 120 }, (_, k) => ({ at: 5990 + 25 * k, eval: `JSON.stringify(__mpctl.log.slice(-2)) + ' ' + ${MPLOG_EVAL}` })),
+    { at: +(process.env.MPEND || 7000), eval: '__mpctl.dump()' }] };
