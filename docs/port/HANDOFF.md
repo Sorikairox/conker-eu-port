@@ -72,6 +72,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   (unread as far as the three routes show; identical in every real build since the mirror no longer moves).
 - Single-retrace H blips in ?nethash runs (non-netdet) differ run to run, with or without options; netpair (netdet) shows
   none. Not explained.
+- e2e recording p357 (tests/e2e/recordings) differs from retrace 5830 since P372 (flames now live, RNG differs; expected):
+  re-record it with the current build. Void-declared functions called through int-returning pointers (P372 list): audit
+  which callers use the result.
+- Widescreen: the MP death picture (black + skull) covers only the 4:3 middle of a view (P371 finding, not looked into).
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
 - The slow-motion camera cut's blur (camera_cut_fade_update, fb_ghost pass 2) was not reached in a test since the
   P335 fix; it uses the same draw as the wake-up blur (fixed), so it should be right.
@@ -89,6 +93,41 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P372 (port-web-b, 2026-10-31): fix of the 4-player Deathmatch trap in heap_age_tagged_blocks (P371 open item)
+- Cause (port bug, not on the N64): flame_flicker / flame_flicker_b (effect3d update-2 handlers g_effect3d_update2_fns
+  [0x23] / [0x24]) were C `void`, but the asm returns flame_flicker_update's v0 (1) untouched. effect3d_update calls them
+  as s32 and ends the effect on 0; the port's icall trampoline returns 0 for a void callee (port/tools/icall.py). So every
+  flame_spawn flame died in its first update. Bone sparks (bone_sparks_emit) pair the flame with an attach_fx follower
+  that keeps it in +0x2C and writes pos + look into it every frame (bone_spark_follow_look -> effect3d_look_follow): the
+  flame was retired (9077), freed (9085, node_unlink_free), a texture block's header landed inside it, the follower's
+  write at 9089 turned its size into 0x4D85EC, and heap_age_tagged_blocks walked out of wasm memory (~9093) on every peer.
+- d47fa32c both return s32 = flame_flicker_update(fx, fx + 0x110) (no #ifdef: the asm's behaviour, difftest --self EQUIV
+  ret int). Flames now live as on the N64.
+- How it was found: offline repro = netrun.sh (netdet, one page, all 4 pad scripts): `bash -c 'export NET_BUNKER_PLAY=60;
+  source tools/port/scripts/netmp_bunker.sh; tools/port/scripts/netrun.sh NAME 260'` traps at 9089..9093 like online
+  (4 min, no 4 browsers). Under netdet every flag outside pc_net.c's whitelist reads 0, so the diagnostics need a local
+  whitelist edit: ?heapwatch=1 (heap broken at 9089 in heap_alloc_tagged), ?p113watch=ADDR&p113wf=F&p113wtrace=F (the
+  header's history; the trace limit 200 had to be raised), then a per-handler check in __wrap_node_lists_run_update
+  (attach_fx_update, node type 61, wrote it). All diagnostics reverted.
+- Tests: check.sh GREEN; difftest --self EQUIV flame_flicker, flame_flicker_b; hold-L 5789 / 0x29 at 5795 no traps;
+  offline netrun 60 s / 120 s play: no trap (to 9102 / 12102); netpair 4p Bunker Deathmatch NET_BUNKER_PLAY=60 own view
+  9857 and split (HOSTQ=&netview=split) 9884 retraces IDENTICAL x3, NET_BUNKER_PLAY=180 own view 16888 IDENTICAL x3, no
+  traps; netpair 2p 9952 IDENTICAL. Evidence port_work/p372 (dm4own, dm4split, dm4own180, pair, e2e*) and
+  port_work/p337/p372_* (offline runs).
+- **e2e p357 now differs at retrace 5830** (expected): its first flame (ground_emitter_spawn_particle, retrace 5813) now
+  lives and flame_flicker_update draws random numbers, so G (RNG) differs. The build without the fix replays it IDENTICAL
+  (7700). The recording must be re-recorded with the new build (a human session; docs/port/E2E.md).
+- Not done: the widescreen death picture (black + skull over the 4:3 middle only) - not trivial (where the picture is
+  drawn and how ws_calc should extend it was not found quickly); skipped. Not merged, not deployed (user merges after
+  the trailer capture).
+- Trap: other void-declared functions are called through int-returning pointers (the same class as this bug). A run-time
+  census (diagnostic in port_icall_note, both the e2e replay and the 4p Deathmatch) listed: emitter_sound_noop (as f:i),
+  snd_cache_entry_unref, point_spark_spawn, segment_debris_spawn, objev_level_screen_effect, level_obj_init_lights_sfx77,
+  effect3d_msg_stub, level_fire_emitters_create, watch_attach_effect_start, effect_handle_message, objev_stop_sound,
+  level_obj_init_area_points, objev_set_d0_114, objev_play_sound, objev_141a7c, objev_start_anim_cmd,
+  objev_sound_alt_300_1800, objev_trail_start_or_stop, objev_192800, bone_sparks_light_on_event, bone_sparks_on_message,
+  objev_7c8e0. Each is a bug only if its caller uses the result and the asm leaves a non-zero v0 (the deleted P317 v0use
+  tool). Not audited.
 ### P371 (port-web-b, 2026-10-31): online "own view": each player sees only their own view (no screen peeking)
 - User request: "do online multiplayer but without split screen so people can't see other people position". Design and
   results: docs/design/ONLINE_MULTIPLAYER.md §12.
@@ -126,7 +165,7 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   "0 (1st)": 7929 IDENTICAL x3), dm4own / dm4split (4p Deathmatch random play: own = split up to 9092), dm2own (2p
   Deathmatch, host widescreen / guest 4:3: 7964 IDENTICAL), tw2own / tw2split (2p Total War, flags + clock at the
   bottom: 7975 IDENTICAL, own = split 7943), offline p337/dmov1. check GREEN, e2e p357 IDENTICAL.
-- Found (not caused by P371, not fixed): 4p Bunker Deathmatch with NET_BUNKER_PLAY=60 traps on every page at retrace
+- Found (not caused by P371; fixed in P372): 4p Bunker Deathmatch with NET_BUNKER_PLAY=60 traps on every page at retrace
   ~9093 in heap_age_tagged_blocks (memory access out of bounds, world_update), in split screen too (dm4split); after it
   the fiber stacks differ (DESYNC). Also P350 widescreen: the death "out" picture (black + skull) covers only the 4:3
   part of a view, the widened sides show the 3D (same in split screen, kill4own/host_150s.png).
