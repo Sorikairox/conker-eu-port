@@ -139,6 +139,25 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   with BAD struck out and Good written comes in by a 0.12 s fade, no pen animation; the clean logo is never on screen
   (checked 37.0 - 42.0 every 0.2 s). Fade chosen over a hard cut: the side doors stand further in on the logo picture.
   Sound = v4 (decoded PCM identical but 779 samples +-1 LSB at 39.8 s: the offline render of the "good" splice).
+- **v6** (user: "Remove the lobby part, just show 4 player gameplay. Get one player to kill another."):
+  conkers_good_fur_day_trailer_v6.mp4 / _v6_25mb.mp4 / _v6_contact_sheet.jpg / _v6_shotlist.txt (85.63 s). The ONLINE beat
+  (62.91 - 69.09, still 10 beats, so the end card stays on beats 56 - 64) is the 4-player Bunker split screen only: P1
+  walks up to the bear (P2), faces him, throws a grenade; jump cut on the beat at 65.99; the blast at 66.6, the bear's
+  view irised out, P1's score 0 -> 1, KILL! tag, push-in on the top half.
+- How the kill was staged (commit 7babd0c5): the ?netdet replay of the net4 menu route (as v1's footage), every pad
+  handed to the page at 5990 (F:P), and tools/port/trailer/mpctl.js writing the port's pad buffer (_port_pad_state)
+  before each retrace: hunter P1 steers to P2 by their positions (objects at N64 0x800CC6F0, 0x32C each, position
+  +0x14..0x1C, facing +0x40 in degrees with 0 = +z; read only), both walk towards each other, P1 turns until he faces
+  P2 (5 degrees), C-down twice (grenades; the second throws; fuse ~4.7 s). The inputs are recorded per retrace and
+  mpkill.py makes plain ?padf scripts of them (capture.mjs padShift 2 undone): the replay without the bot gives the
+  same positions and P2's death (object state 1 -> 5 at ~6690). No game memory written, no teleport.
+- Found: spawns differ by mode. ?netdet (and v1's mp4 replay): P1 (-378, -48, -751), P2 (-425, -47, 2226). A local
+  split-screen game, a ?netloop session and (by v1's note) a live session: P1 (3043, -48, -3249), P2 (2400, 646, 4136).
+  So pads made under ?netdet do not reproduce the kill in a live session: **no live online session was run for v6**;
+  the footage is the online determinism mode, as in v1. (?netloop under capture.mjs stalls after a few retraces: the
+  session paces itself, not by the stepped animation frames.)
+- Coordination: no lockrun.sh exists in this repo (only in ~/goldeneye); every Chrome run here waited until no
+  `headless=new` process was running (the pageshot.sh / audprobe convention).
 ### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
 - User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
   the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
