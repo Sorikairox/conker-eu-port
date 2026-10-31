@@ -187,6 +187,15 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   session paces itself, not by the stepped animation frames.)
 - Coordination: no lockrun.sh exists in this repo (only in ~/goldeneye); every Chrome run here waited until no
   `headless=new` process was running (the pageshot.sh / audprobe convention).
+- **v7** (user: "transitioning from split to non split right before the kill"): conkers_good_fur_day_trailer_v7.mp4 /
+  _v7_25mb.mp4 / _v7_contact_sheet.jpg / _v7_shotlist.txt (85.63 s, ONLINE still 10 beats 62.91 - 69.09, end card on
+  beat 56). Split screen 4 beats (walk up, face, throw), cut on the beat to just before the blast, P1's quarter zooms
+  x1 -> x2 from the top-left corner over one beat (66.00 - 66.62) onto the own-view picture of the same retrace (shot
+  mpkill_own: the same replay with ?ownview=1; render-only, the game ran identically, P2 dead at 6692), then the blast,
+  score and KILL! in the own view with the label OWN VIEW - NO SCREEN PEEKING. The 3D lines up exactly (the own view
+  zooms a 16:9 quadrant by 2 about its centre = x2 from the corner); the HUD does not (P371 scales it by 1.5 and anchors
+  it), so the last third of the zoom cross-fades. Seen in the own-view footage (P371, not changed here): the place
+  suffix of the score is drawn apart from its number ("1 (1      ST)") and the clock sits on top of the score.
 ### P369 (port-web, 2026-10-30): customisation settings always on + touch controls in portrait and inside the menu
 - User request: "Make in game options on by default. It cannot be toggled off. Call them customisation settings. Also,
   the touch control don't appear when phone is on portrait mode and when I go into our options menu." **The user
