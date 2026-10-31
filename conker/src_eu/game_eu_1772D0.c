@@ -1362,9 +1362,15 @@ s32 flame_flicker_update(u8 *arg0, u8 *arg1) {
     return 1;
 }
 
+/* P372: effect3d update-2 handler (g_effect3d_update2_fns [0x23] / [0x24], called by effect3d_update as
+ * s32 (u8 *); 0 ends the effect). It returns flame_flicker_update's result (always 1): the asm calls it and returns with
+ * its v0 untouched. The C used to be void, and the port's indirect call of a void function returns 0, so every flame
+ * spawned by flame_spawn (bone sparks: bone_sparks_emit) died in its first update while its attach_fx follower kept it in
+ * +0x2C and kept writing its position into the freed node (bone_spark_follow_look): heap corruption, then a trap in
+ * heap_age_tagged_blocks (4-player Bunker Deathmatch, retrace 9089). */
 /* was func_1514C370 */
-void flame_flicker(u8 *arg0) {
-    flame_flicker_update(arg0, arg0 + 0x110);
+s32 flame_flicker(u8 *fx) { /* fx was arg0 */
+    return flame_flicker_update(fx, fx + 0x110);
 }
 
 /* P133 */
@@ -1412,9 +1418,10 @@ void effect3d_look_set_up(f32 *arg0) {
     arg0[0x48 / 4] = arg0[0x3C / 4];
 }
 
+/* P372: returns flame_flicker_update's result like flame_flicker (update-2 handler [0x24]; was void: the flame died at once) */
 /* was func_1514C4EC */
-void flame_flicker_b(u8 *arg0) {
-    flame_flicker_update(arg0, arg0 + 0x110);
+s32 flame_flicker_b(u8 *fx) { /* fx was arg0 */
+    return flame_flicker_update(fx, fx + 0x110);
 }
 
 /* was func_1514C50C */
