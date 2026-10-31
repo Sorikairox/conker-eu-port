@@ -43,6 +43,11 @@ for F in $FILES; do
     [ -f "$D/expected.png" ] && [ -f "$D/actual.png" ] && python3 tools/port/scripts/pngtool.py diff "$D/actual.png" "$D/expected.png" > "$D/pixdiff.txt" 2>&1
   fi
   python3 tools/port/scripts/e2e_report.py "$D" "$F" || FAILS=$((FAILS + 1))
+  # P373: a void function called through a value-returning pointer that port/tools/icall_void_audit.tsv does not list
+  if grep -q '^\[icall\] UNAUDITED' "$D/chrome.log" 2>/dev/null; then
+    echo "FAIL $F: unaudited void indirect-call targets (port/tools/icall_void_audit.tsv):"; grep '^\[icall\] UNAUDITED' "$D/chrome.log" | head -5
+    FAILS=$((FAILS + 1))
+  fi
 done
 if [ "$FAILS" -eq 0 ] && [ -n "${SAVE_REF:-}" ]; then rm -rf port_work/e2e/ref_web; mkdir -p port_work/e2e; cp -R "$WEB" port_work/e2e/ref_web; echo "reference build saved: port_work/e2e/ref_web"; fi
 echo "e2e: $(echo $FILES | wc -w | tr -d ' ') recording(s), $FAILS with a difference"

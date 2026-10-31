@@ -63,6 +63,6 @@ echo "== $1 ($P players, ${T}s, $(( $(date +%s) - s ))s wall)"
 for p in "${NAMES[@]:0:$P}"; do
   L=$D/$p.log
   echo "$p: modes $(grep -oE 'frame [0-9]+: mode [0-9]+ \(prev [0-9]+\) level [0-9A-F]+' $L | awk '{print $2 "m" $4 "L" $8}' | tr '\n' ' ' | cut -c1-200)"
-  echo "$p: nethash lines $(grep -c '^\[nethash\] [0-9]' $L), traps $(grep -iE 'Aborted|RuntimeError' $L | grep -vc 'no trap'), DESYNC $(grep -c DESYNC $L); $(grep -E '^\[net\] (session|mesh)' $L | head -2 | tr '\n' ' ')"
+  echo "$p: nethash lines $(grep -c '^\[nethash\] [0-9]' $L), traps $(grep -iE 'Aborted|RuntimeError' $L | grep -vc 'no trap'), DESYNC $(grep -c DESYNC $L), unaudited void icalls $(grep -c '^\[icall\] UNAUDITED' $L) (P373); $(grep -E '^\[net\] (session|mesh)' $L | head -2 | tr '\n' ' ')"
 done
 for p in "${NAMES[@]:1:$((P - 1))}"; do echo "-- host vs $p"; python3 tools/port/nethash_diff.py $D/host.log $D/$p.log 2>&1 | tail -3; done

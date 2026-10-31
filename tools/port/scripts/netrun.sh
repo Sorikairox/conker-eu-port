@@ -21,4 +21,4 @@ echo "== $1 (${T}s run, $(( $(date +%s) - s ))s wall)"
 echo "modes: $(grep -oE 'frame [0-9]+: mode [0-9]+ \(prev [0-9]+\) level [0-9A-F]+' $L | awk '{print $2 "m" $4 "L" $8}' | tr '\n' ' ' | cut -c1-300)"
 echo "nethash lines: $(grep -c '^\[nethash\] [0-9]' $L)  last: $(grep '^\[nethash\] [0-9]' $L | tail -1)"
 grep -E '^\[netprof\]|^\[netsnap\]' $L | tail -4
-echo "traps/aborts: $(grep -iE 'Aborted|RuntimeError|trap' $L | grep -vc 'no trap')  last frame: $(grep -oE 'frame [0-9]+' $L | tail -1)"
+echo "traps/aborts: $(grep -iE 'Aborted|RuntimeError|trap' $L | grep -vc 'no trap')  last frame: $(grep -oE 'frame [0-9]+' $L | tail -1)  unaudited void icalls (P373): $(grep -c '^\[icall\] UNAUDITED' $L)"

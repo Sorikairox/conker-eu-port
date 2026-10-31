@@ -11,6 +11,7 @@ unsigned __port_fsig(void *fp);                   /* 0 = unknown target */
 u64_ __port_icall_slow(void *fp, unsigned tsig, const u64_ *b, int n, unsigned k, unsigned rk);
 void port_icall_note(void *fp, unsigned tsig, int n, unsigned k, unsigned rk);
 const char *port_fsig_name(unsigned id);
+const char *port_icall_void_audited(void *fp);    /* P373: name if fp is an audited void target, else 0 */
 void port_icall_report(void);
 extern unsigned port_icall_slow_calls;
 

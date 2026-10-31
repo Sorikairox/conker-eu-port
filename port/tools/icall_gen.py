@@ -60,6 +60,56 @@ def expectations(regs):
             '    return bad;', '}']
 
 
+AUDIT = 'port/tools/icall_void_audit.tsv'
+
+
+def void_audit(regs):
+    """P373: port_icall_void_audited(fp) for the void functions that AUDIT lists as called through a value-returning
+    pointer with a harmless result (verdict `ok`: the caller ignores it, or the asm's v0 is 0 too) or a known unfixed one
+    (verdict `open`, see the row's note). pc_icall.c logs every other void target such a site meets ("[icall]
+    UNAUDITED ..."). Build-time checks: an `ok` / `open` row must name a void function the build defines (else the row
+    is stale: a rename, or the function got a return type), a `fixed` row must name a function that is no longer void
+    (the P372 / P373 fixes stay fixed)."""
+    import json
+    from icall import wsig
+    can = json.load(open('port/build/sigdb.json'))
+
+    def ret_of(nm):
+        if '@' + nm in can:
+            r, ps = can['@' + nm][:2]
+            return r, (wsig('void', ps) or 'v:?').split(':')[1]
+        if nm in regs:
+            r, ps = regs[nm].split(':')
+            return ('void' if r == 'v' else r), ps
+        return None, None
+    rows, errs = [], []
+    for ln, l in enumerate(open(AUDIT), 1):
+        f = l.rstrip('\n').split('\t')
+        if not f[0] or f[0].startswith('#') or f[0] == 'function':
+            continue
+        nm, verdict = f[0], f[1]
+        r, ps = ret_of(nm)
+        if r is None:
+            errs.append(f'{AUDIT}:{ln}: {nm} is not a function of this build (renamed? update the row)')
+        elif verdict in ('ok', 'open') and r != 'void':
+            errs.append(f'{AUDIT}:{ln}: {nm} returns {r} now: change its verdict to fixed')
+        elif verdict == 'fixed' and r == 'void':
+            errs.append(f'{AUDIT}:{ln}: {nm} is void again, but the audit found the caller needs its result')
+        elif verdict not in ('ok', 'open', 'fixed'):
+            errs.append(f'{AUDIT}:{ln}: verdict must be ok, open or fixed, not {verdict!r}')
+        elif verdict in ('ok', 'open'):
+            rows.append((nm, ps))
+    if errs:
+        sys.exit('icall_gen: ' + '\n'.join(errs))
+    L = ['', f'/* P373: audited void targets of value-returning indirect calls ({AUDIT}) */']
+    for j, (nm, ps) in enumerate(rows):
+        L.append(f'void iva_{j}({", ".join(CT[p] for p in ps) or "void"}) __asm__("{nm}");')
+    L += ['const char *port_icall_void_audited(void *fp) {']
+    L += [f'    if (fp == (void *)iva_{j}) return "{nm}";' for j, (nm, ps) in enumerate(rows)]
+    L += ['    return 0;', '}']
+    return L, len(rows)
+
+
 def main():
     out, objs = sys.argv[1], sys.argv[2:]
     regs, sigs, stubs = {}, set(), set()
@@ -133,8 +183,11 @@ def main():
     L += ['    }', '    return 0;', '}']
     L += S
     L += expectations(regs)
+    VA, nva = void_audit(regs)
+    L += VA
     open(out, 'w').write('\n'.join(L) + '\n')
-    print(f'icall_gen: {len(regs)} registered functions (non-vbe objects), {len(ids)} target signatures, {len(sj)} asm stubs')
+    print(f'icall_gen: {len(regs)} registered functions (non-vbe objects), {len(ids)} target signatures, {len(sj)} asm stubs, '
+          f'{nva} audited void targets')
 
 
 if __name__ == '__main__':

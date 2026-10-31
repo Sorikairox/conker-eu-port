@@ -1,0 +1,269 @@
+# P373 audit of void functions called through value-returning function pointers (port/tools/icall_gen.py,
+# port/ultra/pc_icall.c). On the N64 the caller reads whatever the callee left in v0; the port reads 0 (icall.py
+# "void result -> 0"). verdict: fixed = the caller uses the value and the asm leaves a real one in v0, so the C now
+# returns it (the build checks that a fixed function is no longer void); ok = the caller ignores the value (C and
+# asm), so 0 is harmless; open = the caller uses the value but the asm value cannot be written in C (see note).
+# A void function called through such a site and not listed here is logged once: "[icall] UNAUDITED void target"
+# (the hold-L / e2e / netrun / netpair scripts fail on it). site = ROM table[index] -> dispatching C function.
+# Rows marked "static" come from P373 port_work/p373/gen_audit.py (IR icall sites x ROM tables), "census" from the
+# run-time log over the e2e replay, hold-L and a 4-player Deathmatch.
+function	verdict	site	caller uses result	asm v0 at return	session
+flame_flicker	fixed	g_effect3d_update2_fns[35] -> effect3d_update	yes: 0 ends the effect	flame_flicker_update result (1)	P372
+flame_flicker_b	fixed	g_effect3d_update2_fns[36] -> effect3d_update	yes: 0 ends the effect	flame_flicker_update result (1)	P372
+particle_follow_owner_update	fixed	g_particle_update_fns[19] -> particle_sprite_update	yes: 0 = particle dies	particle_upd_damp_vel result	P373
+dust_cloud_bob_update	fixed	g_particle_update_fns[23] -> particle_sprite_update	yes: 0 = particle dies	impact_dust_cloud_wobble result	P373
+particle_check_surface_hit	fixed	g_particle_update_fns[27] -> particle_sprite_update	yes: 0 = particle dies	particle_surface_hit_dispatch result	P373
+particle_upd_damp_hit	fixed	g_particle_update_fns[28] -> particle_sprite_update	yes: 0 = particle dies	particle_surface_hit_dispatch result	P373
+particle_upd_damp_xz_hit	fixed	g_particle_update_fns[29] -> particle_sprite_update	yes: 0 = particle dies	particle_surface_hit_dispatch result	P373
+aim_hud_fade_update	fixed	g_sprite2d_update_fns[4] -> sprite2d_update	yes: 0 = sprite done	sprite + 0x70 (never 0)	P373
+aim_hud_slot_row_update	fixed	g_sprite2d_update_fns[11] -> sprite2d_update	yes: 0 = sprite done	sprite + 0x70 (never 0)	P373
+timedfx_track_and_test	fixed	g_timedfx_update_fns[1] -> timedfx_update_all	yes: non-zero runs the done hook	timedfx_player_in_box result	P373
+mdl_particle_emit_tex_seg_a	fixed	g_mdl_particle_draw_fns[0] -> mdl_particle_draw	yes: display-list pointer	gfx_emit_sprite_tex_segment result (gdl)	P373
+mdl_particle_emit_tex_seg_b	fixed	g_mdl_particle_draw_fns[1] -> mdl_particle_draw	yes: display-list pointer	gfx_emit_sprite_tex_segment result (gdl)	P373
+banner_sprite_draw	fixed	g_anim_model_fx_mtx_fns[2] -> anim_model_fx_draw	yes: display-list pointer	anim_model_fx_load_screen_mtx result (gdl)	P373
+screen_tint_draw_dispatch	fixed	g_node_type_table layer draw (+0x8) -> node_render_layers_draw	yes: display-list pointer	g_screen_tint_fx_draw_fns handler result (gdl)	P373
+screen_tint_draw_fill	fixed	g_screen_tint_fx_draw_fns[0] -> screen_tint_draw_dispatch	yes (returned on to node_render_layers_draw)	gfx_other_mode_cached result (gdl)	P373
+layer_pre_flash_texture	fixed	g_node_type_table layer pre (+0x14) -> node_render_layers_draw	yes: display-list pointer	sprite_load_texture result (gdl)	P373
+beam_effect_handler_stub	fixed	g_node_type_table layer post (+0x20) -> node_render_layers_draw	yes: display-list pointer	beam_effect_stub result (its gdl argument)	P373
+puff_view_dl_begin	fixed	g_node_type_table layer post (+0x20) -> node_render_layers_draw	yes: display-list pointer	view_dl_begin result (gdl)	P373
+arc_point_from_record	ok	g_arc_end_point_fns[1] -> arc_spark_spawn	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+arc_point_near_object	ok	g_arc_end_point_fns[0] -> arc_spark_spawn	no (C and asm ignore it)	result of char_fx_find_slot,expr	P373 static
+arc_point_random_box2	ok	g_arc_start_point_fns[0] -> arc_spark_spawn	no (C and asm ignore it)	expr	P373 static
+arc_point_random_box6	ok	g_arc_start_point_fns[2] -> arc_spark_spawn	no (C and asm ignore it)	expr	P373 static
+arc_point_random_marker	ok	g_arc_start_point_fns[1] -> arc_spark_spawn	no (C and asm ignore it)	result of spawn_region_random_point_3d	P373 static
+arc_wobble_init_fixed	ok	g_arc_path_fns[1] -> arc_spark_spawn	no (C and asm ignore it)	result of random_float	P373 static
+arc_wobble_init_random	ok	g_arc_path_fns[0] -> arc_spark_spawn	no (C and asm ignore it)	result of random_float	P373 static
+attached_particle_handle_event	ok	g_effect3d_msg_fns[2] -> effect3d_on_msg	no (C and asm ignore it)	result of node_handle_link_message	P373 static
+aura_particle_handle_link_msg	ok	g_effect3d_msg_fns[6] g_effect3d_msg_fns[7] -> effect3d_on_msg	no (C and asm ignore it)	result of node_handle_link_message	P373 static
+bone_sparks_light_on_event	ok	g_light_message_fns[37] -> light_ctrl_handle_message	no (C and asm ignore it)	result of node_destroy,entry,expr	P373 static
+bone_sparks_on_message	ok	g_attach_ctrl_message_fns[1] -> attach_ctrl_handle_message	no (C and asm ignore it)	result of indirect,expr	P373 static
+bound_cloud_handle_event	ok	g_effect3d_msg_fns[9] -> effect3d_on_msg	no (C and asm ignore it)	expr	P373 static
+drip_sprite_on_message	ok	g_effect3d_msg_fns[10] -> effect3d_on_msg	no (C and asm ignore it)	result of node_handle_link_message	P373 static
+effect3d_msg_stub	ok	g_effect3d_msg_fns[0] -> effect3d_on_msg	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+effect3d_on_msg_owner	ok	g_effect3d_msg_fns[1] -> effect3d_on_msg	no (C and asm ignore it)	result of node_destroy,expr	P373 static
+effect_handle_message	ok	g_effect3d_msg_fns[4] -> effect3d_on_msg	no (C and asm ignore it)	result of node_destroy,expr	P373 static
+emitter_sound_noop	ok	g_emitter_extra_fns[0] -> emitter_path_update	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+emitter_sound_update	ok	g_emitter_sound_update_fns[0] -> emitter_path_update	no (C and asm ignore it)	result of sound_voice_update_3d,expr	P373 static
+event_effect_stop	open	g_event_native_stop_fns[13] -> event_native_stop_cmd	stored: event_vm_run g_event_vm_result (a script reads it only if it uses the call value)	its entry v0 = event_vm_run's stale v0 (the previous native / return value, or its caller's)	P373 static
+head_icon_hide_current	ok	g_anim_event_fns[28] -> anim_events_run	no (C and asm ignore it)	result of head_icon_find	P373 static
+impact_tint_bright	ok	g_impact_tint_fns[12] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_brown	ok	g_impact_tint_fns[8] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_cyan	ok	g_impact_tint_fns[9] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_green	ok	g_impact_tint_fns[7] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_green_fixed	ok	g_impact_tint_fns[6] -> impact_tinted_particle_spawn	no (C and asm ignore it)	constant 200	P373 static
+impact_tint_magenta	ok	g_impact_tint_fns[10] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_red	ok	g_impact_tint_fns[0] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_red_green_a	ok	g_impact_tint_fns[2] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_red_green_b	ok	g_impact_tint_fns[3] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_red_green_c	ok	g_impact_tint_fns[4] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+impact_tint_white	ok	g_impact_tint_fns[5] -> impact_tinted_particle_spawn	no (C and asm ignore it)	constant 255	P373 static
+impact_tint_yellow	ok	g_impact_tint_fns[11] g_impact_tint_fns[1] -> impact_tinted_particle_spawn	no (C and asm ignore it)	result of random_int	P373 static
+laser_handle_message	ok	g_effect3d_msg_fns[3] -> effect3d_on_msg	no (C and asm ignore it)	result of laser_break_effects,result of laser_hits_object,expr	P373 static
+level_clear_be500	ok	g_level_obj_init_fns[14] -> level_objects_init	no (C and asm ignore it)	result of bzero	P373 static
+level_clear_d9d40_flags	ok	g_level_obj_init_fns[2] -> level_objects_init	no (C and asm ignore it)	expr	P373 static
+level_fire_emitters_create	ok	g_level_obj_init_fns[13] -> level_objects_init	no (C and asm ignore it)	result of memcpy,result of particle_emitter_spawn	P373 static
+level_ground_emitter_spawn7	ok	g_obj_effect_dispatch_fns[7] -> obj_effect_dispatch	no (C and asm ignore it)	result of ground_emitter_spawn	P373 static
+level_hook_call_15103800	ok	g_level_obj_init_fns[26] -> level_objects_init	no (C and asm ignore it)	result of sfx_cooldown_clear	P373 static
+level_mist_setup	ok	g_level_obj_init_fns[8] -> level_objects_init	no (C and asm ignore it)	result of area_drift_emitter_create	P373 static
+level_obj_init_area_points	ok	g_level_obj_init_fns[21] -> level_objects_init	no (C and asm ignore it)	result of area_points_alloc	P373 static
+level_obj_init_area_points_23	ok	g_level_obj_init_fns[31] -> level_objects_init	no (C and asm ignore it)	expr	P373 static
+level_obj_init_d34b8_effect	ok	g_level_obj_init_fns[20] -> level_objects_init	no (C and asm ignore it)	result of effect_node_create,result of memcpy	P373 static
+level_obj_init_d9d70	ok	g_level_obj_init_fns[15] -> level_objects_init	no (C and asm ignore it)	result of world_record_find	P373 static
+level_obj_init_debris_table	ok	g_level_obj_init_fns[23] -> level_objects_init	no (C and asm ignore it)	result of light_create_with_ctrl,result of mdl_particle_spawn,result of memcpy	P373 static
+level_obj_init_drift_scene	ok	g_level_obj_init_fns[1] -> level_objects_init	no (C and asm ignore it)	result of sfx_emitter_start	P373 static
+level_obj_init_lights_sfx77	ok	g_level_obj_init_fns[17] -> level_objects_init	no (C and asm ignore it)	result of sfx_emitter_start	P373 static
+level_obj_init_nop_150106a0	ok	g_level_obj_init_fns[7] -> level_objects_init	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+level_obj_init_rope	ok	g_level_obj_init_fns[22] -> level_objects_init	no (C and asm ignore it)	result of storm_controller_spawn	P373 static
+level_obj_init_ropes	ok	g_level_obj_init_fns[19] -> level_objects_init	no (C and asm ignore it)	result of rope_create	P373 static
+level_obj_init_scroll_e4	ok	g_level_obj_init_fns[25] -> level_objects_init	no (C and asm ignore it)	result of level_dl_add_texture_scroll	P373 static
+level_obj_init_scroll_fx59	ok	g_level_obj_init_fns[30] -> level_objects_init	no (C and asm ignore it)	result of effect_node_create	P373 static
+level_obj_init_scroll_handles	ok	g_level_obj_init_fns[33] -> level_objects_init	no (C and asm ignore it)	result of zone_tree_find_leaf	P373 static
+level_obj_init_scroll_xy	ok	g_level_obj_init_fns[35] -> level_objects_init	no (C and asm ignore it)	result of level_dl_add_texture_scroll	P373 static
+level_obj_init_storm	ok	g_level_obj_init_fns[16] -> level_objects_init	no (C and asm ignore it)	result of storm_controller_spawn	P373 static
+level_obj_init_storm_sounds	ok	g_level_obj_init_fns[37] -> level_objects_init	no (C and asm ignore it)	result of sfx_emitter_start	P373 static
+level_obj_init_tex_scroll	ok	g_level_obj_init_fns[36] -> level_objects_init	no (C and asm ignore it)	result of level_dl_add_texture_scroll	P373 static
+level_obj_init_two_vtx_lights	ok	g_level_obj_init_fns[32] -> level_objects_init	no (C and asm ignore it)	result of vtx_anim_light_create	P373 static
+level_obj_init_vertex_lights	ok	g_level_obj_init_fns[18] -> level_objects_init	no (C and asm ignore it)	result of vtx_anim_light_create	P373 static
+level_obj_set_hit_activate_cb	ok	g_level_obj_init_fns[6] -> level_objects_init	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+level_obj_set_target_hit_cb	ok	g_level_obj_init_fns[10] -> level_objects_init	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+level_reset_d9aa0_sfx	ok	g_level_obj_init_fns[28] -> level_objects_init	no (C and asm ignore it)	result of sfx_cooldown_clear	P373 static
+level_ropes_setup	ok	g_level_obj_init_fns[11] -> level_objects_init	no (C and asm ignore it)	expr	P373 static
+level_setup_fx_points	ok	g_level_obj_init_fns[4] -> level_objects_init	no (C and asm ignore it)	result of level_fx_point_spawn	P373 static
+level_setup_light_pipe_spray	ok	g_level_obj_init_fns[9] -> level_objects_init	no (C and asm ignore it)	result of pipe_spray_points_init	P373 static
+level_setup_noop_102c0	ok	g_level_obj_init_fns[27] -> level_objects_init	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+level_setup_noop_eb20	ok	g_level_obj_init_fns[3] -> level_objects_init	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+level_setup_scroll_fx_points	ok	g_level_obj_init_fns[5] -> level_objects_init	no (C and asm ignore it)	expr	P373 static
+level_setup_tex_scroll_neg	ok	g_level_obj_init_fns[34] -> level_objects_init	no (C and asm ignore it)	result of level_dl_add_texture_scroll	P373 static
+level_setup_tex_scroll_pos	ok	g_level_obj_init_fns[24] -> level_objects_init	no (C and asm ignore it)	result of level_dl_add_texture_scroll	P373 static
+level_sfx_cooldown_reset	ok	g_level_obj_init_fns[29] -> level_objects_init	no (C and asm ignore it)	result of sfx_cooldown_clear	P373 static
+level_tex_scroll_fx_setup	ok	g_level_obj_init_fns[12] -> level_objects_init	no (C and asm ignore it)	result of effect_node_create,result of memcpy	P373 static
+light_flash_handle_message	ok	g_light_message_fns[39] -> light_ctrl_handle_message	no (C and asm ignore it)	expr	P373 static
+light_follow_handle_message	ok	g_light_message_fns[21] -> light_ctrl_handle_message	no (C and asm ignore it)	result of indirect,expr	P373 static
+light_msg_on_off	ok	g_light_message_fns[36] -> light_ctrl_handle_message	no (C and asm ignore it)	reg 6	P373 static
+light_obj_handle_message_a	ok	g_light_message_fns[16] -> light_ctrl_handle_message	no (C and asm ignore it)	result of indirect,result of node_destroy,expr	P373 static
+light_obj_handle_message_b	ok	g_light_message_fns[17] -> light_ctrl_handle_message	no (C and asm ignore it)	result of indirect,result of node_destroy,expr	P373 static
+light_track_handle_message	ok	g_light_message_fns[31] -> light_ctrl_handle_message	no (C and asm ignore it)	result of indirect,expr	P373 static
+object_effect_kind2_start	ok	g_obj_effect_dispatch_fns[0] g_obj_effect_dispatch_fns[1] g_obj_effect_dispatch_fns[2] g_obj_effect_dispatch_fns[3] g_obj_effect_dispatch_fns[4] g_obj_effect_dispatch_fns[5] -> obj_effect_dispatch	no (C and asm ignore it)	result of ground_emitter_spawn,result of memcpy	P373 static
+objev_12d748	ok	g_anim_event_fns[128] -> anim_events_run	no (C and asm ignore it)	result of camera_shake_start	P373 static
+objev_141a7c	ok	g_anim_event_fns[97] -> anim_events_run	no (C and asm ignore it)	result of obj_interaction_update	P373 static
+objev_192800	ok	g_anim_event_fns[98] -> anim_events_run	no (C and asm ignore it)	result of obj_surface_handler_dispatch	P373 static
+objev_7c8e0	ok	g_anim_event_fns[92] -> anim_events_run	no (C and asm ignore it)	result of player_set_respawn_wait	P373 static
+objev_add_31c_1aa	ok	g_anim_event_fns[160] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_adopt_remembered_obj	ok	g_anim_event_fns[96] -> anim_events_run	no (C and asm ignore it)	result of obj_dust_trail_on_link,entry	P373 static
+objev_alert_players_near	ok	g_anim_event_fns[33] -> anim_events_run	no (C and asm ignore it)	result of obj_dist_3d,entry,expr	P373 static
+objev_allow_run	ok	g_anim_event_fns[4] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_allow_run_idle	ok	g_anim_event_fns[150] -> anim_events_run	no (C and asm ignore it)	result of player_idle_animation	P373 static
+objev_anim_at_frame	ok	g_anim_event_fns[88] -> anim_events_run	no (C and asm ignore it)	result of obj_start_anim	P373 static
+objev_anim_in_water_by_health	ok	g_anim_event_fns[102] -> anim_events_run	no (C and asm ignore it)	result of objev_start_anim_cmd,expr	P373 static
+objev_anim_set_flag_8000	ok	g_anim_event_fns[61] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_anim_slow	ok	g_anim_event_fns[18] -> anim_events_run	no (C and asm ignore it)	result of obj_start_anim	P373 static
+objev_camera_view_close	ok	g_anim_event_fns[149] -> anim_events_run	no (C and asm ignore it)	result of camera_object_spawn	P373 static
+objev_camera_view_mode11	ok	g_anim_event_fns[162] -> anim_events_run	no (C and asm ignore it)	result of camera_object_spawn	P373 static
+objev_camera_view_mode12	ok	g_anim_event_fns[163] -> anim_events_run	no (C and asm ignore it)	result of camera_object_spawn	P373 static
+objev_child_fade	ok	g_anim_event_fns[95] -> anim_events_run	no (C and asm ignore it)	result of obj_fade_command,result of obj_find_child	P373 static
+objev_clear_10c_grounded	ok	g_anim_event_fns[93] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_clear_10c_if_slow	ok	g_anim_event_fns[115] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_clear_282	ok	g_anim_event_fns[17] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_clear_6e	ok	g_anim_event_fns[13] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_clear_flags_10b	ok	g_anim_event_fns[153] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_clear_flags_25c	ok	g_anim_event_fns[74] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_clear_flags_f4	ok	g_anim_event_fns[75] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_clear_flags_f8	ok	g_anim_event_fns[152] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_clear_mask_94	ok	g_anim_event_fns[124] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_damage	ok	g_anim_event_fns[156] -> anim_events_run	no (C and asm ignore it)	result of player_hit_reaction,result of screen_tint_start,expr	P373 static
+objev_drop_carried	ok	g_anim_event_fns[25] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_effect_by_mode	ok	g_anim_event_fns[78] -> anim_events_run	no (C and asm ignore it)	entry,jumptable?entry	P373 static
+objev_fade_cmd	ok	g_anim_event_fns[112] -> anim_events_run	no (C and asm ignore it)	result of obj_fade_command	P373 static
+objev_fire_beam_forward	ok	g_anim_event_fns[117] -> anim_events_run	no (C and asm ignore it)	result of object_ray_hit_nearest	P373 static
+objev_hold_frame	ok	g_anim_event_fns[57] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_hold_frame_airborne	ok	g_anim_event_fns[60] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_hop	ok	g_anim_event_fns[2] -> anim_events_run	no (C and asm ignore it)	result of game_gu_random,entry	P373 static
+objev_jump_if_low	ok	g_anim_event_fns[118] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_launch_owner_obj	ok	g_anim_event_fns[136] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_ledge_climb_up	ok	g_anim_event_fns[22] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_level_screen_effect	ok	g_anim_event_fns[51] -> anim_events_run	no (C and asm ignore it)	result of level_screen_effect_active,result of particle_emitter_preset_cooldown	P373 static
+objev_link_nearby_object	ok	g_anim_event_fns[41] -> anim_events_run	no (C and asm ignore it)	result of obj_find_child_nth,result of obj_release_partner_remove	P373 static
+objev_loop_sound_start	ok	g_anim_event_fns[105] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_loop_sound_stop	ok	g_anim_event_fns[106] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_lose_life_cur_player	ok	g_anim_event_fns[19] -> anim_events_run	no (C and asm ignore it)	result of player_lose_life,entry	P373 static
+objev_nop_1506d4ec	ok	g_anim_event_fns[16] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_nop_1506d950	ok	g_anim_event_fns[0] g_anim_event_fns[15] g_anim_event_fns[21] g_anim_event_fns[27] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_nop_1506dcf8	ok	g_anim_event_fns[45] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_nop_1506ddb8	ok	g_anim_event_fns[50] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_nop_1507340c	ok	g_anim_event_fns[120] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_or_flags_25c	ok	g_anim_event_fns[73] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_or_flags_f4	ok	g_anim_event_fns[85] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_or_mask_94	ok	g_anim_event_fns[125] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_own_remembered_obj	ok	g_anim_event_fns[140] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_pick_turn_to_player_wrap	ok	g_anim_event_fns[71] -> anim_events_run	no (C and asm ignore it)	result of objev_pick_turn_to_player	P373 static
+objev_play_random_sound	ok	g_anim_event_fns[10] -> anim_events_run	no (C and asm ignore it)	result of objev_play_sound,expr	P373 static
+objev_play_sound	ok	g_anim_event_fns[9] -> anim_events_run	no (C and asm ignore it)	result of actor_sound_play,result of actor_sound_play2,result of actor_sound_play_untracked,result of sound_pick_variant,result of sound_surface_footstep,result of sound_voice_get_id,expr	P373 static
+objev_player_camera_view	ok	g_anim_event_fns[11] -> anim_events_run	no (C and asm ignore it)	result of camera_object_spawn,jumptable?result of math_atan2f,jumptable?entry,jumptable?expr	P373 static
+objev_player_react_anim	ok	g_anim_event_fns[94] -> anim_events_run	no (C and asm ignore it)	result of obj_start_anim,constant 0,expr	P373 static
+objev_random_voice	ok	g_anim_event_fns[40] -> anim_events_run	no (C and asm ignore it)	result of obj_sfx_play_alt	P373 static
+objev_release_kind53_wait	ok	g_anim_event_fns[142] -> anim_events_run	no (C and asm ignore it)	result of obj_find_by_id	P373 static
+objev_remove_kind	ok	g_anim_event_fns[126] -> anim_events_run	no (C and asm ignore it)	result of obj_find_by_setup_id,result of obj_remove	P373 static
+objev_remove_kind_owned	ok	g_anim_event_fns[127] -> anim_events_run	no (C and asm ignore it)	result of obj_find_by_setup_id,result of obj_remove	P373 static
+objev_respawn_record_object	ok	g_anim_event_fns[122] -> anim_events_run	no (C and asm ignore it)	result of setup_entry_find_by_id,result of setup_entry_spawn	P373 static
+objev_run_action	ok	g_anim_event_fns[90] -> anim_events_run	no (C and asm ignore it)	result of indirect,expr	P373 static
+objev_run_action_on_child	ok	g_anim_event_fns[101] -> anim_events_run	no (C and asm ignore it)	result of obj_find_child,result of objev_run_action	P373 static
+objev_scale_anim_speed	ok	g_anim_event_fns[114] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_screen_effect_stop	ok	g_anim_event_fns[32] -> anim_events_run	no (C and asm ignore it)	result of fx_dust_puff_behind_obj	P373 static
+objev_screen_effect_twice	ok	g_anim_event_fns[52] -> anim_events_run	no (C and asm ignore it)	result of fx_dust_puff_behind_obj	P373 static
+objev_set_100	ok	g_anim_event_fns[68] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_103	ok	g_anim_event_fns[26] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_10c	ok	g_anim_event_fns[113] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_1890_update	ok	g_anim_event_fns[34] -> anim_events_run	no (C and asm ignore it)	result of aiscript_nop_b	P373 static
+objev_set_1e5_1e6	ok	g_anim_event_fns[39] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_1ff_200	ok	g_anim_event_fns[129] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_21c	ok	g_anim_event_fns[70] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_22e	ok	g_anim_event_fns[121] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_239	ok	g_anim_event_fns[38] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_247	ok	g_anim_event_fns[86] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_248	ok	g_anim_event_fns[87] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_24e	ok	g_anim_event_fns[81] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_24f	ok	g_anim_event_fns[20] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_2cb	ok	g_anim_event_fns[151] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_2e4	ok	g_anim_event_fns[103] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_2e8	ok	g_anim_event_fns[43] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_2ec	ok	g_anim_event_fns[37] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_2f8_low3	ok	g_anim_event_fns[104] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_31c_11a	ok	g_anim_event_fns[157] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_31c_26	ok	g_anim_event_fns[35] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_31c_a8_ac_ad	ok	g_anim_event_fns[138] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_3a	ok	g_anim_event_fns[63] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_44	ok	g_anim_event_fns[135] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_83_lock	ok	g_anim_event_fns[66] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_anim_speed	ok	g_anim_event_fns[99] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_carried_state	ok	g_anim_event_fns[24] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_cc3d7	ok	g_anim_event_fns[30] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_d0_114	ok	g_anim_event_fns[7] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_disable_run	ok	g_anim_event_fns[6] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_flags_f4	ok	g_anim_event_fns[72] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_flags_f8	ok	g_anim_event_fns[48] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_gravity	ok	g_anim_event_fns[3] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_gravity_tenth	ok	g_anim_event_fns[23] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_health	ok	g_anim_event_fns[44] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_height_above_remembered	ok	g_anim_event_fns[139] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_immune	ok	g_anim_event_fns[31] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_inner_extent_height	ok	g_anim_event_fns[42] -> anim_events_run	no (C and asm ignore it)	result of obj_set_inner_extent_height	P373 static
+objev_set_inner_extent_width	ok	g_anim_event_fns[147] -> anim_events_run	no (C and asm ignore it)	result of obj_set_inner_extent_width	P373 static
+objev_set_mask_94	ok	g_anim_event_fns[123] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_matrix_physics	ok	g_anim_event_fns[49] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_music_mode	ok	g_anim_event_fns[158] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_owned_obj_flags	ok	g_anim_event_fns[29] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_owned_state	ok	g_anim_event_fns[100] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_owner_state	ok	g_anim_event_fns[159] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_path_cmd	ok	g_anim_event_fns[91] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_path_pair	ok	g_anim_event_fns[14] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_set_stunned	ok	g_anim_event_fns[116] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_target_speed	ok	g_anim_event_fns[5] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_timer_3c_2000	ok	g_anim_event_fns[164] -> anim_events_run	no (C and asm ignore it)	result of attachment_find_by_slot	P373 static
+objev_set_wait_timer	ok	g_anim_event_fns[133] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_xz_velocity	ok	g_anim_event_fns[36] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_set_y_velocity	ok	g_anim_event_fns[1] -> anim_events_run	no (C and asm ignore it)	its entry v0 (unchanged)	P373 static
+objev_skip_if_cutscene	ok	g_anim_event_fns[89] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_skip_if_flags	ok	g_anim_event_fns[161] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_skip_if_not_carrying	ok	g_anim_event_fns[46] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_sound_100_800	ok	g_anim_event_fns[80] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_or_stop,result of sound_word_resolve	P373 static
+objev_sound_190_1300	ok	g_anim_event_fns[145] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_or_stop,result of sound_word_resolve	P373 static
+objev_sound_3000_8000	ok	g_anim_event_fns[56] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_or_stop,result of sound_word_resolve	P373 static
+objev_sound_300_1800	ok	g_anim_event_fns[53] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_or_stop,result of sound_word_resolve	P373 static
+objev_sound_300_3000	ok	g_anim_event_fns[110] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_or_stop,result of sound_word_resolve	P373 static
+objev_sound_700_4000	ok	g_anim_event_fns[144] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_or_stop,result of sound_word_resolve	P373 static
+objev_sound_alt_100_800	ok	g_anim_event_fns[83] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_alt_or_stop,result of sound_word_resolve	P373 static
+objev_sound_alt_190_1300	ok	g_anim_event_fns[146] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_alt_or_stop,result of sound_word_resolve	P373 static
+objev_sound_alt_3000_8000	ok	g_anim_event_fns[55] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_alt_or_stop,result of sound_word_resolve	P373 static
+objev_sound_alt_300_1800	ok	g_anim_event_fns[82] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_alt_or_stop,result of sound_word_resolve	P373 static
+objev_sound_alt_300_3000	ok	g_anim_event_fns[141] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_alt_or_stop,result of sound_word_resolve	P373 static
+objev_sound_alt_700_4000	ok	g_anim_event_fns[143] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_alt_or_stop,result of sound_word_resolve	P373 static
+objev_sound_alt_hi_300_3000	ok	g_anim_event_fns[84] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_hi_word_alt,result of sound_word_resolve	P373 static
+objev_sound_global_300_1800	ok	g_anim_event_fns[154] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_hi_word_3,result of sound_word_resolve	P373 static
+objev_sound_hi_300_1800	ok	g_anim_event_fns[77] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_hi_word,result of sound_word_resolve	P373 static
+objev_sound_hi_300_3000	ok	g_anim_event_fns[111] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_hi_word,result of sound_word_resolve	P373 static
+objev_sound_if_above_water	ok	g_anim_event_fns[8] -> anim_events_run	no (C and asm ignore it)	result of objev_play_sound,expr	P373 static
+objev_sound_if_grounded	ok	g_anim_event_fns[76] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_300_1800,expr	P373 static
+objev_sound_if_not_playing	ok	g_anim_event_fns[109] -> anim_events_run	no (C and asm ignore it)	result of objev_sound_or_stop,result of sound_id_is_playing,result of sound_word_resolve	P373 static
+objev_spawn_helper_object	ok	g_anim_event_fns[155] -> anim_events_run	no (C and asm ignore it)	result of obj_limb_muzzle_burst,result of setup_entry_find_by_id,result of setup_entry_spawn,result of vec_from_yaw_pitch,expr	P373 static
+objev_spawn_shot_kind	ok	g_anim_event_fns[130] -> anim_events_run	no (C and asm ignore it)	result of obj_spawn_child_at_joint,expr	P373 static
+objev_speed_by_player_dist	ok	g_anim_event_fns[47] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_start_anim_cmd	ok	g_anim_event_fns[12] -> anim_events_run	no (C and asm ignore it)	result of face_anim_start,expr	P373 static
+objev_stop_sound	ok	g_anim_event_fns[108] -> anim_events_run	no (C and asm ignore it)	result of actor_sound_stop	P373 static
+objev_stop_sound_alt	ok	g_anim_event_fns[107] -> anim_events_run	no (C and asm ignore it)	result of actor_sound2_stop	P373 static
+objev_throw_carried	ok	g_anim_event_fns[54] -> anim_events_run	no (C and asm ignore it)	result of obj_hit_reaction_advance,expr	P373 static
+objev_throw_object	ok	g_anim_event_fns[119] -> anim_events_run	no (C and asm ignore it)	result of obj_find_by_spawn,expr	P373 static
+objev_toggle_2f8_100	ok	g_anim_event_fns[131] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_toss_carried	ok	g_anim_event_fns[132] -> anim_events_run	no (C and asm ignore it)	result of obj_start_anim,expr	P373 static
+objev_trail_set	ok	g_anim_event_fns[137] -> anim_events_run	no (C and asm ignore it)	result of afterimage_set_skin	P373 static
+objev_trail_start_or_stop	ok	g_anim_event_fns[79] -> anim_events_run	no (C and asm ignore it)	result of afterimage_start,result of afterimage_stop	P373 static
+objev_unlink_kind	ok	g_anim_event_fns[148] -> anim_events_run	no (C and asm ignore it)	result of obj_find_by_setup_id	P373 static
+objev_unlock_a9	ok	g_anim_event_fns[69] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+objev_wait_timer	ok	g_anim_event_fns[134] -> anim_events_run	no (C and asm ignore it)	expr	P373 static
+point_spark_spawn	ok	g_seg_effect_point_fns[0] -> obj_point_effect_emitter_update	no (C and asm ignore it)	result of emit_streaks_from_spec	P373 static
+rail_script_nop	open	g_event_native_stop_fns[14] -> event_native_stop_cmd	stored: event_vm_run g_event_vm_result (a script reads it only if it uses the call value)	its entry v0 = event_vm_run's stale v0 (the previous native / return value, or its caller's)	P373 static
+rail_script_set_ease	open	g_event_native_start_fns[14] -> event_native_start_cmd	stored: event_vm_run g_event_vm_result (a script reads it only if it uses the call value)	its entry v0 = event_vm_run's stale v0 (the previous native / return value, or its caller's)	P373 static
+segment_debris_spawn	ok	g_seg_effect_point_fns[1] -> obj_point_effect_emitter_update	no (C and asm ignore it)	result of mdl_particle_spawn	P373 static
+tether_effect_on_message	ok	g_effect3d_msg_fns[5] -> effect3d_on_msg	no (C and asm ignore it)	result of node_destroy,expr	P373 static
+tracer_on_obj_replaced	ok	g_effect3d_msg_fns[8] -> effect3d_on_msg	no (C and asm ignore it)	expr	P373 static
+watch_attach_effect_start	ok	g_obj_effect_dispatch_fns[6] -> obj_effect_dispatch	no (C and asm ignore it)	result of ground_emitter_spawn,result of memcpy,entry	P373 static
+snd_cache_entry_unref	ok	N_ALSynth.dma (audio_mgr_init) -> n_alSynFreeVoice	no (C and asm ignore it)	its entry v0	P373 census
