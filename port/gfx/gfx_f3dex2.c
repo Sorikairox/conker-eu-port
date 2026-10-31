@@ -442,6 +442,154 @@ static unsigned char *ws_scrub_lo; static size_t ws_scrub_n;
     ws_scrub_lo = (unsigned char *)(sp_ - n_); ws_scrub_n = n_; memcpy(ws_scrub_buf, ws_scrub_lo, n_); } while (0)
 #define WS_SCRUB_RESTORE() memcpy(ws_scrub_lo, ws_scrub_buf, ws_scrub_n)
 
+/* P371 online "own view" (room setting SCREEN: OWN VIEW, port/web/main.js port_gfx_ownview; test aid ?ownview=N, N = the
+ * controller number 1..4). Every peer runs the whole game, multiplayer split screen included: the game still builds the
+ * display list of every view (camera, culling, animation, effects, LOD, HUD all run as before, so the game memory and the
+ * online state hash are exactly those of a split-screen run). Only this renderer changes what reaches the canvas:
+ *  - the view of the local player (the player whose controller g_player_pad_map names this peer's channel) fills the
+ *    picture: its 3D viewport and scissor are scaled about the view's centre by ov_z = the larger of canvas / view along
+ *    the two axes (4:3 quadrants fill exactly; a 2-player strip, ~2.2:1, is cut at its sides; with Widescreen the
+ *    widened view is used), so the scene is rasterised at full resolution, not a scaled-up quarter;
+ *  - the other players' views are not drawn: triangles and rectangles whose scissor box is another player's view (their
+ *    3D scenes, fades, scopes) and HUD pieces that lie inside another player's view rectangle are dropped;
+ *  - the multiplayer HUD (mp_hud_draw_views, the text queue: drawn with the full-screen scissor, each view's pieces placed
+ *    relative to its view rectangle) is put on the full picture: a piece inside the local view is scaled by ov_h (3/4
+ *    of the view's zoom: 1.5) and keeps its distance to the view's nearest edge (its centre in the first 40 %: left /
+ *    top, in the last 40 %: right / bottom, else the centre), so the health at the top left stays at the top left; the
+ *    shared pieces across the middle of the screen (team scores, the clock: they straddle the views) move to the top
+ *    centre; the split lines are dropped;
+ *  - paused (the game draws no views then): the overlays as drawn; the paused frame behind the pause menu is the copy of
+ *    the own view the canvas held (a GPU read-back: outside the hash like every pause frame).
+ * Render-only, like Widescreen: this object is outside the online hash and game memory is only read (pc_overrides.c). */
+int port_ownview_views(float *rects, int ch, int *count, int *paused) __attribute__((weak));   /* port/boot/pc_overrides.c (game build) */
+static int ov_ch1;          /* the local controller + 1 (0: off): the page (online room setting) or ?ownview */
+static int ov_on;           /* this task draws the own view (multiplayer with 2..4 views, the local player has one) */
+static int ov_p, ov_n;      /* the local player's view, the number of views */
+static float ov_r[4][4];    /* view rectangles x0, y0, x1, y1 (N64 pixels) */
+static int ov_paused;       /* the game is paused / the pause menu is open */
+static int ov_cls;          /* how the draws now run: 0 as drawn, 1 local view (zoomed), 2 local HUD piece, 3 dropped, 4 shared
+                             * piece moved to the top */
+static int ov_rcls;         /* the class of the rectangle being drawn (rect() sets it before need_state) */
+static float ov_z, ov_cx, ov_cy;   /* zoom about the local view's centre (canvas pixels, y down) */
+static float ov_h, ov_split;       /* HUD scale; the y between the view rows (N64), 0 = none */
+static int ov_logged;
+EMSCRIPTEN_KEEPALIVE void port_gfx_ownview(int ch) { ov_ch1 = ch >= 0 && ch < 4 ? ch + 1 : 0; state_dirty = 1; }
+EMSCRIPTEN_KEEPALIVE int port_gfx_ownview_state(void) { return ov_on ? 1 + ov_p : 0; }   /* tests: 0 off, else 1 + the view drawn */
+static void ov_task_begin(void) {
+    static int flag_read;
+    if (!flag_read) { int f = port_flag("ownview"); flag_read = 1; if (f >= 1 && f <= 4 && !ov_ch1) ov_ch1 = f; }
+    int was = ov_on ? 1 + ov_p : 0;
+    ov_on = 0; ov_cls = ov_rcls = 0;
+    if (ov_ch1 && port_ownview_views && !off_on) {
+        float r[16]; int n = 0, paused = 0;
+        int p = port_ownview_views(r, ov_ch1 - 1, &n, &paused);
+        if (p >= 0 && n >= 2 && n <= 4) {
+            ov_split = 0;
+            for (int q = 0; q < n; q++) {
+                for (int k = 0; k < 4; k++) ov_r[q][k] = r[q * 4 + k];
+                if (ov_r[q][1] > 16 && (ov_split == 0 || ov_r[q][1] < ov_split)) ov_split = ov_r[q][1];
+            }
+            if (ov_split > 0) ov_split -= 1;   /* the top row ends ~2 pixels above the bottom row's y0 */
+            ov_n = n; ov_p = p; ov_on = 1; ov_paused = paused;
+        }
+    }
+    if ((ov_on ? 1 + ov_p : 0) != was && ov_logged < 40) {
+        ov_logged++;
+        if (ov_on) port_log("[ownview] on at retrace %u: controller %d = player %d of %d, view %.0f,%.0f..%.0f,%.0f\n", port_frame_count, ov_ch1, ov_p + 1, ov_n,
+                            ov_r[ov_p][0], ov_r[ov_p][1], ov_r[ov_p][2], ov_r[ov_p][3]);
+        else port_log("[ownview] off at retrace %u (controller %d)\n", port_frame_count, ov_ch1);
+    }
+    state_dirty = 1;
+}
+/* canvas pixels of an N64 view edge, as the 3D of a view is placed (edges within 4 pixels of the screen edge: the canvas edge) */
+static float ov_cx3(float x) {
+    float W = (float)cimg_width;
+    if (ws_on) return ws_edge(x);
+    return x <= 4 ? 0 : x >= W - 4 ? (float)canvas_w : x * canvas_w / W;
+}
+static float ov_cy3(float y) {
+    float t = y - VI_Y0, H = CIMG_H;
+    return t <= 4 ? 0 : t >= H - 4 ? (float)canvas_h : t * canvas_h / H;
+}
+static void ov_calc(void) {   /* after ws_calc (apply_state): the zoom of the local view and the HUD scale */
+    if (!ov_on) return;
+    const float *r = ov_r[ov_p];
+    float X0 = ov_cx3(r[0]), X1 = ov_cx3(r[2]), Y0 = ov_cy3(r[1]), Y1 = ov_cy3(r[3]);
+    if (X1 - X0 < 8 || Y1 - Y0 < 8) { ov_z = 1; ov_cx = canvas_w * 0.5f; ov_cy = canvas_h * 0.5f; ov_h = 1; return; }
+    float zx = canvas_w / (X1 - X0), zy = canvas_h / (Y1 - Y0);
+    ov_z = zx > zy ? zx : zy;
+    ov_cx = (X0 + X1) * 0.5f; ov_cy = (Y0 + Y1) * 0.5f;
+    float sxn = ws_on ? ws_sx : canvas_w / (float)cimg_width, syn = canvas_h / CIMG_H;
+    float fx = canvas_w / ((r[2] - r[0]) * sxn), fy = canvas_h / ((r[3] - r[1]) * syn), fill = fx > fy ? fx : fy;
+    ov_h = fill * 0.75f; if (ov_h < 1) ov_h = 1;   /* 1.5 for quadrants and 2-player strips */
+}
+/* the view whose rectangle holds the box (tolerance d pixels), else -1 */
+static int ov_view_of(float x0, float y0, float x1, float y1, float d) {
+    for (int q = 0; q < ov_n; q++)
+        if (x0 >= ov_r[q][0] - d && y0 >= ov_r[q][1] - d && x1 <= ov_r[q][2] + d && y1 <= ov_r[q][3] + d) return q;
+    return -1;
+}
+static int ov_sc_full(void) { return !sc_on || (sc_box[0] <= 4 && sc_box[2] >= cimg_width - 4.0f && sc_box[3] - sc_box[1] >= CIMG_H - 8); }
+/* the class of the triangles drawn with the current scissor: a view's own scissor box decides */
+static int ov_tri_class(void) {
+    if (!ov_on || off_on || ov_sc_full()) return 0;
+    int q = ov_view_of(sc_box[0], sc_box[1], sc_box[2], sc_box[3], 3);
+    return q < 0 ? 0 : q == ov_p ? 1 : 3;
+}
+/* the class of a rectangle x0,y0 .. x1,y1 (N64 pixels) */
+static int ov_rect_class(float x0, float y0, float x1, float y1, int rm) {
+    if (!ov_on || off_on || ov_paused) return 0;
+    if (!ov_sc_full()) {   /* a view's own overlays (fades, tint, scope, the "out" picture): the whole view's mapping */
+        int q = ov_view_of(sc_box[0], sc_box[1], sc_box[2], sc_box[3], 3);
+        if (q >= 0) return q == ov_p ? 1 : 3;
+        return 0;
+    }
+    int q = ov_view_of(x0, y0, x1, y1, 1);
+    if (q >= 0) {
+        if (q != ov_p) return 3;
+        const float *r = ov_r[q];
+        return (x1 - x0) >= 0.8f * (r[2] - r[0]) && (y1 - y0) >= 0.8f * (r[3] - r[1]) ? 1 : 2;
+    }
+    float W = (float)cimg_width, w = x1 - x0, h = y1 - y0;
+    if (rm == 1 && ((w >= 0.9f * W && h <= 16) || (h >= 0.9f * CIMG_H && w <= 8))) return 3;   /* split lines */
+    if (ov_split > 0 && w < 0.9f * W && fabsf((y0 + y1) * 0.5f - ov_split) <= 16) return 4;     /* team scores, clock */
+    return 0;
+}
+/* rect(): canvas x / y of an N64 point of a class-2 piece whose centre is ex, ey */
+static float ov_hud_x(float x, float ex) {
+    const float *r = ov_r[ov_p];
+    float s = (ws_on ? ws_sx : canvas_w / (float)cimg_width) * ov_h, w = r[2] - r[0], u = (ex - r[0]) / w;
+    if (fabsf(w * s - canvas_w) < 1) return (x - r[0]) * s;
+    return u < 0.4f ? (x - r[0]) * s : u > 0.6f ? canvas_w - (r[2] - x) * s : canvas_w * 0.5f + (x - (r[0] + r[2]) * 0.5f) * s;
+}
+static float ov_hud_y(float y, float ey) {
+    const float *r = ov_r[ov_p];
+    float s = canvas_h / CIMG_H * ov_h, h = r[3] - r[1], u = (ey - r[1]) / h;
+    if (fabsf(h * s - canvas_h) < 1) return (y - r[1]) * s;
+    return u < 0.4f ? (y - r[1]) * s : u > 0.6f ? canvas_h - (r[3] - y) * s : canvas_h * 0.5f + (y - (r[1] + r[3]) * 0.5f) * s;
+}
+/* GL viewport / scissor (x, y from the bottom left, canvas pixels) of a class-1 draw: scaled about the view's centre */
+static void ov_glbox(GLint *x, GLint *y, GLint *w, GLint *h) {
+    float top = canvas_h - (float)(*y + *h);
+    float X = canvas_w * 0.5f + (*x - ov_cx) * ov_z, T = canvas_h * 0.5f + (top - ov_cy) * ov_z, Wd = *w * ov_z, Hd = *h * ov_z;
+    *x = (GLint)floorf(X + 0.5f); *w = (GLint)floorf(Wd + 0.5f); *h = (GLint)floorf(Hd + 0.5f);
+    *y = (GLint)floorf(canvas_h - (T + Hd) + 0.5f);
+}
+static void ov_viewport(GLint x, GLint y, GLint w, GLint h) { if (ov_cls == 1 && rect_mode == 0) ov_glbox(&x, &y, &w, &h); glViewport(x, y, w, h); }
+/* the scissor too; an edge that lands within 4 N64 pixels of the canvas edge goes to it (the view's 2-pixel border on the
+ * screen's edge, which the zoom made ~13 canvas pixels wide) */
+static void ov_scissor(GLint x, GLint y, GLint w, GLint h) {
+    if (ov_cls == 1 || ov_cls == 2) {
+        ov_glbox(&x, &y, &w, &h);
+        GLint t = (GLint)(4 * ov_z * canvas_w / cimg_width);
+        if (x <= t) { w += x; x = 0; }
+        if (x + w >= canvas_w - t) w = canvas_w - x;
+        if (y <= t) { h += y; y = 0; }
+        if (y + h >= canvas_h - t) h = canvas_h - y;
+    }
+    glScissor(x, y, w, h);
+}
+
 static const char *VS =
     "#version 300 es\n"
     "in vec4 aPos; in vec4 aCol; in vec2 aST; in float aFog;\n"
@@ -818,6 +966,8 @@ static void blend_state(unsigned cyc, int mode) {
 static unsigned dl_st[10];   /* P193: see draw_log_line */
 static void apply_state(void) {
     ws_calc();   /* P350 */
+    ov_calc();   /* P371 */
+    ov_cls = !ov_on ? 0 : rect_mode ? ov_rcls : ov_tri_class();
     unsigned cyc = oth_h >> 20 & 3; /* 0 1CYC, 1 2CYC, 2 COPY, 3 FILL */
     unsigned w0 = combine_w0, w1 = combine_w1;
     if (filt_mode < 0) filt_mode = port_flag("filter0") ? 0 : port_flag("filter4") ? 2 : 1;
@@ -924,14 +1074,14 @@ static void apply_state(void) {
             float x0 = (vp_trans[0] - vp_scale[0]) / 4.0f, y0 = (vp_trans[1] - vp_scale[1]) / 4.0f;
             float d3 = ws_tag == 1 || ws_tag == 2 ? ws_dx : 0;   /* a corner HUD model (health chocolate) moves with its anchor */
             float X0 = is3d ? ws_x3d(x0) + d3 : ws_x2d(x0), X1 = is3d ? ws_x3d(x0 + w) + d3 : ws_x2d(x0 + w);
-            glViewport((GLint)floorf(X0 + 0.5f), (GLint)(canvas_h - (y0 + h - VI_Y0) * sy), (GLint)floorf(X1 - X0 + 0.5f), (GLint)(h * sy));
+            ov_viewport((GLint)floorf(X0 + 0.5f), (GLint)(canvas_h - (y0 + h - VI_Y0) * sy), (GLint)floorf(X1 - X0 + 0.5f), (GLint)(h * sy));
         }
         if (sc_on) {
             float X0, X1, full = sc_box[0] <= 4 && sc_box[2] >= W - 4;
             if (is3d) { X0 = sc_box[0] <= 4 ? 0 : ws_x3d(sc_box[0]); X1 = sc_box[2] >= W - 4 ? canvas_w : ws_x3d(sc_box[2]); }
             else { X0 = full ? 0 : ws_x2d(sc_box[0]); X1 = full ? canvas_w : ws_x2d(sc_box[2]); }
             glEnable(GL_SCISSOR_TEST);
-            glScissor((GLint)floorf(X0 + 0.5f), (GLint)(canvas_h - (sc_box[3] - VI_Y0) * sy), (GLint)floorf(X1 - X0 + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
+            ov_scissor((GLint)floorf(X0 + 0.5f), (GLint)(canvas_h - (sc_box[3] - VI_Y0) * sy), (GLint)floorf(X1 - X0 + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
         } else glDisable(GL_SCISSOR_TEST);
         return;
     }
@@ -939,12 +1089,12 @@ static void apply_state(void) {
     else {
         float w = 2 * vp_scale[0] / 4.0f, h = 2 * vp_scale[1] / 4.0f;
         float x0 = (vp_trans[0] - vp_scale[0]) / 4.0f, y0 = (vp_trans[1] - vp_scale[1]) / 4.0f;
-        glViewport((GLint)(x0 * sx), (GLint)(canvas_h - (y0 + h - VI_Y0) * sy), (GLint)(w * sx), (GLint)(h * sy));
+        ov_viewport((GLint)(x0 * sx), (GLint)(canvas_h - (y0 + h - VI_Y0) * sy), (GLint)(w * sx), (GLint)(h * sy));
     }
     /* P35b: G_SETSCISSOR (the RDP clips every primitive to it; the level frames use x 2..290, y 0..216) */
     if (sc_on) {
         glEnable(GL_SCISSOR_TEST);
-        glScissor((GLint)(sc_box[0] * sx), (GLint)(canvas_h - (sc_box[3] - VI_Y0) * sy), (GLint)((sc_box[2] - sc_box[0]) * sx + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
+        ov_scissor((GLint)(sc_box[0] * sx), (GLint)(canvas_h - (sc_box[3] - VI_Y0) * sy), (GLint)((sc_box[2] - sc_box[0]) * sx + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
     } else glDisable(GL_SCISSOR_TEST);
 }
 
@@ -1114,6 +1264,7 @@ static void tri(unsigned i0, unsigned i1, unsigned i2) {
     }
     if (off_on && off_zimg) zsnap.valid = 0;   /* P349: the z image gets more than the copied frame */
     need_state(0);
+    if (ov_cls == 3) return;   /* P371: another player's view */
     put(a, 1, 1); put(b, 1, 1); put(c, 1, 1);   /* P35: the tile shift is applied per tile in the shader */
     if (ws_on && proj_persp) { float *o = batch + (nbatch - 3) * VF; o[0] /= ws_k; o[VF] /= ws_k; o[2 * VF] /= ws_k; }   /* P350 */
 }
@@ -1491,6 +1642,12 @@ static void hx_task_end(void) {
  * decides, see ws_calc), and is cleared here. */
 static int rect_ext;
 static void rect(float x0, float y0, float x1, float y1, float s0, float t0, float s1, float t1, unsigned col, int rm) {
+    if (ov_on) {   /* P371: the class of this rectangle (another one: the state is applied again) */
+        int c = ov_rect_class(x0, y0, x1, y1, rm);
+        if (c != ov_rcls) { ov_rcls = c; state_dirty = 1; }
+        if (c == 3) { rect_ext = 0; return; }
+        if (c == 4) { y0 += 14 - ov_split; y1 += 14 - ov_split; }   /* the band across the middle -> the top */
+    }
     need_state(rm);
     float W = cimg_width, H = CIMG_H;
     V q[4];
@@ -1504,6 +1661,12 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
         else
         q[i].x = xs[i] / W * 2 - 1;
         q[i].y = 1 - (ys[i] - VI_Y0) / H * 2; q[i].z = 0; q[i].w = 1;
+        if (ov_cls == 1) {   /* P371: the local view's overlay, zoomed like its 3D */
+            float X = (q[i].x + 1) * 0.5f * canvas_w, Y = (1 - q[i].y) * 0.5f * canvas_h;
+            q[i].x = (canvas_w * 0.5f + (X - ov_cx) * ov_z) / canvas_w * 2 - 1; q[i].y = 1 - (canvas_h * 0.5f + (Y - ov_cy) * ov_z) / canvas_h * 2;
+        } else if (ov_cls == 2) {   /* P371: a local HUD piece on the full picture */
+            q[i].x = ov_hud_x(xs[i], (x0 + x1) * 0.5f) / canvas_w * 2 - 1; q[i].y = 1 - ov_hud_y(ys[i], (y0 + y1) * 0.5f) / canvas_h * 2;
+        }
         q[i].r = (col >> 24) / 255.0f; q[i].g = (col >> 16 & 255) / 255.0f; q[i].b = (col >> 8 & 255) / 255.0f;
         q[i].a = (col & 255) / 255.0f; q[i].s = ss[i]; q[i].t = ts[i]; q[i].fog = 0;
     }
@@ -2763,6 +2926,7 @@ static __attribute__((noinline)) void gfx_run_task_body(void *task) {
     gfx_bounds_reset();
     gfx_frame_begin(0, 0, 0);
     ws_tag = 0;   /* P350 */
+    ov_task_begin();   /* P371 */
     cur_ucode = ucode; cur_udata = rd32(t + 24);
     if (port_flag("udump") && gfx_stats.tasks == 10) {   /* P35b ?udump=1: hex dump of the task ucode text + data */
         const unsigned char *a = gfx_addr(ucode), *d = gfx_addr(cur_udata);

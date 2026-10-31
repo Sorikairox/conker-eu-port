@@ -176,3 +176,34 @@ void port_cam_probe(unsigned task) {
 /* P205: the P199 --wrap of object_state_dispatch_a / object_state_dispatch_b (dropped object argument of the g_object_state_fns_a / g_object_state_fns_b
  * handlers) was removed: port P200 made the NON_MATCHING game C (game_161520.c) pass the object and return the
  * handler's result. ?p199nowrap is gone with it. */
+
+/* P371 online "own view" (the renderer, port/gfx/gfx_f3dex2.c ov_task_begin): the multiplayer views of this frame, read
+ * here because this TU sees game memory with N64 semantics (the renderer is a plain C object). Writes the view
+ * rectangles of players 0 .. n - 1 (x0, y0, x1, y1 floats from the camera records: +0x2C, +0x24, +0x30, +0x28), the
+ * view count and the paused state ; returns the player whose controller is `ch`, -1 when there is none or the game is not
+ * in a multiplayer split screen. Reads only (32-bit stores into the caller's buffers). */
+extern u8 g_mp_mode_active;        /* was D_800BE616 */
+extern u8 g_game_paused;           /* was D_800BEAC0 */
+extern u8 g_pause_open;            /* was D_800BEAC1 */
+extern u8 g_player_pad_map[];      /* was D_800843F0 */
+s32 port_ownview_views(f32 *rects, s32 ch, s32 *count, s32 *paused) {
+    s32 n = g_last_player_index + 1, p = -1, q;
+    u8 *cam;
+
+    if (g_mp_mode_active == 0 || n < 2 || n > 4) {
+        return -1;
+    }
+    for (q = 0; q < n; q++) {
+        cam = (u8 *)g_player_cams + q * 0x180;   /* g_player_cams holds the address of the records */
+        rects[q * 4 + 0] = *(f32 *)(cam + 0x2C);
+        rects[q * 4 + 1] = *(f32 *)(cam + 0x24);
+        rects[q * 4 + 2] = *(f32 *)(cam + 0x30);
+        rects[q * 4 + 3] = *(f32 *)(cam + 0x28);
+        if (p < 0 && g_player_pad_map[q] == ch) {
+            p = q;
+        }
+    }
+    *count = n;
+    *paused = g_game_paused != 0 || g_pause_open != 0;
+    return p;
+}
