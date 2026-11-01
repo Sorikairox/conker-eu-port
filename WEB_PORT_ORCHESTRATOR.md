@@ -24,6 +24,13 @@ Most of the knowledge is N64-shaped (MIPS, libultra, RSP microcode). Section 12 
   holders, bring your own ROM".
 - **No third-party downloads without the user's approval** (fonts, music, libraries). Prefer what the game or the
   toolchain already has.
+- **Every web port ships touch controls (user rule 2026-11-01).** On-screen pad for the console's full controller,
+  playable on a phone in portrait (picture at the top, controls below) and landscape (controls over the sides), with
+  multi-touch, rotation mid-game, the page's ROM picker and menus usable by touch, and the touch pad feeding the same
+  input path as keyboard/gamepad (so online lockstep and recordings are unchanged). Setting Auto (default: on for
+  touch devices) / On / Off; store only the player's explicit choice. Test with real phone emulation (CDP touch,
+  mobile UA, 390x844, 412x915, 844x390, rotation) before deploy. Conker's implementation is the reference
+  (port/web/main.js, docs/design/PLAYING.md, traps 60-63).
 
 ---
 
@@ -585,4 +592,5 @@ flash, controller pak).
 6. Convert in disjoint slices with 2–3 agents; gate every commit; boot-test continuously.
 7. Reach the real route with sound; add the determinism modes and route tests.
 8. Rename everything; drop matching scaffolding from the integration branch.
-9. Deploy; then features (each optional), then online, then e2e recordings.
+9. Deploy with touch controls from the first public build (section 0); then features (each optional), then online,
+   then e2e recordings.
