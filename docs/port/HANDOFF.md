@@ -99,6 +99,32 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P375 (port-web, 2026-11-02): offline play (service worker, update notice, manifest, home-screen icon)
+- User request: "Deploy everything with Netlify so I can play. Also make all port work offline so anyone can play as
+  long as they loaded the website." Option **Offline play** (key `offline`, page tool, not in the presets), **on by
+  default** because it was asked for.
+- 832cda72: port/web/sw.js precaches 12 files = 8.09 MB (8481229 bytes; conker.wasm 7.68 MB) on install, cache
+  `conker-offline-<build id>`, id = port/tools/sw_stamp.py (SHA-256 of the precached files, stamped by `make web` and on
+  the site copy by deploy_web.sh, which checks both stamps agree). activate deletes other conker-offline-* caches.
+  Cache-first for same-origin precached GETs (navigation to the folder = index.html, query ignored); /api/,
+  /.netlify/, BUILD.txt, dev files never cached. A new worker waits; main.js offlinePlay*: before the game started the
+  page activates it and reloads at once, during play `#offline-update` "Update ready / Reload". Off = unregister + delete
+  caches. navigator.storage.persist() + estimate logged ("[offline] ..."). ROM / saves: IndexedDB 'conker-port'
+  (unchanged; untouched by the worker and by turning the option off). Manifest + plain generic icon (icon.svg,
+  icon-192/512.png from port/tools/make_icons.py, no game art). ?nosw=1 / ?netdet skip the worker. deploy_web.sh
+  vars renamed WEB_BUILD (was B), SITE (was S). PLAYING.md Options: Offline play paragraph.
+- Trap: a running worker's `caches.open()` recreates a cache the page just deleted: the fetch handler uses
+  `caches.match(key, { cacheName })`.
+- Test: `tools/port/scripts/offline_test.sh local|live` (CDP Android 412x915, ROM through the page's own file input,
+  Network.emulateNetworkConditions offline on the page + every service worker target, local server stopped too):
+  local ALL PASS (install, ROM stored, uncached fetch fails, offline reload with ROM picker + stored ROM, offline boot
+  ?warp=29 to frame 989, touch laid out, update A -> B notice + Reload -> only B's cache, option off -> 0 workers, 0
+  caches, ROM kept); live ALL PASS (steps 1-5). phone_shots android 412,915 -> 844,390: positions as P369; e2e p357 7700
+  IDENTICAL; check GREEN. Deployed 832cda72 (sw build 45f842efc20283ea). Evidence port_work/p375.
+- Not tested: real iOS Safari (SW + 64 MB ROM in IndexedDB quota, Add to Home Screen gives a separate storage on iOS:
+  the ROM must be picked again inside the installed app); persistent storage is "not granted" in headless Chrome (Chrome
+  grants it to installed / engaged sites). A sw.js-only change keeps the same cache name (the id hashes the precached
+  files); the worker still updates.
 ### P374 (port-web-b, 2026-10-31): widescreen death picture covers the whole view (MP black + skull, iris)
 - User request: "Fix the widescreen death screen so it covers everything" (P371 / P372 / P373 open item).
 - Cause: render_player_hud tags a player's overlays ws_tag 3 (port_ws_hud_anchor). The death picture is
