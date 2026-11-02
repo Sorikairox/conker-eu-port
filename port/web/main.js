@@ -139,6 +139,11 @@ const OPTIONS = [
   // P357: a tool like Online / Photo mode (not in the presets): shows the Record button (docs/port/E2E.md)
   { key: 'recorder', label: 'Input recorder (for testing)', def: false,
     help: 'Shows the Record button: records everything you press from power-on (with your save and options) into a small file that the developers replay automatically to find the first point where a new version of the port plays differently. While recording, the game runs in the same exact-timing mode as online play; free camera and photo mode are off and the game options are fixed.' },
+  // P375: a page tool like Online (not in the presets), on by default because the user asked for it: the service worker
+  // (sw.js) keeps every site file in the browser so the game runs with no network after one visit. Off: the worker is
+  // unregistered and its caches are deleted (the ROM and saves in IndexedDB stay either way).
+  { key: 'offline', label: 'Offline play', def: true,
+    help: 'Keeps the whole site (page, game code, everything except your ROM and saves, which are always kept in this browser) on this device after one visit, so the game starts and plays with no internet connection. A new version downloads in the background and asks you to reload. Off: the stored copy is deleted and the site needs the network again. Online multiplayer always needs the network.' },
   { key: 'skipcut', label: 'Skippable cutscenes (hold L)', def: true, game: 0,
     help: 'Hold L for 3 s to skip any cutscene, even one not seen yet (also Start on the boot intro). Off: the N64 rules (only scenes already seen, L skips at once).' },
   { key: 'saveicon', label: 'Autosave icon',  def: false,
@@ -222,7 +227,7 @@ for (const kv of (Q.get('opt') || '').split(',')) {
 // Classic / Modern whose values no longer match (a ?opt override, an option added later) is shown as what matches.
 // P348: 'photomode' is not in the presets either: like 'online' it only adds a tool (a key that freezes the game for a
 // photo) and changes nothing until it is used, so picking Classic or Modern neither turns it on nor off.
-const PRESET_KEYS = OPTIONS.filter((o) => !['online', 'photomode', 'recorder'].includes(o.key)).map((o) => o.key);   // P357: recorder = a tool
+const PRESET_KEYS = OPTIONS.filter((o) => !['online', 'photomode', 'recorder', 'offline'].includes(o.key)).map((o) => o.key);   // P357: recorder = a tool; P375: offline = a page tool
 const PRESET_MODERN_ON = ['skipcut', 'skipintro', 'saveicon', 'healthhud', 'cashhud', 'airbar', 'crosshair', 'conkerlod', 'rumble', 'hires2d', 'smoothfont', 'widescreen', 'fullres', 'hfr'];
 const PRESETS = {
   classic: { label: 'Classic', help: 'The original N64 game: every extra off, volumes 100 %. Only the hold-L cutscene skip stays on (it does nothing unless you hold L).',
@@ -2138,6 +2143,66 @@ function installAudioProbe() {
 if (Q.get('audprobe')) installAudioProbe();
 $('demo').onclick = () => start('demo');
 $('start').onclick = () => start('game');
+
+// ---------------------------------------------------------------- P375 offline play (option 'offline', sw.js)
+// On: register sw.js (it precaches every site file, cache 'conker-offline-<build id>'), ask for persistent storage (so
+// the browser does not evict the cached site, the ROM or the saves under storage pressure). A new build's worker waits
+// until this page lets it in: before the game started that happens at once and the page reloads into the new version;
+// while the game runs a small "Update ready" notice offers the reload. Off: unregister the worker, delete its caches.
+// Not under ?netdet / a test run's ?nosw=1 (the tests that do not test this keep the plain network path).
+const offlinePlayAvailable = 'serviceWorker' in navigator && window.isSecureContext && !NETDET && !Q.get('nosw');
+let offlinePlayReloading = false;
+function offlinePlayShowUpdate(worker) {
+  if (!running) { offlinePlayActivate(worker); return; }   // nothing to lose yet: take the new version now
+  $('offline-update').hidden = false;
+  $('offline-reload').onclick = () => offlinePlayActivate(worker);
+  log('[offline] update ready (reload to use it)');
+}
+function offlinePlayActivate(worker) {
+  log('[offline] activating the new version');
+  offlinePlayReloading = true;
+  worker.postMessage('skip-waiting');
+}
+async function offlinePlayEnable() {
+  if (!offlinePlayAvailable) return;
+  try {
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (offlinePlayReloading) location.reload();   // only after this page asked for the new version (never a loop)
+      else log('[offline] this page is now kept offline');
+    });
+    const reg = await navigator.serviceWorker.register('sw.js');
+    if (reg.waiting && hadController) offlinePlayShowUpdate(reg.waiting);
+    reg.addEventListener('updatefound', () => {
+      const w = reg.installing;
+      if (!w) return;
+      w.addEventListener('statechange', () => {
+        if (w.state === 'installed') {
+          if (navigator.serviceWorker.controller) offlinePlayShowUpdate(w);
+          else log('[offline] site stored: the game now plays with no network');
+        } else if (w.state === 'redundant') log('[offline] storing the site failed (it retries on the next visit)', 'fail');
+      });
+    });
+    if (navigator.storage && navigator.storage.persist) {
+      const persisted = await navigator.storage.persist();
+      const est = navigator.storage.estimate ? await navigator.storage.estimate() : null;
+      log(`[offline] worker ${hadController ? 'active' : 'registered'}, persistent storage ${persisted ? 'granted' : 'not granted'}` +
+        (est ? `, ${(est.usage / 1048576).toFixed(1)} MB used of ${(est.quota / 1048576).toFixed(0)} MB` : ''));
+    }
+  } catch (e) { log('[offline] ' + e.message, 'fail'); }
+}
+async function offlinePlayDisable() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    for (const reg of await navigator.serviceWorker.getRegistrations()) await reg.unregister();
+    if (window.caches) for (const name of await caches.keys()) if (name.startsWith('conker-offline-')) await caches.delete(name);
+    $('offline-update').hidden = true;
+    log('[offline] off: worker unregistered, stored site deleted');
+  } catch (e) { log('[offline] ' + e.message, 'fail'); }
+}
+optionChanged.offline = (on) => (on ? offlinePlayEnable() : offlinePlayDisable());
+if (opt('offline')) offlinePlayEnable();
+else if (offlinePlayAvailable) offlinePlayDisable();   // a worker left from before the option was turned off
 
 (async () => {
   if (!Q.get('romurl')) try {

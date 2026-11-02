@@ -211,6 +211,8 @@ The **Options** button in the menu (Esc) opens a panel of extras that are not in
 - **Modern**: Classic plus the extras that show more or make you wait less without making the game easier or changing the controls: *Skip intro*, *Autosave icon*, *Health always visible*, *Always show cash*, *Underwater air meter*, *Aiming crosshair*, *Conker always full detail*, *Rumble*, *Hi-res menus and 2D*, *Smooth font*, *Widescreen*, *Full-resolution picture* and *High frame rate*. Left off on purpose: *Longer breath* and *Longer tail spin* (they make the game easier), the three toggles, *Inverted swimming* and *Free camera* (they change how the game controls: a matter of taste), and *No motion blur / drunk sway* (the blur and sway are part of the story's scenes).
 - **Custom**: shown as soon as you change any single option (or a volume). Pick Classic or Modern again to reset every option to that preset.
 
+**Offline play** (on by default, not part of the presets): after one visit to the site, the browser keeps the whole site (page, game code, about 8.1 MB) so the game starts and plays with no internet connection, also from the home-screen icon (browser menu > *Add to Home screen* / *Install*). Your ROM and saves are always kept in this browser either way. When a new version is out, it downloads in the background; before the game starts the page simply reloads into it, during play a small **Update ready - Reload** notice appears. Turning the option off deletes the stored copy. Online multiplayer always needs the network.
+
 The choice is saved with the options. In an online game the host's options apply: the panel then shows the host's options and preset, greyed out.
 
 | Option | Default | What it does |

@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Conker Port</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
   /* P360: the game fills the whole window (black, 4:3 centred, or the window's aspect with Widescreen); every page control
      lives in the menu drawer (#drawer: Esc or the corner button #menu-btn), dark translucent and styled like the game's
@@ -59,6 +65,11 @@
            pointer-events: none; transition: opacity .4s; }
   #toast.bad { color: var(--bad); } #toast.ok { color: var(--ok); }
   #toast.out { opacity: 0; }
+  /* P375 offline play: a new version is stored and waits for a reload (main.js offlinePlayShowUpdate) */
+  #offline-update { position: fixed; z-index: 16; left: 50%; top: calc(48px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
+                    padding: 4px 6px 4px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font-size: 13px; white-space: nowrap; }
+  #offline-update button { margin-left: 8px; padding: 2px 10px; }
+  #offline-update[hidden] { display: none; }
   /* the menu: corner button + drawer over the left of the window */
   #menu-btn { position: fixed; z-index: 20; left: calc(10px + env(safe-area-inset-left)); top: calc(10px + env(safe-area-inset-top));
               width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 20px; line-height: 1; background: rgba(0, 0, 0, .55);
@@ -349,6 +360,7 @@
   <div class="row"><button id="ready-rom" title="Pick another ROM file">Another ROM…</button></div>
 </div>
 <div id="toast" class="out"></div>
+<div id="offline-update" hidden>Update ready <button id="offline-reload">Reload</button></div>
 <button id="menu-btn" title="Customisation settings: options, controls, saves, online (Esc)" aria-label="Customisation settings" aria-expanded="false">☰</button>
 <div id="drawer-shade" hidden></div>
 <div id="drawer" role="dialog" aria-label="Menu">

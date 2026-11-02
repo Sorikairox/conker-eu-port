@@ -153,7 +153,12 @@ $(WEB)/conker_netsyms.txt: $(WEB)/conker.js tools/net_regions.py ../port/symbols
 	python3 tools/net_regions.py --syms $(B)/conker.map > $@
 
 # ---- page
-web: $(WEB)/index.html $(WEB)/main.js $(WEB)/net.js $(WEB)/gmenu.js
+# P375 offline play: the web app manifest + icons, and the service worker stamped with the build id (sw_stamp.py: a
+# hash of every precached file, so it is remade after any of them changes)
+OFFLINE_FILES := $(WEB)/manifest.webmanifest $(WEB)/icon.svg $(WEB)/icon-192.png $(WEB)/icon-512.png
+web: $(WEB)/index.html $(WEB)/main.js $(WEB)/net.js $(WEB)/gmenu.js $(OFFLINE_FILES) $(WEB)/sw.js
+$(WEB)/sw.js: web/sw.js tools/sw_stamp.py $(WEB)/index.html $(WEB)/main.js $(WEB)/net.js $(WEB)/gmenu.js $(OFFLINE_FILES) $(WEB)/conker.js $(WEB)/conker_netx.txt $(WEB)/conker_netsyms.txt
+	python3 tools/sw_stamp.py web/sw.js $(WEB)
 $(WEB)/%: web/%
 	@mkdir -p $(@D)
 	cp $< $@
