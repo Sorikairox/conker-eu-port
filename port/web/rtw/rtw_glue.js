@@ -12,6 +12,8 @@
 //   - conker_netx.txt (files.data) -> port_net_exclude before the first retrace (photo mode's snapshot, the recorder's hash).
 //   - P377: the page's overlays (customisation settings, autosave icon, hold-L ring, photo HUD and Pose & Outfit panel)
 //     are drawn in the worker by rtw_overlay.js (object rtwOverlay); this tick hands it pad 1 first (rtwOverlay.input).
+//   - P378 standard 1.1: the right analog stick (rtw_rstick, option 113) is the free camera's stick / photo mode's look
+//     stick as in main.js gamepadPad (the host still sets the C buttons from it; those stay C buttons elsewhere).
 // Left out (no host interface in retrowser v1): online play (net.js, W11), recording replays (no way to hand a file to
 // the game).
 var rtwGlue = (function () {
@@ -24,7 +26,7 @@ var rtwGlue = (function () {
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
-    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108 };
+    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113 };   // P378: RSTICK
   // main.js OPTIONS keys of the game options, for the recording's header (e2e_replay.js applies them by key)
   const GAME_OPTION_KEYS = { 0: 'skipcut', 1: 'skipintro', 2: 'healthhud', 3: 'cashhud', 4: 'longbreath', 5: 'longspin',
     17: 'ledgegrab', 6: 'nodrunk', 7: 'conkerlod', 8: 'airbar', 13: 'rumble', 14: 'crosshair', 15: 'freecam',
@@ -97,20 +99,39 @@ var rtwGlue = (function () {
     return [Math.round(x * k), Math.round(y * k)];
   }
   const freeCameraOn = () => !!opt(OPT.FREECAM) && !rec.active;   // P357: never while recording
+  // P378 standard 1.1 right stick (rtw_rstick, option 113): main.js gamepadPad's analog right stick (radial dead zone 0.2,
+  // rescaled, 80 counts at full) -> [rx, ry] in N64 counts, y up. [0, 0] with the option off (v1: C buttons only).
+  function rightStick(rawRx, rawRy) {
+    if (!opt(OPT.RSTICK)) return [0, 0];
+    let x = Math.max(-1, Math.min(1, rawRx / 127)), y = Math.max(-1, Math.min(1, rawRy / 127));
+    const m = Math.hypot(x, y);
+    if (m < 0.2) return [0, 0];
+    const k = Math.min(1, (m - 0.2) / 0.8) / m;
+    return [Math.round(x * k * STICK), Math.round(y * k * STICK)];
+  }
+  // the C buttons the host made from that stick (its axis past 0.5, i.e. |raw| >= 63 after its rounding): they are the
+  // stick's, not a key's or a face button's, so the analog stick stands in for them where main.js uses it
+  function rightStickCBits(rawRx, rawRy) {
+    if (!opt(OPT.RSTICK)) return 0;
+    return (rawRx >= 63 ? N64.CR : 0) | (rawRx <= -63 ? N64.CL : 0) | (rawRy >= 63 ? N64.CU : 0) | (rawRy <= -63 ? N64.CD : 0);
+  }
   const photoModeOn = () => !!opt(OPT.PHOTOMODE) && !rec.active;
-  // one host pad (rtw_input: active-high N64 bits, extras in bits 16.., stick -127..127, up positive) -> main.js's pad object
-  function hostPad(buttons, sx, sy) {
+  // one host pad (rtw_input: active-high N64 bits, extras in bits 16.., stick -127..127, up positive; P378 rtw_rstick:
+  // rawRx / rawRy) -> main.js's pad object (P378: rx / ry = main.js `look`, photo mode's analog look stick)
+  function hostPad(buttons, sx, sy, rawRx, rawRy) {
     let b = buttons & 0xFFFF;
     let [x, y] = octagon(Math.max(-1, Math.min(1, sx / 127)), Math.max(-1, Math.min(1, sy / 127)));
     const half = (buttons & EXTRA.HALF) !== 0;
     if (half && !opt(OPT.TOGGLEWALK)) { x = Math.round(x / 2); y = Math.round(y / 2); }   // latched: see applyLatches
     let cx = 0, cy = 0;
+    const [rx, ry] = rightStick(rawRx | 0, rawRy | 0);   // P378
     if (freeCameraOn()) {   // P347: the C buttons (the host's right stick or C keys) become the camera stick
-      cx = ((b & N64.CR) ? STICK : 0) - ((b & N64.CL) ? STICK : 0);
-      cy = ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
+      const keyC = b & ~rightStickCBits(rawRx | 0, rawRy | 0);   // P378: C keys / buttons; the analog stick wins (main.js k.cx || g.cx)
+      cx = rx || ((keyC & N64.CR) ? STICK : 0) - ((keyC & N64.CL) ? STICK : 0);
+      cy = ry || ((keyC & N64.CU) ? STICK : 0) - ((keyC & N64.CD) ? STICK : 0);
       b = (b & ~C_BITS) | ((buttons & EXTRA.CAMZOOM) ? N64.CU : 0) | ((buttons & EXTRA.CAMBACK) ? N64.CD : 0);
     }
-    return { b, x, y, half, cx, cy, photo: (buttons & EXTRA.PHOTO) !== 0, recSave: (buttons & EXTRA.RECSAVE) !== 0, menu: (buttons & EXTRA.MENU) !== 0 };
+    return { b, x, y, half, cx, cy, rx, ry, photo: (buttons & EXTRA.PHOTO) !== 0, recSave: (buttons & EXTRA.RECSAVE) !== 0, menu: (buttons & EXTRA.MENU) !== 0 };
   }
   // P324 toggle options (crouch / R-Look / walk): a new press of the bound input flips a latch that holds it
   const LATCHES = [{ id: OPT.TOGGLECROUCH, bit: N64.Z }, { id: OPT.TOGGLERLOOK, bit: N64.R }, { id: OPT.TOGGLEWALK, bit: 0 }];
@@ -138,7 +159,8 @@ var rtwGlue = (function () {
     for (let i = 0; i < 4; i++) {
       const calls = HEAP32[raw + i * 4];
       if (calls !== portCalls[i]) { portCalls[i] = calls; portSeenAt[i] = now; }
-      if (i === 0 || (portSeenAt[i] && now - portSeenAt[i] < 1000)) pads[i] = hostPad(HEAP32[raw + i * 4 + 1], HEAP32[raw + i * 4 + 2], HEAP32[raw + i * 4 + 3]);
+      if (i === 0 || (portSeenAt[i] && now - portSeenAt[i] < 1000)) pads[i] = hostPad(HEAP32[raw + i * 4 + 1], HEAP32[raw + i * 4 + 2], HEAP32[raw + i * 4 + 3],
+        HEAP32[raw + 20 + i * 2], HEAP32[raw + 21 + i * 2]);   // P378: rtw_rstick (pc_rtw.c RTW_RAW_RSTICK)
     }
     const mouseDx = HEAP32[raw + 16], mouseDy = HEAP32[raw + 17];
     HEAP32[raw + 16] = 0; HEAP32[raw + 17] = 0;
@@ -147,7 +169,7 @@ var rtwGlue = (function () {
     recSavePrev = pad1.recSave;
     // P377: the customisation settings have pad 1 while open (the game, and a recording, get an idle pad)
     const menuHasPad = rtwOverlay.input(pad1, now);
-    if (menuHasPad) pads[0] = pad1 = { b: 0, x: 0, y: 0, half: false, cx: 0, cy: 0, photo: false, recSave: false, menu: false };
+    if (menuHasPad) pads[0] = pad1 = { b: 0, x: 0, y: 0, half: false, cx: 0, cy: 0, rx: 0, ry: 0, photo: false, recSave: false, menu: false };
     if (photo.state === 2) { photo.mx += mouseDx; photo.my += mouseDy; }   // P348 photo camera
     const photoHasInput = photoPoll(pad1);
     const wantLock = freeCameraOn() || photo.state === 2;
@@ -205,9 +227,10 @@ var rtwGlue = (function () {
     photo.viewReq = false;
     if (newButtons & N64.L) photo.hud = !photo.hud;
     if (photo.hud) flags |= 1;
-    // look: the free camera's stick (C buttons with that option), else the C buttons
-    const lx = d.cx || ((heldButtons & N64.CR) ? STICK : 0) - ((heldButtons & N64.CL) ? STICK : 0);
-    const ly = d.cy || ((heldButtons & N64.CU) ? STICK : 0) - ((heldButtons & N64.CD) ? STICK : 0);
+    // look: the free camera's stick (C buttons with that option), else the analog right stick (P378, main.js d.rx), else
+    // the C buttons
+    const lx = d.cx || d.rx || ((heldButtons & N64.CR) ? STICK : 0) - ((heldButtons & N64.CL) ? STICK : 0);
+    const ly = d.cy || d.ry || ((heldButtons & N64.CU) ? STICK : 0) - ((heldButtons & N64.CD) ? STICK : 0);
     const fwd = d.y / STICK * 500 * dt, right = d.x / STICK * 500 * dt;
     const up = (((heldButtons & N64.R) ? 1 : 0) - ((heldButtons & N64.Z) ? 1 : 0)) * 350 * dt;
     const dyaw = lx / STICK * 90 * dt + photo.mx * 0.15, dpitch = ly / STICK * 60 * dt - photo.my * 0.15;
@@ -351,7 +374,8 @@ var rtwGlue = (function () {
       // test aid (tools/port/scripts/rtw_e2e.mjs reads the game's state from the worker); the worker is the sandbox's own
       globalThis.__rtwConker = { Module, photoState: () => photo.state, rec: () => ({ active: rec.active, frames: rec.frames, checks: rec.checks.length }),
         audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation'](),
-        overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues) };   // P377
+        overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues),   // P377
+        cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); } };   // P378: the camera sticks
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
     },
     beforeGl() { layout(); },   // the drawing buffer the renderer starts with (gfx_init reads the viewport)

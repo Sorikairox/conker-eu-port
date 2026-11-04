@@ -22,6 +22,9 @@
 //   dismiss (the host's storage notice), hostopt:ID:V (change option ID in the host's own menu: Menu -> its checkbox / field -> Back to game),
 //   expect:PATH:VALUE (a field of `ov` / `opts`, e.g. expect:menu.page:hud, expect:opts.102:1, expect:ring.progress:>0; counts a failure if not),
 //   waitfor:PATH:VALUE[:MS] (the same, polled until it matches; default 20 s)
+//   P378 standard 1.1: pad:AX2:AY3 (a fake standard gamepad, navigator.getGamepads in the host page, with these right
+//   stick axes, -1..1, down positive; pad:off removes it), PATH roots cam (the camera stick per pad the glue wrote,
+//   [cx0, cy0, cx1, ...]) and other __rtwConker readouts (e.g. replay)
 // Env RTW_SERVE=PORT: serve retrowser's built dist (tools/serve-worker.ts) in this process on PORT; HOST_URL is then
 // ignored (use "-"), so nothing is left running after the run.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -53,6 +56,8 @@ const context = profile
   : await (await chromium.launch({ executablePath: chrome, headless: true, args })).newContext({ viewport: { width: 1280, height: 800 }, acceptDownloads: true });
 const browser = context.browser();
 await context.addInitScript(([ep, opts]) => {
+  // P378: a fake standard gamepad for pad:X:Y (the host polls navigator.getGamepads)
+  try { window.__rtwFakePad = null; Object.defineProperty(navigator, 'getGamepads', { configurable: true, value: () => (window.__rtwFakePad ? [window.__rtwFakePad] : []) }); } catch { /* ignore */ }
   try {
     if (location.hostname !== 'localhost') return;
     localStorage.setItem('rtw:test-endpoints', ep);
@@ -213,8 +218,9 @@ try {
       const field = async () => {
         const w = await gameWorker();
         const [root, ...path] = x.split('.');
-        const v = w && await w.evaluate((r) => (r === 'opts' ? globalThis.__rtwConker.options() : globalThis.__rtwConker.overlay()), root);
-        let got = root === 'opts' ? v : v && v[root];
+        const own = ['opts', 'cam', 'replay'].includes(root);   // P378: cam, replay
+        const v = w && await w.evaluate(([r, o]) => (r === 'opts' ? globalThis.__rtwConker.options() : o ? globalThis.__rtwConker[r]() : globalThis.__rtwConker.overlay()), [root, own]);
+        let got = own ? v : v && v[root];
         for (const k of path) got = got == null ? got : got[k];
         return got;
       };
@@ -225,6 +231,12 @@ try {
       const ok = match(got);
       say(`${cmd} ${x} = ${y}: ${ok ? 'ok' : `FAIL (got ${JSON.stringify(got)})`}`);
       if (!ok) fails++;
+    } else if (cmd === 'pad') {   // P378
+      await page.evaluate(([ax, ay]) => {
+        window.__rtwFakePad = ax === 'off' ? null : { id: 'rtw_e2e fake pad', index: 0, connected: true, mapping: 'standard', timestamp: performance.now(),
+          buttons: Array.from({ length: 17 }, () => ({ pressed: false, touched: false, value: 0 })), axes: [0, 0, Number(ax), Number(ay || 0)] };
+      }, [x, y]);
+      say(`fake gamepad ${x === 'off' ? 'off' : `right stick ${x}, ${y || 0}`}`);
     } else if (cmd === 'hostopt') {   // the host's own options menu
       await page.click('[data-action=menu]');
       const row = page.locator(`[data-option="${x}"]`);

@@ -11,6 +11,7 @@
  *   rtw_pause(on)               port_set_paused (+ rumble off)
  *   rtw_input(port, buttons, sx, sy), rtw_mouse(dx, dy, buttons)   raw host input; the glue's tick (rtw_glue.js, the
  *                               worker twin of main.js pollInput) turns it into the PIF pads / camera stick / photo camera
+ *   rtw_rstick(port, rx, ry)    P378 (standard 1.1) the right analog stick, raw too (the glue's camera stick)
  *   rtw_resize(w, h, dpr)       the view size; the glue sizes the OffscreenCanvas like main.js layoutScreen
  *   rtw_audio_rate/drain/buffer the game's 22020 Hz stereo s16, pulled once per display frame (aud_out.c)
  *   rtw_option(id, value)       game options (PORT_OPT_* ids, as main.js port_set_option) and page-side options (ids
@@ -50,8 +51,9 @@ int16_t *port_rtw_audio_buffer(void);
 
 /* Raw host input, read by the glue tick through port_rtw_raw_state() (HEAP32):
  *   [0..15]  per port: calls (rtw_input calls so far, so the glue sees which ports the host still sends), buttons, sx, sy
- *   [16..18] mouse dx, dy (summed since the glue last took them), buttons */
-enum { RTW_RAW_MOUSE = 16, RTW_RAW_WORDS = 20 };
+ *   [16..18] mouse dx, dy (summed since the glue last took them), buttons
+ *   [20..27] P378 (standard 1.1) per port: the right analog stick rx, ry (-127..127, up positive; rtw_rstick) */
+enum { RTW_RAW_MOUSE = 16, RTW_RAW_RSTICK = 20, RTW_RAW_WORDS = 32 };
 static int32_t rtw_raw_input[RTW_RAW_WORDS];
 EMSCRIPTEN_KEEPALIVE int32_t *port_rtw_raw_state(void) { return rtw_raw_input; }
 
@@ -132,6 +134,16 @@ EMSCRIPTEN_KEEPALIVE int rtw_input(int port, int buttons, int stick_x, int stick
     rtw_raw_input[port * 4 + 1] = buttons;
     rtw_raw_input[port * 4 + 2] = stick_x;
     rtw_raw_input[port * 4 + 3] = stick_y;
+    return 0;
+}
+
+/* P378 standard 1.1 (spec §4.11): the right analog stick, called by the host right after rtw_input for each port. The
+ * glue's tick turns it into the camera stick the way main.js gamepadPad does (option 113; the host also still sets the
+ * C buttons from it) */
+EMSCRIPTEN_KEEPALIVE int rtw_rstick(int port, int rx, int ry) {
+    if (port < 0 || port > 3) return 0;
+    rtw_raw_input[RTW_RAW_RSTICK + port * 2] = rx;
+    rtw_raw_input[RTW_RAW_RSTICK + port * 2 + 1] = ry;
     return 0;
 }
 
