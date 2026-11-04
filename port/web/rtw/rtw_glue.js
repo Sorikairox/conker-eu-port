@@ -13,7 +13,9 @@
 //   - P377: the page's overlays (customisation settings, autosave icon, hold-L ring, photo HUD and Pose & Outfit panel)
 //     are drawn in the worker by rtw_overlay.js (object rtwOverlay); this tick hands it pad 1 first (rtwOverlay.input).
 //   - P378 standard 1.1: the right analog stick (rtw_rstick, option 113) is the free camera's stick / photo mode's look
-//     stick as in main.js gamepadPad (the host still sets the C buttons from it; those stay C buttons elsewhere).
+//     stick as in main.js gamepadPad (the host still sets the C buttons from it; those stay C buttons elsewhere); the
+//     mouse wheel (rtw_wheel, option 114) zooms in photo mode as main.js's canvas wheel and moves the customisation
+//     settings' rows as gmenu.js's.
 // Left out (no host interface in retrowser v1): online play (net.js, W11), recording replays (no way to hand a file to
 // the game).
 var rtwGlue = (function () {
@@ -26,7 +28,7 @@ var rtwGlue = (function () {
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
-    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113 };   // P378: RSTICK
+    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114 };   // P378: RSTICK, WHEEL
   // main.js OPTIONS keys of the game options, for the recording's header (e2e_replay.js applies them by key)
   const GAME_OPTION_KEYS = { 0: 'skipcut', 1: 'skipintro', 2: 'healthhud', 3: 'cashhud', 4: 'longbreath', 5: 'longspin',
     17: 'ledgegrab', 6: 'nodrunk', 7: 'conkerlod', 8: 'airbar', 13: 'rumble', 14: 'crosshair', 15: 'freecam',
@@ -164,6 +166,8 @@ var rtwGlue = (function () {
     }
     const mouseDx = HEAP32[raw + 16], mouseDy = HEAP32[raw + 17];
     HEAP32[raw + 16] = 0; HEAP32[raw + 17] = 0;
+    const wheel = opt(OPT.WHEEL) ? HEAP32[raw + 28] : 0;   // P378 rtw_wheel (pc_rtw.c RTW_RAW_WHEEL), 1/100 notch
+    HEAP32[raw + 28] = 0;
     let pad1 = pads[0];   // P377 name (was p0)
     if (pad1.recSave && !recSavePrev) recStop('the Save recording button');
     recSavePrev = pad1.recSave;
@@ -171,6 +175,7 @@ var rtwGlue = (function () {
     const menuHasPad = rtwOverlay.input(pad1, now);
     if (menuHasPad) pads[0] = pad1 = { b: 0, x: 0, y: 0, half: false, cx: 0, cy: 0, rx: 0, ry: 0, photo: false, recSave: false, menu: false };
     if (photo.state === 2) { photo.mx += mouseDx; photo.my += mouseDy; }   // P348 photo camera
+    if (wheel && !rtwOverlay.wheel(wheel) && photo.state === 2) photo.wheel += wheel;   // P378: a menu's rows, else photo zoom
     const photoHasInput = photoPoll(pad1);
     const wantLock = freeCameraOn() || photo.state === 2;
     if (wantLock !== pointerLocked) { pointerLocked = wantLock; wasm('port_rtw_set_pointer_lock')(wantLock ? 1 : 0); }
@@ -194,7 +199,7 @@ var rtwGlue = (function () {
   function scheduleTick() { tickQueued = true; raf(() => { tickQueued = false; inputTick(); }); }
 
   // ------------------------------------------------------------------ photo mode (main.js photoPoll / photoCapture, P348)
-  const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, last: 0, busy: false, asked: 0,
+  const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, wheel: 0, last: 0, busy: false, asked: 0,   // P378 wheel
     maskB: 0, maskStick: false, scale: 2 };
   const PHOTO_WHY = { 1: 'Photo mode is off in Options', 2: 'no photo mode online', 3: 'photo mode needs the 3D view of a single-player game (not a menu, the pause screen, split screen or loading)',
     4: 'photo mode is not available (conker_netx.txt did not load)', 5: 'not enough memory for photo mode' };
@@ -210,7 +215,7 @@ var rtwGlue = (function () {
     if (d.photo && !photo.prevKey) photoRequest(!(st === 2 || st === 1));
     photo.prevKey = d.photo;
     photo.state = st;
-    if (st === 2 && was !== 2) { photo.hud = false; photo.mx = photo.my = 0; photo.prevB = d.b; photo.last = now; log('[photo] on'); rtwOverlay.photoShown(true); }
+    if (st === 2 && was !== 2) { photo.hud = false; photo.mx = photo.my = photo.wheel = 0; photo.prevB = d.b; photo.last = now; log('[photo] on'); rtwOverlay.photoShown(true); }
     if (st !== 2 && was === 2) { photo.maskB = d.b; photo.maskStick = true; log('[photo] off'); rtwOverlay.photoShown(false); }
     if (st < 0 && photo.asked) { log(`[photo] not started: ${PHOTO_WHY[-st] || 'photo mode did not start'}`); photo.asked = 0; }
     if (st === 2) photo.asked = 0;
@@ -235,8 +240,8 @@ var rtwGlue = (function () {
     const up = (((heldButtons & N64.R) ? 1 : 0) - ((heldButtons & N64.Z) ? 1 : 0)) * 350 * dt;
     const dyaw = lx / STICK * 90 * dt + photo.mx * 0.15, dpitch = ly / STICK * 60 * dt - photo.my * 0.15;
     const droll = (((heldButtons & N64.DR) ? 1 : 0) - ((heldButtons & N64.DL) ? 1 : 0)) * 45 * dt;
-    const zoom = Math.exp((((heldButtons & N64.DD) ? 1 : 0) - ((heldButtons & N64.DU) ? 1 : 0)) * 0.9 * dt);
-    photo.mx = photo.my = 0;
+    const zoom = Math.exp((((heldButtons & N64.DD) ? 1 : 0) - ((heldButtons & N64.DU) ? 1 : 0)) * 0.9 * dt) * Math.pow(1.1, photo.wheel / 100);   // P378 wheel as main.js
+    photo.mx = photo.my = photo.wheel = 0;
     wasm('port_photo_input')(fwd, right, up, dyaw, dpitch, droll, zoom, flags);
     return true;
   }
@@ -375,7 +380,8 @@ var rtwGlue = (function () {
       globalThis.__rtwConker = { Module, photoState: () => photo.state, rec: () => ({ active: rec.active, frames: rec.frames, checks: rec.checks.length }),
         audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation'](),
         overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues),   // P377
-        cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); } };   // P378: the camera sticks
+        cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); },   // P378: the camera sticks
+        photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }) };   // P378: photo camera's field of view
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
     },
     beforeGl() { layout(); },   // the drawing buffer the renderer starts with (gfx_init reads the viewport)

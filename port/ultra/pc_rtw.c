@@ -12,6 +12,7 @@
  *   rtw_input(port, buttons, sx, sy), rtw_mouse(dx, dy, buttons)   raw host input; the glue's tick (rtw_glue.js, the
  *                               worker twin of main.js pollInput) turns it into the PIF pads / camera stick / photo camera
  *   rtw_rstick(port, rx, ry)    P378 (standard 1.1) the right analog stick, raw too (the glue's camera stick)
+ *   rtw_wheel(dy)               P378 (standard 1.1) the mouse wheel, raw too (photo mode's zoom, menu rows)
  *   rtw_resize(w, h, dpr)       the view size; the glue sizes the OffscreenCanvas like main.js layoutScreen
  *   rtw_audio_rate/drain/buffer the game's 22020 Hz stereo s16, pulled once per display frame (aud_out.c)
  *   rtw_option(id, value)       game options (PORT_OPT_* ids, as main.js port_set_option) and page-side options (ids
@@ -52,8 +53,9 @@ int16_t *port_rtw_audio_buffer(void);
 /* Raw host input, read by the glue tick through port_rtw_raw_state() (HEAP32):
  *   [0..15]  per port: calls (rtw_input calls so far, so the glue sees which ports the host still sends), buttons, sx, sy
  *   [16..18] mouse dx, dy (summed since the glue last took them), buttons
- *   [20..27] P378 (standard 1.1) per port: the right analog stick rx, ry (-127..127, up positive; rtw_rstick) */
-enum { RTW_RAW_MOUSE = 16, RTW_RAW_RSTICK = 20, RTW_RAW_WORDS = 32 };
+ *   [20..27] P378 (standard 1.1) per port: the right analog stick rx, ry (-127..127, up positive; rtw_rstick)
+ *   [28]     P378 (standard 1.1) the mouse wheel, 1/100 notch, positive towards the player (summed until the glue takes it) */
+enum { RTW_RAW_MOUSE = 16, RTW_RAW_RSTICK = 20, RTW_RAW_WHEEL = 28, RTW_RAW_WORDS = 32 };
 static int32_t rtw_raw_input[RTW_RAW_WORDS];
 EMSCRIPTEN_KEEPALIVE int32_t *port_rtw_raw_state(void) { return rtw_raw_input; }
 
@@ -151,6 +153,13 @@ EMSCRIPTEN_KEEPALIVE int rtw_mouse(int dx, int dy, int buttons) {
     rtw_raw_input[RTW_RAW_MOUSE] += dx;
     rtw_raw_input[RTW_RAW_MOUSE + 1] += dy;
     rtw_raw_input[RTW_RAW_MOUSE + 2] = buttons;
+    return 0;
+}
+
+/* P378 standard 1.1 (spec §4.11): the mouse wheel over the picture (hundredths of a notch since the last call; never
+ * while paused). The glue's tick: photo mode's zoom as main.js (canvas wheel), the customisation settings' rows (option 114) */
+EMSCRIPTEN_KEEPALIVE int rtw_wheel(int dy) {
+    rtw_raw_input[RTW_RAW_WHEEL] += dy;
     return 0;
 }
 

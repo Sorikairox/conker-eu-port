@@ -36,7 +36,7 @@ var rtwOverlay = (function () {
   const log = (s) => (glue ? glue.log(s) : out(String(s)));
   const featureOn = (id) => (glue ? glue.value(id, 1) : 1) !== 0;   // the four features default to on (retrowser.json)
   // the feature files' hooks (each an array, called in file order)
-  const hooks = { attach: [], input: [], draw: [], hostResumed: [], state: {} };
+  const hooks = { attach: [], input: [], draw: [], hostResumed: [], wheel: [], state: {} };   // P378 wheel
   // rtw_menu.js: the menu sounds (silent without it), a host option's effective value (the host's without it)
   let snd = () => {};
   let hostOption = (id, value) => value;
@@ -158,6 +158,7 @@ var rtwOverlay = (function () {
     },
     hostOption: (id, value, started) => hostOption(id, value, started),
     input, tick, upload,
+    wheel(dy) { for (const f of hooks.wheel) if (f(dy)) return true; return false; },   // P378 rtw_wheel: true = a menu took it
     photoTick: (dt, d, fresh) => photoTick(dt, d, fresh), photoShown: (on) => photoShown(on), photoToast: (text) => photoToast(text),
     setRecording(on) { recCfg = on ? { mode: 'record' } : null; optionsLocked = !!on; },
     hostResumed() { for (const f of hooks.hostResumed) f(); },   // rtw_pause(0)

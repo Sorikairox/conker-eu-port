@@ -23,8 +23,9 @@
 //   expect:PATH:VALUE (a field of `ov` / `opts`, e.g. expect:menu.page:hud, expect:opts.102:1, expect:ring.progress:>0; counts a failure if not),
 //   waitfor:PATH:VALUE[:MS] (the same, polled until it matches; default 20 s)
 //   P378 standard 1.1: pad:AX2:AY3 (a fake standard gamepad, navigator.getGamepads in the host page, with these right
-//   stick axes, -1..1, down positive; pad:off removes it), PATH roots cam (the camera stick per pad the glue wrote,
-//   [cx0, cy0, cx1, ...]) and other __rtwConker readouts (e.g. replay)
+//   stick axes, -1..1, down positive; pad:off removes it), wheel:DY (the mouse over the game, one wheel event of DY px),
+//   click (on the picture until the host captured the mouse), unlock (document.exitPointerLock), PATH roots cam (the camera stick per pad the glue wrote, [cx0, cy0, mdx0, mdy0, cx1, ...]), photoinfo
+//   ({ state, fov }) and other __rtwConker readouts (e.g. replay)
 // Env RTW_SERVE=PORT: serve retrowser's built dist (tools/serve-worker.ts) in this process on PORT; HOST_URL is then
 // ignored (use "-"), so nothing is left running after the run.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -204,9 +205,9 @@ try {
       const lines = (await hostLog().catch(() => '')).split('\n');
       say(`state ${JSON.stringify(st)} audio ${audio}`);
       say('log tail:\n  ' + lines.slice(-12).join('\n  '));
-    } else if (cmd === 'ov' || cmd === 'opts') {   // P377
+    } else if (cmd === 'ov' || cmd === 'opts' || ['cam', 'photoinfo', 'replay'].includes(cmd)) {   // P377 (P378: cam, photoinfo, replay)
       const w = await gameWorker();
-      const v = w && await w.evaluate((c) => (c === 'ov' ? globalThis.__rtwConker.overlay() : globalThis.__rtwConker.options()), cmd);
+      const v = w && await w.evaluate((c) => (c === 'ov' ? globalThis.__rtwConker.overlay() : c === 'opts' ? globalThis.__rtwConker.options() : globalThis.__rtwConker[c]()), cmd);
       say(`${cmd} ${JSON.stringify(v)}`);
     } else if (cmd === 'hostmenu') {   // the host's menu open for MS ms (the host pauses the game: rtw_pause)
       await page.click('[data-action=menu]'); await page.waitForTimeout(Number(x || 1000)); await page.click('[data-action=close-menu]').catch(() => {});
@@ -218,7 +219,7 @@ try {
       const field = async () => {
         const w = await gameWorker();
         const [root, ...path] = x.split('.');
-        const own = ['opts', 'cam', 'replay'].includes(root);   // P378: cam, replay
+        const own = ['opts', 'cam', 'photoinfo', 'replay'].includes(root);   // P378: cam, photoinfo, replay
         const v = w && await w.evaluate(([r, o]) => (r === 'opts' ? globalThis.__rtwConker.options() : o ? globalThis.__rtwConker[r]() : globalThis.__rtwConker.overlay()), [root, own]);
         let got = own ? v : v && v[root];
         for (const k of path) got = got == null ? got : got[k];
@@ -231,6 +232,21 @@ try {
       const ok = match(got);
       say(`${cmd} ${x} = ${y}: ${ok ? 'ok' : `FAIL (got ${JSON.stringify(got)})`}`);
       if (!ok) fails++;
+    } else if (cmd === 'wheel') {   // P378 wheel:DY: the mouse over the middle of the game frame, one wheel event of DY pixels
+      const box = await page.locator('iframe').first().boundingBox();
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.wheel(0, Number(x)); await page.waitForTimeout(150);
+      say(`wheel ${x}`);
+    } else if (cmd === 'click') {   // P378 a click on the middle of the picture (the host's "Click to use the mouse": pointer lock)
+      const box = await page.locator('iframe').first().boundingBox();
+      let locked = 'no catcher';
+      for (let i = 0; i < 4 && locked !== '1'; i++) {   // headless Chrome sometimes refuses the first request
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2); await page.waitForTimeout(400);
+        locked = await page.getAttribute('[data-field=mouse-catch]', 'data-locked', { timeout: 1000 }).catch(() => 'no catcher');
+      }
+      say(`clicked the picture (mouse captured: ${locked})`);
+    } else if (cmd === 'unlock') {   // P378 give the mouse back (Esc does not in headless Chrome)
+      await page.evaluate(() => document.exitPointerLock()); await page.waitForTimeout(300); say('mouse released');
     } else if (cmd === 'pad') {   // P378
       await page.evaluate(([ax, ay]) => {
         window.__rtwFakePad = ax === 'off' ? null : { id: 'rtw_e2e fake pad', index: 0, connected: true, mapping: 'standard', timestamp: performance.now(),

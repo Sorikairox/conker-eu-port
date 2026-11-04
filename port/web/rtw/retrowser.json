@@ -59,6 +59,7 @@
     { "id": 111, "label": "Hold-L skip ring", "type": "bool", "default": 1 },
     { "id": 112, "label": "Photo mode menus (Pose & Outfit)", "type": "bool", "default": 1 },
     { "id": 113, "label": "Analog right stick (camera)", "type": "bool", "default": 1 },
+    { "id": 114, "label": "Mouse wheel (photo zoom, menu rows)", "type": "bool", "default": 1 },
     { "id": 108, "label": "Input recorder (for testing)", "type": "bool", "default": 0 }
   ],
   "source": "https://github.com/Sorikairox/conker-eu-port"

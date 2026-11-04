@@ -338,9 +338,17 @@
         const cw = GameFont.measure('CHANGE', FS);
         GFace.dpad(ctx, k, ox, 290 - cw - 8, FY, 'lr', fade); T('CHANGE', 290, FY, { scale: FS, color: C.dim, align: 'right' });
       }
+      // P378 the mouse wheel (rtw_wheel, 1/100 notch, positive = down): one row per notch, as gmenu.js's wheel
+      let wheelRest = 0;
+      function wheel(dy) {
+        if (!U.open) { wheelRest = 0; return false; }
+        wheelRest += dy;
+        while (Math.abs(wheelRest) >= 100) { const d = Math.sign(wheelRest); wheelRest -= d * 100; moveSel(d); }
+        return true;
+      }
       const state = () => ({ open: U.open, from: U.from, page: U.open ? page().id : null, sel: U.open ? page().sel : -1,
         item: U.open ? (itemsOf(page())[page().sel] || {}).label : null, rows: U.row, paused: U.paused });
-      return { open, close, poll, gameRows, draw, note, state, get isOpen() { return U.open; }, get paused() { return U.paused; } };
+      return { open, close, poll, gameRows, draw, note, state, wheel, get isOpen() { return U.open; }, get paused() { return U.paused; } };
     })();
     // ---- hooks into the layer
     hooks.attach.push(() => {   // option 110 off (the host sends it after most options): the host's values only after all
@@ -359,6 +367,7 @@
       if (rtwMenu.isOpen && d.photo) { d.photo = false; snd('back'); rtwMenu.close(); }   // a short press of Photo closes it
       return rtwMenu.poll(d, now);
     });
+    hooks.wheel.push((dy) => featureOn(FEATURE.MENUS) && rtwMenu.wheel(dy));   // P378
     hooks.draw.push((ctx, now) => { if (!rtwMenu.isOpen || !GameFont.load()) return false; rtwMenu.draw(ctx, now); return true; });
     hooks.hostResumed.push(() => { if (rtwMenu.isOpen && rtwMenu.paused) M._port_set_paused(1); });   // the menu still holds the game
     hooks.state.menu = () => Object.assign(rtwMenu.state(), { on: featureOn(FEATURE.MENUS), preset: presetShown(),
