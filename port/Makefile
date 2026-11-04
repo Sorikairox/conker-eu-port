@@ -173,7 +173,9 @@ _port_rtw_rom_ptr,_port_rtw_rom_size,_port_set_rom,_port_set_paused,_port_set_op
 _port_eeprom_ptr,_port_eeprom_size,_port_dump_threads,_port_photo_request,_port_photo_status,_port_photo_input,_port_photo_render,\
 _port_photo_info,_port_gfx_resize,_port_gfx_widescreen,_port_gfx_hires_2d,_port_gfx_smooth_font,_port_gfx_hfr,_port_gfx_hfr_vsync,\
 _port_net_exclude,_port_net_addr,_port_rec_session,_port_rec_checkpoint_now,_port_rec_checkpoint_ms,\
-_port_font_info,_port_font_glyph,_port_rtw_overlay_composite,_port_rtw_overlay_restore,_port_skip_progress,_port_set_gmenu_row,_port_gmenu_take_request,_port_sfx_decode,_port_sfx_info,_port_sfx_pcm,_port_rtw_menu_sound_play,_port_rtw_menu_sounds_played,_port_rtw_audio_drained,_port_photo_look_set,_port_photo_look_info
+_port_font_info,_port_font_glyph,_port_set_gmenu_row,_port_gmenu_take_request,_port_skip_progress,_port_sfx_decode,_port_sfx_info,\
+_port_sfx_pcm,_port_photo_look_set,_port_photo_look_info,_port_rtw_overlay_composite,_port_rtw_overlay_restore,\
+_port_rtw_menu_sound_play,_port_rtw_menu_sounds_played,_port_rtw_audio_drained
 RTW_EMPTY :=
 RTW_SPACE := $(RTW_EMPTY) $(RTW_EMPTY)
 RTW_EXPORTS = $(subst $(RTW_SPACE),,$(RTW_EXPORT_LIST))   # the continuation lines above put spaces after the commas

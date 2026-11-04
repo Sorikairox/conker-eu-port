@@ -17,6 +17,13 @@
 //   stopservers          stop the GitHub mock (with offline: nothing left to fetch)
 //   state                print the game state (retrace, photo mode, audio, last log lines)
 //   pos                  print Conker's position (record 0 of g_objects, address from port/build/rtw/conker.map)
+//   P377 overlays: ov (the overlay layer's state: menu page / row, photo panel, ring, icon, sounds, settings record),
+//   opts (the option values the game uses), press:CODE[:N] (N short presses of a key, 90 ms each, 160 ms apart),
+//   dismiss (the host's storage notice), hostopt:ID:V (change option ID in the host's own menu: Menu -> its checkbox / field -> Back to game),
+//   expect:PATH:VALUE (a field of `ov` / `opts`, e.g. expect:menu.page:hud, expect:opts.102:1, expect:ring.progress:>0; counts a failure if not),
+//   waitfor:PATH:VALUE[:MS] (the same, polled until it matches; default 20 s)
+// Env RTW_SERVE=PORT: serve retrowser's built dist (tools/serve-worker.ts) in this process on PORT; HOST_URL is then
+// ignored (use "-"), so nothing is left running after the run.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -26,12 +33,18 @@ if (!out || !host || !rom) { console.error('usage: rtw_e2e.mjs OUTDIR HOST_URL R
 const RTW = process.env.RETROWSER_DIR || join(homedir(), 'Code/retrowser');
 const { chromium } = await import(join(RTW, 'node_modules/playwright-core/index.mjs'));
 const { startMockGithub } = await import(join(RTW, 'tools/mock-github.ts'));
-const DIST = resolve(new URL('../../../port/build/rtw/dist', import.meta.url).pathname);
+const DIST = process.env.RTW_DIST ? resolve(process.env.RTW_DIST) : resolve(new URL('../../../port/build/rtw/dist', import.meta.url).pathname);   // P377: RTW_DIST = another dist
 const REPO = 'sorikairox/conker-eu-port', COMMIT = 'c0ffee0000000000000000000000000000000376';
 mkdirSync(out, { recursive: true });
 const t0 = Date.now(), say = (s) => console.log(`[${((Date.now() - t0) / 1000).toFixed(1)}s] ${s}`);
 
 const mock = await startMockGithub({ [REPO]: { refs: { main: COMMIT }, commits: [{ sha: COMMIT, dir: DIST }] } });
+let served = null, hostUrl = host;
+if (process.env.RTW_SERVE) {   // P377: the host's Worker handler on its built dist, in this process
+  const { serveWorker } = await import(join(RTW, 'tools/serve-worker.ts'));
+  served = await serveWorker(Number(process.env.RTW_SERVE));
+  hostUrl = `http://localhost:${process.env.RTW_SERVE}`;
+}
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const args = ['--mute-audio', '--use-angle=metal', '--autoplay-policy=no-user-gesture-required'];
 const profile = process.env.RTW_PROFILE;
@@ -56,6 +69,7 @@ const finish = async (code) => {
   await context.close().catch(() => {});
   if (browser) await browser.close().catch(() => {});
   if (mockUp) await mock.close();
+  if (served) await new Promise((ok) => { served.closeAllConnections?.(); served.close(ok); });
   process.exit(code);
 };
 const timer = setTimeout(() => { say('TIMEOUT'); finish(3); }, Number(process.env.RTW_TIMEOUT || 900000));
@@ -86,7 +100,7 @@ const gameState = async () => {
   });
 };
 async function open() {
-  await page.goto(`${host}/g/${REPO}`);
+  await page.goto(`${hostUrl}/g/${REPO}`);
   const download = page.locator('[data-action=download]');
   const stored = page.locator('[data-action=use-stored]');
   const rompick = page.locator('[data-field=rom]');
@@ -185,9 +199,50 @@ try {
       const lines = (await hostLog().catch(() => '')).split('\n');
       say(`state ${JSON.stringify(st)} audio ${audio}`);
       say('log tail:\n  ' + lines.slice(-12).join('\n  '));
+    } else if (cmd === 'ov' || cmd === 'opts') {   // P377
+      const w = await gameWorker();
+      const v = w && await w.evaluate((c) => (c === 'ov' ? globalThis.__rtwConker.overlay() : globalThis.__rtwConker.options()), cmd);
+      say(`${cmd} ${JSON.stringify(v)}`);
+    } else if (cmd === 'hostmenu') {   // the host's menu open for MS ms (the host pauses the game: rtw_pause)
+      await page.click('[data-action=menu]'); await page.waitForTimeout(Number(x || 1000)); await page.click('[data-action=close-menu]').catch(() => {});
+    } else if (cmd === 'dismiss') {   // the host's "may delete saved games" notice (it covers the picture's top)
+      await page.click('[data-state=persist-warning] button', { timeout: 2000 }).catch(() => {});
+    } else if (cmd === 'press') {
+      for (let i = 0; i < Number(y || 1); i++) { await page.keyboard.down(x); await page.waitForTimeout(90); await page.keyboard.up(x); await page.waitForTimeout(160); }
+    } else if (cmd === 'expect' || cmd === 'waitfor') {   // waitfor:PATH:VALUE[:MS] polls every 100 ms (default 20 s)
+      const field = async () => {
+        const w = await gameWorker();
+        const [root, ...path] = x.split('.');
+        const v = w && await w.evaluate((r) => (r === 'opts' ? globalThis.__rtwConker.options() : globalThis.__rtwConker.overlay()), root);
+        let got = root === 'opts' ? v : v && v[root];
+        for (const k of path) got = got == null ? got : got[k];
+        return got;
+      };
+      const match = (v) => (String(y).startsWith('>') ? Number(v) > Number(String(y).slice(1)) : String(v) === String(y));   // VALUE '>N': more than N
+      let got = await field();
+      const until = Date.now() + Number(a.split(':')[3] || 20000);
+      while (cmd === 'waitfor' && !match(got) && Date.now() < until) { await page.waitForTimeout(100); got = await field(); }
+      const ok = match(got);
+      say(`${cmd} ${x} = ${y}: ${ok ? 'ok' : `FAIL (got ${JSON.stringify(got)})`}`);
+      if (!ok) fails++;
+    } else if (cmd === 'hostopt') {   // the host's own options menu
+      await page.click('[data-action=menu]');
+      const row = page.locator(`[data-option="${x}"]`);
+      await row.waitFor({ timeout: 5000 });
+      const box = row.locator('input[type=checkbox]');
+      if (await box.count()) { if ((await box.isChecked()) !== (y === '1')) await box.click(); }
+      else { const f = row.locator('input, select').first(); await f.fill(String(y)).catch(async () => f.selectOption(String(y))); await f.dispatchEvent('change'); }
+      await page.waitForTimeout(300);
+      await page.click('[data-action=close-menu]').catch(() => {});
+      say(`host option ${x} = ${y}`);
     } else { say('unknown action ' + a); fails++; }
   }
-} catch (e) { say('ERROR ' + (e && e.stack || e)); fails++; }
+} catch (e) {
+  say('ERROR ' + (e && e.stack || e)); fails++;
+  await page.click('text=Details', { timeout: 1000 }).catch(() => {});
+  await page.screenshot({ path: join(out, 'error.png') }).catch(() => {});
+  say('page text: ' + (await page.evaluate(() => document.body.innerText).catch(() => '')).replace(/\s+/g, ' ').slice(0, 3000));
+}
 clearTimeout(timer);
 say(fails ? `${fails} failure(s)` : 'done');
 await finish(fails ? 1 : 0);
