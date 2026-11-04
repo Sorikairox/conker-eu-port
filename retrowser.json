@@ -18,19 +18,19 @@
   "files": {
     "wasm": {
       "path": "conker.wasm",
-      "sha256": "6502d0fc1330d31ccc2b195ce961e8bb3571c043c10c421875015a3f0eac43bd",
-      "size": 7690677
+      "sha256": "9d5adf5a1ca35a5ae9d49b20052c02b5c737e9429726e59e4c8f45ff71b4434d",
+      "size": 7691422
     },
     "js": {
       "path": "conker.js",
-      "sha256": "5fecacf19abeec06802c67a2095a659b65d4fa23377736fb97ae201cfb481138",
-      "size": 353933
+      "sha256": "3833af143b32fa4ef2ea69b06cac94471a5ef90f47449b0bb61ede933108a7c9",
+      "size": 377465
     },
     "data": [
       {
         "path": "conker_netx.txt",
-        "sha256": "dd2655c16839a36df04dec89780587986da9fb7b0d642c2418f81ce6854881f5",
-        "size": 31122
+        "sha256": "b6d8bcead29d57d9b771da335ec01d46e09bad5291c2041a87853468b0ea2a27",
+        "size": 31245
       }
     ]
   },
@@ -259,10 +259,44 @@
       "default": 1
     },
     {
+      "id": 113,
+      "label": "Analog right stick (camera)",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 114,
+      "label": "Mouse wheel (photo zoom, menu rows)",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 115,
+      "label": "Replay recordings",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 116,
+      "label": "In-game changes update this menu",
+      "type": "bool",
+      "default": 1
+    },
+    {
       "id": 108,
       "label": "Input recorder (for testing)",
       "type": "bool",
       "default": 0
+    }
+  ],
+  "fileInputs": [
+    {
+      "id": 1,
+      "label": "Replay a recording",
+      "accept": [
+        ".ckrec"
+      ],
+      "maxSize": 16777216
     }
   ],
   "source": "https://github.com/Sorikairox/conker-eu-port"

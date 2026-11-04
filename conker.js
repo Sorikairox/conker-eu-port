@@ -72,7 +72,7 @@ var rtwOverlay = (function () {
   const log = (s) => (glue ? glue.log(s) : out(String(s)));
   const featureOn = (id) => (glue ? glue.value(id, 1) : 1) !== 0;   // the four features default to on (retrowser.json)
   // the feature files' hooks (each an array, called in file order)
-  const hooks = { attach: [], input: [], draw: [], hostResumed: [], state: {} };
+  const hooks = { attach: [], input: [], draw: [], hostResumed: [], wheel: [], state: {} };   // P378 wheel
   // rtw_menu.js: the menu sounds (silent without it), a host option's effective value (the host's without it)
   let snd = () => {};
   let hostOption = (id, value) => value;
@@ -424,6 +424,9 @@ const GFace = {
   // menu since, so the host's wins and the record forgets that option. A change in the host's menu during play applies at
   // once and also wins. So a change in either place survives a reload; the host's menu may show an older value for an
   // option last changed here. No storage (a browser that refuses it): the host's values only, as before.
+  // P378: a host with the standard 1.1 import rtw_option_changed is told about every change made here (option 116, on by
+  // default): its menu shows the value at once and it stores it itself, so the record keeps only what such a host could
+  // not take (an older host, or option 116 off).
   // Option 110 (on by default) switches all of this off: no menus, no rows, no sounds, the host's values only.
   {
     // ---- page code (main.js OPTIONS: labels, help, defaults)
@@ -512,13 +515,16 @@ const PAGE_OPTIONS = [
     };
     const OPTIONS = PAGE_OPTIONS.filter((o) => KEY_ID[o.key] !== undefined).map((o) => (RTW_HELP[o.key] ? Object.assign({}, o, { help: RTW_HELP[o.key] }) : o));
     const optOf = (key) => OPTIONS.find((o) => o.key === key);
-    // main.js setOption over the glue's values (rtw_option ids); every change made here goes into the settings record
+    // main.js setOption over the glue's values (rtw_option ids). P378: the host is told (standard 1.1 rtw_option_changed,
+    // option 116): it shows and keeps the value itself, so the settings record forgets that option; a host that cannot be
+    // told (or option 116 off): the change goes into the settings record (P377)
     function setOption(o, value) {
       const id = KEY_ID[o.key];
       if (id === undefined || !glue) return;
       const v = o.range ? Math.max(0, Math.min(100, value | 0)) : value ? 1 : 0;
-      glue.setOption(id, v);
-      settings.chosen[id] = v; settings.hostSeen[id] = hostValue(id);   // the host's value now: a different one at a start = changed there
+      if (!glue.setOption(id, v)) return;   // the game options are fixed (recording / replay)
+      if (glue.optionChanged(id, v)) { hostNow[id] = v; delete settings.chosen[id]; delete settings.hostSeen[id]; }
+      else { settings.chosen[id] = v; settings.hostSeen[id] = hostValue(id); }   // the host's value now: a different one at a start = changed there
       settingsSave();
     }
     const showOptionValue = () => {};   // the page's drawer inputs: none here
@@ -726,6 +732,11 @@ const MenuModel = (() => {
         let pre = [];
         if (p.id === 'controls') pre = [hostRow('Keys, gamepad, touch', 'HOST MENU', 'Which key, gamepad button or touch button is which N64 button is set in the host\'s menu (Controls). The Menu button (6 on the keyboard by default, or its touch button) opens these settings; holding the Photo mode button (1, the gamepad\'s Back) half a second does too.')];
         else if (p.id === 'sound') pre = [hostRow('Master volume', 'HOST MENU', 'The volume of everything is the host\'s (its menu); these are the game\'s own levels.')];
+        else if (p.id === 'tools') pre = [{ kind: 'action', label: 'Replay a recording',   // P378 (standard 1.1 rtw_request_file)
+          help: () => 'Watch an input recording (.ckrec, made with the Input recorder here or on the page build): the host asks you for the file (or use Open in game next to one in its Saved files). It then plays from power-on, with the recording\'s save and options, the next time the game starts (reload the page); your own save is not changed.' +
+            (glue.replayPending() ? ` Ready now: "${glue.replayPending()}".` : ''),
+          locked: () => glue.replayLocked(),
+          act: () => { const r = glue.requestReplay(); note(r ? 'This host cannot ask for a file.' : 'Pick the recording in the host\'s window.'); } }];
         return pre.concat(s.items, [backRow]);
       }
       const TITLES = { main: 'Customisation settings', saves: 'Saves', online: 'Online' };
@@ -876,9 +887,17 @@ const MenuModel = (() => {
         const cw = GameFont.measure('CHANGE', FS);
         GFace.dpad(ctx, k, ox, 290 - cw - 8, FY, 'lr', fade); T('CHANGE', 290, FY, { scale: FS, color: C.dim, align: 'right' });
       }
+      // P378 the mouse wheel (rtw_wheel, 1/100 notch, positive = down): one row per notch, as gmenu.js's wheel
+      let wheelRest = 0;
+      function wheel(dy) {
+        if (!U.open) { wheelRest = 0; return false; }
+        wheelRest += dy;
+        while (Math.abs(wheelRest) >= 100) { const d = Math.sign(wheelRest); wheelRest -= d * 100; moveSel(d); }
+        return true;
+      }
       const state = () => ({ open: U.open, from: U.from, page: U.open ? page().id : null, sel: U.open ? page().sel : -1,
         item: U.open ? (itemsOf(page())[page().sel] || {}).label : null, rows: U.row, paused: U.paused });
-      return { open, close, poll, gameRows, draw, note, state, get isOpen() { return U.open; }, get paused() { return U.paused; } };
+      return { open, close, poll, gameRows, draw, note, state, wheel, get isOpen() { return U.open; }, get paused() { return U.paused; } };
     })();
     // ---- hooks into the layer
     hooks.attach.push(() => {   // option 110 off (the host sends it after most options): the host's values only after all
@@ -897,6 +916,7 @@ const MenuModel = (() => {
       if (rtwMenu.isOpen && d.photo) { d.photo = false; snd('back'); rtwMenu.close(); }   // a short press of Photo closes it
       return rtwMenu.poll(d, now);
     });
+    hooks.wheel.push((dy) => featureOn(FEATURE.MENUS) && rtwMenu.wheel(dy));   // P378
     hooks.draw.push((ctx, now) => { if (!rtwMenu.isOpen || !GameFont.load()) return false; rtwMenu.draw(ctx, now); return true; });
     hooks.hostResumed.push(() => { if (rtwMenu.isOpen && rtwMenu.paused) M._port_set_paused(1); });   // the menu still holds the game
     hooks.state.menu = () => Object.assign(rtwMenu.state(), { on: featureOn(FEATURE.MENUS), preset: presetShown(),
@@ -1689,6 +1709,26 @@ const GPhoto = (() => {
     hooks.state.photo = () => Object.assign({ on: featureOn(FEATURE.PHOTOMENUS), shown: photoUi.shown }, window.__gphoto ? window.__gphoto.state() : {});
   }
 
+  // ---------------------------------------------------------------- P378 a notice on the picture (the replay's messages)
+  // up to 3 lines of the game's font on a dark band at the bottom of the picture, over every feature's drawing; also
+  // logged. ms 0 = until the next notice (the end of a replay, which stays paused).
+  const noticeState = { text: '', until: 0, drawnTicks: 0 };
+  function notice(text, ms) {
+    log(`[notice] ${text}`);
+    noticeState.text = String(text || ''); noticeState.until = ms > 0 ? performance.now() + ms : Infinity;
+  }
+  function drawNotice(ctx, now) {
+    if (!noticeState.text) return false;
+    if (now > noticeState.until) { noticeState.text = ''; return false; }
+    if (!GameFont.load()) return false;
+    const k = layer.h / 240, W = layer.w / k, ox = (W - 320) / 2, S = 0.7, LH = 10.5;
+    const lines = GameFont.wrap(noticeState.text, 280, S).slice(0, 3), top = 234 - lines.length * LH - 6;
+    ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect((ox + 14) * k, top * k, 292 * k, (lines.length * LH + 6) * k);
+    lines.forEach((l, j) => GameFont.draw(ctx, l, ox + 160, top + 3 + j * LH, k, { scale: S, color: '#fff', align: 'center', smooth: !!opt('smoothfont') }));
+    noticeState.drawnTicks++;
+    return true;
+  }
+
   // ---------------------------------------------------------------- the overlay tick (pc_sched.c, after the game's frame)
   let tickErrors = 0, composited = 0;
   function tick() {
@@ -1701,6 +1741,7 @@ const GPhoto = (() => {
       for (const f of q) f(now);
       let drawn = false;
       for (const f of hooks.draw) drawn = f(layer.ctx, now) || drawn;
+      drawn = drawNotice(layer.ctx, now) || drawn;   // P378
       if (drawn && M._port_rtw_overlay_composite()) composited++;
     } catch (e) {
       if (tickErrors++ < 3) log(`[overlay] ${e && e.stack || e}`);
@@ -1723,11 +1764,13 @@ const GPhoto = (() => {
     },
     hostOption: (id, value, started) => hostOption(id, value, started),
     input, tick, upload,
+    wheel(dy) { for (const f of hooks.wheel) if (f(dy)) return true; return false; },   // P378 rtw_wheel: true = a menu took it
     photoTick: (dt, d, fresh) => photoTick(dt, d, fresh), photoShown: (on) => photoShown(on), photoToast: (text) => photoToast(text),
     setRecording(on) { recCfg = on ? { mode: 'record' } : null; optionsLocked = !!on; },
     hostResumed() { for (const f of hooks.hostResumed) f(); },   // rtw_pause(0)
+    notice,   // P378
     state() {
-      const s = { composited, font: GameFont.ready() };
+      const s = { composited, font: GameFont.ready(), notice: { text: noticeState.text, drawnTicks: noticeState.drawnTicks } };   // P378 notice
       for (const [k, f] of Object.entries(hooks.state)) s[k] = f();
       return s;
     },
@@ -1749,8 +1792,17 @@ const GPhoto = (() => {
 //   - conker_netx.txt (files.data) -> port_net_exclude before the first retrace (photo mode's snapshot, the recorder's hash).
 //   - P377: the page's overlays (customisation settings, autosave icon, hold-L ring, photo HUD and Pose & Outfit panel)
 //     are drawn in the worker by rtw_overlay.js (object rtwOverlay); this tick hands it pad 1 first (rtwOverlay.input).
-// Left out (no host interface in retrowser v1): online play (net.js, W11), recording replays (no way to hand a file to
-// the game).
+//   - P378 standard 1.1: the right analog stick (rtw_rstick, option 113) is the free camera's stick / photo mode's look
+//     stick as in main.js gamepadPad (the host still sets the C buttons from it; those stay C buttons elsewhere); the
+//     mouse wheel (rtw_wheel, option 114) zooms in photo mode as main.js's canvas wheel and moves the customisation
+//     settings' rows as gmenu.js's.
+//   - P378 standard 1.1 files to the game: a recording handed in (fileInputs 1, from the customisation settings' "Replay a
+//     recording", the host's menu or "Open in game" next to a .ckrec in Saved files) is checked and kept in the worker's
+//     storage; the next start of the game replays it from power-on (main.js ?replay, e2eBegin) and reports whether it
+//     played the same (option 115);
+//   - P378 standard 1.1 rtw_option_changed: a manifest option changed in the customisation settings is told to the host,
+//     so its menu shows it and it keeps it (option 116; rtw_menu.js).
+// Left out (no host interface in retrowser v1): online play (net.js, W11).
 var rtwGlue = (function () {
   'use strict';
   const N64 = { A: 0x8000, B: 0x4000, Z: 0x2000, START: 0x1000, DU: 0x0800, DD: 0x0400, DL: 0x0200, DR: 0x0100,
@@ -1761,7 +1813,7 @@ var rtwGlue = (function () {
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
-    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108 };
+    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115, OPTSYNC: 116 };   // P378: RSTICK, WHEEL, REPLAY, OPTSYNC
   // main.js OPTIONS keys of the game options, for the recording's header (e2e_replay.js applies them by key)
   const GAME_OPTION_KEYS = { 0: 'skipcut', 1: 'skipintro', 2: 'healthhud', 3: 'cashhud', 4: 'longbreath', 5: 'longspin',
     17: 'ledgegrab', 6: 'nodrunk', 7: 'conkerlod', 8: 'airbar', 13: 'rumble', 14: 'crosshair', 15: 'freecam',
@@ -1771,6 +1823,7 @@ var rtwGlue = (function () {
     105: 'togglecrouch', 106: 'togglerlook', 107: 'togglewalk' };
   const STICK = 80;   // typical full deflection of an N64 stick (main.js)
 
+  const hostDeclared = new Set();   // P378: the option ids the host sent (rtw_option at start = every manifest option)
   const optionValues = {};   // id -> value the game uses (the host's, or one chosen in the customisation settings: rtwOverlay.hostOption)
   const GAME_OPTION_COUNT = 18;   // PORT_OPT_COUNT (port/ultra/port_options.h): ids below it are game options
   const opt = (id) => optionValues[id] | 0;
@@ -1833,21 +1886,40 @@ var rtwGlue = (function () {
     const k = m * STICK * (1 - 0.125 * Math.min(ax, ay) / mx) / mx;
     return [Math.round(x * k), Math.round(y * k)];
   }
-  const freeCameraOn = () => !!opt(OPT.FREECAM) && !rec.active;   // P357: never while recording
-  const photoModeOn = () => !!opt(OPT.PHOTOMODE) && !rec.active;
-  // one host pad (rtw_input: active-high N64 bits, extras in bits 16.., stick -127..127, up positive) -> main.js's pad object
-  function hostPad(buttons, sx, sy) {
+  const freeCameraOn = () => !!opt(OPT.FREECAM) && !rec.active && !replay.active;   // P357: never while recording (P378: or replaying)
+  // P378 standard 1.1 right stick (rtw_rstick, option 113): main.js gamepadPad's analog right stick (radial dead zone 0.2,
+  // rescaled, 80 counts at full) -> [rx, ry] in N64 counts, y up. [0, 0] with the option off (v1: C buttons only).
+  function rightStick(rawRx, rawRy) {
+    if (!opt(OPT.RSTICK)) return [0, 0];
+    let x = Math.max(-1, Math.min(1, rawRx / 127)), y = Math.max(-1, Math.min(1, rawRy / 127));
+    const m = Math.hypot(x, y);
+    if (m < 0.2) return [0, 0];
+    const k = Math.min(1, (m - 0.2) / 0.8) / m;
+    return [Math.round(x * k * STICK), Math.round(y * k * STICK)];
+  }
+  // the C buttons the host made from that stick (its axis past 0.5, i.e. |raw| >= 63 after its rounding): they are the
+  // stick's, not a key's or a face button's, so the analog stick stands in for them where main.js uses it
+  function rightStickCBits(rawRx, rawRy) {
+    if (!opt(OPT.RSTICK)) return 0;
+    return (rawRx >= 63 ? N64.CR : 0) | (rawRx <= -63 ? N64.CL : 0) | (rawRy >= 63 ? N64.CU : 0) | (rawRy <= -63 ? N64.CD : 0);
+  }
+  const photoModeOn = () => !!opt(OPT.PHOTOMODE) && !rec.active && !replay.active;
+  // one host pad (rtw_input: active-high N64 bits, extras in bits 16.., stick -127..127, up positive; P378 rtw_rstick:
+  // rawRx / rawRy) -> main.js's pad object (P378: rx / ry = main.js `look`, photo mode's analog look stick)
+  function hostPad(buttons, sx, sy, rawRx, rawRy) {
     let b = buttons & 0xFFFF;
     let [x, y] = octagon(Math.max(-1, Math.min(1, sx / 127)), Math.max(-1, Math.min(1, sy / 127)));
     const half = (buttons & EXTRA.HALF) !== 0;
     if (half && !opt(OPT.TOGGLEWALK)) { x = Math.round(x / 2); y = Math.round(y / 2); }   // latched: see applyLatches
     let cx = 0, cy = 0;
+    const [rx, ry] = rightStick(rawRx | 0, rawRy | 0);   // P378
     if (freeCameraOn()) {   // P347: the C buttons (the host's right stick or C keys) become the camera stick
-      cx = ((b & N64.CR) ? STICK : 0) - ((b & N64.CL) ? STICK : 0);
-      cy = ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
+      const keyC = b & ~rightStickCBits(rawRx | 0, rawRy | 0);   // P378: C keys / buttons; the analog stick wins (main.js k.cx || g.cx)
+      cx = rx || ((keyC & N64.CR) ? STICK : 0) - ((keyC & N64.CL) ? STICK : 0);
+      cy = ry || ((keyC & N64.CU) ? STICK : 0) - ((keyC & N64.CD) ? STICK : 0);
       b = (b & ~C_BITS) | ((buttons & EXTRA.CAMZOOM) ? N64.CU : 0) | ((buttons & EXTRA.CAMBACK) ? N64.CD : 0);
     }
-    return { b, x, y, half, cx, cy, photo: (buttons & EXTRA.PHOTO) !== 0, recSave: (buttons & EXTRA.RECSAVE) !== 0, menu: (buttons & EXTRA.MENU) !== 0 };
+    return { b, x, y, half, cx, cy, rx, ry, photo: (buttons & EXTRA.PHOTO) !== 0, recSave: (buttons & EXTRA.RECSAVE) !== 0, menu: (buttons & EXTRA.MENU) !== 0 };
   }
   // P324 toggle options (crouch / R-Look / walk): a new press of the bound input flips a latch that holds it
   const LATCHES = [{ id: OPT.TOGGLECROUCH, bit: N64.Z }, { id: OPT.TOGGLERLOOK, bit: N64.R }, { id: OPT.TOGGLEWALK, bit: 0 }];
@@ -1875,17 +1947,21 @@ var rtwGlue = (function () {
     for (let i = 0; i < 4; i++) {
       const calls = HEAP32[raw + i * 4];
       if (calls !== portCalls[i]) { portCalls[i] = calls; portSeenAt[i] = now; }
-      if (i === 0 || (portSeenAt[i] && now - portSeenAt[i] < 1000)) pads[i] = hostPad(HEAP32[raw + i * 4 + 1], HEAP32[raw + i * 4 + 2], HEAP32[raw + i * 4 + 3]);
+      if (i === 0 || (portSeenAt[i] && now - portSeenAt[i] < 1000)) pads[i] = hostPad(HEAP32[raw + i * 4 + 1], HEAP32[raw + i * 4 + 2], HEAP32[raw + i * 4 + 3],
+        HEAP32[raw + 20 + i * 2], HEAP32[raw + 21 + i * 2]);   // P378: rtw_rstick (pc_rtw.c RTW_RAW_RSTICK)
     }
     const mouseDx = HEAP32[raw + 16], mouseDy = HEAP32[raw + 17];
     HEAP32[raw + 16] = 0; HEAP32[raw + 17] = 0;
+    const wheel = opt(OPT.WHEEL) ? HEAP32[raw + 28] : 0;   // P378 rtw_wheel (pc_rtw.c RTW_RAW_WHEEL), 1/100 notch
+    HEAP32[raw + 28] = 0;
     let pad1 = pads[0];   // P377 name (was p0)
     if (pad1.recSave && !recSavePrev) recStop('the Save recording button');
     recSavePrev = pad1.recSave;
     // P377: the customisation settings have pad 1 while open (the game, and a recording, get an idle pad)
     const menuHasPad = rtwOverlay.input(pad1, now);
-    if (menuHasPad) pads[0] = pad1 = { b: 0, x: 0, y: 0, half: false, cx: 0, cy: 0, photo: false, recSave: false, menu: false };
+    if (menuHasPad) pads[0] = pad1 = { b: 0, x: 0, y: 0, half: false, cx: 0, cy: 0, rx: 0, ry: 0, photo: false, recSave: false, menu: false };
     if (photo.state === 2) { photo.mx += mouseDx; photo.my += mouseDy; }   // P348 photo camera
+    if (wheel && !rtwOverlay.wheel(wheel) && photo.state === 2) photo.wheel += wheel;   // P378: a menu's rows, else photo zoom
     const photoHasInput = photoPoll(pad1);
     const wantLock = freeCameraOn() || photo.state === 2;
     if (wantLock !== pointerLocked) { pointerLocked = wantLock; wasm('port_rtw_set_pointer_lock')(wantLock ? 1 : 0); }
@@ -1894,6 +1970,7 @@ var rtwGlue = (function () {
     if (!menuHasPad) photoMaskAfter(pad1);   // P377: not on the idle pad of the tick a menu closed in (its mask would end there)
     applyLatches(pad1);
     if (rec.active) { recSetPad(pad1); return; }   // P357: the recorded pad (pc_net.c samples it at the next retrace)
+    if (replay.active) return;   // P378: the retraces read the recording's input (pc_net.c rec_input)
     const pp = wasm('port_pad_state')() >> 2;
     for (let i = 0; i < 4; i++) {
       const d = pads[i];
@@ -1909,7 +1986,7 @@ var rtwGlue = (function () {
   function scheduleTick() { tickQueued = true; raf(() => { tickQueued = false; inputTick(); }); }
 
   // ------------------------------------------------------------------ photo mode (main.js photoPoll / photoCapture, P348)
-  const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, last: 0, busy: false, asked: 0,
+  const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, wheel: 0, last: 0, busy: false, asked: 0,   // P378 wheel
     maskB: 0, maskStick: false, scale: 2 };
   const PHOTO_WHY = { 1: 'Photo mode is off in Options', 2: 'no photo mode online', 3: 'photo mode needs the 3D view of a single-player game (not a menu, the pause screen, split screen or loading)',
     4: 'photo mode is not available (conker_netx.txt did not load)', 5: 'not enough memory for photo mode' };
@@ -1925,7 +2002,7 @@ var rtwGlue = (function () {
     if (d.photo && !photo.prevKey) photoRequest(!(st === 2 || st === 1));
     photo.prevKey = d.photo;
     photo.state = st;
-    if (st === 2 && was !== 2) { photo.hud = false; photo.mx = photo.my = 0; photo.prevB = d.b; photo.last = now; log('[photo] on'); rtwOverlay.photoShown(true); }
+    if (st === 2 && was !== 2) { photo.hud = false; photo.mx = photo.my = photo.wheel = 0; photo.prevB = d.b; photo.last = now; log('[photo] on'); rtwOverlay.photoShown(true); }
     if (st !== 2 && was === 2) { photo.maskB = d.b; photo.maskStick = true; log('[photo] off'); rtwOverlay.photoShown(false); }
     if (st < 0 && photo.asked) { log(`[photo] not started: ${PHOTO_WHY[-st] || 'photo mode did not start'}`); photo.asked = 0; }
     if (st === 2) photo.asked = 0;
@@ -1942,15 +2019,16 @@ var rtwGlue = (function () {
     photo.viewReq = false;
     if (newButtons & N64.L) photo.hud = !photo.hud;
     if (photo.hud) flags |= 1;
-    // look: the free camera's stick (C buttons with that option), else the C buttons
-    const lx = d.cx || ((heldButtons & N64.CR) ? STICK : 0) - ((heldButtons & N64.CL) ? STICK : 0);
-    const ly = d.cy || ((heldButtons & N64.CU) ? STICK : 0) - ((heldButtons & N64.CD) ? STICK : 0);
+    // look: the free camera's stick (C buttons with that option), else the analog right stick (P378, main.js d.rx), else
+    // the C buttons
+    const lx = d.cx || d.rx || ((heldButtons & N64.CR) ? STICK : 0) - ((heldButtons & N64.CL) ? STICK : 0);
+    const ly = d.cy || d.ry || ((heldButtons & N64.CU) ? STICK : 0) - ((heldButtons & N64.CD) ? STICK : 0);
     const fwd = d.y / STICK * 500 * dt, right = d.x / STICK * 500 * dt;
     const up = (((heldButtons & N64.R) ? 1 : 0) - ((heldButtons & N64.Z) ? 1 : 0)) * 350 * dt;
     const dyaw = lx / STICK * 90 * dt + photo.mx * 0.15, dpitch = ly / STICK * 60 * dt - photo.my * 0.15;
     const droll = (((heldButtons & N64.DR) ? 1 : 0) - ((heldButtons & N64.DL) ? 1 : 0)) * 45 * dt;
-    const zoom = Math.exp((((heldButtons & N64.DD) ? 1 : 0) - ((heldButtons & N64.DU) ? 1 : 0)) * 0.9 * dt);
-    photo.mx = photo.my = 0;
+    const zoom = Math.exp((((heldButtons & N64.DD) ? 1 : 0) - ((heldButtons & N64.DU) ? 1 : 0)) * 0.9 * dt) * Math.pow(1.1, photo.wheel / 100);   // P378 wheel as main.js
+    photo.mx = photo.my = photo.wheel = 0;
     wasm('port_photo_input')(fwd, right, up, dyaw, dpitch, droll, zoom, flags);
     return true;
   }
@@ -2061,8 +2139,168 @@ var rtwGlue = (function () {
         (r ? ` (the host refused it: ${r})` : '') + '. The game goes on in the recording mode; restart it to play normally.');
   }
 
+  // ------------------------------------------------------------------ P378 replay of an input recording (main.js ?replay)
+  // A .ckrec the player hands in (rtw_file_ready, fileInputs 1) is unpacked and checked (format, ROM SHA-1, input runs),
+  // then kept in this origin's IndexedDB ('conker-rtw-replay', the file's bytes) and the player is told to start the
+  // game again (reload). A replay needs the power-on state, which a running game cannot go back to. At the next start
+  // (read in preRun, before the game boots, and removed there: it plays once) the glue sets up main.js's replay session:
+  // the recording's game options (fixed), its EEPROM image (the player's stored save stays untouched: replayed saves never
+  // reach the host, pc_pif.c), its input per retrace (port_rec_session(2): pc_net.c feeds retrace N the recorded input),
+  // at the real 50 Hz so the player watches it; free camera, photo mode and the pads are off, the menus show the options
+  // locked. Each digest / checkpoint is compared as main.js e2eG / e2eCheck (H / S only with the same conker.wasm); the
+  // game pauses after the last recorded retrace (pc_net.c) and stays paused; the result shows on the picture and in the log.
+  const FILE_REPLAY = 1;
+  const REPLAY_DB = 'conker-rtw-replay', REPLAY_STORE = 'pending', REPLAY_KEY = 'next';
+  const replay = { doc: null, active: false, ended: false, state: 'idle', sameBuild: false, build: 'unknown', g: [], ci: 0,
+    matchedChecks: 0, matchedG: 0, first: null, mismatches: 0, level: 0, mode: 0, endFrame: 0, lastGood: 0, pending: '', refused: 0 };
+  const b64dec = (t) => { const b = atob(t || ''), u8 = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u8[i] = b.charCodeAt(i); return u8; };
+  function recDecodeRuns(u8, total) {   // main.js: -> Uint32Array of every retrace's input (retrace 1 first)
+    const o32 = new Uint32Array(total); let o = 0, i = 0;
+    while (i + 4 <= u8.length) {
+      const v = (u8[i] | u8[i + 1] << 8 | u8[i + 2] << 16 | u8[i + 3] << 24) >>> 0; i += 4;
+      let n = 0, m = 1, c; do { c = u8[i++]; n += (c & 127) * m; m *= 128; } while (c & 128);
+      for (let k = 0; k < n && o < total; k++) o32[o++] = v;
+    }
+    return o32;
+  }
+  const u32dec = (u8) => { const d = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), o = []; for (let i = 0; i + 4 <= u8.length; i += 4) o.push(d.getUint32(i, true)); return o; };
+  async function recUnpack(bytes) {   // main.js: gzip or plain JSON -> the recording object
+    let u8 = bytes;
+    if (u8[0] === 0x1f && u8[1] === 0x8b) u8 = new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+    const doc = JSON.parse(new TextDecoder().decode(u8));
+    if (!doc || doc.format !== REC_FORMAT) throw new Error('not a Conker input recording');
+    if (!(doc.retraces > 0) || typeof doc.inputs !== 'string' || !Array.isArray(doc.checks)) throw new Error('the recording has no input');
+    return doc;
+  }
+  const replayLength = (doc) => { const s = Math.round(doc.retraces / 50); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const replayName = (doc) => String(doc.name || 'recording').slice(0, 40);
+  function replayDb(mode, fn) {
+    return new Promise((ok, no) => {
+      if (typeof indexedDB === 'undefined') { no(new Error('no storage in this worker')); return; }
+      const q = indexedDB.open(REPLAY_DB, 1);
+      q.onupgradeneeded = () => q.result.createObjectStore(REPLAY_STORE);
+      q.onerror = () => no(q.error);
+      q.onsuccess = () => {
+        const db = q.result, t = db.transaction(REPLAY_STORE, mode), r = fn(t.objectStore(REPLAY_STORE));
+        t.oncomplete = () => { db.close(); ok(r && r.result); }; t.onerror = () => { db.close(); no(t.error); };
+      };
+    });
+  }
+  let romSha1 = null;   // of the ROM the host gave (port_rom), computed when a recording comes in
+  async function thisRomSha1() {
+    if (!romSha1) { const p = wasm('port_rtw_rom_ptr')(), n = wasm('port_rtw_rom_size')(); romSha1 = p && n ? await digestHex('SHA-1', HEAPU8.subarray(p, p + n).slice()) : 'unknown'; }
+    return romSha1;
+  }
+  async function replayAccept(bytes) {   // a .ckrec from the host: check it, keep it for the next start
+    try {
+      const doc = await recUnpack(bytes), sha = await thisRomSha1();
+      if (doc.rom_sha1 && doc.rom_sha1 !== 'unknown' && sha !== 'unknown' && doc.rom_sha1 !== sha) throw new Error(`it was made with another ROM (SHA-1 ${doc.rom_sha1.slice(0, 12)}…)`);
+      await replayDb('readwrite', (st) => st.put(bytes, REPLAY_KEY));
+      replay.pending = replayName(doc);
+      log(`[replay] "${doc.name}" (${doc.retraces} retraces, ${doc.checks.length} checkpoints, created ${doc.created}, build ${doc.build}) kept: it plays at the next start`);
+      rtwOverlay.notice(`Replay "${replayName(doc)}" (${replayLength(doc)}) is ready. Start the game again (reload the page) to watch it from power-on.`, 8000);
+    } catch (e) {
+      log(`[replay] the file was not taken: ${e && e.message || e}`);
+      rtwOverlay.notice(`That file cannot be replayed: ${e && e.message || e}.`, 6000);
+    }
+  }
+  // preRun: a recording kept for this start (removed at once: it plays once, also if this start fails)
+  {
+    const pre = Module['preRun'] ? [].concat(Module['preRun']) : [];
+    pre.push(() => {
+      addRunDependency('rtw-replay');
+      let done = false;
+      const finish = (why) => { if (done) return; done = true; if (why) out(`[replay] ${why}`); removeRunDependency('rtw-replay'); };
+      setTimeout(() => finish('the kept recording was not read in time'), 3000);
+      (async () => {
+        const bytes = await replayDb('readonly', (st) => st.get(REPLAY_KEY));
+        if (!bytes) return finish('');
+        await replayDb('readwrite', (st) => st.delete(REPLAY_KEY));
+        replay.doc = await recUnpack(new Uint8Array(bytes));
+        try { if (Module['wasmBinary']) replay.build = (await digestHex('SHA-256', Module['wasmBinary'])).slice(0, 16); } catch (e) { /* keep unknown */ }
+        finish(`a kept recording for this start: "${replay.doc.name}" (${replay.doc.retraces} retraces)`);
+      })().catch((e) => { replay.doc = null; finish(`the kept recording could not be read: ${e && e.message || e}`); });
+    });
+    Module['preRun'] = pre;
+  }
+  const REPLAY_KIND = ['periodic', 'level / mode change', 'end'];
+  function replayMismatch(m) {
+    replay.mismatches++;
+    if (replay.first) return;
+    replay.first = Object.assign({ lastGood: replay.lastGood }, m);
+    log(`[replay] FIRST DIFFERENCE at retrace ${m.f}: ${m.what}`);
+  }
+  function replayG(f, g) {   // main.js e2eG
+    const want = replay.g[f / replay.doc.g_every - 1];
+    if (want === undefined) return;
+    if ((want >>> 0) === (g >>> 0)) { replay.matchedG++; replay.lastGood = Math.max(replay.lastGood, f); return; }
+    replayMismatch({ f, field: 'G', what: `game digest G ${(g >>> 0).toString(16)}, the recording has ${(want >>> 0).toString(16)}` });
+  }
+  function replayCheck(c) {   // main.js e2eCheck
+    const [f, h, s, g, level, mode, kind, x, y, z] = c, exp = replay.doc.checks[replay.ci++];
+    replay.level = level; replay.mode = mode;
+    if (!exp) { if (replay.doc.complete) replayMismatch({ f, field: 'extra', what: `a ${REPLAY_KIND[kind]} checkpoint the recording does not have (level ${level.toString(16)}, mode ${mode})` }); return; }
+    const [ef, eh, es, eg, el, em, ek, ex, ey, ez] = exp;
+    const pos = `Conker at ${x}, ${y}, ${z} (recording ${ex}, ${ey}, ${ez})`;
+    let what = null, field = null;
+    if (ef !== f) { field = 'frame'; what = `${REPLAY_KIND[kind]} checkpoint at retrace ${f} (level ${level.toString(16)} mode ${mode}), the recording's next one is a ${REPLAY_KIND[ek]} at retrace ${ef} (level ${el.toString(16)} mode ${em})`; }
+    else if (el !== level || em !== mode) { field = 'level'; what = `level ${level.toString(16)} mode ${mode}, the recording has level ${el.toString(16)} mode ${em}; ${pos}`; }
+    else if ((eg >>> 0) !== (g >>> 0)) { field = 'G'; what = `game digest G ${(g >>> 0).toString(16)}, the recording has ${(eg >>> 0).toString(16)}; ${pos}`; }
+    else if (replay.sameBuild && (eh >>> 0) !== (h >>> 0)) { field = 'H'; what = `static memory hash H ${(h >>> 0).toString(16)}, the recording has ${(eh >>> 0).toString(16)} (same build); ${pos}`; }
+    else if (replay.sameBuild && (es >>> 0) !== (s >>> 0)) { field = 'S'; what = `thread stack hash S ${(s >>> 0).toString(16)}, the recording has ${(es >>> 0).toString(16)} (same build)`; }
+    if (what) replayMismatch({ f: Math.min(f, ef), field, what });
+    else { replay.matchedChecks++; replay.lastGood = Math.max(replay.lastGood, f); }
+  }
+  function replayEnd(f) {   // main.js e2eEnd (pc_net.c paused the game after the last recorded retrace)
+    replay.endFrame = f; replay.ended = true;
+    const left = replay.doc.checks.length - replay.ci;
+    if (!replay.first && left > 0) replayMismatch({ f, field: 'missing', what: `${left} checkpoint(s) of the recording never came` });
+    replay.state = replay.first ? 'different' : 'identical';
+    const result = replay.first ? `DIFFERENT from retrace ${replay.first.f} (${replay.first.field})` : 'IDENTICAL';
+    log(`[replay] ended at retrace ${f} of ${replay.doc.retraces}: ${result}; ${replay.matchedChecks} checkpoints and ${replay.matchedG} digests matched` +
+        (replay.first ? `; first difference: ${replay.first.what}` : ''));
+    rtwOverlay.notice(`Replay ended: ${replay.first ? `it played differently from retrace ${replay.first.f} on (${replay.first.field})` : 'it played exactly as recorded'}` +
+      ` (${replay.matchedChecks} of ${replay.doc.checks.length} checkpoints). Reload the page to play.`, 0);
+  }
+  function replayBegin() {   // rtw_start, before main(): main.js e2eLoad + recBegin + e2eBegin
+    const doc = replay.doc, n = doc.retraces;
+    for (const id in GAME_OPTION_KEYS) {   // the recording's game options, fixed (main.js recCfg.options)
+      const key = GAME_OPTION_KEYS[id], v = doc.options ? doc.options[key] : undefined;
+      if (v === undefined) continue;
+      const value = RANGE_OPTIONS.has(+id) ? (v | 0) : (v ? 1 : 0);
+      wasm('port_set_option')(+id, value); optionValues[id] = value;
+    }
+    wasm('port_set_option')(OPT.FREECAM, 0); wasm('port_set_option')(OPT.PHOTOMODE, 0);
+    wasm('port_rtw_lock_game_options')(); gameOptionsLocked = true;
+    const eep = b64dec(doc.eeprom), ep = wasm('port_eeprom_ptr')(), en = wasm('port_eeprom_size')();
+    HEAPU8.fill(0, ep, ep + en); HEAPU8.set(eep.subarray(0, en), ep);   // the recording's save (not the player's)
+    replay.g = u32dec(b64dec(doc.g));
+    replay.sameBuild = doc.build === replay.build;
+    Module['recInput'] = () => {};
+    Module['recG'] = (f, g) => replayG(f, g);
+    Module['recCheck'] = (f, h, s, g, level, mode, kind, x, y, z) => replayCheck([f, h, s, g, level, mode, kind, +x.toFixed(3), +y.toFixed(3), +z.toFixed(3)]);
+    Module['recEnd'] = (f) => replayEnd(f);
+    const inputs = recDecodeRuns(b64dec(doc.inputs), n), p = wasm('malloc')(Math.max(4, n * 4));
+    HEAPU8.set(new Uint8Array(inputs.buffer), p);
+    rtwOverlay.setRecording(true);   // the menus: options locked, no game rows, no sounds (as while recording)
+    wasm('port_rec_session')(2, doc.check_every, doc.g_every, p, n, 0, 0);   // real time: the player watches it
+    replay.active = true; replay.state = 'running';
+    log(`[replay] "${doc.name}" (${n} retraces, ${doc.checks.length} checkpoints, recorded with build ${doc.build}, this build ${replay.build}: ` +
+        `${replay.sameBuild ? 'same build, H / S compared' : 'other build, only G / level / mode compared'}), options ` +
+        Object.entries(doc.options || {}).map(([k, v]) => `${k}=${+v}`).join(' '));
+    rtwOverlay.notice(`Replaying "${replayName(doc)}" (${replayLength(doc)}) from power-on with its save and options. The controller does nothing until it ends.`, 6000);
+  }
+  function replayStatus() {
+    return { state: replay.state, active: replay.active, ended: replay.ended, pending: replay.pending, name: replay.doc ? replay.doc.name : '',
+      total: replay.doc ? replay.doc.retraces : 0, checks: replay.doc ? replay.doc.checks.length : 0, matchedChecks: replay.matchedChecks,
+      matchedG: replay.matchedG, mismatches: replay.mismatches, first: replay.first, sameBuild: replay.sameBuild, endFrame: replay.endFrame,
+      frame: wasm('port_net_frame') ? wasm('port_net_frame')() >>> 0 : 0, refused: replay.refused,
+      saveGeneration: wasm('rtw_save_generation')(), eepromNonzero: eepromBytes().reduce((n, b) => n + (b ? 1 : 0), 0) };
+  }
+
   // ------------------------------------------------------------------ hooks from pc_rtw.c / pc_video.c (rtw_lib.js)
   let romForHash = null;
+  const optionSync = { told: 0, refused: 0 };   // P378
   function loadExclusions() {   // main.js netLoadExclusions: conker_netx.txt from files.data
     const files = Module['files'] || {}, bytes = files['conker_netx.txt'];
     if (!bytes) { log('[nethash] conker_netx.txt not in files.data: photo mode and the recorder are off'); return; }
@@ -2077,7 +2315,11 @@ var rtwGlue = (function () {
     start() {   // rtw_start, before main()
       loadExclusions();
       layout();
-      if (opt(OPT.RECORDER)) {
+      if (replay.doc && !opt(OPT.REPLAY)) log(`[replay] "${replay.doc.name}" not played: Replay recordings is off`);
+      if (replay.doc && opt(OPT.REPLAY)) {   // P378: a kept recording plays now (and the recorder waits)
+        if (opt(OPT.RECORDER)) log('[rec] no recording during a replay');
+        replayBegin();
+      } else if (opt(OPT.RECORDER)) {
         const romPtr = wasm('port_rtw_rom_ptr')(), romSize = wasm('port_rtw_rom_size')();
         if (romPtr && romSize) romForHash = HEAPU8.slice(romPtr, romPtr + romSize);
         recBegin();
@@ -2088,12 +2330,16 @@ var rtwGlue = (function () {
       // test aid (tools/port/scripts/rtw_e2e.mjs reads the game's state from the worker); the worker is the sandbox's own
       globalThis.__rtwConker = { Module, photoState: () => photo.state, rec: () => ({ active: rec.active, frames: rec.frames, checks: rec.checks.length }),
         audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation'](),
-        overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues) };   // P377
+        overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues), replay: replayStatus,   // P377 (P378 replay)
+        optsync: () => Object.assign({}, optionSync),   // P378 rtw_option_changed calls
+        cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); },   // P378: the camera sticks
+        photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }) };   // P378: photo camera's field of view
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
     },
     beforeGl() { layout(); },   // the drawing buffer the renderer starts with (gfx_init reads the viewport)
     glReady() { glUp = true; layout(); },
     option(id, value) {   // rtw_option (pc_rtw.c already set the game options to the host's value)
+      hostDeclared.add(id);   // P378
       // P377: a value chosen in the customisation settings may win over the host's at start (rtwOverlay.hostOption)
       const effective = rtwOverlay.hostOption(id, value, started);
       if (effective !== value) {
@@ -2112,8 +2358,16 @@ var rtwGlue = (function () {
       if (on && !rec.pauseSince) rec.pauseSince = now;
       if (!on && rec.pauseSince) { rec.pausedMs += now - rec.pauseSince; rec.pauseSince = 0; }
       if (!on) rtwOverlay.hostResumed();   // P377: the customisation settings still hold the game
+      if (!on && replay.ended) wasm('port_set_paused')(1);   // P378: a finished replay stays paused (main.js e2e.ended)
     },
     get glUp() { return glUp; },
+    file(id, ptr, size) {   // P378 rtw_file_ready: the bytes are copied out now (pc_rtw.c frees its buffer)
+      const bytes = HEAPU8.slice(ptr, ptr + size);
+      log(`[file] ${size} bytes for file input ${id}`);
+      if (id !== FILE_REPLAY) { log(`[file] no file input ${id} in this build`); return; }
+      if (!opt(OPT.REPLAY)) { replay.refused++; rtwOverlay.notice('Replays are off (option "Replay recordings" in the host\'s menu).', 5000); return; }
+      replayAccept(bytes);
+    },
   };
   // an option's value for the game and this glue (from the host, or from the customisation settings)
   function applyOption(id, value) {
@@ -2142,6 +2396,19 @@ var rtwGlue = (function () {
     photo, photoRequest: (on) => photoRequest(on), photoCapture: () => photoCapture(), photoBusy: () => photo.busy,
     maskHeld() { photo.maskB = 0xFFFF; photo.maskStick = true; },   // main.js GMenu close: held inputs wait for a release
     exportSave: () => exportFile('conker-eu.eep', 'application/octet-stream', eepromBytes()),
+    // P378 the customisation settings' "Replay a recording": why it cannot ask now ('' = it can), and the host's prompt
+    replayLocked: () => (!opt(OPT.REPLAY) ? 'Replays are off in the host\'s options (Replay recordings)' : replay.active ? 'A replay is playing' : ''),
+    requestReplay: () => wasm('port_rtw_request_file')(FILE_REPLAY),
+    replayPending: () => replay.pending,
+    // P378 standard 1.1: a manifest option changed in the customisation settings -> env.rtw_option_changed (option 116).
+    // true = the host took it (its menu and stored value now have it)
+    optionChanged(id, value) {
+      if (!opt(OPT.OPTSYNC) || !hostDeclared.has(id)) return false;
+      const r = wasm('port_rtw_option_changed')(id, value);
+      log(`[settings] option ${id} = ${value} told to the host${r ? ` (not taken: ${r})` : ''}`);
+      optionSync.told++; if (r) optionSync.refused++;
+      return r === 0;
+    },
   };
   return glue;
 })();
@@ -4760,6 +5027,8 @@ async function createWasm() {
 
   var _port_rtw_gl_ready = () => rtwGlue.glReady();
 
+  var _port_rtw_glue_file = (id, ptr, size) => rtwGlue.file(id, ptr, size);
+
   var _port_rtw_glue_option = (id, value) => rtwGlue.option(id, value);
 
   var _port_rtw_glue_pause = (on) => rtwGlue.pause(on);
@@ -4854,9 +5123,19 @@ async function createWasm() {
       return 0;
     };
 
+  var _rtw_option_changed = (id, value) => {
+      const host = Module['rtw'];
+      return host && host['rtw_option_changed'] ? host['rtw_option_changed'](id, value) | 0 : -1;
+    };
+
   var _rtw_pointer_lock = (on) => {
       const host = Module['rtw'];
       return host && host['rtw_pointer_lock'] ? host['rtw_pointer_lock'](on) | 0 : 0;
+    };
+
+  var _rtw_request_file = (id) => {
+      const host = Module['rtw'];
+      return host && host['rtw_request_file'] ? host['rtw_request_file'](id) | 0 : -1;
     };
 
   var _rtw_rumble = (port, on) => {
@@ -5408,6 +5687,8 @@ var _port_rtw_log = Module['_port_rtw_log'] = makeInvalidEarlyAccess('_port_rtw_
 var _port_rtw_export_file = Module['_port_rtw_export_file'] = makeInvalidEarlyAccess('_port_rtw_export_file');
 var _port_rtw_build_id = Module['_port_rtw_build_id'] = makeInvalidEarlyAccess('_port_rtw_build_id');
 var _port_rtw_set_pointer_lock = Module['_port_rtw_set_pointer_lock'] = makeInvalidEarlyAccess('_port_rtw_set_pointer_lock');
+var _port_rtw_request_file = Module['_port_rtw_request_file'] = makeInvalidEarlyAccess('_port_rtw_request_file');
+var _port_rtw_option_changed = Module['_port_rtw_option_changed'] = makeInvalidEarlyAccess('_port_rtw_option_changed');
 var _rtw_rom_buffer = Module['_rtw_rom_buffer'] = makeInvalidEarlyAccess('_rtw_rom_buffer');
 var _port_rtw_rom_ptr = Module['_port_rtw_rom_ptr'] = makeInvalidEarlyAccess('_port_rtw_rom_ptr');
 var _port_rtw_rom_size = Module['_port_rtw_rom_size'] = makeInvalidEarlyAccess('_port_rtw_rom_size');
@@ -5418,8 +5699,12 @@ var _rtw_save_load = Module['_rtw_save_load'] = makeInvalidEarlyAccess('_rtw_sav
 var _rtw_start = Module['_rtw_start'] = makeInvalidEarlyAccess('_rtw_start');
 var _rtw_pause = Module['_rtw_pause'] = makeInvalidEarlyAccess('_rtw_pause');
 var _rtw_input = Module['_rtw_input'] = makeInvalidEarlyAccess('_rtw_input');
+var _rtw_rstick = Module['_rtw_rstick'] = makeInvalidEarlyAccess('_rtw_rstick');
 var _rtw_mouse = Module['_rtw_mouse'] = makeInvalidEarlyAccess('_rtw_mouse');
+var _rtw_wheel = Module['_rtw_wheel'] = makeInvalidEarlyAccess('_rtw_wheel');
 var _rtw_resize = Module['_rtw_resize'] = makeInvalidEarlyAccess('_rtw_resize');
+var _rtw_file_buffer = Module['_rtw_file_buffer'] = makeInvalidEarlyAccess('_rtw_file_buffer');
+var _rtw_file_ready = Module['_rtw_file_ready'] = makeInvalidEarlyAccess('_rtw_file_ready');
 var _rtw_audio_rate = Module['_rtw_audio_rate'] = makeInvalidEarlyAccess('_rtw_audio_rate');
 var _rtw_audio_drain = Module['_rtw_audio_drain'] = makeInvalidEarlyAccess('_rtw_audio_drain');
 var _rtw_audio_buffer = Module['_rtw_audio_buffer'] = makeInvalidEarlyAccess('_rtw_audio_buffer');
@@ -5797,6 +6082,8 @@ function assignWasmExports(wasmExports) {
   Module['_port_rtw_export_file'] = _port_rtw_export_file = createExportWrapper('port_rtw_export_file', 4);
   Module['_port_rtw_build_id'] = _port_rtw_build_id = createExportWrapper('port_rtw_build_id', 1);
   Module['_port_rtw_set_pointer_lock'] = _port_rtw_set_pointer_lock = createExportWrapper('port_rtw_set_pointer_lock', 1);
+  Module['_port_rtw_request_file'] = _port_rtw_request_file = createExportWrapper('port_rtw_request_file', 1);
+  Module['_port_rtw_option_changed'] = _port_rtw_option_changed = createExportWrapper('port_rtw_option_changed', 2);
   Module['_rtw_rom_buffer'] = _rtw_rom_buffer = createExportWrapper('rtw_rom_buffer', 1);
   Module['_port_rtw_rom_ptr'] = _port_rtw_rom_ptr = createExportWrapper('port_rtw_rom_ptr', 0);
   Module['_port_rtw_rom_size'] = _port_rtw_rom_size = createExportWrapper('port_rtw_rom_size', 0);
@@ -5807,8 +6094,12 @@ function assignWasmExports(wasmExports) {
   Module['_rtw_start'] = _rtw_start = createExportWrapper('rtw_start', 0);
   Module['_rtw_pause'] = _rtw_pause = createExportWrapper('rtw_pause', 1);
   Module['_rtw_input'] = _rtw_input = createExportWrapper('rtw_input', 4);
+  Module['_rtw_rstick'] = _rtw_rstick = createExportWrapper('rtw_rstick', 3);
   Module['_rtw_mouse'] = _rtw_mouse = createExportWrapper('rtw_mouse', 3);
+  Module['_rtw_wheel'] = _rtw_wheel = createExportWrapper('rtw_wheel', 1);
   Module['_rtw_resize'] = _rtw_resize = createExportWrapper('rtw_resize', 3);
+  Module['_rtw_file_buffer'] = _rtw_file_buffer = createExportWrapper('rtw_file_buffer', 1);
+  Module['_rtw_file_ready'] = _rtw_file_ready = createExportWrapper('rtw_file_ready', 2);
   Module['_rtw_audio_rate'] = _rtw_audio_rate = createExportWrapper('rtw_audio_rate', 0);
   Module['_rtw_audio_drain'] = _rtw_audio_drain = createExportWrapper('rtw_audio_drain', 0);
   Module['_rtw_audio_buffer'] = _rtw_audio_buffer = createExportWrapper('rtw_audio_buffer', 0);
@@ -6291,6 +6582,8 @@ var wasmImports = {
   /** @export */
   port_rtw_gl_ready: _port_rtw_gl_ready,
   /** @export */
+  port_rtw_glue_file: _port_rtw_glue_file,
+  /** @export */
   port_rtw_glue_option: _port_rtw_glue_option,
   /** @export */
   port_rtw_glue_pause: _port_rtw_glue_pause,
@@ -6309,7 +6602,11 @@ var wasmImports = {
   /** @export */
   rtw_log: _rtw_log,
   /** @export */
+  rtw_option_changed: _rtw_option_changed,
+  /** @export */
   rtw_pointer_lock: _rtw_pointer_lock,
+  /** @export */
+  rtw_request_file: _rtw_request_file,
   /** @export */
   rtw_rumble: _rtw_rumble
 };
