@@ -54,6 +54,7 @@
     { "id": 10, "label": "Sound effects volume (%)", "type": "int", "default": 100, "min": 0, "max": 100 },
     { "id": 11, "label": "Speech volume (%)", "type": "int", "default": 100, "min": 0, "max": 100 },
     { "id": 109, "label": "Autosave icon", "type": "bool", "default": 1 },
+    { "id": 111, "label": "Hold-L skip ring", "type": "bool", "default": 1 },
     { "id": 108, "label": "Input recorder (for testing)", "type": "bool", "default": 0 }
   ],
   "source": "https://github.com/Sorikairox/conker-eu-port"
