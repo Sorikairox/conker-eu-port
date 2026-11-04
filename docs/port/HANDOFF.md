@@ -39,7 +39,9 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   (`tools/port/scripts/gen_compile_commands.py`).
 - Renames: docs/RENAMING.md (`tools/eu_port/rename.py`, `apply_names.sh`).
 - retrowser.app build (P376): `tools/eu_port/build_rtw.sh --rom baserom.eu.z64` -> port/build/rtw/dist; e2e
-  `node tools/port/scripts/rtw_e2e.mjs OUT HOST_URL ROM ACTIONS`; publish locally `tools/eu_port/rtw_dist_commit.sh`.
+  `node tools/port/scripts/rtw_e2e.mjs OUT HOST_URL ROM ACTIONS` (RTW_SERVE=PORT serves retrowser's built dist in-process,
+  HOST_URL `-`); overlays (P377): `tools/port/scripts/rtw_overlay_e2e.sh OUT` (3 runs, ~4 min, ALL PASS); publish
+  locally `tools/eu_port/rtw_dist_commit.sh`.
 - Deploy after a green check + browser test: `tools/eu_port/deploy_web.sh`; backup: `~/conker/tools/eu_port/backup_push.sh`.
 
 ## Reference docs
@@ -48,8 +50,12 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
-- retrowser build (P376): rebuild + rtw_dist_commit.sh after page changes that matter; the host needs v1 additions
-  for replays (a file import), wheel / analog right stick, netplay (W11). Not tested on a phone or another browser.
+- retrowser build (P376): rebuild + rtw_dist_commit.sh after page changes that matter (P377: main.js / gmenu.js blocks
+  the worker copies in: rtw_page_extract.py stops the build if one moved); the host needs v1 additions for replays (a
+  file import), wheel / analog right stick, netplay (W11). Not tested on a phone or another browser. Pre-existing (P376
+  build too): after any pause (the host's menu, P377's customisation settings) the host drops ~117 ms of sound once
+  (its queue passes 200 ms on resume; AI_LEN model vs. the host queue's restart); a photo PNG taken during the
+  wake-up blur at the level start shows a 640-wide strip of the blur's old frame (2x capture + fb ghost texture).
 - MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls), proven online in 2-player Bunker
   (netmp_bunker.sh). event_query_world_object fixed in P343 (it was converted with
   six mistakes, see P343).
@@ -103,6 +109,47 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P377 (port-web, 2026-11-05): retrowser build: the page overlays drawn in the worker
+- User request: the four page overlays P376 dropped (customisation settings, autosave icon, hold-L ring, photo Pose &
+  Outfit) in the rtw build, inside the worker, buttons only, settings in sync with the host's options, menu sounds
+  through the pulled audio, web build and live site unchanged, one commit per feature, on by default there.
+- How they are drawn: an overlay layer = a worker OffscreenCanvas 2D the size of the picture, composited over the WebGL
+  frame once per main-loop tick (gfx_f3dex2.c PORT_RTW port_rtw_overlay_composite: clean copy of the picture, texture
+  upload from rtw_lib.js, own program, renderer state put back; port_rtw_overlay_restore puts the clean picture back
+  before the next tick: the game never reads the overlay, no stacking; pc_sched.c rtw_main_loop_tick). Same technique
+  as the page (2D canvas + the game's font read from game memory), with the page's own code: rtw_page_extract.py copies
+  GameFont, GFace, OPTIONS, PRESETS, MenuModel, the photo tables / `look`, GPhoto verbatim from main.js / gmenu.js into
+  port/build/rtw/gen/rtw_overlay.js (each block must match once), with small document / window / rAF stand-ins.
+  Files: port/web/rtw/rtw_overlay.js (core, buttons, tick) + rtw_saveicon.js (109) / rtw_ring.js (111) /
+  rtw_menu.js (110) / rtw_photo.js (112), manifest options, all default 1. Saves icon / ring: the index.html SVGs as 2D
+  paths (L in the game font). Menus: GMenu's look and pad controls, own pages (no binding / online pages: the host's;
+  Saves exports through rtw_export_file). Entries: new extra button Menu (bit 21; keyboard 6, touch), holding Photo mode
+  500 ms (gamepad Back; a short press = photo mode on release), the game's CUSTOMISATION rows (pause, slots, MULTI,
+  fireplace: unchanged game C). Photo panel: Menu / holding Photo = GPhoto's nav, holding Menu = hide.
+- Settings decision: the in-game menu keeps its own record in the origin's IndexedDB ('conker-rtw', read in preRun
+  before the game starts): value chosen + the host's value at that time per option. At start a chosen value wins while
+  the host still sends its old value; a different host value (changed in the host's menu) wins and is forgotten from
+  the record; host changes during play apply at once. Both survive a reload (tested both ways); the host's menu can
+  show a stale value for an option last changed in-game. No IndexedDB: host values only.
+- Menu sounds: pc_sfx.c port_sfx_decode (read-only) -> aud_out.c port_rtw_menu_sound_play (4 voices, resampled, mixed
+  into the drain); while the game is quiet (menu pause, photo) the drain hands the host silence at the output rate.
+- Fix found on the way: closing a menu cleared photoMaskAfter's held-input mask on the same tick's idle pad (the A that
+  chose "Back to title" reached the game and reopened the menu): rtw_glue.js skips the mask on that tick. The page
+  build's GMenu has the same order (keyboard saved by keysDown.clear(); not changed: page bytes).
+- Renames: rtw_glue.js tick -> inputTick, p0 -> pad1, photoPoll b / fresh -> heldButtons / newButtons. Not renamed
+  (would change the web build: function names in the name section, static names in the shipped conker_netx.txt):
+  frame, sh, prog, vao, bound_fb, state_dirty, aud_out_push_game and the aud_out.c statics.
+- Commits: 9186dd4d layer + autosave icon, 0bf33a9f ring, 09be5d91 customisation settings + sounds, 586bdaa9 photo
+  menus, 72512760 tests. rtw-dist 03ce57df (local, not pushed), build id
+  3b22c4865b4c39e0e7065ab5cf439248dab712c291e56cba76829dd55ca3cd6c (conker.wasm 6502d0fc..., conker.js 5fecacf1...);
+  rtw-hash + rtw-check --rom OK. port/build/web: all 15 files sha256-identical before / after; check GREEN each
+  commit; no deploy.
+- E2E (muted headless Chrome through retrowser's serve-worker on its dist + GitHub mock, buttons only):
+  rtw_overlay_e2e.sh ALL PASS: menus (slot row -> all 9 pages, Widescreen on applied 808x480, music 90 %, save export,
+  reload kept, host menu sets Widescreen on / off -> off kept after reload, music still 90), play (hold Photo opens it
+  paused, NEW GAME, ring at 0.5, autosave icon at the level's save, photo panel: animation list pick, model 1, hide /
+  show, PNG fetched, pause row -> menu from pause), off (options 109-112 off: no menu, rows 0). Recorder run: rows 0,
+  game options locked, no sounds, .ckrec saved. Evidence port_work/p377 (final_e2e/menus, final_e2e/play).
 ### P376 (port-web, 2026-11-05): retrowser.app v1 build (separate target, page build unchanged)
 - User request: a retrowser.app build of Conker (standard: ~/Code/retrowser spec/retrowser-v1.md). 0a7f21ed:
   `tools/eu_port/build_rtw.sh [--rom ROM]` = `make -C port rtw` (not part of `all`) -> port/build/rtw/dist
@@ -140,7 +187,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   `tools/eu_port/rtw_dist_commit.sh --rom ROM "msg"` (plumbing, own index; refuses without a passing leak scan).
   Link: Sorikairox/conker-eu-port@rtw-dist. Build id 457f0626a56e4dc2b7a8497ba7e9976fb3c1be4ac5fab16505740b4a2f320bd3.
 - Not in the rtw build (no v1 host interface): netplay (W11), recording replay (no way to hand a file to the game),
-  the page overlays (game-style menus, autosave icon, hold-L ring, photo Pose / Outfit panel, photo toasts -> log),
+  the page overlays (game-style menus, autosave icon, hold-L ring, photo Pose / Outfit panel, photo toasts -> log; all
+  in the worker since P377),
   mouse wheel zoom in photo mode (rtw_mouse has no wheel), analog right stick (the host sends C bits only).
 ### P375 (port-web, 2026-11-02): offline play (service worker, update notice, manifest, home-screen icon)
 - User request: "Deploy everything with Netlify so I can play. Also make all port work offline so anyone can play as

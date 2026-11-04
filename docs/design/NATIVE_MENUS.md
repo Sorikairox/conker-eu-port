@@ -349,6 +349,12 @@ single source of truth (`OPTIONS`).
     margin; stick zone 180 px), nothing reaches the game (pad 1 idle). Fixed: faces drawn 0 x 0 while #touch was
     display: none (a phone turned with a menu open lost its A button until turned back) and the stick ring placed from
     an empty box; portrait puts the picture at the top, controls below. The detected touch default is no longer stored.
+- **P377: the retrowser.app build** (port/web/rtw, HANDOFF P377): the customisation settings, the autosave icon, the
+  hold-L ring and photo mode's HUD / Pose & Outfit panel are drawn in the worker on an OffscreenCanvas layer over the
+  WebGL frame, with this page code copied in verbatim (port/tools/rtw_page_extract.py: GameFont, GFace, OPTIONS,
+  PRESETS, MenuModel, GPhoto, main.js `look`): moving or renaming one of those blocks stops the rtw build until the
+  extract table follows. Its own menu pages (no binding / online pages), the game's rows unchanged, sounds mixed into
+  the host's pulled audio, settings kept in the origin's IndexedDB next to the host's options.
 - **Next** (the original P365 "Controls + Saves overlays" was done in P362; proposed new order):
   1. ~~P365 Online overlay~~ (done, above).
   2. ~~P366 photo mode restyle~~ (done, above).
