@@ -38,6 +38,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   server). Chrome + "C/C++ DevTools Support (DWARF)": breakpoints on C lines. CLion: `compile_commands.json`
   (`tools/port/scripts/gen_compile_commands.py`).
 - Renames: docs/RENAMING.md (`tools/eu_port/rename.py`, `apply_names.sh`).
+- retrowser.app build (P376): `tools/eu_port/build_rtw.sh --rom baserom.eu.z64` -> port/build/rtw/dist; e2e
+  `node tools/port/scripts/rtw_e2e.mjs OUT HOST_URL ROM ACTIONS`; publish locally `tools/eu_port/rtw_dist_commit.sh`.
 - Deploy after a green check + browser test: `tools/eu_port/deploy_web.sh`; backup: `~/conker/tools/eu_port/backup_push.sh`.
 
 ## Reference docs
@@ -46,6 +48,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
+- retrowser build (P376): rebuild + rtw_dist_commit.sh after page changes that matter; the host needs v1 additions
+  for replays (a file import), wheel / analog right stick, netplay (W11). Not tested on a phone or another browser.
 - MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls), proven online in 2-player Bunker
   (netmp_bunker.sh). event_query_world_object fixed in P343 (it was converted with
   six mistakes, see P343).
@@ -99,6 +103,45 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P376 (port-web, 2026-11-05): retrowser.app v1 build (separate target, page build unchanged)
+- User request: a retrowser.app build of Conker (standard: ~/Code/retrowser spec/retrowser-v1.md). 0a7f21ed:
+  `tools/eu_port/build_rtw.sh [--rom ROM]` = `make -C port rtw` (not part of `all`) -> port/build/rtw/dist
+  (conker.js, conker.wasm, conker_netx.txt, retrowser.json hashed with retrowser tools/rtw-hash.ts, then
+  rtw-check [--rom]). The page build is untouched: every C change is `#ifdef PORT_RTW` (PC layer compiled again into
+  port/build/rtw/{ultra,gfx,audio}), the game / boot / stub objects are shared; port/build/web proved byte-identical
+  (all 17 files, sha256 before / after a relink with the edited sources). No deploy (the live site did not change).
+- Module: classic-script MODULARIZE `createConker`, ENVIRONMENT=worker, DYNAMIC_EXECUTION=0, no SDL, wasm from
+  Module.wasmBinary, `loop: asyncify` (the Emscripten main loop on the worker's rAF), `video: webgl`.
+  port/ultra/pc_rtw.c: the 14 rtw_* exports (rom buffer -> port_set_rom; save = the 2048-byte EEPROM image,
+  generation = blocks written; start -> `__main_void()` (clang's name of main(void)); pause (+ rumble off); raw
+  input / mouse; resize; audio pull; option) and wrappers so all 5 env.rtw_* imports are real wasm imports.
+  PORT_RTW: pc_video.c GL.createContext on Module.canvas (port/web/rtw/rtw_lib.js; "#canvas" finds nothing without a
+  document in Emscripten 4.0.15), pc_sched.c wall-paced 50 Hz (the worker has no `window`, which meant det pacing),
+  aud_out.c ring drained by the host at 22020 Hz, AI_LEN = ring + a model of the host's queue - 2048, pc_pif.c EEPROM
+  write -> generation, rumble -> rtw_rumble. net_regions.py leaves pc_rtw.o out of the hash / photo snapshot.
+- port/web/rtw/rtw_glue.js (--pre-js) is the worker twin of main.js: input tick per rAF (host pads -> octagon gate,
+  toggle latches, free camera stick, PIF pads / cam pads / recorder pad), photo mode (extra button Photo, camera, A =
+  PNG at 2x through OffscreenCanvas.convertToBlob -> rtw_export_file, pointer lock), layoutScreen from rtw_resize,
+  the recorder (option 108: from power-on; extra button "Save recording" or option off -> .ckrec via
+  rtw_export_file; build = SHA-256 of conker.wasm, rtw_build = host build id), conker_netx.txt from files.data.
+  Option ids: game options = PORT_OPT_*, page-side 100.. (port/web/rtw/retrowser.json). Test aid: the worker's
+  globalThis.__rtwConker (Module, photo / recorder / audio / save state).
+- E2E (tools/port/scripts/rtw_e2e.mjs, playwright-core of the retrowser repo, retrowser's GitHub mock serving the
+  dist as sorikairox/conker-eu-port, muted headless Chrome --use-angle=metal, the ROM only through the host's file
+  input). `npm run dev` host: legal / title render, hold-L route to level 0x29, ArrowUp moves Conker (2069,-66.8,1981)
+  -> (1836.8,-23.3,1795.7), host pulls 3.28 M frames in ~149 s (= 22020 Hz), photo exported. Someone was committing to
+  the retrowser repo meanwhile (HMR reset a run), so the rest ran on its built dist (tools/serve-worker.ts): worklet
+  queue 82-110 ms, 0 underruns; photo 1280x960 in Saved files and still listed after reload; host save == module
+  EEPROM (fnv 6f636738), after reload the same image and the title's GAME 1 slot shows 0:00:24; mock stopped +
+  network off + reload -> the game boots and runs (offline); recorder: 716 retraces, 16 checkpoints, .ckrec in
+  Saved files with build / rtw_build / rom_sha1. "Click to use the mouse" shows in photo mode. Evidence
+  port_work/p376 (local). check GREEN.
+- Branch rtw-dist (17ed4547, local, not pushed): only retrowser.json + the 3 files, made by
+  `tools/eu_port/rtw_dist_commit.sh --rom ROM "msg"` (plumbing, own index; refuses without a passing leak scan).
+  Link: Sorikairox/conker-eu-port@rtw-dist. Build id 457f0626a56e4dc2b7a8497ba7e9976fb3c1be4ac5fab16505740b4a2f320bd3.
+- Not in the rtw build (no v1 host interface): netplay (W11), recording replay (no way to hand a file to the game),
+  the page overlays (game-style menus, autosave icon, hold-L ring, photo Pose / Outfit panel, photo toasts -> log),
+  mouse wheel zoom in photo mode (rtw_mouse has no wheel), analog right stick (the host sends C bits only).
 ### P375 (port-web, 2026-11-02): offline play (service worker, update notice, manifest, home-screen icon)
 - User request: "Deploy everything with Netlify so I can play. Also make all port work offline so anyone can play as
   long as they loaded the website." Option **Offline play** (key `offline`, page tool, not in the presets), **on by
