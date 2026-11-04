@@ -85,9 +85,15 @@ int aud_out_open(int rate) {
     return 0;
 }
 
+#ifdef PORT_RTW
+static double rtw_game_pushed_at_ms;   /* P377: when the game last made sound (the menu sounds play alone while it is quiet) */
+#endif
 void aud_out_push_game(const void *buf, unsigned frames) {
     const uint8_t *p = (const uint8_t *)buf;
     pushed += frames;
+#ifdef PORT_RTW
+    rtw_game_pushed_at_ms = emscripten_get_now();
+#endif
     { extern unsigned det_vq_push(unsigned); det_vq_push(frames); }
     { /* P110 DIAGNOSTIC ?p110aud=1 (node PORT_P110AUD=1): game output level per ~1 s window (left channel) */
         static int f = -1; static double e; static int pk; static unsigned n, nz;
@@ -181,12 +187,69 @@ static void rtw_host_queue_age(void) {
 }
 int port_rtw_audio_rate(void) { return game_rate; }
 int16_t *port_rtw_audio_buffer(void) { return &rtw_out_buffer[0][0]; }
+/* P377 the menu sounds of the worker's game-style menus (rtw_overlay.js rtwSound, the page's gmenu.js GSound): the page
+ * plays them on its own AudioContext; the worker has none, so they are mixed into the frames the host pulls. The sound
+ * is decoded read-only from the player's ROM by pc_sfx.c port_sfx_decode (never through the game's sound player, whose
+ * state is game memory); port_rtw_menu_sound_play copies that PCM into one of four voices, each resampled from its own
+ * rate to the output rate. While the game makes no sound (the menu paused it, photo mode) the drain adds silent frames
+ * for the wall time since the last drain (port_rtw_audio_drain), so a playing voice is heard on its own. */
+#define RTW_MENU_VOICES 4
+#define RTW_MENU_VOICE_MAX 32768   /* frames (1.5 s at 22020 Hz; the game's menu sounds are well under 1 s) */
+static struct { float pcm[RTW_MENU_VOICE_MAX]; unsigned frames; double pos, step; float gain; } rtw_menu_voice[RTW_MENU_VOICES];
+static unsigned rtw_menu_voice_next, rtw_menu_sounds_played;
+static double rtw_drained_at_ms;
+float *port_sfx_pcm(void);   /* pc_sfx.c */
+EMSCRIPTEN_KEEPALIVE int port_rtw_menu_sound_play(int frames, float rate, float gain) {
+    if (frames <= 0 || rate <= 0) return 0;
+    if (frames > RTW_MENU_VOICE_MAX) frames = RTW_MENU_VOICE_MAX;
+    unsigned v = rtw_menu_voice_next++ % RTW_MENU_VOICES;   /* never a pile of clicks: the oldest of four makes room */
+    memcpy(rtw_menu_voice[v].pcm, port_sfx_pcm(), (size_t)frames * sizeof(float));
+    rtw_menu_voice[v].frames = (unsigned)frames; rtw_menu_voice[v].pos = 0;
+    rtw_menu_voice[v].step = rate / (double)out_rate; rtw_menu_voice[v].gain = gain;
+    rtw_menu_sounds_played++;
+    return 1;
+}
+EMSCRIPTEN_KEEPALIVE unsigned port_rtw_menu_sounds_played(void) { return rtw_menu_sounds_played; }   /* tests */
+static int rtw_menu_voices_playing(void) {
+    for (int v = 0; v < RTW_MENU_VOICES; v++) if (rtw_menu_voice[v].pos < rtw_menu_voice[v].frames) return 1;
+    return 0;
+}
+static void rtw_menu_voices_mix(unsigned n) {
+    for (int v = 0; v < RTW_MENU_VOICES; v++) {
+        if (rtw_menu_voice[v].pos >= rtw_menu_voice[v].frames) continue;
+        for (unsigned i = 0; i < n && rtw_menu_voice[v].pos < rtw_menu_voice[v].frames; i++) {
+            unsigned k = (unsigned)rtw_menu_voice[v].pos;
+            double frac = rtw_menu_voice[v].pos - k;
+            float a = rtw_menu_voice[v].pcm[k], b = k + 1 < rtw_menu_voice[v].frames ? rtw_menu_voice[v].pcm[k + 1] : 0.0f;
+            int add = (int)((a + (b - a) * (float)frac) * rtw_menu_voice[v].gain * 32767.0f);
+            for (int c = 0; c < 2; c++) {
+                int s = rtw_out_buffer[i][c] + add;
+                rtw_out_buffer[i][c] = (int16_t)(s > 32767 ? 32767 : s < -32768 ? -32768 : s);
+            }
+            rtw_menu_voice[v].pos += rtw_menu_voice[v].step;
+        }
+    }
+}
 int port_rtw_audio_drain(void) {
     unsigned n = aud_out_queued();
     if (n > RTW_OUT_MAX) n = RTW_OUT_MAX;
     for (unsigned i = 0; i < n; i++) {
         rtw_out_buffer[i][0] = ring[rd][0]; rtw_out_buffer[i][1] = ring[rd][1];
         rd = (rd + 1) & (RING - 1);
+    }
+    {   /* P377: menu sounds (above). While the game makes no sound at all (the menu paused it, photo mode) the host gets
+         * silence at the output rate: its queue keeps playing (an empty queue stops, then waits for 85 ms before playing
+         * again, which the AI_LEN model above does not know: the game's sound after the pause overfilled it and the host
+         * dropped 117 ms), and a menu sound is heard on its own */
+        double now = emscripten_get_now();
+        if (!n && rtw_game_pushed_at_ms > 0 && now - rtw_game_pushed_at_ms > 120.0 && rtw_drained_at_ms > 0) {
+            double since_ms = now - rtw_drained_at_ms;   /* at most 50 ms: after a gap the host's queue would overflow */
+            double want = (since_ms > 50.0 ? 50.0 : since_ms) * out_rate / 1000.0;
+            n = want > RTW_OUT_MAX ? RTW_OUT_MAX : (unsigned)want;
+            memset(rtw_out_buffer, 0, (size_t)n * sizeof rtw_out_buffer[0]);
+        }
+        if (rtw_menu_voices_playing()) rtw_menu_voices_mix(n);
+        rtw_drained_at_ms = now;
     }
     rtw_host_queue_age();
     rtw_host_queued_frames += n;
