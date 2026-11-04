@@ -173,7 +173,7 @@ _port_rtw_rom_ptr,_port_rtw_rom_size,_port_set_rom,_port_set_paused,_port_set_op
 _port_eeprom_ptr,_port_eeprom_size,_port_dump_threads,_port_photo_request,_port_photo_status,_port_photo_input,_port_photo_render,\
 _port_photo_info,_port_gfx_resize,_port_gfx_widescreen,_port_gfx_hires_2d,_port_gfx_smooth_font,_port_gfx_hfr,_port_gfx_hfr_vsync,\
 _port_net_exclude,_port_net_addr,_port_rec_session,_port_rec_checkpoint_now,_port_rec_checkpoint_ms,\
-_port_font_info,_port_font_glyph,_port_rtw_overlay_composite,_port_rtw_overlay_restore,_port_skip_progress,_port_set_gmenu_row,_port_gmenu_take_request,_port_sfx_decode,_port_sfx_info,_port_sfx_pcm,_port_rtw_menu_sound_play,_port_rtw_menu_sounds_played,_port_rtw_audio_drained
+_port_font_info,_port_font_glyph,_port_rtw_overlay_composite,_port_rtw_overlay_restore,_port_skip_progress,_port_set_gmenu_row,_port_gmenu_take_request,_port_sfx_decode,_port_sfx_info,_port_sfx_pcm,_port_rtw_menu_sound_play,_port_rtw_menu_sounds_played,_port_rtw_audio_drained,_port_photo_look_set,_port_photo_look_info
 RTW_EMPTY :=
 RTW_SPACE := $(RTW_EMPTY) $(RTW_EMPTY)
 RTW_EXPORTS = $(subst $(RTW_SPACE),,$(RTW_EXPORT_LIST))   # the continuation lines above put spaces after the commas
@@ -204,7 +204,7 @@ $(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_
 	@ls -l $(RTW_DIST)/conker.wasm $(RTW_DIST)/conker.js
 # P377: the worker's overlay layer = web/rtw/rtw_overlay.js + one file per feature (autosave icon, hold-L ring,
 # customisation settings, photo mode menus), with the page code they reuse copied in from main.js / gmenu.js
-RTW_OVERLAY_FILES := web/rtw/rtw_overlay.js web/rtw/rtw_saveicon.js web/rtw/rtw_ring.js web/rtw/rtw_menu.js
+RTW_OVERLAY_FILES := web/rtw/rtw_overlay.js web/rtw/rtw_saveicon.js web/rtw/rtw_ring.js web/rtw/rtw_menu.js web/rtw/rtw_photo.js
 $(RTW)/gen/rtw_overlay.js: $(RTW_OVERLAY_FILES) web/main.js web/gmenu.js tools/rtw_page_extract.py Makefile
 	@mkdir -p $(@D)
 	python3 tools/rtw_page_extract.py web $@ $(RTW_OVERLAY_FILES)

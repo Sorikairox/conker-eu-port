@@ -57,6 +57,7 @@
     { "id": 109, "label": "Autosave icon", "type": "bool", "default": 1 },
     { "id": 110, "label": "Customisation settings (Menu button)", "type": "bool", "default": 1 },
     { "id": 111, "label": "Hold-L skip ring", "type": "bool", "default": 1 },
+    { "id": 112, "label": "Photo mode menus (Pose & Outfit)", "type": "bool", "default": 1 },
     { "id": 108, "label": "Input recorder (for testing)", "type": "bool", "default": 0 }
   ],
   "source": "https://github.com/Sorikairox/conker-eu-port"
