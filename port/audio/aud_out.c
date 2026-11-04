@@ -67,6 +67,12 @@ static int game_rate = 22020; /* P252: the game's AI rate (for the ?det virtual 
 int aud_out_open(int rate) {
     if (rate > 0) game_rate = rate;
     if (opened) return 0;
+#ifdef PORT_RTW
+    /* P376 retrowser build: no AudioContext in the worker; the host pulls the ring (port_rtw_audio_drain) */
+    opened = 1; out_rate = rate;
+    port_log("[aud] retrowser output: ring at %d Hz, stereo, pulled by the host\n", rate);
+    return 0;
+#endif
     int has_ctx = EM_ASM_INT({ return (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') ? 1 : 0; });
     if (!has_ctx) { port_log("[aud] no AudioContext (node): output disabled, %d Hz\n", rate); opened = -1; return -1; }
     int got = __port_web_audio_open(rate, (int)(uintptr_t)ring, (int)(uintptr_t)&rd, (int)(uintptr_t)&wr, (int)(RING - 1), (int)(uintptr_t)&underrun);
@@ -155,8 +161,52 @@ unsigned det_vq_push(unsigned frames) {
     if (det_vq > RING - 1) det_vq = RING - 1; /* the real ring drops beyond this too */
     return (unsigned)det_vq;
 }
+#ifdef PORT_RTW
+/* P376 retrowser build: the pull model of spec §4.8. The host calls port_rtw_audio_drain (rtw_audio_drain) once per
+ * display frame, plays the frames from its own queue (about 85 ms, with its own rate control) and never calls back.
+ * AI_LEN (below) therefore counts what is still to be played: the ring plus a model of the host's queue (the frames
+ * handed over, minus the wall time since then at the output rate), so the audio manager's frame sizes follow the
+ * real playback as they follow the ScriptProcessor on the page. */
+#define RTW_OUT_MAX 8192   /* stereo frames per drain (~370 ms at 22020 Hz; a display frame needs ~370 frames) */
+static int16_t rtw_out_buffer[RTW_OUT_MAX][2];
+static double rtw_host_queued_frames, rtw_host_aged_at_ms;
+static unsigned rtw_drained_total;
+static void rtw_host_queue_age(void) {
+    double now = emscripten_get_now();
+    if (rtw_host_aged_at_ms > 0) {
+        rtw_host_queued_frames -= (now - rtw_host_aged_at_ms) * out_rate / 1000.0;
+        if (rtw_host_queued_frames < 0) rtw_host_queued_frames = 0;
+    }
+    rtw_host_aged_at_ms = now;
+}
+int port_rtw_audio_rate(void) { return game_rate; }
+int16_t *port_rtw_audio_buffer(void) { return &rtw_out_buffer[0][0]; }
+int port_rtw_audio_drain(void) {
+    unsigned n = aud_out_queued();
+    if (n > RTW_OUT_MAX) n = RTW_OUT_MAX;
+    for (unsigned i = 0; i < n; i++) {
+        rtw_out_buffer[i][0] = ring[rd][0]; rtw_out_buffer[i][1] = ring[rd][1];
+        rd = (rd + 1) & (RING - 1);
+    }
+    rtw_host_queue_age();
+    rtw_host_queued_frames += n;
+    if (!rtw_drained_total && n) port_log("[aud] retrowser: first %u frames pulled by the host\n", n);
+    rtw_drained_total += n;
+    return (int)n;
+}
+EMSCRIPTEN_KEEPALIVE unsigned port_rtw_audio_drained(void) { return rtw_drained_total; }   /* tests: frames the host pulled */
+#endif
 unsigned aud_out_ai_len(void) {
     static int lat = -1;
+#ifdef PORT_RTW
+    if (lat < 0) { lat = port_flag("ailat"); if (lat <= 0) lat = 2048; }   /* ~93 ms: the host's queue + one display frame */
+    if (det_on < 0) det_on = port_flag("det");
+    if (!det_on) {
+        rtw_host_queue_age();
+        unsigned q = aud_out_queued() + (unsigned)rtw_host_queued_frames;
+        return q > (unsigned)lat ? q - (unsigned)lat : 0;
+    }
+#endif
     if (lat < 0) { lat = port_flag("ailat"); if (lat <= 0) lat = 3072; }
     if (det_on < 0) det_on = port_flag("det");
     unsigned q = det_on ? (det_vq_drain(), (unsigned)det_vq) : aud_out_queued();

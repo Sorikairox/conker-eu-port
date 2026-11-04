@@ -447,7 +447,12 @@ static void frame(void) {
     static int pacing_mode = -1; static double last_tick_ms, backlog_ms;   /* P338 names: were mode, last, acc (locals: per, now, dt, n) */
     /* P252: ?det=2 = deterministic clock and no wall budget (pc_os.c, port_sched_run) but keep this wall-paced 50 Hz VI,
      * so Chrome route runs keep their real-time screenshot timing and still replay identically (?det=1 = one retrace per tick) */
+#ifdef PORT_RTW
+    /* P376 retrowser build: the worker has no window but is a browser: wall-paced 50 Hz VI like the page */
+    if (pacing_mode < 0) pacing_mode = port_flag("det") == 1 || port_flag("vi60") ? 0 : 1;
+#else
     if (pacing_mode < 0) pacing_mode = port_flag("det") == 1 || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
+#endif
     if (port_paused) { last_tick_ms = 0; return; }
     /* P348 photo mode: no game retraces; the tick draws photo frames (pc_photo.c). No catch-up afterwards, as after a pause */
     if (port_photo_state) { last_tick_ms = 0; port_photo_tick(); return; }

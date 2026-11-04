@@ -223,7 +223,13 @@ static u8 eeprom[EEP_SIZE];
 static unsigned eep_writes;
 EMSCRIPTEN_KEEPALIVE u8 *port_eeprom_ptr(void) { return eeprom; }
 EMSCRIPTEN_KEEPALIVE int port_eeprom_size(void) { return EEP_SIZE; }
+#ifdef PORT_RTW
+/* P376 retrowser build: a write the page would persist bumps rtw_save_generation (pc_rtw.c); the host stores the image */
+void port_rtw_eeprom_written(void);
+static void __port_eep_dirty(void) { port_rtw_eeprom_written(); }
+#else
 EM_JS(void, __port_eep_dirty, (void), { if (typeof Module !== 'undefined' && Module.portEepDirty) Module.portEepDirty(); });
+#endif
 
 /* ---- P333 option "Rumble" (PORT_OPT_RUMBLE): a Rumble Pak in every connected controller.
  * libultra talks to a pak with two PIF commands on the controller's channel: 0x02 read 32 bytes (tx 3: cmd + address
@@ -237,7 +243,13 @@ EM_JS(void, __port_eep_dirty, (void), { if (typeof Module !== 'undefined' && Mod
  * Pak code and the EEPROM saves (channel 4) see what they always saw. Motor changes go to the page
  * (Module.portRumble(channel, on)), which drives the gamepad's vibration. P335: rumble_update re-probes when the
  * option changes, so a toggle takes effect at once (not at the next level load). */
+#ifdef PORT_RTW
+/* P376 retrowser build: the motor goes to the host's env.rtw_rumble (pc_rtw.c) */
+void port_rtw_rumble(int channel, int on);
+static void __port_rumble(int ch, int on) { port_rtw_rumble(ch, on); }
+#else
 EM_JS(void, __port_rumble, (int ch, int on), { if (typeof Module !== 'undefined' && Module.portRumble) Module.portRumble(ch, on); });
+#endif
 static u8 rumble_probe[MAXCONTROLLERS];   /* last byte written to the probe block (0x80 = rumble pak selected) */
 static u8 rumble_motor[MAXCONTROLLERS];
 static unsigned rumble_events;

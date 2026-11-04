@@ -1,0 +1,59 @@
+{
+  "retrowser": 1,
+  "id": "conker-eu",
+  "title": "Conker's Bad Fur Day (EU)",
+  "platform": "n64",
+  "rom": {
+    "accept": [".z64", ".n64", ".v64"],
+    "sha1": ["ee7bc6656fd1e1d9ffb3d19add759f28b88df710"],
+    "byteswap": "auto",
+    "maxSize": 67108864
+  },
+  "files": {
+    "wasm": { "path": "conker.wasm" },
+    "js": { "path": "conker.js" },
+    "data": [{ "path": "conker_netx.txt" }]
+  },
+  "module": { "factory": "createConker", "loop": "asyncify" },
+  "video": "webgl",
+  "save": { "kind": "eeprom", "size": 2048 },
+  "controls": {
+    "extra": [
+      { "bit": 16, "label": "Photo mode" },
+      { "bit": 17, "label": "Free camera: C up" },
+      { "bit": 18, "label": "Free camera: behind" },
+      { "bit": 19, "label": "Half tilt (walk)" },
+      { "bit": 20, "label": "Save recording" }
+    ]
+  },
+  "options": [
+    { "id": 0, "label": "Skippable cutscenes (hold L)", "type": "bool", "default": 1 },
+    { "id": 1, "label": "Skip intro", "type": "bool", "default": 0 },
+    { "id": 2, "label": "Health always visible", "type": "bool", "default": 0 },
+    { "id": 3, "label": "Always show cash", "type": "bool", "default": 0 },
+    { "id": 8, "label": "Underwater air meter", "type": "bool", "default": 0 },
+    { "id": 14, "label": "Aiming crosshair", "type": "bool", "default": 0 },
+    { "id": 7, "label": "Conker always full detail", "type": "bool", "default": 0 },
+    { "id": 4, "label": "Longer breath", "type": "bool", "default": 0 },
+    { "id": 5, "label": "Longer tail spin", "type": "bool", "default": 0 },
+    { "id": 17, "label": "Ledge grab everywhere", "type": "bool", "default": 0 },
+    { "id": 6, "label": "No motion blur / drunk sway", "type": "bool", "default": 0 },
+    { "id": 12, "label": "Inverted swimming", "type": "bool", "default": 0 },
+    { "id": 13, "label": "Rumble", "type": "bool", "default": 0 },
+    { "id": 15, "label": "Free camera", "type": "bool", "default": 0 },
+    { "id": 16, "label": "Photo mode", "type": "bool", "default": 0 },
+    { "id": 105, "label": "Toggle crouch", "type": "bool", "default": 0 },
+    { "id": 106, "label": "Toggle R-Look", "type": "bool", "default": 0 },
+    { "id": 107, "label": "Toggle walk (half tilt)", "type": "bool", "default": 0 },
+    { "id": 100, "label": "Hi-res menus and 2D", "type": "bool", "default": 0 },
+    { "id": 101, "label": "Smooth font", "type": "bool", "default": 0 },
+    { "id": 102, "label": "Widescreen", "type": "bool", "default": 0 },
+    { "id": 103, "label": "Full-resolution picture", "type": "bool", "default": 0 },
+    { "id": 104, "label": "High frame rate (smooth motion)", "type": "bool", "default": 0 },
+    { "id": 9, "label": "Music volume (%)", "type": "int", "default": 100, "min": 0, "max": 100 },
+    { "id": 10, "label": "Sound effects volume (%)", "type": "int", "default": 100, "min": 0, "max": 100 },
+    { "id": 11, "label": "Speech volume (%)", "type": "int", "default": 100, "min": 0, "max": 100 },
+    { "id": 108, "label": "Input recorder (for testing)", "type": "bool", "default": 0 }
+  ],
+  "source": "https://github.com/Sorikairox/conker-eu-port"
+}

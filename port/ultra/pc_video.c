@@ -19,11 +19,22 @@ void port_video_init(void) {
     emscripten_webgl_init_context_attributes(&a);
     a.majorVersion = 2; a.minorVersion = 0; a.alpha = 0; a.antialias = 0;
     a.preserveDrawingBuffer = 1; /* so screenshots see the last frame */
+#ifdef PORT_RTW
+    /* P376 retrowser build: no document in the worker, so "#canvas" finds nothing; the WebGL2 context is made on the
+     * host's OffscreenCanvas (Module.canvas) with the same attributes (port/web/rtw/rtw_lib.js port_rtw_gl_create) */
+    { EMSCRIPTEN_WEBGL_CONTEXT_HANDLE port_rtw_gl_create(void); ctx = port_rtw_gl_create(); }
+#else
     ctx = port_flag("nogl") ? 0 : emscripten_webgl_create_context("#canvas", &a); /* P21: ?nogl=1 = node-like headless */
+#endif
     if (ctx <= 0) { port_log("[video] no WebGL2 context (%d); running headless\n", (int)ctx); ctx = 0; return; }
     emscripten_webgl_make_context_current(ctx);
     port_log("[video] WebGL2: %s\n", (const char *)glGetString(GL_VERSION));
     gfx_init();
+#ifdef PORT_RTW
+    demo = 0;   /* P376: no ?gfxdemo (no URL, and emscripten_run_script needs eval, which the sandbox forbids) */
+    { void port_rtw_gl_ready(void); port_rtw_gl_ready(); }   /* the glue may now resize the renderer */
+    return;
+#endif
     demo = emscripten_run_script_int("(typeof location !== 'undefined' && /[?&]gfxdemo=/.test(location.search)) ? 1 : 0");
 }
 

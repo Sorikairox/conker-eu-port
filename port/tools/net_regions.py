@@ -28,7 +28,8 @@ import sys
 
 EXCLUDE_OBJ = {'gfx_f3dex2.o': 'renderer', 'gfx_demo.o': 'renderer', 'pc_net.o': 'harness', 'pc_nethash.o': 'harness',
                'pc_photo.o': 'photo mode',   # P348: photo mode's own state (pose, clock hold) survives the snapshot restores
-               'pc_sfx.o': 'menu sounds'}    # P367: the page's menu sound decoder (its PCM buffer; never used online)
+               'pc_sfx.o': 'menu sounds',    # P367: the page's menu sound decoder (its PCM buffer; never used online)
+               'pc_rtw.o': 'retrowser host interface'}   # P376: raw host input, save generation (only in the rtw build)
 KEEP_IN_AUD_OUT = {'det_vq', 'det_vf', 'det_on', 'game_rate'}
 EXCLUDE_SYM = {
     'pc_os.o': {'port_vi_view.full': 'renderer flag cache', 't0': 'wall time', 'pause_at': 'wall time', 'pause_total': 'wall time', 'port_paused': 'page pause'},
