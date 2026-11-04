@@ -18,10 +18,14 @@
 #           recording is kept; reload: it replays from power-on at 50 Hz, every checkpoint / digest IDENTICAL (same
 #           build: H / S too), paused at its end; the replayed saves never reach the host (save generation 0, the
 #           module's EEPROM written). Then Saved files -> "Open in game" keeps it again; option 115 off: refused.
+#   optsync rtw_option_changed (option 116): the customisation settings (Menu button on the title) turn Widescreen on and
+#           the music to 90 %: the host is told (2 calls), stores both and its menu shows them, the settings record
+#           keeps nothing; after a reload the host seeds them. Option 116 off: Widescreen off in-game is not told (the
+#           host keeps 1, the record keeps 0 and wins at the next start, as P377).
 set -uo pipefail
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1
 OUT=${1:?usage: rtw_v11_e2e.sh OUTDIR [ROM] [RUN ...]}; ROM=${2:-baserom.eu.z64}; shift; shift 2>/dev/null || true
-RUNS=${*:-rstick wheel replay}
+RUNS=${*:-rstick wheel replay optsync}
 PORT=${RTW_SERVE:-8788}
 run() {   # NAME OPTIONS ACTIONS [noprofile]
   rm -rf "$OUT/profile"
@@ -52,12 +56,22 @@ press:KeyX,askfile:last,waitfor:replay.pending:retrowser,shot:pending,press:KeyC
 reload,open,frame:100,expect:replay.state:running,expect:replay.sameBuild:true,shot:replaying,waitfor:replay.ended:true:150000,\
 expect:replay.state:identical,expect:replay.mismatches:0,expect:replay.saveGeneration:0,expect:replay.eepromNonzero:>0,shot:ended,hostsave,\
 openingame:conker-rec,waitfor:replay.pending:retrowser,hostopt:115:0,openingame:conker-rec,waitfor:replay.refused:1,grep:replay"
+OPTSYNC="open,frame:900,press:Enter,wait:3000,press:Enter,wait:4000,press:Digit6,waitfor:menu.open:true,\
+press:ArrowDown,press:KeyX,expect:menu.page:picture,press:KeyX,wait:800,expect:opts.102:1,press:KeyC,\
+press:ArrowDown:4,press:KeyX,expect:menu.page:sound,press:ArrowDown,press:ArrowLeft:2,expect:opts.9:90,press:KeyC,press:KeyC,waitfor:menu.open:false,\
+expect:optsync.told:3,expect:optsync.refused:0,expect:hoststored.102:1,expect:hoststored.9:90,expect:menu.settings.chosen.102:undefined,\
+expect:menu.settings.chosen.9:undefined,expect:hostmenu.102:1,expect:hostmenu.9:90,\
+reload,open,frame:300,expect:opts.102:1,expect:opts.9:90,expect:optsync.told:0,\
+hostopt:116:0,press:Digit6,waitfor:menu.open:true,press:ArrowDown,press:KeyX,press:KeyX,wait:800,expect:opts.102:0,press:KeyC,press:KeyC,\
+waitfor:menu.open:false,expect:optsync.told:0,expect:hoststored.102:1,expect:hostmenu.102:1,expect:menu.settings.chosen.102:0,\
+reload,open,frame:300,expect:opts.102:0,expect:hoststored.116:0"
 fails=0
 for r in $RUNS; do
   case $r in
     rstick) run rstick '{"1":1,"15":1}' "$RSTICK" || fails=$((fails + 1)) ;;
     wheel) run wheel_menu '{"1":1,"16":1}' "$WHEELMENU" || fails=$((fails + 1))
            run wheel_photo '{"1":1,"16":1}' "$WHEELPHOTO" noprofile || fails=$((fails + 1)) ;;
+    optsync) run optsync '{"1":1,"16":1}' "$OPTSYNC" || fails=$((fails + 1)) ;;
     replay) run replay '{"1":1,"108":1}' "$REPLAY" || fails=$((fails + 1)) ;;
     *) echo "unknown run $r"; fails=$((fails + 1)) ;;
   esac

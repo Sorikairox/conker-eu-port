@@ -19,7 +19,9 @@
 //   - P378 standard 1.1 files to the game: a recording handed in (fileInputs 1, from the customisation settings' "Replay a
 //     recording", the host's menu or "Open in game" next to a .ckrec in Saved files) is checked and kept in the worker's
 //     storage; the next start of the game replays it from power-on (main.js ?replay, e2eBegin) and reports whether it
-//     played the same (option 115).
+//     played the same (option 115);
+//   - P378 standard 1.1 rtw_option_changed: a manifest option changed in the customisation settings is told to the host,
+//     so its menu shows it and it keeps it (option 116; rtw_menu.js).
 // Left out (no host interface in retrowser v1): online play (net.js, W11).
 var rtwGlue = (function () {
   'use strict';
@@ -31,7 +33,7 @@ var rtwGlue = (function () {
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
-    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115 };   // P378: RSTICK, WHEEL, REPLAY
+    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115, OPTSYNC: 116 };   // P378: RSTICK, WHEEL, REPLAY, OPTSYNC
   // main.js OPTIONS keys of the game options, for the recording's header (e2e_replay.js applies them by key)
   const GAME_OPTION_KEYS = { 0: 'skipcut', 1: 'skipintro', 2: 'healthhud', 3: 'cashhud', 4: 'longbreath', 5: 'longspin',
     17: 'ledgegrab', 6: 'nodrunk', 7: 'conkerlod', 8: 'airbar', 13: 'rumble', 14: 'crosshair', 15: 'freecam',
@@ -41,6 +43,7 @@ var rtwGlue = (function () {
     105: 'togglecrouch', 106: 'togglerlook', 107: 'togglewalk' };
   const STICK = 80;   // typical full deflection of an N64 stick (main.js)
 
+  const hostDeclared = new Set();   // P378: the option ids the host sent (rtw_option at start = every manifest option)
   const optionValues = {};   // id -> value the game uses (the host's, or one chosen in the customisation settings: rtwOverlay.hostOption)
   const GAME_OPTION_COUNT = 18;   // PORT_OPT_COUNT (port/ultra/port_options.h): ids below it are game options
   const opt = (id) => optionValues[id] | 0;
@@ -517,6 +520,7 @@ var rtwGlue = (function () {
 
   // ------------------------------------------------------------------ hooks from pc_rtw.c / pc_video.c (rtw_lib.js)
   let romForHash = null;
+  const optionSync = { told: 0, refused: 0 };   // P378
   function loadExclusions() {   // main.js netLoadExclusions: conker_netx.txt from files.data
     const files = Module['files'] || {}, bytes = files['conker_netx.txt'];
     if (!bytes) { log('[nethash] conker_netx.txt not in files.data: photo mode and the recorder are off'); return; }
@@ -547,6 +551,7 @@ var rtwGlue = (function () {
       globalThis.__rtwConker = { Module, photoState: () => photo.state, rec: () => ({ active: rec.active, frames: rec.frames, checks: rec.checks.length }),
         audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation'](),
         overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues), replay: replayStatus,   // P377 (P378 replay)
+        optsync: () => Object.assign({}, optionSync),   // P378 rtw_option_changed calls
         cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); },   // P378: the camera sticks
         photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }) };   // P378: photo camera's field of view
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
@@ -554,6 +559,7 @@ var rtwGlue = (function () {
     beforeGl() { layout(); },   // the drawing buffer the renderer starts with (gfx_init reads the viewport)
     glReady() { glUp = true; layout(); },
     option(id, value) {   // rtw_option (pc_rtw.c already set the game options to the host's value)
+      hostDeclared.add(id);   // P378
       // P377: a value chosen in the customisation settings may win over the host's at start (rtwOverlay.hostOption)
       const effective = rtwOverlay.hostOption(id, value, started);
       if (effective !== value) {
@@ -614,6 +620,15 @@ var rtwGlue = (function () {
     replayLocked: () => (!opt(OPT.REPLAY) ? 'Replays are off in the host\'s options (Replay recordings)' : replay.active ? 'A replay is playing' : ''),
     requestReplay: () => wasm('port_rtw_request_file')(FILE_REPLAY),
     replayPending: () => replay.pending,
+    // P378 standard 1.1: a manifest option changed in the customisation settings -> env.rtw_option_changed (option 116).
+    // true = the host took it (its menu and stored value now have it)
+    optionChanged(id, value) {
+      if (!opt(OPT.OPTSYNC) || !hostDeclared.has(id)) return false;
+      const r = wasm('port_rtw_option_changed')(id, value);
+      log(`[settings] option ${id} = ${value} told to the host${r ? ` (not taken: ${r})` : ''}`);
+      optionSync.told++; if (r) optionSync.refused++;
+      return r === 0;
+    },
   };
   return glue;
 })();

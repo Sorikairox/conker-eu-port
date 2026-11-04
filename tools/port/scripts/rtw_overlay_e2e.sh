@@ -18,8 +18,9 @@ OUT=${1:?usage: rtw_overlay_e2e.sh OUTDIR [ROM]}; ROM=${2:-baserom.eu.z64}
 PORT=${RTW_SERVE:-8788}
 run() {   # NAME ACTIONS
   rm -rf "$OUT/profile"
-  local opts='{"1":1,"16":1}'
-  [ -n "${RTW_OFF:-}" ] && opts='{"1":1,"16":1,"109":0,"110":0,"111":0,"112":0}'
+  # P378: option 116 off (the host is not told about in-game changes), so the menus run still tests P377's settings record
+  local opts='{"1":1,"16":1,"116":0}'
+  [ -n "${RTW_OFF:-}" ] && opts='{"1":1,"16":1,"109":0,"110":0,"111":0,"112":0,"116":0}'
   RTW_OPTIONS=$opts RTW_SERVE=$PORT RTW_PROFILE=$PWD/$OUT/profile RTW_TIMEOUT=600000 \
     node tools/port/scripts/rtw_e2e.mjs "$OUT/$1" - "$ROM" "$2" > "$OUT/$1.log" 2>&1
   local rc=$?

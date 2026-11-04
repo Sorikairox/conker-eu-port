@@ -28,6 +28,11 @@ addToLibrary({
     const host = Module['rtw'];
     return host && host['rtw_pointer_lock'] ? host['rtw_pointer_lock'](on) | 0 : 0;
   },
+  // P378 standard 1.1: an option the game changed itself (the host's menu and stored value follow; -1: a host without it)
+  rtw_option_changed: (id, value) => {
+    const host = Module['rtw'];
+    return host && host['rtw_option_changed'] ? host['rtw_option_changed'](id, value) | 0 : -1;
+  },
   // P378 standard 1.1: the host's file prompt for a fileInputs entry (-1: a host without it)
   rtw_request_file: (id) => {
     const host = Module['rtw'];

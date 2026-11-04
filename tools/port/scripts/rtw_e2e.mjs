@@ -26,7 +26,9 @@
 //   stick axes, -1..1, down positive; pad:off removes it), wheel:DY (the mouse over the game, one wheel event of DY px),
 //   askfile:FILE|last (the host's file prompt the game opened: pick FILE / the last fetchfile), openingame:PREFIX (Saved
 //   files: Open in game), click (on the picture until the host captured the mouse), unlock (document.exitPointerLock), PATH roots cam (the camera stick per pad the glue wrote, [cx0, cy0, mdx0, mdy0, cx1, ...]), photoinfo
-//   ({ state, fov }) and other __rtwConker readouts (e.g. replay)
+//   ({ state, fov }) and other __rtwConker readouts (replay, optsync), hoststored (the host's stored option values,
+//   localStorage) and hostmenu (the values its options menu shows: opens and closes it). RTW_OPTIONS is stored only on a
+//   first load (P378), so the host's own stored values survive a reload as for a player.
 // Env RTW_SERVE=PORT: serve retrowser's built dist (tools/serve-worker.ts) in this process on PORT; HOST_URL is then
 // ignored (use "-"), so nothing is left running after the run.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -63,7 +65,7 @@ await context.addInitScript(([ep, opts]) => {
   try {
     if (location.hostname !== 'localhost') return;
     localStorage.setItem('rtw:test-endpoints', ep);
-    if (opts) localStorage.setItem('rtw:options:conker-eu', opts);
+    if (opts && localStorage.getItem('rtw:options:conker-eu') === null) localStorage.setItem('rtw:options:conker-eu', opts);   // P378: only on a first load (the host keeps its own after)
   } catch { /* ignore */ }
 }, [JSON.stringify(mock.endpoints), process.env.RTW_OPTIONS || '']);
 const page = context.pages()[0] || await context.newPage();
@@ -206,7 +208,7 @@ try {
       const lines = (await hostLog().catch(() => '')).split('\n');
       say(`state ${JSON.stringify(st)} audio ${audio}`);
       say('log tail:\n  ' + lines.slice(-12).join('\n  '));
-    } else if (cmd === 'ov' || cmd === 'opts' || ['cam', 'photoinfo', 'replay'].includes(cmd)) {   // P377 (P378: cam, photoinfo, replay)
+    } else if (cmd === 'ov' || cmd === 'opts' || ['cam', 'photoinfo', 'replay', 'optsync'].includes(cmd)) {   // P377 (P378: cam, photoinfo, replay)
       const w = await gameWorker();
       const v = w && await w.evaluate((c) => (c === 'ov' ? globalThis.__rtwConker.overlay() : c === 'opts' ? globalThis.__rtwConker.options() : globalThis.__rtwConker[c]()), cmd);
       say(`${cmd} ${JSON.stringify(v)}`);
@@ -218,9 +220,25 @@ try {
       for (let i = 0; i < Number(y || 1); i++) { await page.keyboard.down(x); await page.waitForTimeout(90); await page.keyboard.up(x); await page.waitForTimeout(160); }
     } else if (cmd === 'expect' || cmd === 'waitfor') {   // waitfor:PATH:VALUE[:MS] polls every 100 ms (default 20 s)
       const field = async () => {
-        const w = await gameWorker();
         const [root, ...path] = x.split('.');
-        const own = ['opts', 'cam', 'photoinfo', 'replay'].includes(root);   // P378: cam, photoinfo, replay
+        if (root === 'hoststored' || root === 'hostmenu') {   // P378: the host's stored options / what its menu shows
+          let v;
+          if (root === 'hoststored') v = await page.evaluate(() => JSON.parse(localStorage.getItem('rtw:options:conker-eu') || '{}'));
+          else {
+            await page.click('[data-action=menu]');
+            await page.locator('[data-option]').first().waitFor({ timeout: 5000 });
+            v = await page.$$eval('[data-option]', (rows) => Object.fromEntries(rows.map((r) => {
+              const box = r.querySelector('input[type=checkbox]'), f = r.querySelector('input, select');
+              return [r.getAttribute('data-option'), box ? (box.checked ? 1 : 0) : f ? Number(f.value) : null];
+            })));
+            await page.click('[data-action=close-menu]', { timeout: 2000 }).catch(() => {});
+          }
+          let got = v;
+          for (const k of path) got = got == null ? got : got[k];
+          return got;
+        }
+        const w = await gameWorker();
+        const own = ['opts', 'cam', 'photoinfo', 'replay', 'optsync'].includes(root);   // P378: cam, photoinfo, replay, optsync
         const v = w && await w.evaluate(([r, o]) => (r === 'opts' ? globalThis.__rtwConker.options() : o ? globalThis.__rtwConker[r]() : globalThis.__rtwConker.overlay()), [root, own]);
         let got = own ? v : v && v[root];
         for (const k of path) got = got == null ? got : got[k];

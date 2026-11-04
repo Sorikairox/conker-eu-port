@@ -166,7 +166,7 @@ RTW_DIST := $(RTW)/dist
 RTW_ULTRA_OBJ := $(patsubst ultra/%.c,$(RTW)/ultra/%.o,$(ULTRA_SRC) ultra/pc_rtw.c)
 RTW_GFX_OBJ   := $(patsubst gfx/%.c,$(RTW)/gfx/%.o,$(GFX_SRC))
 RTW_AUD_OBJ   := $(patsubst audio/%.c,$(RTW)/audio/%.o,$(AUD_SRC))
-RTW_EXPORT_LIST := _main,_malloc,_free,_rtw_rom_buffer,_rtw_save_load,_rtw_start,_rtw_pause,_rtw_input,_rtw_rstick,_rtw_wheel,_rtw_mouse,_rtw_file_buffer,_rtw_file_ready,_port_rtw_request_file,_rtw_resize,\
+RTW_EXPORT_LIST := _main,_malloc,_free,_rtw_rom_buffer,_rtw_save_load,_rtw_start,_rtw_pause,_rtw_input,_rtw_rstick,_rtw_wheel,_rtw_mouse,_rtw_file_buffer,_rtw_file_ready,_port_rtw_request_file,_port_rtw_option_changed,_rtw_resize,\
 _rtw_audio_rate,_rtw_audio_drain,_rtw_audio_buffer,_rtw_save_ptr,_rtw_save_size,_rtw_save_generation,_rtw_option,\
 _port_rtw_raw_state,_port_rtw_log,_port_rtw_export_file,_port_rtw_build_id,_port_rtw_set_pointer_lock,_port_rtw_lock_game_options,\
 _port_rtw_rom_ptr,_port_rtw_rom_size,_port_set_rom,_port_set_paused,_port_set_option,_port_pad_state,_port_cam_state,\

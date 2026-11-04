@@ -35,6 +35,7 @@ int rtw_export_file(const char *name, const char *mime, const void *bytes, int l
 int rtw_rumble(int port, int on);
 int rtw_pointer_lock(int on);
 int rtw_request_file(int id);   /* P378 standard 1.1: the host asks the player for a file of fileInputs entry id */
+int rtw_option_changed(int id, int value);   /* P378 standard 1.1: the game changed a manifest option itself */
 /* worker glue hooks (port/web/rtw/rtw_lib.js -> rtw_glue.js) */
 void port_rtw_glue_start(void);
 void port_rtw_glue_option(int id, int value);
@@ -90,6 +91,9 @@ EMSCRIPTEN_KEEPALIVE int port_rtw_build_id(uint8_t *out32) { return rtw_build_id
 EMSCRIPTEN_KEEPALIVE int port_rtw_set_pointer_lock(int on) { return rtw_pointer_lock(on != 0); }
 /* P378 the customisation settings' "Replay a recording" (rtw_menu.js): the host's own file prompt for fileInputs id */
 EMSCRIPTEN_KEEPALIVE int port_rtw_request_file(int id) { return rtw_request_file(id); }
+/* P378 a manifest option changed in the customisation settings (rtw_menu.js): the host's menu and stored value follow
+ * (it does not call rtw_option back). 0 = the host took it; -1 = a host without this import (rtw_lib.js) */
+EMSCRIPTEN_KEEPALIVE int port_rtw_option_changed(int id, int value) { return rtw_option_changed(id, value); }
 
 EMSCRIPTEN_KEEPALIVE int rtw_rom_buffer(int size) {
     if (size <= 0) return 0;

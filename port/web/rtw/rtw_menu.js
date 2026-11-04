@@ -20,6 +20,9 @@
   // menu since, so the host's wins and the record forgets that option. A change in the host's menu during play applies at
   // once and also wins. So a change in either place survives a reload; the host's menu may show an older value for an
   // option last changed here. No storage (a browser that refuses it): the host's values only, as before.
+  // P378: a host with the standard 1.1 import rtw_option_changed is told about every change made here (option 116, on by
+  // default): its menu shows the value at once and it stores it itself, so the record keeps only what such a host could
+  // not take (an older host, or option 116 off).
   // Option 110 (on by default) switches all of this off: no menus, no rows, no sounds, the host's values only.
   {
     // ---- page code (main.js OPTIONS: labels, help, defaults)
@@ -35,13 +38,16 @@
     };
     const OPTIONS = PAGE_OPTIONS.filter((o) => KEY_ID[o.key] !== undefined).map((o) => (RTW_HELP[o.key] ? Object.assign({}, o, { help: RTW_HELP[o.key] }) : o));
     const optOf = (key) => OPTIONS.find((o) => o.key === key);
-    // main.js setOption over the glue's values (rtw_option ids); every change made here goes into the settings record
+    // main.js setOption over the glue's values (rtw_option ids). P378: the host is told (standard 1.1 rtw_option_changed,
+    // option 116): it shows and keeps the value itself, so the settings record forgets that option; a host that cannot be
+    // told (or option 116 off): the change goes into the settings record (P377)
     function setOption(o, value) {
       const id = KEY_ID[o.key];
       if (id === undefined || !glue) return;
       const v = o.range ? Math.max(0, Math.min(100, value | 0)) : value ? 1 : 0;
-      glue.setOption(id, v);
-      settings.chosen[id] = v; settings.hostSeen[id] = hostValue(id);   // the host's value now: a different one at a start = changed there
+      if (!glue.setOption(id, v)) return;   // the game options are fixed (recording / replay)
+      if (glue.optionChanged(id, v)) { hostNow[id] = v; delete settings.chosen[id]; delete settings.hostSeen[id]; }
+      else { settings.chosen[id] = v; settings.hostSeen[id] = hostValue(id); }   // the host's value now: a different one at a start = changed there
       settingsSave();
     }
     const showOptionValue = () => {};   // the page's drawer inputs: none here
