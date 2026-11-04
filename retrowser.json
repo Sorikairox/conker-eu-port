@@ -18,19 +18,19 @@
   "files": {
     "wasm": {
       "path": "conker.wasm",
-      "sha256": "919063fb39f725efa4cb6a0ad5e081e2da535b558eaff96f8139c9771f3fa94a",
-      "size": 7685511
+      "sha256": "6502d0fc1330d31ccc2b195ce961e8bb3571c043c10c421875015a3f0eac43bd",
+      "size": 7690677
     },
     "js": {
       "path": "conker.js",
-      "sha256": "3c9db9ca94d4f9995e840e2e178d627f379efecc62de882d18fb07a2927c3fe3",
-      "size": 217345
+      "sha256": "5fecacf19abeec06802c67a2095a659b65d4fa23377736fb97ae201cfb481138",
+      "size": 353933
     },
     "data": [
       {
         "path": "conker_netx.txt",
-        "sha256": "ce8c8aabbb0dec08eddd3c7a0b008c20a5b3a21233a7dc8bd3f1a2ff03b1c46b",
-        "size": 30435
+        "sha256": "dd2655c16839a36df04dec89780587986da9fb7b0d642c2418f81ce6854881f5",
+        "size": 31122
       }
     ]
   },
@@ -64,6 +64,10 @@
       {
         "bit": 20,
         "label": "Save recording"
+      },
+      {
+        "bit": 21,
+        "label": "Menu (customisation settings)"
       }
     ]
   },
@@ -229,6 +233,30 @@
       "default": 100,
       "min": 0,
       "max": 100
+    },
+    {
+      "id": 109,
+      "label": "Autosave icon",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 110,
+      "label": "Customisation settings (Menu button)",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 111,
+      "label": "Hold-L skip ring",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 112,
+      "label": "Photo mode menus (Pose & Outfit)",
+      "type": "bool",
+      "default": 1
     },
     {
       "id": 108,
