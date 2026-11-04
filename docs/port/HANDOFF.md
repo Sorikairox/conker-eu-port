@@ -40,7 +40,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - Renames: docs/RENAMING.md (`tools/eu_port/rename.py`, `apply_names.sh`).
 - retrowser.app build (P376): `tools/eu_port/build_rtw.sh --rom baserom.eu.z64` -> port/build/rtw/dist; e2e
   `node tools/port/scripts/rtw_e2e.mjs OUT HOST_URL ROM ACTIONS` (RTW_SERVE=PORT serves retrowser's built dist in-process,
-  HOST_URL `-`); overlays (P377): `tools/port/scripts/rtw_overlay_e2e.sh OUT` (3 runs, ~4 min, ALL PASS); publish
+  HOST_URL `-`); overlays (P377): `tools/port/scripts/rtw_overlay_e2e.sh OUT` (3 runs, ~4 min, ALL PASS); standard 1.1
+  (P378): `tools/port/scripts/rtw_v11_e2e.sh OUT [ROM] [rstick wheel replay optsync]` (~6 min, ALL PASS); publish
   locally `tools/eu_port/rtw_dist_commit.sh`.
 - Deploy after a green check + browser test: `tools/eu_port/deploy_web.sh`; backup: `~/conker/tools/eu_port/backup_push.sh`.
 
@@ -51,8 +52,11 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 
 ## Open items
 - retrowser build (P376): rebuild + rtw_dist_commit.sh after page changes that matter (P377: main.js / gmenu.js blocks
-  the worker copies in: rtw_page_extract.py stops the build if one moved); the host needs v1 additions for replays (a
-  file import), wheel / analog right stick, netplay (W11). Not tested on a phone or another browser. Pre-existing (P376
+  the worker copies in: rtw_page_extract.py stops the build if one moved). Standard 1.1 adopted in P378 (right stick,
+  wheel, replays, rtw_option_changed); still missing: netplay (W11; the host has none). Not tested on a phone, another
+  browser or a real gamepad (a fake standard gamepad in the host page only). Host-side gap found in P378: while the game
+  asks for the mouse and the host has not captured it, the host's "Click to use the mouse" cover takes the wheel (spec
+  §4.11 says over the picture too). Pre-existing (P376
   build too): after any pause (the host's menu, P377's customisation settings) the host drops ~117 ms of sound once
   (its queue passes 200 ms on resume; AI_LEN model vs. the host queue's restart); a photo PNG taken during the
   wake-up blur at the level start shows a 640-wide strip of the blur's old frame (2x capture + fb ghost texture).
@@ -109,6 +113,36 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P378 (port-web, 2026-11-05): retrowser build adopts standard 1.1
+- User request: rtw_rstick, rtw_wheel, fileInputs + rtw_file_buffer / rtw_file_ready + rtw_request_file (replays), and
+  env.rtw_option_changed (host commit 95d3c82 landed during the session), one commit per feature, rtw target only.
+  Each feature behind a manifest option, on by default (adopting the standard was the request): 113 Analog right stick,
+  114 Mouse wheel, 115 Replay recordings, 116 In-game changes update this menu.
+- 1e931d96 right stick: pc_rtw.c rtw_rstick -> raw words 20..27; rtw_glue.js hostPad = main.js gamepadPad (radial dead
+  zone 0.2, rescaled, 80 counts): free camera's stick (the C bits the host made from the stick, |raw| >= 63, are taken
+  out so C keys / face buttons stay digital) and photo mode's look stick (d.rx / d.ry); elsewhere still the host's C bits.
+- 6b943949 wheel: rtw_wheel -> raw word 28; the customisation settings' rows (one per notch) else photo zoom x
+  1.1^(dy/100) exactly as main.js (the page has no other wheel zoom).
+- 78d00505 replays: fileInputs [{1, "Replay a recording", .ckrec, 16 MiB}]; Tools -> "Replay a recording" =
+  rtw_request_file (also the host's "Open a file in the game" / "Open in game"). A replay needs power-on, so the checked
+  file is kept in the worker origin's IndexedDB 'conker-rtw-replay' and plays at the next start (preRun reads + removes
+  it): main.js's replay session at real 50 Hz, digests / checkpoints compared as e2eG / e2eCheck, paused at the end,
+  result in a new overlay notice + log. Replayed saves never reach the host (generation unchanged). The page's "Import
+  save" was not moved over (the host imports saves itself and restarts; a running game already read its EEPROM).
+- c95e3651 rtw_option_changed: rtw_menu.js setOption tells the host (ids the host sent with rtw_option), the P377
+  settings record then forgets the option; without the import / option 116 off the record works as in P377.
+- Tests (muted headless Chrome, retrowser dist with 95d3c82, one at a time): rtw_v11_e2e.sh ALL PASS: rstick (fake standard
+  gamepad: 0.6 -> 40, full -> 80, diagonal -0.3/0.3 -> -16/-16, option off -> C bit 80), wheel (menu rows 0/1/3/2; photo
+  fov 60.6 -> 80.659 -> 45.53, off unchanged; needs the host's pointer capture: `click`, `unlock`; no Chrome profile,
+  a persistent one refused the lock), replay (record NEW GAME -> level autosave, Tools prompt, reload: IDENTICAL 46/46
+  checkpoints + 188 digests, same build, host save fnv unchanged, Open in game, off refused), optsync (3 calls, host
+  storage + host menu show Widescreen 1 / music 90, record empty, reload kept; 116 off: not told, record wins).
+  rtw_overlay_e2e.sh ALL PASS (now with 116 off so it still tests the record); offline reload plays (mock stopped, network
+  off). rtw_e2e.mjs: actions pad / wheel / click / unlock / askfile / openingame, readouts cam / photoinfo / replay /
+  optsync / hoststored / hostmenu; RTW_OPTIONS stored only on a first load.
+- port/build/web: 15 files sha256-identical to the session start after each commit (port_work/p378/web_before.sha);
+  check GREEN each commit; rtw.mjs hash + check --rom OK; rtw-dist e6eb2ddb (build id
+  e7b20c69b88ff965849789905c8f65569a8c4c6103ba5cb1200224b8836ea9b0). No deploy. Evidence port_work/p378 (local).
 ### P377 (port-web, 2026-11-05): retrowser build: the page overlays drawn in the worker
 - User request: the four page overlays P376 dropped (customisation settings, autosave icon, hold-L ring, photo Pose &
   Outfit) in the rtw build, inside the worker, buttons only, settings in sync with the host's options, menu sounds
