@@ -21,9 +21,11 @@ for b in $(git for-each-ref --format='%(refname:short)' refs/heads); do
   # exact-byte-decomp-wip keeps the byte-matching decomp build (IDO/splat/asm) frozen at the P328 split; it
   # diverges from port-web on purpose, so it is pushed but never reported as unmerged.
   [ "$b" = exact-byte-decomp-wip ] && continue
+  # rtw-dist holds only the retrowser.app build output (retrowser.json + built files, P376); it is pushed, never merged.
+  [ "$b" = rtw-dist ] && continue
   n=$(git rev-list --count "port-web..$b")
   [ "$n" = 0 ] || echo "WARNING: $b has $n commits port-web lacks: merge it into port-web" >&2
 done
 git -c credential.helper= -c credential.helper='!gh auth git-credential' \
-  push --quiet origin eu port-web exact-byte-decomp-wip 2>&1 | tail -3
+  push --quiet origin eu port-web exact-byte-decomp-wip $(git show-ref --verify --quiet refs/heads/rtw-dist && echo rtw-dist) 2>&1 | tail -3
 echo "backup push done: $(date '+%F %T')"
