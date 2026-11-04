@@ -47,4 +47,10 @@ addToLibrary({
   port_rtw_glue_option: (id, value) => rtwGlue.option(id, value),
   port_rtw_glue_resize: (width, height, dpr100) => rtwGlue.resize(width, height, dpr100),
   port_rtw_glue_pause: (on) => rtwGlue.pause(on),
+  // P377 the overlay layer (rtw_overlay.js): its tick after each main-loop frame (pc_sched.c rtw_main_loop_tick), and the
+  // texture upload of its OffscreenCanvas (gfx_f3dex2.c port_rtw_overlay_composite, the texture bound to unit 0)
+  port_rtw_overlay_tick__deps: ['$addRunDependency', '$removeRunDependency'],   // rtw_overlay.js reads its settings record in preRun
+  port_rtw_overlay_tick: () => rtwOverlay.tick(),
+  port_rtw_overlay_upload__deps: ['$GL'],
+  port_rtw_overlay_upload: (texture) => rtwOverlay.upload(texture),
 });

@@ -510,6 +510,18 @@ EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
     }
 }
 
+#ifdef PORT_RTW
+/* P377 retrowser build: one main-loop tick = frame() between the overlay layer's two steps (gfx_f3dex2.c, rtw_overlay.js):
+ * the game's clean picture back first (the last tick's overlay off the canvas), then the game's retraces and pictures,
+ * then this tick's overlay (customisation settings, autosave icon, hold-L ring, photo menus) drawn over it */
+void port_rtw_overlay_restore(void);   /* gfx_f3dex2.c */
+void port_rtw_overlay_tick(void);      /* rtw_lib.js -> rtw_overlay.js */
+static void rtw_main_loop_tick(void) {
+    port_rtw_overlay_restore();
+    frame();
+    port_rtw_overlay_tick();
+}
+#endif
 void port_run(port_boot_fn boot) {
     emscripten_fiber_init_from_current_context(&sched_fiber, sched_astack, sizeof sched_astack);
     { int pad = port_flag("mallocpad"); if (pad) port_log("[sched] mallocpad %d at %p\n", pad, malloc(pad)); } /* P21 test aid: shift the malloc layout */
@@ -521,7 +533,11 @@ void port_run(port_boot_fn boot) {
     /* P339: an online session's loop is a 4 ms timer from the first tick (250 per second, pc_net.c section 4). Switching
      * the timing after a requestAnimationFrame start waits for that first animation frame, which a covered / hidden
      * window never gets: its game stayed at retrace 0 */
+#ifdef PORT_RTW
+    emscripten_set_main_loop(rtw_main_loop_tick, port_net_on ? 250 : 0, 0);   /* P377: frame() + the worker's overlay layer */
+#else
     emscripten_set_main_loop(frame, port_net_on ? 250 : 0, 0);
+#endif
     /* ?timer=1: drive frames from setTimeout (headless Chrome's virtual time throttles rAF); P147: ?timer=N (N > 1) uses
      * an N ms period, e.g. 7 to test the 50 Hz VI pacing against a ~144 Hz main loop */
     if (EM_ASM_INT({ return typeof location !== 'undefined' ? 1 : 0; })) {

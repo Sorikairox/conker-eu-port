@@ -3553,3 +3553,107 @@ int __wrap_texscroll_update(int a0, int a1) {
     p46_6560_calls++;
     return r;
 }
+
+#ifdef PORT_RTW
+/* P377 retrowser build: the worker's overlay layer (port/web/rtw/rtw_overlay.js: the customisation settings, the autosave
+ * icon, the hold-L ring, photo mode's HUD and Pose & Outfit panel) composited over the game's picture. The page build
+ * draws those as page elements over the canvas; the worker has no page, so they are drawn on a worker OffscreenCanvas 2D
+ * (in the game's own font, read from game memory like gmenu.js does) and laid over the WebGL frame here, once per
+ * main-loop tick (pc_sched.c rtw_main_loop_tick), after the game drew.
+ * The game's frames stay clean: before the overlay is drawn the picture is copied (rtw_overlay_clean_*), and the next
+ * tick puts that copy back first (port_rtw_overlay_restore), so the game never reads the overlay back (frozen pause
+ * frame, motion blur, photo frames) and a tick without a new game frame does not draw the overlay over itself.
+ * The renderer binds its program / VAO once (gfx_init) and sets its draw state in apply_state on state_dirty; both are
+ * put back after the overlay's draw. Not in the page build (gfx_f3dex2.c is compiled again with -DPORT_RTW). */
+void port_rtw_overlay_upload(int texture);   /* rtw_lib.js: texImage2D of the overlay's OffscreenCanvas into `texture` */
+static GLuint rtw_overlay_program, rtw_overlay_vao, rtw_overlay_texture, rtw_overlay_clean_fbo, rtw_overlay_clean_texture;
+static int rtw_overlay_clean_w, rtw_overlay_clean_h, rtw_overlay_on_screen;
+static int rtw_overlay_init(void) {
+    static const char *vs = "#version 300 es\nout vec2 vUV;\nvoid main() {\n"
+        "  vec2 p = vec2(float(gl_VertexID & 1) * 2.0 - 1.0, float(gl_VertexID >> 1) * 2.0 - 1.0);\n"
+        "  vUV = vec2(p.x * 0.5 + 0.5, 0.5 - p.y * 0.5);\n  gl_Position = vec4(p, 0.0, 1.0);\n}\n";
+    static const char *fs = "#version 300 es\nprecision mediump float;\nuniform sampler2D uOverlay;\nin vec2 vUV;\nout vec4 outColour;\n"
+        "void main() { outColour = texture(uOverlay, vUV); }\n";
+    GLuint program = glCreateProgram();
+    glAttachShader(program, sh(GL_VERTEX_SHADER, vs));
+    glAttachShader(program, sh(GL_FRAGMENT_SHADER, fs));
+    glLinkProgram(program);
+    GLint linked = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (!linked) { port_log("[overlay] program link failed\n"); return -1; }
+    glUseProgram(program);
+    glUniform1i(glGetUniformLocation(program, "uOverlay"), 0);
+    glUseProgram(prog);
+    glGenVertexArrays(1, &rtw_overlay_vao);
+    glGenTextures(1, &rtw_overlay_texture);
+    glBindTexture(GL_TEXTURE_2D, rtw_overlay_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    rtw_overlay_program = program;
+    state_dirty = 1;
+    port_log("[overlay] retrowser overlay layer ready\n");
+    return 0;
+}
+/* the next main-loop tick: the game's clean picture back on the canvas (nothing to do when no overlay was drawn) */
+EMSCRIPTEN_KEEPALIVE void port_rtw_overlay_restore(void) {
+    if (!rtw_overlay_on_screen || !gl_ok) return;
+    rtw_overlay_on_screen = 0;
+    if (rtw_overlay_clean_w != canvas_w || rtw_overlay_clean_h != canvas_h) return;   /* resized meanwhile: the buffer was cleared */
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, rtw_overlay_clean_fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glDisable(GL_SCISSOR_TEST);
+    glBlitFramebuffer(0, 0, canvas_w, canvas_h, 0, 0, canvas_w, canvas_h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());
+    state_dirty = 1;
+}
+/* rtw_overlay.js, after it drew this tick's overlay on its OffscreenCanvas (the canvas's size = the drawing buffer's):
+ * copy the clean picture, upload the overlay, draw it over the whole canvas (straight alpha). 0 = not drawn. */
+EMSCRIPTEN_KEEPALIVE int port_rtw_overlay_composite(void) {
+    if (!gl_ok || off_on) return 0;   /* off_on: canvas_w / canvas_h are an offscreen image's now */
+    if (!rtw_overlay_program && rtw_overlay_init()) return 0;
+    const int w = canvas_w, h = canvas_h;
+    if (rtw_overlay_clean_w != w || rtw_overlay_clean_h != h) {
+        if (!rtw_overlay_clean_fbo) { glGenFramebuffers(1, &rtw_overlay_clean_fbo); glGenTextures(1, &rtw_overlay_clean_texture); }
+        glBindTexture(GL_TEXTURE_2D, rtw_overlay_clean_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, rtw_overlay_clean_fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rtw_overlay_clean_texture, 0);
+        rtw_overlay_clean_w = w; rtw_overlay_clean_h = h;
+    }
+    GLint active_unit = 0, unit0_texture = 0, blend_src_rgb = 0, blend_dst_rgb = 0, blend_src_a = 0, blend_dst_a = 0;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &active_unit);
+    glActiveTexture(GL_TEXTURE0);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &unit0_texture);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blend_src_rgb); glGetIntegerv(GL_BLEND_DST_RGB, &blend_dst_rgb);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blend_src_a); glGetIntegerv(GL_BLEND_DST_ALPHA, &blend_dst_a);
+    const GLboolean blend_on = glIsEnabled(GL_BLEND), depth_on = glIsEnabled(GL_DEPTH_TEST), offset_on = glIsEnabled(GL_POLYGON_OFFSET_FILL);
+    glDisable(GL_SCISSOR_TEST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rtw_overlay_clean_fbo);
+    glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, rtw_overlay_texture);
+    port_rtw_overlay_upload((int)rtw_overlay_texture);
+    glViewport(0, 0, w, h);
+    glDisable(GL_DEPTH_TEST); glDisable(GL_POLYGON_OFFSET_FILL); glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
+    glUseProgram(rtw_overlay_program);
+    glBindVertexArray(rtw_overlay_vao);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glUseProgram(prog);
+    glBindVertexArray(vao);
+    glBindTexture(GL_TEXTURE_2D, (GLuint)unit0_texture);
+    glActiveTexture((GLenum)active_unit);
+    glBlendFuncSeparate((GLenum)blend_src_rgb, (GLenum)blend_dst_rgb, (GLenum)blend_src_a, (GLenum)blend_dst_a);
+    if (!blend_on) glDisable(GL_BLEND);
+    if (depth_on) glEnable(GL_DEPTH_TEST);
+    if (offset_on) glEnable(GL_POLYGON_OFFSET_FILL);
+    glBindFramebuffer(GL_FRAMEBUFFER, bound_fb());
+    state_dirty = 1;
+    rtw_overlay_on_screen = 1;
+    return 1;
+}
+#endif

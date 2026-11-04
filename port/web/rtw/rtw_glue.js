@@ -10,15 +10,17 @@
 //   - the input recorder (main.js rec*): option "Input recorder" records from power-on; the extra button "Save
 //     recording" (or turning the option off) ends it and hands the .ckrec file to the host (rtw_export_file);
 //   - conker_netx.txt (files.data) -> port_net_exclude before the first retrace (photo mode's snapshot, the recorder's hash).
-// Left out (no host interface in retrowser v1): online play (net.js, W11), the page overlays (game-style menus, save
-// icon, hold-L ring, photo Pose / Outfit panel), recording replays (no way to hand a file to the game).
+//   - P377: the page's overlays (customisation settings, autosave icon, hold-L ring, photo HUD and Pose & Outfit panel)
+//     are drawn in the worker by rtw_overlay.js (object rtwOverlay); this tick hands it pad 1 first (rtwOverlay.input).
+// Left out (no host interface in retrowser v1): online play (net.js, W11), recording replays (no way to hand a file to
+// the game).
 var rtwGlue = (function () {
   'use strict';
   const N64 = { A: 0x8000, B: 0x4000, Z: 0x2000, START: 0x1000, DU: 0x0800, DD: 0x0400, DL: 0x0200, DR: 0x0100,
     L: 0x0020, R: 0x0010, CU: 0x0008, CD: 0x0004, CL: 0x0002, CR: 0x0001 };
   const C_BITS = N64.CU | N64.CD | N64.CL | N64.CR;
   // controls.extra in retrowser.json (bits 16..31 of rtw_input's buttons)
-  const EXTRA = { PHOTO: 1 << 16, CAMZOOM: 1 << 17, CAMBACK: 1 << 18, HALF: 1 << 19, RECSAVE: 1 << 20 };
+  const EXTRA = { PHOTO: 1 << 16, CAMZOOM: 1 << 17, CAMBACK: 1 << 18, HALF: 1 << 19, RECSAVE: 1 << 20, MENU: 1 << 21 };   // P377: MENU
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
@@ -32,10 +34,11 @@ var rtwGlue = (function () {
     105: 'togglecrouch', 106: 'togglerlook', 107: 'togglewalk' };
   const STICK = 80;   // typical full deflection of an N64 stick (main.js)
 
-  const optionValues = {};   // id -> value, as the host set them
+  const optionValues = {};   // id -> value the game uses (the host's, or one chosen in the customisation settings: rtwOverlay.hostOption)
+  const GAME_OPTION_COUNT = 18;   // PORT_OPT_COUNT (port/ultra/port_options.h): ids below it are game options
   const opt = (id) => optionValues[id] | 0;
   const view = { width: 640, height: 480, dpr100: 100 };
-  let started = false, glUp = false, hostPaused = false, pointerLocked = false;
+  let started = false, glUp = false, hostPaused = false, pointerLocked = false, gameOptionsLocked = false;
 
   const wasm = (name) => Module['_' + name];
   function log(text) {
@@ -107,7 +110,7 @@ var rtwGlue = (function () {
       cy = ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
       b = (b & ~C_BITS) | ((buttons & EXTRA.CAMZOOM) ? N64.CU : 0) | ((buttons & EXTRA.CAMBACK) ? N64.CD : 0);
     }
-    return { b, x, y, half, cx, cy, photo: (buttons & EXTRA.PHOTO) !== 0, recSave: (buttons & EXTRA.RECSAVE) !== 0 };
+    return { b, x, y, half, cx, cy, photo: (buttons & EXTRA.PHOTO) !== 0, recSave: (buttons & EXTRA.RECSAVE) !== 0, menu: (buttons & EXTRA.MENU) !== 0 };
   }
   // P324 toggle options (crouch / R-Look / walk): a new press of the bound input flips a latch that holds it
   const LATCHES = [{ id: OPT.TOGGLECROUCH, bit: N64.Z }, { id: OPT.TOGGLERLOOK, bit: N64.R }, { id: OPT.TOGGLEWALK, bit: 0 }];
@@ -125,7 +128,7 @@ var rtwGlue = (function () {
   }
   const portCalls = [0, 0, 0, 0], portSeenAt = [0, 0, 0, 0];
   let recSavePrev = false;
-  function tick() {
+  function inputTick() {   // P377 name (was tick)
     scheduleTick();
     if (!started || hostPaused) return;
     const now = performance.now(), raw = wasm('port_rtw_raw_state')() >> 2;
@@ -139,18 +142,21 @@ var rtwGlue = (function () {
     }
     const mouseDx = HEAP32[raw + 16], mouseDy = HEAP32[raw + 17];
     HEAP32[raw + 16] = 0; HEAP32[raw + 17] = 0;
-    const p0 = pads[0];
-    if (p0.recSave && !recSavePrev) recStop('the Save recording button');
-    recSavePrev = p0.recSave;
+    let pad1 = pads[0];   // P377 name (was p0)
+    if (pad1.recSave && !recSavePrev) recStop('the Save recording button');
+    recSavePrev = pad1.recSave;
+    // P377: the customisation settings have pad 1 while open (the game, and a recording, get an idle pad)
+    const menuHasPad = rtwOverlay.input(pad1, now);
+    if (menuHasPad) pads[0] = pad1 = { b: 0, x: 0, y: 0, half: false, cx: 0, cy: 0, photo: false, recSave: false, menu: false };
     if (photo.state === 2) { photo.mx += mouseDx; photo.my += mouseDy; }   // P348 photo camera
-    const photoHasInput = photoPoll(p0);
+    const photoHasInput = photoPoll(pad1);
     const wantLock = freeCameraOn() || photo.state === 2;
     if (wantLock !== pointerLocked) { pointerLocked = wantLock; wasm('port_rtw_set_pointer_lock')(wantLock ? 1 : 0); }
     wasm('port_gfx_hfr_vsync')();
     if (photoHasInput) return;   // P348: photo mode takes pad 1's input
-    photoMaskAfter(p0);
-    applyLatches(p0);
-    if (rec.active) { recSetPad(p0); return; }   // P357: the recorded pad (pc_net.c samples it at the next retrace)
+    if (!menuHasPad) photoMaskAfter(pad1);   // P377: not on the idle pad of the tick a menu closed in (its mask would end there)
+    applyLatches(pad1);
+    if (rec.active) { recSetPad(pad1); return; }   // P357: the recorded pad (pc_net.c samples it at the next retrace)
     const pp = wasm('port_pad_state')() >> 2;
     for (let i = 0; i < 4; i++) {
       const d = pads[i];
@@ -163,7 +169,7 @@ var rtwGlue = (function () {
   }
   const raf = typeof requestAnimationFrame === 'function' ? requestAnimationFrame.bind(globalThis) : (f) => setTimeout(f, 16);
   let tickQueued = false;
-  function scheduleTick() { tickQueued = true; raf(() => { tickQueued = false; tick(); }); }
+  function scheduleTick() { tickQueued = true; raf(() => { tickQueued = false; inputTick(); }); }
 
   // ------------------------------------------------------------------ photo mode (main.js photoPoll / photoCapture, P348)
   const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, last: 0, busy: false, asked: 0,
@@ -182,28 +188,31 @@ var rtwGlue = (function () {
     if (d.photo && !photo.prevKey) photoRequest(!(st === 2 || st === 1));
     photo.prevKey = d.photo;
     photo.state = st;
-    if (st === 2 && was !== 2) { photo.hud = false; photo.mx = photo.my = 0; photo.prevB = d.b; photo.last = now; log('[photo] on'); }
-    if (st !== 2 && was === 2) { photo.maskB = d.b; photo.maskStick = true; log('[photo] off'); }
+    if (st === 2 && was !== 2) { photo.hud = false; photo.mx = photo.my = 0; photo.prevB = d.b; photo.last = now; log('[photo] on'); rtwOverlay.photoShown(true); }
+    if (st !== 2 && was === 2) { photo.maskB = d.b; photo.maskStick = true; log('[photo] off'); rtwOverlay.photoShown(false); }
     if (st < 0 && photo.asked) { log(`[photo] not started: ${PHOTO_WHY[-st] || 'photo mode did not start'}`); photo.asked = 0; }
     if (st === 2) photo.asked = 0;
     if (st !== 2) return st === 1 || st === 3;
     const dt = Math.min(0.1, (now - photo.last) / 1000);
-    const b = d.b, fresh = b & ~photo.prevB;
-    photo.last = now; photo.prevB = b;
-    if (fresh & N64.START) { photoRequest(false); return true; }
-    if (fresh & N64.A) photoCapture();
+    let heldButtons = d.b, newButtons = heldButtons & ~photo.prevB;   // P377 names (were b, fresh)
+    photo.last = now; photo.prevB = heldButtons;
+    const panel = rtwOverlay.photoTick(dt, d, newButtons);   // P377 (main.js lookTick): the Pose & Outfit panel's bits, not the camera's
+    heldButtons &= ~panel; newButtons &= ~panel;
+    if (newButtons & N64.START) { photoRequest(false); return true; }
+    if (newButtons & N64.A) photoCapture();
     let flags = 0;
-    if (fresh & N64.B) flags |= 2;   // back to the game's view
-    if (fresh & N64.L) photo.hud = !photo.hud;
+    if ((newButtons & N64.B) || photo.viewReq) flags |= 2;   // back to the game's view (P377 viewReq: GPhoto's footer)
+    photo.viewReq = false;
+    if (newButtons & N64.L) photo.hud = !photo.hud;
     if (photo.hud) flags |= 1;
     // look: the free camera's stick (C buttons with that option), else the C buttons
-    const lx = d.cx || ((b & N64.CR) ? STICK : 0) - ((b & N64.CL) ? STICK : 0);
-    const ly = d.cy || ((b & N64.CU) ? STICK : 0) - ((b & N64.CD) ? STICK : 0);
+    const lx = d.cx || ((heldButtons & N64.CR) ? STICK : 0) - ((heldButtons & N64.CL) ? STICK : 0);
+    const ly = d.cy || ((heldButtons & N64.CU) ? STICK : 0) - ((heldButtons & N64.CD) ? STICK : 0);
     const fwd = d.y / STICK * 500 * dt, right = d.x / STICK * 500 * dt;
-    const up = (((b & N64.R) ? 1 : 0) - ((b & N64.Z) ? 1 : 0)) * 350 * dt;
+    const up = (((heldButtons & N64.R) ? 1 : 0) - ((heldButtons & N64.Z) ? 1 : 0)) * 350 * dt;
     const dyaw = lx / STICK * 90 * dt + photo.mx * 0.15, dpitch = ly / STICK * 60 * dt - photo.my * 0.15;
-    const droll = (((b & N64.DR) ? 1 : 0) - ((b & N64.DL) ? 1 : 0)) * 45 * dt;
-    const zoom = Math.exp((((b & N64.DD) ? 1 : 0) - ((b & N64.DU) ? 1 : 0)) * 0.9 * dt);
+    const droll = (((heldButtons & N64.DR) ? 1 : 0) - ((heldButtons & N64.DL) ? 1 : 0)) * 45 * dt;
+    const zoom = Math.exp((((heldButtons & N64.DD) ? 1 : 0) - ((heldButtons & N64.DU) ? 1 : 0)) * 0.9 * dt);
     photo.mx = photo.my = 0;
     wasm('port_photo_input')(fwd, right, up, dyaw, dpitch, droll, zoom, flags);
     return true;
@@ -222,6 +231,7 @@ var rtwGlue = (function () {
     photo.busy = true;
     const canvas = Module['canvas'], w0 = canvas.width, h0 = canvas.height, k = photo.scale;
     let blob = null;
+    wasm('port_rtw_overlay_restore')();   // P377: the photo menus are not in the picture (photo.busy keeps them off meanwhile)
     try {
       if (k !== 1) { canvas.width = w0 * k; canvas.height = h0 * k; wasm('port_gfx_resize')(canvas.width, canvas.height); }
       wasm('port_photo_render')();   // switches fibers (asyncify): ask port_photo_info(9) whether it drew
@@ -238,6 +248,7 @@ var rtwGlue = (function () {
     const name = `conker-photo-${stamp(new Date())}.png`;
     const r = exportFile(name, 'image/png', new Uint8Array(await blob.arrayBuffer()));
     log(`[photo] saved ${name} (${w0 * k} x ${h0 * k})${r ? ` (the host refused it: ${r})` : ''}`);
+    rtwOverlay.photoToast(r ? `the host refused the picture (${r})` : `saved ${name}`);
   }
 
   // ------------------------------------------------------------------ input recorder (main.js rec*, P357; docs/port/E2E.md)
@@ -285,7 +296,8 @@ var rtwGlue = (function () {
       try { if (romForHash) rec.header.rom_sha1 = await digestHex('SHA-1', romForHash); } catch (e) { /* keep unknown */ }
     })();
     wasm('port_set_option')(OPT.FREECAM, 0); wasm('port_set_option')(OPT.PHOTOMODE, 0);
-    wasm('port_rtw_lock_game_options')();   // main.js optionsLocked: the game options stay fixed for the recording
+    wasm('port_rtw_lock_game_options')(); gameOptionsLocked = true;   // main.js optionsLocked: the game options stay fixed for the recording
+    rtwOverlay.setRecording(true);   // P377: the customisation settings show them locked, no game rows, no menu sounds
     wasm('port_rec_session')(1, REC_CHECK_EVERY, REC_G_EVERY, 0, 0, 0, 0);
     rec.active = true; rec.t0 = performance.now();
     log(`[rec] recording from power-on: build id ${rtwBuild.slice(0, 16)}, options ` +
@@ -324,7 +336,7 @@ var rtwGlue = (function () {
     }
     log(`[nethash] ${n} excluded static ranges from conker_netx.txt`);
   }
-  return {
+  const glue = {
     start() {   // rtw_start, before main()
       loadExclusions();
       layout();
@@ -333,27 +345,25 @@ var rtwGlue = (function () {
         if (romPtr && romSize) romForHash = HEAPU8.slice(romPtr, romPtr + romSize);
         recBegin();
       }
+      rtwOverlay.attach(overlayApi);   // P377
       started = true;
       if (!tickQueued) scheduleTick();
       // test aid (tools/port/scripts/rtw_e2e.mjs reads the game's state from the worker); the worker is the sandbox's own
       globalThis.__rtwConker = { Module, photoState: () => photo.state, rec: () => ({ active: rec.active, frames: rec.frames, checks: rec.checks.length }),
-        audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation']() };
+        audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation'](),
+        overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues) };   // P377
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
     },
     beforeGl() { layout(); },   // the drawing buffer the renderer starts with (gfx_init reads the viewport)
     glReady() { glUp = true; layout(); },
-    option(id, value) {   // rtw_option (pc_rtw.c already set the game options)
-      const was = optionValues[id];
-      optionValues[id] = value;
-      if (id === OPT.HIRES2D) wasm('port_gfx_hires_2d')(value ? 1 : 0);
-      else if (id === OPT.SMOOTHFONT) wasm('port_gfx_smooth_font')(value ? 1 : 0);
-      else if (id === OPT.HFR) wasm('port_gfx_hfr')(value ? 1 : 0);
-      else if (id === OPT.WIDESCREEN || id === OPT.FULLRES) layout();
-      else if (id === OPT.PHOTOMODE && !value && photo.state === 2) photoRequest(false);
-      else if (id === OPT.RECORDER && started && value !== was) {
-        if (!value) recStop('turning the option off');
-        else log('[rec] the recorder starts with the next start of the game (from power-on)');
+    option(id, value) {   // rtw_option (pc_rtw.c already set the game options to the host's value)
+      // P377: a value chosen in the customisation settings may win over the host's at start (rtwOverlay.hostOption)
+      const effective = rtwOverlay.hostOption(id, value, started);
+      if (effective !== value) {
+        if (id < GAME_OPTION_COUNT && !gameOptionsLocked) wasm('port_set_option')(id, effective);
+        log(`[settings] option ${id}: ${effective} (chosen in the customisation settings; the host sent ${value})`);
       }
+      applyOption(id, effective);
     },
     resize(width, height, dpr100) {   // rtw_resize: CSS pixels of the view, devicePixelRatio x 100
       view.width = width; view.height = height; view.dpr100 = dpr100 || 100;
@@ -364,7 +374,37 @@ var rtwGlue = (function () {
       const now = performance.now();
       if (on && !rec.pauseSince) rec.pauseSince = now;
       if (!on && rec.pauseSince) { rec.pausedMs += now - rec.pauseSince; rec.pauseSince = 0; }
+      if (!on) rtwOverlay.hostResumed();   // P377: the customisation settings still hold the game
     },
     get glUp() { return glUp; },
   };
+  // an option's value for the game and this glue (from the host, or from the customisation settings)
+  function applyOption(id, value) {
+    const was = optionValues[id];
+    optionValues[id] = value;
+    if (id === OPT.HIRES2D) wasm('port_gfx_hires_2d')(value ? 1 : 0);
+    else if (id === OPT.SMOOTHFONT) wasm('port_gfx_smooth_font')(value ? 1 : 0);
+    else if (id === OPT.HFR) wasm('port_gfx_hfr')(value ? 1 : 0);
+    else if (id === OPT.WIDESCREEN || id === OPT.FULLRES) layout();
+    else if (id === OPT.PHOTOMODE && !value && photo.state === 2) photoRequest(false);
+    else if (id === OPT.RECORDER && started && value !== was) {
+      if (!value) recStop('turning the option off');
+      else log('[rec] the recorder starts with the next start of the game (from power-on)');
+    }
+  }
+  // P377: what rtw_overlay.js may use of this glue
+  const overlayApi = {
+    log,
+    value: (id, def) => (optionValues[id] !== undefined ? optionValues[id] : def),
+    setOption(id, value) {   // a change in the customisation settings (MenuModel rows, presets)
+      if (id < GAME_OPTION_COUNT) { if (gameOptionsLocked) return false; wasm('port_set_option')(id, value); }
+      applyOption(id, value);
+      return true;
+    },
+    started: () => started, hostPaused: () => hostPaused,
+    photo, photoRequest: (on) => photoRequest(on), photoCapture: () => photoCapture(), photoBusy: () => photo.busy,
+    maskHeld() { photo.maskB = 0xFFFF; photo.maskStick = true; },   // main.js GMenu close: held inputs wait for a release
+    exportSave: () => exportFile('conker-eu.eep', 'application/octet-stream', eepromBytes()),
+  };
+  return glue;
 })();

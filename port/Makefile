@@ -172,7 +172,8 @@ _port_rtw_raw_state,_port_rtw_log,_port_rtw_export_file,_port_rtw_build_id,_port
 _port_rtw_rom_ptr,_port_rtw_rom_size,_port_set_rom,_port_set_paused,_port_set_option,_port_pad_state,_port_cam_state,\
 _port_eeprom_ptr,_port_eeprom_size,_port_dump_threads,_port_photo_request,_port_photo_status,_port_photo_input,_port_photo_render,\
 _port_photo_info,_port_gfx_resize,_port_gfx_widescreen,_port_gfx_hires_2d,_port_gfx_smooth_font,_port_gfx_hfr,_port_gfx_hfr_vsync,\
-_port_net_exclude,_port_net_addr,_port_rec_session,_port_rec_checkpoint_now,_port_rec_checkpoint_ms
+_port_net_exclude,_port_net_addr,_port_rec_session,_port_rec_checkpoint_now,_port_rec_checkpoint_ms,\
+_port_font_info,_port_font_glyph,_port_rtw_overlay_composite,_port_rtw_overlay_restore
 RTW_EMPTY :=
 RTW_SPACE := $(RTW_EMPTY) $(RTW_EMPTY)
 RTW_EXPORTS = $(subst $(RTW_SPACE),,$(RTW_EXPORT_LIST))   # the continuation lines above put spaces after the commas
@@ -180,7 +181,7 @@ RTW_LINK := -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VERSION=2 -sMIN_W
             -sSTACK_SIZE=1MB -sMODULARIZE=1 -sEXPORT_NAME=createConker -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sENVIRONMENT=worker \
             -sDYNAMIC_EXECUTION=0 -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 --profiling-funcs \
             -sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAP32,HEAPU32,wasmMemory,stringToNewUTF8 -sEXPORTED_FUNCTIONS=$(RTW_EXPORTS) \
-            --js-library web/rtw/rtw_lib.js --pre-js web/rtw/rtw_glue.js
+            --js-library web/rtw/rtw_lib.js --pre-js $(RTW)/gen/rtw_overlay.js --pre-js web/rtw/rtw_glue.js
 
 $(RTW)/ultra/%.o: ultra/%.c ultra/pc_ultra.h ultra/pc_mem.h ultra/pc_icall.h
 	@mkdir -p $(@D)
@@ -194,13 +195,19 @@ $(RTW)/audio/%.o: audio/%.c audio/aud.h ultra/pc_mem.h
 
 .PHONY: rtw
 rtw: $(RTW_DIST)/conker.js $(RTW_DIST)/conker_netx.txt $(RTW_DIST)/retrowser.json
-$(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(STUB_OBJS) web/rtw/rtw_lib.js web/rtw/rtw_glue.js
+$(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(STUB_OBJS) web/rtw/rtw_lib.js web/rtw/rtw_glue.js $(RTW)/gen/rtw_overlay.js
 	@mkdir -p $(@D)
 	emcc $(B)/stubs/n64mem_labels.o $(GAME_OBJS) $(BOOT_OBJS) $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(filter-out $(B)/stubs/n64mem_labels.o,$(STUB_OBJS)) -o $@ \
 	  $(RTW_LINK) -Wl,--error-limit=0 -Wl,-Map=$(RTW)/conker.map $(GAME_WRAP_FLAGS) 2> $(RTW)/link_warnings.txt \
 	  || (tail -40 $(RTW)/link_warnings.txt; exit 1)
 	@echo "rtw link warnings: $$(grep -c warning $(RTW)/link_warnings.txt) (port/build/rtw/link_warnings.txt)"
 	@ls -l $(RTW_DIST)/conker.wasm $(RTW_DIST)/conker.js
+# P377: the worker's overlay layer = web/rtw/rtw_overlay.js + one file per feature (autosave icon, hold-L ring,
+# customisation settings, photo mode menus), with the page code they reuse copied in from main.js / gmenu.js
+RTW_OVERLAY_FILES := web/rtw/rtw_overlay.js web/rtw/rtw_saveicon.js
+$(RTW)/gen/rtw_overlay.js: $(RTW_OVERLAY_FILES) web/main.js web/gmenu.js tools/rtw_page_extract.py Makefile
+	@mkdir -p $(@D)
+	python3 tools/rtw_page_extract.py web $@ $(RTW_OVERLAY_FILES)
 $(RTW_DIST)/conker_netx.txt: $(RTW_DIST)/conker.js tools/net_regions.py
 	python3 tools/net_regions.py $(RTW)/conker.map > $@
 $(RTW_DIST)/retrowser.json: web/rtw/retrowser.json
