@@ -124,6 +124,26 @@ var rtwOverlay = (function () {
 
   /* @RTW_FEATURES@ */
 
+  // ---------------------------------------------------------------- P378 a notice on the picture (the replay's messages)
+  // up to 3 lines of the game's font on a dark band at the bottom of the picture, over every feature's drawing; also
+  // logged. ms 0 = until the next notice (the end of a replay, which stays paused).
+  const noticeState = { text: '', until: 0, drawnTicks: 0 };
+  function notice(text, ms) {
+    log(`[notice] ${text}`);
+    noticeState.text = String(text || ''); noticeState.until = ms > 0 ? performance.now() + ms : Infinity;
+  }
+  function drawNotice(ctx, now) {
+    if (!noticeState.text) return false;
+    if (now > noticeState.until) { noticeState.text = ''; return false; }
+    if (!GameFont.load()) return false;
+    const k = layer.h / 240, W = layer.w / k, ox = (W - 320) / 2, S = 0.7, LH = 10.5;
+    const lines = GameFont.wrap(noticeState.text, 280, S).slice(0, 3), top = 234 - lines.length * LH - 6;
+    ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect((ox + 14) * k, top * k, 292 * k, (lines.length * LH + 6) * k);
+    lines.forEach((l, j) => GameFont.draw(ctx, l, ox + 160, top + 3 + j * LH, k, { scale: S, color: '#fff', align: 'center', smooth: !!opt('smoothfont') }));
+    noticeState.drawnTicks++;
+    return true;
+  }
+
   // ---------------------------------------------------------------- the overlay tick (pc_sched.c, after the game's frame)
   let tickErrors = 0, composited = 0;
   function tick() {
@@ -136,6 +156,7 @@ var rtwOverlay = (function () {
       for (const f of q) f(now);
       let drawn = false;
       for (const f of hooks.draw) drawn = f(layer.ctx, now) || drawn;
+      drawn = drawNotice(layer.ctx, now) || drawn;   // P378
       if (drawn && M._port_rtw_overlay_composite()) composited++;
     } catch (e) {
       if (tickErrors++ < 3) log(`[overlay] ${e && e.stack || e}`);
@@ -162,8 +183,9 @@ var rtwOverlay = (function () {
     photoTick: (dt, d, fresh) => photoTick(dt, d, fresh), photoShown: (on) => photoShown(on), photoToast: (text) => photoToast(text),
     setRecording(on) { recCfg = on ? { mode: 'record' } : null; optionsLocked = !!on; },
     hostResumed() { for (const f of hooks.hostResumed) f(); },   // rtw_pause(0)
+    notice,   // P378
     state() {
-      const s = { composited, font: GameFont.ready() };
+      const s = { composited, font: GameFont.ready(), notice: { text: noticeState.text, drawnTicks: noticeState.drawnTicks } };   // P378 notice
       for (const [k, f] of Object.entries(hooks.state)) s[k] = f();
       return s;
     },

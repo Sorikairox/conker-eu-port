@@ -60,7 +60,11 @@
     { "id": 112, "label": "Photo mode menus (Pose & Outfit)", "type": "bool", "default": 1 },
     { "id": 113, "label": "Analog right stick (camera)", "type": "bool", "default": 1 },
     { "id": 114, "label": "Mouse wheel (photo zoom, menu rows)", "type": "bool", "default": 1 },
+    { "id": 115, "label": "Replay recordings", "type": "bool", "default": 1 },
     { "id": 108, "label": "Input recorder (for testing)", "type": "bool", "default": 0 }
+  ],
+  "fileInputs": [
+    { "id": 1, "label": "Replay a recording", "accept": [".ckrec"], "maxSize": 16777216 }
   ],
   "source": "https://github.com/Sorikairox/conker-eu-port"
 }

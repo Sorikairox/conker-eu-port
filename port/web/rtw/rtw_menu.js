@@ -188,6 +188,11 @@
         let pre = [];
         if (p.id === 'controls') pre = [hostRow('Keys, gamepad, touch', 'HOST MENU', 'Which key, gamepad button or touch button is which N64 button is set in the host\'s menu (Controls). The Menu button (6 on the keyboard by default, or its touch button) opens these settings; holding the Photo mode button (1, the gamepad\'s Back) half a second does too.')];
         else if (p.id === 'sound') pre = [hostRow('Master volume', 'HOST MENU', 'The volume of everything is the host\'s (its menu); these are the game\'s own levels.')];
+        else if (p.id === 'tools') pre = [{ kind: 'action', label: 'Replay a recording',   // P378 (standard 1.1 rtw_request_file)
+          help: () => 'Watch an input recording (.ckrec, made with the Input recorder here or on the page build): the host asks you for the file (or use Open in game next to one in its Saved files). It then plays from power-on, with the recording\'s save and options, the next time the game starts (reload the page); your own save is not changed.' +
+            (glue.replayPending() ? ` Ready now: "${glue.replayPending()}".` : ''),
+          locked: () => glue.replayLocked(),
+          act: () => { const r = glue.requestReplay(); note(r ? 'This host cannot ask for a file.' : 'Pick the recording in the host\'s window.'); } }];
         return pre.concat(s.items, [backRow]);
       }
       const TITLES = { main: 'Customisation settings', saves: 'Saves', online: 'Online' };

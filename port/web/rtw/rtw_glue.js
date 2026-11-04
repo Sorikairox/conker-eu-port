@@ -16,8 +16,11 @@
 //     stick as in main.js gamepadPad (the host still sets the C buttons from it; those stay C buttons elsewhere); the
 //     mouse wheel (rtw_wheel, option 114) zooms in photo mode as main.js's canvas wheel and moves the customisation
 //     settings' rows as gmenu.js's.
-// Left out (no host interface in retrowser v1): online play (net.js, W11), recording replays (no way to hand a file to
-// the game).
+//   - P378 standard 1.1 files to the game: a recording handed in (fileInputs 1, from the customisation settings' "Replay a
+//     recording", the host's menu or "Open in game" next to a .ckrec in Saved files) is checked and kept in the worker's
+//     storage; the next start of the game replays it from power-on (main.js ?replay, e2eBegin) and reports whether it
+//     played the same (option 115).
+// Left out (no host interface in retrowser v1): online play (net.js, W11).
 var rtwGlue = (function () {
   'use strict';
   const N64 = { A: 0x8000, B: 0x4000, Z: 0x2000, START: 0x1000, DU: 0x0800, DD: 0x0400, DL: 0x0200, DR: 0x0100,
@@ -28,7 +31,7 @@ var rtwGlue = (function () {
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
-    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114 };   // P378: RSTICK, WHEEL
+    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115 };   // P378: RSTICK, WHEEL, REPLAY
   // main.js OPTIONS keys of the game options, for the recording's header (e2e_replay.js applies them by key)
   const GAME_OPTION_KEYS = { 0: 'skipcut', 1: 'skipintro', 2: 'healthhud', 3: 'cashhud', 4: 'longbreath', 5: 'longspin',
     17: 'ledgegrab', 6: 'nodrunk', 7: 'conkerlod', 8: 'airbar', 13: 'rumble', 14: 'crosshair', 15: 'freecam',
@@ -100,7 +103,7 @@ var rtwGlue = (function () {
     const k = m * STICK * (1 - 0.125 * Math.min(ax, ay) / mx) / mx;
     return [Math.round(x * k), Math.round(y * k)];
   }
-  const freeCameraOn = () => !!opt(OPT.FREECAM) && !rec.active;   // P357: never while recording
+  const freeCameraOn = () => !!opt(OPT.FREECAM) && !rec.active && !replay.active;   // P357: never while recording (P378: or replaying)
   // P378 standard 1.1 right stick (rtw_rstick, option 113): main.js gamepadPad's analog right stick (radial dead zone 0.2,
   // rescaled, 80 counts at full) -> [rx, ry] in N64 counts, y up. [0, 0] with the option off (v1: C buttons only).
   function rightStick(rawRx, rawRy) {
@@ -117,7 +120,7 @@ var rtwGlue = (function () {
     if (!opt(OPT.RSTICK)) return 0;
     return (rawRx >= 63 ? N64.CR : 0) | (rawRx <= -63 ? N64.CL : 0) | (rawRy >= 63 ? N64.CU : 0) | (rawRy <= -63 ? N64.CD : 0);
   }
-  const photoModeOn = () => !!opt(OPT.PHOTOMODE) && !rec.active;
+  const photoModeOn = () => !!opt(OPT.PHOTOMODE) && !rec.active && !replay.active;
   // one host pad (rtw_input: active-high N64 bits, extras in bits 16.., stick -127..127, up positive; P378 rtw_rstick:
   // rawRx / rawRy) -> main.js's pad object (P378: rx / ry = main.js `look`, photo mode's analog look stick)
   function hostPad(buttons, sx, sy, rawRx, rawRy) {
@@ -184,6 +187,7 @@ var rtwGlue = (function () {
     if (!menuHasPad) photoMaskAfter(pad1);   // P377: not on the idle pad of the tick a menu closed in (its mask would end there)
     applyLatches(pad1);
     if (rec.active) { recSetPad(pad1); return; }   // P357: the recorded pad (pc_net.c samples it at the next retrace)
+    if (replay.active) return;   // P378: the retraces read the recording's input (pc_net.c rec_input)
     const pp = wasm('port_pad_state')() >> 2;
     for (let i = 0; i < 4; i++) {
       const d = pads[i];
@@ -352,6 +356,165 @@ var rtwGlue = (function () {
         (r ? ` (the host refused it: ${r})` : '') + '. The game goes on in the recording mode; restart it to play normally.');
   }
 
+  // ------------------------------------------------------------------ P378 replay of an input recording (main.js ?replay)
+  // A .ckrec the player hands in (rtw_file_ready, fileInputs 1) is unpacked and checked (format, ROM SHA-1, input runs),
+  // then kept in this origin's IndexedDB ('conker-rtw-replay', the file's bytes) and the player is told to start the
+  // game again (reload). A replay needs the power-on state, which a running game cannot go back to. At the next start
+  // (read in preRun, before the game boots, and removed there: it plays once) the glue sets up main.js's replay session:
+  // the recording's game options (fixed), its EEPROM image (the player's stored save stays untouched: replayed saves never
+  // reach the host, pc_pif.c), its input per retrace (port_rec_session(2): pc_net.c feeds retrace N the recorded input),
+  // at the real 50 Hz so the player watches it; free camera, photo mode and the pads are off, the menus show the options
+  // locked. Each digest / checkpoint is compared as main.js e2eG / e2eCheck (H / S only with the same conker.wasm); the
+  // game pauses after the last recorded retrace (pc_net.c) and stays paused; the result shows on the picture and in the log.
+  const FILE_REPLAY = 1;
+  const REPLAY_DB = 'conker-rtw-replay', REPLAY_STORE = 'pending', REPLAY_KEY = 'next';
+  const replay = { doc: null, active: false, ended: false, state: 'idle', sameBuild: false, build: 'unknown', g: [], ci: 0,
+    matchedChecks: 0, matchedG: 0, first: null, mismatches: 0, level: 0, mode: 0, endFrame: 0, lastGood: 0, pending: '', refused: 0 };
+  const b64dec = (t) => { const b = atob(t || ''), u8 = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u8[i] = b.charCodeAt(i); return u8; };
+  function recDecodeRuns(u8, total) {   // main.js: -> Uint32Array of every retrace's input (retrace 1 first)
+    const o32 = new Uint32Array(total); let o = 0, i = 0;
+    while (i + 4 <= u8.length) {
+      const v = (u8[i] | u8[i + 1] << 8 | u8[i + 2] << 16 | u8[i + 3] << 24) >>> 0; i += 4;
+      let n = 0, m = 1, c; do { c = u8[i++]; n += (c & 127) * m; m *= 128; } while (c & 128);
+      for (let k = 0; k < n && o < total; k++) o32[o++] = v;
+    }
+    return o32;
+  }
+  const u32dec = (u8) => { const d = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), o = []; for (let i = 0; i + 4 <= u8.length; i += 4) o.push(d.getUint32(i, true)); return o; };
+  async function recUnpack(bytes) {   // main.js: gzip or plain JSON -> the recording object
+    let u8 = bytes;
+    if (u8[0] === 0x1f && u8[1] === 0x8b) u8 = new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+    const doc = JSON.parse(new TextDecoder().decode(u8));
+    if (!doc || doc.format !== REC_FORMAT) throw new Error('not a Conker input recording');
+    if (!(doc.retraces > 0) || typeof doc.inputs !== 'string' || !Array.isArray(doc.checks)) throw new Error('the recording has no input');
+    return doc;
+  }
+  const replayLength = (doc) => { const s = Math.round(doc.retraces / 50); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const replayName = (doc) => String(doc.name || 'recording').slice(0, 40);
+  function replayDb(mode, fn) {
+    return new Promise((ok, no) => {
+      if (typeof indexedDB === 'undefined') { no(new Error('no storage in this worker')); return; }
+      const q = indexedDB.open(REPLAY_DB, 1);
+      q.onupgradeneeded = () => q.result.createObjectStore(REPLAY_STORE);
+      q.onerror = () => no(q.error);
+      q.onsuccess = () => {
+        const db = q.result, t = db.transaction(REPLAY_STORE, mode), r = fn(t.objectStore(REPLAY_STORE));
+        t.oncomplete = () => { db.close(); ok(r && r.result); }; t.onerror = () => { db.close(); no(t.error); };
+      };
+    });
+  }
+  let romSha1 = null;   // of the ROM the host gave (port_rom), computed when a recording comes in
+  async function thisRomSha1() {
+    if (!romSha1) { const p = wasm('port_rtw_rom_ptr')(), n = wasm('port_rtw_rom_size')(); romSha1 = p && n ? await digestHex('SHA-1', HEAPU8.subarray(p, p + n).slice()) : 'unknown'; }
+    return romSha1;
+  }
+  async function replayAccept(bytes) {   // a .ckrec from the host: check it, keep it for the next start
+    try {
+      const doc = await recUnpack(bytes), sha = await thisRomSha1();
+      if (doc.rom_sha1 && doc.rom_sha1 !== 'unknown' && sha !== 'unknown' && doc.rom_sha1 !== sha) throw new Error(`it was made with another ROM (SHA-1 ${doc.rom_sha1.slice(0, 12)}…)`);
+      await replayDb('readwrite', (st) => st.put(bytes, REPLAY_KEY));
+      replay.pending = replayName(doc);
+      log(`[replay] "${doc.name}" (${doc.retraces} retraces, ${doc.checks.length} checkpoints, created ${doc.created}, build ${doc.build}) kept: it plays at the next start`);
+      rtwOverlay.notice(`Replay "${replayName(doc)}" (${replayLength(doc)}) is ready. Start the game again (reload the page) to watch it from power-on.`, 8000);
+    } catch (e) {
+      log(`[replay] the file was not taken: ${e && e.message || e}`);
+      rtwOverlay.notice(`That file cannot be replayed: ${e && e.message || e}.`, 6000);
+    }
+  }
+  // preRun: a recording kept for this start (removed at once: it plays once, also if this start fails)
+  {
+    const pre = Module['preRun'] ? [].concat(Module['preRun']) : [];
+    pre.push(() => {
+      addRunDependency('rtw-replay');
+      let done = false;
+      const finish = (why) => { if (done) return; done = true; if (why) out(`[replay] ${why}`); removeRunDependency('rtw-replay'); };
+      setTimeout(() => finish('the kept recording was not read in time'), 3000);
+      (async () => {
+        const bytes = await replayDb('readonly', (st) => st.get(REPLAY_KEY));
+        if (!bytes) return finish('');
+        await replayDb('readwrite', (st) => st.delete(REPLAY_KEY));
+        replay.doc = await recUnpack(new Uint8Array(bytes));
+        try { if (Module['wasmBinary']) replay.build = (await digestHex('SHA-256', Module['wasmBinary'])).slice(0, 16); } catch (e) { /* keep unknown */ }
+        finish(`a kept recording for this start: "${replay.doc.name}" (${replay.doc.retraces} retraces)`);
+      })().catch((e) => { replay.doc = null; finish(`the kept recording could not be read: ${e && e.message || e}`); });
+    });
+    Module['preRun'] = pre;
+  }
+  const REPLAY_KIND = ['periodic', 'level / mode change', 'end'];
+  function replayMismatch(m) {
+    replay.mismatches++;
+    if (replay.first) return;
+    replay.first = Object.assign({ lastGood: replay.lastGood }, m);
+    log(`[replay] FIRST DIFFERENCE at retrace ${m.f}: ${m.what}`);
+  }
+  function replayG(f, g) {   // main.js e2eG
+    const want = replay.g[f / replay.doc.g_every - 1];
+    if (want === undefined) return;
+    if ((want >>> 0) === (g >>> 0)) { replay.matchedG++; replay.lastGood = Math.max(replay.lastGood, f); return; }
+    replayMismatch({ f, field: 'G', what: `game digest G ${(g >>> 0).toString(16)}, the recording has ${(want >>> 0).toString(16)}` });
+  }
+  function replayCheck(c) {   // main.js e2eCheck
+    const [f, h, s, g, level, mode, kind, x, y, z] = c, exp = replay.doc.checks[replay.ci++];
+    replay.level = level; replay.mode = mode;
+    if (!exp) { if (replay.doc.complete) replayMismatch({ f, field: 'extra', what: `a ${REPLAY_KIND[kind]} checkpoint the recording does not have (level ${level.toString(16)}, mode ${mode})` }); return; }
+    const [ef, eh, es, eg, el, em, ek, ex, ey, ez] = exp;
+    const pos = `Conker at ${x}, ${y}, ${z} (recording ${ex}, ${ey}, ${ez})`;
+    let what = null, field = null;
+    if (ef !== f) { field = 'frame'; what = `${REPLAY_KIND[kind]} checkpoint at retrace ${f} (level ${level.toString(16)} mode ${mode}), the recording's next one is a ${REPLAY_KIND[ek]} at retrace ${ef} (level ${el.toString(16)} mode ${em})`; }
+    else if (el !== level || em !== mode) { field = 'level'; what = `level ${level.toString(16)} mode ${mode}, the recording has level ${el.toString(16)} mode ${em}; ${pos}`; }
+    else if ((eg >>> 0) !== (g >>> 0)) { field = 'G'; what = `game digest G ${(g >>> 0).toString(16)}, the recording has ${(eg >>> 0).toString(16)}; ${pos}`; }
+    else if (replay.sameBuild && (eh >>> 0) !== (h >>> 0)) { field = 'H'; what = `static memory hash H ${(h >>> 0).toString(16)}, the recording has ${(eh >>> 0).toString(16)} (same build); ${pos}`; }
+    else if (replay.sameBuild && (es >>> 0) !== (s >>> 0)) { field = 'S'; what = `thread stack hash S ${(s >>> 0).toString(16)}, the recording has ${(es >>> 0).toString(16)} (same build)`; }
+    if (what) replayMismatch({ f: Math.min(f, ef), field, what });
+    else { replay.matchedChecks++; replay.lastGood = Math.max(replay.lastGood, f); }
+  }
+  function replayEnd(f) {   // main.js e2eEnd (pc_net.c paused the game after the last recorded retrace)
+    replay.endFrame = f; replay.ended = true;
+    const left = replay.doc.checks.length - replay.ci;
+    if (!replay.first && left > 0) replayMismatch({ f, field: 'missing', what: `${left} checkpoint(s) of the recording never came` });
+    replay.state = replay.first ? 'different' : 'identical';
+    const result = replay.first ? `DIFFERENT from retrace ${replay.first.f} (${replay.first.field})` : 'IDENTICAL';
+    log(`[replay] ended at retrace ${f} of ${replay.doc.retraces}: ${result}; ${replay.matchedChecks} checkpoints and ${replay.matchedG} digests matched` +
+        (replay.first ? `; first difference: ${replay.first.what}` : ''));
+    rtwOverlay.notice(`Replay ended: ${replay.first ? `it played differently from retrace ${replay.first.f} on (${replay.first.field})` : 'it played exactly as recorded'}` +
+      ` (${replay.matchedChecks} of ${replay.doc.checks.length} checkpoints). Reload the page to play.`, 0);
+  }
+  function replayBegin() {   // rtw_start, before main(): main.js e2eLoad + recBegin + e2eBegin
+    const doc = replay.doc, n = doc.retraces;
+    for (const id in GAME_OPTION_KEYS) {   // the recording's game options, fixed (main.js recCfg.options)
+      const key = GAME_OPTION_KEYS[id], v = doc.options ? doc.options[key] : undefined;
+      if (v === undefined) continue;
+      const value = RANGE_OPTIONS.has(+id) ? (v | 0) : (v ? 1 : 0);
+      wasm('port_set_option')(+id, value); optionValues[id] = value;
+    }
+    wasm('port_set_option')(OPT.FREECAM, 0); wasm('port_set_option')(OPT.PHOTOMODE, 0);
+    wasm('port_rtw_lock_game_options')(); gameOptionsLocked = true;
+    const eep = b64dec(doc.eeprom), ep = wasm('port_eeprom_ptr')(), en = wasm('port_eeprom_size')();
+    HEAPU8.fill(0, ep, ep + en); HEAPU8.set(eep.subarray(0, en), ep);   // the recording's save (not the player's)
+    replay.g = u32dec(b64dec(doc.g));
+    replay.sameBuild = doc.build === replay.build;
+    Module['recInput'] = () => {};
+    Module['recG'] = (f, g) => replayG(f, g);
+    Module['recCheck'] = (f, h, s, g, level, mode, kind, x, y, z) => replayCheck([f, h, s, g, level, mode, kind, +x.toFixed(3), +y.toFixed(3), +z.toFixed(3)]);
+    Module['recEnd'] = (f) => replayEnd(f);
+    const inputs = recDecodeRuns(b64dec(doc.inputs), n), p = wasm('malloc')(Math.max(4, n * 4));
+    HEAPU8.set(new Uint8Array(inputs.buffer), p);
+    rtwOverlay.setRecording(true);   // the menus: options locked, no game rows, no sounds (as while recording)
+    wasm('port_rec_session')(2, doc.check_every, doc.g_every, p, n, 0, 0);   // real time: the player watches it
+    replay.active = true; replay.state = 'running';
+    log(`[replay] "${doc.name}" (${n} retraces, ${doc.checks.length} checkpoints, recorded with build ${doc.build}, this build ${replay.build}: ` +
+        `${replay.sameBuild ? 'same build, H / S compared' : 'other build, only G / level / mode compared'}), options ` +
+        Object.entries(doc.options || {}).map(([k, v]) => `${k}=${+v}`).join(' '));
+    rtwOverlay.notice(`Replaying "${replayName(doc)}" (${replayLength(doc)}) from power-on with its save and options. The controller does nothing until it ends.`, 6000);
+  }
+  function replayStatus() {
+    return { state: replay.state, active: replay.active, ended: replay.ended, pending: replay.pending, name: replay.doc ? replay.doc.name : '',
+      total: replay.doc ? replay.doc.retraces : 0, checks: replay.doc ? replay.doc.checks.length : 0, matchedChecks: replay.matchedChecks,
+      matchedG: replay.matchedG, mismatches: replay.mismatches, first: replay.first, sameBuild: replay.sameBuild, endFrame: replay.endFrame,
+      frame: wasm('port_net_frame') ? wasm('port_net_frame')() >>> 0 : 0, refused: replay.refused,
+      saveGeneration: wasm('rtw_save_generation')(), eepromNonzero: eepromBytes().reduce((n, b) => n + (b ? 1 : 0), 0) };
+  }
+
   // ------------------------------------------------------------------ hooks from pc_rtw.c / pc_video.c (rtw_lib.js)
   let romForHash = null;
   function loadExclusions() {   // main.js netLoadExclusions: conker_netx.txt from files.data
@@ -368,7 +531,11 @@ var rtwGlue = (function () {
     start() {   // rtw_start, before main()
       loadExclusions();
       layout();
-      if (opt(OPT.RECORDER)) {
+      if (replay.doc && !opt(OPT.REPLAY)) log(`[replay] "${replay.doc.name}" not played: Replay recordings is off`);
+      if (replay.doc && opt(OPT.REPLAY)) {   // P378: a kept recording plays now (and the recorder waits)
+        if (opt(OPT.RECORDER)) log('[rec] no recording during a replay');
+        replayBegin();
+      } else if (opt(OPT.RECORDER)) {
         const romPtr = wasm('port_rtw_rom_ptr')(), romSize = wasm('port_rtw_rom_size')();
         if (romPtr && romSize) romForHash = HEAPU8.slice(romPtr, romPtr + romSize);
         recBegin();
@@ -379,7 +546,7 @@ var rtwGlue = (function () {
       // test aid (tools/port/scripts/rtw_e2e.mjs reads the game's state from the worker); the worker is the sandbox's own
       globalThis.__rtwConker = { Module, photoState: () => photo.state, rec: () => ({ active: rec.active, frames: rec.frames, checks: rec.checks.length }),
         audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation'](),
-        overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues),   // P377
+        overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues), replay: replayStatus,   // P377 (P378 replay)
         cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); },   // P378: the camera sticks
         photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }) };   // P378: photo camera's field of view
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
@@ -405,8 +572,16 @@ var rtwGlue = (function () {
       if (on && !rec.pauseSince) rec.pauseSince = now;
       if (!on && rec.pauseSince) { rec.pausedMs += now - rec.pauseSince; rec.pauseSince = 0; }
       if (!on) rtwOverlay.hostResumed();   // P377: the customisation settings still hold the game
+      if (!on && replay.ended) wasm('port_set_paused')(1);   // P378: a finished replay stays paused (main.js e2e.ended)
     },
     get glUp() { return glUp; },
+    file(id, ptr, size) {   // P378 rtw_file_ready: the bytes are copied out now (pc_rtw.c frees its buffer)
+      const bytes = HEAPU8.slice(ptr, ptr + size);
+      log(`[file] ${size} bytes for file input ${id}`);
+      if (id !== FILE_REPLAY) { log(`[file] no file input ${id} in this build`); return; }
+      if (!opt(OPT.REPLAY)) { replay.refused++; rtwOverlay.notice('Replays are off (option "Replay recordings" in the host\'s menu).', 5000); return; }
+      replayAccept(bytes);
+    },
   };
   // an option's value for the game and this glue (from the host, or from the customisation settings)
   function applyOption(id, value) {
@@ -435,6 +610,10 @@ var rtwGlue = (function () {
     photo, photoRequest: (on) => photoRequest(on), photoCapture: () => photoCapture(), photoBusy: () => photo.busy,
     maskHeld() { photo.maskB = 0xFFFF; photo.maskStick = true; },   // main.js GMenu close: held inputs wait for a release
     exportSave: () => exportFile('conker-eu.eep', 'application/octet-stream', eepromBytes()),
+    // P378 the customisation settings' "Replay a recording": why it cannot ask now ('' = it can), and the host's prompt
+    replayLocked: () => (!opt(OPT.REPLAY) ? 'Replays are off in the host\'s options (Replay recordings)' : replay.active ? 'A replay is playing' : ''),
+    requestReplay: () => wasm('port_rtw_request_file')(FILE_REPLAY),
+    replayPending: () => replay.pending,
   };
   return glue;
 })();

@@ -13,6 +13,8 @@
  *                               worker twin of main.js pollInput) turns it into the PIF pads / camera stick / photo camera
  *   rtw_rstick(port, rx, ry)    P378 (standard 1.1) the right analog stick, raw too (the glue's camera stick)
  *   rtw_wheel(dy)               P378 (standard 1.1) the mouse wheel, raw too (photo mode's zoom, menu rows)
+ *   rtw_file_buffer(size), rtw_file_ready(id, size)   P378 (standard 1.1) a file the player handed to the game
+ *                               (retrowser.json fileInputs: 1 = an input recording to replay, .ckrec): the glue takes it
  *   rtw_resize(w, h, dpr)       the view size; the glue sizes the OffscreenCanvas like main.js layoutScreen
  *   rtw_audio_rate/drain/buffer the game's 22020 Hz stereo s16, pulled once per display frame (aud_out.c)
  *   rtw_option(id, value)       game options (PORT_OPT_* ids, as main.js port_set_option) and page-side options (ids
@@ -32,11 +34,13 @@ int rtw_build_id(uint8_t *out32);
 int rtw_export_file(const char *name, const char *mime, const void *bytes, int len);
 int rtw_rumble(int port, int on);
 int rtw_pointer_lock(int on);
+int rtw_request_file(int id);   /* P378 standard 1.1: the host asks the player for a file of fileInputs entry id */
 /* worker glue hooks (port/web/rtw/rtw_lib.js -> rtw_glue.js) */
 void port_rtw_glue_start(void);
 void port_rtw_glue_option(int id, int value);
 void port_rtw_glue_resize(int width, int height, int dpr100);
 void port_rtw_glue_pause(int on);
+void port_rtw_glue_file(int id, const uint8_t *bytes, int size);   /* P378 */
 
 void port_set_rom(unsigned char *p, unsigned size);
 void port_set_paused(int p);
@@ -84,6 +88,8 @@ EMSCRIPTEN_KEEPALIVE int port_rtw_export_file(const char *name, const char *mime
 EMSCRIPTEN_KEEPALIVE int port_rtw_build_id(uint8_t *out32) { return rtw_build_id(out32); }
 /* free camera / photo mode want the mouse (main.js requested pointer lock on a click on the canvas) */
 EMSCRIPTEN_KEEPALIVE int port_rtw_set_pointer_lock(int on) { return rtw_pointer_lock(on != 0); }
+/* P378 the customisation settings' "Replay a recording" (rtw_menu.js): the host's own file prompt for fileInputs id */
+EMSCRIPTEN_KEEPALIVE int port_rtw_request_file(int id) { return rtw_request_file(id); }
 
 EMSCRIPTEN_KEEPALIVE int rtw_rom_buffer(int size) {
     if (size <= 0) return 0;
@@ -165,6 +171,29 @@ EMSCRIPTEN_KEEPALIVE int rtw_wheel(int dy) {
 
 EMSCRIPTEN_KEEPALIVE int rtw_resize(int width, int height, int dpr100) {
     port_rtw_glue_resize(width, height, dpr100);
+    return 0;
+}
+
+/* P378 standard 1.1 files to the game (spec §4.11): the host asks for a buffer of `size` bytes (0 = refused), copies the
+ * player's file there and calls rtw_file_ready; the glue copies it out at once (rtw_glue.js file: a recording to replay
+ * is kept in the worker's storage for the next start) and the buffer is freed. The manifest's maxSize is 16 MiB. */
+#define RTW_FILE_MAX (16 << 20)
+static uint8_t *rtw_file_bytes;
+static int rtw_file_capacity;
+EMSCRIPTEN_KEEPALIVE int rtw_file_buffer(int size) {
+    free(rtw_file_bytes);
+    rtw_file_bytes = NULL; rtw_file_capacity = 0;
+    if (size <= 0 || size > RTW_FILE_MAX) return 0;
+    rtw_file_bytes = malloc((size_t)size);
+    if (!rtw_file_bytes) return 0;
+    rtw_file_capacity = size;
+    return (int)(uintptr_t)rtw_file_bytes;
+}
+EMSCRIPTEN_KEEPALIVE int rtw_file_ready(int id, int size) {
+    if (!rtw_file_bytes || size < 0 || size > rtw_file_capacity) return 0;
+    port_rtw_glue_file(id, rtw_file_bytes, size);
+    free(rtw_file_bytes);
+    rtw_file_bytes = NULL; rtw_file_capacity = 0;
     return 0;
 }
 

@@ -24,7 +24,8 @@
 //   waitfor:PATH:VALUE[:MS] (the same, polled until it matches; default 20 s)
 //   P378 standard 1.1: pad:AX2:AY3 (a fake standard gamepad, navigator.getGamepads in the host page, with these right
 //   stick axes, -1..1, down positive; pad:off removes it), wheel:DY (the mouse over the game, one wheel event of DY px),
-//   click (on the picture until the host captured the mouse), unlock (document.exitPointerLock), PATH roots cam (the camera stick per pad the glue wrote, [cx0, cy0, mdx0, mdy0, cx1, ...]), photoinfo
+//   askfile:FILE|last (the host's file prompt the game opened: pick FILE / the last fetchfile), openingame:PREFIX (Saved
+//   files: Open in game), click (on the picture until the host captured the mouse), unlock (document.exitPointerLock), PATH roots cam (the camera stick per pad the glue wrote, [cx0, cy0, mdx0, mdy0, cx1, ...]), photoinfo
 //   ({ state, fov }) and other __rtwConker readouts (e.g. replay)
 // Env RTW_SERVE=PORT: serve retrowser's built dist (tools/serve-worker.ts) in this process on PORT; HOST_URL is then
 // ignored (use "-"), so nothing is left running after the run.
@@ -133,7 +134,7 @@ async function network(offline) {
   context.setOffline(offline);
 }
 
-let fails = 0;
+let fails = 0, lastFetched = '';
 try {
   for (const a of actions.split(',').map((s) => s.trim()).filter(Boolean)) {
     const [cmd, x, y] = a.split(':');
@@ -194,7 +195,7 @@ try {
       if (!name) { say(`no saved file ${x}*`); fails++; }
       else {
         const [dl] = await Promise.all([page.waitForEvent('download'), page.click(`[data-file="${name}"] [data-action=file-save]`)]);
-        await dl.saveAs(join(out, name)); say(`fetched ${name}`);
+        await dl.saveAs(join(out, name)); say(`fetched ${name}`); lastFetched = join(out, name);
       }
       await page.click('[data-action=close-menu]').catch(() => {});
     }
@@ -245,6 +246,18 @@ try {
         locked = await page.getAttribute('[data-field=mouse-catch]', 'data-locked', { timeout: 1000 }).catch(() => 'no catcher');
       }
       say(`clicked the picture (mouse captured: ${locked})`);
+    } else if (cmd === 'askfile') {   // P378 the host's prompt after rtw_request_file: pick FILE (last = the last fetchfile)
+      await page.locator('[data-state=file-request]').waitFor({ timeout: 10000 });
+      const file = x === 'last' ? lastFetched : resolve(x);
+      await page.setInputFiles('[data-field=file-request-input]', file);
+      say(`host file prompt: picked ${file.split('/').pop()}`);
+    } else if (cmd === 'openingame') {   // P378 Saved files: "Open in game" next to the newest file whose name starts with x
+      await page.click('[data-action=files]');
+      const name = (await page.$$eval('[data-file]', (els) => els.map((e) => e.getAttribute('data-file')))).filter((n) => n.startsWith(x)).pop();
+      if (!name) { say(`no saved file ${x}*`); fails++; }
+      else { await page.click(`[data-file="${name}"] [data-action=file-open]`); say(`open in game: ${name}`); }
+      await page.waitForTimeout(300);
+      await page.click('[data-action=close-menu]', { timeout: 1000 }).catch(() => {});   // (Open in game closes the menu)
     } else if (cmd === 'unlock') {   // P378 give the mouse back (Esc does not in headless Chrome)
       await page.evaluate(() => document.exitPointerLock()); await page.waitForTimeout(300); say('mouse released');
     } else if (cmd === 'pad') {   // P378
