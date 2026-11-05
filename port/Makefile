@@ -160,7 +160,8 @@ $(WEB)/conker_netsyms.txt: $(WEB)/conker.js tools/net_regions.py ../port/symbols
 # exports), linked as a classic-script MODULARIZE factory for a dedicated worker (no SDL, no DOM, no eval), with the
 # env.rtw_* imports (web/rtw/rtw_lib.js) and the worker glue (web/rtw/rtw_glue.js). Output $(RTW)/dist: conker.js,
 # conker.wasm, conker_netx.txt (from this link's map), retrowser.json (web/rtw/retrowser.json; hashed by
-# build_rtw.sh with ~/Code/retrowser tools/rtw-hash.ts) and cover.png (the cartridge picture, P384). Nothing here changes $(WEB).
+# build_rtw.sh with ~/Code/retrowser tools/rtw-hash.ts), cover.png (the cartridge picture, P384) and icon.png (the game
+# icon, P385: the page's own web/icon-512.png). Nothing here changes $(WEB).
 RTW      := $(B)/rtw
 RTW_DIST := $(RTW)/dist
 RTW_ULTRA_OBJ := $(patsubst ultra/%.c,$(RTW)/ultra/%.o,$(ULTRA_SRC) ultra/pc_rtw.c)
@@ -198,7 +199,7 @@ $(RTW)/audio/%.o: audio/%.c audio/aud.h ultra/pc_mem.h
 	emcc $(ULTRA_CFLAGS) -DPORT_RTW=1 -sUSE_SDL=2 -c $< -o $@
 
 .PHONY: rtw
-rtw: $(RTW_DIST)/conker.js $(RTW_DIST)/conker_netx.txt $(RTW_DIST)/retrowser.json $(RTW_DIST)/cover.png
+rtw: $(RTW_DIST)/conker.js $(RTW_DIST)/conker_netx.txt $(RTW_DIST)/retrowser.json $(RTW_DIST)/cover.png $(RTW_DIST)/icon.png
 $(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(STUB_OBJS) web/rtw/rtw_lib.js web/rtw/rtw_net.js web/rtw/rtw_glue.js $(RTW)/gen/rtw_overlay.js
 	@mkdir -p $(@D)
 	emcc $(B)/stubs/n64mem_labels.o $(GAME_OBJS) $(BOOT_OBJS) $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(filter-out $(B)/stubs/n64mem_labels.o,$(STUB_OBJS)) -o $@ \
@@ -219,6 +220,10 @@ $(RTW_DIST)/retrowser.json: web/rtw/retrowser.json
 	cp $< $@
 # P384: the cartridge picture (standard 1.2 "picture"): box art kept as source art in web/rtw/cover.png
 $(RTW_DIST)/cover.png: web/rtw/cover.png
+	@mkdir -p $(@D)
+	cp $< $@
+# P385: the game icon (standard 1.2 "icon"): the site's own icon (512x512 PNG), the same file the page build ships
+$(RTW_DIST)/icon.png: web/icon-512.png
 	@mkdir -p $(@D)
 	cp $< $@
 
