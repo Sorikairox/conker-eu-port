@@ -34,6 +34,12 @@
       }
     ]
   },
+  "picture": {
+    "path": "cover.png",
+    "credit": "Box art © Rare / Nintendo · image from libretro-thumbnails",
+    "sha256": "48d75da891e6228e32c87769bfb9314cc8c82ed64ffb10b86793ff145fe7751d",
+    "size": 221406
+  },
   "module": {
     "factory": "createConker",
     "loop": "asyncify"
