@@ -29,6 +29,9 @@
   // Smooth font, Widescreen, Full-resolution, High frame rate) and the overlay features (autosave icon, hold-L ring, photo
   // mode menus) are each player's own and not declared: the record below keeps them and applies them at every start
   // (BUILD_ROWS / the attach hook). This menu is always on (it was option 110): nothing may hide the only way to these.
+  // P383 (user rule: what changes how much a player sees follows the room host online): Widescreen and High frame rate
+  // are inGame again (told to the host, which hands the room host's to every peer of a session); in a session their rows
+  // are locked (ROOM_HOST_LOCK). A value the record kept for them before P383 goes to the host at the next start alone.
   {
     // ---- page code (main.js OPTIONS: labels, help, defaults)
     /* @RTW_PAGE OPTIONS@ */
@@ -66,6 +69,17 @@
       };
     }
     const buildRowsOf = (sectionId) => BUILD_ROWS.filter((o) => o.section === sectionId).map(buildRowItem);
+    // P383: a picture row the room host sets in an online session (Widescreen, High frame rate: rtw_glue.js
+    // ROOM_HOST_VIEW_OPTIONS) shows locked with the reason; other rows unchanged
+    const ROOM_HOST_LOCK = 'Set by the room host during online play.';
+    function roomHostLocked(item) {
+      const id = item && item.key !== undefined ? KEY_ID[item.key] : undefined;
+      if (id === undefined || !glue || !glue.roomHostsOption) return item;
+      return Object.assign({}, item, {
+        locked: () => (glue.roomHostsOption(id) ? ROOM_HOST_LOCK : item.locked ? item.locked() : ''),
+        set: (v) => (glue.roomHostsOption(id) ? false : item.set(v)),
+      });
+    }
     // P382 test aid: the option with this rtw id set as its row would (game options locked online / while recording)
     menuSetOption = function menuSetById(id, value) {
       const key = Object.keys(KEY_ID).find((k) => KEY_ID[k] === id);
@@ -236,7 +250,7 @@
             (glue.replayPending() ? ` Ready now: "${glue.replayPending()}".` : ''),
           locked: () => glue.replayLocked(),
           act: () => { const r = glue.requestReplay(); note(r ? 'This host cannot ask for a file.' : 'Pick the recording in the host\'s window.'); } }];
-        return pre.concat(s.items, buildRowsOf(p.id), [backRow]);   // P382: this build's own rows
+        return pre.concat(s.items.map(roomHostLocked), buildRowsOf(p.id), [backRow]);   // P382: this build's own rows
       }
       const TITLES = { main: 'Customisation settings', saves: 'Saves', online: 'Online' };
       const titleOf = (p) => TITLES[p.id] || MenuModel.sections().find((x) => x.id === p.id).label;
@@ -395,7 +409,8 @@
         return true;
       }
       const state = () => ({ open: U.open, from: U.from, page: U.open ? page().id : null, sel: U.open ? page().sel : -1,
-        item: U.open ? (itemsOf(page())[page().sel] || {}).label : null, rows: U.row, paused: U.paused });
+        item: U.open ? (itemsOf(page())[page().sel] || {}).label : null, rows: U.row, paused: U.paused,
+        lock: U.open ? (((it) => (it && it.locked ? it.locked() : ''))(itemsOf(page())[page().sel])) : '' });   // P383: the selected row's lock reason
       return { open, close, poll, gameRows, draw, note, state, wheel, get isOpen() { return U.open; }, get paused() { return U.paused; } };
     })();
     // ---- hooks into the layer
@@ -409,6 +424,17 @@
         applied.push(`${id}=${v}`);
       }
       if (applied.length) log(`[settings] this game's own options from the customisation settings: ${applied.join(' ')}`);
+      // P383: an option the record kept while the host did not declare it (Widescreen / High frame rate before P383) and
+      // the host now declares: menuHostOption already applied it at this start; outside a session hand it to the host
+      // (it keeps it from now on and passes it to a session it hosts) and forget it here
+      if (!glue.online()) {
+        const told = [];
+        for (const [id, v] of Object.entries(settings.chosen)) {
+          if (!glue.hostDeclared(+id) || glue.value(+id, v) !== v) continue;
+          if (glue.reportOptionToHost(+id, v)) { hostNow[id] = v; delete settings.chosen[id]; delete settings.hostSeen[id]; told.push(`${id}=${v}`); }
+        }
+        if (told.length) { settingsSave(); log(`[settings] now kept by the host: ${told.join(' ')}`); }
+      }
     });
     const buttonsBefore = buttonsWanted;
     buttonsWanted = () => featureEnabled(FEATURE.MENUS) || buttonsBefore();

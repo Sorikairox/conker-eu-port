@@ -25,6 +25,12 @@
 //     the host's menu shows only the start-up options (1 skip intro, 108 recorder, 117-119 online play), the options that
 //     change the game or its input are `"inGame": true`, the picture options and overlay features are not declared (each
 //     player's own: BUILD_OPTION_DEFAULTS here, kept by the customisation settings' record).
+//   - P383 (user rule: what changes how much a player sees follows the room host online): Widescreen (102, Hor+: the
+//     same picture plus more at the sides) and High frame rate (104, smoother motion, up to one game frame later) are
+//     `"inGame": true` again: the host keeps the value the game reports and hands the room host's to every peer at a
+//     lockstep session boot; in a session they are fixed (ROOM_HOST_VIEW_OPTIONS) and the widescreen picture is 16:9
+//     whatever the player's window (a wider window would show more). Full-resolution (103, the same view in more
+//     pixels), Hi-res menus (100), Smooth font (101) and the overlay features stay each player's own (the record).
 //   - P380 standard 1.2 online play (option 117, on by default): the host's lockstep session boot calls rtw_net_session
 //     before rtw_start; netSession starts pc_net.c's session through rtw_net.js (object rtwNet: net.js's packet logic
 //     over rtw_net_send / rtw_net_recv). In a session the game options are the room host's and stay fixed (the host's
@@ -54,8 +60,13 @@ var rtwGlue = (function () {
   const hostDeclared = new Set();   // P378: the option ids the host sent (rtw_option at start = every manifest option)
   // P382: the options this build keeps itself (not in retrowser.json: each player's own, set in the customisation settings,
   // kept by its record) start at these values; 109 autosave icon, 111 hold-L ring, 112 photo mode menus on as in P377
+  // (P383: Widescreen / High frame rate are declared again: the host sends them; 0 until it does)
   const BUILD_OPTION_DEFAULTS = { [OPT.HIRES2D]: 0, [OPT.SMOOTHFONT]: 0, [OPT.WIDESCREEN]: 0, [OPT.FULLRES]: 0, [OPT.HFR]: 0,
     109: 1, 111: 1, 112: 1 };
+  // P383: the picture options that change how much a player sees (or when): the room host's in a lockstep session, fixed
+  // there like the game options (the host's menu cannot change them, nor can the customisation settings)
+  const ROOM_HOST_VIEW_OPTIONS = new Set([OPT.WIDESCREEN, OPT.HFR]);
+  const SESSION_WIDE_ASPECT = 16 / 9;   // P383: the widescreen picture's aspect in a session (every peer the same view)
   // id -> value the game uses (the host's, or one chosen in the customisation settings: rtwOverlay.hostOption)
   const optionValues = Object.assign({}, BUILD_OPTION_DEFAULTS);
   const GAME_OPTION_COUNT = 18;   // PORT_OPT_COUNT (port/ultra/port_options.h): ids below it are game options
@@ -88,14 +99,16 @@ var rtwGlue = (function () {
   const stamp = (t) => { const p2 = (n) => String(n).padStart(2, '0'); return `${t.getFullYear()}${p2(t.getMonth() + 1)}${p2(t.getDate())}-${p2(t.getHours())}${p2(t.getMinutes())}${p2(t.getSeconds())}`; };
 
   // ------------------------------------------------------------------ picture size (main.js layoutScreen)
-  // Off: 640 x 480. Widescreen: 480 rows, the view's aspect between 4:3 and 21:9. Full-resolution: the picture's size in
-  // the view times devicePixelRatio, at most 2560 x 1440. The host shows the buffer with object-fit: contain.
+  // Off: 640 x 480. Widescreen: 480 rows, the view's aspect between 4:3 and 21:9 (P383: 16:9 in an online session, so a
+  // wider window shows no more than the others see). Full-resolution: the picture's size in the view times
+  // devicePixelRatio, at most 2560 x 1440 (the same aspect: more pixels, not more view). The host shows the buffer with
+  // object-fit: contain.
   function layout() {
     const canvas = Module['canvas'];
     if (!canvas || photo.busy) return;
     let aspect = 4 / 3, w = 640, h = 480;
     if (opt(OPT.WIDESCREEN)) {
-      aspect = Math.max(4 / 3, Math.min(64 / 27, view.height > 0 ? view.width / view.height : 16 / 9));
+      aspect = netSessionOn ? SESSION_WIDE_ASPECT : Math.max(4 / 3, Math.min(64 / 27, view.height > 0 ? view.width / view.height : 16 / 9));
       w = Math.round(h * aspect / 2) * 2;
     }
     if (opt(OPT.FULLRES) && view.width > 0 && view.height > 0) {
@@ -589,7 +602,8 @@ var rtwGlue = (function () {
     option(id, value) {   // rtw_option (pc_rtw.c already set the game options to the host's value)
       hostDeclared.add(id);   // P378
       if (!started) { hostStartOptions.push([id, value]); applyOption(id, value); return; }   // P380: the record applies at start
-      if (netSessionOn && (id < GAME_OPTION_COUNT || id === OPT.ONLINE || id === OPT.ONLINE_DELAY || id === OPT.ONLINE_OWNVIEW)) {
+      if (netSessionOn && (id < GAME_OPTION_COUNT || id === OPT.ONLINE || id === OPT.ONLINE_DELAY || id === OPT.ONLINE_OWNVIEW ||
+          ROOM_HOST_VIEW_OPTIONS.has(id))) {   // P383: + Widescreen, High frame rate
         log(`[net] option ${id} = ${value} from the host's menu ignored: the session keeps the room host's options`);
         return;
       }
@@ -604,6 +618,7 @@ var rtwGlue = (function () {
       // in a session in the C: port_free_camera_enabled / port_photo_request)
       wasm('port_rtw_lock_game_options')(); gameOptionsLocked = true;
       rtwOverlay.setOnline(true);   // the customisation settings show them locked and never pause the game
+      layout();   // P383: the session's widescreen aspect
     },
     resize(width, height, dpr100) {   // rtw_resize: CSS pixels of the view, devicePixelRatio x 100
       view.width = width; view.height = height; view.dpr100 = dpr100 || 100;
@@ -649,11 +664,14 @@ var rtwGlue = (function () {
       else log('[rec] the recorder starts with the next start of the game (from power-on)');
     }
   }
+  // P383: Widescreen / High frame rate during a lockstep session: the room host's value, not changed here
+  function roomHostsOption(id) { return netSessionOn && ROOM_HOST_VIEW_OPTIONS.has(id); }
   // P377: what rtw_overlay.js may use of this glue
   const overlayApi = {
     log,
     value: (id, def) => (optionValues[id] !== undefined ? optionValues[id] : def),
     setOption(id, value) {   // a change in the customisation settings (MenuModel rows, presets)
+      if (roomHostsOption(id)) return false;   // P383: the room host's view options stay fixed in a session
       if (id < GAME_OPTION_COUNT) { if (gameOptionsLocked) return false; wasm('port_set_option')(id, value); }
       applyOption(id, value);
       return true;
@@ -667,6 +685,7 @@ var rtwGlue = (function () {
     requestReplay: () => wasm('port_rtw_request_file')(FILE_REPLAY),
     replayPending: () => replay.pending,
     hostDeclared: (id) => hostDeclared.has(id),   // P382: the host sent this option (declared in retrowser.json)
+    roomHostsOption: (id) => roomHostsOption(id),   // P383: a picture option fixed to the room host's value now
     // P378 standard 1.1: a manifest option changed in the customisation settings -> env.rtw_option_changed (P382: always,
     // standard 1.2 requires it for an inGame option). true = the host took it (its menu and stored value now have it).
     reportOptionToHost(id, value) {   // was optionChanged
