@@ -42,7 +42,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   `node tools/port/scripts/rtw_e2e.mjs OUT HOST_URL ROM ACTIONS` (RTW_SERVE=PORT serves retrowser's built dist in-process,
   HOST_URL `-`); overlays (P377): `tools/port/scripts/rtw_overlay_e2e.sh OUT` (3 runs, ~4 min, ALL PASS); standard 1.1
   (P378): `tools/port/scripts/rtw_v11_e2e.sh OUT [ROM] [rstick wheel replay optsync]` (~6 min, ALL PASS); options rule
-  (P382): ☰ = start-up options only, the rest in the customisation settings (inGame / game-kept, see P382); publish
+  (P382): ☰ = start-up options only, the rest in the customisation settings (inGame / game-kept, see P382; P383: Widescreen /
+  High frame rate inGame = the room host's online, net e2e LEAVE=2 / COSMETIC); publish
   `tools/eu_port/rtw_dist_commit.sh --rom ROM "msg"` (rtw-dist + the root `retrowser.json` / `retrowser/` copy on this branch,
   commit those; P379). Online play (P380): `PLAYERS=2..4 [DROP=1 DESYNC=1 LEAVE=1 SOLO=1] node
   tools/port/scripts/rtw_net_e2e.mjs OUT ROM` (pages in one muted headless Chrome, retrowser's dist + room server in-process,
@@ -123,6 +124,41 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P383 (port-web, 2026-11-05): retrowser build: what changes how much a player sees follows the room host online
+- User rule: in a lockstep session every setting that changes how much a player sees (or when) is the room host's; every
+  other picture setting stays each player's own; offline nothing changes. rtw build only (web build byte-identical).
+- What the code does (checked): Widescreen (102, gfx_f3dex2.c ws_*, P350) is Hor+: the N64 picture keeps its place and
+  the 3D view is ws_k times wider (clip x / ws_k, viewport and scissor widened, render-side culling copies so the side
+  strips have geometry; the game's own culling output and memory untouched, outside the hash); HUD corners move to the
+  wide edges. The width follows the player's window (rtw_glue.js layout: 4:3 .. 21:9), so a wider window saw more.
+  High frame rate (104, P351) replays the newest game frame with interpolated matrices on every animation frame: no
+  game code, no game memory, outside the hash, no effect on retraces; the picture runs up to one game frame (40-80 ms)
+  behind, and in a session it presents once per input tick (hfr_vsync). Full-resolution (103): the same aspect, more
+  pixels (no more view). Hi-res menus / Smooth font: 2D drawing only. Camera options: Free camera (15) and Photo mode
+  (16) are off in any session (C: port_free_camera_enabled / port_photo_request) and inGame already; right stick (113)
+  is input shaping; Own view only (118) is a start-up option read at session boot (the room host's, P380).
+- 1ff3dc19 the feature: retrowser.json 102 / 104 `"inGame": true` again; rtw_glue.js ROOM_HOST_VIEW_OPTIONS (fixed in a
+  session: host rtw_option ignored, overlay setOption refused, roomHostsOption), SESSION_WIDE_ASPECT: widescreen is 16:9
+  in a session whatever the window (letterboxed by the host); rtw_menu.js roomHostLocked: the rows say "Set by the room
+  host during online play." and refuse a change; a value the record kept for an option the host now declares (102 /
+  104 set in P382) goes to the host at the next start without a session and leaves the record (tested: seedrecord).
+  Per player (the record): 100, 101, 103, 109, 111, 112. Final lists: room host's online = game options 0, 2-17,
+  105-107, 113-115, 102, 104 (+ start-up 1, 117-119, 108 n/a); each player's own = 100, 101, 103, 109, 111, 112.
+- 54baf3f7 fix found by the tests: with High frame rate on every peer, a 3-player session in one headless Chrome stalled
+  the guest worker's requestAnimationFrame ~15 s at a time (its pad no longer reached the ring or the menus; the game
+  went on with the stale pad, hashes equal; not with HFR off). scheduleTick now also arms a 100 ms timer, whichever comes
+  first runs the input tick (tickGen); inputTicks() counts both (4p run: 8-21 timer ticks per peer, 0 in 2p HFR off).
+- Tests (retrowser dist served in-process, muted headless Chrome, net runs through chrome_lock): rtw_net_e2e 2 players
+  host ws+hfr on / guest off and the reverse (LEAVE=2): both peers 16:9 (or 4:3), inGame 102 / 104 equal, 64 hash
+  points equal, cosmetic 100 / 101 / 103 different per peer in the session, guest's Widescreen row locked with the
+  reason and changes refused, Full-resolution row free; after the guest leaves its own 102 / 104 back, its host-stored
+  values and record untouched; 3p VARY_VIEW DROP, 4p LEAVE SOLO, root-layout copy ALL PASS; rtw_overlay_e2e ALL PASS
+  (Widescreen host-stored, Full-resolution in the record), rtw_v11_e2e ALL PASS (optsync told 3), offline reload (mock
+  stopped, network off): 102 / 104 / 2 / 9 from the host, 103 from the record. check GREEN; port/build/web 15 files
+  identical (conker.wasm a2225161…). Output 6e8cd72a: rtw-dist 35269a3e (build id 3c8d6b26…), root build id ce30485d…;
+  `rtw.mjs check . --rom` OK. No deploy. Evidence port_work/p383.
+- Note: a player whose window is narrower than 16:9 now sees the session's widescreen letterboxed; HFR forced on by the
+  room host costs a weak machine GPU time it cannot opt out of during the session.
 ### P382 (port-web, 2026-11-05): retrowser build follows the options rule (host menu = start-up options only)
 - User rule (retrowser 39060f5, standard 1.2): the host's ☰ shows only settings that must be chosen before the game
   starts; everything else is set in the game's own menu, declared `"inGame": true` when the host should keep it and
