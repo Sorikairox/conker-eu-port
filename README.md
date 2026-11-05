@@ -14,12 +14,16 @@ Saves stay in your browser; use **Export save** in ☰ to keep a copy. After the
 Online multiplayer is only on the port's own site for now. retrowser runs this repository's own build (`retrowser.json`
 and `retrowser/`); it hosts no game code and no ROMs.
 
+The cartridge picture retrowser shows (`retrowser/cover.png`): Box art © Rare / Nintendo · image from
+libretro-thumbnails. The box art belongs to its owners and is only used here to identify the game.
+
 ---
 
 # Conker's Bad Fur Day (EU) — decomp + browser port
 
 > **No ROM is stored here — you need your own EU ROM.** The game's data is read from your ROM at run time; the build output
-> (`retrowser.json` + `retrowser/`) contains only code and data written for this port.
+> (`retrowser.json` + `retrowser/`) contains only code and data written for this port, plus the box art picture
+> credited above.
 
 **To play it yourself, see [PLAYING.md](PLAYING.md)** (one command: `tools/eu_port/play.sh`).
 
