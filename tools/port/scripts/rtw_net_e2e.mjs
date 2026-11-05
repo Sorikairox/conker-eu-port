@@ -10,6 +10,12 @@
 // LEAVE=1 (then player 1 leaves the session: its game restarts alone), SOLO=1 (afterwards: a fresh page plays alone), RTW_OPTIONS_HOST (stored options of player 1, default
 // {"1":1,"2":1,"9":70,"105":1,"113":0}: skip intro (a start-up option) and four inGame options, P382) and RTW_OPTIONS_GUEST
 // (of the others, default the opposite values: the session must use player 1's, start-up and inGame alike).
+// P383: the defaults include Widescreen 102 / High frame rate 104 (inGame: the room host's in a session; the widescreen
+// picture is 16:9 on every peer, fixed: the guest's menu row says "Set by the room host during online play.", its
+// change is refused). COSMETIC (default 1): before the session every player sets Hi-res menus 100 / Smooth font 101 /
+// Full-resolution 103 in the customisation settings (their record; player 1 100=1 101=0 103=0, the others the
+// opposite): in the session each keeps its own. LEAVE=2: player 2 leaves (its game restarts alone): its own
+// Widescreen / High frame rate (stored by the host, untouched by the session) and its own record values are back.
 // Prints PASS / FAIL lines and "ALL PASS" at the end; exit code 0 only then.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -150,10 +156,28 @@ async function playInputs(list, target) {   // random presses on every page unti
 }
 
 try {
-  const hostOpts = process.env.RTW_OPTIONS_HOST || '{"1":1,"2":1,"9":70,"105":1,"113":0}',   // P382: + inGame options
-    guestOpts = process.env.RTW_OPTIONS_GUEST || '{"1":0,"2":0,"9":100,"105":0,"113":1}';
+  const hostOpts = process.env.RTW_OPTIONS_HOST || '{"1":1,"2":1,"9":70,"105":1,"113":0,"102":1,"104":1}',   // P382: + inGame options (P383: 102, 104)
+    guestOpts = process.env.RTW_OPTIONS_GUEST || '{"1":0,"2":0,"9":100,"105":0,"113":1,"102":0,"104":0}';
   for (let n = 1; n <= PLAYERS; n++) await newPlayer(n, n === 1 ? hostOpts : guestOpts);
   for (const p of players) { await open(p); say(`P${p.n} plays alone`); }
+  // P383 helpers: the picture's aspect, the record's own picture options per player
+  const aspectOf = (p) => inWorker(p, () => { const c = globalThis.__rtwConker.Module.canvas; return c.width / c.height; });
+  const isWide = (a) => a > 1.7 && a < 1.8, is43 = (a) => Math.abs(a - 4 / 3) < 0.01;
+  const COSMETIC = process.env.COSMETIC !== '0', COSMETIC_IDS = [100, 101, 103];
+  const cosmeticOf = (p) => (p.n === 1 ? { 100: 1, 101: 0, 103: 0 } : { 100: 0, 101: 1, 103: 1 });
+  {
+    const want = (p) => JSON.parse(p.n === 1 ? hostOpts : guestOpts);
+    const o = await Promise.all(players.map((p) => inWorker(p, () => globalThis.__rtwConker.options())));
+    check(players.every((p, i) => o[i] && [102, 104].every((k) => want(p)[k] === undefined || o[i][k] === want(p)[k])),
+      `alone, every player has its own stored Widescreen / High frame rate (${players.map((p, i) => `P${p.n} ${o[i] && o[i][102]}/${o[i] && o[i][104]}`).join(', ')})`);
+  }
+  if (COSMETIC) {
+    for (const p of players) await inWorker(p, (vals) => { for (const [k, v] of Object.entries(vals)) globalThis.__rtwConker.menuSet(+k, v); }, cosmeticOf(p));
+    await new Promise((r) => setTimeout(r, 1000));   // the record is written 250 ms after a change
+    const o = await Promise.all(players.map((p) => inWorker(p, () => globalThis.__rtwConker.options())));
+    check(players.every((p, i) => o[i] && COSMETIC_IDS.every((k) => o[i][k] === cosmeticOf(p)[k])),
+      `alone, each player set its own Hi-res menus / Smooth font / Full-resolution (${players.map((p, i) => `P${p.n} ${COSMETIC_IDS.map((k) => o[i] && o[i][k]).join('/')}`).join(', ')})`);
+  }
   check((await Promise.all(players.map(net))).every((s) => s && !s.active), 'before the session nobody is in one');
   if (process.env.ALONE === '1') {   // diagnostics: the same pages and inputs, every game alone (no session)
     const fs = await playInputs(players, FRAMES);
@@ -190,6 +214,35 @@ try {
       `every player gets the room host's inGame options (${ids.map((k) => `${k}: ${opts.map((o) => o && o[k]).join('/')}`).join(', ')})`);
   }
   check(sts.every((s) => s.beganAt === 0), `the session is set before the first retrace (lockstep boot): ${sts.map((s) => s.beganAt).join(' ')}`);
+  {   // P383: Widescreen follows the room host (16:9 on every peer, or 4:3 on every peer); the cosmetic options stay each player's own
+    const hostWide = JSON.parse(hostOpts)[102];
+    if (hostWide !== undefined) {
+      const as = await until('every picture laid out', async () => { const a = await Promise.all(players.map(aspectOf)); return a.every((x) => x) ? a : null; }, 20000);
+      check(as.every((a) => (hostWide ? isWide(a) : is43(a))), `every peer draws the room host's Widescreen ${hostWide ? 'on (16:9)' : 'off (4:3)'}: aspects ${as.map((a) => a.toFixed(3)).join(' ')}`);
+    }
+    if (COSMETIC) check(players.every((p, i) => opts[i] && COSMETIC_IDS.every((k) => opts[i][k] === cosmeticOf(p)[k])),
+      `in the session each player keeps its own Hi-res menus / Smooth font / Full-resolution (${players.map((p, i) => `P${p.n} ${COSMETIC_IDS.map((k) => opts[i] && opts[i][k]).join('/')}`).join(', ')})`);
+    // the guest's own menu: the Widescreen row is locked with the reason, a change refused; Full-resolution is not locked
+    const tap = async (p, key, after = 200) => { await p.page.keyboard.down(key); await p.page.waitForTimeout(120); await p.page.keyboard.up(key); await p.page.waitForTimeout(after); };
+    const B = players[1], ws0 = opts[1] && opts[1][102];
+    await tap(B, 'Digit6', 300);
+    await until('the guest\'s menu open', () => inWorker(B, () => globalThis.__rtwConker.overlay().menu.open), 10000);
+    await tap(B, 'ArrowDown', 150);
+    await tap(B, 'KeyX', 300);
+    const m1 = await inWorker(B, () => globalThis.__rtwConker.overlay().menu);
+    await tap(B, 'KeyX', 400);
+    const ws1 = await inWorker(B, () => globalThis.__rtwConker.options()[102]);
+    const refusedSet = await inWorker(B, (v) => { globalThis.__rtwConker.menuSet(102, v); globalThis.__rtwConker.menuSet(104, v); const o = globalThis.__rtwConker.options(); return [o[102], o[104]]; }, ws0 ? 0 : 1);
+    await tap(B, 'ArrowDown', 150);
+    const m2 = await inWorker(B, () => globalThis.__rtwConker.overlay().menu);
+    await tap(B, 'KeyC', 150); await tap(B, 'KeyC', 300);
+    const mc = await inWorker(B, () => globalThis.__rtwConker.overlay().menu.open);
+    if (mc) { await tap(B, 'Digit6', 300); }
+    check(m1 && m1.page === 'picture' && m1.item === 'Widescreen' && m1.lock === 'Set by the room host during online play.' && ws1 === ws0 &&
+      refusedSet && refusedSet[0] === ws0 && refusedSet[1] === (opts[1] && opts[1][104]),
+      `guest's Widescreen row locked ("${m1 && m1.lock}"), A on it and a menu change refused (102 ${ws0} -> ${ws1}, set -> ${refusedSet && refusedSet.join('/')})`);
+    check(m2 && /Full/.test(m2.item || '') && m2.lock === '', `guest's ${m2 && m2.item} row is not locked`);
+  }
   const fs = await playInputs(players, FRAMES);
   say(`played to retraces ${fs.join(' ')}`);
   await new Promise((r) => setTimeout(r, 1500));
@@ -242,6 +295,20 @@ try {
     await A.page.click('[data-action=net-leave]');
     const f = await until('player 1 alone again', async () => { const s = await net(A); const x = await frameOf(A); return s && !s.active && x > 100 ? x : null; }, 60000);
     check(true, `player 1 left the session and plays alone (${f} retraces, no session)`);
+  }
+
+  if (process.env.LEAVE === '2') {   // P383: a guest leaves: its own options are back (the session overwrote nothing)
+    const B = players[1], own = JSON.parse(guestOpts);
+    await B.page.click('[data-action=online]');
+    await B.page.click('[data-action=net-leave]');
+    const f = await until('player 2 alone again', async () => { const s = await net(B); const x = await frameOf(B); return s && !s.active && x > 100 ? x : null; }, 60000);
+    await B.page.click('[data-action=online]').catch(() => {});   // close the panel again (harmless if it is not a toggle)
+    const o = await inWorker(B, () => globalThis.__rtwConker.options()), a = await aspectOf(B);
+    const stored = JSON.parse(await B.page.evaluate(() => localStorage.getItem('rtw:options:conker-eu') || '{}'));
+    check(o && [102, 104].every((k) => own[k] === undefined || o[k] === own[k]) && (own[102] ? !is43(a) : is43(a)),
+      `player 2 left (${f} retraces alone): its own Widescreen ${o && o[102]} / High frame rate ${o && o[104]} are back (aspect ${a && a.toFixed(3)})`);
+    check([102, 104].every((k) => own[k] === undefined || +stored[k] === own[k]), `player 2's stored options untouched by the session (102 ${stored[102]}, 104 ${stored[104]})`);
+    if (COSMETIC) check(o && COSMETIC_IDS.every((k) => o[k] === cosmeticOf(B)[k]), `player 2's own record values still there (${COSMETIC_IDS.map((k) => o && o[k]).join('/')})`);
   }
 
   if (process.env.SOLO === '1') {

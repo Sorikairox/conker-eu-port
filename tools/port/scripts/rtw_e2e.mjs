@@ -31,6 +31,7 @@
 //   ({ state, fov }) and other __rtwConker readouts (replay, optsync), hoststored (the host's stored option values,
 //   localStorage) and hostmenu (the values its options menu shows: opens and closes it). RTW_OPTIONS is stored only on a
 //   first load (P378), so the host's own stored values survive a reload as for a player.
+//   P383: seedrecord:ID:V:SEEN (write option ID = V into the settings record as an older build kept it; reload to apply).
 // Env RTW_SERVE=PORT: serve retrowser's built dist (tools/serve-worker.ts) in this process on PORT; HOST_URL is then
 // ignored (use "-"), so nothing is left running after the run.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -291,6 +292,20 @@ try {
       const w = await gameWorker();
       const ok = w && await w.evaluate(([id, v]) => globalThis.__rtwConker.menuSet(id, v), [Number(x), Number(y)]);
       say(`game option ${x} = ${y}${ok ? '' : ' (FAILED: no such option)'}`);
+      if (!ok) fails++;
+    } else if (cmd === 'seedrecord') {   // P383 seedrecord:ID:V:SEEN: the settings record (IndexedDB conker-rtw) gets option ID = V chosen while the host had SEEN (a record an older build wrote)
+      const w = await gameWorker(), seen = Number(a.split(':')[3] || 0);
+      const ok = w && await w.evaluate(([id, v, hs]) => new Promise((done) => {
+        const q = indexedDB.open('conker-rtw', 1);
+        q.onupgradeneeded = () => q.result.createObjectStore('settings');
+        q.onerror = () => done(false);
+        q.onsuccess = () => {
+          const db = q.result, t = db.transaction('settings', 'readwrite'), st = t.objectStore('settings'), g = st.get('customisation');
+          g.onsuccess = () => { const r = g.result || { chosen: {}, hostSeen: {}, preset: null }; r.chosen[id] = v; r.hostSeen[id] = hs; st.put(r, 'customisation'); };
+          t.oncomplete = () => { db.close(); done(true); }; t.onerror = () => done(false);
+        };
+      }), [Number(x), Number(y), seen]);
+      say(`settings record: option ${x} = ${y} (host value then ${seen})${ok ? '' : ' (FAILED)'}`);
       if (!ok) fails++;
     } else if (cmd === 'hostopt') {   // the host's own options menu (P382: start-up options only)
       await page.click('[data-action=menu]');

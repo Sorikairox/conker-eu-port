@@ -5,11 +5,11 @@
 #   tools/port/scripts/rtw_overlay_e2e.sh OUTDIR [ROM]      (ROM default baserom.eu.z64, read only by the host's file input)
 # Needs a built dist (tools/eu_port/build_rtw.sh) and ~/Code/retrowser's built dist (served in-process: RTW_SERVE, nothing
 # is left running). Both runs start from a fresh browser profile (OUTDIR/profile): skip intro and photo mode on.
-#   1 menus: the title's save slot page -> its CUSTOMISATION row -> every page (Picture: Widescreen on, Sound: music 90 %,
-#     Saves: export), back to the title; reload: both kept. P382 (options rule): Widescreen is each player's own (not in
-#     the manifest): the settings record keeps it; music is inGame: the host stores it (rtw_option_changed) and hands it
-#     back at the start, the record keeps nothing; the host's menu shows only the start-up options (1 108 117 118 119)
-#     and still changes them (Skip intro off).
+#   1 menus: the title's save slot page -> its CUSTOMISATION row -> every page (Picture: Widescreen and Full-resolution
+#     on, Sound: music 90 %, Saves: export), back to the title; reload: all kept. P382 (options rule): Full-resolution is
+#     each player's own (not in the manifest): the settings record keeps it; music and (P383) Widescreen are inGame: the
+#     host stores them (rtw_option_changed) and hands them back at the start, the record keeps nothing; the host's menu
+#     shows only the start-up options (1 108 117 118 119) and still changes them (Skip intro off).
 #   2 play: holding Photo opens the menu (paused), a Photo tap closes it; NEW GAME, hold L over the opening (ring), the
 #     autosave icon when the level saves; photo mode: Menu = the Pose & Outfit panel, D-pad / A / B change the animation
 #     (list page) and the model, hold Menu hides / shows the menus, holding Photo focuses the panel, A saves the PNG
@@ -32,7 +32,8 @@ run() {   # NAME ACTIONS
 mkdir -p "$OUT"
 TITLE='open,frame:900,press:Enter,wait:3000,press:Enter,wait:4000'
 MENUS="$TITLE,shot:slot_row,key:ArrowDown:250,wait:600,press:KeyX,waitfor:menu.open:true,expect:menu.from:title,wait:400,shot:menu_from_title,\
-press:ArrowDown,press:KeyX,expect:menu.page:picture,press:KeyX,wait:800,expect:opts.102:1,shot:pg_picture_ws,press:KeyC,\
+press:ArrowDown,press:KeyX,expect:menu.page:picture,press:KeyX,wait:800,expect:opts.102:1,shot:pg_picture_ws,\
+press:ArrowDown,expect:menu.item:Full-resolution picture,press:KeyX,wait:800,expect:opts.103:1,press:KeyC,\
 press:ArrowDown,press:KeyX,expect:menu.page:hud,shot:pg_hud,press:KeyC,\
 press:ArrowDown,press:KeyX,expect:menu.page:gameplay,shot:pg_gameplay,press:KeyC,\
 press:ArrowDown,press:KeyX,expect:menu.page:controls,shot:pg_controls,press:KeyC,\
@@ -41,8 +42,8 @@ press:ArrowDown,press:KeyX,expect:menu.page:saves,press:KeyX,wait:300,shot:pg_sa
 press:ArrowDown,press:KeyX,expect:menu.page:online,shot:pg_online,press:KeyC,\
 press:ArrowDown,press:ArrowDown,press:KeyX,expect:menu.page:tools,shot:pg_tools,press:KeyC,\
 press:ArrowDown,expect:menu.item:Back to title,press:KeyX,wait:2000,expect:menu.open:false,shot:closed,files,\
-reload,open,frame:300,expect:opts.102:1,expect:opts.9:90,shot:reload_kept,expect:menu.settings.chosen.102:1,expect:menu.settings.chosen.9:undefined,\
-expect:hoststored.9:90,expect:hoststored.102:undefined,expect:hostmenu.ids:1-108-117-118-119,hostopt:1:0,wait:500,expect:opts.1:0,expect:hoststored.1:0,ov"
+reload,open,frame:300,expect:opts.102:1,expect:opts.103:1,expect:opts.9:90,shot:reload_kept,expect:menu.settings.chosen.102:undefined,\
+expect:menu.settings.chosen.103:1,expect:menu.settings.chosen.9:undefined,expect:hoststored.9:90,expect:hoststored.102:1,expect:hoststored.103:undefined,expect:hostmenu.ids:1-108-117-118-119,hostopt:1:0,wait:500,expect:opts.1:0,expect:hoststored.1:0,ov"
 PLAY="open,frame:900,key:Digit1:800,waitfor:menu.open:true,expect:menu.paused:true,shot:menu_by_hold,press:Digit1,waitfor:menu.open:false,\
 press:Enter,wait:3000,press:Enter,wait:4000,press:KeyX,wait:16000,down:KeyA,wait:1500,shot:ring,expect:ring.progress:>0.2,wait:3000,up:KeyA,\
 waitfor:saveicon.showing:true:40000,dismiss,shot:saveicon,wait:6000,shot:level,\

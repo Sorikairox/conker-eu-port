@@ -19,10 +19,11 @@
 #           build: H / S too), paused at its end; the replayed saves never reach the host (save generation 0, the
 #           module's EEPROM written). Then Saved files -> "Open in game" keeps it again; option 115 off: refused.
 #   optsync rtw_option_changed (P382: always; options rule): the customisation settings (Menu button on the title) turn
-#           Widescreen on (each player's own, not declared: the settings record keeps it, the host is not told) and the
-#           music to 90 % (inGame: 2 calls, the host stores it but its menu does not show it; the record keeps nothing);
-#           the host's menu shows only 1 108 117 118 119; after a reload both are back (music from the host). Skip intro
-#           (a start-up option) turned off in-game: told, the host's menu shows it off, kept after a reload.
+#           Full-resolution on (each player's own, not declared: the settings record keeps it, the host is not told),
+#           Widescreen on (P383: inGame, 1 call) and the music to 90 % (inGame: 2 calls, the host stores both but its menu
+#           does not show them; the record keeps nothing of them); the host's menu shows only 1 108 117 118 119; after a
+#           reload all are back (music and Widescreen from the host). Skip intro (a start-up option) turned off in-game:
+#           told, the host's menu shows it off, kept after a reload.
 #   (P382: options 113 / 114 / 115 are no longer in the host's menu: the runs set them as a settings row does, gameopt.)
 set -uo pipefail
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 1
@@ -59,14 +60,14 @@ reload,open,frame:100,expect:replay.state:running,expect:replay.sameBuild:true,s
 expect:replay.state:identical,expect:replay.mismatches:0,expect:replay.saveGeneration:0,expect:replay.eepromNonzero:>0,shot:ended,hostsave,\
 openingame:conker-rec,waitfor:replay.pending:retrowser,gameopt:115:0,openingame:conker-rec,waitfor:replay.refused:1,grep:replay"
 OPTSYNC="open,frame:900,press:Enter,wait:3000,press:Enter,wait:4000,press:Digit6,waitfor:menu.open:true,\
-press:ArrowDown,press:KeyX,expect:menu.page:picture,press:KeyX,wait:800,expect:opts.102:1,press:KeyC,\
+press:ArrowDown,press:KeyX,expect:menu.page:picture,press:KeyX,wait:800,expect:opts.102:1,press:ArrowDown,press:KeyX,wait:800,expect:opts.103:1,press:KeyC,\
 press:ArrowDown:4,press:KeyX,expect:menu.page:sound,press:ArrowDown,press:ArrowLeft:2,expect:opts.9:90,press:KeyC,press:KeyC,waitfor:menu.open:false,\
-expect:optsync.told:2,expect:optsync.refused:0,expect:hoststored.102:undefined,expect:hoststored.9:90,expect:menu.settings.chosen.102:1,\
-expect:menu.settings.chosen.9:undefined,expect:hostmenu.ids:1-108-117-118-119,expect:hostmenu.9:undefined,\
-reload,open,frame:300,expect:opts.102:1,expect:opts.9:90,expect:optsync.told:0,expect:menu.settings.chosen.9:undefined,\
+expect:optsync.told:3,expect:optsync.refused:0,expect:hoststored.102:1,expect:hoststored.103:undefined,expect:hoststored.9:90,expect:menu.settings.chosen.102:undefined,\
+expect:menu.settings.chosen.103:1,expect:menu.settings.chosen.9:undefined,expect:hostmenu.ids:1-108-117-118-119,expect:hostmenu.9:undefined,expect:hostmenu.102:undefined,\
+reload,open,frame:300,expect:opts.102:1,expect:opts.103:1,expect:opts.9:90,expect:optsync.told:0,expect:menu.settings.chosen.9:undefined,\
 press:Digit6,waitfor:menu.open:true,press:ArrowDown:3,expect:menu.page:main,expect:menu.item:Gameplay,press:KeyX,press:ArrowDown,expect:menu.item:Skip intro,\
 press:KeyX,wait:500,expect:opts.1:0,press:KeyC,press:KeyC,waitfor:menu.open:false,expect:optsync.told:1,expect:hoststored.1:0,expect:hostmenu.1:0,\
-reload,open,frame:300,expect:opts.1:0,expect:opts.9:90,expect:opts.102:1"
+reload,open,frame:300,expect:opts.1:0,expect:opts.9:90,expect:opts.102:1,expect:opts.103:1"
 fails=0
 for r in $RUNS; do
   case $r in
