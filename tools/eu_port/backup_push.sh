@@ -10,7 +10,9 @@ url=$(git remote get-url origin)
 case "$url" in *Sorikairox/conker-eu-port*) ;; *) echo "origin is not the private backup repo: $url" >&2; exit 1;; esac
 if git merge-base --is-ancestor eu port-web; then
   if [ "$(git rev-parse eu)" != "$(git rev-parse port-web)" ]; then
-    if [ "$(git branch --show-current)" = eu ]; then git merge --ff-only --quiet port-web; else git branch -f eu port-web; fi
+    # eu may be checked out here, in another worktree (e.g. ~/conker), or nowhere: fast-forward it where it lives
+    eu_wt=$(git worktree list --porcelain | awk '/^worktree /{w=substr($0,10)} $0=="branch refs/heads/eu"{print w}')
+    if [ -n "$eu_wt" ]; then git -C "$eu_wt" merge --ff-only --quiet port-web; else git branch -f eu port-web; fi
     echo "eu fast-forwarded to port-web"
   fi
 else
