@@ -124,6 +124,20 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P385 (port-web, 2026-11-06): retrowser game icon (standard 1.2 `icon`): the site's own icon
+- Standard: retrowser 21a5fab, spec §2.2 `"icon": { "path", "sha256", "size" }` (PNG only, square, 192-1024 px,
+  <= 256 KiB, path relative to the manifest's folder ending in .png; rtw-hash fills sha256 / size). Icon: the page's
+  own port/web/icon-512.png (512x512 RGBA, 6794 bytes, sha256 9b36e1ea...), no new source art.
+- 0ccd9700 build: template retrowser.json `"icon": { "path": "icon.png" }`; port/Makefile `rtw` copies web/icon-512.png
+  to port/build/rtw/dist/icon.png; rtw_dist_commit.sh takes m.icon along (icon.png at rtw-dist's root,
+  retrowser/icon.png + path moved in the root manifest); build_rtw.sh lists it. 4830583e output: root build id
+  7d04f049..., rtw-dist b515a02e (build id 50942107...); conker.wasm / conker.js / conker_netx.txt / cover.png unchanged.
+- Tests: check GREEN; port/build/web 15 files identical (conker.wasm a2225161...); rtw-check --rom OK (picture png
+  512x374, icon 512x512) on dist and root; `node ~/Code/retrowser/dist/tools/rtw.mjs check . --rom baserom.eu.z64` OK
+  ending `icon 512×512` (retrowser rebuilt with npm run build at 21a5fab). Pushed; raw.githubusercontent.com
+  eu/retrowser.json sha256 = local, eu/retrowser/icon.png and rtw-dist/icon.png sha256 9b36e1ea.... No deploy. No
+  renames (no decomp-named function or variable touched). Not checked: the tab / home-screen icon on retrowser.app;
+  whether the icon's alpha is fully opaque (spec recommends an opaque background; no PIL here to check).
 ### P384 (port-web, 2026-11-05): retrowser cartridge picture (standard 1.2 `picture`): the official box art
 - User choice: the official EU box art (libretro-thumbnails, Nintendo_-_Nintendo_64 / Named_Boxarts, "Conker's Bad Fur
   Day (Europe).png", 512x374 PNG, 221406 bytes, sha256 48d75da8...). Not ROM-derived; no screenshot.
