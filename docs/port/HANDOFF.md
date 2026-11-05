@@ -68,10 +68,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls), proven online in 2-player Bunker
   (netmp_bunker.sh). event_query_world_object fixed in P343 (it was converted with
   six mistakes, see P343).
-- Page build latent bugs found in P380 (fixed only in the rtw build, the page build had to stay byte-identical):
-  `__port_icall_slow` with 26064 locals (Liftoff frame ~200 KB: stack overflow risk on nested mismatched calls);
-  pc_nethash.c net_in_gpu false desyncs when a page holds two GPU write-back ranges registered out of address order and
-  the peers' pictures differ (own view, other GPUs). Port both fixes (icall_gen.py split, net_in_gpu) when the page may change.
+- P380's two rtw-only fixes (icall_gen.py dispatcher split, pc_nethash.c lowest GPU range first) are in the page build
+  since P381 (3eacc8fb, c14cc01c); not deployed yet (the user deploys). Regression: netpair.sh PLAYERS=4
+  PADS=tools/port/scripts/netmp_pause.sh (false DESYNC at 8420 before), netgroup.js JS_FLAGS='--liftoff-only
+  --stack-size=300' (main-thread overflow at level_load before).
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
   WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync, automatic input
   delay, hidden page ticks from a Worker, desync report. Phase 2a done (P344, §10): 2 to 4 players, full mesh with a
@@ -122,6 +122,28 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P381 (port-web, 2026-11-05): P380's two rtw-only fixes in the page build
+- User request: bring the stack-overflow and false-desync fixes to the web build (only these two changes), rtw output
+  unchanged, no deploy (the user deploys after reading the report).
+- 3eacc8fb icall_gen.py: the split dispatcher (one noinline icall_case_N per signature) for both builds; the rtw-only
+  icall_tab.o rule (-DPORT_RTW) removed, both link the same object (emitted where P380's rtw copy had it). L2 ->
+  split_dispatch. netgroup.js JS_FLAGS (V8 switches for the pages). Main thread vs worker: a recursion test in this
+  headless Chrome reached depth 15269 on the main thread, 5298 in a dedicated worker (~3x); the page runs the game on
+  the main thread, so the old build did not overflow in normal runs (also not with --liftoff-only, nor with a 520 KB
+  V8 stack). With --liftoff-only --stack-size=300 the old build overflowed on all 3 pages at level_load (retrace 2139:
+  level_load -> hotspots_start_all -> __port_icall_slow -> record_dispatch_82ecc -> __port_icall_slow) and desynced;
+  the new one plays on at 300 (x3) and 200 KB, hashes equal to the old build's at every retrace.
+- c14cc01c pc_nethash.c net_in_gpu -> net_gpu_lowest_overlap, the P380 loop for both builds. Reproduced on the page
+  first: 4 players, own view (room default, zoomed), host fullres 1920x1080, viewports 800x600 / 1280x720 / 1024x768,
+  player 1 pauses (new PADS file netmp_pause.sh): 803D6300 +1EA78 registered at 8117, 803B7600 at 8417 (the two
+  framebuffers share page 803D6000) -> static hash diverged at 8417, DESYNC at 8420 on all four (page 3030, stacks
+  equal). Fixed: 10484 and 10487 retraces IDENTICAL on all peers; hashes equal to the old build's up to 8416.
+- Tests (muted headless Chrome through the shared lock): check.sh GREEN (each commit); e2e p357 7700 IDENTICAL
+  (G / level / mode, new build id); hold-L 5789 / 0x29 at 5795 OK; netpair 2p 4994 IDENTICAL; 3p x6 (60 s, ~2990
+  retraces each) IDENTICAL, 0 overflows; 4p pause (above); offline_test.sh local ALL PASS. port/build/rtw/dist
+  sha256-identical after both (rebuilt), rtw-check OK on dist (a36cc05e) and root (8328d165): no rtw_dist_commit needed.
+- Web build: conker.wasm 1d99ef0f.. -> a2225161.., sched_demo.wasm 7e09f8bc.. -> a5c40329.., sw.js build id
+  45f842efc20283ea -> a39b03a0f90e3143; other files identical. Not deployed. Evidence port_work/p381.
 ### P380 (port-web, 2026-11-05): retrowser build plays online (standard 1.2, lockstep, 2-4 players)
 - User request: online play of the rtw build through retrowser's standard 1.2 (host 16b4f184), rtw target only, web build
   byte-identical, a manifest option for it (on). Manifest `"net": { "players": 4, "model": "lockstep" }`; options (all the

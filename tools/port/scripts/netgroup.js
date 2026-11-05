@@ -11,9 +11,9 @@
 //   P345: ROOM=1 connects through a room code instead (host __online.roomCreate, guests __online.roomJoin in order; with
 //   UI=1 through the panel's Create room / code field / Join room); the pages' ?roomapi names the room server.
 //   ROMFILE=PATH gives each page the ROM through its file picker (for pages without ?romurl, e.g. the public site).
-//   JS_FLAGS='--liftoff-only --stack-size=340': V8 switches for every page (P381: --liftoff-only keeps every wasm function
-//   in V8's baseline compiler, i.e. the big frames of untiered functions; --stack-size=KB gives the page's main thread the
-//   stack of a dedicated worker; together they reproduce the retrowser worker's __port_icall_slow stack overflow)
+//   JS_FLAGS='--liftoff-only --stack-size=300': V8 switches for every page (P381: --liftoff-only keeps every wasm function
+//   in V8's baseline compiler, i.e. the big frames of untiered functions; --stack-size=KB shrinks the main thread's stack,
+//   ~3x a dedicated worker's by default; at 300 the pre-P381 page build overflowed in __port_icall_slow at level_load)
 //   ROOMCHECK=1 (with ROOM=1) also tries an unknown code and, after everyone joined, one more player (ROOMMAX=N: the room
 //   is made for N players, so with N = the page count it is full); prints the errors.
 // Logs: OUTDIR/NAME.log (the page console). Prints a summary of the [net] lines.
