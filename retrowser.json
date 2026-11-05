@@ -23,8 +23,8 @@
     },
     "js": {
       "path": "retrowser/conker.js",
-      "sha256": "41b5ad77dedaa7bed8d72118a87f2fe4a83ca97c0bfd4faa194e2ec1af704c70",
-      "size": 416144
+      "sha256": "c286b4589027ade3fbd26719d793a6429064280854952a8bc09c731491458ca3",
+      "size": 420118
     },
     "data": [
       {
@@ -172,6 +172,20 @@
     {
       "id": 16,
       "label": "Photo mode",
+      "type": "bool",
+      "default": 0,
+      "inGame": true
+    },
+    {
+      "id": 102,
+      "label": "Widescreen",
+      "type": "bool",
+      "default": 0,
+      "inGame": true
+    },
+    {
+      "id": 104,
+      "label": "High frame rate",
       "type": "bool",
       "default": 0,
       "inGame": true
