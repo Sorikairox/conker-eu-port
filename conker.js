@@ -102,8 +102,9 @@ var rtwOverlay = (function () {
   const document = { createElement: () => new OffscreenCanvas(1, 1), getElementById: () => layerElement, body: { classList: noClass } };
   const window = { addEventListener() {}, devicePixelRatio: 1 };
   const navigator = { getGamepads: () => [] };   // the host's pads arrive as rtw_input
-  // the page's session flags: no online play and no ?netdet in this build; recCfg = the recorder runs
-  const netCfg = null, NETDET = false;
+  // the page's session flags: no ?netdet in this build; recCfg = the recorder runs; netCfg = an online session runs (P380)
+  const NETDET = false;
+  let netCfg = null;
   let recCfg = null, optionsLocked = false;
   // main.js photo mode, bound to rtw_glue.js's photo object / functions at attach()
   let photo = { state: 0, hud: false, viewReq: false };
@@ -408,7 +409,7 @@ const GFace = {
   // footer's N64 button faces) and pad controls (D-pad / stick move with the game's repeat, left / right change, A or Start
   // choose, B back, closes on the main page), the same model (MenuModel over main.js OPTIONS, the Classic / Modern presets)
   // and the game's own menu sounds (gmenu.js GSound). Its own pages: no keyboard / gamepad binding pages (the host maps its
-  // keys, pads and touch buttons to N64 buttons), no online rooms (no netplay in retrowser v1: an information page), saves
+  // keys, pads and touch buttons to N64 buttons), no online rooms (the host's Online panel has them, P380: an information page), saves
   // through the host's menu (an export here too).
   // Opened by the extra button Menu (bit 21), by holding Photo mode half a second, or by the CUSTOMISATION row of the
   // game's own menus (pause, save slots, MULTI, the fireplace OPTIONS page: game C, port_set_gmenu_row /
@@ -676,7 +677,7 @@ const MenuModel = (() => {
     snd = function menuSound(kind) {
       const k = SOUND[kind];
       if (!k) return;
-      if (recCfg || !featureOn(FEATURE.MENUS)) { soundStats.silent++; return; }
+      if (recCfg || netCfg || !featureOn(FEATURE.MENUS)) { soundStats.silent++; return; }   // P380: silent online (outside the lockstep)
       if (!M._port_sfx_decode || !M._port_rtw_menu_sound_play) { soundStats.none++; return; }
       const n = M._port_sfx_decode(k[0], k[2]);
       if (!n) { soundStats.none++; return; }   // the sound bank is not loaded yet (boot)
@@ -698,11 +699,11 @@ const MenuModel = (() => {
       const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
       const page = () => U.stack[U.stack.length - 1];
       const fontOk = () => GameFont.load();
-      const hostRow = (label, value, help) => ({ kind: 'info', label, value: () => value, help });
+      const hostRow = (label, value, help) => ({ kind: 'info', label, value: typeof value === 'function' ? value : () => value, help });
       function mainItems() {
         return [MenuModel.presetItem()].concat(MenuModel.sections().filter((s) => s.id !== 'tools').map((s) => ({ kind: 'link', label: s.label, help: s.help, page: s.id })), [
           { kind: 'link', label: 'Saves', help: 'Your save is the cartridge\'s EEPROM: the host keeps it for you automatically. Export it to a file here or in the host\'s menu; import one in the host\'s menu.', page: 'saves' },
-          { kind: 'link', label: 'Online', help: 'Online multiplayer is not in this build yet.', page: 'online' },
+          { kind: 'link', label: 'Online', help: 'Online multiplayer: rooms are in the host\'s Online panel.', page: 'online' },   // P380
           { kind: 'action', label: 'Photo mode', help: 'Freeze the game and move a free camera; A saves a picture, Start leaves (a short press of the Photo mode button also starts it). Single player only.',
             locked: () => MenuModel.lockReason(optOf('photomode')),
             act: () => {
@@ -724,7 +725,8 @@ const MenuModel = (() => {
           backRow,
         ];
         if (p.id === 'online') return [
-          hostRow('Online multiplayer', 'NOT YET', 'Online matches need netplay in the retrowser host, which is not there yet (retrowser v1). The page build at conker-web-port.netlify.app has online rooms.'),
+          // P380 standard 1.2: the host owns the rooms; the session's settings are the host menu's options 117-119
+          hostRow('Online multiplayer', () => (glue.online() ? 'IN A SESSION' : glue.value(117, 1) ? 'HOST PANEL' : 'OFF'), 'Up to 4 players: one creates a room in the host\'s Online panel and shares its code or link, the others join it, the room host presses Start. Every player\'s game then starts from power-on with the room host\'s options and save (yours stays untouched). Options "Online play", "Online: own view" and "Online input delay" are in the host\'s menu.'),
           hostRow('Local multiplayer', 'MULTI', 'Up to 4 players on one screen: plug in more gamepads (the host sends them as controllers 2 to 4) and choose MULTI on the title menu.'),
           backRow,
         ];
@@ -753,8 +755,8 @@ const MenuModel = (() => {
         U.open = true; U.t0 = performance.now(); U.stack = [{ id: 'main', sel: 0, top: 0 }]; U.prev = -1; U.helpSel = ''; U.note = '';
         U.from = BACK[how] ? how : '';
         // single player: the game pauses as on the page (P363 / P364: not from the game's own pause / title menu, which keeps
-        // running underneath with an idle pad 1); never while recording
-        if (!U.from && !recCfg && !glue.hostPaused()) { U.paused = true; M._port_set_paused(1); }
+        // running underneath with an idle pad 1); never while recording, never in an online session (P380)
+        if (!U.from && !recCfg && !netCfg && !glue.hostPaused()) { U.paused = true; M._port_set_paused(1); }   // P380: never in an online session
         log(`[gmenu] open${U.from ? ` (from the game's ${U.from} menu)` : ` (${how})`}`);
         if (!U.from) snd('choose');
         return true;
@@ -1767,6 +1769,7 @@ const GPhoto = (() => {
     wheel(dy) { for (const f of hooks.wheel) if (f(dy)) return true; return false; },   // P378 rtw_wheel: true = a menu took it
     photoTick: (dt, d, fresh) => photoTick(dt, d, fresh), photoShown: (on) => photoShown(on), photoToast: (text) => photoToast(text),
     setRecording(on) { recCfg = on ? { mode: 'record' } : null; optionsLocked = !!on; },
+    setOnline(on) { netCfg = on ? { online: true } : null; optionsLocked = !!on || !!recCfg; },   // P380 standard 1.2 session
     hostResumed() { for (const f of hooks.hostResumed) f(); },   // rtw_pause(0)
     notice,   // P378
     state() {
@@ -1777,6 +1780,427 @@ const GPhoto = (() => {
   };
 })();
 // end include: build/rtw/gen/rtw_overlay.js
+// include: web/rtw/rtw_net.js
+// P380 retrowser build: online play through the host (retrowser standard 1.2, spec §4.12; plan.md §19.2). Emscripten
+// --pre-js of the rtw build only; the page build's port/web/net.js is unchanged.
+// The game side stays port/ultra/pc_net.c: the input ring (256 frames x 4 channels), the frame barrier (pc_sched.c
+// frame: retrace N runs only when every session channel's input for N is in the ring), input delay D (the local input
+// for N + D is sampled at the start of retrace N), the state hash every K retraces. This object is the worker twin of
+// net.js's packet logic, with the transport replaced by the host's: the host page owns the room, the WebRTC mesh and
+// its relay, the build / ROM check, the pre-start round trips, the session boot (every peer from power-on with the room
+// host's options and save) and the hidden-tab ticker. Peers are session indexes (0 = the room host = controller 1).
+//
+// Channel 0 (unreliable, unordered): one input packet per receiver (net.js type 1 without its type and sender bytes:
+// the host gives the sender's index):
+//   u32 ack (the newest frame of the receiver's channel this sender holds without gaps) | u32 first frame | u8 count |
+//   u32 input x count (packed: buttons << 16 | (u8)x << 8 | (u8)y) | u32 hash frame | u32 H | u32 S |
+//   u32 the sender's last retrace | i16 the sender's input margin of the receiver's channel x 64 (time sync).
+// Every input the receiver has not acknowledged is repeated (up to 64), so a lost packet costs nothing. A packet leaves
+// as soon as a local input is sampled (pc_net.c net_send_now -> afterTick), the same packet once more ~8 ms later, a
+// keep-alive every 30 ms. A packet that brings the input a waiting game needs runs the retrace at once
+// (pc_sched.c port_rtw_net_kick). The round trip is the host's (rtw_net_stat kind 0): no pings of our own.
+// Channel 1 (reliable, ordered): net.js's 'ctl' messages in binary, u8 type first:
+//   1 lost  | u8 ch                          the coordinator asks for the lost player's inputs everyone holds
+//   2 held  | u8 ch | u32 top | u32 first | u16 n | n x (u8 has, u32 v)      the answer
+//   3 drop  | u8 ch | u32 neutralFrom | u32 first | u16 n | n x (u8 has, u32 v) | UTF-8 why
+//                                            the agreed inputs up to F - 1; channel ch reads neutral from F everywhere
+//   4 desync| u32 frame | u32 mine H | u32 mine S | u32 theirs H | u32 theirs S
+//   5 pages | u32 frame | u32 x (pages + 32 stacks)   the per-page hashes of the desync retrace (raw, not base64)
+// Lost player (net.js P344 decision 6: it stands still): the host says rtw_net_peer(i, 0) (left, dropped or silent 15 s);
+// the coordinator (the lowest index that is neither lost nor silent) collects what everyone holds of i's input, fixes
+// F = 1 + the newest frame anyone holds, sends 'drop'; from F channel i reads neutral on every peer (port_net_drop).
+// Input delay D: rtw_net_stat(0, 3) is the worst 90th-percentile round trip of the session, the same number on every
+// peer, so D needs no message: net.js autoDelay(median, p90) = clamp(ceil((median / 2 + (p90 - median) / 2) / 20) + 1,
+// 2, 8) is exactly clamp(ceil(p90 / 40) + 1, 2, 8). Option 119 (Online input delay, the room host's) fixes D instead.
+var rtwNet = (function () {
+  'use strict';
+  const RING = 256, HASH_EVERY = 10, MAX_IN = 64;
+  const CH_IN = 0, CH_CTL = 1;
+  const PEER_GONE = 0, PEER_CONNECTED = 1, PEER_SILENT = 2;
+  const T_LOST = 1, T_HELD = 2, T_DROP = 3, T_DESYNC = 4, T_PAGES = 5;
+  const wasm = (name) => Module['_' + name];
+  let say = (s) => out(s), notice = () => {};
+  const S = {
+    active: false, off: false, players: 0, me: 0, delay: 0, autoDelay: false, worst: -1, roster: [], base: {},
+    peers: {}, sent: 0, recv: 0, refused: 0, bad: 0, kicks: 0, desync: null, desyncReport: null, myHashSeen: 0,
+    hashesMatched: 0, beganAt: -1, errors: 0, lastSend: 0, pumps: 0, drop: null, drops: [], playing: false, slowAsked: 0, started: false, scratch: 0,
+  };
+  const pn = (ch) => `player ${ch + 1}`;
+  function guard(what, fn) {   // an exception in a timer is logged (the first few), not lost in the worker's console
+    try { fn(); } catch (e) {
+      S.errors++;
+      if (S.errors <= 3) { const st = String(e && e.stack || e).split('\n'); say(`[net] ${what}: ${st.slice(0, 6).join('\n')}${st.length > 12 ? '\n  ...\n' + st.slice(-6).join('\n') : ''} (${st.length - 1} frames)`); }
+    }
+  }
+  let u32 = null;
+  const U32 = () => { if (!u32 || u32.buffer !== HEAPU8.buffer) u32 = new Uint32Array(HEAPU8.buffer); return u32; };
+
+  // ---- the game side (pc_net.c), as net.js N.*
+  const frame = () => wasm('port_net_frame')() >>> 0;   // the last retrace run
+  const ready = (f) => wasm('port_net_ready')(f) !== 0;   // may retrace f run (the frame barrier)
+  const stat = (i) => U32()[S.base.stat + i];   // pc_net.c port_net_addr(4)
+  const has = (f, ch) => U32()[S.base.frame + (f % RING) * 4 + ch] === f;
+  const get = (f, ch) => (has(f, ch) ? U32()[S.base.input + (f % RING) * 4 + ch] : -1);
+  function put(f, ch, v) {   // a peer's input for frame f
+    const run = frame();
+    if (f <= run || f > run + RING - 16 || has(f, ch)) return false;   // already run / too far ahead / already there
+    const i = (f % RING) * 4 + ch, H = U32();
+    H[S.base.input + i] = v >>> 0; H[S.base.frame + i] = f;
+    return true;
+  }
+  const localTop = () => frame() + S.delay;   // newest local frame sampled so far
+  function hashes() {   // [{f, h, s}] of the hash ring, oldest first
+    const H = U32(), list = [];
+    for (let i = 0; i < 64; i++) { const p = S.base.hash + i * 3; if (H[p]) list.push({ f: H[p], h: H[p + 1], s: H[p + 2] }); }
+    return list.sort((a, b) => a.f - b.f);
+  }
+  // run the waiting retrace now (pc_sched.c port_rtw_net_kick). Never from inside rtw_net_recv: the retrace switches the
+  // game's fibers (Asyncify), which must not unwind through the import that called us; a microtask runs it right after
+  // the host's packet handler returned
+  let kickQueued = false;
+  const kick = () => {
+    if (kickQueued) return;
+    kickQueued = true;
+    queueMicrotask(() => { kickQueued = false; S.kicks++; guard('kick', () => wasm('port_rtw_net_kick')()); });
+  };
+
+  // ---- the host's transport (pc_rtw.c port_rtw_net_send / port_rtw_net_stat -> env.rtw_net_send / rtw_net_stat)
+  function send(peer, channel, u8) {
+    if (u8.length > 65536) return -1;
+    if (!S.scratch) S.scratch = wasm('malloc')(65536);
+    HEAPU8.set(u8, S.scratch);
+    const r = wasm('port_rtw_net_send')(peer, channel, S.scratch, u8.length);
+    S.lastSend = r;
+    if (r === -1) S.refused++;
+    return r;
+  }
+  const netStat = (peer, kind) => wasm('port_rtw_net_stat')(peer, kind);
+
+  function peer(ch) {
+    return S.peers[ch] || (S.peers[ch] = { ch, recvTop: 0, peerAck: 0, hash: new Map(), myMargin: 0, peerMargin: 0, peerFrame: 0,
+      marginAt: 0, rtt: 0, lastRecv: 0, lastSendTop: 0, lastSendAt: 0, lastPacket: null, repeated: true,
+      lost: false, suspect: false, dropping: false, state: PEER_CONNECTED });
+  }
+  const others = () => S.roster.filter((c) => c !== S.me);
+  const livePeers = () => others().map(peer).filter((p) => !p.lost);
+  // the coordinator of a drop: the lowest index among me and the players that are neither lost nor silent / gone
+  const amCoordinator = () => livePeers().every((p) => p.suspect || p.dropping || p.ch > S.me);
+
+  // ---- session start: rtw_net_session(players, me), before rtw_start (the host's lockstep boot)
+  // D = clamp(ceil(p90 / 40) + 1, 2, 8) (see the top); no measurement (-1): 4 as net.js
+  const autoDelay = (p90) => (p90 >= 0 ? Math.max(2, Math.min(8, Math.ceil(p90 / 40) + 1)) : 4);
+  function begin(players, me, cfg) {   // cfg: { on, delay (0 = auto), ownView, log, notice }
+    if (cfg.log) say = cfg.log;
+    if (cfg.notice) notice = cfg.notice;
+    if (S.active || S.off) { say(`[net] rtw_net_session(${players}, ${me}) again: ignored`); return false; }
+    if (!(players >= 2 && players <= 4 && me >= 0 && me < players)) { S.off = true; say(`[net] session (${players} players, me ${me}) refused: 2 to 4 players`); return false; }
+    if (!cfg.on) {   // option 117 is the room host's, so every peer of the session takes this branch
+      S.off = true;
+      say(`[net] session of ${players} players: option "Online play" is off (the room host's options): this game runs alone`);
+      return false;
+    }
+    S.players = players; S.me = me; S.roster = [...Array(players).keys()];
+    S.worst = netStat(0, 3);
+    S.autoDelay = !(cfg.delay > 0);
+    S.delay = S.autoDelay ? autoDelay(S.worst) : Math.max(1, Math.min(16, cfg.delay | 0));
+    const mask = (1 << players) - 1;
+    wasm('port_net_session')(mask, 1 << me, S.delay, HASH_EVERY);   // forces online determinism (pc_net.c section 1)
+    for (const [k, i] of [['input', 0], ['frame', 1], ['hash', 2], ['pad', 3], ['stat', 4]]) S.base[k] = wasm('port_net_addr')(i) >>> 2;
+    if (wasm('port_gfx_ownview')) wasm('port_gfx_ownview')(cfg.ownView ? me : -1);   // P371 the room's SCREEN setting (option 118)
+    const now = performance.now();
+    for (const p of others().map(peer)) { p.recvTop = S.delay; p.peerAck = S.delay; p.lastRecv = now; }   // frames 1..D are neutral
+    S.active = true; S.beganAt = frame();   // 0: before the first retrace (the lockstep boot)
+    say(`[net] session: ${players} players, I am ${pn(me)}, input delay ${S.delay}${S.autoDelay ? ` (auto: worst round trip p90 ${S.worst} ms)` : ' (option)'}, ` +
+        `hash every ${HASH_EVERY} retraces, screen ${cfg.ownView ? 'own view' : 'split'}`);
+    return true;
+  }
+  // rtw_net_peer(peer, state): 1 connected / back, 2 silent (3 s), 0 gone (final)
+  function peerState(ch, state) {
+    if (!S.active || ch === S.me || ch < 0 || ch >= S.players) return;
+    const p = peer(ch), was = p.state;
+    p.state = state;
+    if (p.lost) return;
+    if (state === PEER_CONNECTED) {
+      if (was !== PEER_CONNECTED) say(`[net] ${pn(ch)} is back`);
+      p.suspect = false; p.lastRecv = performance.now();
+    } else if (state === PEER_SILENT) {
+      p.suspect = true;
+      say(`[net] ${pn(ch)} is silent (nothing heard for 3 s)`);
+    } else if (state === PEER_GONE) {
+      p.suspect = true;
+      say(`[net] ${pn(ch)} is gone (left, dropped, or silent for 15 s)`);
+      if (amCoordinator()) declareLost(ch, `${pn(ch)} left`);
+      // a coordinator that went silent too: the next one takes over when the host says so (its own state change)
+      for (const q of livePeers()) if (q.state === PEER_GONE && !q.dropping && amCoordinator()) declareLost(q.ch, `${pn(q.ch)} left`);
+    }
+  }
+
+  // ---- after rtw_start: the pump sends inputs, keeps alive, checks the hashes; the time sync
+  function startTransport() {
+    if (!S.active || S.started) return;
+    S.started = true;
+    for (const p of livePeers()) advanceRecvTop(p);
+    say(`[net] waiting for the other player${others().length > 1 ? 's' : ''}`);
+    setInterval(() => guard('pump', pump), 5);
+    setInterval(() => guard('time sync', timeSync), 250);
+    // peers the host already reported gone at the boot
+    for (const p of livePeers()) if (p.state === PEER_GONE && amCoordinator()) declareLost(p.ch, `${pn(p.ch)} left`);
+  }
+  function advanceRecvTop(p) { while (has(p.recvTop + 1, p.ch)) p.recvTop++; }
+  function sendInputsTo(p, now) {
+    const top = localTop();
+    const first = Math.max(p.peerAck + 1, S.delay + 1, top - (MAX_IN - 1));
+    const count = Math.max(0, top - first + 1);
+    const b = new Uint8Array(9 + 4 * count + 18), dv = new DataView(b.buffer);
+    dv.setUint32(0, p.recvTop, true); dv.setUint32(4, first, true); dv.setUint8(8, count);
+    for (let i = 0; i < count; i++) dv.setUint32(9 + 4 * i, get(first + i, S.me) >>> 0, true);
+    const hs = hashes(), h = hs[hs.length - 1] || { f: 0, h: 0, s: 0 }, o = 9 + 4 * count;
+    dv.setUint32(o, h.f, true); dv.setUint32(o + 4, h.h, true); dv.setUint32(o + 8, h.s, true);
+    dv.setUint32(o + 12, frame(), true); dv.setInt16(o + 16, Math.max(-32768, Math.min(32767, Math.round(p.myMargin * 64))), true);
+    if (send(p.ch, CH_IN, b) === 0) S.sent++;
+    p.lastSendTop = top; p.lastSendAt = now; p.lastPacket = b; p.repeated = false;
+  }
+  // pc_net.c net_send_now (start of each retrace, right after the local input for N + D was sampled)
+  function afterTick() { if (S.active && S.started) { const now = performance.now(); for (const p of livePeers()) sendInputsTo(p, now); } }
+  function pump() {
+    S.pumps++;
+    const now = performance.now(), lastRun = frame();
+    for (const p of livePeers()) {
+      const margin = p.recvTop - lastRun;   // the input margin of p, time-averaged (500 ms)
+      if (p.marginAt) { const a = Math.min(1, (now - p.marginAt) / 500); p.myMargin += (margin - p.myMargin) * a; } else p.myMargin = margin;
+      p.marginAt = now;
+      if (localTop() !== p.lastSendTop || now - p.lastSendAt > 30) sendInputsTo(p, now);
+      else if (!p.repeated && now - p.lastSendAt >= 8) { if (send(p.ch, CH_IN, p.lastPacket) === 0) S.sent++; p.repeated = true; }
+      const r = netStat(p.ch, 0);
+      if (r >= 0) p.rtt = r;
+    }
+    checkHashes();
+    if (!S.playing && lastRun > S.delay + 1) { S.playing = true; say(`[net] playing (retrace ${lastRun})`); }
+  }
+  let lastSyncLog = 0;
+  function timeSync() {   // net.js P339: if this peer runs ahead of any player, slow down by half the largest difference
+    let ahead = 0;
+    for (const p of livePeers()) if (p.peerFrame) ahead = Math.max(ahead, (p.peerMargin - p.myMargin) / 2);
+    S.slowAsked = ahead > 0.3 ? Math.min(15, ahead * 20 * 0.6) : 0;
+    wasm('port_net_slow')(S.slowAsked);
+    const now = performance.now();
+    if (now - lastSyncLog > 5000) {
+      lastSyncLog = now;
+      say(`[net] sync: retrace ${frame()}, ` + livePeers().map((p) => `${pn(p.ch)} margin mine ${p.myMargin.toFixed(2)} theirs ${p.peerMargin.toFixed(2)} rtt ${Math.round(p.rtt)}`).join('; ') +
+          `, slow ${S.slowAsked.toFixed(1)} ms, slowed ${stat(7)} ms total, waits ${stat(8)}, hashes matched ${S.hashesMatched} (to ${S.myHashSeen})`);
+    }
+  }
+
+  // ---- rtw_net_recv(peer, channel, len): the bytes are copied out here (pc_rtw.c reuses its buffer)
+  function recv(from, channel, ptr, len) {
+    if (!S.active || from === S.me || from < 0 || from >= S.players) return;
+    const p = peer(from);
+    if (p.lost) return;
+    p.lastRecv = performance.now();
+    const b = HEAPU8.slice(ptr, ptr + len);
+    S.recv++;
+    try {
+      if (channel === CH_IN) onInputs(p, b);
+      else if (channel === CH_CTL) onCtl(p, b);
+    } catch (e) { S.bad++; if (S.bad < 5) say(`[net] bad packet from ${pn(from)} on channel ${channel}: ${e.message || e}`); }
+  }
+  function onInputs(p, b) {
+    if (b.length < 9) throw new Error('short input packet');
+    const dv = new DataView(b.buffer), ack = dv.getUint32(0, true), first = dv.getUint32(4, true), count = dv.getUint8(8);
+    if (count > MAX_IN || b.length < 9 + 4 * count + 18) throw new Error('input packet length');
+    if (ack > p.peerAck && ack <= localTop()) p.peerAck = ack;
+    for (let i = 0; i < count; i++) put(first + i, p.ch, dv.getUint32(9 + 4 * i, true));
+    const lastRun = frame();
+    advanceRecvTop(p);
+    if (p.recvTop > lastRun && ready(lastRun + 1)) kick();   // net.js P339: no need to wait for the next tick
+    const o = 9 + 4 * count, hf = dv.getUint32(o, true);
+    if (hf && hf % HASH_EVERY === 0) p.hash.set(hf, [dv.getUint32(o + 4, true), dv.getUint32(o + 8, true)]);
+    const peerFrame = dv.getUint32(o + 12, true);   // time sync: newer packets only (they arrive out of order)
+    if (peerFrame >= p.peerFrame) { p.peerFrame = peerFrame; p.peerMargin = dv.getInt16(o + 16, true) / 64; }
+  }
+  function checkHashes() {
+    if (S.desync) return;
+    const mine = hashes();
+    for (const p of livePeers()) {
+      if (!p.hash.size) continue;
+      for (const h of mine) {
+        const q = p.hash.get(h.f);
+        if (!q) continue;
+        if (q[0] !== h.h || q[1] !== h.s) {
+          S.desync = { frame: h.f, mine: [h.h, h.s], theirs: q, ch: p.ch };
+          say(`[net] DESYNC at retrace ${h.f} with ${pn(p.ch)}: mine ${h.h.toString(16)} ${h.s.toString(16)}, theirs ${q[0].toString(16)} ${q[1].toString(16)}`);
+          notice(`Online: the games of ${pn(S.me)} and ${pn(p.ch)} differ from retrace ${h.f} on (desync).`, 10000);
+          const b = new Uint8Array(21), dv = new DataView(b.buffer);
+          dv.setUint8(0, T_DESYNC); dv.setUint32(1, h.f, true); dv.setUint32(5, h.h, true); dv.setUint32(9, h.s, true);
+          dv.setUint32(13, q[0], true); dv.setUint32(17, q[1], true);
+          send(p.ch, CH_CTL, b);
+          sendPages(h.f, p.ch);
+          return;
+        }
+        if (h.f > S.myHashSeen) { S.myHashSeen = h.f; S.hashesMatched++; }   // hash points checked (each once)
+        p.hash.delete(h.f);
+      }
+      if (p.hash.size > 256) for (const k of [...p.hash.keys()].slice(0, 128)) p.hash.delete(k);
+    }
+  }
+
+  // ---- channel 1
+  const entriesSize = (n) => 5 * n;
+  function writeEntries(dv, o, first, v) {   // v[i] = input of frame first + i, or -1 (not held)
+    for (let i = 0; i < v.length; i++, o += 5) { dv.setUint8(o, v[i] === -1 ? 0 : 1); dv.setUint32(o + 1, v[i] === -1 ? 0 : v[i] >>> 0, true); }
+    return o;
+  }
+  function readEntries(dv, o, n) {
+    if (n > 1024 || o + entriesSize(n) > dv.byteLength) throw new Error('entries length');
+    const v = [];
+    for (let i = 0; i < n; i++, o += 5) v.push(dv.getUint8(o) ? dv.getUint32(o + 1, true) : -1);
+    return v;
+  }
+  function onCtl(p, b) {
+    if (!b.length) throw new Error('empty message');
+    const dv = new DataView(b.buffer), type = b[0];
+    const chOk = (ch) => { if (!(ch >= 0 && ch < S.players)) throw new Error('channel'); return ch; };
+    if (type === T_LOST) { if (b.length < 2) throw new Error('lost'); onLost(chOk(b[1]), p.ch); }
+    else if (type === T_HELD) {
+      if (b.length < 12) throw new Error('held');
+      const ch = chOk(b[1]), top = dv.getUint32(2, true), first = dv.getUint32(6, true), n = dv.getUint16(10, true);
+      onHeld({ ch, top, first, v: readEntries(dv, 12, n) }, p.ch);
+    } else if (type === T_DROP) {
+      if (b.length < 12) throw new Error('drop');
+      const ch = chOk(b[1]), neutralFrom = dv.getUint32(2, true), first = dv.getUint32(6, true), n = dv.getUint16(10, true);
+      const v = readEntries(dv, 12, n), why = new TextDecoder().decode(b.subarray(12 + entriesSize(n), 12 + entriesSize(n) + 200));
+      if (ch === S.me) return;   // I was dropped by the others: they go on without me (the host ends my session)
+      applyDrop({ ch, neutralFrom, first, v, why });
+    } else if (type === T_DESYNC) {
+      if (b.length < 21) throw new Error('desync');
+      const f = dv.getUint32(1, true);
+      say(`[net] ${pn(p.ch)} reports a DESYNC at retrace ${f}: theirs ${dv.getUint32(5, true).toString(16)} ${dv.getUint32(9, true).toString(16)}`);
+      if (!S.desync) { S.desync = { frame: f, mine: [dv.getUint32(13, true), dv.getUint32(17, true)], theirs: [dv.getUint32(5, true), dv.getUint32(9, true)], ch: p.ch, remote: true };
+        notice(`Online: the games of ${pn(S.me)} and ${pn(p.ch)} differ from retrace ${f} on (desync).`, 10000); }
+      sendPages(f, p.ch);
+    } else if (type === T_PAGES) {
+      if (b.length < 5 || (b.length - 5) % 4) throw new Error('pages');
+      comparePages(dv.getUint32(1, true), new Uint32Array(b.buffer.slice(5)), p.ch);
+    } else throw new Error(`message type ${type}`);
+  }
+  function sendCtl(ch, b) { return send(ch, CH_CTL, b); }
+
+  // ---- lost player (net.js P344)
+  function heldOf(ch) {   // the lost player's inputs this game holds (contiguous up to recvTop; the ring keeps 256 frames)
+    const p = peer(ch), v = [], first = Math.max(S.delay + 1, p.recvTop - 200);
+    for (let f = first; f <= p.recvTop; f++) v.push(get(f, ch));
+    return { ch, top: p.recvTop, first, v };
+  }
+  function declareLost(ch, why) {
+    const p = peer(ch);
+    if (p.lost || p.dropping || !S.active) return;
+    p.dropping = true;
+    say(`[net] ${pn(ch)} lost (${why}): collecting the inputs every player holds`);
+    const ask = livePeers().filter((q) => q.ch !== ch && !q.suspect);
+    S.drop = { ch, why, held: [heldOf(ch)], wait: new Set(ask.map((q) => q.ch)) };
+    for (const q of ask) sendCtl(q.ch, Uint8Array.of(T_LOST, ch));
+    S.drop.timer = setTimeout(finishDrop, 2500);
+    if (!ask.length) finishDrop();
+  }
+  function onLost(ch, from) {
+    const p = peer(ch); p.dropping = true; p.suspect = true;
+    const h = heldOf(ch), b = new Uint8Array(12 + entriesSize(h.v.length)), dv = new DataView(b.buffer);
+    dv.setUint8(0, T_HELD); dv.setUint8(1, ch); dv.setUint32(2, h.top, true); dv.setUint32(6, h.first, true); dv.setUint16(10, h.v.length, true);
+    writeEntries(dv, 12, h.first, h.v);
+    sendCtl(from, b);
+  }
+  function onHeld(m, from) {
+    const d = S.drop;
+    if (!d || d.ch !== m.ch || !d.wait.has(from)) return;
+    d.held.push(m); d.wait.delete(from);
+    if (!d.wait.size) finishDrop();
+  }
+  function finishDrop() {
+    const d = S.drop;
+    if (!d || d.done) return;
+    d.done = true; clearTimeout(d.timer);
+    const neutralFrom = Math.max(...d.held.map((h) => h.top)) + 1, first = Math.min(...d.held.map((h) => h.first)), v = [];
+    for (let f = first; f < neutralFrom; f++) {
+      let x = -1;
+      for (const h of d.held) if (f >= h.first && f <= h.top && h.v[f - h.first] !== -1) { x = h.v[f - h.first]; break; }
+      v.push(x);
+    }
+    const why = new TextEncoder().encode(d.why).subarray(0, 200);
+    const b = new Uint8Array(12 + entriesSize(v.length) + why.length), dv = new DataView(b.buffer);
+    dv.setUint8(0, T_DROP); dv.setUint8(1, d.ch); dv.setUint32(2, neutralFrom, true); dv.setUint32(6, first, true); dv.setUint16(10, v.length, true);
+    b.set(why, writeEntries(dv, 12, first, v));
+    for (const q of livePeers()) if (q.ch !== d.ch) sendCtl(q.ch, b);
+    applyDrop({ ch: d.ch, neutralFrom, first, v, why: d.why });
+  }
+  function applyDrop(m) {
+    const p = peer(m.ch);
+    if (p.lost) return;
+    for (let i = 0; i < m.v.length; i++) if (m.v[i] !== -1) put(m.first + i, m.ch, m.v[i]);
+    advanceRecvTop(p);
+    wasm('port_net_drop')(m.ch, m.neutralFrom);
+    p.lost = true; p.dropping = true;
+    S.drops.push({ ch: m.ch, neutralFrom: m.neutralFrom, at: frame() });
+    if (S.drop && S.drop.ch === m.ch) S.drop = null;
+    say(`[net] ${m.why || pn(m.ch) + ' left'}: controller ${m.ch + 1} stands still from retrace ${m.neutralFrom}`);
+    notice(`Online: ${pn(m.ch)} left. Controller ${m.ch + 1} stands still.`, 6000);
+    if (ready(frame() + 1)) kick();
+  }
+
+  // ---- desync report (net.js P339): both peers swap the per-page hashes of the desync retrace and name the first page
+  // that differs (addresses only: the rtw build ships no conker_netsyms.txt)
+  const pagesSent = new Set();
+  function pageVector(f) {
+    const p = wasm('port_net_page_hashes')(f) >>> 0;
+    if (!p) return null;
+    const n = wasm('port_net_page_info')(0) + wasm('port_net_page_info')(1);
+    return new Uint32Array(HEAPU8.buffer.slice(p, p + 4 * n));
+  }
+  function sendPages(f, ch) {
+    if (!f || pagesSent.has(f + ':' + ch)) return;
+    pagesSent.add(f + ':' + ch);
+    const v = pageVector(f);
+    if (!v) { say(`[net] desync report: the page hashes of retrace ${f} are no longer kept`); return; }
+    const b = new Uint8Array(5 + v.byteLength);
+    b[0] = T_PAGES; new DataView(b.buffer).setUint32(1, f, true); b.set(new Uint8Array(v.buffer), 5);
+    if (b.length > 65536) { say(`[net] desync report: ${b.length} bytes of page hashes do not fit a channel-1 packet`); return; }
+    sendCtl(ch, b);
+  }
+  const hex8 = (x) => (x >>> 0).toString(16).toUpperCase().padStart(8, '0');
+  function comparePages(f, theirs, from) {
+    const mine = pageVector(f);
+    sendPages(f, from);   // the other side needs mine too
+    if (!mine) return;
+    const pages = wasm('port_net_page_info')(0), slots = wasm('port_net_page_info')(1);
+    if (theirs.length !== mine.length) { say(`[net] desync report from ${pn(from)}: ${theirs.length} page hashes, mine ${mine.length}`); return; }
+    const diff = [], stacks = [];
+    for (let i = 0; i < pages; i++) if (mine[i] !== theirs[i]) diff.push(i);
+    for (let i = 0; i < slots; i++) if (mine[pages + i] !== theirs[pages + i]) stacks.push(i);
+    const base = wasm('port_net_page_info')(2) >>> 0, size = wasm('port_net_page_info')(3), rdram = wasm('port_net_page_info')(4) >>> 0;
+    let where = 'no static page differs';
+    if (diff.length) {
+      const a = base + diff[0] * size;
+      where = `first different page ${diff[0]} (` + (a >= rdram && a < rdram + 0x800000
+        ? `n64_rdram N64 ${hex8(0x80000000 + (a - rdram))}..${hex8(0x80000000 + (a - rdram) + size - 1)}` : `wasm ${hex8(a)}..${hex8(a + size - 1)}`) + ')';
+    }
+    S.desyncReport = { frame: f, ch: from, where, pages: diff.length, firstPages: diff.slice(0, 8), stacks };
+    say(`[net] DESYNC REPORT retrace ${f} (this game vs ${pn(from)}): ${where}; ${diff.length} page(s) differ` +
+        `${diff.length ? ' [' + diff.slice(0, 8).join(' ') + (diff.length > 8 ? ' …' : '') + ']' : ''}, thread stacks ${stacks.length ? stacks.join(' ') : 'none'}`);
+  }
+
+  // test aid / status (tools/port/scripts/rtw_net_e2e.mjs through __rtwConker.net())
+  function status() {
+    if (!S.active) return { active: false, off: S.off };
+    return { active: true, beganAt: S.beganAt, players: S.players, me: S.me, delay: S.delay, autoDelay: S.autoDelay, worst: S.worst, frame: frame(),
+      hashes: hashes(), hashesMatched: S.hashesMatched, hashChecked: S.myHashSeen, desync: S.desync, desyncReport: S.desyncReport,
+      drops: S.drops.slice(), errors: S.errors, lastSend: S.lastSend, pumps: S.pumps, ready: ready(frame() + 1), sent: S.sent, recv: S.recv, refused: S.refused, bad: S.bad, kicks: S.kicks, playing: S.playing,
+      waits: stat(8), waitMs: stat(9), slowedMs: stat(7), stalledTicks: stat(0),
+      peers: others().map((c) => { const p = peer(c); return { ch: c, state: p.state, lost: p.lost, suspect: p.suspect, rtt: p.rtt, recvTop: p.recvTop, peerAck: p.peerAck }; }) };
+  }
+  // the ring's entries of channel ch for frames a..b (tests: the remote inputs that arrived)
+  function ring(ch, a, b) { const list = []; for (let f = a; f <= b; f++) list.push(get(f, ch)); return list; }
+  return { begin, peerState, startTransport, afterTick, recv, status, ring, get active() { return S.active; } };
+})();
+// end include: web/rtw/rtw_net.js
 // include: web/rtw/rtw_glue.js
 // P376 retrowser.app build: the worker-side half of port/web/main.js (Emscripten --pre-js, only in the rtw build).
 // The game runs in the host's dedicated worker (no DOM): the host calls conker.wasm's rtw_* exports (port/ultra/pc_rtw.c)
@@ -1802,7 +2226,11 @@ const GPhoto = (() => {
 //     played the same (option 115);
 //   - P378 standard 1.1 rtw_option_changed: a manifest option changed in the customisation settings is told to the host,
 //     so its menu shows it and it keeps it (option 116; rtw_menu.js).
-// Left out (no host interface in retrowser v1): online play (net.js, W11).
+//   - P380 standard 1.2 online play (option 117, on by default): the host's lockstep session boot calls rtw_net_session
+//     before rtw_start; netSession starts pc_net.c's session through rtw_net.js (object rtwNet: net.js's packet logic
+//     over rtw_net_send / rtw_net_recv). In a session the game options are the room host's and stay fixed (the host's
+//     menu and the customisation settings cannot change them), the settings record does not apply, the recorder and a
+//     kept replay wait for a game without a session, and this tick writes pad 1 into the input ring (pc_net.c local pad).
 var rtwGlue = (function () {
   'use strict';
   const N64 = { A: 0x8000, B: 0x4000, Z: 0x2000, START: 0x1000, DU: 0x0800, DD: 0x0400, DL: 0x0200, DR: 0x0100,
@@ -1813,7 +2241,8 @@ var rtwGlue = (function () {
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
-    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115, OPTSYNC: 116 };   // P378: RSTICK, WHEEL, REPLAY, OPTSYNC
+    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115, OPTSYNC: 116,   // P378: RSTICK, WHEEL, REPLAY, OPTSYNC
+    ONLINE: 117, ONLINE_OWNVIEW: 118, ONLINE_DELAY: 119 };   // P380 online play (standard 1.2)
   // main.js OPTIONS keys of the game options, for the recording's header (e2e_replay.js applies them by key)
   const GAME_OPTION_KEYS = { 0: 'skipcut', 1: 'skipintro', 2: 'healthhud', 3: 'cashhud', 4: 'longbreath', 5: 'longspin',
     17: 'ledgegrab', 6: 'nodrunk', 7: 'conkerlod', 8: 'airbar', 13: 'rumble', 14: 'crosshair', 15: 'freecam',
@@ -1829,6 +2258,8 @@ var rtwGlue = (function () {
   const opt = (id) => optionValues[id] | 0;
   const view = { width: 640, height: 480, dpr100: 100 };
   let started = false, glUp = false, hostPaused = false, pointerLocked = false, gameOptionsLocked = false;
+  let netSessionOn = false;   // P380: a lockstep session runs (rtw_net_session started pc_net.c's session)
+  const hostStartOptions = [];   // P380: rtw_option calls before rtw_start ([id, value]); the settings record applies at start
 
   const wasm = (name) => Module['_' + name];
   function log(text) {
@@ -1969,7 +2400,7 @@ var rtwGlue = (function () {
     if (photoHasInput) return;   // P348: photo mode takes pad 1's input
     if (!menuHasPad) photoMaskAfter(pad1);   // P377: not on the idle pad of the tick a menu closed in (its mask would end there)
     applyLatches(pad1);
-    if (rec.active) { recSetPad(pad1); return; }   // P357: the recorded pad (pc_net.c samples it at the next retrace)
+    if (rec.active || netSessionOn) { recSetPad(pad1); return; }   // P357: the recorded pad; P380: this peer's pad -> the input ring (main.js PortNet.setLocalPad)
     if (replay.active) return;   // P378: the retraces read the recording's input (pc_net.c rec_input)
     const pp = wasm('port_pad_state')() >> 2;
     for (let i = 0; i < 4; i++) {
@@ -2319,11 +2750,18 @@ var rtwGlue = (function () {
     start() {   // rtw_start, before main()
       loadExclusions();
       layout();
-      if (replay.doc && !opt(OPT.REPLAY)) log(`[replay] "${replay.doc.name}" not played: Replay recordings is off`);
-      if (replay.doc && opt(OPT.REPLAY)) {   // P378: a kept recording plays now (and the recorder waits)
+      // P380: the host's option values of the start, through the settings record (P377) unless a session runs (the room
+      // host's values then stand)
+      for (const [id, value] of hostStartOptions.splice(0)) if (!netSessionOn) startOption(id, value);
+      if (netSessionOn) {   // P380: no replay and no recording in an online session (the input is the session's)
+        if (replay.doc) log(`[replay] "${replay.doc.name}" waits: an online session runs (it plays at the next start without one)`);
+        if (opt(OPT.RECORDER)) log('[rec] no recording in an online session');
+        rtwNet.startTransport();
+      } else if (replay.doc && !opt(OPT.REPLAY)) log(`[replay] "${replay.doc.name}" not played: Replay recordings is off`);
+      if (!netSessionOn && replay.doc && opt(OPT.REPLAY)) {   // P378: a kept recording plays now (and the recorder waits)
         if (opt(OPT.RECORDER)) log('[rec] no recording during a replay');
         replayBegin();
-      } else if (opt(OPT.RECORDER)) {
+      } else if (!netSessionOn && opt(OPT.RECORDER)) {
         const romPtr = wasm('port_rtw_rom_ptr')(), romSize = wasm('port_rtw_rom_size')();
         if (romPtr && romSize) romForHash = HEAPU8.slice(romPtr, romPtr + romSize);
         recBegin();
@@ -2337,20 +2775,30 @@ var rtwGlue = (function () {
         overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues), replay: replayStatus,   // P377 (P378 replay)
         optsync: () => Object.assign({}, optionSync),   // P378 rtw_option_changed calls
         cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); },   // P378: the camera sticks
-        photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }) };   // P378: photo camera's field of view
+        photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }),   // P378: photo camera's field of view
+        net: () => rtwNet.status(), netRing: (ch, a, b) => rtwNet.ring(ch, a, b) };   // P380 online play
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
     },
     beforeGl() { layout(); },   // the drawing buffer the renderer starts with (gfx_init reads the viewport)
     glReady() { glUp = true; layout(); },
     option(id, value) {   // rtw_option (pc_rtw.c already set the game options to the host's value)
       hostDeclared.add(id);   // P378
-      // P377: a value chosen in the customisation settings may win over the host's at start (rtwOverlay.hostOption)
-      const effective = rtwOverlay.hostOption(id, value, started);
-      if (effective !== value) {
-        if (id < GAME_OPTION_COUNT && !gameOptionsLocked) wasm('port_set_option')(id, effective);
-        log(`[settings] option ${id}: ${effective} (chosen in the customisation settings; the host sent ${value})`);
+      if (!started) { hostStartOptions.push([id, value]); applyOption(id, value); return; }   // P380: the record applies at start
+      if (netSessionOn && (id < GAME_OPTION_COUNT || id === OPT.ONLINE || id === OPT.ONLINE_DELAY || id === OPT.ONLINE_OWNVIEW)) {
+        log(`[net] option ${id} = ${value} from the host's menu ignored: the session keeps the room host's options`);
+        return;
       }
-      applyOption(id, effective);
+      startOption(id, value);
+    },
+    netSession(players, me) {   // P380 rtw_net_session (standard 1.2 lockstep boot: after rtw_option, before rtw_start)
+      if (started) { log(`[net] rtw_net_session(${players}, ${me}) after the start: ignored (this build plays lockstep sessions from power-on)`); return; }
+      netSessionOn = rtwNet.begin(players, me, { on: !!opt(OPT.ONLINE), delay: opt(OPT.ONLINE_DELAY), ownView: !!opt(OPT.ONLINE_OWNVIEW),
+        log, notice: (text, ms) => rtwOverlay.notice(text, ms) });
+      if (!netSessionOn) return;
+      // main.js optionsLocked: the session's game options are the room host's, fixed (free camera and photo mode are off
+      // in a session in the C: port_free_camera_enabled / port_photo_request)
+      wasm('port_rtw_lock_game_options')(); gameOptionsLocked = true;
+      rtwOverlay.setOnline(true);   // the customisation settings show them locked and never pause the game
     },
     resize(width, height, dpr100) {   // rtw_resize: CSS pixels of the view, devicePixelRatio x 100
       view.width = width; view.height = height; view.dpr100 = dpr100 || 100;
@@ -2373,6 +2821,15 @@ var rtwGlue = (function () {
       replayAccept(bytes);
     },
   };
+  // P377 / P380: a host value through the customisation settings' record (a value chosen there may win at start)
+  function startOption(id, value) {
+    const effective = rtwOverlay.hostOption(id, value, started);
+    if (effective !== value) {
+      if (id < GAME_OPTION_COUNT && !gameOptionsLocked) wasm('port_set_option')(id, effective);
+      log(`[settings] option ${id}: ${effective} (chosen in the customisation settings; the host sent ${value})`);
+    }
+    applyOption(id, effective);
+  }
   // an option's value for the game and this glue (from the host, or from the customisation settings)
   function applyOption(id, value) {
     const was = optionValues[id];
@@ -2396,7 +2853,7 @@ var rtwGlue = (function () {
       applyOption(id, value);
       return true;
     },
-    started: () => started, hostPaused: () => hostPaused,
+    started: () => started, hostPaused: () => hostPaused, online: () => netSessionOn,   // P380
     photo, photoRequest: (on) => photoRequest(on), photoCapture: () => photoCapture(), photoBusy: () => photo.busy,
     maskHeld() { photo.maskB = 0xFFFF; photo.maskStick = true; },   // main.js GMenu close: held inputs wait for a release
     exportSave: () => exportFile('conker-eu.eep', 'application/octet-stream', eepromBytes()),
@@ -2407,7 +2864,7 @@ var rtwGlue = (function () {
     // P378 standard 1.1: a manifest option changed in the customisation settings -> env.rtw_option_changed (option 116).
     // true = the host took it (its menu and stored value now have it)
     optionChanged(id, value) {
-      if (!opt(OPT.OPTSYNC) || !hostDeclared.has(id)) return false;
+      if (!opt(OPT.OPTSYNC) || !hostDeclared.has(id) || netSessionOn) return false;   // P380: a session's options are the room host's
       const r = wasm('port_rtw_option_changed')(id, value);
       log(`[settings] option ${id} = ${value} told to the host${r ? ` (not taken: ${r})` : ''}`);
       optionSync.told++; if (r) optionSync.refused++;
@@ -5033,6 +5490,12 @@ async function createWasm() {
 
   var _port_rtw_glue_file = (id, ptr, size) => rtwGlue.file(id, ptr, size);
 
+  var _port_rtw_glue_net_peer = (peer, state) => rtwNet.peerState(peer, state);
+
+  var _port_rtw_glue_net_recv = (peer, channel, ptr, len) => rtwNet.recv(peer, channel, ptr, len);
+
+  var _port_rtw_glue_net_session = (players, me) => rtwGlue.netSession(players, me);
+
   var _port_rtw_glue_option = (id, value) => rtwGlue.option(id, value);
 
   var _port_rtw_glue_pause = (on) => rtwGlue.pause(on);
@@ -5040,6 +5503,8 @@ async function createWasm() {
   var _port_rtw_glue_resize = (width, height, dpr100) => rtwGlue.resize(width, height, dpr100);
 
   var _port_rtw_glue_start = () => rtwGlue.start();
+
+  var _port_rtw_net_after_tick = () => rtwNet.afterTick();
 
   var runDependencies = 0;
   
@@ -5125,6 +5590,16 @@ async function createWasm() {
       if (host && host['rtw_log']) return host['rtw_log'](ptr, len) | 0;
       out(UTF8ToString(ptr, len));
       return 0;
+    };
+
+  var _rtw_net_send = (peer, channel, ptr, len) => {
+      const host = Module['rtw'];
+      return host && host['rtw_net_send'] ? host['rtw_net_send'](peer, channel, ptr, len) | 0 : -2;
+    };
+
+  var _rtw_net_stat = (peer, kind) => {
+      const host = Module['rtw'];
+      return host && host['rtw_net_stat'] ? host['rtw_net_stat'](peer, kind) | 0 : -1;
     };
 
   var _rtw_option_changed = (id, value) => {
@@ -5621,11 +6096,10 @@ function checkIncomingModuleAPI() {
 var ASM_CONSTS = {
   268714416: () => { return typeof location !== 'undefined' ? 1 : 0; },  
  268714468: ($0, $1) => { if (Module['recInput']) Module['recInput']($0, $1 >>> 0); },  
- 268714530: () => { if (Module['netAfterTick']) Module['netAfterTick'](); },  
- 268714588: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9) => { if (Module['recCheck']) Module['recCheck']($0, $1 >>> 0, $2 >>> 0, $3 >>> 0, $4, $5, $6, $7, $8, $9); },  
- 268714694: ($0, $1) => { if (Module['recG']) Module['recG']($0, $1 >>> 0); },  
- 268714748: ($0) => { if (Module['recEnd']) Module['recEnd']($0); },  
- 268714796: ($0, $1, $2) => { if (typeof process !== 'undefined' && process.env && process.env.AUDTEST_WAV) { const fs = require('fs'); fs.writeFileSync(process.env.AUDTEST_WAV, Buffer.concat([Buffer.from(HEAPU8.subarray($0, $0 + 44)), Buffer.from(HEAPU8.subarray($1, $1 + $2))])); console.log('[audtest] wrote ' + process.env.AUDTEST_WAV); } }
+ 268714530: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9) => { if (Module['recCheck']) Module['recCheck']($0, $1 >>> 0, $2 >>> 0, $3 >>> 0, $4, $5, $6, $7, $8, $9); },  
+ 268714636: ($0, $1) => { if (Module['recG']) Module['recG']($0, $1 >>> 0); },  
+ 268714690: ($0) => { if (Module['recEnd']) Module['recEnd']($0); },  
+ 268714738: ($0, $1, $2) => { if (typeof process !== 'undefined' && process.env && process.env.AUDTEST_WAV) { const fs = require('fs'); fs.writeFileSync(process.env.AUDTEST_WAV, Buffer.concat([Buffer.from(HEAPU8.subarray($0, $0 + 44)), Buffer.from(HEAPU8.subarray($1, $1 + $2))])); console.log('[audtest] wrote ' + process.env.AUDTEST_WAV); } }
 };
 function __port_flag_js(name) { var n = UTF8ToString(name), v = null; if (typeof location !== 'undefined') { var m = new RegExp('[?&]' + n + '(=([^&]*))?(&|$)').exec(location.search); if (m) v = m[2] === undefined ? '1' : m[2]; } else if (typeof process !== 'undefined' && process.env) { var e = process.env['PORT_' + n.toUpperCase()]; if (e !== undefined) v = e; } return v === null ? 0 : (parseInt(v, 0) || (v === '' ? 1 : 0)); }
 function __port_flag_hex_js(name) { var n = UTF8ToString(name), v = null; if (typeof location !== 'undefined') { var m = new RegExp('[?&]' + n + '(=([^&]*))?(&|$)').exec(location.search); if (m) v = m[2] === undefined ? '1' : m[2]; } else if (typeof process !== 'undefined' && process.env) { var e = process.env['PORT_' + n.toUpperCase()]; if (e !== undefined) v = e; } return v === null ? 0 : (parseInt(v, 16) || (v === '' ? 1 : 0)); }
@@ -5647,8 +6121,9 @@ var _port_net_kick = Module['_port_net_kick'] = makeInvalidEarlyAccess('_port_ne
 var _port_net_ready = Module['_port_net_ready'] = makeInvalidEarlyAccess('_port_net_ready');
 var _port_dump_threads = Module['_port_dump_threads'] = makeInvalidEarlyAccess('_port_dump_threads');
 var _port_dump_stubs = Module['_port_dump_stubs'] = makeInvalidEarlyAccess('_port_dump_stubs');
-var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
+var _port_rtw_net_kick = Module['_port_rtw_net_kick'] = makeInvalidEarlyAccess('_port_rtw_net_kick');
 var _port_rtw_overlay_restore = Module['_port_rtw_overlay_restore'] = makeInvalidEarlyAccess('_port_rtw_overlay_restore');
+var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _port_set_rom = Module['_port_set_rom'] = makeInvalidEarlyAccess('_port_set_rom');
 var _port_set_paused = Module['_port_set_paused'] = makeInvalidEarlyAccess('_port_set_paused');
@@ -5713,6 +6188,12 @@ var _rtw_audio_rate = Module['_rtw_audio_rate'] = makeInvalidEarlyAccess('_rtw_a
 var _rtw_audio_drain = Module['_rtw_audio_drain'] = makeInvalidEarlyAccess('_rtw_audio_drain');
 var _rtw_audio_buffer = Module['_rtw_audio_buffer'] = makeInvalidEarlyAccess('_rtw_audio_buffer');
 var _rtw_option = Module['_rtw_option'] = makeInvalidEarlyAccess('_rtw_option');
+var _rtw_net_session = Module['_rtw_net_session'] = makeInvalidEarlyAccess('_rtw_net_session');
+var _rtw_net_peer = Module['_rtw_net_peer'] = makeInvalidEarlyAccess('_rtw_net_peer');
+var _rtw_net_buffer = Module['_rtw_net_buffer'] = makeInvalidEarlyAccess('_rtw_net_buffer');
+var _rtw_net_recv = Module['_rtw_net_recv'] = makeInvalidEarlyAccess('_rtw_net_recv');
+var _port_rtw_net_send = Module['_port_rtw_net_send'] = makeInvalidEarlyAccess('_port_rtw_net_send');
+var _port_rtw_net_stat = Module['_port_rtw_net_stat'] = makeInvalidEarlyAccess('_port_rtw_net_stat');
 var _port_gfx_hires_2d = Module['_port_gfx_hires_2d'] = makeInvalidEarlyAccess('_port_gfx_hires_2d');
 var _port_gfx_smooth_font = Module['_port_gfx_smooth_font'] = makeInvalidEarlyAccess('_port_gfx_smooth_font');
 var _port_gfx_widescreen = Module['_port_gfx_widescreen'] = makeInvalidEarlyAccess('_port_gfx_widescreen');
@@ -6042,8 +6523,9 @@ function assignWasmExports(wasmExports) {
   Module['_port_net_ready'] = _port_net_ready = createExportWrapper('port_net_ready', 1);
   Module['_port_dump_threads'] = _port_dump_threads = createExportWrapper('port_dump_threads', 0);
   Module['_port_dump_stubs'] = _port_dump_stubs = createExportWrapper('port_dump_stubs', 1);
-  Module['_malloc'] = _malloc = createExportWrapper('malloc', 1);
+  Module['_port_rtw_net_kick'] = _port_rtw_net_kick = createExportWrapper('port_rtw_net_kick', 0);
   Module['_port_rtw_overlay_restore'] = _port_rtw_overlay_restore = createExportWrapper('port_rtw_overlay_restore', 0);
+  Module['_malloc'] = _malloc = createExportWrapper('malloc', 1);
   _fflush = createExportWrapper('fflush', 1);
   Module['_port_set_rom'] = _port_set_rom = createExportWrapper('port_set_rom', 2);
   Module['_port_set_paused'] = _port_set_paused = createExportWrapper('port_set_paused', 1);
@@ -6108,6 +6590,12 @@ function assignWasmExports(wasmExports) {
   Module['_rtw_audio_drain'] = _rtw_audio_drain = createExportWrapper('rtw_audio_drain', 0);
   Module['_rtw_audio_buffer'] = _rtw_audio_buffer = createExportWrapper('rtw_audio_buffer', 0);
   Module['_rtw_option'] = _rtw_option = createExportWrapper('rtw_option', 2);
+  Module['_rtw_net_session'] = _rtw_net_session = createExportWrapper('rtw_net_session', 2);
+  Module['_rtw_net_peer'] = _rtw_net_peer = createExportWrapper('rtw_net_peer', 2);
+  Module['_rtw_net_buffer'] = _rtw_net_buffer = createExportWrapper('rtw_net_buffer', 1);
+  Module['_rtw_net_recv'] = _rtw_net_recv = createExportWrapper('rtw_net_recv', 3);
+  Module['_port_rtw_net_send'] = _port_rtw_net_send = createExportWrapper('port_rtw_net_send', 4);
+  Module['_port_rtw_net_stat'] = _port_rtw_net_stat = createExportWrapper('port_rtw_net_stat', 2);
   Module['_port_gfx_hires_2d'] = _port_gfx_hires_2d = createExportWrapper('port_gfx_hires_2d', 1);
   Module['_port_gfx_smooth_font'] = _port_gfx_smooth_font = createExportWrapper('port_gfx_smooth_font', 1);
   Module['_port_gfx_widescreen'] = _port_gfx_widescreen = createExportWrapper('port_gfx_widescreen', 1);
@@ -6588,6 +7076,12 @@ var wasmImports = {
   /** @export */
   port_rtw_glue_file: _port_rtw_glue_file,
   /** @export */
+  port_rtw_glue_net_peer: _port_rtw_glue_net_peer,
+  /** @export */
+  port_rtw_glue_net_recv: _port_rtw_glue_net_recv,
+  /** @export */
+  port_rtw_glue_net_session: _port_rtw_glue_net_session,
+  /** @export */
   port_rtw_glue_option: _port_rtw_glue_option,
   /** @export */
   port_rtw_glue_pause: _port_rtw_glue_pause,
@@ -6595,6 +7089,8 @@ var wasmImports = {
   port_rtw_glue_resize: _port_rtw_glue_resize,
   /** @export */
   port_rtw_glue_start: _port_rtw_glue_start,
+  /** @export */
+  port_rtw_net_after_tick: _port_rtw_net_after_tick,
   /** @export */
   port_rtw_overlay_tick: _port_rtw_overlay_tick,
   /** @export */
@@ -6605,6 +7101,10 @@ var wasmImports = {
   rtw_export_file: _rtw_export_file,
   /** @export */
   rtw_log: _rtw_log,
+  /** @export */
+  rtw_net_send: _rtw_net_send,
+  /** @export */
+  rtw_net_stat: _rtw_net_stat,
   /** @export */
   rtw_option_changed: _rtw_option_changed,
   /** @export */
