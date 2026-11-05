@@ -1,3 +1,21 @@
+[![Play on retrowser](.github/play-on-retrowser.svg)](https://retrowser.app/g/Sorikairox/conker-eu-port)
+
+## ▶ Play Conker's Bad Fur Day in your browser on retrowser
+
+1. Open **[retrowser.app/g/Sorikairox/conker-eu-port](https://retrowser.app/g/Sorikairox/conker-eu-port)**
+   (or paste this repository's link on [retrowser.app](https://retrowser.app)).
+2. Choose **your own ROM** of *Conker's Bad Fur Day* (Europe), as `.z64`, `.n64` or `.v64`
+   (SHA-1 of the `.z64`: `ee7bc6656fd1e1d9ffb3d19add759f28b88df710`). It is checked on your device and never uploaded.
+3. Play with a keyboard, a gamepad (right stick: free camera / photo look) or the touch controls on a phone.
+   Options (skippable cutscenes, free camera, photo mode, …) are in the ☰ menu; the mouse wheel zooms in photo mode.
+   To watch a recording, choose **Replay a recording** (in-game Tools menu or ☰) and pick a `.ckrec` file.
+
+Saves stay in your browser; use **Export save** in ☰ to keep a copy. After the first load the game also works offline.
+Online multiplayer is only on the port's own site for now. retrowser runs this repository's own build (`retrowser.json`
+and `retrowser/`); it hosts no game code and no ROMs.
+
+---
+
 # Conker's Bad Fur Day (EU) — private decomp + browser port
 
 > **Private repository. Do not make public.** It contains material derived from the game (screenshots and data dumps in the git history). No ROM is stored here — you need your own EU ROM.
