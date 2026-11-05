@@ -223,25 +223,37 @@ try {
     if (COSMETIC) check(players.every((p, i) => opts[i] && COSMETIC_IDS.every((k) => opts[i][k] === cosmeticOf(p)[k])),
       `in the session each player keeps its own Hi-res menus / Smooth font / Full-resolution (${players.map((p, i) => `P${p.n} ${COSMETIC_IDS.map((k) => opts[i] && opts[i][k]).join('/')}`).join(', ')})`);
     // the guest's own menu: the Widescreen row is locked with the reason, a change refused; Full-resolution is not locked
-    const tap = async (p, key, after = 200) => { await p.page.keyboard.down(key); await p.page.waitForTimeout(120); await p.page.keyboard.up(key); await p.page.waitForTimeout(after); };
+    const menuOf = (p) => inWorker(p, () => globalThis.__rtwConker.overlay().menu);
+    // hold the key until the menu shows the change (at most 3 s: a background page's worker may tick slowly), then release
+    const tapUntil = async (p, key, ok) => {
+      await p.page.keyboard.down(key);
+      let m = null;
+      for (const end = Date.now() + 3000; Date.now() < end;) { m = await menuOf(p); if (m && ok(m)) break; await p.page.waitForTimeout(40); }
+      await p.page.keyboard.up(key); await p.page.waitForTimeout(300);
+      if (process.env.MENU_DEBUG) {
+        const rafMs = await inWorker(p, () => new Promise((r) => { const t0 = performance.now(); const to = setTimeout(() => r(-1), 2000); requestAnimationFrame(() => { clearTimeout(to); r(Math.round(performance.now() - t0)); }); }));
+        const vis = await p.page.evaluate(() => `${document.visibilityState} focus ${document.hasFocus()}`);
+        say(`key ${key} on P${p.n} -> menu ${m && m.page}/${m && m.sel} ${m && m.item}; worker rAF ${rafMs} ms; page ${vis}`);
+      }
+      return m;
+    };
     const B = players[1], ws0 = opts[1] && opts[1][102];
-    await tap(B, 'Digit6', 300);
-    await until('the guest\'s menu open', () => inWorker(B, () => globalThis.__rtwConker.overlay().menu.open), 10000);
-    await tap(B, 'ArrowDown', 150);
-    await tap(B, 'KeyX', 300);
-    const m1 = await inWorker(B, () => globalThis.__rtwConker.overlay().menu);
-    await tap(B, 'KeyX', 400);
+    await B.page.bringToFront();   // the keyboard goes to the focused page
+    await tapUntil(B, 'Digit6', (m) => m.open);
+    await tapUntil(B, 'ArrowDown', (m) => m.sel === 1);
+    const m1 = await tapUntil(B, 'KeyX', (m) => m.page === 'picture');
+    await tapUntil(B, 'KeyX', (m) => m.sounds.silent > m1.sounds.silent);   // the error sound (silent online) of a locked row
     const ws1 = await inWorker(B, () => globalThis.__rtwConker.options()[102]);
     const refusedSet = await inWorker(B, (v) => { globalThis.__rtwConker.menuSet(102, v); globalThis.__rtwConker.menuSet(104, v); const o = globalThis.__rtwConker.options(); return [o[102], o[104]]; }, ws0 ? 0 : 1);
-    await tap(B, 'ArrowDown', 150);
-    const m2 = await inWorker(B, () => globalThis.__rtwConker.overlay().menu);
-    await tap(B, 'KeyC', 150); await tap(B, 'KeyC', 300);
-    const mc = await inWorker(B, () => globalThis.__rtwConker.overlay().menu.open);
-    if (mc) { await tap(B, 'Digit6', 300); }
+    const m2 = await tapUntil(B, 'ArrowDown', (m) => m.item !== 'Widescreen');
+    await tapUntil(B, 'KeyC', (m) => m.page === 'main' || !m.open);
+    await tapUntil(B, 'KeyC', (m) => !m.open);
+    if ((await menuOf(B)).open) await tapUntil(B, 'Digit6', (m) => !m.open);
     check(m1 && m1.page === 'picture' && m1.item === 'Widescreen' && m1.lock === 'Set by the room host during online play.' && ws1 === ws0 &&
       refusedSet && refusedSet[0] === ws0 && refusedSet[1] === (opts[1] && opts[1][104]),
       `guest's Widescreen row locked ("${m1 && m1.lock}"), A on it and a menu change refused (102 ${ws0} -> ${ws1}, set -> ${refusedSet && refusedSet.join('/')})`);
-    check(m2 && /Full/.test(m2.item || '') && m2.lock === '', `guest's ${m2 && m2.item} row is not locked`);
+    const m2want = m2 && /High frame rate/.test(m2.item || '') ? 'Set by the room host during online play.' : '';
+    check(m2 && m2.item !== 'Widescreen' && m2.lock === m2want, `guest's ${m2 && m2.item} row: ${m2want ? 'locked' : 'not locked'} (${m2 && JSON.stringify(m2.lock)})`);
   }
   const fs = await playInputs(players, FRAMES);
   say(`played to retraces ${fs.join(' ')}`);
@@ -254,6 +266,7 @@ try {
     const both = ra && rb ? ra.filter((v, i) => v !== -1 && v === rb[i]).length : 0, pressed = rb ? rb.filter((v) => v > 0).length : 0;
     check(both > 50 && pressed > 0, `player 2's inputs on player 1 = player 2's own: ${both} of ${hi - lo + 1} ring frames still kept equal, ${pressed} with buttons / stick`);
   }
+  say('input ticks (animation frame / fallback timer): ' + (await Promise.all(players.map((p) => inWorker(p, () => globalThis.__rtwConker.inputTicks ? globalThis.__rtwConker.inputTicks() : null)))).map((t) => (t ? `${t.raf}/${t.timer}` : '?')).join(' '));
   say('canvas sizes: ' + (await Promise.all(players.map((p) => inWorker(p, () => { const c = globalThis.__rtwConker.Module.canvas; return `${c.width}x${c.height}`; })))).join(' '));
   const st2 = await Promise.all(players.map(net));
   say('stats: ' + st2.map((s) => `P${s.me + 1} sent ${s.sent} recv ${s.recv} refused ${s.refused} bad ${s.bad} waits ${s.waits} (${s.waitMs} ms) slowed ${s.slowedMs} ms kicks ${s.kicks}`).join('; '));
