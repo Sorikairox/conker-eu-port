@@ -49,7 +49,8 @@ const finish = async (code) => {
 const timer = setTimeout(() => { say('TIMEOUT'); fails++; finish(3); }, Number(process.env.RTW_TIMEOUT || 540000));
 
 async function newPlayer(n, options) {
-  const ctx = await browser.newContext({ viewport: { width: 960, height: 640 } });
+  const vw = process.env.VARY_VIEW === '1' ? [960, 700, 1280, 820][(n - 1) % 4] : 960;   // VARY_VIEW=1: a different page size per player
+  const ctx = await browser.newContext({ viewport: { width: vw, height: Math.round(vw * 2 / 3) } });
   await ctx.addInitScript(([ep, opts]) => {
     try {
       if (location.hostname !== 'localhost') return;
@@ -98,6 +99,26 @@ async function compareHashes(list, label) {
   for (const [f, h] of rings[0]) {
     if (!rings.every((r) => r.has(f))) continue;
     if (rings.every((r) => r.get(f).h === h.h && r.get(f).s === h.s)) { same++; first = first || f; last = Math.max(last, f); } else differ++;
+  }
+  if (differ) {   // diagnostics: the renderer's GPU write-back ranges (excluded from the hash) and where the reported page differs now
+    const MAPF = join(DIST, '../conker.map'), map = (await import('node:fs')).readFileSync(MAPF, 'utf8');
+    const gpuAt = parseInt((/^([0-9a-f]+)\s+\S+\s+\S+\s+net_gpu$/m.exec(map) || [])[1] || '0', 16), ngpuAt = parseInt((/^([0-9a-f]+)\s+\S+\s+\S+\s+net_ngpu$/m.exec(map) || [])[1] || '0', 16);
+    const rep = sts.find((x) => x && x.desyncReport);
+    const page = rep ? rep.desyncReport.firstPages[0] : -1;
+    const dumps = await Promise.all(list.map((p) => inWorker(p, ([g, ng, pg]) => {
+      const M = globalThis.__rtwConker.Module, H = new Uint32Array(M.HEAPU8.buffer), rd = M._port_net_page_info(4) >>> 0, base = M._port_net_page_info(2) >>> 0;
+      const n = H[ng >> 2], ranges = [];
+      for (let i = 0; i < n && i < 32; i++) { const a = H[(g >> 2) + i * 2], b = H[(g >> 2) + i * 2 + 1]; ranges.push(a >= rd && a < rd + 0x800000 ? `N64 ${(0x80000000 + a - rd).toString(16)}+${(b - a).toString(16)}` : `wasm ${a.toString(16)}+${(b - a).toString(16)}`); }
+      const bytes = pg >= 0 ? Array.from(M.HEAPU8.subarray(base + pg * 4096, base + pg * 4096 + 4096)) : [];
+      return { ranges, bytes, frame: M._port_net_frame() >>> 0 };
+    }, [gpuAt, ngpuAt, page])));
+    const lines = dumps.map((d, i) => `P${list[i].n} retrace ${d && d.frame} gpu write-backs: ${d ? d.ranges.join(', ') : '?'}`);
+    if (page >= 0 && dumps.every(Boolean)) {
+      const diffAt = []; for (let k = 0; k < 4096; k++) if (dumps.some((d) => d.bytes[k] !== dumps[0].bytes[k])) diffAt.push(k);
+      lines.push(`page ${page}: ${diffAt.length} byte offsets differ now, first ${diffAt.slice(0, 16).map((k) => k.toString(16)).join(' ')}`);
+    }
+    writeFileSync(join(out, 'desync_diag.txt'), lines.join('\n') + '\n');
+    say(lines.join('\n'));
   }
   check(same >= 10 && differ === 0, `${label}: ${same} common hash points equal (retraces ${first}..${last}), ${differ} differ; ` +
     sts.map((s, i) => `P${list[i].n} matched ${s ? s.hashesMatched : '?'} to ${s ? s.hashChecked : '?'}, desync ${s && s.desync ? s.desync.frame : 'none'}`).join(', '));
@@ -173,6 +194,7 @@ try {
     const both = ra && rb ? ra.filter((v, i) => v !== -1 && v === rb[i]).length : 0, pressed = rb ? rb.filter((v) => v > 0).length : 0;
     check(both > 50 && pressed > 0, `player 2's inputs on player 1 = player 2's own: ${both} of ${hi - lo + 1} ring frames still kept equal, ${pressed} with buttons / stick`);
   }
+  say('canvas sizes: ' + (await Promise.all(players.map((p) => inWorker(p, () => { const c = globalThis.__rtwConker.Module.canvas; return `${c.width}x${c.height}`; })))).join(' '));
   const st2 = await Promise.all(players.map(net));
   say('stats: ' + st2.map((s) => `P${s.me + 1} sent ${s.sent} recv ${s.recv} refused ${s.refused} bad ${s.bad} waits ${s.waits} (${s.waitMs} ms) slowed ${s.slowedMs} ms kicks ${s.kicks}`).join('; '));
   check(st2.every((s) => s.bad === 0 && s.refused === 0), 'no bad or refused packets');
