@@ -11,6 +11,9 @@
 //   P345: ROOM=1 connects through a room code instead (host __online.roomCreate, guests __online.roomJoin in order; with
 //   UI=1 through the panel's Create room / code field / Join room); the pages' ?roomapi names the room server.
 //   ROMFILE=PATH gives each page the ROM through its file picker (for pages without ?romurl, e.g. the public site).
+//   JS_FLAGS='--liftoff-only --stack-size=340': V8 switches for every page (P381: --liftoff-only keeps every wasm function
+//   in V8's baseline compiler, i.e. the big frames of untiered functions; --stack-size=KB gives the page's main thread the
+//   stack of a dedicated worker; together they reproduce the retrowser worker's __port_icall_slow stack overflow)
 //   ROOMCHECK=1 (with ROOM=1) also tries an unknown code and, after everyone joined, one more player (ROOMMAX=N: the room
 //   is made for N players, so with N = the page count it is full); prints the errors.
 // Logs: OUTDIR/NAME.log (the page console). Prints a summary of the [net] lines.
@@ -24,7 +27,7 @@ const port = 9300 + (process.pid % 500);
 const bgSwitches = process.env.REALBG ? [] : ['--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'];
 const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debugging-port=${port}`, '--use-angle=metal',
   '--mute-audio', '--autoplay-policy=no-user-gesture-required', '--window-size=1500,900',
-  ...bgSwitches, 'about:blank'], { stdio: 'ignore' });
+  ...bgSwitches, ...(process.env.JS_FLAGS ? [`--js-flags=${process.env.JS_FLAGS}`] : []), 'about:blank'], { stdio: 'ignore' });
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
 setTimeout(() => { console.log('netgroup: timeout'); done(2); }, (+secs + 240) * 1000);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
