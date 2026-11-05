@@ -8,7 +8,8 @@
 // 8795), RETROWSER_DIR, DROP=1 (close the last player's page: the others agree on its neutral frame and go on, hashes
 // compared after the drop too), DESYNC=1 (at the end: flip one byte of game memory on player 2 -> both report it),
 // LEAVE=1 (then player 1 leaves the session: its game restarts alone), SOLO=1 (afterwards: a fresh page plays alone), RTW_OPTIONS_HOST (stored options of player 1, default
-// {"1":1}: skip intro) and RTW_OPTIONS_GUEST (of the others, default {"1":0}: the session must use player 1's).
+// {"1":1,"2":1,"9":70,"105":1,"113":0}: skip intro (a start-up option) and four inGame options, P382) and RTW_OPTIONS_GUEST
+// (of the others, default the opposite values: the session must use player 1's, start-up and inGame alike).
 // Prints PASS / FAIL lines and "ALL PASS" at the end; exit code 0 only then.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -149,7 +150,8 @@ async function playInputs(list, target) {   // random presses on every page unti
 }
 
 try {
-  const hostOpts = process.env.RTW_OPTIONS_HOST || '{"1":1}', guestOpts = process.env.RTW_OPTIONS_GUEST || '{"1":0}';
+  const hostOpts = process.env.RTW_OPTIONS_HOST || '{"1":1,"2":1,"9":70,"105":1,"113":0}',   // P382: + inGame options
+    guestOpts = process.env.RTW_OPTIONS_GUEST || '{"1":0,"2":0,"9":100,"105":0,"113":1}';
   for (let n = 1; n <= PLAYERS; n++) await newPlayer(n, n === 1 ? hostOpts : guestOpts);
   for (const p of players) { await open(p); say(`P${p.n} plays alone`); }
   check((await Promise.all(players.map(net))).every((s) => s && !s.active), 'before the session nobody is in one');
@@ -182,6 +184,11 @@ try {
   check(new Set(sts.map((s) => s.delay)).size === 1, `the same input delay everywhere: ${sts.map((s) => `${s.delay}${s.autoDelay ? ' auto (worst p90 ' + s.worst + ' ms)' : ''}`).join(', ')}`);
   const opts = await Promise.all(players.map((p) => inWorker(p, () => globalThis.__rtwConker.options())));
   check(opts.every((o) => o && o[1] === 1), `every player boots with the room host's options (skip intro: ${opts.map((o) => o && o[1]).join(' ')})`);
+  {   // P382: the room host's inGame options (hidden in the host's menu, kept from rtw_option_changed) on every peer too
+    const want = JSON.parse(hostOpts), ids = Object.keys(want).filter((k) => k !== '1');
+    check(opts.every((o) => o && ids.every((k) => o[k] === want[k])),
+      `every player gets the room host's inGame options (${ids.map((k) => `${k}: ${opts.map((o) => o && o[k]).join('/')}`).join(', ')})`);
+  }
   check(sts.every((s) => s.beganAt === 0), `the session is set before the first retrace (lockstep boot): ${sts.map((s) => s.beganAt).join(' ')}`);
   const fs = await playInputs(players, FRAMES);
   say(`played to retraces ${fs.join(' ')}`);

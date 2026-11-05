@@ -19,7 +19,9 @@
 //   pos                  print Conker's position (record 0 of g_objects, address from port/build/rtw/conker.map)
 //   P377 overlays: ov (the overlay layer's state: menu page / row, photo panel, ring, icon, sounds, settings record),
 //   opts (the option values the game uses), press:CODE[:N] (N short presses of a key, 90 ms each, 160 ms apart),
-//   dismiss (the host's storage notice), hostopt:ID:V (change option ID in the host's own menu: Menu -> its checkbox / field -> Back to game),
+//   dismiss (the host's storage notice), hostopt:ID:V (change option ID in the host's own menu: Menu -> its checkbox / field -> Back to game;
+//   P382: start-up options only), gameopt:ID:V (P382: set option ID as a customisation settings row does: the game's
+//   value, rtw_option_changed for a declared option, else the settings record), hostmenu.ids (the ids its menu shows, ascending),
 //   expect:PATH:VALUE (a field of `ov` / `opts`, e.g. expect:menu.page:hud, expect:opts.102:1, expect:ring.progress:>0; counts a failure if not),
 //   waitfor:PATH:VALUE[:MS] (the same, polled until it matches; default 20 s)
 //   P378 standard 1.1: pad:AX2:AY3 (a fake standard gamepad, navigator.getGamepads in the host page, with these right
@@ -231,6 +233,7 @@ try {
               const box = r.querySelector('input[type=checkbox]'), f = r.querySelector('input, select');
               return [r.getAttribute('data-option'), box ? (box.checked ? 1 : 0) : f ? Number(f.value) : null];
             })));
+            v.ids = Object.keys(v).join('-');   // P382: hostmenu.ids = the option ids the menu shows, in order
             await page.click('[data-action=close-menu]', { timeout: 2000 }).catch(() => {});
           }
           let got = v;
@@ -284,7 +287,12 @@ try {
           buttons: Array.from({ length: 17 }, () => ({ pressed: false, touched: false, value: 0 })), axes: [0, 0, Number(ax), Number(ay || 0)] };
       }, [x, y]);
       say(`fake gamepad ${x === 'off' ? 'off' : `right stick ${x}, ${y || 0}`}`);
-    } else if (cmd === 'hostopt') {   // the host's own options menu
+    } else if (cmd === 'gameopt') {   // P382: option ID set as the game's customisation settings set it (inGame options)
+      const w = await gameWorker();
+      const ok = w && await w.evaluate(([id, v]) => globalThis.__rtwConker.menuSet(id, v), [Number(x), Number(y)]);
+      say(`game option ${x} = ${y}${ok ? '' : ' (FAILED: no such option)'}`);
+      if (!ok) fails++;
+    } else if (cmd === 'hostopt') {   // the host's own options menu (P382: start-up options only)
       await page.click('[data-action=menu]');
       const row = page.locator(`[data-option="${x}"]`);
       await row.waitFor({ timeout: 5000 });
