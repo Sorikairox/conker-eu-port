@@ -231,7 +231,20 @@ var rtwGlue = (function () {
   }
   const raf = typeof requestAnimationFrame === 'function' ? requestAnimationFrame.bind(globalThis) : (f) => setTimeout(f, 16);
   let tickQueued = false;
-  function scheduleTick() { tickQueued = true; raf(() => { tickQueued = false; inputTick(); }); }
+  // P383: the input tick follows the worker's animation frames, with a 100 ms timer behind it: a 3-player session with
+  // High frame rate on (every peer's: the room host's option) in one headless Chrome stalled the worker's
+  // requestAnimationFrame for ~15 s at a time (the GPU process behind on frames), so pad 1 stopped reaching the input
+  // ring and the menus; the game went on with the stale pad. Whichever comes first runs the tick (tickGen: the other is
+  // dropped); inputTickRuns counts both (test aid).
+  let tickGen = 0;
+  const inputTickRuns = { raf: 0, timer: 0 };
+  const TICK_FALLBACK_MS = 100;
+  function scheduleTick() {   // was: rAF only
+    const gen = ++tickGen;
+    tickQueued = true;
+    raf(() => { if (gen !== tickGen) return; tickGen++; tickQueued = false; inputTickRuns.raf++; inputTick(); });
+    setTimeout(() => { if (gen !== tickGen) return; tickGen++; tickQueued = false; inputTickRuns.timer++; inputTick(); }, TICK_FALLBACK_MS);
+  }
 
   // ------------------------------------------------------------------ photo mode (main.js photoPoll / photoCapture, P348)
   const photo = { state: 0, prevB: 0, prevKey: false, hud: false, mx: 0, my: 0, wheel: 0, last: 0, busy: false, asked: 0,   // P378 wheel
@@ -591,6 +604,7 @@ var rtwGlue = (function () {
         audioDrained: () => Module['_port_rtw_audio_drained']() >>> 0, saveGeneration: () => Module['_rtw_save_generation'](),
         overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues), replay: replayStatus,   // P377 (P378 replay)
         optsync: () => Object.assign({}, optionSync),   // P378 rtw_option_changed calls
+        inputTicks: () => Object.assign({}, inputTickRuns),   // P383: input ticks run by an animation frame / by the fallback timer
         menuSet: (id, value) => rtwOverlay.menuSet(id, value),   // P382: set an option as the customisation settings do
         cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); },   // P378: the camera sticks
         photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }),   // P378: photo camera's field of view
