@@ -177,7 +177,9 @@ _port_photo_info,_port_gfx_resize,_port_gfx_widescreen,_port_gfx_hires_2d,_port_
 _port_net_exclude,_port_net_addr,_port_rec_session,_port_rec_checkpoint_now,_port_rec_checkpoint_ms,\
 _port_font_info,_port_font_glyph,_port_set_gmenu_row,_port_gmenu_take_request,_port_skip_progress,_port_sfx_decode,_port_sfx_info,\
 _port_sfx_pcm,_port_photo_look_set,_port_photo_look_info,_port_rtw_overlay_composite,_port_rtw_overlay_restore,\
-_port_rtw_menu_sound_play,_port_rtw_menu_sounds_played,_port_rtw_audio_drained
+_port_rtw_menu_sound_play,_port_rtw_menu_sounds_played,_port_rtw_audio_drained,\
+_rtw_net_session,_rtw_net_peer,_rtw_net_buffer,_rtw_net_recv,_port_rtw_net_send,_port_rtw_net_stat,_port_rtw_net_kick,\
+_port_net_session,_port_net_frame,_port_net_ready,_port_net_slow,_port_net_drop,_port_net_page_hashes,_port_net_page_info,_port_gfx_ownview
 RTW_EMPTY :=
 RTW_SPACE := $(RTW_EMPTY) $(RTW_EMPTY)
 RTW_EXPORTS = $(subst $(RTW_SPACE),,$(RTW_EXPORT_LIST))   # the continuation lines above put spaces after the commas
@@ -185,7 +187,7 @@ RTW_LINK := -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VERSION=2 -sMIN_W
             -sSTACK_SIZE=1MB -sMODULARIZE=1 -sEXPORT_NAME=createConker -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sENVIRONMENT=worker \
             -sDYNAMIC_EXECUTION=0 -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 --profiling-funcs \
             -sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAP32,HEAPU32,wasmMemory,stringToNewUTF8 -sEXPORTED_FUNCTIONS=$(RTW_EXPORTS) \
-            --js-library web/rtw/rtw_lib.js --pre-js $(RTW)/gen/rtw_overlay.js --pre-js web/rtw/rtw_glue.js
+            --js-library web/rtw/rtw_lib.js --pre-js $(RTW)/gen/rtw_overlay.js --pre-js web/rtw/rtw_net.js --pre-js web/rtw/rtw_glue.js
 
 $(RTW)/stubs/icall_tab.o: $(GEN)/icall_tab.c ultra/pc_mem.h ultra/pc_icall.h
 	@mkdir -p $(@D)
@@ -202,7 +204,7 @@ $(RTW)/audio/%.o: audio/%.c audio/aud.h ultra/pc_mem.h
 
 .PHONY: rtw
 rtw: $(RTW_DIST)/conker.js $(RTW_DIST)/conker_netx.txt $(RTW_DIST)/retrowser.json
-$(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(RTW_STUB_OBJS) web/rtw/rtw_lib.js web/rtw/rtw_glue.js $(RTW)/gen/rtw_overlay.js
+$(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(RTW_STUB_OBJS) web/rtw/rtw_lib.js web/rtw/rtw_net.js web/rtw/rtw_glue.js $(RTW)/gen/rtw_overlay.js
 	@mkdir -p $(@D)
 	emcc $(B)/stubs/n64mem_labels.o $(GAME_OBJS) $(BOOT_OBJS) $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(filter-out $(B)/stubs/n64mem_labels.o,$(RTW_STUB_OBJS)) -o $@ \
 	  $(RTW_LINK) -Wl,--error-limit=0 -Wl,-Map=$(RTW)/conker.map $(GAME_WRAP_FLAGS) 2> $(RTW)/link_warnings.txt \

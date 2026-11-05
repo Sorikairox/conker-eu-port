@@ -22,7 +22,11 @@
 //     played the same (option 115);
 //   - P378 standard 1.1 rtw_option_changed: a manifest option changed in the customisation settings is told to the host,
 //     so its menu shows it and it keeps it (option 116; rtw_menu.js).
-// Left out (no host interface in retrowser v1): online play (net.js, W11).
+//   - P380 standard 1.2 online play (option 117, on by default): the host's lockstep session boot calls rtw_net_session
+//     before rtw_start; netSession starts pc_net.c's session through rtw_net.js (object rtwNet: net.js's packet logic
+//     over rtw_net_send / rtw_net_recv). In a session the game options are the room host's and stay fixed (the host's
+//     menu and the customisation settings cannot change them), the settings record does not apply, the recorder and a
+//     kept replay wait for a game without a session, and this tick writes pad 1 into the input ring (pc_net.c local pad).
 var rtwGlue = (function () {
   'use strict';
   const N64 = { A: 0x8000, B: 0x4000, Z: 0x2000, START: 0x1000, DU: 0x0800, DD: 0x0400, DL: 0x0200, DR: 0x0100,
@@ -33,7 +37,8 @@ var rtwGlue = (function () {
   // rtw_option ids: the game options are the PORT_OPT_* ids (port/ultra/port_options.h, main.js `game:`), the
   // page-side ones start at 100 (pc_rtw.c RTW_PAGE_OPT_BASE)
   const OPT = { FREECAM: 15, PHOTOMODE: 16, HIRES2D: 100, SMOOTHFONT: 101, WIDESCREEN: 102, FULLRES: 103, HFR: 104,
-    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115, OPTSYNC: 116 };   // P378: RSTICK, WHEEL, REPLAY, OPTSYNC
+    TOGGLECROUCH: 105, TOGGLERLOOK: 106, TOGGLEWALK: 107, RECORDER: 108, RSTICK: 113, WHEEL: 114, REPLAY: 115, OPTSYNC: 116,   // P378: RSTICK, WHEEL, REPLAY, OPTSYNC
+    ONLINE: 117, ONLINE_OWNVIEW: 118, ONLINE_DELAY: 119 };   // P380 online play (standard 1.2)
   // main.js OPTIONS keys of the game options, for the recording's header (e2e_replay.js applies them by key)
   const GAME_OPTION_KEYS = { 0: 'skipcut', 1: 'skipintro', 2: 'healthhud', 3: 'cashhud', 4: 'longbreath', 5: 'longspin',
     17: 'ledgegrab', 6: 'nodrunk', 7: 'conkerlod', 8: 'airbar', 13: 'rumble', 14: 'crosshair', 15: 'freecam',
@@ -49,6 +54,8 @@ var rtwGlue = (function () {
   const opt = (id) => optionValues[id] | 0;
   const view = { width: 640, height: 480, dpr100: 100 };
   let started = false, glUp = false, hostPaused = false, pointerLocked = false, gameOptionsLocked = false;
+  let netSessionOn = false;   // P380: a lockstep session runs (rtw_net_session started pc_net.c's session)
+  const hostStartOptions = [];   // P380: rtw_option calls before rtw_start ([id, value]); the settings record applies at start
 
   const wasm = (name) => Module['_' + name];
   function log(text) {
@@ -189,7 +196,7 @@ var rtwGlue = (function () {
     if (photoHasInput) return;   // P348: photo mode takes pad 1's input
     if (!menuHasPad) photoMaskAfter(pad1);   // P377: not on the idle pad of the tick a menu closed in (its mask would end there)
     applyLatches(pad1);
-    if (rec.active) { recSetPad(pad1); return; }   // P357: the recorded pad (pc_net.c samples it at the next retrace)
+    if (rec.active || netSessionOn) { recSetPad(pad1); return; }   // P357: the recorded pad; P380: this peer's pad -> the input ring (main.js PortNet.setLocalPad)
     if (replay.active) return;   // P378: the retraces read the recording's input (pc_net.c rec_input)
     const pp = wasm('port_pad_state')() >> 2;
     for (let i = 0; i < 4; i++) {
@@ -539,11 +546,18 @@ var rtwGlue = (function () {
     start() {   // rtw_start, before main()
       loadExclusions();
       layout();
-      if (replay.doc && !opt(OPT.REPLAY)) log(`[replay] "${replay.doc.name}" not played: Replay recordings is off`);
-      if (replay.doc && opt(OPT.REPLAY)) {   // P378: a kept recording plays now (and the recorder waits)
+      // P380: the host's option values of the start, through the settings record (P377) unless a session runs (the room
+      // host's values then stand)
+      for (const [id, value] of hostStartOptions.splice(0)) if (!netSessionOn) startOption(id, value);
+      if (netSessionOn) {   // P380: no replay and no recording in an online session (the input is the session's)
+        if (replay.doc) log(`[replay] "${replay.doc.name}" waits: an online session runs (it plays at the next start without one)`);
+        if (opt(OPT.RECORDER)) log('[rec] no recording in an online session');
+        rtwNet.startTransport();
+      } else if (replay.doc && !opt(OPT.REPLAY)) log(`[replay] "${replay.doc.name}" not played: Replay recordings is off`);
+      if (!netSessionOn && replay.doc && opt(OPT.REPLAY)) {   // P378: a kept recording plays now (and the recorder waits)
         if (opt(OPT.RECORDER)) log('[rec] no recording during a replay');
         replayBegin();
-      } else if (opt(OPT.RECORDER)) {
+      } else if (!netSessionOn && opt(OPT.RECORDER)) {
         const romPtr = wasm('port_rtw_rom_ptr')(), romSize = wasm('port_rtw_rom_size')();
         if (romPtr && romSize) romForHash = HEAPU8.slice(romPtr, romPtr + romSize);
         recBegin();
@@ -557,20 +571,30 @@ var rtwGlue = (function () {
         overlay: () => rtwOverlay.state(), options: () => Object.assign({}, optionValues), replay: replayStatus,   // P377 (P378 replay)
         optsync: () => Object.assign({}, optionSync),   // P378 rtw_option_changed calls
         cam: () => { const cp = wasm('port_cam_state')() >> 2; return Array.from(HEAP32.subarray(cp, cp + 16)); },   // P378: the camera sticks
-        photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }) };   // P378: photo camera's field of view
+        photoinfo: () => ({ state: photo.state, fov: +wasm('port_photo_info')(7).toFixed(3) }),   // P378: photo camera's field of view
+        net: () => rtwNet.status(), netRing: (ch, a, b) => rtwNet.ring(ch, a, b) };   // P380 online play
       log(`[rtw] started: options ${Object.entries(optionValues).map(([k, v]) => `${k}=${v}`).join(' ')}`);
     },
     beforeGl() { layout(); },   // the drawing buffer the renderer starts with (gfx_init reads the viewport)
     glReady() { glUp = true; layout(); },
     option(id, value) {   // rtw_option (pc_rtw.c already set the game options to the host's value)
       hostDeclared.add(id);   // P378
-      // P377: a value chosen in the customisation settings may win over the host's at start (rtwOverlay.hostOption)
-      const effective = rtwOverlay.hostOption(id, value, started);
-      if (effective !== value) {
-        if (id < GAME_OPTION_COUNT && !gameOptionsLocked) wasm('port_set_option')(id, effective);
-        log(`[settings] option ${id}: ${effective} (chosen in the customisation settings; the host sent ${value})`);
+      if (!started) { hostStartOptions.push([id, value]); applyOption(id, value); return; }   // P380: the record applies at start
+      if (netSessionOn && (id < GAME_OPTION_COUNT || id === OPT.ONLINE || id === OPT.ONLINE_DELAY || id === OPT.ONLINE_OWNVIEW)) {
+        log(`[net] option ${id} = ${value} from the host's menu ignored: the session keeps the room host's options`);
+        return;
       }
-      applyOption(id, effective);
+      startOption(id, value);
+    },
+    netSession(players, me) {   // P380 rtw_net_session (standard 1.2 lockstep boot: after rtw_option, before rtw_start)
+      if (started) { log(`[net] rtw_net_session(${players}, ${me}) after the start: ignored (this build plays lockstep sessions from power-on)`); return; }
+      netSessionOn = rtwNet.begin(players, me, { on: !!opt(OPT.ONLINE), delay: opt(OPT.ONLINE_DELAY), ownView: !!opt(OPT.ONLINE_OWNVIEW),
+        log, notice: (text, ms) => rtwOverlay.notice(text, ms) });
+      if (!netSessionOn) return;
+      // main.js optionsLocked: the session's game options are the room host's, fixed (free camera and photo mode are off
+      // in a session in the C: port_free_camera_enabled / port_photo_request)
+      wasm('port_rtw_lock_game_options')(); gameOptionsLocked = true;
+      rtwOverlay.setOnline(true);   // the customisation settings show them locked and never pause the game
     },
     resize(width, height, dpr100) {   // rtw_resize: CSS pixels of the view, devicePixelRatio x 100
       view.width = width; view.height = height; view.dpr100 = dpr100 || 100;
@@ -593,6 +617,15 @@ var rtwGlue = (function () {
       replayAccept(bytes);
     },
   };
+  // P377 / P380: a host value through the customisation settings' record (a value chosen there may win at start)
+  function startOption(id, value) {
+    const effective = rtwOverlay.hostOption(id, value, started);
+    if (effective !== value) {
+      if (id < GAME_OPTION_COUNT && !gameOptionsLocked) wasm('port_set_option')(id, effective);
+      log(`[settings] option ${id}: ${effective} (chosen in the customisation settings; the host sent ${value})`);
+    }
+    applyOption(id, effective);
+  }
   // an option's value for the game and this glue (from the host, or from the customisation settings)
   function applyOption(id, value) {
     const was = optionValues[id];
@@ -616,7 +649,7 @@ var rtwGlue = (function () {
       applyOption(id, value);
       return true;
     },
-    started: () => started, hostPaused: () => hostPaused,
+    started: () => started, hostPaused: () => hostPaused, online: () => netSessionOn,   // P380
     photo, photoRequest: (on) => photoRequest(on), photoCapture: () => photoCapture(), photoBusy: () => photo.busy,
     maskHeld() { photo.maskB = 0xFFFF; photo.maskStick = true; },   // main.js GMenu close: held inputs wait for a release
     exportSave: () => exportFile('conker-eu.eep', 'application/octet-stream', eepromBytes()),
@@ -627,7 +660,7 @@ var rtwGlue = (function () {
     // P378 standard 1.1: a manifest option changed in the customisation settings -> env.rtw_option_changed (option 116).
     // true = the host took it (its menu and stored value now have it)
     optionChanged(id, value) {
-      if (!opt(OPT.OPTSYNC) || !hostDeclared.has(id)) return false;
+      if (!opt(OPT.OPTSYNC) || !hostDeclared.has(id) || netSessionOn) return false;   // P380: a session's options are the room host's
       const r = wasm('port_rtw_option_changed')(id, value);
       log(`[settings] option ${id} = ${value} told to the host${r ? ` (not taken: ${r})` : ''}`);
       optionSync.told++; if (r) optionSync.refused++;

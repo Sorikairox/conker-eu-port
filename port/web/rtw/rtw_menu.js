@@ -4,7 +4,7 @@
   // footer's N64 button faces) and pad controls (D-pad / stick move with the game's repeat, left / right change, A or Start
   // choose, B back, closes on the main page), the same model (MenuModel over main.js OPTIONS, the Classic / Modern presets)
   // and the game's own menu sounds (gmenu.js GSound). Its own pages: no keyboard / gamepad binding pages (the host maps its
-  // keys, pads and touch buttons to N64 buttons), no online rooms (no netplay in retrowser v1: an information page), saves
+  // keys, pads and touch buttons to N64 buttons), no online rooms (the host's Online panel has them, P380: an information page), saves
   // through the host's menu (an export here too).
   // Opened by the extra button Menu (bit 21), by holding Photo mode half a second, or by the CUSTOMISATION row of the
   // game's own menus (pause, save slots, MULTI, the fireplace OPTIONS page: game C, port_set_gmenu_row /
@@ -138,7 +138,7 @@
     snd = function menuSound(kind) {
       const k = SOUND[kind];
       if (!k) return;
-      if (recCfg || !featureOn(FEATURE.MENUS)) { soundStats.silent++; return; }
+      if (recCfg || netCfg || !featureOn(FEATURE.MENUS)) { soundStats.silent++; return; }   // P380: silent online (outside the lockstep)
       if (!M._port_sfx_decode || !M._port_rtw_menu_sound_play) { soundStats.none++; return; }
       const n = M._port_sfx_decode(k[0], k[2]);
       if (!n) { soundStats.none++; return; }   // the sound bank is not loaded yet (boot)
@@ -160,11 +160,11 @@
       const C = { title: 'rgb(255,50,50)', text: '#ffffff', on: 'rgb(255,255,0)', off: 'rgb(170,170,170)', dim: 'rgb(150,150,150)', lock: 'rgb(120,120,120)', head: 'rgb(255,200,60)' };
       const page = () => U.stack[U.stack.length - 1];
       const fontOk = () => GameFont.load();
-      const hostRow = (label, value, help) => ({ kind: 'info', label, value: () => value, help });
+      const hostRow = (label, value, help) => ({ kind: 'info', label, value: typeof value === 'function' ? value : () => value, help });
       function mainItems() {
         return [MenuModel.presetItem()].concat(MenuModel.sections().filter((s) => s.id !== 'tools').map((s) => ({ kind: 'link', label: s.label, help: s.help, page: s.id })), [
           { kind: 'link', label: 'Saves', help: 'Your save is the cartridge\'s EEPROM: the host keeps it for you automatically. Export it to a file here or in the host\'s menu; import one in the host\'s menu.', page: 'saves' },
-          { kind: 'link', label: 'Online', help: 'Online multiplayer is not in this build yet.', page: 'online' },
+          { kind: 'link', label: 'Online', help: 'Online multiplayer: rooms are in the host\'s Online panel.', page: 'online' },   // P380
           { kind: 'action', label: 'Photo mode', help: 'Freeze the game and move a free camera; A saves a picture, Start leaves (a short press of the Photo mode button also starts it). Single player only.',
             locked: () => MenuModel.lockReason(optOf('photomode')),
             act: () => {
@@ -186,7 +186,8 @@
           backRow,
         ];
         if (p.id === 'online') return [
-          hostRow('Online multiplayer', 'NOT YET', 'Online matches need netplay in the retrowser host, which is not there yet (retrowser v1). The page build at conker-web-port.netlify.app has online rooms.'),
+          // P380 standard 1.2: the host owns the rooms; the session's settings are the host menu's options 117-119
+          hostRow('Online multiplayer', () => (glue.online() ? 'IN A SESSION' : glue.value(117, 1) ? 'HOST PANEL' : 'OFF'), 'Up to 4 players: one creates a room in the host\'s Online panel and shares its code or link, the others join it, the room host presses Start. Every player\'s game then starts from power-on with the room host\'s options and save (yours stays untouched). Options "Online play", "Online: own view" and "Online input delay" are in the host\'s menu.'),
           hostRow('Local multiplayer', 'MULTI', 'Up to 4 players on one screen: plug in more gamepads (the host sends them as controllers 2 to 4) and choose MULTI on the title menu.'),
           backRow,
         ];
@@ -215,8 +216,8 @@
         U.open = true; U.t0 = performance.now(); U.stack = [{ id: 'main', sel: 0, top: 0 }]; U.prev = -1; U.helpSel = ''; U.note = '';
         U.from = BACK[how] ? how : '';
         // single player: the game pauses as on the page (P363 / P364: not from the game's own pause / title menu, which keeps
-        // running underneath with an idle pad 1); never while recording
-        if (!U.from && !recCfg && !glue.hostPaused()) { U.paused = true; M._port_set_paused(1); }
+        // running underneath with an idle pad 1); never while recording, never in an online session (P380)
+        if (!U.from && !recCfg && !netCfg && !glue.hostPaused()) { U.paused = true; M._port_set_paused(1); }   // P380: never in an online session
         log(`[gmenu] open${U.from ? ` (from the game's ${U.from} menu)` : ` (${how})`}`);
         if (!U.from) snd('choose');
         return true;

@@ -521,6 +521,9 @@ static void rtw_main_loop_tick(void) {
     frame();
     port_rtw_overlay_tick();
 }
+/* P380 online play (standard 1.2): rtw_net.js calls this when a packet brings the input a waiting session needs, as
+ * net.js calls port_net_kick; here the whole main-loop tick runs, so the overlay layer's clean picture stays in step */
+EMSCRIPTEN_KEEPALIVE void port_rtw_net_kick(void) { if (in_main_loop && port_net_on && !port_paused) rtw_main_loop_tick(); }
 #endif
 void port_run(port_boot_fn boot) {
     emscripten_fiber_init_from_current_context(&sched_fiber, sched_astack, sizeof sched_astack);

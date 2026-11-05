@@ -39,6 +39,17 @@ addToLibrary({
     return host && host['rtw_request_file'] ? host['rtw_request_file'](id) | 0 : -1;
   },
 
+  // P380 standard 1.2 online play: a packet to a session peer (-2 = no session: a host without online play) and the
+  // round trips (-1 = unknown)
+  rtw_net_send: (peer, channel, ptr, len) => {
+    const host = Module['rtw'];
+    return host && host['rtw_net_send'] ? host['rtw_net_send'](peer, channel, ptr, len) | 0 : -2;
+  },
+  rtw_net_stat: (peer, kind) => {
+    const host = Module['rtw'];
+    return host && host['rtw_net_stat'] ? host['rtw_net_stat'](peer, kind) | 0 : -1;
+  },
+
   // pc_video.c port_video_init: the WebGL2 context on the host's OffscreenCanvas, with the attributes the page build
   // asks emscripten_webgl_create_context for (WebGL 2, no alpha, no antialias, depth, preserveDrawingBuffer for photos)
   port_rtw_gl_create__deps: ['$GL'],
@@ -58,6 +69,11 @@ addToLibrary({
   port_rtw_glue_resize: (width, height, dpr100) => rtwGlue.resize(width, height, dpr100),
   port_rtw_glue_pause: (on) => rtwGlue.pause(on),
   port_rtw_glue_file: (id, ptr, size) => rtwGlue.file(id, ptr, size),   // P378 rtw_file_ready
+  // P380 online play: rtw_net_session / rtw_net_peer / rtw_net_recv (pc_rtw.c), pc_net.c's send point (rtw_net.js)
+  port_rtw_glue_net_session: (players, me) => rtwGlue.netSession(players, me),
+  port_rtw_glue_net_peer: (peer, state) => rtwNet.peerState(peer, state),
+  port_rtw_glue_net_recv: (peer, channel, ptr, len) => rtwNet.recv(peer, channel, ptr, len),
+  port_rtw_net_after_tick: () => rtwNet.afterTick(),
   // P377 the overlay layer (rtw_overlay.js): its tick after each main-loop frame (pc_sched.c rtw_main_loop_tick), and the
   // texture upload of its OffscreenCanvas (gfx_f3dex2.c port_rtw_overlay_composite, the texture bound to unit 0)
   port_rtw_overlay_tick__deps: ['$addRunDependency', '$removeRunDependency'],   // rtw_overlay.js reads its settings record in preRun

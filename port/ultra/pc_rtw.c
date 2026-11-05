@@ -19,6 +19,9 @@
  *   rtw_audio_rate/drain/buffer the game's 22020 Hz stereo s16, pulled once per display frame (aud_out.c)
  *   rtw_option(id, value)       game options (PORT_OPT_* ids, as main.js port_set_option) and page-side options (ids
  *                               >= RTW_PAGE_OPT_BASE: renderer switches, input toggles, the recorder), see retrowser.json
+ *   rtw_net_session(players, me), rtw_net_peer(peer, state), rtw_net_buffer(size), rtw_net_recv(peer, channel, len)
+ *                               P380 (standard 1.2) online play: the lockstep session of pc_net.c with the host's
+ *                               transport; the packet logic (net.js's) is the worker glue's port/web/rtw/rtw_net.js
  * Everything here is port-only state: port/tools/net_regions.py leaves pc_rtw.o out of the state hash and the photo
  * mode snapshot (like pc_photo.o). */
 #include <emscripten.h>
@@ -36,12 +39,17 @@ int rtw_rumble(int port, int on);
 int rtw_pointer_lock(int on);
 int rtw_request_file(int id);   /* P378 standard 1.1: the host asks the player for a file of fileInputs entry id */
 int rtw_option_changed(int id, int value);   /* P378 standard 1.1: the game changed a manifest option itself */
+int rtw_net_send(int peer, int channel, const void *bytes, int len);   /* P380 standard 1.2: a packet to a session peer */
+int rtw_net_stat(int peer, int kind);                                  /* P380 standard 1.2: round trips (ms) */
 /* worker glue hooks (port/web/rtw/rtw_lib.js -> rtw_glue.js) */
 void port_rtw_glue_start(void);
 void port_rtw_glue_option(int id, int value);
 void port_rtw_glue_resize(int width, int height, int dpr100);
 void port_rtw_glue_pause(int on);
 void port_rtw_glue_file(int id, const uint8_t *bytes, int size);   /* P378 */
+void port_rtw_glue_net_session(int players, int me);                              /* P380 */
+void port_rtw_glue_net_peer(int peer, int state);
+void port_rtw_glue_net_recv(int peer, int channel, const uint8_t *bytes, int len);
 
 void port_set_rom(unsigned char *p, unsigned size);
 void port_set_paused(int p);
@@ -210,3 +218,23 @@ EMSCRIPTEN_KEEPALIVE int rtw_option(int id, int value) {
     port_rtw_glue_option(id, value);   /* the glue keeps every value (photo mode, free camera and the page-side ones act there) */
     return 0;
 }
+
+/* P380 standard 1.2 online play (spec §4.12; manifest "net": { "players": 4 }, lockstep). The host boots every peer from
+ * power-on with the room host's options and save and calls rtw_net_session + rtw_net_peer after rtw_option, before
+ * rtw_start; the glue (rtw_glue.js netSession -> rtw_net.js) starts pc_net.c's session (port_net_session) there, so the
+ * game is in the session from its first retrace. Packets arrive between the module's own steps: the host asks for a
+ * buffer (rtw_net_buffer, at most 64 KiB: channel 1's limit), copies the packet in and calls rtw_net_recv; the glue copies
+ * it out at once (input packets feed the ring, channel-1 messages the drop agreement / desync report). Sending goes
+ * through port_rtw_net_send so both host imports are real env.rtw_* imports of conker.wasm. */
+#define RTW_NET_MAX 65536
+static uint8_t rtw_net_rx[RTW_NET_MAX];
+EMSCRIPTEN_KEEPALIVE int rtw_net_session(int players, int me) { port_rtw_glue_net_session(players, me); return 0; }
+EMSCRIPTEN_KEEPALIVE int rtw_net_peer(int peer, int state) { port_rtw_glue_net_peer(peer, state); return 0; }
+EMSCRIPTEN_KEEPALIVE int rtw_net_buffer(int size) { return size >= 0 && size <= RTW_NET_MAX ? (int)(uintptr_t)rtw_net_rx : 0; }
+EMSCRIPTEN_KEEPALIVE int rtw_net_recv(int peer, int channel, int len) {
+    if (len < 0 || len > RTW_NET_MAX) return 0;
+    port_rtw_glue_net_recv(peer, channel, rtw_net_rx, len);
+    return 0;
+}
+EMSCRIPTEN_KEEPALIVE int port_rtw_net_send(int peer, int channel, const void *bytes, int len) { return rtw_net_send(peer, channel, bytes, len); }
+EMSCRIPTEN_KEEPALIVE int port_rtw_net_stat(int peer, int kind) { return rtw_net_stat(peer, kind); }

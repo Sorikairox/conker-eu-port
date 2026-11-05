@@ -66,8 +66,9 @@ var rtwOverlay = (function () {
   const document = { createElement: () => new OffscreenCanvas(1, 1), getElementById: () => layerElement, body: { classList: noClass } };
   const window = { addEventListener() {}, devicePixelRatio: 1 };
   const navigator = { getGamepads: () => [] };   // the host's pads arrive as rtw_input
-  // the page's session flags: no online play and no ?netdet in this build; recCfg = the recorder runs
-  const netCfg = null, NETDET = false;
+  // the page's session flags: no ?netdet in this build; recCfg = the recorder runs; netCfg = an online session runs (P380)
+  const NETDET = false;
+  let netCfg = null;
   let recCfg = null, optionsLocked = false;
   // main.js photo mode, bound to rtw_glue.js's photo object / functions at attach()
   let photo = { state: 0, hud: false, viewReq: false };
@@ -182,6 +183,7 @@ var rtwOverlay = (function () {
     wheel(dy) { for (const f of hooks.wheel) if (f(dy)) return true; return false; },   // P378 rtw_wheel: true = a menu took it
     photoTick: (dt, d, fresh) => photoTick(dt, d, fresh), photoShown: (on) => photoShown(on), photoToast: (text) => photoToast(text),
     setRecording(on) { recCfg = on ? { mode: 'record' } : null; optionsLocked = !!on; },
+    setOnline(on) { netCfg = on ? { online: true } : null; optionsLocked = !!on || !!recCfg; },   // P380 standard 1.2 session
     hostResumed() { for (const f of hooks.hostResumed) f(); },   // rtw_pause(0)
     notice,   // P378
     state() {

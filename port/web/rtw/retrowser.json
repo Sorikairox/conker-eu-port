@@ -62,8 +62,12 @@
     { "id": 114, "label": "Mouse wheel (photo zoom, menu rows)", "type": "bool", "default": 1 },
     { "id": 115, "label": "Replay recordings", "type": "bool", "default": 1 },
     { "id": 116, "label": "In-game changes update this menu", "type": "bool", "default": 1 },
+    { "id": 117, "label": "Online play", "type": "bool", "default": 1 },
+    { "id": 118, "label": "Online: own view only", "type": "bool", "default": 1 },
+    { "id": 119, "label": "Online input delay (0 = auto)", "type": "int", "default": 0, "min": 0, "max": 16 },
     { "id": 108, "label": "Input recorder (for testing)", "type": "bool", "default": 0 }
   ],
+  "net": { "players": 4, "model": "lockstep" },
   "fileInputs": [
     { "id": 1, "label": "Replay a recording", "accept": [".ckrec"], "maxSize": 16777216 }
   ],

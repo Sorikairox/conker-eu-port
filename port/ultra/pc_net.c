@@ -187,7 +187,12 @@ double port_net_take_slow_ms(double elapsed_ms) {
 /* port_net_retrace_start, right after the local input for N + D is sampled: the page sends it at once, before this
  * retrace runs (1.5 ms mean, up to ~10 ms with rendering), not on its timer */
 static void net_send_now(void) {
+#ifdef PORT_RTW
+    void port_rtw_net_after_tick(void);   /* P380 retrowser build: rtw_lib.js -> rtw_net.js sends the input packets (rtw_net_send) */
+    port_rtw_net_after_tick();
+#else
     EM_ASM({ if (Module['netAfterTick']) Module['netAfterTick'](); });
+#endif
 }
 
 /* start of retrace N (pc_sched.c retrace): sample the local input for frame N + D */
