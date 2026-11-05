@@ -42,7 +42,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   `node tools/port/scripts/rtw_e2e.mjs OUT HOST_URL ROM ACTIONS` (RTW_SERVE=PORT serves retrowser's built dist in-process,
   HOST_URL `-`); overlays (P377): `tools/port/scripts/rtw_overlay_e2e.sh OUT` (3 runs, ~4 min, ALL PASS); standard 1.1
   (P378): `tools/port/scripts/rtw_v11_e2e.sh OUT [ROM] [rstick wheel replay optsync]` (~6 min, ALL PASS); publish
-  locally `tools/eu_port/rtw_dist_commit.sh`.
+  `tools/eu_port/rtw_dist_commit.sh --rom ROM "msg"` (rtw-dist + the root `retrowser.json` / `retrowser/` copy on this branch,
+  commit those; P379).
 - Deploy after a green check + browser test: `tools/eu_port/deploy_web.sh`; backup: `~/conker/tools/eu_port/backup_push.sh`.
 
 ## Reference docs
@@ -51,7 +52,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
-- retrowser build (P376): rebuild + rtw_dist_commit.sh after page changes that matter (P377: main.js / gmenu.js blocks
+- retrowser build (P376): rebuild + rtw_dist_commit.sh (and commit the root retrowser.json + retrowser/ it refreshes, P379)
+  after page changes that matter (P377: main.js / gmenu.js blocks
   the worker copies in: rtw_page_extract.py stops the build if one moved). Standard 1.1 adopted in P378 (right stick,
   wheel, replays, rtw_option_changed); still missing: netplay (W11; the host has none). Not tested on a phone, another
   browser or a real gamepad (a fake standard gamepad in the host page only). Host-side gap found in P378: while the game
@@ -113,6 +115,24 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P379 (port-web, 2026-11-05): retrowser build on the default branch (plain link owner/repo)
+- retrowser.app reads `retrowser.json` from the root of the GitHub default branch (`eu`, kept equal to port-web), paths
+  relative to it, no `..`. So the branch now carries `retrowser.json` (paths `retrowser/conker.{wasm,js}`,
+  `retrowser/conker_netx.txt`) and `retrowser/` (the same bytes as port/build/rtw/dist); the link
+  `Sorikairox/conker-eu-port` works without `@rtw-dist`. rtw-dist is kept (link `@rtw-dist` in older notes).
+- eb95d818 glue fix found on the way: the host keys files.data by the manifest path, so in the root layout the file is
+  `retrowser/conker_netx.txt` and rtw_glue.js loadExclusions (exact key `conker_netx.txt`) missed it: photo mode
+  failed with -4 ("conker_netx.txt did not load"; e2e negative control with the old conker.js in the root layout).
+  Now any key equal to or ending in `/conker_netx.txt`. conker.js only (wasm, netx identical).
+- e5dd129d `tools/eu_port/rtw_dist_commit.sh`: after the rtw-dist commit it copies the dist files into `retrowser/`,
+  writes the root manifest with the paths moved, rtw-hash + rtw-check --rom on the repo root, compares the copies;
+  `--no-root` skips. 17006997: the output (build id 9f222f68…; rtw-dist c11c1f46, build id 77cb4405…).
+- Tests: `rtw.mjs check . --rom baserom.eu.z64` OK; e2e on a `git archive HEAD retrowser.json retrowser` copy served by the
+  GitHub mock as the default branch (RTW_DIST=copy, RTW_SERVE built dist, muted headless Chrome): boot, Enter x2 to the
+  title / opening scene, network off + mock stopped + reload -> boots and plays from the caches, same scene;
+  photo mode in gameplay (photoinfo state 2, fov 60.6). port/build/web 15 files sha256-identical to the session start
+  after each commit; check GREEN. Pushed with backup_push.sh (eu fast-forwarded to port-web).
+- No renames: no decomp-named function or variable was touched (rtw_glue.js / the script only).
 ### P378 (port-web, 2026-11-05): retrowser build adopts standard 1.1
 - User request: rtw_rstick, rtw_wheel, fileInputs + rtw_file_buffer / rtw_file_ready + rtw_request_file (replays), and
   env.rtw_option_changed (host commit 95d3c82 landed during the session), one commit per feature, rtw target only.
