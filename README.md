@@ -16,13 +16,14 @@ and `retrowser/`); it hosts no game code and no ROMs.
 
 ---
 
-# Conker's Bad Fur Day (EU) — private decomp + browser port
+# Conker's Bad Fur Day (EU) — decomp + browser port
 
-> **Private repository. Do not make public.** It contains material derived from the game (screenshots and data dumps in the git history). No ROM is stored here — you need your own EU ROM.
+> **No ROM is stored here — you need your own EU ROM.** The game's data is read from your ROM at run time; the build output
+> (`retrowser.json` + `retrowser/`) contains only code and data written for this port.
 
 **To play it yourself, see [PLAYING.md](PLAYING.md)** (one command: `tools/eu_port/play.sh`).
 
-This is a private fork of [mkst/conker](https://github.com/mkst/conker) (the US decompilation). The goal is a **native source port of the EU version that runs in a web browser**: the game's own code rewritten as readable C, compiled to WebAssembly with Emscripten (TypeScript only for the page), with native Mac/Windows builds later from the same C. It is **not** a static recompilation.
+This is a fork of [mkst/conker](https://github.com/mkst/conker) (the US decompilation). The goal is a **native source port of the EU version that runs in a web browser**: the game's own code rewritten as readable C, compiled to WebAssembly with Emscripten (TypeScript only for the page), with native Mac/Windows builds later from the same C. It is **not** a static recompilation.
 
 ## Branches
 
