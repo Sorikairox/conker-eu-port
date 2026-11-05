@@ -522,7 +522,11 @@ var rtwGlue = (function () {
   let romForHash = null;
   const optionSync = { told: 0, refused: 0 };   // P378
   function loadExclusions() {   // main.js netLoadExclusions: conker_netx.txt from files.data
-    const files = Module['files'] || {}, bytes = files['conker_netx.txt'];
+    // files.data is keyed by the manifest path (spec §4.2): 'conker_netx.txt' on rtw-dist, 'retrowser/conker_netx.txt'
+    // with the manifest at the repo root of the default branch
+    const files = Module['files'] || {};
+    const netxKey = Object.keys(files).find((k) => k === 'conker_netx.txt' || k.endsWith('/conker_netx.txt'));
+    const bytes = netxKey ? files[netxKey] : null;
     if (!bytes) { log('[nethash] conker_netx.txt not in files.data: photo mode and the recorder are off'); return; }
     let n = 0;
     for (const line of new TextDecoder().decode(bytes).split('\n')) {
