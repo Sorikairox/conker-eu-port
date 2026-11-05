@@ -45,7 +45,7 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   (P382): ☰ = start-up options only, the rest in the customisation settings (inGame / game-kept, see P382; P383: Widescreen /
   High frame rate inGame = the room host's online, net e2e LEAVE=2 / COSMETIC); publish
   `tools/eu_port/rtw_dist_commit.sh --rom ROM "msg"` (rtw-dist + the root `retrowser.json` / `retrowser/` copy on this branch,
-  commit those; P379). Online play (P380): `PLAYERS=2..4 [DROP=1 DESYNC=1 LEAVE=1 SOLO=1] node
+  commit those; P379; P384: the manifest's `picture`, port/web/rtw/cover.png, goes along). Online play (P380): `PLAYERS=2..4 [DROP=1 DESYNC=1 LEAVE=1 SOLO=1] node
   tools/port/scripts/rtw_net_e2e.mjs OUT ROM` (pages in one muted headless Chrome, retrowser's dist + room server in-process,
   ~1 min, ALL PASS).
 - Deploy after a green check + browser test: `tools/eu_port/deploy_web.sh`; backup: `~/conker/tools/eu_port/backup_push.sh`.
@@ -124,6 +124,20 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P384 (port-web, 2026-11-05): retrowser cartridge picture (standard 1.2 `picture`): the official box art
+- User choice: the official EU box art (libretro-thumbnails, Nintendo_-_Nintendo_64 / Named_Boxarts, "Conker's Bad Fur
+  Day (Europe).png", 512x374 PNG, 221406 bytes, sha256 48d75da8...). Not ROM-derived; no screenshot.
+- e9f43665 source art port/web/rtw/cover.png. c891ca98 build: template retrowser.json `"picture": { "path": "cover.png",
+  "credit": "Box art © Rare / Nintendo · image from libretro-thumbnails" }`; port/Makefile `rtw` copies it to
+  port/build/rtw/dist/cover.png; rtw_dist_commit.sh takes m.picture along (cover.png at rtw-dist's root,
+  retrowser/cover.png + path moved in the root manifest); build_rtw.sh lists it. 40bfe5cd README credit + "belongs to
+  its owners, only used to identify the game". b148d0d1 output: root build id 18376f4f..., rtw-dist 168eb6e7 (build id
+  ff37f1d0...); conker.wasm / conker.js / conker_netx.txt unchanged.
+- Tests: check GREEN; port/build/web 15 files identical (conker.wasm a2225161...); rtw-check --rom OK (picture png
+  512x374) on dist and root; `node ~/Code/retrowser/dist/tools/rtw.mjs check . --rom baserom.eu.z64` OK (retrowser
+  rebuilt with npm run build at 82b624b). Pushed (eu = b148d0d1); raw.githubusercontent.com eu/retrowser.json sha256 =
+  local (18376f4f...), eu/retrowser/cover.png and rtw-dist/cover.png sha256 48d75da8... No deploy. No renames (no
+  decomp-named function or variable touched). Not checked: the drawn cartridge on retrowser.app itself.
 ### P383 (port-web, 2026-11-05): retrowser build: what changes how much a player sees follows the room host online
 - User rule: in a lockstep session every setting that changes how much a player sees (or when) is the room host's; every
   other picture setting stays each player's own; offline nothing changes. rtw build only (web build byte-identical).
