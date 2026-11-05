@@ -40,6 +40,11 @@
     "sha256": "48d75da891e6228e32c87769bfb9314cc8c82ed64ffb10b86793ff145fe7751d",
     "size": 221406
   },
+  "icon": {
+    "path": "retrowser/icon.png",
+    "sha256": "9b36e1ea9b1901ccd30685edc5ea272772270b232fed18bfd733887ad7625bab",
+    "size": 6794
+  },
   "module": {
     "factory": "createConker",
     "loop": "asyncify"
