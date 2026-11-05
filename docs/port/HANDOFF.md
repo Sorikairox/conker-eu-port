@@ -41,7 +41,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - retrowser.app build (P376): `tools/eu_port/build_rtw.sh --rom baserom.eu.z64` -> port/build/rtw/dist; e2e
   `node tools/port/scripts/rtw_e2e.mjs OUT HOST_URL ROM ACTIONS` (RTW_SERVE=PORT serves retrowser's built dist in-process,
   HOST_URL `-`); overlays (P377): `tools/port/scripts/rtw_overlay_e2e.sh OUT` (3 runs, ~4 min, ALL PASS); standard 1.1
-  (P378): `tools/port/scripts/rtw_v11_e2e.sh OUT [ROM] [rstick wheel replay optsync]` (~6 min, ALL PASS); publish
+  (P378): `tools/port/scripts/rtw_v11_e2e.sh OUT [ROM] [rstick wheel replay optsync]` (~6 min, ALL PASS); options rule
+  (P382): ☰ = start-up options only, the rest in the customisation settings (inGame / game-kept, see P382); publish
   `tools/eu_port/rtw_dist_commit.sh --rom ROM "msg"` (rtw-dist + the root `retrowser.json` / `retrowser/` copy on this branch,
   commit those; P379). Online play (P380): `PLAYERS=2..4 [DROP=1 DESYNC=1 LEAVE=1 SOLO=1] node
   tools/port/scripts/rtw_net_e2e.mjs OUT ROM` (pages in one muted headless Chrome, retrowser's dist + room server in-process,
@@ -122,6 +123,39 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P382 (port-web, 2026-11-05): retrowser build follows the options rule (host menu = start-up options only)
+- User rule (retrowser 39060f5, standard 1.2): the host's ☰ shows only settings that must be chosen before the game
+  starts; everything else is set in the game's own menu, declared `"inGame": true` when the host should keep it and
+  hand it to every player of a lockstep session, else left out of the manifest. Checked each of the 39 options in the
+  code (pc_rtw.c rtw_option -> port_set_option is live for every game option; the glue's applyOption switches the
+  picture options live: port_gfx_* / layout()).
+- Shown in ☰ (5): 1 Skip intro (read only at boot, intro_mode_update), 108 Input recorder (records from power-on),
+  117 Online play / 118 Online: own view only / 119 Online input delay (read at the session's boot).
+  inGame (23): the game options 0, 2-17 (change game memory: the room host's in a session), 105-107 control toggles,
+  113 right stick, 114 wheel, 115 replay recordings (input). Dropped (10): 100-104 Hi-res 2D / Smooth font /
+  Widescreen / Full-resolution / High frame rate (renderer only, outside the online hash, each player's own, switch
+  live), 109 autosave icon / 111 hold-L ring / 112 photo mode menus (overlay only), 110 Customisation settings (now
+  always on: with most options only there, a toggle could hide the only way to them; not kept in ☰), 116 In-game
+  changes update this menu (rtw_option_changed is now required for every declared option, so always on).
+- 5e146376 the feature: rtw_menu.js BUILD_ROWS (HUD: Hold-L skip ring; Controls: Analog right stick, Mouse wheel;
+  Tools: Photo mode menus, Replay recordings; not in the presets), undeclared options from the settings record at
+  every start (attach hook; also in a session: they never reach the others), test aid menuSet; rtw_glue.js
+  BUILD_OPTION_DEFAULTS (109 / 111 / 112 on), reportOptionToHost (was optionChanged) without the 116 check,
+  hostDeclared; rtw_overlay.js featureEnabled (was featureOn; menus always on), KEY_ID rows. Page code unchanged.
+  Not locked: the page-side inGame toggles (105-107, 113-115) can still change locally during a session (input
+  shaping before the ring, no desync; not told to the host there).
+- df723419 tests: rtw_e2e.mjs gameopt:ID:V, hostmenu.ids; overlay "off" run -> "rows"; v11 runs set 113-115 in-game,
+  optsync rewritten; rtw_net_e2e.mjs checks the room host's inGame options on every peer.
+- Tests (retrowser rebuilt at a4d4055, served in-process; muted headless Chrome, net run through chrome_lock):
+  rtw_overlay_e2e.sh ALL PASS (☰ ids 1-108-117-118-119; Widescreen in the record, music 90 in the host, both kept
+  after reload; stale stored 109-112 / 116 ignored; new rows kept); rtw_v11_e2e.sh ALL PASS (optsync: 2 calls for
+  music, none for Widescreen, Skip intro changed in-game shows in ☰); rtw_net_e2e 2 players ALL PASS (inGame 2 / 9 /
+  105 / 113 = room host's on both, 64 hash points equal); offline reload (mock stopped, network off): game-set 2,
+  host-stored 9, record-kept 102 all back; root-layout copy (git archive) boots, ☰ ids, music stored.
+  check GREEN; port/build/web 15 files sha256-identical (conker.wasm a2225161…). f77dba96 output: rtw-dist 1d9afbbd
+  (build id df45f281…), root build id d1b633b5…; `rtw.mjs check . --rom` OK. No deploy. Evidence port_work/p382.
+- Players who set a picture option in ☰ before P382 get the default again until they set it in-game (the host no
+  longer sends it).
 ### P381 (port-web, 2026-11-05): P380's two rtw-only fixes in the page build
 - User request: bring the stack-overflow and false-desync fixes to the web build (only these two changes), rtw output
   unchanged, no deploy (the user deploys after reading the report).
