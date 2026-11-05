@@ -166,6 +166,8 @@ RTW_DIST := $(RTW)/dist
 RTW_ULTRA_OBJ := $(patsubst ultra/%.c,$(RTW)/ultra/%.o,$(ULTRA_SRC) ultra/pc_rtw.c)
 RTW_GFX_OBJ   := $(patsubst gfx/%.c,$(RTW)/gfx/%.o,$(GFX_SRC))
 RTW_AUD_OBJ   := $(patsubst audio/%.c,$(RTW)/audio/%.o,$(AUD_SRC))
+# P380: the indirect-call table with its mismatch dispatcher split per signature (tools/icall_gen.py, -DPORT_RTW)
+RTW_STUB_OBJS := $(filter-out $(B)/stubs/icall_tab.o,$(STUB_OBJS)) $(RTW)/stubs/icall_tab.o
 RTW_EXPORT_LIST := _main,_malloc,_free,_rtw_rom_buffer,_rtw_save_load,_rtw_start,_rtw_pause,_rtw_input,_rtw_rstick,_rtw_wheel,_rtw_mouse,_rtw_file_buffer,_rtw_file_ready,_port_rtw_request_file,_port_rtw_option_changed,_rtw_resize,\
 _rtw_audio_rate,_rtw_audio_drain,_rtw_audio_buffer,_rtw_save_ptr,_rtw_save_size,_rtw_save_generation,_rtw_option,\
 _port_rtw_raw_state,_port_rtw_log,_port_rtw_export_file,_port_rtw_build_id,_port_rtw_set_pointer_lock,_port_rtw_lock_game_options,\
@@ -185,6 +187,9 @@ RTW_LINK := -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VERSION=2 -sMIN_W
             -sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAP32,HEAPU32,wasmMemory,stringToNewUTF8 -sEXPORTED_FUNCTIONS=$(RTW_EXPORTS) \
             --js-library web/rtw/rtw_lib.js --pre-js $(RTW)/gen/rtw_overlay.js --pre-js web/rtw/rtw_glue.js
 
+$(RTW)/stubs/icall_tab.o: $(GEN)/icall_tab.c ultra/pc_mem.h ultra/pc_icall.h
+	@mkdir -p $(@D)
+	emcc -O1 -g0 -DPORT_RTW=1 -Wno-incompatible-library-redeclaration -c $< -o $@
 $(RTW)/ultra/%.o: ultra/%.c ultra/pc_ultra.h ultra/pc_mem.h ultra/pc_icall.h
 	@mkdir -p $(@D)
 	emcc $(ULTRA_CFLAGS) -DPORT_RTW=1 -c $< -o $@
@@ -197,9 +202,9 @@ $(RTW)/audio/%.o: audio/%.c audio/aud.h ultra/pc_mem.h
 
 .PHONY: rtw
 rtw: $(RTW_DIST)/conker.js $(RTW_DIST)/conker_netx.txt $(RTW_DIST)/retrowser.json
-$(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(STUB_OBJS) web/rtw/rtw_lib.js web/rtw/rtw_glue.js $(RTW)/gen/rtw_overlay.js
+$(RTW_DIST)/conker.js: $(B)/vbe.stamp $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(RTW_STUB_OBJS) web/rtw/rtw_lib.js web/rtw/rtw_glue.js $(RTW)/gen/rtw_overlay.js
 	@mkdir -p $(@D)
-	emcc $(B)/stubs/n64mem_labels.o $(GAME_OBJS) $(BOOT_OBJS) $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(filter-out $(B)/stubs/n64mem_labels.o,$(STUB_OBJS)) -o $@ \
+	emcc $(B)/stubs/n64mem_labels.o $(GAME_OBJS) $(BOOT_OBJS) $(RTW_ULTRA_OBJ) $(RTW_GFX_OBJ) $(RTW_AUD_OBJ) $(filter-out $(B)/stubs/n64mem_labels.o,$(RTW_STUB_OBJS)) -o $@ \
 	  $(RTW_LINK) -Wl,--error-limit=0 -Wl,-Map=$(RTW)/conker.map $(GAME_WRAP_FLAGS) 2> $(RTW)/link_warnings.txt \
 	  || (tail -40 $(RTW)/link_warnings.txt; exit 1)
 	@echo "rtw link warnings: $$(grep -c warning $(RTW)/link_warnings.txt) (port/build/rtw/link_warnings.txt)"

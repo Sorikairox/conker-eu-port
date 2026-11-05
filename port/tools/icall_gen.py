@@ -169,6 +169,7 @@ def main():
          '    return 0;', '}']
     L += [f'    case {i}u: return "{s}";' for i, s in sorted(ids.items())]
     L += ['    }', '    return "?";', '}', '',
+          '#ifndef PORT_RTW   /* P380: the retrowser build has the split dispatcher at the end of this file */',
           'unsigned long long __port_icall_slow(void *fp, unsigned tsig, const unsigned long long *b, int n,',
           '                                     unsigned k, unsigned rk) {',
           '    port_icall_note(fp, tsig, n, k, rk);', '    switch (tsig) {']
@@ -181,10 +182,30 @@ def main():
         else:
             L.append(f'    case {i}u: return R_{r}((({T})fp)({args}), rk);')
     L += ['    }', '    return 0;', '}']
+    # P380 retrowser build (-DPORT_RTW): the same dispatcher split into one small function per signature. The single
+    # switch above is one wasm function with ~26000 locals once Asyncify instruments it (every case calls game code
+    # that may switch fibers); V8's baseline compiler (Liftoff) gives it a ~200 KB stack frame, and three nested
+    # mismatched calls (level_load -> hotspots_start_all -> record dispatch -> obj_effect_dispatch) overflowed the
+    # worker's stack ("Maximum call stack size exceeded") in online-play tests before the function tiered up.
+    # Split, each frame holds only its own case. The page build compiles the #ifndef PORT_RTW one, byte for byte as before.
+    L += ['#endif']
+    L2 = ['#ifdef PORT_RTW']
+    for i, s in sorted(ids.items()):
+        r, ps = s.split(':')
+        args = ', '.join(f'A_{p}(b, n, k, {j})' for j, p in enumerate(ps))
+        T = f'{CT[r]} (*)({", ".join(CT[p] for p in ps) or "void"})'
+        body = f'(({T})fp)({args}); return 0;' if r == 'v' else f'return R_{r}((({T})fp)({args}), rk);'
+        L2.append(f'__attribute__((noinline)) static unsigned long long icall_case_{i}(void *fp, const unsigned long long *b, int n, unsigned k, unsigned rk) {{ {body} }}')
+    L2 += ['unsigned long long __port_icall_slow(void *fp, unsigned tsig, const unsigned long long *b, int n,',
+           '                                     unsigned k, unsigned rk) {',
+           '    port_icall_note(fp, tsig, n, k, rk);', '    switch (tsig) {']
+    L2 += [f'    case {i}u: return icall_case_{i}(fp, b, n, k, rk);' for i in sorted(ids)]
+    L2 += ['    }', '    return 0;', '}', '#endif']
     L += S
     L += expectations(regs)
     VA, nva = void_audit(regs)
     L += VA
+    L += L2
     open(out, 'w').write('\n'.join(L) + '\n')
     print(f'icall_gen: {len(regs)} registered functions (non-vbe objects), {len(ids)} target signatures, {len(sj)} asm stubs, '
           f'{nva} audited void targets')
