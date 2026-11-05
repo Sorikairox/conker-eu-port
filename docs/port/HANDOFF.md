@@ -43,7 +43,9 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   HOST_URL `-`); overlays (P377): `tools/port/scripts/rtw_overlay_e2e.sh OUT` (3 runs, ~4 min, ALL PASS); standard 1.1
   (P378): `tools/port/scripts/rtw_v11_e2e.sh OUT [ROM] [rstick wheel replay optsync]` (~6 min, ALL PASS); publish
   `tools/eu_port/rtw_dist_commit.sh --rom ROM "msg"` (rtw-dist + the root `retrowser.json` / `retrowser/` copy on this branch,
-  commit those; P379).
+  commit those; P379). Online play (P380): `PLAYERS=2..4 [DROP=1 DESYNC=1 LEAVE=1 SOLO=1] node
+  tools/port/scripts/rtw_net_e2e.mjs OUT ROM` (pages in one muted headless Chrome, retrowser's dist + room server in-process,
+  ~1 min, ALL PASS).
 - Deploy after a green check + browser test: `tools/eu_port/deploy_web.sh`; backup: `~/conker/tools/eu_port/backup_push.sh`.
 
 ## Reference docs
@@ -55,7 +57,8 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - retrowser build (P376): rebuild + rtw_dist_commit.sh (and commit the root retrowser.json + retrowser/ it refreshes, P379)
   after page changes that matter (P377: main.js / gmenu.js blocks
   the worker copies in: rtw_page_extract.py stops the build if one moved). Standard 1.1 adopted in P378 (right stick,
-  wheel, replays, rtw_option_changed); still missing: netplay (W11; the host has none). Not tested on a phone, another
+  wheel, replays, rtw_option_changed); online play (standard 1.2) adopted in P380 (2-4 players, lockstep; open: a real
+  multi-machine internet test, the host's 15 s stall when a player closes the tab, see P380). Not tested on a phone, another
   browser or a real gamepad (a fake standard gamepad in the host page only). Host-side gap found in P378: while the game
   asks for the mouse and the host has not captured it, the host's "Click to use the mouse" cover takes the wheel (spec
   §4.11 says over the picture too). Pre-existing (P376
@@ -65,6 +68,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 - MP weapons: fixed in P341 (sigs.py dropped zeroext on rewritten calls), proven online in 2-player Bunker
   (netmp_bunker.sh). event_query_world_object fixed in P343 (it was converted with
   six mistakes, see P343).
+- Page build latent bugs found in P380 (fixed only in the rtw build, the page build had to stay byte-identical):
+  `__port_icall_slow` with 26064 locals (Liftoff frame ~200 KB: stack overflow risk on nested mismatched calls);
+  pc_nethash.c net_in_gpu false desyncs when a page holds two GPU write-back ranges registered out of address order and
+  the peers' pictures differ (own view, other GPUs). Port both fixes (icall_gen.py split, net_in_gpu) when the page may change.
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
   WebRTC with copy-paste codes, Online panel (option "Online multiplayer (experimental)"), time sync, automatic input
   delay, hidden page ticks from a Worker, desync report. Phase 2a done (P344, §10): 2 to 4 players, full mesh with a
@@ -115,6 +122,42 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P380 (port-web, 2026-11-05): retrowser build plays online (standard 1.2, lockstep, 2-4 players)
+- User request: online play of the rtw build through retrowser's standard 1.2 (host 16b4f184), rtw target only, web build
+  byte-identical, a manifest option for it (on). Manifest `"net": { "players": 4, "model": "lockstep" }`; options (all the
+  room host's in a session) 117 Online play (on; off on the room host = everyone plays alone), 118 Online: own view only
+  (P371 SCREEN, on), 119 Online input delay (0 = auto).
+- aa823f59 the feature: pc_rtw.c rtw_net_session / _peer / _buffer (64 KiB) / _recv + imports rtw_net_send / _stat;
+  pc_net.c unchanged for the page (ring, barrier, D, hashes), its send point under PORT_RTW calls the glue;
+  pc_sched.c port_rtw_net_kick (a whole rtw tick); new port/web/rtw/rtw_net.js = net.js's packet logic on the host's
+  transport: channel 0 input packet per receiver (no type / sender bytes), channel 1 binary lost / held / drop / desync /
+  pages (raw u32). D = clamp(ceil(rtw_net_stat(0, 3) / 40) + 1, 2, 8): net.js autoDelay(median, p90) reduces to exactly
+  that, and kind 3 is the same on every peer. rtw_net_peer(i, 0) starts the drop agreement. Glue: session before the
+  first retrace, pad 1 -> ring, game options locked (host menu changes ignored, no rtw_option_changed), no recorder /
+  replay; host start-up options now pass the P377 settings record at rtw_start (a session skips it); the overlay menu
+  never pauses online, no menu sounds. Renamed nothing decomp-named (net_send_now / port code only).
+- Found on the way (both rtw-only fixes, the page build keeps the old code and has the same latent bugs, see Open items):
+  7697145b `__port_icall_slow` (icall_gen.py) is one wasm function with 26064 locals after Asyncify: a ~200 KB Liftoff
+  frame; three nested mismatched calls at level_load overflowed the worker stack ("Maximum call stack size exceeded",
+  21 frames) in ~1/3 of 3-player runs; the rtw build now compiles icall_tab.c with -DPORT_RTW = one small function per
+  signature (12/12 3-player runs then). 23cea872 pc_nethash.c net_in_gpu cut the first GPU write-back range in
+  registration order, so a page holding two ranges hashed one range's pixels: false DESYNC in a 4-player run (page
+  803D6000, room host drew its own view zoomed); now the lowest overlapping range first.
+  Also: rtw_net_recv must not run the game (Asyncify abort "import ... changed the state"): the kick is a microtask.
+- Tests (muted headless Chrome, one at a time; retrowser dist 2ae5f57b + its in-memory room server): rtw_net_e2e.mjs
+  2 players: 64 common hash points equal (retraces 350..980), drop agreed (neutral from 990), goes on 1000 -> 1308;
+  3 players: 64 equal (340..970), drop of P3 agreed 979/979, 64 equal after (730..1360), desync test names page
+  n64_rdram 80200000 on both, P1 leaves -> alone, single player 258 retraces no session; 4 players: 64 equal (450..1080),
+  drop agreed 1085/1085/1085, 64 equal after (850..1480); ~20 more 3/4-player runs ALL PASS after the two fixes. Room
+  host's options on every peer, session set at retrace 0, no bad / refused packets, D 2 (loopback p90 1 ms).
+  rtw_overlay_e2e.sh ALL PASS, rtw_v11_e2e.sh ALL PASS (rstick wheel optsync replay), offline reload plays; root-layout
+  copy: 2 players + solo PASS. rtw.mjs check . --rom OK (build id 8328d165; rtw-dist cae8606b, a36cc05e).
+- port/build/web 15 files sha256-identical to the session start after every change (port_work/p380/web_before.sha);
+  check GREEN. No deploy.
+- Host gaps (not edited; reported): a player who closes the tab sends no bye, so the others stall 15 s until the host
+  says gone (repro: DROP=1, page.close()); the host's menu can change options (rtw_option) and hand files to the game
+  during a lockstep session (Conker ignores them; it should be locked); guide note wanted: a self-running Asyncify module
+  must not resume its game inside rtw_net_recv.
 ### P379 (port-web, 2026-11-05): retrowser build on the default branch (plain link owner/repo)
 - retrowser.app reads `retrowser.json` from the root of the GitHub default branch (`eu`, kept equal to port-web), paths
   relative to it, no `..`. So the branch now carries `retrowser.json` (paths `retrowser/conker.{wasm,js}`,
