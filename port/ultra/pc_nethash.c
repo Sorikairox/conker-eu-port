@@ -79,9 +79,22 @@ static uint64_t net_mix(uint64_t h, const unsigned char *a, const unsigned char 
     return h;
 }
 static int net_in_gpu(uintptr_t a, uintptr_t b, uintptr_t *cut_a, uintptr_t *cut_b) {
+#ifdef PORT_RTW
+    /* P380 retrowser build: the overlapping range that starts lowest. net_gpu is in registration order, and the first
+     * overlapping entry can start after another one in [a, b): net_mix_range then hashed [a, its start), i.e. the GPU
+     * pixels of the other range. Seen online (4 players): page 803D6000 held the end of a frame copy written back at
+     * retrace 1401 (803B7600 +1EA78) and the start of one registered at retrace 941 (803D6300); the room host's
+     * picture differed (own view zoomed) -> a false DESYNC at 1410. GPU pixels differ between peers by design
+     * (own view, other GPUs / drivers); the game never reads them as data. The page build keeps the old loop. */
+    int found = 0;
+    for (int i = 0; i < net_ngpu; i++)
+        if (net_gpu[i].a < b && net_gpu[i].b > a && (!found || net_gpu[i].a < *cut_a)) { *cut_a = net_gpu[i].a; *cut_b = net_gpu[i].b; found = 1; }
+    return found;
+#else
     for (int i = 0; i < net_ngpu; i++)
         if (net_gpu[i].a < b && net_gpu[i].b > a) { *cut_a = net_gpu[i].a; *cut_b = net_gpu[i].b; return 1; }
     return 0;
+#endif
 }
 /* hash of [a, b) minus the GPU write-back ranges */
 static uint64_t net_mix_range(uint64_t h, uintptr_t a, uintptr_t b) {
