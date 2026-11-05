@@ -24,9 +24,9 @@
     hooks.draw.push((ctx) => {
       const pr = M._port_skip_progress ? M._port_skip_progress() : 0;
       ring.progress = pr;
-      if (!(pr > 0) || photo.state === 2 || !featureOn(FEATURE.RING)) return false;
+      if (!(pr > 0) || photo.state === 2 || !featureEnabled(FEATURE.RING)) return false;
       drawRing(ctx, pr); ring.shown++;
       return true;
     });
-    hooks.state.ring = () => ({ on: featureOn(FEATURE.RING), progress: ring.progress, drawnTicks: ring.shown });
+    hooks.state.ring = () => ({ on: featureEnabled(FEATURE.RING), progress: ring.progress, drawnTicks: ring.shown });
   }

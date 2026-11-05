@@ -1,4 +1,4 @@
-  // ---------------------------------------------------------------- P377 feature 110: the customisation settings (rtw_menu.js)
+  // ---------------------------------------------------------------- P377 the customisation settings (rtw_menu.js; always on since P382, was feature 110)
   // The page's game-style menus (gmenu.js GMenu, docs/design/NATIVE_MENUS.md) in the worker: the same look (the game's red
   // title, rows in the game's font, the selected one on a red band with a pulsing >, ON in the game's yellow, help, the
   // footer's N64 button faces) and pad controls (D-pad / stick move with the game's repeat, left / right change, A or Start
@@ -20,10 +20,15 @@
   // menu since, so the host's wins and the record forgets that option. A change in the host's menu during play applies at
   // once and also wins. So a change in either place survives a reload; the host's menu may show an older value for an
   // option last changed here. No storage (a browser that refuses it): the host's values only, as before.
-  // P378: a host with the standard 1.1 import rtw_option_changed is told about every change made here (option 116, on by
-  // default): its menu shows the value at once and it stores it itself, so the record keeps only what such a host could
-  // not take (an older host, or option 116 off).
-  // Option 110 (on by default) switches all of this off: no menus, no rows, no sounds, the host's values only.
+  // P378: a host with the standard 1.1 import rtw_option_changed is told about every change made here: its menu shows the
+  // value at once and it stores it itself, so the record keeps only what such a host could not take (an older host).
+  // P382 (retrowser's options rule, standard 1.2): the host's menu shows only the start-up options (skip intro, the
+  // recorder, online play); every other option is changed here only. The ones that change the game or its input are
+  // declared `"inGame": true` (the host keeps what it is told and hands it back at start and to every player of a
+  // lockstep session); telling the host is no longer an option (option 116 removed). The picture options (Hi-res menus,
+  // Smooth font, Widescreen, Full-resolution, High frame rate) and the overlay features (autosave icon, hold-L ring, photo
+  // mode menus) are each player's own and not declared: the record below keeps them and applies them at every start
+  // (BUILD_ROWS / the attach hook). This menu is always on (it was option 110): nothing may hide the only way to these.
   {
     // ---- page code (main.js OPTIONS: labels, help, defaults)
     /* @RTW_PAGE OPTIONS@ */
@@ -38,15 +43,46 @@
     };
     const OPTIONS = PAGE_OPTIONS.filter((o) => KEY_ID[o.key] !== undefined).map((o) => (RTW_HELP[o.key] ? Object.assign({}, o, { help: RTW_HELP[o.key] }) : o));
     const optOf = (key) => OPTIONS.find((o) => o.key === key);
-    // main.js setOption over the glue's values (rtw_option ids). P378: the host is told (standard 1.1 rtw_option_changed,
-    // option 116): it shows and keeps the value itself, so the settings record forgets that option; a host that cannot be
-    // told (or option 116 off): the change goes into the settings record (P377)
+    // P382: this build's own options (no main.js row; ids in rtw_overlay.js KEY_ID, defaults in rtw_glue.js): rows of the
+    // customisation settings now that the host's menu no longer shows them. Not part of the presets (like main.js's tools).
+    const BUILD_ROWS = [
+      { key: 'holdring', section: 'hud', label: 'Hold-L skip ring', help: 'While you hold L to skip a cutscene, a ring fills in the corner of the picture and the scene is skipped when it is full (3 s). Off: no ring (holding L still skips).' },
+      { key: 'rstick', section: 'controls', label: 'Analog right stick (camera)', help: 'A gamepad\'s right stick turns the free camera and photo mode\'s camera smoothly (how far you push it is how fast it turns). Elsewhere it stays the C buttons. Off: the right stick is only the four C buttons.' },
+      { key: 'wheel', section: 'controls', label: 'Mouse wheel', help: 'The mouse wheel zooms in photo mode and moves the rows of these settings (one row per notch). Off: the wheel does nothing in the game.' },
+      { key: 'photomenus', section: 'tools', label: 'Photo mode menus (Pose & Outfit)', help: 'In photo mode the Menu button opens the Pose & Outfit panel (Conker\'s animation, pose and model) and the HUD shows the camera\'s controls. Off: plain photo mode without menus.' },
+      { key: 'replay', section: 'tools', label: 'Replay recordings', help: 'Lets the game take an input recording (.ckrec) from the host ("Replay a recording" here, or Open in game next to one in the host\'s Saved files) and replay it at the next start. Off: recordings are refused.' },
+    ];
+    // MenuModel.optionItem for these rows (a toggle; same change log and sounds)
+    function buildRowItem(o) {
+      return {
+        kind: 'toggle', key: o.key, label: o.label, help: o.help, get: () => opt(o.key), locked: () => '',
+        set: (v) => {
+          v = v ? 1 : 0;
+          if (v === +opt(o.key)) return false;
+          setOption(o, v);
+          log(`[options] ${o.key} ${v ? 'on' : 'off'} (game menu)`);
+          return true;
+        },
+      };
+    }
+    const buildRowsOf = (sectionId) => BUILD_ROWS.filter((o) => o.section === sectionId).map(buildRowItem);
+    // P382 test aid: the option with this rtw id set as its row would (game options locked online / while recording)
+    menuSetOption = function menuSetById(id, value) {
+      const key = Object.keys(KEY_ID).find((k) => KEY_ID[k] === id);
+      const o = key && (optOf(key) || BUILD_ROWS.find((r) => r.key === key));
+      if (!o) return false;
+      setOption(o, value);
+      return true;
+    };
+    // main.js setOption over the glue's values (rtw_option ids). P378: the host is told (standard 1.1 rtw_option_changed;
+    // P382: always, for every option it declared): it shows and keeps the value itself, so the settings record forgets
+    // that option; an option the host does not declare (P382) or a host that cannot be told: the settings record (P377)
     function setOption(o, value) {
       const id = KEY_ID[o.key];
       if (id === undefined || !glue) return;
       const v = o.range ? Math.max(0, Math.min(100, value | 0)) : value ? 1 : 0;
       if (!glue.setOption(id, v)) return;   // the game options are fixed (recording / replay)
-      if (glue.optionChanged(id, v)) { hostNow[id] = v; delete settings.chosen[id]; delete settings.hostSeen[id]; }
+      if (glue.reportOptionToHost(id, v)) { hostNow[id] = v; delete settings.chosen[id]; delete settings.hostSeen[id]; }
       else { settings.chosen[id] = v; settings.hostSeen[id] = hostValue(id); }   // the host's value now: a different one at a start = changed there
       settingsSave();
     }
@@ -131,14 +167,14 @@
 
     // ---- the game's menu sounds (gmenu.js GSound) through the pulled audio
     // Same sounds and volumes as GSound; decoded read-only by pc_sfx.c port_sfx_decode, mixed into the host's pulled audio
-    // by aud_out.c port_rtw_menu_sound_play. Silent while recording (the replay must not change) and with option 110 off.
+    // by aud_out.c port_rtw_menu_sound_play. Silent while recording (the replay must not change).
     const SOUND = { move: [0x62D, 0x5DC0, 0], choose: [0x500, 0x5DC0, 0], change: [0x4FF, 0x4650, 0],
       back: [0x500, 0x4650, -500], error: [0x4FF, 0x5DC0, -1000] };   // [game sound id, play volume (of 0x7FFF), cents]
     const soundStats = { played: 0, silent: 0, none: 0, last: '' };
     snd = function menuSound(kind) {
       const k = SOUND[kind];
       if (!k) return;
-      if (recCfg || netCfg || !featureOn(FEATURE.MENUS)) { soundStats.silent++; return; }   // P380: silent online (outside the lockstep)
+      if (recCfg || netCfg || !featureEnabled(FEATURE.MENUS)) { soundStats.silent++; return; }   // P380: silent online (outside the lockstep)
       if (!M._port_sfx_decode || !M._port_rtw_menu_sound_play) { soundStats.none++; return; }
       const n = M._port_sfx_decode(k[0], k[2]);
       if (!n) { soundStats.none++; return; }   // the sound bank is not loaded yet (boot)
@@ -200,7 +236,7 @@
             (glue.replayPending() ? ` Ready now: "${glue.replayPending()}".` : ''),
           locked: () => glue.replayLocked(),
           act: () => { const r = glue.requestReplay(); note(r ? 'This host cannot ask for a file.' : 'Pick the recording in the host\'s window.'); } }];
-        return pre.concat(s.items, [backRow]);
+        return pre.concat(s.items, buildRowsOf(p.id), [backRow]);   // P382: this build's own rows
       }
       const TITLES = { main: 'Customisation settings', saves: 'Saves', online: 'Online' };
       const titleOf = (p) => TITLES[p.id] || MenuModel.sections().find((x) => x.id === p.id).label;
@@ -211,7 +247,7 @@
         log(`[gmenu] save exported${r ? ` (refused: ${r})` : ''}`);
       }
       function open(how) {
-        if (U.open || !glue || !glue.started() || !featureOn(FEATURE.MENUS)) return false;
+        if (U.open || !glue || !glue.started() || !featureEnabled(FEATURE.MENUS)) return false;
         if (photo.state === 2 || !fontOk()) return false;
         U.open = true; U.t0 = performance.now(); U.stack = [{ id: 'main', sel: 0, top: 0 }]; U.prev = -1; U.helpSel = ''; U.note = '';
         U.from = BACK[how] ? how : '';
@@ -259,7 +295,7 @@
       // the game's rows (P363 / P364 / P367): on while this feature is on and nothing records; a chosen row opens the menu
       function gameRows() {
         if (!M._port_set_gmenu_row) return;
-        const on = glue.started() && featureOn(FEATURE.MENUS) && !recCfg ? 1 : 0;
+        const on = glue.started() && featureEnabled(FEATURE.MENUS) && !recCfg ? 1 : 0;
         if (on !== U.row) { U.row = on; M._port_set_gmenu_row(on); log(`[gmenu] game menu customisation rows ${on ? 'on' : 'off'}`); }
         const req = M._port_gmenu_take_request();
         if (req && on && !U.open) { const how = req === 2 ? 'title' : 'pause'; if (open(how)) log(`[gmenu] opened from the ${how} menu's customisation row`); }
@@ -268,7 +304,7 @@
       // change, A / Start choose, B back (closes on the main page)
       function poll(d, now) {
         if (!U.open) return false;
-        if (!featureOn(FEATURE.MENUS)) { close(); return false; }
+        if (!featureEnabled(FEATURE.MENUS)) { close(); return false; }
         const b = d.b | 0;
         let bits = 0;
         if ((b & N64.DU) || d.y > 40) bits |= 1;
@@ -363,15 +399,22 @@
       return { open, close, poll, gameRows, draw, note, state, wheel, get isOpen() { return U.open; }, get paused() { return U.paused; } };
     })();
     // ---- hooks into the layer
-    hooks.attach.push(() => {   // option 110 off (the host sends it after most options): the host's values only after all
-      if (featureOn(FEATURE.MENUS)) return;
-      for (const id of Object.keys(settings.chosen)) if (hostNow[id] !== undefined && glue.value(+id, 0) !== hostNow[id]) glue.setOption(+id, hostNow[id]);
+    // P382: the options the host does not declare (each player's own: picture, overlay features) come from the record at
+    // every start, also in an online session (they never reach the other players). (Was: option 110 off = the host's values.)
+    hooks.attach.push(() => {
+      const applied = [];
+      for (const [id, v] of Object.entries(settings.chosen)) {
+        if (glue.hostDeclared(+id)) continue;   // the host's (rtw_option at start, through menuHostOption)
+        if (glue.value(+id, v) !== v) glue.setOption(+id, v);
+        applied.push(`${id}=${v}`);
+      }
+      if (applied.length) log(`[settings] this game's own options from the customisation settings: ${applied.join(' ')}`);
     });
     const buttonsBefore = buttonsWanted;
-    buttonsWanted = () => featureOn(FEATURE.MENUS) || buttonsBefore();
+    buttonsWanted = () => featureEnabled(FEATURE.MENUS) || buttonsBefore();
     hooks.input.push((d, now) => {
       rtwMenu.gameRows();
-      if (!featureOn(FEATURE.MENUS)) { if (rtwMenu.isOpen) rtwMenu.close(); return false; }
+      if (!featureEnabled(FEATURE.MENUS)) { if (rtwMenu.isOpen) rtwMenu.close(); return false; }
       if (photo.state !== 2) {
         if (d.menuPress) { if (rtwMenu.isOpen) { snd('back'); rtwMenu.close(); } else rtwMenu.open('button'); }
         else if (d.photoHold && !rtwMenu.isOpen && rtwMenu.open('hold')) log('[gmenu] opened by holding the photo mode button');
@@ -379,10 +422,10 @@
       if (rtwMenu.isOpen && d.photo) { d.photo = false; snd('back'); rtwMenu.close(); }   // a short press of Photo closes it
       return rtwMenu.poll(d, now);
     });
-    hooks.wheel.push((dy) => featureOn(FEATURE.MENUS) && rtwMenu.wheel(dy));   // P378
+    hooks.wheel.push((dy) => featureEnabled(FEATURE.MENUS) && rtwMenu.wheel(dy));   // P378
     hooks.draw.push((ctx, now) => { if (!rtwMenu.isOpen || !GameFont.load()) return false; rtwMenu.draw(ctx, now); return true; });
     hooks.hostResumed.push(() => { if (rtwMenu.isOpen && rtwMenu.paused) M._port_set_paused(1); });   // the menu still holds the game
-    hooks.state.menu = () => Object.assign(rtwMenu.state(), { on: featureOn(FEATURE.MENUS), preset: presetShown(),
+    hooks.state.menu = () => Object.assign(rtwMenu.state(), { on: featureEnabled(FEATURE.MENUS), preset: presetShown(),
       sounds: Object.assign({ mixed: M._port_rtw_menu_sounds_played ? M._port_rtw_menu_sounds_played() : 0 }, soundStats),
       settings: { loaded: settings.loaded, chosen: settings.chosen, hostSeen: settings.hostSeen, preset: settings.preset } });
   }

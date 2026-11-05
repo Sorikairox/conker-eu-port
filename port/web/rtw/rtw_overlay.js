@@ -12,8 +12,10 @@
 // feature, each behind its manifest option (all on by default in this build, they are the game's normal UI here):
 //   rtw_saveicon.js  109 Autosave icon (the page's option 'saveicon', P324)
 //   rtw_ring.js      111 Hold-L skip ring (P321)
-//   rtw_menu.js      110 Customisation settings: the menus, the game's CUSTOMISATION rows, the menu sounds, the
-//                    settings record that keeps a change made there (see that file)
+//   rtw_menu.js      Customisation settings: the menus, the game's CUSTOMISATION rows, the menu sounds, the
+//                    settings record that keeps a change made there (see that file). P382: always on (it was option
+//                    110): retrowser's options rule leaves only the start-up options in the host's menu, so this
+//                    menu is the only place to change every other option and must not be switched off
 //   rtw_photo.js     112 Photo mode menus: the HUD and the Pose & Outfit panel (P358 / P366)
 // port/tools/rtw_page_extract.py joins them (port/build/rtw/gen/rtw_overlay.js, the @RTW_FEATURES@ place below) and copies
 // in the page code they reuse verbatim from port/web/main.js and gmenu.js (the @RTW_PAGE ...@ places): GameFont, GFace
@@ -34,12 +36,14 @@ var rtwOverlay = (function () {
   const FEATURE = { SAVEICON: 109, MENUS: 110, RING: 111, PHOTOMENUS: 112 };
   let glue = null;   // rtw_glue.js's side (attach): option values, photo state / camera, the recorder, log, export
   const log = (s) => (glue ? glue.log(s) : out(String(s)));
-  const featureOn = (id) => (glue ? glue.value(id, 1) : 1) !== 0;   // the four features default to on (retrowser.json)
+  // was featureOn. The features default to on (rtw_glue.js BUILD_OPTION_DEFAULTS); P382: the menus are always on
+  const featureEnabled = (id) => id === FEATURE.MENUS || (glue ? glue.value(id, 1) : 1) !== 0;
   // the feature files' hooks (each an array, called in file order)
   const hooks = { attach: [], input: [], draw: [], hostResumed: [], wheel: [], state: {} };   // P378 wheel
   // rtw_menu.js: the menu sounds (silent without it), a host option's effective value (the host's without it)
   let snd = () => {};
   let hostOption = (id, value) => value;
+  let menuSetOption = () => false;   // P382 test aid: an option set exactly as a customisation settings row sets it
   // rtw_photo.js: photo mode's menus (none without it)
   let photoTick = () => 0, photoShown = () => {}, photoToast = () => {};
 
@@ -78,7 +82,8 @@ var rtwOverlay = (function () {
   const KEY_ID = { skipcut: 0, skipintro: 1, healthhud: 2, cashhud: 3, longbreath: 4, longspin: 5, nodrunk: 6, conkerlod: 7,
     airbar: 8, volmusic: 9, volsfx: 10, volspeech: 11, swiminvert: 12, rumble: 13, crosshair: 14, freecam: 15, photomode: 16,
     ledgegrab: 17, hires2d: 100, smoothfont: 101, widescreen: 102, fullres: 103, hfr: 104, togglecrouch: 105,
-    togglerlook: 106, togglewalk: 107, recorder: 108, saveicon: 109 };
+    togglerlook: 106, togglewalk: 107, recorder: 108, saveicon: 109,
+    holdring: 111, photomenus: 112, rstick: 113, wheel: 114, replay: 115 };   // P382: this build's own rows (rtw_menu.js BUILD_ROWS)
   const RANGE_IDS = new Set([9, 10, 11]);
   const opt = (key) => {
     const id = KEY_ID[key];
@@ -179,6 +184,7 @@ var rtwOverlay = (function () {
       log(`[overlay] retrowser overlay layer: ${Object.keys(hooks.state).join(', ') || 'no features'}`);
     },
     hostOption: (id, value, started) => hostOption(id, value, started),
+    menuSet: (id, value) => menuSetOption(id, value),   // P382 test aid (rtw_e2e.mjs gameopt:ID:V)
     input, tick, upload,
     wheel(dy) { for (const f of hooks.wheel) if (f(dy)) return true; return false; },   // P378 rtw_wheel: true = a menu took it
     photoTick: (dt, d, fresh) => photoTick(dt, d, fresh), photoShown: (on) => photoShown(on), photoToast: (text) => photoToast(text),

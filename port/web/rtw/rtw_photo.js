@@ -44,7 +44,7 @@
     };
     // main.js photoShow: photo mode started / ended
     photoShown = function photoMenusShown(on) {
-      if (on && !(featureOn(FEATURE.PHOTOMENUS) && GameFont.load())) { log('[gphoto] photo mode without its menus (option 112 off, or no font yet)'); return; }
+      if (on && !(featureEnabled(FEATURE.PHOTOMENUS) && GameFont.load())) { log('[gphoto] photo mode without its menus (option 112 off, or no font yet)'); return; }
       if (on === photoUi.shown) return;
       photoUi.shown = on;
       if (on) { lookUi.built = false; lookUi.nav = false; }
@@ -53,7 +53,7 @@
     photoToast = function photoMenusToast(text) { if (photoUi.shown && GPhoto.active()) GPhoto.toast(text); };
     // ---- hooks into the layer
     const buttonsBefore = buttonsWanted;
-    buttonsWanted = () => featureOn(FEATURE.PHOTOMENUS) || buttonsBefore();
+    buttonsWanted = () => featureEnabled(FEATURE.PHOTOMENUS) || buttonsBefore();
     hooks.input.push((d) => {   // in photo mode: Menu = the panel, holding Menu = hide the menus, holding Photo = the panel
       if (photo.state !== 2 || !photoUi.shown) return false;
       d.nav = !!(d.menuTap || d.photoHold);
@@ -61,5 +61,5 @@
       return false;   // photo mode itself takes pad 1 (rtw_glue.js photoPoll)
     });
     hooks.draw.push(() => photo.state === 2 && photoUi.shown && GPhoto.active());   // GPhoto drew in its animation frame
-    hooks.state.photo = () => Object.assign({ on: featureOn(FEATURE.PHOTOMENUS), shown: photoUi.shown }, window.__gphoto ? window.__gphoto.state() : {});
+    hooks.state.photo = () => Object.assign({ on: featureEnabled(FEATURE.PHOTOMENUS), shown: photoUi.shown }, window.__gphoto ? window.__gphoto.state() : {});
   }

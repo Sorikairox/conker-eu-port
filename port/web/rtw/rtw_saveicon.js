@@ -20,14 +20,14 @@
     }
     hooks.draw.push((ctx, now) => {
       const gen = M._rtw_save_generation();
-      if (icon.generation >= 0 && gen !== icon.generation && featureOn(FEATURE.SAVEICON)) {
+      if (icon.generation >= 0 && gen !== icon.generation && featureEnabled(FEATURE.SAVEICON)) {
         if (now > icon.until) { icon.since = now; log(`[saveicon] the game writes its save (generation ${gen})`); }
         icon.until = now + 1500;
       }
       icon.generation = gen;
-      if (photo.state === 2 || now >= icon.until || !featureOn(FEATURE.SAVEICON)) return false;
+      if (photo.state === 2 || now >= icon.until || !featureEnabled(FEATURE.SAVEICON)) return false;
       drawSaveIcon(ctx, now); icon.shown++;
       return true;
     });
-    hooks.state.saveicon = () => ({ on: featureOn(FEATURE.SAVEICON), generation: icon.generation, showing: performance.now() < icon.until, drawnTicks: icon.shown });
+    hooks.state.saveicon = () => ({ on: featureEnabled(FEATURE.SAVEICON), generation: icon.generation, showing: performance.now() < icon.until, drawnTicks: icon.shown });
   }
