@@ -14,6 +14,7 @@
     "js": { "path": "conker.js" },
     "data": [{ "path": "conker_netx.txt" }]
   },
+  "picture": { "path": "cover.png", "credit": "Box art © Rare / Nintendo · image from libretro-thumbnails" },
   "module": { "factory": "createConker", "loop": "asyncify" },
   "video": "webgl",
   "save": { "kind": "eeprom", "size": 2048 },
