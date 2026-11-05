@@ -18,19 +18,19 @@
   "files": {
     "wasm": {
       "path": "retrowser/conker.wasm",
-      "sha256": "9d5adf5a1ca35a5ae9d49b20052c02b5c737e9429726e59e4c8f45ff71b4434d",
-      "size": 7691422
+      "sha256": "b90045355e7898dfb751d3f1cbfe6e883d787d24883e977fcde3cab35219f87b",
+      "size": 7704295
     },
     "js": {
       "path": "retrowser/conker.js",
-      "sha256": "f5f6ebedbb42bda9d268b569baeae07c8537c505b889b1e0c1f97ff29a17d5fa",
-      "size": 377778
+      "sha256": "47ad7989e851bd56ec9e20bc7de065c6daf6709f1c3ba8253af537057dc2c9b7",
+      "size": 410494
     },
     "data": [
       {
         "path": "retrowser/conker_netx.txt",
-        "sha256": "b6d8bcead29d57d9b771da335ec01d46e09bad5291c2041a87853468b0ea2a27",
-        "size": 31245
+        "sha256": "023e08f0464e10b42d2c7e7e764d7c2c4cad7654e3c6a1913842a7f8efff480a",
+        "size": 31305
       }
     ]
   },
@@ -283,12 +283,36 @@
       "default": 1
     },
     {
+      "id": 117,
+      "label": "Online play",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 118,
+      "label": "Online: own view only",
+      "type": "bool",
+      "default": 1
+    },
+    {
+      "id": 119,
+      "label": "Online input delay (0 = auto)",
+      "type": "int",
+      "default": 0,
+      "min": 0,
+      "max": 16
+    },
+    {
       "id": 108,
       "label": "Input recorder (for testing)",
       "type": "bool",
       "default": 0
     }
   ],
+  "net": {
+    "players": 4,
+    "model": "lockstep"
+  },
   "fileInputs": [
     {
       "id": 1,
