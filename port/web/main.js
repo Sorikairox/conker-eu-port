@@ -2147,13 +2147,14 @@ $('start').onclick = () => start('game');
 // ---------------------------------------------------------------- P375 offline play (option 'offline', sw.js)
 // On: register sw.js (it precaches every site file, cache 'conker-offline-<build id>'), ask for persistent storage (so
 // the browser does not evict the cached site, the ROM or the saves under storage pressure). A new build's worker waits
-// until this page lets it in: before the game started that happens at once and the page reloads into the new version;
-// while the game runs a small "Update ready" notice offers the reload. Off: unregister the worker, delete its caches.
+// until this page lets it in: a page that loads while a new worker already waits takes it at once (the reload follows
+// the load before the player did anything); a new version found later, before or during the game, only shows a small
+// "Update ready" notice offering the reload (an automatic reload then lost the ROM picker, the menus or the title screen
+// in the middle of a click). Off: unregister the worker, delete its caches.
 // Not under ?netdet / a test run's ?nosw=1 (the tests that do not test this keep the plain network path).
 const offlinePlayAvailable = 'serviceWorker' in navigator && window.isSecureContext && !NETDET && !Q.get('nosw');
 let offlinePlayReloading = false;
 function offlinePlayShowUpdate(worker) {
-  if (!running) { offlinePlayActivate(worker); return; }   // nothing to lose yet: take the new version now
   $('offline-update').hidden = false;
   $('offline-reload').onclick = () => offlinePlayActivate(worker);
   log('[offline] update ready (reload to use it)');
@@ -2172,7 +2173,10 @@ async function offlinePlayEnable() {
       else log('[offline] this page is now kept offline');
     });
     const reg = await navigator.serviceWorker.register('sw.js');
-    if (reg.waiting && hadController) offlinePlayShowUpdate(reg.waiting);
+    if (reg.waiting && hadController) {
+      if (!running) offlinePlayActivate(reg.waiting);   // just loaded: take the new version now
+      else offlinePlayShowUpdate(reg.waiting);
+    }
     reg.addEventListener('updatefound', () => {
       const w = reg.installing;
       if (!w) return;

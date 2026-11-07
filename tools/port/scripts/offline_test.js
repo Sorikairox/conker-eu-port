@@ -10,6 +10,8 @@
 //  5 load ?app=game&warp=29: the stored ROM boots into the game (frames advance), touch controls laid out
 //  6 (update) network on ($ONLINE_CMD), $UPDATE_CMD makes build B, reg.update() while the game runs: the notice shows;
 //    its Reload button: the page runs build B and only B's cache is left
+//  6b (update) on the start page, $UPDATE_CMD makes build C, reg.update(): the notice shows, the page is not reloaded;
+//    its Reload button: build C runs
 //  7 (update) the option off: no worker, no cache, the ROM kept
 const { spawn, execSync } = require('child_process');
 const fs = require('fs'), os = require('os'), path = require('path');
@@ -113,6 +115,26 @@ const check = (name, ok, detail) => { console.log(`${ok ? 'PASS' : 'FAIL'} ${nam
     for (let i = 0; i < 30; i++) { await sleep(1000); st = JSON.parse(await ev(cacheState)); if (st.caches.length === 1 && st.caches[0] !== cacheA && st.controlled) break; }
     const marker = await ev("fetch('index.html').then((r) => r.text()).then((t) => t.includes('offline-test-build-B'))");
     check('6 after Reload: build B runs, A cache deleted', st.caches.length === 1 && st.caches[0] !== cacheA && st.controlled && marker === true, `A ${cacheA} -> ${JSON.stringify(st)}, B page ${marker}`);
+  }
+  // 6b (update) build C found on the start page (the game not started): the notice shows and the page is not reloaded
+  //    by itself (it used to reload at once, in the middle of the player's ROM pick or menu clicks)
+  if (mode === 'update') {
+    await nav('?mute=1');
+    await sleep(3000);
+    const cacheB = JSON.parse(await ev(cacheState)).caches[0];
+    await ev('window.offlineTestSamePage = 1');
+    execSync(process.env.UPDATE_CMD, { stdio: 'inherit' });
+    let shown = false;
+    for (let i = 0; i < 40 && !shown; i++) {   // one check right after the load found nothing in the test: check again every 5 s
+      if (i % 5 === 0) await ev('navigator.serviceWorker.getRegistration().then((r) => r.update()).then(() => 0, () => 0)');
+      await sleep(1000); shown = await ev("!document.getElementById('offline-update').hidden");
+    }
+    const same = await ev('window.offlineTestSamePage === 1 && running === null');
+    check('6b update C found before the game starts: notice shown, no automatic reload', shown === true && same === true, `notice ${shown}, same page ${same}`);
+    await ev("document.getElementById('offline-reload').click()");
+    for (let i = 0; i < 30; i++) { await sleep(1000); st = JSON.parse(await ev(cacheState)); if (st.caches.length === 1 && st.caches[0] !== cacheB && st.controlled) break; }
+    const reloaded = await ev('window.offlineTestSamePage === undefined');
+    check('6b after Reload: build C runs, B cache deleted', st.caches.length === 1 && st.caches[0] !== cacheB && st.controlled && reloaded === true, `B ${cacheB} -> ${JSON.stringify(st)}, reloaded ${reloaded}`);
   }
   // 7 the option off: worker unregistered, caches deleted (the ROM stays in IndexedDB)
   if (mode === 'update') {
