@@ -84,7 +84,8 @@ const net = (p) => inWorker(p, () => globalThis.__rtwConker.net());
 const frameOf = (p) => inWorker(p, () => globalThis.__rtwConker.Module._port_net_frame() >>> 0);
 async function open(p) {
   await p.page.goto(`${site}/g/${REPO}`);
-  await p.page.click('[data-action=download]', { timeout: 60000 });
+  // the game page's cartridge (retrowser since 2026-11-07; it floats, so force) or the older Download button
+  await p.page.click('[data-action=cartridge], [data-action=download]', { timeout: 60000, force: true });
   await p.page.locator('[data-field=rom]').setInputFiles(rom, { timeout: 120000 });
   await p.page.waitForFunction(() => Number(document.querySelector('[data-state=playing]')?.getAttribute('data-frames') ?? 0) > 10, null, { timeout: 120000 });
   await p.page.click('[data-state=persist-warning] button', { timeout: 1000 }).catch(() => {});

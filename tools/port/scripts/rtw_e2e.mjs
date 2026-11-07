@@ -113,12 +113,13 @@ const gameState = async () => {
 };
 async function open() {
   await page.goto(`${hostUrl}/g/${REPO}`);
-  const download = page.locator('[data-action=download]');
+  // the game page's cartridge (retrowser since 2026-11-07; it floats, so force) or the older Download button
+  const download = page.locator('[data-action=cartridge], [data-action=download]').first();
   const stored = page.locator('[data-action=use-stored]');
   const rompick = page.locator('[data-field=rom]');
   const playing = page.locator('[data-state=playing]');
   await Promise.race([download.waitFor({ timeout: 60000 }), playing.waitFor({ timeout: 60000 }), stored.waitFor({ timeout: 60000 }), rompick.waitFor({ timeout: 60000 })]);
-  if (await download.isVisible().catch(() => false)) { say('download'); await download.click(); }
+  if (await download.isVisible().catch(() => false)) { say('download'); await download.click({ force: true }); }
   await Promise.race([stored.waitFor({ timeout: 120000 }), rompick.waitFor({ timeout: 120000 }), playing.waitFor({ timeout: 120000 })]);
   if (await stored.isVisible().catch(() => false)) { say('use the stored ROM'); await stored.first().click(); }
   else if (await rompick.count()) { say('ROM through the file input'); await rompick.setInputFiles(rom); }
