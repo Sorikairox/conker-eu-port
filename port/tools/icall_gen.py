@@ -110,6 +110,10 @@ def void_audit(regs):
     return L, len(rows)
 
 
+# P387: call sites per function of the mismatch dispatcher (see main(): JavaScriptCore's OMG tier and Asyncify)
+ICALL_GROUP = 16
+
+
 def main():
     out, objs = sys.argv[1], sys.argv[2:]
     regs, sigs, stubs = {}, set(), set()
@@ -176,8 +180,13 @@ def main():
     # calls (level_load -> hotspots_start_all -> record_dispatch_82ecc -> obj_effect_dispatch) overflowed the stack
     # ("Maximum call stack size exceeded"): ~1/3 of 3-player runs in the retrowser worker; the page's main thread has
     # about 3x a worker's stack and overflowed there only with a 300 KB V8 stack (tools/port/scripts/netgroup.js JS_FLAGS).
-    # Split, each frame holds only its own case. Emitted at the end of the file, where P380's rtw copy had it, so the
-    # retrowser build's object is the same as before.
+    # Split, each frame holds only its own case. Emitted at the end of the file, where P380's rtw copy had it.
+    # P387: in two levels, __port_icall_slow -> icall_group_G (ICALL_GROUP signatures each) -> icall_case_N. P381's one
+    # switch calling all 293 cases was still a 70 KB function after Asyncify (~240 bytes per call site), under
+    # JavaScriptCore's limit for its optimizing tier (maximumOMGCandidateCost 100000; the single switch before it, 425
+    # KB, was over it): once hot, WebKit compiled it with OMG, whose register allocator took ~6 GB for it (jsc shell:
+    # peak footprint 6.0 GB vs 357 MB), and iOS killed the page ("Can't open this page" in Chrome on iPhone while the
+    # customisation settings were open). Each function now holds at most ICALL_GROUP call sites.
     split_dispatch = []   # was L2 (P380)
     for i, s in sorted(ids.items()):
         r, ps = s.split(':')
@@ -185,10 +194,18 @@ def main():
         T = f'{CT[r]} (*)({", ".join(CT[p] for p in ps) or "void"})'
         body = f'(({T})fp)({args}); return 0;' if r == 'v' else f'return R_{r}((({T})fp)({args}), rk);'
         split_dispatch.append(f'__attribute__((noinline)) static unsigned long long icall_case_{i}(void *fp, const unsigned long long *b, int n, unsigned k, unsigned rk) {{ {body} }}')
+    groups = [sorted(ids)[g:g + ICALL_GROUP] for g in range(0, len(ids), ICALL_GROUP)]
+    for g, grp in enumerate(groups):
+        split_dispatch += [f'__attribute__((noinline)) static unsigned long long icall_group_{g}(void *fp, unsigned tsig, const unsigned long long *b, int n, unsigned k, unsigned rk) {{',
+                           '    switch (tsig) {']
+        split_dispatch += [f'    case {i}u: return icall_case_{i}(fp, b, n, k, rk);' for i in grp]
+        split_dispatch += ['    }', '    return 0;', '}']
     split_dispatch += ['unsigned long long __port_icall_slow(void *fp, unsigned tsig, const unsigned long long *b, int n,',
                        '                                     unsigned k, unsigned rk) {',
                        '    port_icall_note(fp, tsig, n, k, rk);', '    switch (tsig) {']
-    split_dispatch += [f'    case {i}u: return icall_case_{i}(fp, b, n, k, rk);' for i in sorted(ids)]
+    for g, grp in enumerate(groups):
+        split_dispatch += [f'    case {i}u:' for i in grp]
+        split_dispatch += [f'        return icall_group_{g}(fp, tsig, b, n, k, rk);']
     split_dispatch += ['    }', '    return 0;', '}']
     L += S
     L += expectations(regs)
