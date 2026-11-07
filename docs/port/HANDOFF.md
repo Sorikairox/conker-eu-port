@@ -71,7 +71,7 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   (netmp_bunker.sh). event_query_world_object fixed in P343 (it was converted with
   six mistakes, see P343).
 - P380's two rtw-only fixes (icall_gen.py dispatcher split, pc_nethash.c lowest GPU range first) are in the page build
-  since P381 (3eacc8fb, c14cc01c); not deployed yet (the user deploys). Regression: netpair.sh PLAYERS=4
+  since P381 (3eacc8fb, c14cc01c; deployed 2026-11-05; P387 split the dispatcher into groups). Regression: netpair.sh PLAYERS=4
   PADS=tools/port/scripts/netmp_pause.sh (false DESYNC at 8420 before), netgroup.js JS_FLAGS='--liftoff-only
   --stack-size=300' (main-thread overflow at level_load before).
 - Online multiplayer: phase 1 done (P338 + P339, docs/design/ONLINE_MULTIPLAYER.md §8, §9): 2-player lockstep over
@@ -124,6 +124,26 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P387 (port-web, 2026-11-08): WebKit killed the page on iPhone: mismatch dispatcher in groups of 16
+- User report: Chrome on iPhone showed "Can't open this page" / reloaded while navigating the customisation settings;
+  Oct 31 and Nov 2 deploys fine, Nov 5 (P381) and later not. iOS browsers all run WebKit (JavaScriptCore).
+- Cause: P381's __port_icall_slow (one switch, 293 calls to icall_case_N) is 70 KB after Asyncify, under JSC's
+  maximumOMGCandidateCost (100000; the pre-P381 single switch was 425 KB, never OMG-compiled). When it gets hot,
+  JSC's OMG tier compiles it and B3 Air's greedy register allocator takes ~5 GB: iOS kills the WebContent process.
+- Repro without a device (screen locked, no Xcode): scratchpad tools, not in the repo: a Swift WKWebView runner
+  (hidden-page throttling and window-occlusion detection off via private setters) on a local copy of a build with a
+  driver script (boot ?warp=29, open the customisation settings, walk them, POST a heartbeat); `footprint -p` on the
+  WebContent pid: Nov 5 253 MB -> 5.3 GB, Nov 2 280-340 MB; `sample`: Wasm Worklist thread 100% in OMGPlan ->
+  allocateRegistersByGreedy. jsc shell (/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc)
+  on a copy of the wasm with the function exported, 200000 calls then idle: 5125 MB with OMG, 85 MB with
+  --useOMGJIT=false; Nov 2 96 MB; published rtw build 4882 MB.
+- Fix (6313a860): icall_gen.py ICALL_GROUP = 16: __port_icall_slow -> icall_group_G -> icall_case_N (15.7 KB +
+  ~3.9 KB groups); jsc 113 MB / 78-83 MB per group; WKWebView menu walk 280-305 MB. P381's stack fix kept (netpair 3
+  players JS_FLAGS='--liftoff-only --stack-size=300' 150 s: 0 traps, 7492 retraces IDENTICAL). e2e replay IDENTICAL,
+  check GREEN; rtw: rtw_e2e open, overlays ALL PASS, rtw_net_e2e 3 players 2605 retraces ALL PASS (both rtw tests
+  now open the game through retrowser's cartridge, 56c41771). rtw-dist 5b01a03f, root manifest d4f5b248. Deployed
+  d4f5b248. Watch for: any wasm function between ~10 KB and 100 KB with hundreds of Asyncify call sites may do the same.
+
 ### P386 (port-web, 2026-11-07): no automatic reload when a new build arrives before Start
 The page used to reload itself as soon as a new build's worker finished installing, if the game had not started
 (ROM picker, menus, title screen): reported by the user as the site "reloading itself". Now `offlinePlayShowUpdate`
