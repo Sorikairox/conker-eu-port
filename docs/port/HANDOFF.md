@@ -124,6 +124,13 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P386 (port-web, 2026-11-07): no automatic reload when a new build arrives before Start
+The page used to reload itself as soon as a new build's worker finished installing, if the game had not started
+(ROM picker, menus, title screen): reported by the user as the site "reloading itself". Now `offlinePlayShowUpdate`
+only shows the "Update ready, Reload" notice; the immediate take-over is kept only when the page loads while a new
+worker already waits (`reg.waiting` at register, before the player did anything). `offline_test.sh local` step 6b
+(update found on the start page: notice shown, same page) ALL PASS. Deployed d5ed38da.
+
 ### P385 (port-web, 2026-11-06): retrowser game icon (standard 1.2 `icon`): the site's own icon
 - Standard: retrowser 21a5fab, spec §2.2 `"icon": { "path", "sha256", "size" }` (PNG only, square, 192-1024 px,
   <= 256 KiB, path relative to the manifest's folder ending in .png; rtw-hash fills sha256 / size). Icon: the page's
