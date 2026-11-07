@@ -18,8 +18,8 @@
   "files": {
     "wasm": {
       "path": "conker.wasm",
-      "sha256": "b90045355e7898dfb751d3f1cbfe6e883d787d24883e977fcde3cab35219f87b",
-      "size": 7704295
+      "sha256": "9480ec4f486abf1f4ca6edb5dc00c692bb22186fa55bc6ce8b21e3e1d66ddb17",
+      "size": 7717083
     },
     "js": {
       "path": "conker.js",
