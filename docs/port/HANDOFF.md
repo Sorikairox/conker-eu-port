@@ -124,6 +124,14 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P388 (port-web, 2026-11-09): retrowser.json follows retrowser's simplified standard
+- retrowser 66418df (deployed 2026-11-09, Worker 9b474bc0) dropped its versions and some manifest fields. User: "Then
+  update Conker's and GoldenEye". `port/web/rtw/retrowser.json` (template) and the root `retrowser.json`: no `module`
+  (loop read from the module: conker.wasm exports no `rtw_frame` = self-running), `factory` in `files.js`, no
+  `rom.accept` (N64 default), `rom.byteswap`, `rom.maxSize`. conker.wasm/js unchanged; root build id e93845a490031ae3.
+- Tests: `rtw.mjs check . --rom baserom.eu.z64` OK; `RTW_SERVE=5199 rtw_e2e.mjs OUT - baserom.eu.z64
+  open,frame:600,shot:boot,state` in the new host (port/build/rtw/dist manifest migrated the same way): playing at
+  3.4 s, retrace 621, 60 fps, audio drained; Nintendo logo looked at. Not pushed; rtw-dist not refreshed.
 ### P387 (port-web, 2026-11-08): WebKit killed the page on iPhone: mismatch dispatcher in groups of 16
 - User report: Chrome on iPhone showed "Can't open this page" / reloaded while navigating the customisation settings;
   Oct 31 and Nov 2 deploys fine, Nov 5 (P381) and later not. iOS browsers all run WebKit (JavaScriptCore).

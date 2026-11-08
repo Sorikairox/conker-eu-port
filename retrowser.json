@@ -4,16 +4,9 @@
   "title": "Conker's Bad Fur Day (EU)",
   "platform": "n64",
   "rom": {
-    "accept": [
-      ".z64",
-      ".n64",
-      ".v64"
-    ],
     "sha1": [
       "ee7bc6656fd1e1d9ffb3d19add759f28b88df710"
-    ],
-    "byteswap": "auto",
-    "maxSize": 67108864
+    ]
   },
   "files": {
     "wasm": {
@@ -24,7 +17,8 @@
     "js": {
       "path": "retrowser/conker.js",
       "sha256": "b3460d74ba7309192ee5daa1a6bb3ebcef3303725189d39e4b43d1c2fc78a38f",
-      "size": 421126
+      "size": 421126,
+      "factory": "createConker"
     },
     "data": [
       {
@@ -44,10 +38,6 @@
     "path": "retrowser/icon.png",
     "sha256": "9b36e1ea9b1901ccd30685edc5ea272772270b232fed18bfd733887ad7625bab",
     "size": 6794
-  },
-  "module": {
-    "factory": "createConker",
-    "loop": "asyncify"
   },
   "video": "webgl",
   "save": {

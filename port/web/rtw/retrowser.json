@@ -3,20 +3,14 @@
   "id": "conker-eu",
   "title": "Conker's Bad Fur Day (EU)",
   "platform": "n64",
-  "rom": {
-    "accept": [".z64", ".n64", ".v64"],
-    "sha1": ["ee7bc6656fd1e1d9ffb3d19add759f28b88df710"],
-    "byteswap": "auto",
-    "maxSize": 67108864
-  },
+  "rom": { "sha1": ["ee7bc6656fd1e1d9ffb3d19add759f28b88df710"] },
   "files": {
     "wasm": { "path": "conker.wasm" },
-    "js": { "path": "conker.js" },
+    "js": { "path": "conker.js", "factory": "createConker" },
     "data": [{ "path": "conker_netx.txt" }]
   },
   "picture": { "path": "cover.png", "credit": "Box art © Rare / Nintendo · image from libretro-thumbnails" },
   "icon": { "path": "icon.png" },
-  "module": { "factory": "createConker", "loop": "asyncify" },
   "video": "webgl",
   "save": { "kind": "eeprom", "size": 2048 },
   "controls": {
