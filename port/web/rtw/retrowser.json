@@ -15,11 +15,11 @@
   "save": { "kind": "eeprom", "size": 2048 },
   "controls": {
     "extra": [
-      { "bit": 16, "label": "Photo mode" },
-      { "bit": 17, "label": "Free camera: C up" },
-      { "bit": 18, "label": "Free camera: behind" },
+      { "bit": 16, "label": "Photo mode", "when": 16 },
+      { "bit": 17, "label": "Free camera: C up", "when": 15 },
+      { "bit": 18, "label": "Free camera: behind", "when": 15 },
       { "bit": 19, "label": "Half tilt (walk)" },
-      { "bit": 20, "label": "Save recording" },
+      { "bit": 20, "label": "Save recording", "when": 108 },
       { "bit": 21, "label": "Menu (customisation settings)" }
     ]
   },

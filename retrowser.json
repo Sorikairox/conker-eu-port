@@ -48,15 +48,18 @@
     "extra": [
       {
         "bit": 16,
-        "label": "Photo mode"
+        "label": "Photo mode",
+      "when": 16
       },
       {
         "bit": 17,
-        "label": "Free camera: C up"
+        "label": "Free camera: C up",
+      "when": 15
       },
       {
         "bit": 18,
-        "label": "Free camera: behind"
+        "label": "Free camera: behind",
+      "when": 15
       },
       {
         "bit": 19,
@@ -64,7 +67,8 @@
       },
       {
         "bit": 20,
-        "label": "Save recording"
+        "label": "Save recording",
+      "when": 108
       },
       {
         "bit": 21,

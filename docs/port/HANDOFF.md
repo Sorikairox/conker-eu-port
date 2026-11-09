@@ -124,6 +124,13 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P389 (port-web, 2026-11-09): touch buttons only when their option is on (retrowser `when`)
+- User on the iPhone: the six extra buttons covered the stick and C buttons; then "Add the « when » option and then
+  deploy". retrowser e8ba88a (Worker 2c728237) added `controls.extra[].when` (an option id: the touch button shows
+  only while that option is on; keys always work) and 08f026c gave the extras their own row. Conker: Photo mode
+  when 16 (Photo mode), Free camera C up/behind when 15 (Free camera), Save recording when 108 (Input recorder);
+  Half tilt and Menu always shown. Template, root manifest and rtw-dist (98c2516a) updated; rtw check --rom OK.
+- P388 note: it was pushed (and rtw-dist refreshed) on 2026-11-09 after the user hit the outdated-manifest error.
 ### P388 (port-web, 2026-11-09): retrowser.json follows retrowser's simplified standard
 - retrowser 66418df (deployed 2026-11-09, Worker 9b474bc0) dropped its versions and some manifest fields. User: "Then
   update Conker's and GoldenEye". `port/web/rtw/retrowser.json` (template) and the root `retrowser.json`: no `module`
